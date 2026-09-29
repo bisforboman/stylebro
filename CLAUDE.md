@@ -100,7 +100,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 2. Real-world testing: run `dotnet format analyzers --diagnostics BRO1001` on some real repos and check they
    still build and the second run changes nothing. Compare with StyleCop's SA1201-SA1204 on a repo that uses
    StyleCop; differences are bugs or deliberate, documented choices.
-3. Name is settled (StyleBro). Check it's free on NuGet/GitHub, create the repo, publish `0.1.0-alpha` to NuGet.
+3. ~~Check the name, create the repo.~~ Done: public at `github.com/bisforboman/stylebro` (MIT).
+   Still to do: publish `0.1.0-alpha` to NuGet (needs the owner's NuGet API key).
 4. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
    `<param>` kept in sync with the parameters. These need the semantic model.
 5. StyleCop migration tool: `stylecop.json` + rulesets -> equivalent `.editorconfig`.
