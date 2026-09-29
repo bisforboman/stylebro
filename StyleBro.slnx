@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StyleBro.Analyzers/StyleBro.Analyzers.csproj" />
+    <Project Path="src/StyleBro.CodeFixes/StyleBro.CodeFixes.csproj" />
+    <Project Path="src/StyleBro.Package/StyleBro.Package.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/StyleBro.Tests/StyleBro.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Messy/Messy.csproj" />
+  </Folder>
+</Solution>

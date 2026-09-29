@@ -1,0 +1,27 @@
+is_global = true
+global_level = -1
+
+# ---------------------------------------------------------------------------
+# StyleBro rules
+# ---------------------------------------------------------------------------
+
+# BRO1001: members ordered by kind, accessibility, const/static/readonly (SA1201-SA1204, SA1214)
+dotnet_diagnostic.BRO1001.severity = warning
+stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, method, struct, class
+stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private
+stylebro_member_constants_first = true
+stylebro_member_static_first = true
+stylebro_member_readonly_first = true
+
+# ---------------------------------------------------------------------------
+# Built-in .NET rules that already cover common StyleCop rules.
+# 'dotnet format' fixes these too. To also enforce them on build, set
+# <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in the project.
+# ---------------------------------------------------------------------------
+
+# Braces on all control statements (SA1503, SA1519, SA1520)
+csharp_prefer_braces = true
+dotnet_diagnostic.IDE0011.severity = warning
+
+# Whitespace and formatting (large parts of the SA1000 series)
+dotnet_diagnostic.IDE0055.severity = warning

@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Applies the recommended preset unless the consuming project sets <StyleBroPreset>none</StyleBroPreset>.
+    This is a .targets file (not .props) so a StyleBroPreset set in the project file is already visible here.
+    The preset is a global config with a low global_level: anything in the project's own
+    .editorconfig or .globalconfig wins.
+  -->
+  <ItemGroup Condition="'$(StyleBroPreset)' != 'none'">
+    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)stylebro.recommended.globalconfig" />
+  </ItemGroup>
+</Project>
