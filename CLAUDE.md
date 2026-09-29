@@ -31,6 +31,11 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - Central package management in `Directory.Packages.props`. Roslyn pinned to **4.8.0** for broad SDK/VS
   compatibility; don't raise it without a reason.
 - `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
+- `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
+  (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
+  Publishing (`NuGet/login@v1`, no stored API key) and creates a GitHub release (prerelease if the version has a `-`).
+  Needs: a nuget.org Trusted Publishing policy (owner bisforboman, repo stylebro, workflow `release.yml`,
+  environment `release`) and the repo secret `NUGET_USER` (nuget.org profile name).
 
 ## Design rules for every rule
 
@@ -101,7 +106,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    still build and the second run changes nothing. Compare with StyleCop's SA1201-SA1204 on a repo that uses
    StyleCop; differences are bugs or deliberate, documented choices.
 3. ~~Check the name, create the repo.~~ Done: public at `github.com/bisforboman/stylebro` (MIT).
-   Still to do: publish `0.1.0-alpha` to NuGet (needs the owner's NuGet API key).
+   Still to do: publish `0.1.0-alpha.1` to NuGet by pushing the tag `v0.1.0-alpha.1` (release.yml), once the
+   Trusted Publishing policy and the `NUGET_USER` secret are set up.
 4. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
    `<param>` kept in sync with the parameters. These need the semantic model.
 5. StyleCop migration tool: `stylecop.json` + rulesets -> equivalent `.editorconfig`.

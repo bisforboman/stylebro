@@ -1,0 +1,59 @@
+name: Release
+
+# Push a tag like v0.1.0-alpha.1 to publish that version to nuget.org.
+# Authentication uses nuget.org Trusted Publishing: no long-lived API key is stored anywhere.
+# One-time setup: a Trusted Publishing policy on nuget.org for bisforboman/stylebro, workflow file
+# release.yml, environment release; plus a repository secret NUGET_USER holding the nuget.org profile name.
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write   # create the GitHub release
+      id-token: write   # request the OIDC token that NuGet/login exchanges for a temporary API key
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Test
+        run: dotnet test StyleBro.slnx
+
+      - name: Verify dotnet format integration
+        shell: pwsh
+        run: ./scripts/verify-format.ps1
+
+      - name: Pack
+        run: dotnet pack src/StyleBro.Package --configuration Release -p:Version=$VERSION --output artifacts
+
+      # Request the temporary key right before pushing: it is valid for one hour.
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to nuget.org
+        run: >
+          dotnet nuget push artifacts/*.nupkg
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=""
+          if [[ "$VERSION" == *-* ]]; then prerelease="--prerelease"; fi
+          gh release create "$GITHUB_REF_NAME" artifacts/*.nupkg --title "StyleBro $VERSION" --generate-notes $prerelease
