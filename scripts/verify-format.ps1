@@ -8,9 +8,9 @@ $ErrorActionPreference = 'Stop'
 
 $root = Split-Path $PSScriptRoot -Parent
 
-# Every rule in AnalyzerReleases.Unshipped.md, so a new rule can't be left out of the check.
-$ids = @(Select-String -Path (Join-Path $root 'src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md') -Pattern '^(BRO\d{4})\s*\|' |
-    ForEach-Object { $_.Matches[0].Groups[1].Value })
+# Every rule in the release tracking files (shipped and unshipped), so a new rule can't be left out of the check.
+$ids = @(Select-String -Path (Join-Path $root 'src/StyleBro.Analyzers/AnalyzerReleases.*.md') -Pattern '^(BRO\d{4})\s*\|' |
+    ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique)
 Write-Host "Rules: $($ids -join ' ')"
 
 $failed = $false
