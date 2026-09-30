@@ -34,8 +34,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
   Publishing (`NuGet/login@v1`, no stored API key) and creates a GitHub release (prerelease if the version has a `-`).
-  Needs: a nuget.org Trusted Publishing policy (owner bisforboman, repo stylebro, workflow `release.yml`,
-  environment `release`) and the repo secret `NUGET_USER` (nuget.org profile name).
+  Set up: nuget.org Trusted Publishing policy (repo owner bisforboman, repo stylebro, workflow `release.yml`,
+  environment `release`, packages `StyleBro.*`, new packages allowed), repo secret `NUGET_USER` (nuget.org
+  profile name), and the `release` environment requires the owner's approval. The first failure (HTTP 401
+  "No matching trust policy") was simply a missing policy.
 
 ## Design rules for every rule
 
@@ -96,8 +98,7 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   `ProjectReference OutputItemType="Analyzer"` (as in `samples/Messy`).
 - Answered: help links and `PackageProjectUrl` point to `github.com/bisforboman/stylebro`.
 - Name checked 2026-09-29: NuGet IDs `StyleBro` and `StyleBro.Analyzers` are free (0 search hits);
-  a `stylebro` GitHub user/org is free; no similar C# projects on GitHub.
-  NuGet can't reserve an ID without publishing, so publish `0.1.0-alpha` soon.
+  a `stylebro` GitHub user/org is free; no similar C# projects on GitHub. `StyleBro.Analyzers` is now taken by us.
 
 ## Next steps (in order)
 
@@ -105,9 +106,9 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 2. Real-world testing: run `dotnet format analyzers --diagnostics BRO1001` on some real repos and check they
    still build and the second run changes nothing. Compare with StyleCop's SA1201-SA1204 on a repo that uses
    StyleCop; differences are bugs or deliberate, documented choices.
-3. ~~Check the name, create the repo.~~ Done: public at `github.com/bisforboman/stylebro` (MIT).
-   Still to do: publish `0.1.0-alpha.1` to NuGet by pushing the tag `v0.1.0-alpha.1` (release.yml), once the
-   Trusted Publishing policy and the `NUGET_USER` secret are set up.
+3. ~~Check the name, create the repo, publish.~~ Done: public at `github.com/bisforboman/stylebro` (MIT);
+   `StyleBro.Analyzers 0.1.0-alpha.1` published to nuget.org on 2026-09-30 by release.yml (tag at `bc053c2`).
+   To release: bump nothing in the csproj, just push a tag `vX.Y.Z[-suffix]` and approve the `release` environment.
 4. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
    `<param>` kept in sync with the parameters. These need the semantic model.
 5. StyleCop migration tool: `stylecop.json` + rulesets -> equivalent `.editorconfig`.
