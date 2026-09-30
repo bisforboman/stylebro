@@ -91,12 +91,18 @@ internal static class MemberOrdering
             var source = order[slot];
             var layout = split[slot].Layout;
 
-            // A member led by a '//' comment that lands right below another member (no blank line in this slot's
-            // layout) would leave the comment glued to that member's code, which BRO1504 (SA1515) reports. Sorting
-            // must not create a new violation that only a second 'dotnet format' run fixes, so add the blank line.
-            if (slot > 0 && source != slot && !layout.Any(SyntaxKind.EndOfLineTrivia) && StartsWithLineComment(split[source].Content))
+            // Blank lines stay with the slot, so a slot without one can end up between members that need one: a method
+            // below a field where two fields sat before (BRO1505, SA1516), or a '//' comment below code (BRO1504,
+            // SA1515). The sort must not create a violation that only a second 'dotnet format' run fixes, so it adds
+            // the blank line in exactly those cases; violations that already existed are left to those rules.
+            if (slot > 0 && !layout.Any(SyntaxKind.EndOfLineTrivia))
             {
-                layout = layout.Insert(0, SyntaxFactory.EndOfLine(newLine));
+                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source]) && !NeedsSeparation(members[slot - 1], members[slot]);
+                var createsComment = StartsWithLineComment(split[source].Content) && !StartsWithLineComment(split[slot].Content);
+                if (createsSeparation || createsComment)
+                {
+                    layout = layout.Insert(0, SyntaxFactory.EndOfLine(newLine));
+                }
             }
 
             var member = members[source].WithLeadingTrivia(layout.AddRange(split[source].Content));
@@ -324,6 +330,12 @@ internal static class MemberOrdering
         }
 
         return (SyntaxFactory.TriviaList(trivia.Take(split)), SyntaxFactory.TriviaList(trivia.Skip(split)));
+    }
+
+    /// <summary>Whether two neighbouring members need a blank line between them: all but two fields (BRO1505).</summary>
+    private static bool NeedsSeparation(MemberDeclarationSyntax previous, MemberDeclarationSyntax current)
+    {
+        return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);
     }
 
     private static bool StartsWithLineComment(SyntaxTriviaList content)

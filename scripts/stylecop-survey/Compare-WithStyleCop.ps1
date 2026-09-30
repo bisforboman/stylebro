@@ -1,8 +1,10 @@
 #!/usr/bin/env pwsh
 # Checks StyleBro rules against the StyleCop rules they replace. For each set in parity/parity.psd1, both tools run on
 # the same case files: the reported positions are compared, then each tool fixes its own copy and the fixed files
-# are compared line by line (and must still compile). Every difference must be listed in the set's 'Expected'
-# entries, which document StyleBro's deliberate deviations; anything else fails.
+# are compared line by line (and must still compile). StyleBro's fixed files must also be clean: a fix that leaves
+# a diagnostic behind would need a second 'dotnet format' run. Every difference must be listed in the set's
+# 'Expected' entries, which document StyleBro's deliberate deviations; anything else fails. A set with
+# CompareOutput = $false skips the output comparison (for StyleCop rules without a working fix).
 param([string[]]$Set)
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -32,11 +34,13 @@ function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withSt
     Copy-Item (Join-Path $cases '*.cs') $dir
 }
 
-function Get-CompileErrors([string]$dir) {
+# Compile errors after a fix, plus any of $remainingIds still reported ("File.cs(1,2) ID").
+function Get-CompileErrors([string]$dir, [string[]]$remainingIds = @()) {
     @(dotnet build (Join-Path $dir 'p.csproj') -nologo --no-incremental 2>&1 | ForEach-Object {
-        if ("$_" -match '(\w+\.cs\(\d+,\d+\)): error (\w+)') { "$($Matches[1]) $($Matches[2])" } } | Sort-Object -Unique)
+        if ("$_" -match '(\w+\.cs\(\d+,\d+\)): (error|warning) (\w+):' -and ($Matches[2] -eq 'error' -or $Matches[3] -in $remainingIds)) {
+            "$($Matches[1]) $($Matches[3])"
+        } } | Sort-Object -Unique)
 }
-
 $failed = $false
 foreach ($s in $config.Sets) {
     if ($Set -and $s.Name -notin $Set) { continue }
@@ -62,14 +66,15 @@ foreach ($s in $config.Sets) {
     dotnet format analyzers (Join-Path $sc 'p.csproj') --diagnostics @($pairs.Keys) --severity warn 2>&1 | Out-Null
     dotnet format analyzers (Join-Path $sb 'p.csproj') --diagnostics @($pairs.Values) --severity warn 2>&1 | Out-Null
     # A diff of the fixed files (not line by line, so a fix that adds lines doesn't shift everything after it).
-    foreach ($file in Get-ChildItem $cases -Filter *.cs) {
+    foreach ($file in Get-ChildItem $cases -Filter *.cs | Where-Object { $s.CompareOutput -ne $false }) {
         $x = @(Get-Content (Join-Path $sc $file.Name)); $y = @(Get-Content (Join-Path $sb $file.Name))
         $differences += Compare-Object $x $y -CaseSensitive | ForEach-Object {
             '{0} {1}: [{2}]' -f $(if ($_.SideIndicator -eq '<=') { 'StyleCop output only:' } else { 'StyleBro output only:' }), $file.Name, $_.InputObject.Replace("`t", '<tab>')
         }
     }
-    $styleBroErrors = Get-CompileErrors $sb
-    $differences += $styleBroErrors | ForEach-Object { "StyleBro fix doesn't compile: $_" }
+    foreach ($e in Get-CompileErrors $sb @($pairs.Values)) {
+        $differences += if ($e -match ' CS\d+$') { "StyleBro fix doesn't compile: $e" } else { "StyleBro fix leaves: $e" }
+    }
     $differences += Get-CompileErrors $sc | ForEach-Object { "StyleCop fix doesn't compile: $_" }
 
     $expected = @($s.Expected)

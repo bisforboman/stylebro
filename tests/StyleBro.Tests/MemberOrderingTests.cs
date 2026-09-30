@@ -338,6 +338,43 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task MethodMovedBelowAField_GetsABlankLine() => VerifyFixAsync("""
+        class C
+        {
+            void M() { }
+
+            int {|BRO1001:a|};
+            int b;
+        }
+        """, """
+        class C
+        {
+            int a;
+
+            int b;
+
+            void M() { }
+        }
+        """);
+
+    [Fact]
+    public Task CompactMembersThatWereAlreadyCompact_StayCompact() => VerifyFixAsync("""
+        interface I
+        {
+            void M();
+            int {|BRO1001:P|} { get; }
+            void N();
+        }
+        """, """
+        interface I
+        {
+            int P { get; }
+            void M();
+            void N();
+        }
+        """);
+
+    [Fact]
     public Task StaticConstructor_ComesBeforeInstanceConstructors() => VerifyFixAsync("""
         class C
         {

@@ -48,6 +48,26 @@
             Expected = @()
         }
         @{
+            Name     = 'element-separation'
+            Map      = @('SA1516=BRO1505')
+            Expected = @(
+                # BRO1505: the blank line also goes above a '///' doc comment; StyleCop's fix leaves that one out.
+                'StyleBro output only: Cases.cs: []'
+                # BRO1505: two members on one line: StyleBro adds a blank line and keeps the indentation; StyleCop's
+                # fix leaves a trailing space and puts the second member at column 0.
+                'StyleBro output only: FileScoped.cs: [    public void M() { }]'
+                'StyleBro output only: FileScoped.cs: [    public void N() { }]'
+                'StyleBro output only: FileScoped.cs: []'
+                'StyleCop output only: FileScoped.cs: [    public void M() { } ]'
+                'StyleCop output only: FileScoped.cs: [public void N() { }]'
+            )
+        }
+        @{
+            Name     = 'comment-and-file-endings'
+            Map      = @('SA1512=BRO1506', 'SA1518=BRO1507')
+            Expected = @()
+        }
+        @{
             Name     = 'comparisons-default-values'
             Map      = @('SA1131=BRO1103', 'SA1129=BRO1104')
             Expected = @(
@@ -87,6 +107,19 @@
                 # '2,}' breaks SA1001 (comma followed by whitespace).
                 'StyleBro output only: CommaEdges.cs: [                B = 2, };]'
                 'StyleCop output only: CommaEdges.cs: [                B = 2,};]'
+            )
+        }
+        @{
+            Name     = 'parameter-layout'
+            Map      = @('SA1116=BRO1107', 'SA1117=BRO1108')
+            # StyleCop's SA1117 fix does nothing, so only positions are compared; StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+                # Record and primary-constructor parameters, and a primary constructor's base arguments: StyleCop
+                # doesn't check these newer lists; StyleBro treats them like any other.
+                'only StyleBro: BRO1107 Declarations.cs(6,25)'
+                'only StyleBro: BRO1107 Declarations.cs(16,26)'
+                'only StyleBro: BRO1107 Declarations.cs(17,23)'
             )
         }
     )

@@ -15,15 +15,21 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// <summary>
     /// Verifies diagnostics in <paramref name="source"/> (markup: {|BROxxxx:text|}), the single-fix result,
     /// and the Fix All result, which is the path 'dotnet format' takes. The framework also re-runs the
-    /// analyzer on the fixed code, so a fix that is not idempotent fails here.
+    /// analyzer on the fixed code, so a fix that is not idempotent fails here. <paramref name="batchFixedSource"/>
+    /// is the Fix All result when it differs from applying the fixes one at a time.
     /// </summary>
-    public static Task VerifyFixAsync(string source, string fixedSource, string? editorConfig = null)
+    public static Task VerifyFixAsync(string source, string fixedSource, string? editorConfig = null, string? batchFixedSource = null)
     {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
         {
             TestCode = source,
             FixedCode = fixedSource,
         };
+
+        if (batchFixedSource is not null)
+        {
+            test.BatchFixedCode = batchFixedSource;
+        }
 
         if (editorConfig is not null)
         {

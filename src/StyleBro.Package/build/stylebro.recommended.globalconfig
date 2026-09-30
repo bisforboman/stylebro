@@ -34,6 +34,12 @@ dotnet_diagnostic.BRO1104.severity = warning
 # BRO1106: string.Empty instead of "" (SA1122)
 dotnet_diagnostic.BRO1106.severity = warning
 
+# BRO1107: split parameters start on the line after the parenthesis (SA1116)
+dotnet_diagnostic.BRO1107.severity = warning
+
+# BRO1108: parameters all on one line or each on its own line (SA1117)
+dotnet_diagnostic.BRO1108.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 
@@ -48,6 +54,15 @@ dotnet_diagnostic.BRO1503.severity = warning
 
 # BRO1504: a blank line before a comment that follows code (SA1515)
 dotnet_diagnostic.BRO1504.severity = warning
+
+# BRO1505: elements separated by a blank line; consecutive fields may stay together (SA1516)
+dotnet_diagnostic.BRO1505.severity = warning
+
+# BRO1506: no blank line after a single-line comment (SA1512)
+dotnet_diagnostic.BRO1506.severity = warning
+
+# BRO1507: no blank lines at the end of a file (SA1518)
+dotnet_diagnostic.BRO1507.severity = warning
 
 # ---------------------------------------------------------------------------
 # Built-in .NET rules that already cover common StyleCop rules.

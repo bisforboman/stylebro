@@ -91,6 +91,27 @@ internal static class Descriptors
         description: "'string.Empty' instead of \"\", except where C# requires a constant. Replaces StyleCop SA1122.",
         helpLinkUri: HelpBase + DiagnosticIds.EmptyString + ".md");
 
+    public static readonly DiagnosticDescriptor SplitParametersStartOnNewLine = new(
+        id: DiagnosticIds.SplitParametersStartOnNewLine,
+        title: "Split parameters should start on the line after the declaration",
+        messageFormat: "Move the first item to the line after the opening parenthesis",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When parameters or arguments span several lines, the first one starts on its own line too. "
+            + "Replaces StyleCop SA1116.",
+        helpLinkUri: HelpBase + DiagnosticIds.SplitParametersStartOnNewLine + ".md");
+
+    public static readonly DiagnosticDescriptor ParametersOnSameOrSeparateLines = new(
+        id: DiagnosticIds.ParametersOnSameOrSeparateLines,
+        title: "Parameters should be on the same line or on separate lines",
+        messageFormat: "Put the items all on one line or each on its own line",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Parameters and arguments are either all on one line or each on its own line. Replaces StyleCop SA1117.",
+        helpLinkUri: HelpBase + DiagnosticIds.ParametersOnSameOrSeparateLines + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",
@@ -141,4 +162,35 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "A comment that introduces the code below it is separated from the code above. Replaces StyleCop SA1515.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeComment + ".md");
+
+    public static readonly DiagnosticDescriptor ElementsSeparatedByBlankLine = new(
+        id: DiagnosticIds.ElementsSeparatedByBlankLine,
+        title: "Elements should be separated by a blank line",
+        messageFormat: "Add a blank line before this element",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Members, types and namespaces are separated by a blank line; consecutive fields may stay together. "
+            + "Replaces StyleCop SA1516.",
+        helpLinkUri: HelpBase + DiagnosticIds.ElementsSeparatedByBlankLine + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineAfterComment = new(
+        id: DiagnosticIds.BlankLineAfterComment,
+        title: "Single-line comments should not be followed by a blank line",
+        messageFormat: "Remove the blank line after the comment",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A comment sits directly on the code it describes. Replaces StyleCop SA1512.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineAfterComment + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLinesAtEndOfFile = new(
+        id: DiagnosticIds.BlankLinesAtEndOfFile,
+        title: "Files should not end with blank lines",
+        messageFormat: "Remove the blank lines at the end of the file",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A file ends with its last line of code, followed by at most one line break. Replaces StyleCop SA1518.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLinesAtEndOfFile + ".md");
 }

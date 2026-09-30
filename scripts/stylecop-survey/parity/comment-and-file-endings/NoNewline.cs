@@ -1,0 +1,1 @@
+namespace ProbeNoNewline { public class D { } }

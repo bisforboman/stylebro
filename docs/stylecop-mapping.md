@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (17 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (22 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -26,10 +26,7 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Proposal |
 |---|---|---|---|---|
 | SA1302 | Interface names should begin with I | on / off / on | 0 / 0 / 0 | rename with Fix All (see naming note) |
-| SA1516 | Elements should be separated by blank line | on / off / off | 0 / 44 / 5,873 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1309 | Field names should not begin with underscore | on / off / off | 0 / 486 / 1,060 | rename with Fix All (see naming note) |
-| SA1116 | Split parameters should start on line after declaration | on / off / off | 0 / 375 / 266 | parameter wrapping |
-| SA1117 | Parameters should be on same line or separate lines | on / off / off | 0 / 370 / 102 | parameter wrapping |
 | SA1313 | Parameter names should begin with lower-case letter | on / off / off | 0 / 0 / 90 | rename with Fix All (see naming note) |
 | SA1306 | Field names should begin with lower-case letter | on / off / off | 0 / 4 / 11 | rename with Fix All (see naming note) |
 | SA1312 | Variable names should begin with lower-case letter | on / off / off | 0 / 14 / 7 | rename with Fix All (see naming note) |
@@ -37,8 +34,6 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 | SA1303 | Const field names should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
 | SA1311 | Static readonly fields should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
 | SA1314 | Type parameter names should begin with T | on / off / off | 0 / 0 / 0 | rename with Fix All (see naming note) |
-| SA1512 | Single-line comments should not be followed by blank line | off / off / on | 82 / 46 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
-| SA1518 | Use line endings correctly at end of file | off / off / off | 2 / 40 / 31 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -121,13 +116,13 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1509 | Opening braces should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1501** (done), same results as StyleCop |
 | SA1510 | Chained statement blocks should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1502** (done), same results as StyleCop |
 | SA1511 | While-do footer should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 82 / 46 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 82 / 46 / 0 | not fixed | StyleBro **BRO1506** (done), same results as StyleCop |
 | SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 0 / 0 / 119 | fixed | SDK: IDE2003 (experimental) |
 | SA1514 | Element documentation header should be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1515 | Single-line comment should be preceded by blank line | on | yes | on / on / off | 0 / 0 / 31 | not fixed | StyleBro **BRO1504** (done), same results as StyleCop |
-| SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 0 / 44 / 5,873 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 0 / 44 / 5,873 | not fixed | StyleBro **BRO1505** (done), same positions as StyleCop |
 | SA1517 | Code should not contain blank lines at start of file | on | yes | on / on / off | 0 / 0 / 11 | fixed | SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template` |
-| SA1518 | Use line endings correctly at end of file | on | yes | off / off / off | 2 / 40 / 31 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1518 | Use line endings correctly at end of file | on | yes | off / off / off | 2 / 40 / 31 | not fixed | StyleBro **BRO1507** (done), same results as StyleCop's default setting |
 | SA1519 | Braces should not be omitted from multi-line child statement | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
 | SA1520 | Use braces consistently | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
 
@@ -217,8 +212,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1113 | Comma should be on the same line as previous parameter | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1114 | Parameter list should follow declaration | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1115 | Parameter should follow comma | on | no | on / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
-| SA1116 | Split parameters should start on line after declaration | on | yes | on / off / off | 0 / 375 / 266 | not fixed | StyleBro: parameter wrapping |
-| SA1117 | Parameters should be on same line or separate lines | on | no | on / off / off | 0 / 370 / 102 | not fixed | StyleBro: parameter wrapping |
+| SA1116 | Split parameters should start on line after declaration | on | yes | on / off / off | 0 / 375 / 266 | not fixed | StyleBro **BRO1107** (done), also checks record and primary-constructor parameters |
+| SA1117 | Parameters should be on same line or separate lines | on | no | on / off / off | 0 / 370 / 102 | not fixed | StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix |
 | SA1118 | Parameter should not span multiple lines | on | no | on / on / off | 0 / 0 / 126 |  | Untested. StyleCop has no fix |
 | SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |

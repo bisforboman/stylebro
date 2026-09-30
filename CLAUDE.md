@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below), 19 unit tests, all green.
+(see the log below) and 18 rules; 128 unit tests (incl. every doc example), all green (2026-09-30).
 
 ## Layout
 
@@ -114,9 +114,20 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   anonymous objects, enums, switch expressions (not collection expressions/patterns/`{k, v}` pairs, like StyleCop 1.2).
   Inserts `, ` when code follows directly (StyleCop's `,}` broke SA1001 in the private app). Skips lists with
   directives between the braces (the multi-targeting conflict). Nested lists fixed in one pass (StyleCop needs two).
+- **BRO1107** (SA1116) first item on the line after `(` when the list is split, and **BRO1108** (SA1117) items all
+  on one line or each on its own (`Readability/ParameterLayout.cs`). Lists: parameter/bracketed parameter/argument/
+  bracketed argument/attribute argument lists and array rank specifiers. SA1117 as probed: the first two items'
+  START lines pick the mode; same line -> every item must start on item 0's line; different -> no item may start on
+  the line where the previous item ENDS. BRO1107 only when item 1 starts below `(` (first two on one line = BRO1108).
+  One fix: BRO1107 = the first edit of BRO1108's "each item on its own line" (never joins lines; items already
+  starting a line keep their indentation). Skipped: syntax errors, comments/directives in the gaps. StyleCop
+  1.2.0-beta.556 misses records/primary constructors (documented deviation) and has no working SA1117 fix. Nested
+  split lists: single fix and Fix All differ in the inner list's indentation (test uses `batchFixedSource`).
 - **StyleCop parity check:** `scripts/stylecop-survey/Compare-WithStyleCop.ps1` + `parity/parity.psd1`. Runs both
   tools on edge-case files, compares positions and fixed output; every difference must be a documented deviation.
-  All 4 sets (8 rules) pass. Add a set for every new rule that replaces a StyleCop rule.
+  StyleBro's fixed output must also be clean ("StyleBro fix leaves: ..." otherwise; this found a BRO1506 bug:
+  the empty line after a file's final line break counted as a blank line below a comment). `CompareOutput = $false`
+  skips the output diff when StyleCop has no fix (SA1117). All 9 sets pass. Add a set for every new rule.
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
 
@@ -135,6 +146,24 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   exceptions, matched exactly: line above blank/comment/directive, directly after `{` or a `case`/`default` label
   (a plain `label:` IS reported), `///`/`////`, trailing comments. Both in `Layout/BlankLineAfterAnalyzer` +
   `BlankLineAfterCodeFixProvider`; parity set `blank-lines-comments`: 12/12 positions, identical output.
+- **BRO1505** (SA1516) elements separated by a blank line (`Layout/ElementSeparation.cs`). Elements: usings/externs/
+  assembly attributes/members of a file or namespace (file-scoped `namespace X;` counts before its first element),
+  type members, accessors (only when either neighbour is multi-line). Exempt like StyleCop: field+field, using+using,
+  extern+extern, attribute list+attribute list. A blank line ANYWHERE before the element's code counts (also below its
+  comment or `#if`); the fix inserts above the element's first line (comment/doc/attribute/directive), diagnostic at
+  that line's start (FullSpan.Start). Same positions as StyleCop (28/28); StyleCop's fix misses doc comments and
+  mangles two-members-on-one-line.
+- BRO1505 accessors: only two accessors that BOTH have block bodies, when either is multi-line (an expression-bodied
+  `get => x;` next to a multi-line `set { }` is fine, like StyleCop; found via 26 false positives in OpenTelemetry).
+- **BRO1506** (SA1512) no blank line below a `//` comment (not the file header, `///`/`////`, trailing comments, or
+  when the next non-blank line is another comment) and **BRO1507** (SA1518, StyleCop's default "allow": at most one
+  line break at the end; `insert_final_newline` covers require/omit). `Layout/TrailingBlankLines.cs`; parity set
+  `comment-and-file-endings`: 10/10, identical output. Fixing BRO1506 and BRO1507 together must not overlap: blank
+  lines below a comment at the end of the file are left to the ending removal. Two of three surveyed teams turn SA1512 off; it's in the
+  preset like StyleCop's default, docs say how to turn it off.
+- BRO1001 + blank lines: the sort never CREATES a BRO1505 (non-field below where two fields were) or BRO1504 (a `//`
+  comment arriving below code) violation; it adds the blank line only then. Pre-existing ones are left to those rules,
+  so compact interfaces stay compact.
 
 ## Real-world testing log
 
@@ -182,12 +211,23 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
      OpenTelemetry's tests, which enforce SA1201-SA1204). StyleCop treats them as public; fixed.
   Final run, all rules: FFMpegCore 153, Polly 498, OpenTelemetry 0, private app 3688, Newtonsoft.Json 2037,
   Serilog 202 findings; all fixed in one pass, no new compile errors, no conflict markers, second run clean.
-  Also: local clones in the scratchpad (hard links, old timestamps) got damaged by a temp cleanup; clone with
-  `--no-hardlinks`. The same cleanup emptied the test framework's reference-assembly cache (flaky first test run).
+  Also: local clones in the scratchpad (under %TEMP%) keep getting damaged by a temp cleanup that deletes files with
+  old timestamps. Hard-linked AND `--no-hardlinks` clones both copy git's object files with their old timestamps;
+  clone local repos via `git clone file:///C:/dev/<repo>` instead, which writes fresh packs (network clones are fine). The same cleanup damages the test framework's reference-assembly cache in
+  `%TEMP%\test-packages` (tests fail en masse with "package is missing the required nuspec file"): delete the
+  damaged package folder under `%TEMP%\test-packages` and rerun.
 - **BRO1002/BRO1105** (2026-09-30): Polly and OpenTelemetry 0. Private app (SA1005/SA1128 off there): BRO1105 408
   (= StyleCop's SA1128 count), BRO1002 77 (StyleCop 1.1.118: 78, see above). FFMpegCore 58, Newtonsoft.Json 257,
   Serilog 26. All fixed in one pass, builds, second run clean. Hooking analyzers into a repo
   without editing it: set the env var `CustomAfterMicrosoftCommonTargets` to a targets file with `<Analyzer>` items.
+- **BRO1503-BRO1507 + all 16 rules together** (2026-09-30): every repo converges in one pass, no conflict markers.
+  Private app: 9,701 findings; BRO1505/1506/1507 counts equal StyleCop's except 41 extra BRO1505 on file-scoped
+  namespaces, which StyleCop 1.1.118 misses (the 1.2 beta reports them). OpenTelemetry: 4 findings left after the run,
+  all in `#if NETFRAMEWORK` code: `dotnet format` doesn't process the net462 target on this machine, so those lines
+  are never analyzed or fixed. An environment limitation, not a StyleBro bug.
+- **BRO1107/BRO1108** (2026-09-30): OpenTelemetry 0 (enforces SA1116/SA1117). FFMpegCore 89, Polly 741, private app
+  613, Newtonsoft.Json 1602, Serilog 118. All fixed in one pass (20/109/150/143/23 files), no new compile errors,
+  second run clean. Items containing `#if` (Newtonsoft.Json) are fine: only the gaps between items are rewritten.
 
 ## Known open questions
 
@@ -213,8 +253,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
    - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
      (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
-     SA1515 (BRO1504). Left: SA1516 (5,873 in the private app), SA1512, SA1518, SA1116/SA1117 (parameter
-     wrapping), naming (SA1300-SA1314; start with private fields/locals/parameters), 107 untested (50 SA16xx).
+     SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
+     (BRO1107/BRO1108). Left: naming (SA1300-SA1314; start with private fields/locals/parameters), 107 untested (50 SA16xx).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

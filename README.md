@@ -22,11 +22,16 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1104](docs/rules/BRO1104.md) | Use default instead of a value type's default constructor | SA1129 | Yes |
 | [BRO1105](docs/rules/BRO1105.md) | Constructor initializers should be on their own line | SA1128 | Yes |
 | [BRO1106](docs/rules/BRO1106.md) | Use string.Empty for empty strings | SA1122 | Yes |
+| [BRO1107](docs/rules/BRO1107.md) | Split parameters should start on the line after the declaration | SA1116 | Yes |
+| [BRO1108](docs/rules/BRO1108.md) | Parameters should be on the same line or on separate lines | SA1117 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 | [BRO1503](docs/rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Yes |
 | [BRO1504](docs/rules/BRO1504.md) | Single-line comments should be preceded by a blank line | SA1515 | Yes |
+| [BRO1505](docs/rules/BRO1505.md) | Elements should be separated by a blank line | SA1516 | Yes |
+| [BRO1506](docs/rules/BRO1506.md) | Single-line comments should not be followed by a blank line | SA1512 | Yes |
+| [BRO1507](docs/rules/BRO1507.md) | Files should not end with blank lines | SA1518 | Yes |
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md).
 
