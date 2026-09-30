@@ -30,6 +30,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   formatted, compared with `Expected/`, then a second run with `--verify-no-changes` must pass.
 - Central package management in `Directory.Packages.props`. Roslyn pinned to **4.8.0** for broad SDK/VS
   compatibility; don't raise it without a reason.
+- `scripts/stylecop-survey`: generates `docs/stylecop-mapping.md` (inventory of StyleCop rules, repo surveys,
+  SDK coverage check). Hand-written decisions in `decisions.psd1`, measured data in `data/`. Not part of the slnx.
 - `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
 - `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted

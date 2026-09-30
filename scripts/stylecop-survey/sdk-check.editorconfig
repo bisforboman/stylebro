@@ -1,0 +1,93 @@
+# SDK settings used by Test-SdkCoverage.ps1: StyleCop-like settings for the SDK's own formatting and code-style
+# rules. The harness appends a section that turns every StyleCop rule on.
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+charset = utf-8-bom
+file_header_template = Copyright (c) Test.
+
+# Formatting (IDE0055) with StyleCop-like layout
+dotnet_diagnostic.IDE0055.severity = warning
+csharp_new_line_before_open_brace = all
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = false
+
+# Code style rules with a StyleCop counterpart
+csharp_prefer_braces = true
+dotnet_diagnostic.IDE0011.severity = warning
+dotnet_style_qualification_for_field = true
+dotnet_style_qualification_for_property = true
+dotnet_style_qualification_for_method = true
+dotnet_style_qualification_for_event = true
+dotnet_diagnostic.IDE0009.severity = warning
+dotnet_style_predefined_type_for_locals_parameters_members = true
+dotnet_style_predefined_type_for_member_access = true
+dotnet_diagnostic.IDE0049.severity = warning
+csharp_using_directive_placement = inside_namespace
+dotnet_diagnostic.IDE0065.severity = warning
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+dotnet_style_require_accessibility_modifiers = always
+dotnet_diagnostic.IDE0040.severity = warning
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary
+dotnet_diagnostic.IDE0047.severity = warning
+dotnet_diagnostic.IDE0048.severity = warning
+dotnet_diagnostic.IDE0073.severity = warning
+
+# Experimental blank-line rules
+dotnet_style_allow_multiple_blank_lines_experimental = false
+dotnet_diagnostic.IDE2000.severity = warning
+csharp_style_allow_embedded_statements_on_same_line_experimental = false
+dotnet_diagnostic.IDE2001.severity = warning
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+dotnet_diagnostic.IDE2002.severity = warning
+dotnet_style_allow_statement_immediately_after_block_experimental = false
+dotnet_diagnostic.IDE2003.severity = warning
+csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = false
+dotnet_diagnostic.IDE2004.severity = warning
+
+# Naming (IDE1006), StyleCop-like: most specific rules first
+dotnet_diagnostic.IDE1006.severity = warning
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.type_parameters.applicable_kinds = type_parameter
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_symbols.static_readonly.applicable_kinds = field
+dotnet_naming_symbols.static_readonly.required_modifiers = static, readonly
+dotnet_naming_symbols.fields.applicable_kinds = field
+dotnet_naming_symbols.fields.applicable_accessibilities = private
+dotnet_naming_symbols.locals_parameters.applicable_kinds = local, parameter
+dotnet_naming_symbols.types_members.applicable_kinds = class, struct, enum, delegate, method, property, event, namespace
+dotnet_naming_style.pascal.capitalization = pascal_case
+dotnet_naming_style.camel.capitalization = camel_case
+dotnet_naming_style.i_prefix.capitalization = pascal_case
+dotnet_naming_style.i_prefix.required_prefix = I
+dotnet_naming_style.t_prefix.capitalization = pascal_case
+dotnet_naming_style.t_prefix.required_prefix = T
+dotnet_naming_rule.r1_interfaces.symbols = interfaces
+dotnet_naming_rule.r1_interfaces.style = i_prefix
+dotnet_naming_rule.r1_interfaces.severity = warning
+dotnet_naming_rule.r2_type_parameters.symbols = type_parameters
+dotnet_naming_rule.r2_type_parameters.style = t_prefix
+dotnet_naming_rule.r2_type_parameters.severity = warning
+dotnet_naming_rule.r3_constants.symbols = constants
+dotnet_naming_rule.r3_constants.style = pascal
+dotnet_naming_rule.r3_constants.severity = warning
+dotnet_naming_rule.r4_static_readonly.symbols = static_readonly
+dotnet_naming_rule.r4_static_readonly.style = pascal
+dotnet_naming_rule.r4_static_readonly.severity = warning
+dotnet_naming_rule.r5_fields.symbols = fields
+dotnet_naming_rule.r5_fields.style = camel
+dotnet_naming_rule.r5_fields.severity = warning
+dotnet_naming_rule.r6_locals_parameters.symbols = locals_parameters
+dotnet_naming_rule.r6_locals_parameters.style = camel
+dotnet_naming_rule.r6_locals_parameters.severity = warning
+dotnet_naming_rule.r7_types_members.symbols = types_members
+dotnet_naming_rule.r7_types_members.style = pascal
+dotnet_naming_rule.r7_types_members.severity = warning
