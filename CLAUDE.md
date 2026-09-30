@@ -110,8 +110,18 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 3. ~~Check the name, create the repo, publish.~~ Done: public at `github.com/bisforboman/stylebro` (MIT);
    `StyleBro.Analyzers 0.1.0-alpha.1` published to nuget.org on 2026-09-30 by release.yml (tag at `bc053c2`).
    To release: bump nothing in the csproj, just push a tag `vX.Y.Z[-suffix]` and approve the `release` environment.
-4. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
+4. Scope = migration parity, not "port every StyleCop rule". `docs/stylecop-mapping.md` (draft, 2026-09-30) maps
+   all 197 StyleCop diagnostics to SDK / StyleBro / drop, from: the rule inventory read from the StyleCop DLLs
+   (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
+   and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
+   - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
+   - Top StyleBro candidates: SA1133, SA1106, SA1509/SA1510 (kept by all 3 teams), SA1128, SA1005, SA1413,
+     SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515, SA1512, SA1518).
+   - 107 rules untested yet, mostly documentation (SA16xx).
+   - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
+     Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.
+5. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
    `<param>` kept in sync with the parameters. These need the semantic model.
-5. StyleCop migration tool: `stylecop.json` + rulesets -> equivalent `.editorconfig`.
-6. Later: blank-line layout rules (the SDK's IDE2000 series is only experimental), baseline support
+6. StyleCop migration tool: `stylecop.json` + rulesets -> equivalent `.editorconfig` (the mapping is its spec).
+7. Later: blank-line layout rules (the SDK's IDE2000 series is only experimental), baseline support
    (fail only on new violations).

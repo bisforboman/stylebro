@@ -1,0 +1,295 @@
+# StyleCop rules and StyleBro
+
+What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. Every rule gets one of three answers:
+
+- **SDK**: the .NET SDK already has an equivalent that `dotnet format` fixes. StyleBro's preset turns it on.
+- **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
+- **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
+
+Status: **draft** (2026-09-30). Of 197 rules: 49 SDK, 31 StyleBro (5 done as BRO1001), 4 drop, 107 not yet tested, 6 not applicable or variants.
+
+## How this was measured
+
+- **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118 and 1.2.0-beta.556, read from the analyzer DLLs, including whether StyleCop itself ships a code fix. 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants.
+- **Teams keeping it on**: the effective setting for production code in three repos that use StyleCop: [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) (`ea1e3f3`), [Polly](https://github.com/App-vNext/Polly) (`0275bc2`) and a private 30-project app. Shown as OTel / Polly / App.
+- **Diagnostics with every rule on**: each repo built with all StyleCop rules enabled as warnings (and XML docs on), counting unique diagnostics. Shown as App / Polly / OTel. Where a team keeps a rule on, the count is near zero; where it is off, the count shows how much code would change. 10 of OpenTelemetry's 81 projects (examples and some tests) did not compile in this setup and are missing.
+- **SDK check**: for 75 rules, a small violating example was formatted with `dotnet format style` and `dotnet format whitespace` (SDK only, not StyleCop's own fixes) using StyleCop-like SDK settings, and StyleCop was run again. "fixed" means the diagnostic was gone. Each rule was checked on one example, so a "fixed" rule can still have cases the SDK handles differently.
+
+**Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
+
+## StyleBro candidates, by demand
+
+Rules the SDK doesn't cover, ordered by how many of the three teams keep them on, then by how often they fire in the private app.
+
+| Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | Proposal |
+|---|---|---|---|---|
+| SA1133 | Do not combine attributes | on / on / on | 0 / 0 / 0 | one attribute per bracket |
+| SA1106 | Code should not contain empty statements | on / on / on | 0 / 0 / 0 | remove the empty statement |
+| SA1509 | Opening braces should not be preceded by blank line | on / on / on | 0 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1510 | Chained statement blocks should not be preceded by blank line | on / on / on | 0 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1131 | Use readable conditions | on / on / on | 0 / 0 / 0 | swap a constant to the right-hand side |
+| SA1129 | Do not use default value type constructor | on / on / on | 0 / 0 / 0 | `new T()` to `default(T)` for value types |
+| SA1128 | Put constructor initializers on their own line | on / on / off | 408 / 0 / 0 | constructor initializer on its own line |
+| SA1005 | Single line comments should begin with single space | on / on / off | 78 / 0 / 0 | space after `//` |
+| SA1505 | Opening braces should not be followed by blank line | on / on / off | 37 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1515 | Single-line comment should be preceded by blank line | on / on / off | 31 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1302 | Interface names should begin with I | on / off / on | 0 / 0 / 0 | rename with Fix All (see naming note) |
+| SA1516 | Elements should be separated by blank line | on / off / off | 5,873 / 44 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1413 | Use trailing comma in multi-line initializers | on / off / off | 1,862 / 407 / 0 | add trailing commas |
+| SA1309 | Field names should not begin with underscore | on / off / off | 1,060 / 486 / 0 | rename with Fix All (see naming note) |
+| SA1122 | Use string.Empty for empty strings | on / off / off | 352 / 7 / 0 | `""` to `string.Empty` |
+| SA1116 | Split parameters should start on line after declaration | on / off / off | 266 / 375 / 0 | parameter wrapping |
+| SA1117 | Parameters should be on same line or separate lines | on / off / off | 102 / 370 / 0 | parameter wrapping |
+| SA1313 | Parameter names should begin with lower-case letter | on / off / off | 90 / 0 / 0 | rename with Fix All (see naming note) |
+| SA1306 | Field names should begin with lower-case letter | on / off / off | 11 / 4 / 0 | rename with Fix All (see naming note) |
+| SA1312 | Variable names should begin with lower-case letter | on / off / off | 7 / 14 / 0 | rename with Fix All (see naming note) |
+| SA1311 | Static readonly fields should begin with upper-case letter | on / off / off | 4 / 0 / 0 | rename with Fix All (see naming note) |
+| SA1303 | Const field names should begin with upper-case letter | on / off / off | 4 / 0 / 0 | rename with Fix All (see naming note) |
+| SA1300 | Element should begin with upper-case letter | on / off / off | 4 / 0 / 0 | rename with Fix All (see naming note) |
+| SA1512 | Single-line comments should not be followed by blank line | off / off / on | 0 / 46 / 82 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1314 | Type parameter names should begin with T | on / off / off | 0 / 0 / 0 | rename with Fix All (see naming note) |
+| SA1518 | Use line endings correctly at end of file | off / off / off | 31 / 40 / 2 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+
+**Naming note.** The SDK can detect all of StyleCop's naming rules (IDE1006 with naming rules in `.editorconfig`), but `dotnet format` cannot fix them: it reports "Unable to fix IDE1006. Code fix NamingStyleCodeFixProvider doesn't support Fix All in Solution." A StyleBro rename fix with Fix All would close that gap. Renaming public API breaks callers, so it should start with private and local symbols.
+
+The documentation rules (SA16xx) are mostly not tested yet. The ones where StyleCop has a fix are candidates for the planned BRO16xx rules.
+
+## All rules
+
+### Documentation
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1600 | Elements should be documented | on | yes | off / on / off | 19,004 / 3,249 / 6,259 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1601 | Partial elements should be documented | on | yes | on / off / on | 0 / 78 / 16 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1602 | Enumeration items should be documented | on | yes | on / on / on | 530 / 10 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1603 | Documentation should contain valid XML | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1604 | Element documentation should have summary | on | no | on / on / on | 1 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1605 | Partial element documentation should have summary | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1606 | Element documentation should have summary text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1607 | Partial element documentation should have summary text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1608 | Element documentation should not have default summary | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1609 | Property documentation should have value | off | yes | off / off / off | 8 / 171 / 292 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1610 | Property documentation should have value text | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1611 | Element parameters should be documented | on | no | on / on / on | 11 / 1 / 8 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1612 | Element parameter documentation should match element parameters | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1613 | Element parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1614 | Element parameter documentation should have text | on | no | on / on / off | 4 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1615 | Element return value should be documented | on | yes | on / on / on | 6 / 1 / 3 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1616 | Element return value documentation should have text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1617 | Void return value should not be documented | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1618 | Generic type parameters should be documented | on | no | on / on / on | 1 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1619 | Generic type parameters should be documented partial class | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1620 | Generic type parameter documentation should match type parameters | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1621 | Generic type parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1622 | Generic type parameter documentation should have text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1623 | Property summary documentation should match accessors | on | yes | on / on / off | 8 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1624 | Property summary documentation should omit accessor with restricted access | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1625 | Element documentation should not be copied and pasted | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1626 | Single-line comments should not use documentation style slashes | on | yes | on / on / on | 2 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1627 | Documentation text should not be empty | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1628 | Documentation text should begin with a capital letter | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1629 | Documentation text should end with a period | on | yes | on / on / off | 29 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1630 | Documentation text should contain whitespace | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1631 | Documentation should meet character percentage | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1632 | Documentation text should meet minimum character length | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1633 | File should have header | on | yes | on / off / off | 2,632 / 0 / 0 | fixed | SDK: IDE0073 (`file_header_template`) |
+| SA1634 | File header should show copyright | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1635 | File header should have copyright text | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1636 | File header copyright text should match | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1637 | File header should contain file name | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1638 | File header file name documentation should match file name | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1639 | File header should have summary | off | yes | off / off / off | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1640 | File header should have valid company text | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1641 | File header company name text should match | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1642 | Constructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1643 | Destructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1644 | Documentation headers should not contain blank lines | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1645 | Included documentation file does not exist | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1646 | Included documentation XPath does not exist | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1647 | Include node does not contain valid file and path | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1648 | inheritdoc should be used with inheriting class | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1649 | File name should match first type name | on | yes | off / on / off | 1 / 0 / 0 |  | Drop: renaming files is not something `dotnet format` can do |
+| SA1650 | Element documentation should be spelled correctly | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1651 | Do not use placeholder elements | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+
+### Layout
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1500 | Braces for multi-line statements should not share line | on | yes | on / on / off | 6 / 0 / 0 | fixed | SDK: IDE0055 (`csharp_new_line_before_open_brace = all`) |
+| SA1501 | Statement should not be on a single line | on | yes | on / on / off | 1 / 0 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_blocks = false`) |
+| SA1502 | Element should not be on a single line | on | yes | on / on / off | 356 / 0 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_blocks = false`) |
+| SA1503 | Braces should not be omitted | on | yes | on / off / off | 14 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
+| SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 37 / 0 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE2000 (experimental) |
+| SA1508 | Closing braces should not be preceded by blank line | on | yes | on / off / off | 85 / 46 / 0 | fixed | SDK: IDE2002 (experimental) |
+| SA1509 | Opening braces should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1510 | Chained statement blocks should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1511 | While-do footer should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 0 / 46 / 82 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 119 / 0 / 0 | fixed | SDK: IDE2003 (experimental) |
+| SA1514 | Element documentation header should be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1515 | Single-line comment should be preceded by blank line | on | yes | on / on / off | 31 / 0 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 5,873 / 44 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1517 | Code should not contain blank lines at start of file | on | yes | on / on / off | 11 / 0 / 0 | fixed | SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template` |
+| SA1518 | Use line endings correctly at end of file | on | yes | off / off / off | 31 / 40 / 2 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1519 | Braces should not be omitted from multi-line child statement | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
+| SA1520 | Use braces consistently | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
+
+### Maintainability
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1119 | Statement should not use unnecessary parenthesis | on | yes | on / on / off | 1 / 0 / 0 | fixed | SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`) |
+| SA1119_p | Statement should not use unnecessary parenthesis | on | yes |  | 0 / 0 / 0 |  | Variant of another rule (not in 1.1.118 as a separate rule) |
+| SA1400 | Access modifier should be declared | on | yes | on / on / off | 10 / 0 / 0 | fixed | SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = always`) |
+| SA1401 | Fields should be private | on | no | off / off / off | 39 / 48 / 141 |  | Drop: making a field private changes public API; no safe automatic fix |
+| SA1402 | File may only contain a single type | on | yes | on / off / off | 1 / 34 / 0 |  | Drop: splitting types into new files is not something `dotnet format` can do |
+| SA1403 | File may only contain a single namespace | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1404 | Code analysis suppression should have justification | on | yes | on / on / on | 0 / 0 / 0 |  | Drop: needs a human-written justification |
+| SA1405 | Debug.Assert should provide message text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1406 | Debug.Fail should provide message text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1407 | Arithmetic expressions should declare precedence | on | yes | on / on / off | 5 / 0 / 0 | not fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass |
+| SA1408 | Conditional expressions should declare precedence | on | yes | on / on / off | 14 / 0 / 0 | fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`) |
+| SA1409 | Remove unnecessary code | off | no | off / on / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 2,581 / 325 / 876 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 1,862 / 407 / 0 | not fixed | StyleBro: add trailing commas |
+
+### Naming
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1300 | Element should begin with upper-case letter | on | yes | on / off / off | 4 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1301 | Element should begin with lower-case letter | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1302 | Interface names should begin with I | on | yes | on / off / on | 0 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 4 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1304 | Non-private readonly fields should begin with upper-case letter | on | yes | on / off / on | 0 / 1 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1305 | Field names should not use Hungarian notation | off | no | off / off / off | 14 / 1 / 82 |  | Untested. StyleCop has no fix |
+| SA1306 | Field names should begin with lower-case letter | on | yes | on / off / off | 11 / 4 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1309 | Field names should not begin with underscore | on | yes | on / off / off | 1,060 / 486 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1310 | Field names should not contain underscore | on | yes | on / on / off | 7 / 0 / 184 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1311 | Static readonly fields should begin with upper-case letter | on | yes | on / off / off | 4 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 7 / 14 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 90 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1314 | Type parameter names should begin with T | on | yes | on / off / off | 0 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1316 (1.2 beta) | Tuple element names should use correct casing | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SX1309 | Field names should begin with underscore | off | yes |  | 32 / 0 / 842 |  | Variant of another rule (not in 1.1.118 as a separate rule) |
+| SX1309S | Static field names should begin with underscore | off | yes |  | 0 / 1 / 19 |  | Variant of another rule (not in 1.1.118 as a separate rule) |
+
+### Ordering
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1200 | Using directives should be placed correctly | on | yes | off / off / off | 14,192 / 0 / 0 | fixed | SDK: IDE0065 (`csharp_using_directive_placement = inside_namespace`) |
+| SA1201 | Elements should appear in the correct order | on | yes | on / off / off | 839 / 89 / 0 |  | StyleBro **BRO1001** (done) |
+| SA1202 | Elements should be ordered by access | on | yes | on / off / off | 185 / 71 / 0 |  | StyleBro **BRO1001** (done) |
+| SA1203 | Constants should appear before fields | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1001** (done) |
+| SA1204 | Static elements should appear before instance elements | on | yes | on / on / off | 50 / 2 / 0 |  | StyleBro **BRO1001** (done) |
+| SA1205 | Partial elements should declare access | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1206 | Declaration keywords should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1207 | Protected should come before internal | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1208 | System using directives should be placed before other using directives | on | yes | on / on / off | 57 / 0 / 0 | fixed | SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`) |
+| SA1209 | Using alias directives should be placed after other using directives | on | yes | on / on / off | 4 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1210 | Using directives should be ordered alphabetically by namespace | on | yes | on / on / off | 290 / 0 / 0 | fixed | SDK: using sorting in `dotnet format` |
+| SA1211 | Using alias directives should be ordered alphabetically by alias name | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: using sorting in `dotnet format` |
+| SA1212 | Property accessors should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1213 | Event accessors should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1214 | Readonly fields should appear before non-readonly fields | on | yes | on / on / off | 2 / 0 / 0 |  | StyleBro **BRO1001** (done) |
+| SA1216 | Using static directives should be placed at the correct location | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1217 | Using static directives should be ordered alphabetically | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+
+### Readability
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1100 | Do not prefix calls with base unless local implementation exists | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1101 | Prefix local calls with this | on | yes | on / off / off | 17,153 / 4,007 / 0 | fixed | SDK: IDE0009 (`dotnet_style_qualification_for_* = true`) |
+| SA1102 | Query clause should follow previous clause | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1103 | Query clauses should be on separate lines or all on one line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1104 | Query clause should begin on new line when previous clause spans multiple lines | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1105 | Query clauses spanning multiple lines should begin on own line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1106 | Code should not contain empty statements | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: remove the empty statement |
+| SA1107 | Code should not contain multiple statements on one line | on | yes | on / off / off | 0 / 243 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_statements = false`) |
+| SA1108 | Block statements should not contain embedded comments | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1109 | Block statements should not contain embedded regions | off | no | off / on / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1110 | Opening parenthesis or bracket should be on declaration line | on | yes | on / on / off | 3 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1111 | Closing parenthesis should be on line of last parameter | on | yes | on / on / off | 740 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1112 | Closing parenthesis should be on line of opening parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1113 | Comma should be on the same line as previous parameter | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1114 | Parameter list should follow declaration | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1115 | Parameter should follow comma | on | no | on / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1116 | Split parameters should start on line after declaration | on | yes | on / off / off | 266 / 375 / 0 | not fixed | StyleBro: parameter wrapping |
+| SA1117 | Parameters should be on same line or separate lines | on | no | on / off / off | 102 / 370 / 0 | not fixed | StyleBro: parameter wrapping |
+| SA1118 | Parameter should not span multiple lines | on | no | on / on / off | 126 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |
+| SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 352 / 7 / 0 | not fixed | StyleBro: `""` to `string.Empty` |
+| SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1124 | Do not use regions | on | yes | on / off / off | 17 / 264 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1126 | Prefix calls correctly | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 82 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1128 | Put constructor initializers on their own line | on | yes | on / on / off | 408 / 0 / 0 | not fixed | StyleBro: constructor initializer on its own line |
+| SA1129 | Do not use default value type constructor | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: `new T()` to `default(T)` for value types |
+| SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1131 | Use readable conditions | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: swap a constant to the right-hand side |
+| SA1132 | Do not combine fields | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1133 | Do not combine attributes | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: one attribute per bracket |
+| SA1134 | Attributes should not share line | on | yes | on / off / on | 0 / 9 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1135 | Using directives should be qualified | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1136 | Enum values should be on separate lines | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1137 | Elements should have the same indentation | on | yes | on / off / off | 4 / 4 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1139 | Use literal suffix notation instead of casting | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1141 (1.2 beta) | Use tuple syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1142 (1.2 beta) | Refer to tuple fields by name | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1414 (1.2 beta) | Tuple types in signatures should have element names | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
+| SX1101 | Do not prefix local calls with 'this.' | off | yes |  | 6 / 0 / 6,123 |  | Variant of another rule (not in 1.1.118 as a separate rule) |
+
+### Spacing
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA1000 | Keywords should be spaced correctly | on | yes | on / off / off | 3,886 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1001 | Commas should be spaced correctly | on | yes | on / off / on | 0 / 4 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1002 | Semicolons should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1003 | Symbols should be spaced correctly | on | yes | on / off / off | 16 / 1 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1004 | Documentation lines should begin with single space | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1005 | Single line comments should begin with single space | on | yes | on / on / off | 78 / 0 / 0 | not fixed | StyleBro: space after `//` |
+| SA1006 | Preprocessor keywords should not be preceded by space | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1007 | Operator keyword should be followed by space | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1008 | Opening parenthesis should be spaced correctly | on | yes | on / off / off | 17 / 1 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1009 | Closing parenthesis should be spaced correctly | on | yes | on / off / off | 1,108 / 8 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1010 | Opening square brackets should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1011 | Closing square brackets should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1012 | Opening braces should be spaced correctly | on | yes | on / off / off | 120 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1013 | Closing braces should be spaced correctly | on | yes | on / off / off | 58 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1014 | Opening generic brackets should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1015 | Closing generic brackets should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1016 | Opening attribute brackets should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1017 | Closing attribute brackets should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1018 | Nullable type symbols should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1019 | Member access symbols should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1020 | Increment decrement symbols should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1021 | Negative signs should be spaced correctly | on | yes | on / off / off | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1022 | Positive signs should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1023 | Dereference and access of symbols should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1024 | Colons Should Be Spaced Correctly | on | yes | on / off / off | 21 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1025 | Code should not contain multiple whitespace in a row | on | yes | on / off / off | 91 / 4 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1026 | Code should not contain space after new or stackalloc keyword in implicitly typed array allocation | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+| SA1027 | Use tabs correctly | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting (`indent_style = space`) |
+| SA1028 | Code should not contain trailing whitespace | on | yes | on / on / off | 11 / 0 / 0 | fixed | SDK: IDE0055 formatting |
+
+### Special
+
+| Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (App / Polly / OTel) | SDK check | Proposal |
+|---|---|---|---|---|---|---|---|
+| SA0001 | XML comment analysis disabled | on | no | on / off / off | 0 / 0 / 0 |  | Not applicable: StyleCop's own setup diagnostic |
+| SA0002 | Invalid settings file | on | no | on / on / on | 0 / 0 / 0 |  | Not applicable: StyleCop's own setup diagnostic |
+
