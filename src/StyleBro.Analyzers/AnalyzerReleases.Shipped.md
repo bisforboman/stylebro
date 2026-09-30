@@ -26,3 +26,17 @@ BRO1106 | Readability | Warning  | EmptyStringAnalyzer
 BRO1401 | Maintainability | Warning  | TrailingCommaAnalyzer
 BRO1501 | Layout | Warning  | BlankLineBeforeAnalyzer
 BRO1502 | Layout | Warning  | BlankLineBeforeAnalyzer
+
+## Release 0.1.0.3
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+BRO1107 | Readability | Warning  | ParameterLayoutAnalyzer
+BRO1108 | Readability | Warning  | ParameterLayoutAnalyzer
+BRO1503 | Layout | Warning  | BlankLineAfterAnalyzer
+BRO1504 | Layout | Warning  | BlankLineAfterAnalyzer
+BRO1505 | Layout | Warning  | ElementSeparationAnalyzer
+BRO1506 | Layout | Warning  | TrailingBlankLinesAnalyzer
+BRO1507 | Layout | Warning  | TrailingBlankLinesAnalyzer
