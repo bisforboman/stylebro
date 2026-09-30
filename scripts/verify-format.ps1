@@ -18,11 +18,11 @@ dotnet build $project --nologo -v q
 if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
 
 Write-Host 'Pass 1: dotnet format applies fixes'
-dotnet format analyzers $project --diagnostics BRO1001 --severity warn --no-restore
+dotnet format analyzers $project --diagnostics BRO1001 BRO1101 BRO1102 --severity warn --no-restore
 if ($LASTEXITCODE -ne 0) { throw "dotnet format failed ($LASTEXITCODE)." }
 
 Write-Host 'Pass 2: a second run must change nothing'
-dotnet format analyzers $project --diagnostics BRO1001 --severity warn --no-restore --verify-no-changes
+dotnet format analyzers $project --diagnostics BRO1001 BRO1101 BRO1102 --severity warn --no-restore --verify-no-changes
 if ($LASTEXITCODE -ne 0) { throw 'Fixes did not converge: second dotnet format run still wanted changes.' }
 
 $failed = $false

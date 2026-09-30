@@ -1,4 +1,4 @@
-using static StyleBro.Tests.MemberOrderingVerifier;
+using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Ordering.MemberOrderingAnalyzer, StyleBro.CodeFixes.Ordering.MemberOrderingCodeFixProvider>;
 
 namespace StyleBro.Tests;
 

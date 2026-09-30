@@ -17,4 +17,25 @@ internal static class Descriptors
             + "The order is configurable with the stylebro_member_* options in .editorconfig. "
             + "Run 'dotnet format analyzers --diagnostics BRO1001' to fix a whole solution.",
         helpLinkUri: HelpBase + DiagnosticIds.MemberOrdering + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyStatement = new(
+        id: DiagnosticIds.EmptyStatement,
+        title: "Code should not contain empty statements",
+        messageFormat: "Remove the empty statement",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A stray ';' in a block, or after the closing brace of a type or namespace, does nothing. "
+            + "Replaces StyleCop SA1106.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyStatement + ".md");
+
+    public static readonly DiagnosticDescriptor CombinedAttributes = new(
+        id: DiagnosticIds.CombinedAttributes,
+        title: "Each attribute should be in its own brackets",
+        messageFormat: "Put '{0}' in its own brackets",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Writes '[A, B]' as '[A]' and '[B]'. Replaces StyleCop SA1133.",
+        helpLinkUri: HelpBase + DiagnosticIds.CombinedAttributes + ".md");
 }

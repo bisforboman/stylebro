@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (5 done as BRO1001), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (7 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -25,10 +25,8 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Proposal |
 |---|---|---|---|---|
-| SA1106 | Code should not contain empty statements | on / on / on | 0 / 0 / 0 | remove the empty statement |
 | SA1129 | Do not use default value type constructor | on / on / on | 0 / 0 / 0 | `new T()` to `default(T)` for value types |
 | SA1131 | Use readable conditions | on / on / on | 0 / 0 / 0 | swap a constant to the right-hand side |
-| SA1133 | Do not combine attributes | on / on / on | 0 / 0 / 0 | one attribute per bracket |
 | SA1509 | Opening braces should not be preceded by blank line | on / on / on | 0 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1510 | Chained statement blocks should not be preceded by blank line | on / on / on | 0 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1128 | Put constructor initializers on their own line | on / on / off | 0 / 0 / 408 | constructor initializer on its own line |
@@ -219,7 +217,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1103 | Query clauses should be on separate lines or all on one line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1104 | Query clause should begin on new line when previous clause spans multiple lines | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1105 | Query clauses spanning multiple lines should begin on own line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1106 | Code should not contain empty statements | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: remove the empty statement |
+| SA1106 | Code should not contain empty statements | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported |
 | SA1107 | Code should not contain multiple statements on one line | on | yes | on / off / off | 0 / 243 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_statements = false`) |
 | SA1108 | Block statements should not contain embedded comments | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1109 | Block statements should not contain embedded regions | off | no | off / on / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
@@ -245,7 +243,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1131 | Use readable conditions | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: swap a constant to the right-hand side |
 | SA1132 | Do not combine fields | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1133 | Do not combine attributes | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: one attribute per bracket |
+| SA1133 | Do not combine attributes | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported |
 | SA1134 | Attributes should not share line | on | yes | on / off / on | 0 / 9 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1135 | Using directives should be qualified | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1136 | Enum values should be on separate lines | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |

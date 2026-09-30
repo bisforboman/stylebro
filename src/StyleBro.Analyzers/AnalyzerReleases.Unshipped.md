@@ -6,3 +6,5 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 BRO1001 | Ordering | Warning  | MemberOrderingAnalyzer
+BRO1101 | Readability | Warning  | EmptyStatementAnalyzer
+BRO1102 | Readability | Warning  | CombinedAttributesAnalyzer

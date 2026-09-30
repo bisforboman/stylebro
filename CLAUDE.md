@@ -68,6 +68,20 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - Code: `src/StyleBro.Analyzers/Ordering/MemberOrdering.cs` (shared logic), `MemberOrderOptions.cs`,
   `MemberOrderingAnalyzer.cs`, `src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs`.
 
+## BRO11xx: readability (numbered in blocks like StyleCop: BRO11xx readability, BRO16xx documentation)
+
+- **BRO1101** (SA1106) empty statements: `;` in blocks/switch sections and after a type's or namespace's `}`.
+  Not reported: embedded (`while (x) ;`, left to the compiler's CS0642; a `{ }` fix would hide a likely bug),
+  labeled (`end: ;`, removal can break the build), bodiless records. The fix is text-based and computed per line
+  (`EmptyStatements.GetChanges`), so single fix and Fix All agree: whitespace-only lines go completely, otherwise
+  the `;` takes the adjacent whitespace. Directives always have their own line, so no directive skip is needed.
+- **BRO1102** (SA1133) combined attributes: `[A, B]` -> `[A]` + `[B]`, target repeated. Own line -> one line per
+  attribute; shares a line with code -> `[A] [B]`. Like StyleCop, parameters/type parameters are not reported.
+  Lists with comments between attributes are skipped (StyleCop's fix drops the comment).
+- Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
+- Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
+  confirming a test fails.
+
 ## Real-world testing log
 
 - **FFMpegCore** (open source, 6 projects, 180 files, no StyleCop; 2026-09-29):
@@ -94,6 +108,11 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
     with all 182 pairs (both orders), 0 differences. (2) The initializer guard treated constants as state and
     skipped a type for `Prop { get; set; } = SomeConst`; constants are now ignored.
   - Not covered by StyleBro (by design): namespace-level ordering of types (part of SA1201).
+- **BRO1101/BRO1102** (2026-09-30): 0 findings in OpenTelemetry, Polly and the private app, which all keep SA1106
+  and SA1133 on (so StyleBro is not stricter than StyleCop there; BRO1001 firing 674x in Polly confirmed the hook
+  loaded). FFMpegCore and Serilog: 0 findings. Newtonsoft.Json: 66 findings (3 BRO1101, 63 BRO1102) in 4 files, all
+  fixed in one pass, no new compile errors, second run clean, diffs reviewed by hand. Hooking analyzers into a repo
+  without editing it: set the env var `CustomAfterMicrosoftCommonTargets` to a targets file with `<Analyzer>` items.
 
 ## Known open questions
 
@@ -117,8 +136,9 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
    and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
-   - Top StyleBro candidates: SA1133, SA1106, SA1509/SA1510 (kept by all 3 teams), SA1128, SA1005, SA1413,
-     SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515, SA1512, SA1518).
+   - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), SA1509/SA1510, SA1131, SA1129 (kept by
+     all 3 teams), SA1128, SA1005, SA1413, SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
+     SA1512, SA1518).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

@@ -13,6 +13,12 @@ stylebro_member_constants_first = true
 stylebro_member_static_first = true
 stylebro_member_readonly_first = true
 
+# BRO1101: no empty statements (SA1106)
+dotnet_diagnostic.BRO1101.severity = warning
+
+# BRO1102: each attribute in its own brackets (SA1133)
+dotnet_diagnostic.BRO1102.severity = warning
+
 # ---------------------------------------------------------------------------
 # Built-in .NET rules that already cover common StyleCop rules.
 # 'dotnet format' fixes these too. To also enforce them on build, set

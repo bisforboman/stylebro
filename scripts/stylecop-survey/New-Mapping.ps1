@@ -78,7 +78,7 @@ W '- **SDK**: the .NET SDK already has an equivalent that `dotnet format` fixes.
 W '- **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.'
 W '- **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn''t cover it.'
 W
-W "Status: **$($decisions.Status)**. Of $($rows.Count) rules: $($tally.SDK) SDK, $($tally.StyleBro) StyleBro ($($tally.Done) done as BRO1001), $($tally.Drop) drop, $($tally.Untested) not yet tested, $other not applicable or variants."
+W "Status: **$($decisions.Status)**. Of $($rows.Count) rules: $($tally.SDK) SDK, $($tally.StyleBro) StyleBro ($($tally.Done) done), $($tally.Drop) drop, $($tally.Untested) not yet tested, $other not applicable or variants."
 W
 W '## How this was measured'
 W

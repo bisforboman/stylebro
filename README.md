@@ -15,6 +15,10 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | ID | Title | Replaces | Fix |
 |----|-------|----------|-----|
 | [BRO1001](docs/rules/BRO1001.md) | Members should be ordered | SA1201-SA1204, SA1214 | Yes, with custom Fix All |
+| [BRO1101](docs/rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Yes |
+| [BRO1102](docs/rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Yes |
+
+How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md).
 
 ## Usage
 
