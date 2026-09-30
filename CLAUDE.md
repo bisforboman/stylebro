@@ -62,7 +62,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 4. Configuration goes through `.editorconfig` keys prefixed `stylebro_`, read via `AnalyzerConfigOptionsProvider`
    in both the analyzer and the fix.
 5. Every rule gets a `docs/rules/BROxxxx.md`, a row in `AnalyzerReleases.Unshipped.md`, unit tests covering
-   the single fix + Fix All, and a case in `samples/Messy`.
+   the single fix + Fix All, and a case in `samples/Messy`. Rule pages share one structure: intro, `## Example`
+   with `### Before`/`### After` csharp blocks, `## Why`, then as needed How the fix works / Configuration /
+   Not reported / Compared with StyleCop. `DocExamplesTests` runs every example (Before compiles and gets the
+   diagnostic, one Fix All pass gives exactly After, After compiles clean), so examples can't go stale.
 
 ## BRO1001: member ordering (implemented, unit + dotnet format tests pass)
 
