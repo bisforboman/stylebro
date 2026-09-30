@@ -8,3 +8,5 @@ Rule ID | Category | Severity | Notes
 BRO1001 | Ordering | Warning  | MemberOrderingAnalyzer
 BRO1101 | Readability | Warning  | EmptyStatementAnalyzer
 BRO1102 | Readability | Warning  | CombinedAttributesAnalyzer
+BRO1501 | Layout | Warning  | BlankLineBeforeAnalyzer
+BRO1502 | Layout | Warning  | BlankLineBeforeAnalyzer

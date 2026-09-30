@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (7 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (9 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -27,8 +27,6 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 |---|---|---|---|---|
 | SA1129 | Do not use default value type constructor | on / on / on | 0 / 0 / 0 | `new T()` to `default(T)` for value types |
 | SA1131 | Use readable conditions | on / on / on | 0 / 0 / 0 | swap a constant to the right-hand side |
-| SA1509 | Opening braces should not be preceded by blank line | on / on / on | 0 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
-| SA1510 | Chained statement blocks should not be preceded by blank line | on / on / on | 0 / 0 / 0 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1128 | Put constructor initializers on their own line | on / on / off | 0 / 0 / 408 | constructor initializer on its own line |
 | SA1005 | Single line comments should begin with single space | on / on / off | 0 / 0 / 78 | space after `//` |
 | SA1505 | Opening braces should not be followed by blank line | on / on / off | 0 / 0 / 37 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
@@ -128,8 +126,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE2000 (experimental) |
 | SA1508 | Closing braces should not be preceded by blank line | on | yes | on / off / off | 0 / 46 / 85 | fixed | SDK: IDE2002 (experimental) |
-| SA1509 | Opening braces should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
-| SA1510 | Chained statement blocks should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1509 | Opening braces should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1501** (done), same results as StyleCop |
+| SA1510 | Chained statement blocks should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1502** (done), same results as StyleCop |
 | SA1511 | While-do footer should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 82 / 46 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 0 / 0 / 119 | fixed | SDK: IDE2003 (experimental) |

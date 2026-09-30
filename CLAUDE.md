@@ -82,6 +82,17 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
 
+## BRO15xx: layout
+
+- **BRO1501** (SA1509) blank line before `{` and **BRO1502** (SA1510) blank line before `else`/`catch`/`finally`.
+  Same results as StyleCop, verified by running both on the same probe files (14 identical positions).
+- "Blank lines directly above": only whole whitespace lines inside the token's leading trivia count, so string
+  contents are never touched; the scan stops at a comment or directive line. The fix deletes those lines.
+- StyleCop's exception, matched on purpose (user's decision): a `{` whose previous token is `}` is not reported
+  (block after block, even with a comment in between). A standalone block after `;` IS reported, like SA1509.
+  `do ... while`'s `while` is not a BRO1502 keyword.
+- One analyzer (`Layout/BlankLineBeforeAnalyzer`, a single token pass) and one fix for both IDs.
+
 ## Real-world testing log
 
 - **FFMpegCore** (open source, 6 projects, 180 files, no StyleCop; 2026-09-29):
@@ -111,7 +122,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - **BRO1101/BRO1102** (2026-09-30): 0 findings in OpenTelemetry, Polly and the private app, which all keep SA1106
   and SA1133 on (so StyleBro is not stricter than StyleCop there; BRO1001 firing 674x in Polly confirmed the hook
   loaded). FFMpegCore and Serilog: 0 findings. Newtonsoft.Json: 66 findings (3 BRO1101, 63 BRO1102) in 4 files, all
-  fixed in one pass, no new compile errors, second run clean, diffs reviewed by hand. Hooking analyzers into a repo
+  fixed in one pass, no new compile errors, second run clean, diffs reviewed by hand.
+- **BRO1501/BRO1502** (2026-09-30): 0 in the three StyleCop repos. First version flagged block-after-block too
+  (22 of 23 real findings); StyleCop doesn't, so that was fixed. Now: FFMpegCore 2, Serilog 1, Newtonsoft.Json 0,
+  all standalone blocks after a statement; fixed, builds, second run clean. Hooking analyzers into a repo
   without editing it: set the env var `CustomAfterMicrosoftCommonTargets` to a targets file with `<Analyzer>` items.
 
 ## Known open questions
@@ -136,7 +150,7 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
    and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
-   - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), SA1509/SA1510, SA1131, SA1129 (kept by
+   - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), ~~SA1509/SA1510~~ (BRO1501/BRO1502), SA1131, SA1129 (kept by
      all 3 teams), SA1128, SA1005, SA1413, SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
      SA1512, SA1518).
    - 107 rules untested yet, mostly documentation (SA16xx).

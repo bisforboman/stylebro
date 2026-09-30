@@ -38,4 +38,24 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "Writes '[A, B]' as '[A]' and '[B]'. Replaces StyleCop SA1133.",
         helpLinkUri: HelpBase + DiagnosticIds.CombinedAttributes + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBeforeOpenBrace = new(
+        id: DiagnosticIds.BlankLineBeforeOpenBrace,
+        title: "Opening braces should not be preceded by a blank line",
+        messageFormat: "Remove the blank line before '{{'",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An opening brace on its own line directly follows the line it belongs to. Replaces StyleCop SA1509.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeOpenBrace + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBeforeChainedBlock = new(
+        id: DiagnosticIds.BlankLineBeforeChainedBlock,
+        title: "Chained blocks should not be preceded by a blank line",
+        messageFormat: "Remove the blank line before '{0}'",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'else', 'catch' and 'finally' directly follow the block they continue. Replaces StyleCop SA1510.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeChainedBlock + ".md");
 }

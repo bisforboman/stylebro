@@ -19,6 +19,12 @@ dotnet_diagnostic.BRO1101.severity = warning
 # BRO1102: each attribute in its own brackets (SA1133)
 dotnet_diagnostic.BRO1102.severity = warning
 
+# BRO1501: no blank line before an opening brace (SA1509)
+dotnet_diagnostic.BRO1501.severity = warning
+
+# BRO1502: no blank line before else, catch or finally (SA1510)
+dotnet_diagnostic.BRO1502.severity = warning
+
 # ---------------------------------------------------------------------------
 # Built-in .NET rules that already cover common StyleCop rules.
 # 'dotnet format' fixes these too. To also enforce them on build, set
