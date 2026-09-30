@@ -35,8 +35,9 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
   Publishing (`NuGet/login@v1`, no stored API key) and creates a GitHub release (prerelease if the version has a `-`).
   Set up: nuget.org Trusted Publishing policy (repo owner bisforboman, repo stylebro, workflow `release.yml`,
-  environment `release`, packages `StyleBro.*`, new packages allowed), repo secret `NUGET_USER` (nuget.org
-  profile name), and the `release` environment requires the owner's approval. The first failure (HTTP 401
+  environment `release`, packages `StyleBro.*`, new packages allowed), repo *variable* `NUGET_USER` = `bisforboman`
+  (nuget.org profile name; a variable, not a secret, so logs aren't masked), and the `release` environment
+  requires the owner's approval. The first failure (HTTP 401
   "No matching trust policy") was simply a missing policy.
 
 ## Design rules for every rule

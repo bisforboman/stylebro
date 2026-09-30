@@ -3,7 +3,7 @@ name: Release
 # Push a tag like v0.1.0-alpha.1 to publish that version to nuget.org.
 # Authentication uses nuget.org Trusted Publishing: no long-lived API key is stored anywhere.
 # One-time setup: a Trusted Publishing policy on nuget.org for bisforboman/stylebro, workflow file
-# release.yml, environment release; plus a repository secret NUGET_USER holding the nuget.org profile name.
+# release.yml, environment release; plus a repository variable NUGET_USER holding the nuget.org profile name.
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
         uses: NuGet/login@v1
         id: login
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: ${{ vars.NUGET_USER }}
 
       - name: Push to nuget.org
         run: >
