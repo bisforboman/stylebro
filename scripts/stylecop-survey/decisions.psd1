@@ -38,12 +38,12 @@
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
         SA1407 = 'SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass'
-        SA1005 = 'StyleBro: space after `//`'
+        SA1005 = 'StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)'
         SA1106 = 'StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported'
         SA1116 = 'StyleBro: parameter wrapping'
         SA1117 = 'StyleBro: parameter wrapping'
         SA1122 = 'StyleBro: `""` to `string.Empty`'
-        SA1128 = 'StyleBro: constructor initializer on its own line'
+        SA1128 = 'StyleBro **BRO1105** (done), same results as StyleCop'
         SA1129 = 'StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported'
         SA1131 = 'StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type''s own operator are not reported'
         SA1133 = 'StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported'

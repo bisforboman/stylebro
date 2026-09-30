@@ -18,6 +18,28 @@ internal static class Descriptors
             + "Run 'dotnet format analyzers --diagnostics BRO1001' to fix a whole solution.",
         helpLinkUri: HelpBase + DiagnosticIds.MemberOrdering + ".md");
 
+    public static readonly DiagnosticDescriptor CommentSpacing = new(
+        id: DiagnosticIds.CommentSpacing,
+        title: "Single-line comments should begin with a space",
+        messageFormat: "Add a space after '//'",
+        category: "Spacing",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'// note' instead of '//note'. Commented-out code ('////') and separators ('//--') are left alone. "
+            + "Replaces StyleCop SA1005.",
+        helpLinkUri: HelpBase + DiagnosticIds.CommentSpacing + ".md");
+
+    public static readonly DiagnosticDescriptor ConstructorInitializerLine = new(
+        id: DiagnosticIds.ConstructorInitializerLine,
+        title: "Constructor initializers should be on their own line",
+        messageFormat: "Put ': {0}(...)' on its own line",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "': base(...)' and ': this(...)' go on the line after the constructor's parameters, one level "
+            + "deeper. Replaces StyleCop SA1128.",
+        helpLinkUri: HelpBase + DiagnosticIds.ConstructorInitializerLine + ".md");
+
     public static readonly DiagnosticDescriptor EmptyStatement = new(
         id: DiagnosticIds.EmptyStatement,
         title: "Code should not contain empty statements",

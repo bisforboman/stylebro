@@ -13,6 +13,12 @@ stylebro_member_constants_first = true
 stylebro_member_static_first = true
 stylebro_member_readonly_first = true
 
+# BRO1002: a space after '//' (SA1005)
+dotnet_diagnostic.BRO1002.severity = warning
+
+# BRO1105: constructor initializers on their own line (SA1128)
+dotnet_diagnostic.BRO1105.severity = warning
+
 # BRO1101: no empty statements (SA1106)
 dotnet_diagnostic.BRO1101.severity = warning
 

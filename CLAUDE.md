@@ -88,7 +88,16 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   (deviations; StyleCop's fix for the statement doesn't compile). Needs the semantic model.
 - For both, StyleCop and StyleBro were run on the same probe files: positions and fixed output are identical except
   the three documented deviations.
+- **BRO1105** (SA1128) `: base(...)`/`: this(...)` on its own line, one level deeper than the constructor
+  (indentation from `.editorconfig` via `Indentation.GetUnit`). Only the stretch colon..keyword is rewritten, so
+  arguments/body/comment-before-colon stay; skipped when a comment sits in that stretch.
+- **BRO1002** (SA1005, numbered in the 10xx block next to BRO1001, which predates the block scheme) space after `//`.
+  Exempt like StyleCop 1.2: already spaced (incl. `//  two`), empty, `///`/`////`, `//--`. StyleCop 1.1.118 also
+  reported `//  two spaces` (the only difference in the private app: 77 vs 78). Whitespace-only -> `//`.
 - Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
+- **StyleCop parity check:** `scripts/stylecop-survey/Compare-WithStyleCop.ps1` + `parity/parity.psd1`. Runs both
+  tools on edge-case files, compares positions and fixed output; every difference must be a documented deviation.
+  All 4 sets (8 rules) pass. Add a set for every new rule that replaces a StyleCop rule.
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
 
@@ -138,7 +147,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   all standalone blocks after a statement; fixed, builds, second run clean.
 - **BRO1103/BRO1104** (2026-09-30): 0 in Polly and OpenTelemetry. Private app: 1 BRO1104 on a target-typed
   `new()` (`DateTime X { get; set; } = new();`), which StyleCop 1.1.118 predates and misses; the 1.2 beta reports it.
-  FFMpegCore 1, Serilog 6, Newtonsoft.Json 30. All fixed in one pass, builds, second run clean. Hooking analyzers into a repo
+  FFMpegCore 1, Serilog 6, Newtonsoft.Json 30. All fixed in one pass, builds, second run clean.
+- **BRO1002/BRO1105** (2026-09-30): Polly and OpenTelemetry 0. Private app (SA1005/SA1128 off there): BRO1105 408
+  (= StyleCop's SA1128 count), BRO1002 77 (StyleCop 1.1.118: 78, see above). FFMpegCore 58, Newtonsoft.Json 257,
+  Serilog 26. All fixed in one pass, builds, second run clean. Hooking analyzers into a repo
   without editing it: set the env var `CustomAfterMicrosoftCommonTargets` to a targets file with `<Analyzer>` items.
 
 ## Known open questions
@@ -164,7 +176,7 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
    - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), ~~SA1509/SA1510~~ (BRO1501/BRO1502), ~~SA1131~~ (BRO1103), ~~SA1129~~ (BRO1104) (kept by
-     all 3 teams), SA1128, SA1005, SA1413, SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
+     all 3 teams), ~~SA1128~~ (BRO1105), ~~SA1005~~ (BRO1002), SA1413, SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
      SA1512, SA1518).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.

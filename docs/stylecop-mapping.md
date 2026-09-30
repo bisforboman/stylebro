@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (11 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (13 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -25,8 +25,6 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Proposal |
 |---|---|---|---|---|
-| SA1128 | Put constructor initializers on their own line | on / on / off | 0 / 0 / 408 | constructor initializer on its own line |
-| SA1005 | Single line comments should begin with single space | on / on / off | 0 / 0 / 78 | space after `//` |
 | SA1505 | Opening braces should not be followed by blank line | on / on / off | 0 / 0 / 37 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1515 | Single-line comment should be preceded by blank line | on / on / off | 0 / 0 / 31 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1302 | Interface names should begin with I | on / off / on | 0 / 0 / 0 | rename with Fix All (see naming note) |
@@ -234,7 +232,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1126 | Prefix calls correctly | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 0 / 0 / 82 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1128 | Put constructor initializers on their own line | on | yes | on / on / off | 0 / 0 / 408 | not fixed | StyleBro: constructor initializer on its own line |
+| SA1128 | Put constructor initializers on their own line | on | yes | on / on / off | 0 / 0 / 408 | not fixed | StyleBro **BRO1105** (done), same results as StyleCop |
 | SA1129 | Do not use default value type constructor | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported |
 | SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1131 | Use readable conditions | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported |
@@ -259,7 +257,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1002 | Semicolons should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1003 | Symbols should be spaced correctly | on | yes | on / off / off | 0 / 1 / 16 | fixed | SDK: IDE0055 formatting |
 | SA1004 | Documentation lines should begin with single space | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1005 | Single line comments should begin with single space | on | yes | on / on / off | 0 / 0 / 78 | not fixed | StyleBro: space after `//` |
+| SA1005 | Single line comments should begin with single space | on | yes | on / on / off | 0 / 0 / 78 | not fixed | StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`) |
 | SA1006 | Preprocessor keywords should not be preceded by space | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1007 | Operator keyword should be followed by space | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1008 | Opening parenthesis should be spaced correctly | on | yes | on / off / off | 0 / 1 / 17 | fixed | SDK: IDE0055 formatting |

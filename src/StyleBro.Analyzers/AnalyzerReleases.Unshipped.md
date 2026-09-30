@@ -12,3 +12,5 @@ BRO1501 | Layout | Warning  | BlankLineBeforeAnalyzer
 BRO1502 | Layout | Warning  | BlankLineBeforeAnalyzer
 BRO1103 | Readability | Warning  | ConstantOnLeftAnalyzer
 BRO1104 | Readability | Warning  | DefaultValueConstructorAnalyzer
+BRO1002 | Spacing | Warning  | CommentSpacingAnalyzer
+BRO1105 | Readability | Warning  | ConstructorInitializerLineAnalyzer

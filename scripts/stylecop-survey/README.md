@@ -15,6 +15,19 @@ The measured data is committed, so step 4 works on its own. Hand-written parts l
 - `decisions.psd1`: the proposal per rule (SDK / StyleBro / drop), which SDK setting covers a rule, and notes.
 - `repos.psd1`: the surveyed repos, and which of their config files apply to production code.
 
+## Checking a rule against StyleCop
+
+`Compare-WithStyleCop.ps1` runs StyleCop and StyleBro on the same case files in `parity/<set>/`, compares the
+reported positions, lets each tool fix its own copy, and diffs the fixed files (both must still compile). Every
+difference has to be listed under `Expected` in `parity/parity.psd1`, next to a comment naming the documented
+deviation; anything else fails. Run it after changing a rule; add a set (and edge-case files) for every new rule
+that replaces a StyleCop rule.
+
+```powershell
+./Compare-WithStyleCop.ps1                  # all sets
+./Compare-WithStyleCop.ps1 -Set blank-lines
+```
+
 ## Adding a repo
 
 ```powershell
