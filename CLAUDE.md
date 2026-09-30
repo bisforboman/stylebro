@@ -73,6 +73,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   Defaults match StyleCop so migration is painless (kind order verified pairwise against StyleCop 1.1.118).
 - One diagnostic per type, on the first out-of-place member. The fix sorts the whole type.
 - Trivia: blank-line layout stays with the position; comments, docs and attributes move with the member.
+  Exception: a member led by a `//` comment moved into a later slot without a blank line gets one, otherwise the
+  sort creates a BRO1504 violation and `dotnet format` needs a second run (seen in Newtonsoft.Json).
 - The Fix All rewriter sorts nested types before their parents in one pass.
 - Types with directives between members (`#region`, `#if`, `#pragma`) are skipped.
 - Types where sorting would swap dependent field/auto-property initializers are skipped (`InitializerOrder.cs`).
@@ -128,6 +130,11 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   (block after block, even with a comment in between). A standalone block after `;` IS reported, like SA1509.
   `do ... while`'s `while` is not a BRO1502 keyword.
 - One analyzer (`Layout/BlankLineBeforeAnalyzer`, a single token pass) and one fix for both IDs.
+- **BRO1503** (SA1505) blank lines after `{` (only whole lines up to the next token; skipped when a comment follows
+  the brace on its line) and **BRO1504** (SA1515) blank line before a `//` comment that follows code. SA1515's
+  exceptions, matched exactly: line above blank/comment/directive, directly after `{` or a `case`/`default` label
+  (a plain `label:` IS reported), `///`/`////`, trailing comments. Both in `Layout/BlankLineAfterAnalyzer` +
+  `BlankLineAfterCodeFixProvider`; parity set `blank-lines-comments`: 12/12 positions, identical output.
 
 ## Real-world testing log
 
@@ -204,9 +211,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
    and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
-   - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), ~~SA1509/SA1510~~ (BRO1501/BRO1502), ~~SA1131~~ (BRO1103), ~~SA1129~~ (BRO1104) (kept by
-     all 3 teams), ~~SA1128~~ (BRO1105), ~~SA1005~~ (BRO1002), ~~SA1413~~ (BRO1401), ~~SA1122~~ (BRO1106), SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
-     SA1512, SA1518).
+   - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
+     (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
+     SA1515 (BRO1504). Left: SA1516 (5,873 in the private app), SA1512, SA1518, SA1116/SA1117 (parameter
+     wrapping), naming (SA1300-SA1314; start with private fields/locals/parameters), 107 untested (50 SA16xx).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

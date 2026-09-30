@@ -43,6 +43,11 @@
             Expected = @()
         }
         @{
+            Name     = 'blank-lines-comments'
+            Map      = @('SA1505=BRO1503', 'SA1515=BRO1504')
+            Expected = @()
+        }
+        @{
             Name     = 'comparisons-default-values'
             Map      = @('SA1131=BRO1103', 'SA1129=BRO1104')
             Expected = @(

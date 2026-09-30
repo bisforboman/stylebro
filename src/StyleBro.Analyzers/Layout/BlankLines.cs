@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Layout;
@@ -44,6 +46,71 @@ internal static class BlankLines
         }
 
         return lines;
+    }
+
+    /// <summary>
+    /// The blank lines directly below an opening brace that ends its line (BRO1503). Only whole lines up to the next
+    /// token's code count, so text inside a string literal is never touched. A brace followed by a comment on its own
+    /// line is skipped.
+    /// </summary>
+    public static IReadOnlyList<TextLine> GetBlankLinesBelow(SyntaxToken openBrace, SourceText text)
+    {
+        var next = openBrace.GetNextToken(includeZeroWidth: true);
+        if (!openBrace.IsKind(SyntaxKind.OpenBraceToken) || next.IsKind(SyntaxKind.None))
+        {
+            return [];
+        }
+
+        var braceLine = text.Lines.GetLineFromPosition(openBrace.SpanStart);
+        if (!IsBlank(text, TextSpan.FromBounds(openBrace.Span.End, braceLine.End)))
+        {
+            return [];
+        }
+
+        var lines = new List<TextLine>();
+        for (var number = braceLine.LineNumber + 1; number < text.Lines.Count; number++)
+        {
+            var line = text.Lines[number];
+            if (line.End > next.SpanStart || !IsBlank(text, line.Span))
+            {
+                break;
+            }
+
+            lines.Add(line);
+        }
+
+        return lines;
+    }
+
+    /// <summary>
+    /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
+    /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
+    /// an opening brace or a 'case'/'default' label; and not for '///' and '////' (commented-out code).
+    /// </summary>
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text)
+    {
+        if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var line = text.Lines.GetLineFromPosition(comment.SpanStart);
+        if (line.LineNumber == 0 || !IsBlank(text, TextSpan.FromBounds(line.Start, comment.SpanStart)))
+        {
+            return false;
+        }
+
+        var above = text.ToString(text.Lines[line.LineNumber - 1].Span).Trim();
+        if (above.Length == 0 || above.StartsWith("//", StringComparison.Ordinal) || above.StartsWith("/*", StringComparison.Ordinal)
+            || above.StartsWith("*", StringComparison.Ordinal) || above.StartsWith("#", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // The token before the comment: an opening brace, or the colon of a switch label, keeps the comment attached.
+        var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
+        return !previous.IsKind(SyntaxKind.OpenBraceToken)
+            && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax);
     }
 
     /// <summary>Deletes the given lines. Duplicates are ignored, so Fix All can pass overlapping sets.</summary>

@@ -314,6 +314,30 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task CommentedMemberMovedBelowCode_GetsABlankLineAbove() => VerifyFixAsync("""
+        class C
+        {
+            // normal deserialization
+            public string Name { get; set; }
+            public {|BRO1001:C|}()
+            {
+            }
+            public int _count;
+        }
+        """, """
+        class C
+        {
+            public int _count;
+            public C()
+            {
+            }
+
+            // normal deserialization
+            public string Name { get; set; }
+        }
+        """);
+
+    [Fact]
     public Task StaticConstructor_ComesBeforeInstanceConstructors() => VerifyFixAsync("""
         class C
         {

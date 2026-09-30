@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (15 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (17 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -25,8 +25,6 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Proposal |
 |---|---|---|---|---|
-| SA1505 | Opening braces should not be followed by blank line | on / on / off | 0 / 0 / 37 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
-| SA1515 | Single-line comment should be preceded by blank line | on / on / off | 0 / 0 / 31 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1302 | Interface names should begin with I | on / off / on | 0 / 0 / 0 | rename with Fix All (see naming note) |
 | SA1516 | Elements should be separated by blank line | on / off / off | 0 / 44 / 5,873 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1309 | Field names should not begin with underscore | on / off / off | 0 / 486 / 1,060 | rename with Fix All (see naming note) |
@@ -116,7 +114,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_blocks = false`) |
 | SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
 | SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
 | SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE2000 (experimental) |
 | SA1508 | Closing braces should not be preceded by blank line | on | yes | on / off / off | 0 / 46 / 85 | fixed | SDK: IDE2002 (experimental) |
@@ -126,7 +124,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 82 / 46 / 0 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 0 / 0 / 119 | fixed | SDK: IDE2003 (experimental) |
 | SA1514 | Element documentation header should be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1515 | Single-line comment should be preceded by blank line | on | yes | on / on / off | 0 / 0 / 31 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
+| SA1515 | Single-line comment should be preceded by blank line | on | yes | on / on / off | 0 / 0 / 31 | not fixed | StyleBro **BRO1504** (done), same results as StyleCop |
 | SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 0 / 44 / 5,873 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1517 | Code should not contain blank lines at start of file | on | yes | on / on / off | 0 / 0 / 11 | fixed | SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template` |
 | SA1518 | Use line endings correctly at end of file | on | yes | off / off / off | 2 / 40 / 31 | not fixed | StyleBro: blank-line rules (the SDK's IDE2000 series doesn't cover this case) |

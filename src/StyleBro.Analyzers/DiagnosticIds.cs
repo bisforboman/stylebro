@@ -13,4 +13,6 @@ public static class DiagnosticIds
     public const string TrailingComma = "BRO1401";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
+    public const string BlankLineAfterOpenBrace = "BRO1503";
+    public const string BlankLineBeforeComment = "BRO1504";
 }

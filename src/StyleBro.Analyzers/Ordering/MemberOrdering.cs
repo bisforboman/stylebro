@@ -89,7 +89,17 @@ internal static class MemberOrdering
         for (var slot = 0; slot < count; slot++)
         {
             var source = order[slot];
-            var member = members[source].WithLeadingTrivia(split[slot].Layout.AddRange(split[source].Content));
+            var layout = split[slot].Layout;
+
+            // A member led by a '//' comment that lands right below another member (no blank line in this slot's
+            // layout) would leave the comment glued to that member's code, which BRO1504 (SA1515) reports. Sorting
+            // must not create a new violation that only a second 'dotnet format' run fixes, so add the blank line.
+            if (slot > 0 && source != slot && !layout.Any(SyntaxKind.EndOfLineTrivia) && StartsWithLineComment(split[source].Content))
+            {
+                layout = layout.Insert(0, SyntaxFactory.EndOfLine(newLine));
+            }
+
+            var member = members[source].WithLeadingTrivia(layout.AddRange(split[source].Content));
 
             if (slot < count - 1 && !EndsWithNewLine(member))
             {
@@ -314,6 +324,12 @@ internal static class MemberOrdering
         }
 
         return (SyntaxFactory.TriviaList(trivia.Take(split)), SyntaxFactory.TriviaList(trivia.Skip(split)));
+    }
+
+    private static bool StartsWithLineComment(SyntaxTriviaList content)
+    {
+        var first = content.FirstOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia));
+        return first.IsKind(SyntaxKind.SingleLineCommentTrivia) && !first.ToString().StartsWith("///", System.StringComparison.Ordinal);
     }
 
     private static bool EndsWithNewLine(MemberDeclarationSyntax member)

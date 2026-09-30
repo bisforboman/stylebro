@@ -121,4 +121,24 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "'else', 'catch' and 'finally' directly follow the block they continue. Replaces StyleCop SA1510.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeChainedBlock + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineAfterOpenBrace = new(
+        id: DiagnosticIds.BlankLineAfterOpenBrace,
+        title: "Opening braces should not be followed by a blank line",
+        messageFormat: "Remove the blank line after '{{'",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The first line inside a block directly follows its opening brace. Replaces StyleCop SA1505.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineAfterOpenBrace + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBeforeComment = new(
+        id: DiagnosticIds.BlankLineBeforeComment,
+        title: "Single-line comments should be preceded by a blank line",
+        messageFormat: "Add a blank line before the comment",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A comment that introduces the code below it is separated from the code above. Replaces StyleCop SA1515.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeComment + ".md");
 }

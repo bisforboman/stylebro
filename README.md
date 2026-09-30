@@ -25,6 +25,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
+| [BRO1503](docs/rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Yes |
+| [BRO1504](docs/rules/BRO1504.md) | Single-line comments should be preceded by a blank line | SA1515 | Yes |
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md).
 

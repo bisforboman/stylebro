@@ -43,6 +43,12 @@ dotnet_diagnostic.BRO1501.severity = warning
 # BRO1502: no blank line before else, catch or finally (SA1510)
 dotnet_diagnostic.BRO1502.severity = warning
 
+# BRO1503: no blank line after an opening brace (SA1505)
+dotnet_diagnostic.BRO1503.severity = warning
+
+# BRO1504: a blank line before a comment that follows code (SA1515)
+dotnet_diagnostic.BRO1504.severity = warning
+
 # ---------------------------------------------------------------------------
 # Built-in .NET rules that already cover common StyleCop rules.
 # 'dotnet format' fixes these too. To also enforce them on build, set
