@@ -122,5 +122,18 @@
                 'only StyleBro: BRO1107 Declarations.cs(17,23)'
             )
         }
+        @{
+            Name     = 'naming-variables-parameters'
+            Map      = @('SA1312=BRO1301', 'SA1313=BRO1302')
+            # StyleCop's rename fix applies only part of the renames per 'dotnet format' run (a different part each
+            # time), so only positions are compared; StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+                # Names that are only underscores ('_', '__', '___') have no camelCase form; StyleBro leaves them.
+                'only StyleCop: BRO1301 Names.cs(43,17)'
+                'only StyleCop: BRO1302 Names.cs(40,42)'
+                'only StyleCop: BRO1302 Names.cs(40,49)'
+            )
+        }
     )
 }

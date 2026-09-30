@@ -16,7 +16,8 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 18 rules; 128 unit tests (incl. every doc example), all green (2026-09-30).
+(see the log below) and 20 rules; 153 unit tests (incl. every doc example), all green (2026-09-30).
+0.1.0-alpha.3 (18 rules) is on nuget.org.
 
 ## Layout
 
@@ -127,9 +128,30 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   tools on edge-case files, compares positions and fixed output; every difference must be a documented deviation.
   StyleBro's fixed output must also be clean ("StyleBro fix leaves: ..." otherwise; this found a BRO1506 bug:
   the empty line after a file's final line break counted as a blank line below a comment). `CompareOutput = $false`
-  skips the output diff when StyleCop has no fix (SA1117). All 9 sets pass. Add a set for every new rule.
+  skips the output diff when StyleCop has no fix (SA1117) or a broken one (SA1312/SA1313: under `dotnet format`
+  its rename fix applies a different subset of renames per run). All 10 sets pass. Add a set for every new rule.
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
+
+## BRO13xx: naming
+
+- **BRO1301** (SA1312) variables and **BRO1302** (SA1313) parameters begin with a lower-case letter
+  (`Naming/CamelCaseNames.cs`, `CamelCaseNamingAnalyzer`, fix `Naming/CamelCaseRenamer.cs`). New name: leading `_`
+  stripped, leading capital run lowered except the capital starting the next word (Newtonsoft's ToCamelCase:
+  `URL`->`url`, `HTMLParser`->`htmlParser`, `IDs`->`iDs`); none for only-underscores, digit start, keywords.
+  The new name travels in the diagnostic's properties (`NewName`).
+- Safety (`CanRename`, syntax only, conservative, over the containing member; primary ctor param = whole type;
+  top-level statements = compilation unit): skip when any identifier there is already the new name or another name
+  maps to it, when the old name is an inferred anonymous-member/tuple-element name, or when the member has `#if`.
+  XML element names (`<param>`) don't count.
+- BRO1302 skips record parameters (properties), partial methods, and parameters that keep their base's name
+  (override/implicit/explicit implementation, like StyleCop). The fix renames via `SymbolFinder.FindReferencesAsync`
+  (finds named arguments in other files and `<param>`/`<paramref>` docs), cascades to same-named parameters of
+  overrides/implementations (a conflicting one keeps its name and is then not reported either), handles linked files
+  by processing every copy and merging edits per file (`LinkedFileFixAllProvider.Merge`). Own Fix All provider
+  (all renames computed on the original solution, applied at once). Deviation: `_`/`__` params not reported.
+- Next naming candidates: private fields (SA1306/SA1309) need a decision on the `_camelCase` convention first
+  (SA1309 is off in two of the three surveyed repos: 486 and 1,060 findings).
 
 ## BRO15xx: layout
 
@@ -228,6 +250,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - **BRO1107/BRO1108** (2026-09-30): OpenTelemetry 0 (enforces SA1116/SA1117). FFMpegCore 89, Polly 741, private app
   613, Newtonsoft.Json 1602, Serilog 118. All fixed in one pass (20/109/150/143/23 files), no new compile errors,
   second run clean. Items containing `#if` (Newtonsoft.Json) are fine: only the gaps between items are rewritten.
+- **BRO1301/BRO1302** (2026-09-30): Polly, OpenTelemetry, Serilog 0. FFMpegCore 8, private app 7, Newtonsoft.Json 14
+  (13 constructor/factory parameters of serialization test types). All fixed in one pass, no new compile errors,
+  second run clean. Parameter names can matter at runtime (serializers bind constructor parameters by name,
+  case-insensitively in Newtonsoft.Json and System.Text.Json): Newtonsoft.Json's related tests (156) pass after the fix.
 
 ## Known open questions
 
@@ -254,7 +280,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
      (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
      SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
-     (BRO1107/BRO1108). Left: naming (SA1300-SA1314; start with private fields/locals/parameters), 107 untested (50 SA16xx).
+     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302). Left: naming (SA1300, SA1302-SA1311, SA1314; fields need
+     the `_camelCase` decision), 107 untested (50 SA16xx).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

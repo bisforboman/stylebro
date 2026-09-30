@@ -112,6 +112,28 @@ internal static class Descriptors
         description: "Parameters and arguments are either all on one line or each on its own line. Replaces StyleCop SA1117.",
         helpLinkUri: HelpBase + DiagnosticIds.ParametersOnSameOrSeparateLines + ".md");
 
+    public static readonly DiagnosticDescriptor VariableCasing = new(
+        id: DiagnosticIds.VariableCasing,
+        title: "Variable names should begin with a lower-case letter",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Local variables and query range variables are camelCase: 'total', not 'Total' or '_total'. "
+            + "Replaces StyleCop SA1312.",
+        helpLinkUri: HelpBase + DiagnosticIds.VariableCasing + ".md");
+
+    public static readonly DiagnosticDescriptor ParameterCasing = new(
+        id: DiagnosticIds.ParameterCasing,
+        title: "Parameter names should begin with a lower-case letter",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Parameters are camelCase: 'count', not 'Count' or '_count'. The fix also renames named arguments "
+            + "and the parameters of overrides and implementations. Replaces StyleCop SA1313.",
+        helpLinkUri: HelpBase + DiagnosticIds.ParameterCasing + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

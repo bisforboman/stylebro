@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (22 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (24 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -27,9 +27,7 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 |---|---|---|---|---|
 | SA1302 | Interface names should begin with I | on / off / on | 0 / 0 / 0 | rename with Fix All (see naming note) |
 | SA1309 | Field names should not begin with underscore | on / off / off | 0 / 486 / 1,060 | rename with Fix All (see naming note) |
-| SA1313 | Parameter names should begin with lower-case letter | on / off / off | 0 / 0 / 90 | rename with Fix All (see naming note) |
 | SA1306 | Field names should begin with lower-case letter | on / off / off | 0 / 4 / 11 | rename with Fix All (see naming note) |
-| SA1312 | Variable names should begin with lower-case letter | on / off / off | 0 / 14 / 7 | rename with Fix All (see naming note) |
 | SA1300 | Element should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
 | SA1303 | Const field names should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
 | SA1311 | Static readonly fields should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
@@ -163,8 +161,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1309 | Field names should not begin with underscore | on | yes | on / off / off | 0 / 486 / 1,060 | not fixed | StyleBro: rename with Fix All (see naming note) |
 | SA1310 | Field names should not contain underscore | on | yes | on / on / off | 184 / 0 / 7 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1311 | Static readonly fields should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro: rename with Fix All (see naming note) |
-| SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 0 / 14 / 7 | not fixed | StyleBro: rename with Fix All (see naming note) |
-| SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 0 / 0 / 90 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 0 / 14 / 7 | not fixed | StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name` |
+| SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 0 / 0 / 90 | not fixed | StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name` |
 | SA1314 | Type parameter names should begin with T | on | yes | on / off / off | 0 / 0 / 0 | not fixed | StyleBro: rename with Fix All (see naming note) |
 | SA1316 (1.2 beta) | Tuple element names should use correct casing | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SX1309 | Field names should begin with underscore | off | yes | off / off / off | 842 / 0 / 32 |  | Variant of another rule (not in 1.1.118 as a separate rule) |

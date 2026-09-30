@@ -12,6 +12,8 @@ public static class DiagnosticIds
     public const string EmptyString = "BRO1106";
     public const string SplitParametersStartOnNewLine = "BRO1107";
     public const string ParametersOnSameOrSeparateLines = "BRO1108";
+    public const string VariableCasing = "BRO1301";
+    public const string ParameterCasing = "BRO1302";
     public const string TrailingComma = "BRO1401";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";

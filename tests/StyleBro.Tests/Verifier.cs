@@ -38,4 +38,21 @@ internal static class Verifier<TAnalyzer, TCodeFix>
 
         return test.RunAsync();
     }
+
+    /// <summary>Like <see cref="VerifyFixAsync(string, string, string?, string?)"/>, for several files.</summary>
+    public static Task VerifyFixAsync(string[] sources, string[] fixedSources)
+    {
+        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>();
+        foreach (var source in sources)
+        {
+            test.TestState.Sources.Add(source);
+        }
+
+        foreach (var source in fixedSources)
+        {
+            test.FixedState.Sources.Add(source);
+        }
+
+        return test.RunAsync();
+    }
 }

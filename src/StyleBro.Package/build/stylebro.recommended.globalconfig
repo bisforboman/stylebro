@@ -40,6 +40,12 @@ dotnet_diagnostic.BRO1107.severity = warning
 # BRO1108: parameters all on one line or each on its own line (SA1117)
 dotnet_diagnostic.BRO1108.severity = warning
 
+# BRO1301: variable names begin with a lower-case letter (SA1312)
+dotnet_diagnostic.BRO1301.severity = warning
+
+# BRO1302: parameter names begin with a lower-case letter (SA1313)
+dotnet_diagnostic.BRO1302.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 
