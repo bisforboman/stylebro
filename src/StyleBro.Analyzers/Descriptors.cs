@@ -134,6 +134,17 @@ internal static class Descriptors
             + "and the parameters of overrides and implementations. Replaces StyleCop SA1313.",
         helpLinkUri: HelpBase + DiagnosticIds.ParameterCasing + ".md");
 
+    public static readonly DiagnosticDescriptor PrivateFieldNaming = new(
+        id: DiagnosticIds.PrivateFieldNaming,
+        title: "Private field names should be camelCase",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Private fields are 'count', or '_count' with stylebro_private_field_naming = _camelCase. "
+            + "Replaces StyleCop SA1306 and SA1309 for private fields.",
+        helpLinkUri: HelpBase + DiagnosticIds.PrivateFieldNaming + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

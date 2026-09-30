@@ -5,13 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers.Naming;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Naming;
 
 /// <summary>
-/// Renames the variables and parameters reported by BRO1301/BRO1302, for the single fix and Fix All alike. All renames
+/// Renames the variables, parameters and fields reported by BRO1301/BRO1302/BRO1303, for the single fix and Fix All alike. All renames
 /// are computed on the original solution and applied at once, as text edits of the declaration and every reference
 /// (named arguments and '&lt;param&gt;' docs included). A parameter's rename cascades to the parameters of overrides
 /// and implementations that have the same name, so they don't drift apart. Linked files (multi-targeting) are handled
@@ -25,6 +27,7 @@ internal static class CamelCaseRenamer
         CancellationToken cancellationToken)
     {
         var changes = new Dictionary<string, List<TextChange>>();
+        HashSet<string>? strings = null;
         var done = new HashSet<(string File, int Start)>();
         foreach (var (document, diagnostic) in items)
         {
@@ -49,6 +52,7 @@ internal static class CamelCaseRenamer
                 if (token.Span != diagnostic.Location.SourceSpan
                     || token.Parent is not { } declaration
                     || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol
+                    || (symbol is IFieldSymbol && (strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)).Contains(symbol.Name))
                     || await GetChangesAsync(solution, symbol, newName, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
                     continue;
@@ -87,6 +91,32 @@ internal static class CamelCaseRenamer
     }
 
     /// <summary>
+    /// Every string literal in the solution. A field whose name is one of them is left alone: code can reach a private
+    /// field by name through reflection, also from other projects the analyzer can't see (Polly's tests read
+    /// '_blockedUntil' with GetField), and renaming it would still compile but break at run time. Its diagnostic stays
+    /// for a manual rename.
+    /// </summary>
+    private static async Task<HashSet<string>> GetStringLiteralsAsync(Solution solution, CancellationToken cancellationToken)
+    {
+        var strings = new HashSet<string>();
+        foreach (var document in solution.Projects.SelectMany(p => p.Documents))
+        {
+            if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is { } root)
+            {
+                foreach (var token in root.DescendantTokens())
+                {
+                    if (token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
+                    {
+                        strings.Add(token.ValueText);
+                    }
+                }
+            }
+        }
+
+        return strings;
+    }
+
+    /// <summary>
     /// The edits that rename <paramref name="symbol"/> (and, for a parameter, the same-named parameters of its
     /// overrides and implementations), or null when one of them isn't safe to rename.
     /// </summary>
@@ -118,12 +148,13 @@ internal static class CamelCaseRenamer
                 var tree = location.SourceTree!;
                 var root = await tree.GetRootAsync(cancellationToken).ConfigureAwait(false);
                 var declaration = root.FindToken(location.SourceSpan.Start).Parent;
-                if (declaration is null || !CamelCaseNames.CanRename(declaration, oldName, newName)
-                    || !await TryAddAsync(solution.GetDocument(tree), location.SourceSpan).ConfigureAwait(false))
+                // Fields were checked over their whole type by the analyzer (FieldNames.CanRename).
+                if (declaration is null
+                    || (current is not IFieldSymbol && !CamelCaseNames.CanRename(declaration, oldName, newName))
+                    || !await TryAddAsync(solution.GetDocument(tree), location.SourceSpan, newName).ConfigureAwait(false))
                 {
                     return null;
                 }
-
             }
 
             foreach (var referenced in await SymbolFinder.FindReferencesAsync(current, solution, cancellationToken).ConfigureAwait(false))
@@ -135,7 +166,11 @@ internal static class CamelCaseRenamer
 
                 foreach (var reference in referenced.Locations)
                 {
-                    if (!reference.IsImplicit && !await TryAddAsync(reference.Document, reference.Location.SourceSpan).ConfigureAwait(false))
+                    if (!reference.IsImplicit
+                        && !await TryAddAsync(
+                            reference.Document,
+                            reference.Location.SourceSpan,
+                            await GetReplacementAsync(current, reference.Document, reference.Location.SourceSpan, newName, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false))
                     {
                         return null;
                     }
@@ -160,7 +195,7 @@ internal static class CamelCaseRenamer
             return true;
         }
 
-        async Task<bool> TryAddAsync(Document? document, TextSpan span)
+        async Task<bool> TryAddAsync(Document? document, TextSpan span, string replacement)
         {
             if (document is null)
             {
@@ -174,9 +209,47 @@ internal static class CamelCaseRenamer
                 return false;
             }
 
-            result.Add((GetFileKey(document), new TextChange(span, newName)));
+            result.Add((GetFileKey(document), new TextChange(span, replacement)));
             return true;
         }
+    }
+
+    /// <summary>
+    /// The text that replaces a reference: the new name, or for a field whose new name a local, parameter or other
+    /// symbol would hide at that spot, the qualified name ('this.count', or 'Type.count' for a static field).
+    /// </summary>
+    private static async Task<string> GetReplacementAsync(
+        ISymbol symbol,
+        Document document,
+        TextSpan span,
+        string newName,
+        CancellationToken cancellationToken)
+    {
+        if (symbol is not IFieldSymbol field
+            || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
+            || root.FindToken(span.Start).Parent is not IdentifierNameSyntax name
+            || !IsSimpleName(name)
+            || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
+            || model.LookupSymbols(span.Start, name: newName).IsEmpty)
+        {
+            return newName;
+        }
+
+        var qualifier = field.IsStatic ? field.ContainingType.ToMinimalDisplayString(model, span.Start) : "this";
+        return qualifier + "." + newName;
+    }
+
+    /// <summary>A name that is looked up in scope, as opposed to the member part of 'x.Name' or 'Name = ...'.</summary>
+    private static bool IsSimpleName(IdentifierNameSyntax name)
+    {
+        return name.Parent switch
+        {
+            MemberAccessExpressionSyntax access when access.Name == name => false,
+            MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax or XmlNameAttributeSyntax => false,
+            QualifiedNameSyntax qualified when qualified.Right == name => false,
+            AssignmentExpressionSyntax { Parent: InitializerExpressionSyntax } assignment when assignment.Left == name => false,
+            _ => true,
+        };
     }
 
     private static async Task AddRelatedParametersAsync(

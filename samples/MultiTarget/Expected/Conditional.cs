@@ -37,7 +37,7 @@ public class Conditional
 #if NET10_0_OR_GREATER
 public class OnlyOnNet10
 {
-    private int _count;
+    private int count;
 
     public string Name { get; set; } = string.Empty;
 

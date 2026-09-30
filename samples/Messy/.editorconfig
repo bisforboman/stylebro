@@ -1,0 +1,3 @@
+# The sample code names private fields '_field', so BRO1303 uses that style here (the default is 'field').
+[*.cs]
+stylebro_private_field_naming = _camelCase

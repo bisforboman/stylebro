@@ -135,5 +135,22 @@
                 'only StyleCop: BRO1302 Names.cs(40,49)'
             )
         }
+        @{
+            Name     = 'naming-fields'
+            Map      = @('SA1306=BRO1303', 'SA1309=BRO1303')
+            # Output isn't compared: StyleCop's fix also renames the fields BRO1303 leaves out (below), which only
+            # repeats those differences line by line. StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+                # BRO1303 checks private fields only. Static readonly and const fields are PascalCase (SA1311/SA1303,
+                # where SA1309's underscore belongs); protected, internal and public fields are visible outside the type.
+                'only StyleCop: BRO1303 Fields.cs(16,37)'
+                'only StyleCop: BRO1303 Fields.cs(18,27)'
+                'only StyleCop: BRO1303 Fields.cs(19,23)'
+                'only StyleCop: BRO1303 Fields.cs(21,23)'
+                'only StyleCop: BRO1303 Fields.cs(24,22)'
+                'only StyleCop: BRO1303 Fields.cs(26,20)'
+            )
+        }
     )
 }

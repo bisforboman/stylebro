@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 20 rules; 153 unit tests (incl. every doc example), all green (2026-09-30).
+(see the log below) and 21 rules; 172 unit tests (incl. every doc example), all green (2026-09-30).
 0.1.0-alpha.3 (18 rules) is on nuget.org.
 
 ## Layout
@@ -150,8 +150,21 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   overrides/implementations (a conflicting one keeps its name and is then not reported either), handles linked files
   by processing every copy and merging edits per file (`LinkedFileFixAllProvider.Merge`). Own Fix All provider
   (all renames computed on the original solution, applied at once). Deviation: `_`/`__` params not reported.
-- Next naming candidates: private fields (SA1306/SA1309) need a decision on the `_camelCase` convention first
-  (SA1309 is off in two of the three surveyed repos: 486 and 1,060 findings).
+- **BRO1303** (SA1306 + SA1309, private fields only; user's decision: configurable, `camelCase` default)
+  `stylebro_private_field_naming = camelCase | _camelCase` (`Naming/FieldNames.cs`, `FieldNamingAnalyzer`, a symbol
+  action; same fix provider/renamer). Checked: private, not const, not static readonly. One-letter prefixes (`m_`,
+  `s_`) left alone in both styles (SA1308; `s_` is the runtime's static convention). Analyzer skips (whole type, all
+  partial parts via DeclaringSyntaxReferences): member with the new name in the type or a base, another checked field
+  with the same new name, attributes or [Serializable], old name as a string literal in the type, in disabled `#if`
+  text, or as an inferred anonymous/tuple name. The fix qualifies references a local/parameter would hide
+  (`LookupSymbols` at the reference: `this.count`, `Type.count` for statics), except `x.Name`, `Name = ` in object
+  initializers, named arguments.
+- **Reflection guard (fix side):** a field whose old name is a string literal ANYWHERE in the solution is not renamed
+  and its warning stays (deliberate exception to design rule 1: the analyzer can't see other projects, and the rename
+  compiles but breaks at run time). Found because Polly's tests read `_blockedUntil`/`_registry` via GetField: the
+  first run compiled cleanly but failed 7 tests. Test helper `VerifyNotFixedAsync`.
+- Remaining naming: SA1300/SA1302/SA1303/SA1304/SA1307/SA1311/SA1314 (PascalCase for types, members, constants,
+  static readonly, public fields; `I` for interfaces; `T` for type parameters), SA1308/SA1310, protected fields.
 
 ## BRO15xx: layout
 
@@ -254,6 +267,20 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   (13 constructor/factory parameters of serialization test types). All fixed in one pass, no new compile errors,
   second run clean. Parameter names can matter at runtime (serializers bind constructor parameters by name,
   case-insensitively in Newtonsoft.Json and System.Text.Json): Newtonsoft.Json's related tests (156) pass after the fix.
+- **BRO1303, default `camelCase`** (2026-09-30), the biggest rename test so far: FFMpegCore 65, Polly 463, private
+  app 1041, Newtonsoft.Json 356, Serilog 193, OpenTelemetry 0 (already camelCase). All compile after one pass
+  (Polly 242 references qualified with `this.`). Compiling is not enough for renames: run the repos' tests.
+  Polly's tests found the reflection case (see the guard above); with it, Polly 3065/3065 and the private app
+  6454/6454 tests pass, 5 + 2 fields keep their names with the warning. Polly's tests use Microsoft Testing
+  Platform: `dotnet test` there reports "Zero tests ran" (exit 5); run the test executables in artifacts/bin instead.
+  Newtonsoft.Json: its MemberSearchFlags test (serializes private fields, reads `_privateString` via GetField) failed
+  on the pre-guard run and passes with the guard (7 fields kept); 3613/3617 pass, the 4 failures (Issue2768, decimal
+  parsing) fail on the untouched code too (machine locale). Serilog: all tests pass on every target framework.
+- **BRO1303 with `_camelCase`** (via a global config): FFMpegCore 1, Polly 1, private app 32 (fields that break the
+  repo's own `_field` convention); all fixed, compile, the private app's tests pass. Gotcha for the real-world hook:
+  `GlobalAnalyzerConfigFiles` added from `CustomAfterMicrosoftCommonTargets` is too late (the SDK has already turned
+  them into `EditorConfigFiles`); add `EditorConfigFiles` directly. The NuGet package isn't affected (its targets are
+  imported earlier).
 
 ## Known open questions
 
@@ -280,8 +307,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
      (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
      SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
-     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302). Left: naming (SA1300, SA1302-SA1311, SA1314; fields need
-     the `_camelCase` decision), 107 untested (50 SA16xx).
+     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303). Left: naming
+     (SA1300, SA1302-SA1305, SA1307, SA1308, SA1310, SA1311, SA1314), 107 untested (50 SA16xx).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

@@ -55,4 +55,22 @@ internal static class Verifier<TAnalyzer, TCodeFix>
 
         return test.RunAsync();
     }
+
+    /// <summary>The diagnostics in <paramref name="sources"/> are reported, but the fix deliberately leaves them.</summary>
+    public static Task VerifyNotFixedAsync(string[] sources)
+    {
+        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+        {
+            NumberOfIncrementalIterations = 1,
+            NumberOfFixAllIterations = 1,
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
+        };
+        foreach (var source in sources)
+        {
+            test.TestState.Sources.Add(source);
+            test.FixedState.Sources.Add(source);
+        }
+
+        return test.RunAsync();
+    }
 }

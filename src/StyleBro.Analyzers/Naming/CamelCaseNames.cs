@@ -107,7 +107,8 @@ internal static class CamelCaseNames
         return node.SyntaxTree.GetRoot();
     }
 
-    private static bool IsInferredMemberName(SyntaxToken token)
+    /// <summary>Whether the name is an inferred anonymous type member or tuple element name ('new { Total }').</summary>
+    public static bool IsInferredMemberName(SyntaxToken token)
     {
         return token.Parent is IdentifierNameSyntax name
             && (name.Parent is AnonymousObjectMemberDeclaratorSyntax { NameEquals: null }
