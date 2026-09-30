@@ -32,6 +32,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   compatibility; don't raise it without a reason.
 - `scripts/stylecop-survey`: generates `docs/stylecop-mapping.md` (inventory of StyleCop rules, repo surveys,
   SDK coverage check). Hand-written decisions in `decisions.psd1`, measured data in `data/`. Not part of the slnx.
+- `samples/MultiTarget`: net10.0 + net8.0 with `#if NET10_0_OR_GREATER` code; verify-format checks it like Messy and
+  also that the fixed sample builds. It does NOT reproduce the old linked-file bug (couldn't find a minimal repro);
+  the reference for that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
+- `scripts/verify-format.ps1` reads the rule IDs from `AnalyzerReleases.Unshipped.md` and runs every sample.
 - `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
 - `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
@@ -45,8 +49,12 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 ## Design rules for every rule
 
 1. Every diagnostic has a code fix, and **Fix All works**. `dotnet format` applies fixes through Fix All.
-   Prefer a custom `FixAllProvider.Create(...)` (document-based rewrite) over `WellKnownFixAllProviders.BatchFixer`
-   when edits can overlap.
+   Use `LinkedFileFixAllProvider.Create(FixDocumentAsync)` (src/StyleBro.CodeFixes), never plain
+   `FixAllProvider.Create`: in multi-targeted projects each target framework has a linked copy of every file, `#if`
+   makes the copies need different edits, and the plain provider left the merge to `dotnet format`, which wrote
+   conflict markers (and, with a diff-based merge, duplicated members) into Newtonsoft.Json. The linked-file provider
+   merges exact edits per physical file (tree rewrites count as one whole-text edit) and gives every copy the same text.
+   Also avoid decisions that depend on `#if`-conditional code (e.g. "which item is last"): skip such cases.
 2. Fixes are **deterministic and idempotent**: after a fix, the analyzer reports nothing, and a second
    `dotnet format` run changes nothing. Analyzer and fix share one piece of logic so they can't disagree.
 3. When a fix could be unsafe (e.g. preprocessor directives between members), skip the case: no diagnostic
@@ -95,6 +103,12 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   Exempt like StyleCop 1.2: already spaced (incl. `//  two`), empty, `///`/`////`, `//--`. StyleCop 1.1.118 also
   reported `//  two spaces` (the only difference in the private app: 77 vs 78). Whitespace-only -> `//`.
 - Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
+- **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
+  defaults, case labels, patterns). Same results as StyleCop.
+- **BRO1401** (SA1413, maintainability block) trailing comma in multi-line array/object/collection/with initializers,
+  anonymous objects, enums, switch expressions (not collection expressions/patterns/`{k, v}` pairs, like StyleCop 1.2).
+  Inserts `, ` when code follows directly (StyleCop's `,}` broke SA1001 in the private app). Skips lists with
+  directives between the braces (the multi-targeting conflict). Nested lists fixed in one pass (StyleCop needs two).
 - **StyleCop parity check:** `scripts/stylecop-survey/Compare-WithStyleCop.ps1` + `parity/parity.psd1`. Runs both
   tools on edge-case files, compares positions and fixed output; every difference must be a documented deviation.
   All 4 sets (8 rules) pass. Add a set for every new rule that replaces a StyleCop rule.
@@ -148,6 +162,18 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - **BRO1103/BRO1104** (2026-09-30): 0 in Polly and OpenTelemetry. Private app: 1 BRO1104 on a target-typed
   `new()` (`DateTime X { get; set; } = new();`), which StyleCop 1.1.118 predates and misses; the 1.2 beta reports it.
   FFMpegCore 1, Serilog 6, Newtonsoft.Json 30. All fixed in one pass, builds, second run clean.
+- **BRO1106/BRO1401 + all rules together** (2026-09-30). Found three problems, all fixed:
+  1. Multi-targeting (Newtonsoft.Json, 8 target frameworks): the plain `FixAllProvider.Create` let `dotnet format`
+     merge each framework's copy of a file, which wrote merge conflict markers into the source (84 compile errors);
+     a first merge fix based on computed diffs duplicated members. Now `LinkedFileFixAllProvider` (design rule 1).
+     StyleCop's own SA1413 fix produced no conflicts, which pointed at our Fix All implementation.
+  2. BRO1401 inserted `,` directly before `}` ("x"},) -> SA1001 error in the private app's build. Now `, `.
+  3. BRO1001 treated static constructors as private and moved them below public constructors (5 cases in
+     OpenTelemetry's tests, which enforce SA1201-SA1204). StyleCop treats them as public; fixed.
+  Final run, all rules: FFMpegCore 153, Polly 498, OpenTelemetry 0, private app 3688, Newtonsoft.Json 2037,
+  Serilog 202 findings; all fixed in one pass, no new compile errors, no conflict markers, second run clean.
+  Also: local clones in the scratchpad (hard links, old timestamps) got damaged by a temp cleanup; clone with
+  `--no-hardlinks`. The same cleanup emptied the test framework's reference-assembly cache (flaky first test run).
 - **BRO1002/BRO1105** (2026-09-30): Polly and OpenTelemetry 0. Private app (SA1005/SA1128 off there): BRO1105 408
   (= StyleCop's SA1128 count), BRO1002 77 (StyleCop 1.1.118: 78, see above). FFMpegCore 58, Newtonsoft.Json 257,
   Serilog 26. All fixed in one pass, builds, second run clean. Hooking analyzers into a repo
@@ -176,7 +202,7 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
    - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), ~~SA1509/SA1510~~ (BRO1501/BRO1502), ~~SA1131~~ (BRO1103), ~~SA1129~~ (BRO1104) (kept by
-     all 3 teams), ~~SA1128~~ (BRO1105), ~~SA1005~~ (BRO1002), SA1413, SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
+     all 3 teams), ~~SA1128~~ (BRO1105), ~~SA1005~~ (BRO1002), ~~SA1413~~ (BRO1401), ~~SA1122~~ (BRO1106), SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
      SA1512, SA1518).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.

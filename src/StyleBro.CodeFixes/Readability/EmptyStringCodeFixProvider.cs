@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers;
@@ -12,17 +13,14 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>
-/// Fix for BRO1105: moves the initializer to its own line, indented with the .editorconfig indentation settings.
-/// Each constructor has at most one initializer, so Fix All is one set of non-overlapping edits.
-/// </summary>
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ConstructorInitializerLineCodeFixProvider))]
-public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
+/// <summary>Fix for BRO1106: replaces "" with 'string.Empty'. Literals never overlap, so Fix All is one set of edits.</summary>
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(EmptyStringCodeFixProvider))]
+public sealed class EmptyStringCodeFixProvider : CodeFixProvider
 {
-    private const string Title = "Put the constructor initializer on its own line";
+    private const string Title = "Use string.Empty";
 
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.ConstructorInitializerLine);
+        ImmutableArray.Create(DiagnosticIds.EmptyString);
 
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
@@ -35,7 +33,7 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
                 CodeAction.Create(
                     Title,
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
-                    equivalenceKey: nameof(ConstructorInitializerLineCodeFixProvider)),
+                    equivalenceKey: nameof(EmptyStringCodeFixProvider)),
                 diagnostic);
         }
 
@@ -54,17 +52,15 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
-        var changes = new Dictionary<ConstructorInitializerSyntax, TextChange>();
-        foreach (var diagnostic in diagnostics)
+        var changes = new List<TextChange>();
+        foreach (var span in diagnostics.Select(d => d.Location.SourceSpan).Distinct())
         {
-            var initializer = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent as ConstructorInitializerSyntax;
-            if (initializer is not null && ConstructorInitializers.ShouldMove(initializer, text))
+            if (root.FindNode(span, getInnermostNodeForTie: true) is LiteralExpressionSyntax literal && EmptyStrings.ShouldReplace(literal))
             {
-                changes[initializer] = ConstructorInitializers.GetChange(initializer, text, indentUnit);
+                changes.Add(new TextChange(literal.Span, "string.Empty"));
             }
         }
 
-        return document.WithText(text.WithChanges(changes.Values));
+        return document.WithText(text.WithChanges(changes));
     }
 }

@@ -22,10 +22,7 @@ public sealed class CommentSpacingCodeFixProvider : CodeFixProvider
         ImmutableArray.Create(DiagnosticIds.CommentSpacing);
 
     public override FixAllProvider GetFixAllProvider() =>
-        FixAllProvider.Create(async (fixAllContext, document, diagnostics) =>
-            diagnostics.IsEmpty
-                ? null
-                : await FixDocumentAsync(document, diagnostics, fixAllContext.CancellationToken).ConfigureAwait(false));
+        LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {

@@ -81,6 +81,27 @@ internal static class Descriptors
         description: "'new int()' creates the default value; 'default(int)' says so. Replaces StyleCop SA1129.",
         helpLinkUri: HelpBase + DiagnosticIds.DefaultValueConstructor + ".md");
 
+    public static readonly DiagnosticDescriptor EmptyString = new(
+        id: DiagnosticIds.EmptyString,
+        title: "Use string.Empty for empty strings",
+        messageFormat: "Use 'string.Empty' instead of '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'string.Empty' instead of \"\", except where C# requires a constant. Replaces StyleCop SA1122.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyString + ".md");
+
+    public static readonly DiagnosticDescriptor TrailingComma = new(
+        id: DiagnosticIds.TrailingComma,
+        title: "Use a trailing comma in multi-line initializers",
+        messageFormat: "Add a trailing comma",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A trailing comma after the last item keeps diffs to one line when items are added. "
+            + "Replaces StyleCop SA1413.",
+        helpLinkUri: HelpBase + DiagnosticIds.TrailingComma + ".md");
+
     public static readonly DiagnosticDescriptor BlankLineBeforeOpenBrace = new(
         id: DiagnosticIds.BlankLineBeforeOpenBrace,
         title: "Opening braces should not be preceded by a blank line",

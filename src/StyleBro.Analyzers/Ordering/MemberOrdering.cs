@@ -216,7 +216,10 @@ internal static class MemberOrdering
 
     private static MemberAccess GetAccess(MemberDeclarationSyntax member, bool inInterface)
     {
-        if (IsExplicitInterfaceImplementation(member))
+        // A static constructor has no access modifier. StyleCop treats it as public, so it comes before every instance
+        // constructor (public ones too, since static comes first). Treating it as private moved it below them.
+        if (IsExplicitInterfaceImplementation(member)
+            || (member is ConstructorDeclarationSyntax && member.Modifiers.Any(SyntaxKind.StaticKeyword)))
         {
             return MemberAccess.Public;
         }

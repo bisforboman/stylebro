@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (13 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (15 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -29,9 +29,7 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 | SA1515 | Single-line comment should be preceded by blank line | on / on / off | 0 / 0 / 31 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
 | SA1302 | Interface names should begin with I | on / off / on | 0 / 0 / 0 | rename with Fix All (see naming note) |
 | SA1516 | Elements should be separated by blank line | on / off / off | 0 / 44 / 5,873 | blank-line rules (the SDK's IDE2000 series doesn't cover this case) |
-| SA1413 | Use trailing comma in multi-line initializers | on / off / off | 0 / 407 / 1,862 | add trailing commas |
 | SA1309 | Field names should not begin with underscore | on / off / off | 0 / 486 / 1,060 | rename with Fix All (see naming note) |
-| SA1122 | Use string.Empty for empty strings | on / off / off | 0 / 7 / 352 | `""` to `string.Empty` |
 | SA1116 | Split parameters should start on line after declaration | on / off / off | 0 / 375 / 266 | parameter wrapping |
 | SA1117 | Parameters should be on same line or separate lines | on / off / off | 0 / 370 / 102 | parameter wrapping |
 | SA1313 | Parameter names should begin with lower-case letter | on / off / off | 0 / 0 / 90 | rename with Fix All (see naming note) |
@@ -154,7 +152,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 876 / 325 / 2,581 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro: add trailing commas |
+| SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported |
 
 ### Naming
 
@@ -226,7 +224,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1118 | Parameter should not span multiple lines | on | no | on / on / off | 0 / 0 / 126 |  | Untested. StyleCop has no fix |
 | SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |
-| SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 0 / 7 / 352 | not fixed | StyleBro: `""` to `string.Empty` |
+| SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 0 / 7 / 352 | not fixed | StyleBro **BRO1106** (done), same results as StyleCop |
 | SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1124 | Do not use regions | on | yes | on / off / off | 0 / 264 / 17 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |

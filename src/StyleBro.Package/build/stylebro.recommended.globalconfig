@@ -31,6 +31,12 @@ dotnet_diagnostic.BRO1103.severity = warning
 # BRO1104: default instead of a value type's default constructor (SA1129)
 dotnet_diagnostic.BRO1104.severity = warning
 
+# BRO1106: string.Empty instead of "" (SA1122)
+dotnet_diagnostic.BRO1106.severity = warning
+
+# BRO1401: trailing comma in multi-line initializers (SA1413)
+dotnet_diagnostic.BRO1401.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 

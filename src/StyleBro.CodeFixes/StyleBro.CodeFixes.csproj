@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="StyleBro.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\StyleBro.Analyzers\StyleBro.Analyzers.csproj" />
   </ItemGroup>
 

@@ -70,5 +70,19 @@
                 'StyleCop output only: CommentEdges.cs: [        // ]'
             )
         }
+        @{
+            Name     = 'strings-commas'
+            Map      = @('SA1122=BRO1106', 'SA1413=BRO1401')
+            Expected = @(
+                # BRO1401: nested multi-line initializers get both commas in one pass; StyleCop's Fix All only adds
+                # the outer one, so a second 'dotnet format' run would still find the inner list.
+                'StyleBro output only: CommaEdges.cs: [                    2,]'
+                'StyleCop output only: CommaEdges.cs: [                    2]'
+                # BRO1401: when code follows the last item directly, the fix inserts ', ' instead of ','; StyleCop's
+                # '2,}' breaks SA1001 (comma followed by whitespace).
+                'StyleBro output only: CommaEdges.cs: [                B = 2, };]'
+                'StyleCop output only: CommaEdges.cs: [                B = 2,};]'
+            )
+        }
     )
 }

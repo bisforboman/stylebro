@@ -3,26 +3,25 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers;
-using StyleBro.Analyzers.Readability;
+using StyleBro.Analyzers.Maintainability;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace StyleBro.CodeFixes.Readability;
+namespace StyleBro.CodeFixes.Maintainability;
 
 /// <summary>
-/// Fix for BRO1105: moves the initializer to its own line, indented with the .editorconfig indentation settings.
-/// Each constructor has at most one initializer, so Fix All is one set of non-overlapping edits.
+/// Fix for BRO1401: inserts ',' after the last item. With nested initializers the inner comma goes before the inner
+/// '}' and the outer one after it, so Fix All's insertions never collide.
 /// </summary>
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ConstructorInitializerLineCodeFixProvider))]
-public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(TrailingCommaCodeFixProvider))]
+public sealed class TrailingCommaCodeFixProvider : CodeFixProvider
 {
-    private const string Title = "Put the constructor initializer on its own line";
+    private const string Title = "Add trailing comma";
 
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.ConstructorInitializerLine);
+        ImmutableArray.Create(DiagnosticIds.TrailingComma);
 
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
@@ -35,7 +34,7 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
                 CodeAction.Create(
                     Title,
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
-                    equivalenceKey: nameof(ConstructorInitializerLineCodeFixProvider)),
+                    equivalenceKey: nameof(TrailingCommaCodeFixProvider)),
                 diagnostic);
         }
 
@@ -54,17 +53,23 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
-        var changes = new Dictionary<ConstructorInitializerSyntax, TextChange>();
+        var insertions = new Dictionary<int, TextChange>();
         foreach (var diagnostic in diagnostics)
         {
-            var initializer = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent as ConstructorInitializerSyntax;
-            if (initializer is not null && ConstructorInitializers.ShouldMove(initializer, text))
+            // The diagnostic is on the last item; its parent is the list.
+            var item = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
+            var list = item.Parent;
+            while (list is not null && list.Span == item.Span)
             {
-                changes[initializer] = ConstructorInitializers.GetChange(initializer, text, indentUnit);
+                list = list.Parent;
+            }
+
+            if (list is not null && TrailingCommas.GetLastItemWithoutComma(list, text) is { } last)
+            {
+                insertions[last.Span.End] = new TextChange(new TextSpan(last.Span.End, 0), TrailingCommas.GetInsertion(last, text));
             }
         }
 
-        return document.WithText(text.WithChanges(changes.Values));
+        return document.WithText(text.WithChanges(insertions.Values));
     }
 }

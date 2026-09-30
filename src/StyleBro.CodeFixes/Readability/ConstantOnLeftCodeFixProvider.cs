@@ -25,10 +25,7 @@ public sealed class ConstantOnLeftCodeFixProvider : CodeFixProvider
         ImmutableArray.Create(DiagnosticIds.ConstantOnLeft);
 
     public override FixAllProvider GetFixAllProvider() =>
-        FixAllProvider.Create(async (fixAllContext, document, diagnostics) =>
-            diagnostics.IsEmpty
-                ? null
-                : await FixDocumentAsync(document, diagnostics, fixAllContext.CancellationToken).ConfigureAwait(false));
+        LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {

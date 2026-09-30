@@ -314,6 +314,43 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task StaticConstructor_ComesBeforeInstanceConstructors() => VerifyFixAsync("""
+        class C
+        {
+            public C() { }
+
+            static {|BRO1001:C|}() { }
+
+            internal C(int x) { }
+
+            private C(long x) { }
+        }
+        """, """
+        class C
+        {
+            static C() { }
+
+            public C() { }
+
+            internal C(int x) { }
+
+            private C(long x) { }
+        }
+        """);
+
+    [Fact]
+    public Task StaticConstructorFirst_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            static C() { }
+
+            public C() { }
+
+            private C(int x) { }
+        }
+        """);
+
+    [Fact]
     public Task StaticFirstDisabled_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C
         {

@@ -14,3 +14,5 @@ BRO1103 | Readability | Warning  | ConstantOnLeftAnalyzer
 BRO1104 | Readability | Warning  | DefaultValueConstructorAnalyzer
 BRO1002 | Spacing | Warning  | CommentSpacingAnalyzer
 BRO1105 | Readability | Warning  | ConstructorInitializerLineAnalyzer
+BRO1106 | Readability | Warning  | EmptyStringAnalyzer
+BRO1401 | Maintainability | Warning  | TrailingCommaAnalyzer

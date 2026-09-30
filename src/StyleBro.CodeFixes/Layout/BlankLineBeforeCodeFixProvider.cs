@@ -23,10 +23,7 @@ public sealed class BlankLineBeforeCodeFixProvider : CodeFixProvider
         ImmutableArray.Create(DiagnosticIds.BlankLineBeforeOpenBrace, DiagnosticIds.BlankLineBeforeChainedBlock);
 
     public override FixAllProvider GetFixAllProvider() =>
-        FixAllProvider.Create(async (fixAllContext, document, diagnostics) =>
-            diagnostics.IsEmpty
-                ? null
-                : await FixDocumentAsync(document, diagnostics, fixAllContext.CancellationToken).ConfigureAwait(false));
+        LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {

@@ -21,6 +21,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1103](docs/rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Yes |
 | [BRO1104](docs/rules/BRO1104.md) | Use default instead of a value type's default constructor | SA1129 | Yes |
 | [BRO1105](docs/rules/BRO1105.md) | Constructor initializers should be on their own line | SA1128 | Yes |
+| [BRO1106](docs/rules/BRO1106.md) | Use string.Empty for empty strings | SA1122 | Yes |
+| [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 
