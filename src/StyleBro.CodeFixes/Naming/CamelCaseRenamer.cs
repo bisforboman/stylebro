@@ -53,7 +53,7 @@ internal static class CamelCaseRenamer
                 if (token.Span != diagnostic.Location.SourceSpan
                     || token.Parent is not { } declaration
                     || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol
-                    || (symbol is IFieldSymbol or INamedTypeSymbol
+                    || (IsReachableByName(symbol)
                         && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
                     || await GetChangesAsync(solution, symbol, newName, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
@@ -124,16 +124,18 @@ internal static class CamelCaseRenamer
     /// </summary>
     private static bool IsInStrings(ISymbol symbol, HashSet<string> strings)
     {
-        if (symbol is IFieldSymbol field)
-        {
-            // A public instance field's name is also data (serializers write it), so look inside strings too.
-            var word = new System.Text.RegularExpressions.Regex(@"(?<![\w@])" + System.Text.RegularExpressions.Regex.Escape(field.Name) + @"(?!\w)");
-            return strings.Contains(field.Name) || (FieldNames.IsDataMember(field) && strings.Any(s => word.IsMatch(s)));
-        }
-
+        // Names that are also data (serializers write public instance fields, properties and enum members by name)
+        // are looked for inside strings too, like test JSON.
+        // Names that serializers write (public instance fields, properties, events, enum members) are looked for inside
+        // strings too, like test JSON. Private fields only by their exact name: other projects reach them only by
+        // reflection ('GetField("_count")'), and a common word like 'count' in any message would block every rename.
+        // (Inside the field's own type, the analyzer also matches it inside strings: 'DebuggerDisplay("{_count}")'.)
+        var isData = symbol is IPropertySymbol or IEventSymbol
+            || (symbol is IFieldSymbol field && (FieldNames.IsDataMember(field) || field.ContainingType.TypeKind == TypeKind.Enum));
         if (symbol is not INamedTypeSymbol)
         {
-            return strings.Contains(symbol.Name);
+            var word = new System.Text.RegularExpressions.Regex(@"(?<![\w@])" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"(?!\w)");
+            return strings.Contains(symbol.Name) || (isData && strings.Any(s => word.IsMatch(s)));
         }
 
         var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
@@ -141,7 +143,20 @@ internal static class CamelCaseRenamer
     }
 
     /// <summary>Symbols whose conflicts are checked by syntax over their member (<see cref="CamelCaseNames.CanRename"/>).</summary>
-    private static bool IsMemberScoped(ISymbol symbol) => symbol is ILocalSymbol or IParameterSymbol or IRangeVariableSymbol;
+    private static bool IsMemberScoped(ISymbol symbol) =>
+        symbol is ILocalSymbol or IParameterSymbol or IRangeVariableSymbol or IMethodSymbol { MethodKind: MethodKind.LocalFunction };
+
+    /// <summary>Symbols that code can reach by a name in a string (reflection, serializers, type names).</summary>
+    private static bool IsReachableByName(ISymbol symbol) =>
+        symbol is IFieldSymbol or INamedTypeSymbol or IPropertySymbol or IEventSymbol
+            || symbol is IMethodSymbol { MethodKind: not MethodKind.LocalFunction };
+
+    /// <summary>Type members whose rename has to follow overrides and implementations.</summary>
+    private static bool IsTypeMember(ISymbol symbol) =>
+        symbol is IPropertySymbol or IEventSymbol || symbol is IMethodSymbol { MethodKind: MethodKind.Ordinary };
+
+    /// <summary>'IShape.area' (an explicit implementation's name) -> 'area'.</summary>
+    private static string SimpleName(string name) => name.Substring(name.LastIndexOf('.') + 1);
 
     /// <summary>
     /// The edits that rename <paramref name="symbol"/> (and, for a parameter, the same-named parameters of its
@@ -162,6 +177,21 @@ internal static class CamelCaseRenamer
         else if (symbol is ITypeParameterSymbol { DeclaringMethod: { } method } typeParameter)
         {
             await AddRelatedAsync(solution, typeParameter, method, typeParameter.Ordinal, GetTypeParameters, symbols, cancellationToken).ConfigureAwait(false);
+        }
+        else if (IsTypeMember(symbol))
+        {
+            await AddRelatedMembersAsync(solution, symbol, symbols, cancellationToken).ConfigureAwait(false);
+            if (await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
+            {
+                return null;
+            }
+        }
+        else if (symbol is INamedTypeSymbol type)
+        {
+            // Constructors and the finalizer carry the type's name.
+            symbols.AddRange(type.InstanceConstructors.Concat(type.StaticConstructors)
+                .Concat(type.GetMembers().OfType<IMethodSymbol>().Where(m => m.MethodKind == MethodKind.Destructor))
+                .Where(m => !m.IsImplicitlyDeclared));
         }
 
         var result = new List<(string, TextChange)>();
@@ -190,14 +220,18 @@ internal static class CamelCaseRenamer
 
             foreach (var referenced in await SymbolFinder.FindReferencesAsync(current, solution, cancellationToken).ConfigureAwait(false))
             {
-                if (referenced.Definition.Name != oldName)
+                // A constructor's references are 'new T(...)' (renamed with the type) and 'this(...)'/'base(...)' (left).
+                var isConstructor = referenced.Definition is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor };
+                if (SimpleName(referenced.Definition.Name) != oldName && !isConstructor)
                 {
                     continue;
                 }
 
                 foreach (var reference in referenced.Locations)
                 {
-                    if (reference.IsImplicit)
+                    if (reference.IsImplicit
+                        || (isConstructor
+                            && (await reference.Document.GetTextAsync(cancellationToken).ConfigureAwait(false)).ToString(reference.Location.SourceSpan).TrimStart('@') != oldName))
                     {
                         continue;
                     }
@@ -265,6 +299,20 @@ internal static class CamelCaseRenamer
             return semanticModel is null || !semanticModel.LookupSymbols(span.Start, name: newName).IsEmpty ? null : newName;
         }
 
+        if (symbol is IMethodSymbol or IPropertySymbol or IEventSymbol)
+        {
+            // A simple name ('area()', not 'x.area()') is looked up in scope, where the new name may mean something else.
+            var memberRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+            if (memberRoot?.FindToken(span.Start).Parent is IdentifierNameSyntax simple && IsSimpleName(simple)
+                && await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is { } memberModel
+                && !memberModel.LookupSymbols(span.Start, name: newName).IsEmpty)
+            {
+                return null;
+            }
+
+            return newName;
+        }
+
         if (symbol is not IFieldSymbol field
             || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
             || root.FindToken(span.Start).Parent is not IdentifierNameSyntax name
@@ -297,6 +345,51 @@ internal static class CamelCaseRenamer
             AssignmentExpressionSyntax { Parent: InitializerExpressionSyntax } assignment when assignment.Left == name => false,
             _ => true,
         };
+    }
+
+    /// <summary>
+    /// Adds the overrides and implementations (explicit ones included) of <paramref name="member"/> that have the same
+    /// name, recursively: renaming an abstract, virtual or interface member without them wouldn't compile.
+    /// </summary>
+    private static async Task AddRelatedMembersAsync(Solution solution, ISymbol member, List<ISymbol> symbols, CancellationToken cancellationToken)
+    {
+        var related = new List<ISymbol>();
+        related.AddRange(await SymbolFinder.FindOverridesAsync(member, solution, cancellationToken: cancellationToken).ConfigureAwait(false));
+        if (member.ContainingType?.TypeKind == TypeKind.Interface)
+        {
+            related.AddRange(await SymbolFinder.FindImplementationsAsync(member, solution, cancellationToken: cancellationToken).ConfigureAwait(false));
+        }
+
+        foreach (var relatedMember in related)
+        {
+            if (SimpleName(relatedMember.Name) == SimpleName(member.Name)
+                && relatedMember.Locations.Any(l => l.IsInSource)
+                && !symbols.Contains(relatedMember, SymbolEqualityComparer.Default))
+            {
+                symbols.Add(relatedMember);
+                await AddRelatedMembersAsync(solution, relatedMember, symbols, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Whether a type deriving from (or implementing) one of the renamed members' types already has a member with the
+    /// new name: the renamed member would then clash with it or be hidden by it.
+    /// </summary>
+    private static async Task<bool> HasDerivedMemberAsync(Solution solution, List<ISymbol> members, string newName, CancellationToken cancellationToken)
+    {
+        foreach (var type in members.Select(m => m.ContainingType).Where(t => t is not null).Distinct(SymbolEqualityComparer.Default).Cast<INamedTypeSymbol>())
+        {
+            var derived = type.TypeKind == TypeKind.Interface
+                ? (await SymbolFinder.FindImplementationsAsync(type, solution, cancellationToken: cancellationToken).ConfigureAwait(false)).OfType<INamedTypeSymbol>()
+                : await SymbolFinder.FindDerivedClassesAsync(type, solution, cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (derived.Any(d => !d.GetMembers(newName).IsEmpty))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

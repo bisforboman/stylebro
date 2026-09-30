@@ -189,6 +189,33 @@ public class FieldNamingTests
             public const string Example = "{\"total\": 1}";
         }
 
+        class JsonObjectAttribute : Attribute
+        {
+        }
+
+        [JsonObject]
+        class FieldsSerialized
+        {
+            private int _stored;
+
+            public int Get() => _stored;
+        }
+
+        [System.Diagnostics.DebuggerDisplay("{_shown}")]
+        class Displayed
+        {
+            private int _shown;
+
+            public int Get() => _shown;
+        }
+
+        class Paired
+        {
+            private int _items;
+
+            public bool ShouldSerialize_items() => _items > 0;
+        }
+
         [Serializable]
         class Serialized
         {
@@ -311,4 +338,84 @@ public class FieldNamingTests
             }
             """,
         ]);
+
+    [Fact]
+    public Task PrefixesAndUnderscores_GetTheCompleteName() => VerifyFixAsync("""
+        using System;
+
+        public class C
+        {
+            private int {|BRO1307:m_member|};
+            private static int {|BRO1307:s_count|};
+            [ThreadStatic]
+            private static int t_depth;
+            private int {|BRO1307:m_with_more|};
+            private int {|BRO1307:m_Upper|};
+            private int {|BRO1308:with_underscore|};
+            private int {|BRO1308:x_other|};
+            private int {|BRO1308:RETRY_COUNT|};
+            private int {|BRO1308:trailing_|};
+            private int {|BRO1308:two__underscores|};
+            private const int {|BRO1308:MAX_VALUE|} = 1;
+            private static readonly int {|BRO1308:Default_Value|} = 1;
+            public int {|BRO1308:Public_Field|};
+            protected int {|BRO1308:protected_field|};
+            private int m_;
+            private static int s_static;
+            private static readonly object Int32_0 = 0;
+
+            public int Use() => m_member + s_count + t_depth + m_with_more + m_Upper + with_underscore + x_other
+                + RETRY_COUNT + trailing_ + two__underscores + MAX_VALUE + Default_Value + Public_Field + protected_field + m_
+                + s_static;
+        }
+        """, """
+        using System;
+
+        public class C
+        {
+            private int member;
+            private static int count;
+            [ThreadStatic]
+            private static int t_depth;
+            private int withMore;
+            private int upper;
+            private int withUnderscore;
+            private int xOther;
+            private int retryCount;
+            private int trailing;
+            private int twoUnderscores;
+            private const int MaxValue = 1;
+            private static readonly int DefaultValue = 1;
+            public int PublicField;
+            protected int protectedField;
+            private int m_;
+            private static int s_static;
+            private static readonly object Int32_0 = 0;
+
+            public int Use() => member + count + t_depth + withMore + upper + withUnderscore + xOther
+                + retryCount + trailing + twoUnderscores + MaxValue + DefaultValue + PublicField + protectedField + m_
+                + s_static;
+        }
+        """);
+
+    [Fact]
+    public Task PrefixesAndUnderscores_FollowTheUnderscoreStyle() => VerifyFixAsync("""
+        class C
+        {
+            private int {|BRO1307:m_member|};
+            private int {|BRO1308:with_underscore|};
+            private const int {|BRO1308:MAX_VALUE|} = 1;
+
+            public int Use() => m_member + with_underscore + MAX_VALUE;
+        }
+        """, """
+        class C
+        {
+            private int _member;
+            private int _withUnderscore;
+            private const int MaxValue = 1;
+
+            public int Use() => _member + _withUnderscore + MaxValue;
+        }
+        """, editorConfig: Underscore);
 }

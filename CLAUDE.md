@@ -16,8 +16,12 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 24 rules; 199 unit tests (incl. every doc example), all green (2026-09-30).
+(see the log below) and 33 rules; 229 unit tests (incl. every doc example), all green (2026-09-30).
 0.1.0-alpha.3 (18 rules) is on nuget.org.
+
+**Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
+is starting out. Keep adding rules on `main` and release again once there's a critical mass of new rules. Don't
+suggest or push a release tag after each batch; mention it only when a release looks worth it.
 
 ## Layout
 
@@ -124,12 +128,26 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   starting a line keep their indentation). Skipped: syntax errors, comments/directives in the gaps. StyleCop
   1.2.0-beta.556 misses records/primary constructors (documented deviation) and has no working SA1117 fix. Nested
   split lists: single fix and Fix All differ in the inner list's indentation (test uses `batchFixedSource`).
+- **BRO1109** (SA1110) `(`/`[` on the name's line and **BRO1110** (SA1111) `)`/`]` on the last item's line
+  (`Readability/ParenthesisPlacement.cs`, same list kinds as BRO1107). BRO1109 only for lists that belong to a name
+  (declarations, calls, `new`, element access, attributes, constructor initializers; not lambdas); the fix swaps the
+  gap and the token (`Method` / `(int a)` -> `Method(` / `int a)`), empty lists are joined. BRO1110 moves the token
+  after the last item and keeps a trailing comment after it (`int b) // last`); skipped for empty lists (SA1009's),
+  comments on their own line/directives, and a trailing comment when code follows the token on its line.
+- **BRO1111** (SA1127) each `where` on its own line, indented one unit deeper than the name's line; for an
+  expression-bodied member the `=>` after the last constraint moves too (like StyleCop's fix).
+- **BRO1112** (SA1124, regions between members/types; OFF in the preset like StyleCop's default) and **BRO1113**
+  (SA1123, regions inside member bodies): the fix removes each `#region`/`#endregion` line pair, one edit per run of
+  removed lines, and drops a neighboring blank line that would double a blank line, follow `{` or precede `}`. A run
+  at the end of the file takes the preceding line break along. Removing regions lets BRO1001 see the type, so a
+  region-heavy codebase needs a second `dotnet format` run (documented in BRO1112.md).
+- Parity: `parenthesis-placement` 13/13 and `constraints-regions` 15/15 positions, identical fixed output.
 - **StyleCop parity check:** `scripts/stylecop-survey/Compare-WithStyleCop.ps1` + `parity/parity.psd1`. Runs both
   tools on edge-case files, compares positions and fixed output; every difference must be a documented deviation.
   StyleBro's fixed output must also be clean ("StyleBro fix leaves: ..." otherwise; this found a BRO1506 bug:
   the empty line after a file's final line break counted as a blank line below a comment). `CompareOutput = $false`
   skips the output diff when StyleCop has no fix (SA1117) or a broken one (SA1312/SA1313: under `dotnet format`
-  its rename fix applies a different subset of renames per run). All 10 sets pass. Add a set for every new rule.
+  its rename fix applies a different subset of renames per run). All 17 sets pass. Add a set for every new rule.
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
 
@@ -181,8 +199,32 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   guards (in the type and solution-wide) also match the name inside a string. Fix: when a reference would see
   another MEMBER with the new name (a derived type's property hiding it), the rename is skipped (only locals and
   parameters are qualified around); this also applies to BRO1303.
-- Remaining naming: SA1300 (types, members, namespaces, enum members, local functions: public API, overrides,
-  serializer property names, non-C# files; needs the most care), SA1308/SA1310, protected fields.
+- **BRO1307** (SA1308, `m_`/`s_`/`t_` prefixes, lowercase only) and **BRO1308** (SA1310, underscore inside a field
+  name): `FieldNames.GetRename` gives every field at most ONE rule and the COMPLETE new name (prefix > underscore >
+  casing), so one rename converges and Fix All never gets two names for one field. Words are joined in the field's
+  casing (Pascal for const/static readonly/non-private, the BRO1303 style for private, camel for protected); an
+  all-caps word of 2+ letters counts as a word (`MAX_VALUE` -> `MaxValue`). Skipped: digit_digit (`Int32_0` would
+  become `Int320`, found in Newtonsoft.Json), results that are keywords (`s_static`) or empty (`m_`); `t_` fields are
+  usually `[ThreadStatic]` (attributed -> skipped).
+- **BRO1309** (SA1300, not namespaces): types (not interfaces), methods, properties, events (incl. field-like), enum
+  members, local functions (`PascalCaseNamingAnalyzer`, syntax node actions). Skips: extern/DllImport/LibraryImport,
+  attributed properties/enum members, partial methods, indexers/operators, inherited names (explicit
+  implementations always), new name visible at the declaration (lookup covers members of the type and bases, types,
+  namespaces; for types also any source type). Fix: members cascade to overrides/implementations incl. explicit ones
+  (`AddRelatedMembersAsync`, simple-name match); types also rename constructors/finalizer declarations and
+  `new T(...)` (constructor references with the type's text; `this(...)`/`base(...)` skipped); abort when a derived
+  type has a member with the new name (`HasDerivedMemberAsync`) or a simple-name reference would see something else.
+- **Guards added after running repos' TESTS (compiling was not enough):** (1) a type with a serializer attribute
+  (name contains Serializ/Json/DataContract/MessagePack/Proto, `FieldNames.IsSerialized`) keeps its fields' and
+  properties' names: Newtonsoft.Json's `[JsonObject(MemberSerialization.Fields)]` MyTuple broke 2 tests. (2) A member
+  whose name is contained in another member's name (`ShouldSerializeitems`, `itemsSpecified`, `OnnameChanged`;
+  accessors and backing fields excluded) keeps its name (`FieldNames.HasRelatedMemberName`): Json.NET's
+  ShouldSerialize convention broke a test. (3) Names are matched inside strings, not only as whole strings: in the
+  field's own type for every field (`DebuggerDisplay("{_count}")`), and solution-wide for names serializers write
+  (public instance fields, properties, events, enum members; test JSON). Private fields are matched solution-wide
+  only by their exact name (reflection): matching the word inside any string made common names like `count` block
+  every rename, and the Messy sample stopped converging.
+- Remaining naming: SA1305 (Hungarian, StyleCop has no fix), protected fields, namespaces.
 
 ## BRO15xx: layout
 
@@ -305,6 +347,17 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   mostly public test-object fields named in JSON strings), Serilog 4, Polly and OpenTelemetry 0. All compile; tests
   pass (Newtonsoft.Json 3613/3617 with the same 4 locale failures as untouched code, private app all, Serilog all
   including its public API approval test).
+- **BRO1307-BRO1309 + all nine naming rules together** (2026-09-30): OpenTelemetry has 203 protobuf-mirroring
+  constants (`AnyValue_String_Value`, BRO1308), Newtonsoft.Json showed the `Int32_0` -> `Int320` bug (fixed: skip
+  digit_digit) and, through its tests, the serializer-attribute and ShouldSerialize cases (fixed: guards above).
+  Final run of BRO1301-BRO1309: every repo compiles; Polly 3065/3065, private app all, Serilog all, Newtonsoft.Json
+  3613/3617 (the 4 locale failures). The string guard for private fields was narrowed afterwards (see above); rerun
+  the naming rules with the repos' tests before the next release.
+- **BRO1109-BRO1113** (2026-09-30): FFMpegCore 15, Polly 411 (BRO1112 264 = its SA1124 count, BRO1113 147),
+  OpenTelemetry 0, private app 1146 (BRO1110 1044, BRO1111 82), Newtonsoft.Json 1415 (1102 regions, incl. the
+  `#region License` around every file header; the BOM stays), Serilog 5. All fixed in one pass, no new compile
+  errors, second run clean. Open question: the private app has 1044 BRO1110 but StyleCop 1.1.118 counted 740 SA1111
+  there, while the parity set (1.2 beta) is identical; likely a version difference, not yet checked.
 
 ## Known open questions
 
@@ -331,8 +384,11 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
      (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
      SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
-     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303), SA1302/SA1314 (BRO1304/BRO1305), SA1303/SA1304/SA1307/SA1311 (BRO1306). Left:
-     naming (SA1300, SA1305, SA1308, SA1310), 107 untested (50 SA16xx).
+     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303), SA1302/SA1314
+     (BRO1304/BRO1305), SA1303/SA1304/SA1307/SA1311 (BRO1306), SA1308/SA1310/SA1300 (BRO1307-BRO1309),
+     SA1110/SA1111/SA1127/SA1124/SA1123 (BRO1109-BRO1113). Left: SA1305 (Hungarian, no StyleCop fix), the
+     documentation rules (SA16xx; SA1600 alone has ~28,000 findings in the three surveyed repos), and the
+     untested rest.
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

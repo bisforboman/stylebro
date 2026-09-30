@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 33 StyleBro (32 done), 4 drop, 105 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 40 StyleBro (40 done), 4 drop, 98 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -25,7 +25,6 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Proposal |
 |---|---|---|---|---|
-| SA1300 | Element should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -143,7 +142,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
-| SA1300 | Element should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1300 | Element should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces not renamed |
 | SA1301 | Element should begin with lower-case letter | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1302 | Interface names should begin with I | on | yes | on / off / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop |
 | SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
@@ -151,9 +150,9 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1305 | Field names should not use Hungarian notation | off | no | off / off / off | 82 / 1 / 14 |  | Untested. StyleCop has no fix |
 | SA1306 | Field names should begin with lower-case letter | on | yes | on / off / off | 0 / 4 / 11 | not fixed | StyleBro **BRO1303** (done) for private fields; `stylebro_private_field_naming` picks `count` (default) or `_count` |
 | SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
-| SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1307** (done), rename to the complete correct name in one pass |
 | SA1309 | Field names should not begin with underscore | on | yes | on / off / off | 0 / 486 / 1,060 | not fixed | StyleBro **BRO1303** (done) for private fields (default style); constants, static readonly and non-private fields not yet |
-| SA1310 | Field names should not contain underscore | on | yes | on / on / off | 184 / 0 / 7 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1310 | Field names should not contain underscore | on | yes | on / on / off | 184 / 0 / 7 |  | StyleBro **BRO1308** (done), words joined in the field's casing (MAX_VALUE -> MaxValue) |
 | SA1311 | Static readonly fields should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 0 / 14 / 7 | not fixed | StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name` |
 | SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 0 / 0 / 90 | not fixed | StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name` |
@@ -198,8 +197,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1107 | Code should not contain multiple statements on one line | on | yes | on / off / off | 0 / 243 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_statements = false`) |
 | SA1108 | Block statements should not contain embedded comments | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1109 | Block statements should not contain embedded regions | off | no | off / on / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
-| SA1110 | Opening parenthesis or bracket should be on declaration line | on | yes | on / on / off | 0 / 0 / 3 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1111 | Closing parenthesis should be on line of last parameter | on | yes | on / on / off | 0 / 0 / 740 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1110 | Opening parenthesis or bracket should be on declaration line | on | yes | on / on / off | 0 / 0 / 3 |  | StyleBro **BRO1109** (done), same results and output as StyleCop |
+| SA1111 | Closing parenthesis should be on line of last parameter | on | yes | on / on / off | 0 / 0 / 740 |  | StyleBro **BRO1110** (done), same results and output as StyleCop |
 | SA1112 | Closing parenthesis should be on line of opening parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1113 | Comma should be on the same line as previous parameter | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1114 | Parameter list should follow declaration | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
@@ -210,11 +209,11 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |
 | SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 0 / 7 / 352 | not fixed | StyleBro **BRO1106** (done), same results as StyleCop |
-| SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1124 | Do not use regions | on | yes | on / off / off | 0 / 264 / 17 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1113** (done), same results and output as StyleCop |
+| SA1124 | Do not use regions | on | yes | on / off / off | 0 / 264 / 17 |  | StyleBro **BRO1112** (done), off in the preset like StyleCop's default |
 | SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1126 | Prefix calls correctly | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
-| SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 0 / 0 / 82 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 0 / 0 / 82 |  | StyleBro **BRO1111** (done), same results and output as StyleCop |
 | SA1128 | Put constructor initializers on their own line | on | yes | on / on / off | 0 / 0 / 408 | not fixed | StyleBro **BRO1105** (done), same results as StyleCop |
 | SA1129 | Do not use default value type constructor | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported |
 | SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |

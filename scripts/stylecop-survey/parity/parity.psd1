@@ -177,5 +177,43 @@
                 'StyleCop output only: PascalFields.cs: [        public int Use() => LowerConst + PrivateLowerConst + _underscoreConst + LowerStaticReadonly]'
             )
         }
+        @{
+            Name     = 'naming-prefix-underscore'
+            Map      = @('SA1308=BRO1307', 'SA1310=BRO1308')
+            # The new names differ by design, so only positions are compared: StyleCop's fix deletes the prefix or the
+            # underscore and nothing else ('MAX_VALUE' -> 'MAXVALUE', 'm_Upper' -> 'Upper', 's_static' -> '@static'), and
+            # needs a second run for 'm_with_more'. StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+                # 's_static' would become the keyword 'static' and 'm_' nothing: skipped (StyleCop writes '@static').
+                'only StyleCop: BRO1307 Underscores.cs(8,28)'
+                'only StyleCop: BRO1307 Underscores.cs(13,21)'
+                # 't_thread' has [ThreadStatic]: fields with attributes aren't renamed.
+                'only StyleCop: BRO1307 Underscores.cs(10,28)'
+            )
+        }
+        @{
+            Name     = 'naming-elements'
+            Map      = @('SA1300=BRO1309')
+            # StyleCop's SA1300 fix changes nothing under 'dotnet format'; positions only.
+            CompareOutput = $false
+            Expected = @(
+                # Namespaces aren't renamed: that also changes embedded resource names and breaks folder conventions.
+                'only StyleCop: BRO1309 Elements.cs(1,11)'
+                'only StyleCop: BRO1309 Elements.cs(1,17)'
+            )
+        }
+        @{
+            Name     = 'parenthesis-placement'
+            Map      = @('SA1110=BRO1109', 'SA1111=BRO1110')
+            Expected = @(
+            )
+        }
+        @{
+            Name     = 'constraints-regions'
+            Map      = @('SA1127=BRO1111', 'SA1124=BRO1112', 'SA1123=BRO1113')
+            Expected = @(
+            )
+        }
     )
 }

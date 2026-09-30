@@ -24,12 +24,20 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1106](docs/rules/BRO1106.md) | Use string.Empty for empty strings | SA1122 | Yes |
 | [BRO1107](docs/rules/BRO1107.md) | Split parameters should start on the line after the declaration | SA1116 | Yes |
 | [BRO1108](docs/rules/BRO1108.md) | Parameters should be on the same line or on separate lines | SA1117 | Yes |
+| [BRO1109](docs/rules/BRO1109.md) | Opening parenthesis or bracket should be on the declaration line | SA1110 | Yes |
+| [BRO1110](docs/rules/BRO1110.md) | Closing parenthesis or bracket should be on the line of the last item | SA1111 | Yes |
+| [BRO1111](docs/rules/BRO1111.md) | Generic type constraints should be on their own line | SA1127 | Yes |
+| [BRO1112](docs/rules/BRO1112.md) | Do not use regions (off in the preset, like StyleCop) | SA1124 | Yes |
+| [BRO1113](docs/rules/BRO1113.md) | Regions should not be placed inside code elements | SA1123 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |
 | [BRO1304](docs/rules/BRO1304.md) | Interface names should begin with I | SA1302 | Yes |
 | [BRO1305](docs/rules/BRO1305.md) | Type parameter names should begin with T | SA1314 | Yes |
 | [BRO1306](docs/rules/BRO1306.md) | Constant, static readonly and non-private field names should be PascalCase | SA1303, SA1304, SA1307, SA1311 | Yes |
+| [BRO1307](docs/rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Yes |
+| [BRO1308](docs/rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Yes |
+| [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |

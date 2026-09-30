@@ -176,6 +176,88 @@ internal static class Descriptors
             + "'_maxCount'. Replaces StyleCop SA1303, SA1311, SA1307 and SA1304.",
         helpLinkUri: HelpBase + DiagnosticIds.FieldPascalCase + ".md");
 
+    public static readonly DiagnosticDescriptor FieldPrefix = new(
+        id: DiagnosticIds.FieldPrefix,
+        title: "Field names should not begin with a prefix",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Fields aren't named 'm_count', 's_count' or 't_count'. Replaces StyleCop SA1308.",
+        helpLinkUri: HelpBase + DiagnosticIds.FieldPrefix + ".md");
+
+    public static readonly DiagnosticDescriptor FieldUnderscore = new(
+        id: DiagnosticIds.FieldUnderscore,
+        title: "Field names should not contain an underscore",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Fields are 'maxValue' or 'MaxValue', not 'max_value' or 'MAX_VALUE'. Replaces StyleCop SA1310.",
+        helpLinkUri: HelpBase + DiagnosticIds.FieldUnderscore + ".md");
+
+    public static readonly DiagnosticDescriptor ElementPascalCase = new(
+        id: DiagnosticIds.ElementPascalCase,
+        title: "Element names should begin with an upper-case letter",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Types, methods, properties, events, enum members and local functions are PascalCase. "
+            + "Replaces StyleCop SA1300 (except for namespaces).",
+        helpLinkUri: HelpBase + DiagnosticIds.ElementPascalCase + ".md");
+
+    public static readonly DiagnosticDescriptor OpenParenthesisOnNameLine = new(
+        id: DiagnosticIds.OpenParenthesisOnNameLine,
+        title: "Opening parenthesis or bracket should be on the declaration line",
+        messageFormat: "Move '{0}' to the end of the previous line",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'Method(' starts the list on the line of the name, not on the next line. Replaces StyleCop SA1110.",
+        helpLinkUri: HelpBase + DiagnosticIds.OpenParenthesisOnNameLine + ".md");
+
+    public static readonly DiagnosticDescriptor CloseParenthesisOnLastItemLine = new(
+        id: DiagnosticIds.CloseParenthesisOnLastItemLine,
+        title: "Closing parenthesis or bracket should be on the line of the last item",
+        messageFormat: "Move '{0}' to the end of the last item",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The list ends where its last item ends, not on a line of its own. Replaces StyleCop SA1111.",
+        helpLinkUri: HelpBase + DiagnosticIds.CloseParenthesisOnLastItemLine + ".md");
+
+    public static readonly DiagnosticDescriptor ConstraintOnOwnLine = new(
+        id: DiagnosticIds.ConstraintOnOwnLine,
+        title: "Generic type constraints should be on their own line",
+        messageFormat: "Move the constraint on '{0}' to its own line",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Each 'where' clause starts its own line, one level deeper than the declaration. Replaces StyleCop SA1127.",
+        helpLinkUri: HelpBase + DiagnosticIds.ConstraintOnOwnLine + ".md");
+
+    public static readonly DiagnosticDescriptor NoRegions = new(
+        id: DiagnosticIds.NoRegions,
+        title: "Do not use regions",
+        messageFormat: "Remove the region",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'#region' hides code instead of organizing it. Replaces StyleCop SA1124 (regions between members "
+            + "and types; BRO1113 covers regions inside members).",
+        helpLinkUri: HelpBase + DiagnosticIds.NoRegions + ".md");
+
+    public static readonly DiagnosticDescriptor NoRegionsInCodeElements = new(
+        id: DiagnosticIds.NoRegionsInCodeElements,
+        title: "Regions should not be placed inside code elements",
+        messageFormat: "Remove the region",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A region inside a method or property body hides part of it. Replaces StyleCop SA1123.",
+        helpLinkUri: HelpBase + DiagnosticIds.NoRegionsInCodeElements + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

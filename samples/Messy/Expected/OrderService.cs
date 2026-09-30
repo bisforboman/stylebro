@@ -5,7 +5,7 @@ public class OrderService
 {
     public const string Name = "orders";
 
-    private static int s_instances;
+    private static int _instances;
 
     private readonly List<string> _items = new();
 

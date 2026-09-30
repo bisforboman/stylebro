@@ -59,6 +59,30 @@ dotnet_diagnostic.BRO1305.severity = warning
 # BRO1306: constant, static readonly and non-private fields are PascalCase (SA1303, SA1311, SA1307, SA1304)
 dotnet_diagnostic.BRO1306.severity = warning
 
+# BRO1307: no m_/s_/t_ prefix on fields (SA1308). Turn off if you follow the .NET runtime's s_/t_ style.
+dotnet_diagnostic.BRO1307.severity = warning
+
+# BRO1308: no underscore inside field names (SA1310)
+dotnet_diagnostic.BRO1308.severity = warning
+
+# BRO1309: types and members begin with an upper-case letter (SA1300, not namespaces)
+dotnet_diagnostic.BRO1309.severity = warning
+
+# BRO1109: opening parenthesis on the declaration line (SA1110)
+dotnet_diagnostic.BRO1109.severity = warning
+
+# BRO1110: closing parenthesis on the line of the last item (SA1111)
+dotnet_diagnostic.BRO1110.severity = warning
+
+# BRO1111: generic type constraints on their own line (SA1127)
+dotnet_diagnostic.BRO1111.severity = warning
+
+# BRO1112: no regions (SA1124). Off, like StyleCop's default; set to warning to remove regions.
+dotnet_diagnostic.BRO1112.severity = none
+
+# BRO1113: no regions inside code elements (SA1123)
+dotnet_diagnostic.BRO1113.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 

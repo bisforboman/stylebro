@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 
 namespace StyleBro.CodeFixes.Naming;
 
-/// <summary>Fix for BRO1301-BRO1306: renames to the new name, everywhere the name is used.</summary>
+/// <summary>Fix for BRO1301-BRO1309: renames to the new name, everywhere the name is used.</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CamelCaseNamingCodeFixProvider))]
 public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
 {
@@ -23,7 +23,10 @@ public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
             DiagnosticIds.PrivateFieldNaming,
             DiagnosticIds.InterfacePrefix,
             DiagnosticIds.TypeParameterPrefix,
-            DiagnosticIds.FieldPascalCase);
+            DiagnosticIds.FieldPascalCase,
+            DiagnosticIds.FieldPrefix,
+            DiagnosticIds.FieldUnderscore,
+            DiagnosticIds.ElementPascalCase);
 
     public override FixAllProvider GetFixAllProvider() => RenameFixAllProvider.Instance;
 
