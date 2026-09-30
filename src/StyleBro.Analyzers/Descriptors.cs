@@ -165,6 +165,17 @@ internal static class Descriptors
         description: "Type parameters are named 'T' or 'TItem', not 'Item'. Replaces StyleCop SA1314.",
         helpLinkUri: HelpBase + DiagnosticIds.TypeParameterPrefix + ".md");
 
+    public static readonly DiagnosticDescriptor FieldPascalCase = new(
+        id: DiagnosticIds.FieldPascalCase,
+        title: "Constant, static readonly and non-private field names should be PascalCase",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Constants, static readonly fields and public or internal fields are 'MaxCount', not 'maxCount' or "
+            + "'_maxCount'. Replaces StyleCop SA1303, SA1311, SA1307 and SA1304.",
+        helpLinkUri: HelpBase + DiagnosticIds.FieldPascalCase + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

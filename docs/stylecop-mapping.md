@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 31 StyleBro (28 done), 4 drop, 107 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 33 StyleBro (32 done), 4 drop, 105 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -26,8 +26,6 @@ Rules the SDK doesn't cover, ordered by how many of the 3 teams keep them on, th
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Proposal |
 |---|---|---|---|---|
 | SA1300 | Element should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
-| SA1303 | Const field names should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
-| SA1311 | Static readonly fields should begin with upper-case letter | on / off / off | 0 / 0 / 4 | rename with Fix All (see naming note) |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -148,15 +146,15 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1300 | Element should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro: rename with Fix All (see naming note) |
 | SA1301 | Element should begin with lower-case letter | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1302 | Interface names should begin with I | on | yes | on / off / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop |
-| SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro: rename with Fix All (see naming note) |
-| SA1304 | Non-private readonly fields should begin with upper-case letter | on | yes | on / off / on | 0 / 1 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
+| SA1304 | Non-private readonly fields should begin with upper-case letter | on | yes | on / off / on | 0 / 1 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1305 | Field names should not use Hungarian notation | off | no | off / off / off | 82 / 1 / 14 |  | Untested. StyleCop has no fix |
 | SA1306 | Field names should begin with lower-case letter | on | yes | on / off / off | 0 / 4 / 11 | not fixed | StyleBro **BRO1303** (done) for private fields; `stylebro_private_field_naming` picks `count` (default) or `_count` |
-| SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
+| SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1309 | Field names should not begin with underscore | on | yes | on / off / off | 0 / 486 / 1,060 | not fixed | StyleBro **BRO1303** (done) for private fields (default style); constants, static readonly and non-private fields not yet |
 | SA1310 | Field names should not contain underscore | on | yes | on / on / off | 184 / 0 / 7 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
-| SA1311 | Static readonly fields should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro: rename with Fix All (see naming note) |
+| SA1311 | Static readonly fields should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 0 / 14 / 7 | not fixed | StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name` |
 | SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 0 / 0 / 90 | not fixed | StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name` |
 | SA1314 | Type parameter names should begin with T | on | yes | on / off / off | 0 / 0 / 0 | not fixed | StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop |

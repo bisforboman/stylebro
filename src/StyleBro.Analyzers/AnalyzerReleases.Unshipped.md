@@ -10,3 +10,4 @@ BRO1302 | Naming | Warning  | CamelCaseNamingAnalyzer
 BRO1303 | Naming | Warning  | FieldNamingAnalyzer
 BRO1304 | Naming | Warning  | PrefixNamingAnalyzer
 BRO1305 | Naming | Warning  | PrefixNamingAnalyzer
+BRO1306 | Naming | Warning  | FieldNamingAnalyzer

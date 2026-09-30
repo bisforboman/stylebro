@@ -29,6 +29,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |
 | [BRO1304](docs/rules/BRO1304.md) | Interface names should begin with I | SA1302 | Yes |
 | [BRO1305](docs/rules/BRO1305.md) | Type parameter names should begin with T | SA1314 | Yes |
+| [BRO1306](docs/rules/BRO1306.md) | Constant, static readonly and non-private field names should be PascalCase | SA1303, SA1304, SA1307, SA1311 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |

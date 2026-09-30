@@ -17,6 +17,7 @@ public static class DiagnosticIds
     public const string PrivateFieldNaming = "BRO1303";
     public const string InterfacePrefix = "BRO1304";
     public const string TypeParameterPrefix = "BRO1305";
+    public const string FieldPascalCase = "BRO1306";
     public const string TrailingComma = "BRO1401";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";

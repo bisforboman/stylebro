@@ -30,17 +30,67 @@ internal static class FieldNames
     }
 
     /// <summary>
-    /// Private fields that StyleCop's SA1306 checks: not constants and not static readonly (those are PascalCase).
-    /// Protected and internal fields are visible outside the type and are left out.
+    /// Private fields that StyleCop's SA1306 checks (BRO1303): not constants and not static readonly (those are
+    /// PascalCase).
     /// </summary>
     public static bool IsChecked(IFieldSymbol field)
     {
-        return field.DeclaredAccessibility == Accessibility.Private
+        return IsSourceField(field)
+            && field.DeclaredAccessibility == Accessibility.Private
             && !field.IsConst
-            && !(field.IsStatic && field.IsReadOnly)
-            && !field.IsImplicitlyDeclared
-            && field.Locations.Any(l => l.IsInSource);
+            && !(field.IsStatic && field.IsReadOnly);
     }
+
+    /// <summary>
+    /// Fields that are PascalCase (BRO1306): constants (SA1303) and static readonly fields (SA1311) of any
+    /// accessibility, and public, internal and protected internal fields (SA1307, SA1304). Protected fields are
+    /// camelCase in StyleCop (SA1306) and are left out of both rules; so are enum members (SA1300).
+    /// </summary>
+    public static bool IsPascalChecked(IFieldSymbol field)
+    {
+        return IsSourceField(field)
+            && field.ContainingType.TypeKind != TypeKind.Enum
+            && (field.IsConst
+                || (field.IsStatic && field.IsReadOnly)
+                || field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal);
+    }
+
+    /// <summary>The new name of a field under BRO1303 or BRO1306, or null when neither applies or it already fits.</summary>
+    public static string? GetNewName(IFieldSymbol field, FieldStyle style)
+    {
+        return IsPascalChecked(field) ? GetPascalName(field.Name)
+            : IsChecked(field) ? GetNewName(field.Name, style)
+            : null;
+    }
+
+    /// <summary>'lowerConst' -> 'LowerConst', '_value' -> 'Value'. Null for one-letter prefixes (SA1308) and names that fit.</summary>
+    public static string? GetPascalName(string name)
+    {
+        if (name.Length > 2 && char.IsLetter(name[0]) && name[1] == '_')
+        {
+            return null;
+        }
+
+        var core = name.TrimStart('_');
+        if (core.Length == 0 || !char.IsLetter(core[0]))
+        {
+            return null;
+        }
+
+        var result = char.ToUpperInvariant(core[0]) + core.Substring(1);
+        return result != name && SyntaxFacts.IsValidIdentifier(result) ? result : null;
+    }
+
+    /// <summary>
+    /// Whether code outside the type may use the field's name as data: serializers write public instance fields under
+    /// their name (Json.NET does by default), so their names are also looked for inside strings, not just as a whole
+    /// string.
+    /// </summary>
+    public static bool IsDataMember(IFieldSymbol field) =>
+        !field.IsConst && !field.IsStatic && field.DeclaredAccessibility != Accessibility.Private;
+
+    private static bool IsSourceField(IFieldSymbol field) =>
+        !field.IsImplicitlyDeclared && field.Locations.Any(l => l.IsInSource);
 
     /// <summary>
     /// The field's name in <paramref name="style"/>, or null when it already fits or has no safe replacement.
@@ -96,7 +146,7 @@ internal static class FieldNames
         }
 
         if (type.GetMembers().OfType<IFieldSymbol>().Any(f =>
-            !SymbolEqualityComparer.Default.Equals(f, field) && IsChecked(f) && GetNewName(f.Name, style) == newName))
+            !SymbolEqualityComparer.Default.Equals(f, field) && GetNewName(f, style) == newName))
         {
             return false;
         }
@@ -108,7 +158,7 @@ internal static class FieldNames
             var declaration = reference.GetSyntax(cancellationToken);
             foreach (var token in declaration.DescendantTokens(descendIntoTrivia: true))
             {
-                if ((token.IsKind(SyntaxKind.StringLiteralToken) && token.ValueText == oldName)
+                if ((token.IsKind(SyntaxKind.StringLiteralToken) && (token.ValueText == oldName || (IsDataMember(field) && word.IsMatch(token.ValueText))))
                     || (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == oldName && CamelCaseNames.IsInferredMemberName(token)))
                 {
                     return false;

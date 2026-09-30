@@ -35,7 +35,7 @@ public class FieldNamingTests
             private static readonly int Max = 10;
             private const int Min = 0;
             protected int _shared;
-            public int visible;
+            public int Visible;
             private event EventHandler Changed;
 
             /// <summary>Sets <see cref="_count"/>.</summary>
@@ -63,7 +63,7 @@ public class FieldNamingTests
             private static readonly int Max = 10;
             private const int Min = 0;
             protected int _shared;
-            public int visible;
+            public int Visible;
             private event EventHandler Changed;
 
             /// <summary>Sets <see cref="count"/>.</summary>
@@ -182,6 +182,13 @@ public class FieldNamingTests
             }
         }
 
+        public class Dto
+        {
+            public int total;
+
+            public const string Example = "{\"total\": 1}";
+        }
+
         [Serializable]
         class Serialized
         {
@@ -206,6 +213,101 @@ public class FieldNamingTests
             class Tests
             {
                 object Read(C c) => typeof(C).GetField("_blockedUntil", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(c);
+            }
+            """,
+        ]);
+
+    [Fact]
+    public Task PascalCaseFields_AreRenamed() => VerifyFixAsync("""
+        public class C
+        {
+            public const int {|BRO1306:maxCount|} = 10;
+            private const int {|BRO1306:_minCount|} = 0;
+            public static readonly string {|BRO1306:defaultName|} = "c";
+            private static readonly object {|BRO1306:syncRoot|} = new object();
+            public int {|BRO1306:total|};
+            internal int {|BRO1306:shared|};
+            protected internal readonly int {|BRO1306:limit|} = 1;
+            protected int kept;
+
+            public enum Kind
+            {
+                small,
+            }
+
+            public int Sum(int maxCount) => C.maxCount + maxCount + _minCount + total + shared + limit + kept;
+
+            public object Lock() => syncRoot;
+
+            public string Name() => defaultName;
+        }
+
+        public class User
+        {
+            public int Read(C c) => c.total + C.maxCount;
+        }
+        """, """
+        public class C
+        {
+            public const int MaxCount = 10;
+            private const int MinCount = 0;
+            public static readonly string DefaultName = "c";
+            private static readonly object SyncRoot = new object();
+            public int Total;
+            internal int Shared;
+            protected internal readonly int Limit = 1;
+            protected int kept;
+
+            public enum Kind
+            {
+                small,
+            }
+
+            public int Sum(int maxCount) => C.MaxCount + maxCount + MinCount + Total + Shared + Limit + kept;
+
+            public object Lock() => SyncRoot;
+
+            public string Name() => DefaultName;
+        }
+
+        public class User
+        {
+            public int Read(C c) => c.Total + C.MaxCount;
+        }
+        """);
+
+    [Fact]
+    public Task PublicFieldsNamedInStrings_KeepTheName() => VerifyNotFixedAsync(
+        [
+            """
+            public class Dto
+            {
+                public int {|BRO1306:total|};
+            }
+            """,
+            """
+            class Tests
+            {
+                const string Json = "{\"total\": 3}";
+            }
+            """,
+        ]);
+
+    [Fact]
+    public Task HidingInDerivedTypes_KeepsTheName() => VerifyNotFixedAsync(
+        [
+            """
+            public class Base
+            {
+                public static readonly int {|BRO1306:limit|} = 1;
+            }
+            """,
+            """
+            public class Derived : Base
+            {
+                public int Limit => 2;
+
+                public int Get() => limit;
             }
             """,
         ]);

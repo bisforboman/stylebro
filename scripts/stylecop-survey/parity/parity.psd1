@@ -160,5 +160,22 @@
             Expected = @(
             )
         }
+        @{
+            Name     = 'naming-pascal-fields'
+            Map      = @('SA1303=BRO1306', 'SA1311=BRO1306', 'SA1307=BRO1306', 'SA1304=BRO1306')
+            Expected = @(
+                # StyleCop reports two rules on one field (SA1307 with SA1311 or SA1304); BRO1306 reports it once.
+                'only StyleCop: BRO1306 PascalFields.cs(8,36)'
+                'only StyleCop: BRO1306 PascalFields.cs(12,41)'
+                'only StyleCop: BRO1306 PascalFields.cs(13,31)'
+                # '_underscoreConst': SA1303 skips it (it doesn't start with a lower-case letter) and leaves the
+                # underscore to SA1309; BRO1306 renames it to 'UnderscoreConst'.
+                'only StyleBro: BRO1306 PascalFields.cs(7,27)'
+                'StyleBro output only: PascalFields.cs: [        private const int UnderscoreConst = 1;]'
+                'StyleBro output only: PascalFields.cs: [        public int Use() => LowerConst + PrivateLowerConst + UnderscoreConst + LowerStaticReadonly]'
+                'StyleCop output only: PascalFields.cs: [        private const int _underscoreConst = 1;]'
+                'StyleCop output only: PascalFields.cs: [        public int Use() => LowerConst + PrivateLowerConst + _underscoreConst + LowerStaticReadonly]'
+            )
+        }
     )
 }

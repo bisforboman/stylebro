@@ -124,6 +124,13 @@ internal static class CamelCaseRenamer
     /// </summary>
     private static bool IsInStrings(ISymbol symbol, HashSet<string> strings)
     {
+        if (symbol is IFieldSymbol field)
+        {
+            // A public instance field's name is also data (serializers write it), so look inside strings too.
+            var word = new System.Text.RegularExpressions.Regex(@"(?<![\w@])" + System.Text.RegularExpressions.Regex.Escape(field.Name) + @"(?!\w)");
+            return strings.Contains(field.Name) || (FieldNames.IsDataMember(field) && strings.Any(s => word.IsMatch(s)));
+        }
+
         if (symbol is not INamedTypeSymbol)
         {
             return strings.Contains(symbol.Name);
@@ -263,9 +270,16 @@ internal static class CamelCaseRenamer
             || root.FindToken(span.Start).Parent is not IdentifierNameSyntax name
             || !IsSimpleName(name)
             || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
-            || model.LookupSymbols(span.Start, name: newName).IsEmpty)
+            || model.LookupSymbols(span.Start, name: newName) is not { IsEmpty: false } found)
         {
             return newName;
+        }
+
+        // Only locals and parameters can be stepped around by qualifying; another member with the new name (for
+        // example in a derived type, which would hide the field) means the rename is skipped.
+        if (found.Any(s => s is not (ILocalSymbol or IParameterSymbol or IRangeVariableSymbol)))
+        {
+            return null;
         }
 
         var qualifier = field.IsStatic ? field.ContainingType.ToMinimalDisplayString(model, span.Start) : "this";

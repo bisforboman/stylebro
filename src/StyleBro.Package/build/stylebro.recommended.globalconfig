@@ -56,6 +56,9 @@ dotnet_diagnostic.BRO1304.severity = warning
 # BRO1305: type parameter names begin with T (SA1314)
 dotnet_diagnostic.BRO1305.severity = warning
 
+# BRO1306: constant, static readonly and non-private fields are PascalCase (SA1303, SA1311, SA1307, SA1304)
+dotnet_diagnostic.BRO1306.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 
