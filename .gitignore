@@ -3,4 +3,4 @@ obj/
 .vs/
 *.user
 artifacts/
-samples/Messy/Generated/
+samples/*/Generated/
