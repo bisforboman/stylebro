@@ -25,7 +25,7 @@ function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withSt
     $bro = if ($withStyleBro) { $analyzers -join '' } else { '' }
     Set-Content (Join-Path $dir 'p.csproj') @"
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Library</OutputType><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion><NoWarn>CS0168;CS0219;CS8321;CS0660;CS0661;CS1718;CS0665;CS0414;CS0642;CS0164;CS0162</NoWarn></PropertyGroup>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Library</OutputType><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion><GenerateDocumentationFile>true</GenerateDocumentationFile><NoWarn>CS0168;CS0219;CS8321;CS0660;CS0661;CS1718;CS0665;CS0414;CS0642;CS0164;CS0162;CS1591;CS1587;CS1572;CS1573;CS0067</NoWarn></PropertyGroup>
   <ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />$bro</ItemGroup>
 </Project>
 "@

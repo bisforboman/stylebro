@@ -258,6 +258,123 @@ internal static class Descriptors
         description: "A region inside a method or property body hides part of it. Replaces StyleCop SA1123.",
         helpLinkUri: HelpBase + DiagnosticIds.NoRegionsInCodeElements + ".md");
 
+    public static readonly DiagnosticDescriptor InheritDocumentation = new(
+        id: DiagnosticIds.InheritDocumentation,
+        title: "Overrides and implementations should inherit their documentation",
+        messageFormat: "Add '/// <inheritdoc/>' to '{0}'",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An override or interface implementation without documentation gets '/// <inheritdoc/>', which "
+            + "takes the documentation from the member it overrides or implements. Replaces StyleCop SA1600 for these "
+            + "members; other missing documentation isn't reported, since only a person can write it.",
+        helpLinkUri: HelpBase + DiagnosticIds.InheritDocumentation + ".md");
+
+    public static readonly DiagnosticDescriptor DocumentationSlashesInComment = new(
+        id: DiagnosticIds.DocumentationSlashesInComment,
+        title: "Single-line comments should not use documentation style slashes",
+        messageFormat: "Use '//' for a comment that doesn't document a member",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'///' starts documentation; a comment inside code uses '//'. Replaces StyleCop SA1626.",
+        helpLinkUri: HelpBase + DiagnosticIds.DocumentationSlashesInComment + ".md");
+
+    public static readonly DiagnosticDescriptor DocumentationEndsWithPeriod = new(
+        id: DiagnosticIds.DocumentationEndsWithPeriod,
+        title: "Documentation text should end with a period",
+        messageFormat: "End the documentation text with a period",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Summary, remarks, parameter, return value and exception text are sentences. Replaces StyleCop SA1629.",
+        helpLinkUri: HelpBase + DiagnosticIds.DocumentationEndsWithPeriod + ".md");
+
+    public static readonly DiagnosticDescriptor PropertySummaryWording = new(
+        id: DiagnosticIds.PropertySummaryWording,
+        title: "Property summary documentation should match accessors",
+        messageFormat: "Begin the summary with '{0}'",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A property's summary begins with 'Gets or sets', 'Gets' or 'Sets' (plus 'a value indicating whether' "
+            + "for a bool), matching its accessors. Replaces StyleCop SA1623.",
+        helpLinkUri: HelpBase + DiagnosticIds.PropertySummaryWording + ".md");
+
+    public static readonly DiagnosticDescriptor PropertySummaryRestrictedSetter = new(
+        id: DiagnosticIds.PropertySummaryRestrictedSetter,
+        title: "Property summary documentation should omit accessor with restricted access",
+        messageFormat: "Begin the summary with '{0}': other code can't use the setter",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A property with a private or otherwise restricted setter is documented as 'Gets', not 'Gets or sets'. "
+            + "Replaces StyleCop SA1624.",
+        helpLinkUri: HelpBase + DiagnosticIds.PropertySummaryRestrictedSetter + ".md");
+
+    public static readonly DiagnosticDescriptor ConstructorSummary = new(
+        id: DiagnosticIds.ConstructorSummary,
+        title: "Constructor summary documentation should begin with standard text",
+        messageFormat: "Begin the constructor's summary with 'Initializes a new instance of ...'",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A constructor's summary begins with 'Initializes a new instance of the <see cref=\"T\"/> class.' "
+            + "(or 'Initializes static members of' for a static constructor). Replaces StyleCop SA1642.",
+        helpLinkUri: HelpBase + DiagnosticIds.ConstructorSummary + ".md");
+
+    public static readonly DiagnosticDescriptor DestructorSummary = new(
+        id: DiagnosticIds.DestructorSummary,
+        title: "Destructor summary documentation should begin with standard text",
+        messageFormat: "Begin the finalizer's summary with 'Finalizes an instance of ...'",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A finalizer's summary begins with 'Finalizes an instance of the <see cref=\"T\"/> class.' "
+            + "Replaces StyleCop SA1643.",
+        helpLinkUri: HelpBase + DiagnosticIds.DestructorSummary + ".md");
+
+    public static readonly DiagnosticDescriptor VoidReturnDocumented = new(
+        id: DiagnosticIds.VoidReturnDocumented,
+        title: "Void return value should not be documented",
+        messageFormat: "Remove the <returns> documentation: the method returns void",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A method or delegate that returns void has no return value to document. Replaces StyleCop SA1617.",
+        helpLinkUri: HelpBase + DiagnosticIds.VoidReturnDocumented + ".md");
+
+    public static readonly DiagnosticDescriptor PlaceholderElement = new(
+        id: DiagnosticIds.PlaceholderElement,
+        title: "Do not use placeholder elements",
+        messageFormat: "Remove the <placeholder> tags",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'<placeholder>' marks generated documentation that still needs a review; the text stays, the "
+            + "tags go. Replaces StyleCop SA1651.",
+        helpLinkUri: HelpBase + DiagnosticIds.PlaceholderElement + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyRemarks = new(
+        id: DiagnosticIds.EmptyRemarks,
+        title: "Documentation text should not be empty",
+        messageFormat: "Remove the empty <remarks>",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An empty '<remarks>' element says nothing. Replaces StyleCop SA1627.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyRemarks + ".md");
+
+    public static readonly DiagnosticDescriptor ParameterTagsMatch = new(
+        id: DiagnosticIds.ParameterTagsMatch,
+        title: "Element parameter documentation should match element parameters",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'<param>' tags document the parameters that exist, in their order. Replaces StyleCop SA1612.",
+        helpLinkUri: HelpBase + DiagnosticIds.ParameterTagsMatch + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

@@ -39,6 +39,17 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1308](docs/rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Yes |
 | [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
+| [BRO1601](docs/rules/BRO1601.md) | Overrides and implementations should inherit their documentation | SA1600 (these members) | Yes |
+| [BRO1602](docs/rules/BRO1602.md) | Single-line comments should not use documentation style slashes | SA1626 | Yes |
+| [BRO1603](docs/rules/BRO1603.md) | Documentation text should end with a period | SA1629 | Yes |
+| [BRO1604](docs/rules/BRO1604.md) | Property summary documentation should match accessors | SA1623 | Yes |
+| [BRO1605](docs/rules/BRO1605.md) | Property summary documentation should omit accessor with restricted access | SA1624 | Yes |
+| [BRO1606](docs/rules/BRO1606.md) | Constructor summary documentation should begin with standard text | SA1642 | Yes |
+| [BRO1607](docs/rules/BRO1607.md) | Destructor summary documentation should begin with standard text | SA1643 | Yes |
+| [BRO1608](docs/rules/BRO1608.md) | Void return value should not be documented | SA1617 | Yes |
+| [BRO1609](docs/rules/BRO1609.md) | Do not use placeholder elements | SA1651 | Yes |
+| [BRO1610](docs/rules/BRO1610.md) | Documentation text should not be empty | SA1627 | Yes |
+| [BRO1611](docs/rules/BRO1611.md) | Element parameter documentation should match element parameters | SA1612 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 | [BRO1503](docs/rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Yes |

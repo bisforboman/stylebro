@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 40 StyleBro (40 done), 4 drop, 98 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 51 StyleBro (51 done), 14 drop, 77 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -38,36 +38,36 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
-| SA1600 | Elements should be documented | on | yes | off / on / off | 6,259 / 3,249 / 19,004 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1600 | Elements should be documented | on | yes | off / on / off | 6,259 / 3,249 / 19,004 |  | StyleBro **BRO1601** (done) for overrides and implementations only (`<inheritdoc/>`); other missing documentation is not reported (no placeholder stubs, user decision) |
 | SA1601 | Partial elements should be documented | on | yes | on / off / on | 16 / 78 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1602 | Enumeration items should be documented | on | yes | on / on / on | 0 / 10 / 530 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1602 | Enumeration items should be documented | on | yes | on / on / on | 0 / 10 / 530 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
 | SA1603 | Documentation should contain valid XML | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1604 | Element documentation should have summary | on | no | on / on / on | 0 / 0 / 1 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1605 | Partial element documentation should have summary | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1606 | Element documentation should have summary text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1606 | Element documentation should have summary text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
 | SA1607 | Partial element documentation should have summary text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1608 | Element documentation should not have default summary | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1609 | Property documentation should have value | off | yes | off / off / off | 292 / 171 / 8 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1609 | Property documentation should have value | off | yes | off / off / off | 292 / 171 / 8 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
 | SA1610 | Property documentation should have value text | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1611 | Element parameters should be documented | on | no | on / on / on | 8 / 1 / 11 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1612 | Element parameter documentation should match element parameters | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1611 | Element parameters should be documented | on | no | on / on / on | 8 / 1 / 11 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
+| SA1612 | Element parameter documentation should match element parameters | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered |
 | SA1613 | Element parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1614 | Element parameter documentation should have text | on | no | on / on / off | 0 / 0 / 4 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1615 | Element return value should be documented | on | yes | on / on / on | 3 / 1 / 6 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1616 | Element return value documentation should have text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1617 | Void return value should not be documented | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1618 | Generic type parameters should be documented | on | no | on / on / on | 0 / 0 / 1 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1614 | Element parameter documentation should have text | on | no | on / on / off | 0 / 0 / 4 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
+| SA1615 | Element return value should be documented | on | yes | on / on / on | 3 / 1 / 6 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
+| SA1616 | Element return value documentation should have text | on | yes | on / on / on | 0 / 0 / 0 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
+| SA1617 | Void return value should not be documented | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1608** (done), same results and output as StyleCop |
+| SA1618 | Generic type parameters should be documented | on | no | on / on / on | 0 / 0 / 1 |  | Drop: the only fix would be placeholder text (no stubs, user decision) |
 | SA1619 | Generic type parameters should be documented partial class | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1620 | Generic type parameter documentation should match type parameters | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1621 | Generic type parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1622 | Generic type parameter documentation should have text | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1623 | Property summary documentation should match accessors | on | yes | on / on / off | 0 / 0 / 8 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1624 | Property summary documentation should omit accessor with restricted access | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1623 | Property summary documentation should match accessors | on | yes | on / on / off | 0 / 0 / 8 |  | StyleBro **BRO1604** (done), same results as StyleCop |
+| SA1624 | Property summary documentation should omit accessor with restricted access | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1605** (done), same results as StyleCop |
 | SA1625 | Element documentation should not be copied and pasted | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1626 | Single-line comments should not use documentation style slashes | on | yes | on / on / on | 0 / 0 / 2 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1627 | Documentation text should not be empty | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1628 | Documentation text should begin with a capital letter | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1629 | Documentation text should end with a period | on | yes | on / on / off | 0 / 0 / 29 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1626 | Single-line comments should not use documentation style slashes | on | yes | on / on / on | 0 / 0 / 2 |  | StyleBro **BRO1602** (done), same results as StyleCop |
+| SA1627 | Documentation text should not be empty | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none |
+| SA1628 | Documentation text should begin with a capital letter | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop 1.2 never reports it (not implemented) |
+| SA1629 | Documentation text should end with a period | on | yes | on / on / off | 0 / 0 / 29 |  | StyleBro **BRO1603** (done). Differs from StyleCop: text ending with `?`, `!` or `:` is not reported |
 | SA1630 | Documentation text should contain whitespace | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1631 | Documentation should meet character percentage | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1632 | Documentation text should meet minimum character length | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
@@ -80,16 +80,16 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1639 | File header should have summary | off | yes | off / off / off | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
 | SA1640 | File header should have valid company text | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
 | SA1641 | File header company name text should match | on | yes | on / off / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1642 | Constructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1643 | Destructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
-| SA1644 | Documentation headers should not contain blank lines | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
+| SA1642 | Constructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1606** (done), same results as StyleCop (the fix adds a space after the standard sentence) |
+| SA1643 | Destructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1607** (done), same results as StyleCop (the fix adds a space after the standard sentence) |
+| SA1644 | Documentation headers should not contain blank lines | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop 1.2 never reports it (not implemented) |
 | SA1645 | Included documentation file does not exist | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1646 | Included documentation XPath does not exist | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1647 | Include node does not contain valid file and path | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1648 | inheritdoc should be used with inheriting class | on | no | on / on / on | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
 | SA1649 | File name should match first type name | on | yes | off / on / off | 0 / 0 / 1 |  | Drop: renaming files is not something `dotnet format` can do |
 | SA1650 | Element documentation should be spelled correctly | off | no | off / on / off | 0 / 0 / 0 |  | Untested. Likely drop: the fix would need human-written text |
-| SA1651 | Do not use placeholder elements | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. BRO16xx candidate (StyleCop has a fix) |
+| SA1651 | Do not use placeholder elements | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1609** (done), same results and output as StyleCop |
 
 ### Layout
 

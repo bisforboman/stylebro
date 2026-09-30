@@ -86,6 +86,35 @@ dotnet_diagnostic.BRO1113.severity = warning
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 
+# BRO1601: <inheritdoc/> on undocumented overrides and implementations (SA1600, for these members only)
+dotnet_diagnostic.BRO1601.severity = warning
+
+# BRO1602: '//' instead of '///' for plain comments (SA1626)
+dotnet_diagnostic.BRO1602.severity = warning
+
+# BRO1603: documentation text ends with a period (SA1629)
+dotnet_diagnostic.BRO1603.severity = warning
+
+# BRO1604/BRO1605: property summaries begin with the accessors' words (SA1623, SA1624)
+dotnet_diagnostic.BRO1604.severity = warning
+dotnet_diagnostic.BRO1605.severity = warning
+
+# BRO1606/BRO1607: constructor and finalizer summaries begin with the standard text (SA1642, SA1643)
+dotnet_diagnostic.BRO1606.severity = warning
+dotnet_diagnostic.BRO1607.severity = warning
+
+# BRO1608: no <returns> on void methods (SA1617)
+dotnet_diagnostic.BRO1608.severity = warning
+
+# BRO1609: no <placeholder> elements (SA1651)
+dotnet_diagnostic.BRO1609.severity = warning
+
+# BRO1610: no empty <remarks> (SA1627)
+dotnet_diagnostic.BRO1610.severity = warning
+
+# BRO1611: <param> tags match the parameters (SA1612)
+dotnet_diagnostic.BRO1611.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 

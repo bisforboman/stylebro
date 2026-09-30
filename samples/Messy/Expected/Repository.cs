@@ -7,5 +7,6 @@ public interface IRepository<TEntity>
 
 public class Store<TItem> : IRepository<TItem>
 {
+    /// <inheritdoc/>
     public TItem Find(int id) => default!;
 }

@@ -195,16 +195,23 @@ internal static class FieldNames
     }
 
     /// <summary>
-    /// Whether another member of the type or a base type contains the member's name, like 'ShouldSerializeitems' or
-    /// 'itemsSpecified' for 'items', or 'OnnameChanged': conventions that pair members by name (Json.NET, XML
-    /// serialization, data binding) would break if only one of them were renamed.
+    /// Whether a member of the type or a base type is paired with this one by name, in the conventions serializers and
+    /// data binding use: 'ShouldSerializeitems' and 'Resetitems' (Json.NET, XML serialization, designers),
+    /// 'itemsSpecified' (XML serialization), 'itemsChanged'/'itemsChanging' and 'OnitemsChanged'/'OnitemsChanging'
+    /// (data binding). Renaming only one of them would break the pairing.
     /// </summary>
     public static bool HasRelatedMemberName(INamedTypeSymbol type, ISymbol member)
     {
+        var name = member.Name;
+        var paired = new[]
+        {
+            "ShouldSerialize" + name, "Reset" + name, name + "Specified",
+            name + "Changed", name + "Changing", "On" + name + "Changed", "On" + name + "Changing",
+        };
+
         for (var current = type; current is not null; current = current.BaseType)
         {
-            // Accessors ('get_items') and backing fields belong to the member itself.
-            if (current.GetMembers().Any(m => m.Name != member.Name && !m.IsImplicitlyDeclared && !IsPartOfAnotherSymbol(m) && m.Name.Contains(member.Name)))
+            if (paired.Any(p => !current.GetMembers(p).IsEmpty))
             {
                 return true;
             }
@@ -212,10 +219,6 @@ internal static class FieldNames
 
         return false;
     }
-
-    private static bool IsPartOfAnotherSymbol(ISymbol member) =>
-        member is IMethodSymbol { AssociatedSymbol: not null } or IFieldSymbol { AssociatedSymbol: not null };
-
     private static bool IsSourceField(IFieldSymbol field) =>
         !field.IsImplicitlyDeclared && field.Locations.Any(l => l.IsInSource);
 

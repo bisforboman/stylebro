@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 33 rules; 229 unit tests (incl. every doc example), all green (2026-09-30).
+(see the log below) and 44 rules; 251 unit tests (incl. every doc example), all green (2026-09-30).
 0.1.0-alpha.3 (18 rules) is on nuget.org.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
@@ -41,6 +41,8 @@ suggest or push a release tag after each batch; mention it only when a release l
   also that the fixed sample builds. It does NOT reproduce the old linked-file bug (couldn't find a minimal repro);
   the reference for that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
 - `scripts/verify-format.ps1` reads the rule IDs from `AnalyzerReleases.Unshipped.md` and runs every sample.
+- C# files under `src/` and `tests/` use LF line endings (normalized 2026-09-30; a few had become mixed from scripted
+  edits inserting CRLF, which then made exact-text replacements fail). Keep new edits LF.
 - `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
 - `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
@@ -147,7 +149,7 @@ suggest or push a release tag after each batch; mention it only when a release l
   StyleBro's fixed output must also be clean ("StyleBro fix leaves: ..." otherwise; this found a BRO1506 bug:
   the empty line after a file's final line break counted as a blank line below a comment). `CompareOutput = $false`
   skips the output diff when StyleCop has no fix (SA1117) or a broken one (SA1312/SA1313: under `dotnet format`
-  its rename fix applies a different subset of renames per run). All 17 sets pass. Add a set for every new rule.
+  its rename fix applies a different subset of renames per run). All 21 sets pass. Add a set for every new rule.
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
 
@@ -217,14 +219,50 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **Guards added after running repos' TESTS (compiling was not enough):** (1) a type with a serializer attribute
   (name contains Serializ/Json/DataContract/MessagePack/Proto, `FieldNames.IsSerialized`) keeps its fields' and
   properties' names: Newtonsoft.Json's `[JsonObject(MemberSerialization.Fields)]` MyTuple broke 2 tests. (2) A member
-  whose name is contained in another member's name (`ShouldSerializeitems`, `itemsSpecified`, `OnnameChanged`;
-  accessors and backing fields excluded) keeps its name (`FieldNames.HasRelatedMemberName`): Json.NET's
-  ShouldSerialize convention broke a test. (3) Names are matched inside strings, not only as whole strings: in the
+  paired with another by a naming convention (`ShouldSerializeX`, `ResetX`, `XSpecified`, `XChanged`/`XChanging`,
+  `OnXChanged`/`OnXChanging`) keeps its name (`FieldNames.HasRelatedMemberName`): Json.NET's ShouldSerialize
+  convention broke a test. (A first version matched any member name CONTAINING the name; that also skipped
+  `publicLower` because of `publicLowerReadonly` and didn't converge once the longer name was renamed.) (3) Names are matched inside strings, not only as whole strings: in the
   field's own type for every field (`DebuggerDisplay("{_count}")`), and solution-wide for names serializers write
   (public instance fields, properties, events, enum members; test JSON). Private fields are matched solution-wide
   only by their exact name (reflection): matching the word inside any string made common names like `count` block
   every rename, and the Messy sample stopped converging.
 - Remaining naming: SA1305 (Hungarian, StyleCop has no fix), protected fields, namespaces.
+
+## BRO16xx: documentation
+
+- **Scope (user's decision, 2026-09-30): no generated stubs.** Missing documentation (SA1600, SA1602, SA1611,
+  SA1615, SA1609, ...) can only be "fixed" by inserting placeholder text, which satisfies the rule but documents
+  nothing (SA1600 alone: ~28,000 findings in the three surveyed repos). StyleBro reports missing documentation only
+  where the fix is real: overrides and interface implementations get `/// <inheritdoc/>` (BRO1601). Everything else
+  in this block corrects existing documentation. File headers (SA1633-SA1641) are the SDK's IDE0073.
+- Done (one `DocumentationAnalyzer` + `DocumentationCodeFixProvider`, logic in `src/StyleBro.Analyzers/Documentation/`):
+  - **BRO1601** (SA1600 subset) `/// <inheritdoc/>` on undocumented overrides/implementations (implicit and explicit,
+    via `FindImplementationForInterfaceMember`), not in private types; inserted right before the member (above its
+    attributes, below a plain comment). **BRO1602** (SA1626) `///` that documents nothing -> `//` (+ space if text
+    follows, for BRO1002). Both work without doc generation (text-based).
+  - **BRO1603** (SA1629) period at the end of summary/remarks/param/typeparam/returns/value/exception text; after an
+    inline element; nested containers (`<remarks>` inside `<param>`, `<para>`, `<placeholder>`) judged by their own
+    text; deviations: `?`, `!`, `:` endings are fine; content ending in `<inheritdoc/>`/`<include/>` isn't checked
+    (OpenTelemetry uses `<param name="key"><inheritdoc cref=... path="/param"/></param>`: 72 false positives before).
+  - **BRO1604/BRO1605** (SA1623/SA1624) property summary verb matches the accessors; private/internal setter =
+    restricted, protected isn't (as StyleCop). Deviation: a bool summary may use the plain verb ("Gets the open
+    state"); only summaries that already say "whether" get "a value indicating whether" (StyleCop's fix writes
+    "Gets a value indicating whether gets the return value condition"). `init` properties and indexers skipped.
+  - **BRO1606/BRO1607** (SA1642/SA1643) standard constructor/static constructor/finalizer sentence first (+ a space;
+    StyleCop's fix has none), a near miss of it ("Initializes a new instance of the X class.") is replaced; private
+    constructors may say "Prevents a default instance ..."; records skipped; members without a summary aren't reported.
+  - **BRO1608** (SA1617) no `<returns>` on void methods/delegates; **BRO1609** (SA1651) `<placeholder>` unwrapped;
+    **BRO1610** (SA1627) empty `<remarks>` removed; **BRO1611** (SA1612) stale `<param>` renamed (exactly one stale
+    tag + one undocumented parameter) or removed, tags reordered to parameter order (only when each has its own lines).
+  - Not implemented in StyleCop 1.2 (never report): SA1628, SA1644. Dropped (would need placeholder text): SA1602,
+    SA1606, SA1609, SA1611, SA1614-SA1616, SA1618.
+- XML-based rules (BRO1603-BRO1611) need `GenerateDocumentationFile` (the compiler only parses docs then), like
+  StyleCop's SA0001. Messy and the parity projects enable it. Structured doc nodes on continuation lines include the
+  `///` in their span: locate elements by their first token (`DocumentationTags.GetStart`).
+- Parity sets `documentation-inherit`, `documentation`, `documentation-tags`, `documentation-params`. Enabling doc
+  generation in the parity projects showed a StyleCop quirk: with docs parsed, SA1516 misses a member whose `///`
+  directly follows the previous member (BRO1505 still reports it; documented in element-separation).
 
 ## BRO15xx: layout
 
@@ -358,6 +396,13 @@ suggest or push a release tag after each batch; mention it only when a release l
   `#region License` around every file header; the BOM stays), Serilog 5. All fixed in one pass, no new compile
   errors, second run clean. Open question: the private app has 1044 BRO1110 but StyleCop 1.1.118 counted 740 SA1111
   there, while the parity set (1.2 beta) is identical; likely a version difference, not yet checked.
+- **BRO1601-BRO1611** (2026-10-01): FFMpegCore 154, Polly 256, OpenTelemetry 400, private app 2920 (almost all
+  BRO1601 `<inheritdoc/>`), Newtonsoft.Json 1186, Serilog 404. All fixed in one pass, second run clean, no new
+  compile errors (doc edits only). Found and fixed on the way: BRO1603 put a period after nested `</remarks>` (Polly,
+  103) and flagged inherited text (OpenTelemetry, 72); BRO1604 turned bool summaries into non-sentences (Polly
+  polyfills, which suppress StyleCop with #pragma). Open question: Polly enforces SA1612 but has 22 out-of-order
+  `<param>` tags that BRO1611 reports (their texts are swapped too, so the names were mixed up; the fix only
+  reorders); why StyleCop stays quiet there wasn't checked.
 
 ## Known open questions
 
@@ -386,9 +431,8 @@ suggest or push a release tag after each batch; mention it only when a release l
      SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
      (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303), SA1302/SA1314
      (BRO1304/BRO1305), SA1303/SA1304/SA1307/SA1311 (BRO1306), SA1308/SA1310/SA1300 (BRO1307-BRO1309),
-     SA1110/SA1111/SA1127/SA1124/SA1123 (BRO1109-BRO1113). Left: SA1305 (Hungarian, no StyleCop fix), the
-     documentation rules (SA16xx; SA1600 alone has ~28,000 findings in the three surveyed repos), and the
-     untested rest.
+     SA1110/SA1111/SA1127/SA1124/SA1123 (BRO1109-BRO1113), documentation rules (BRO1601-BRO1611, see BRO16xx).
+     Left: SA1305 (Hungarian, no StyleCop fix), SA1613 (unnamed `<param>`), and the untested rest (77).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

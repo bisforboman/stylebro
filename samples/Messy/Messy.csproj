@@ -10,6 +10,9 @@
     <IsPackable>false</IsPackable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <!-- Documentation rules read '///' comments as XML, which the compiler only does when it generates documentation. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

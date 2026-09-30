@@ -19,3 +19,14 @@ BRO1110 | Readability | Warning  | ParenthesisPlacementAnalyzer
 BRO1111 | Readability | Warning  | ConstraintPlacementAnalyzer
 BRO1112 | Readability | Warning  | RegionsAnalyzer
 BRO1113 | Readability | Warning  | RegionsAnalyzer
+BRO1601 | Documentation | Warning  | DocumentationAnalyzer
+BRO1602 | Documentation | Warning  | DocumentationAnalyzer
+BRO1603 | Documentation | Warning  | DocumentationAnalyzer
+BRO1604 | Documentation | Warning  | DocumentationAnalyzer
+BRO1605 | Documentation | Warning  | DocumentationAnalyzer
+BRO1606 | Documentation | Warning  | DocumentationAnalyzer
+BRO1607 | Documentation | Warning  | DocumentationAnalyzer
+BRO1608 | Documentation | Warning  | DocumentationAnalyzer
+BRO1609 | Documentation | Warning  | DocumentationAnalyzer
+BRO1610 | Documentation | Warning  | DocumentationAnalyzer
+BRO1611 | Documentation | Warning  | DocumentationAnalyzer

@@ -51,6 +51,9 @@
             Name     = 'element-separation'
             Map      = @('SA1516=BRO1505')
             Expected = @(
+                # With documentation generated, StyleCop 1.2.0-beta.556 no longer reports a member whose '///' comment
+                # directly follows the previous member (no blank line); it did with documentation off. BRO1505 reports it either way.
+                'only StyleBro: BRO1505 Cases.cs(38,1)'
                 # BRO1505: the blank line also goes above a '///' doc comment; StyleCop's fix leaves that one out.
                 'StyleBro output only: Cases.cs: []'
                 # BRO1505: two members on one line: StyleBro adds a blank line and keeps the indentation; StyleCop's
@@ -213,6 +216,76 @@
             Name     = 'constraints-regions'
             Map      = @('SA1127=BRO1111', 'SA1124=BRO1112', 'SA1123=BRO1113')
             Expected = @(
+            )
+        }
+        @{
+            Name     = 'documentation-inherit'
+            Map      = @('SA1600=BRO1601', 'SA1626=BRO1602')
+            # StyleCop's SA1600 fix has no Fix All ('didn't return a Fix All action'), so only positions are compared.
+            CompareOutput = $false
+            Expected = @(
+                # BRO1601 reports missing documentation only for overrides and implementations ('/// <inheritdoc/>' is
+                # a real fix); a public method or an internal class without documentation would need written text.
+                'only StyleCop: BRO1601 Inherit.cs(56,21)'
+                'only StyleCop: BRO1601 Inherit.cs(67,20)'
+            )
+        }
+        @{
+            Name     = 'documentation'
+            Map      = @('SA1629=BRO1603', 'SA1623=BRO1604', 'SA1624=BRO1605')
+            Expected = @(
+                # Text ending with '?', '!' or ':' is a finished sentence; StyleCop turns it into 'question?.'.
+                'only StyleCop: BRO1603 Periods.cs(16,43)'
+                'only StyleCop: BRO1603 Periods.cs(37,40)'
+                'only StyleCop: BRO1603 Periods.cs(43,47)'
+                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!.</summary>]'
+                # A bool's summary may use the plain verb ('Gets the open state'); StyleCop requires 'a value indicating
+                # whether' and puts it in front of any text ('whether gets the return value condition').
+                'only StyleCop: BRO1604 Bools.cs(10,21)'
+                'only StyleCop: BRO1604 Bools.cs(7,21)'
+                'StyleBro output only: Bools.cs: [        /// <summary>Gets the return value condition.</summary>]'
+                'StyleBro output only: Bools.cs: [        /// <summary>Gets or sets the flag.</summary>]'
+                'StyleBro output only: Bools.cs: [        /// <summary>Gets the open state.</summary>]'
+                'StyleBro output only: Bools.cs: [        /// <summary>Gets a value indicating whether it is closed.</summary>]'
+                'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether gets the return value condition.</summary>]'
+                'StyleCop output only: Bools.cs: [        /// <summary>Gets or sets a value indicating whether gets or sets the flag.</summary>]'
+                'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether the open state.</summary>]'
+                'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether gets whether it is closed.</summary>]'
+                'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets is it closed.</summary>]'
+                'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets a value indicating whether is it closed.</summary>]'
+            )
+        }
+        @{
+            Name     = 'documentation-tags'
+            Map      = @('SA1642=BRO1606', 'SA1643=BRO1607', 'SA1617=BRO1608', 'SA1651=BRO1609')
+            Expected = @(
+                # StyleBro puts a space after the standard sentence; StyleCop's fix doesn't ('class.Creates').
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class. Initializes the static members.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct. Makes a point.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class. Makes one.</summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Creates a words object.</summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class.Initializes the static members.</summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class.Cleans up.</summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct.Makes a point.</summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class.Makes one.</summary>]'
+            )
+        }
+        @{
+            Name     = 'documentation-params'
+            Map      = @('SA1627=BRO1610', 'SA1612=BRO1611')
+            # StyleCop has no fix for SA1627 or SA1612; positions only. StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+                # StyleCop counts a stale tag when numbering positions, so after 'old' it reports 'b' as out of order;
+                # without the stale tag 'b' is where it belongs, so BRO1611 only reports 'old'.
+                'only StyleCop: BRO1611 Params.cs(62,26)'
             )
         }
     )

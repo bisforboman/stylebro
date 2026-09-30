@@ -26,6 +26,17 @@ public static class DiagnosticIds
     public const string FieldPrefix = "BRO1307";
     public const string FieldUnderscore = "BRO1308";
     public const string ElementPascalCase = "BRO1309";
+    public const string InheritDocumentation = "BRO1601";
+    public const string DocumentationSlashesInComment = "BRO1602";
+    public const string DocumentationEndsWithPeriod = "BRO1603";
+    public const string PropertySummaryWording = "BRO1604";
+    public const string PropertySummaryRestrictedSetter = "BRO1605";
+    public const string ConstructorSummary = "BRO1606";
+    public const string DestructorSummary = "BRO1607";
+    public const string VoidReturnDocumented = "BRO1608";
+    public const string PlaceholderElement = "BRO1609";
+    public const string EmptyRemarks = "BRO1610";
+    public const string ParameterTagsMatch = "BRO1611";
     public const string TrailingComma = "BRO1401";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
