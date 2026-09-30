@@ -39,6 +39,26 @@ internal static class Descriptors
         description: "Writes '[A, B]' as '[A]' and '[B]'. Replaces StyleCop SA1133.",
         helpLinkUri: HelpBase + DiagnosticIds.CombinedAttributes + ".md");
 
+    public static readonly DiagnosticDescriptor ConstantOnLeft = new(
+        id: DiagnosticIds.ConstantOnLeft,
+        title: "Constants should be on the right-hand side of comparisons",
+        messageFormat: "Put '{0}' on the right-hand side of the comparison",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'x == 1' reads more naturally than '1 == x'. Replaces StyleCop SA1131.",
+        helpLinkUri: HelpBase + DiagnosticIds.ConstantOnLeft + ".md");
+
+    public static readonly DiagnosticDescriptor DefaultValueConstructor = new(
+        id: DiagnosticIds.DefaultValueConstructor,
+        title: "Use default instead of a value type's default constructor",
+        messageFormat: "Use '{0}' instead",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'new int()' creates the default value; 'default(int)' says so. Replaces StyleCop SA1129.",
+        helpLinkUri: HelpBase + DiagnosticIds.DefaultValueConstructor + ".md");
+
     public static readonly DiagnosticDescriptor BlankLineBeforeOpenBrace = new(
         id: DiagnosticIds.BlankLineBeforeOpenBrace,
         title: "Opening braces should not be preceded by a blank line",

@@ -78,6 +78,16 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 - **BRO1102** (SA1133) combined attributes: `[A, B]` -> `[A]` + `[B]`, target repeated. Own line -> one line per
   attribute; shares a line with code -> `[A] [B]`. Like StyleCop, parameters/type parameters are not reported.
   Lists with comments between attributes are skipped (StyleCop's fix drops the comment).
+- **BRO1103** (SA1131) constant on the left of a comparison: swap operands, flip `<`/`>`/`<=`/`>=`. "Constant" as in
+  StyleCop (incl. `static readonly` fields). Only built-in operators and operators from the core library (same
+  assembly as `object`) are swapped; a type's own `==` may not be symmetric -> not reported (deviation). Same-precedence
+  left operand gets parentheses (`1 == 2 == b` -> `b == (1 == 2)`). Fix All is a bottom-up rewriter (nesting).
+- **BRO1104** (SA1129) `new T()` for value types -> `default(T)`, or like StyleCop `CancellationToken.None`,
+  `Guid.Empty`, `IntPtr/UIntPtr.Zero`, an enum's zero member; `default(T)` in parameter defaults (must be constant).
+  Not reported: explicit parameterless struct ctor (like StyleCop), type parameters and `new S();` statements
+  (deviations; StyleCop's fix for the statement doesn't compile). Needs the semantic model.
+- For both, StyleCop and StyleBro were run on the same probe files: positions and fixed output are identical except
+  the three documented deviations.
 - Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
@@ -125,7 +135,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   fixed in one pass, no new compile errors, second run clean, diffs reviewed by hand.
 - **BRO1501/BRO1502** (2026-09-30): 0 in the three StyleCop repos. First version flagged block-after-block too
   (22 of 23 real findings); StyleCop doesn't, so that was fixed. Now: FFMpegCore 2, Serilog 1, Newtonsoft.Json 0,
-  all standalone blocks after a statement; fixed, builds, second run clean. Hooking analyzers into a repo
+  all standalone blocks after a statement; fixed, builds, second run clean.
+- **BRO1103/BRO1104** (2026-09-30): 0 in Polly and OpenTelemetry. Private app: 1 BRO1104 on a target-typed
+  `new()` (`DateTime X { get; set; } = new();`), which StyleCop 1.1.118 predates and misses; the 1.2 beta reports it.
+  FFMpegCore 1, Serilog 6, Newtonsoft.Json 30. All fixed in one pass, builds, second run clean. Hooking analyzers into a repo
   without editing it: set the env var `CustomAfterMicrosoftCommonTargets` to a targets file with `<Analyzer>` items.
 
 ## Known open questions
@@ -150,7 +163,7 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
    and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
    - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
-   - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), ~~SA1509/SA1510~~ (BRO1501/BRO1502), SA1131, SA1129 (kept by
+   - Top StyleBro candidates: ~~SA1133~~ (BRO1102), ~~SA1106~~ (BRO1101), ~~SA1509/SA1510~~ (BRO1501/BRO1502), ~~SA1131~~ (BRO1103), ~~SA1129~~ (BRO1104) (kept by
      all 3 teams), SA1128, SA1005, SA1413, SA1122, SA1116/SA1117, blank-line rules (SA1516, SA1505, SA1515,
      SA1512, SA1518).
    - 107 rules untested yet, mostly documentation (SA16xx).

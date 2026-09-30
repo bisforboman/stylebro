@@ -17,6 +17,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1001](docs/rules/BRO1001.md) | Members should be ordered | SA1201-SA1204, SA1214 | Yes, with custom Fix All |
 | [BRO1101](docs/rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Yes |
 | [BRO1102](docs/rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Yes |
+| [BRO1103](docs/rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Yes |
+| [BRO1104](docs/rules/BRO1104.md) | Use default instead of a value type's default constructor | SA1129 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 

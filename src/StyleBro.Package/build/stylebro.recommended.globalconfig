@@ -19,6 +19,12 @@ dotnet_diagnostic.BRO1101.severity = warning
 # BRO1102: each attribute in its own brackets (SA1133)
 dotnet_diagnostic.BRO1102.severity = warning
 
+# BRO1103: constants on the right-hand side of comparisons (SA1131)
+dotnet_diagnostic.BRO1103.severity = warning
+
+# BRO1104: default instead of a value type's default constructor (SA1129)
+dotnet_diagnostic.BRO1104.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 
