@@ -111,7 +111,8 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static IEnumerable<ISymbol> GetBaseMembers(ISymbol member)
+    /// <summary>The members <paramref name="member"/> overrides or implements (explicitly or implicitly).</summary>
+    internal static IEnumerable<ISymbol> GetBaseMembers(ISymbol member)
     {
         switch (member)
         {

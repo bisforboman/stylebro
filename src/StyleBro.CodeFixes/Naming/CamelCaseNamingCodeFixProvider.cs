@@ -12,12 +12,17 @@ using Microsoft.CodeAnalysis.CodeFixes;
 
 namespace StyleBro.CodeFixes.Naming;
 
-/// <summary>Fix for BRO1301, BRO1302 and BRO1303: renames to the new name, everywhere the name is used.</summary>
+/// <summary>Fix for BRO1301-BRO1305: renames to the new name, everywhere the name is used.</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CamelCaseNamingCodeFixProvider))]
 public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
 {
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.VariableCasing, DiagnosticIds.ParameterCasing, DiagnosticIds.PrivateFieldNaming);
+        ImmutableArray.Create(
+            DiagnosticIds.VariableCasing,
+            DiagnosticIds.ParameterCasing,
+            DiagnosticIds.PrivateFieldNaming,
+            DiagnosticIds.InterfacePrefix,
+            DiagnosticIds.TypeParameterPrefix);
 
     public override FixAllProvider GetFixAllProvider() => RenameFixAllProvider.Instance;
 

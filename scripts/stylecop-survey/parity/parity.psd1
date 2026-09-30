@@ -152,5 +152,13 @@
                 'only StyleCop: BRO1303 Fields.cs(26,20)'
             )
         }
+        @{
+            Name     = 'naming-prefixes'
+            Map      = @('SA1302=BRO1304', 'SA1314=BRO1305')
+            # StyleCop's fixes for SA1302/SA1314 change nothing under 'dotnet format'; positions only.
+            CompareOutput = $false
+            Expected = @(
+            )
+        }
     )
 }

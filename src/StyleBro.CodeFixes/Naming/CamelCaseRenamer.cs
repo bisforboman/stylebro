@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -52,7 +53,8 @@ internal static class CamelCaseRenamer
                 if (token.Span != diagnostic.Location.SourceSpan
                     || token.Parent is not { } declaration
                     || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol
-                    || (symbol is IFieldSymbol && (strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)).Contains(symbol.Name))
+                    || (symbol is IFieldSymbol or INamedTypeSymbol
+                        && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
                     || await GetChangesAsync(solution, symbol, newName, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
                     continue;
@@ -117,6 +119,24 @@ internal static class CamelCaseRenamer
     }
 
     /// <summary>
+    /// Whether code can refer to the symbol by a string: a field by its name (GetField("_count")), a type by its name
+    /// or its qualified name (Type.GetType("App.Shape"), "App.Shape, App").
+    /// </summary>
+    private static bool IsInStrings(ISymbol symbol, HashSet<string> strings)
+    {
+        if (symbol is not INamedTypeSymbol)
+        {
+            return strings.Contains(symbol.Name);
+        }
+
+        var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
+        return strings.Any(s => pattern.IsMatch(s));
+    }
+
+    /// <summary>Symbols whose conflicts are checked by syntax over their member (<see cref="CamelCaseNames.CanRename"/>).</summary>
+    private static bool IsMemberScoped(ISymbol symbol) => symbol is ILocalSymbol or IParameterSymbol or IRangeVariableSymbol;
+
+    /// <summary>
     /// The edits that rename <paramref name="symbol"/> (and, for a parameter, the same-named parameters of its
     /// overrides and implementations), or null when one of them isn't safe to rename.
     /// </summary>
@@ -130,7 +150,11 @@ internal static class CamelCaseRenamer
         var symbols = new List<ISymbol> { symbol };
         if (symbol is IParameterSymbol parameter)
         {
-            await AddRelatedParametersAsync(solution, parameter, symbols, cancellationToken).ConfigureAwait(false);
+            await AddRelatedAsync(solution, parameter, parameter.ContainingSymbol, parameter.Ordinal, GetParameters, symbols, cancellationToken).ConfigureAwait(false);
+        }
+        else if (symbol is ITypeParameterSymbol { DeclaringMethod: { } method } typeParameter)
+        {
+            await AddRelatedAsync(solution, typeParameter, method, typeParameter.Ordinal, GetTypeParameters, symbols, cancellationToken).ConfigureAwait(false);
         }
 
         var result = new List<(string, TextChange)>();
@@ -138,7 +162,7 @@ internal static class CamelCaseRenamer
         {
             // A related parameter that can't be renamed safely keeps its name (it's then no longer reported either,
             // since the same conflict blocks its own rename); the reported symbol itself was checked by the analyzer.
-            if (!SymbolEqualityComparer.Default.Equals(current, symbol) && !await CanRenameAsync(current).ConfigureAwait(false))
+            if (!SymbolEqualityComparer.Default.Equals(current, symbol) && IsMemberScoped(current) && !await CanRenameAsync(current).ConfigureAwait(false))
             {
                 continue;
             }
@@ -148,9 +172,9 @@ internal static class CamelCaseRenamer
                 var tree = location.SourceTree!;
                 var root = await tree.GetRootAsync(cancellationToken).ConfigureAwait(false);
                 var declaration = root.FindToken(location.SourceSpan.Start).Parent;
-                // Fields were checked over their whole type by the analyzer (FieldNames.CanRename).
+                // Fields, types and type parameters were checked by their analyzers; references are checked below.
                 if (declaration is null
-                    || (current is not IFieldSymbol && !CamelCaseNames.CanRename(declaration, oldName, newName))
+                    || (IsMemberScoped(current) && !CamelCaseNames.CanRename(declaration, oldName, newName))
                     || !await TryAddAsync(solution.GetDocument(tree), location.SourceSpan, newName).ConfigureAwait(false))
                 {
                     return null;
@@ -166,11 +190,13 @@ internal static class CamelCaseRenamer
 
                 foreach (var reference in referenced.Locations)
                 {
-                    if (!reference.IsImplicit
-                        && !await TryAddAsync(
-                            reference.Document,
-                            reference.Location.SourceSpan,
-                            await GetReplacementAsync(current, reference.Document, reference.Location.SourceSpan, newName, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false))
+                    if (reference.IsImplicit)
+                    {
+                        continue;
+                    }
+
+                    var replacement = await GetReplacementAsync(current, reference.Document, reference.Location.SourceSpan, newName, cancellationToken).ConfigureAwait(false);
+                    if (replacement is null || !await TryAddAsync(reference.Document, reference.Location.SourceSpan, replacement).ConfigureAwait(false))
                     {
                         return null;
                     }
@@ -216,15 +242,22 @@ internal static class CamelCaseRenamer
 
     /// <summary>
     /// The text that replaces a reference: the new name, or for a field whose new name a local, parameter or other
-    /// symbol would hide at that spot, the qualified name ('this.count', or 'Type.count' for a static field).
+    /// symbol would hide at that spot, the qualified name ('this.count', or 'Type.count' for a static field). Null for
+    /// a type or type parameter whose new name already means something at that spot (the whole rename is skipped).
     /// </summary>
-    private static async Task<string> GetReplacementAsync(
+    private static async Task<string?> GetReplacementAsync(
         ISymbol symbol,
         Document document,
         TextSpan span,
         string newName,
         CancellationToken cancellationToken)
     {
+        if (symbol is INamedTypeSymbol or ITypeParameterSymbol)
+        {
+            var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+            return semanticModel is null || !semanticModel.LookupSymbols(span.Start, name: newName).IsEmpty ? null : newName;
+        }
+
         if (symbol is not IFieldSymbol field
             || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
             || root.FindToken(span.Start).Parent is not IdentifierNameSyntax name
@@ -252,13 +285,19 @@ internal static class CamelCaseRenamer
         };
     }
 
-    private static async Task AddRelatedParametersAsync(
+    /// <summary>
+    /// Adds the parameters (or type parameters) at the same position in the overrides and implementations of
+    /// <paramref name="member"/> that have the same name, recursively, so they are renamed together.
+    /// </summary>
+    private static async Task AddRelatedAsync(
         Solution solution,
-        IParameterSymbol parameter,
+        ISymbol item,
+        ISymbol member,
+        int ordinal,
+        Func<ISymbol, ImmutableArray<ISymbol>> getItems,
         List<ISymbol> symbols,
         CancellationToken cancellationToken)
     {
-        var member = parameter.ContainingSymbol;
         var related = new List<ISymbol>();
         related.AddRange(await SymbolFinder.FindOverridesAsync(member, solution, cancellationToken: cancellationToken).ConfigureAwait(false));
         if (member.ContainingType?.TypeKind == TypeKind.Interface)
@@ -268,25 +307,27 @@ internal static class CamelCaseRenamer
 
         foreach (var relatedMember in related)
         {
-            var parameters = relatedMember switch
+            var items = getItems(relatedMember);
+            if (ordinal < items.Length
+                && items[ordinal] is { } relatedItem
+                && relatedItem.Name == item.Name
+                && relatedItem.Locations.Any(l => l.IsInSource)
+                && !symbols.Contains(relatedItem, SymbolEqualityComparer.Default))
             {
-                IMethodSymbol method => method.Parameters,
-                IPropertySymbol property => property.Parameters,
-                _ => ImmutableArray<IParameterSymbol>.Empty,
-            };
-
-            if (parameter.Ordinal < parameters.Length
-                && parameters[parameter.Ordinal] is { } relatedParameter
-                && relatedParameter.Name == parameter.Name
-                && relatedParameter.Locations.Any(l => l.IsInSource)
-                && !symbols.Contains(relatedParameter, SymbolEqualityComparer.Default))
-            {
-                symbols.Add(relatedParameter);
-                await AddRelatedParametersAsync(solution, relatedParameter, symbols, cancellationToken).ConfigureAwait(false);
+                symbols.Add(relatedItem);
+                await AddRelatedAsync(solution, relatedItem, relatedMember, ordinal, getItems, symbols, cancellationToken).ConfigureAwait(false);
             }
         }
     }
 
+    private static ImmutableArray<ISymbol> GetParameters(ISymbol member) => member switch
+    {
+        IMethodSymbol method => method.Parameters.CastArray<ISymbol>(),
+        IPropertySymbol property => property.Parameters.CastArray<ISymbol>(),
+        _ => ImmutableArray<ISymbol>.Empty,
+    };
 
+    private static ImmutableArray<ISymbol> GetTypeParameters(ISymbol member) =>
+        member is IMethodSymbol method ? method.TypeParameters.CastArray<ISymbol>() : ImmutableArray<ISymbol>.Empty;
     private static string GetFileKey(Document document) => document.FilePath ?? document.Id.Id.ToString();
 }

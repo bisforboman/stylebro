@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 21 rules; 172 unit tests (incl. every doc example), all green (2026-09-30).
+(see the log below) and 23 rules; 195 unit tests (incl. every doc example), all green (2026-09-30).
 0.1.0-alpha.3 (18 rules) is on nuget.org.
 
 ## Layout
@@ -163,8 +163,18 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   and its warning stays (deliberate exception to design rule 1: the analyzer can't see other projects, and the rename
   compiles but breaks at run time). Found because Polly's tests read `_blockedUntil`/`_registry` via GetField: the
   first run compiled cleanly but failed 7 tests. Test helper `VerifyNotFixedAsync`.
-- Remaining naming: SA1300/SA1302/SA1303/SA1304/SA1307/SA1311/SA1314 (PascalCase for types, members, constants,
-  static readonly, public fields; `I` for interfaces; `T` for type parameters), SA1308/SA1310, protected fields.
+- **BRO1304** (SA1302, interfaces begin with `I`) and **BRO1305** (SA1314, type parameters begin with `T`)
+  (`Naming/PrefixNames.cs`, `PrefixNamingAnalyzer`, same renamer). Like StyleCop only the first letter is checked
+  (`Item` interface, `Type` type parameter are fine). `Shape`/`iShape`/`_Shape` -> `IShape`; `Item` -> `TItem`,
+  `t` -> `T`, `tKey` -> `TKey`. Analyzer skips: a source type named the new name anywhere in the compilation, or
+  `LookupSymbols(newName)` non-empty at the declaration (this covers members, type parameters and imported types in
+  scope; the explicit container walk was redundant and removed after mutation testing); type parameters inherited
+  from a base method (cascade like parameters, generalized `AddRelatedAsync`); partial methods. Fix: aborts when
+  any reference would see something else under the new name (warning stays; e.g. `using System.Collections;` in
+  another file + interface `Enumerable`), and interfaces get the string guard (name or qualified name in a string).
+  Parity: 14/14 positions. Files aren't renamed (`dotnet format` can't).
+- Remaining naming: SA1300/SA1303/SA1304/SA1307/SA1311 (PascalCase for types, members, constants, static readonly,
+  public fields), SA1308/SA1310, protected fields.
 
 ## BRO15xx: layout
 
@@ -281,6 +291,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
   `GlobalAnalyzerConfigFiles` added from `CustomAfterMicrosoftCommonTargets` is too late (the SDK has already turned
   them into `EditorConfigFiles`); add `EditorConfigFiles` directly. The NuGet package isn't affected (its targets are
   imported earlier).
+- **BRO1304/BRO1305** (2026-09-30): 0 everywhere except Newtonsoft.Json (14 single-letter type parameters,
+  `U` -> `TU`); fixed in one pass, compiles, second run clean.
 
 ## Known open questions
 
@@ -307,8 +319,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
    - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
      (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
      SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
-     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303). Left: naming
-     (SA1300, SA1302-SA1305, SA1307, SA1308, SA1310, SA1311, SA1314), 107 untested (50 SA16xx).
+     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303), SA1302/SA1314 (BRO1304/BRO1305). Left:
+     naming (SA1300, SA1303-SA1305, SA1307, SA1308, SA1310, SA1311), 107 untested (50 SA16xx).
    - 107 rules untested yet, mostly documentation (SA16xx).
    - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.

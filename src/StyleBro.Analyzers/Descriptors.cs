@@ -145,6 +145,26 @@ internal static class Descriptors
             + "Replaces StyleCop SA1306 and SA1309 for private fields.",
         helpLinkUri: HelpBase + DiagnosticIds.PrivateFieldNaming + ".md");
 
+    public static readonly DiagnosticDescriptor InterfacePrefix = new(
+        id: DiagnosticIds.InterfacePrefix,
+        title: "Interface names should begin with I",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Interfaces are named 'IShape', not 'Shape'. Replaces StyleCop SA1302.",
+        helpLinkUri: HelpBase + DiagnosticIds.InterfacePrefix + ".md");
+
+    public static readonly DiagnosticDescriptor TypeParameterPrefix = new(
+        id: DiagnosticIds.TypeParameterPrefix,
+        title: "Type parameter names should begin with T",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Type parameters are named 'T' or 'TItem', not 'Item'. Replaces StyleCop SA1314.",
+        helpLinkUri: HelpBase + DiagnosticIds.TypeParameterPrefix + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",
