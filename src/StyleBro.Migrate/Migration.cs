@@ -113,6 +113,13 @@ internal static class Migration
             lines.Add($"dotnet_diagnostic.{id}.severity = {Name(severity)}");
         }
 
+        // StyleCop's SX1309 (private fields begin with '_') is BRO1303 with '_camelCase'.
+        if (result.FieldStyle == "_camelCase" && setup.IsOn("SX1309")
+            && !lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.PrivateFieldNaming}.severity = none"))
+        {
+            result.Covered.Add("SX1309");
+        }
+
         AddMemberOrder(setup, lines);
         lines.Add($"stylebro_private_field_naming = {result.FieldStyle}");
         AddDocumentationScope(setup, lines);
@@ -373,6 +380,12 @@ internal static class Migration
     /// </summary>
     private static string InferFieldStyle(StyleCopSetup setup, string root, List<string> notes)
     {
+        if (setup.IsOn("SX1309"))
+        {
+            notes.Add("SX1309 (fields begin with an underscore) is on, so BRO1303 uses '_camelCase'.");
+            return "_camelCase";
+        }
+
         var (underscore, plain) = CountPrivateFields(root);
         var style = !setup.IsOn("SA1309") && underscore > plain ? "_camelCase" : "camelCase";
         notes.Add($"Private fields: {underscore} named '_field', {plain} named 'field'; SA1309 is {(setup.IsOn("SA1309") ? "on" : "off")}, so BRO1303 uses '{style}'.");
@@ -424,6 +437,13 @@ internal static class Migration
             lines.Add($"indent_style = {(useTabs.GetBoolean() ? "tab" : "space")}");
         }
 
+        // UTF-8 with a byte order mark (SA1412, off by default): 'dotnet format' writes it with this setting.
+        if (setup.IsOn("SA1412"))
+        {
+            result.Covered.Add("SA1412");
+            lines.Add("charset = utf-8-bom");
+        }
+
         // Braces.
         Rule("IDE0011", "SA1503", "SA1519", "SA1520");
         lines.Add($"csharp_prefer_braces = {(setup.IsOn("SA1503") ? "true" : setup.IsOn("SA1519") || setup.IsOn("SA1520") ? "when_multiline" : "false")}");
@@ -467,8 +487,9 @@ internal static class Migration
         Rule("IDE2003", "SA1513");
         lines.Add($"dotnet_style_allow_statement_immediately_after_block_experimental = {Bool(!setup.IsOn("SA1513"))}");
 
-        // 'this.' qualification.
+        // 'this.' qualification: required (SA1101, IDE0009) or removed (StyleCop's SX1101, IDE0003).
         Rule("IDE0009", "SA1101");
+        Rule("IDE0003", "SX1101");
         foreach (var kind in new[] { "field", "property", "method", "event" })
         {
             lines.Add($"dotnet_style_qualification_for_{kind} = {Bool(setup.IsOn("SA1101"))}");

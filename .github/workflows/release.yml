@@ -32,7 +32,9 @@ jobs:
         run: ./scripts/verify-format.ps1
 
       - name: Pack
-        run: dotnet pack src/StyleBro.Package --configuration Release -p:Version=$VERSION --output artifacts
+        run: |
+          dotnet pack src/StyleBro.Package --configuration Release -p:Version=$VERSION --output artifacts
+          dotnet pack src/StyleBro.Migrate --configuration Release -p:Version=$VERSION --output artifacts
 
       # Request the temporary key right before pushing: it is valid for one hour.
       - name: NuGet login

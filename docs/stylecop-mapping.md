@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 51 SDK, 51 StyleBro (51 done), 44 drop, 45 not yet done, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 52 StyleBro (52 done), 44 drop, 44 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -72,7 +72,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1640](skipped-rules.md#sa1640) | File header should have valid company text | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1641](skipped-rules.md#sa1641) | File header company name text should match | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1115](skipped-rules.md#sa1115) | Parameter should follow comma | on / off / off | 0 / 0 / 0 | candidate |
-| [SA1412](skipped-rules.md#sa1412) | Store files as UTF-8 with byte order mark | off / off / off | 876 / 325 / 2,581 | SDK not on yet |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -183,7 +182,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1409 | Remove unnecessary code | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed). ([details](skipped-rules.md#sa1409)) |
 | SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`. ([details](skipped-rules.md#sa1410)) |
 | SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `[Obsolete()]` -> `[Obsolete]`. ([details](skipped-rules.md#sa1411)) |
-| SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 876 / 325 / 2,581 | fixed | Not yet: the SDK can fix it, but it isn't turned on. Off by default. `charset = utf-8-bom` makes `dotnet format` write the BOM (measured), but neither the preset nor stylebro-migrate sets it: with the rule on, nearly every file changes (876 / 325 / 2,581). ([details](skipped-rules.md#sa1412)) |
+| SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 876 / 325 / 2,581 | fixed | SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on |
 | SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported |
 
 ### Naming
@@ -206,8 +205,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1313 | Parameter names should begin with lower-case letter | on | yes | on / off / off | 0 / 0 / 90 | not fixed | StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name` |
 | SA1314 | Type parameter names should begin with T | on | yes | on / off / off | 0 / 0 / 0 | not fixed | StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop |
 | SA1316 (1.2 beta) | Tuple element names should use correct casing | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing). ([details](skipped-rules.md#sa1316)) |
-| SX1309 | Field names should begin with underscore | off | yes | off / off / off | 842 / 0 / 32 |  | Variant: Private fields begin with `_`: what BRO1303 does with `stylebro_private_field_naming = _camelCase`. stylebro-migrate infers `_camelCase` from the code when SA1309 is off, but doesn't read SX1309 itself. ([details](skipped-rules.md#sx1309)) |
-| SX1309S | Static field names should begin with underscore | off | yes | off / off / off | 19 / 1 / 0 |  | Variant: Static fields begin with `_`. BRO1303 covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule. ([details](skipped-rules.md#sx1309s)) |
+| SX1309 | Field names should begin with underscore | off | yes | off / off / off | 842 / 0 / 32 |  | StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which stylebro-migrate sets when SX1309 is on |
+| SX1309S | Static field names should begin with underscore | off | yes | off / off / off | 19 / 1 / 0 |  | Variant: Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule. ([details](skipped-rules.md#sx1309s)) |
 
 ### Ordering
 
@@ -276,7 +275,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1141 (1.2 beta) | Use tuple syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`. ([details](skipped-rules.md#sa1141)) |
 | SA1142 (1.2 beta) | Refer to tuple fields by name | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `t.Item1` -> `t.Name` when the element has a name. ([details](skipped-rules.md#sa1142)) |
 | SA1414 (1.2 beta) | Tuple types in signatures should have element names | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person. ([details](skipped-rules.md#sa1414)) |
-| SX1101 | Do not prefix local calls with 'this.' | off | yes | off / on / off | 6,123 / 0 / 6 |  | Variant: The opposite of SA1101 (no `this.`). The SDK covers it (IDE0003 with `dotnet_style_qualification_for_* = false`, which the preset sets), but stylebro-migrate doesn't map SX ids, so its report lists it as not covered. ([details](skipped-rules.md#sx1101)) |
+| SX1101 | Do not prefix local calls with 'this.' | off | yes | off / on / off | 6,123 / 0 / 6 |  | SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; stylebro-migrate turns IDE0003 on when SX1101 is on |
 
 ### Spacing
 

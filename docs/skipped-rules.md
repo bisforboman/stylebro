@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-95 rules: 42 candidate, 3 SDK not on yet, 34 drop, 10 not in StyleCop, 4 variant, 2 n/a.
+92 rules: 42 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -67,7 +67,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1641](#sa1641) | File header company name text should match | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1206](#sa1206) | Declaration keywords should follow order | SDK not on yet | on / on / on | 0 / 0 / 0 |
 | [SA1207](#sa1207) | Protected should come before internal | SDK not on yet | on / on / on | 0 / 0 / 0 |
-| [SA1412](#sa1412) | Store files as UTF-8 with byte order mark | SDK not on yet | off / off / off | 876 / 325 / 2,581 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
 | [SA1305](#sa1305) | Field names should not use Hungarian notation | drop | off / off / off | 82 / 1 / 14 |
@@ -113,8 +112,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1644](#sa1644) | Documentation headers should not contain blank lines | not in StyleCop | off / on / off | 0 / 0 / 0 |
 | [SA1650](#sa1650) | Element documentation should be spelled correctly | not in StyleCop | off / on / off | 0 / 0 / 0 |
 | [SA1119_p](#sa1119_p) | Statement should not use unnecessary parenthesis | variant | on / off / on | 0 / 0 / 0 |
-| [SX1101](#sx1101) | Do not prefix local calls with 'this.' | variant | off / on / off | 6,123 / 0 / 6 |
-| [SX1309](#sx1309) | Field names should begin with underscore | variant | off / off / off | 842 / 0 / 32 |
 | [SX1309S](#sx1309s) | Static field names should begin with underscore | variant | off / off / off | 19 / 1 / 0 |
 | [SA0001](#sa0001) | XML comment analysis disabled | n/a | on / off / off | 0 / 0 / 0 |
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
@@ -562,16 +559,6 @@ Ordering rule. StyleCop: on by default, has a code fix; SDK check: fixed. Teams 
 **Why:** IDE0036 fixes `internal protected` -> `protected internal` (measured); same catch as SA1206.
 
 **To revisit:** Decide together with SA1206.
-
-<a id="sa1412"></a>
-
-### SA1412: Store files as UTF-8 with byte order mark
-
-Maintainability rule. StyleCop: off by default, has a code fix; SDK check: fixed. Teams keeping it on (OTel / Polly / App): off / off / off. Diagnostics with every rule on (OTel / Polly / App): 876 / 325 / 2,581.
-
-**Why:** Off by default. `charset = utf-8-bom` makes `dotnet format` write the BOM (measured), but neither the preset nor stylebro-migrate sets it: with the rule on, nearly every file changes (876 / 325 / 2,581).
-
-**To revisit:** stylebro-migrate: write `charset = utf-8-bom` when SA1412 is on (a team that enforces it already has BOMs). One line.
 
 ## Dropped: no safe automatic fix
 
@@ -1029,33 +1016,13 @@ Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it 
 
 **To revisit:** Nothing separate to do.
 
-<a id="sx1101"></a>
-
-### SX1101: Do not prefix local calls with 'this.'
-
-Readability rule. StyleCop: off by default, has a code fix. Teams keeping it on (OTel / Polly / App): off / on / off. Diagnostics with every rule on (OTel / Polly / App): 6,123 / 0 / 6.
-
-**Why:** The opposite of SA1101 (no `this.`). The SDK covers it (IDE0003 with `dotnet_style_qualification_for_* = false`, which the preset sets), but stylebro-migrate doesn't map SX ids, so its report lists it as not covered.
-
-**To revisit:** stylebro-migrate: when SX1101 is on, turn IDE0003 on (warning). One line plus a test.
-
-<a id="sx1309"></a>
-
-### SX1309: Field names should begin with underscore
-
-Naming rule. StyleCop: off by default, has a code fix. Teams keeping it on (OTel / Polly / App): off / off / off. Diagnostics with every rule on (OTel / Polly / App): 842 / 0 / 32.
-
-**Why:** Private fields begin with `_`: what BRO1303 does with `stylebro_private_field_naming = _camelCase`. stylebro-migrate infers `_camelCase` from the code when SA1309 is off, but doesn't read SX1309 itself.
-
-**To revisit:** stylebro-migrate: SX1309 on -> `_camelCase` directly, and count it as covered.
-
 <a id="sx1309s"></a>
 
 ### SX1309S: Static field names should begin with underscore
 
 Naming rule. StyleCop: off by default, has a code fix. Teams keeping it on (OTel / Polly / App): off / off / off. Diagnostics with every rule on (OTel / Polly / App): 19 / 1 / 0.
 
-**Why:** Static fields begin with `_`. BRO1303 covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule.
+**Why:** Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule.
 
 **To revisit:** With SX1309; decide whether `_camelCase` should extend to private static readonly fields.
 

@@ -111,8 +111,6 @@
             Revisit = 'Only when the empty parameter list isn''t needed for overload resolution (semantic model). Small; consider doing with SA1130.' }
         SA1411 = @{ Status = 'Candidate'; Why = 'Not done yet. `[Obsolete()]` -> `[Obsolete]`.'
             Revisit = 'Syntax-only. Small.' }
-        SA1412 = @{ Status = 'SdkLater'; Why = 'Off by default. `charset = utf-8-bom` makes `dotnet format` write the BOM (measured), but neither the preset nor stylebro-migrate sets it: with the rule on, nearly every file changes (876 / 325 / 2,581).'
-            Revisit = 'stylebro-migrate: write `charset = utf-8-bom` when SA1412 is on (a team that enforces it already has BOMs). One line.' }
         SA1414 = @{ Status = 'Drop'; Why = 'StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.'
             Revisit = 'Nothing automatic.' }
 
@@ -215,11 +213,7 @@
         # ---- Variants ----------------------------------------------------------------------------------------------
         SA1119_p = @{ Status = 'Variant'; Why = 'SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047.'
             Revisit = 'Nothing separate to do.' }
-        SX1101 = @{ Status = 'Variant'; Why = 'The opposite of SA1101 (no `this.`). The SDK covers it (IDE0003 with `dotnet_style_qualification_for_* = false`, which the preset sets), but stylebro-migrate doesn''t map SX ids, so its report lists it as not covered.'
-            Revisit = 'stylebro-migrate: when SX1101 is on, turn IDE0003 on (warning). One line plus a test.' }
-        SX1309 = @{ Status = 'Variant'; Why = 'Private fields begin with `_`: what BRO1303 does with `stylebro_private_field_naming = _camelCase`. stylebro-migrate infers `_camelCase` from the code when SA1309 is off, but doesn''t read SX1309 itself.'
-            Revisit = 'stylebro-migrate: SX1309 on -> `_camelCase` directly, and count it as covered.' }
-        SX1309S = @{ Status = 'Variant'; Why = 'Static fields begin with `_`. BRO1303 covers private static non-readonly fields; `static readonly` fields are BRO1306''s (PascalCase), so a team using `_` for those has no StyleBro rule.'
+        SX1309S = @{ Status = 'Variant'; Why = 'Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306''s (PascalCase), so a team using `_` for those has no StyleBro rule.'
             Revisit = 'With SX1309; decide whether `_camelCase` should extend to private static readonly fields.' }
     }
 

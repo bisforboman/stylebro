@@ -35,7 +35,7 @@ internal sealed record Scope(string File, string Section, IReadOnlyDictionary<st
 /// </summary>
 internal sealed class StyleCopSetup
 {
-    private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(SA\d{4})\.severity$", RegexOptions.IgnoreCase);
+    private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*)\.severity$", RegexOptions.IgnoreCase);
     private static readonly Regex PackageVersion = new(@"Include=""StyleCop\.Analyzers""[^>]*?Version=""([^""]+)""|Include=""StyleCop\.Analyzers""[^>]*>\s*<Version>([^<]+)</Version>", RegexOptions.IgnoreCase);
     private static readonly Regex DocumentationFile = new(@"<GenerateDocumentationFile>\s*true\s*<|<DocumentationFile>", RegexOptions.IgnoreCase);
     private static readonly Regex CategoryKey = new(@"^dotnet_analyzer_diagnostic\.category-StyleCop\.CSharp\.(\w+)\.severity$", RegexOptions.IgnoreCase);
@@ -231,7 +231,7 @@ internal sealed class StyleCopSetup
     {
         var sections = new List<(string Section, Dictionary<string, Severity> ByRule, Dictionary<string, Severity> ByCategory)>();
         (string Section, Dictionary<string, Severity> ByRule, Dictionary<string, Severity> ByCategory)? current =
-            global ? (string.Empty, new(), new()) : null;
+            global ? (string.Empty, new(StringComparer.OrdinalIgnoreCase), new()) : null;
         foreach (var raw in File.ReadAllLines(file))
         {
             var line = raw.Trim();
@@ -244,7 +244,7 @@ internal sealed class StyleCopSetup
             {
                 AddCurrent();
                 var section = line.Trim('[', ']');
-                current = global || MayApplyToCSharp(section) ? (section, new(), new()) : null;
+                current = global || MayApplyToCSharp(section) ? (section, new(StringComparer.OrdinalIgnoreCase), new()) : null;
                 continue;
             }
 
@@ -263,7 +263,7 @@ internal sealed class StyleCopSetup
 
             if (DiagnosticKey.Match(key) is { Success: true } rule)
             {
-                target.ByRule[rule.Groups[1].Value.ToUpperInvariant()] = severity;
+                target.ByRule[rule.Groups[1].Value] = severity;
             }
             else if (CategoryKey.Match(key) is { Success: true } category)
             {
@@ -311,7 +311,7 @@ internal sealed class StyleCopSetup
             {
                 var id = (string?)rule.Attribute("Id");
                 var action = (string?)rule.Attribute("Action");
-                if (id is not null && id.StartsWith("SA", StringComparison.Ordinal) && action is not null && ParseSeverity(action) is { } severity)
+                if (id is not null && (id.StartsWith("SA", StringComparison.Ordinal) || id.StartsWith("SX", StringComparison.Ordinal)) && action is not null && ParseSeverity(action) is { } severity)
                 {
                     result[id] = severity;
                 }

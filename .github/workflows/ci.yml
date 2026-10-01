@@ -23,7 +23,9 @@ jobs:
         run: ./scripts/verify-format.ps1
 
       - name: Pack
-        run: dotnet pack src/StyleBro.Package --output artifacts
+        run: |
+          dotnet pack src/StyleBro.Package --output artifacts
+          dotnet pack src/StyleBro.Migrate --output artifacts
 
       - uses: actions/upload-artifact@v7
         with:

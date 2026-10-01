@@ -82,7 +82,8 @@ To opt out of the preset and configure everything yourself: `<StyleBroPreset>non
 `stylecop.json`) and writes matching StyleBro and SDK settings into its `.editorconfig` files, so the switch doesn't
 reformat code StyleCop was happy with. It also carries `#pragma warning disable SA…` and `[SuppressMessage]`
 suppressions over to the replacing rules, and lists the StyleCop rules nothing enforces any more.
-See [docs/migrating.md](docs/migrating.md).
+`dotnet tool install --global StyleBro.Migrate --prerelease`, then `stylebro-migrate path/to/repo`. See
+[docs/migrating.md](docs/migrating.md).
 
 ## Repository layout
 
@@ -109,5 +110,4 @@ Roslyn is pinned to 4.8.0 so the package loads in the .NET 8 SDK / VS 17.8 and n
 ## Roadmap
 
 1. More StyleCop rules with safe fixes (the candidates in [docs/skipped-rules.md](docs/skipped-rules.md))
-2. Publish `stylebro-migrate` as a .NET tool
-3. Baseline support: fail only on new violations in legacy codebases
+2. Baseline support: fail only on new violations in legacy codebases

@@ -348,6 +348,28 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void StyleCopsAlternativeRules_AreMapped()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1101.severity = none\ndotnet_diagnostic.SX1101.severity = warning\ndotnet_diagnostic.SA1309.severity = none\ndotnet_diagnostic.SX1309.severity = warning\ndotnet_diagnostic.SA1412.severity = warning\n");
+        Write("C.cs", "class C { private int count; private int other; }"); // the code would say camelCase; SX1309 wins
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("dotnet_diagnostic.IDE0003.severity = warning", result.Lines);
+        Assert.Contains("dotnet_diagnostic.IDE0009.severity = none", result.Lines);
+        Assert.Contains("stylebro_private_field_naming = _camelCase", result.Lines);
+        Assert.Contains("charset = utf-8-bom", result.Lines);
+        Assert.Contains("SX1101", result.Covered);
+        Assert.Contains("SX1309", result.Covered);
+        Assert.Contains("SA1412", result.Covered);
+    }
+
+    [Fact]
+    public void CharsetIsLeftAlone_WhenSA1412IsOff()
+    {
+        Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("charset", StringComparison.Ordinal));
+    }
+    [Fact]
     public void PrivateFieldStyle_IsInferredFromTheCode()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1309.severity = none\n");

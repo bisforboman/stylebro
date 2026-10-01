@@ -117,7 +117,7 @@ SA1408,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed o
 SA1409,Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed).
 SA1410,Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`.
 SA1411,Not yet: StyleBro candidate. Not done yet. `[Obsolete()]` -> `[Obsolete]`.
-SA1412,"Not yet: the SDK can fix it, but it isn't turned on. Off by default. `charset = utf-8-bom` makes `dotnet format` write the BOM (measured), but neither the preset nor stylebro-migrate sets it: with the rule on, nearly every file changes (876 / 325 / 2,581)."
+SA1412,SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on
 SA1413,StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported
 SA1414,Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.
 SA1500,SDK: IDE0055 (`csharp_new_line_before_open_brace = all`)
@@ -193,6 +193,6 @@ SA1648,Drop: `<inheritdoc/>` where there is nothing to inherit: the fix is real 
 SA1649,Drop: Renaming files isn't something `dotnet format` can do.
 SA1650,Drop: StyleCop never reports it. Off by default and no diagnostic on misspelled words (probed).
 SA1651,"StyleBro **BRO1609** (done), same results and output as StyleCop"
-SX1101,"Variant: The opposite of SA1101 (no `this.`). The SDK covers it (IDE0003 with `dotnet_style_qualification_for_* = false`, which the preset sets), but stylebro-migrate doesn't map SX ids, so its report lists it as not covered."
-SX1309,"Variant: Private fields begin with `_`: what BRO1303 does with `stylebro_private_field_naming = _camelCase`. stylebro-migrate infers `_camelCase` from the code when SA1309 is off, but doesn't read SX1309 itself."
-SX1309S,"Variant: Static fields begin with `_`. BRO1303 covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule."
+SX1101,SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; stylebro-migrate turns IDE0003 on when SX1101 is on
+SX1309,"StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which stylebro-migrate sets when SX1309 is on"
+SX1309S,"Variant: Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule."

@@ -6,9 +6,13 @@ but most teams have changed some of StyleCop's defaults anyway. `stylebro-migrat
 and writes the matching settings.
 
 ```
-dotnet run --project src/StyleBro.Migrate -- path/to/repo           # dry run: prints the report and the settings
-dotnet run --project src/StyleBro.Migrate -- path/to/repo --write   # writes them
+dotnet tool install --global StyleBro.Migrate --prerelease
+stylebro-migrate path/to/repo           # dry run: prints the report and the settings
+stylebro-migrate path/to/repo --write   # writes them
 ```
+
+The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version. From a clone of
+this repository: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
 Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `dotnet format`.
 
@@ -27,6 +31,8 @@ Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run 
 - Whether any project sets `GenerateDocumentationFile`. Without it the build doesn't parse XML documentation and
   StyleCop's rules that read it never run (it reports SA0001 instead), but `dotnet format` does parse it. So the
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.
+- StyleCop's alternative rules: SX1101 (no `this.`) turns on the SDK's IDE0003, SX1309 (fields begin with `_`) sets
+  BRO1303 to `_camelCase`, and SA1412 (UTF-8 with BOM) writes `charset = utf-8-bom`.
 - `stylecop.json`: `elementOrder`, `usingDirectivesPlacement`, `systemUsingDirectivesFirst`,
   `blankLinesBetweenUsingGroups`, `allowBuiltInTypeAliases`, indentation, and the file header settings.
 
