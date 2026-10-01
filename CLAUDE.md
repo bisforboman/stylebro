@@ -16,7 +16,8 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 44 rules; 251 unit tests (incl. every doc example), all green (2026-09-30).
+(see the log below) and 44 rules; 275 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+`stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.3 (18 rules) is on nuget.org.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
@@ -30,6 +31,9 @@ suggest or push a release tag after each batch; mention it only when a release l
 - `src/StyleBro.CodeFixes`: netstandard2.0, Workspaces, code fixes + Fix All providers. References Analyzers.
 - `src/StyleBro.Package`: packs both DLLs into `analyzers/dotnet/cs`, plus `build/StyleBro.Analyzers.targets`
   that adds `stylebro.recommended.globalconfig` (global_level -1; opt out with `<StyleBroPreset>none</StyleBroPreset>`).
+- `src/StyleBro.Migrate`: net8.0 console tool `stylebro-migrate` (PackAsTool, not published yet), see "Migration tool".
+  References StyleBro.Analyzers (reads every rule's "Replaces StyleCop SAxxxx" from its description) and embeds
+  `scripts/stylecop-survey/data/inventory-1.2.0-beta.556.csv` and `data/mapping.csv` (written by New-Mapping.ps1).
 - `tests/StyleBro.Tests`: xunit + Microsoft.CodeAnalysis.CSharp.CodeFix.Testing 1.1.2 (`DefaultVerifier`).
 - `samples/Messy`: dotnet format integration sample. `Input/*.cs` is copied to `Generated/` (gitignored),
   formatted, compared with `Expected/`, then a second run with `--verify-no-changes` must pass.
@@ -138,8 +142,9 @@ suggest or push a release tag after each batch; mention it only when a release l
   comments on their own line/directives, and a trailing comment when code follows the token on its line.
 - **BRO1111** (SA1127) each `where` on its own line, indented one unit deeper than the name's line; for an
   expression-bodied member the `=>` after the last constraint moves too (like StyleCop's fix).
-- **BRO1112** (SA1124, regions between members/types; OFF in the preset like StyleCop's default) and **BRO1113**
-  (SA1123, regions inside member bodies): the fix removes each `#region`/`#endregion` line pair, one edit per run of
+- **BRO1112** (SA1124, regions between members/types; OFF in the preset although StyleCop has SA1124 ON by default (both inventories; the earlier "like StyleCop" was wrong)) and **BRO1113**
+  (SA1123, regions inside a `{ }` block; a region in an expression body, e.g. between switch-expression arms after
+  `=>`, is SA1124 in StyleCop 1.2, probed; the private app had one, StyleCop quiet because SA1124 is off there): the fix removes each `#region`/`#endregion` line pair, one edit per run of
   removed lines, and drops a neighboring blank line that would double a blank line, follow `{` or precede `}`. A run
   at the end of the file takes the preceding line break along. Removing regions lets BRO1001 see the type, so a
   region-heavy codebase needs a second `dotnet format` run (documented in BRO1112.md).
@@ -238,7 +243,9 @@ suggest or push a release tag after each batch; mention it only when a release l
   in this block corrects existing documentation. File headers (SA1633-SA1641) are the SDK's IDE0073.
 - Done (one `DocumentationAnalyzer` + `DocumentationCodeFixProvider`, logic in `src/StyleBro.Analyzers/Documentation/`):
   - **BRO1601** (SA1600 subset) `/// <inheritdoc/>` on undocumented overrides/implementations (implicit and explicit,
-    via `FindImplementationForInterfaceMember`), not in private types; inserted right before the member (above its
+    via `FindImplementationForInterfaceMember`); which members by effective accessibility, like stylecop.json:
+    `stylebro_document_exposed_elements`/`_internal_elements`/`_private_elements` (true/true/false; Polly sets
+    documentInternalElements false, and BRO1601 added 93 inheritdocs to internal classes before); inserted right before the member (above its
     attributes, below a plain comment). **BRO1602** (SA1626) `///` that documents nothing -> `//` (+ space if text
     follows, for BRO1002). Both work without doc generation (text-based).
   - **BRO1603** (SA1629) period at the end of summary/remarks/param/typeparam/returns/value/exception text; after an
@@ -252,9 +259,14 @@ suggest or push a release tag after each batch; mention it only when a release l
   - **BRO1606/BRO1607** (SA1642/SA1643) standard constructor/static constructor/finalizer sentence first (+ a space;
     StyleCop's fix has none), a near miss of it ("Initializes a new instance of the X class.") is replaced; private
     constructors may say "Prevents a default instance ..."; records skipped; members without a summary aren't reported.
+    Like StyleCop only the BEGINNING counts (no period needed: "... class representing X." is fine; the first version
+    replaced such sentences, losing text, in Polly), crefs compare without spaces (`{TResult, TArgs}`), and the
+    near-miss replacement only applies to a sentence ending in class/struct/type; anything else is kept after it.
   - **BRO1608** (SA1617) no `<returns>` on void methods/delegates; **BRO1609** (SA1651) `<placeholder>` unwrapped;
     **BRO1610** (SA1627) empty `<remarks>` removed; **BRO1611** (SA1612) stale `<param>` renamed (exactly one stale
     tag + one undocumented parameter) or removed, tags reordered to parameter order (only when each has its own lines).
+    Methods, indexers, delegates only: StyleCop 1.2's SA1612 doesn't check constructors or operators (probed: neither
+    stale nor out-of-order tags; this was the Polly open question, 22 out-of-order constructor tags).
   - Not implemented in StyleCop 1.2 (never report): SA1628, SA1644. Dropped (would need placeholder text): SA1602,
     SA1606, SA1609, SA1611, SA1614-SA1616, SA1618.
 - XML-based rules (BRO1603-BRO1611) need `GenerateDocumentationFile` (the compiler only parses docs then), like
@@ -297,6 +309,56 @@ suggest or push a release tag after each batch; mention it only when a release l
 - BRO1001 + blank lines: the sort never CREATES a BRO1505 (non-field below where two fields were) or BRO1504 (a `//`
   comment arriving below code) violation; it adds the blank line only then. Pre-existing ones are left to those rules,
   so compact interfaces stay compact.
+
+## Migration tool (`stylebro-migrate`, 2026-10-01)
+
+- User's decision: porting = "generate config from theirs". The preset stays the default for new projects; the tool
+  reads a repo's StyleCop setup and writes matching settings, so a StyleCop-clean repo stays (almost) unchanged.
+  Usage and rules: `docs/migrating.md`. Code: `StyleCopSetup.cs` (reading), `Migration.cs` (mapping, plan, render),
+  `Suppressions.cs`, `Program.cs` (report). Tests: `MigrationTests.cs`.
+- Reading: defaults (inventory) <- rulesets <- globalconfigs (strictest wins within a kind) <- root .editorconfig
+  sections for all C#. Sub-directory .editorconfigs and path sections are *scopes*: each gets, in its own file and
+  section, only the generated lines that differ from the main block.
+- BRO rules: on only when ALL replaced SA rules are on (weakest severity); stylecop.json can make some moot
+  (elementOrder without constant/static/readonly -> SA1203/SA1204/SA1214; `_camelCase` -> SA1309). The first version
+  used the strongest, which turned on BRO1001's full sort in Polly (SA1201/SA1202 off) and changed 244 files.
+- SDK rules: strongest severity of the covered SA rules, options from stylecop.json; keys the root .editorconfig
+  already sets for C# are left out (OpenTelemetry sets `csharp_preserve_single_line_statements = true`; overriding
+  it split `case X: a(); break;` lines).
+- Suppressions carried over with `--write`: `#pragma warning disable SA...` (+ BRO/IDE ids), `[SuppressMessage]`
+  (a sibling attribute per replacing id, own attribute list so BRO1102 stays quiet), `<NoWarn>` in
+  .csproj/.props/.targets (Polly's Snippets project has `SA1123` in NoWarn: its `#region`s are doc snippets, and
+  BRO1113 removed 147 of them before). The StyleCop ids stay. Idempotent.
+- `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>` in the root Directory.Build.props) and the
+  block writes every preset key (test `TheGeneratedSettings_CoverEveryPresetKey`). Reason, probed: `dotnet format`
+  sorts usings whenever `dotnet_sort_system_directives_first` is SET (any value, even `false`; `unset` doesn't help),
+  and an .editorconfig can't remove a key the preset's global config sets. The private app has SA1208/SA1210 off and
+  unsorted usings: the block writing `true` changed ~95 files, `false` ~1,650. Now the sort keys are written only
+  when SA1208 or SA1210 is on.
+- Also read: the StyleCop.Analyzers version (1.1.x: SA1141/SA1142/SA1316/SA1414 off) and whether any project sets
+  GenerateDocumentationFile. Without it StyleCop's XML doc rules never run in the build (SA0001), but `dotnet format`
+  parses docs anyway, so BRO1603-BRO1611 stay off (the private app: 5 `<placeholder>` unwraps before).
+- Report: rules on but not enforced afterwards, grouped: partly covered / not expressible (with the reason),
+  dropped by design (from mapping.csv), not covered yet (rule titles).
+- Found on the way, fixed in the preset too: `csharp_preserve_single_line_blocks = false` expands every
+  `{ get; set; }` (StyleCop allows them), so it's `true` and SA1501/SA1502 aren't SDK-covered (mapping: SDK 49 -> 47);
+  IDE0040 `always` adds `public` to interface members, SA1400 doesn't ask for that: `for_non_interface_members`.
+  Also: StyleCop has SA1124 ON by default (both DLL inventories); BRO1112 stays off in the preset (opt-in, large
+  one-time change), the docs no longer claim it matches StyleCop.
+- Measuring (scratchpad `migrate-delta.ps1`): plain `dotnet format` committed as baseline (it has its own noise:
+  conflict markers in multi-targeted files, line endings), then migrate --write, then `dotnet format` with StyleBro
+  and the preset; the remaining diff is StyleBro's. The hook uses COPIES of the DLLs (`hookbin`), otherwise the run
+  locks the build output, and it drops StyleCop.Analyzers' analyzers (a real migration removes the package; its SA1651
+  fix ran under `dotnet format`, which parses docs even where the build doesn't).
+- Results (2026-10-01), files StyleBro changes on StyleCop-clean repos after migrating: Polly 244 -> 3 (2 IDE0047 lines
+  removing parentheses in `a ?? (b ?? c)`, which SA1119 accepts; 1 file plain `dotnet format` had already broken with
+  conflict markers), OpenTelemetry 22 -> 1 (a line ending in a mixed-EOL file), private app 1,659 (mid-way) -> 10
+  (9 IDE2000 blank lines at a file's start / before `}`, which SA1507 leaves to SA1517/SA1508, both off there; 1
+  BRO1104 on target-typed `new()`, which StyleCop 1.1.118 misses). The IDE0047/IDE2000 differences are documented
+  in docs/migrating.md; the SDK rules can't be narrowed.
+- StyleBro bugs found this way (fixed): BRO1606 replaced "Initializes ... class representing X." (text lost); BRO1606
+  flagged `{TResult, TArgs}` crefs; BRO1601 ignored documentInternalElements; BRO1611 checked constructors/operators
+  (StyleCop doesn't); BRO1113 took regions in expression bodies (StyleCop: SA1124, so BRO1112).
 
 ## Real-world testing log
 
@@ -400,9 +462,8 @@ suggest or push a release tag after each batch; mention it only when a release l
   BRO1601 `<inheritdoc/>`), Newtonsoft.Json 1186, Serilog 404. All fixed in one pass, second run clean, no new
   compile errors (doc edits only). Found and fixed on the way: BRO1603 put a period after nested `</remarks>` (Polly,
   103) and flagged inherited text (OpenTelemetry, 72); BRO1604 turned bool summaries into non-sentences (Polly
-  polyfills, which suppress StyleCop with #pragma). Open question: Polly enforces SA1612 but has 22 out-of-order
-  `<param>` tags that BRO1611 reports (their texts are swapped too, so the names were mixed up; the fix only
-  reorders); why StyleCop stays quiet there wasn't checked.
+  polyfills, which suppress StyleCop with #pragma). Polly's 22 out-of-order `<param>` tags under SA1612: all on
+  constructors, which StyleCop doesn't check (answered 2026-10-01; BRO1611 now skips constructors and operators).
 
 ## Known open questions
 
@@ -438,6 +499,6 @@ suggest or push a release tag after each batch; mention it only when a release l
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.
 5. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
    `<param>` kept in sync with the parameters. These need the semantic model.
-6. StyleCop migration tool: `stylecop.json` + rulesets -> equivalent `.editorconfig` (the mapping is its spec).
+6. ~~StyleCop migration tool~~ Done (`src/StyleBro.Migrate`, see "Migration tool"); not yet published as a .NET tool.
 7. Later: blank-line layout rules (the SDK's IDE2000 series is only experimental), baseline support
    (fail only on new violations).

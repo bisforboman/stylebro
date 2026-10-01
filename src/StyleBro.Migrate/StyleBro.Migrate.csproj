@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    stylebro-migrate: turns a repository's StyleCop setup (rule severities and stylecop.json) into the StyleBro and
+    SDK settings that enforce the same things, so switching to StyleBro doesn't change the code's style.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>stylebro-migrate</ToolCommandName>
+    <PackageId>StyleBro.Migrate</PackageId>
+    <Version>0.1.0-alpha.1</Version>
+    <Description>Generates StyleBro and .NET SDK settings from a repository's StyleCop configuration, so moving from StyleCop.Analyzers to StyleBro keeps the code's style.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/bisforboman/stylebro</PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <ProjectReference Include="..\StyleBro.Analyzers\StyleBro.Analyzers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- StyleCop's rules with their default severities, read from the StyleCop DLLs by Get-Inventory.ps1. -->
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.2.0-beta.556.csv" LogicalName="StyleCopRules.csv" />
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.1.118.csv" LogicalName="StyleCopRules-1.1.118.csv" />
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\mapping.csv" LogicalName="StyleCopMapping.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="StyleBro.Tests" />
+  </ItemGroup>
+
+</Project>

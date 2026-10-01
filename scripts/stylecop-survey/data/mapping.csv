@@ -1,0 +1,198 @@
+Id,Proposal
+SA0001,Not applicable: StyleCop's own setup diagnostic
+SA0002,Not applicable: StyleCop's own setup diagnostic
+SA1000,SDK: IDE0055 formatting
+SA1001,SDK: IDE0055 formatting
+SA1002,SDK: IDE0055 formatting
+SA1003,SDK: IDE0055 formatting
+SA1004,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1005,"StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)"
+SA1006,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1007,SDK: IDE0055 formatting
+SA1008,SDK: IDE0055 formatting
+SA1009,SDK: IDE0055 formatting
+SA1010,SDK: IDE0055 formatting
+SA1011,SDK: IDE0055 formatting
+SA1012,SDK: IDE0055 formatting
+SA1013,SDK: IDE0055 formatting
+SA1014,SDK: IDE0055 formatting
+SA1015,SDK: IDE0055 formatting
+SA1016,SDK: IDE0055 formatting
+SA1017,SDK: IDE0055 formatting
+SA1018,SDK: IDE0055 formatting
+SA1019,SDK: IDE0055 formatting
+SA1020,SDK: IDE0055 formatting
+SA1021,SDK: IDE0055 formatting
+SA1022,SDK: IDE0055 formatting
+SA1023,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1024,SDK: IDE0055 formatting
+SA1025,SDK: IDE0055 formatting
+SA1026,SDK: IDE0055 formatting
+SA1027,SDK: IDE0055 formatting (`indent_style = space`)
+SA1028,SDK: IDE0055 formatting
+SA1100,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1101,SDK: IDE0009 (`dotnet_style_qualification_for_* = true`)
+SA1102,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1103,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1104,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1105,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1106,StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported
+SA1107,SDK: IDE0055 (`csharp_preserve_single_line_statements = false`)
+SA1108,Untested. StyleCop has no fix
+SA1109,Untested. StyleCop has no fix
+SA1110,"StyleBro **BRO1109** (done), same results and output as StyleCop"
+SA1111,"StyleBro **BRO1110** (done), same results and output as StyleCop"
+SA1112,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1113,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1114,Untested. StyleCop has no fix
+SA1115,Untested. StyleCop has no fix
+SA1116,"StyleBro **BRO1107** (done), also checks record and primary-constructor parameters"
+SA1117,"StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix"
+SA1118,Untested. StyleCop has no fix
+SA1119,SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`)
+SA1119_p,Variant of another rule (not in 1.1.118 as a separate rule)
+SA1120,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1121,SDK: IDE0049 (`dotnet_style_predefined_type_* = true`)
+SA1122,"StyleBro **BRO1106** (done), same results as StyleCop"
+SA1123,"StyleBro **BRO1113** (done), same results and output as StyleCop"
+SA1124,"StyleBro **BRO1112** (done), off in the preset (StyleCop has it on; opt-in because it's a large one-time change)"
+SA1125,Untested. StyleCop has no fix
+SA1126,Untested. StyleCop has no fix
+SA1127,"StyleBro **BRO1111** (done), same results and output as StyleCop"
+SA1128,"StyleBro **BRO1105** (done), same results as StyleCop"
+SA1129,StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported
+SA1130,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1131,StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported
+SA1132,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1133,StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported
+SA1134,SDK: IDE0055 formatting
+SA1135,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1136,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1137,SDK: IDE0055 formatting
+SA1139,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1141,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1142,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1200,SDK: IDE0065 (`csharp_using_directive_placement = inside_namespace`)
+SA1201,StyleBro **BRO1001** (done)
+SA1202,StyleBro **BRO1001** (done)
+SA1203,StyleBro **BRO1001** (done)
+SA1204,StyleBro **BRO1001** (done)
+SA1205,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1206,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1207,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1208,SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)
+SA1209,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1210,SDK: using sorting in `dotnet format`
+SA1211,SDK: using sorting in `dotnet format`
+SA1212,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1213,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1214,StyleBro **BRO1001** (done)
+SA1216,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1217,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1300,"StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces not renamed"
+SA1301,Untested. StyleCop has no fix
+SA1302,"StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop"
+SA1303,"StyleBro **BRO1306** (done), rename with Fix All"
+SA1304,"StyleBro **BRO1306** (done), rename with Fix All"
+SA1305,Untested. StyleCop has no fix
+SA1306,StyleBro **BRO1303** (done) for private fields; `stylebro_private_field_naming` picks `count` (default) or `_count`
+SA1307,"StyleBro **BRO1306** (done), rename with Fix All"
+SA1308,"StyleBro **BRO1307** (done), rename to the complete correct name in one pass"
+SA1309,"StyleBro **BRO1303** (done) for private fields (default style); constants, static readonly and non-private fields not yet"
+SA1310,"StyleBro **BRO1308** (done), words joined in the field's casing (MAX_VALUE -> MaxValue)"
+SA1311,"StyleBro **BRO1306** (done), rename with Fix All"
+SA1312,"StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name`"
+SA1313,"StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name`"
+SA1314,"StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop"
+SA1316,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1400,"SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn't ask for)"
+SA1401,Drop: making a field private changes public API; no safe automatic fix
+SA1402,Drop: splitting types into new files is not something `dotnet format` can do
+SA1403,Untested. StyleCop has no fix
+SA1404,Drop: needs a human-written justification
+SA1405,Untested. StyleCop has no fix
+SA1406,Untested. StyleCop has no fix
+SA1407,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
+SA1408,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`)
+SA1409,Untested. StyleCop has no fix
+SA1410,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1411,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1412,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1413,StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported
+SA1414,Untested. StyleCop has no fix
+SA1500,SDK: IDE0055 (`csharp_new_line_before_open_brace = all`)
+SA1501,"Untested. The SDK's `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule"
+SA1502,"Untested. The SDK's `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule"
+SA1503,SDK: IDE0011 (`csharp_prefer_braces = true`)
+SA1504,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"
+SA1506,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1507,SDK: IDE2000 (experimental)
+SA1508,SDK: IDE2002 (experimental)
+SA1509,"StyleBro **BRO1501** (done), same results as StyleCop"
+SA1510,"StyleBro **BRO1502** (done), same results as StyleCop"
+SA1511,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1512,"StyleBro **BRO1506** (done), same results as StyleCop"
+SA1513,SDK: IDE2003 (experimental)
+SA1514,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1515,"StyleBro **BRO1504** (done), same results as StyleCop"
+SA1516,"StyleBro **BRO1505** (done), same positions as StyleCop"
+SA1517,SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template`
+SA1518,"StyleBro **BRO1507** (done), same results as StyleCop's default setting"
+SA1519,SDK: IDE0011 (`csharp_prefer_braces = true`)
+SA1520,SDK: IDE0011 (`csharp_prefer_braces = true`)
+SA1600,"StyleBro **BRO1601** (done) for overrides and implementations only (`<inheritdoc/>`); other missing documentation is not reported (no placeholder stubs, user decision)"
+SA1601,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1602,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1603,Untested. Likely drop: the fix would need human-written text
+SA1604,Untested. Likely drop: the fix would need human-written text
+SA1605,Untested. Likely drop: the fix would need human-written text
+SA1606,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1607,Untested. Likely drop: the fix would need human-written text
+SA1608,Untested. Likely drop: the fix would need human-written text
+SA1609,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1610,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1611,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1612,"StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered"
+SA1613,Untested. Likely drop: the fix would need human-written text
+SA1614,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1615,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1616,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1617,"StyleBro **BRO1608** (done), same results and output as StyleCop"
+SA1618,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1619,Untested. Likely drop: the fix would need human-written text
+SA1620,Untested. Likely drop: the fix would need human-written text
+SA1621,Untested. Likely drop: the fix would need human-written text
+SA1622,Untested. Likely drop: the fix would need human-written text
+SA1623,"StyleBro **BRO1604** (done), same results as StyleCop"
+SA1624,"StyleBro **BRO1605** (done), same results as StyleCop"
+SA1625,Untested. Likely drop: the fix would need human-written text
+SA1626,"StyleBro **BRO1602** (done), same results as StyleCop"
+SA1627,"StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none"
+SA1628,Drop: StyleCop 1.2 never reports it (not implemented)
+SA1629,"StyleBro **BRO1603** (done). Differs from StyleCop: text ending with `?`, `!` or `:` is not reported"
+SA1630,Untested. Likely drop: the fix would need human-written text
+SA1631,Untested. Likely drop: the fix would need human-written text
+SA1632,Untested. Likely drop: the fix would need human-written text
+SA1633,SDK: IDE0073 (`file_header_template`)
+SA1634,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1635,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1636,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1637,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1638,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1639,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1640,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1641,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1642,"StyleBro **BRO1606** (done), same results as StyleCop (the fix adds a space after the standard sentence)"
+SA1643,"StyleBro **BRO1607** (done), same results as StyleCop (the fix adds a space after the standard sentence)"
+SA1644,Drop: StyleCop 1.2 never reports it (not implemented)
+SA1645,Untested. Likely drop: the fix would need human-written text
+SA1646,Untested. Likely drop: the fix would need human-written text
+SA1647,Untested. Likely drop: the fix would need human-written text
+SA1648,Untested. Likely drop: the fix would need human-written text
+SA1649,Drop: renaming files is not something `dotnet format` can do
+SA1650,Untested. Likely drop: the fix would need human-written text
+SA1651,"StyleBro **BRO1609** (done), same results and output as StyleCop"
+SX1101,Variant of another rule (not in 1.1.118 as a separate rule)
+SX1309,Variant of another rule (not in 1.1.118 as a separate rule)
+SX1309S,Variant of another rule (not in 1.1.118 as a separate rule)

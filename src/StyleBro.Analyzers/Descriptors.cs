@@ -15,7 +15,8 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "Orders type members by kind, then accessibility, then const/static/readonly. "
             + "The order is configurable with the stylebro_member_* options in .editorconfig. "
-            + "Run 'dotnet format analyzers --diagnostics BRO1001' to fix a whole solution.",
+            + "Run 'dotnet format analyzers --diagnostics BRO1001' to fix a whole solution. "
+            + "Replaces StyleCop SA1201-SA1204 and SA1214.",
         helpLinkUri: HelpBase + DiagnosticIds.MemberOrdering + ".md");
 
     public static readonly DiagnosticDescriptor CommentSpacing = new(

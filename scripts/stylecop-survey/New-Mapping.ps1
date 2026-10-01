@@ -117,4 +117,8 @@ foreach ($cat in ($inv | ForEach-Object Category | Sort-Object -Unique)) {
     W
 }
 [IO.File]::WriteAllText([IO.Path]::GetFullPath($Out), $sb.ToString())
+
+# The same proposals for stylebro-migrate's report (embedded in the tool): why a rule isn't covered.
+$rows | ForEach-Object { [pscustomobject]@{ Id = $_.Rule.Id; Proposal = $_.Proposal } } |
+    ConvertTo-Csv -NoTypeInformation -UseQuotes AsNeeded | Set-Content (Join-Path $data 'mapping.csv')
 "$([IO.Path]::GetFullPath($Out)): $($rows.Count) rules. SDK $($tally.SDK), StyleBro $($tally.StyleBro), drop $($tally.Drop), untested $($tally.Untested), other $other"

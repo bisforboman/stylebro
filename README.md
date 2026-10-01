@@ -73,12 +73,21 @@ dotnet format analyzers --diagnostics BRO1001
 
 To opt out of the preset and configure everything yourself: `<StyleBroPreset>none</StyleBroPreset>`.
 
+## Migrating from StyleCop
+
+`stylebro-migrate` reads a repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
+`stylecop.json`) and writes matching StyleBro and SDK settings into its `.editorconfig` files, so the switch doesn't
+reformat code StyleCop was happy with. It also carries `#pragma warning disable SA…` and `[SuppressMessage]`
+suppressions over to the replacing rules, and lists the StyleCop rules nothing enforces any more.
+See [docs/migrating.md](docs/migrating.md).
+
 ## Repository layout
 
 ```
 src/StyleBro.Analyzers     netstandard2.0, Microsoft.CodeAnalysis.CSharp only (no Workspaces, RS1038)
 src/StyleBro.CodeFixes     netstandard2.0, code fixes + Fix All providers
 src/StyleBro.Package       packs both DLLs into analyzers/dotnet/cs + build/ preset
+src/StyleBro.Migrate       stylebro-migrate: StyleCop setup -> .editorconfig settings
 tests/StyleBro.Tests       Microsoft.CodeAnalysis.Testing: diagnostics, single fix, Fix All, idempotence
 samples/Messy           dotnet format integration sample (Input -> Expected)
 scripts/verify-format.ps1
@@ -96,7 +105,6 @@ Roslyn is pinned to 4.8.0 so the package loads in the .NET 8 SDK / VS 17.8 and n
 
 ## Roadmap
 
-1. `BRO1600`-series documentation: generate XML doc stubs, `<inheritdoc/>` on overrides and interface implementations, keep `<param>` in sync with parameters
-2. StyleCop migration tool: read `stylecop.json` + rulesets and write equivalent `.editorconfig`
-3. Layout rules the SDK only has as experimental (blank lines, IDE2000 series)
-4. Baseline support: fail only on new violations in legacy codebases
+1. More StyleCop rules with safe fixes (the "not covered yet" list in [docs/stylecop-mapping.md](docs/stylecop-mapping.md))
+2. Publish `stylebro-migrate` as a .NET tool
+3. Baseline support: fail only on new violations in legacy codebases

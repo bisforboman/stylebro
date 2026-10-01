@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\StyleBro.Analyzers\StyleBro.Analyzers.csproj" />
     <ProjectReference Include="..\..\src\StyleBro.CodeFixes\StyleBro.CodeFixes.csproj" />
+    <ProjectReference Include="..\..\src\StyleBro.Migrate\StyleBro.Migrate.csproj" />
   </ItemGroup>
 
 </Project>
