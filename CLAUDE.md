@@ -18,7 +18,8 @@ matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
 (see the log below) and 44 rules; 275 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.1.0-alpha.3 (18 rules) is on nuget.org.
+0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
+alpha.3 (18 rules). `stylebro-migrate` isn't published yet (release.yml packs only StyleBro.Package).
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
 is starting out. Keep adding rules on `main` and release again once there's a critical mass of new rules. Don't
