@@ -16,6 +16,7 @@ Set-Content (Join-Path $WorkDir 'p.csproj') @'
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>CS0169;CS0414;CS0219;CS1591;CS0649;CS8321;CS0660;CS0661;CS0642</NoWarn>
   </PropertyGroup>
   <ItemGroup>

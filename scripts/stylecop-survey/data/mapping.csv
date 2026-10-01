@@ -1,13 +1,13 @@
 Id,Proposal
-SA0001,Not applicable: StyleCop's own setup diagnostic
-SA0002,Not applicable: StyleCop's own setup diagnostic
+SA0001,Not applicable: StyleCop's own setup diagnostic: XML comment analysis is disabled (no GenerateDocumentationFile).
+SA0002,Not applicable: StyleCop's own diagnostic for an invalid stylecop.json.
 SA1000,SDK: IDE0055 formatting
 SA1001,SDK: IDE0055 formatting
 SA1002,SDK: IDE0055 formatting
 SA1003,SDK: IDE0055 formatting
-SA1004,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1004,Not yet: StyleBro candidate. Not done yet. `///text` -> `/// text`; the SDK doesn't fix it (measured).
 SA1005,"StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)"
-SA1006,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1006,Not yet: StyleBro candidate. Not done yet. `# if` -> `#if`; the SDK doesn't fix it (measured). Rare in practice.
 SA1007,SDK: IDE0055 formatting
 SA1008,SDK: IDE0055 formatting
 SA1009,SDK: IDE0055 formatting
@@ -24,77 +24,77 @@ SA1019,SDK: IDE0055 formatting
 SA1020,SDK: IDE0055 formatting
 SA1021,SDK: IDE0055 formatting
 SA1022,SDK: IDE0055 formatting
-SA1023,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1023,SDK: IDE0055 formatting
 SA1024,SDK: IDE0055 formatting
 SA1025,SDK: IDE0055 formatting
 SA1026,SDK: IDE0055 formatting
 SA1027,SDK: IDE0055 formatting (`indent_style = space`)
 SA1028,SDK: IDE0055 formatting
-SA1100,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1100,"Not yet: StyleBro candidate. Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior."
 SA1101,SDK: IDE0009 (`dotnet_style_qualification_for_* = true`)
-SA1102,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1103,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1104,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1105,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1102,Not yet: StyleBro candidate. Not done yet. LINQ query clause layout (no blank line between clauses). 0 findings in the surveyed repos.
+SA1103,Not yet: StyleBro candidate. Not done yet. Query clauses all on one line or each on its own (like SA1117 for queries).
+SA1104,Not yet: StyleBro candidate. Not done yet. A clause after a multi-line clause starts on a new line.
+SA1105,Not yet: StyleBro candidate. Not done yet. A multi-line clause starts on its own line.
 SA1106,StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported
 SA1107,SDK: IDE0055 (`csharp_preserve_single_line_statements = false`)
-SA1108,Untested. StyleCop has no fix
-SA1109,Untested. StyleCop has no fix
+SA1108,"Drop: StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning)."
+SA1109,Drop: StyleCop never reports it. Off by default and no diagnostic for a region between `if (b)` and its block (probed).
 SA1110,"StyleBro **BRO1109** (done), same results and output as StyleCop"
 SA1111,"StyleBro **BRO1110** (done), same results and output as StyleCop"
-SA1112,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1113,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1114,Untested. StyleCop has no fix
-SA1115,Untested. StyleCop has no fix
+SA1112,Not yet: StyleBro candidate. Not done yet. `M(` + newline + `)` -> `M()`; the SDK doesn't fix it (measured).
+SA1113,Not yet: StyleBro candidate. Not done yet. A comma at the start of the next line moves to the end of the previous item.
+SA1114,Not yet: StyleBro candidate. StyleCop has no fix. No blank line or comment between `(` and the first parameter.
+SA1115,Not yet: StyleBro candidate. StyleCop has no fix. No blank line between a comma and the next parameter.
 SA1116,"StyleBro **BRO1107** (done), also checks record and primary-constructor parameters"
 SA1117,"StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix"
-SA1118,Untested. StyleCop has no fix
+SA1118,"Drop: StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app."
 SA1119,SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`)
-SA1119_p,Variant of another rule (not in 1.1.118 as a separate rule)
-SA1120,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1119_p,"Variant: SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047."
+SA1120,Not yet: StyleBro candidate. Not done yet. An empty `//` comment line is removed.
 SA1121,SDK: IDE0049 (`dotnet_style_predefined_type_* = true`)
 SA1122,"StyleBro **BRO1106** (done), same results as StyleCop"
 SA1123,"StyleBro **BRO1113** (done), same results and output as StyleCop"
 SA1124,"StyleBro **BRO1112** (done), off in the preset (StyleCop has it on; opt-in because it's a large one-time change)"
-SA1125,Untested. StyleCop has no fix
-SA1126,Untested. StyleCop has no fix
+SA1125,Not yet: StyleBro candidate. StyleCop has no fix. `Nullable<int>` -> `int?`; no SDK rule covers it.
+SA1126,Drop: StyleCop never reports it. Off by default and no diagnostic on an unprefixed member call (probed).
 SA1127,"StyleBro **BRO1111** (done), same results and output as StyleCop"
 SA1128,"StyleBro **BRO1105** (done), same results as StyleCop"
 SA1129,StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported
-SA1130,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1130,Not yet: StyleBro candidate. Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.
 SA1131,StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported
-SA1132,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1132,"Not yet: StyleBro candidate. Not done yet. `int a, b;` -> one field per declaration."
 SA1133,StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported
 SA1134,SDK: IDE0055 formatting
-SA1135,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1136,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1135,Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified.
+SA1136,Not yet: StyleBro candidate. Not done yet. Each enum member on its own line.
 SA1137,SDK: IDE0055 formatting
-SA1139,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1141,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1142,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1139,Not yet: StyleBro candidate. Not done yet. `(long)1` -> `1L`.
+SA1141,"Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`."
+SA1142,Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `t.Item1` -> `t.Name` when the element has a name.
 SA1200,SDK: IDE0065 (`csharp_using_directive_placement = inside_namespace`)
 SA1201,StyleBro **BRO1001** (done)
 SA1202,StyleBro **BRO1001** (done)
 SA1203,StyleBro **BRO1001** (done)
 SA1204,StyleBro **BRO1001** (done)
-SA1205,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1206,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1207,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1205,Not yet: StyleBro candidate. Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default).
+SA1206,"Not yet: the SDK can fix it, but it isn't turned on. The SDK's IDE0036 (`csharp_preferred_modifier_order`) fixes it (measured), but IDE0036 enforces a complete order while StyleCop only wants access modifier, then `static`, then the rest in any order: IDE0036 would also reorder `async override` and other combinations StyleCop accepts."
+SA1207,"Not yet: the SDK can fix it, but it isn't turned on. IDE0036 fixes `internal protected` -> `protected internal` (measured); same catch as SA1206."
 SA1208,SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)
-SA1209,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1209,SDK: using sorting in `dotnet format`
 SA1210,SDK: using sorting in `dotnet format`
 SA1211,SDK: using sorting in `dotnet format`
-SA1212,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1213,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1212,Not yet: StyleBro candidate. Not done yet. `set` before `get` -> swap the accessors.
+SA1213,Not yet: StyleBro candidate. Not done yet. `remove` before `add` -> swap the accessors.
 SA1214,StyleBro **BRO1001** (done)
-SA1216,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1217,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1216,SDK: using sorting in `dotnet format`
+SA1217,SDK: using sorting in `dotnet format`
 SA1300,"StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces not renamed"
-SA1301,Untested. StyleCop has no fix
+SA1301,Drop: StyleCop never reports it. Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.
 SA1302,"StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop"
 SA1303,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1304,"StyleBro **BRO1306** (done), rename with Fix All"
-SA1305,Untested. StyleCop has no fix
+SA1305,"Drop: Off by default, StyleCop has no fix. The fix would have to guess the name without the prefix (`strName` -> `name`, but `isOpen` is fine), configured by allowed prefixes. 82 / 1 / 14 findings with the rule on."
 SA1306,StyleBro **BRO1303** (done) for private fields; `stylebro_private_field_naming` picks `count` (default) or `_count`
 SA1307,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1308,"StyleBro **BRO1307** (done), rename to the complete correct name in one pass"
@@ -104,37 +104,37 @@ SA1311,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1312,"StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name`"
 SA1313,"StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name`"
 SA1314,"StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop"
-SA1316,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1316,Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).
 SA1400,"SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn't ask for)"
-SA1401,Drop: making a field private changes public API; no safe automatic fix
-SA1402,Drop: splitting types into new files is not something `dotnet format` can do
-SA1403,Untested. StyleCop has no fix
-SA1404,Drop: needs a human-written justification
-SA1405,Untested. StyleCop has no fix
-SA1406,Untested. StyleCop has no fix
+SA1401,Drop: Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on.
+SA1402,Drop: Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it).
+SA1403,Drop: StyleCop has no fix; splitting namespaces into files has the same problem as SA1402.
+SA1404,Drop: The justification of a SuppressMessage has to be written by a person.
+SA1405,Drop: StyleCop has no fix; the message for Debug.Assert has to be written by a person.
+SA1406,Drop: StyleCop has no fix; the message for Debug.Fail has to be written by a person.
 SA1407,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
-SA1408,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`)
-SA1409,Untested. StyleCop has no fix
-SA1410,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1411,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
-SA1412,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1408,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
+SA1409,Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed).
+SA1410,Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`.
+SA1411,Not yet: StyleBro candidate. Not done yet. `[Obsolete()]` -> `[Obsolete]`.
+SA1412,"Not yet: the SDK can fix it, but it isn't turned on. Off by default. `charset = utf-8-bom` makes `dotnet format` write the BOM (measured), but neither the preset nor stylebro-migrate sets it: with the rule on, nearly every file changes (876 / 325 / 2,581)."
 SA1413,StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported
-SA1414,Untested. StyleCop has no fix
+SA1414,Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.
 SA1500,SDK: IDE0055 (`csharp_new_line_before_open_brace = all`)
-SA1501,"Untested. The SDK's `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule"
-SA1502,"Untested. The SDK's `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule"
+SA1501,"Not yet: StyleBro candidate. The SDK's `csharp_preserve_single_line_blocks = false` fixes it (measured) but also expands every auto-property's `{ get; set; }`, which StyleCop allows, so the preset keeps single-line blocks."
+SA1502,Not yet: StyleBro candidate. Same SDK problem as SA1501. 356 findings in the private app (which has it off).
 SA1503,SDK: IDE0011 (`csharp_prefer_braces = true`)
-SA1504,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1504,Not yet: StyleBro candidate. Not done yet. All accessors of a property single-line or all multi-line.
 SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"
-SA1506,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1506,Not yet: StyleBro candidate. Not done yet. No blank line between a doc comment and its element.
 SA1507,SDK: IDE2000 (experimental)
 SA1508,SDK: IDE2002 (experimental)
 SA1509,"StyleBro **BRO1501** (done), same results as StyleCop"
 SA1510,"StyleBro **BRO1502** (done), same results as StyleCop"
-SA1511,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1511,Not yet: StyleBro candidate. Not done yet. No blank line before the `while` of a `do ... while`.
 SA1512,"StyleBro **BRO1506** (done), same results as StyleCop"
 SA1513,SDK: IDE2003 (experimental)
-SA1514,"Untested. StyleCop has a fix, so a StyleBro fix is feasible"
+SA1514,Not yet: StyleBro candidate. Not done yet. A doc comment is preceded by a blank line (unless it follows `{`).
 SA1515,"StyleBro **BRO1504** (done), same results as StyleCop"
 SA1516,"StyleBro **BRO1505** (done), same positions as StyleCop"
 SA1517,SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template`
@@ -142,57 +142,57 @@ SA1518,"StyleBro **BRO1507** (done), same results as StyleCop's default setting"
 SA1519,SDK: IDE0011 (`csharp_prefer_braces = true`)
 SA1520,SDK: IDE0011 (`csharp_prefer_braces = true`)
 SA1600,"StyleBro **BRO1601** (done) for overrides and implementations only (`<inheritdoc/>`); other missing documentation is not reported (no placeholder stubs, user decision)"
-SA1601,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1602,"Drop: the only fix would be placeholder text (no stubs, user decision)"
-SA1603,Untested. Likely drop: the fix would need human-written text
-SA1604,Untested. Likely drop: the fix would need human-written text
-SA1605,Untested. Likely drop: the fix would need human-written text
-SA1606,"Drop: the only fix would be placeholder text (no stubs, user decision)"
-SA1607,Untested. Likely drop: the fix would need human-written text
-SA1608,Untested. Likely drop: the fix would need human-written text
-SA1609,"Drop: the only fix would be placeholder text (no stubs, user decision)"
-SA1610,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1611,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1601,"Drop: Missing documentation on a partial element; the only fix is placeholder text (no stubs, user decision)."
+SA1602,"Drop: Missing documentation on enum members; the only fix is placeholder text (no stubs, user decision). 530 findings in the private app."
+SA1603,"Drop: Off by default, no StyleCop fix; invalid XML needs a person to say what was meant."
+SA1604,Drop: A doc comment without `<summary>`; the fix would be placeholder text.
+SA1605,Drop: Same as SA1604 for partial elements.
+SA1606,"Drop: An empty `<summary>`; the fix would be placeholder text (no stubs, user decision)."
+SA1607,Drop: Same as SA1606 for partial elements.
+SA1608,"Drop: The default ""Summary description for X"" text has to be replaced by a person."
+SA1609,"Drop: Off by default. Missing `<value>`; the fix would be placeholder text (no stubs, user decision)."
+SA1610,Drop: An empty `<value>`; StyleCop's fix writes placeholder text.
+SA1611,"Drop: Missing `<param>`; the fix would be placeholder text (no stubs, user decision)."
 SA1612,"StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered"
-SA1613,Untested. Likely drop: the fix would need human-written text
-SA1614,"Drop: the only fix would be placeholder text (no stubs, user decision)"
-SA1615,"Drop: the only fix would be placeholder text (no stubs, user decision)"
-SA1616,"Drop: the only fix would be placeholder text (no stubs, user decision)"
+SA1613,"Not yet: StyleBro candidate. Not done yet. A `<param>` without `name`: when exactly one parameter is undocumented, the name is known."
+SA1614,Drop: An empty `<param>`; the fix would be placeholder text.
+SA1615,Drop: Missing `<returns>`; the fix would be placeholder text.
+SA1616,Drop: An empty `<returns>`; the fix would be placeholder text.
 SA1617,"StyleBro **BRO1608** (done), same results and output as StyleCop"
-SA1618,"Drop: the only fix would be placeholder text (no stubs, user decision)"
-SA1619,Untested. Likely drop: the fix would need human-written text
-SA1620,Untested. Likely drop: the fix would need human-written text
-SA1621,Untested. Likely drop: the fix would need human-written text
-SA1622,Untested. Likely drop: the fix would need human-written text
+SA1618,Drop: Missing `<typeparam>`; the fix would be placeholder text.
+SA1619,Drop: Same as SA1618 for partial types.
+SA1620,Not yet: StyleBro candidate. Not done yet. `<typeparam>` tags match the type parameters: the same as BRO1611 for `<param>`.
+SA1621,Not yet: StyleBro candidate. Not done yet. A `<typeparam>` without `name`.
+SA1622,Drop: An empty `<typeparam>`; the fix would be placeholder text.
 SA1623,"StyleBro **BRO1604** (done), same results as StyleCop"
 SA1624,"StyleBro **BRO1605** (done), same results as StyleCop"
-SA1625,Untested. Likely drop: the fix would need human-written text
+SA1625,Drop: Identical text copied between tags has to be rewritten by a person.
 SA1626,"StyleBro **BRO1602** (done), same results as StyleCop"
 SA1627,"StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none"
-SA1628,Drop: StyleCop 1.2 never reports it (not implemented)
+SA1628,"Drop: StyleCop never reports it. StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx)."
 SA1629,"StyleBro **BRO1603** (done). Differs from StyleCop: text ending with `?`, `!` or `:` is not reported"
-SA1630,Untested. Likely drop: the fix would need human-written text
-SA1631,Untested. Likely drop: the fix would need human-written text
-SA1632,Untested. Likely drop: the fix would need human-written text
+SA1630,Drop: StyleCop never reports it. Off by default and no diagnostic on a one-word summary (probed).
+SA1631,Drop: StyleCop never reports it. Off by default and no diagnostic on a summary of symbols (probed).
+SA1632,Drop: StyleCop never reports it. Off by default and no diagnostic on a one-letter summary (probed).
 SA1633,SDK: IDE0073 (`file_header_template`)
-SA1634,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1635,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1636,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1637,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1638,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1639,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1640,Untested. BRO16xx candidate (StyleCop has a fix)
-SA1641,Untested. BRO16xx candidate (StyleCop has a fix)
+SA1634,"Not yet: StyleBro candidate. StyleCop's XML file header (`// <copyright file=""X.cs"" company=""Y"">`) has no SDK equivalent; IDE0073 only writes a plain header (SA1633 with `xmlHeader: false` is covered)."
+SA1635,Not yet: StyleBro candidate. XML file header: copyright text missing. See SA1634.
+SA1636,Not yet: StyleBro candidate. XML file header: copyright text doesn't match stylecop.json. See SA1634.
+SA1637,Not yet: StyleBro candidate. XML file header: file name missing. See SA1634.
+SA1638,Not yet: StyleBro candidate. XML file header: file name doesn't match the file. See SA1634.
+SA1639,Drop: Off by default; the header's `<summary>` has to be written by a person.
+SA1640,Not yet: StyleBro candidate. XML file header: company attribute missing. See SA1634.
+SA1641,Not yet: StyleBro candidate. XML file header: company doesn't match stylecop.json. See SA1634.
 SA1642,"StyleBro **BRO1606** (done), same results as StyleCop (the fix adds a space after the standard sentence)"
 SA1643,"StyleBro **BRO1607** (done), same results as StyleCop (the fix adds a space after the standard sentence)"
-SA1644,Drop: StyleCop 1.2 never reports it (not implemented)
-SA1645,Untested. Likely drop: the fix would need human-written text
-SA1646,Untested. Likely drop: the fix would need human-written text
-SA1647,Untested. Likely drop: the fix would need human-written text
-SA1648,Untested. Likely drop: the fix would need human-written text
-SA1649,Drop: renaming files is not something `dotnet format` can do
-SA1650,Untested. Likely drop: the fix would need human-written text
+SA1644,"Drop: StyleCop never reports it. StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx)."
+SA1645,Drop: Off by default; a missing `<include>` file can't be fixed automatically.
+SA1646,Drop: Off by default; a wrong `<include>` XPath can't be fixed automatically.
+SA1647,Drop: Off by default; an `<include>` without file/path can't be fixed automatically.
+SA1648,Drop: `<inheritdoc/>` where there is nothing to inherit: the fix is real documentation.
+SA1649,Drop: Renaming files isn't something `dotnet format` can do.
+SA1650,Drop: StyleCop never reports it. Off by default and no diagnostic on misspelled words (probed).
 SA1651,"StyleBro **BRO1609** (done), same results and output as StyleCop"
-SX1101,Variant of another rule (not in 1.1.118 as a separate rule)
-SX1309,Variant of another rule (not in 1.1.118 as a separate rule)
-SX1309S,Variant of another rule (not in 1.1.118 as a separate rule)
+SX1101,"Variant: The opposite of SA1101 (no `this.`). The SDK covers it (IDE0003 with `dotnet_style_qualification_for_* = false`, which the preset sets), but stylebro-migrate doesn't map SX ids, so its report lists it as not covered."
+SX1309,"Variant: Private fields begin with `_`: what BRO1303 does with `stylebro_private_field_naming = _camelCase`. stylebro-migrate infers `_camelCase` from the code when SA1309 is off, but doesn't read SX1309 itself."
+SX1309S,"Variant: Static fields begin with `_`. BRO1303 covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule."

@@ -11,6 +11,8 @@
         SA1019 = 'IDE0055 formatting'; SA1020 = 'IDE0055 formatting'; SA1021 = 'IDE0055 formatting'; SA1022 = 'IDE0055 formatting'
         SA1024 = 'IDE0055 formatting'; SA1025 = 'IDE0055 formatting'; SA1026 = 'IDE0055 formatting'; SA1028 = 'IDE0055 formatting'
         SA1027 = 'IDE0055 formatting (`indent_style = space`)'
+        SA1023 = 'IDE0055 formatting'
+        SA1209 = 'using sorting in `dotnet format`'; SA1216 = 'using sorting in `dotnet format`'; SA1217 = 'using sorting in `dotnet format`'
         SA1134 = 'IDE0055 formatting'; SA1137 = 'IDE0055 formatting'
         SA1101 = 'IDE0009 (`dotnet_style_qualification_for_* = true`)'
         SA1107 = 'IDE0055 (`csharp_preserve_single_line_statements = false`)'
@@ -35,8 +37,7 @@
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
-        SA1501 = 'Untested. The SDK''s `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule'
-        SA1502 = 'Untested. The SDK''s `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule'
+        SA1408 = 'SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass'
         SA1407 = 'SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass'
         SA1005 = 'StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)'
         SA1106 = 'StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported'
@@ -54,11 +55,6 @@
         SA1133 = 'StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported'
         SA1413 = 'StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported'
         SA1600 = 'StyleBro **BRO1601** (done) for overrides and implementations only (`<inheritdoc/>`); other missing documentation is not reported (no placeholder stubs, user decision)'
-        SA1602 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
-        SA1609 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
-        SA1611 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
-        SA1615 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
-        SA1618 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
         SA1623 = 'StyleBro **BRO1604** (done), same results as StyleCop'
         SA1624 = 'StyleBro **BRO1605** (done), same results as StyleCop'
         SA1626 = 'StyleBro **BRO1602** (done), same results as StyleCop'
@@ -69,11 +65,6 @@
         SA1651 = 'StyleBro **BRO1609** (done), same results and output as StyleCop'
         SA1612 = 'StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered'
         SA1627 = 'StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none'
-        SA1628 = 'Drop: StyleCop 1.2 never reports it (not implemented)'
-        SA1644 = 'Drop: StyleCop 1.2 never reports it (not implemented)'
-        SA1606 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
-        SA1614 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
-        SA1616 = 'Drop: the only fix would be placeholder text (no stubs, user decision)'
         SA1300 = 'StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces not renamed'
         SA1302 = 'StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop'
         SA1303 = 'StyleBro **BRO1306** (done), rename with Fix All'
@@ -99,12 +90,6 @@
         SA1203 = 'StyleBro **BRO1001** (done)'
         SA1204 = 'StyleBro **BRO1001** (done)'
         SA1214 = 'StyleBro **BRO1001** (done)'
-        SA1401 = 'Drop: making a field private changes public API; no safe automatic fix'
-        SA1402 = 'Drop: splitting types into new files is not something `dotnet format` can do'
-        SA1649 = 'Drop: renaming files is not something `dotnet format` can do'
-        SA1404 = 'Drop: needs a human-written justification'
-        SA0001 = 'Not applicable: StyleCop''s own setup diagnostic'
-        SA0002 = 'Not applicable: StyleCop''s own setup diagnostic'
     }
 
     # Paragraphs placed after the candidates table.

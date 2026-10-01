@@ -448,11 +448,11 @@ internal static class Migration
         var placement = setup.Setting("orderingRules", "usingDirectivesPlacement")?.GetString() ?? "insideNamespace";
         Rule("IDE0065", placement == "preserve" ? [] : ["SA1200"]);
         lines.Add($"csharp_using_directive_placement = {(placement == "outsideNamespace" ? "outside_namespace" : "inside_namespace")}");
-        // 'dotnet format' sorts usings alphabetically (SA1210, SA1211) whenever either key is set, whatever its value
+        // 'dotnet format' sorts usings (SA1210, SA1211, and aliases/static usings: SA1209, SA1216, SA1217) whenever either key is set, whatever its value
         // (even 'false'): so the keys are written only when StyleCop sorted them. System first only for SA1208.
         if (setup.IsOn("SA1208") || setup.IsOn("SA1210"))
         {
-            result.Covered.UnionWith(["SA1208", "SA1210", "SA1211"]);
+            result.Covered.UnionWith(["SA1208", "SA1209", "SA1210", "SA1211", "SA1216", "SA1217"]);
             var systemFirst = setup.IsOn("SA1208") && setup.Setting("orderingRules", "systemUsingDirectivesFirst") is not { ValueKind: JsonValueKind.False };
             lines.Add($"dotnet_sort_system_directives_first = {Bool(systemFirst)}");
             var groups = setup.Setting("orderingRules", "blankLinesBetweenUsingGroups")?.GetString();

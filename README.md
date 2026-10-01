@@ -58,7 +58,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1506](docs/rules/BRO1506.md) | Single-line comments should not be followed by a blank line | SA1512 | Yes |
 | [BRO1507](docs/rules/BRO1507.md) | Files should not end with blank lines | SA1518 | Yes |
 
-How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md).
+How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md). The rules
+StyleBro doesn't cover, why, and what it would take to add them: [docs/skipped-rules.md](docs/skipped-rules.md).
 
 ## Usage
 
@@ -105,6 +106,6 @@ Roslyn is pinned to 4.8.0 so the package loads in the .NET 8 SDK / VS 17.8 and n
 
 ## Roadmap
 
-1. More StyleCop rules with safe fixes (the "not covered yet" list in [docs/stylecop-mapping.md](docs/stylecop-mapping.md))
+1. More StyleCop rules with safe fixes (the candidates in [docs/skipped-rules.md](docs/skipped-rules.md))
 2. Publish `stylebro-migrate` as a .NET tool
 3. Baseline support: fail only on new violations in legacy codebases

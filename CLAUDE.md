@@ -39,8 +39,12 @@ suggest or push a release tag after each batch; mention it only when a release l
   formatted, compared with `Expected/`, then a second run with `--verify-no-changes` must pass.
 - Central package management in `Directory.Packages.props`. Roslyn pinned to **4.8.0** for broad SDK/VS
   compatibility; don't raise it without a reason.
-- `scripts/stylecop-survey`: generates `docs/stylecop-mapping.md` (inventory of StyleCop rules, repo surveys,
+- `scripts/stylecop-survey`: generates `docs/stylecop-mapping.md` and `docs/skipped-rules.md` (inventory of StyleCop rules, repo surveys,
   SDK coverage check). Hand-written decisions in `decisions.psd1`, measured data in `data/`. Not part of the slnx.
+  **Every StyleCop rule StyleBro doesn't cover has an entry in `skipped.psd1`** (status Candidate / SdkLater / Drop /
+  NotInStyleCop / Variant / NotApplicable, why, what revisiting would take), rendered as `docs/skipped-rules.md`
+  (user's request, 2026-10-01: "so they can easily be revisited later"). When a rule gets implemented, move it to
+  `decisions.psd1`; when a new reason to skip one turns up, write it there. New-Mapping warns about missing entries.
 - `samples/MultiTarget`: net10.0 + net8.0 with `#if NET10_0_OR_GREATER` code; verify-format checks it like Messy and
   also that the fixed sample builds. It does NOT reproduce the old linked-file bug (couldn't find a minimal repro);
   the reference for that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
@@ -345,9 +349,9 @@ suggest or push a release tag after each batch; mention it only when a release l
   IDE0040 `always` adds `public` to interface members, SA1400 doesn't ask for that: `for_non_interface_members`.
   Also: StyleCop has SA1124 ON by default (both DLL inventories); BRO1112 stays off in the preset (opt-in, large
   one-time change), the docs no longer claim it matches StyleCop.
-- Measuring (scratchpad `migrate-delta.ps1`): plain `dotnet format` committed as baseline (it has its own noise:
+- Measuring (`scripts/stylecop-survey/Measure-MigrationDelta.ps1`, needs `-ResetTargetRepo` on a throwaway clone): plain `dotnet format` committed as baseline (it has its own noise:
   conflict markers in multi-targeted files, line endings), then migrate --write, then `dotnet format` with StyleBro
-  and the preset; the remaining diff is StyleBro's. The hook uses COPIES of the DLLs (`hookbin`), otherwise the run
+  and the preset; the remaining diff is StyleBro's. The hook uses COPIES of the DLLs (in %TEMP%), otherwise the run
   locks the build output, and it drops StyleCop.Analyzers' analyzers (a real migration removes the package; its SA1651
   fix ran under `dotnet format`, which parses docs even where the build doesn't).
 - Results (2026-10-01), files StyleBro changes on StyleCop-clean repos after migrating: Polly 244 -> 3 (2 IDE0047 lines

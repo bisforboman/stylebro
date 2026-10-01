@@ -29,9 +29,13 @@ $cases = [ordered]@{
     SA1026 = 'class C { int[] M() { return new [] { 1 }; } }'
     SA1027 = "class C`n{`n${T}void M() { }`n}"
     SA1028 = "class C`n{    `n    void M() { }`n}"
+    SA1004 = "class C`n{`n    ///<summary>Does it.</summary>`n    public void M() { }`n}"
+    SA1006 = "class C`n{`n# if DEBUG`n    void M() { }`n#endif`n}"
+    SA1023 = 'unsafe class C { int M(int * p) { return * p; } }'
 
     # ---- Readability ---------------------------------------------------------------------------
     SA1101 = 'class C { int x; int M() { return x; } }'
+    SA1112 = "class C`n{`n    void M()`n    {`n        M(`n        );`n    }`n}"
     SA1106 = 'class C { void M() { ; } }'
     SA1107 = "class C`n{`n    void M()`n    {`n        int a = 1; int b = 2;`n        _ = a + b;`n    }`n}"
     SA1116 = "class C`n{`n    void M(int a,`n        int b)`n    {`n    }`n}"
@@ -64,9 +68,15 @@ $cases = [ordered]@{
     SA1314 = 'class C<Item> { }'
 
     # ---- Maintainability -----------------------------------------------------------------------
+    SA1206 = 'class C { static public void M() { } }'
+    SA1207 = 'class C { internal protected void M() { } }'
+    SA1209 = "namespace Cases.SA1209`n{`n    using A = System.Text;`n    using System;`n`n    class C { A.StringBuilder s; Type t; }`n}"
+    SA1216 = "namespace Cases.SA1216`n{`n    using static System.Math;`n    using System;`n`n    class C { Type t; double d = Abs(1); }`n}"
+    SA1217 = "namespace Cases.SA1217`n{`n    using static System.Math;`n    using static System.Console;`n`n    class C { double d = Abs(1); void M() => WriteLine(); }`n}"
     SA1400 = 'class C { void M() { } }'
     SA1407 = 'class C { int M(int a, int b, int c) => a + b * c; }'
     SA1408 = 'class C { bool M(bool a, bool b, bool c) => a || b && c; }'
+    SA1412 = 'class C { }'
     SA1413 = "class C`n{`n    int[] M() => new[]`n    {`n        1,`n        2`n    };`n}"
 
     # ---- Layout --------------------------------------------------------------------------------
@@ -90,4 +100,14 @@ $cases = [ordered]@{
 
     # ---- Documentation -------------------------------------------------------------------------
     SA1633 = 'class C { }'
+
+    # ---- Probes: does StyleCop 1.2 report these at all? ('no-repro' = no diagnostic on an obvious violation) -------
+    SA1109 = "class C`n{`n    void M(bool b)`n    {`n        if (b)`n        #region R`n        {`n        }`n        #endregion`n    }`n}"
+    SA1126 = 'class C { int x; int M() { return x; } }'
+    SA1301 = 'class C { public int Value { get; set; } }'
+    SA1409 = 'class C { void M() { try { } finally { } } }'
+    SA1630 = "/// <summary>Words.</summary>`npublic class C`n{`n    /// <summary>Nowhitespacehere.</summary>`n    public void M() { }`n}"
+    SA1631 = "/// <summary>Words.</summary>`npublic class C`n{`n    /// <summary>@@@ ### $$$ %%% ^^^.</summary>`n    public void M() { }`n}"
+    SA1632 = "/// <summary>Words.</summary>`npublic class C`n{`n    /// <summary>A.</summary>`n    public void M() { }`n}"
+    SA1650 = "/// <summary>Words.</summary>`npublic class C`n{`n    /// <summary>Teh wrold is runing.</summary>`n    public void M() { }`n}"
 }
