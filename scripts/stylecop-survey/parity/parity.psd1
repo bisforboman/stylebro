@@ -327,5 +327,32 @@
             Expected = @(
             )
         }
+        @{
+            Name     = 'accessors-fields-attributes'
+            Map      = @('SA1212=BRO1003', 'SA1213=BRO1004', 'SA1132=BRO1114', 'SA1125=BRO1115', 'SA1411=BRO1402')
+            Expected = @(
+                # SA1411: StyleCop's fix leaves the space of '( )' ('[Obsolete ]').
+                'StyleBro output only: Cases.cs: [        [Obsolete]]'
+                'StyleCop output only: Cases.cs: [        [Obsolete ]]'
+                # SA1132: StyleCop keeps an attribute on the first field only (the second loses [Obsolete]); BRO1114 copies it.
+                # Event fields are separated by the blank line BRO1505 wants.
+                'StyleBro output only: Cases.cs: []'
+                # SA1125: StyleCop has no fix.
+                'StyleBro output only: Cases.cs: [        private int? a;]'
+                'StyleBro output only: Cases.cs: [        private int? b;]'
+                'StyleBro output only: Cases.cs: [        private int? c;]'
+                'StyleBro output only: Cases.cs: [        private List<int?> d;]'
+                'StyleBro output only: Cases.cs: [        private Type u = typeof(int?);]'
+                'StyleBro output only: Cases.cs: [        public void M(bool? p)]'
+                'StyleBro output only: Cases.cs: [            var x = default(long?);]'
+                'StyleCop output only: Cases.cs: [        private Nullable<int> a;]'
+                'StyleCop output only: Cases.cs: [        private System.Nullable<int> b;]'
+                'StyleCop output only: Cases.cs: [        private global::System.Nullable<int> c;]'
+                'StyleCop output only: Cases.cs: [        private List<Nullable<int>> d;]'
+                'StyleCop output only: Cases.cs: [        private Type u = typeof(Nullable<int>);]'
+                'StyleCop output only: Cases.cs: [        public void M(Nullable<bool> p)]'
+                'StyleCop output only: Cases.cs: [            var x = default(Nullable<long>);]'
+            )
+        }
     )
 }

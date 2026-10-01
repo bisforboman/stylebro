@@ -522,4 +522,54 @@ internal static class Descriptors
         description: "When every accessor has a block body, they are either all single-line or all multi-line. The fix puts "
             + "one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
         helpLinkUri: HelpBase + DiagnosticIds.AccessorsConsistentLayout + ".md");
+    public static readonly DiagnosticDescriptor PropertyAccessorOrder = new(
+        id: DiagnosticIds.PropertyAccessorOrder,
+        title: "Property accessors should follow order",
+        messageFormat: "Put the 'get' accessor before the '{0}' accessor",
+        category: "Ordering",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'get' comes before 'set' or 'init'. The fix swaps the accessors with their comments. Replaces StyleCop SA1212.",
+        helpLinkUri: HelpBase + DiagnosticIds.PropertyAccessorOrder + ".md");
+
+    public static readonly DiagnosticDescriptor EventAccessorOrder = new(
+        id: DiagnosticIds.EventAccessorOrder,
+        title: "Event accessors should follow order",
+        messageFormat: "Put the 'add' accessor before the 'remove' accessor",
+        category: "Ordering",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'add' comes before 'remove'. The fix swaps the accessors with their comments. Replaces StyleCop SA1213.",
+        helpLinkUri: HelpBase + DiagnosticIds.EventAccessorOrder + ".md");
+
+    public static readonly DiagnosticDescriptor CombinedFields = new(
+        id: DiagnosticIds.CombinedFields,
+        title: "Do not combine fields",
+        messageFormat: "Declare '{0}' in a declaration of its own",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "One field (or event field) per declaration. The fix gives every field its own declaration with the same "
+            + "attributes, modifiers, type and documentation. Replaces StyleCop SA1132.",
+        helpLinkUri: HelpBase + DiagnosticIds.CombinedFields + ".md");
+
+    public static readonly DiagnosticDescriptor NullableShorthand = new(
+        id: DiagnosticIds.NullableShorthand,
+        title: "Use shorthand for nullable types",
+        messageFormat: "Use '{0}?' instead of 'Nullable<{0}>'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'int?' instead of 'Nullable<int>' or 'System.Nullable<int>'. Replaces StyleCop SA1125.",
+        helpLinkUri: HelpBase + DiagnosticIds.NullableShorthand + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyAttributeParentheses = new(
+        id: DiagnosticIds.EmptyAttributeParentheses,
+        title: "Attribute constructor should not use unnecessary parenthesis",
+        messageFormat: "Remove the empty parentheses",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'[Obsolete]' instead of '[Obsolete()]'. Replaces StyleCop SA1411.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyAttributeParentheses + ".md");
 }

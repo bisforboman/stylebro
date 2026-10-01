@@ -4,6 +4,8 @@ public static class DiagnosticIds
 {
     public const string MemberOrdering = "BRO1001";
     public const string CommentSpacing = "BRO1002";
+    public const string PropertyAccessorOrder = "BRO1003";
+    public const string EventAccessorOrder = "BRO1004";
     public const string EmptyStatement = "BRO1101";
     public const string CombinedAttributes = "BRO1102";
     public const string ConstantOnLeft = "BRO1103";
@@ -17,6 +19,8 @@ public static class DiagnosticIds
     public const string ConstraintOnOwnLine = "BRO1111";
     public const string NoRegions = "BRO1112";
     public const string NoRegionsInCodeElements = "BRO1113";
+    public const string CombinedFields = "BRO1114";
+    public const string NullableShorthand = "BRO1115";
     public const string VariableCasing = "BRO1301";
     public const string ParameterCasing = "BRO1302";
     public const string PrivateFieldNaming = "BRO1303";
@@ -41,6 +45,7 @@ public static class DiagnosticIds
     public const string TypeParameterTagsMatch = "BRO1613";
     public const string TypeParameterTagHasName = "BRO1614";
     public const string TrailingComma = "BRO1401";
+    public const string EmptyAttributeParentheses = "BRO1402";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

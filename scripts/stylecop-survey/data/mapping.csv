@@ -56,14 +56,14 @@ SA1121,SDK: IDE0049 (`dotnet_style_predefined_type_* = true`)
 SA1122,"StyleBro **BRO1106** (done), same results as StyleCop"
 SA1123,"StyleBro **BRO1113** (done), same results and output as StyleCop"
 SA1124,"StyleBro **BRO1112** (done), off in the preset (StyleCop has it on; opt-in because it's a large one-time change)"
-SA1125,Not yet: StyleBro candidate. StyleCop has no fix. `Nullable<int>` -> `int?`; no SDK rule covers it.
+SA1125,"StyleBro **BRO1115** (done), same positions, with a fix (StyleCop has none)"
 SA1126,Drop: StyleCop never reports it. Off by default and no diagnostic on an unprefixed member call (probed).
 SA1127,"StyleBro **BRO1111** (done), same results and output as StyleCop"
 SA1128,"StyleBro **BRO1105** (done), same results as StyleCop"
 SA1129,StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported
 SA1130,Not yet: StyleBro candidate. Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.
 SA1131,StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported
-SA1132,"Not yet: StyleBro candidate. Not done yet. `int a, b;` -> one field per declaration."
+SA1132,"StyleBro **BRO1114** (done), same positions; the fix copies attributes and documentation to every field (StyleCop's keeps attributes on the first only)"
 SA1133,StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported
 SA1134,SDK: IDE0055 formatting
 SA1135,Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified.
@@ -84,8 +84,8 @@ SA1208,SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_fir
 SA1209,SDK: using sorting in `dotnet format`
 SA1210,SDK: using sorting in `dotnet format`
 SA1211,SDK: using sorting in `dotnet format`
-SA1212,Not yet: StyleBro candidate. Not done yet. `set` before `get` -> swap the accessors.
-SA1213,Not yet: StyleBro candidate. Not done yet. `remove` before `add` -> swap the accessors.
+SA1212,"StyleBro **BRO1003** (done), same positions and output as StyleCop"
+SA1213,"StyleBro **BRO1004** (done), same positions and output as StyleCop"
 SA1214,StyleBro **BRO1001** (done)
 SA1216,SDK: using sorting in `dotnet format`
 SA1217,SDK: using sorting in `dotnet format`
@@ -116,7 +116,7 @@ SA1407,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed o
 SA1408,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
 SA1409,Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed).
 SA1410,Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`.
-SA1411,Not yet: StyleBro candidate. Not done yet. `[Obsolete()]` -> `[Obsolete]`.
+SA1411,"StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )`"
 SA1412,SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on
 SA1413,StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported
 SA1414,Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.

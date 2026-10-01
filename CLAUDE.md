@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 50 rules; 299 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+(see the log below) and 54 rules; 312 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
 alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -160,6 +160,17 @@ suggest or push a release tag after each batch; mention it only when a release l
   removed lines, and drops a neighboring blank line that would double a blank line, follow `{` or precede `}`. A run
   at the end of the file takes the preceding line break along. Removing regions lets BRO1001 see the type, so a
   region-heavy codebase needs a second `dotnet format` run (documented in BRO1112.md).
+- **BRO1003/BRO1004** (SA1212/SA1213, `Ordering/AccessorOrder.cs`): swap the two accessors; one-line lists swap the
+  accessor text, otherwise "slots" (comments above + the accessor + a trailing comment) so blank lines stay put;
+  auto-properties `{ set; get; }` count like in StyleCop. **BRO1114** (SA1132, `Readability/CombinedFields.cs`): one
+  declaration per field/event field (locals not reported, like StyleCop); every copy gets the attributes, modifiers,
+  type and doc comment (StyleCop's fix drops the attributes from all but the first: a real semantic change); a line
+  break between type and first name is joined (Serilog's `const string` + one constant per line); event fields get
+  BRO1505's blank line. **BRO1115** (SA1125, `Readability/NullableShorthand.cs`, semantic): only
+  `System.Nullable<T>`, only where `SyntaxFacts.IsInTypeOnlyContext` (that alone leaves out is/as, patterns, using
+  aliases, crefs, nameof, `Nullable<int>.Equals`; explicit checks were dead code per mutation testing); nested ones
+  in one edit. **BRO1402** (SA1411, `Maintainability/EmptyAttributeParentheses.cs`): removes `()` incl. `( )`. Parity
+  set `accessors-fields-attributes`: 24/24 positions, output differences documented.
 - Parity: `parenthesis-placement` 13/13 and `constraints-regions` 15/15 positions, identical fixed output.
 - **StyleCop parity check:** `scripts/stylecop-survey/Compare-WithStyleCop.ps1` + `parity/parity.psd1`. Runs both
   tools on edge-case files, compares positions and fixed output; every difference must be a documented deviation.
@@ -531,6 +542,10 @@ suggest or push a release tag after each batch; mention it only when a release l
 
 - **BRO1510, BRO1612-BRO1614** (2026-10-01): 0 in Polly, OpenTelemetry, the private app (StyleCop repos) and
   FFMpegCore; Newtonsoft.Json 13 (11 BRO1510, 2 BRO1613), Serilog 1. All fixed in one pass, compile, second run clean.
+
+- **BRO1003/BRO1004/BRO1114/BRO1115/BRO1402** (2026-10-01): 0 in FFMpegCore, Polly, OpenTelemetry, private app;
+  Newtonsoft.Json 3 (1 BRO1003, 2 BRO1402), Serilog 8 (BRO1114; found the multi-line `const string` layout, fixed).
+  All fixed in one pass, compile, second run clean.
 
 ## Known open questions
 

@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-86 rules: 36 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+81 rules: 31 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -35,20 +35,15 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1114](#sa1114) | Parameter list should follow declaration | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1115](#sa1115) | Parameter should follow comma | candidate | on / off / off | 0 / 0 / 0 |
 | [SA1120](#sa1120) | Comments should contain text | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1125](#sa1125) | Use shorthand for nullable types | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1130](#sa1130) | Use lambda syntax | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1132](#sa1132) | Do not combine fields | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1135](#sa1135) | Using directives should be qualified | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1136](#sa1136) | Enum values should be on separate lines | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1139](#sa1139) | Use literal suffix notation instead of casting | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1141](#sa1141) | Use tuple syntax | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1142](#sa1142) | Refer to tuple fields by name | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1205](#sa1205) | Partial elements should declare access | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1212](#sa1212) | Property accessors should follow order | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1213](#sa1213) | Event accessors should follow order | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1410](#sa1410) | Remove delegate parenthesis when possible | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1411](#sa1411) | Attribute constructor should not use unnecessary parenthesis | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1506](#sa1506) | Element documentation headers should not be followed by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1511](#sa1511) | While-do footer should not be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1514](#sa1514) | Element documentation header should be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
@@ -232,16 +227,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 
 **To revisit:** Text-based; coordinate with BRO1002, which turns whitespace-only comments into `//` (that would then be removed). Small.
 
-<a id="sa1125"></a>
-
-### SA1125: Use shorthand for nullable types
-
-Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** StyleCop has no fix. `Nullable<int>` -> `int?`; no SDK rule covers it.
-
-**To revisit:** Semantic model to confirm System.Nullable<T>; skip `typeof(Nullable<>)` and cref. Small.
-
 <a id="sa1130"></a>
 
 ### SA1130: Use lambda syntax
@@ -251,16 +236,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 **Why:** Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.
 
 **To revisit:** `delegate { }` without a parameter list can bind to any delegate type; converting it needs the target's parameters (semantic model) and may need discards. Medium.
-
-<a id="sa1132"></a>
-
-### SA1132: Do not combine fields
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `int a, b;` -> one field per declaration.
-
-**To revisit:** Like BRO1102 (attributes and doc comments must be duplicated or kept on the first). Mind initializer order (InitializerOrder.cs). Small-medium.
 
 <a id="sa1135"></a>
 
@@ -322,26 +297,6 @@ Ordering rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTe
 
 **To revisit:** Check first whether IDE0040 already does it with `dotnet_style_require_accessibility_modifiers` (not in the SDK check). Semantic model otherwise. Small.
 
-<a id="sa1212"></a>
-
-### SA1212: Property accessors should follow order
-
-Ordering rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `set` before `get` -> swap the accessors.
-
-**To revisit:** Swap the accessor declarations with their trivia (like BRO1001 does for members). Small.
-
-<a id="sa1213"></a>
-
-### SA1213: Event accessors should follow order
-
-Ordering rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `remove` before `add` -> swap the accessors.
-
-**To revisit:** Same code as SA1212.
-
 <a id="sa1316"></a>
 
 ### SA1316: Tuple element names should use correct casing
@@ -361,16 +316,6 @@ Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it 
 **Why:** Not done yet. `delegate() { }` -> `delegate { }`.
 
 **To revisit:** Only when the empty parameter list isn't needed for overload resolution (semantic model). Small; consider doing with SA1130.
-
-<a id="sa1411"></a>
-
-### SA1411: Attribute constructor should not use unnecessary parenthesis
-
-Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `[Obsolete()]` -> `[Obsolete]`.
-
-**To revisit:** Syntax-only. Small.
 
 <a id="sa1506"></a>
 

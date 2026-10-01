@@ -11,3 +11,8 @@ BRO1510 | Layout | Warning  | AccessorLayoutAnalyzer
 BRO1612 | Documentation | Warning  | DocumentationAnalyzer
 BRO1613 | Documentation | Warning  | DocumentationAnalyzer
 BRO1614 | Documentation | Warning  | DocumentationAnalyzer
+BRO1003 | Ordering | Warning  | AccessorOrderAnalyzer
+BRO1004 | Ordering | Warning  | AccessorOrderAnalyzer
+BRO1114 | Readability | Warning  | CombinedFieldsAnalyzer
+BRO1115 | Readability | Warning  | NullableShorthandAnalyzer
+BRO1402 | Maintainability | Warning  | EmptyAttributeParenthesesAnalyzer

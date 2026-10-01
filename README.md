@@ -16,6 +16,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 |----|-------|----------|-----|
 | [BRO1001](docs/rules/BRO1001.md) | Members should be ordered | SA1201-SA1204, SA1214 | Yes, with custom Fix All |
 | [BRO1002](docs/rules/BRO1002.md) | Single-line comments should begin with a space | SA1005 | Yes |
+| [BRO1003](docs/rules/BRO1003.md) | Property accessors should follow order | SA1212 | Yes |
+| [BRO1004](docs/rules/BRO1004.md) | Event accessors should follow order | SA1213 | Yes |
 | [BRO1101](docs/rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Yes |
 | [BRO1102](docs/rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Yes |
 | [BRO1103](docs/rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Yes |
@@ -29,6 +31,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1111](docs/rules/BRO1111.md) | Generic type constraints should be on their own line | SA1127 | Yes |
 | [BRO1112](docs/rules/BRO1112.md) | Do not use regions (off in the preset, like StyleCop) | SA1124 | Yes |
 | [BRO1113](docs/rules/BRO1113.md) | Regions should not be placed inside code elements | SA1123 | Yes |
+| [BRO1114](docs/rules/BRO1114.md) | Do not combine fields | SA1132 | Yes |
+| [BRO1115](docs/rules/BRO1115.md) | Use shorthand for nullable types | SA1125 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |
@@ -39,6 +43,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1308](docs/rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Yes |
 | [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
+| [BRO1402](docs/rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Yes |
 | [BRO1601](docs/rules/BRO1601.md) | Overrides and implementations should inherit their documentation | SA1600 (these members) | Yes |
 | [BRO1602](docs/rules/BRO1602.md) | Single-line comments should not use documentation style slashes | SA1626 | Yes |
 | [BRO1603](docs/rules/BRO1603.md) | Documentation text should end with a period | SA1629 | Yes |

@@ -53,14 +53,10 @@
             Revisit = 'Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.' }
         SA1120 = @{ Status = 'Candidate'; Why = 'Not done yet. An empty `//` comment line is removed.'
             Revisit = 'Text-based; coordinate with BRO1002, which turns whitespace-only comments into `//` (that would then be removed). Small.' }
-        SA1125 = @{ Status = 'Candidate'; Why = 'StyleCop has no fix. `Nullable<int>` -> `int?`; no SDK rule covers it.'
-            Revisit = 'Semantic model to confirm System.Nullable<T>; skip `typeof(Nullable<>)` and cref. Small.' }
         SA1126 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on an unprefixed member call (probed).'
             Revisit = 'Nothing to port.' }
         SA1130 = @{ Status = 'Candidate'; Why = 'Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.'
             Revisit = '`delegate { }` without a parameter list can bind to any delegate type; converting it needs the target''s parameters (semantic model) and may need discards. Medium.' }
-        SA1132 = @{ Status = 'Candidate'; Why = 'Not done yet. `int a, b;` -> one field per declaration.'
-            Revisit = 'Like BRO1102 (attributes and doc comments must be duplicated or kept on the first). Mind initializer order (InitializerOrder.cs). Small-medium.' }
         SA1135 = @{ Status = 'Candidate'; Why = 'Not done yet. Usings inside a namespace must be fully qualified.'
             Revisit = 'Only relevant to teams with usings inside the namespace (SA1200 default). Semantic model to get the full name. Small.' }
         SA1136 = @{ Status = 'Candidate'; Why = 'Not done yet. Each enum member on its own line.'
@@ -79,10 +75,6 @@
             Revisit = 'Measure IDE0036 on the StyleCop-clean repos (Measure-MigrationDelta.ps1). If the extra reorders are rare, add IDE0036 to the preset and to stylebro-migrate; otherwise write a BRO rule that only moves access modifiers and `static` forward.' }
         SA1207 = @{ Status = 'SdkLater'; Why = 'IDE0036 fixes `internal protected` -> `protected internal` (measured); same catch as SA1206.'
             Revisit = 'Decide together with SA1206.' }
-        SA1212 = @{ Status = 'Candidate'; Why = 'Not done yet. `set` before `get` -> swap the accessors.'
-            Revisit = 'Swap the accessor declarations with their trivia (like BRO1001 does for members). Small.' }
-        SA1213 = @{ Status = 'Candidate'; Why = 'Not done yet. `remove` before `add` -> swap the accessors.'
-            Revisit = 'Same code as SA1212.' }
 
         # ---- Naming ------------------------------------------------------------------------------------------------
         SA1301 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.'
@@ -109,8 +101,6 @@
             Revisit = 'Nothing to port.' }
         SA1410 = @{ Status = 'Candidate'; Why = 'Not done yet. `delegate() { }` -> `delegate { }`.'
             Revisit = 'Only when the empty parameter list isn''t needed for overload resolution (semantic model). Small; consider doing with SA1130.' }
-        SA1411 = @{ Status = 'Candidate'; Why = 'Not done yet. `[Obsolete()]` -> `[Obsolete]`.'
-            Revisit = 'Syntax-only. Small.' }
         SA1414 = @{ Status = 'Drop'; Why = 'StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.'
             Revisit = 'Nothing automatic.' }
 

@@ -37,6 +37,11 @@
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
+        SA1212 = 'StyleBro **BRO1003** (done), same positions and output as StyleCop'
+        SA1213 = 'StyleBro **BRO1004** (done), same positions and output as StyleCop'
+        SA1132 = 'StyleBro **BRO1114** (done), same positions; the fix copies attributes and documentation to every field (StyleCop''s keeps attributes on the first only)'
+        SA1125 = 'StyleBro **BRO1115** (done), same positions, with a fix (StyleCop has none)'
+        SA1411 = 'StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )`'
         SA1613 = 'StyleBro **BRO1612** (done) when the name is certain (one unnamed tag and one undocumented parameter, or all unnamed with one per parameter); StyleCop reports every unnamed tag and has no fix'
         SA1620 = 'StyleBro **BRO1613** (done), same positions as StyleCop, with a fix (StyleCop has none): stale tags renamed or removed, tags reordered'
         SA1621 = 'StyleBro **BRO1614** (done) when the name is certain, like BRO1612'

@@ -18,6 +18,10 @@ stylebro_member_readonly_first = true
 # BRO1002: a space after '//' (SA1005)
 dotnet_diagnostic.BRO1002.severity = warning
 
+# BRO1003/BRO1004: 'get' before 'set'/'init', 'add' before 'remove' (SA1212, SA1213)
+dotnet_diagnostic.BRO1003.severity = warning
+dotnet_diagnostic.BRO1004.severity = warning
+
 # BRO1105: constructor initializers on their own line (SA1128)
 dotnet_diagnostic.BRO1105.severity = warning
 
@@ -86,8 +90,17 @@ dotnet_diagnostic.BRO1112.severity = none
 # BRO1113: no regions inside code elements (SA1123)
 dotnet_diagnostic.BRO1113.severity = warning
 
+# BRO1114: one field per declaration (SA1132)
+dotnet_diagnostic.BRO1114.severity = warning
+
+# BRO1115: 'int?' instead of 'Nullable<int>' (SA1125)
+dotnet_diagnostic.BRO1115.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
+
+# BRO1402: no empty parentheses on attributes (SA1411)
+dotnet_diagnostic.BRO1402.severity = warning
 
 # BRO1601: <inheritdoc/> on undocumented overrides and implementations (SA1600, for these members only). Which members
 # need documentation, like stylecop.json's documentationRules (StyleCop's defaults):

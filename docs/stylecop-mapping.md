@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 58 StyleBro (58 done), 44 drop, 38 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 63 StyleBro (63 done), 44 drop, 33 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -39,7 +39,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1113](skipped-rules.md#sa1113) | Comma should be on the same line as previous parameter | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1114](skipped-rules.md#sa1114) | Parameter list should follow declaration | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1120](skipped-rules.md#sa1120) | Comments should contain text | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1125](skipped-rules.md#sa1125) | Use shorthand for nullable types | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1130](skipped-rules.md#sa1130) | Use lambda syntax | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1135](skipped-rules.md#sa1135) | Using directives should be qualified | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1136](skipped-rules.md#sa1136) | Enum values should be on separate lines | on / on / on | 0 / 0 / 0 | candidate |
@@ -48,15 +47,11 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1205](skipped-rules.md#sa1205) | Partial elements should declare access | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1206](skipped-rules.md#sa1206) | Declaration keywords should follow order | on / on / on | 0 / 0 / 0 | SDK not on yet |
 | [SA1207](skipped-rules.md#sa1207) | Protected should come before internal | on / on / on | 0 / 0 / 0 | SDK not on yet |
-| [SA1212](skipped-rules.md#sa1212) | Property accessors should follow order | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1213](skipped-rules.md#sa1213) | Event accessors should follow order | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1410](skipped-rules.md#sa1410) | Remove delegate parenthesis when possible | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1411](skipped-rules.md#sa1411) | Attribute constructor should not use unnecessary parenthesis | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1506](skipped-rules.md#sa1506) | Element documentation headers should not be followed by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1511](skipped-rules.md#sa1511) | While-do footer should not be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1514](skipped-rules.md#sa1514) | Element documentation header should be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1132](skipped-rules.md#sa1132) | Do not combine fields | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1142](skipped-rules.md#sa1142) | Refer to tuple fields by name | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1634](skipped-rules.md#sa1634) | File header should show copyright | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1635](skipped-rules.md#sa1635) | File header should have copyright text | on / off / on | 0 / 0 / 0 | candidate |
@@ -175,7 +170,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1408 | Conditional expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 14 | fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass ([details](skipped-rules.md#sa1408)) |
 | SA1409 | Remove unnecessary code | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed). ([details](skipped-rules.md#sa1409)) |
 | SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`. ([details](skipped-rules.md#sa1410)) |
-| SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `[Obsolete()]` -> `[Obsolete]`. ([details](skipped-rules.md#sa1411)) |
+| SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )` |
 | SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 876 / 325 / 2,581 | fixed | SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on |
 | SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported |
 
@@ -218,8 +213,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1209 | Using alias directives should be placed after other using directives | on | yes | on / on / off | 0 / 0 / 4 | fixed | SDK: using sorting in `dotnet format` |
 | SA1210 | Using directives should be ordered alphabetically by namespace | on | yes | on / on / off | 0 / 0 / 290 | fixed | SDK: using sorting in `dotnet format` |
 | SA1211 | Using alias directives should be ordered alphabetically by alias name | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: using sorting in `dotnet format` |
-| SA1212 | Property accessors should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `set` before `get` -> swap the accessors. ([details](skipped-rules.md#sa1212)) |
-| SA1213 | Event accessors should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `remove` before `add` -> swap the accessors. ([details](skipped-rules.md#sa1213)) |
+| SA1212 | Property accessors should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1003** (done), same positions and output as StyleCop |
+| SA1213 | Event accessors should follow order | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1004** (done), same positions and output as StyleCop |
 | SA1214 | Readonly fields should appear before non-readonly fields | on | yes | on / on / off | 0 / 0 / 2 |  | StyleBro **BRO1001** (done) |
 | SA1216 | Using static directives should be placed at the correct location | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: using sorting in `dotnet format` |
 | SA1217 | Using static directives should be ordered alphabetically | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: using sorting in `dotnet format` |
@@ -252,14 +247,14 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 0 / 7 / 352 | not fixed | StyleBro **BRO1106** (done), same results as StyleCop |
 | SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1113** (done), same results and output as StyleCop |
 | SA1124 | Do not use regions | on | yes | on / off / off | 0 / 264 / 17 |  | StyleBro **BRO1112** (done), off in the preset (StyleCop has it on; opt-in because it's a large one-time change) |
-| SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. StyleCop has no fix. `Nullable<int>` -> `int?`; no SDK rule covers it. ([details](skipped-rules.md#sa1125)) |
+| SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1115** (done), same positions, with a fix (StyleCop has none) |
 | SA1126 | Prefix calls correctly | off | no | off / off / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on an unprefixed member call (probed). ([details](skipped-rules.md#sa1126)) |
 | SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 0 / 0 / 82 |  | StyleBro **BRO1111** (done), same results and output as StyleCop |
 | SA1128 | Put constructor initializers on their own line | on | yes | on / on / off | 0 / 0 / 408 | not fixed | StyleBro **BRO1105** (done), same results as StyleCop |
 | SA1129 | Do not use default value type constructor | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported |
 | SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`. ([details](skipped-rules.md#sa1130)) |
 | SA1131 | Use readable conditions | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported |
-| SA1132 | Do not combine fields | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `int a, b;` -> one field per declaration. ([details](skipped-rules.md#sa1132)) |
+| SA1132 | Do not combine fields | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1114** (done), same positions; the fix copies attributes and documentation to every field (StyleCop's keeps attributes on the first only) |
 | SA1133 | Do not combine attributes | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported |
 | SA1134 | Attributes should not share line | on | yes | on / off / on | 0 / 9 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1135 | Using directives should be qualified | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified. ([details](skipped-rules.md#sa1135)) |
