@@ -146,5 +146,47 @@ dotnet_diagnostic.BRO1507.severity = warning
 csharp_prefer_braces = true
 dotnet_diagnostic.IDE0011.severity = warning
 
-# Whitespace and formatting (large parts of the SA1000 series)
+# Formatting (IDE0055): spacing, indentation and line breaks. Covers the spacing rules SA1000-SA1028, SA1134,
+# SA1137, and with the line-break settings below SA1500, SA1501, SA1502 and SA1107 (verified with
+# scripts/stylecop-survey/Test-SdkCoverage.ps1).
 dotnet_diagnostic.IDE0055.severity = warning
+csharp_new_line_before_open_brace = all
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = false
+
+# Explicit access modifiers (SA1400)
+dotnet_style_require_accessibility_modifiers = always
+dotnet_diagnostic.IDE0040.severity = warning
+
+# 'int' and 'string' instead of 'Int32' and 'String' (SA1121)
+dotnet_style_predefined_type_for_locals_parameters_members = true
+dotnet_style_predefined_type_for_member_access = true
+dotnet_diagnostic.IDE0049.severity = warning
+
+# Parentheses that clarify precedence, and none that don't (SA1407, SA1408, SA1119)
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary
+dotnet_diagnostic.IDE0047.severity = warning
+dotnet_diagnostic.IDE0048.severity = warning
+
+# Using directives: outside the namespace (works with file-scoped namespaces; StyleCop's SA1200 default is
+# inside), System first, sorted (SA1208, SA1210, SA1211). Sorting happens in 'dotnet format'.
+csharp_using_directive_placement = outside_namespace
+dotnet_diagnostic.IDE0065.severity = warning
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# Blank lines (SA1507, SA1508, SA1513). The SDK marks these rules experimental.
+dotnet_style_allow_multiple_blank_lines_experimental = false
+dotnet_diagnostic.IDE2000.severity = warning
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+dotnet_diagnostic.IDE2002.severity = warning
+dotnet_style_allow_statement_immediately_after_block_experimental = false
+dotnet_diagnostic.IDE2003.severity = warning
+
+# Not set on purpose:
+# - 'this.' qualification (SA1101): not required, like the SDK default; most teams turn SA1101 off.
+# - File headers (SA1633): set file_header_template in your .editorconfig and IDE0073 to warning.
+# - Naming (IDE1006): StyleBro's BRO13xx rules cover it, and IDE1006 has no Fix All for 'dotnet format'.
