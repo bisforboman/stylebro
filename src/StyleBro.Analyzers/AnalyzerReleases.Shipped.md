@@ -40,3 +40,35 @@ BRO1504 | Layout | Warning  | BlankLineAfterAnalyzer
 BRO1505 | Layout | Warning  | ElementSeparationAnalyzer
 BRO1506 | Layout | Warning  | TrailingBlankLinesAnalyzer
 BRO1507 | Layout | Warning  | TrailingBlankLinesAnalyzer
+
+## Release 0.1.0.4
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+BRO1109 | Readability | Warning  | ParenthesisPlacementAnalyzer
+BRO1110 | Readability | Warning  | ParenthesisPlacementAnalyzer
+BRO1111 | Readability | Warning  | ConstraintPlacementAnalyzer
+BRO1112 | Readability | Warning  | RegionsAnalyzer
+BRO1113 | Readability | Warning  | RegionsAnalyzer
+BRO1301 | Naming | Warning  | CamelCaseNamingAnalyzer
+BRO1302 | Naming | Warning  | CamelCaseNamingAnalyzer
+BRO1303 | Naming | Warning  | FieldNamingAnalyzer
+BRO1304 | Naming | Warning  | PrefixNamingAnalyzer
+BRO1305 | Naming | Warning  | PrefixNamingAnalyzer
+BRO1306 | Naming | Warning  | FieldNamingAnalyzer
+BRO1307 | Naming | Warning  | FieldNamingAnalyzer
+BRO1308 | Naming | Warning  | FieldNamingAnalyzer
+BRO1309 | Naming | Warning  | PascalCaseNamingAnalyzer
+BRO1601 | Documentation | Warning  | DocumentationAnalyzer
+BRO1602 | Documentation | Warning  | DocumentationAnalyzer
+BRO1603 | Documentation | Warning  | DocumentationAnalyzer
+BRO1604 | Documentation | Warning  | DocumentationAnalyzer
+BRO1605 | Documentation | Warning  | DocumentationAnalyzer
+BRO1606 | Documentation | Warning  | DocumentationAnalyzer
+BRO1607 | Documentation | Warning  | DocumentationAnalyzer
+BRO1608 | Documentation | Warning  | DocumentationAnalyzer
+BRO1609 | Documentation | Warning  | DocumentationAnalyzer
+BRO1610 | Documentation | Warning  | DocumentationAnalyzer
+BRO1611 | Documentation | Warning  | DocumentationAnalyzer

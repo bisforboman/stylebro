@@ -8,7 +8,7 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
 
     <PackageId>StyleBro.Analyzers</PackageId>
-    <Version>0.1.0-alpha.3</Version>
+    <Version>0.1.0-alpha.4</Version>
     <Description>Roslyn analyzers and code fixes that keep C# code tidy. A modern alternative to StyleCop, built so that 'dotnet format' can fix everything it reports.</Description>
     <PackageTags>analyzers;roslyn;stylecop;code-style;dotnet-format</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
