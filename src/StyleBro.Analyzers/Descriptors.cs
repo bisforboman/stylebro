@@ -457,4 +457,26 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "A file ends with its last line of code, followed by at most one line break. Replaces StyleCop SA1518.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLinesAtEndOfFile + ".md");
+
+    public static readonly DiagnosticDescriptor SingleLineStatementBlock = new(
+        id: DiagnosticIds.SingleLineStatementBlock,
+        title: "A block should not be on a single line",
+        messageFormat: "Put the block on separate lines",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'if (x) { return; }' becomes a block with its braces and each statement on their own lines. Lambda "
+            + "bodies are left alone. Replaces StyleCop SA1501.",
+        helpLinkUri: HelpBase + DiagnosticIds.SingleLineStatementBlock + ".md");
+
+    public static readonly DiagnosticDescriptor SingleLineElement = new(
+        id: DiagnosticIds.SingleLineElement,
+        title: "An element should not be on a single line",
+        messageFormat: "Put '{0}' on separate lines",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Types, namespaces, method bodies and accessor lists with bodies aren't written on one line. Auto-properties "
+            + "('{ get; set; }') and single-line accessors inside a multi-line property are fine. Replaces StyleCop SA1502.",
+        helpLinkUri: HelpBase + DiagnosticIds.SingleLineElement + ".md");
 }

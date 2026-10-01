@@ -57,6 +57,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1505](docs/rules/BRO1505.md) | Elements should be separated by a blank line | SA1516 | Yes |
 | [BRO1506](docs/rules/BRO1506.md) | Single-line comments should not be followed by a blank line | SA1512 | Yes |
 | [BRO1507](docs/rules/BRO1507.md) | Files should not end with blank lines | SA1518 | Yes |
+| [BRO1508](docs/rules/BRO1508.md) | A block should not be on a single line | SA1501 | Yes |
+| [BRO1509](docs/rules/BRO1509.md) | An element should not be on a single line | SA1502 | Yes |
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md). The rules
 StyleBro doesn't cover, why, and what it would take to add them: [docs/skipped-rules.md](docs/skipped-rules.md).

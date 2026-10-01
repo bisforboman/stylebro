@@ -294,5 +294,21 @@
                 'only StyleCop: BRO1611 Params.cs(62,26)'
             )
         }
+        @{
+            Name     = 'single-line-blocks'
+            Map      = @('SA1501=BRO1508', 'SA1502=BRO1509')
+            # StyleCop's fix misindents nested blocks (`{` at column 1), leaves namespaces, accessors and `} catch` chains
+            # partly on one line and writes CRLF into LF files; positions only. StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+                # A comment inside the braces: skipped (the fix rewrites exactly those gaps).
+                'only StyleCop: BRO1508 Statements.cs(29,20)'
+                # A block in a switch section that shares its line with 'switch (b) {': no line to indent it from.
+                'only StyleCop: BRO1508 Statements.cs(30,37)'
+                # Local functions: StyleCop reports SA1501 and SA1502 at the same brace, StyleBro one BRO1509.
+                'only StyleCop: BRO1508 Statements.cs(39,26)'
+                'only StyleCop: BRO1508 Statements.cs(40,31)'
+            )
+        }
     )
 }

@@ -1,6 +1,9 @@
 namespace Messy;
 
-public enum Level { None, Low, High }
+public enum Level
+{
+    None, Low, High,
+}
 
 public class Checks
 {

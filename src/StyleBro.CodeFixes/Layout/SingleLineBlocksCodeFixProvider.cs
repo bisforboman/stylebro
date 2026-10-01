@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers;
@@ -13,16 +12,14 @@ using Microsoft.CodeAnalysis.Text;
 namespace StyleBro.CodeFixes.Layout;
 
 /// <summary>
-/// Fix for BRO1505: adds the blank line before each reported element. The edits are insertions at line starts (or a
-/// replaced run of spaces), one per element, so Fix All applies them all at once.
+/// Fix for BRO1508/BRO1509: puts the braces and each item between them on their own lines (text edits in the gaps, so
+/// nested blocks don't overlap and Fix All agrees with the single fix).
 /// </summary>
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ElementSeparationCodeFixProvider))]
-public sealed class ElementSeparationCodeFixProvider : CodeFixProvider
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(SingleLineBlocksCodeFixProvider))]
+public sealed class SingleLineBlocksCodeFixProvider : CodeFixProvider
 {
-    private const string Title = "Add blank line";
-
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.ElementsSeparatedByBlankLine);
+        ImmutableArray.Create(DiagnosticIds.SingleLineStatementBlock, DiagnosticIds.SingleLineElement);
 
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
@@ -33,9 +30,9 @@ public sealed class ElementSeparationCodeFixProvider : CodeFixProvider
         {
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    Title,
+                    "Put it on separate lines",
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
-                    equivalenceKey: nameof(ElementSeparationCodeFixProvider)),
+                    equivalenceKey: nameof(SingleLineBlocksCodeFixProvider)),
                 diagnostic);
         }
 
@@ -56,25 +53,18 @@ public sealed class ElementSeparationCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var trailingComma = SingleLineBlocks.WantsTrailingComma(document.Project.CompilationOptions, root.SyntaxTree, cancellationToken);
-        var reported = new HashSet<int>(diagnostics.Select(d => d.Location.SourceSpan.Start));
         var changes = new List<TextChange>();
-        foreach (var (previous, current) in ElementSeparation.GetViolations(root, text))
+        foreach (var diagnostic in diagnostics)
         {
-            if (!reported.Contains(current.FullSpan.Start))
+            // The diagnostic is on the opening brace; the node is the one whose braces those are.
+            var brace = root.FindToken(diagnostic.Location.SourceSpan.Start);
+            for (var node = brace.Parent; node is not null; node = node.Parent)
             {
-                continue;
-            }
-
-            // Members of a type (namespace, accessor list) written on one line: the same expansion BRO1509's fix makes,
-            // which separates them as BRO1505 wants. Splitting just this gap would leave the braces on the line and
-            // stop BRO1509 from seeing the type, so the result would depend on which fix 'dotnet format' runs first.
-            if (current.Parent is { } container && SingleLineBlocks.GetChanges(container, text, options, trailingComma) is { } expansion)
-            {
-                changes.AddRange(expansion);
-            }
-            else if (ElementSeparation.GetChange(previous, current, text) is { } change)
-            {
-                changes.Add(change);
+                if (SingleLineBlocks.GetBraces(node) is { } braces && braces.Open == brace)
+                {
+                    changes.AddRange(SingleLineBlocks.GetChanges(node, text, options, trailingComma) ?? []);
+                    break;
+                }
             }
         }
 

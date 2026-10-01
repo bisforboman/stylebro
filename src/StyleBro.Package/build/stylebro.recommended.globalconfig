@@ -143,6 +143,13 @@ dotnet_diagnostic.BRO1506.severity = warning
 # BRO1507: no blank lines at the end of a file (SA1518)
 dotnet_diagnostic.BRO1507.severity = warning
 
+# BRO1508: blocks of statements not on a single line (SA1501); lambda bodies may stay on one line
+dotnet_diagnostic.BRO1508.severity = warning
+
+# BRO1509: types, members and accessor lists with bodies not on a single line (SA1502); auto-properties
+# ('{ get; set; }') are fine
+dotnet_diagnostic.BRO1509.severity = warning
+
 # ---------------------------------------------------------------------------
 # Built-in .NET rules that already cover common StyleCop rules.
 # 'dotnet format' fixes these too. To also enforce them on build, set
@@ -155,8 +162,8 @@ dotnet_diagnostic.IDE0011.severity = warning
 
 # Formatting (IDE0055): spacing, indentation and line breaks. Covers the spacing rules SA1000-SA1028, SA1134,
 # SA1137, and with the line-break settings below SA1500 and SA1107 (verified with
-# scripts/stylecop-survey/Test-SdkCoverage.ps1). Single-line blocks are kept: the SDK would expand
-# 'void M() { }' (SA1501/SA1502) only together with every auto-property's '{ get; set; }', which StyleCop allows.
+# scripts/stylecop-survey/Test-SdkCoverage.ps1). The SDK keeps single-line blocks: it could expand 'void M() { }' only
+# together with every auto-property's '{ get; set; }', which StyleCop allows; BRO1508/BRO1509 expand them instead.
 dotnet_diagnostic.IDE0055.severity = warning
 csharp_new_line_before_open_brace = all
 csharp_preserve_single_line_statements = false

@@ -86,9 +86,9 @@ again adds nothing.
 
 The dry run lists the StyleCop rules that are on but that nothing enforces after the switch:
 
-- **Partly covered or not expressible:** the StyleBro rule also enforces rules your team turned off, or the SDK can't
-  match StyleCop exactly. SA1501/SA1502 (single-line blocks) are here: the SDK can only expand `{ return x; }`
-  together with every auto-property's `{ get; set; }`, which StyleCop allows.
+- **Partly covered or not expressible:** the StyleBro rule also enforces rules your team turned off (BRO1001 sorts by
+  kind, accessibility and static together, so SA1203/SA1204 alone can't be carried over), or a setting can't be
+  expressed for the SDK.
 - **Dropped by design:** there's no safe automatic fix (the fix would be placeholder documentation, a file rename, or
   a changed public API).
 - **Not covered yet:** candidates for future StyleBro rules. See [stylecop-mapping.md](stylecop-mapping.md).

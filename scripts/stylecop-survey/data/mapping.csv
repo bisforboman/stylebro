@@ -121,8 +121,8 @@ SA1412,SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by defau
 SA1413,StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported
 SA1414,Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.
 SA1500,SDK: IDE0055 (`csharp_new_line_before_open_brace = all`)
-SA1501,"Not yet: StyleBro candidate. The SDK's `csharp_preserve_single_line_blocks = false` fixes it (measured) but also expands every auto-property's `{ get; set; }`, which StyleCop allows, so the preset keeps single-line blocks."
-SA1502,Not yet: StyleBro candidate. Same SDK problem as SA1501. 356 findings in the private app (which has it off).
+SA1501,"StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported"
+SA1502,"StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)"
 SA1503,SDK: IDE0011 (`csharp_prefer_braces = true`)
 SA1504,Not yet: StyleBro candidate. Not done yet. All accessors of a property single-line or all multi-line.
 SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"

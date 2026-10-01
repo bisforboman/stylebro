@@ -11,7 +11,9 @@ public class Settings
 
     [Obsolete("Use Apply")]
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public void Reset() { }
+    public void Reset()
+    {
+    }
 
     private void Load() => _version++;
 }

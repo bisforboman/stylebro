@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 44 rules; 275 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+(see the log below) and 46 rules; 289 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
 alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -318,6 +318,27 @@ suggest or push a release tag after each batch; mention it only when a release l
   `comment-and-file-endings`: 10/10, identical output. Fixing BRO1506 and BRO1507 together must not overlap: blank
   lines below a comment at the end of the file are left to the ending removal. Two of three surveyed teams turn SA1512 off; it's in the
   preset like StyleCop's default, docs say how to turn it off.
+- **BRO1508** (SA1501, statement blocks) and **BRO1509** (SA1502: types, namespaces, method/ctor/operator/local
+  function bodies, accessor lists with a block-bodied accessor) on a single line (`Layout/SingleLineBlocks.cs`, one
+  analyzer + one fix). Probed with StyleCop 1.2: empty braces count; lambda/anonymous-method bodies, `{ get; set; }`,
+  `{ get => x; }` and single-line accessors inside a multi-line property don't; nested blocks are all reported; a local
+  function gets SA1501 AND SA1502 (we report BRO1509 once). The fix rewrites only whitespace GAPS (before `{`, after
+  `{`, between items, before `}`, before a following else/catch/finally), each computed assuming every enclosing
+  single-line block is expanded too (`StartIndent` walks up), so nested blocks give disjoint edits and single fix ==
+  Fix All. Respects `csharp_new_line_before_open_brace` (per kind) and `_else/_catch/_finally`; keeps `} while (x);`
+  and the file's line endings; enum members stay on one line like StyleCop. Skipped: a comment in a gap, a block whose
+  owner shares its line with code that stays (`switch (x) { case 1: { ... } }`). Parity set `single-line-blocks`:
+  56/52 positions, 4 documented; output not compared (StyleCop's fix misindents nested blocks, writes CRLF into LF
+  files). Replaces the SDK option the preset couldn't use (`csharp_preserve_single_line_blocks = false` also expands
+  `{ get; set; }`).
+- **Fix ORDER under `dotnet format` is not fixed** (found with BRO1509 in the Messy sample: 4 of 5 runs failed). Two
+  interactions had to be made order-independent: (1) BRO1505's fix on members of a ONE-LINE type now applies the
+  whole BRO1509 expansion (identical edits, merged), instead of splitting one gap at column 0, which left the braces
+  on the line and BRO1509 blind; BRO1509's expansion adds the blank lines BRO1505 wants. (2) BRO1509 adds the
+  trailing comma BRO1401 wants on an expanded enum, unless BRO1401 is off. Severity keys (`dotnet_diagnostic.X.severity`)
+  are NOT in AnalyzerConfigOptions; read them from `CompilationOptions.SyntaxTreeOptionsProvider`
+  (`SingleLineBlocks.WantsTrailingComma`). Lesson: a fix that changes a node's shape (single-line -> multi-line) must
+  also produce what other rules want for the new shape. Run verify-format several times when adding a layout rule.
 - BRO1001 + blank lines: the sort never CREATES a BRO1505 (non-field below where two fields were) or BRO1504 (a `//`
   comment arriving below code) violation; it adds the blank line only then. Pre-existing ones are left to those rules,
   so compact interfaces stay compact.
@@ -485,6 +506,14 @@ suggest or push a release tag after each batch; mention it only when a release l
   103) and flagged inherited text (OpenTelemetry, 72); BRO1604 turned bool summaries into non-sentences (Polly
   polyfills, which suppress StyleCop with #pragma). Polly's 22 out-of-order `<param>` tags under SA1612: all on
   constructors, which StyleCop doesn't check (answered 2026-10-01; BRO1611 now skips constructors and operators).
+
+- **BRO1508/BRO1509 + all 46 rules together** (2026-10-01): BRO1508/BRO1509 found Polly 0 and OpenTelemetry 0 (both
+  enforce SA1501/SA1502), private app 1 + 356 (= StyleCop's SA1501/SA1502 counts there exactly), Newtonsoft.Json 57,
+  Serilog 4, FFMpegCore 22. Totals: FFMpegCore 656, Polly 2477, OpenTelemetry 682, private app 15807, Newtonsoft.Json
+  8369, Serilog 1021 findings; no new compile errors anywhere, no conflict markers (Newtonsoft.Json, 8 frameworks).
+  Second run clean for OpenTelemetry and Serilog; the leftovers elsewhere are all known: rename guards (Polly 5,
+  private app 7, Newtonsoft.Json 49) and BRO1001 in files whose `#region`s BRO1112 removed in the same run
+  (FFMpegCore 2, Polly 10, private app 2), which BRO1001 can only sort on a second run.
 
 ## Known open questions
 

@@ -410,16 +410,11 @@ internal static class Migration
             lines.Add($"dotnet_diagnostic.{ide}.severity = {Name(severity)}");
         }
 
-        // Formatting. Single-line blocks stay: the SDK can't expand '{ return x; }' (SA1501/SA1502) without also
-        // expanding auto-properties' '{ get; set; }', which StyleCop allows.
+        // Formatting.
         var spacing = Enumerable.Range(1000, 29).Select(n => "SA" + n).Concat(["SA1134", "SA1137", "SA1500", "SA1107"]).ToArray();
         Rule("IDE0055", spacing);
         lines.Add("csharp_new_line_before_open_brace = all");
-        lines.Add("csharp_preserve_single_line_blocks = true");
-        foreach (var sa in new[] { "SA1501", "SA1502" }.Where(setup.IsOn))
-        {
-            result.Reasons[sa] = "the SDK can't expand single-line blocks without also expanding auto-properties";
-        }
+        lines.Add("csharp_preserve_single_line_blocks = true"); // BRO1508/BRO1509 expand them; the SDK would also expand '{ get; set; }'
 
         lines.Add($"csharp_preserve_single_line_statements = {Bool(!setup.IsOn("SA1107"))}");
         if (setup.Setting("indentation", "indentationSize") is { ValueKind: JsonValueKind.Number } size)

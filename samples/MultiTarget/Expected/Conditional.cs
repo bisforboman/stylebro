@@ -41,6 +41,8 @@ public class OnlyOnNet10
 
     public string Name { get; set; } = string.Empty;
 
-    public void Run() { }
+    public void Run()
+    {
+    }
 }
 #endif

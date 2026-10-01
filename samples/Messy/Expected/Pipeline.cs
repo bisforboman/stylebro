@@ -12,7 +12,9 @@ public class Stage
 public class Pipeline : Stage
 {
     public Pipeline()
-        : this("default") { }
+        : this("default")
+    {
+    }
 
     public Pipeline(string name)
         : base(name)

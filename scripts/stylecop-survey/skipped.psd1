@@ -115,12 +115,8 @@
             Revisit = 'Nothing automatic.' }
 
         # ---- Layout ------------------------------------------------------------------------------------------------
-        SA1501 = @{ Status = 'Candidate'; Why = 'The SDK''s `csharp_preserve_single_line_blocks = false` fixes it (measured) but also expands every auto-property''s `{ get; set; }`, which StyleCop allows, so the preset keeps single-line blocks.'
-            Revisit = 'BRO rule: expand single-line statement blocks (`if (x) { return; }`) only. Do with SA1502. Medium (indentation from .editorconfig, like BRO1105).' }
-        SA1502 = @{ Status = 'Candidate'; Why = 'Same SDK problem as SA1501. 356 findings in the private app (which has it off).'
-            Revisit = 'BRO rule: expand single-line types, methods, and accessors with bodies; leave `{ get; set; }` and empty-bodied auto-properties alone, like StyleCop.' }
         SA1504 = @{ Status = 'Candidate'; Why = 'Not done yet. All accessors of a property single-line or all multi-line.'
-            Revisit = 'Expand the single-line ones (StyleCop''s fix). Overlaps with SA1502; do together. Small-medium.' }
+            Revisit = 'Expand the single-line accessors (StyleCop''s fix); BRO1509''s fix leaves accessors on one line each, so this would be its own rule. Small.' }
         SA1506 = @{ Status = 'Candidate'; Why = 'Not done yet. No blank line between a doc comment and its element.'
             Revisit = 'Delete the blank lines; the BlankLineAfter code (BRO1503/BRO1506) has the line logic. Small.' }
         SA1511 = @{ Status = 'Candidate'; Why = 'Not done yet. No blank line before the `while` of a `do ... while`.'

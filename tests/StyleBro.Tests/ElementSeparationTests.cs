@@ -163,4 +163,18 @@ public class ElementSeparationTests
 
         class C { }
         """);
+
+    [Fact]
+    public Task OneLineType_IsExpandedLikeBRO1509() => VerifyFixAsync("""
+        public class Gauge { private int level; {|BRO1505:|}public int Level => this.level; {|BRO1505:|}public void Reset() { this.level = 0; } }
+        """, """
+        public class Gauge
+        {
+            private int level;
+
+            public int Level => this.level;
+
+            public void Reset() { this.level = 0; }
+        }
+        """);
 }

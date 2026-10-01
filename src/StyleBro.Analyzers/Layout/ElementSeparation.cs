@@ -81,7 +81,8 @@ internal static class ElementSeparation
         };
     }
 
-    private static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text)
+    /// <summary>Whether two neighbouring elements need a blank line between them (BRO1505; also used by BRO1509's fix).</summary>
+    public static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text)
     {
         if (previous.ContainsDiagnostics || current.ContainsDiagnostics)
         {

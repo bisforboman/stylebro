@@ -45,4 +45,6 @@ public static class DiagnosticIds
     public const string ElementsSeparatedByBlankLine = "BRO1505";
     public const string BlankLineAfterComment = "BRO1506";
     public const string BlankLinesAtEndOfFile = "BRO1507";
+    public const string SingleLineStatementBlock = "BRO1508";
+    public const string SingleLineElement = "BRO1509";
 }

@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 52 StyleBro (52 done), 44 drop, 44 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 54 StyleBro (54 done), 44 drop, 42 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -60,8 +60,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1613](skipped-rules.md#sa1613) | Element parameter documentation should declare parameter name | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1620](skipped-rules.md#sa1620) | Generic type parameter documentation should match type parameters | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1621](skipped-rules.md#sa1621) | Generic type parameter documentation should declare parameter name | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1502](skipped-rules.md#sa1502) | Element should not be on a single line | on / on / off | 0 / 0 / 356 | candidate |
-| [SA1501](skipped-rules.md#sa1501) | Statement should not be on a single line | on / on / off | 0 / 0 / 1 | candidate |
 | [SA1132](skipped-rules.md#sa1132) | Do not combine fields | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1142](skipped-rules.md#sa1142) | Refer to tuple fields by name | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1634](skipped-rules.md#sa1634) | File header should show copyright | on / off / on | 0 / 0 / 0 | candidate |
@@ -143,8 +141,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
 | SA1500 | Braces for multi-line statements should not share line | on | yes | on / on / off | 0 / 0 / 6 | fixed | SDK: IDE0055 (`csharp_new_line_before_open_brace = all`) |
-| SA1501 | Statement should not be on a single line | on | yes | on / on / off | 0 / 0 / 1 | fixed | Not yet: StyleBro candidate. The SDK's `csharp_preserve_single_line_blocks = false` fixes it (measured) but also expands every auto-property's `{ get; set; }`, which StyleCop allows, so the preset keeps single-line blocks. ([details](skipped-rules.md#sa1501)) |
-| SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | Not yet: StyleBro candidate. Same SDK problem as SA1501. 356 findings in the private app (which has it off). ([details](skipped-rules.md#sa1502)) |
+| SA1501 | Statement should not be on a single line | on | yes | on / on / off | 0 / 0 / 1 | fixed | StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported |
+| SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509) |
 | SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
 | SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. All accessors of a property single-line or all multi-line. ([details](skipped-rules.md#sa1504)) |
 | SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
