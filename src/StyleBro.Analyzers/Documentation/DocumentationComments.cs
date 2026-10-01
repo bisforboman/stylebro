@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Documentation;
@@ -30,16 +31,66 @@ internal static class DocumentationComments
         return member.GetLeadingTrivia().Any(IsDocumentationComment);
     }
 
+    /// <summary>Exposed elements (visible outside the assembly) need documentation: StyleCop's documentExposedElements.</summary>
+    public const string ExposedElementsKey = "stylebro_document_exposed_elements";
+
+    /// <summary>Elements visible only inside the assembly need documentation: StyleCop's documentInternalElements.</summary>
+    public const string InternalElementsKey = "stylebro_document_internal_elements";
+
+    /// <summary>Private elements (and members of private types) need documentation: StyleCop's documentPrivateElements.</summary>
+    public const string PrivateElementsKey = "stylebro_document_private_elements";
+
     /// <summary>
     /// Whether every symbol the declaration declares overrides a member or implements an interface member, so its
-    /// documentation can come from there. Members of private types are left out, like StyleCop, which doesn't require
-    /// documentation for them.
+    /// documentation can come from there, and needs documentation at all: like StyleCop's SA1600, by the member's
+    /// effective accessibility (a public member of an internal type is internal) and the three settings above
+    /// (defaults: exposed and internal yes, private no).
     /// </summary>
-    public static bool InheritsDocumentation(IEnumerable<ISymbol> symbols)
+    public static bool InheritsDocumentation(IEnumerable<ISymbol> symbols, AnalyzerConfigOptions options)
     {
         var list = symbols.ToList();
         return list.Count > 0 && list.All(s =>
-            !IsInPrivateType(s) && (s.IsOverride || ImplementsInterfaceMember(s)));
+            NeedsDocumentation(s, options) && (s.IsOverride || ImplementsInterfaceMember(s)));
+    }
+
+    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
+    {
+        var (key, defaultValue) = GetVisibility(symbol) switch
+        {
+            Accessibility.Public => (ExposedElementsKey, true),
+            Accessibility.Internal => (InternalElementsKey, true),
+            _ => (PrivateElementsKey, false),
+        };
+        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
+    }
+
+    /// <summary>
+    /// Public (visible outside the assembly, including protected), Internal or Private, from the member and every type
+    /// around it. Explicit interface implementations count as public.
+    /// </summary>
+    private static Accessibility GetVisibility(ISymbol symbol)
+    {
+        var result = Accessibility.Public;
+        for (var current = symbol; current is not null; current = current.ContainingType)
+        {
+            var accessibility = current is IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }
+                || current is IPropertySymbol { ExplicitInterfaceImplementations.Length: > 0 }
+                || current is IEventSymbol { ExplicitInterfaceImplementations.Length: > 0 }
+                    ? Accessibility.Public
+                    : current.DeclaredAccessibility;
+            var level = accessibility switch
+            {
+                Accessibility.Public or Accessibility.Protected or Accessibility.ProtectedOrInternal => Accessibility.Public,
+                Accessibility.Internal or Accessibility.ProtectedAndInternal => Accessibility.Internal,
+                _ => Accessibility.Private,
+            };
+            if (level < result)
+            {
+                result = level;
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -139,19 +190,6 @@ internal static class DocumentationComments
 
         return token.Parent?.AncestorsAndSelf().FirstOrDefault(n => n.SpanStart == token.SpanStart && n is MemberDeclarationSyntax)
             is { } member && member is not BaseNamespaceDeclarationSyntax;
-    }
-
-    private static bool IsInPrivateType(ISymbol symbol)
-    {
-        for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
-        {
-            if (type.DeclaredAccessibility == Accessibility.Private)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /// <summary>Implicit and explicit implementations alike: FindImplementationForInterfaceMember returns both.</summary>

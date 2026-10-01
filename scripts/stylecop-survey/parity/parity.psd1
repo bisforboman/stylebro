@@ -216,6 +216,10 @@
             Name     = 'constraints-regions'
             Map      = @('SA1127=BRO1111', 'SA1124=BRO1112', 'SA1123=BRO1113')
             Expected = @(
+                # A region between switch expression arms with blank lines around it: StyleBro keeps one blank line
+                # where it was (like between members), StyleCop's fix removes both.
+                'StyleBro output only: Constraints.cs: []'
+                'StyleBro output only: Constraints.cs: []'
             )
         }
         @{
@@ -270,11 +274,13 @@
                 'StyleBro output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct. Makes a point.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class. Makes one.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Initializes a new instance of Words with the given name.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Creates a words object.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class.Initializes the static members.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class.Cleans up.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct.Makes a point.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class.Makes one.</summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Initializes a new instance of Words with the given name.</summary>]'
             )
         }
         @{

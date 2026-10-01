@@ -13,13 +13,13 @@ namespace StyleBro.Analyzers.Documentation;
 /// </summary>
 internal static class ParameterDocumentation
 {
-    /// <summary>The declarations whose '&lt;param&gt;' tags BRO1611 checks.</summary>
+    /// <summary>
+    /// The declarations whose '&lt;param&gt;' tags BRO1611 checks: like StyleCop 1.2's SA1612, not constructors or
+    /// operators (probed: StyleCop reports neither stale nor out-of-order tags there).
+    /// </summary>
     public static readonly SyntaxKind[] MemberKinds =
     [
         SyntaxKind.MethodDeclaration,
-        SyntaxKind.ConstructorDeclaration,
-        SyntaxKind.OperatorDeclaration,
-        SyntaxKind.ConversionOperatorDeclaration,
         SyntaxKind.IndexerDeclaration,
         SyntaxKind.DelegateDeclaration,
     ];

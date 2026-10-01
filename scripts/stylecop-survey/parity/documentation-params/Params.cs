@@ -113,4 +113,59 @@ namespace Probe
         {
         }
     }
+
+    /// <summary>Ordered by constructor.</summary>
+    public readonly struct Arguments
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Arguments"/> struct.
+        /// </summary>
+        /// <param name="outcome">The outcome.</param>
+        /// <param name="context">The context.</param>
+        public Arguments(object context, object outcome)
+        {
+        }
+    }
+
+    /// <summary>Ordered by constructor.</summary>
+    public class Rejected
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Rejected"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="retryAfter">The retry.</param>
+        public Rejected(int retryAfter, string message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Rejected"/> class.
+        /// </summary>
+        /// <param name="gone">Removed.</param>
+        public Rejected()
+        {
+        }
+    }
+
+    /// <summary>Other members.</summary>
+    public class Others
+    {
+        /// <summary>Handles.</summary>
+        /// <param name="b">The b.</param>
+        /// <param name="a">The a.</param>
+        public delegate void Handler(int a, int b);
+
+        /// <summary>Gets an item.</summary>
+        /// <param name="b">The b.</param>
+        /// <param name="a">The a.</param>
+        /// <returns>The item.</returns>
+        public int this[int a, int b] => a;
+
+        /// <summary>Adds.</summary>
+        /// <param name="b">The b.</param>
+        /// <param name="a">The a.</param>
+        /// <returns>The sum.</returns>
+        public static Others operator +(Others a, Others b) => a;
+    }
 }

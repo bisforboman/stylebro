@@ -414,6 +414,42 @@ public class DocumentationTests
         """);
 
     [Fact]
+    public Task InheritDoc_FollowsTheDocumentationScope() => VerifyFixAsync("""
+        public interface IShape
+        {
+            int Sides { get; }
+        }
+
+        /// <summary>Public.</summary>
+        public class Square : IShape
+        {
+            public int {|BRO1601:Sides|} => 4;
+        }
+
+        internal class Triangle : IShape
+        {
+            public int Sides => 3;
+        }
+        """, """
+        public interface IShape
+        {
+            int Sides { get; }
+        }
+
+        /// <summary>Public.</summary>
+        public class Square : IShape
+        {
+            /// <inheritdoc/>
+            public int Sides => 4;
+        }
+
+        internal class Triangle : IShape
+        {
+            public int Sides => 3;
+        }
+        """, editorConfig: "stylebro_document_internal_elements = false");
+
+    [Fact]
     public Task ConstructorSummaries_BeginWithTheStandardText() => VerifyFixAsync("""
         /// <summary>Words.</summary>
         public class Words
@@ -432,6 +468,12 @@ public class DocumentationTests
             /// {|BRO1606:<summary>|}Initializes a new instance of the Words class.</summary>
             /// <param name="s">The s.</param>
             public Words(string s)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Initializes a new instance of Words with the given name.</summary>
+            /// <param name="b">The b.</param>
+            public Words(byte b)
             {
             }
 
@@ -485,6 +527,12 @@ public class DocumentationTests
             {
             }
 
+            /// <summary>Initializes a new instance of the <see cref="Words"/> class. Initializes a new instance of Words with the given name.</summary>
+            /// <param name="b">The b.</param>
+            public Words(byte b)
+            {
+            }
+
             /// <summary>
             /// Initializes static members of the <see cref="Words"/> class. Loads the defaults.
             /// </summary>
@@ -531,7 +579,26 @@ public class DocumentationTests
             {
             }
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Words"/> class representing <paramref name="b"/>.
+            /// </summary>
+            /// <param name="b">The b.</param>
+            public Words(byte b)
+            {
+            }
+
             public Words(string s)
+            {
+            }
+        }
+
+        /// <summary>A pair.</summary>
+        /// <typeparam name="TKey">The key.</typeparam>
+        /// <typeparam name="TValue">The value.</typeparam>
+        public class Pair<TKey, TValue>
+        {
+            /// <summary>Initializes a new instance of the <see cref="Pair{TKey, TValue}" /> class.</summary>
+            public Pair()
             {
             }
         }

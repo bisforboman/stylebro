@@ -8,7 +8,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 - **StyleBro**: StyleBro provides (or should provide) a rule with a safe automatic fix.
 - **Drop**: there is no safe automatic fix, so StyleBro deliberately doesn't cover it.
 
-Status: **draft (2026-09-30)**. Of 197 rules: 49 SDK, 51 StyleBro (51 done), 14 drop, 77 not yet tested, 6 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 47 SDK, 51 StyleBro (51 done), 14 drop, 79 not yet tested, 6 not applicable or variants.
 
 ## How this was measured
 
@@ -96,8 +96,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
 | SA1500 | Braces for multi-line statements should not share line | on | yes | on / on / off | 0 / 0 / 6 | fixed | SDK: IDE0055 (`csharp_new_line_before_open_brace = all`) |
-| SA1501 | Statement should not be on a single line | on | yes | on / on / off | 0 / 0 / 1 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_blocks = false`) |
-| SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_blocks = false`) |
+| SA1501 | Statement should not be on a single line | on | yes | on / on / off | 0 / 0 / 1 | fixed | Untested. The SDK's `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule |
+| SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | Untested. The SDK's `csharp_preserve_single_line_blocks = false` fixes it but also expands auto-properties (`{ get; set; }`), which StyleCop allows; needs a StyleBro rule |
 | SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
 | SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has a fix, so a StyleBro fix is feasible |
 | SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
@@ -123,7 +123,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 |---|---|---|---|---|---|---|---|
 | SA1119 | Statement should not use unnecessary parenthesis | on | yes | on / on / off | 0 / 0 / 1 | fixed | SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`) |
 | SA1119_p | Statement should not use unnecessary parenthesis | on | yes | on / off / on | 0 / 0 / 0 |  | Variant of another rule (not in 1.1.118 as a separate rule) |
-| SA1400 | Access modifier should be declared | on | yes | on / on / off | 0 / 0 / 10 | fixed | SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = always`) |
+| SA1400 | Access modifier should be declared | on | yes | on / on / off | 0 / 0 / 10 | fixed | SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn't ask for) |
 | SA1401 | Fields should be private | on | no | off / off / off | 141 / 48 / 39 |  | Drop: making a field private changes public API; no safe automatic fix |
 | SA1402 | File may only contain a single type | on | yes | on / off / off | 0 / 34 / 1 |  | Drop: splitting types into new files is not something `dotnet format` can do |
 | SA1403 | File may only contain a single namespace | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
@@ -210,7 +210,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |
 | SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 0 / 7 / 352 | not fixed | StyleBro **BRO1106** (done), same results as StyleCop |
 | SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1113** (done), same results and output as StyleCop |
-| SA1124 | Do not use regions | on | yes | on / off / off | 0 / 264 / 17 |  | StyleBro **BRO1112** (done), off in the preset like StyleCop's default |
+| SA1124 | Do not use regions | on | yes | on / off / off | 0 / 264 / 17 |  | StyleBro **BRO1112** (done), off in the preset (StyleCop has it on; opt-in because it's a large one-time change) |
 | SA1125 | Use shorthand for nullable types | on | no | on / on / on | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1126 | Prefix calls correctly | off | no | off / off / off | 0 / 0 / 0 |  | Untested. StyleCop has no fix |
 | SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 0 / 0 / 82 |  | StyleBro **BRO1111** (done), same results and output as StyleCop |

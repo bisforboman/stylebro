@@ -16,6 +16,18 @@ namespace Probe
         {
         }
 
+        /// <summary>Initializes a new instance of the <see cref="Words"/> class representing <paramref name="b"/>.</summary>
+        /// <param name="b">The b.</param>
+        public Words(byte b)
+        {
+        }
+
+        /// <summary>Initializes a new instance of Words with the given name.</summary>
+        /// <param name="name">The name.</param>
+        public Words(string name)
+        {
+        }
+
         /// <summary>Initializes the static members.</summary>
         static Words()
         {

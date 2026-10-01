@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -44,9 +45,11 @@ internal static class ConstructorSummaries
             return null;
         }
 
+        // Like StyleCop, only the beginning counts: 'Initializes a new instance of the <see cref="X"/> class
+        // representing ...' is fine.
         var line = text.Lines.GetLineFromPosition(start);
         var rest = text.ToString(TextSpan.FromBounds(start, line.End));
-        if (accepted.Any(a => Normalize(rest).StartsWith(a, StringComparison.Ordinal)))
+        if (accepted.Any(a => StartsWithWords(Normalize(rest), a.TrimEnd('.'))))
         {
             return null;
         }
@@ -63,8 +66,17 @@ internal static class ConstructorSummaries
                 return null;
             }
 
+            // Only a sentence that is just the standard one with the type named differently; anything more
+            // ('Initializes a new instance of Foo with the given name.') says something and stays.
+            var sentence = rest.Substring(0, end);
+            if (!sentence.EndsWith(" class", StringComparison.Ordinal) && !sentence.EndsWith(" struct", StringComparison.Ordinal)
+                && !sentence.EndsWith(" type", StringComparison.Ordinal))
+            {
+                end = -1;
+            }
+
             replaceLength = end + 1;
-            while (replaceLength < rest.Length && rest[replaceLength] == ' ')
+            while (replaceLength > 0 && replaceLength < rest.Length && rest[replaceLength] == ' ')
             {
                 replaceLength++;
             }
@@ -111,8 +123,20 @@ internal static class ConstructorSummaries
         return end == summary.StartTag.Span.End ? end : null;
     }
 
-    /// <summary>Compares documentation text independent of the space in '&lt;see cref="X" /&gt;'.</summary>
-    private static string Normalize(string text) => text.Replace(" />", "/>");
+    /// <summary>Whether <paramref name="text"/> begins with <paramref name="prefix"/> as whole words ('class', not 'classes').</summary>
+    private static bool StartsWithWords(string text, string prefix)
+    {
+        return text.StartsWith(prefix, StringComparison.Ordinal) && (text.Length == prefix.Length || !char.IsLetterOrDigit(text[prefix.Length]));
+    }
+
+    /// <summary>
+    /// Compares documentation text independent of spacing that doesn't change the link: '&lt;see cref="X" /&gt;',
+    /// 'X{TKey, TValue}'.
+    /// </summary>
+    private static string Normalize(string text)
+    {
+        return Regex.Replace(text.Replace(" />", "/>"), @"\{[^}]*\}", m => Regex.Replace(m.Value, @"\s+", string.Empty));
+    }
 
     /// <summary>A constructor or destructor whose summary doesn't begin with the standard text, and the edit.</summary>
     public sealed class Finding

@@ -66,4 +66,37 @@ namespace Probe
         #endregion
     }
     #endregion
+
+    /// <summary>Regions in expressions.</summary>
+    public static class Switches
+    {
+        /// <summary>Names a number.</summary>
+        /// <param name="n">The number.</param>
+        /// <returns>The name.</returns>
+        public static string Name(int n) => n switch
+        {
+            1 => "one",
+
+            #region Larger
+
+            2 => "two",
+
+            #endregion
+
+            _ => "many",
+        };
+
+        /// <summary>Lists numbers.</summary>
+        /// <returns>The numbers.</returns>
+        public static int[] List()
+        {
+            return new[]
+            {
+                1,
+                #region More
+                2,
+                #endregion
+            };
+        }
+    }
 }

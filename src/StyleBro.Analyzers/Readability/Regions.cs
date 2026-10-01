@@ -94,14 +94,12 @@ internal static class Regions
     }
 
     /// <summary>
-    /// Inside a code element: some member that isn't a type or namespace has the directive within its span (not in the
-    /// leading trivia before it, which is between members).
+    /// Inside a code element: within a statement block ('{ }' of a method, accessor, lambda, ...), like StyleCop's
+    /// SA1123. A region in an expression body (a switch expression after '=>') is SA1124's, probed with StyleCop 1.2.
     /// </summary>
     private static bool IsInCodeElement(SyntaxTrivia trivia)
     {
         var position = trivia.SpanStart;
-        return trivia.Token.Parent?.AncestorsAndSelf().Any(n =>
-            n is MemberDeclarationSyntax and not BaseTypeDeclarationSyntax and not BaseNamespaceDeclarationSyntax and not EnumMemberDeclarationSyntax
-            && n.Span.Contains(position)) == true;
+        return trivia.Token.Parent?.AncestorsAndSelf().Any(n => n is BlockSyntax && n.Span.Contains(position)) == true;
     }
 }

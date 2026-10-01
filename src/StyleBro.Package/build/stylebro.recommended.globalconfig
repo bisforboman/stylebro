@@ -77,7 +77,7 @@ dotnet_diagnostic.BRO1110.severity = warning
 # BRO1111: generic type constraints on their own line (SA1127)
 dotnet_diagnostic.BRO1111.severity = warning
 
-# BRO1112: no regions (SA1124). Off, like StyleCop's default; set to warning to remove regions.
+# BRO1112: no regions (SA1124). Off (StyleCop has it on): removing every region is a large one-time change; set to warning to opt in.
 dotnet_diagnostic.BRO1112.severity = none
 
 # BRO1113: no regions inside code elements (SA1123)
@@ -147,15 +147,16 @@ csharp_prefer_braces = true
 dotnet_diagnostic.IDE0011.severity = warning
 
 # Formatting (IDE0055): spacing, indentation and line breaks. Covers the spacing rules SA1000-SA1028, SA1134,
-# SA1137, and with the line-break settings below SA1500, SA1501, SA1502 and SA1107 (verified with
-# scripts/stylecop-survey/Test-SdkCoverage.ps1).
+# SA1137, and with the line-break settings below SA1500 and SA1107 (verified with
+# scripts/stylecop-survey/Test-SdkCoverage.ps1). Single-line blocks are kept: the SDK would expand
+# 'void M() { }' (SA1501/SA1502) only together with every auto-property's '{ get; set; }', which StyleCop allows.
 dotnet_diagnostic.IDE0055.severity = warning
 csharp_new_line_before_open_brace = all
 csharp_preserve_single_line_statements = false
-csharp_preserve_single_line_blocks = false
+csharp_preserve_single_line_blocks = true
 
-# Explicit access modifiers (SA1400)
-dotnet_style_require_accessibility_modifiers = always
+# Explicit access modifiers (SA1400), except on interface members, which SA1400 leaves alone
+dotnet_style_require_accessibility_modifiers = for_non_interface_members
 dotnet_diagnostic.IDE0040.severity = warning
 
 # 'int' and 'string' instead of 'Int32' and 'String' (SA1121)
