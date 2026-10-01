@@ -19,7 +19,8 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 (see the log below) and 44 rules; 275 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
-alpha.3 (18 rules). `stylebro-migrate` isn't published yet (release.yml packs only StyleBro.Package).
+alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
+tool) with the same version; CI packs both too.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
 is starting out. Keep adding rules on `main` and release again once there's a critical mass of new rules. Don't
@@ -32,7 +33,8 @@ suggest or push a release tag after each batch; mention it only when a release l
 - `src/StyleBro.CodeFixes`: netstandard2.0, Workspaces, code fixes + Fix All providers. References Analyzers.
 - `src/StyleBro.Package`: packs both DLLs into `analyzers/dotnet/cs`, plus `build/StyleBro.Analyzers.targets`
   that adds `stylebro.recommended.globalconfig` (global_level -1; opt out with `<StyleBroPreset>none</StyleBroPreset>`).
-- `src/StyleBro.Migrate`: net8.0 console tool `stylebro-migrate` (PackAsTool, not published yet), see "Migration tool".
+- `src/StyleBro.Migrate`: net8.0 console tool `stylebro-migrate` (PackAsTool, published from alpha.5 with the analyzers;
+  its package README is `src/StyleBro.Migrate/README.md`), see "Migration tool".
   References StyleBro.Analyzers (reads every rule's "Replaces StyleCop SAxxxx" from its description) and embeds
   `scripts/stylecop-survey/data/inventory-1.2.0-beta.556.csv` and `data/mapping.csv` (written by New-Mapping.ps1).
 - `tests/StyleBro.Tests`: xunit + Microsoft.CodeAnalysis.CSharp.CodeFix.Testing 1.1.2 (`DefaultVerifier`).
@@ -345,6 +347,8 @@ suggest or push a release tag after each batch; mention it only when a release l
   and an .editorconfig can't remove a key the preset's global config sets. The private app has SA1208/SA1210 off and
   unsorted usings: the block writing `true` changed ~95 files, `false` ~1,650. Now the sort keys are written only
   when SA1208 or SA1210 is on.
+- SX ids are read too (the reader used to accept only SA ids, so SX settings were silently ignored): SX1101 -> IDE0003,
+  SX1309 -> `_camelCase`; SA1412 on -> `charset = utf-8-bom`.
 - Also read: the StyleCop.Analyzers version (1.1.x: SA1141/SA1142/SA1316/SA1414 off) and whether any project sets
   GenerateDocumentationFile. Without it StyleCop's XML doc rules never run in the build (SA0001), but `dotnet format`
   parses docs anyway, so BRO1603-BRO1611 stay off (the private app: 5 `<placeholder>` unwraps before).
@@ -461,8 +465,15 @@ suggest or push a release tag after each batch; mention it only when a release l
   constants (`AnyValue_String_Value`, BRO1308), Newtonsoft.Json showed the `Int32_0` -> `Int320` bug (fixed: skip
   digit_digit) and, through its tests, the serializer-attribute and ShouldSerialize cases (fixed: guards above).
   Final run of BRO1301-BRO1309: every repo compiles; Polly 3065/3065, private app all, Serilog all, Newtonsoft.Json
-  3613/3617 (the 4 locale failures). The string guard for private fields was narrowed afterwards (see above); rerun
-  the naming rules with the repos' tests before the next release.
+  3613/3617 (the 4 locale failures). The string guard for private fields was narrowed afterwards (see above).
+- **Naming rerun with the narrowed guard** (2026-10-01, after alpha.4 had shipped without it): BRO1301-BRO1309 on all
+  repos, default `camelCase`. FFMpegCore 80, Polly 463, OpenTelemetry 203, private app 1070, Newtonsoft.Json 455,
+  Serilog 198 renames; all compile; left with the warning on purpose: Polly 5, private app 7, Newtonsoft.Json 49
+  (guards). Tests: Polly all (4 frameworks), private app 6454/6454, Serilog all (5 frameworks, API approval
+  included), Newtonsoft.Json 3613/3617 (the 4 locale failures), FFMpegCore 204/209 with the same 4 cancellation-test
+  failures on the untouched code (machine timing/ffmpeg, checked with git stash), OpenTelemetry (first time with its tests): the only failures (Prometheus HTTP listener, net472 serializer and
+  self-diagnostics tests) are identical on the untouched code (machine environment).
+  Humanizer (not a reference repo) doesn't build here, so it says nothing.
 - **BRO1109-BRO1113** (2026-09-30): FFMpegCore 15, Polly 411 (BRO1112 264 = its SA1124 count, BRO1113 147),
   OpenTelemetry 0, private app 1146 (BRO1110 1044, BRO1111 82), Newtonsoft.Json 1415 (1102 regions, incl. the
   `#region License` around every file header; the BOM stays), Serilog 5. All fixed in one pass, no new compile
@@ -510,6 +521,6 @@ suggest or push a release tag after each batch; mention it only when a release l
      Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.
 5. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
    `<param>` kept in sync with the parameters. These need the semantic model.
-6. ~~StyleCop migration tool~~ Done (`src/StyleBro.Migrate`, see "Migration tool"); not yet published as a .NET tool.
+6. ~~StyleCop migration tool~~ Done (`src/StyleBro.Migrate`, see "Migration tool"); published as a .NET tool from alpha.5.
 7. Later: blank-line layout rules (the SDK's IDE2000 series is only experimental), baseline support
    (fail only on new violations).
