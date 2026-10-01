@@ -1,9 +1,7 @@
 name: Release
 
 # Push a tag like v0.1.0-alpha.1 to publish that version to nuget.org.
-# Authentication uses nuget.org Trusted Publishing: no long-lived API key is stored anywhere.
-# One-time setup: a Trusted Publishing policy on nuget.org for bisforboman/stylebro, workflow file
-# release.yml, environment release; plus a repository variable NUGET_USER holding the nuget.org profile name.
+# Prerelease tags (with a 
 
 on:
   push:
@@ -12,7 +10,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    environment: release
+    environment: ${{ contains(github.ref_name, '-') && 'prerelease' || 'release' }}
     permissions:
       contents: write   # create the GitHub release
       id-token: write   # request the OIDC token that NuGet/login exchanges for a temporary API key

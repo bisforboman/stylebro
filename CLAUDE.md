@@ -59,7 +59,10 @@ suggest or push a release tag after each batch; mention it only when a release l
   Set up: nuget.org Trusted Publishing policy (repo owner bisforboman, repo stylebro, workflow `release.yml`,
   environment `release`, packages `StyleBro.*`, new packages allowed), repo *variable* `NUGET_USER` = `bisforboman`
   (nuget.org profile name; a variable, not a secret, so logs aren't masked), and the `release` environment
-  requires the owner's approval. The first failure (HTTP 401
+  requires the owner's approval. Since 2026-10-01 (user's decision: "prereleases auto"): tags with a `-` use the
+  `prerelease` environment instead, which has no reviewers and only accepts tags matching `v*-*` (deployment tag
+  policy), so alphas publish as soon as the tag is pushed and stable tags still wait for approval. It needs its own
+  nuget.org Trusted Publishing policy (same repo/workflow, environment `prerelease`), added by the owner on nuget.org. The first failure (HTTP 401
   "No matching trust policy") was simply a missing policy.
 
 ## Design rules for every rule
@@ -488,7 +491,8 @@ suggest or push a release tag after each batch; mention it only when a release l
    StyleCop; differences are bugs or deliberate, documented choices.
 3. ~~Check the name, create the repo, publish.~~ Done: public at `github.com/bisforboman/stylebro` (MIT);
    `StyleBro.Analyzers 0.1.0-alpha.1` published to nuget.org on 2026-09-30 by release.yml (tag at `bc053c2`).
-   To release: bump nothing in the csproj, just push a tag `vX.Y.Z[-suffix]` and approve the `release` environment.
+   To release: move the Unshipped rules to Shipped, bump `<Version>` in StyleBro.Package.csproj (as for alpha.3/alpha.4),
+   push a tag `vX.Y.Z[-suffix]`; a prerelease publishes on its own, a stable version needs the `release` approval.
 4. Scope = migration parity, not "port every StyleCop rule". `docs/stylecop-mapping.md` (draft, 2026-09-30) maps
    all 197 StyleCop diagnostics to SDK / StyleBro / drop, from: the rule inventory read from the StyleCop DLLs
    (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
