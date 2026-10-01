@@ -60,6 +60,8 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md). The rules
 StyleBro doesn't cover, why, and what it would take to add them: [docs/skipped-rules.md](docs/skipped-rules.md).
+Where the preset and the rules differ from StyleCop's defaults, and how to get StyleCop's behavior back:
+[docs/differences-from-stylecop.md](docs/differences-from-stylecop.md).
 
 ## Usage
 

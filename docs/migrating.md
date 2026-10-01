@@ -1,7 +1,8 @@
 # Migrating from StyleCop
 
 Switching a StyleCop-clean repository to StyleBro shouldn't reformat code StyleCop was happy with. StyleBro's preset
-follows StyleCop's defaults, but most teams have changed some of them. `stylebro-migrate` reads what your team changed
+follows StyleCop's defaults with a few deliberate exceptions ([differences-from-stylecop.md](differences-from-stylecop.md)),
+but most teams have changed some of StyleCop's defaults anyway. `stylebro-migrate` reads what your team changed
 and writes the matching settings.
 
 ```

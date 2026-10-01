@@ -79,7 +79,9 @@ suggest or push a release tag after each batch; mention it only when a release l
 5. Every rule gets a `docs/rules/BROxxxx.md`, a row in `AnalyzerReleases.Unshipped.md`, unit tests covering
    the single fix + Fix All, and a case in `samples/Messy`. Rule pages share one structure: intro, `## Example`
    with `### Before`/`### After` csharp blocks, `## Why`, then as needed How the fix works / Configuration /
-   Not reported / Compared with StyleCop. `DocExamplesTests` runs every example (Before compiles and gets the
+   Not reported / Compared with StyleCop. Every rule is also listed in `docs/differences-from-stylecop.md` (under
+   "Same as StyleCop" if nothing differs), and every preset value that differs from StyleCop's defaults is explained
+   there (user's request, 2026-10-01: "so it's obvious later"); `MigrationTests` enforces both. `DocExamplesTests` runs every example (Before compiles and gets the
    diagnostic, one Fix All pass gives exactly After, After compiles clean), so examples can't go stale.
 
 ## BRO1001: member ordering (implemented, unit + dotnet format tests pass)

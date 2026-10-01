@@ -296,6 +296,46 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void EveryPresetDifferenceFromStyleCop_IsDocumented()
+    {
+        // What StyleCop's defaults translate to (a repository without StyleCop settings that generates docs) ...
+        Write("Directory.Build.props", "<Project><PropertyGroup><GenerateDocumentationFile>true</GenerateDocumentationFile></PropertyGroup></Project>");
+        var styleCop = KeyValues(Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+
+        // ... against the preset: every key the preset sets differently must be named in docs/differences-from-stylecop.md.
+        var preset = KeyValues(File.ReadAllLines(Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig")));
+        var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
+        var different = preset.Where(p => p.Key is not "is_global" and not "global_level"
+            && styleCop.TryGetValue(p.Key, out var value) && value != p.Value).Select(p => p.Key).ToList();
+
+        Assert.NotEmpty(different);
+        Assert.All(different, key => Assert.True(
+            page.Contains(key, StringComparison.Ordinal) || page.Contains(key[..key.LastIndexOf('_')] + "_*", StringComparison.Ordinal),
+            $"The preset sets {key} = {preset[key]} (StyleCop's defaults: {styleCop[key]}); explain it in docs/differences-from-stylecop.md."));
+    }
+
+    [Fact]
+    public void EveryRule_IsInTheDifferencesPage()
+    {
+        var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
+
+        Assert.All(Migration.StyleBroRules(), rule => Assert.True(
+            page.Contains($"[{rule.Id}](rules/{rule.Id}.md)", StringComparison.Ordinal),
+            $"{rule.Id} is missing from docs/differences-from-stylecop.md (list it under 'Same as StyleCop' if nothing differs)."));
+    }
+
+    private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in lines.Select(l => l.Trim()).Where(l => l.Contains('=') && !l.StartsWith('#') && !l.StartsWith('[')))
+        {
+            var equals = line.IndexOf('=');
+            result[line[..equals].Trim()] = line[(equals + 1)..].Split('#')[0].Trim();
+        }
+
+        return result;
+    }
+    [Fact]
     public void DisablePreset_AddsThePropertyOnce()
     {
         Assert.Contains("<StyleBroPreset>none</StyleBroPreset>", Migration.DisablePreset(null));

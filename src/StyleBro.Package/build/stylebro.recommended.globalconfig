@@ -1,6 +1,8 @@
 is_global = true
 global_level = -1
 
+# Follows StyleCop's defaults except where docs/differences-from-stylecop.md says otherwise (test-enforced).
+
 # ---------------------------------------------------------------------------
 # StyleBro rules
 # ---------------------------------------------------------------------------
@@ -49,6 +51,7 @@ dotnet_diagnostic.BRO1302.severity = warning
 # BRO1303: private field names are camelCase (SA1306/SA1309). For '_count' instead of 'count', set
 # stylebro_private_field_naming = _camelCase in .editorconfig.
 dotnet_diagnostic.BRO1303.severity = warning
+stylebro_private_field_naming = camelCase
 
 # BRO1304: interface names begin with I (SA1302)
 dotnet_diagnostic.BRO1304.severity = warning
@@ -86,8 +89,12 @@ dotnet_diagnostic.BRO1113.severity = warning
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 
-# BRO1601: <inheritdoc/> on undocumented overrides and implementations (SA1600, for these members only)
+# BRO1601: <inheritdoc/> on undocumented overrides and implementations (SA1600, for these members only). Which members
+# need documentation, like stylecop.json's documentationRules (StyleCop's defaults):
 dotnet_diagnostic.BRO1601.severity = warning
+stylebro_document_exposed_elements = true
+stylebro_document_internal_elements = true
+stylebro_document_private_elements = false
 
 # BRO1602: '//' instead of '///' for plain comments (SA1626)
 dotnet_diagnostic.BRO1602.severity = warning
@@ -187,7 +194,14 @@ dotnet_diagnostic.IDE2002.severity = warning
 dotnet_style_allow_statement_immediately_after_block_experimental = false
 dotnet_diagnostic.IDE2003.severity = warning
 
-# Not set on purpose:
-# - 'this.' qualification (SA1101): not required, like the SDK default; most teams turn SA1101 off.
+# 'this.' qualification (SA1101, on in StyleCop): not required, like the SDK default; most teams turn SA1101 off.
+# To require it like StyleCop, set these to true and IDE0009 to warning.
+dotnet_style_qualification_for_field = false
+dotnet_style_qualification_for_property = false
+dotnet_style_qualification_for_method = false
+dotnet_style_qualification_for_event = false
+dotnet_diagnostic.IDE0009.severity = none
+
+# Not set on purpose (see docs/differences-from-stylecop.md):
 # - File headers (SA1633): set file_header_template in your .editorconfig and IDE0073 to warning.
 # - Naming (IDE1006): StyleBro's BRO13xx rules cover it, and IDE1006 has no Fix All for 'dotnet format'.
