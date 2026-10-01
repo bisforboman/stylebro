@@ -77,7 +77,7 @@ Where the preset and the rules differ from StyleCop's defaults, and how to get S
 ## Usage
 
 ```xml
-<PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.4" PrivateAssets="all" />
+<PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.6" PrivateAssets="all" />
 ```
 
 ```
