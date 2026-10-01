@@ -37,6 +37,9 @@
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
+        SA1613 = 'StyleBro **BRO1612** (done) when the name is certain (one unnamed tag and one undocumented parameter, or all unnamed with one per parameter); StyleCop reports every unnamed tag and has no fix'
+        SA1620 = 'StyleBro **BRO1613** (done), same positions as StyleCop, with a fix (StyleCop has none): stale tags renamed or removed, tags reordered'
+        SA1621 = 'StyleBro **BRO1614** (done) when the name is certain, like BRO1612'
         SA1504 = 'StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop''s applies one direction to the whole project) and keeps comments'
         SA1501 = 'StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported'
         SA1502 = 'StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)'

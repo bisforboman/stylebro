@@ -376,6 +376,38 @@ internal static class Descriptors
         description: "'<param>' tags document the parameters that exist, in their order. Replaces StyleCop SA1612.",
         helpLinkUri: HelpBase + DiagnosticIds.ParameterTagsMatch + ".md");
 
+    public static readonly DiagnosticDescriptor ParameterTagHasName = new(
+        id: DiagnosticIds.ParameterTagHasName,
+        title: "Element parameter documentation should declare parameter name",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Every '<param>' tag has a 'name'. Reported when the name is certain: one unnamed tag and one "
+            + "undocumented parameter, or every tag unnamed with one per parameter. Replaces StyleCop SA1613.",
+        helpLinkUri: HelpBase + DiagnosticIds.ParameterTagHasName + ".md");
+
+    public static readonly DiagnosticDescriptor TypeParameterTagsMatch = new(
+        id: DiagnosticIds.TypeParameterTagsMatch,
+        title: "Generic type parameter documentation should match type parameters",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'<typeparam>' tags document the type parameters that exist, in their order. Replaces StyleCop SA1620.",
+        helpLinkUri: HelpBase + DiagnosticIds.TypeParameterTagsMatch + ".md");
+
+    public static readonly DiagnosticDescriptor TypeParameterTagHasName = new(
+        id: DiagnosticIds.TypeParameterTagHasName,
+        title: "Generic type parameter documentation should declare parameter name",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Every '<typeparam>' tag has a 'name'. Reported when the name is certain, like BRO1612. Replaces "
+            + "StyleCop SA1621.",
+        helpLinkUri: HelpBase + DiagnosticIds.TypeParameterTagHasName + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

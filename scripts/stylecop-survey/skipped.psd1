@@ -145,8 +145,6 @@
             Revisit = 'Removing the empty tag would be a real fix, but trades one diagnostic for SA1609 (off by default). Decide with SA1609.' }
         SA1611 = @{ Status = 'Drop'; Why = 'Missing `<param>`; the fix would be placeholder text (no stubs, user decision).'
             Revisit = 'Revisit with the stub decision.' }
-        SA1613 = @{ Status = 'Candidate'; Why = 'Not done yet. A `<param>` without `name`: when exactly one parameter is undocumented, the name is known.'
-            Revisit = 'Extend BRO1611''s finding (it already renames a stale tag when exactly one parameter is undocumented). Otherwise skip. Small.' }
         SA1614 = @{ Status = 'Drop'; Why = 'An empty `<param>`; the fix would be placeholder text.'
             Revisit = 'Revisit with the stub decision.' }
         SA1615 = @{ Status = 'Drop'; Why = 'Missing `<returns>`; the fix would be placeholder text.'
@@ -157,10 +155,6 @@
             Revisit = 'Revisit with the stub decision.' }
         SA1619 = @{ Status = 'Drop'; Why = 'Same as SA1618 for partial types.'
             Revisit = 'With SA1618.' }
-        SA1620 = @{ Status = 'Candidate'; Why = 'Not done yet. `<typeparam>` tags match the type parameters: the same as BRO1611 for `<param>`.'
-            Revisit = 'Generalize ParameterDocumentation (rename a stale tag, remove, reorder) to type parameters. Check what StyleCop skips (BRO1611 found it skips constructors/operators). Small-medium.' }
-        SA1621 = @{ Status = 'Candidate'; Why = 'Not done yet. A `<typeparam>` without `name`.'
-            Revisit = 'Same as SA1613, for type parameters.' }
         SA1622 = @{ Status = 'Drop'; Why = 'An empty `<typeparam>`; the fix would be placeholder text.'
             Revisit = 'Revisit with the stub decision.' }
         SA1625 = @{ Status = 'Drop'; Why = 'Identical text copied between tags has to be rewritten by a person.'

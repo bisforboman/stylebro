@@ -320,5 +320,12 @@
             Expected = @(
             )
         }
+        @{
+            Name     = 'documentation-typeparams'
+            Map      = @('SA1613=BRO1612', 'SA1620=BRO1613', 'SA1621=BRO1614')
+            CompareOutput = $false
+            Expected = @(
+            )
+        }
     )
 }

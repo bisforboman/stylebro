@@ -8,3 +8,6 @@ Rule ID | Category | Severity | Notes
 BRO1508 | Layout | Warning  | SingleLineBlocksAnalyzer
 BRO1509 | Layout | Warning  | SingleLineBlocksAnalyzer
 BRO1510 | Layout | Warning  | AccessorLayoutAnalyzer
+BRO1612 | Documentation | Warning  | DocumentationAnalyzer
+BRO1613 | Documentation | Warning  | DocumentationAnalyzer
+BRO1614 | Documentation | Warning  | DocumentationAnalyzer

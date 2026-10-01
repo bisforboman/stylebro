@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-89 rules: 39 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+86 rules: 36 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -52,9 +52,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1506](#sa1506) | Element documentation headers should not be followed by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1511](#sa1511) | While-do footer should not be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1514](#sa1514) | Element documentation header should be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1613](#sa1613) | Element parameter documentation should declare parameter name | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1620](#sa1620) | Generic type parameter documentation should match type parameters | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1621](#sa1621) | Generic type parameter documentation should declare parameter name | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1634](#sa1634) | File header should show copyright | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1635](#sa1635) | File header should have copyright text | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1636](#sa1636) | File header copyright text should match | candidate | on / off / on | 0 / 0 / 0 |
@@ -404,36 +401,6 @@ Layout rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel 
 **Why:** Not done yet. A doc comment is preceded by a blank line (unless it follows `{`).
 
 **To revisit:** Mostly covered by BRO1505 (element separation inserts the blank line above the doc comment); check the remaining cases with the parity script. Small.
-
-<a id="sa1613"></a>
-
-### SA1613: Element parameter documentation should declare parameter name
-
-Documentation rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A `<param>` without `name`: when exactly one parameter is undocumented, the name is known.
-
-**To revisit:** Extend BRO1611's finding (it already renames a stale tag when exactly one parameter is undocumented). Otherwise skip. Small.
-
-<a id="sa1620"></a>
-
-### SA1620: Generic type parameter documentation should match type parameters
-
-Documentation rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `<typeparam>` tags match the type parameters: the same as BRO1611 for `<param>`.
-
-**To revisit:** Generalize ParameterDocumentation (rename a stale tag, remove, reorder) to type parameters. Check what StyleCop skips (BRO1611 found it skips constructors/operators). Small-medium.
-
-<a id="sa1621"></a>
-
-### SA1621: Generic type parameter documentation should declare parameter name
-
-Documentation rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A `<typeparam>` without `name`.
-
-**To revisit:** Same as SA1613, for type parameters.
 
 <a id="sa1634"></a>
 

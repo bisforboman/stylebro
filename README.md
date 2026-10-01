@@ -50,6 +50,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1609](docs/rules/BRO1609.md) | Do not use placeholder elements | SA1651 | Yes |
 | [BRO1610](docs/rules/BRO1610.md) | Documentation text should not be empty | SA1627 | Yes |
 | [BRO1611](docs/rules/BRO1611.md) | Element parameter documentation should match element parameters | SA1612 | Yes |
+| [BRO1612](docs/rules/BRO1612.md) | Element parameter documentation should declare parameter name | SA1613 | Yes |
+| [BRO1613](docs/rules/BRO1613.md) | Generic type parameter documentation should match type parameters | SA1620 | Yes |
+| [BRO1614](docs/rules/BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 | [BRO1503](docs/rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Yes |

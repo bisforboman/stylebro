@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 55 StyleBro (55 done), 44 drop, 41 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 58 StyleBro (58 done), 44 drop, 38 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -56,9 +56,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1506](skipped-rules.md#sa1506) | Element documentation headers should not be followed by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1511](skipped-rules.md#sa1511) | While-do footer should not be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1514](skipped-rules.md#sa1514) | Element documentation header should be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1613](skipped-rules.md#sa1613) | Element parameter documentation should declare parameter name | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1620](skipped-rules.md#sa1620) | Generic type parameter documentation should match type parameters | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1621](skipped-rules.md#sa1621) | Generic type parameter documentation should declare parameter name | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1132](skipped-rules.md#sa1132) | Do not combine fields | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1142](skipped-rules.md#sa1142) | Refer to tuple fields by name | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1634](skipped-rules.md#sa1634) | File header should show copyright | on / off / on | 0 / 0 / 0 | candidate |
@@ -95,15 +92,15 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1610 | Property documentation should have value text | on | yes | on / off / on | 0 / 0 / 0 |  | Drop: An empty `<value>`; StyleCop's fix writes placeholder text. ([details](skipped-rules.md#sa1610)) |
 | SA1611 | Element parameters should be documented | on | no | on / on / on | 8 / 1 / 11 |  | Drop: Missing `<param>`; the fix would be placeholder text (no stubs, user decision). ([details](skipped-rules.md#sa1611)) |
 | SA1612 | Element parameter documentation should match element parameters | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered |
-| SA1613 | Element parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A `<param>` without `name`: when exactly one parameter is undocumented, the name is known. ([details](skipped-rules.md#sa1613)) |
+| SA1613 | Element parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1612** (done) when the name is certain (one unnamed tag and one undocumented parameter, or all unnamed with one per parameter); StyleCop reports every unnamed tag and has no fix |
 | SA1614 | Element parameter documentation should have text | on | no | on / on / off | 0 / 0 / 4 |  | Drop: An empty `<param>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1614)) |
 | SA1615 | Element return value should be documented | on | yes | on / on / on | 3 / 1 / 6 |  | Drop: Missing `<returns>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1615)) |
 | SA1616 | Element return value documentation should have text | on | yes | on / on / on | 0 / 0 / 0 |  | Drop: An empty `<returns>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1616)) |
 | SA1617 | Void return value should not be documented | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1608** (done), same results and output as StyleCop |
 | SA1618 | Generic type parameters should be documented | on | no | on / on / on | 0 / 0 / 1 |  | Drop: Missing `<typeparam>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1618)) |
 | SA1619 | Generic type parameters should be documented partial class | on | no | on / on / on | 0 / 0 / 0 |  | Drop: Same as SA1618 for partial types. ([details](skipped-rules.md#sa1619)) |
-| SA1620 | Generic type parameter documentation should match type parameters | on | no | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `<typeparam>` tags match the type parameters: the same as BRO1611 for `<param>`. ([details](skipped-rules.md#sa1620)) |
-| SA1621 | Generic type parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A `<typeparam>` without `name`. ([details](skipped-rules.md#sa1621)) |
+| SA1620 | Generic type parameter documentation should match type parameters | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1613** (done), same positions as StyleCop, with a fix (StyleCop has none): stale tags renamed or removed, tags reordered |
+| SA1621 | Generic type parameter documentation should declare parameter name | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1614** (done) when the name is certain, like BRO1612 |
 | SA1622 | Generic type parameter documentation should have text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: An empty `<typeparam>`; the fix would be placeholder text. ([details](skipped-rules.md#sa1622)) |
 | SA1623 | Property summary documentation should match accessors | on | yes | on / on / off | 0 / 0 / 8 |  | StyleBro **BRO1604** (done), same results as StyleCop |
 | SA1624 | Property summary documentation should omit accessor with restricted access | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1605** (done), same results as StyleCop |

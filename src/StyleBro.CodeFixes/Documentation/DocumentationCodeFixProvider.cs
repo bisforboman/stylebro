@@ -29,7 +29,10 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             DiagnosticIds.VoidReturnDocumented,
             DiagnosticIds.PlaceholderElement,
             DiagnosticIds.EmptyRemarks,
-            DiagnosticIds.ParameterTagsMatch);
+            DiagnosticIds.ParameterTagsMatch,
+            DiagnosticIds.ParameterTagHasName,
+            DiagnosticIds.TypeParameterTagsMatch,
+            DiagnosticIds.TypeParameterTagHasName);
 
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
@@ -48,6 +51,9 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                 DiagnosticIds.PlaceholderElement => "Remove the <placeholder> tags",
                 DiagnosticIds.EmptyRemarks => "Remove the empty <remarks>",
                 DiagnosticIds.ParameterTagsMatch => "Make the <param> tags match the parameters",
+                DiagnosticIds.ParameterTagHasName => "Name the <param> tag",
+                DiagnosticIds.TypeParameterTagsMatch => "Make the <typeparam> tags match the type parameters",
+                DiagnosticIds.TypeParameterTagHasName => "Name the <typeparam> tag",
                 _ => "Add a period",
             };
             context.RegisterCodeFix(
@@ -76,7 +82,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         var changes = new List<TextChange>();
         var misplaced = DocumentationComments.GetMisplacedDocumentationComments(root).ToList();
         var missingPeriods = new HashSet<int>(DocumentationPeriods.GetMissingPeriods(root));
-        var fixedMembers = new HashSet<SyntaxNode>();
+        var fixedMembers = new HashSet<(SyntaxNode, ParameterDocumentation.TagKind)>();
         foreach (var diagnostic in diagnostics)
         {
             var span = diagnostic.Location.SourceSpan;
@@ -123,13 +129,19 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                     changes.Add(DocumentationTags.GetRemoval(remarks, text));
                 }
             }
-            else if (diagnostic.Id == DiagnosticIds.ParameterTagsMatch)
+            else if (diagnostic.Id is DiagnosticIds.ParameterTagsMatch or DiagnosticIds.ParameterTagHasName
+                or DiagnosticIds.TypeParameterTagsMatch or DiagnosticIds.TypeParameterTagHasName)
             {
-                // One member can have several diagnostics; its edits are computed together and applied once.
-                if (root.FindToken(span.Start).Parent?.AncestorsAndSelf()
-                        .FirstOrDefault(n => ParameterDocumentation.MemberKinds.Any(k => n.IsKind(k))) is { } member
-                    && fixedMembers.Add(member)
-                    && ParameterDocumentation.GetFinding(member, text) is { } finding)
+                // One member can have several diagnostics (of up to two rules per tag kind); its edits are computed
+                // together and applied once, so every rule's fix gives the same result.
+                var kind = diagnostic.Id is DiagnosticIds.ParameterTagsMatch or DiagnosticIds.ParameterTagHasName
+                    ? ParameterDocumentation.TagKind.Parameter
+                    : ParameterDocumentation.TagKind.TypeParameter;
+                var kinds = kind == ParameterDocumentation.TagKind.Parameter ? ParameterDocumentation.MemberKinds : ParameterDocumentation.TypeParameterMemberKinds;
+                if (root.FindToken(span.Start, findInsideTrivia: true).Parent?.AncestorsAndSelf()
+                        .FirstOrDefault(n => kinds.Any(k => n.IsKind(k))) is { } member
+                    && fixedMembers.Add((member, kind))
+                    && ParameterDocumentation.GetFinding(member, text, kind) is { } finding)
                 {
                     changes.AddRange(finding.Changes);
                 }

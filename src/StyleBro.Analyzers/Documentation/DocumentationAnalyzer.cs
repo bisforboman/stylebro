@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -29,7 +30,10 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
             Descriptors.VoidReturnDocumented,
             Descriptors.PlaceholderElement,
             Descriptors.EmptyRemarks,
-            Descriptors.ParameterTagsMatch);
+            Descriptors.ParameterTagsMatch,
+            Descriptors.ParameterTagHasName,
+            Descriptors.TypeParameterTagsMatch,
+            Descriptors.TypeParameterTagHasName);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -74,18 +78,29 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                if (ParameterDocumentation.GetFinding(c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)) is { } finding)
+                var text = c.Node.SyntaxTree.GetText(c.CancellationToken);
+                foreach (var kind in new[] { ParameterDocumentation.TagKind.Parameter, ParameterDocumentation.TagKind.TypeParameter })
                 {
-                    foreach (var (tag, message) in finding.Problems)
+                    var kinds = kind == ParameterDocumentation.TagKind.Parameter ? ParameterDocumentation.MemberKinds : ParameterDocumentation.TypeParameterMemberKinds;
+                    if (!kinds.Any(k => c.Node.IsKind(k)) || ParameterDocumentation.GetFinding(c.Node, text, kind) is not { } finding)
                     {
-                        c.ReportDiagnostic(Diagnostic.Create(
-                            Descriptors.ParameterTagsMatch,
-                            ParameterDocumentation.GetNameToken(tag)!.Value.GetLocation(),
-                            message));
+                        continue;
+                    }
+
+                    foreach (var problem in finding.Problems)
+                    {
+                        var descriptor = problem.Id switch
+                        {
+                            DiagnosticIds.ParameterTagHasName => Descriptors.ParameterTagHasName,
+                            DiagnosticIds.TypeParameterTagsMatch => Descriptors.TypeParameterTagsMatch,
+                            DiagnosticIds.TypeParameterTagHasName => Descriptors.TypeParameterTagHasName,
+                            _ => Descriptors.ParameterTagsMatch,
+                        };
+                        c.ReportDiagnostic(Diagnostic.Create(descriptor, Location.Create(c.Node.SyntaxTree, problem.Span), problem.Message));
                     }
                 }
             },
-            ParameterDocumentation.MemberKinds);
+            ParameterDocumentation.MemberKinds.Concat(ParameterDocumentation.TypeParameterMemberKinds).Distinct().ToArray());
         context.RegisterSyntaxTreeAction(c =>
         {
             var root = c.Tree.GetRoot(c.CancellationToken);

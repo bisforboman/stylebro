@@ -37,6 +37,9 @@ public static class DiagnosticIds
     public const string PlaceholderElement = "BRO1609";
     public const string EmptyRemarks = "BRO1610";
     public const string ParameterTagsMatch = "BRO1611";
+    public const string ParameterTagHasName = "BRO1612";
+    public const string TypeParameterTagsMatch = "BRO1613";
+    public const string TypeParameterTagHasName = "BRO1614";
     public const string TrailingComma = "BRO1401";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";

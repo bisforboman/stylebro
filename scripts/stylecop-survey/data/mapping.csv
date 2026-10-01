@@ -154,15 +154,15 @@ SA1609,"Drop: Off by default. Missing `<value>`; the fix would be placeholder te
 SA1610,Drop: An empty `<value>`; StyleCop's fix writes placeholder text.
 SA1611,"Drop: Missing `<param>`; the fix would be placeholder text (no stubs, user decision)."
 SA1612,"StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered"
-SA1613,"Not yet: StyleBro candidate. Not done yet. A `<param>` without `name`: when exactly one parameter is undocumented, the name is known."
+SA1613,"StyleBro **BRO1612** (done) when the name is certain (one unnamed tag and one undocumented parameter, or all unnamed with one per parameter); StyleCop reports every unnamed tag and has no fix"
 SA1614,Drop: An empty `<param>`; the fix would be placeholder text.
 SA1615,Drop: Missing `<returns>`; the fix would be placeholder text.
 SA1616,Drop: An empty `<returns>`; the fix would be placeholder text.
 SA1617,"StyleBro **BRO1608** (done), same results and output as StyleCop"
 SA1618,Drop: Missing `<typeparam>`; the fix would be placeholder text.
 SA1619,Drop: Same as SA1618 for partial types.
-SA1620,Not yet: StyleBro candidate. Not done yet. `<typeparam>` tags match the type parameters: the same as BRO1611 for `<param>`.
-SA1621,Not yet: StyleBro candidate. Not done yet. A `<typeparam>` without `name`.
+SA1620,"StyleBro **BRO1613** (done), same positions as StyleCop, with a fix (StyleCop has none): stale tags renamed or removed, tags reordered"
+SA1621,"StyleBro **BRO1614** (done) when the name is certain, like BRO1612"
 SA1622,Drop: An empty `<typeparam>`; the fix would be placeholder text.
 SA1623,"StyleBro **BRO1604** (done), same results as StyleCop"
 SA1624,"StyleBro **BRO1605** (done), same results as StyleCop"

@@ -122,6 +122,13 @@ dotnet_diagnostic.BRO1610.severity = warning
 # BRO1611: <param> tags match the parameters (SA1612)
 dotnet_diagnostic.BRO1611.severity = warning
 
+# BRO1612/BRO1614: <param> and <typeparam> tags name what they document (SA1613, SA1621)
+dotnet_diagnostic.BRO1612.severity = warning
+dotnet_diagnostic.BRO1614.severity = warning
+
+# BRO1613: <typeparam> tags match the type parameters (SA1620)
+dotnet_diagnostic.BRO1613.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 

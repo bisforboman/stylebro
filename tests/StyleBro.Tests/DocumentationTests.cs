@@ -745,4 +745,147 @@ public class DocumentationTests
             }
         }
         """);
+
+    [Fact]
+    public Task UnnamedParamTags_GetTheirName() => VerifyFixAsync("""
+        /// <summary>Tags.</summary>
+        public class Tags
+        {
+            /// <summary>One.</summary>
+            /// {|BRO1612:<param>|}The a.</param>
+            public void One(int a)
+            {
+            }
+
+            /// <summary>Second.</summary>
+            /// <param name="a">The a.</param>
+            /// {|BRO1612:<param>|}The b.</param>
+            public void Second(int a, int b)
+            {
+            }
+
+            /// <summary>All unnamed.</summary>
+            /// {|BRO1612:<param>|}The a.</param>
+            /// {|BRO1612:<param>|}The b.</param>
+            public void All(int a, int b)
+            {
+            }
+
+            /// <summary>Empty name.</summary>
+            /// <param {|BRO1612:name=""|}>The a.</param>
+            public void Empty(int a)
+            {
+            }
+        }
+        """, """
+        /// <summary>Tags.</summary>
+        public class Tags
+        {
+            /// <summary>One.</summary>
+            /// <param name="a">The a.</param>
+            public void One(int a)
+            {
+            }
+
+            /// <summary>Second.</summary>
+            /// <param name="a">The a.</param>
+            /// <param name="b">The b.</param>
+            public void Second(int a, int b)
+            {
+            }
+
+            /// <summary>All unnamed.</summary>
+            /// <param name="a">The a.</param>
+            /// <param name="b">The b.</param>
+            public void All(int a, int b)
+            {
+            }
+
+            /// <summary>Empty name.</summary>
+            /// <param name="a">The a.</param>
+            public void Empty(int a)
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task AmbiguousUnnamedTags_AreNotReported() => VerifyNoDiagnosticsAsync("""
+        /// <summary>Tags.</summary>
+        public class Tags
+        {
+            /// <summary>Two unnamed, three parameters.</summary>
+            /// <param>The a.</param>
+            /// <param>The b.</param>
+            public void Unclear(int a, int b, int c)
+            {
+            }
+
+            /// <summary>Unnamed next to a stale tag.</summary>
+            /// <param name="old">The old.</param>
+            /// <param>The b.</param>
+            public void Stale(int a, int b)
+            {
+            }
+
+            /// <summary>Unnamed before a stale tag.</summary>
+            /// <param>The a.</param>
+            /// <param name="old">The old.</param>
+            public void StaleAfter(int a, int b)
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task TypeParamTags_MatchTheTypeParameters() => VerifyFixAsync("""
+        /// <summary>A box.</summary>
+        /// <typeparam name="{|BRO1613:TOld|}">The type.</typeparam>
+        public class Box<T>
+        {
+            /// <summary>Swapped.</summary>
+            /// <typeparam name="{|BRO1613:TValue|}">The value.</typeparam>
+            /// <typeparam name="{|BRO1613:TKey|}">The key.</typeparam>
+            public void Swapped<TKey, TValue>()
+            {
+            }
+
+            /// <summary>Extra.</summary>
+            /// <typeparam name="TItem">The item.</typeparam>
+            /// <typeparam name="{|BRO1613:TGone|}">Gone.</typeparam>
+            public void Extra<TItem>()
+            {
+            }
+        }
+
+        /// <summary>Unnamed.</summary>
+        /// {|BRO1614:<typeparam>|}The type.</typeparam>
+        public struct Holder<T>
+        {
+        }
+        """, """
+        /// <summary>A box.</summary>
+        /// <typeparam name="T">The type.</typeparam>
+        public class Box<T>
+        {
+            /// <summary>Swapped.</summary>
+            /// <typeparam name="TKey">The key.</typeparam>
+            /// <typeparam name="TValue">The value.</typeparam>
+            public void Swapped<TKey, TValue>()
+            {
+            }
+
+            /// <summary>Extra.</summary>
+            /// <typeparam name="TItem">The item.</typeparam>
+            public void Extra<TItem>()
+            {
+            }
+        }
+
+        /// <summary>Unnamed.</summary>
+        /// <typeparam name="T">The type.</typeparam>
+        public struct Holder<T>
+        {
+        }
+        """);
 }

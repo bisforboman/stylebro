@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 47 rules; 293 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+(see the log below) and 50 rules; 299 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
 alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -279,6 +279,12 @@ suggest or push a release tag after each batch; mention it only when a release l
     tag + one undocumented parameter) or removed, tags reordered to parameter order (only when each has its own lines).
     Methods, indexers, delegates only: StyleCop 1.2's SA1612 doesn't check constructors or operators (probed: neither
     stale nor out-of-order tags; this was the Polly open question, 22 out-of-order constructor tags).
+  - **BRO1612** (SA1613) / **BRO1614** (SA1621) unnamed `<param>`/`<typeparam>` tags, **BRO1613** (SA1620)
+    `<typeparam>` tags match the type parameters (methods, delegates, classes/structs/interfaces/records). One
+    generalized `ParameterDocumentation.GetFinding(member, text, TagKind)`: all problems of a member's tags of one kind
+    are found and fixed together (every rule's fix gives the same edits). An unnamed tag is named only when certain
+    (one unnamed + one undocumented, or all unnamed with one per (type) parameter, in order; `name=""` counts as
+    unnamed); otherwise not reported (StyleCop reports all, no fix). Parity `documentation-typeparams`: 15/15.
   - Not implemented in StyleCop 1.2 (never report): SA1628, SA1644. Dropped (would need placeholder text): SA1602,
     SA1606, SA1609, SA1611, SA1614-SA1616, SA1618.
 - XML-based rules (BRO1603-BRO1611) need `GenerateDocumentationFile` (the compiler only parses docs then), like
@@ -522,6 +528,9 @@ suggest or push a release tag after each batch; mention it only when a release l
   Second run clean for OpenTelemetry and Serilog; the leftovers elsewhere are all known: rename guards (Polly 5,
   private app 7, Newtonsoft.Json 49) and BRO1001 in files whose `#region`s BRO1112 removed in the same run
   (FFMpegCore 2, Polly 10, private app 2), which BRO1001 can only sort on a second run.
+
+- **BRO1510, BRO1612-BRO1614** (2026-10-01): 0 in Polly, OpenTelemetry, the private app (StyleCop repos) and
+  FFMpegCore; Newtonsoft.Json 13 (11 BRO1510, 2 BRO1613), Serilog 1. All fixed in one pass, compile, second run clean.
 
 ## Known open questions
 
