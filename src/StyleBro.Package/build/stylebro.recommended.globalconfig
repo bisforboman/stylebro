@@ -22,6 +22,9 @@ dotnet_diagnostic.BRO1002.severity = warning
 dotnet_diagnostic.BRO1003.severity = warning
 dotnet_diagnostic.BRO1004.severity = warning
 
+# BRO1005: one space after '///' (SA1004)
+dotnet_diagnostic.BRO1005.severity = warning
+
 # BRO1105: constructor initializers on their own line (SA1128)
 dotnet_diagnostic.BRO1105.severity = warning
 
@@ -95,6 +98,18 @@ dotnet_diagnostic.BRO1114.severity = warning
 
 # BRO1115: 'int?' instead of 'Nullable<int>' (SA1125)
 dotnet_diagnostic.BRO1115.severity = warning
+
+# BRO1116-BRO1119: parameter and argument lists: '()' on one line, commas at line ends, no blank lines (SA1112-SA1115)
+dotnet_diagnostic.BRO1116.severity = warning
+dotnet_diagnostic.BRO1117.severity = warning
+dotnet_diagnostic.BRO1118.severity = warning
+dotnet_diagnostic.BRO1119.severity = warning
+
+# BRO1120: no empty comments at the start or end of a comment (SA1120)
+dotnet_diagnostic.BRO1120.severity = warning
+
+# BRO1121: each enum value on its own line (SA1136)
+dotnet_diagnostic.BRO1121.severity = warning
 
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
@@ -172,6 +187,11 @@ dotnet_diagnostic.BRO1509.severity = warning
 
 # BRO1510: accessors with bodies all single-line or all multi-line (SA1504)
 dotnet_diagnostic.BRO1510.severity = warning
+
+# BRO1511-BRO1513: documentation directly on its element and after a blank line; 'while' right after its 'do' block (SA1506, SA1514, SA1511)
+dotnet_diagnostic.BRO1511.severity = warning
+dotnet_diagnostic.BRO1512.severity = warning
+dotnet_diagnostic.BRO1513.severity = warning
 
 # ---------------------------------------------------------------------------
 # Built-in .NET rules that already cover common StyleCop rules.

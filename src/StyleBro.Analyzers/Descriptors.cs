@@ -572,4 +572,104 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "'[Obsolete]' instead of '[Obsolete()]'. Replaces StyleCop SA1411.",
         helpLinkUri: HelpBase + DiagnosticIds.EmptyAttributeParentheses + ".md");
+
+    public static readonly DiagnosticDescriptor DocumentationLineSpace = new(
+        id: DiagnosticIds.DocumentationLineSpace,
+        title: "Documentation lines should begin with single space",
+        messageFormat: "Put one space after '///'",
+        category: "Spacing",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'/// text' instead of '///text' or '///   text'. Lines inside <code> are left alone. Replaces StyleCop SA1004.",
+        helpLinkUri: HelpBase + DiagnosticIds.DocumentationLineSpace + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyListOnOneLine = new(
+        id: DiagnosticIds.EmptyListOnOneLine,
+        title: "Closing parenthesis should be on line of opening parenthesis",
+        messageFormat: "Put ')' right after '('",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An empty parameter or argument list is written '()', not split over lines. Replaces StyleCop SA1112.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyListOnOneLine + ".md");
+
+    public static readonly DiagnosticDescriptor CommaOnItemLine = new(
+        id: DiagnosticIds.CommaOnItemLine,
+        title: "Comma should be on the same line as previous parameter",
+        messageFormat: "Put the comma at the end of the line before",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A comma in a parameter or argument list ends the line of the item before it instead of starting the next. Replaces StyleCop SA1113.",
+        helpLinkUri: HelpBase + DiagnosticIds.CommaOnItemLine + ".md");
+
+    public static readonly DiagnosticDescriptor FirstItemFollowsOpening = new(
+        id: DiagnosticIds.FirstItemFollowsOpening,
+        title: "Parameter list should follow declaration",
+        messageFormat: "Remove the blank lines before the first item",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "No blank line between the opening parenthesis and the first parameter or argument. Replaces StyleCop SA1114.",
+        helpLinkUri: HelpBase + DiagnosticIds.FirstItemFollowsOpening + ".md");
+
+    public static readonly DiagnosticDescriptor ItemFollowsComma = new(
+        id: DiagnosticIds.ItemFollowsComma,
+        title: "Parameter should follow comma",
+        messageFormat: "Remove the blank lines before this item",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "No blank line between a comma and the next parameter or argument. Replaces StyleCop SA1115.",
+        helpLinkUri: HelpBase + DiagnosticIds.ItemFollowsComma + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyComment = new(
+        id: DiagnosticIds.EmptyComment,
+        title: "Comments should contain text",
+        messageFormat: "Remove the empty comment",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An empty '//' or '/* */' at the start or end of a comment (or on its own) is removed. Empty lines between comment paragraphs are fine. Replaces StyleCop SA1120.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyComment + ".md");
+
+    public static readonly DiagnosticDescriptor EnumValueOnOwnLine = new(
+        id: DiagnosticIds.EnumValueOnOwnLine,
+        title: "Enum values should be on separate lines",
+        messageFormat: "Put '{0}' on its own line",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Each enum value starts its own line. Replaces StyleCop SA1136.",
+        helpLinkUri: HelpBase + DiagnosticIds.EnumValueOnOwnLine + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineAfterDocumentation = new(
+        id: DiagnosticIds.BlankLineAfterDocumentation,
+        title: "Element documentation headers should not be followed by blank line",
+        messageFormat: "Remove the blank lines between the documentation and the element",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A documentation comment sits directly on the element it documents. Replaces StyleCop SA1506.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineAfterDocumentation + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBeforeWhile = new(
+        id: DiagnosticIds.BlankLineBeforeWhile,
+        title: "While-do footer should not be preceded by blank line",
+        messageFormat: "Remove the blank lines before 'while'",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The 'while' of a 'do ... while' follows the block directly. Replaces StyleCop SA1511.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeWhile + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBeforeDocumentation = new(
+        id: DiagnosticIds.BlankLineBeforeDocumentation,
+        title: "Element documentation header should be preceded by blank line",
+        messageFormat: "Add a blank line before the documentation",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A documentation comment is separated from the code above it by a blank line, except after an opening brace. Replaces StyleCop SA1514.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeDocumentation + ".md");
 }

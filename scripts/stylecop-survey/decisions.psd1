@@ -37,6 +37,16 @@
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
+        SA1004 = 'StyleBro **BRO1005** (done), same positions and output as StyleCop'
+        SA1112 = 'StyleBro **BRO1116** (done), same positions and output as StyleCop'
+        SA1113 = 'StyleBro **BRO1117** (done), same positions and output as StyleCop'
+        SA1114 = 'StyleBro **BRO1118** (done), with a fix (StyleCop has none); a comment before the first item is not reported'
+        SA1115 = 'StyleBro **BRO1119** (done), with a fix (StyleCop has none)'
+        SA1120 = 'StyleBro **BRO1120** (done), same positions; the fix removes every empty comment at that end of the group in one run'
+        SA1136 = 'StyleBro **BRO1121** (done), same positions; an enum on one line gets BRO1509''s expansion'
+        SA1506 = 'StyleBro **BRO1511** (done), same positions and output as StyleCop'
+        SA1511 = 'StyleBro **BRO1512** (done), same positions and output as StyleCop'
+        SA1514 = 'StyleBro **BRO1513** (done); documentation right below a comment is not reported (it would conflict with SA1512/BRO1506)'
         SA1212 = 'StyleBro **BRO1003** (done), same positions and output as StyleCop'
         SA1213 = 'StyleBro **BRO1004** (done), same positions and output as StyleCop'
         SA1132 = 'StyleBro **BRO1114** (done), same positions; the fix copies attributes and documentation to every field (StyleCop''s keeps attributes on the first only)'

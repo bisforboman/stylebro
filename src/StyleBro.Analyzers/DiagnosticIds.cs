@@ -6,6 +6,7 @@ public static class DiagnosticIds
     public const string CommentSpacing = "BRO1002";
     public const string PropertyAccessorOrder = "BRO1003";
     public const string EventAccessorOrder = "BRO1004";
+    public const string DocumentationLineSpace = "BRO1005";
     public const string EmptyStatement = "BRO1101";
     public const string CombinedAttributes = "BRO1102";
     public const string ConstantOnLeft = "BRO1103";
@@ -21,6 +22,12 @@ public static class DiagnosticIds
     public const string NoRegionsInCodeElements = "BRO1113";
     public const string CombinedFields = "BRO1114";
     public const string NullableShorthand = "BRO1115";
+    public const string EmptyListOnOneLine = "BRO1116";
+    public const string CommaOnItemLine = "BRO1117";
+    public const string FirstItemFollowsOpening = "BRO1118";
+    public const string ItemFollowsComma = "BRO1119";
+    public const string EmptyComment = "BRO1120";
+    public const string EnumValueOnOwnLine = "BRO1121";
     public const string VariableCasing = "BRO1301";
     public const string ParameterCasing = "BRO1302";
     public const string PrivateFieldNaming = "BRO1303";
@@ -56,4 +63,7 @@ public static class DiagnosticIds
     public const string SingleLineStatementBlock = "BRO1508";
     public const string SingleLineElement = "BRO1509";
     public const string AccessorsConsistentLayout = "BRO1510";
+    public const string BlankLineAfterDocumentation = "BRO1511";
+    public const string BlankLineBeforeWhile = "BRO1512";
+    public const string BlankLineBeforeDocumentation = "BRO1513";
 }

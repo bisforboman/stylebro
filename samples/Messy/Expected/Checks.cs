@@ -2,7 +2,9 @@ namespace Messy;
 
 public enum Level
 {
-    None, Low, High,
+    None,
+    Low,
+    High,
 }
 
 public class Checks

@@ -18,6 +18,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1002](docs/rules/BRO1002.md) | Single-line comments should begin with a space | SA1005 | Yes |
 | [BRO1003](docs/rules/BRO1003.md) | Property accessors should follow order | SA1212 | Yes |
 | [BRO1004](docs/rules/BRO1004.md) | Event accessors should follow order | SA1213 | Yes |
+| [BRO1005](docs/rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Yes |
 | [BRO1101](docs/rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Yes |
 | [BRO1102](docs/rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Yes |
 | [BRO1103](docs/rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Yes |
@@ -33,6 +34,12 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1113](docs/rules/BRO1113.md) | Regions should not be placed inside code elements | SA1123 | Yes |
 | [BRO1114](docs/rules/BRO1114.md) | Do not combine fields | SA1132 | Yes |
 | [BRO1115](docs/rules/BRO1115.md) | Use shorthand for nullable types | SA1125 | Yes |
+| [BRO1116](docs/rules/BRO1116.md) | Closing parenthesis should be on line of opening parenthesis | SA1112 | Yes |
+| [BRO1117](docs/rules/BRO1117.md) | Comma should be on the same line as previous parameter | SA1113 | Yes |
+| [BRO1118](docs/rules/BRO1118.md) | Parameter list should follow declaration | SA1114 | Yes |
+| [BRO1119](docs/rules/BRO1119.md) | Parameter should follow comma | SA1115 | Yes |
+| [BRO1120](docs/rules/BRO1120.md) | Comments should contain text | SA1120 | Yes |
+| [BRO1121](docs/rules/BRO1121.md) | Enum values should be on separate lines | SA1136 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |
@@ -68,6 +75,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1508](docs/rules/BRO1508.md) | A block should not be on a single line | SA1501 | Yes |
 | [BRO1509](docs/rules/BRO1509.md) | An element should not be on a single line | SA1502 | Yes |
 | [BRO1510](docs/rules/BRO1510.md) | Accessors should all be single-line or all multi-line | SA1504 | Yes |
+| [BRO1511](docs/rules/BRO1511.md) | Element documentation headers should not be followed by blank line | SA1506 | Yes |
+| [BRO1512](docs/rules/BRO1512.md) | While-do footer should not be preceded by blank line | SA1511 | Yes |
+| [BRO1513](docs/rules/BRO1513.md) | Element documentation header should be preceded by blank line | SA1514 | Yes |
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md). The rules
 StyleBro doesn't cover, why, and what it would take to add them: [docs/skipped-rules.md](docs/skipped-rules.md).

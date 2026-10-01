@@ -21,8 +21,6 @@
             Revisit = 'Nothing to port. stylebro-migrate parses stylecop.json leniently (comments, trailing commas).' }
 
         # ---- Spacing -----------------------------------------------------------------------------------------------
-        SA1004 = @{ Status = 'Candidate'; Why = 'Not done yet. `///text` -> `/// text`; the SDK doesn''t fix it (measured).'
-            Revisit = 'Text-based like BRO1002 (SA1005), which already skips `///`. Check whether StyleCop also reports several spaces (indentation inside `<code>` must stay). Small.' }
         SA1006 = @{ Status = 'Candidate'; Why = 'Not done yet. `# if` -> `#if`; the SDK doesn''t fix it (measured). Rare in practice.'
             Revisit = 'Text edit inside the directive trivia. Small, low value.' }
 
@@ -41,26 +39,14 @@
             Revisit = 'Possible rule: move it to the line above the statement. Probe what teams expect first.' }
         SA1109 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic for a region between `if (b)` and its block (probed).'
             Revisit = 'Nothing to port. Regions are BRO1112/BRO1113.' }
-        SA1112 = @{ Status = 'Candidate'; Why = 'Not done yet. `M(` + newline + `)` -> `M()`; the SDK doesn''t fix it (measured).'
-            Revisit = 'Extend ParenthesisPlacement (BRO1110 skips empty lists on purpose; this is the empty-list case). Small.' }
-        SA1113 = @{ Status = 'Candidate'; Why = 'Not done yet. A comma at the start of the next line moves to the end of the previous item.'
-            Revisit = 'Gap rewrite in ParameterLayout (same lists as BRO1107); keep comments in the gap out (skip).' }
-        SA1114 = @{ Status = 'Candidate'; Why = 'StyleCop has no fix. No blank line or comment between `(` and the first parameter.'
-            Revisit = 'Delete the blank lines (comments: skip). Same list kinds as BRO1107. Small.' }
-        SA1115 = @{ Status = 'Candidate'; Why = 'StyleCop has no fix. No blank line between a comma and the next parameter.'
-            Revisit = 'Delete the blank lines (comments: skip). Do together with SA1114.' }
         SA1118 = @{ Status = 'Drop'; Why = 'StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app.'
             Revisit = 'Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.' }
-        SA1120 = @{ Status = 'Candidate'; Why = 'Not done yet. An empty `//` comment line is removed.'
-            Revisit = 'Text-based; coordinate with BRO1002, which turns whitespace-only comments into `//` (that would then be removed). Small.' }
         SA1126 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on an unprefixed member call (probed).'
             Revisit = 'Nothing to port.' }
         SA1130 = @{ Status = 'Candidate'; Why = 'Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.'
             Revisit = '`delegate { }` without a parameter list can bind to any delegate type; converting it needs the target''s parameters (semantic model) and may need discards. Medium.' }
         SA1135 = @{ Status = 'Candidate'; Why = 'Not done yet. Usings inside a namespace must be fully qualified.'
             Revisit = 'Only relevant to teams with usings inside the namespace (SA1200 default). Semantic model to get the full name. Small.' }
-        SA1136 = @{ Status = 'Candidate'; Why = 'Not done yet. Each enum member on its own line.'
-            Revisit = 'Layout fix; reuse ParameterLayout''s "each item on its own line". Small.' }
         SA1139 = @{ Status = 'Candidate'; Why = 'Not done yet. `(long)1` -> `1L`.'
             Revisit = 'Semantic model for the constant and target type; only numeric literals, skip checked/unchecked edge cases. Small.' }
         SA1141 = @{ Status = 'Candidate'; Why = 'Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`.'
@@ -105,12 +91,6 @@
             Revisit = 'Nothing automatic.' }
 
         # ---- Layout ------------------------------------------------------------------------------------------------
-        SA1506 = @{ Status = 'Candidate'; Why = 'Not done yet. No blank line between a doc comment and its element.'
-            Revisit = 'Delete the blank lines; the BlankLineAfter code (BRO1503/BRO1506) has the line logic. Small.' }
-        SA1511 = @{ Status = 'Candidate'; Why = 'Not done yet. No blank line before the `while` of a `do ... while`.'
-            Revisit = 'Add `while` after `do` to BRO1502''s keywords (it''s left out on purpose so far). Small.' }
-        SA1514 = @{ Status = 'Candidate'; Why = 'Not done yet. A doc comment is preceded by a blank line (unless it follows `{`).'
-            Revisit = 'Mostly covered by BRO1505 (element separation inserts the blank line above the doc comment); check the remaining cases with the parity script. Small.' }
 
         # ---- Documentation -----------------------------------------------------------------------------------------
         SA1601 = @{ Status = 'Drop'; Why = 'Missing documentation on a partial element; the only fix is placeholder text (no stubs, user decision).'

@@ -16,10 +16,10 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 54 rules; 312 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+(see the log below) and 64 rules; 330 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
-alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
+0.1.0-alpha.6 (54 rules, released 2026-10-01, the first prerelease published without an approval step) is on
+nuget.org with StyleBro.Migrate; earlier: alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
 tool) with the same version; CI packs both too.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
@@ -356,6 +356,24 @@ suggest or push a release tag after each batch; mention it only when a release l
   multi-line accessor has <= 1 single-line statement and no comments, else expand the single-line ones; adds the
   BRO1505 blank line between accessors when BRO1505 wants it on the original (order-independence). Parity set
   `accessor-layout`: 8/8 positions, output not compared.
+- **Batch 2** (2026-10-01). Lists (`Readability/ListGaps.cs`, same list kinds as BRO1107): **BRO1116** (SA1112) `()`
+  not split, not attributes (like StyleCop); **BRO1117** (SA1113) comma ends the previous item's line (its edit also
+  drops blank lines before the item, else BRO1119 needs a 2nd run); **BRO1118/BRO1119** (SA1114/SA1115, no StyleCop
+  fix) blank lines after `(`/after a comma removed (only whole blank lines, so a comment on its own line blocks it).
+  Comments (`Readability/CommentText.cs`): **BRO1005** (SA1004) a missing space after `///` anywhere, but several
+  spaces only before a TOP-LEVEL tag (`///   <param>`); indented text/nested tags and `<code>` are fine (probed; the
+  first version flagged 367 lines in Polly, which enforces SA1004);
+  **BRO1120** (SA1120) empty `//`/`/* */` reported at the start/end of a group of consecutive comment lines (a comment
+  after code starts a group; `////` isn't empty), the fix removes the whole empty run at that end (StyleCop one per
+  run). **BRO1121** (SA1136, `Readability/EnumValueLines.cs`) one enum value per line; a one-line enum gets BRO1509's
+  expansion, and BRO1509 now puts every enum value on its own line (StyleCop's SA1502 fix leaves `A, B`, which its
+  SA1136 then reports). `Layout/DocumentationBlankLines.cs`: **BRO1511** (SA1506) blank lines between docs and element,
+  also between two `///` blocks; **BRO1512** (SA1511) blank before do-while's `while`; **BRO1513** (SA1514) blank line
+  before docs, not after `{`/file start, not after `#if`/`#else`/`#pragma` (but after `#endif`/`#region`/`#endregion`;
+  probed after 66 false positives in Polly), and NOT below a `//` comment (StyleCop reports it, but its SA1512 forbids
+  the blank line: the fixes would undo each other). GOTCHA: a doc comment trivia's `Span` starts AFTER its first
+  `///`; use `FullSpan.Start` (BRO1513 reported nothing until that was found). Parity set `lists-comments-docs`:
+  34/32 positions, 19 documented differences.
 - **Fix ORDER under `dotnet format` is not fixed** (found with BRO1509 in the Messy sample: 4 of 5 runs failed). Two
   interactions had to be made order-independent: (1) BRO1505's fix on members of a ONE-LINE type now applies the
   whole BRO1509 expansion (identical edits, merged), instead of splitting one gap at column 0, which left the braces
@@ -546,6 +564,10 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **BRO1003/BRO1004/BRO1114/BRO1115/BRO1402** (2026-10-01): 0 in FFMpegCore, Polly, OpenTelemetry, private app;
   Newtonsoft.Json 3 (1 BRO1003, 2 BRO1402), Serilog 8 (BRO1114; found the multi-line `const string` layout, fixed).
   All fixed in one pass, compile, second run clean.
+
+- **Batch 2** (2026-10-01): Polly 0 and OpenTelemetry 0 (both enforce these rules) after the two fixes above; private app
+  356 BRO1509 (= SA1502), FFMpegCore 23, Newtonsoft.Json 387, Serilog 21. All fixed in one pass, compile, second run
+  clean (OpenTelemetry: 1 left in net462-only code, the known environment limit).
 
 ## Known open questions
 

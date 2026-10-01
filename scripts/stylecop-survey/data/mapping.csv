@@ -5,7 +5,7 @@ SA1000,SDK: IDE0055 formatting
 SA1001,SDK: IDE0055 formatting
 SA1002,SDK: IDE0055 formatting
 SA1003,SDK: IDE0055 formatting
-SA1004,Not yet: StyleBro candidate. Not done yet. `///text` -> `/// text`; the SDK doesn't fix it (measured).
+SA1004,"StyleBro **BRO1005** (done), same positions and output as StyleCop"
 SA1005,"StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)"
 SA1006,Not yet: StyleBro candidate. Not done yet. `# if` -> `#if`; the SDK doesn't fix it (measured). Rare in practice.
 SA1007,SDK: IDE0055 formatting
@@ -42,16 +42,16 @@ SA1108,"Drop: StyleCop has no fix. A comment between `if (x)` and `{` would have
 SA1109,Drop: StyleCop never reports it. Off by default and no diagnostic for a region between `if (b)` and its block (probed).
 SA1110,"StyleBro **BRO1109** (done), same results and output as StyleCop"
 SA1111,"StyleBro **BRO1110** (done), same results and output as StyleCop"
-SA1112,Not yet: StyleBro candidate. Not done yet. `M(` + newline + `)` -> `M()`; the SDK doesn't fix it (measured).
-SA1113,Not yet: StyleBro candidate. Not done yet. A comma at the start of the next line moves to the end of the previous item.
-SA1114,Not yet: StyleBro candidate. StyleCop has no fix. No blank line or comment between `(` and the first parameter.
-SA1115,Not yet: StyleBro candidate. StyleCop has no fix. No blank line between a comma and the next parameter.
+SA1112,"StyleBro **BRO1116** (done), same positions and output as StyleCop"
+SA1113,"StyleBro **BRO1117** (done), same positions and output as StyleCop"
+SA1114,"StyleBro **BRO1118** (done), with a fix (StyleCop has none); a comment before the first item is not reported"
+SA1115,"StyleBro **BRO1119** (done), with a fix (StyleCop has none)"
 SA1116,"StyleBro **BRO1107** (done), also checks record and primary-constructor parameters"
 SA1117,"StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix"
 SA1118,"Drop: StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app."
 SA1119,SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`)
 SA1119_p,"Variant: SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047."
-SA1120,Not yet: StyleBro candidate. Not done yet. An empty `//` comment line is removed.
+SA1120,"StyleBro **BRO1120** (done), same positions; the fix removes every empty comment at that end of the group in one run"
 SA1121,SDK: IDE0049 (`dotnet_style_predefined_type_* = true`)
 SA1122,"StyleBro **BRO1106** (done), same results as StyleCop"
 SA1123,"StyleBro **BRO1113** (done), same results and output as StyleCop"
@@ -67,7 +67,7 @@ SA1132,"StyleBro **BRO1114** (done), same positions; the fix copies attributes a
 SA1133,StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported
 SA1134,SDK: IDE0055 formatting
 SA1135,Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified.
-SA1136,Not yet: StyleBro candidate. Not done yet. Each enum member on its own line.
+SA1136,"StyleBro **BRO1121** (done), same positions; an enum on one line gets BRO1509's expansion"
 SA1137,SDK: IDE0055 formatting
 SA1139,Not yet: StyleBro candidate. Not done yet. `(long)1` -> `1L`.
 SA1141,"Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`."
@@ -126,15 +126,15 @@ SA1502,"StyleBro **BRO1509** (done), same positions as StyleCop (local functions
 SA1503,SDK: IDE0011 (`csharp_prefer_braces = true`)
 SA1504,"StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments"
 SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"
-SA1506,Not yet: StyleBro candidate. Not done yet. No blank line between a doc comment and its element.
+SA1506,"StyleBro **BRO1511** (done), same positions and output as StyleCop"
 SA1507,SDK: IDE2000 (experimental)
 SA1508,SDK: IDE2002 (experimental)
 SA1509,"StyleBro **BRO1501** (done), same results as StyleCop"
 SA1510,"StyleBro **BRO1502** (done), same results as StyleCop"
-SA1511,Not yet: StyleBro candidate. Not done yet. No blank line before the `while` of a `do ... while`.
+SA1511,"StyleBro **BRO1512** (done), same positions and output as StyleCop"
 SA1512,"StyleBro **BRO1506** (done), same results as StyleCop"
 SA1513,SDK: IDE2003 (experimental)
-SA1514,Not yet: StyleBro candidate. Not done yet. A doc comment is preceded by a blank line (unless it follows `{`).
+SA1514,StyleBro **BRO1513** (done); documentation right below a comment is not reported (it would conflict with SA1512/BRO1506)
 SA1515,"StyleBro **BRO1504** (done), same results as StyleCop"
 SA1516,"StyleBro **BRO1505** (done), same positions as StyleCop"
 SA1517,SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template`

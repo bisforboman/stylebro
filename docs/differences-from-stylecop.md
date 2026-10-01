@@ -71,6 +71,8 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1306](rules/BRO1306.md), [BRO1307](rules/BRO1307.md), [BRO1308](rules/BRO1308.md), [BRO1309](rules/BRO1309.md) (SA1303, SA1304, SA1307, SA1311; SA1308; SA1310; SA1300) | Namespaces (SA1300); names that would become keywords or merge digits (`Int32_0`); the same rename guards | Namespace renames move files; the rest must compile and keep working. |
 | [BRO1401](rules/BRO1401.md) (SA1413) | Lists with `#if` between the braces | Each target framework's copy needs a different edit. |
 | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) (SA1501, SA1502) | One-line blocks with a comment inside the braces; a `case` block on the line of `switch (x) {`. A local function's body is reported once (BRO1509), not as both SA1501 and SA1502. | The fix would have to move the comment; the `case` block has no line to indent from. |
+| [BRO1118](rules/BRO1118.md) (SA1114) | A comment between `(` and the first item | The fix would have to move the comment (StyleCop has no fix). |
+| [BRO1513](rules/BRO1513.md) (SA1514) | Documentation right below a `//` comment | The blank line would break BRO1506 (SA1512), and the two fixes would undo each other. |
 | [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and interface implementations | See "Missing documentation" above. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:` | Already ends a sentence; StyleCop's fix writes `question?.`. |
 | [BRO1611](rules/BRO1611.md) (SA1612) | Constructors and operators | Matches StyleCop 1.2, which doesn't check them either. |
@@ -102,6 +104,9 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1114](rules/BRO1114.md) (SA1132) | Keeps the attributes on the first field only, so the others lose them (`[Obsolete]` disappears from the second field) | Copies the attributes and the documentation comment to every field; blank line between event fields |
 | [BRO1115](rules/BRO1115.md) (SA1125) | None | `int?` for `Nullable<int>`, nested ones in one pass |
 | [BRO1402](rules/BRO1402.md) (SA1411) | `[Obsolete ]` for `[Obsolete( )]` | `[Obsolete]` |
+| [BRO1118](rules/BRO1118.md), [BRO1119](rules/BRO1119.md) (SA1114, SA1115) | None | Removes the blank lines |
+| [BRO1120](rules/BRO1120.md) (SA1120) | Removes only the reported empty comment; the next one at the same end is reported on the next run | Removes every empty comment at that end of the group |
+| [BRO1121](rules/BRO1121.md) (SA1136) | For an enum on one line, leaves `{ A,` and `C }` on the brace lines | Expands the enum like BRO1509 |
 | [BRO1610](rules/BRO1610.md), [BRO1611](rules/BRO1611.md) (SA1627, SA1612) | None | Removes the empty `<remarks>`; renames, removes and reorders `<param>` tags |
 | [BRO1612](rules/BRO1612.md), [BRO1613](rules/BRO1613.md), [BRO1614](rules/BRO1614.md) (SA1613, SA1620, SA1621) | None | Names unnamed tags when certain; renames, removes and reorders `<typeparam>` tags |
 | [BRO1112](rules/BRO1112.md) (SA1124) | Removes a region between switch-expression arms with the blank lines around it | Keeps one blank line where it was |
@@ -109,7 +114,8 @@ under "Compared with StyleCop". Two things differ for every rule:
 ### Same as StyleCop
 
 Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-WithStyleCop.ps1`):
-[BRO1003](rules/BRO1003.md), [BRO1004](rules/BRO1004.md), [BRO1105](rules/BRO1105.md), [BRO1106](rules/BRO1106.md), [BRO1109](rules/BRO1109.md), [BRO1111](rules/BRO1111.md),
+[BRO1003](rules/BRO1003.md), [BRO1004](rules/BRO1004.md), [BRO1005](rules/BRO1005.md), [BRO1116](rules/BRO1116.md), [BRO1117](rules/BRO1117.md),
+[BRO1511](rules/BRO1511.md), [BRO1512](rules/BRO1512.md), [BRO1105](rules/BRO1105.md), [BRO1106](rules/BRO1106.md), [BRO1109](rules/BRO1109.md), [BRO1111](rules/BRO1111.md),
 [BRO1113](rules/BRO1113.md), [BRO1304](rules/BRO1304.md), [BRO1305](rules/BRO1305.md), [BRO1501](rules/BRO1501.md),
 [BRO1502](rules/BRO1502.md), [BRO1503](rules/BRO1503.md), [BRO1504](rules/BRO1504.md), [BRO1506](rules/BRO1506.md),
 [BRO1507](rules/BRO1507.md), [BRO1602](rules/BRO1602.md), [BRO1605](rules/BRO1605.md), [BRO1608](rules/BRO1608.md),

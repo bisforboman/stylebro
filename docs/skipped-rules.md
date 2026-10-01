@@ -19,34 +19,24 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-81 rules: 31 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+71 rules: 21 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
-| [SA1004](#sa1004) | Documentation lines should begin with single space | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1006](#sa1006) | Preprocessor keywords should not be preceded by space | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1100](#sa1100) | Do not prefix calls with base unless local implementation exists | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1102](#sa1102) | Query clause should follow previous clause | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1103](#sa1103) | Query clauses should be on separate lines or all on one line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1104](#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1105](#sa1105) | Query clauses spanning multiple lines should begin on own line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1112](#sa1112) | Closing parenthesis should be on line of opening parenthesis | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1113](#sa1113) | Comma should be on the same line as previous parameter | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1114](#sa1114) | Parameter list should follow declaration | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1115](#sa1115) | Parameter should follow comma | candidate | on / off / off | 0 / 0 / 0 |
-| [SA1120](#sa1120) | Comments should contain text | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1130](#sa1130) | Use lambda syntax | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1135](#sa1135) | Using directives should be qualified | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1136](#sa1136) | Enum values should be on separate lines | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1139](#sa1139) | Use literal suffix notation instead of casting | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1141](#sa1141) | Use tuple syntax | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1142](#sa1142) | Refer to tuple fields by name | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1205](#sa1205) | Partial elements should declare access | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1410](#sa1410) | Remove delegate parenthesis when possible | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1506](#sa1506) | Element documentation headers should not be followed by blank line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1511](#sa1511) | While-do footer should not be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1514](#sa1514) | Element documentation header should be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1634](#sa1634) | File header should show copyright | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1635](#sa1635) | File header should have copyright text | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1636](#sa1636) | File header copyright text should match | candidate | on / off / on | 0 / 0 / 0 |
@@ -106,16 +96,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
 
 ## Not yet: StyleBro candidates
-
-<a id="sa1004"></a>
-
-### SA1004: Documentation lines should begin with single space
-
-Spacing rule. StyleCop: on by default, has a code fix; SDK check: not fixed. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `///text` -> `/// text`; the SDK doesn't fix it (measured).
-
-**To revisit:** Text-based like BRO1002 (SA1005), which already skips `///`. Check whether StyleCop also reports several spaces (indentation inside `<code>` must stay). Small.
 
 <a id="sa1006"></a>
 
@@ -177,56 +157,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 
 **To revisit:** Part of the SA1102-SA1105 batch.
 
-<a id="sa1112"></a>
-
-### SA1112: Closing parenthesis should be on line of opening parenthesis
-
-Readability rule. StyleCop: on by default, has a code fix; SDK check: not fixed. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `M(` + newline + `)` -> `M()`; the SDK doesn't fix it (measured).
-
-**To revisit:** Extend ParenthesisPlacement (BRO1110 skips empty lists on purpose; this is the empty-list case). Small.
-
-<a id="sa1113"></a>
-
-### SA1113: Comma should be on the same line as previous parameter
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A comma at the start of the next line moves to the end of the previous item.
-
-**To revisit:** Gap rewrite in ParameterLayout (same lists as BRO1107); keep comments in the gap out (skip).
-
-<a id="sa1114"></a>
-
-### SA1114: Parameter list should follow declaration
-
-Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** StyleCop has no fix. No blank line or comment between `(` and the first parameter.
-
-**To revisit:** Delete the blank lines (comments: skip). Same list kinds as BRO1107. Small.
-
-<a id="sa1115"></a>
-
-### SA1115: Parameter should follow comma
-
-Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / off / off. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** StyleCop has no fix. No blank line between a comma and the next parameter.
-
-**To revisit:** Delete the blank lines (comments: skip). Do together with SA1114.
-
-<a id="sa1120"></a>
-
-### SA1120: Comments should contain text
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. An empty `//` comment line is removed.
-
-**To revisit:** Text-based; coordinate with BRO1002, which turns whitespace-only comments into `//` (that would then be removed). Small.
-
 <a id="sa1130"></a>
 
 ### SA1130: Use lambda syntax
@@ -246,16 +176,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 **Why:** Not done yet. Usings inside a namespace must be fully qualified.
 
 **To revisit:** Only relevant to teams with usings inside the namespace (SA1200 default). Semantic model to get the full name. Small.
-
-<a id="sa1136"></a>
-
-### SA1136: Enum values should be on separate lines
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. Each enum member on its own line.
-
-**To revisit:** Layout fix; reuse ParameterLayout's "each item on its own line". Small.
 
 <a id="sa1139"></a>
 
@@ -316,36 +236,6 @@ Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it 
 **Why:** Not done yet. `delegate() { }` -> `delegate { }`.
 
 **To revisit:** Only when the empty parameter list isn't needed for overload resolution (semantic model). Small; consider doing with SA1130.
-
-<a id="sa1506"></a>
-
-### SA1506: Element documentation headers should not be followed by blank line
-
-Layout rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. No blank line between a doc comment and its element.
-
-**To revisit:** Delete the blank lines; the BlankLineAfter code (BRO1503/BRO1506) has the line logic. Small.
-
-<a id="sa1511"></a>
-
-### SA1511: While-do footer should not be preceded by blank line
-
-Layout rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. No blank line before the `while` of a `do ... while`.
-
-**To revisit:** Add `while` after `do` to BRO1502's keywords (it's left out on purpose so far). Small.
-
-<a id="sa1514"></a>
-
-### SA1514: Element documentation header should be preceded by blank line
-
-Layout rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A doc comment is preceded by a blank line (unless it follows `{`).
-
-**To revisit:** Mostly covered by BRO1505 (element separation inserts the blank line above the doc comment); check the remaining cases with the parity script. Small.
 
 <a id="sa1634"></a>
 

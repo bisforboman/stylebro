@@ -161,7 +161,8 @@ public class SingleLineBlocksTests
 
         public enum E
         {
-            A, B,
+            A,
+            B,
         }
 
         public class Members
@@ -275,7 +276,8 @@ public class SingleLineBlocksTests
         """, """
         public enum E
         {
-            A, B
+            A,
+            B
         }
         """, editorConfig: "dotnet_diagnostic.BRO1401.severity = none\n");
 }

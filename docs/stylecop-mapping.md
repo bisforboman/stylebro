@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 63 StyleBro (63 done), 44 drop, 33 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 73 StyleBro (73 done), 44 drop, 23 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -28,20 +28,14 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Status |
 |---|---|---|---|---|
-| [SA1004](skipped-rules.md#sa1004) | Documentation lines should begin with single space | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1006](skipped-rules.md#sa1006) | Preprocessor keywords should not be preceded by space | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1100](skipped-rules.md#sa1100) | Do not prefix calls with base unless local implementation exists | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1102](skipped-rules.md#sa1102) | Query clause should follow previous clause | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1103](skipped-rules.md#sa1103) | Query clauses should be on separate lines or all on one line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1104](skipped-rules.md#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1105](skipped-rules.md#sa1105) | Query clauses spanning multiple lines should begin on own line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1112](skipped-rules.md#sa1112) | Closing parenthesis should be on line of opening parenthesis | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1113](skipped-rules.md#sa1113) | Comma should be on the same line as previous parameter | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1114](skipped-rules.md#sa1114) | Parameter list should follow declaration | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1120](skipped-rules.md#sa1120) | Comments should contain text | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1130](skipped-rules.md#sa1130) | Use lambda syntax | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1135](skipped-rules.md#sa1135) | Using directives should be qualified | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1136](skipped-rules.md#sa1136) | Enum values should be on separate lines | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1139](skipped-rules.md#sa1139) | Use literal suffix notation instead of casting | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1141](skipped-rules.md#sa1141) | Use tuple syntax | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1205](skipped-rules.md#sa1205) | Partial elements should declare access | on / on / on | 0 / 0 / 0 | candidate |
@@ -49,9 +43,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1207](skipped-rules.md#sa1207) | Protected should come before internal | on / on / on | 0 / 0 / 0 | SDK not on yet |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1410](skipped-rules.md#sa1410) | Remove delegate parenthesis when possible | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1506](skipped-rules.md#sa1506) | Element documentation headers should not be followed by blank line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1511](skipped-rules.md#sa1511) | While-do footer should not be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1514](skipped-rules.md#sa1514) | Element documentation header should be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1142](skipped-rules.md#sa1142) | Refer to tuple fields by name | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1634](skipped-rules.md#sa1634) | File header should show copyright | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1635](skipped-rules.md#sa1635) | File header should have copyright text | on / off / on | 0 / 0 / 0 | candidate |
@@ -60,7 +51,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1638](skipped-rules.md#sa1638) | File header file name documentation should match file name | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1640](skipped-rules.md#sa1640) | File header should have valid company text | on / off / on | 0 / 0 / 0 | candidate |
 | [SA1641](skipped-rules.md#sa1641) | File header company name text should match | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1115](skipped-rules.md#sa1115) | Parameter should follow comma | on / off / off | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -137,15 +127,15 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
 | SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments |
 | SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
-| SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. No blank line between a doc comment and its element. ([details](skipped-rules.md#sa1506)) |
+| SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1511** (done), same positions and output as StyleCop |
 | SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE2000 (experimental) ([details](skipped-rules.md#sa1507)) |
 | SA1508 | Closing braces should not be preceded by blank line | on | yes | on / off / off | 0 / 46 / 85 | fixed | SDK: IDE2002 (experimental) |
 | SA1509 | Opening braces should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1501** (done), same results as StyleCop |
 | SA1510 | Chained statement blocks should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1502** (done), same results as StyleCop |
-| SA1511 | While-do footer should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. No blank line before the `while` of a `do ... while`. ([details](skipped-rules.md#sa1511)) |
+| SA1511 | While-do footer should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1512** (done), same positions and output as StyleCop |
 | SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 82 / 46 / 0 | not fixed | StyleBro **BRO1506** (done), same results as StyleCop |
 | SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 0 / 0 / 119 | fixed | SDK: IDE2003 (experimental) |
-| SA1514 | Element documentation header should be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A doc comment is preceded by a blank line (unless it follows `{`). ([details](skipped-rules.md#sa1514)) |
+| SA1514 | Element documentation header should be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1513** (done); documentation right below a comment is not reported (it would conflict with SA1512/BRO1506) |
 | SA1515 | Single-line comment should be preceded by blank line | on | yes | on / on / off | 0 / 0 / 31 | not fixed | StyleBro **BRO1504** (done), same results as StyleCop |
 | SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 0 / 44 / 5,873 | not fixed | StyleBro **BRO1505** (done), same positions as StyleCop |
 | SA1517 | Code should not contain blank lines at start of file | on | yes | on / on / off | 0 / 0 / 11 | fixed | SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template` |
@@ -235,14 +225,14 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1109 | Block statements should not contain embedded regions | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for a region between `if (b)` and its block (probed). ([details](skipped-rules.md#sa1109)) |
 | SA1110 | Opening parenthesis or bracket should be on declaration line | on | yes | on / on / off | 0 / 0 / 3 |  | StyleBro **BRO1109** (done), same results and output as StyleCop |
 | SA1111 | Closing parenthesis should be on line of last parameter | on | yes | on / on / off | 0 / 0 / 740 |  | StyleBro **BRO1110** (done), same results and output as StyleCop |
-| SA1112 | Closing parenthesis should be on line of opening parenthesis | on | yes | on / on / on | 0 / 0 / 0 | not fixed | Not yet: StyleBro candidate. Not done yet. `M(` + newline + `)` -> `M()`; the SDK doesn't fix it (measured). ([details](skipped-rules.md#sa1112)) |
-| SA1113 | Comma should be on the same line as previous parameter | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A comma at the start of the next line moves to the end of the previous item. ([details](skipped-rules.md#sa1113)) |
-| SA1114 | Parameter list should follow declaration | on | no | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. StyleCop has no fix. No blank line or comment between `(` and the first parameter. ([details](skipped-rules.md#sa1114)) |
-| SA1115 | Parameter should follow comma | on | no | on / off / off | 0 / 0 / 0 |  | Not yet: StyleBro candidate. StyleCop has no fix. No blank line between a comma and the next parameter. ([details](skipped-rules.md#sa1115)) |
+| SA1112 | Closing parenthesis should be on line of opening parenthesis | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1116** (done), same positions and output as StyleCop |
+| SA1113 | Comma should be on the same line as previous parameter | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1117** (done), same positions and output as StyleCop |
+| SA1114 | Parameter list should follow declaration | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1118** (done), with a fix (StyleCop has none); a comment before the first item is not reported |
+| SA1115 | Parameter should follow comma | on | no | on / off / off | 0 / 0 / 0 |  | StyleBro **BRO1119** (done), with a fix (StyleCop has none) |
 | SA1116 | Split parameters should start on line after declaration | on | yes | on / off / off | 0 / 375 / 266 | not fixed | StyleBro **BRO1107** (done), also checks record and primary-constructor parameters |
 | SA1117 | Parameters should be on same line or separate lines | on | no | on / off / off | 0 / 370 / 102 | not fixed | StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix |
 | SA1118 | Parameter should not span multiple lines | on | no | on / on / off | 0 / 0 / 126 |  | Drop: StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app. ([details](skipped-rules.md#sa1118)) |
-| SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. An empty `//` comment line is removed. ([details](skipped-rules.md#sa1120)) |
+| SA1120 | Comments should contain text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1120** (done), same positions; the fix removes every empty comment at that end of the group in one run |
 | SA1121 | Use built-in type alias | on | yes | on / on / off | 0 / 0 / 0 | fixed | SDK: IDE0049 (`dotnet_style_predefined_type_* = true`) |
 | SA1122 | Use string.Empty for empty strings | on | yes | on / off / off | 0 / 7 / 352 | not fixed | StyleBro **BRO1106** (done), same results as StyleCop |
 | SA1123 | Do not place regions within elements | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1113** (done), same results and output as StyleCop |
@@ -258,7 +248,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1133 | Do not combine attributes | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported |
 | SA1134 | Attributes should not share line | on | yes | on / off / on | 0 / 9 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1135 | Using directives should be qualified | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified. ([details](skipped-rules.md#sa1135)) |
-| SA1136 | Enum values should be on separate lines | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. Each enum member on its own line. ([details](skipped-rules.md#sa1136)) |
+| SA1136 | Enum values should be on separate lines | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1121** (done), same positions; an enum on one line gets BRO1509's expansion |
 | SA1137 | Elements should have the same indentation | on | yes | on / off / off | 0 / 4 / 4 | fixed | SDK: IDE0055 formatting |
 | SA1139 | Use literal suffix notation instead of casting | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `(long)1` -> `1L`. ([details](skipped-rules.md#sa1139)) |
 | SA1141 (1.2 beta) | Use tuple syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`. ([details](skipped-rules.md#sa1141)) |
@@ -274,7 +264,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1001 | Commas should be spaced correctly | on | yes | on / off / on | 0 / 4 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1002 | Semicolons should be spaced correctly | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1003 | Symbols should be spaced correctly | on | yes | on / off / off | 0 / 1 / 16 | fixed | SDK: IDE0055 formatting |
-| SA1004 | Documentation lines should begin with single space | on | yes | on / on / on | 0 / 0 / 0 | not fixed | Not yet: StyleBro candidate. Not done yet. `///text` -> `/// text`; the SDK doesn't fix it (measured). ([details](skipped-rules.md#sa1004)) |
+| SA1004 | Documentation lines should begin with single space | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1005** (done), same positions and output as StyleCop |
 | SA1005 | Single line comments should begin with single space | on | yes | on / on / off | 0 / 0 / 78 | not fixed | StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`) |
 | SA1006 | Preprocessor keywords should not be preceded by space | on | yes | on / on / on | 0 / 0 / 0 | not fixed | Not yet: StyleBro candidate. Not done yet. `# if` -> `#if`; the SDK doesn't fix it (measured). Rare in practice. ([details](skipped-rules.md#sa1006)) |
 | SA1007 | Operator keyword should be followed by space | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |

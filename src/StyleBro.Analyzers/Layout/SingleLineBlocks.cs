@@ -97,7 +97,8 @@ internal static class SingleLineBlocks
             return null;
         }
 
-        // Inside: every item on its own line, one level deeper; an enum's members stay together, like StyleCop.
+        // Inside: every item on its own line, one level deeper (also enum values: StyleCop's SA1502 fix keeps them on one
+        // line, which its SA1136 then reports).
         var items = GetItems(node);
         if (items.Count == 0)
         {
@@ -116,8 +117,9 @@ internal static class SingleLineBlocks
             // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges.
             for (var i = 1; i < items.Count; i++)
             {
-                var separator = node is not BlockSyntax && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text) ? lineBreak + lineBreak : lineBreak;
-                if (!Gap(items[i - 1].GetLastToken(), items[i].GetFirstToken(), separator + inner, text, changes))
+                // Enum values: one per line (StyleCop's SA1136, BRO1121), no blank lines; the comma stays where it is.
+                var separator = node is not (BlockSyntax or EnumDeclarationSyntax) && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text) ? lineBreak + lineBreak : lineBreak;
+                if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
                 {
                     return null;
                 }
@@ -198,12 +200,11 @@ internal static class SingleLineBlocks
         return null;
     }
 
-    /// <summary>The items inside the braces, each of which gets its own line. Enum members count as one.</summary>
+    /// <summary>The items inside the braces, each of which gets its own line.</summary>
     private static IReadOnlyList<SyntaxNode> GetItems(SyntaxNode node) => node switch
     {
         BlockSyntax block => block.Statements,
-        EnumDeclarationSyntax { Members.Count: > 0 } @enum => [@enum.Members[0]],
-        EnumDeclarationSyntax => [],
+        EnumDeclarationSyntax @enum => @enum.Members,
         TypeDeclarationSyntax type => type.Members,
         NamespaceDeclarationSyntax ns => ns.Externs.Cast<SyntaxNode>().Concat(ns.Usings).Concat(ns.Members).ToList(),
         AccessorListSyntax list => list.Accessors,

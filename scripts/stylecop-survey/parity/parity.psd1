@@ -354,5 +354,38 @@
                 'StyleCop output only: Cases.cs: [            var x = default(Nullable<long>);]'
             )
         }
+        @{
+            Name     = 'lists-comments-docs'
+            Map      = @('SA1004=BRO1005', 'SA1112=BRO1116', 'SA1113=BRO1117', 'SA1114=BRO1118', 'SA1115=BRO1119', 'SA1120=BRO1120', 'SA1136=BRO1121', 'SA1506=BRO1511', 'SA1511=BRO1512', 'SA1514=BRO1513')
+            Expected = @(
+                # A comment between '(' and the first item: the fix would have to move it (StyleCop has no fix).
+                'only StyleCop: BRO1118 Cases.cs(54,13)'
+                # Documentation right below a comment: a blank line there would break SA1512/BRO1506, and the fixes would
+                # undo each other. StyleCop's fix adds it.
+                'only StyleCop: BRO1513 More.cs(61,9)'
+                'StyleCop output only: More.cs: []'
+                # An enum on one line: StyleBro puts every value on its own line with the trailing comma (BRO1509's
+                # expansion, so BRO1121 and BRO1509 agree); StyleCop's SA1136 fix leaves '{ A,' and 'C }'.
+                'StyleBro output only: Cases.cs: [    public enum Values]'
+                'StyleBro output only: Cases.cs: [    {]'
+                'StyleBro output only: Cases.cs: [        A,]'
+                'StyleBro output only: Cases.cs: [        C,]'
+                'StyleBro output only: Cases.cs: [    }]'
+                'StyleCop output only: Cases.cs: [    public enum Values { A,]'
+                'StyleCop output only: Cases.cs: [        C }]'
+                # Empty comments: StyleCop removes the reported first/last one only, leaving the next empty one to be reported
+                # on the next run; StyleBro removes the whole empty run at that end of the group.
+                'StyleCop output only: Cases.cs: [            //]'
+                'StyleCop output only: Cases.cs: [            //    ]'
+                # SA1114/SA1115 have no StyleCop fix: the blank lines in the lists stay in StyleCop's output.
+                'StyleCop output only: Cases.cs: []'
+                'StyleCop output only: Cases.cs: []'
+                'StyleCop output only: More.cs: []'
+                'StyleCop output only: Third.cs: []'
+                'StyleCop output only: Third.cs: []'
+                'StyleCop output only: Third.cs: []'
+                'StyleCop output only: Third.cs: []'
+            )
+        }
     )
 }
