@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-90 rules: 40 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+89 rules: 39 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -49,7 +49,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1410](#sa1410) | Remove delegate parenthesis when possible | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1411](#sa1411) | Attribute constructor should not use unnecessary parenthesis | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1504](#sa1504) | All accessors should be single-line or multi-line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1506](#sa1506) | Element documentation headers should not be followed by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1511](#sa1511) | While-do footer should not be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1514](#sa1514) | Element documentation header should be preceded by blank line | candidate | on / on / on | 0 / 0 / 0 |
@@ -375,16 +374,6 @@ Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it 
 **Why:** Not done yet. `[Obsolete()]` -> `[Obsolete]`.
 
 **To revisit:** Syntax-only. Small.
-
-<a id="sa1504"></a>
-
-### SA1504: All accessors should be single-line or multi-line
-
-Layout rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. All accessors of a property single-line or all multi-line.
-
-**To revisit:** Expand the single-line accessors (StyleCop's fix); BRO1509's fix leaves accessors on one line each, so this would be its own rule. Small.
 
 <a id="sa1506"></a>
 

@@ -59,6 +59,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1507](docs/rules/BRO1507.md) | Files should not end with blank lines | SA1518 | Yes |
 | [BRO1508](docs/rules/BRO1508.md) | A block should not be on a single line | SA1501 | Yes |
 | [BRO1509](docs/rules/BRO1509.md) | An element should not be on a single line | SA1502 | Yes |
+| [BRO1510](docs/rules/BRO1510.md) | Accessors should all be single-line or all multi-line | SA1504 | Yes |
 
 How every StyleCop rule maps to StyleBro or the SDK: [docs/stylecop-mapping.md](docs/stylecop-mapping.md). The rules
 StyleBro doesn't cover, why, and what it would take to add them: [docs/skipped-rules.md](docs/skipped-rules.md).

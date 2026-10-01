@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 46 rules; 289 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+(see the log below) and 47 rules; 293 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.4 (44 rules, released 2026-10-01 by release.yml from tag `v0.1.0-alpha.4`) is on nuget.org; earlier:
 alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -331,6 +331,14 @@ suggest or push a release tag after each batch; mention it only when a release l
   56/52 positions, 4 documented; output not compared (StyleCop's fix misindents nested blocks, writes CRLF into LF
   files). Replaces the SDK option the preset couldn't use (`csharp_preserve_single_line_blocks = false` also expands
   `{ get; set; }`).
+- **BRO1510** (SA1504) accessors with block bodies all single-line or all multi-line (`Layout/AccessorLayout.cs`).
+  Probed: only lists where EVERY accessor has a block body (`get => x;`/`get;` next to a multi-line `set {}` is fine),
+  only multi-line lists (a one-line list is BRO1509's), diagnostic on the first accessor's keyword. StyleCop's fix has
+  "single line" and "multiple lines" actions and under Fix All applies one of them to the whole project (whichever
+  the first diagnostic offers), and drops comments in a body it collapses. Ours decides per list: collapse when every
+  multi-line accessor has <= 1 single-line statement and no comments, else expand the single-line ones; adds the
+  BRO1505 blank line between accessors when BRO1505 wants it on the original (order-independence). Parity set
+  `accessor-layout`: 8/8 positions, output not compared.
 - **Fix ORDER under `dotnet format` is not fixed** (found with BRO1509 in the Messy sample: 4 of 5 runs failed). Two
   interactions had to be made order-independent: (1) BRO1505's fix on members of a ONE-LINE type now applies the
   whole BRO1509 expansion (identical edits, merged), instead of splitting one gap at column 0, which left the braces

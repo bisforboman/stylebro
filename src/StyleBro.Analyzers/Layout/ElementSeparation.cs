@@ -103,7 +103,8 @@ internal static class ElementSeparation
         };
     }
 
-    private static bool HasBlankLineBetween(SyntaxNode previous, SyntaxNode current, SourceText text)
+    /// <summary>Whether there's a blank line anywhere between the two elements' code (BRO1505; also used by BRO1510's fix).</summary>
+    public static bool HasBlankLineBetween(SyntaxNode previous, SyntaxNode current, SourceText text)
     {
         // Like StyleCop, a blank line anywhere before the element's code counts, also one between its comment (or
         // '#if') and the code. The fix still adds the line above the comment.

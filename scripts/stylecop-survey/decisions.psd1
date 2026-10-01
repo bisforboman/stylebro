@@ -37,6 +37,7 @@
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
+        SA1504 = 'StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop''s applies one direction to the whole project) and keeps comments'
         SA1501 = 'StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported'
         SA1502 = 'StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)'
         SX1101 = 'SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; stylebro-migrate turns IDE0003 on when SX1101 is on'

@@ -7,3 +7,4 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 BRO1508 | Layout | Warning  | SingleLineBlocksAnalyzer
 BRO1509 | Layout | Warning  | SingleLineBlocksAnalyzer
+BRO1510 | Layout | Warning  | AccessorLayoutAnalyzer

@@ -115,8 +115,6 @@
             Revisit = 'Nothing automatic.' }
 
         # ---- Layout ------------------------------------------------------------------------------------------------
-        SA1504 = @{ Status = 'Candidate'; Why = 'Not done yet. All accessors of a property single-line or all multi-line.'
-            Revisit = 'Expand the single-line accessors (StyleCop''s fix); BRO1509''s fix leaves accessors on one line each, so this would be its own rule. Small.' }
         SA1506 = @{ Status = 'Candidate'; Why = 'Not done yet. No blank line between a doc comment and its element.'
             Revisit = 'Delete the blank lines; the BlankLineAfter code (BRO1503/BRO1506) has the line logic. Small.' }
         SA1511 = @{ Status = 'Candidate'; Why = 'Not done yet. No blank line before the `while` of a `do ... while`.'

@@ -214,7 +214,7 @@ internal static class SingleLineBlocks
     /// Replaces the whitespace between two tokens with the given text (no edit when it's already that). False when the
     /// gap holds a comment or directive: the node is then skipped.
     /// </summary>
-    private static bool Gap(SyntaxToken before, SyntaxToken after, string newText, SourceText text, List<TextChange> changes)
+    internal static bool Gap(SyntaxToken before, SyntaxToken after, string newText, SourceText text, List<TextChange> changes)
     {
         // An enum's members are one item: its last token is the last member's, plus a trailing comma if there is one.
         if (after.Parent is EnumDeclarationSyntax @enum && after == @enum.CloseBraceToken && @enum.Members.Count > 0)
@@ -238,7 +238,7 @@ internal static class SingleLineBlocks
     }
 
     /// <summary>The SDK's csharp_new_line_before_open_brace for this kind of brace (default: all).</summary>
-    private static bool NewLineBeforeBrace(SyntaxNode node, AnalyzerConfigOptions options)
+    internal static bool NewLineBeforeBrace(SyntaxNode node, AnalyzerConfigOptions options)
     {
         if (!options.TryGetValue("csharp_new_line_before_open_brace", out var value))
         {
@@ -254,6 +254,7 @@ internal static class SingleLineBlocks
         var kind = node switch
         {
             BlockSyntax { Parent: LocalFunctionStatementSyntax } => "local_functions",
+            BlockSyntax { Parent: AccessorDeclarationSyntax } => "accessors",
             BlockSyntax { Parent: BaseMethodDeclarationSyntax } => "methods",
             BlockSyntax => "control_blocks",
             AccessorListSyntax { Parent: IndexerDeclarationSyntax } => "indexers",
@@ -296,7 +297,7 @@ internal static class SingleLineBlocks
     }
 
     /// <summary>The line break the file uses: the one ending the node's line, or the first one in the file.</summary>
-    private static string LineBreak(SourceText text, int position)
+    internal static string LineBreak(SourceText text, int position)
     {
         var line = text.Lines.GetLineFromPosition(position);
         foreach (var candidate in new[] { line }.Concat(text.Lines))

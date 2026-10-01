@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 54 StyleBro (54 done), 44 drop, 42 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 55 StyleBro (55 done), 44 drop, 41 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -53,7 +53,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1410](skipped-rules.md#sa1410) | Remove delegate parenthesis when possible | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1411](skipped-rules.md#sa1411) | Attribute constructor should not use unnecessary parenthesis | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1504](skipped-rules.md#sa1504) | All accessors should be single-line or multi-line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1506](skipped-rules.md#sa1506) | Element documentation headers should not be followed by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1511](skipped-rules.md#sa1511) | While-do footer should not be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1514](skipped-rules.md#sa1514) | Element documentation header should be preceded by blank line | on / on / on | 0 / 0 / 0 | candidate |
@@ -144,7 +143,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1501 | Statement should not be on a single line | on | yes | on / on / off | 0 / 0 / 1 | fixed | StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported |
 | SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509) |
 | SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
-| SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. All accessors of a property single-line or all multi-line. ([details](skipped-rules.md#sa1504)) |
+| SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments |
 | SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
 | SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. No blank line between a doc comment and its element. ([details](skipped-rules.md#sa1506)) |
 | SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE2000 (experimental) ([details](skipped-rules.md#sa1507)) |

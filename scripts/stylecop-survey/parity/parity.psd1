@@ -310,5 +310,15 @@
                 'only StyleCop: BRO1508 Statements.cs(40,31)'
             )
         }
+        @{
+            Name     = 'accessor-layout'
+            Map      = @('SA1504=BRO1510')
+            # StyleCop's fix offers 'single line' and 'multiple lines'; under Fix All one of them is applied to the whole
+            # project (whichever the first diagnostic offers), and it drops comments in a body it collapses. StyleBro
+            # decides per accessor list and never drops a comment. Positions only; StyleBro's output must still be clean.
+            CompareOutput = $false
+            Expected = @(
+            )
+        }
     )
 }

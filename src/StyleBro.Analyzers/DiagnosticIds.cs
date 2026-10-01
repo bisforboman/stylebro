@@ -47,4 +47,5 @@ public static class DiagnosticIds
     public const string BlankLinesAtEndOfFile = "BRO1507";
     public const string SingleLineStatementBlock = "BRO1508";
     public const string SingleLineElement = "BRO1509";
+    public const string AccessorsConsistentLayout = "BRO1510";
 }

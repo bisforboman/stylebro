@@ -479,4 +479,15 @@ internal static class Descriptors
         description: "Types, namespaces, method bodies and accessor lists with bodies aren't written on one line. Auto-properties "
             + "('{ get; set; }') and single-line accessors inside a multi-line property are fine. Replaces StyleCop SA1502.",
         helpLinkUri: HelpBase + DiagnosticIds.SingleLineElement + ".md");
+
+    public static readonly DiagnosticDescriptor AccessorsConsistentLayout = new(
+        id: DiagnosticIds.AccessorsConsistentLayout,
+        title: "Accessors should all be single-line or all multi-line",
+        messageFormat: "Lay out all accessors the same way: all on one line each, or all on several lines",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When every accessor has a block body, they are either all single-line or all multi-line. The fix puts "
+            + "one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
+        helpLinkUri: HelpBase + DiagnosticIds.AccessorsConsistentLayout + ".md");
 }

@@ -124,7 +124,7 @@ SA1500,SDK: IDE0055 (`csharp_new_line_before_open_brace = all`)
 SA1501,"StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported"
 SA1502,"StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)"
 SA1503,SDK: IDE0011 (`csharp_prefer_braces = true`)
-SA1504,Not yet: StyleBro candidate. Not done yet. All accessors of a property single-line or all multi-line.
+SA1504,"StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments"
 SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"
 SA1506,Not yet: StyleBro candidate. Not done yet. No blank line between a doc comment and its element.
 SA1507,SDK: IDE2000 (experimental)
