@@ -13,11 +13,17 @@ namespace StyleBro.Migrate;
 /// directory) and prints the matching StyleBro and SDK settings. With --write it puts them into the repository's
 /// .editorconfig files, between markers so a second run replaces them, and carries StyleCop suppressions in the code
 /// ('#pragma warning disable SA1202', [SuppressMessage], &lt;NoWarn&gt;) over to the rules that replace them.
+/// 'stylebro-migrate baseline' writes a baseline instead (<see cref="BaselineCommand"/>).
 /// </summary>
 internal static class Program
 {
     public static int Main(string[] args)
     {
+        if (args.FirstOrDefault() == "baseline")
+        {
+            return BaselineCommand.Run(args.Skip(1).ToArray());
+        }
+
         var write = args.Contains("--write");
         var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
         if (!Directory.Exists(root))

@@ -22,3 +22,14 @@ Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run 
 
 The report lists the StyleCop rules that nothing enforces after the switch, and why. Details:
 [docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md).
+
+## Baseline
+
+```
+stylebro-migrate baseline [path] [--project MySolution.sln]
+```
+
+Writes `stylebro.baseline` with every violation `dotnet format` would fix today. The StyleBro.Analyzers package then
+hides those in the build, the IDE and `dotnet format`, so only new code has to follow the rules; a violation counts as
+new once its line is edited. Whitespace formatting can't be baselined. Details:
+[docs/baseline.md](https://github.com/bisforboman/stylebro/blob/main/docs/baseline.md).

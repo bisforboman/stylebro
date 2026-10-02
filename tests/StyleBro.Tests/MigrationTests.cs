@@ -360,6 +360,23 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void TheBaseline_CoversEverySdkRuleThePresetOrTheToolTurnsOn()
+    {
+        var preset = Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig");
+        // A repository with a plain file header and SX1101 turns on IDE0073 and IDE0003 too.
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1101.severity = warning\n");
+        var ids = File.ReadAllLines(preset).Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
+            .Select(l => System.Text.RegularExpressions.Regex.Match(l, @"^dotnet_diagnostic\.(IDE\d{4})\.severity"))
+            .Where(m => m.Success)
+            .Select(m => m.Groups[1].Value)
+            .ToHashSet();
+
+        Assert.Contains("IDE0073", ids);
+        Assert.All(ids, id => Assert.Contains(id, StyleBro.Analyzers.Baseline.BaselineSuppressor.SdkIds));
+    }
+
+    [Fact]
     public void EveryPresetDifferenceFromStyleCop_IsDocumented()
     {
         // What StyleCop's defaults translate to (a repository without StyleCop settings that generates docs) ...

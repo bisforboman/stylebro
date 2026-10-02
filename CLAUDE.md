@@ -478,6 +478,32 @@ suggest or push a release tag after each batch; mention it only when a release l
   flagged `{TResult, TArgs}` crefs; BRO1601 ignored documentInternalElements; BRO1611 checked constructors/operators
   (StyleCop doesn't); BRO1113 took regions in expression bodies (StyleCop: SA1124, so BRO1112).
 
+## Baseline (2026-10-02)
+
+- User's request: "baseline support" (fail only on new violations). Docs: `docs/baseline.md`.
+- Probed first: `dotnet format` honors a `DiagnosticSuppressor` (suppressed BRO and IDE diagnostics aren't fixed), and
+  `dotnet format --verify-no-changes --report dir` lists every analyzer/style diagnostic it would fix (suppressed ones
+  left out). Whitespace formatting is NOT a diagnostic there ("WHITESPACE"), so it can't be baselined (documented).
+- `src/StyleBro.Analyzers/Baseline/`: `Baseline` (file format: tab-separated rule, path relative to the baseline,
+  fingerprint = 64-bit FNV-1a of the trimmed line text, count; sorted render) and `BaselineSuppressor` (every BRO id
+  via reflection over `DiagnosticIds` + `SdkIds`, the IDE rules the preset/migrate can turn on; a MigrationTests guard
+  keeps `SdkIds` in sync). Each entry covers `count` diagnostics of its rule on a line with that text, in source order,
+  per compilation (multi-targeting: each TFM on its own). Moved lines stay hidden; an edited line's violations are new.
+- Package targets: the nearest `stylebro.baseline` above the project (`GetPathOfFileAbove`) becomes an AdditionalFile;
+  `<StyleBroBaseline>` overrides the path (file name must stay `stylebro.baseline`), `none` turns it off. Checked by
+  packing a test version and consuming it.
+- `stylebro-migrate baseline [path] [--project x]` (`BaselineCommand.cs`): moves an existing baseline aside, runs
+  `dotnet format --verify-no-changes --severity warn --report`, dedupes TFM copies, writes the file, prints counts per
+  rule, whitespace changes and uncovered ids (other analyzers).
+- FFMpegCore end to end (all rules + preset, TreatWarningsAsErrors): 820 violations on 759 lines baselined; then build
+  0 StyleBro errors (519 without), `dotnet format --verify-no-changes` exit 0; a new file's violation and an edited
+  baselined line were reported and fixed.
+- Found on the way: **ListGapsAnalyzer crashed (AD0001)** in FFMpegCore's tests: BRO1117 compared the previous item's
+  START line with the comma's, so a multi-line raw/verbatim string ending right before the comma looked like a comma on
+  a new line and `LastIndexOf('\n')` returned -1. Now compares the token's END. Earlier real-world runs missed it
+  because realworld.ps1 only reported NEW compile errors; it now prints analyzer crashes separately. AD0001 sweep of all
+  six repos with every rule: see the log.
+
 ## Real-world testing log
 
 - **FFMpegCore** (open source, 6 projects, 180 files, no StyleCop; 2026-09-29):

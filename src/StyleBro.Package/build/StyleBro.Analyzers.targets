@@ -8,4 +8,15 @@
   <ItemGroup Condition="'$(StyleBroPreset)' != 'none'">
     <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)stylebro.recommended.globalconfig" />
   </ItemGroup>
+
+  <!--
+    The baseline: existing violations that aren't reported (docs/baseline.md). The nearest stylebro.baseline above the
+    project, or the file <StyleBroBaseline> names (it must be called stylebro.baseline); 'none' turns it off.
+  -->
+  <PropertyGroup>
+    <StyleBroBaseline Condition="'$(StyleBroBaseline)' == ''">$([MSBuild]::GetPathOfFileAbove('stylebro.baseline', '$(MSBuildProjectDirectory)'))</StyleBroBaseline>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(StyleBroBaseline)' != '' and '$(StyleBroBaseline)' != 'none' and Exists('$(StyleBroBaseline)')">
+    <AdditionalFiles Include="$(StyleBroBaseline)" />
+  </ItemGroup>
 </Project>

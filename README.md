@@ -113,6 +113,13 @@ suppressions over to the replacing rules, and lists the StyleCop rules nothing e
 `dotnet tool install --global StyleBro.Migrate --prerelease`, then `stylebro-migrate path/to/repo`. See
 [docs/migrating.md](docs/migrating.md).
 
+## Baseline: fail only on new violations
+
+In a codebase with many existing violations, `stylebro-migrate baseline` records them in `stylebro.baseline`. The
+build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules the preset turns on), so
+only new code has to follow the rules; a violation counts as new once its line is edited. See
+[docs/baseline.md](docs/baseline.md).
+
 ## Repository layout
 
 ```
@@ -138,4 +145,4 @@ Roslyn is pinned to 4.8.0 so the package loads in the .NET 8 SDK / VS 17.8 and n
 ## Roadmap
 
 1. More StyleCop rules with safe fixes (the candidates in [docs/skipped-rules.md](docs/skipped-rules.md))
-2. Baseline support: fail only on new violations in legacy codebases
+2. ~~Baseline support~~ ([docs/baseline.md](docs/baseline.md))
