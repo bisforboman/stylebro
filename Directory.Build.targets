@@ -1,0 +1,10 @@
+<Project>
+  <!-- The downloaded StyleBro package for the analyzer and code-fix projects (see Directory.Build.props). -->
+  <PropertyGroup Condition="'$(StyleBroSelf)' == 'download'">
+    <_StyleBroSelfRoot>$(NuGetPackageRoot)stylebro.analyzers/$(StyleBroSelfVersion)/</_StyleBroSelfRoot>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(StyleBroSelf)' == 'download'">
+    <Analyzer Include="$(_StyleBroSelfRoot)analyzers/dotnet/cs/*.dll" />
+  </ItemGroup>
+  <Import Project="$(_StyleBroSelfRoot)build/StyleBro.Analyzers.targets" Condition="'$(StyleBroSelf)' == 'download' and Exists('$(_StyleBroSelfRoot)build/StyleBro.Analyzers.targets')" />
+</Project>

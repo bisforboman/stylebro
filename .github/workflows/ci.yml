@@ -22,6 +22,10 @@ jobs:
         shell: pwsh
         run: ./scripts/verify-format.ps1
 
+      # StyleBro's own code follows its rules (the latest published release, see Directory.Build.props).
+      - name: Check StyleBro's own code style
+        run: dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples
+
       - name: Pack
         run: |
           dotnet pack src/StyleBro.Package --output artifacts

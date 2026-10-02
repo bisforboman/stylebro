@@ -7,4 +7,24 @@
     <Authors>Jakob Boman</Authors>
     <Copyright>Copyright (c) Jakob Boman</Copyright>
   </PropertyGroup>
+
+  <!--
+    StyleBro checks its own code with its latest published release from nuget.org (StyleBroSelfVersion), not the code
+    being built. Left out: the samples (their input is deliberately messy and is checked by the analyzers being built,
+    see scripts/verify-format.ps1) and StyleBro.Package, which is that package and has no code. The analyzer and
+    code-fix projects are referenced by StyleBro.Package, so a PackageReference there would be a restore cycle
+    (StyleBro.Analyzers -> ... -> StyleBro.Analyzers); they download the package instead and load it in
+    Directory.Build.targets.
+  -->
+  <PropertyGroup>
+    <StyleBroSelfVersion>0.1.0-alpha.8</StyleBroSelfVersion>
+    <StyleBroSelf Condition="'$(MSBuildProjectName)' == 'StyleBro.Analyzers' or '$(MSBuildProjectName)' == 'StyleBro.CodeFixes'">download</StyleBroSelf>
+    <StyleBroSelf Condition="'$(MSBuildProjectName)' == 'Messy' or '$(MSBuildProjectName)' == 'MultiTarget' or '$(MSBuildProjectName)' == 'StyleBro.Package'">none</StyleBroSelf>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(StyleBroSelf)' == ''">
+    <PackageReference Include="StyleBro.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(StyleBroSelf)' == 'download'">
+    <PackageDownload Include="StyleBro.Analyzers" Version="[$(StyleBroSelfVersion)]" />
+  </ItemGroup>
 </Project>

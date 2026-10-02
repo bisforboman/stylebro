@@ -53,6 +53,14 @@ suggest or push a release tag after each batch; mention it only when a release l
   also that the fixed sample builds. It does NOT reproduce the old linked-file bug (couldn't find a minimal repro);
   the reference for that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
 - `scripts/verify-format.ps1` reads the rule IDs from `AnalyzerReleases.Unshipped.md` and runs every sample.
+- **StyleBro checks its own code** (2026-10-02) with its latest PUBLISHED release (`StyleBroSelfVersion` in
+  Directory.Build.props, bump it after each release): a PackageReference in Migrate and Tests (the real install path);
+  StyleBro.Analyzers/CodeFixes can't (StyleBro.Package references them and is the package itself: NU1108 restore
+  cycle), so they `PackageDownload` it and Directory.Build.targets adds its DLLs as Analyzers and imports its build
+  targets. Samples and StyleBro.Package are left out. First run: ~535 findings (190 BRO1601 inheritdoc, 144+144
+  BRO1107/BRO1108 on `VerifyFixAsync("""...""", """...""")` in tests, BRO1303 unified `_field`/`field` to `field`), 142
+  files changed, builds, 397 tests pass, second run clean. CI runs
+  `dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples`.
 - C# files under `src/` and `tests/` use LF line endings (normalized 2026-09-30; a few had become mixed from scripted
   edits inserting CRLF, which then made exact-text replacements fail). Keep new edits LF.
 - `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
