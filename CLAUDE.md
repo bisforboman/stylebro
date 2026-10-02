@@ -18,8 +18,8 @@ matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
 (see the log below) and 71 rules; 387 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.1.0-alpha.6 (54 rules, released 2026-10-01, the first prerelease published without an approval step) is on
-nuget.org with StyleBro.Migrate; earlier: alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
+0.1.0-alpha.7 (71 rules, 2026-10-02) is the latest on nuget.org with StyleBro.Migrate; earlier: alpha.6 (54 rules,
+the first prerelease published without an approval step), alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
 tool) with the same version; CI packs both too.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
@@ -323,8 +323,7 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **BRO1615** (SA1633 with the XML header, SA1634-SA1638, SA1640, SA1641; 2026-10-02; `Documentation/FileHeaders.cs`,
   `FileHeaderAnalyzer`, `FileHeaderCodeFixProvider`): one rule, one diagnostic per file. Does nothing until
   `stylebro_file_header_company` is set (preset: warning; StyleCop's default company is `PlaceholderCompany`).
-  `stylebro_file_header_copyright` (default StyleCop's text; `
-`, `{companyName}`, `{fileName}`),
+  `stylebro_file_header_copyright` (default StyleCop's text; `\n`, `{companyName}`, `{fileName}`),
   `stylebro_file_header_decoration`. Header read exactly like StyleCop's `FileHeaderHelpers` (source read from GitHub:
   `//` comments up to a blank line, `//-` borders skipped, `<root>`-wrapped XML, no element = malformed). Text compared
   line by line, trimmed; file name ordinal. Fix: rewrites only the `<copyright>` tag's lines; no tag -> inserted at the
@@ -614,8 +613,7 @@ suggest or push a release tag after each batch; mention it only when a release l
   app have SA1633 off), so every repo got a company via a global config and a header in every file: FFMpegCore 161,
   Polly 790, private app 2632 (= its SA1633 count with the rule on), Newtonsoft.Json 1100 (header above its
   `#region License`, no conflict markers across 8 frameworks), Serilog 221; OpenTelemetry with its own text configured
-  (`Copyright The OpenTelemetry Authors
-SPDX-License-Identifier: Apache-2.0`): all 876 plain headers became the XML
+  (`Copyright The OpenTelemetry Authors\nSPDX-License-Identifier: Apache-2.0`): all 876 plain headers became the XML
   header around the same lines. All in one pass, no new compile errors, second run clean, BOMs and line endings kept.
 
 - **Batch 3** (BRO1122-BRO1126, BRO1403; 2026-10-02): 0 in FFMpegCore, Polly, OpenTelemetry, the private app and
