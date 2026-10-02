@@ -16,9 +16,10 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 71 rules; 388 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
+(see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.1.0-alpha.7 (71 rules, 2026-10-02) is the latest on nuget.org with StyleBro.Migrate; earlier: alpha.6 (54 rules,
+0.1.0-alpha.8 (71 rules + baseline support + the BRO1117 crash fix, 2026-10-02) is the latest on nuget.org with
+StyleBro.Migrate; earlier: alpha.7 (71 rules), alpha.6 (54 rules,
 the first prerelease published without an approval step), alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
 tool) with the same version; CI packs both too.
 
