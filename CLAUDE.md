@@ -756,6 +756,12 @@ suggest or push a release tag after each batch; mention it only when a release l
   stylebro-migrate maps SA1205 to IDE0040 with SA1400; the preset already had IDE0040 on. Case added to
   sdk-check-cases.ps1 and the row to data/sdk-check.csv.
 
+- **Migration re-measured after `init` and the Fix All changes** (2026-10-03): Polly 3, OpenTelemetry 1 (unchanged).
+  Private app first 22: `migrate --write` turned IDE0040 on because SA1205 (on by default) mapped to it, and IDE0040 now
+  really runs (severities in .editorconfig since `init`); with SA1400 off there, it added modifiers everywhere. Fixed:
+  IDE0040 only when SA1400 is on. Then 16 = the same 10 as before + 6 line-ending-only changes: stray CRLF lines in doc
+  comments, which the SDK formatter (ENDOFLINE) fixes because the repo's own .editorconfig says `end_of_line = lf`.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
