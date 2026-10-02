@@ -40,6 +40,11 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1119](docs/rules/BRO1119.md) | Parameter should follow comma | SA1115 | Yes |
 | [BRO1120](docs/rules/BRO1120.md) | Comments should contain text | SA1120 | Yes |
 | [BRO1121](docs/rules/BRO1121.md) | Enum values should be on separate lines | SA1136 | Yes |
+| [BRO1122](docs/rules/BRO1122.md) | Use literal suffix notation instead of casting | SA1139 | Yes |
+| [BRO1123](docs/rules/BRO1123.md) | Use tuple syntax | SA1141 | Yes |
+| [BRO1124](docs/rules/BRO1124.md) | Refer to tuple elements by name | SA1142 | Yes |
+| [BRO1125](docs/rules/BRO1125.md) | Use lambda syntax | SA1130 | Yes |
+| [BRO1126](docs/rules/BRO1126.md) | Using directives should be qualified | SA1135 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |
@@ -51,6 +56,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1402](docs/rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Yes |
+| [BRO1403](docs/rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Yes |
 | [BRO1601](docs/rules/BRO1601.md) | Overrides and implementations should inherit their documentation | SA1600 (these members) | Yes |
 | [BRO1602](docs/rules/BRO1602.md) | Single-line comments should not use documentation style slashes | SA1626 | Yes |
 | [BRO1603](docs/rules/BRO1603.md) | Documentation text should end with a period | SA1629 | Yes |

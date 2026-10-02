@@ -52,8 +52,14 @@ public static class DiagnosticIds
     public const string TypeParameterTagsMatch = "BRO1613";
     public const string TypeParameterTagHasName = "BRO1614";
     public const string FileHeader = "BRO1615";
+    public const string LiteralSuffix = "BRO1122";
+    public const string TupleSyntax = "BRO1123";
+    public const string TupleElementName = "BRO1124";
+    public const string LambdaSyntax = "BRO1125";
+    public const string QualifiedUsing = "BRO1126";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
+    public const string EmptyDelegateParentheses = "BRO1403";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

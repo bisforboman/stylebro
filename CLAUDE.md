@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 65 rules; 360 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
+(see the log below) and 71 rules; 387 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.6 (54 rules, released 2026-10-01, the first prerelease published without an approval step) is on
 nuget.org with StyleBro.Migrate; earlier: alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -177,11 +177,30 @@ suggest or push a release tag after each batch; mention it only when a release l
   StyleBro's fixed output must also be clean ("StyleBro fix leaves: ..." otherwise; this found a BRO1506 bug:
   the empty line after a file's final line break counted as a blank line below a comment). `CompareOutput = $false`
   skips the output diff when StyleCop has no fix (SA1117) or a broken one (SA1312/SA1313: under `dotnet format`
-  its rename fix applies a different subset of renames per run). All 28 sets pass. Add a set for every new rule.
+  its rename fix applies a different subset of renames per run). All 29 sets pass. Add a set for every new rule.
   Sets may map several SA ids to one BRO id (StyleCop's reports at one position count once) and set `StyleCopJson`/
   `EditorConfig` (file-header).
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
+
+- **Batch 3, semantic readability** (2026-10-02; StyleCop's source read from GitHub for each rule and fix):
+  **BRO1122** (SA1139, `Readability/LiteralSuffixes.cs`) `(long)1` -> `1L` only when the new literal's VALUE equals the
+  cast's constant (StyleCop checks the type only: `(decimal)0.1234567890123456789` rounds through double, `(decimal)1.50`
+  loses its scale (compare `decimal.GetBits`), `(float)1.00000005960464488641292746251565404236316680908203125` double-
+  rounds); skips `a-(long)-1` (would be `a--1L`) and comments. **BRO1123** (SA1141, `TupleSyntax.cs`) every type-only
+  position (StyleCop: declarations only), outermost ValueTuple per edit; creations/`ValueTuple.Create` -> literal only
+  when no argument would infer an element name (else BRO1124 changes code on a second run), args == arity (StyleCop's
+  fix writes `()` for `new ValueTuple<int, int>()`), not in expression trees; casts only on literal args.
+  **BRO1124** (SA1142, `TupleElementNames.cs`) `t.Item1` -> name; not in `nameof`; after `?.` reported on `.Item1`
+  like StyleCop. **BRO1125** (SA1130, `LambdaSyntax.cs`) StyleCop's output (types dropped, `delegate { }` gets the
+  delegate's names made unique against scope AND identifiers in the body), checked by `Speculation.BindsTheSame`
+  (speculative model on the enclosing statement/initializer/arrow clause: same converted type, same invoked symbol);
+  that also rejects `var f = delegate (int x) {...}`. **BRO1403** (SA1410) only where BRO1125 is off or skips the
+  method (`Severities.IsOn`, extracted from `SingleLineBlocks.WantsTrailingComma`), so the two fixes never overlap.
+  **BRO1126** (SA1135, `QualifiedUsings.cs`) also skips a qualified name whose root an enclosing namespace hides.
+  Under `dotnet format`, StyleCop's SA1141 fix has no Fix All and its SA1142 fix throws (checked in the log this time).
+  Parity `readability-semantics`: 38/37 positions, 44 documented differences. Mutation-tested: every guard has a test
+  (the value check needed the double-rounding float case; an explicit `global::` check was dead, `GetAliasInfo` covers it).
 
 ## BRO13xx: naming
 
@@ -598,6 +617,10 @@ suggest or push a release tag after each batch; mention it only when a release l
   (`Copyright The OpenTelemetry Authors
 SPDX-License-Identifier: Apache-2.0`): all 876 plain headers became the XML
   header around the same lines. All in one pass, no new compile errors, second run clean, BOMs and line endings kept.
+
+- **Batch 3** (BRO1122-BRO1126, BRO1403; 2026-10-02): 0 in FFMpegCore, Polly, OpenTelemetry, the private app and
+  Serilog; Newtonsoft.Json 38 (20 BRO1122, 9 BRO1123, 9 BRO1125) in 11 files, fixed in one pass, compiles, second run
+  clean (lambdas keep their Allman layout).
 
 ## Known open questions
 

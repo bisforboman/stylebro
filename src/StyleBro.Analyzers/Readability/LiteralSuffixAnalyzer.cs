@@ -1,0 +1,30 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
+
+namespace StyleBro.Analyzers.Readability;
+
+/// <summary>BRO1122: '1L' instead of '(long)1'. The diagnostic is on the cast.</summary>
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+public sealed class LiteralSuffixAnalyzer : DiagnosticAnalyzer
+{
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
+        ImmutableArray.Create(Descriptors.LiteralSuffix);
+
+    public override void Initialize(AnalysisContext context)
+    {
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.EnableConcurrentExecution();
+        context.RegisterSyntaxNodeAction(
+            c =>
+            {
+                if (LiteralSuffixes.GetChange((CastExpressionSyntax)c.Node, c.SemanticModel, c.CancellationToken) is { } change)
+                {
+                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.LiteralSuffix, c.Node.GetLocation(), change.NewText));
+                }
+            },
+            SyntaxKind.CastExpression);
+    }
+}

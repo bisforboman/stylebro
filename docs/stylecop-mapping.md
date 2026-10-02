@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 80 StyleBro (80 done), 44 drop, 16 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 86 StyleBro (86 done), 44 drop, 10 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -34,16 +34,10 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1103](skipped-rules.md#sa1103) | Query clauses should be on separate lines or all on one line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1104](skipped-rules.md#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1105](skipped-rules.md#sa1105) | Query clauses spanning multiple lines should begin on own line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1130](skipped-rules.md#sa1130) | Use lambda syntax | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1135](skipped-rules.md#sa1135) | Using directives should be qualified | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1139](skipped-rules.md#sa1139) | Use literal suffix notation instead of casting | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1141](skipped-rules.md#sa1141) | Use tuple syntax | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1205](skipped-rules.md#sa1205) | Partial elements should declare access | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1206](skipped-rules.md#sa1206) | Declaration keywords should follow order | on / on / on | 0 / 0 / 0 | SDK not on yet |
 | [SA1207](skipped-rules.md#sa1207) | Protected should come before internal | on / on / on | 0 / 0 / 0 | SDK not on yet |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1410](skipped-rules.md#sa1410) | Remove delegate parenthesis when possible | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1142](skipped-rules.md#sa1142) | Refer to tuple fields by name | on / off / on | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -152,7 +146,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1407 | Arithmetic expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 5 | not fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass ([details](skipped-rules.md#sa1407)) |
 | SA1408 | Conditional expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 14 | fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass ([details](skipped-rules.md#sa1408)) |
 | SA1409 | Remove unnecessary code | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed). ([details](skipped-rules.md#sa1409)) |
-| SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`. ([details](skipped-rules.md#sa1410)) |
+| SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1403** (done), only where BRO1125 doesn't turn the method into a lambda |
 | SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )` |
 | SA1412 | Store files as UTF-8 with byte order mark | off | yes | off / off / off | 876 / 325 / 2,581 | fixed | SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on |
 | SA1413 | Use trailing comma in multi-line initializers | on | yes | on / off / off | 0 / 407 / 1,862 | not fixed | StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported |
@@ -235,17 +229,17 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1127 | Generic type constraints should be on their own line | on | yes | on / on / off | 0 / 0 / 82 |  | StyleBro **BRO1111** (done), same results and output as StyleCop |
 | SA1128 | Put constructor initializers on their own line | on | yes | on / on / off | 0 / 0 / 408 | not fixed | StyleBro **BRO1105** (done), same results as StyleCop |
 | SA1129 | Do not use default value type constructor | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported |
-| SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`. ([details](skipped-rules.md#sa1130)) |
+| SA1130 | Use lambda syntax | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1125** (done), lambdas checked by binding them in place (same delegate type and overload); StyleCop misses some calls and its fix breaks `var` |
 | SA1131 | Use readable conditions | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported |
 | SA1132 | Do not combine fields | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1114** (done), same positions; the fix copies attributes and documentation to every field (StyleCop's keeps attributes on the first only) |
 | SA1133 | Do not combine attributes | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported |
 | SA1134 | Attributes should not share line | on | yes | on / off / on | 0 / 9 / 0 | fixed | SDK: IDE0055 formatting |
-| SA1135 | Using directives should be qualified | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified. ([details](skipped-rules.md#sa1135)) |
+| SA1135 | Using directives should be qualified | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1126** (done), same positions and output as StyleCop; skips names an enclosing namespace would hide |
 | SA1136 | Enum values should be on separate lines | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1121** (done), same positions; an enum on one line gets BRO1509's expansion |
 | SA1137 | Elements should have the same indentation | on | yes | on / off / off | 0 / 4 / 4 | fixed | SDK: IDE0055 formatting |
-| SA1139 | Use literal suffix notation instead of casting | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. `(long)1` -> `1L`. ([details](skipped-rules.md#sa1139)) |
-| SA1141 (1.2 beta) | Use tuple syntax | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`. ([details](skipped-rules.md#sa1141)) |
-| SA1142 (1.2 beta) | Refer to tuple fields by name | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `t.Item1` -> `t.Name` when the element has a name. ([details](skipped-rules.md#sa1142)) |
+| SA1139 | Use literal suffix notation instead of casting | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1122** (done), only when the suffixed literal has exactly the cast's value (StyleCop's fix can change decimals) |
+| SA1141 (1.2 beta) | Use tuple syntax | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1123** (done), every type-only position (StyleCop: declarations only); StyleCop's fix has no Fix All |
+| SA1142 (1.2 beta) | Refer to tuple fields by name | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1124** (done), same positions as StyleCop except nameof; StyleCop's fix throws under `dotnet format` |
 | SA1414 (1.2 beta) | Tuple types in signatures should have element names | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person. ([details](skipped-rules.md#sa1414)) |
 | SX1101 | Do not prefix local calls with 'this.' | off | yes | off / on / off | 6,123 / 0 / 6 |  | SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; stylebro-migrate turns IDE0003 on when SX1101 is on |
 

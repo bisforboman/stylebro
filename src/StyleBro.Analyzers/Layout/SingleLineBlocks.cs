@@ -270,19 +270,8 @@ internal static class SingleLineBlocks
     /// Whether BRO1401 (trailing comma in multi-line lists) is on for the file. Severities aren't in the analyzer
     /// options (the compiler takes the dotnet_diagnostic keys out), so they're read from the compilation's options.
     /// </summary>
-    public static bool WantsTrailingComma(CompilationOptions? compilationOptions, SyntaxTree tree, CancellationToken cancellationToken)
-    {
-        var id = DiagnosticIds.TrailingComma;
-        var severity = ReportDiagnostic.Default;
-        if (compilationOptions?.SyntaxTreeOptionsProvider is { } provider
-            && (provider.TryGetDiagnosticValue(tree, id, cancellationToken, out severity) || provider.TryGetGlobalDiagnosticValue(id, cancellationToken, out severity)))
-        {
-            return severity is not (ReportDiagnostic.Suppress or ReportDiagnostic.Hidden);
-        }
-
-        return compilationOptions is null || !compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity)
-            || severity is not (ReportDiagnostic.Suppress or ReportDiagnostic.Hidden);
-    }
+    public static bool WantsTrailingComma(CompilationOptions? compilationOptions, SyntaxTree tree, CancellationToken cancellationToken) =>
+        Severities.IsOn(compilationOptions, tree, DiagnosticIds.TrailingComma, cancellationToken);
 
     private static bool IsClauseKeyword(SyntaxToken token, AnalyzerConfigOptions options)
     {

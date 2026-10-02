@@ -78,6 +78,12 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1611](rules/BRO1611.md) (SA1612) | Constructors and operators | Matches StyleCop 1.2, which doesn't check them either. |
 | [BRO1612](rules/BRO1612.md), [BRO1614](rules/BRO1614.md) (SA1613, SA1621) | Unnamed `<param>`/`<typeparam>` tags whose (type) parameter isn't certain (two unnamed tags for three parameters, an unnamed tag next to a stale one) | The fix would have to guess the name. |
 | [BRO1615](rules/BRO1615.md) (SA1633-SA1638, SA1640, SA1641) | Anything until `stylebro_file_header_company` is set; headers in a `/* */` comment; a broken XML header that already has a `<copyright` tag; a tag sharing its first or last line with other text. One diagnostic per file, on the first line of code when the header is missing. | Placeholder headers help nobody; a broken header needs a person; only whole lines are rewritten. |
+| [BRO1122](rules/BRO1122.md) (SA1139) | Casts whose suffixed literal has another value (`(decimal)0.1234567890123456789`, `(decimal)1.50`, a `(float)` of a double literal that rounds differently) | StyleCop's fix changes the number. |
+| [BRO1123](rules/BRO1123.md) (SA1141) | `ValueTuple.Create(x, y)` and `new ValueTuple<..>(x, y)` with an argument that would name the element; `new ValueTuple<int, int>()`; creations in expression trees | The names would make BRO1124 change code on a second run; there's no literal for the empty creation (StyleCop's fix writes `()`); expression trees can't contain tuple literals. |
+| [BRO1124](rules/BRO1124.md) (SA1142) | `nameof(t.Item1)` | The fix would change the string. |
+| [BRO1125](rules/BRO1125.md) (SA1130) | Anonymous methods whose lambda wouldn't bind the same (another overload, no target type for `var`), `ref`/`out` parameters | StyleCop's fix for these changes behavior or doesn't compile. |
+| [BRO1126](rules/BRO1126.md) (SA1135) | A qualified name an enclosing namespace would hide | StyleCop's fix would refer to the wrong namespace. |
+| [BRO1403](rules/BRO1403.md) (SA1410) | `delegate() { }` that BRO1125 turns into a lambda | One fix per anonymous method; StyleCop reports both rules there. |
 
 ### Reports more than StyleCop
 
@@ -86,6 +92,8 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1104](rules/BRO1104.md) (SA1129) | Target-typed `new()` for value types | StyleCop 1.1.118 predates it; 1.2 reports it too. |
 | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | Record parameters, primary-constructor parameters and base arguments | StyleCop 1.2.0-beta.556 doesn't check them; they're lists like any other. |
 | [BRO1306](rules/BRO1306.md) (SA1303, SA1311) | Constants and `static readonly` fields starting with `_` | StyleCop leaves them to SA1309; StyleBro renames to the full correct name in one pass. |
+| [BRO1123](rules/BRO1123.md) (SA1141) | Tuple types in locals, arrays, nullables, `typeof` and type arguments of calls | StyleCop only checks declarations and creations. |
+| [BRO1125](rules/BRO1125.md) (SA1130) | Calls like `list.ForEach(delegate (int item) { ... })` | StyleCop's overload check misses them; StyleBro binds the lambda and finds the same method. |
 | [BRO1505](rules/BRO1505.md) (SA1516) | A member whose `///` directly follows the previous member, and file-scoped namespace declarations | StyleCop misses the first when it parses docs, and 1.1.118 misses the second (1.2 reports it). |
 | [BRO1002](rules/BRO1002.md) (SA1005) | Nothing extra; StyleCop 1.1.118 reported `//  two spaces`, 1.2 and StyleBro don't | |
 
@@ -112,6 +120,8 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1612](rules/BRO1612.md), [BRO1613](rules/BRO1613.md), [BRO1614](rules/BRO1614.md) (SA1613, SA1620, SA1621) | None | Names unnamed tags when certain; renames, removes and reorders `<typeparam>` tags |
 | [BRO1112](rules/BRO1112.md) (SA1124) | Removes a region between switch-expression arms with the blank lines around it | Keeps one blank line where it was |
 | [BRO1615](rules/BRO1615.md) (SA1633-SA1641) | Deletes a plain comment header (license text, notes) when it writes the XML header | Keeps any other comment below the new header; otherwise the same headers |
+| [BRO1123](rules/BRO1123.md), [BRO1124](rules/BRO1124.md) (SA1141, SA1142) | None under `dotnet format` (SA1141's has no Fix All, SA1142's throws) | Tuple syntax and element names |
+| [BRO1125](rules/BRO1125.md) (SA1130) | Leaves two spaces after `=`, pulls a body on its own line up behind `=>` | Keeps the layout |
 
 ### Same as StyleCop
 

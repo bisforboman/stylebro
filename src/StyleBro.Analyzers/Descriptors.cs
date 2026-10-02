@@ -575,6 +575,70 @@ internal static class Descriptors
         description: "'int?' instead of 'Nullable<int>' or 'System.Nullable<int>'. Replaces StyleCop SA1125.",
         helpLinkUri: HelpBase + DiagnosticIds.NullableShorthand + ".md");
 
+    public static readonly DiagnosticDescriptor LiteralSuffix = new(
+        id: DiagnosticIds.LiteralSuffix,
+        title: "Use literal suffix notation instead of casting",
+        messageFormat: "Use '{0}' instead of the cast",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'1L' instead of '(long)1', when the literal has exactly the cast's value. Replaces StyleCop SA1139.",
+        helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffix + ".md");
+
+    public static readonly DiagnosticDescriptor TupleSyntax = new(
+        id: DiagnosticIds.TupleSyntax,
+        title: "Use tuple syntax",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'(int, string)' instead of 'ValueTuple<int, string>', and '(1, \"a\")' instead of 'new ValueTuple<int, string>(1, \"a\")' "
+            + "or 'ValueTuple.Create(1, \"a\")'. Replaces StyleCop SA1141.",
+        helpLinkUri: HelpBase + DiagnosticIds.TupleSyntax + ".md");
+
+    public static readonly DiagnosticDescriptor TupleElementName = new(
+        id: DiagnosticIds.TupleElementName,
+        title: "Refer to tuple elements by name",
+        messageFormat: "Use '{0}' instead of '{1}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'t.Name' instead of 't.Item1' when the tuple element has a name. Replaces StyleCop SA1142.",
+        helpLinkUri: HelpBase + DiagnosticIds.TupleElementName + ".md");
+
+    public static readonly DiagnosticDescriptor LambdaSyntax = new(
+        id: DiagnosticIds.LambdaSyntax,
+        title: "Use lambda syntax",
+        messageFormat: "Use a lambda instead of an anonymous method",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'(s, e) => { }' instead of 'delegate (object s, EventArgs e) { }', when the lambda binds the same way. "
+            + "Replaces StyleCop SA1130.",
+        helpLinkUri: HelpBase + DiagnosticIds.LambdaSyntax + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyDelegateParentheses = new(
+        id: DiagnosticIds.EmptyDelegateParentheses,
+        title: "Remove delegate parenthesis when possible",
+        messageFormat: "Remove the empty parentheses after 'delegate'",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'delegate { }' instead of 'delegate() { }', unless an overloaded call needs them. Where BRO1125 is on, it turns "
+            + "the method into a lambda instead. Replaces StyleCop SA1410.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyDelegateParentheses + ".md");
+
+    public static readonly DiagnosticDescriptor QualifiedUsing = new(
+        id: DiagnosticIds.QualifiedUsing,
+        title: "Using directives should be qualified",
+        messageFormat: "Use the fully qualified name '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A using directive inside a namespace names its namespace or type fully, so it doesn't depend on the "
+            + "namespace it's in. Replaces StyleCop SA1135.",
+        helpLinkUri: HelpBase + DiagnosticIds.QualifiedUsing + ".md");
+
     public static readonly DiagnosticDescriptor EmptyAttributeParentheses = new(
         id: DiagnosticIds.EmptyAttributeParentheses,
         title: "Attribute constructor should not use unnecessary parenthesis",

@@ -43,16 +43,6 @@
             Revisit = 'Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.' }
         SA1126 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on an unprefixed member call (probed).'
             Revisit = 'Nothing to port.' }
-        SA1130 = @{ Status = 'Candidate'; Why = 'Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.'
-            Revisit = '`delegate { }` without a parameter list can bind to any delegate type; converting it needs the target''s parameters (semantic model) and may need discards. Medium.' }
-        SA1135 = @{ Status = 'Candidate'; Why = 'Not done yet. Usings inside a namespace must be fully qualified.'
-            Revisit = 'Only relevant to teams with usings inside the namespace (SA1200 default). Semantic model to get the full name. Small.' }
-        SA1139 = @{ Status = 'Candidate'; Why = 'Not done yet. `(long)1` -> `1L`.'
-            Revisit = 'Semantic model for the constant and target type; only numeric literals, skip checked/unchecked edge cases. Small.' }
-        SA1141 = @{ Status = 'Candidate'; Why = 'Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`.'
-            Revisit = 'Semantic model; skip ValueTuple with more than 7 elements (TRest) and `typeof`. Small.' }
-        SA1142 = @{ Status = 'Candidate'; Why = 'Not done yet (StyleCop 1.2 only). `t.Item1` -> `t.Name` when the element has a name.'
-            Revisit = 'Semantic model; the name must be the same in every use (inferred names differ by C# version). Small.' }
 
         # ---- Ordering ----------------------------------------------------------------------------------------------
         SA1205 = @{ Status = 'Candidate'; Why = 'Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default).'
@@ -85,8 +75,6 @@
             Revisit = 'Nothing automatic.' }
         SA1409 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic for an empty `try { } finally { }` (probed).'
             Revisit = 'Nothing to port.' }
-        SA1410 = @{ Status = 'Candidate'; Why = 'Not done yet. `delegate() { }` -> `delegate { }`.'
-            Revisit = 'Only when the empty parameter list isn''t needed for overload resolution (semantic model). Small; consider doing with SA1130.' }
         SA1414 = @{ Status = 'Drop'; Why = 'StyleCop has no fix (1.2 only); tuple element names in signatures have to be chosen by a person.'
             Revisit = 'Nothing automatic.' }
 

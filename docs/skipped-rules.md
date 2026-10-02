@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-64 rules: 14 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+58 rules: 8 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -29,14 +29,8 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1103](#sa1103) | Query clauses should be on separate lines or all on one line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1104](#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1105](#sa1105) | Query clauses spanning multiple lines should begin on own line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1130](#sa1130) | Use lambda syntax | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1135](#sa1135) | Using directives should be qualified | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1139](#sa1139) | Use literal suffix notation instead of casting | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1141](#sa1141) | Use tuple syntax | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1142](#sa1142) | Refer to tuple fields by name | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1205](#sa1205) | Partial elements should declare access | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1410](#sa1410) | Remove delegate parenthesis when possible | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1206](#sa1206) | Declaration keywords should follow order | SDK not on yet | on / on / on | 0 / 0 / 0 |
 | [SA1207](#sa1207) | Protected should come before internal | SDK not on yet | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
@@ -150,56 +144,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 
 **To revisit:** Part of the SA1102-SA1105 batch.
 
-<a id="sa1130"></a>
-
-### SA1130: Use lambda syntax
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.
-
-**To revisit:** `delegate { }` without a parameter list can bind to any delegate type; converting it needs the target's parameters (semantic model) and may need discards. Medium.
-
-<a id="sa1135"></a>
-
-### SA1135: Using directives should be qualified
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. Usings inside a namespace must be fully qualified.
-
-**To revisit:** Only relevant to teams with usings inside the namespace (SA1200 default). Semantic model to get the full name. Small.
-
-<a id="sa1139"></a>
-
-### SA1139: Use literal suffix notation instead of casting
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `(long)1` -> `1L`.
-
-**To revisit:** Semantic model for the constant and target type; only numeric literals, skip checked/unchecked edge cases. Small.
-
-<a id="sa1141"></a>
-
-### SA1141: Use tuple syntax
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`.
-
-**To revisit:** Semantic model; skip ValueTuple with more than 7 elements (TRest) and `typeof`. Small.
-
-<a id="sa1142"></a>
-
-### SA1142: Refer to tuple fields by name
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet (StyleCop 1.2 only). `t.Item1` -> `t.Name` when the element has a name.
-
-**To revisit:** Semantic model; the name must be the same in every use (inferred names differ by C# version). Small.
-
 <a id="sa1205"></a>
 
 ### SA1205: Partial elements should declare access
@@ -219,16 +163,6 @@ Naming rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel 
 **Why:** Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).
 
 **To revisit:** Tuple element names aren't symbols SymbolFinder renames; every use (deconstruction, `t.name`, inferred names) must change together. Medium, risky.
-
-<a id="sa1410"></a>
-
-### SA1410: Remove delegate parenthesis when possible
-
-Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `delegate() { }` -> `delegate { }`.
-
-**To revisit:** Only when the empty parameter list isn't needed for overload resolution (semantic model). Small; consider doing with SA1130.
 
 ## Not yet: the SDK can fix it, but it isn't turned on
 

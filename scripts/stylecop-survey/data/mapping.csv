@@ -61,17 +61,17 @@ SA1126,Drop: StyleCop never reports it. Off by default and no diagnostic on an u
 SA1127,"StyleBro **BRO1111** (done), same results and output as StyleCop"
 SA1128,"StyleBro **BRO1105** (done), same results as StyleCop"
 SA1129,StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported
-SA1130,Not yet: StyleBro candidate. Not done yet. `delegate (int x) { ... }` -> `(int x) => { ... }`.
+SA1130,"StyleBro **BRO1125** (done), lambdas checked by binding them in place (same delegate type and overload); StyleCop misses some calls and its fix breaks `var`"
 SA1131,StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type's own operator are not reported
 SA1132,"StyleBro **BRO1114** (done), same positions; the fix copies attributes and documentation to every field (StyleCop's keeps attributes on the first only)"
 SA1133,StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported
 SA1134,SDK: IDE0055 formatting
-SA1135,Not yet: StyleBro candidate. Not done yet. Usings inside a namespace must be fully qualified.
+SA1135,"StyleBro **BRO1126** (done), same positions and output as StyleCop; skips names an enclosing namespace would hide"
 SA1136,"StyleBro **BRO1121** (done), same positions; an enum on one line gets BRO1509's expansion"
 SA1137,SDK: IDE0055 formatting
-SA1139,Not yet: StyleBro candidate. Not done yet. `(long)1` -> `1L`.
-SA1141,"Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `ValueTuple<int, string>` -> `(int, string)`."
-SA1142,Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). `t.Item1` -> `t.Name` when the element has a name.
+SA1139,"StyleBro **BRO1122** (done), only when the suffixed literal has exactly the cast's value (StyleCop's fix can change decimals)"
+SA1141,"StyleBro **BRO1123** (done), every type-only position (StyleCop: declarations only); StyleCop's fix has no Fix All"
+SA1142,"StyleBro **BRO1124** (done), same positions as StyleCop except nameof; StyleCop's fix throws under `dotnet format`"
 SA1200,SDK: IDE0065 (`csharp_using_directive_placement = inside_namespace`)
 SA1201,StyleBro **BRO1001** (done)
 SA1202,StyleBro **BRO1001** (done)
@@ -115,7 +115,7 @@ SA1406,Drop: StyleCop has no fix; the message for Debug.Fail has to be written b
 SA1407,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
 SA1408,SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
 SA1409,Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed).
-SA1410,Not yet: StyleBro candidate. Not done yet. `delegate() { }` -> `delegate { }`.
+SA1410,"StyleBro **BRO1403** (done), only where BRO1125 doesn't turn the method into a lambda"
 SA1411,"StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )`"
 SA1412,SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on
 SA1413,StyleBro **BRO1401** (done). Differs from StyleCop: lists with `#if` between their braces are not reported

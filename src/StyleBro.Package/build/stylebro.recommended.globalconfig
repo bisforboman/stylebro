@@ -111,11 +111,27 @@ dotnet_diagnostic.BRO1120.severity = warning
 # BRO1121: each enum value on its own line (SA1136)
 dotnet_diagnostic.BRO1121.severity = warning
 
+# BRO1122: 1L instead of (long)1 (SA1139)
+dotnet_diagnostic.BRO1122.severity = warning
+
+# BRO1123/BRO1124: tuple syntax, and tuple elements by name (SA1141, SA1142)
+dotnet_diagnostic.BRO1123.severity = warning
+dotnet_diagnostic.BRO1124.severity = warning
+
+# BRO1125: lambdas instead of anonymous methods (SA1130)
+dotnet_diagnostic.BRO1125.severity = warning
+
+# BRO1126: using directives inside a namespace are fully qualified (SA1135)
+dotnet_diagnostic.BRO1126.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 
 # BRO1402: no empty parentheses on attributes (SA1411)
 dotnet_diagnostic.BRO1402.severity = warning
+
+# BRO1403: no empty parentheses after 'delegate' (SA1410), where BRO1125 leaves an anonymous method
+dotnet_diagnostic.BRO1403.severity = warning
 
 # BRO1601: <inheritdoc/> on undocumented overrides and implementations (SA1600, for these members only). Which members
 # need documentation, like stylecop.json's documentationRules (StyleCop's defaults):

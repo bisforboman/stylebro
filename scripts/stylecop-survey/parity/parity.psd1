@@ -416,5 +416,66 @@
                 'StyleBro output only: PlainComment.cs: []'
             )
         }
+            @{
+            Name     = 'readability-semantics'
+            Map      = @('SA1139=BRO1122', 'SA1141=BRO1123', 'SA1142=BRO1124', 'SA1130=BRO1125', 'SA1135=BRO1126', 'SA1410=BRO1403')
+            Expected = @(
+                # Literal suffixes that change the value: (decimal) of a double rounds to 15 digits, and 1.50M keeps its scale.
+                'only StyleCop: BRO1122 Literals.cs(16,28)'
+                'only StyleCop: BRO1122 Literals.cs(17,28)'
+                'StyleBro output only: Literals.cs: [        public decimal L = (decimal)0.1234567890123456789;]'
+                'StyleBro output only: Literals.cs: [        public decimal M = (decimal)1.50;]'
+                'StyleCop output only: Literals.cs: [        public decimal L = 0.1234567890123456789M;]'
+                'StyleCop output only: Literals.cs: [        public decimal M = 1.50M;]'
+                # Tuple types StyleCop doesn't check (arrays, nullables, locals, typeof).
+                'only StyleBro: BRO1123 Tuples.cs(12,16)'
+                'only StyleBro: BRO1123 Tuples.cs(14,16)'
+                'only StyleBro: BRO1123 Tuples.cs(20,13)'
+                'only StyleBro: BRO1123 Tuples.cs(21,31)'
+                # ValueTuple.Create(x, 1) would name its first element x; new ValueTuple<int, int>() has no tuple literal
+                # (StyleCop's fix writes '()').
+                'only StyleCop: BRO1123 Tuples.cs(24,21)'
+                'only StyleCop: BRO1123 Tuples.cs(25,21)'
+                # nameof(t.Item1) would change its string.
+                'only StyleCop: BRO1124 Tuples.cs(29,30)'
+                # StyleCop's SA1141 fix doesn't support Fix All in Solution and its SA1142 fix throws under 'dotnet format',
+                # so StyleCop leaves every tuple as it is.
+                'StyleBro output only: Tuples.cs: [        public (int, string) Field;]'
+                'StyleBro output only: Tuples.cs: [        public (int, (int, int)) Nested(List<(int, int)> items) => default;]'
+                'StyleBro output only: Tuples.cs: [        public (int, int)[] Array;]'
+                'StyleBro output only: Tuples.cs: [        public (int, int)? Maybe;]'
+                'StyleBro output only: Tuples.cs: [            (long, long) local = default((long, long));]'
+                'StyleBro output only: Tuples.cs: [            var type = typeof((int, int));]'
+                'StyleBro output only: Tuples.cs: [            var a = (1, "a");]'
+                'StyleBro output only: Tuples.cs: [            var b = (1, 2L);]'
+                'StyleBro output only: Tuples.cs: [            var e = t.Count + t.Name.Length;]'
+                'StyleBro output only: Tuples.cs: [            var f = maybe?.b;]'
+                'StyleCop output only: Tuples.cs: [        public ValueTuple<int, string> Field;]'
+                'StyleCop output only: Tuples.cs: [        public System.ValueTuple<int, ValueTuple<int, int>> Nested(List<ValueTuple<int, int>> items) => default;]'
+                'StyleCop output only: Tuples.cs: [        public ValueTuple<int, int>[] Array;]'
+                'StyleCop output only: Tuples.cs: [        public ValueTuple<int, int>? Maybe;]'
+                'StyleCop output only: Tuples.cs: [            ValueTuple<long, long> local = default(ValueTuple<long, long>);]'
+                'StyleCop output only: Tuples.cs: [            var type = typeof(ValueTuple<int, int>);]'
+                'StyleCop output only: Tuples.cs: [            var a = new ValueTuple<int, string>(1, "a");]'
+                'StyleCop output only: Tuples.cs: [            var b = ValueTuple.Create(1, 2L);]'
+                'StyleCop output only: Tuples.cs: [            var e = t.Item1 + t.Item2.Length;]'
+                'StyleCop output only: Tuples.cs: [            var f = maybe?.Item2;]'
+                # StyleCop misses List<int>.ForEach(delegate (int item) ...): its overload check compares the reduced and
+                # constructed method symbols. StyleBro's binds the lambda and finds the same method.
+                'only StyleBro: BRO1125 Lambdas.cs(28,27)'
+                'StyleBro output only: Lambdas.cs: [            items.ForEach(item => { Console.WriteLine(item); });]'
+                'StyleCop output only: Lambdas.cs: [            items.ForEach(delegate (int item) { Console.WriteLine(item); });]'
+                # delegate() { }: StyleCop reports SA1410 and SA1130; StyleBro only BRO1125, whose lambda replaces both.
+                'only StyleCop: BRO1403 Lambdas.cs(24,32)'
+                # StyleCop's lambda fix leaves two spaces after '=' and pulls a body on its own line up behind '=>'.
+                'StyleBro output only: Lambdas.cs: [        private Func<int, int> twice = x => { return x * 2; };]'
+                'StyleBro output only: Lambdas.cs: [            Func<int, int, int> add = (x, y) => { return x + y; };]'
+                'StyleBro output only: Lambdas.cs: [            this.Changed += (s, e) =>]'
+                'StyleBro output only: Lambdas.cs: [            {]'
+                'StyleCop output only: Lambdas.cs: [        private Func<int, int> twice =  x => { return x * 2; };]'
+                'StyleCop output only: Lambdas.cs: [            Func<int, int, int> add =  (x, y) => { return x + y; };]'
+                'StyleCop output only: Lambdas.cs: [            this.Changed +=  (s, e) =>             {]'
+            )
+        }
     )
 }
