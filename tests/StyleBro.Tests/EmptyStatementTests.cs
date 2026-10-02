@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class EmptyStatementTests
 {
     [Fact]
-    public Task EmptyStatementOnItsOwnLine_LineIsRemoved() => VerifyFixAsync("""
+    public Task EmptyStatementOnItsOwnLine_LineIsRemoved() => VerifyFixAsync(
+        """
         class C
         {
             void M()
@@ -15,7 +16,8 @@ public class EmptyStatementTests
                 M();
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M()
@@ -27,7 +29,8 @@ public class EmptyStatementTests
         """);
 
     [Fact]
-    public Task EmptyStatementAfterStatement_IsRemovedWithTheSpaceBeforeIt() => VerifyFixAsync("""
+    public Task EmptyStatementAfterStatement_IsRemovedWithTheSpaceBeforeIt() => VerifyFixAsync(
+        """
         class C
         {
             void M()
@@ -35,7 +38,8 @@ public class EmptyStatementTests
                 M(); {|BRO1101:;|}
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M()
@@ -46,7 +50,8 @@ public class EmptyStatementTests
         """);
 
     [Fact]
-    public Task EmptyStatementBeforeComment_CommentKeepsItsIndentation() => VerifyFixAsync("""
+    public Task EmptyStatementBeforeComment_CommentKeepsItsIndentation() => VerifyFixAsync(
+        """
         class C
         {
             void M()
@@ -54,7 +59,8 @@ public class EmptyStatementTests
                 {|BRO1101:;|} // done
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M()
@@ -65,7 +71,8 @@ public class EmptyStatementTests
         """);
 
     [Fact]
-    public Task SeveralOnOneLine_AreRemovedTogether() => VerifyFixAsync("""
+    public Task SeveralOnOneLine_AreRemovedTogether() => VerifyFixAsync(
+        """
         class C
         {
             void M()
@@ -74,7 +81,8 @@ public class EmptyStatementTests
                 M(); {|BRO1101:;|} {|BRO1101:;|}
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M()
@@ -85,7 +93,8 @@ public class EmptyStatementTests
         """);
 
     [Fact]
-    public Task EmptyStatementInSwitchSection_IsRemoved() => VerifyFixAsync("""
+    public Task EmptyStatementInSwitchSection_IsRemoved() => VerifyFixAsync(
+        """
         class C
         {
             void M(int i)
@@ -98,7 +107,8 @@ public class EmptyStatementTests
                 }
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(int i)
@@ -113,7 +123,8 @@ public class EmptyStatementTests
         """);
 
     [Fact]
-    public Task SemicolonAfterTypeAndNamespace_IsRemoved() => VerifyFixAsync("""
+    public Task SemicolonAfterTypeAndNamespace_IsRemoved() => VerifyFixAsync(
+        """
         namespace N
         {
             class C
@@ -122,7 +133,8 @@ public class EmptyStatementTests
 
             enum E { A }{|BRO1101:;|}
         }{|BRO1101:;|}
-        """, """
+        """,
+        """
         namespace N
         {
             class C
@@ -169,7 +181,8 @@ public class EmptyStatementTests
         """);
 
     [Fact]
-    public Task EmptyStatementBetweenDirectives_DirectivesAreKept() => VerifyFixAsync("""
+    public Task EmptyStatementBetweenDirectives_DirectivesAreKept() => VerifyFixAsync(
+        """
         class C
         {
             void M()
@@ -180,7 +193,8 @@ public class EmptyStatementTests
                 M();
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M()

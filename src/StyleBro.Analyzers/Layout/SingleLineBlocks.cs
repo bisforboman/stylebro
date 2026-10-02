@@ -154,6 +154,83 @@ internal static class SingleLineBlocks
     }
 
     /// <summary>
+    /// Whether BRO1401 (trailing comma in multi-line lists) is on for the file. Severities aren't in the analyzer
+    /// options (the compiler takes the dotnet_diagnostic keys out), so they're read from the compilation's options.
+    /// </summary>
+    public static bool WantsTrailingComma(CompilationOptions? compilationOptions, SyntaxTree tree, CancellationToken cancellationToken) =>
+        Severities.IsOn(compilationOptions, tree, DiagnosticIds.TrailingComma, cancellationToken);
+
+    /// <summary>
+    /// Replaces the whitespace between two tokens with the given text (no edit when it's already that). False when the
+    /// gap holds a comment or directive: the node is then skipped.
+    /// </summary>
+    internal static bool Gap(SyntaxToken before, SyntaxToken after, string newText, SourceText text, List<TextChange> changes)
+    {
+        // An enum's members are one item: its last token is the last member's, plus a trailing comma if there is one.
+        if (after.Parent is EnumDeclarationSyntax @enum && after == @enum.CloseBraceToken && @enum.Members.Count > 0)
+        {
+            var last = @enum.Members.GetSeparators().LastOrDefault();
+            before = @enum.Members.SeparatorCount == @enum.Members.Count && last.RawKind != 0 ? last : @enum.Members[@enum.Members.Count - 1].GetLastToken();
+        }
+
+        if (!before.TrailingTrivia.Concat(after.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia)))
+        {
+            return false;
+        }
+
+        var span = TextSpan.FromBounds(before.Span.End, after.SpanStart);
+        if (text.ToString(span) != newText)
+        {
+            changes.Add(new TextChange(span, newText));
+        }
+
+        return true;
+    }
+
+    /// <summary>The SDK's csharp_new_line_before_open_brace for this kind of brace (default: all).</summary>
+    internal static bool NewLineBeforeBrace(SyntaxNode node, AnalyzerConfigOptions options)
+    {
+        if (!options.TryGetValue("csharp_new_line_before_open_brace", out var value))
+        {
+            return true;
+        }
+
+        var kinds = value.Split(',').Select(v => v.Trim().ToLowerInvariant()).ToList();
+        if (kinds.Contains("all"))
+        {
+            return true;
+        }
+
+        var kind = node switch
+        {
+            BlockSyntax { Parent: LocalFunctionStatementSyntax } => "local_functions",
+            BlockSyntax { Parent: AccessorDeclarationSyntax } => "accessors",
+            BlockSyntax { Parent: BaseMethodDeclarationSyntax } => "methods",
+            BlockSyntax => "control_blocks",
+            AccessorListSyntax { Parent: IndexerDeclarationSyntax } => "indexers",
+            AccessorListSyntax { Parent: EventDeclarationSyntax } => "events",
+            AccessorListSyntax => "properties",
+            _ => "types",
+        };
+        return kinds.Contains(kind);
+    }
+
+    /// <summary>The line break the file uses: the one ending the node's line, or the first one in the file.</summary>
+    internal static string LineBreak(SourceText text, int position)
+    {
+        var line = text.Lines.GetLineFromPosition(position);
+        foreach (var candidate in new[] { line }.Concat(text.Lines))
+        {
+            if (candidate.EndIncludingLineBreak > candidate.End)
+            {
+                return text.ToString(TextSpan.FromBounds(candidate.End, candidate.EndIncludingLineBreak));
+            }
+        }
+
+        return "\n";
+    }
+
+    /// <summary>
     /// What the braces belong to, for their indentation: the statement or clause that owns a block, the block itself when
     /// it stands alone, or the declaration.
     /// </summary>
@@ -211,68 +288,6 @@ internal static class SingleLineBlocks
         _ => [],
     };
 
-    /// <summary>
-    /// Replaces the whitespace between two tokens with the given text (no edit when it's already that). False when the
-    /// gap holds a comment or directive: the node is then skipped.
-    /// </summary>
-    internal static bool Gap(SyntaxToken before, SyntaxToken after, string newText, SourceText text, List<TextChange> changes)
-    {
-        // An enum's members are one item: its last token is the last member's, plus a trailing comma if there is one.
-        if (after.Parent is EnumDeclarationSyntax @enum && after == @enum.CloseBraceToken && @enum.Members.Count > 0)
-        {
-            var last = @enum.Members.GetSeparators().LastOrDefault();
-            before = @enum.Members.SeparatorCount == @enum.Members.Count && last.RawKind != 0 ? last : @enum.Members[@enum.Members.Count - 1].GetLastToken();
-        }
-
-        if (!before.TrailingTrivia.Concat(after.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia)))
-        {
-            return false;
-        }
-
-        var span = TextSpan.FromBounds(before.Span.End, after.SpanStart);
-        if (text.ToString(span) != newText)
-        {
-            changes.Add(new TextChange(span, newText));
-        }
-
-        return true;
-    }
-
-    /// <summary>The SDK's csharp_new_line_before_open_brace for this kind of brace (default: all).</summary>
-    internal static bool NewLineBeforeBrace(SyntaxNode node, AnalyzerConfigOptions options)
-    {
-        if (!options.TryGetValue("csharp_new_line_before_open_brace", out var value))
-        {
-            return true;
-        }
-
-        var kinds = value.Split(',').Select(v => v.Trim().ToLowerInvariant()).ToList();
-        if (kinds.Contains("all"))
-        {
-            return true;
-        }
-
-        var kind = node switch
-        {
-            BlockSyntax { Parent: LocalFunctionStatementSyntax } => "local_functions",
-            BlockSyntax { Parent: AccessorDeclarationSyntax } => "accessors",
-            BlockSyntax { Parent: BaseMethodDeclarationSyntax } => "methods",
-            BlockSyntax => "control_blocks",
-            AccessorListSyntax { Parent: IndexerDeclarationSyntax } => "indexers",
-            AccessorListSyntax { Parent: EventDeclarationSyntax } => "events",
-            AccessorListSyntax => "properties",
-            _ => "types",
-        };
-        return kinds.Contains(kind);
-    }
-
-    /// <summary>
-    /// Whether BRO1401 (trailing comma in multi-line lists) is on for the file. Severities aren't in the analyzer
-    /// options (the compiler takes the dotnet_diagnostic keys out), so they're read from the compilation's options.
-    /// </summary>
-    public static bool WantsTrailingComma(CompilationOptions? compilationOptions, SyntaxTree tree, CancellationToken cancellationToken) =>
-        Severities.IsOn(compilationOptions, tree, DiagnosticIds.TrailingComma, cancellationToken);
-
     private static bool IsClauseKeyword(SyntaxToken token, AnalyzerConfigOptions options)
     {
         var option = token.Kind() switch
@@ -284,21 +299,6 @@ internal static class SingleLineBlocks
         };
         return option is not null
             && !(options.TryGetValue(option, out var value) && value.Trim().Equals("false", StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>The line break the file uses: the one ending the node's line, or the first one in the file.</summary>
-    internal static string LineBreak(SourceText text, int position)
-    {
-        var line = text.Lines.GetLineFromPosition(position);
-        foreach (var candidate in new[] { line }.Concat(text.Lines))
-        {
-            if (candidate.EndIncludingLineBreak > candidate.End)
-            {
-                return text.ToString(TextSpan.FromBounds(candidate.End, candidate.EndIncludingLineBreak));
-            }
-        }
-
-        return "\n";
     }
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;

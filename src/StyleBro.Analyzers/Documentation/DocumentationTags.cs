@@ -61,6 +61,13 @@ internal static class DocumentationTags
     /// <summary>Where an element starts: its '&lt;', not the '///' before it on a continuation line.</summary>
     public static int GetStart(XmlNodeSyntax element) => element.GetFirstToken().SpanStart;
 
+    /// <summary>The edits that unwrap a placeholder: its tags go, its content stays.</summary>
+    public static IEnumerable<TextChange> GetUnwrap(XmlElementSyntax placeholder)
+    {
+        yield return new TextChange(placeholder.StartTag.Span, string.Empty);
+        yield return new TextChange(placeholder.EndTag.Span, string.Empty);
+    }
+
     private static int SkipSpacesBack(SourceText text, int position, int lineStart)
     {
         while (position > lineStart && text[position - 1] == ' ')
@@ -69,13 +76,6 @@ internal static class DocumentationTags
         }
 
         return position;
-    }
-
-    /// <summary>The edits that unwrap a placeholder: its tags go, its content stays.</summary>
-    public static IEnumerable<TextChange> GetUnwrap(XmlElementSyntax placeholder)
-    {
-        yield return new TextChange(placeholder.StartTag.Span, string.Empty);
-        yield return new TextChange(placeholder.EndTag.Span, string.Empty);
     }
 
     private static IEnumerable<DocumentationCommentTriviaSyntax> GetDocumentation(SyntaxNode member) =>

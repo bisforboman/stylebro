@@ -4,8 +4,6 @@ namespace StyleBro.Analyzers;
 
 internal static class Descriptors
 {
-    private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
-
     public static readonly DiagnosticDescriptor MemberOrdering = new(
         id: DiagnosticIds.MemberOrdering,
         title: "Members should be ordered",
@@ -534,6 +532,7 @@ internal static class Descriptors
         description: "When every accessor has a block body, they are either all single-line or all multi-line. The fix puts "
             + "one-statement bodies on one line, or expands the single-line ones. Replaces StyleCop SA1504.",
         helpLinkUri: HelpBase + DiagnosticIds.AccessorsConsistentLayout + ".md");
+
     public static readonly DiagnosticDescriptor PropertyAccessorOrder = new(
         id: DiagnosticIds.PropertyAccessorOrder,
         title: "Property accessors should follow order",
@@ -543,7 +542,6 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "'get' comes before 'set' or 'init'. The fix swaps the accessors with their comments. Replaces StyleCop SA1212.",
         helpLinkUri: HelpBase + DiagnosticIds.PropertyAccessorOrder + ".md");
-
     public static readonly DiagnosticDescriptor EventAccessorOrder = new(
         id: DiagnosticIds.EventAccessorOrder,
         title: "Event accessors should follow order",
@@ -748,4 +746,6 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "A documentation comment is separated from the code above it by a blank line, except after an opening brace. Replaces StyleCop SA1514.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeDocumentation + ".md");
+
+    private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }

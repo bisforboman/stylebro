@@ -31,10 +31,10 @@ internal sealed class FileHeaderOptions
 
     public string Company { get; }
 
-    /// <summary>The copyright text with '\n' for line breaks and the variables {companyName} and {fileName}.</summary>
+    /// <summary>Gets the copyright text with '\n' for line breaks and the variables {companyName} and {fileName}.</summary>
     public string Copyright { get; }
 
-    /// <summary>A line written above and below a new header (StyleCop's headerDecoration), or empty.</summary>
+    /// <summary>Gets a line written above and below a new header (StyleCop's headerDecoration), or empty.</summary>
     public string Decoration { get; }
 
     public static FileHeaderOptions? Read(AnalyzerConfigOptions options)
@@ -62,23 +62,6 @@ internal sealed class FileHeaderOptions
 /// </summary>
 internal static class FileHeaders
 {
-    /// <summary>One problem with the header: where it's reported, the message, and the edit that fixes it.</summary>
-    public sealed class Finding
-    {
-        public Finding(int position, string message, TextChange change)
-        {
-            Position = position;
-            Message = message;
-            Change = change;
-        }
-
-        public int Position { get; }
-
-        public string Message { get; }
-
-        public TextChange Change { get; }
-    }
-
     /// <summary>
     /// The header's problem, or null when it's fine or can't be fixed safely: an empty or whitespace-only file, a
     /// header in a '/* */' comment, a broken header that already has a copyright tag (a person has to repair it), and a
@@ -342,5 +325,22 @@ internal static class FileHeaders
     {
         var attribute = new XAttribute("t", value).ToString();
         return attribute.Substring(3, attribute.Length - 4);
+    }
+
+    /// <summary>One problem with the header: where it's reported, the message, and the edit that fixes it.</summary>
+    public sealed class Finding
+    {
+        public Finding(int position, string message, TextChange change)
+        {
+            Position = position;
+            Message = message;
+            Change = change;
+        }
+
+        public int Position { get; }
+
+        public string Message { get; }
+
+        public TextChange Change { get; }
     }
 }

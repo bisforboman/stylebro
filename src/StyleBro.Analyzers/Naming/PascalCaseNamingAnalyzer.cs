@@ -16,28 +16,9 @@ namespace StyleBro.Analyzers.Naming;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.ElementPascalCase);
-
-    public override void Initialize(AnalysisContext context)
-    {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
-            AnalyzeDeclaration,
-            SyntaxKind.ClassDeclaration,
-            SyntaxKind.StructDeclaration,
-            SyntaxKind.RecordDeclaration,
-            SyntaxKind.RecordStructDeclaration,
-            SyntaxKind.EnumDeclaration,
-            SyntaxKind.DelegateDeclaration,
-            SyntaxKind.MethodDeclaration,
-            SyntaxKind.PropertyDeclaration,
-            SyntaxKind.EventDeclaration,
-            SyntaxKind.EnumMemberDeclaration,
-            SyntaxKind.LocalFunctionStatement);
-        context.RegisterSyntaxNodeAction(AnalyzeEventField, SyntaxKind.EventFieldDeclaration);
-    }
 
     /// <summary>'lowerMethod' -> 'LowerMethod', '_helper' -> 'Helper'; null when it already begins with a capital.</summary>
     public static string? GetNewName(string name)
@@ -66,6 +47,27 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
             _ => CamelCaseNamingAnalyzer.GetBaseMembers(member).Any(b => b.Name == member.Name)
                 || (member is IEventSymbol { OverriddenEvent: { } overridden } && overridden.Name == member.Name),
         };
+    }
+
+    /// <inheritdoc/>
+    public override void Initialize(AnalysisContext context)
+    {
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.EnableConcurrentExecution();
+        context.RegisterSyntaxNodeAction(
+            AnalyzeDeclaration,
+            SyntaxKind.ClassDeclaration,
+            SyntaxKind.StructDeclaration,
+            SyntaxKind.RecordDeclaration,
+            SyntaxKind.RecordStructDeclaration,
+            SyntaxKind.EnumDeclaration,
+            SyntaxKind.DelegateDeclaration,
+            SyntaxKind.MethodDeclaration,
+            SyntaxKind.PropertyDeclaration,
+            SyntaxKind.EventDeclaration,
+            SyntaxKind.EnumMemberDeclaration,
+            SyntaxKind.LocalFunctionStatement);
+        context.RegisterSyntaxNodeAction(AnalyzeEventField, SyntaxKind.EventFieldDeclaration);
     }
 
     private static void AnalyzeDeclaration(SyntaxNodeAnalysisContext context)

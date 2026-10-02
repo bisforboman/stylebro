@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class LiteralSuffixTests
 {
     [Fact]
-    public Task Casts_BecomeSuffixes() => Verify.VerifyFixAsync("""
+    public Task Casts_BecomeSuffixes() => Verify.VerifyFixAsync(
+        """
         class C
         {
             long a = {|BRO1122:(long)1|};
@@ -22,7 +23,8 @@ public class LiteralSuffixTests
             int l = {|BRO1122:(int)1L|};
             long m = {|BRO1122:(long)1u|};
         }
-        """, """
+        """,
+        """
         class C
         {
             long a = 1L;
@@ -64,13 +66,15 @@ public class LiteralSuffixTests
         """);
 
     [Fact]
-    public Task FloatFromADoubleLiteral_IsFixedWhenTheValueIsTheSame() => Verify.VerifyFixAsync("""
+    public Task FloatFromADoubleLiteral_IsFixedWhenTheValueIsTheSame() => Verify.VerifyFixAsync(
+        """
         class C
         {
             float a = {|BRO1122:(float)0.5|};
             float b = {|BRO1122:(float)0.1|};
         }
-        """, """
+        """,
+        """
         class C
         {
             float a = 0.5F;

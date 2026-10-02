@@ -21,11 +21,11 @@ namespace StyleBro.CodeFixes;
 /// </summary>
 internal sealed class LinkedFileFixAllProvider : FixAllProvider
 {
-    private readonly Func<Document, ImmutableArray<Diagnostic>, CancellationToken, Task<Document>> _fixDocument;
+    private readonly Func<Document, ImmutableArray<Diagnostic>, CancellationToken, Task<Document>> fixDocument;
 
     private LinkedFileFixAllProvider(Func<Document, ImmutableArray<Diagnostic>, CancellationToken, Task<Document>> fixDocument)
     {
-        _fixDocument = fixDocument;
+        this.fixDocument = fixDocument;
     }
 
     public static FixAllProvider Create(Func<Document, ImmutableArray<Diagnostic>, CancellationToken, Task<Document>> fixDocument)
@@ -33,17 +33,50 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
         return new LinkedFileFixAllProvider(fixDocument);
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<FixAllScope> GetSupportedFixAllScopes()
     {
         return new[] { FixAllScope.Document, FixAllScope.Project, FixAllScope.Solution };
     }
 
+    /// <inheritdoc/>
     public override Task<CodeAction?> GetFixAsync(FixAllContext fixAllContext)
     {
         return Task.FromResult<CodeAction?>(CodeAction.Create(
             fixAllContext.CodeActionEquivalenceKey ?? "Fix all",
             ct => FixAllAsync(fixAllContext, ct),
             fixAllContext.CodeActionEquivalenceKey));
+    }
+
+    /// <summary>Identical changes are kept once; a change that conflicts with an accepted one is dropped.</summary>
+    internal static List<TextChange> Merge(List<TextChange> changes)
+    {
+        var accepted = new List<TextChange>();
+        foreach (var change in changes.OrderBy(c => c.Span.Start).ThenBy(c => c.Span.End))
+        {
+            if (!accepted.Any(a => a.Span == change.Span && a.NewText == change.NewText)
+                && !accepted.Any(a => Conflicts(a.Span, change.Span)))
+            {
+                accepted.Add(change);
+            }
+        }
+
+        return accepted;
+    }
+
+    private static bool Conflicts(TextSpan a, TextSpan b)
+    {
+        if (a.IsEmpty || b.IsEmpty)
+        {
+            // An insertion conflicts with another insertion at the same position (order would be arbitrary) and with
+            // a replacement that covers its position.
+            var (insertion, other) = a.IsEmpty ? (a, b) : (b, a);
+            return other.IsEmpty
+                ? insertion.Start == other.Start
+                : insertion.Start > other.Start && insertion.Start < other.End;
+        }
+
+        return a.OverlapsWith(b);
     }
 
     private async Task<Solution> FixAllAsync(FixAllContext context, CancellationToken cancellationToken)
@@ -81,7 +114,7 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
             // Exact changes for fixes that edit text (SourceText.WithChanges); a single whole-text change for fixes
             // that rewrite the syntax tree. Never a computed diff: two copies' diffs of the same result can be chunked
             // differently, and merging those duplicated members in a multi-targeted repo.
-            var fixedDocument = await _fixDocument(document, diagnostics, cancellationToken).ConfigureAwait(false);
+            var fixedDocument = await fixDocument(document, diagnostics, cancellationToken).ConfigureAwait(false);
             var originalText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
             var fixedText = await fixedDocument.GetTextAsync(cancellationToken).ConfigureAwait(false);
             group.Changes.AddRange(fixedText.GetTextChanges(originalText));
@@ -98,37 +131,6 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
         }
 
         return solution;
-    }
-
-    /// <summary>Identical changes are kept once; a change that conflicts with an accepted one is dropped.</summary>
-    internal static List<TextChange> Merge(List<TextChange> changes)
-    {
-        var accepted = new List<TextChange>();
-        foreach (var change in changes.OrderBy(c => c.Span.Start).ThenBy(c => c.Span.End))
-        {
-            if (!accepted.Any(a => a.Span == change.Span && a.NewText == change.NewText)
-                && !accepted.Any(a => Conflicts(a.Span, change.Span)))
-            {
-                accepted.Add(change);
-            }
-        }
-
-        return accepted;
-    }
-
-    private static bool Conflicts(TextSpan a, TextSpan b)
-    {
-        if (a.IsEmpty || b.IsEmpty)
-        {
-            // An insertion conflicts with another insertion at the same position (order would be arbitrary) and with
-            // a replacement that covers its position.
-            var (insertion, other) = a.IsEmpty ? (a, b) : (b, a);
-            return other.IsEmpty
-                ? insertion.Start == other.Start
-                : insertion.Start > other.Start && insertion.Start < other.End;
-        }
-
-        return a.OverlapsWith(b);
     }
 
     private sealed class FileGroup

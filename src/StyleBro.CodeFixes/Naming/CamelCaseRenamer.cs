@@ -209,6 +209,7 @@ internal static class CamelCaseRenamer
                 var tree = location.SourceTree!;
                 var root = await tree.GetRootAsync(cancellationToken).ConfigureAwait(false);
                 var declaration = root.FindToken(location.SourceSpan.Start).Parent;
+
                 // Fields, types and type parameters were checked by their analyzers; references are checked below.
                 if (declaration is null
                     || (IsMemberScoped(current) && !CamelCaseNames.CanRename(declaration, oldName, newName))
@@ -436,5 +437,6 @@ internal static class CamelCaseRenamer
 
     private static ImmutableArray<ISymbol> GetTypeParameters(ISymbol member) =>
         member is IMethodSymbol method ? method.TypeParameters.CastArray<ISymbol>() : ImmutableArray<ISymbol>.Empty;
+
     private static string GetFileKey(Document document) => document.FilePath ?? document.Id.Id.ToString();
 }

@@ -17,12 +17,15 @@ namespace StyleBro.CodeFixes.Ordering;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AccessorOrderCodeFixProvider))]
 public sealed class AccessorOrderCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.PropertyAccessorOrder, DiagnosticIds.EventAccessorOrder);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

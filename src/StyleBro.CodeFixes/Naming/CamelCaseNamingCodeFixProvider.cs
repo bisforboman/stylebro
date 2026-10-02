@@ -16,6 +16,7 @@ namespace StyleBro.CodeFixes.Naming;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CamelCaseNamingCodeFixProvider))]
 public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(
             DiagnosticIds.VariableCasing,
@@ -28,8 +29,10 @@ public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
             DiagnosticIds.FieldUnderscore,
             DiagnosticIds.ElementPascalCase);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() => RenameFixAllProvider.Instance;
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

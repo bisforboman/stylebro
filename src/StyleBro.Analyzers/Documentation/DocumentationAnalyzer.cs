@@ -18,6 +18,7 @@ namespace StyleBro.Analyzers.Documentation;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
             Descriptors.InheritDocumentation,
@@ -35,6 +36,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
             Descriptors.TypeParameterTagsMatch,
             Descriptors.TypeParameterTagHasName);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

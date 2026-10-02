@@ -15,9 +15,11 @@ namespace StyleBro.Analyzers.Naming;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.PrivateFieldNaming, Descriptors.FieldPascalCase, Descriptors.FieldPrefix, Descriptors.FieldUnderscore);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

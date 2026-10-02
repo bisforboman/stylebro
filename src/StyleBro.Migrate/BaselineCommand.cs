@@ -76,26 +76,6 @@ internal static class BaselineCommand
         }
     }
 
-    /// <summary>The baseline for a 'dotnet format' JSON report, and what it couldn't include.</summary>
-    public sealed class Result
-    {
-        public Result(Baseline baseline, Dictionary<string, int> perRule, int whitespace, Dictionary<string, int> notCovered)
-        {
-            Baseline = baseline;
-            PerRule = perRule;
-            Whitespace = whitespace;
-            NotCovered = notCovered;
-        }
-
-        public Baseline Baseline { get; }
-
-        public Dictionary<string, int> PerRule { get; }
-
-        public int Whitespace { get; }
-
-        public Dictionary<string, int> NotCovered { get; }
-    }
-
     /// <summary>
     /// Turns a report into a baseline. A diagnostic reported for several target frameworks' copies of a file counts
     /// once (the suppressor checks each compilation on its own).
@@ -211,5 +191,25 @@ internal static class BaselineCommand
         {
             File.Move(aside, path);
         }
+    }
+
+    /// <summary>The baseline for a 'dotnet format' JSON report, and what it couldn't include.</summary>
+    public sealed class Result
+    {
+        public Result(Baseline baseline, Dictionary<string, int> perRule, int whitespace, Dictionary<string, int> notCovered)
+        {
+            Baseline = baseline;
+            PerRule = perRule;
+            Whitespace = whitespace;
+            NotCovered = notCovered;
+        }
+
+        public Baseline Baseline { get; }
+
+        public Dictionary<string, int> PerRule { get; }
+
+        public int Whitespace { get; }
+
+        public Dictionary<string, int> NotCovered { get; }
     }
 }

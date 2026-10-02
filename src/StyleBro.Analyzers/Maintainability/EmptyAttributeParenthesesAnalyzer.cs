@@ -10,9 +10,11 @@ namespace StyleBro.Analyzers.Maintainability;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EmptyAttributeParenthesesAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.EmptyAttributeParentheses);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

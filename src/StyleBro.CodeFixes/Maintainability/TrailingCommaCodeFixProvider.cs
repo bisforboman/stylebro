@@ -20,12 +20,15 @@ public sealed class TrailingCommaCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Add trailing comma";
 
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.TrailingComma);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

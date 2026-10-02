@@ -18,12 +18,15 @@ namespace StyleBro.CodeFixes.Readability;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(EnumValueLinesCodeFixProvider))]
 public sealed class EnumValueLinesCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.EnumValueOnOwnLine);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

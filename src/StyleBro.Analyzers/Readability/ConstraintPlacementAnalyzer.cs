@@ -8,9 +8,11 @@ namespace StyleBro.Analyzers.Readability;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ConstraintPlacementAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.ConstraintOnOwnLine);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

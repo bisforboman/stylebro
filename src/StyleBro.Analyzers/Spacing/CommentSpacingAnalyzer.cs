@@ -12,9 +12,11 @@ namespace StyleBro.Analyzers.Spacing;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class CommentSpacingAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.CommentSpacing);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

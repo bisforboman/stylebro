@@ -15,7 +15,8 @@ public class PascalCaseNamingTests
     public void NewName(string name, string? expected) => Assert.Equal(expected, PascalCaseNamingAnalyzer.GetNewName(name));
 
     [Fact]
-    public Task TypesAndMembers_AreRenamedEverywhere() => VerifyFixAsync("""
+    public Task TypesAndMembers_AreRenamedEverywhere() => VerifyFixAsync(
+        """
         using System;
 
         public class {|BRO1309:shape|}
@@ -59,7 +60,8 @@ public class PascalCaseNamingTests
 
             public string Name => nameof(area);
         }
-        """, """
+        """,
+        """
         using System;
 
         public class Shape
@@ -106,7 +108,8 @@ public class PascalCaseNamingTests
         """.Replace("public enum Kind", "public enum Kind").Replace("public Kind Current => Kind.Round;", "public Kind Current => Kind.Round;"));
 
     [Fact]
-    public Task BaseMembers_RenameOverridesAndImplementations() => VerifyFixAsync("""
+    public Task BaseMembers_RenameOverridesAndImplementations() => VerifyFixAsync(
+        """
         public interface IShape
         {
             double {|BRO1309:area|}();
@@ -140,7 +143,8 @@ public class PascalCaseNamingTests
                 return s.area() + s.name.Length;
             }
         }
-        """, """
+        """,
+        """
         public interface IShape
         {
             double Area();

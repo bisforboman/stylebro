@@ -14,7 +14,8 @@ public class ConstructorInitializerLineTests
         """;
 
     [Fact]
-    public Task Initializers_MoveToTheirOwnLine() => VerifyFixAsync("""
+    public Task Initializers_MoveToTheirOwnLine() => VerifyFixAsync(
+        """
         class C : B
         {
             public C() {|BRO1105::|} base() { }
@@ -32,7 +33,8 @@ public class ConstructorInitializerLineTests
 
             public C(byte b) {|BRO1105::|} this() => System.Console.WriteLine();
         }
-        """ + BaseClass, """
+        """ + BaseClass,
+        """
         class C : B
         {
             public C()
@@ -57,7 +59,8 @@ public class ConstructorInitializerLineTests
         """ + BaseClass);
 
     [Fact]
-    public Task MultiLineArguments_AreKept() => VerifyFixAsync("""
+    public Task MultiLineArguments_AreKept() => VerifyFixAsync(
+        """
         class C : B
         {
             public C() {|BRO1105::|} base(
@@ -65,7 +68,8 @@ public class ConstructorInitializerLineTests
             {
             }
         }
-        """ + BaseClass, """
+        """ + BaseClass,
+        """
         class C : B
         {
             public C()
@@ -77,18 +81,21 @@ public class ConstructorInitializerLineTests
         """ + BaseClass);
 
     [Fact]
-    public Task IndentationComesFromEditorConfig() => VerifyFixAsync("""
+    public Task IndentationComesFromEditorConfig() => VerifyFixAsync(
+        """
         class C : B
         {
             public C() {|BRO1105::|} base() { }
         }
-        """ + BaseClass, """
+        """ + BaseClass,
+        """
         class C : B
         {
             public C()
               : base() { }
         }
-        """ + BaseClass, editorConfig: "indent_style = space\nindent_size = 2\n");
+        """ + BaseClass,
+        editorConfig: "indent_style = space\nindent_size = 2\n");
 
     [Fact]
     public Task TabIndentation_FromEditorConfig()

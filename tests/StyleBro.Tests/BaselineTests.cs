@@ -10,8 +10,6 @@ namespace StyleBro.Tests;
 
 public class BaselineTests
 {
-    private static readonly string Root = Path.Combine(Path.GetTempPath(), "stylebro-baseline-test");
-
     private const string Old = """
         class Old
         {
@@ -19,6 +17,8 @@ public class BaselineTests
             string b = "", c = "";
         }
         """;
+
+    private static readonly string Root = Path.Combine(Path.GetTempPath(), "stylebro-baseline-test");
 
     [Fact]
     public async Task BaselinedViolations_AreSuppressed_OthersReported()
@@ -91,6 +91,7 @@ public class BaselineTests
             File.WriteAllText(file, "class A\r\n{\r\n    string a = \"\", b = \"\";\r\n}\r\n");
             string Change(int line, int column, string id) => $$"""{ "LineNumber": {{line}}, "CharNumber": {{column}}, "DiagnosticId": "{{id}}", "FormatDescription": "x" }""";
             var document = $$"""{ "FileName": "A.cs", "FilePath": {{System.Text.Json.JsonSerializer.Serialize(file)}}, "FileChanges": [{{Change(3, 16, "BRO1106")}}, {{Change(3, 26, "BRO1106")}}, {{Change(1, 1, "IDE0040")}}, {{Change(2, 1, "WHITESPACE")}}, {{Change(1, 1, "CA1050")}}] }""";
+
             // The same document twice: two target frameworks.
             var result = StyleBro.Migrate.BaselineCommand.Build(dir, "[" + document + "," + document + "]");
 

@@ -21,12 +21,15 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Put the constructor initializer on its own line";
 
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.ConstructorInitializerLine);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

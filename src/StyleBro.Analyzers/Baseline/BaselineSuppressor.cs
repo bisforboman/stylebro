@@ -26,8 +26,10 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
 
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = CreateDescriptors();
 
+    /// <inheritdoc/>
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } = Descriptors.Values.ToImmutableArray();
 
+    /// <inheritdoc/>
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
         var file = context.Options.AdditionalFiles.FirstOrDefault(f => string.Equals(Path.GetFileName(f.Path), Baseline.FileName, StringComparison.OrdinalIgnoreCase));

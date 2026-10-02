@@ -12,9 +12,11 @@ namespace StyleBro.Analyzers.Readability;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EnumValueLinesAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.EnumValueOnOwnLine);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

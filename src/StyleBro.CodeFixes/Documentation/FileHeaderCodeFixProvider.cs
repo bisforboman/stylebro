@@ -15,11 +15,14 @@ public sealed class FileHeaderCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Fix the file header";
 
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } = ImmutableArray.Create(DiagnosticIds.FileHeader);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

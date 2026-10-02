@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class TrailingCommaTests
 {
     [Fact]
-    public Task MultiLineLists_GetATrailingComma() => VerifyFixAsync("""
+    public Task MultiLineLists_GetATrailingComma() => VerifyFixAsync(
+        """
         using System.Collections.Generic;
 
         enum E
@@ -55,7 +56,8 @@ public class TrailingCommaTests
         }
 
         namespace System.Runtime.CompilerServices { class IsExternalInit { } }
-        """, """
+        """,
+        """
         using System.Collections.Generic;
 
         enum E
@@ -108,7 +110,8 @@ public class TrailingCommaTests
         """);
 
     [Fact]
-    public Task CommaGoesBeforeATrailingComment_AndBeforeABraceOnTheSameLine() => VerifyFixAsync("""
+    public Task CommaGoesBeforeATrailingComment_AndBeforeABraceOnTheSameLine() => VerifyFixAsync(
+        """
         class C
         {
             int[] a = new[]
@@ -120,7 +123,8 @@ public class TrailingCommaTests
             int[] b = new[] { 1,
                 {|BRO1401:2|} };
         }
-        """, """
+        """,
+        """
         class C
         {
             int[] a = new[]
@@ -135,7 +139,8 @@ public class TrailingCommaTests
         """);
 
     [Fact]
-    public Task CodeDirectlyAfterTheLastItem_GetsCommaAndSpace() => VerifyFixAsync("""
+    public Task CodeDirectlyAfterTheLastItem_GetsCommaAndSpace() => VerifyFixAsync(
+        """
         class P { public string A; public string B; }
 
         class C
@@ -145,7 +150,8 @@ public class TrailingCommaTests
                 A = "a",
                 {|BRO1401:B = "b"|}};
         }
-        """, """
+        """,
+        """
         class P { public string A; public string B; }
 
         class C
@@ -183,7 +189,8 @@ public class TrailingCommaTests
         """);
 
     [Fact]
-    public Task NestedLists_AreFixedInOnePass() => VerifyFixAsync("""
+    public Task NestedLists_AreFixedInOnePass() => VerifyFixAsync(
+        """
         class C
         {
             int[][] a = new[]
@@ -194,7 +201,8 @@ public class TrailingCommaTests
                 }|}
             };
         }
-        """, """
+        """,
+        """
         class C
         {
             int[][] a = new[]

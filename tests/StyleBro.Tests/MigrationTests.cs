@@ -6,6 +6,7 @@ public sealed class MigrationTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("stylebro-migrate-").FullName;
 
+    /// <inheritdoc/>
     public void Dispose() => Directory.Delete(root, recursive: true);
 
     [Fact]
@@ -196,7 +197,8 @@ public sealed class MigrationTests : IDisposable
         var (text, added) = Suppressions.Rewrite(code, replacements);
 
         Assert.Equal(3, added);
-        Assert.Equal("""
+        Assert.Equal(
+            """
             #pragma warning disable SA1202, SA1203, BRO1001 // ordering
             using System.Diagnostics.CodeAnalysis;
 
@@ -209,7 +211,8 @@ public sealed class MigrationTests : IDisposable
                 [SuppressMessage("Style", "IDE0009")]
                 void M() { }
             }
-            """.Replace("\r\n", "\n"), text.Replace("\r\n", "\n"));
+            """.Replace("\r\n", "\n"),
+            text.Replace("\r\n", "\n"));
         Assert.Equal(0, Suppressions.Rewrite(text, replacements).Added);
     }
 
@@ -363,6 +366,7 @@ public sealed class MigrationTests : IDisposable
     public void TheBaseline_CoversEverySdkRuleThePresetOrTheToolTurnsOn()
     {
         var preset = Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig");
+
         // A repository with a plain file header and SX1101 turns on IDE0073 and IDE0003 too.
         Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1101.severity = warning\n");
@@ -405,17 +409,6 @@ public sealed class MigrationTests : IDisposable
             $"{rule.Id} is missing from docs/differences-from-stylecop.md (list it under 'Same as StyleCop' if nothing differs)."));
     }
 
-    private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)
-    {
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var line in lines.Select(l => l.Trim()).Where(l => l.Contains('=') && !l.StartsWith('#') && !l.StartsWith('[')))
-        {
-            var equals = line.IndexOf('=');
-            result[line[..equals].Trim()] = line[(equals + 1)..].Split('#')[0].Trim();
-        }
-
-        return result;
-    }
     [Fact]
     public void DisablePreset_AddsThePropertyOnce()
     {
@@ -450,6 +443,7 @@ public sealed class MigrationTests : IDisposable
     {
         Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("charset", StringComparison.Ordinal));
     }
+
     [Fact]
     public void PrivateFieldStyle_IsInferredFromTheCode()
     {
@@ -477,6 +471,18 @@ public sealed class MigrationTests : IDisposable
         var second = Migration.Apply(first, "# BEGIN stylebro-migrate\nnew\n# END stylebro-migrate\n");
 
         Assert.Equal("root = true\n\n# BEGIN stylebro-migrate\nnew\n# END stylebro-migrate\n", second);
+    }
+
+    private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in lines.Select(l => l.Trim()).Where(l => l.Contains('=') && !l.StartsWith('#') && !l.StartsWith('[')))
+        {
+            var equals = line.IndexOf('=');
+            result[line[..equals].Trim()] = line[(equals + 1)..].Split('#')[0].Trim();
+        }
+
+        return result;
     }
 
     private static string RepositoryRoot()

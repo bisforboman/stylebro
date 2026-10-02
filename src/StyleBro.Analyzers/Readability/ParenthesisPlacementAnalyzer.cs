@@ -11,9 +11,11 @@ namespace StyleBro.Analyzers.Readability;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ParenthesisPlacementAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.OpenParenthesisOnNameLine, Descriptors.CloseParenthesisOnLastItemLine);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

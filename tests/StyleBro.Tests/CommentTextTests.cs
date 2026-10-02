@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class CommentTextTests
 {
     [Fact]
-    public Task DocumentationLines_GetOneSpace() => VerifyFixAsync("""
+    public Task DocumentationLines_GetOneSpace() => VerifyFixAsync(
+        """
         /// <summary>
         ///{|BRO1005:|}Text.
         ///   Indented text and <para>tags</para> are fine.
@@ -20,7 +21,8 @@ public class CommentTextTests
         public class C
         {
         }
-        """, """
+        """,
+        """
         /// <summary>
         /// Text.
         ///   Indented text and <para>tags</para> are fine.
@@ -38,7 +40,8 @@ public class CommentTextTests
         """);
 
     [Fact]
-    public Task EmptyComments_AtTheEndsOfAGroup_AreRemoved() => VerifyFixAsync("""
+    public Task EmptyComments_AtTheEndsOfAGroup_AreRemoved() => VerifyFixAsync(
+        """
         public class C
         {
             public int M()
@@ -55,7 +58,8 @@ public class CommentTextTests
                 return a;
             }
         }
-        """, """
+        """,
+        """
         public class C
         {
             public int M()

@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class CombinedAttributesTests
 {
     [Fact]
-    public Task ListOnItsOwnLine_IsSplitIntoLines() => VerifyFixAsync("""
+    public Task ListOnItsOwnLine_IsSplitIntoLines() => VerifyFixAsync(
+        """
         using System;
         using System.Diagnostics;
 
@@ -14,7 +15,8 @@ public class CombinedAttributesTests
             [Obsolete("a, b"), {|BRO1102:DebuggerStepThrough|}]
             void M() { }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Diagnostics;
 
@@ -27,7 +29,8 @@ public class CombinedAttributesTests
         """);
 
     [Fact]
-    public Task ListSharingItsLine_IsSplitInPlace() => VerifyFixAsync("""
+    public Task ListSharingItsLine_IsSplitInPlace() => VerifyFixAsync(
+        """
         using System;
         using System.Diagnostics;
 
@@ -35,7 +38,8 @@ public class CombinedAttributesTests
         {
             [Obsolete, {|BRO1102:DebuggerStepThrough|}] void M() { }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Diagnostics;
 
@@ -46,7 +50,8 @@ public class CombinedAttributesTests
         """);
 
     [Fact]
-    public Task Targets_AreRepeated() => VerifyFixAsync("""
+    public Task Targets_AreRepeated() => VerifyFixAsync(
+        """
         [assembly: System.CLSCompliant(false), {|BRO1102:System.Reflection.AssemblyTrademark("x")|}]
 
         class C
@@ -57,7 +62,8 @@ public class CombinedAttributesTests
 
         class AAttribute : System.Attribute { }
         class BAttribute : System.Attribute { }
-        """, """
+        """,
+        """
         [assembly: System.CLSCompliant(false)]
         [assembly: System.Reflection.AssemblyTrademark("x")]
 
@@ -73,7 +79,8 @@ public class CombinedAttributesTests
         """);
 
     [Fact]
-    public Task MultiLineList_BecomesOneLinePerAttribute() => VerifyFixAsync("""
+    public Task MultiLineList_BecomesOneLinePerAttribute() => VerifyFixAsync(
+        """
         [A,
          {|BRO1102:B|},
          C]
@@ -82,7 +89,8 @@ public class CombinedAttributesTests
         class AAttribute : System.Attribute { }
         class BAttribute : System.Attribute { }
         class CAttribute : System.Attribute { }
-        """, """
+        """,
+        """
         [A]
         [B]
         [C]

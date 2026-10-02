@@ -161,17 +161,17 @@ public partial class DocExamplesTests
 
     private sealed class DocumentDiagnosticProvider : FixAllContext.DiagnosticProvider
     {
-        private readonly DiagnosticAnalyzer _analyzer;
-        private readonly string _id;
+        private readonly DiagnosticAnalyzer analyzer;
+        private readonly string id;
 
         public DocumentDiagnosticProvider(DiagnosticAnalyzer analyzer, string id)
         {
-            _analyzer = analyzer;
-            _id = id;
+            this.analyzer = analyzer;
+            this.id = id;
         }
 
         public override Task<IEnumerable<Diagnostic>> GetDocumentDiagnosticsAsync(Document document, CancellationToken cancellationToken) =>
-            GetDiagnosticsAsync(document, _analyzer, _id).ContinueWith(t => (IEnumerable<Diagnostic>)t.Result, cancellationToken);
+            GetDiagnosticsAsync(document, analyzer, id).ContinueWith(t => (IEnumerable<Diagnostic>)t.Result, cancellationToken);
 
         public override Task<IEnumerable<Diagnostic>> GetProjectDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
             Task.FromResult(Enumerable.Empty<Diagnostic>());

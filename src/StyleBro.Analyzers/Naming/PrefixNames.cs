@@ -23,6 +23,7 @@ internal static class PrefixNames
     /// </summary>
     public static bool IsTypeNameTaken(string newName, Compilation compilation) =>
         compilation.ContainsSymbolsWithName(newName, SymbolFilter.Type);
+
     private static string? GetName(string name, char prefix)
     {
         if (name.Length > 0 && name[0] == prefix)

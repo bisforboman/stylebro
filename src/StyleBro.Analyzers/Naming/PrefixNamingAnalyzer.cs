@@ -15,16 +15,9 @@ namespace StyleBro.Analyzers.Naming;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.InterfacePrefix, Descriptors.TypeParameterPrefix);
-
-    public override void Initialize(AnalysisContext context)
-    {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeInterface, SyntaxKind.InterfaceDeclaration);
-        context.RegisterSyntaxNodeAction(AnalyzeTypeParameter, SyntaxKind.TypeParameter);
-    }
 
     /// <summary>
     /// Whether a method's type parameter keeps the name of the one it overrides or implements. Like a parameter
@@ -35,6 +28,15 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
         return typeParameter.DeclaringMethod is { } method
             && CamelCaseNamingAnalyzer.GetBaseMembers(method).OfType<IMethodSymbol>().Any(b =>
                 typeParameter.Ordinal < b.TypeParameters.Length && b.TypeParameters[typeParameter.Ordinal].Name == typeParameter.Name);
+    }
+
+    /// <inheritdoc/>
+    public override void Initialize(AnalysisContext context)
+    {
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.EnableConcurrentExecution();
+        context.RegisterSyntaxNodeAction(AnalyzeInterface, SyntaxKind.InterfaceDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeTypeParameter, SyntaxKind.TypeParameter);
     }
 
     private static void AnalyzeInterface(SyntaxNodeAnalysisContext context)

@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class ElementSeparationTests
 {
     [Fact]
-    public Task AdjacentMembers_GetABlankLineAboveTheirCommentsAndAttributes() => VerifyFixAsync("""
+    public Task AdjacentMembers_GetABlankLineAboveTheirCommentsAndAttributes() => VerifyFixAsync(
+        """
         using System;
         using System.Text;
         {|BRO1505:|}namespace N
@@ -25,7 +26,8 @@ public class ElementSeparationTests
             }
         {|BRO1505:|}    class D { }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Text;
 
@@ -55,7 +57,8 @@ public class ElementSeparationTests
         """);
 
     [Fact]
-    public Task Accessors_NeedABlankLineWhenEitherIsMultiLine() => VerifyFixAsync("""
+    public Task Accessors_NeedABlankLineWhenEitherIsMultiLine() => VerifyFixAsync(
+        """
         class C
         {
             int a;
@@ -75,7 +78,8 @@ public class ElementSeparationTests
                 }
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             int a;
@@ -125,12 +129,14 @@ public class ElementSeparationTests
         """);
 
     [Fact]
-    public Task TwoMembersOnOneLine_AreSplit() => VerifyFixAsync("""
+    public Task TwoMembersOnOneLine_AreSplit() => VerifyFixAsync(
+        """
         class C
         {
             void M() { } {|BRO1505:|}void N() { }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M() { }
@@ -155,19 +161,23 @@ public class ElementSeparationTests
         """);
 
     [Fact]
-    public Task FileScopedNamespace_IsSeparatedFromTheFirstType() => VerifyFixAsync("""
+    public Task FileScopedNamespace_IsSeparatedFromTheFirstType() => VerifyFixAsync(
+        """
         namespace N;
         {|BRO1505:|}class C { }
-        """, """
+        """,
+        """
         namespace N;
 
         class C { }
         """);
 
     [Fact]
-    public Task OneLineType_IsExpandedLikeBRO1509() => VerifyFixAsync("""
+    public Task OneLineType_IsExpandedLikeBRO1509() => VerifyFixAsync(
+        """
         public class Gauge { private int level; {|BRO1505:|}public int Level => this.level; {|BRO1505:|}public void Reset() { this.level = 0; } }
-        """, """
+        """,
+        """
         public class Gauge
         {
             private int level;

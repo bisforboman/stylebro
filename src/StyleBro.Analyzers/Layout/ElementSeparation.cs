@@ -66,21 +66,6 @@ internal static class ElementSeparation
         return new TextChange(between, lineBreak + lineBreak + indentation);
     }
 
-    private static List<SyntaxNode> GetElements(SyntaxNode node)
-    {
-        return node switch
-        {
-            CompilationUnitSyntax unit => unit.Externs.Cast<SyntaxNode>().Concat(unit.Usings).Concat(unit.AttributeLists)
-                .Concat(unit.Members.Where(m => m is not GlobalStatementSyntax)).ToList(),
-            FileScopedNamespaceDeclarationSyntax fileScoped => new SyntaxNode[] { fileScoped }.Concat(fileScoped.Externs)
-                .Concat(fileScoped.Usings).Concat(fileScoped.Members).ToList(),
-            NamespaceDeclarationSyntax ns => ns.Externs.Cast<SyntaxNode>().Concat(ns.Usings).Concat(ns.Members).ToList(),
-            TypeDeclarationSyntax type => type.Members.Cast<SyntaxNode>().ToList(),
-            AccessorListSyntax accessors => accessors.Accessors.Cast<SyntaxNode>().ToList(),
-            _ => new List<SyntaxNode>(),
-        };
-    }
-
     /// <summary>Whether two neighbouring elements need a blank line between them (BRO1505; also used by BRO1509's fix).</summary>
     public static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text)
     {
@@ -95,6 +80,7 @@ internal static class ElementSeparation
             (UsingDirectiveSyntax, UsingDirectiveSyntax) => false,
             (ExternAliasDirectiveSyntax, ExternAliasDirectiveSyntax) => false,
             (AttributeListSyntax, AttributeListSyntax) => false,
+
             // Like StyleCop: only two accessors with block bodies, when either spans several lines. An
             // expression-bodied accessor ('get => x;') never needs a blank line next to it.
             (AccessorDeclarationSyntax { Body: not null }, AccessorDeclarationSyntax { Body: not null }) => IsMultiLine(previous, text) || IsMultiLine(current, text),
@@ -119,6 +105,21 @@ internal static class ElementSeparation
         }
 
         return false;
+    }
+
+    private static List<SyntaxNode> GetElements(SyntaxNode node)
+    {
+        return node switch
+        {
+            CompilationUnitSyntax unit => unit.Externs.Cast<SyntaxNode>().Concat(unit.Usings).Concat(unit.AttributeLists)
+                .Concat(unit.Members.Where(m => m is not GlobalStatementSyntax)).ToList(),
+            FileScopedNamespaceDeclarationSyntax fileScoped => new SyntaxNode[] { fileScoped }.Concat(fileScoped.Externs)
+                .Concat(fileScoped.Usings).Concat(fileScoped.Members).ToList(),
+            NamespaceDeclarationSyntax ns => ns.Externs.Cast<SyntaxNode>().Concat(ns.Usings).Concat(ns.Members).ToList(),
+            TypeDeclarationSyntax type => type.Members.Cast<SyntaxNode>().ToList(),
+            AccessorListSyntax accessors => accessors.Accessors.Cast<SyntaxNode>().ToList(),
+            _ => new List<SyntaxNode>(),
+        };
     }
 
     /// <summary>

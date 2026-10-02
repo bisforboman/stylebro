@@ -17,26 +17,9 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
 {
     public const string NewNameKey = "NewName";
 
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.VariableCasing, Descriptors.ParameterCasing);
-
-    public override void Initialize(AnalysisContext context)
-    {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
-            AnalyzeVariable,
-            SyntaxKind.VariableDeclarator,
-            SyntaxKind.SingleVariableDesignation,
-            SyntaxKind.ForEachStatement,
-            SyntaxKind.CatchDeclaration,
-            SyntaxKind.FromClause,
-            SyntaxKind.LetClause,
-            SyntaxKind.JoinClause,
-            SyntaxKind.JoinIntoClause,
-            SyntaxKind.QueryContinuation);
-        context.RegisterSyntaxNodeAction(AnalyzeParameter, SyntaxKind.Parameter);
-    }
 
     /// <summary>The name token of a variable declaration, for every declaration kind BRO1301 checks.</summary>
     public static SyntaxToken GetIdentifier(SyntaxNode node)
@@ -67,48 +50,23 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             GetParameters(b) is { } parameters && parameter.Ordinal < parameters.Length && parameters[parameter.Ordinal].Name == parameter.Name);
     }
 
-    private static void AnalyzeVariable(SyntaxNodeAnalysisContext context)
+    /// <inheritdoc/>
+    public override void Initialize(AnalysisContext context)
     {
-        var identifier = GetIdentifier(context.Node);
-        if (identifier.IsKind(SyntaxKind.None) || identifier.IsMissing)
-        {
-            return;
-        }
-
-        var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node, context.CancellationToken);
-        if (symbol is ILocalSymbol { IsConst: false } or IRangeVariableSymbol)
-        {
-            Report(context, Descriptors.VariableCasing, identifier);
-        }
-    }
-
-    private static void AnalyzeParameter(SyntaxNodeAnalysisContext context)
-    {
-        var node = (ParameterSyntax)context.Node;
-        if (node.Identifier.IsMissing
-            || node.Parent?.Parent is RecordDeclarationSyntax
-            || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { } parameter
-            || InheritsName(parameter)
-            || parameter.ContainingSymbol is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null })
-        {
-            return;
-        }
-
-        Report(context, Descriptors.ParameterCasing, node.Identifier);
-    }
-
-    private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier)
-    {
-        var oldName = identifier.ValueText;
-        if (CamelCaseNames.GetNewName(oldName) is { } newName && CamelCaseNames.CanRename(context.Node, oldName, newName))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(
-                descriptor,
-                identifier.GetLocation(),
-                ImmutableDictionary<string, string?>.Empty.Add(NewNameKey, newName),
-                oldName,
-                newName));
-        }
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.EnableConcurrentExecution();
+        context.RegisterSyntaxNodeAction(
+            AnalyzeVariable,
+            SyntaxKind.VariableDeclarator,
+            SyntaxKind.SingleVariableDesignation,
+            SyntaxKind.ForEachStatement,
+            SyntaxKind.CatchDeclaration,
+            SyntaxKind.FromClause,
+            SyntaxKind.LetClause,
+            SyntaxKind.JoinClause,
+            SyntaxKind.JoinIntoClause,
+            SyntaxKind.QueryContinuation);
+        context.RegisterSyntaxNodeAction(AnalyzeParameter, SyntaxKind.Parameter);
     }
 
     /// <summary>The members <paramref name="member"/> overrides or implements (explicitly or implicitly).</summary>
@@ -154,6 +112,50 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
                     yield return interfaceMember;
                 }
             }
+        }
+    }
+
+    private static void AnalyzeVariable(SyntaxNodeAnalysisContext context)
+    {
+        var identifier = GetIdentifier(context.Node);
+        if (identifier.IsKind(SyntaxKind.None) || identifier.IsMissing)
+        {
+            return;
+        }
+
+        var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node, context.CancellationToken);
+        if (symbol is ILocalSymbol { IsConst: false } or IRangeVariableSymbol)
+        {
+            Report(context, Descriptors.VariableCasing, identifier);
+        }
+    }
+
+    private static void AnalyzeParameter(SyntaxNodeAnalysisContext context)
+    {
+        var node = (ParameterSyntax)context.Node;
+        if (node.Identifier.IsMissing
+            || node.Parent?.Parent is RecordDeclarationSyntax
+            || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { } parameter
+            || InheritsName(parameter)
+            || parameter.ContainingSymbol is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null })
+        {
+            return;
+        }
+
+        Report(context, Descriptors.ParameterCasing, node.Identifier);
+    }
+
+    private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier)
+    {
+        var oldName = identifier.ValueText;
+        if (CamelCaseNames.GetNewName(oldName) is { } newName && CamelCaseNames.CanRename(context.Node, oldName, newName))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                descriptor,
+                identifier.GetLocation(),
+                ImmutableDictionary<string, string?>.Empty.Add(NewNameKey, newName),
+                oldName,
+                newName));
         }
     }
 

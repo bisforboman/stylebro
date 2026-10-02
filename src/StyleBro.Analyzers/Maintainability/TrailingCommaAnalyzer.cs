@@ -9,9 +9,11 @@ namespace StyleBro.Analyzers.Maintainability;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TrailingCommaAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.TrailingComma);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

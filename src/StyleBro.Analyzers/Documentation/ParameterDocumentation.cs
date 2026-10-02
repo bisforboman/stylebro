@@ -25,23 +25,6 @@ internal static class ParameterDocumentation
         SyntaxKind.DelegateDeclaration,
     ];
 
-    /// <summary>Empty '&lt;remarks&gt;' elements ('&lt;remarks&gt;&lt;/remarks&gt;', '&lt;remarks/&gt;' or only whitespace).</summary>
-    public static IEnumerable<XmlNodeSyntax> GetEmptyRemarks(SyntaxNode root)
-    {
-        foreach (var documentation in root.DescendantTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>())
-        {
-            foreach (var node in documentation.Content)
-            {
-                if (node is XmlEmptyElementSyntax { Name.LocalName.ValueText: "remarks" }
-                    || (node is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "remarks" } element
-                        && element.Content.All(c => c is XmlTextSyntax text && text.TextTokens.All(t => t.Text.Trim().Length == 0))))
-                {
-                    yield return node;
-                }
-            }
-        }
-    }
-
     /// <summary>The declarations whose '&lt;typeparam&gt;' tags BRO1613/BRO1614 check (StyleCop's SA1620/SA1621).</summary>
     public static readonly SyntaxKind[] TypeParameterMemberKinds =
     [
@@ -61,35 +44,21 @@ internal static class ParameterDocumentation
         TypeParameter,
     }
 
-    /// <summary>One problem: where it's reported, which rule, and the message.</summary>
-    public sealed class Problem
+    /// <summary>Empty '&lt;remarks&gt;' elements ('&lt;remarks&gt;&lt;/remarks&gt;', '&lt;remarks/&gt;' or only whitespace).</summary>
+    public static IEnumerable<XmlNodeSyntax> GetEmptyRemarks(SyntaxNode root)
     {
-        public Problem(TextSpan span, string id, string message)
+        foreach (var documentation in root.DescendantTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>())
         {
-            Span = span;
-            Id = id;
-            Message = message;
+            foreach (var node in documentation.Content)
+            {
+                if (node is XmlEmptyElementSyntax { Name.LocalName.ValueText: "remarks" }
+                    || (node is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "remarks" } element
+                        && element.Content.All(c => c is XmlTextSyntax text && text.TextTokens.All(t => t.Text.Trim().Length == 0))))
+                {
+                    yield return node;
+                }
+            }
         }
-
-        public TextSpan Span { get; }
-
-        public string Id { get; }
-
-        public string Message { get; }
-    }
-
-    /// <summary>What's wrong with a member's tags of one kind, and the edits that fix all of it.</summary>
-    public sealed class Finding
-    {
-        public Finding(IReadOnlyList<Problem> problems, IReadOnlyList<TextChange> changes)
-        {
-            Problems = problems;
-            Changes = changes;
-        }
-
-        public IReadOnlyList<Problem> Problems { get; }
-
-        public IReadOnlyList<TextChange> Changes { get; }
     }
 
     /// <summary>
@@ -217,6 +186,10 @@ internal static class ParameterDocumentation
         return problems.Count == 0 ? null : new Finding(problems, changes);
     }
 
+    /// <summary>The name in the tag's 'name' attribute, where the diagnostic goes (like StyleCop).</summary>
+    public static SyntaxToken? GetNameToken(XmlElementSyntax tag) =>
+        tag.StartTag.Attributes.OfType<XmlNameAttributeSyntax>().FirstOrDefault()?.Identifier.Identifier;
+
     private static List<string>? GetTypeParameterNames(SyntaxNode member)
     {
         var list = member switch
@@ -229,6 +202,7 @@ internal static class ParameterDocumentation
 
         return list?.Parameters.Select(p => p.Identifier.ValueText).ToList();
     }
+
     private static List<string>? GetParameterNames(SyntaxNode member)
     {
         var list = member switch
@@ -244,10 +218,6 @@ internal static class ParameterDocumentation
 
     /// <summary>The name in the tag, or null for a tag without one (no 'name' attribute, or an empty one).</summary>
     private static string? GetName(XmlElementSyntax tag) => GetNameToken(tag)?.ValueText is { Length: > 0 } name ? name : null;
-
-    /// <summary>The name in the tag's 'name' attribute, where the diagnostic goes (like StyleCop).</summary>
-    public static SyntaxToken? GetNameToken(XmlElementSyntax tag) =>
-        tag.StartTag.Attributes.OfType<XmlNameAttributeSyntax>().FirstOrDefault()?.Identifier.Identifier;
 
     /// <summary>Whether the tag has its '///' lines to itself.</summary>
     private static bool IsOnOwnLines(XmlElementSyntax tag, SourceText text)
@@ -265,5 +235,36 @@ internal static class ParameterDocumentation
         var first = text.Lines.GetLineFromPosition(DocumentationTags.GetStart(tag));
         var last = text.Lines.GetLineFromPosition(tag.Span.End);
         return TextSpan.FromBounds(first.Start, last.End);
+    }
+
+    /// <summary>One problem: where it's reported, which rule, and the message.</summary>
+    public sealed class Problem
+    {
+        public Problem(TextSpan span, string id, string message)
+        {
+            Span = span;
+            Id = id;
+            Message = message;
+        }
+
+        public TextSpan Span { get; }
+
+        public string Id { get; }
+
+        public string Message { get; }
+    }
+
+    /// <summary>What's wrong with a member's tags of one kind, and the edits that fix all of it.</summary>
+    public sealed class Finding
+    {
+        public Finding(IReadOnlyList<Problem> problems, IReadOnlyList<TextChange> changes)
+        {
+            Problems = problems;
+            Changes = changes;
+        }
+
+        public IReadOnlyList<Problem> Problems { get; }
+
+        public IReadOnlyList<TextChange> Changes { get; }
     }
 }

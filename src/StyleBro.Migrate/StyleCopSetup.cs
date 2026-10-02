@@ -50,54 +50,29 @@ internal sealed class StyleCopSetup
         Scopes = scopes;
     }
 
-    /// <summary>Every StyleCop rule's effective severity.</summary>
+    /// <summary>Gets styleCop's rules: id, category, default severity and title, from the inventory of the DLLs.</summary>
+    public static IReadOnlyList<(string Id, string Category, Severity Default, string Title)> Rules { get; } = LoadRules();
+
+    /// <summary>Gets every StyleCop rule's effective severity.</summary>
     public IReadOnlyDictionary<string, Severity> Severities { get; }
 
-    /// <summary>The 'settings' object of stylecop.json, or null when there's none.</summary>
+    /// <summary>Gets the 'settings' object of stylecop.json, or null when there's none.</summary>
     public JsonElement? Settings { get; }
 
-    /// <summary>The files the setup was read from, for the report.</summary>
+    /// <summary>Gets the files the setup was read from, for the report.</summary>
     public IReadOnlyList<string> Sources { get; }
 
-    /// <summary>The StyleCop.Analyzers version the repository references, or null when none was found.</summary>
+    /// <summary>Gets the StyleCop.Analyzers version the repository references, or null when none was found.</summary>
     public string? Version { get; }
 
     /// <summary>
-    /// Whether some project generates a documentation file. Without one the compiler doesn't parse XML documentation
+    /// Gets a value indicating whether some project generates a documentation file. Without one the compiler doesn't parse XML documentation
     /// in the build, and StyleCop's rules that read it stay silent (SA0001), while 'dotnet format' does parse it.
     /// </summary>
     public bool DocumentationParsed { get; }
 
-    /// <summary>Parts of the repository with their own severities.</summary>
+    /// <summary>Gets parts of the repository with their own severities.</summary>
     public IReadOnlyList<Scope> Scopes { get; }
-
-    /// <summary>StyleCop's rules: id, category, default severity and title, from the inventory of the DLLs.</summary>
-    public static IReadOnlyList<(string Id, string Category, Severity Default, string Title)> Rules { get; } = LoadRules();
-
-    public bool IsOn(string id) => Severities.TryGetValue(id, out var severity) && severity >= Severity.Suggestion;
-
-    /// <summary>The setup as seen inside a scope: the base severities with the scope's on top.</summary>
-    public StyleCopSetup For(Scope scope)
-    {
-        var severities = Severities.ToDictionary(p => p.Key, p => p.Value);
-        foreach (var (id, severity) in scope.Severities)
-        {
-            severities[id] = severity;
-        }
-
-        return new StyleCopSetup(severities, Settings, Sources, [], Version, DocumentationParsed);
-    }
-
-    /// <summary>A stylecop.json setting, like ("orderingRules", "usingDirectivesPlacement").</summary>
-    public JsonElement? Setting(string section, string name)
-    {
-        return Settings is { } settings
-            && settings.TryGetProperty(section, out var sectionElement)
-            && sectionElement.ValueKind == JsonValueKind.Object
-            && sectionElement.TryGetProperty(name, out var value)
-                ? value
-                : null;
-    }
 
     public static StyleCopSetup Read(string root)
     {
@@ -213,6 +188,62 @@ internal sealed class StyleCopSetup
 
         var braces = Regex.Match(section, @"^\*\.\{([^}]*)\}$");
         return braces.Success && braces.Groups[1].Value.Split(',').Any(e => e.Trim() == "cs");
+    }
+
+    /// <summary>Files in the repository, skipping build output and version control.</summary>
+    public static IEnumerable<string> EnumerateFiles(string root)
+    {
+        var pending = new Stack<string>();
+        pending.Push(root);
+        while (pending.Count > 0)
+        {
+            var directory = pending.Pop();
+            foreach (var file in Directory.EnumerateFiles(directory))
+            {
+                yield return file;
+            }
+
+            foreach (var child in Directory.EnumerateDirectories(directory))
+            {
+                var name = Path.GetFileName(child);
+                if (name is not ("bin" or "obj" or ".git" or ".vs" or "node_modules" or "artifacts"))
+                {
+                    pending.Push(child);
+                }
+            }
+        }
+    }
+
+    /// <summary>A .csproj, .props or .targets file.</summary>
+    public static bool IsMSBuild(string file)
+    {
+        return file.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".props", StringComparison.OrdinalIgnoreCase)
+            || file.EndsWith(".targets", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public bool IsOn(string id) => Severities.TryGetValue(id, out var severity) && severity >= Severity.Suggestion;
+
+    /// <summary>The setup as seen inside a scope: the base severities with the scope's on top.</summary>
+    public StyleCopSetup For(Scope scope)
+    {
+        var severities = Severities.ToDictionary(p => p.Key, p => p.Value);
+        foreach (var (id, severity) in scope.Severities)
+        {
+            severities[id] = severity;
+        }
+
+        return new StyleCopSetup(severities, Settings, Sources, [], Version, DocumentationParsed);
+    }
+
+    /// <summary>A stylecop.json setting, like ("orderingRules", "usingDirectivesPlacement").</summary>
+    public JsonElement? Setting(string section, string name)
+    {
+        return Settings is { } settings
+            && settings.TryGetProperty(section, out var sectionElement)
+            && sectionElement.ValueKind == JsonValueKind.Object
+            && sectionElement.TryGetProperty(name, out var value)
+                ? value
+                : null;
     }
 
     /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]').</summary>
@@ -351,37 +382,6 @@ internal sealed class StyleCopSetup
             : name.EndsWith(".globalconfig", StringComparison.OrdinalIgnoreCase) ? "globalconfig"
             : name.EndsWith(".ruleset", StringComparison.OrdinalIgnoreCase) ? "ruleset"
             : null;
-    }
-
-    /// <summary>Files in the repository, skipping build output and version control.</summary>
-    public static IEnumerable<string> EnumerateFiles(string root)
-    {
-        var pending = new Stack<string>();
-        pending.Push(root);
-        while (pending.Count > 0)
-        {
-            var directory = pending.Pop();
-            foreach (var file in Directory.EnumerateFiles(directory))
-            {
-                yield return file;
-            }
-
-            foreach (var child in Directory.EnumerateDirectories(directory))
-            {
-                var name = Path.GetFileName(child);
-                if (name is not ("bin" or "obj" or ".git" or ".vs" or "node_modules" or "artifacts"))
-                {
-                    pending.Push(child);
-                }
-            }
-        }
-    }
-
-    /// <summary>A .csproj, .props or .targets file.</summary>
-    public static bool IsMSBuild(string file)
-    {
-        return file.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".props", StringComparison.OrdinalIgnoreCase)
-            || file.EndsWith(".targets", StringComparison.OrdinalIgnoreCase);
     }
 
     private static HashSet<string> LoadIds(string resource)

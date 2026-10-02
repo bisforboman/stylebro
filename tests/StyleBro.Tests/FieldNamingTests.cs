@@ -24,7 +24,8 @@ public class FieldNamingTests
         Assert.Equal(expected, FieldNames.GetNewName(name, underscore ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase));
 
     [Fact]
-    public Task CamelCase_RenamesAndQualifiesHiddenReferences() => VerifyFixAsync("""
+    public Task CamelCase_RenamesAndQualifiesHiddenReferences() => VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -52,7 +53,8 @@ public class FieldNamingTests
 
             public int Add(int value) => new Func<int, int>(count => count + _count)(value) + Max + Min;
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -83,7 +85,8 @@ public class FieldNamingTests
         """);
 
     [Fact]
-    public Task UnderscoreStyle_IsRead() => VerifyFixAsync("""
+    public Task UnderscoreStyle_IsRead() => VerifyFixAsync(
+        """
         class C
         {
             private int {|BRO1303:count|};
@@ -92,7 +95,8 @@ public class FieldNamingTests
 
             public int Sum() => count + Total + _done;
         }
-        """, """
+        """,
+        """
         class C
         {
             private int _count;
@@ -101,7 +105,8 @@ public class FieldNamingTests
 
             public int Sum() => _count + _total + _done;
         }
-        """, editorConfig: Underscore);
+        """,
+        editorConfig: Underscore);
 
     [Fact]
     public Task PartialTypes_AreRenamedInEveryPart() => VerifyFixAsync(
@@ -135,14 +140,16 @@ public class FieldNamingTests
         ]);
 
     [Fact]
-    public Task StructsAndObjectInitializers() => VerifyFixAsync("""
+    public Task StructsAndObjectInitializers() => VerifyFixAsync(
+        """
         struct S
         {
             private int {|BRO1303:_value|};
 
             public S Copy(int value) => new S { _value = value };
         }
-        """, """
+        """,
+        """
         struct S
         {
             private int value;
@@ -245,7 +252,8 @@ public class FieldNamingTests
         ]);
 
     [Fact]
-    public Task PascalCaseFields_AreRenamed() => VerifyFixAsync("""
+    public Task PascalCaseFields_AreRenamed() => VerifyFixAsync(
+        """
         public class C
         {
             public const int {|BRO1306:maxCount|} = 10;
@@ -273,7 +281,8 @@ public class FieldNamingTests
         {
             public int Read(C c) => c.total + C.maxCount;
         }
-        """, """
+        """,
+        """
         public class C
         {
             public const int MaxCount = 10;
@@ -340,7 +349,8 @@ public class FieldNamingTests
         ]);
 
     [Fact]
-    public Task PrefixesAndUnderscores_GetTheCompleteName() => VerifyFixAsync("""
+    public Task PrefixesAndUnderscores_GetTheCompleteName() => VerifyFixAsync(
+        """
         using System;
 
         public class C
@@ -368,7 +378,8 @@ public class FieldNamingTests
                 + RETRY_COUNT + trailing_ + two__underscores + MAX_VALUE + Default_Value + Public_Field + protected_field + m_
                 + s_static;
         }
-        """, """
+        """,
+        """
         using System;
 
         public class C
@@ -399,7 +410,8 @@ public class FieldNamingTests
         """);
 
     [Fact]
-    public Task PrefixesAndUnderscores_FollowTheUnderscoreStyle() => VerifyFixAsync("""
+    public Task PrefixesAndUnderscores_FollowTheUnderscoreStyle() => VerifyFixAsync(
+        """
         class C
         {
             private int {|BRO1307:m_member|};
@@ -408,7 +420,8 @@ public class FieldNamingTests
 
             public int Use() => m_member + with_underscore + MAX_VALUE;
         }
-        """, """
+        """,
+        """
         class C
         {
             private int _member;
@@ -417,5 +430,6 @@ public class FieldNamingTests
 
             public int Use() => _member + _withUnderscore + MaxValue;
         }
-        """, editorConfig: Underscore);
+        """,
+        editorConfig: Underscore);
 }

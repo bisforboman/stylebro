@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class EnumValueLinesTests
 {
     [Fact]
-    public Task EnumValues_GetTheirOwnLine() => VerifyFixAsync("""
+    public Task EnumValues_GetTheirOwnLine() => VerifyFixAsync(
+        """
         public enum OneLine { A, {|BRO1121:B|}, {|BRO1121:C|} }
 
         public enum Shared
@@ -14,7 +15,8 @@ public class EnumValueLinesTests
 
             C,
         }
-        """, """
+        """,
+        """
         public enum OneLine
         {
             A,

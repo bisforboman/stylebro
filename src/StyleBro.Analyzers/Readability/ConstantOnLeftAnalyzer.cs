@@ -10,9 +10,11 @@ namespace StyleBro.Analyzers.Readability;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ConstantOnLeftAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.ConstantOnLeft);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

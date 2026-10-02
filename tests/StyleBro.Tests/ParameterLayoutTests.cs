@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class ParameterLayoutTests
 {
     [Fact]
-    public Task FirstItem_MovesToTheNextLine() => VerifyFixAsync("""
+    public Task FirstItem_MovesToTheNextLine() => VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -31,7 +32,8 @@ public class ParameterLayoutTests
                     q) => p + q;
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -66,7 +68,8 @@ public class ParameterLayoutTests
         """);
 
     [Fact]
-    public Task MixedLayout_PutsEachItemOnItsOwnLine() => VerifyFixAsync("""
+    public Task MixedLayout_PutsEachItemOnItsOwnLine() => VerifyFixAsync(
+        """
         class C
         {
             void M(int a, int b,
@@ -86,7 +89,8 @@ public class ParameterLayoutTests
                     {|BRO1108:3|});
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(
@@ -115,7 +119,8 @@ public class ParameterLayoutTests
         """);
 
     [Fact]
-    public Task MultiLineItems_FollowStyleCop() => VerifyFixAsync("""
+    public Task MultiLineItems_FollowStyleCop() => VerifyFixAsync(
+        """
         class C
         {
             int M(int a, int b, int c, int d) => a;
@@ -133,7 +138,8 @@ public class ParameterLayoutTests
                     4);
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             int M(int a, int b, int c, int d) => a;
@@ -159,7 +165,8 @@ public class ParameterLayoutTests
         """);
 
     [Fact]
-    public Task FixAll_FixesNestedLists() => VerifyFixAsync("""
+    public Task FixAll_FixesNestedLists() => VerifyFixAsync(
+        """
         class C
         {
             int M(int a, int b) => a;
@@ -171,7 +178,8 @@ public class ParameterLayoutTests
                     3);
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             int M(int a, int b) => a;
@@ -269,7 +277,8 @@ public class ParameterLayoutTests
         """);
 
     [Fact]
-    public Task ItemsAtTheStartOfALine_KeepTheirIndentation() => VerifyFixAsync("""
+    public Task ItemsAtTheStartOfALine_KeepTheirIndentation() => VerifyFixAsync(
+        """
         class C
         {
             void M(int a, int b,
@@ -277,7 +286,8 @@ public class ParameterLayoutTests
             {
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(

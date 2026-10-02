@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class LambdaSyntaxTests
 {
     [Fact]
-    public Task AnonymousMethods_BecomeLambdas() => Verify.VerifyFixAsync("""
+    public Task AnonymousMethods_BecomeLambdas() => Verify.VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -28,7 +29,8 @@ public class LambdaSyntaxTests
                 };
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -54,7 +56,8 @@ public class LambdaSyntaxTests
         """);
 
     [Fact]
-    public Task GeneratedNames_AvoidNamesInScopeAndInTheBody() => Verify.VerifyFixAsync("""
+    public Task GeneratedNames_AvoidNamesInScopeAndInTheBody() => Verify.VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -66,7 +69,8 @@ public class LambdaSyntaxTests
                 Changed += {|BRO1125:delegate|} { var e = 1; Console.WriteLine(e); };
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -106,7 +110,8 @@ public class LambdaSyntaxTests
         """);
 
     [Fact]
-    public Task Arguments_BecomeLambdasWhenTheSameOverloadIsCalled() => Verify.VerifyFixAsync("""
+    public Task Arguments_BecomeLambdasWhenTheSameOverloadIsCalled() => Verify.VerifyFixAsync(
+        """
         using System;
         using System.Collections.Generic;
 
@@ -121,7 +126,8 @@ public class LambdaSyntaxTests
                 items.RemoveAll(match: {|BRO1125:delegate|} (int i) { return i > 1; });
             }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Collections.Generic;
 
@@ -154,7 +160,8 @@ public class LambdaSyntaxTests
         """);
 
     [Fact]
-    public Task EmptyParentheses_AreRemovedWhenLambdasAreOff() => Verify.VerifyFixAsync("""
+    public Task EmptyParentheses_AreRemovedWhenLambdasAreOff() => Verify.VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -165,7 +172,8 @@ public class LambdaSyntaxTests
                 Action b = delegate {|BRO1403:()|}{ };
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -176,10 +184,12 @@ public class LambdaSyntaxTests
                 Action b = delegate { };
             }
         }
-        """, "dotnet_diagnostic.BRO1125.severity = none\n");
+        """,
+        "dotnet_diagnostic.BRO1125.severity = none\n");
 
     [Fact]
-    public Task EmptyParenthesesNeededForAnOverload_AreKept() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task EmptyParenthesesNeededForAnOverload_AreKept() => Verify.VerifyNoDiagnosticsAsync(
+        """
         using System;
 
         class C
@@ -190,5 +200,6 @@ public class LambdaSyntaxTests
 
             void M() => Run(delegate() { });
         }
-        """, "dotnet_diagnostic.BRO1125.severity = none\n");
+        """,
+        "dotnet_diagnostic.BRO1125.severity = none\n");
 }

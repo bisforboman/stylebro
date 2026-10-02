@@ -21,12 +21,15 @@ public sealed class ConstantOnLeftCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Put the constant on the right-hand side";
 
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.ConstantOnLeft);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
@@ -69,18 +72,18 @@ public sealed class ConstantOnLeftCodeFixProvider : CodeFixProvider
 
     private sealed class SwapRewriter : CSharpSyntaxRewriter
     {
-        private readonly HashSet<BinaryExpressionSyntax> _targets;
+        private readonly HashSet<BinaryExpressionSyntax> targets;
 
         public SwapRewriter(HashSet<BinaryExpressionSyntax> targets)
         {
-            _targets = targets;
+            this.targets = targets;
         }
 
         public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
         {
             // 'node' is from the original tree, so it matches the targets; the operands are already rewritten.
             var visited = base.VisitBinaryExpression(node);
-            return _targets.Contains(node) && visited is BinaryExpressionSyntax binary
+            return targets.Contains(node) && visited is BinaryExpressionSyntax binary
                 ? ConstantComparisons.Swap(binary)
                 : visited;
         }

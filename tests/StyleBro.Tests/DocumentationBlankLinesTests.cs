@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class DocumentationBlankLinesTests
 {
     [Fact]
-    public Task BlankLines_AroundDocumentation_AreFixed() => VerifyFixAsync("""
+    public Task BlankLines_AroundDocumentation_AreFixed() => VerifyFixAsync(
+        """
         using System;
 
         public class C
@@ -47,7 +48,8 @@ public class DocumentationBlankLinesTests
             }
             #endregion
         }
-        """, """
+        """,
+        """
         using System;
 
         public class C

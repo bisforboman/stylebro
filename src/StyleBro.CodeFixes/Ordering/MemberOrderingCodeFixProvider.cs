@@ -22,12 +22,15 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Reorder members";
 
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.MemberOrdering);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
@@ -80,13 +83,13 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
     /// <summary>Sorts the targeted types bottom-up, so nested types are sorted before their parents.</summary>
     private sealed class SortingRewriter : CSharpSyntaxRewriter
     {
-        private readonly HashSet<TypeDeclarationSyntax> _targets;
-        private readonly MemberOrderOptions _options;
+        private readonly HashSet<TypeDeclarationSyntax> targets;
+        private readonly MemberOrderOptions options;
 
         public SortingRewriter(HashSet<TypeDeclarationSyntax> targets, MemberOrderOptions options)
         {
-            _targets = targets;
-            _options = options;
+            this.targets = targets;
+            this.options = options;
         }
 
         public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
@@ -104,8 +107,8 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         private SyntaxNode? SortIfTargeted(TypeDeclarationSyntax original, SyntaxNode? visited)
         {
             // 'original' is the node from the unmodified tree, so reference equality with the targets holds.
-            return _targets.Contains(original) && visited is TypeDeclarationSyntax type
-                ? MemberOrdering.Sort(type, _options)
+            return targets.Contains(original) && visited is TypeDeclarationSyntax type
+                ? MemberOrdering.Sort(type, options)
                 : visited;
         }
     }

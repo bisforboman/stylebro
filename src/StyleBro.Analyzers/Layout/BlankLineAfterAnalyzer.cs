@@ -12,9 +12,11 @@ namespace StyleBro.Analyzers.Layout;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.BlankLineAfterOpenBrace, Descriptors.BlankLineBeforeComment);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

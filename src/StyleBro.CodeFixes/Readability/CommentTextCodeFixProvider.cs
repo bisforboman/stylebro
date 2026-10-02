@@ -17,12 +17,15 @@ namespace StyleBro.CodeFixes.Readability;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CommentTextCodeFixProvider))]
 public sealed class CommentTextCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.DocumentationLineSpace, DiagnosticIds.EmptyComment);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

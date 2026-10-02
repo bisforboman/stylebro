@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class EmptyStringTests
 {
     [Fact]
-    public Task EmptyLiterals_BecomeStringEmpty() => VerifyFixAsync("""
+    public Task EmptyLiterals_BecomeStringEmpty() => VerifyFixAsync(
+        """
         class C
         {
             static readonly string ReadOnly = {|BRO1106:""|};
@@ -19,7 +20,8 @@ public class EmptyStringTests
                 return s == {|BRO1106:""|};
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             static readonly string ReadOnly = string.Empty;

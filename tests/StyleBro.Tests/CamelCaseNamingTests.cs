@@ -23,7 +23,8 @@ public class CamelCaseNamingTests
     public void NewName(string name, string? expected) => Assert.Equal(expected, CamelCaseNames.GetNewName(name));
 
     [Fact]
-    public Task Variables_AreRenamedEverywhere() => VerifyFixAsync("""
+    public Task Variables_AreRenamedEverywhere() => VerifyFixAsync(
+        """
         using System;
         using System.Linq;
 
@@ -62,7 +63,8 @@ public class CamelCaseNamingTests
                 return Total + _count + A + b + ConstLocal + nameof(Total).Length;
             }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Linq;
 
@@ -104,7 +106,8 @@ public class CamelCaseNamingTests
         """);
 
     [Fact]
-    public Task Parameters_AreRenamedWithNamedArgumentsAndDocs() => VerifyFixAsync("""
+    public Task Parameters_AreRenamedWithNamedArgumentsAndDocs() => VerifyFixAsync(
+        """
         using System;
 
         delegate void Handler(object {|BRO1302:Sender|});
@@ -139,7 +142,8 @@ public class CamelCaseNamingTests
 
             int N() => M(Value: 1, other: 2) + new Primary(Count: 3).Get();
         }
-        """, """
+        """,
+        """
         using System;
 
         delegate void Handler(object sender);
@@ -177,7 +181,8 @@ public class CamelCaseNamingTests
         """);
 
     [Fact]
-    public Task BaseParameters_RenameOverridesAndImplementations() => VerifyFixAsync("""
+    public Task BaseParameters_RenameOverridesAndImplementations() => VerifyFixAsync(
+        """
         interface IThing
         {
             void Do(int {|BRO1302:Value|});
@@ -210,7 +215,8 @@ public class CamelCaseNamingTests
             {
             }
         }
-        """, """
+        """,
+        """
         interface IThing
         {
             void Do(int value);
@@ -375,7 +381,8 @@ public class CamelCaseNamingTests
         """);
 
     [Fact]
-    public Task OverrideConflict_KeepsThatOverridesName() => VerifyFixAsync("""
+    public Task OverrideConflict_KeepsThatOverridesName() => VerifyFixAsync(
+        """
         abstract class Base
         {
             public abstract int Run(int {|BRO1302:Speed|});
@@ -387,7 +394,8 @@ public class CamelCaseNamingTests
 
             public override int Run(int Speed) => Speed + speed;
         }
-        """, """
+        """,
+        """
         abstract class Base
         {
             public abstract int Run(int speed);

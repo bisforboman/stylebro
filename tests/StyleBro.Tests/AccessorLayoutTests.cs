@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class AccessorLayoutTests
 {
     [Fact]
-    public Task OneStatementBodies_AreCollapsed() => VerifyFixAsync("""
+    public Task OneStatementBodies_AreCollapsed() => VerifyFixAsync(
+        """
         public class C
         {
             private int x;
@@ -36,7 +37,8 @@ public class AccessorLayoutTests
                 }
             }
         }
-        """, """
+        """,
+        """
         public class C
         {
             private int x;
@@ -65,7 +67,8 @@ public class AccessorLayoutTests
         """);
 
     [Fact]
-    public Task LongerBodies_ExpandTheSingleLineOnes() => VerifyFixAsync("""
+    public Task LongerBodies_ExpandTheSingleLineOnes() => VerifyFixAsync(
+        """
         public class C
         {
             private int x;
@@ -92,7 +95,8 @@ public class AccessorLayoutTests
                 }
             }
         }
-        """, """
+        """,
+        """
         public class C
         {
             private int x;

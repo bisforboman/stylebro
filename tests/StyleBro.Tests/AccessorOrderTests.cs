@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class AccessorOrderTests
 {
     [Fact]
-    public Task Accessors_AreSwapped() => VerifyFixAsync("""
+    public Task Accessors_AreSwapped() => VerifyFixAsync(
+        """
         using System;
 
         public class C
@@ -43,7 +44,8 @@ public class AccessorOrderTests
                 add { }
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         public class C

@@ -15,25 +15,6 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class TupleSyntax
 {
-    /// <summary>A finding: the node to report and replace, and its replacement.</summary>
-    public sealed class Finding
-    {
-        public Finding(SyntaxNode node, Location location, string replacement)
-        {
-            Node = node;
-            Location = location;
-            Replacement = replacement;
-        }
-
-        public SyntaxNode Node { get; }
-
-        public Location Location { get; }
-
-        public string Replacement { get; }
-
-        public TextChange Change => new(Node.Span, Replacement);
-    }
-
     /// <summary>
     /// A <c>ValueTuple&lt;...&gt;</c> type with 2 to 7 elements in a type-only context, the outermost one when they're
     /// nested (its replacement converts the inner ones too). The type of a <c>new</c> is
@@ -190,4 +171,23 @@ internal static class TupleSyntax
         node.Ancestors().OfType<AnonymousFunctionExpressionSyntax>().Any(f =>
             model.GetTypeInfo(f, cancellationToken).ConvertedType is INamedTypeSymbol type
             && type.Name == "Expression" && type.ContainingNamespace?.ToDisplayString() == "System.Linq.Expressions");
+
+    /// <summary>A finding: the node to report and replace, and its replacement.</summary>
+    public sealed class Finding
+    {
+        public Finding(SyntaxNode node, Location location, string replacement)
+        {
+            Node = node;
+            Location = location;
+            Replacement = replacement;
+        }
+
+        public SyntaxNode Node { get; }
+
+        public Location Location { get; }
+
+        public string Replacement { get; }
+
+        public TextChange Change => new(Node.Span, Replacement);
+    }
 }

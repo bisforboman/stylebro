@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class TrailingBlankLinesTests
 {
     [Fact]
-    public Task BlankLinesAfterComments_AreRemoved() => VerifyFixAsync("""
+    public Task BlankLinesAfterComments_AreRemoved() => VerifyFixAsync(
+        """
         using System;
         {|BRO1506:// After the usings.|}
 
@@ -28,7 +29,8 @@ public class TrailingBlankLinesTests
                 }
             }
         }
-        """, """
+        """,
+        """
         using System;
         // After the usings.
         namespace N

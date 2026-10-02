@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class RegionsTests
 {
     [Fact]
-    public Task Regions_AreRemoved() => VerifyFixAsync("""
+    public Task Regions_AreRemoved() => VerifyFixAsync(
+        """
         {|BRO1112:#region Types|}
         public class C
         {
@@ -29,7 +30,8 @@ public class RegionsTests
             #endregion
         }
         #endregion
-        """, """
+        """,
+        """
         public class C
         {
             private int x;
@@ -43,7 +45,8 @@ public class RegionsTests
         """);
 
     [Fact]
-    public Task RegionsAroundDirectives_KeepTheDirectives() => VerifyFixAsync("""
+    public Task RegionsAroundDirectives_KeepTheDirectives() => VerifyFixAsync(
+        """
         public class C
         {
             {|BRO1112:#region Conditional|}
@@ -52,7 +55,8 @@ public class RegionsTests
         #endif
             #endregion
         }
-        """, """
+        """,
+        """
         public class C
         {
         #if !NEVER

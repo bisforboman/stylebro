@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class CommentSpacingTests
 {
     [Fact]
-    public Task CommentsWithoutSpace_GetOne() => VerifyFixAsync("""
+    public Task CommentsWithoutSpace_GetOne() => VerifyFixAsync(
+        """
         class C
         {
             {|BRO1002://note|}
@@ -17,7 +18,8 @@ public class CommentSpacingTests
                 {|BRO1002://=====|}
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             // note

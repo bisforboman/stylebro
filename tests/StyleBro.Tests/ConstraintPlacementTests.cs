@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class ConstraintPlacementTests
 {
     [Fact]
-    public Task Constraints_MoveToTheirOwnLine() => VerifyFixAsync("""
+    public Task Constraints_MoveToTheirOwnLine() => VerifyFixAsync(
+        """
         using System;
 
         public class Box<T> {|BRO1111:where T : class|}
@@ -43,7 +44,8 @@ public class ConstraintPlacementTests
                 }
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         public class Box<T>

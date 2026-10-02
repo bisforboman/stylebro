@@ -94,6 +94,7 @@ internal static class LambdaSyntax
         }
 
         var text = method.SyntaxTree.GetText(cancellationToken);
+
         // 'delegate (){' keeps a space: 'delegate {'.
         var change = new TextChange(TextSpan.FromBounds(method.DelegateKeyword.Span.End, list.Span.End), list.GetTrailingTrivia().Any() ? string.Empty : " ");
         var withoutList = text.ToString(TextSpan.FromBounds(method.SpanStart, method.DelegateKeyword.Span.End)) + change.NewText

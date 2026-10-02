@@ -10,9 +10,11 @@ namespace StyleBro.Analyzers.Layout;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AccessorLayoutAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.AccessorsConsistentLayout);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class DefaultValueConstructorTests
 {
     [Fact]
-    public Task ValueTypes_BecomeDefault() => VerifyFixAsync("""
+    public Task ValueTypes_BecomeDefault() => VerifyFixAsync(
+        """
         using System;
 
         struct Plain { public int X; }
@@ -22,7 +23,8 @@ public class DefaultValueConstructorTests
                 var f = {|BRO1104:new Plain()|}.X;
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         struct Plain { public int X; }
@@ -42,7 +44,8 @@ public class DefaultValueConstructorTests
         """);
 
     [Fact]
-    public Task WellKnownTypesAndEnums_UseTheirEmptyMember() => VerifyFixAsync("""
+    public Task WellKnownTypesAndEnums_UseTheirEmptyMember() => VerifyFixAsync(
+        """
         using System;
         using System.Threading;
 
@@ -60,7 +63,8 @@ public class DefaultValueConstructorTests
                 var e = {|BRO1104:new Flags()|};
             }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Threading;
 
@@ -81,7 +85,8 @@ public class DefaultValueConstructorTests
         """);
 
     [Fact]
-    public Task ParameterDefaults_StayConstant() => VerifyFixAsync("""
+    public Task ParameterDefaults_StayConstant() => VerifyFixAsync(
+        """
         using System;
         using System.Threading;
 
@@ -93,7 +98,8 @@ public class DefaultValueConstructorTests
             {
             }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Threading;
 

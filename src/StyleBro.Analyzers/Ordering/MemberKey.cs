@@ -40,6 +40,7 @@ internal readonly struct MemberKey : IComparable<MemberKey>
 
     public int ReadonlyRank { get; }
 
+    /// <inheritdoc/>
     public int CompareTo(MemberKey other)
     {
         var c = KindRank.CompareTo(other.KindRank);

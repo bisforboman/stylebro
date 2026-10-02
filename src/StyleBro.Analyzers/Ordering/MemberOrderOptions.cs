@@ -86,8 +86,8 @@ internal sealed class MemberOrderOptions
 
     public static readonly MemberOrderOptions Default = new(null, null, true, true, true);
 
-    private readonly int[] _kindRanks;
-    private readonly int[] _accessRanks;
+    private readonly int[] kindRanks;
+    private readonly int[] accessRanks;
 
     private MemberOrderOptions(
         List<int>? kindOrder,
@@ -96,8 +96,8 @@ internal sealed class MemberOrderOptions
         bool staticFirst,
         bool readonlyFirst)
     {
-        _kindRanks = BuildRanks(kindOrder, KindCount);
-        _accessRanks = BuildRanks(accessOrder, AccessCount);
+        kindRanks = BuildRanks(kindOrder, KindCount);
+        accessRanks = BuildRanks(accessOrder, AccessCount);
         ConstantsFirst = constantsFirst;
         StaticFirst = staticFirst;
         ReadonlyFirst = readonlyFirst;
@@ -109,9 +109,9 @@ internal sealed class MemberOrderOptions
 
     public bool ReadonlyFirst { get; }
 
-    public int KindRank(MemberKind kind) => _kindRanks[(int)kind];
+    public int KindRank(MemberKind kind) => kindRanks[(int)kind];
 
-    public int AccessRank(MemberAccess access) => _accessRanks[(int)access];
+    public int AccessRank(MemberAccess access) => accessRanks[(int)access];
 
     public static MemberOrderOptions Read(AnalyzerConfigOptions options)
     {

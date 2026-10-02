@@ -15,10 +15,10 @@ internal sealed class OrderingViolation
         Reason = reason;
     }
 
-    /// <summary>The out-of-place member.</summary>
+    /// <summary>Gets the out-of-place member.</summary>
     public MemberDeclarationSyntax Member { get; }
 
-    /// <summary>The first earlier member that <see cref="Member"/> should come before.</summary>
+    /// <summary>Gets the first earlier member that <see cref="Member"/> should come before.</summary>
     public MemberDeclarationSyntax ShouldPrecede { get; }
 
     public string Reason { get; }

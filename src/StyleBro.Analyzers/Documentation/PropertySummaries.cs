@@ -30,29 +30,6 @@ internal static class PropertySummaries
         "Whether",
     ];
 
-    /// <summary>A property whose summary doesn't begin with the right words, and what they should be.</summary>
-    public sealed class Finding
-    {
-        public Finding(SyntaxToken identifier, string prefix, bool restrictedSetter, TextSpan replace, string newText)
-        {
-            Identifier = identifier;
-            Prefix = prefix;
-            RestrictedSetter = restrictedSetter;
-            Replace = replace;
-            NewText = newText;
-        }
-
-        public SyntaxToken Identifier { get; }
-
-        public string Prefix { get; }
-
-        public bool RestrictedSetter { get; }
-
-        public TextSpan Replace { get; }
-
-        public string NewText { get; }
-    }
-
     /// <summary>
     /// The finding for a property, or null when its summary is right or can't be checked. The words follow the
     /// accessors other code can use: 'Gets or sets', 'Gets' (no setter, or a private or internal setter; a protected
@@ -68,6 +45,7 @@ internal static class PropertySummaries
 
         var getter = property.ExpressionBody is not null || property.AccessorList?.Accessors.Any(a => a.IsKind(SyntaxKind.GetAccessorDeclaration)) == true;
         var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration));
+
         // Like StyleCop, a protected setter is usable (by derived types); a private or internal one isn't.
         var restrictedSetter = setter is not null
             && setter.Modifiers.Any(m => m.IsKind(SyntaxKind.PrivateKeyword) || m.IsKind(SyntaxKind.InternalKeyword))
@@ -166,5 +144,28 @@ internal static class PropertySummaries
     {
         return text.StartsWith(words, StringComparison.Ordinal)
             && (text.Length == words.Length || !char.IsLetterOrDigit(text[words.Length]));
+    }
+
+    /// <summary>A property whose summary doesn't begin with the right words, and what they should be.</summary>
+    public sealed class Finding
+    {
+        public Finding(SyntaxToken identifier, string prefix, bool restrictedSetter, TextSpan replace, string newText)
+        {
+            Identifier = identifier;
+            Prefix = prefix;
+            RestrictedSetter = restrictedSetter;
+            Replace = replace;
+            NewText = newText;
+        }
+
+        public SyntaxToken Identifier { get; }
+
+        public string Prefix { get; }
+
+        public bool RestrictedSetter { get; }
+
+        public TextSpan Replace { get; }
+
+        public string NewText { get; }
     }
 }

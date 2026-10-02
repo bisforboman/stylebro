@@ -33,28 +33,6 @@ internal static class Migration
 
     private static readonly Regex StyleCopIds = new(@"SA(\d{4})(?:-SA(\d{4}))?");
 
-    /// <summary>The generated settings, and what the report should mention.</summary>
-    public sealed class Result
-    {
-        public List<string> Lines { get; } = new();
-
-        public List<string> Notes { get; } = new();
-
-        /// <summary>StyleCop rules that a StyleBro or SDK rule now enforces (or makes moot).</summary>
-        public SortedSet<string> Covered { get; } = new(StringComparer.Ordinal);
-
-        /// <summary>Why a StyleCop rule that was on isn't covered, when the migration knows better than the mapping.</summary>
-        public SortedDictionary<string, string> Reasons { get; } = new(StringComparer.Ordinal);
-
-        /// <summary>For each StyleCop rule, the StyleBro and SDK rules that replace it (for suppressions).</summary>
-        public SortedDictionary<string, SortedSet<string>> Replacements { get; } = new(StringComparer.Ordinal);
-
-        public string FieldStyle { get; set; } = "camelCase";
-
-        /// <summary>Keys left out because the repository sets them itself.</summary>
-        public HashSet<string> OwnKeys { get; } = new(StringComparer.OrdinalIgnoreCase);
-    }
-
     /// <summary>Every StyleBro rule and the StyleCop rules it replaces, read from the analyzers' descriptions.</summary>
     public static IReadOnlyList<(string Id, string Title, IReadOnlyList<string> StyleCop)> StyleBroRules()
     {
@@ -206,15 +184,6 @@ internal static class Migration
         return keys;
     }
 
-    /// <summary>The key of a 'key = value' line, or null for comments and other lines.</summary>
-    private static string? KeyOf(string line)
-    {
-        var equals = line.IndexOf('=');
-        return line.StartsWith("#", StringComparison.Ordinal) || line.StartsWith(";", StringComparison.Ordinal) || equals <= 0
-            ? null
-            : line.Substring(0, equals).Trim();
-    }
-
     /// <summary>The blocks to write, per .editorconfig (relative path): the repository-wide settings and every scope's.</summary>
     public static SortedDictionary<string, List<(string Section, List<string> Lines)>> Plan(StyleCopSetup setup, string root, Result main)
     {
@@ -317,6 +286,15 @@ internal static class Migration
         }
 
         return normalized.TrimEnd('\n') + "\n\n" + block;
+    }
+
+    /// <summary>The key of a 'key = value' line, or null for comments and other lines.</summary>
+    private static string? KeyOf(string line)
+    {
+        var equals = line.IndexOf('=');
+        return line.StartsWith("#", StringComparison.Ordinal) || line.StartsWith(";", StringComparison.Ordinal) || equals <= 0
+            ? null
+            : line.Substring(0, equals).Trim();
     }
 
     /// <summary>
@@ -491,8 +469,10 @@ internal static class Migration
 
         // Access modifiers, type aliases, parentheses.
         Rule("IDE0040", "SA1400", "SA1205");
+
         // SA1400 doesn't ask for modifiers on interface members.
         lines.Add("dotnet_style_require_accessibility_modifiers = for_non_interface_members");
+
         // Modifier order (the SDK's default order; it puts access modifiers first and static next, like SA1206/SA1207).
         Rule("IDE0036", "SA1206", "SA1207");
         lines.Add("csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async");
@@ -512,6 +492,7 @@ internal static class Migration
         var placement = setup.Setting("orderingRules", "usingDirectivesPlacement")?.GetString() ?? "insideNamespace";
         Rule("IDE0065", placement == "preserve" ? [] : ["SA1200"]);
         lines.Add($"csharp_using_directive_placement = {(placement == "outsideNamespace" ? "outside_namespace" : "inside_namespace")}");
+
         // 'dotnet format' sorts usings (SA1210, SA1211, and aliases/static usings: SA1209, SA1216, SA1217) whenever either key is set, whatever its value
         // (even 'false'): so the keys are written only when StyleCop sorted them. System first only for SA1208.
         if (setup.IsOn("SA1208") || setup.IsOn("SA1210"))
@@ -627,4 +608,26 @@ internal static class Migration
     private static string Name(Severity severity) => severity.ToString().ToLowerInvariant();
 
     private static string Bool(bool value) => value ? "true" : "false";
+
+    /// <summary>The generated settings, and what the report should mention.</summary>
+    public sealed class Result
+    {
+        public List<string> Lines { get; } = new();
+
+        public List<string> Notes { get; } = new();
+
+        /// <summary>Gets styleCop rules that a StyleBro or SDK rule now enforces (or makes moot).</summary>
+        public SortedSet<string> Covered { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets why a StyleCop rule that was on isn't covered, when the migration knows better than the mapping.</summary>
+        public SortedDictionary<string, string> Reasons { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets for each StyleCop rule, the StyleBro and SDK rules that replace it (for suppressions).</summary>
+        public SortedDictionary<string, SortedSet<string>> Replacements { get; } = new(StringComparer.Ordinal);
+
+        public string FieldStyle { get; set; } = "camelCase";
+
+        /// <summary>Gets keys left out because the repository sets them itself.</summary>
+        public HashSet<string> OwnKeys { get; } = new(StringComparer.OrdinalIgnoreCase);
+    }
 }

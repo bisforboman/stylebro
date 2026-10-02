@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class EmptyAttributeParenthesesTests
 {
     [Fact]
-    public Task EmptyParentheses_AreRemoved() => VerifyFixAsync("""
+    public Task EmptyParentheses_AreRemoved() => VerifyFixAsync(
+        """
         using System;
 
         [Obsolete{|BRO1402:()|}]
@@ -24,7 +25,8 @@ public class EmptyAttributeParenthesesTests
             [return: System.Diagnostics.CodeAnalysis.NotNull{|BRO1402:()|}]
             public string D() => string.Empty;
         }
-        """, """
+        """,
+        """
         using System;
 
         [Obsolete]

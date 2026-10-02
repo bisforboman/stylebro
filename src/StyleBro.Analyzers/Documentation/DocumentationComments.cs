@@ -15,6 +15,15 @@ namespace StyleBro.Analyzers.Documentation;
 /// </summary>
 internal static class DocumentationComments
 {
+    /// <summary>Exposed elements (visible outside the assembly) need documentation: StyleCop's documentExposedElements.</summary>
+    public const string ExposedElementsKey = "stylebro_document_exposed_elements";
+
+    /// <summary>Elements visible only inside the assembly need documentation: StyleCop's documentInternalElements.</summary>
+    public const string InternalElementsKey = "stylebro_document_internal_elements";
+
+    /// <summary>Private elements (and members of private types) need documentation: StyleCop's documentPrivateElements.</summary>
+    public const string PrivateElementsKey = "stylebro_document_private_elements";
+
     /// <summary>The member declarations BRO1601 checks.</summary>
     public static readonly SyntaxKind[] MemberKinds =
     [
@@ -31,15 +40,6 @@ internal static class DocumentationComments
         return member.GetLeadingTrivia().Any(IsDocumentationComment);
     }
 
-    /// <summary>Exposed elements (visible outside the assembly) need documentation: StyleCop's documentExposedElements.</summary>
-    public const string ExposedElementsKey = "stylebro_document_exposed_elements";
-
-    /// <summary>Elements visible only inside the assembly need documentation: StyleCop's documentInternalElements.</summary>
-    public const string InternalElementsKey = "stylebro_document_internal_elements";
-
-    /// <summary>Private elements (and members of private types) need documentation: StyleCop's documentPrivateElements.</summary>
-    public const string PrivateElementsKey = "stylebro_document_private_elements";
-
     /// <summary>
     /// Whether every symbol the declaration declares overrides a member or implements an interface member, so its
     /// documentation can come from there, and needs documentation at all: like StyleCop's SA1600, by the member's
@@ -51,46 +51,6 @@ internal static class DocumentationComments
         var list = symbols.ToList();
         return list.Count > 0 && list.All(s =>
             NeedsDocumentation(s, options) && (s.IsOverride || ImplementsInterfaceMember(s)));
-    }
-
-    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
-    {
-        var (key, defaultValue) = GetVisibility(symbol) switch
-        {
-            Accessibility.Public => (ExposedElementsKey, true),
-            Accessibility.Internal => (InternalElementsKey, true),
-            _ => (PrivateElementsKey, false),
-        };
-        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
-    }
-
-    /// <summary>
-    /// Public (visible outside the assembly, including protected), Internal or Private, from the member and every type
-    /// around it. Explicit interface implementations count as public.
-    /// </summary>
-    private static Accessibility GetVisibility(ISymbol symbol)
-    {
-        var result = Accessibility.Public;
-        for (var current = symbol; current is not null; current = current.ContainingType)
-        {
-            var accessibility = current is IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }
-                || current is IPropertySymbol { ExplicitInterfaceImplementations.Length: > 0 }
-                || current is IEventSymbol { ExplicitInterfaceImplementations.Length: > 0 }
-                    ? Accessibility.Public
-                    : current.DeclaredAccessibility;
-            var level = accessibility switch
-            {
-                Accessibility.Public or Accessibility.Protected or Accessibility.ProtectedOrInternal => Accessibility.Public,
-                Accessibility.Internal or Accessibility.ProtectedAndInternal => Accessibility.Internal,
-                _ => Accessibility.Private,
-            };
-            if (level < result)
-            {
-                result = level;
-            }
-        }
-
-        return result;
     }
 
     /// <summary>
@@ -154,6 +114,46 @@ internal static class DocumentationComments
             var replacement = char.IsWhiteSpace(next) ? "//" : "// ";
             yield return new TextChange(new TextSpan(line.Start + start, 3), replacement);
         }
+    }
+
+    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
+    {
+        var (key, defaultValue) = GetVisibility(symbol) switch
+        {
+            Accessibility.Public => (ExposedElementsKey, true),
+            Accessibility.Internal => (InternalElementsKey, true),
+            _ => (PrivateElementsKey, false),
+        };
+        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
+    }
+
+    /// <summary>
+    /// Public (visible outside the assembly, including protected), Internal or Private, from the member and every type
+    /// around it. Explicit interface implementations count as public.
+    /// </summary>
+    private static Accessibility GetVisibility(ISymbol symbol)
+    {
+        var result = Accessibility.Public;
+        for (var current = symbol; current is not null; current = current.ContainingType)
+        {
+            var accessibility = current is IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }
+                || current is IPropertySymbol { ExplicitInterfaceImplementations.Length: > 0 }
+                || current is IEventSymbol { ExplicitInterfaceImplementations.Length: > 0 }
+                    ? Accessibility.Public
+                    : current.DeclaredAccessibility;
+            var level = accessibility switch
+            {
+                Accessibility.Public or Accessibility.Protected or Accessibility.ProtectedOrInternal => Accessibility.Public,
+                Accessibility.Internal or Accessibility.ProtectedAndInternal => Accessibility.Internal,
+                _ => Accessibility.Private,
+            };
+            if (level < result)
+            {
+                result = level;
+            }
+        }
+
+        return result;
     }
 
     private static bool IsDocumentationComment(SyntaxTrivia trivia)

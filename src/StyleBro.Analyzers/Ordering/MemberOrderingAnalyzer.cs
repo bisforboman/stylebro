@@ -14,9 +14,11 @@ namespace StyleBro.Analyzers.Ordering;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MemberOrderingAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.MemberOrdering);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

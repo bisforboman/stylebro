@@ -17,6 +17,7 @@ namespace StyleBro.CodeFixes.Documentation;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(DocumentationCodeFixProvider))]
 public sealed class DocumentationCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(
             DiagnosticIds.InheritDocumentation,
@@ -34,9 +35,11 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             DiagnosticIds.TypeParameterTagsMatch,
             DiagnosticIds.TypeParameterTagHasName);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

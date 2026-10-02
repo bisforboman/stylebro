@@ -15,23 +15,6 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class ListGaps
 {
-    /// <summary>One problem: where it's reported, its rule, and the edit.</summary>
-    public sealed class Finding
-    {
-        public Finding(Location location, string id, TextChange change)
-        {
-            Location = location;
-            Id = id;
-            Change = change;
-        }
-
-        public Location Location { get; }
-
-        public string Id { get; }
-
-        public TextChange Change { get; }
-    }
-
     public static IEnumerable<Finding> GetFindings(SyntaxNode list, SourceText text)
     {
         var (open, items) = ParameterLayout.GetList(list);
@@ -55,6 +38,7 @@ internal static class ListGaps
 
         // BRO1118: blank lines between '(' and the first item.
         var first = items[0].GetFirstToken();
+
         // Only whole blank lines are removed, so a comment on a line of its own keeps the list from being reported.
         if (GetBlankLines(open, first, text) is { } blankFirst)
         {
@@ -74,6 +58,7 @@ internal static class ListGaps
             if (Line(text, previousEnd.Span.End) < Line(text, comma.SpanStart) && IsPlain(previousEnd, comma) && IsPlain(comma, items[i].GetFirstToken()))
             {
                 var span = TextSpan.FromBounds(previousEnd.Span.End, items[i].SpanStart);
+
                 // The comma goes up; the item keeps its line, without the blank lines before it (BRO1119's, done here
                 // so one run is enough).
                 var gap = text.ToString(TextSpan.FromBounds(previousEnd.Span.End, comma.SpanStart));
@@ -116,4 +101,21 @@ internal static class ListGaps
         before.TrailingTrivia.Concat(after.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia));
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
+
+    /// <summary>One problem: where it's reported, its rule, and the edit.</summary>
+    public sealed class Finding
+    {
+        public Finding(Location location, string id, TextChange change)
+        {
+            Location = location;
+            Id = id;
+            Change = change;
+        }
+
+        public Location Location { get; }
+
+        public string Id { get; }
+
+        public TextChange Change { get; }
+    }
 }

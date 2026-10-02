@@ -9,8 +9,10 @@ namespace StyleBro.Analyzers.Documentation;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class FileHeaderAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(Descriptors.FileHeader);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

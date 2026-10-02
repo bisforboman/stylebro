@@ -7,13 +7,15 @@ public class FileHeaderTests
     private const string Contoso = "stylebro_file_header_company = Contoso\n";
 
     [Fact]
-    public Task CorrectHeader_IsNotReported() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task CorrectHeader_IsNotReported() => Verify.VerifyNoDiagnosticsAsync(
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
     public Task WithoutCompany_NothingIsReported() => Verify.VerifyNoDiagnosticsAsync("""
@@ -21,11 +23,13 @@ public class FileHeaderTests
         """);
 
     [Fact]
-    public Task MissingHeader_IsAdded() => Verify.VerifyFixAsync("""
+    public Task MissingHeader_IsAdded() => Verify.VerifyFixAsync(
+        """
         {|BRO1615:|}using System;
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
@@ -33,42 +37,51 @@ public class FileHeaderTests
         using System;
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task MissingHeader_BlankLinesAtTheTopAreReplaced() => Verify.VerifyFixAsync("""
+    public Task MissingHeader_BlankLinesAtTheTopAreReplaced() => Verify.VerifyFixAsync(
+        """
 
 
         #nullable enable
         {|BRO1615:|}namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         #nullable enable
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task DocumentationCommentFirst_HeaderGoesAbove() => Verify.VerifyFixAsync("""
+    public Task DocumentationCommentFirst_HeaderGoesAbove() => Verify.VerifyFixAsync(
+        """
         /// <summary>A type.</summary>
         {|BRO1615:|}public class C { }
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         /// <summary>A type.</summary>
         public class C { }
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task PlainComment_IsKeptBelowTheNewHeader() => Verify.VerifyFixAsync("""
+    public Task PlainComment_IsKeptBelowTheNewHeader() => Verify.VerifyFixAsync(
+        """
         {|BRO1615:|}// Some notes about this file.
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
@@ -76,45 +89,55 @@ public class FileHeaderTests
         // Some notes about this file.
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task PlainHeaderWithTheCopyrightText_BecomesTheXmlHeader() => Verify.VerifyFixAsync("""
+    public Task PlainHeaderWithTheCopyrightText_BecomesTheXmlHeader() => Verify.VerifyFixAsync(
+        """
         {|BRO1615:|}// Copyright (c) Contoso. All rights reserved.
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task BrokenXmlHeader_IsLeftToAPerson() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task BrokenXmlHeader_IsLeftToAPerson() => Verify.VerifyNoDiagnosticsAsync(
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task HeaderWithoutCopyrightTag_GetsOneAtTheTop() => Verify.VerifyFixAsync("""
+    public Task HeaderWithoutCopyrightTag_GetsOneAtTheTop() => Verify.VerifyFixAsync(
+        """
         {|BRO1615:|}// <summary>Helpers.</summary>
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
         // <summary>Helpers.</summary>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task WrongFileCompanyAndText_TagIsRewrittenAndTheRestKept() => Verify.VerifyFixAsync("""
+    public Task WrongFileCompanyAndText_TagIsRewrittenAndTheRestKept() => Verify.VerifyFixAsync(
+        """
         //-----------------------------------------------------------------------
         // {|BRO1615:|}<copyright file="Other.cs" company="Fabrikam">
         //     Copyright (c) Fabrikam. All rights reserved.
@@ -123,7 +146,8 @@ public class FileHeaderTests
         //-----------------------------------------------------------------------
 
         namespace P;
-        """, """
+        """,
+        """
         //-----------------------------------------------------------------------
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
@@ -132,73 +156,89 @@ public class FileHeaderTests
         //-----------------------------------------------------------------------
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Theory]
     [InlineData("<copyright company=\"Contoso\">")]
     [InlineData("<copyright file=\"test0.cs\" company=\"Contoso\">")]
     [InlineData("<copyright file=\"Test0.cs\">")]
     [InlineData("<copyright file=\"Test0.cs\" company=\" \">")]
-    public Task EachAttributeProblem_IsReported(string openingTag) => Verify.VerifyFixAsync($$"""
+    public Task EachAttributeProblem_IsReported(string openingTag) => Verify.VerifyFixAsync(
+        $$"""
         // {|BRO1615:|}{{openingTag}}
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task EmptyCopyrightText_IsFilledIn() => Verify.VerifyFixAsync("""
+    public Task EmptyCopyrightText_IsFilledIn() => Verify.VerifyFixAsync(
+        """
         // {|BRO1615:|}<copyright file="Test0.cs" company="Contoso">
         // </copyright>
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task SelfClosingTag_IsReplaced() => Verify.VerifyFixAsync("""
+    public Task SelfClosingTag_IsReplaced() => Verify.VerifyFixAsync(
+        """
         // {|BRO1615:|}<copyright file="Test0.cs" company="Contoso" />
 
         namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task TextIsComparedLikeStyleCop_LineByLineWithoutSurroundingWhitespace() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task TextIsComparedLikeStyleCop_LineByLineWithoutSurroundingWhitespace() => Verify.VerifyNoDiagnosticsAsync(
+        """
         //<copyright file="Test0.cs" company="Contoso">
         //      Copyright (c) Contoso. All rights reserved.
         //</copyright>
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task OneLineTag_IsFine() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task OneLineTag_IsFine() => Verify.VerifyNoDiagnosticsAsync(
+        """
         // <copyright file="Test0.cs" company="Contoso">Copyright (c) Contoso. All rights reserved.</copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task CustomCopyrightText_WithLineBreaksAndVariables() => Verify.VerifyFixAsync("""
+    public Task CustomCopyrightText_WithLineBreaksAndVariables() => Verify.VerifyFixAsync(
+        """
         {|BRO1615:|}namespace P;
-        """, """
+        """,
+        """
         // <copyright file="Test0.cs" company="A &amp; B">
         // Copyright A &amp; B.
         //
@@ -206,12 +246,15 @@ public class FileHeaderTests
         // </copyright>
 
         namespace P;
-        """, "stylebro_file_header_company = A & B\nstylebro_file_header_copyright = Copyright {companyName}.\\n\\n{fileName} is licensed under the MIT license.\n");
+        """,
+        "stylebro_file_header_company = A & B\nstylebro_file_header_copyright = Copyright {companyName}.\\n\\n{fileName} is licensed under the MIT license.\n");
 
     [Fact]
-    public Task Decoration_SurroundsANewHeader() => Verify.VerifyFixAsync("""
+    public Task Decoration_SurroundsANewHeader() => Verify.VerifyFixAsync(
+        """
         {|BRO1615:|}namespace P;
-        """, """
+        """,
+        """
         // -----------------------------------------------------------------------
         // <copyright file="Test0.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
@@ -219,31 +262,38 @@ public class FileHeaderTests
         // -----------------------------------------------------------------------
 
         namespace P;
-        """, Contoso + "stylebro_file_header_decoration = -----------------------------------------------------------------------\n");
+        """,
+        Contoso + "stylebro_file_header_decoration = -----------------------------------------------------------------------\n");
 
     [Fact]
-    public Task TagSharingALineWithOtherText_IsNotReported() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task TagSharingALineWithOtherText_IsNotReported() => Verify.VerifyNoDiagnosticsAsync(
+        """
         // <summary>Helpers.</summary><copyright file="Other.cs" company="Contoso">
         // Copyright (c) Contoso. All rights reserved.
         // </copyright>
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task BlockCommentHeader_IsNotChecked() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task BlockCommentHeader_IsNotChecked() => Verify.VerifyNoDiagnosticsAsync(
+        """
         /* <copyright file="Other.cs" company="Contoso">
            Copyright (c) Contoso. All rights reserved.
            </copyright> */
 
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
-    public Task GeneratedFile_IsNotChecked() => Verify.VerifyNoDiagnosticsAsync("""
+    public Task GeneratedFile_IsNotChecked() => Verify.VerifyNoDiagnosticsAsync(
+        """
         // <auto-generated/>
         namespace P;
-        """, Contoso);
+        """,
+        Contoso);
 
     [Fact]
     public Task WhitespaceOnlyFile_IsNotChecked() => Verify.VerifyNoDiagnosticsAsync("\n\n", Contoso);

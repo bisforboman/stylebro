@@ -21,12 +21,15 @@ public sealed class TrailingBlankLinesCodeFixProvider : CodeFixProvider
 {
     private const string Title = "Remove blank lines";
 
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.BlankLineAfterComment, DiagnosticIds.BlankLinesAtEndOfFile);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

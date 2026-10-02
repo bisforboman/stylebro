@@ -26,7 +26,8 @@ public class PrefixNamingTests
     public void TypeParameterName(string name, string? expected) => Assert.Equal(expected, PrefixNames.GetTypeParameterName(name));
 
     [Fact]
-    public Task Interfaces_AreRenamedEverywhere() => VerifyFixAsync("""
+    public Task Interfaces_AreRenamedEverywhere() => VerifyFixAsync(
+        """
         using System.Collections.Generic;
 
         /// <summary>Implemented by <see cref="Circle"/>; see also <see cref="Shape.Area"/>.</summary>
@@ -53,7 +54,8 @@ public class PrefixNamingTests
 
             public static List<Shape> All(Shape first) => new List<Shape> { first, (Shape)new Circle() };
         }
-        """, """
+        """,
+        """
         using System.Collections.Generic;
 
         /// <summary>Implemented by <see cref="Circle"/>; see also <see cref="IShape.Area"/>.</summary>
@@ -83,7 +85,8 @@ public class PrefixNamingTests
         """);
 
     [Fact]
-    public Task TypeParameters_AreRenamedEverywhere() => VerifyFixAsync("""
+    public Task TypeParameters_AreRenamedEverywhere() => VerifyFixAsync(
+        """
         using System;
 
         /// <typeparam name="Item">The item.</typeparam>
@@ -102,7 +105,8 @@ public class PrefixNamingTests
         }
 
         public delegate TResult Handler<{|BRO1305:Arg|}, TResult>(Arg a);
-        """, """
+        """,
+        """
         using System;
 
         /// <typeparam name="TItem">The item.</typeparam>
@@ -124,7 +128,8 @@ public class PrefixNamingTests
         """);
 
     [Fact]
-    public Task MethodTypeParameters_RenameOverridesAndImplementations() => VerifyFixAsync("""
+    public Task MethodTypeParameters_RenameOverridesAndImplementations() => VerifyFixAsync(
+        """
         public interface IConverter
         {
             T Convert<{|BRO1305:Source|}, T>(Source s);
@@ -143,7 +148,8 @@ public class PrefixNamingTests
             {
             }
         }
-        """, """
+        """,
+        """
         public interface IConverter
         {
             T Convert<TSource, T>(TSource s);

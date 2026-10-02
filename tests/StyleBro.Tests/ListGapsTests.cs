@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class ListGapsTests
 {
     [Fact]
-    public Task ListGaps_AreFixed() => VerifyFixAsync("""
+    public Task ListGaps_AreFixed() => VerifyFixAsync(
+        """
         using System;
 
         public class C
@@ -39,7 +40,8 @@ public class ListGapsTests
             {
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         public class C
@@ -96,7 +98,8 @@ public class ListGapsTests
         """);
 
     [Fact]
-    public Task MultiLineStringBeforeTheComma_IsHandled() => VerifyFixAsync(""""
+    public Task MultiLineStringBeforeTheComma_IsHandled() => VerifyFixAsync(
+        """"
         class C
         {
             void M(string a, int b)
@@ -110,7 +113,8 @@ public class ListGapsTests
                 second"
                 {|BRO1117:,|} 1);
         }
-        """", """"
+        """",
+        """"
         class C
         {
             void M(string a, int b)

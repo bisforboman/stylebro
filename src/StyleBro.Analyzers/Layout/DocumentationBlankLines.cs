@@ -52,6 +52,7 @@ internal static class DocumentationBlankLines
 
         return changes.Count == 0 ? null : (changes[0].Span, changes);
     }
+
     /// <summary>BRO1512: the blank lines before the 'while' of a 'do ... while', or null.</summary>
     public static TextSpan? GetBlankLinesBeforeWhile(DoStatementSyntax statement, SourceText text)
     {
@@ -88,6 +89,7 @@ internal static class DocumentationBlankLines
         }
 
         var above = text.ToString(text.Lines[line.LineNumber - 1].Span).Trim();
+
         // Like StyleCop, a directive above counts as code only when it ends or marks a block (#endif, #region,
         // #endregion); after #if, #else or #pragma the documentation is the first thing in its block.
         var directive = above.StartsWith("#") ? above.TrimStart('#').TrimStart() : null;

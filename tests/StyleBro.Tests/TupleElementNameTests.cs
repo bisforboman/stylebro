@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class TupleElementNameTests
 {
     [Fact]
-    public Task ItemN_BecomesTheName() => Verify.VerifyFixAsync("""
+    public Task ItemN_BecomesTheName() => Verify.VerifyFixAsync(
+        """
         class C
         {
             (int Count, string Name) Get() => (1, "a");
@@ -19,7 +20,8 @@ public class TupleElementNameTests
                 var z = Get().{|BRO1124:Item2|};
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             (int Count, string Name) Get() => (1, "a");
@@ -50,12 +52,14 @@ public class TupleElementNameTests
         """);
 
     [Fact]
-    public Task EighthElement_UsesItsName() => Verify.VerifyFixAsync("""
+    public Task EighthElement_UsesItsName() => Verify.VerifyFixAsync(
+        """
         class C
         {
             int M((int a, int b, int c, int d, int e, int f, int g, int h) t) => t.{|BRO1124:Item8|};
         }
-        """, """
+        """,
+        """
         class C
         {
             int M((int a, int b, int c, int d, int e, int f, int g, int h) t) => t.h;

@@ -13,9 +13,11 @@ namespace StyleBro.Analyzers.Layout;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class SingleLineBlocksAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.SingleLineStatementBlock, Descriptors.SingleLineElement);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

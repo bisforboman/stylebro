@@ -19,12 +19,15 @@ namespace StyleBro.CodeFixes.Layout;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(BlankLineAfterCodeFixProvider))]
 public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.BlankLineAfterOpenBrace, DiagnosticIds.BlankLineBeforeComment);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

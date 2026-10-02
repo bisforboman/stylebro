@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class TupleSyntaxTests
 {
     [Fact]
-    public Task Types_BecomeTupleTypes() => Verify.VerifyFixAsync("""
+    public Task Types_BecomeTupleTypes() => Verify.VerifyFixAsync(
+        """
         using System;
         using System.Collections.Generic;
 
@@ -26,7 +27,8 @@ public class TupleSyntaxTests
                 var empty = new List<{|BRO1123:ValueTuple<int, int>|}>();
             }
         }
-        """, """
+        """,
+        """
         using System;
         using System.Collections.Generic;
 
@@ -50,7 +52,8 @@ public class TupleSyntaxTests
         """);
 
     [Fact]
-    public Task Creations_BecomeTupleLiterals() => Verify.VerifyFixAsync("""
+    public Task Creations_BecomeTupleLiterals() => Verify.VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -65,7 +68,8 @@ public class TupleSyntaxTests
 
             int Count() => 0;
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -109,14 +113,16 @@ public class TupleSyntaxTests
         """);
 
     [Fact]
-    public Task CreationWithANamingArgument_KeepsNewButConvertsInnerTypes() => Verify.VerifyFixAsync("""
+    public Task CreationWithANamingArgument_KeepsNewButConvertsInnerTypes() => Verify.VerifyFixAsync(
+        """
         using System;
 
         class C
         {
             object M(int x) => new ValueTuple<{|BRO1123:ValueTuple<int, int>|}, int>(default, x);
         }
-        """, """
+        """,
+        """
         using System;
 
         class C

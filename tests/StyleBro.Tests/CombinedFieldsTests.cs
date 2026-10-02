@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class CombinedFieldsTests
 {
     [Fact]
-    public Task Fields_AreSplit() => VerifyFixAsync("""
+    public Task Fields_AreSplit() => VerifyFixAsync(
+        """
         using System;
 
         public class C
@@ -31,7 +32,8 @@ public class CombinedFieldsTests
                 k = l = 0;
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         public class C

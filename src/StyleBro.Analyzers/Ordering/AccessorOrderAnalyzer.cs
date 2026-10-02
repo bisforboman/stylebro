@@ -10,9 +10,11 @@ namespace StyleBro.Analyzers.Ordering;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AccessorOrderAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.PropertyAccessorOrder, Descriptors.EventAccessorOrder);
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

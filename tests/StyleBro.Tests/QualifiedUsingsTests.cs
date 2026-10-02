@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class QualifiedUsingsTests
 {
     [Fact]
-    public Task RelativeNames_AreQualified() => Verify.VerifyFixAsync("""
+    public Task RelativeNames_AreQualified() => Verify.VerifyFixAsync(
+        """
         namespace System.Tools
         {
             {|BRO1126:using IO;|}
@@ -18,7 +19,8 @@ public class QualifiedUsingsTests
             {
             }
         }
-        """, """
+        """,
+        """
         namespace System.Tools
         {
             using System.IO;

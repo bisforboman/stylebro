@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class ConstantOnLeftTests
 {
     [Fact]
-    public Task ConstantsOnTheLeft_AreSwapped() => VerifyFixAsync("""
+    public Task ConstantsOnTheLeft_AreSwapped() => VerifyFixAsync(
+        """
         enum Color { Red, Green }
 
         class C
@@ -24,7 +25,8 @@ public class ConstantOnLeftTests
                 b = {|BRO1103:1 == n|};
             }
         }
-        """, """
+        """,
+        """
         enum Color { Red, Green }
 
         class C
@@ -46,7 +48,8 @@ public class ConstantOnLeftTests
         """);
 
     [Fact]
-    public Task RelationalOperators_AreFlipped() => VerifyFixAsync("""
+    public Task RelationalOperators_AreFlipped() => VerifyFixAsync(
+        """
         class C
         {
             void M(int x)
@@ -58,7 +61,8 @@ public class ConstantOnLeftTests
                 b = {|BRO1103:0 >= x|};
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(int x)
@@ -73,12 +77,14 @@ public class ConstantOnLeftTests
         """);
 
     [Fact]
-    public Task NestedComparisons_AreFixedInOnePass() => VerifyFixAsync("""
+    public Task NestedComparisons_AreFixedInOnePass() => VerifyFixAsync(
+        """
         class C
         {
             bool M(int x) => {|BRO1103:true == ({|BRO1103:1 == x|})|};
         }
-        """, """
+        """,
+        """
         class C
         {
             bool M(int x) => (x == 1) == true;
@@ -86,12 +92,14 @@ public class ConstantOnLeftTests
         """);
 
     [Fact]
-    public Task SamePrecedenceOnTheLeft_GetsParentheses() => VerifyFixAsync("""
+    public Task SamePrecedenceOnTheLeft_GetsParentheses() => VerifyFixAsync(
+        """
         class C
         {
             bool M(bool b) => {|BRO1103:1 == 2 == b|};
         }
-        """, """
+        """,
+        """
         class C
         {
             bool M(bool b) => b == (1 == 2);
@@ -99,13 +107,15 @@ public class ConstantOnLeftTests
         """);
 
     [Fact]
-    public Task MultiLineComparison_KeepsItsLayout() => VerifyFixAsync("""
+    public Task MultiLineComparison_KeepsItsLayout() => VerifyFixAsync(
+        """
         class C
         {
             bool M(int x) => {|BRO1103:1 ==
                 x|};
         }
-        """, """
+        """,
+        """
         class C
         {
             bool M(int x) => x ==
@@ -114,14 +124,16 @@ public class ConstantOnLeftTests
         """);
 
     [Fact]
-    public Task CoreLibraryOperators_AreSwapped() => VerifyFixAsync("""
+    public Task CoreLibraryOperators_AreSwapped() => VerifyFixAsync(
+        """
         using System;
 
         class C
         {
             bool M(Guid g, DateTime d) => {|BRO1103:Guid.Empty == g|} && {|BRO1103:DateTime.MinValue < d|};
         }
-        """, """
+        """,
+        """
         using System;
 
         class C

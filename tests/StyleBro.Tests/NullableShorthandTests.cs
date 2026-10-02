@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class NullableShorthandTests
 {
     [Fact]
-    public Task Nullable_IsShortened() => VerifyFixAsync("""
+    public Task Nullable_IsShortened() => VerifyFixAsync(
+        """
         using System;
         using System.Collections.Generic;
 
@@ -20,7 +21,8 @@ public class NullableShorthandTests
 
             public {|BRO1115:Nullable<bool>|} M({|BRO1115:Nullable<bool>|} p) => default({|BRO1115:Nullable<bool>|});
         }
-        """, """
+        """,
+        """
         using System;
         using System.Collections.Generic;
 

@@ -18,12 +18,15 @@ namespace StyleBro.CodeFixes.Readability;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ParenthesisPlacementCodeFixProvider))]
 public sealed class ParenthesisPlacementCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.OpenParenthesisOnNameLine, DiagnosticIds.CloseParenthesisOnLastItemLine);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

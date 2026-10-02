@@ -33,34 +33,6 @@ internal sealed class Baseline
 
     public IReadOnlyDictionary<Key, int> Entries => counts;
 
-    /// <summary>An entry's identity: rule, path ('/'-separated, relative to the baseline's folder), fingerprint.</summary>
-    public readonly struct Key : IEquatable<Key>
-    {
-        public Key(string id, string path, string fingerprint)
-        {
-            Id = id;
-            Path = path;
-            Fingerprint = fingerprint;
-        }
-
-        public string Id { get; }
-
-        public string Path { get; }
-
-        public string Fingerprint { get; }
-
-        public bool Equals(Key other) =>
-            string.Equals(Id, other.Id, StringComparison.Ordinal)
-            && string.Equals(Path, other.Path, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(Fingerprint, other.Fingerprint, StringComparison.Ordinal);
-
-        public override bool Equals(object? obj) => obj is Key other && Equals(other);
-
-        public override int GetHashCode() =>
-            (StringComparer.Ordinal.GetHashCode(Id) * 31 + StringComparer.OrdinalIgnoreCase.GetHashCode(Path)) * 31
-            + StringComparer.Ordinal.GetHashCode(Fingerprint);
-    }
-
     public static Baseline Parse(string text)
     {
         var counts = new Dictionary<Key, int>();
@@ -82,23 +54,6 @@ internal sealed class Baseline
 
         return new Baseline(counts);
     }
-
-    /// <summary>The file's text: the header, then the entries sorted so regenerating gives small diffs.</summary>
-    public string Render()
-    {
-        var builder = new StringBuilder(Header);
-        foreach (var entry in counts.OrderBy(e => e.Key.Path, StringComparer.OrdinalIgnoreCase).ThenBy(e => e.Key.Id, StringComparer.Ordinal)
-            .ThenBy(e => e.Key.Fingerprint, StringComparer.Ordinal))
-        {
-            builder.Append(entry.Key.Id).Append('\t').Append(entry.Key.Path).Append('\t').Append(entry.Key.Fingerprint).Append('\t')
-                .Append(entry.Value).Append('\n');
-        }
-
-        return builder.ToString();
-    }
-
-    /// <summary>How many violations of this rule on this line the baseline covers (0 when none).</summary>
-    public int Allowed(Key key) => counts.TryGetValue(key, out var count) ? count : 0;
 
     /// <summary>
     /// The fingerprint of a line: 64-bit FNV-1a over the line's text without leading and trailing whitespace, as 16 hex
@@ -132,5 +87,53 @@ internal sealed class Baseline
         return file.StartsWith(root, StringComparison.OrdinalIgnoreCase) ? file.Substring(root.Length) : null;
     }
 
+    /// <summary>The file's text: the header, then the entries sorted so regenerating gives small diffs.</summary>
+    public string Render()
+    {
+        var builder = new StringBuilder(Header);
+        foreach (var entry in counts.OrderBy(e => e.Key.Path, StringComparer.OrdinalIgnoreCase).ThenBy(e => e.Key.Id, StringComparer.Ordinal)
+            .ThenBy(e => e.Key.Fingerprint, StringComparer.Ordinal))
+        {
+            builder.Append(entry.Key.Id).Append('\t').Append(entry.Key.Path).Append('\t').Append(entry.Key.Fingerprint).Append('\t')
+                .Append(entry.Value).Append('\n');
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>How many violations of this rule on this line the baseline covers (0 when none).</summary>
+    public int Allowed(Key key) => counts.TryGetValue(key, out var count) ? count : 0;
+
     private static string NormalizePath(string path) => path.Replace('\\', '/');
+
+    /// <summary>An entry's identity: rule, path ('/'-separated, relative to the baseline's folder), fingerprint.</summary>
+    public readonly struct Key : IEquatable<Key>
+    {
+        public Key(string id, string path, string fingerprint)
+        {
+            Id = id;
+            Path = path;
+            Fingerprint = fingerprint;
+        }
+
+        public string Id { get; }
+
+        public string Path { get; }
+
+        public string Fingerprint { get; }
+
+        /// <inheritdoc/>
+        public bool Equals(Key other) =>
+            string.Equals(Id, other.Id, StringComparison.Ordinal)
+            && string.Equals(Path, other.Path, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(Fingerprint, other.Fingerprint, StringComparison.Ordinal);
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj) => obj is Key other && Equals(other);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() =>
+            (StringComparer.Ordinal.GetHashCode(Id) * 31 + StringComparer.OrdinalIgnoreCase.GetHashCode(Path)) * 31
+            + StringComparer.Ordinal.GetHashCode(Fingerprint);
+    }
 }

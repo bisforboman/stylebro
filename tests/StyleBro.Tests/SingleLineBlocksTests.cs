@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class SingleLineBlocksTests
 {
     [Fact]
-    public Task StatementBlocks_AreExpanded() => VerifyFixAsync("""
+    public Task StatementBlocks_AreExpanded() => VerifyFixAsync(
+        """
         using System;
 
         public class C
@@ -23,7 +24,8 @@ public class SingleLineBlocksTests
                 if (b) {|BRO1508:{|} return; } // trailing
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         public class C
@@ -82,7 +84,8 @@ public class SingleLineBlocksTests
         """);
 
     [Fact]
-    public Task NestedBlocks_SingleFixAndFixAllAgree() => VerifyFixAsync("""
+    public Task NestedBlocks_SingleFixAndFixAllAgree() => VerifyFixAsync(
+        """
         public class C
         {
             public void M(bool b)
@@ -90,7 +93,8 @@ public class SingleLineBlocksTests
                 if (b) {|BRO1508:{|} if (b) {|BRO1508:{|} return; } else if (!b) {|BRO1508:{|} b = true; } }
             }
         }
-        """, """
+        """,
+        """
         public class C
         {
             public void M(bool b)
@@ -111,7 +115,8 @@ public class SingleLineBlocksTests
         """);
 
     [Fact]
-    public Task Elements_AreExpanded() => VerifyFixAsync("""
+    public Task Elements_AreExpanded() => VerifyFixAsync(
+        """
         using System;
 
         namespace N {|BRO1509:{|} public class Empty {|BRO1509:{|} } }
@@ -139,7 +144,8 @@ public class SingleLineBlocksTests
                 void L() {|BRO1509:{|} Console.WriteLine(); }
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         namespace N
@@ -243,7 +249,8 @@ public class SingleLineBlocksTests
         """);
 
     [Fact]
-    public Task EditorConfig_IndentationAndBracesOnTheSameLine() => VerifyFixAsync("""
+    public Task EditorConfig_IndentationAndBracesOnTheSameLine() => VerifyFixAsync(
+        """
         public class C
         {
         	public void M(bool b)
@@ -251,7 +258,8 @@ public class SingleLineBlocksTests
         		if (b) {|BRO1508:{|} return; } else {|BRO1508:{|} b = true; }
         	}
         }
-        """, """
+        """,
+        """
         public class C
         {
         	public void M(bool b)
@@ -263,7 +271,8 @@ public class SingleLineBlocksTests
         		}
         	}
         }
-        """, editorConfig: "indent_style = tab\ncsharp_new_line_before_open_brace = types, methods\ncsharp_new_line_before_else = false\n");
+        """,
+        editorConfig: "indent_style = tab\ncsharp_new_line_before_open_brace = types, methods\ncsharp_new_line_before_else = false\n");
 
     [Fact]
     public Task LineEndings_AreKept() => VerifyFixAsync(
@@ -271,13 +280,16 @@ public class SingleLineBlocksTests
         "public class C\r\n{\r\n    public void M(bool b)\r\n    {\r\n        if (b)\r\n        {\r\n            return;\r\n        }\r\n    }\r\n}\r\n");
 
     [Fact]
-    public Task Enum_GetsNoTrailingComma_WhenBRO1401IsOff() => VerifyFixAsync("""
+    public Task Enum_GetsNoTrailingComma_WhenBRO1401IsOff() => VerifyFixAsync(
+        """
         public enum E {|BRO1509:{|} A, B }
-        """, """
+        """,
+        """
         public enum E
         {
             A,
             B
         }
-        """, editorConfig: "dotnet_diagnostic.BRO1401.severity = none\n");
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1401.severity = none\n");
 }

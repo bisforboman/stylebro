@@ -92,25 +92,26 @@ internal static class InitializerOrder
     /// <summary>The names through which an initializer can reach state of one type declaration.</summary>
     private sealed class TypeState
     {
-        private readonly HashSet<string> _typeNames = new();
-        private readonly HashSet<string> _memberNames = new();
+        private readonly HashSet<string> typeNames = new();
+        private readonly HashSet<string> memberNames = new();
 
         public TypeState(TypeDeclarationSyntax type)
         {
-            _typeNames.Add(type.Identifier.ValueText);
+            typeNames.Add(type.Identifier.ValueText);
             foreach (var member in type.Members)
             {
                 switch (member)
                 {
                     case BaseTypeDeclarationSyntax nested:
-                        _typeNames.Add(nested.Identifier.ValueText);
+                        typeNames.Add(nested.Identifier.ValueText);
                         break;
+
                     // Constants hold the same value whenever they are read, so they never make order matter.
                     case BaseFieldDeclarationSyntax field when !field.Modifiers.Any(SyntaxKind.ConstKeyword):
-                        _memberNames.UnionWith(field.Declaration.Variables.Select(v => v.Identifier.ValueText));
+                        memberNames.UnionWith(field.Declaration.Variables.Select(v => v.Identifier.ValueText));
                         break;
                     case MethodDeclarationSyntax or PropertyDeclarationSyntax or EventDeclarationSyntax or DelegateDeclarationSyntax:
-                        _memberNames.Add(MemberOrdering.GetNameToken(member).ValueText);
+                        memberNames.Add(MemberOrdering.GetNameToken(member).ValueText);
                         break;
                 }
             }
@@ -145,7 +146,7 @@ internal static class InitializerOrder
         private bool IsStateReference(SimpleNameSyntax name)
         {
             var text = name.Identifier.ValueText;
-            if (_typeNames.Contains(text))
+            if (typeNames.Contains(text))
             {
                 // 'C.Member' or 'new C()' reach the type's state; 'List<C>' or a declaration type don't.
                 return name.Parent switch
@@ -156,7 +157,7 @@ internal static class InitializerOrder
                 };
             }
 
-            if (!_memberNames.Contains(text))
+            if (!memberNames.Contains(text))
             {
                 return false;
             }
@@ -182,7 +183,7 @@ internal static class InitializerOrder
                 _ => null,
             };
 
-            return name is not null && _typeNames.Contains(name.Identifier.ValueText);
+            return name is not null && typeNames.Contains(name.Identifier.ValueText);
         }
     }
 }

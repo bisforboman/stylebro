@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class ParenthesisPlacementTests
 {
     [Fact]
-    public Task OpeningTokens_MoveUp() => VerifyFixAsync("""
+    public Task OpeningTokens_MoveUp() => VerifyFixAsync(
+        """
         using System;
 
         class Mark : Attribute
@@ -45,7 +46,8 @@ public class ParenthesisPlacementTests
                     v) => v;
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         class Mark : Attribute
@@ -86,7 +88,8 @@ public class ParenthesisPlacementTests
         """);
 
     [Fact]
-    public Task ClosingTokens_MoveUp() => VerifyFixAsync("""
+    public Task ClosingTokens_MoveUp() => VerifyFixAsync(
+        """
         using System;
 
         class C
@@ -124,7 +127,8 @@ public class ParenthesisPlacementTests
                     {|BRO1110:)|} => v;
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         class C
@@ -159,7 +163,8 @@ public class ParenthesisPlacementTests
         """);
 
     [Fact]
-    public Task BothInOneList() => VerifyFixAsync("""
+    public Task BothInOneList() => VerifyFixAsync(
+        """
         class C
         {
             void M(int a, int b)
@@ -170,7 +175,8 @@ public class ParenthesisPlacementTests
                     {|BRO1110:)|};
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(int a, int b)

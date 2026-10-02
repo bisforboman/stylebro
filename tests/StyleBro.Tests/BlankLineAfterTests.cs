@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class BlankLineAfterTests
 {
     [Fact]
-    public Task BlankLinesAfterOpeningBraces_AreRemoved() => VerifyFixAsync("""
+    public Task BlankLinesAfterOpeningBraces_AreRemoved() => VerifyFixAsync(
+        """
         namespace N
         {|BRO1503:{|}
 
@@ -20,7 +21,8 @@ public class BlankLineAfterTests
                 };
             }
         }
-        """, """
+        """,
+        """
         namespace N
         {
             class C
@@ -47,7 +49,8 @@ public class BlankLineAfterTests
         """");
 
     [Fact]
-    public Task CommentsAfterCode_GetABlankLineAbove() => VerifyFixAsync("""
+    public Task CommentsAfterCode_GetABlankLineAbove() => VerifyFixAsync(
+        """
         class C
         {
             int a;
@@ -67,7 +70,8 @@ public class BlankLineAfterTests
                 return;
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             int a;

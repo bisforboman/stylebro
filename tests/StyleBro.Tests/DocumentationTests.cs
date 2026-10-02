@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class DocumentationTests
 {
     [Fact]
-    public Task OverridesAndImplementations_GetInheritDoc() => VerifyFixAsync("""
+    public Task OverridesAndImplementations_GetInheritDoc() => VerifyFixAsync(
+        """
         using System;
 
         /// <summary>A shape.</summary>
@@ -70,7 +71,8 @@ public class DocumentationTests
                 }
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         /// <summary>A shape.</summary>
@@ -145,7 +147,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task TripleSlashComments_BecomePlainComments() => VerifyFixAsync("""
+    public Task TripleSlashComments_BecomePlainComments() => VerifyFixAsync(
+        """
         class C
         {
             void M()
@@ -157,7 +160,8 @@ public class DocumentationTests
                 //// Commented-out code stays.
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M()
@@ -172,7 +176,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task DocumentationText_EndsWithAPeriod() => VerifyFixAsync("""
+    public Task DocumentationText_EndsWithAPeriod() => VerifyFixAsync(
+        """
         using System;
 
         /// <summary>A class without a period{|BRO1603:|}</summary>
@@ -204,7 +209,8 @@ public class DocumentationTests
             {
             }
         }
-        """, """
+        """,
+        """
         using System;
 
         /// <summary>A class without a period.</summary>
@@ -291,7 +297,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task PropertySummaries_MatchTheAccessors() => VerifyFixAsync("""
+    public Task PropertySummaries_MatchTheAccessors() => VerifyFixAsync(
+        """
         /// <summary>Words.</summary>
         public class Words
         {
@@ -330,7 +337,8 @@ public class DocumentationTests
             /// <summary>URL of the site.</summary>
             public string {|BRO1604:Site|} => "x";
         }
-        """, """
+        """,
+        """
         /// <summary>Words.</summary>
         public class Words
         {
@@ -414,7 +422,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task InheritDoc_FollowsTheDocumentationScope() => VerifyFixAsync("""
+    public Task InheritDoc_FollowsTheDocumentationScope() => VerifyFixAsync(
+        """
         public interface IShape
         {
             int Sides { get; }
@@ -430,7 +439,8 @@ public class DocumentationTests
         {
             public int Sides => 3;
         }
-        """, """
+        """,
+        """
         public interface IShape
         {
             int Sides { get; }
@@ -447,10 +457,12 @@ public class DocumentationTests
         {
             public int Sides => 3;
         }
-        """, editorConfig: "stylebro_document_internal_elements = false");
+        """,
+        editorConfig: "stylebro_document_internal_elements = false");
 
     [Fact]
-    public Task ConstructorSummaries_BeginWithTheStandardText() => VerifyFixAsync("""
+    public Task ConstructorSummaries_BeginWithTheStandardText() => VerifyFixAsync(
+        """
         /// <summary>Words.</summary>
         public class Words
         {
@@ -506,7 +518,8 @@ public class DocumentationTests
             {
             }
         }
-        """, """
+        """,
+        """
         /// <summary>Words.</summary>
         public class Words
         {
@@ -605,7 +618,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task VoidReturnsAndPlaceholders_AreRemoved() => VerifyFixAsync("""
+    public Task VoidReturnsAndPlaceholders_AreRemoved() => VerifyFixAsync(
+        """
         /// <summary>Tags.</summary>
         public class Tags
         {
@@ -633,7 +647,8 @@ public class DocumentationTests
             {
             }
         }
-        """, """
+        """,
+        """
         /// <summary>Tags.</summary>
         public class Tags
         {
@@ -662,7 +677,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task EmptyRemarksAndStaleParameterTags_AreFixed() => VerifyFixAsync("""
+    public Task EmptyRemarksAndStaleParameterTags_AreFixed() => VerifyFixAsync(
+        """
         /// <summary>Tags.</summary>
         public class Tags
         {
@@ -694,7 +710,8 @@ public class DocumentationTests
             {
             }
         }
-        """, """
+        """,
+        """
         /// <summary>Tags.</summary>
         public class Tags
         {
@@ -747,7 +764,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task UnnamedParamTags_GetTheirName() => VerifyFixAsync("""
+    public Task UnnamedParamTags_GetTheirName() => VerifyFixAsync(
+        """
         /// <summary>Tags.</summary>
         public class Tags
         {
@@ -777,7 +795,8 @@ public class DocumentationTests
             {
             }
         }
-        """, """
+        """,
+        """
         /// <summary>Tags.</summary>
         public class Tags
         {
@@ -838,7 +857,8 @@ public class DocumentationTests
         """);
 
     [Fact]
-    public Task TypeParamTags_MatchTheTypeParameters() => VerifyFixAsync("""
+    public Task TypeParamTags_MatchTheTypeParameters() => VerifyFixAsync(
+        """
         /// <summary>A box.</summary>
         /// <typeparam name="{|BRO1613:TOld|}">The type.</typeparam>
         public class Box<T>
@@ -863,7 +883,8 @@ public class DocumentationTests
         public struct Holder<T>
         {
         }
-        """, """
+        """,
+        """
         /// <summary>A box.</summary>
         /// <typeparam name="T">The type.</typeparam>
         public class Box<T>

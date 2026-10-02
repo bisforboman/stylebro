@@ -36,14 +36,16 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task FieldAfterMethod_IsMovedUp() => VerifyFixAsync("""
+    public Task FieldAfterMethod_IsMovedUp() => VerifyFixAsync(
+        """
         class C
         {
             public void M() { }
 
             private int {|BRO1001:_x|};
         }
-        """, """
+        """,
+        """
         class C
         {
             private int _x;
@@ -53,14 +55,16 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task PublicAfterPrivate_IsMovedUp() => VerifyFixAsync("""
+    public Task PublicAfterPrivate_IsMovedUp() => VerifyFixAsync(
+        """
         class C
         {
             private void A() { }
 
             public void {|BRO1001:B|}() { }
         }
-        """, """
+        """,
+        """
         class C
         {
             public void B() { }
@@ -70,13 +74,15 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task StaticAfterInstance_IsMovedUp() => VerifyFixAsync("""
+    public Task StaticAfterInstance_IsMovedUp() => VerifyFixAsync(
+        """
         class C
         {
             private int _a;
             private static int {|BRO1001:s_b|};
         }
-        """, """
+        """,
+        """
         class C
         {
             private static int s_b;
@@ -85,13 +91,15 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task ConstantAfterField_IsMovedUp() => VerifyFixAsync("""
+    public Task ConstantAfterField_IsMovedUp() => VerifyFixAsync(
+        """
         class C
         {
             private static int s_a;
             private const int {|BRO1001:B|} = 1;
         }
-        """, """
+        """,
+        """
         class C
         {
             private const int B = 1;
@@ -100,7 +108,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task CommentsAndDocs_MoveWithTheirMember() => VerifyFixAsync("""
+    public Task CommentsAndDocs_MoveWithTheirMember() => VerifyFixAsync(
+        """
         class C
         {
             /// <summary>Does M.</summary>
@@ -110,7 +119,8 @@ public class MemberOrderingTests
             [System.Obsolete]
             private int {|BRO1001:_x|};
         }
-        """, """
+        """,
+        """
         class C
         {
             // The value.
@@ -123,7 +133,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task NestedTypes_AreFixedInOnePass() => VerifyFixAsync("""
+    public Task NestedTypes_AreFixedInOnePass() => VerifyFixAsync(
+        """
         class Outer
         {
             class Inner
@@ -135,7 +146,8 @@ public class MemberOrderingTests
 
             int {|BRO1001:_x|};
         }
-        """, """
+        """,
+        """
         class Outer
         {
             int _x;
@@ -150,14 +162,16 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task InterfaceMembers_AreImplicitlyPublic() => VerifyFixAsync("""
+    public Task InterfaceMembers_AreImplicitlyPublic() => VerifyFixAsync(
+        """
         interface I
         {
             void M();
 
             int {|BRO1001:P|} { get; }
         }
-        """, """
+        """,
+        """
         interface I
         {
             int P { get; }
@@ -179,24 +193,28 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task CustomKindOrder_FromEditorConfig() => VerifyFixAsync("""
+    public Task CustomKindOrder_FromEditorConfig() => VerifyFixAsync(
+        """
         class C
         {
             private int _x;
 
             private void {|BRO1001:M|}() { }
         }
-        """, """
+        """,
+        """
         class C
         {
             private void M() { }
 
             private int _x;
         }
-        """, editorConfig: "stylebro_member_order = method, field\n");
+        """,
+        editorConfig: "stylebro_member_order = method, field\n");
 
     [Fact]
-    public Task ConversionsAndOperators_ComeBeforeMethods() => VerifyFixAsync("""
+    public Task ConversionsAndOperators_ComeBeforeMethods() => VerifyFixAsync(
+        """
         class C
         {
             public void M() { }
@@ -205,7 +223,8 @@ public class MemberOrderingTests
 
             public static implicit operator int(C c) => 0;
         }
-        """, """
+        """,
+        """
         class C
         {
             public static implicit operator int(C c) => 0;
@@ -217,7 +236,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task InitializerReadingConstant_DoesNotBlockSorting() => VerifyFixAsync("""
+    public Task InitializerReadingConstant_DoesNotBlockSorting() => VerifyFixAsync(
+        """
         class C
         {
             private const string Default = "x";
@@ -225,7 +245,8 @@ public class MemberOrderingTests
             private string Name { get; set; } = Default;
             private readonly object {|BRO1001:_lock|} = new();
         }
-        """, """
+        """,
+        """
         class C
         {
             private const string Default = "x";
@@ -280,13 +301,15 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task IndependentInitializers_AreStillSorted() => VerifyFixAsync("""
+    public Task IndependentInitializers_AreStillSorted() => VerifyFixAsync(
+        """
         class C
         {
             private static int s_a = 1;
             public static readonly int {|BRO1001:B|} = 2;
         }
-        """, """
+        """,
+        """
         class C
         {
             public static readonly int B = 2;
@@ -295,7 +318,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task TypeofNameofAndForeignMembers_DoNotBlockSorting() => VerifyFixAsync("""
+    public Task TypeofNameofAndForeignMembers_DoNotBlockSorting() => VerifyFixAsync(
+        """
         class C
         {
             private static int s_count = 0;
@@ -303,7 +327,8 @@ public class MemberOrderingTests
             public static readonly string Name = nameof(s_count) + typeof(C).Name;
             public static readonly int Length = 3;
         }
-        """, """
+        """,
+        """
         class C
         {
             public static readonly string Name = nameof(s_count) + typeof(C).Name;
@@ -314,7 +339,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task CommentedMemberMovedBelowCode_GetsABlankLineAbove() => VerifyFixAsync("""
+    public Task CommentedMemberMovedBelowCode_GetsABlankLineAbove() => VerifyFixAsync(
+        """
         class C
         {
             // normal deserialization
@@ -324,7 +350,8 @@ public class MemberOrderingTests
             }
             public int _count;
         }
-        """, """
+        """,
+        """
         class C
         {
             public int _count;
@@ -338,7 +365,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task MethodMovedBelowAField_GetsABlankLine() => VerifyFixAsync("""
+    public Task MethodMovedBelowAField_GetsABlankLine() => VerifyFixAsync(
+        """
         class C
         {
             void M() { }
@@ -346,7 +374,8 @@ public class MemberOrderingTests
             int {|BRO1001:a|};
             int b;
         }
-        """, """
+        """,
+        """
         class C
         {
             int a;
@@ -358,14 +387,16 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task CompactMembersThatWereAlreadyCompact_StayCompact() => VerifyFixAsync("""
+    public Task CompactMembersThatWereAlreadyCompact_StayCompact() => VerifyFixAsync(
+        """
         interface I
         {
             void M();
             int {|BRO1001:P|} { get; }
             void N();
         }
-        """, """
+        """,
+        """
         interface I
         {
             int P { get; }
@@ -375,7 +406,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task StaticConstructor_ComesBeforeInstanceConstructors() => VerifyFixAsync("""
+    public Task StaticConstructor_ComesBeforeInstanceConstructors() => VerifyFixAsync(
+        """
         class C
         {
             public C() { }
@@ -386,7 +418,8 @@ public class MemberOrderingTests
 
             private C(long x) { }
         }
-        """, """
+        """,
+        """
         class C
         {
             static C() { }
@@ -412,11 +445,13 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task StaticFirstDisabled_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+    public Task StaticFirstDisabled_NoDiagnostic() => VerifyNoDiagnosticsAsync(
+        """
         class C
         {
             private int _a;
             private static int s_b;
         }
-        """, editorConfig: "stylebro_member_static_first = false\n");
+        """,
+        editorConfig: "stylebro_member_static_first = false\n");
 }

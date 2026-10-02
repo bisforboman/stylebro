@@ -17,12 +17,15 @@ namespace StyleBro.CodeFixes.Readability;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ListGapsCodeFixProvider))]
 public sealed class ListGapsCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.EmptyListOnOneLine, DiagnosticIds.CommaOnItemLine, DiagnosticIds.FirstItemFollowsOpening, DiagnosticIds.ItemFollowsComma);
 
+    /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
+    /// <inheritdoc/>
     public override Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)

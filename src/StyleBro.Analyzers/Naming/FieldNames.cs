@@ -40,6 +40,13 @@ internal static class FieldNames
 {
     public const string StyleKey = "stylebro_private_field_naming";
 
+    private enum FieldCasing
+    {
+        Camel,
+        UnderscoreCamel,
+        Pascal,
+    }
+
     public static FieldStyle GetStyle(AnalyzerConfigOptions options)
     {
         return options.TryGetValue(StyleKey, out var value) && value.Trim() == "_camelCase"
@@ -108,54 +115,6 @@ internal static class FieldNames
         return newName is null ? null : (IsPascalChecked(field) ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
     }
 
-    /// <summary>
-    /// The words of <paramref name="core"/> (split at underscores) joined in <paramref name="casing"/>: 'with_underscore'
-    /// -> 'withUnderscore', 'MAX_VALUE' -> 'MaxValue' (Pascal) or 'maxValue' (camel). An all-capitals word of more than
-    /// one letter counts as a word, not an acronym, when there are several words.
-    /// </summary>
-    private static string? GetJoinedName(string core, FieldCasing casing)
-    {
-        var words = core.Split(new[] { '_' }, System.StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length == 0 || !char.IsLetter(words[0][0]))
-        {
-            return null;
-        }
-
-        // 'Int32_0': an underscore between two digits separates numbers; joining them ('Int320') would change the name's
-        // meaning, so such names are left alone.
-        for (var i = 1; i < words.Length; i++)
-        {
-            if (char.IsDigit(words[i - 1][words[i - 1].Length - 1]) && char.IsDigit(words[i][0]))
-            {
-                return null;
-            }
-        }
-
-        var several = words.Length > 1;
-        var first = words[0];
-        var rest = string.Concat(words.Skip(1).Select(w => Capitalize(w, several)));
-        var result = casing switch
-        {
-            FieldCasing.Pascal => Capitalize(first, several) + rest,
-            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.GetNewName(first) ?? first) + rest,
-        };
-
-        if (casing == FieldCasing.UnderscoreCamel)
-        {
-            result = "_" + result;
-        }
-
-        return SyntaxFacts.IsValidIdentifier(result) && SyntaxFacts.GetKeywordKind(result) == SyntaxKind.None ? result : null;
-    }
-
-    private static string Capitalize(string word, bool lowerRest)
-    {
-        var rest = lowerRest && IsAllUpper(word) ? word.Substring(1).ToLowerInvariant() : word.Substring(1);
-        return char.ToUpperInvariant(word[0]) + rest;
-    }
-
-    private static bool IsAllUpper(string word) => word.Length > 1 && word.All(c => !char.IsLetter(c) || char.IsUpper(c));
-
     /// <summary>'lowerConst' -> 'LowerConst', '_value' -> 'Value'. Null for one-letter prefixes (SA1308) and names that fit.</summary>
     public static string? GetPascalName(string name)
     {
@@ -219,8 +178,6 @@ internal static class FieldNames
 
         return false;
     }
-    private static bool IsSourceField(IFieldSymbol field) =>
-        !field.IsImplicitlyDeclared && field.Locations.Any(l => l.IsInSource);
 
     /// <summary>
     /// The field's name in <paramref name="style"/>, or null when it already fits or has no safe replacement.
@@ -305,10 +262,54 @@ internal static class FieldNames
         return true;
     }
 
-    private enum FieldCasing
+    /// <summary>
+    /// The words of <paramref name="core"/> (split at underscores) joined in <paramref name="casing"/>: 'with_underscore'
+    /// -> 'withUnderscore', 'MAX_VALUE' -> 'MaxValue' (Pascal) or 'maxValue' (camel). An all-capitals word of more than
+    /// one letter counts as a word, not an acronym, when there are several words.
+    /// </summary>
+    private static string? GetJoinedName(string core, FieldCasing casing)
     {
-        Camel,
-        UnderscoreCamel,
-        Pascal,
+        var words = core.Split(new[] { '_' }, System.StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length == 0 || !char.IsLetter(words[0][0]))
+        {
+            return null;
+        }
+
+        // 'Int32_0': an underscore between two digits separates numbers; joining them ('Int320') would change the name's
+        // meaning, so such names are left alone.
+        for (var i = 1; i < words.Length; i++)
+        {
+            if (char.IsDigit(words[i - 1][words[i - 1].Length - 1]) && char.IsDigit(words[i][0]))
+            {
+                return null;
+            }
+        }
+
+        var several = words.Length > 1;
+        var first = words[0];
+        var rest = string.Concat(words.Skip(1).Select(w => Capitalize(w, several)));
+        var result = casing switch
+        {
+            FieldCasing.Pascal => Capitalize(first, several) + rest,
+            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.GetNewName(first) ?? first) + rest,
+        };
+
+        if (casing == FieldCasing.UnderscoreCamel)
+        {
+            result = "_" + result;
+        }
+
+        return SyntaxFacts.IsValidIdentifier(result) && SyntaxFacts.GetKeywordKind(result) == SyntaxKind.None ? result : null;
     }
+
+    private static string Capitalize(string word, bool lowerRest)
+    {
+        var rest = lowerRest && IsAllUpper(word) ? word.Substring(1).ToLowerInvariant() : word.Substring(1);
+        return char.ToUpperInvariant(word[0]) + rest;
+    }
+
+    private static bool IsAllUpper(string word) => word.Length > 1 && word.All(c => !char.IsLetter(c) || char.IsUpper(c));
+
+    private static bool IsSourceField(IFieldSymbol field) =>
+        !field.IsImplicitlyDeclared && field.Locations.Any(l => l.IsInSource);
 }

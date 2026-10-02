@@ -5,7 +5,8 @@ namespace StyleBro.Tests;
 public class BlankLineBeforeTests
 {
     [Fact]
-    public Task OpeningBraces_BlankLinesAreRemoved() => VerifyFixAsync("""
+    public Task OpeningBraces_BlankLinesAreRemoved() => VerifyFixAsync(
+        """
         class C
 
         {|BRO1501:{|}
@@ -30,7 +31,8 @@ public class BlankLineBeforeTests
                 };
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             int P
@@ -62,7 +64,8 @@ public class BlankLineBeforeTests
     }
 
     [Fact]
-    public Task BlankLineBetweenCommentAndBrace_IsRemoved() => VerifyFixAsync("""
+    public Task BlankLineBetweenCommentAndBrace_IsRemoved() => VerifyFixAsync(
+        """
         class C
         {
             void M(bool b)
@@ -74,7 +77,8 @@ public class BlankLineBeforeTests
                 }
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(bool b)
@@ -135,7 +139,8 @@ public class BlankLineBeforeTests
         """);
 
     [Fact]
-    public Task StandaloneBlocks_ReportedUnlessTheyFollowAClosingBrace() => VerifyFixAsync("""
+    public Task StandaloneBlocks_ReportedUnlessTheyFollowAClosingBrace() => VerifyFixAsync(
+        """
         class C
         {
             void M(int x)
@@ -162,7 +167,8 @@ public class BlankLineBeforeTests
                 }
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(int x)
@@ -190,7 +196,8 @@ public class BlankLineBeforeTests
         """);
 
     [Fact]
-    public Task ChainedBlocks_BlankLinesAreRemoved() => VerifyFixAsync("""
+    public Task ChainedBlocks_BlankLinesAreRemoved() => VerifyFixAsync(
+        """
         class C
         {
             void M(bool b)
@@ -222,7 +229,8 @@ public class BlankLineBeforeTests
                     M(b);
             }
         }
-        """, """
+        """,
+        """
         class C
         {
             void M(bool b)
