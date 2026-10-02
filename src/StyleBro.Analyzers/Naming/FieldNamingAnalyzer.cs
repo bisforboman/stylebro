@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -24,10 +26,15 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSymbolAction(AnalyzeField, SymbolKind.Field);
+        context.RegisterCompilationStartAction(start =>
+        {
+            // Each type's strings and names are read once for all its fields (they were read per field before).
+            var facts = new ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>>(SymbolEqualityComparer.Default);
+            start.RegisterSymbolAction(c => AnalyzeField(c, facts), SymbolKind.Field);
+        });
     }
 
-    private static void AnalyzeField(SymbolAnalysisContext context)
+    private static void AnalyzeField(SymbolAnalysisContext context, ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>> cache)
     {
         var field = (IFieldSymbol)context.Symbol;
         if (field.Locations.FirstOrDefault(l => l.IsInSource) is not { SourceTree: { } tree } location)
@@ -36,7 +43,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         }
 
         var style = FieldNames.GetStyle(context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree));
-        if (FieldNames.GetRename(field, style) is ({ } rule, { } newName) && FieldNames.CanRename(field, newName, style, context.CancellationToken))
+        if (FieldNames.GetRename(field, style) is ({ } rule, { } newName) && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 rule switch

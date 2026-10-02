@@ -40,6 +40,9 @@ internal static class FieldNames
 {
     public const string StyleKey = "stylebro_private_field_naming";
 
+    /// <summary>A whole word: a run of \w characters not directly after another one or an '@'.</summary>
+    private static readonly Regex Word = new(@"(?<![\w@])\w+");
+
     private enum FieldCasing
     {
         Camel,
@@ -216,7 +219,11 @@ internal static class FieldNames
     /// anonymous type member or tuple element name. Locals and parameters with the new name are no reason to skip:
     /// the fix qualifies the references they would hide ('this.count').
     /// </summary>
-    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, CancellationToken cancellationToken)
+    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, CancellationToken cancellationToken) =>
+        CanRename(field, newName, style, TypeFacts.For(field.ContainingType, cancellationToken));
+
+    /// <summary>Like the other overload, with the type's facts gathered once for all its fields.</summary>
+    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, TypeFacts facts)
     {
         var type = field.ContainingType;
         if (field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field))
@@ -232,34 +239,18 @@ internal static class FieldNames
             }
         }
 
-        if (type.GetMembers().OfType<IFieldSymbol>().Any(f =>
-            !SymbolEqualityComparer.Default.Equals(f, field) && GetNewName(f, style) == newName))
+        // Another field of the type would get the same name (the field itself is one of them).
+        if (facts.CountNewName(style, newName) > 1)
         {
             return false;
         }
 
+        // The old name as a word in a string or in code excluded by '#if', or as an inferred member name. A field
+        // name made of other characters than \w (rare formatting characters) is checked with the exact pattern.
         var oldName = field.Name;
-        var word = new Regex(@"(?<![\w@])" + Regex.Escape(oldName) + @"(?!\w)");
-        foreach (var reference in type.DeclaringSyntaxReferences)
-        {
-            var declaration = reference.GetSyntax(cancellationToken);
-            foreach (var token in declaration.DescendantTokens(descendIntoTrivia: true))
-            {
-                if ((token.IsKind(SyntaxKind.StringLiteralToken) && word.IsMatch(token.ValueText))
-                    || (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == oldName && CamelCaseNames.IsInferredMemberName(token)))
-                {
-                    return false;
-                }
-            }
-
-            if (declaration.DescendantTrivia(descendIntoTrivia: true)
-                .Any(t => t.IsKind(SyntaxKind.DisabledTextTrivia) && word.IsMatch(t.ToString())))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return !(facts.InferredNames.Contains(oldName) || (Word.Match(oldName) is { Success: true } m && m.Length == oldName.Length
+            ? facts.Words.Contains(oldName)
+            : facts.Texts.Any(t => Regex.IsMatch(t, @"(?<![\w@])" + Regex.Escape(oldName) + @"(?!\w)"))));
     }
 
     /// <summary>
@@ -312,4 +303,80 @@ internal static class FieldNames
 
     private static bool IsSourceField(IFieldSymbol field) =>
         !field.IsImplicitlyDeclared && field.Locations.Any(l => l.IsInSource);
+
+    /// <summary>
+    /// What <see cref="CanRename(IFieldSymbol, string, FieldStyle, TypeFacts)"/> needs from a type's declarations, read
+    /// once: the words in its strings and in code excluded by '#if', and its inferred anonymous/tuple member names.
+    /// </summary>
+    internal sealed class TypeFacts
+    {
+        private readonly INamedTypeSymbol type;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<FieldStyle, System.Collections.Generic.Dictionary<string, int>> newNames = new();
+
+        private TypeFacts(INamedTypeSymbol type)
+        {
+            this.type = type;
+        }
+
+        public System.Collections.Generic.List<string> Texts { get; } = new();
+
+        public System.Collections.Generic.HashSet<string> Words { get; } = new(System.StringComparer.Ordinal);
+
+        public System.Collections.Generic.HashSet<string> InferredNames { get; } = new(System.StringComparer.Ordinal);
+
+        public static TypeFacts For(INamedTypeSymbol type, CancellationToken cancellationToken)
+        {
+            var facts = new TypeFacts(type);
+
+            // Only the type's own field names matter as inferred names; checking just those skips most identifiers.
+            var fieldNames = new System.Collections.Generic.HashSet<string>(type.GetMembers().OfType<IFieldSymbol>().Select(f => f.Name), System.StringComparer.Ordinal);
+            foreach (var reference in type.DeclaringSyntaxReferences)
+            {
+                var declaration = reference.GetSyntax(cancellationToken);
+                foreach (var token in declaration.DescendantTokens(descendIntoTrivia: true))
+                {
+                    if (token.IsKind(SyntaxKind.StringLiteralToken))
+                    {
+                        facts.Texts.Add(token.ValueText);
+                    }
+                    else if (token.IsKind(SyntaxKind.IdentifierToken) && fieldNames.Contains(token.ValueText) && CamelCaseNames.IsInferredMemberName(token))
+                    {
+                        facts.InferredNames.Add(token.ValueText);
+                    }
+                }
+
+                facts.Texts.AddRange(declaration.DescendantTrivia(descendIntoTrivia: true)
+                    .Where(t => t.IsKind(SyntaxKind.DisabledTextTrivia)).Select(t => t.ToString()));
+            }
+
+            foreach (var text in facts.Texts)
+            {
+                foreach (Match match in Word.Matches(text))
+                {
+                    facts.Words.Add(match.Value);
+                }
+            }
+
+            return facts;
+        }
+
+        /// <summary>How many of the type's fields <see cref="GetNewName(IFieldSymbol, FieldStyle)"/> gives this name.</summary>
+        public int CountNewName(FieldStyle style, string newName)
+        {
+            var counts = newNames.GetOrAdd(style, s =>
+            {
+                var map = new System.Collections.Generic.Dictionary<string, int>(System.StringComparer.Ordinal);
+                foreach (var f in type.GetMembers().OfType<IFieldSymbol>())
+                {
+                    if (GetNewName(f, s) is { } name)
+                    {
+                        map[name] = map.TryGetValue(name, out var n) ? n + 1 : 1;
+                    }
+                }
+
+                return map;
+            });
+            return counts.TryGetValue(newName, out var count) ? count : 0;
+        }
+    }
 }
