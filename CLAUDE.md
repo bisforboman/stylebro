@@ -633,6 +633,12 @@ suggest or push a release tag after each batch; mention it only when a release l
   `csharp_preferred_modifier_order` in the preset and in stylebro-migrate (strongest of SA1206/SA1207; a repo's own
   order is kept). Listed under "covered with known differences".
 
+- **SA1205 -> IDE0040** (2026-10-02): probed with StyleCop 1.2 (9 SA1205 on partial parts without an access modifier:
+  classes, structs, interfaces, records, nested, static) and `dotnet format style --diagnostics IDE0040` with
+  `for_non_interface_members`: all 9 fixed (the other part's modifier or the default), StyleCop quiet afterwards.
+  stylebro-migrate maps SA1205 to IDE0040 with SA1400; the preset already had IDE0040 on. Case added to
+  sdk-check-cases.ps1 and the row to data/sdk-check.csv.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

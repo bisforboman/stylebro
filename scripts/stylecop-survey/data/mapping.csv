@@ -77,7 +77,7 @@ SA1201,StyleBro **BRO1001** (done)
 SA1202,StyleBro **BRO1001** (done)
 SA1203,StyleBro **BRO1001** (done)
 SA1204,StyleBro **BRO1001** (done)
-SA1205,Not yet: StyleBro candidate. Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default).
+SA1205,SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; adds the other part's modifier or the default; measured separately 2026-10-02: 9/9 fixed)
 SA1206,"SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order)"
 SA1207,SDK: IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`)
 SA1208,SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)

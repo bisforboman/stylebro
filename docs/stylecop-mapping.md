@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 55 SDK, 86 StyleBro (86 done), 44 drop, 8 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 86 StyleBro (86 done), 44 drop, 7 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -20,7 +20,7 @@ Scripts and data: [scripts/stylecop-survey](../scripts/stylecop-survey).
 - **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118 and 1.2.0-beta.556, read from the analyzer DLLs, including whether StyleCop itself ships a code fix. 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants.
 - **Teams keeping it on**: the effective setting for production code in 3 repos that use StyleCop: [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) (`ea1e3f3`, StyleCop 1.2.0-beta.556), [Polly](https://github.com/App-vNext/Polly) (`0275bc2`, StyleCop 1.2.0-beta.556), a private 30-project app (StyleCop 1.1.118). Shown as OTel / Polly / App.
 - **Diagnostics with every rule on**: each repo built with all StyleCop rules enabled as warnings (and XML docs on), counting unique diagnostics. Shown as OTel / Polly / App. Where a team keeps a rule on, the count is near zero; where it is off, the count shows how much code would change. 10 of OpenTelemetry's 81 projects (examples and some tests) did not compile in the survey (CS1705 in a shallow clone) and are missing from its counts.
-- **SDK check**: for 93 rules, a small violating example was formatted with `dotnet format style` and `dotnet format whitespace` (SDK only, not StyleCop's own fixes) using StyleCop-like SDK settings, and StyleCop was run again. "fixed" means the diagnostic was gone. Each rule was checked on one example, so a "fixed" rule can still have cases the SDK handles differently.
+- **SDK check**: for 94 rules, a small violating example was formatted with `dotnet format style` and `dotnet format whitespace` (SDK only, not StyleCop's own fixes) using StyleCop-like SDK settings, and StyleCop was run again. "fixed" means the diagnostic was gone. Each rule was checked on one example, so a "fixed" rule can still have cases the SDK handles differently.
 
 ## Not yet done, by demand
 
@@ -34,7 +34,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1103](skipped-rules.md#sa1103) | Query clauses should be on separate lines or all on one line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1104](skipped-rules.md#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1105](skipped-rules.md#sa1105) | Query clauses spanning multiple lines should begin on own line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1205](skipped-rules.md#sa1205) | Partial elements should declare access | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
@@ -181,7 +180,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1202 | Elements should be ordered by access | on | yes | on / off / off | 0 / 71 / 185 |  | StyleBro **BRO1001** (done) |
 | SA1203 | Constants should appear before fields | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1001** (done) |
 | SA1204 | Static elements should appear before instance elements | on | yes | on / on / off | 0 / 2 / 50 |  | StyleBro **BRO1001** (done) |
-| SA1205 | Partial elements should declare access | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default). ([details](skipped-rules.md#sa1205)) |
+| SA1205 | Partial elements should declare access | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; adds the other part's modifier or the default; measured separately 2026-10-02: 9/9 fixed) |
 | SA1206 | Declaration keywords should follow order | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order) ([details](skipped-rules.md#sa1206)) |
 | SA1207 | Protected should come before internal | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`) |
 | SA1208 | System using directives should be placed before other using directives | on | yes | on / on / off | 0 / 0 / 57 | fixed | SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`) |

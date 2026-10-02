@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-56 rules: 8 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+55 rules: 7 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -29,7 +29,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1103](#sa1103) | Query clauses should be on separate lines or all on one line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1104](#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1105](#sa1105) | Query clauses spanning multiple lines should begin on own line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1205](#sa1205) | Partial elements should declare access | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
@@ -141,16 +140,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 **Why:** Not done yet. A multi-line clause starts on its own line.
 
 **To revisit:** Part of the SA1102-SA1105 batch.
-
-<a id="sa1205"></a>
-
-### SA1205: Partial elements should declare access
-
-Ordering rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default).
-
-**To revisit:** Check first whether IDE0040 already does it with `dotnet_style_require_accessibility_modifiers` (not in the SDK check). Semantic model otherwise. Small.
 
 <a id="sa1316"></a>
 

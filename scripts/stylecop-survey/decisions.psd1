@@ -22,6 +22,7 @@
         SA1208 = 'using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)'
         SA1210 = 'using sorting in `dotnet format`'
         SA1211 = 'using sorting in `dotnet format`'
+        SA1205 = 'IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; adds the other part''s modifier or the default; measured separately 2026-10-02: 9/9 fixed)'
         SA1206 = 'IDE0036 (`csharp_preferred_modifier_order`, the SDK default order)'
         SA1207 = 'IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`)'
         SA1400 = 'IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn''t ask for)'

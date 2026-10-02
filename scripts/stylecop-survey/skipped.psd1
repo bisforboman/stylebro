@@ -45,8 +45,6 @@
             Revisit = 'Nothing to port.' }
 
         # ---- Ordering ----------------------------------------------------------------------------------------------
-        SA1205 = @{ Status = 'Candidate'; Why = 'Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default).'
-            Revisit = 'Check first whether IDE0040 already does it with `dotnet_style_require_accessibility_modifiers` (not in the SDK check). Semantic model otherwise. Small.' }
 
         # ---- Naming ------------------------------------------------------------------------------------------------
         SA1301 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.'

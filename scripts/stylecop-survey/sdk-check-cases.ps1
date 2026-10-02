@@ -73,6 +73,7 @@ $cases = [ordered]@{
     SA1209 = "namespace Cases.SA1209`n{`n    using A = System.Text;`n    using System;`n`n    class C { A.StringBuilder s; Type t; }`n}"
     SA1216 = "namespace Cases.SA1216`n{`n    using static System.Math;`n    using System;`n`n    class C { Type t; double d = Abs(1); }`n}"
     SA1217 = "namespace Cases.SA1217`n{`n    using static System.Math;`n    using static System.Console;`n`n    class C { double d = Abs(1); void M() => WriteLine(); }`n}"
+    SA1205 = "public partial class C { }`npartial class C { }`npartial class D { }"
     SA1400 = 'class C { void M() { } }'
     SA1407 = 'class C { int M(int a, int b, int c) => a + b * c; }'
     SA1408 = 'class C { bool M(bool a, bool b, bool c) => a || b && c; }'

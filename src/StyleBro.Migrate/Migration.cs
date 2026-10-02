@@ -490,7 +490,7 @@ internal static class Migration
         lines.Add($"csharp_prefer_braces = {(setup.IsOn("SA1503") ? "true" : setup.IsOn("SA1519") || setup.IsOn("SA1520") ? "when_multiline" : "false")}");
 
         // Access modifiers, type aliases, parentheses.
-        Rule("IDE0040", "SA1400");
+        Rule("IDE0040", "SA1400", "SA1205");
         // SA1400 doesn't ask for modifiers on interface members.
         lines.Add("dotnet_style_require_accessibility_modifiers = for_non_interface_members");
         // Modifier order (the SDK's default order; it puts access modifiers first and static next, like SA1206/SA1207).

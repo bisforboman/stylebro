@@ -25,6 +25,7 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", on.Lines);
         Assert.Contains(on.Lines, l => l.StartsWith("csharp_preferred_modifier_order = public,private,protected,internal,", StringComparison.Ordinal));
         Assert.Contains("SA1207", on.Covered);
+        Assert.Contains("SA1205", on.Covered);  // IDE0040 also adds the modifier to every part of a partial type
 
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1206.severity = none\ndotnet_diagnostic.SA1207.severity = none\n");
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = none", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
