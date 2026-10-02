@@ -562,6 +562,34 @@ suggest or push a release tag after each batch; mention it only when a release l
 - When the self-check moves to a release with this fix (`StyleBroSelfVersion`), the preset starts applying to
   StyleBro's own code too (e.g. using sorting): run `dotnet format` and commit that separately.
 
+## First run through the package (2026-10-03)
+
+- `scratchpad/pkgrun.ps1`: the package from a local feed (hook adds only a PackageReference + feed, isolated
+  NUGET_PACKAGES), `stylebro-migrate init --write`, then plain `dotnet format` (whitespace + style + analyzers), i.e.
+  exactly a new user's first run. FFMpegCore: 142 files in one pass, compiles, second run clean.
+- **Serilog: `dotnet format` wrote NOTHING.** First "Changes must be within bounds of SourceText" in BRO1108's Fix All:
+  `LinkedFileFixAllProvider` (and `CamelCaseRenamer`) applied every linked copy's edits to the FIRST copy's text, but
+  `dotnet format` runs its whitespace and style phases first and can leave a multi-targeted file's copies DIFFERENT.
+  First fix: copies with identical text share edits, diverged copies fixed on their own. That turned Newtonsoft.Json
+  into 1,722 conflict-marker lines (StyleBro alone, no `init`): whole-file fixes (BRO1001) made different edits in
+  each copy, which `dotnet format`'s merge can only write as conflicts. Final: when a file's copies differ, ONLY THE
+  FIRST copy (group of identical copies) is fixed and the rest left unchanged; Roslyn's merge combines its edits with
+  the others' untouched text, and `#if`-only fixes come on the next run. Renamer: one text variant per path (file key
+  = path|checksum, first key per path wins). Test `CopiesWithDifferentText_OnlyTheFirstIsFixed`.
+- Then still nothing written: the SDK's own fixers break multi-targeted repos under `dotnet format` once `init`'s
+  severities are on, WITHOUT StyleBro too (plain `dotnet format` alone fine). Serilog: IDE0011 crashes Roslyn's
+  `LinkedFileDiffMergingSession` (unhandled exception, nothing written), IDE0040 writes conflict markers;
+  Newtonsoft.Json: plain dotnet format + init severities = 172 conflict-marker lines (79 files, 0 markers without).
+  Bisect script `scratchpad/bisect-ide.ps1` (one rule at a time): IDE0011 crash, IDE0040/IDE0047 markers, IDE0055 at
+  warning crash (its fix runs in the style pass), IDE0048 a broken net462 edit; with StyleBro also IDE2000-2003 (one
+  blank-line conflict per repo). `init` detects multi-targeted projects (`<TargetFrameworks>` with ';' in a .csproj or
+  .props) and writes those 8 as `suggestion` (`InitCommand.UnsafeWhenMultiTargeted`); `--write` (StyleCop) keeps them
+  and adds a report note. Final first runs (package + init): Serilog 169 files, Newtonsoft.Json 704 files, 0 conflict
+  markers, 0 new compile errors; Newtonsoft needs 2 runs (2nd: 135 files), then only the 49 guard-kept renames remain
+  (the report lists each once per target framework: 270 entries). FFMpegCore 1 run.
+- DocumentationAnalyzer prefilter (skip members that can't be overrides/implementations) measured NO gain (143-150 vs
+  155-166 ms): reverted.
+
 ## Real-world testing log
 
 - **FFMpegCore** (open source, 6 projects, 180 files, no StyleCop; 2026-09-29):

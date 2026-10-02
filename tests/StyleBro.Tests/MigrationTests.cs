@@ -474,6 +474,20 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void Init_InAMultiTargetedRepository_WritesTheUnsafeRulesAsSuggestions()
+    {
+        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFrameworks>net8.0;net10.0</TargetFrameworks></PropertyGroup></Project>");
+
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+
+        Assert.All(InitCommand.UnsafeWhenMultiTargeted, id => Assert.Contains($"dotnet_diagnostic.{id}.severity = suggestion", editorConfig));
+        Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", editorConfig);
+        Assert.DoesNotContain("dotnet_diagnostic.IDE0011.severity = warning", InitCommand.Block(multiTargeted: true));
+        Assert.Contains("dotnet_diagnostic.IDE0011.severity = warning", InitCommand.Block());
+    }
+
+    [Fact]
     public void ThePreset_SetsNoBuiltInRuleSeverities()
     {
         // 'dotnet format' ignores rule severities in a package's global config; they belong in 'stylebro-migrate init'.

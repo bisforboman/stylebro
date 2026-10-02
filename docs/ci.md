@@ -93,4 +93,12 @@ steps:
   hide whitespace formatting; either run `dotnet format whitespace` once, or check only `dotnet format style` and
   `dotnet format analyzers` in CI until you do.
 - **Several target frameworks:** `dotnet format` checks every framework's copy of a file. StyleBro's fixes give all
-  copies the same text, so `#if` code doesn't cause conflicts.
+  copies the same text, so `#if` code doesn't cause conflicts; when `dotnet format`'s earlier passes leave the copies
+  different, StyleBro gives all of them the first copy's fixed text, and a second run picks up what only another
+  copy's `#if` code needed (Newtonsoft.Json, 8 target frameworks: clean after two runs). Several of the SDK's fixes
+  aren't safe there: on Serilog and Newtonsoft.Json, IDE0011 (braces) and IDE0055 (formatting, at warning) crashed
+  `dotnet format` (nothing written), and IDE0040 (access modifiers), IDE0047/IDE0048 (parentheses) and the blank-line
+  rules IDE2000/IDE2002/IDE2003 wrote merge conflict markers. In a repository with multi-targeted projects,
+  `stylebro-migrate init` writes those as suggestions (shown in the IDE, not fixed by `dotnet format --severity warn`;
+  whitespace is still formatted). Turn them back to `warning` only after checking that `dotnet format` handles your
+  code.

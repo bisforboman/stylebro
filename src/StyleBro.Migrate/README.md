@@ -31,7 +31,9 @@ stylebro-migrate init [path] [--write]
 
 Adds the severities of the built-in .NET rules StyleBro relies on (IDE0011 braces, IDE0040 access modifiers, IDE0055
 formatting, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
-a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too.
+a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. In a
+repository with multi-targeted projects, IDE0011, IDE0040, IDE0047, IDE0048, IDE0055, IDE2000, IDE2002 and IDE2003 are
+written as suggestions: their `dotnet format` fixes break such projects (a crash or merge conflict markers).
 
 ## Baseline
 
