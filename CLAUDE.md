@@ -145,6 +145,8 @@ suggest or push a release tag after each batch; mention it only when a release l
   Exempt like StyleCop 1.2: already spaced (incl. `//  two`), empty, `///`/`////`, `//--`. StyleCop 1.1.118 also
   reported `//  two spaces` (the only difference in the private app: 77 vs 78). Whitespace-only -> `//`.
 - Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
+- **BRO1006** (SA1006, 2026-10-03, `Spacing/DirectiveSpacingAnalyzer.cs`) `# if` -> `#if`: StyleCop's check (a `#` whose
+  trailing trivia has no line break, reported on the next token); empty `# ` directives skipped. Parity `directive-spacing`: 8/8, identical.
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
   defaults, case labels, patterns). Same results as StyleCop.
 - **BRO1401** (SA1413, maintainability block) trailing comma in multi-line array/object/collection/with initializers,

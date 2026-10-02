@@ -41,6 +41,7 @@
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
         SA1004 = 'StyleBro **BRO1005** (done), same positions and output as StyleCop'
+        SA1006 = 'StyleBro **BRO1006** (done), same positions and output as StyleCop'
         SA1112 = 'StyleBro **BRO1116** (done), same positions and output as StyleCop'
         SA1113 = 'StyleBro **BRO1117** (done), same positions and output as StyleCop'
         SA1114 = 'StyleBro **BRO1118** (done), with a fix (StyleCop has none); a comment before the first item is not reported'

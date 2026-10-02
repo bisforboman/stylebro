@@ -124,6 +124,9 @@ dotnet_diagnostic.BRO1125.severity = warning
 # BRO1126: using directives inside a namespace are fully qualified (SA1135)
 dotnet_diagnostic.BRO1126.severity = warning
 
+# BRO1006: no space between '#' and a preprocessor keyword (SA1006)
+dotnet_diagnostic.BRO1006.severity = warning
+
 # BRO1127-BRO1130: query clause layout (SA1102-SA1105)
 dotnet_diagnostic.BRO1127.severity = warning
 dotnet_diagnostic.BRO1128.severity = warning

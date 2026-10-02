@@ -20,10 +20,6 @@
         SA0002 = @{ Status = 'NotApplicable'; Why = 'StyleCop''s own diagnostic for an invalid stylecop.json.'
             Revisit = 'Nothing to port. stylebro-migrate parses stylecop.json leniently (comments, trailing commas).' }
 
-        # ---- Spacing -----------------------------------------------------------------------------------------------
-        SA1006 = @{ Status = 'Candidate'; Why = 'Not done yet. `# if` -> `#if`; the SDK doesn''t fix it (measured). Rare in practice.'
-            Revisit = 'Text edit inside the directive trivia. Small, low value.' }
-
         # ---- Readability -------------------------------------------------------------------------------------------
         SA1100 = @{ Status = 'Candidate'; Why = 'Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior.'
             Revisit = 'Needs the semantic model; only safe when M isn''t virtual/overridable or the type is sealed. Decide whether to report the unsafe cases without a fix (design rule 3 says skip).' }

@@ -677,6 +677,16 @@ internal static class Descriptors
         description: "A clause that spans several lines starts on its own line. Replaces StyleCop SA1105.",
         helpLinkUri: HelpBase + DiagnosticIds.MultiLineQueryClause + ".md");
 
+    public static readonly DiagnosticDescriptor DirectiveSpacing = new(
+        id: DiagnosticIds.DirectiveSpacing,
+        title: "Preprocessor keywords should not be preceded by a space",
+        messageFormat: "Remove the space between '#' and '{0}'",
+        category: "Spacing",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'#if', not '# if'. Replaces StyleCop SA1006.",
+        helpLinkUri: HelpBase + DiagnosticIds.DirectiveSpacing + ".md");
+
     public static readonly DiagnosticDescriptor EmptyAttributeParentheses = new(
         id: DiagnosticIds.EmptyAttributeParentheses,
         title: "Attribute constructor should not use unnecessary parenthesis",

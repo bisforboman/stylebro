@@ -19,11 +19,10 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-51 rules: 3 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+50 rules: 2 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
-| [SA1006](#sa1006) | Preprocessor keywords should not be preceded by space | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1100](#sa1100) | Do not prefix calls with base unless local implementation exists | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
@@ -76,16 +75,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
 
 ## Not yet: StyleBro candidates
-
-<a id="sa1006"></a>
-
-### SA1006: Preprocessor keywords should not be preceded by space
-
-Spacing rule. StyleCop: on by default, has a code fix; SDK check: not fixed. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. `# if` -> `#if`; the SDK doesn't fix it (measured). Rare in practice.
-
-**To revisit:** Text edit inside the directive trivia. Small, low value.
 
 <a id="sa1100"></a>
 

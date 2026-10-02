@@ -7,6 +7,7 @@ public static class DiagnosticIds
     public const string PropertyAccessorOrder = "BRO1003";
     public const string EventAccessorOrder = "BRO1004";
     public const string DocumentationLineSpace = "BRO1005";
+    public const string DirectiveSpacing = "BRO1006";
     public const string EmptyStatement = "BRO1101";
     public const string CombinedAttributes = "BRO1102";
     public const string ConstantOnLeft = "BRO1103";

@@ -4,6 +4,11 @@
 @{
     Sets = @(
         @{
+            Name     = 'directive-spacing'
+            Map      = @('SA1006=BRO1006')
+            Expected = @()
+        }
+        @{
             Name     = 'empty-statements-attributes'
             Map      = @('SA1106=BRO1101', 'SA1133=BRO1102')
             Expected = @(

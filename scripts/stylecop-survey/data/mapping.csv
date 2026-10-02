@@ -7,7 +7,7 @@ SA1002,SDK: IDE0055 formatting
 SA1003,SDK: IDE0055 formatting
 SA1004,"StyleBro **BRO1005** (done), same positions and output as StyleCop"
 SA1005,"StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)"
-SA1006,Not yet: StyleBro candidate. Not done yet. `# if` -> `#if`; the SDK doesn't fix it (measured). Rare in practice.
+SA1006,"StyleBro **BRO1006** (done), same positions and output as StyleCop"
 SA1007,SDK: IDE0055 formatting
 SA1008,SDK: IDE0055 formatting
 SA1009,SDK: IDE0055 formatting

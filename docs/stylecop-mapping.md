@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 90 StyleBro (90 done), 44 drop, 3 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 91 StyleBro (91 done), 44 drop, 2 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -28,7 +28,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Status |
 |---|---|---|---|---|
-| [SA1006](skipped-rules.md#sa1006) | Preprocessor keywords should not be preceded by space | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1100](skipped-rules.md#sa1100) | Do not prefix calls with base unless local implementation exists | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 
@@ -246,7 +245,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1003 | Symbols should be spaced correctly | on | yes | on / off / off | 0 / 1 / 16 | fixed | SDK: IDE0055 formatting |
 | SA1004 | Documentation lines should begin with single space | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1005** (done), same positions and output as StyleCop |
 | SA1005 | Single line comments should begin with single space | on | yes | on / on / off | 0 / 0 / 78 | not fixed | StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`) |
-| SA1006 | Preprocessor keywords should not be preceded by space | on | yes | on / on / on | 0 / 0 / 0 | not fixed | Not yet: StyleBro candidate. Not done yet. `# if` -> `#if`; the SDK doesn't fix it (measured). Rare in practice. ([details](skipped-rules.md#sa1006)) |
+| SA1006 | Preprocessor keywords should not be preceded by space | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1006** (done), same positions and output as StyleCop |
 | SA1007 | Operator keyword should be followed by space | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE0055 formatting |
 | SA1008 | Opening parenthesis should be spaced correctly | on | yes | on / off / off | 0 / 1 / 17 | fixed | SDK: IDE0055 formatting |
 | SA1009 | Closing parenthesis should be spaced correctly | on | yes | on / off / off | 0 / 8 / 1,108 | fixed | SDK: IDE0055 formatting |

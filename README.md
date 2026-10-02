@@ -19,6 +19,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1003](docs/rules/BRO1003.md) | Property accessors should follow order | SA1212 | Yes |
 | [BRO1004](docs/rules/BRO1004.md) | Event accessors should follow order | SA1213 | Yes |
 | [BRO1005](docs/rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Yes |
+| [BRO1006](docs/rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Yes |
 | [BRO1101](docs/rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Yes |
 | [BRO1102](docs/rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Yes |
 | [BRO1103](docs/rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Yes |
