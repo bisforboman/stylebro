@@ -20,7 +20,7 @@ The preset follows StyleCop's defaults except here.
 | Using placement (SA1200) | Inside the namespace | Outside (`csharp_using_directive_placement = outside_namespace`) | Works with file-scoped namespaces, matches the .NET templates; all three surveyed teams turn SA1200 off. User decision. | `csharp_using_directive_placement = inside_namespace`. |
 | Regions between members (SA1124, [BRO1112](rules/BRO1112.md)) | Reported | Off (`dotnet_diagnostic.BRO1112.severity = none`) | Removing every region in an existing codebase is a large one-time change, so it's opt-in. (Regions inside code, SA1123/[BRO1113](rules/BRO1113.md), stay on.) | `dotnet_diagnostic.BRO1112.severity = warning`. |
 | Missing documentation (SA1600, SA1601, SA1602, SA1611, SA1615, ...) | Reported | Only overrides and interface implementations, fixed with `<inheritdoc/>` ([BRO1601](rules/BRO1601.md)) | The only automatic fix for other members is placeholder text, which satisfies the rule without documenting anything. User decision. | Not available (keep StyleCop's SA1600 for reporting only, or use the compiler's CS1591). |
-| File header (SA1633-SA1641) | Required, XML format (`// <copyright file="X.cs" company="...">`) | Not required | A header needs company/copyright text from the team. The SDK's IDE0073 writes a plain header; StyleCop's XML format isn't supported yet ([SA1634](skipped-rules.md#sa1634)). | `file_header_template = Copyright (c) ...` and `dotnet_diagnostic.IDE0073.severity = warning` (plain header). |
+| File header (SA1633-SA1641) | Required, XML format (`// <copyright file="X.cs" company="PlaceholderCompany">`) | XML format with [BRO1615](rules/BRO1615.md), but only once `stylebro_file_header_company` is set | A header needs the team's company name and copyright text; a placeholder header everywhere is worse than none. | `stylebro_file_header_company = YourCompany` (and `stylebro_file_header_copyright` if the text differs). For a plain header (`xmlHeader: false`): `file_header_template = ...` and `dotnet_diagnostic.IDE0073.severity = warning`. |
 
 Settings that look different but match StyleCop: `stylebro_private_field_naming = camelCase` (SA1306/SA1309: no
 leading underscore), `stylebro_document_*` (stylecop.json's documentationRules defaults), `stylebro_member_*`
@@ -41,7 +41,7 @@ always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covere
 - **IDE2000** (for SA1507) also removes extra blank lines at the start of a file and right before `}`, which StyleCop
   leaves to SA1517 and SA1508.
 - **IDE0048** (for SA1407, SA1408) may need a second `dotnet format` run.
-- **IDE0073** (for SA1633) writes a plain header, not StyleCop's XML header.
+- **IDE0073** (for SA1633 with `xmlHeader: false`) writes a plain header; the XML header is [BRO1615](rules/BRO1615.md).
 - **Using sorting** in `dotnet format` happens whenever `dotnet_sort_system_directives_first` is set, even to `false`.
 
 ## Rule by rule
@@ -77,6 +77,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:` | Already ends a sentence; StyleCop's fix writes `question?.`. |
 | [BRO1611](rules/BRO1611.md) (SA1612) | Constructors and operators | Matches StyleCop 1.2, which doesn't check them either. |
 | [BRO1612](rules/BRO1612.md), [BRO1614](rules/BRO1614.md) (SA1613, SA1621) | Unnamed `<param>`/`<typeparam>` tags whose (type) parameter isn't certain (two unnamed tags for three parameters, an unnamed tag next to a stale one) | The fix would have to guess the name. |
+| [BRO1615](rules/BRO1615.md) (SA1633-SA1638, SA1640, SA1641) | Anything until `stylebro_file_header_company` is set; headers in a `/* */` comment; a broken XML header that already has a `<copyright` tag; a tag sharing its first or last line with other text. One diagnostic per file, on the first line of code when the header is missing. | Placeholder headers help nobody; a broken header needs a person; only whole lines are rewritten. |
 
 ### Reports more than StyleCop
 
@@ -110,6 +111,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1610](rules/BRO1610.md), [BRO1611](rules/BRO1611.md) (SA1627, SA1612) | None | Removes the empty `<remarks>`; renames, removes and reorders `<param>` tags |
 | [BRO1612](rules/BRO1612.md), [BRO1613](rules/BRO1613.md), [BRO1614](rules/BRO1614.md) (SA1613, SA1620, SA1621) | None | Names unnamed tags when certain; renames, removes and reorders `<typeparam>` tags |
 | [BRO1112](rules/BRO1112.md) (SA1124) | Removes a region between switch-expression arms with the blank lines around it | Keeps one blank line where it was |
+| [BRO1615](rules/BRO1615.md) (SA1633-SA1641) | Deletes a plain comment header (license text, notes) when it writes the XML header | Keeps any other comment below the new header; otherwise the same headers |
 
 ### Same as StyleCop
 

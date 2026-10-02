@@ -174,15 +174,15 @@ SA1629,"StyleBro **BRO1603** (done). Differs from StyleCop: text ending with `?`
 SA1630,Drop: StyleCop never reports it. Off by default and no diagnostic on a one-word summary (probed).
 SA1631,Drop: StyleCop never reports it. Off by default and no diagnostic on a summary of symbols (probed).
 SA1632,Drop: StyleCop never reports it. Off by default and no diagnostic on a one-letter summary (probed).
-SA1633,SDK: IDE0073 (`file_header_template`)
-SA1634,"Not yet: StyleBro candidate. StyleCop's XML file header (`// <copyright file=""X.cs"" company=""Y"">`) has no SDK equivalent; IDE0073 only writes a plain header (SA1633 with `xmlHeader: false` is covered)."
-SA1635,Not yet: StyleBro candidate. XML file header: copyright text missing. See SA1634.
-SA1636,Not yet: StyleBro candidate. XML file header: copyright text doesn't match stylecop.json. See SA1634.
-SA1637,Not yet: StyleBro candidate. XML file header: file name missing. See SA1634.
-SA1638,Not yet: StyleBro candidate. XML file header: file name doesn't match the file. See SA1634.
+SA1633,SDK: IDE0073 (`file_header_template`) for a plain header (`xmlHeader: false`); StyleBro **BRO1615** for the XML header
+SA1634,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
+SA1635,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
+SA1636,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
+SA1637,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
+SA1638,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
 SA1639,Drop: Off by default; the header's `<summary>` has to be written by a person.
-SA1640,Not yet: StyleBro candidate. XML file header: company attribute missing. See SA1634.
-SA1641,Not yet: StyleBro candidate. XML file header: company doesn't match stylecop.json. See SA1634.
+SA1640,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
+SA1641,"StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them)"
 SA1642,"StyleBro **BRO1606** (done), same results as StyleCop (the fix adds a space after the standard sentence)"
 SA1643,"StyleBro **BRO1607** (done), same results as StyleCop (the fix adds a space after the standard sentence)"
 SA1644,"Drop: StyleCop never reports it. StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx)."

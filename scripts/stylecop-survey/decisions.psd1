@@ -32,7 +32,7 @@
         SA1508 = 'IDE2002 (experimental)'
         SA1513 = 'IDE2003 (experimental)'
         SA1517 = 'only as a side effect of IDE0073 (file header); not fixed without `file_header_template`'
-        SA1633 = 'IDE0073 (`file_header_template`)'
+        SA1633 = 'IDE0073 (`file_header_template`) for a plain header (`xmlHeader: false`); StyleBro **BRO1615** for the XML header'
     }
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
@@ -55,6 +55,13 @@
         SA1613 = 'StyleBro **BRO1612** (done) when the name is certain (one unnamed tag and one undocumented parameter, or all unnamed with one per parameter); StyleCop reports every unnamed tag and has no fix'
         SA1620 = 'StyleBro **BRO1613** (done), same positions as StyleCop, with a fix (StyleCop has none): stale tags renamed or removed, tags reordered'
         SA1621 = 'StyleBro **BRO1614** (done) when the name is certain, like BRO1612'
+        SA1634 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
+        SA1635 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
+        SA1636 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
+        SA1637 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
+        SA1638 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
+        SA1640 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
+        SA1641 = 'StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop''s deletes them)'
         SA1504 = 'StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop''s applies one direction to the whole project) and keeps comments'
         SA1501 = 'StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported'
         SA1502 = 'StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)'

@@ -137,22 +137,8 @@
             Revisit = 'Nothing to port.' }
         SA1632 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on a one-letter summary (probed).'
             Revisit = 'Nothing to port.' }
-        SA1634 = @{ Status = 'Candidate'; Why = 'StyleCop''s XML file header (`// <copyright file="X.cs" company="Y">`) has no SDK equivalent; IDE0073 only writes a plain header (SA1633 with `xmlHeader: false` is covered).'
-            Revisit = 'One BRO rule for SA1634-SA1641 that writes/corrects the XML header from stylecop.json''s documentationRules (companyName, copyrightText, headerDecoration, variables). Medium; worth it for teams on the default XML header.' }
-        SA1635 = @{ Status = 'Candidate'; Why = 'XML file header: copyright text missing. See SA1634.'
-            Revisit = 'With SA1634.' }
-        SA1636 = @{ Status = 'Candidate'; Why = 'XML file header: copyright text doesn''t match stylecop.json. See SA1634.'
-            Revisit = 'With SA1634.' }
-        SA1637 = @{ Status = 'Candidate'; Why = 'XML file header: file name missing. See SA1634.'
-            Revisit = 'With SA1634.' }
-        SA1638 = @{ Status = 'Candidate'; Why = 'XML file header: file name doesn''t match the file. See SA1634.'
-            Revisit = 'With SA1634. Linked files (multi-targeting) have one physical name, so this is safe.' }
         SA1639 = @{ Status = 'Drop'; Why = 'Off by default; the header''s `<summary>` has to be written by a person.'
             Revisit = 'Nothing automatic.' }
-        SA1640 = @{ Status = 'Candidate'; Why = 'XML file header: company attribute missing. See SA1634.'
-            Revisit = 'With SA1634.' }
-        SA1641 = @{ Status = 'Candidate'; Why = 'XML file header: company doesn''t match stylecop.json. See SA1634.'
-            Revisit = 'With SA1634.' }
         SA1644 = @{ Status = 'NotInStyleCop'; Why = 'StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx).'
             Revisit = 'Nothing to port.' }
         SA1645 = @{ Status = 'Drop'; Why = 'Off by default; a missing `<include>` file can''t be fixed automatically.'
@@ -186,7 +172,5 @@
             Revisit = 'Nothing to configure in IDE2000.' }
         SA1600 = @{ Why = 'BRO1601 adds `<inheritdoc/>` to overrides and implementations; other missing documentation isn''t reported (no stubs, user decision).'
             Revisit = 'Revisit with the stub decision (also SA1601, SA1602, SA1604-SA1607, SA1609-SA1611, SA1614-SA1616, SA1618, SA1619, SA1622).' }
-        SA1633 = @{ Why = 'IDE0073 writes a plain header from `file_header_template`; StyleCop''s default XML header isn''t migrated (stylebro-migrate notes it).'
-            Revisit = 'With the SA1634-SA1641 header rule.' }
     }
 }

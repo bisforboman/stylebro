@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 64 rules; 330 unit tests (incl. every doc example), all green (2026-10-01). Migration tool
+(see the log below) and 65 rules; 360 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.6 (54 rules, released 2026-10-01, the first prerelease published without an approval step) is on
 nuget.org with StyleBro.Migrate; earlier: alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -177,7 +177,9 @@ suggest or push a release tag after each batch; mention it only when a release l
   StyleBro's fixed output must also be clean ("StyleBro fix leaves: ..." otherwise; this found a BRO1506 bug:
   the empty line after a file's final line break counted as a blank line below a comment). `CompareOutput = $false`
   skips the output diff when StyleCop has no fix (SA1117) or a broken one (SA1312/SA1313: under `dotnet format`
-  its rename fix applies a different subset of renames per run). All 21 sets pass. Add a set for every new rule.
+  its rename fix applies a different subset of renames per run). All 28 sets pass. Add a set for every new rule.
+  Sets may map several SA ids to one BRO id (StyleCop's reports at one position count once) and set `StyleCopJson`/
+  `EditorConfig` (file-header).
 - Tests use the generic `Verifier<TAnalyzer, TCodeFix>`; each skip condition was checked by disabling it and
   confirming a test fails.
 
@@ -263,7 +265,8 @@ suggest or push a release tag after each batch; mention it only when a release l
   SA1615, SA1609, ...) can only be "fixed" by inserting placeholder text, which satisfies the rule but documents
   nothing (SA1600 alone: ~28,000 findings in the three surveyed repos). StyleBro reports missing documentation only
   where the fix is real: overrides and interface implementations get `/// <inheritdoc/>` (BRO1601). Everything else
-  in this block corrects existing documentation. File headers (SA1633-SA1641) are the SDK's IDE0073.
+  in this block corrects existing documentation. Plain file headers (SA1633, `xmlHeader: false`) are the SDK's IDE0073;
+  the XML header is BRO1615.
 - Done (one `DocumentationAnalyzer` + `DocumentationCodeFixProvider`, logic in `src/StyleBro.Analyzers/Documentation/`):
   - **BRO1601** (SA1600 subset) `/// <inheritdoc/>` on undocumented overrides/implementations (implicit and explicit,
     via `FindImplementationForInterfaceMember`); which members by effective accessibility, like stylecop.json:
@@ -298,6 +301,25 @@ suggest or push a release tag after each batch; mention it only when a release l
     unnamed); otherwise not reported (StyleCop reports all, no fix). Parity `documentation-typeparams`: 15/15.
   - Not implemented in StyleCop 1.2 (never report): SA1628, SA1644. Dropped (would need placeholder text): SA1602,
     SA1606, SA1609, SA1611, SA1614-SA1616, SA1618.
+- **BRO1615** (SA1633 with the XML header, SA1634-SA1638, SA1640, SA1641; 2026-10-02; `Documentation/FileHeaders.cs`,
+  `FileHeaderAnalyzer`, `FileHeaderCodeFixProvider`): one rule, one diagnostic per file. Does nothing until
+  `stylebro_file_header_company` is set (preset: warning; StyleCop's default company is `PlaceholderCompany`).
+  `stylebro_file_header_copyright` (default StyleCop's text; `
+`, `{companyName}`, `{fileName}`),
+  `stylebro_file_header_decoration`. Header read exactly like StyleCop's `FileHeaderHelpers` (source read from GitHub:
+  `//` comments up to a blank line, `//-` borders skipped, `<root>`-wrapped XML, no element = malformed). Text compared
+  line by line, trimmed; file name ordinal. Fix: rewrites only the `<copyright>` tag's lines; no tag -> inserted at the
+  header's first non-border line; plain header equal to the copyright text -> replaced; any other plain comment -> new
+  header above + blank line (StyleCop's fix DELETES it). Skipped: `/* */` headers, a malformed header containing
+  `<copyright` (a person repairs it), a tag sharing its first/last line with other text, whitespace-only files.
+  Missing header reported at the first token (StyleCop: 0,0), so a `#pragma warning disable` at the top suppresses it
+  (the test framework checks exactly that). Parity `file-header`: positions and fixed output identical to StyleCop's
+  apart from the documented skips/kept comments. Migration: on when xmlHeader (default true) and all eight SA rules are
+  on; writes company/copyright (custom `variables` expanded; also for IDE0073's template now)/decoration. Doc examples
+  can now carry an ```ini block (between `## Example` and `### Before`) used as their .editorconfig.
+  GOTCHA from probing: `dotnet format` printed "Unable to fix SA1633. Code fix SettingsFileCodeFixProvider doesn't
+  support Fix All" but StyleCop's FileHeaderCodeFixProvider still ran; a backup copy of the probe files INSIDE the
+  probe project got rewritten too and hid it. Keep probe backups outside the project folder.
 - XML-based rules (BRO1603-BRO1611) need `GenerateDocumentationFile` (the compiler only parses docs then), like
   StyleCop's SA0001. Messy and the parity projects enable it. Structured doc nodes on continuation lines include the
   `///` in their span: locate elements by their first token (`DocumentationTags.GetStart`).
@@ -568,6 +590,14 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **Batch 2** (2026-10-01): Polly 0 and OpenTelemetry 0 (both enforce these rules) after the two fixes above; private app
   356 BRO1509 (= SA1502), FFMpegCore 23, Newtonsoft.Json 387, Serilog 21. All fixed in one pass, compile, second run
   clean (OpenTelemetry: 1 left in net462-only code, the known environment limit).
+
+- **BRO1615** (2026-10-02): none of the repos uses the XML header (OpenTelemetry has a plain one, Polly and the private
+  app have SA1633 off), so every repo got a company via a global config and a header in every file: FFMpegCore 161,
+  Polly 790, private app 2632 (= its SA1633 count with the rule on), Newtonsoft.Json 1100 (header above its
+  `#region License`, no conflict markers across 8 frameworks), Serilog 221; OpenTelemetry with its own text configured
+  (`Copyright The OpenTelemetry Authors
+SPDX-License-Identifier: Apache-2.0`): all 876 plain headers became the XML
+  header around the same lines. All in one pass, no new compile errors, second run clean, BOMs and line endings kept.
 
 ## Known open questions
 

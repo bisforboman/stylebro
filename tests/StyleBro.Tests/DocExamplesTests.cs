@@ -14,6 +14,7 @@ namespace StyleBro.Tests;
 /// Every rule page in docs/rules has an "Example" with "Before" and "After" code. This runs each example the way
 /// 'dotnet format' does: the Before code must compile and get the rule's diagnostic, one Fix All pass must produce
 /// exactly the After code, and the After code must compile without the diagnostic. So the docs can't go stale.
+/// An ```ini block between "## Example" and the first "### Before" is the examples' .editorconfig.
 /// </summary>
 public partial class DocExamplesTests
 {
@@ -40,12 +41,14 @@ public partial class DocExamplesTests
 
         var analyzer = FindAnalyzer(id);
         var fixer = FindCodeFix(id);
+        var exampleStart = markdown.IndexOf("## Example", StringComparison.Ordinal);
+        var settings = ConfigPattern().Match(markdown, exampleStart, markdown.IndexOf("### Before", exampleStart, StringComparison.Ordinal) - exampleStart);
         foreach (Match example in examples)
         {
             var before = example.Groups["before"].Value;
             var after = example.Groups["after"].Value;
 
-            var document = CreateDocument(before);
+            var document = CreateDocument(before, settings.Success ? settings.Groups["config"].Value : null);
             await AssertCompilesAsync(document, id, "Before");
             var diagnostics = await GetDiagnosticsAsync(document, analyzer, id);
             Assert.True(diagnostics.Length > 0, $"{id}: the Before example doesn't get a {id} diagnostic.");
@@ -62,7 +65,11 @@ public partial class DocExamplesTests
     [GeneratedRegex(@"### Before\s*\n```csharp\n(?<before>.*?)```\s*\n### After\s*\n```csharp\n(?<after>.*?)```", RegexOptions.Singleline)]
     private static partial Regex ExamplePattern();
 
-    private static Document CreateDocument(string code)
+    [GeneratedRegex(@"```ini
+(?<config>.*?)```", RegexOptions.Singleline)]
+    private static partial Regex ConfigPattern();
+
+    private static Document CreateDocument(string code, string? editorConfig)
     {
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
             .Split(Path.PathSeparator)
@@ -79,7 +86,12 @@ public partial class DocExamplesTests
             compilationOptions: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable),
             parseOptions: new CSharpParseOptions(LanguageVersion.Latest),
             metadataReferences: references));
-        return workspace.AddDocument(project.Id, "Example.cs", SourceText.From(code));
+        if (editorConfig is not null)
+        {
+            project = project.AddAnalyzerConfigDocument(".editorconfig", SourceText.From(editorConfig), filePath: "/.editorconfig").Project;
+        }
+
+        return project.AddDocument("Example.cs", SourceText.From(code), filePath: "/Example.cs");
     }
 
     private static async Task AssertCompilesAsync(Document document, string id, string which)

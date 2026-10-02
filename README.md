@@ -30,7 +30,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1109](docs/rules/BRO1109.md) | Opening parenthesis or bracket should be on the declaration line | SA1110 | Yes |
 | [BRO1110](docs/rules/BRO1110.md) | Closing parenthesis or bracket should be on the line of the last item | SA1111 | Yes |
 | [BRO1111](docs/rules/BRO1111.md) | Generic type constraints should be on their own line | SA1127 | Yes |
-| [BRO1112](docs/rules/BRO1112.md) | Do not use regions (off in the preset, like StyleCop) | SA1124 | Yes |
+| [BRO1112](docs/rules/BRO1112.md) | Do not use regions (off in the preset) | SA1124 | Yes |
 | [BRO1113](docs/rules/BRO1113.md) | Regions should not be placed inside code elements | SA1123 | Yes |
 | [BRO1114](docs/rules/BRO1114.md) | Do not combine fields | SA1132 | Yes |
 | [BRO1115](docs/rules/BRO1115.md) | Use shorthand for nullable types | SA1125 | Yes |
@@ -65,6 +65,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1612](docs/rules/BRO1612.md) | Element parameter documentation should declare parameter name | SA1613 | Yes |
 | [BRO1613](docs/rules/BRO1613.md) | Generic type parameter documentation should match type parameters | SA1620 | Yes |
 | [BRO1614](docs/rules/BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | Yes |
+| [BRO1615](docs/rules/BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 | [BRO1503](docs/rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Yes |

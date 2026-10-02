@@ -1,3 +1,7 @@
 # The sample code names private fields '_field', so BRO1303 uses that style here (the default is 'field').
 [*.cs]
 stylebro_private_field_naming = _camelCase
+
+# BRO1615 (XML file header) for one file only, so the other samples stay header-free.
+[**/Ledger.cs]
+stylebro_file_header_company = Contoso

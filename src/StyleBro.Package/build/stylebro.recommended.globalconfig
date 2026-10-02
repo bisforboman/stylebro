@@ -157,6 +157,10 @@ dotnet_diagnostic.BRO1614.severity = warning
 # BRO1613: <typeparam> tags match the type parameters (SA1620)
 dotnet_diagnostic.BRO1613.severity = warning
 
+# BRO1615: StyleCop's XML copyright header (SA1633-SA1641). Does nothing until stylebro_file_header_company is set in
+# your .editorconfig (also stylebro_file_header_copyright, stylebro_file_header_decoration; see docs/rules/BRO1615.md).
+dotnet_diagnostic.BRO1615.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 
@@ -253,5 +257,6 @@ dotnet_style_qualification_for_event = false
 dotnet_diagnostic.IDE0009.severity = none
 
 # Not set on purpose (see docs/differences-from-stylecop.md):
-# - File headers (SA1633): set file_header_template in your .editorconfig and IDE0073 to warning.
+# - File headers: BRO1615 above needs your company name; for a plain header instead, set file_header_template in
+#   your .editorconfig and IDE0073 to warning.
 # - Naming (IDE1006): StyleBro's BRO13xx rules cover it, and IDE1006 has no Fix All for 'dotnet format'.

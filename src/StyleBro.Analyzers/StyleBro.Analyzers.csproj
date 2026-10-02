@@ -23,6 +23,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="StyleBro.CodeFixes" />
     <InternalsVisibleTo Include="StyleBro.Tests" />
+    <InternalsVisibleTo Include="StyleBro.Migrate" />
   </ItemGroup>
 
 </Project>

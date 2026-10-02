@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-71 rules: 21 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+64 rules: 14 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -37,13 +37,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1205](#sa1205) | Partial elements should declare access | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1410](#sa1410) | Remove delegate parenthesis when possible | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1634](#sa1634) | File header should show copyright | candidate | on / off / on | 0 / 0 / 0 |
-| [SA1635](#sa1635) | File header should have copyright text | candidate | on / off / on | 0 / 0 / 0 |
-| [SA1636](#sa1636) | File header copyright text should match | candidate | on / off / on | 0 / 0 / 0 |
-| [SA1637](#sa1637) | File header should contain file name | candidate | on / off / on | 0 / 0 / 0 |
-| [SA1638](#sa1638) | File header file name documentation should match file name | candidate | on / off / on | 0 / 0 / 0 |
-| [SA1640](#sa1640) | File header should have valid company text | candidate | on / off / on | 0 / 0 / 0 |
-| [SA1641](#sa1641) | File header company name text should match | candidate | on / off / on | 0 / 0 / 0 |
 | [SA1206](#sa1206) | Declaration keywords should follow order | SDK not on yet | on / on / on | 0 / 0 / 0 |
 | [SA1207](#sa1207) | Protected should come before internal | SDK not on yet | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
@@ -236,76 +229,6 @@ Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it 
 **Why:** Not done yet. `delegate() { }` -> `delegate { }`.
 
 **To revisit:** Only when the empty parameter list isn't needed for overload resolution (semantic model). Small; consider doing with SA1130.
-
-<a id="sa1634"></a>
-
-### SA1634: File header should show copyright
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** StyleCop's XML file header (`// <copyright file="X.cs" company="Y">`) has no SDK equivalent; IDE0073 only writes a plain header (SA1633 with `xmlHeader: false` is covered).
-
-**To revisit:** One BRO rule for SA1634-SA1641 that writes/corrects the XML header from stylecop.json's documentationRules (companyName, copyrightText, headerDecoration, variables). Medium; worth it for teams on the default XML header.
-
-<a id="sa1635"></a>
-
-### SA1635: File header should have copyright text
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** XML file header: copyright text missing. See SA1634.
-
-**To revisit:** With SA1634.
-
-<a id="sa1636"></a>
-
-### SA1636: File header copyright text should match
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** XML file header: copyright text doesn't match stylecop.json. See SA1634.
-
-**To revisit:** With SA1634.
-
-<a id="sa1637"></a>
-
-### SA1637: File header should contain file name
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** XML file header: file name missing. See SA1634.
-
-**To revisit:** With SA1634.
-
-<a id="sa1638"></a>
-
-### SA1638: File header file name documentation should match file name
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** XML file header: file name doesn't match the file. See SA1634.
-
-**To revisit:** With SA1634. Linked files (multi-targeting) have one physical name, so this is safe.
-
-<a id="sa1640"></a>
-
-### SA1640: File header should have valid company text
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** XML file header: company attribute missing. See SA1634.
-
-**To revisit:** With SA1634.
-
-<a id="sa1641"></a>
-
-### SA1641: File header company name text should match
-
-Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** XML file header: company doesn't match stylecop.json. See SA1634.
-
-**To revisit:** With SA1634.
 
 ## Not yet: the SDK can fix it, but it isn't turned on
 
@@ -868,13 +791,3 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 **Difference:** BRO1601 adds `<inheritdoc/>` to overrides and implementations; other missing documentation isn't reported (no stubs, user decision).
 
 **To revisit:** Revisit with the stub decision (also SA1601, SA1602, SA1604-SA1607, SA1609-SA1611, SA1614-SA1616, SA1618, SA1619, SA1622).
-
-<a id="sa1633"></a>
-
-### SA1633: File should have header
-
-**Covered by:** SDK: IDE0073 (`file_header_template`)
-
-**Difference:** IDE0073 writes a plain header from `file_header_template`; StyleCop's default XML header isn't migrated (stylebro-migrate notes it).
-
-**To revisit:** With the SA1634-SA1641 header rule.

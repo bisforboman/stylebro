@@ -4,7 +4,9 @@
 # are compared line by line (and must still compile). StyleBro's fixed files must also be clean: a fix that leaves
 # a diagnostic behind would need a second 'dotnet format' run. Every difference must be listed in the set's
 # 'Expected' entries, which document StyleBro's deliberate deviations; anything else fails. A set with
-# CompareOutput = $false skips the output comparison (for StyleCop rules without a working fix).
+# CompareOutput = $false skips the output comparison (for StyleCop rules without a working fix). Optional per set:
+# StyleCopJson (stylecop.json for both projects) and EditorConfig (extra .editorconfig lines, e.g. StyleBro settings).
+# Several StyleCop rules may map to one StyleBro rule; StyleCop's reports at the same position then count once.
 param([string[]]$Set)
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -19,10 +21,14 @@ $analyzers = @('StyleBro.Analyzers', 'StyleBro.CodeFixes') | ForEach-Object {
     "<Analyzer Include=""$(Join-Path $repo "src/$_/bin/Debug/netstandard2.0/$_.dll")"" />"
 }
 
-function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withStyleBro) {
+function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withStyleBro, [hashtable]$set) {
     if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
     New-Item $dir -ItemType Directory -Force | Out-Null
     $bro = if ($withStyleBro) { $analyzers -join '' } else { '' }
+    if ($set.StyleCopJson) {
+        Set-Content (Join-Path $dir 'stylecop.json') $set.StyleCopJson
+        $bro += '<AdditionalFiles Include="stylecop.json" />'
+    }
     Set-Content (Join-Path $dir 'p.csproj') @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Library</OutputType><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion><GenerateDocumentationFile>true</GenerateDocumentationFile><NoWarn>CS0168;CS0219;CS8321;CS0660;CS0661;CS1718;CS0665;CS0414;CS0642;CS0164;CS0162;CS1591;CS1587;CS1572;CS1573;CS0067</NoWarn></PropertyGroup>
@@ -30,7 +36,7 @@ function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withSt
 </Project>
 "@
     Set-Content (Join-Path $dir '.editorconfig') ("root = true`n[*.cs]`ndotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = none`n" +
-        (($ids | ForEach-Object { "dotnet_diagnostic.$_.severity = warning" }) -join "`n") + "`n")
+        (($ids | ForEach-Object { "dotnet_diagnostic.$_.severity = warning" }) -join "`n") + "`n" + $set.EditorConfig)
     Copy-Item (Join-Path $cases '*.cs') $dir
 }
 
@@ -47,8 +53,8 @@ foreach ($s in $config.Sets) {
     $pairs = @{}; foreach ($m in $s.Map) { $sa, $bro = $m -split '='; $pairs[$sa] = $bro }
     $cases = Join-Path $PSScriptRoot "parity/$($s.Name)"
     $sc = Join-Path $work "$($s.Name)/stylecop"; $sb = Join-Path $work "$($s.Name)/stylebro"
-    New-Project $sc @($pairs.Keys) $cases $false
-    New-Project $sb @($pairs.Keys) $cases $true
+    New-Project $sc @($pairs.Keys) $cases $false $s
+    New-Project $sb @($pairs.Keys) $cases $true $s
 
     # Positions, from the project that has both analyzers.
     $pattern = '(?<file>\w+\.cs)\((?<pos>\d+,\d+)\): warning (?<id>' + ((@($pairs.Keys) + @($pairs.Values)) -join '|') + '):'
@@ -59,6 +65,7 @@ foreach ($s in $config.Sets) {
             else { $b += "$($Matches.id) $($Matches.file)($($Matches.pos))" }
         }
     }
+    $a = @($a | Sort-Object -Unique)
     $differences = @(Compare-Object ($a | Sort-Object) ($b | Sort-Object) | ForEach-Object {
         '{0} {1}' -f $(if ($_.SideIndicator -eq '<=') { 'only StyleCop:' } else { 'only StyleBro:' }), $_.InputObject })
 

@@ -40,9 +40,14 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     }
 
     /// <summary>Like <see cref="VerifyFixAsync(string, string, string?, string?)"/>, for several files.</summary>
-    public static Task VerifyFixAsync(string[] sources, string[] fixedSources)
+    public static Task VerifyFixAsync(string[] sources, string[] fixedSources, string? editorConfig = null)
     {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>();
+        if (editorConfig is not null)
+        {
+            test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\n" + editorConfig));
+        }
+
         foreach (var source in sources)
         {
             test.TestState.Sources.Add(source);

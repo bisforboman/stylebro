@@ -167,10 +167,8 @@
             Name     = 'naming-pascal-fields'
             Map      = @('SA1303=BRO1306', 'SA1311=BRO1306', 'SA1307=BRO1306', 'SA1304=BRO1306')
             Expected = @(
-                # StyleCop reports two rules on one field (SA1307 with SA1311 or SA1304); BRO1306 reports it once.
-                'only StyleCop: BRO1306 PascalFields.cs(8,36)'
-                'only StyleCop: BRO1306 PascalFields.cs(12,41)'
-                'only StyleCop: BRO1306 PascalFields.cs(13,31)'
+                # StyleCop reports two rules on some fields (SA1307 with SA1311 or SA1304); BRO1306 reports them once,
+                # and the comparison counts StyleCop's reports at one position once.
                 # '_underscoreConst': SA1303 skips it (it doesn't start with a lower-case letter) and leaves the
                 # underscore to SA1309; BRO1306 renames it to 'UnderscoreConst'.
                 'only StyleBro: BRO1306 PascalFields.cs(7,27)'
@@ -385,6 +383,37 @@
                 'StyleCop output only: Third.cs: []'
                 'StyleCop output only: Third.cs: []'
                 'StyleCop output only: Third.cs: []'
+            )
+        }
+        @{
+            Name         = 'file-header'
+            Map          = @('SA1633=BRO1615', 'SA1634=BRO1615', 'SA1635=BRO1615', 'SA1636=BRO1615', 'SA1637=BRO1615', 'SA1638=BRO1615', 'SA1640=BRO1615', 'SA1641=BRO1615')
+            StyleCopJson = '{ "settings": { "documentationRules": { "companyName": "Contoso" } } }'
+            EditorConfig = "stylebro_file_header_company = Contoso`n"
+            Expected = @(
+                # A missing header is reported on the first code, not at the start of the file, so a '#pragma warning
+                # disable' at the top can suppress it. Both fixes put the header above the '#pragma'.
+                'only StyleBro: BRO1615 Pragma.cs(6,1)'
+                'only StyleCop: BRO1615 Pragma.cs(1,1)'
+                # A header in a '/* */' comment isn't checked (rare; StyleCop rewrites it with ' *' lines).
+                'only StyleCop: BRO1615 BlockWrong.cs(1,4)'
+                'StyleBro output only: BlockWrong.cs: [/* <copyright file="Other.cs" company="Contoso">]'
+                'StyleBro output only: BlockWrong.cs: [ Copyright (c) Contoso. All rights reserved.]'
+                'StyleBro output only: BlockWrong.cs: [ </copyright> */]'
+                'StyleCop output only: BlockWrong.cs: [/* <copyright file="BlockWrong.cs" company="Contoso">]'
+                'StyleCop output only: BlockWrong.cs: [ * Copyright (c) Contoso. All rights reserved.]'
+                'StyleCop output only: BlockWrong.cs: [ * </copyright>]'
+                'StyleCop output only: BlockWrong.cs: [ */]'
+                # A broken XML header (no '</copyright>') is left to a person; StyleCop replaces it.
+                'only StyleCop: BRO1615 Malformed.cs(1,1)'
+                'StyleCop output only: Malformed.cs: [// </copyright>]'
+                # A plain comment header that isn't the copyright text: StyleCop's fix deletes it, StyleBro keeps it below
+                # the new header.
+                'StyleBro output only: License.cs: [// Licensed under the MIT license. See LICENSE in the repository root.]'
+                'StyleBro output only: License.cs: []'
+                'StyleBro output only: OnlyComment.cs: [// just a comment]'
+                'StyleBro output only: PlainComment.cs: [// Some comment.]'
+                'StyleBro output only: PlainComment.cs: []'
             )
         }
     )

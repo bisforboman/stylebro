@@ -15,3 +15,4 @@ BRO1121 | Readability | Warning  | EnumValueLinesAnalyzer
 BRO1511 | Layout | Warning  | DocumentationBlankLinesAnalyzer
 BRO1512 | Layout | Warning  | DocumentationBlankLinesAnalyzer
 BRO1513 | Layout | Warning  | DocumentationBlankLinesAnalyzer
+BRO1615 | Documentation | Warning  | FileHeaderAnalyzer

@@ -84,6 +84,57 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void XmlHeader_TurnsOnBro1615_WithStyleCopsHeaderSettings()
+    {
+        Write("stylecop.json", """
+            { "settings": { "documentationRules": {
+                "companyName": "Contoso",
+                "copyrightText": "Copyright (c) {companyName}.\nLicensed under the {licenseName} license.",
+                "variables": { "licenseName": "MIT" },
+                "headerDecoration": "-----" } } }
+            """);
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = warning", result.Lines);
+        Assert.Contains("stylebro_file_header_company = Contoso", result.Lines);
+        Assert.Contains("stylebro_file_header_copyright = Copyright (c) {companyName}.\\nLicensed under the MIT license.", result.Lines);
+        Assert.Contains("stylebro_file_header_decoration = -----", result.Lines);
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("file_header_template", StringComparison.Ordinal));
+        Assert.Contains("SA1641", result.Covered);
+    }
+
+    [Fact]
+    public void PlainHeader_IsIde0073_AndBro1615StaysOff()
+    {
+        Write("stylecop.json", """
+            { "settings": { "documentationRules": {
+                "xmlHeader": false,
+                "companyName": "Contoso",
+                "copyrightText": "Copyright (c) {companyName}.\nSPDX-License-Identifier: {license}",
+                "variables": { "license": "Apache-2.0" } } } }
+            """);
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = none", result.Lines);
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("stylebro_file_header", StringComparison.Ordinal));
+        Assert.Contains("file_header_template = Copyright (c) Contoso.\\nSPDX-License-Identifier: Apache-2.0", result.Lines);
+        Assert.Contains("dotnet_diagnostic.IDE0073.severity = warning", result.Lines);
+    }
+
+    [Fact]
+    public void XmlHeader_WithOneHeaderRuleOff_Bro1615StaysOff()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1636.severity = none\n");
+
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = none", lines);
+        Assert.DoesNotContain(lines, l => l.StartsWith("stylebro_file_header", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void SubDirectoryConfigs_GetTheSettingsThatDiffer()
     {
         Write(".editorconfig", "root = true\n[*.cs]\nindent_size = 4\n");

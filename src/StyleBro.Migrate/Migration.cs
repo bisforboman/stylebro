@@ -97,6 +97,13 @@ internal static class Migration
                 relevant = [];
             }
 
+            // The XML header rule only stands in for StyleCop's XML header; a plain header is IDE0073's (below).
+            if (id == StyleBro.Analyzers.DiagnosticIds.FileHeader && !XmlHeader(setup))
+            {
+                severity = Severity.None;
+                relevant = [];
+            }
+
             if (severity > Severity.None)
             {
                 result.Covered.UnionWith(styleCop);
@@ -123,6 +130,10 @@ internal static class Migration
         AddMemberOrder(setup, lines);
         lines.Add($"stylebro_private_field_naming = {result.FieldStyle}");
         AddDocumentationScope(setup, lines);
+        if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none"))
+        {
+            AddFileHeader(setup, lines);
+        }
 
         lines.Add(string.Empty);
         lines.Add("# Built-in .NET rules, with the severity of the StyleCop rules they cover.");
@@ -343,6 +354,41 @@ internal static class Migration
         return styleCop.Where(sa => !moot.Contains(sa)).ToList();
     }
 
+    private static bool XmlHeader(StyleCopSetup setup) =>
+        setup.Setting("documentationRules", "xmlHeader") is not { ValueKind: JsonValueKind.False };
+
+    private static string Company(StyleCopSetup setup) =>
+        setup.Setting("documentationRules", "companyName")?.GetString() ?? "PlaceholderCompany";
+
+    /// <summary>
+    /// stylecop.json's copyrightText as an .editorconfig value: line breaks as '\n', its custom variables filled in.
+    /// {companyName} and {fileName} stay; both BRO1615 and IDE0073 fill in {fileName} per file.
+    /// </summary>
+    private static string CopyrightTemplate(StyleCopSetup setup)
+    {
+        var text = setup.Setting("documentationRules", "copyrightText")?.GetString() ?? "Copyright (c) {companyName}. All rights reserved.";
+        if (setup.Setting("documentationRules", "variables") is { ValueKind: JsonValueKind.Object } variables)
+        {
+            foreach (var variable in variables.EnumerateObject().Where(v => v.Value.ValueKind == JsonValueKind.String))
+            {
+                text = text.Replace("{" + variable.Name + "}", variable.Value.GetString());
+            }
+        }
+
+        return text.Replace("\r\n", "\n").Replace("\n", "\\n");
+    }
+
+    /// <summary>BRO1615's settings, from stylecop.json's documentationRules.</summary>
+    private static void AddFileHeader(StyleCopSetup setup, List<string> lines)
+    {
+        lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.CompanyKey} = {Company(setup)}");
+        lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.CopyrightKey} = {CopyrightTemplate(setup)}");
+        if (setup.Setting("documentationRules", "headerDecoration")?.GetString() is { Length: > 0 } decoration)
+        {
+            lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.DecorationKey} = {decoration}");
+        }
+    }
+
     /// <summary>Which members need documentation (BRO1601), from stylecop.json's documentationRules.</summary>
     private static void AddDocumentationScope(StyleCopSetup setup, List<string> lines)
     {
@@ -490,21 +536,11 @@ internal static class Migration
             lines.Add($"dotnet_style_qualification_for_{kind} = {Bool(setup.IsOn("SA1101"))}");
         }
 
-        // File header: only a plain copyright line maps onto file_header_template.
-        if (setup.IsOn("SA1633"))
+        // File header: a plain header is IDE0073's file_header_template; the XML header is BRO1615's (above).
+        if (setup.IsOn("SA1633") && !XmlHeader(setup))
         {
-            var xmlHeader = setup.Setting("documentationRules", "xmlHeader") is not { ValueKind: JsonValueKind.False };
-            var company = setup.Setting("documentationRules", "companyName")?.GetString() ?? "PlaceholderCompany";
-            var copyright = setup.Setting("documentationRules", "copyrightText")?.GetString() ?? "Copyright (c) {companyName}. All rights reserved.";
-            if (xmlHeader)
-            {
-                result.Notes.Add("SA1633 (file header) uses StyleCop's XML header ('<copyright file=...>'), which the SDK's IDE0073 can't write; not migrated.");
-            }
-            else
-            {
-                Rule("IDE0073", "SA1633");
-                lines.Add("file_header_template = " + copyright.Replace("{companyName}", company).Replace("\n", "\\n"));
-            }
+            Rule("IDE0073", "SA1633");
+            lines.Add("file_header_template = " + CopyrightTemplate(setup).Replace("{companyName}", Company(setup)));
         }
     }
 

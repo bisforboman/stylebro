@@ -51,6 +51,7 @@ public static class DiagnosticIds
     public const string ParameterTagHasName = "BRO1612";
     public const string TypeParameterTagsMatch = "BRO1613";
     public const string TypeParameterTagHasName = "BRO1614";
+    public const string FileHeader = "BRO1615";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string BlankLineBeforeOpenBrace = "BRO1501";

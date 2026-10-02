@@ -408,6 +408,18 @@ internal static class Descriptors
             + "StyleCop SA1621.",
         helpLinkUri: HelpBase + DiagnosticIds.TypeParameterTagHasName + ".md");
 
+    public static readonly DiagnosticDescriptor FileHeader = new(
+        id: DiagnosticIds.FileHeader,
+        title: "File should have the XML copyright header",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The file starts with StyleCop's XML header: a '<copyright>' tag with the file name, the company and the "
+            + "copyright text from stylebro_file_header_company/_copyright. Does nothing until stylebro_file_header_company is set. "
+            + "Replaces StyleCop SA1633 (XML header), SA1634, SA1635, SA1636, SA1637, SA1638, SA1640 and SA1641.",
+        helpLinkUri: HelpBase + DiagnosticIds.FileHeader + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

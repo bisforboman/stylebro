@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 73 StyleBro (73 done), 44 drop, 23 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 80 StyleBro (80 done), 44 drop, 16 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -44,13 +44,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1410](skipped-rules.md#sa1410) | Remove delegate parenthesis when possible | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1142](skipped-rules.md#sa1142) | Refer to tuple fields by name | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1634](skipped-rules.md#sa1634) | File header should show copyright | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1635](skipped-rules.md#sa1635) | File header should have copyright text | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1636](skipped-rules.md#sa1636) | File header copyright text should match | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1637](skipped-rules.md#sa1637) | File header should contain file name | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1638](skipped-rules.md#sa1638) | File header file name documentation should match file name | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1640](skipped-rules.md#sa1640) | File header should have valid company text | on / off / on | 0 / 0 / 0 | candidate |
-| [SA1641](skipped-rules.md#sa1641) | File header company name text should match | on / off / on | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
 
@@ -97,15 +90,15 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1630 | Documentation text should contain whitespace | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on a one-word summary (probed). ([details](skipped-rules.md#sa1630)) |
 | SA1631 | Documentation should meet character percentage | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on a summary of symbols (probed). ([details](skipped-rules.md#sa1631)) |
 | SA1632 | Documentation text should meet minimum character length | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic on a one-letter summary (probed). ([details](skipped-rules.md#sa1632)) |
-| SA1633 | File should have header | on | yes | on / off / off | 0 / 0 / 2,632 | fixed | SDK: IDE0073 (`file_header_template`) ([details](skipped-rules.md#sa1633)) |
-| SA1634 | File header should show copyright | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. StyleCop's XML file header (`// <copyright file="X.cs" company="Y">`) has no SDK equivalent; IDE0073 only writes a plain header (SA1633 with `xmlHeader: false` is covered). ([details](skipped-rules.md#sa1634)) |
-| SA1635 | File header should have copyright text | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. XML file header: copyright text missing. See SA1634. ([details](skipped-rules.md#sa1635)) |
-| SA1636 | File header copyright text should match | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. XML file header: copyright text doesn't match stylecop.json. See SA1634. ([details](skipped-rules.md#sa1636)) |
-| SA1637 | File header should contain file name | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. XML file header: file name missing. See SA1634. ([details](skipped-rules.md#sa1637)) |
-| SA1638 | File header file name documentation should match file name | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. XML file header: file name doesn't match the file. See SA1634. ([details](skipped-rules.md#sa1638)) |
+| SA1633 | File should have header | on | yes | on / off / off | 0 / 0 / 2,632 | fixed | SDK: IDE0073 (`file_header_template`) for a plain header (`xmlHeader: false`); StyleBro **BRO1615** for the XML header |
+| SA1634 | File header should show copyright | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
+| SA1635 | File header should have copyright text | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
+| SA1636 | File header copyright text should match | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
+| SA1637 | File header should contain file name | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
+| SA1638 | File header file name documentation should match file name | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
 | SA1639 | File header should have summary | off | yes | off / off / off | 0 / 0 / 0 |  | Drop: Off by default; the header's `<summary>` has to be written by a person. ([details](skipped-rules.md#sa1639)) |
-| SA1640 | File header should have valid company text | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. XML file header: company attribute missing. See SA1634. ([details](skipped-rules.md#sa1640)) |
-| SA1641 | File header company name text should match | on | yes | on / off / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. XML file header: company doesn't match stylecop.json. See SA1634. ([details](skipped-rules.md#sa1641)) |
+| SA1640 | File header should have valid company text | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
+| SA1641 | File header company name text should match | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1615** (done), one rule for the XML header; same positions and fixed headers as StyleCop, except that the fix keeps other comments (StyleCop's deletes them) |
 | SA1642 | Constructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1606** (done), same results as StyleCop (the fix adds a space after the standard sentence) |
 | SA1643 | Destructor summary documentation should begin with standard text | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1607** (done), same results as StyleCop (the fix adds a space after the standard sentence) |
 | SA1644 | Documentation headers should not contain blank lines | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. StyleCop 1.2 never reports it (not implemented, probed while building BRO16xx). ([details](skipped-rules.md#sa1644)) |
