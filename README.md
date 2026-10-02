@@ -119,6 +119,9 @@ The preset (StyleBro's rule severities and the formatting options) comes with th
 everything yourself: `<StyleBroPreset>none</StyleBroPreset>`. Coming from StyleCop? Use `stylebro-migrate --write`
 instead of `init` (below). Checking it in CI: [docs/ci.md](docs/ci.md).
 
+Projects with several target frameworks: `init` keeps the built-in rules whose `dotnet format` fixes break them as
+suggestions, and the first `dotnet format` on existing code may need a second run (details in [docs/ci.md](docs/ci.md)).
+
 ## Migrating from StyleCop
 
 `stylebro-migrate` reads a repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
@@ -131,8 +134,8 @@ suppressions over to the replacing rules, and lists the StyleCop rules nothing e
 ## Baseline: fail only on new violations
 
 In a codebase with many existing violations, `stylebro-migrate baseline` records them in `stylebro.baseline`. The
-build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules `stylebro-migrate init` turns on), so
-only new code has to follow the rules; a violation counts as new once its line is edited. See
+build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules `stylebro-migrate init`
+turns on), so only new code has to follow the rules; a violation counts as new once its line is edited. See
 [docs/baseline.md](docs/baseline.md).
 
 ## Repository layout
