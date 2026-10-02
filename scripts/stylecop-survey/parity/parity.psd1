@@ -4,6 +4,16 @@
 @{
     Sets = @(
         @{
+            Name     = 'base-calls'
+            Map      = @('SA1100=BRO1131')
+            Expected = @(
+                # BRO1131: virtual members in a type that isn't sealed are skipped ('this.' dispatches virtually).
+                'only StyleCop: BRO1131 BaseCalls.cs(26,32)'
+                'StyleBro output only: BaseCalls.cs: [        public void Clear() => base.Reset();]'
+                'StyleCop output only: BaseCalls.cs: [        public void Clear() => this.Reset();]'
+            )
+        }
+        @{
             Name     = 'directive-spacing'
             Map      = @('SA1006=BRO1006')
             Expected = @()

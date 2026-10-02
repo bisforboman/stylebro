@@ -10,3 +10,4 @@ BRO1127 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1128 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1129 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1130 | Readability | Warning  | QueryLayoutAnalyzer
+BRO1131 | Readability | Warning  | BaseCallsAnalyzer

@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 91 StyleBro (91 done), 44 drop, 2 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 92 StyleBro (92 done), 44 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -28,7 +28,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 
 | Rule | Title | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | Status |
 |---|---|---|---|---|
-| [SA1100](skipped-rules.md#sa1100) | Do not prefix calls with base unless local implementation exists | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
@@ -192,7 +191,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
-| SA1100 | Do not prefix calls with base unless local implementation exists | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior. ([details](skipped-rules.md#sa1100)) |
+| SA1100 | Do not prefix calls with base unless local implementation exists | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1131** (done). Differs from StyleCop: virtual members in types that aren't sealed are not reported (`this.` would dispatch to a derived override) |
 | SA1101 | Prefix local calls with this | on | yes | on / off / off | 0 / 4,007 / 17,153 | fixed | SDK: IDE0009 (`dotnet_style_qualification_for_* = true`) |
 | SA1102 | Query clause should follow previous clause | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1127** (done), same positions as StyleCop except blank lines around a comment line |
 | SA1103 | Query clauses should be on separate lines or all on one line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1128** (done), always one clause per line (StyleCop's fix picks one line or split, varying between runs) |

@@ -50,6 +50,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1128](docs/rules/BRO1128.md) | Query clauses should be on separate lines or all on one line | SA1103 | Yes |
 | [BRO1129](docs/rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Yes |
 | [BRO1130](docs/rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Yes |
+| [BRO1131](docs/rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

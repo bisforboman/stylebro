@@ -30,7 +30,7 @@ SA1025,SDK: IDE0055 formatting
 SA1026,SDK: IDE0055 formatting
 SA1027,SDK: IDE0055 formatting (`indent_style = space`)
 SA1028,SDK: IDE0055 formatting
-SA1100,"Not yet: StyleBro candidate. Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior."
+SA1100,StyleBro **BRO1131** (done). Differs from StyleCop: virtual members in types that aren't sealed are not reported (`this.` would dispatch to a derived override)
 SA1101,SDK: IDE0009 (`dotnet_style_qualification_for_* = true`)
 SA1102,"StyleBro **BRO1127** (done), same positions as StyleCop except blank lines around a comment line"
 SA1103,"StyleBro **BRO1128** (done), always one clause per line (StyleCop's fix picks one line or split, varying between runs)"

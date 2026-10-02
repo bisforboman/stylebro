@@ -677,6 +677,16 @@ internal static class Descriptors
         description: "A clause that spans several lines starts on its own line. Replaces StyleCop SA1105.",
         helpLinkUri: HelpBase + DiagnosticIds.MultiLineQueryClause + ".md");
 
+    public static readonly DiagnosticDescriptor BaseCall = new(
+        id: DiagnosticIds.BaseCall,
+        title: "Do not prefix calls with base unless local implementation exists",
+        messageFormat: "Use 'this' instead of 'base': the type has no member of its own with this name",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'base.' suggests the type overrides or hides the member. Replaces StyleCop SA1100.",
+        helpLinkUri: HelpBase + DiagnosticIds.BaseCall + ".md");
+
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
         title: "Preprocessor keywords should not be preceded by a space",

@@ -95,6 +95,7 @@
         SA1117 = 'StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix'
         SA1122 = 'StyleBro **BRO1106** (done), same results as StyleCop'
         SA1128 = 'StyleBro **BRO1105** (done), same results as StyleCop'
+        SA1100 = 'StyleBro **BRO1131** (done). Differs from StyleCop: virtual members in types that aren''t sealed are not reported (`this.` would dispatch to a derived override)'
         SA1129 = 'StyleBro **BRO1104** (done). Differs from StyleCop: `new T()` on a type parameter and `new S();` statements are not reported'
         SA1131 = 'StyleBro **BRO1103** (done). Differs from StyleCop: comparisons using a type''s own operator are not reported'
         SA1133 = 'StyleBro **BRO1102** (done). Differs from StyleCop: lists with comments between attributes are not reported'

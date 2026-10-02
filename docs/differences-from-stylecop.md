@@ -67,6 +67,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1101](rules/BRO1101.md) (SA1106) | `while (x) ;` and labeled `end: ;` | StyleCop's fix hides a likely bug in the first and breaks the build in the second. |
 | [BRO1102](rules/BRO1102.md) (SA1133) | Attribute lists with a comment between the attributes | StyleCop's fix drops the comment. |
 | [BRO1103](rules/BRO1103.md) (SA1131) | Comparisons using a type's own `==`/`<` | A user-defined operator may not be symmetric. |
+| [BRO1131](rules/BRO1131.md) (SA1100) | `base.M()` for a virtual M in a type that isn't sealed | `this.M()` would call a derived type's override instead: a behavior change. |
 | [BRO1104](rules/BRO1104.md) (SA1129) | `new T()` for type parameters; `new S();` statements | `default(T)` differs for reference types; StyleCop's fix for the statement doesn't compile. |
 | [BRO1110](rules/BRO1110.md) (SA1111) | A comment at the end of the last item's line when code follows the `)` (`2 // two` then `); var x = 1;`) | The code would end up behind the comment. |
 | [BRO1301](rules/BRO1301.md), [BRO1302](rules/BRO1302.md) (SA1312, SA1313) | `_`/`__` parameters; names whose rename could clash or is inferred elsewhere | Discards; renames must compile. |

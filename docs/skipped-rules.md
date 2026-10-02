@@ -19,11 +19,10 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-50 rules: 2 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+49 rules: 1 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
-| [SA1100](#sa1100) | Do not prefix calls with base unless local implementation exists | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
@@ -75,16 +74,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
 
 ## Not yet: StyleBro candidates
-
-<a id="sa1100"></a>
-
-### SA1100: Do not prefix calls with base unless local implementation exists
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior.
-
-**To revisit:** Needs the semantic model; only safe when M isn't virtual/overridable or the type is sealed. Decide whether to report the unsafe cases without a fix (design rule 3 says skip).
 
 <a id="sa1316"></a>
 

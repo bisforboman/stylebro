@@ -124,6 +124,9 @@ dotnet_diagnostic.BRO1125.severity = warning
 # BRO1126: using directives inside a namespace are fully qualified (SA1135)
 dotnet_diagnostic.BRO1126.severity = warning
 
+# BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
+dotnet_diagnostic.BRO1131.severity = warning
+
 # BRO1006: no space between '#' and a preprocessor keyword (SA1006)
 dotnet_diagnostic.BRO1006.severity = warning
 
