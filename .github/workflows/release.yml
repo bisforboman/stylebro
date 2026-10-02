@@ -31,6 +31,10 @@ jobs:
         shell: pwsh
         run: ./scripts/verify-format.ps1
 
+      - name: Verify the package as a consumer uses it
+        shell: pwsh
+        run: ./scripts/verify-package.ps1
+
       - name: Pack
         run: |
           dotnet pack src/StyleBro.Package --configuration Release -p:Version=$VERSION --output artifacts

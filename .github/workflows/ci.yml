@@ -26,6 +26,10 @@ jobs:
       - name: Check StyleBro's own code style
         run: dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples
 
+      - name: Verify the package as a consumer uses it
+        shell: pwsh
+        run: ./scripts/verify-package.ps1
+
       - name: Pack
         run: |
           dotnet pack src/StyleBro.Package --output artifacts

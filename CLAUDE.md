@@ -53,6 +53,11 @@ suggest or push a release tag after each batch; mention it only when a release l
   also that the fixed sample builds. It does NOT reproduce the old linked-file bug (couldn't find a minimal repro);
   the reference for that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
 - `scripts/verify-format.ps1` reads the rule IDs from `AnalyzerReleases.Unshipped.md` and runs every sample.
+- `scripts/verify-package.ps1` (CI and release.yml, 2026-10-02): packs StyleBro.Analyzers as 0.0.0-verify into a temp
+  feed, restores it (isolated RestorePackagesPath) into a project OUTSIDE the repo and checks what only the package's
+  build targets do: preset reaches the compiler (BRO1112 off, BRO1106 on), `StyleBroPreset=none`, `init --write` +
+  `dotnet format` (IDE0040/IDE0036/BRO1106 fixed, preset option applied, second run clean), baseline. Verified that it
+  fails (3 checks) with the old GlobalAnalyzerConfigFiles targets.
 - **StyleBro checks its own code** (2026-10-02) with its latest PUBLISHED release (`StyleBroSelfVersion` in
   Directory.Build.props, bump it after each release): a PackageReference in Migrate and Tests (the real install path);
   StyleBro.Analyzers/CodeFixes can't (StyleBro.Package references them and is the package itself: NU1108 restore
