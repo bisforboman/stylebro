@@ -214,20 +214,18 @@ dotnet_diagnostic.BRO1512.severity = warning
 dotnet_diagnostic.BRO1513.severity = warning
 
 # ---------------------------------------------------------------------------
-# Built-in .NET rules that already cover common StyleCop rules.
-# 'dotnet format' fixes these too. To also enforce them on build, set
-# <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in the project.
+# Options for the built-in .NET rules that cover common StyleCop rules. Only the options: 'dotnet format' ignores rule
+# severities in a package's global config, so the severities go into your .editorconfig with 'stylebro-migrate init'
+# (see the README). The formatting options below apply to 'dotnet format' either way.
 # ---------------------------------------------------------------------------
 
 # Braces on all control statements (SA1503, SA1519, SA1520)
 csharp_prefer_braces = true
-dotnet_diagnostic.IDE0011.severity = warning
 
-# Formatting (IDE0055): spacing, indentation and line breaks. Covers the spacing rules SA1000-SA1028, SA1134,
+# Formatting (IDE0055, which plain 'dotnet format' always applies): spacing, indentation and line breaks. Covers the spacing rules SA1000-SA1028, SA1134,
 # SA1137, and with the line-break settings below SA1500 and SA1107 (verified with
 # scripts/stylecop-survey/Test-SdkCoverage.ps1). The SDK keeps single-line blocks: it could expand 'void M() { }' only
 # together with every auto-property's '{ get; set; }', which StyleCop allows; BRO1508/BRO1509 expand them instead.
-dotnet_diagnostic.IDE0055.severity = warning
 csharp_new_line_before_open_brace = all
 csharp_preserve_single_line_statements = false
 csharp_preserve_single_line_blocks = true
@@ -235,48 +233,38 @@ csharp_preserve_single_line_blocks = true
 # Explicit access modifiers (SA1400), except on interface members, which SA1400 leaves alone; also on every part of a
 # partial type (SA1205: the other part's modifier, or the default)
 dotnet_style_require_accessibility_modifiers = for_non_interface_members
-dotnet_diagnostic.IDE0040.severity = warning
 
 # Modifier order: access modifier first, then static (SA1206, SA1207). IDE0036 enforces the whole order below (the SDK's
 # default); StyleCop only checks access and static, but on six real repos IDE0036 changed nothing StyleCop accepts.
 csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async
-dotnet_diagnostic.IDE0036.severity = warning
 
 # 'int' and 'string' instead of 'Int32' and 'String' (SA1121)
 dotnet_style_predefined_type_for_locals_parameters_members = true
 dotnet_style_predefined_type_for_member_access = true
-dotnet_diagnostic.IDE0049.severity = warning
 
 # Parentheses that clarify precedence, and none that don't (SA1407, SA1408, SA1119)
 dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity
 dotnet_style_parentheses_in_other_binary_operators = always_for_clarity
 dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
 dotnet_style_parentheses_in_other_operators = never_if_unnecessary
-dotnet_diagnostic.IDE0047.severity = warning
-dotnet_diagnostic.IDE0048.severity = warning
 
 # Using directives: outside the namespace (works with file-scoped namespaces; StyleCop's SA1200 default is
 # inside), System first, sorted (SA1208, SA1210, SA1211). Sorting happens in 'dotnet format'.
 csharp_using_directive_placement = outside_namespace
-dotnet_diagnostic.IDE0065.severity = warning
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
 
 # Blank lines (SA1507, SA1508, SA1513). The SDK marks these rules experimental.
 dotnet_style_allow_multiple_blank_lines_experimental = false
-dotnet_diagnostic.IDE2000.severity = warning
 csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
-dotnet_diagnostic.IDE2002.severity = warning
 dotnet_style_allow_statement_immediately_after_block_experimental = false
-dotnet_diagnostic.IDE2003.severity = warning
 
 # 'this.' qualification (SA1101, on in StyleCop): not required, like the SDK default; most teams turn SA1101 off.
-# To require it like StyleCop, set these to true and IDE0009 to warning.
+# To require it like StyleCop, set these to true and IDE0009 to warning in your .editorconfig.
 dotnet_style_qualification_for_field = false
 dotnet_style_qualification_for_property = false
 dotnet_style_qualification_for_method = false
 dotnet_style_qualification_for_event = false
-dotnet_diagnostic.IDE0009.severity = none
 
 # Not set on purpose (see docs/differences-from-stylecop.md):
 # - File headers: BRO1615 above needs your company name; for a plain header instead, set file_header_template in

@@ -29,7 +29,7 @@ file must be called `stylebro.baseline`); `<StyleBroBaseline>none</StyleBroBasel
 
 ## What it covers
 
-Every StyleBro rule, and the SDK rules the preset or `stylebro-migrate` turns on (IDE0003, IDE0009, IDE0011, IDE0036,
+Every StyleBro rule, and the SDK rules `stylebro-migrate init` or `stylebro-migrate --write` turns on (IDE0003, IDE0009, IDE0011, IDE0036,
 IDE0040, IDE0047, IDE0048, IDE0049, IDE0055, IDE0065, IDE0073, IDE2000, IDE2002, IDE2003). A baselined violation isn't
 reported by the build or the IDE, and `dotnet format` leaves it alone.
 

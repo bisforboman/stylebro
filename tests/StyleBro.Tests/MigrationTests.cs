@@ -363,14 +363,14 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
-    public void TheBaseline_CoversEverySdkRuleThePresetOrTheToolTurnsOn()
+    public void TheBaseline_CoversEverySdkRuleInitOrTheToolTurnsOn()
     {
         var preset = Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig");
 
         // A repository with a plain file header and SX1101 turns on IDE0073 and IDE0003 too.
         Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1101.severity = warning\n");
-        var ids = File.ReadAllLines(preset).Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
+        var ids = File.ReadAllLines(preset).Concat(InitCommand.Template().Split('\n')).Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
             .Select(l => System.Text.RegularExpressions.Regex.Match(l, @"^dotnet_diagnostic\.(IDE\d{4})\.severity"))
             .Where(m => m.Success)
             .Select(m => m.Groups[1].Value)
@@ -471,6 +471,31 @@ public sealed class MigrationTests : IDisposable
         var second = Migration.Apply(first, "# BEGIN stylebro-migrate\nnew\n# END stylebro-migrate\n");
 
         Assert.Equal("root = true\n\n# BEGIN stylebro-migrate\nnew\n# END stylebro-migrate\n", second);
+    }
+
+    [Fact]
+    public void ThePreset_SetsNoBuiltInRuleSeverities()
+    {
+        // 'dotnet format' ignores rule severities in a package's global config; they belong in 'stylebro-migrate init'.
+        var preset = File.ReadAllLines(Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig"));
+
+        Assert.DoesNotContain(preset, l => l.StartsWith("dotnet_diagnostic.IDE", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Init_WritesTheBuiltInRulesOnce_AndLeavesMigratedSettingsAlone()
+    {
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        var first = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.StartsWith("root = true\n", first);
+        Assert.Contains("dotnet_diagnostic.IDE0040.severity = warning", first);
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+
+        var migrated = Migration.Apply("root = true\n", Migration.Render(new[] { ("[*.cs]", new List<string> { "dotnet_diagnostic.IDE0040.severity = none" }) }));
+        Write(".editorconfig", migrated);
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        Assert.Equal(migrated, File.ReadAllText(Path.Combine(root, ".editorconfig")));
     }
 
     private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)

@@ -7,7 +7,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 ## Principles
 
 - **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run.
-- **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, the preset enables that rule instead of shipping a copy.
+- **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, StyleBro uses that rule instead of shipping a copy: the preset sets its options and `stylebro-migrate init` turns it on in `.editorconfig`.
 - **Configurable through `.editorconfig`**, with a recommended preset shipped as a low-priority global config.
 
 ## Rules
@@ -97,12 +97,23 @@ Where the preset and the rules differ from StyleCop's defaults, and how to get S
 <PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" PrivateAssets="all" />
 ```
 
+Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0011 braces, IDE0040 access
+modifiers, IDE0055 formatting, ...). Their severities have to be in `.editorconfig`: `dotnet format` ignores severities
+from a package's preset.
+
+```
+dotnet tool install --global StyleBro.Migrate --prerelease
+stylebro-migrate init --write      # adds a block to .editorconfig
+```
+
 ```
 dotnet format                      # whitespace + style + analyzers, including StyleBro
 dotnet format analyzers --diagnostics BRO1001
 ```
 
-To opt out of the preset and configure everything yourself: `<StyleBroPreset>none</StyleBroPreset>`.
+The preset (StyleBro's rule severities and the formatting options) comes with the package. To opt out and configure
+everything yourself: `<StyleBroPreset>none</StyleBroPreset>`. Coming from StyleCop? Use `stylebro-migrate --write`
+instead of `init` (below).
 
 ## Migrating from StyleCop
 
@@ -116,7 +127,7 @@ suppressions over to the replacing rules, and lists the StyleCop rules nothing e
 ## Baseline: fail only on new violations
 
 In a codebase with many existing violations, `stylebro-migrate baseline` records them in `stylebro.baseline`. The
-build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules the preset turns on), so
+build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules `stylebro-migrate init` turns on), so
 only new code has to follow the rules; a violation counts as new once its line is edited. See
 [docs/baseline.md](docs/baseline.md).
 

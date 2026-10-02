@@ -47,7 +47,7 @@ tool again replaces the block, so put your own settings outside it.
   that `stylecop.json` makes moot don't count: SA1203 when `elementOrder` leaves out `constant`, and so on.
 - **Private field naming.** [BRO1303](rules/BRO1303.md) uses `_camelCase` when SA1309 (no leading underscore) is off
   and most of the repository's private fields start with `_`, and `camelCase` otherwise.
-- **SDK rules.** The rules the preset turns on (IDE0055 formatting, IDE0011 braces, IDE0065 using placement, and so
+- **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0011 braces, IDE0065 using placement, and so
   on) get the strongest severity of the StyleCop rules they cover, with options from `stylecop.json`.
 
 - **Documentation scope.** `documentExposedElements`, `documentInternalElements` and `documentPrivateElements`

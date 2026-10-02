@@ -145,7 +145,7 @@ internal static class BaselineCommand
 
         foreach (var (id, count) in result.NotCovered.OrderBy(r => r.Key, StringComparer.Ordinal))
         {
-            Console.WriteLine($"Not in the baseline: {count} {id} (not a StyleBro rule or one of the SDK rules the preset turns on).");
+            Console.WriteLine($"Not in the baseline: {count} {id} (not a StyleBro rule or one of the SDK rules 'stylebro-migrate init' turns on).");
         }
     }
 

@@ -13,7 +13,8 @@ namespace StyleBro.Migrate;
 /// directory) and prints the matching StyleBro and SDK settings. With --write it puts them into the repository's
 /// .editorconfig files, between markers so a second run replaces them, and carries StyleCop suppressions in the code
 /// ('#pragma warning disable SA1202', [SuppressMessage], &lt;NoWarn&gt;) over to the rules that replace them.
-/// 'stylebro-migrate baseline' writes a baseline instead (<see cref="BaselineCommand"/>).
+/// 'stylebro-migrate baseline' writes a baseline instead (<see cref="BaselineCommand"/>), 'stylebro-migrate init' the
+/// built-in rule severities the preset relies on (<see cref="InitCommand"/>).
 /// </summary>
 internal static class Program
 {
@@ -22,6 +23,11 @@ internal static class Program
         if (args.FirstOrDefault() == "baseline")
         {
             return BaselineCommand.Run(args.Skip(1).ToArray());
+        }
+
+        if (args.FirstOrDefault() == "init")
+        {
+            return InitCommand.Run(args.Skip(1).ToArray());
         }
 
         var write = args.Contains("--write");

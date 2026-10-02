@@ -527,6 +527,26 @@ suggest or push a release tag after each batch; mention it only when a release l
   per type per compilation (cache in a compilation-start action). Same results (218 findings both ways); 468 -> ~150 ms,
   StyleBro total ~800 ms. Next most expensive: DocumentationAnalyzer (~160 ms), CommentTextAnalyzer (~80 ms).
 
+## Preset packaging bug and `stylebro-migrate init` (2026-10-02)
+
+- Found while writing the CI guide: **the preset never reached the compiler through the NuGet package (alpha.1 to
+  alpha.8).** The package's build targets added it as `GlobalAnalyzerConfigFiles`, but the SDK turns those into
+  `EditorConfigFiles` in an ItemGroup of Microsoft.Managed.Core.targets, evaluated BEFORE a package's build targets
+  (only the SDK's analysislevel globalconfig showed up in `/analyzerconfig`). Every real-world run used a hook adding
+  `EditorConfigFiles`, which hid it. Effect for package users: BRO rules at their default severity (BRO1112 regions ON
+  instead of off), no preset options. Fix: the targets add `EditorConfigFiles` (the file has `is_global = true`).
+- Probed then: `dotnet format`'s style pass IGNORES rule severities from global configs (any `global_level`, also a
+  repo `.globalconfig`; `--diagnostics IDE0040` doesn't help), reads them from `.editorconfig`; the build honors
+  both. Formatting OPTIONS from a global config are honored by `dotnet format` (`csharp_preserve_single_line_statements
+  = false` split a line), and severity `none` for BRO rules too. User's decision: the preset keeps BRO severities and
+  the SDK options; the 12 `dotnet_diagnostic.IDE*` severities moved to `src/StyleBro.Migrate/sdk-rules.editorconfig`,
+  which `stylebro-migrate init [--write]` (`InitCommand.cs`) writes into the root .editorconfig between the
+  stylebro-migrate markers (a `--write` block wins; it has them too). Tests: `ThePreset_SetsNoBuiltInRuleSeverities`,
+  `Init_WritesTheBuiltInRulesOnce_AndLeavesMigratedSettingsAlone`. Checked through a locally packed package: build
+  gets IDE0040/IDE0036/IDE0055, and after `init --write`, `dotnet format` fixes them.
+- When the self-check moves to a release with this fix (`StyleBroSelfVersion`), the preset starts applying to
+  StyleBro's own code too (e.g. using sorting): run `dotnet format` and commit that separately.
+
 ## Real-world testing log
 
 - **FFMpegCore** (open source, 6 projects, 180 files, no StyleCop; 2026-09-29):

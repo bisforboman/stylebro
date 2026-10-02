@@ -23,6 +23,16 @@ Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run 
 The report lists the StyleCop rules that nothing enforces after the switch, and why. Details:
 [docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md).
 
+## Starting without StyleCop
+
+```
+stylebro-migrate init [path] [--write]
+```
+
+Adds the severities of the built-in .NET rules StyleBro relies on (IDE0011 braces, IDE0040 access modifiers, IDE0055
+formatting, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
+a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too.
+
 ## Baseline
 
 ```

@@ -34,6 +34,7 @@
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.2.0-beta.556.csv" LogicalName="StyleCopRules.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.1.118.csv" LogicalName="StyleCopRules-1.1.118.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\mapping.csv" LogicalName="StyleCopMapping.csv" />
+    <EmbeddedResource Include="sdk-rules.editorconfig" LogicalName="SdkRules.editorconfig" />
   </ItemGroup>
 
   <ItemGroup>

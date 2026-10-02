@@ -11,13 +11,13 @@ namespace StyleBro.Analyzers.Baseline;
 
 /// <summary>
 /// Hides the violations listed in <c>stylebro.baseline</c> (an AdditionalFile; the package adds the nearest one above
-/// the project). Covers every StyleBro rule and the SDK rules the preset or stylebro-migrate turns on. A suppressed
+/// the project). Covers every StyleBro rule and the SDK rules 'stylebro-migrate init' or '--write' turns on. A suppressed
 /// diagnostic is neither reported by the build nor fixed by 'dotnet format'.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class BaselineSuppressor : DiagnosticSuppressor
 {
-    /// <summary>The SDK rules the preset or stylebro-migrate can turn on (MigrationTests checks this list).</summary>
+    /// <summary>The SDK rules stylebro-migrate (init or --write) can turn on (MigrationTests checks this list).</summary>
     internal static readonly string[] SdkIds =
     {
         "IDE0003", "IDE0009", "IDE0011", "IDE0036", "IDE0040", "IDE0047", "IDE0048", "IDE0049", "IDE0055", "IDE0065", "IDE0073",

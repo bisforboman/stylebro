@@ -1,0 +1,26 @@
+[*.cs]
+# Built-in .NET rules that cover StyleCop rules, at the preset's severities. Their options (brace placement, modifier
+# order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
+# package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
+
+# Braces on all control statements (SA1503, SA1519, SA1520)
+dotnet_diagnostic.IDE0011.severity = warning
+# Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
+dotnet_diagnostic.IDE0055.severity = warning
+# Explicit access modifiers, also on every part of a partial type (SA1400, SA1205)
+dotnet_diagnostic.IDE0040.severity = warning
+# Modifier order: access modifier first, then static (SA1206, SA1207)
+dotnet_diagnostic.IDE0036.severity = warning
+# 'int' instead of 'Int32' (SA1121)
+dotnet_diagnostic.IDE0049.severity = warning
+# Parentheses that clarify precedence, and none that don't (SA1119, SA1407, SA1408)
+dotnet_diagnostic.IDE0047.severity = warning
+dotnet_diagnostic.IDE0048.severity = warning
+# Using directives outside the namespace (SA1200, the preset's choice)
+dotnet_diagnostic.IDE0065.severity = warning
+# Blank lines (SA1507, SA1508, SA1513; experimental in the SDK)
+dotnet_diagnostic.IDE2000.severity = warning
+dotnet_diagnostic.IDE2002.severity = warning
+dotnet_diagnostic.IDE2003.severity = warning
+# 'this.' qualification isn't required (SA1101 is off in the preset)
+dotnet_diagnostic.IDE0009.severity = none

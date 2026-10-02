@@ -4,9 +4,12 @@
     This is a .targets file (not .props) so a StyleBroPreset set in the project file is already visible here.
     The preset is a global config with a low global_level: anything in the project's own
     .editorconfig or .globalconfig wins.
+    It goes in EditorConfigFiles, not GlobalAnalyzerConfigFiles: the SDK turns GlobalAnalyzerConfigFiles into
+    EditorConfigFiles in Microsoft.Managed.Core.targets, which is evaluated before a package's build targets, so an item
+    added here was never passed to the compiler (alpha.1 to alpha.8). The compiler reads it as global (is_global = true).
   -->
   <ItemGroup Condition="'$(StyleBroPreset)' != 'none'">
-    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)stylebro.recommended.globalconfig" />
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)stylebro.recommended.globalconfig" />
   </ItemGroup>
 
   <!--

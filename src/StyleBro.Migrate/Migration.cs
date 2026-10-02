@@ -15,7 +15,7 @@ namespace StyleBro.Migrate;
 /// <summary>
 /// Turns a <see cref="StyleCopSetup"/> into .editorconfig settings. A StyleBro rule is on only when StyleCop enforced
 /// every rule it replaces (a team that turned SA1201 off doesn't get BRO1001's full sort), with the weakest of their
-/// severities; each SDK rule the StyleBro preset turns on gets the strongest severity of the StyleCop rules it covers,
+/// severities; each SDK rule StyleBro relies on gets the strongest severity of the StyleCop rules it covers,
 /// with its options taken from stylecop.json. Every key the preset sets is written, so the result overrides the preset
 /// completely (an .editorconfig beats the preset's global config).
 /// </summary>

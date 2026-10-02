@@ -16,7 +16,7 @@ The preset follows StyleCop's defaults except here.
 
 | Topic | StyleCop default | StyleBro preset | Why | To get StyleCop's behavior |
 |---|---|---|---|---|
-| `this.` prefix (SA1101) | Required | Not required (`dotnet_style_qualification_for_field`, `_property`, `_method`, `_event` = `false`, `dotnet_diagnostic.IDE0009.severity = none`) | Most teams turn SA1101 off (2 of the 3 surveyed); it's also the SDK's default. User decision. | Set the four `dotnet_style_qualification_for_*` keys to `true` and IDE0009 to `warning`. |
+| `this.` prefix (SA1101) | Required | Not required (`dotnet_style_qualification_for_field`, `_property`, `_method`, `_event` = `false`; `stylebro-migrate init` writes `dotnet_diagnostic.IDE0009.severity = none`) | Most teams turn SA1101 off (2 of the 3 surveyed); it's also the SDK's default. User decision. | Set the four `dotnet_style_qualification_for_*` keys to `true` and IDE0009 to `warning` in `.editorconfig`. |
 | Using placement (SA1200) | Inside the namespace | Outside (`csharp_using_directive_placement = outside_namespace`) | Works with file-scoped namespaces, matches the .NET templates; all three surveyed teams turn SA1200 off. User decision. | `csharp_using_directive_placement = inside_namespace`. |
 | Regions between members (SA1124, [BRO1112](rules/BRO1112.md)) | Reported | Off (`dotnet_diagnostic.BRO1112.severity = none`) | Removing every region in an existing codebase is a large one-time change, so it's opt-in. (Regions inside code, SA1123/[BRO1113](rules/BRO1113.md), stay on.) | `dotnet_diagnostic.BRO1112.severity = warning`. |
 | Missing documentation (SA1600, SA1601, SA1602, SA1611, SA1615, ...) | Reported | Only overrides and interface implementations, fixed with `<inheritdoc/>` ([BRO1601](rules/BRO1601.md)) | The only automatic fix for other members is placeholder text, which satisfies the rule without documenting anything. User decision. | Not available (keep StyleCop's SA1600 for reporting only, or use the compiler's CS1591). |
@@ -34,7 +34,8 @@ SA1401, SA1402, SA1649).
 
 ## SDK rules that replace StyleCop rules
 
-Where the preset turns on an SDK rule instead of a StyleBro one, `dotnet format` fixes with the SDK's logic, which isn't
+Where StyleBro relies on an SDK rule instead of shipping its own (its options come from the preset, its severity from
+`stylebro-migrate init`), `dotnet format` fixes with the SDK's logic, which isn't
 always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covered-with-known-differences).
 
 - **IDE0047** (for SA1119) also removes the parentheses in `a ?? (b ?? c)`, which SA1119 accepts.
