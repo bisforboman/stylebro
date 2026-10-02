@@ -78,8 +78,8 @@ SA1202,StyleBro **BRO1001** (done)
 SA1203,StyleBro **BRO1001** (done)
 SA1204,StyleBro **BRO1001** (done)
 SA1205,Not yet: StyleBro candidate. Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default).
-SA1206,"Not yet: the SDK can fix it, but it isn't turned on. The SDK's IDE0036 (`csharp_preferred_modifier_order`) fixes it (measured), but IDE0036 enforces a complete order while StyleCop only wants access modifier, then `static`, then the rest in any order: IDE0036 would also reorder `async override` and other combinations StyleCop accepts."
-SA1207,"Not yet: the SDK can fix it, but it isn't turned on. IDE0036 fixes `internal protected` -> `protected internal` (measured); same catch as SA1206."
+SA1206,"SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order)"
+SA1207,SDK: IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`)
 SA1208,SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)
 SA1209,SDK: using sorting in `dotnet format`
 SA1210,SDK: using sorting in `dotnet format`

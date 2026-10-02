@@ -30,7 +30,7 @@ matches SA1400, which doesn't ask for modifiers on interface members (`always` w
 
 StyleCop rules that are on by default but that nothing enforces under the preset: the **candidate**, **drop** and
 **SDK not on yet** entries in [skipped-rules.md](skipped-rules.md) whose facts say "on by default" (for example SA1118,
-SA1206, SA1401, SA1402, SA1649).
+SA1401, SA1402, SA1649).
 
 ## SDK rules that replace StyleCop rules
 
@@ -41,6 +41,8 @@ always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covere
 - **IDE2000** (for SA1507) also removes extra blank lines at the start of a file and right before `}`, which StyleCop
   leaves to SA1517 and SA1508.
 - **IDE0048** (for SA1407, SA1408) may need a second `dotnet format` run.
+- **IDE0036** (for SA1206, SA1207) enforces the SDK's whole modifier order, where StyleCop only checks that the access
+  modifier comes first and `static` next. On six real repos it changed nothing StyleCop accepts.
 - **IDE0073** (for SA1633 with `xmlHeader: false`) writes a plain header; the XML header is [BRO1615](rules/BRO1615.md).
 - **Using sorting** in `dotnet format` happens whenever `dotnet_sort_system_directives_first` is set, even to `false`.
 

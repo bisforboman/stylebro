@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-58 rules: 8 candidate, 2 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+56 rules: 8 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -31,8 +31,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1105](#sa1105) | Query clauses spanning multiple lines should begin on own line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1205](#sa1205) | Partial elements should declare access | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1206](#sa1206) | Declaration keywords should follow order | SDK not on yet | on / on / on | 0 / 0 / 0 |
-| [SA1207](#sa1207) | Protected should come before internal | SDK not on yet | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
 | [SA1305](#sa1305) | Field names should not use Hungarian notation | drop | off / off / off | 82 / 1 / 14 |
@@ -163,28 +161,6 @@ Naming rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel 
 **Why:** Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).
 
 **To revisit:** Tuple element names aren't symbols SymbolFinder renames; every use (deconstruction, `t.name`, inferred names) must change together. Medium, risky.
-
-## Not yet: the SDK can fix it, but it isn't turned on
-
-<a id="sa1206"></a>
-
-### SA1206: Declaration keywords should follow order
-
-Ordering rule. StyleCop: on by default, has a code fix; SDK check: fixed. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** The SDK's IDE0036 (`csharp_preferred_modifier_order`) fixes it (measured), but IDE0036 enforces a complete order while StyleCop only wants access modifier, then `static`, then the rest in any order: IDE0036 would also reorder `async override` and other combinations StyleCop accepts.
-
-**To revisit:** Measure IDE0036 on the StyleCop-clean repos (Measure-MigrationDelta.ps1). If the extra reorders are rare, add IDE0036 to the preset and to stylebro-migrate; otherwise write a BRO rule that only moves access modifiers and `static` forward.
-
-<a id="sa1207"></a>
-
-### SA1207: Protected should come before internal
-
-Ordering rule. StyleCop: on by default, has a code fix; SDK check: fixed. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** IDE0036 fixes `internal protected` -> `protected internal` (measured); same catch as SA1206.
-
-**To revisit:** Decide together with SA1206.
 
 ## Dropped: no safe automatic fix
 
@@ -685,6 +661,16 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 **Difference:** Covered by the SDK's IDE0047, which is a little broader: it also removes the parentheses in `a ?? (b ?? c)`, which SA1119 accepts (2 lines in Polly after migrating).
 
 **To revisit:** Nothing to configure in IDE0047. Only a BRO replacement for SA1119 would match exactly; not worth it so far.
+
+<a id="sa1206"></a>
+
+### SA1206: Declaration keywords should follow order
+
+**Covered by:** SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order)
+
+**Difference:** IDE0036 (`csharp_preferred_modifier_order`) enforces the whole modifier order, while StyleCop only wants the access modifier first and `static` next. Measured on six repos (2026-10-02): IDE0036 reordered nothing that StyleCop accepts (Polly, OpenTelemetry, the private app, FFMpegCore, Serilog 0; Newtonsoft.Json 27 lines, all SA1206 violations such as `public new static`).
+
+**To revisit:** Only if a team reports reorders StyleCop accepted (`async override` vs `override async`); then a BRO rule that only moves access modifiers and `static`.
 
 <a id="sa1407"></a>
 

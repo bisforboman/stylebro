@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 86 StyleBro (86 done), 44 drop, 10 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 55 SDK, 86 StyleBro (86 done), 44 drop, 8 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -35,8 +35,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 | [SA1104](skipped-rules.md#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1105](skipped-rules.md#sa1105) | Query clauses spanning multiple lines should begin on own line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1205](skipped-rules.md#sa1205) | Partial elements should declare access | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1206](skipped-rules.md#sa1206) | Declaration keywords should follow order | on / on / on | 0 / 0 / 0 | SDK not on yet |
-| [SA1207](skipped-rules.md#sa1207) | Protected should come before internal | on / on / on | 0 / 0 / 0 | SDK not on yet |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
@@ -184,8 +182,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1203 | Constants should appear before fields | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1001** (done) |
 | SA1204 | Static elements should appear before instance elements | on | yes | on / on / off | 0 / 2 / 50 |  | StyleBro **BRO1001** (done) |
 | SA1205 | Partial elements should declare access | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A partial type part without an access modifier gets the one the other part declares (or the default). ([details](skipped-rules.md#sa1205)) |
-| SA1206 | Declaration keywords should follow order | on | yes | on / on / on | 0 / 0 / 0 | fixed | Not yet: the SDK can fix it, but it isn't turned on. The SDK's IDE0036 (`csharp_preferred_modifier_order`) fixes it (measured), but IDE0036 enforces a complete order while StyleCop only wants access modifier, then `static`, then the rest in any order: IDE0036 would also reorder `async override` and other combinations StyleCop accepts. ([details](skipped-rules.md#sa1206)) |
-| SA1207 | Protected should come before internal | on | yes | on / on / on | 0 / 0 / 0 | fixed | Not yet: the SDK can fix it, but it isn't turned on. IDE0036 fixes `internal protected` -> `protected internal` (measured); same catch as SA1206. ([details](skipped-rules.md#sa1207)) |
+| SA1206 | Declaration keywords should follow order | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order) ([details](skipped-rules.md#sa1206)) |
+| SA1207 | Protected should come before internal | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`) |
 | SA1208 | System using directives should be placed before other using directives | on | yes | on / on / off | 0 / 0 / 57 | fixed | SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`) |
 | SA1209 | Using alias directives should be placed after other using directives | on | yes | on / on / off | 0 / 0 / 4 | fixed | SDK: using sorting in `dotnet format` |
 | SA1210 | Using directives should be ordered alphabetically by namespace | on | yes | on / on / off | 0 / 0 / 290 | fixed | SDK: using sorting in `dotnet format` |

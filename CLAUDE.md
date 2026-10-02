@@ -16,7 +16,7 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 71 rules; 387 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
+(see the log below) and 71 rules; 388 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.7 (71 rules, 2026-10-02) is the latest on nuget.org with StyleBro.Migrate; earlier: alpha.6 (54 rules,
 the first prerelease published without an approval step), alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
@@ -625,6 +625,13 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **Migration re-measured with 71 rules** (2026-10-02): unchanged from 46 rules: Polly 3 files (2 IDE0047, 1 broken by
   plain `dotnet format`), OpenTelemetry 1 (line ending), private app 10 (9 IDE2000, 1 BRO1104 target-typed `new()`).
   None of the 25 newer rules changes anything in these StyleCop-clean repos.
+
+- **SA1206/SA1207 -> IDE0036** (2026-10-02): the SDK's IDE0036 enforces the whole modifier order (SDK default list)
+  where StyleCop only wants access first and `static` next. Measured with IDE0036 alone at warning: Polly, OpenTelemetry,
+  private app, FFMpegCore, Serilog 0 changes; Newtonsoft.Json 27 lines, all real SA1206 violations (`public new static`,
+  `static private`). A planted `static public` was fixed, so the zeros are real. So no BRO rule: IDE0036 + the default
+  `csharp_preferred_modifier_order` in the preset and in stylebro-migrate (strongest of SA1206/SA1207; a repo's own
+  order is kept). Listed under "covered with known differences".
 
 ## Known open questions
 

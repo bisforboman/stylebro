@@ -19,6 +19,18 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void ModifierOrder_IsIde0036_OffWhenBothStyleCopRulesAreOff()
+    {
+        var on = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", on.Lines);
+        Assert.Contains(on.Lines, l => l.StartsWith("csharp_preferred_modifier_order = public,private,protected,internal,", StringComparison.Ordinal));
+        Assert.Contains("SA1207", on.Covered);
+
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1206.severity = none\ndotnet_diagnostic.SA1207.severity = none\n");
+        Assert.Contains("dotnet_diagnostic.IDE0036.severity = none", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+    }
+
+    [Fact]
     public void Severities_ComeFromEveryKindOfConfig()
     {
         Write("rules.ruleset", """

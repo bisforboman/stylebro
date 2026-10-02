@@ -22,6 +22,8 @@
         SA1208 = 'using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)'
         SA1210 = 'using sorting in `dotnet format`'
         SA1211 = 'using sorting in `dotnet format`'
+        SA1206 = 'IDE0036 (`csharp_preferred_modifier_order`, the SDK default order)'
+        SA1207 = 'IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`)'
         SA1400 = 'IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn''t ask for)'
         SA1408 = 'IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`)'
         SA1500 = 'IDE0055 (`csharp_new_line_before_open_brace = all`)'

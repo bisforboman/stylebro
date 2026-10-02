@@ -493,6 +493,9 @@ internal static class Migration
         Rule("IDE0040", "SA1400");
         // SA1400 doesn't ask for modifiers on interface members.
         lines.Add("dotnet_style_require_accessibility_modifiers = for_non_interface_members");
+        // Modifier order (the SDK's default order; it puts access modifiers first and static next, like SA1206/SA1207).
+        Rule("IDE0036", "SA1206", "SA1207");
+        lines.Add("csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async");
         var aliases = setup.Setting("readabilityRules", "allowBuiltInTypeAliases") is { ValueKind: JsonValueKind.True };
         Rule("IDE0049", aliases ? [] : ["SA1121"]);
         lines.Add($"dotnet_style_predefined_type_for_locals_parameters_members = {Bool(setup.IsOn("SA1121") && !aliases)}");
