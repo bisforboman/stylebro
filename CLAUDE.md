@@ -762,6 +762,10 @@ suggest or push a release tag after each batch; mention it only when a release l
   IDE0040 only when SA1400 is on. Then 16 = the same 10 as before + 6 line-ending-only changes: stray CRLF lines in doc
   comments, which the SDK formatter (ENDOFLINE) fixes because the repo's own .editorconfig says `end_of_line = lf`.
 
+- **BRO1006/BRO1131** (2026-10-03): 0 in FFMpegCore, Polly, OpenTelemetry, Serilog; Newtonsoft.Json 1 BRO1131 (a
+  sealed JsonTextWriter subclass calling `base.WriteValue("redacted")` from its `WriteValue(object)` override: same
+  overload with `this.`), fixed, compiles, second run clean. Private app not run (its clone was busy with the delta).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
