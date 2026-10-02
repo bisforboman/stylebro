@@ -119,7 +119,7 @@
         SA1308 = 'StyleBro **BRO1307** (done), rename to the complete correct name in one pass'
         SA1310 = 'StyleBro **BRO1308** (done), words joined in the field''s casing (MAX_VALUE -> MaxValue)'
         SA1306 = 'StyleBro **BRO1303** (done) for private fields; `stylebro_private_field_naming` picks `count` (default) or `_count`'
-        SA1309 = 'StyleBro **BRO1303** (done) for private fields (default style); constants, static readonly and non-private fields not yet'
+        SA1309 = 'StyleBro **BRO1303** (done, private fields) and **BRO1306** (done, constants, static readonly and non-private fields). Protected fields aren''t renamed (left out of both rules, see BRO1306)'
         SA1311 = 'StyleBro **BRO1306** (done), rename with Fix All'
         SA1312 = 'StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name`'
         SA1313 = 'StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name`'

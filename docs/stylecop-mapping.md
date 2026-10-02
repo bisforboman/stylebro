@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 92 StyleBro (92 done), 44 drop, 1 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 92 StyleBro (91 done), 44 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -155,7 +155,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1306 | Field names should begin with lower-case letter | on | yes | on / off / off | 0 / 4 / 11 | not fixed | StyleBro **BRO1303** (done) for private fields; `stylebro_private_field_naming` picks `count` (default) or `_count` |
 | SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1307** (done), rename to the complete correct name in one pass |
-| SA1309 | Field names should not begin with underscore | on | yes | on / off / off | 0 / 486 / 1,060 | not fixed | StyleBro **BRO1303** (done) for private fields (default style); constants, static readonly and non-private fields not yet |
+| SA1309 | Field names should not begin with underscore | on | yes | on / off / off | 0 / 486 / 1,060 | not fixed | StyleBro **BRO1303** (done, private fields) and **BRO1306** (done, constants, static readonly and non-private fields). Protected fields aren't renamed (left out of both rules, see BRO1306) |
 | SA1310 | Field names should not contain underscore | on | yes | on / on / off | 184 / 0 / 7 |  | StyleBro **BRO1308** (done), words joined in the field's casing (MAX_VALUE -> MaxValue) |
 | SA1311 | Static readonly fields should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1312 | Variable names should begin with lower-case letter | on | yes | on / off / off | 0 / 14 / 7 | not fixed | StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name` |
