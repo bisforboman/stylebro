@@ -94,4 +94,35 @@ public class ListGapsTests
             }
         }
         """);
+
+    [Fact]
+    public Task MultiLineStringBeforeTheComma_IsHandled() => VerifyFixAsync(""""
+        class C
+        {
+            void M(string a, int b)
+            {
+            }
+
+            void Same() => M(@"first
+                second", 1);
+
+            void Next() => M(@"first
+                second"
+                {|BRO1117:,|} 1);
+        }
+        """", """"
+        class C
+        {
+            void M(string a, int b)
+            {
+            }
+
+            void Same() => M(@"first
+                second", 1);
+
+            void Next() => M(@"first
+                second",
+                1);
+        }
+        """");
 }

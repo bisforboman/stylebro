@@ -71,7 +71,7 @@ internal static class ListGaps
             }
 
             // BRO1117: the comma starts a line instead of ending the item before it.
-            if (Line(text, previousEnd.SpanStart) < Line(text, comma.SpanStart) && IsPlain(previousEnd, comma) && IsPlain(comma, items[i].GetFirstToken()))
+            if (Line(text, previousEnd.Span.End) < Line(text, comma.SpanStart) && IsPlain(previousEnd, comma) && IsPlain(comma, items[i].GetFirstToken()))
             {
                 var span = TextSpan.FromBounds(previousEnd.Span.End, items[i].SpanStart);
                 // The comma goes up; the item keeps its line, without the blank lines before it (BRO1119's, done here
