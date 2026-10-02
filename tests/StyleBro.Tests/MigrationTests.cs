@@ -33,6 +33,15 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void AccessModifiers_IsIde0040_OnlyWhenSA1400IsOn()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1400.severity = none\n");
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", result.Lines);
+        Assert.DoesNotContain("SA1205", result.Covered);
+    }
+
+    [Fact]
     public void Severities_ComeFromEveryKindOfConfig()
     {
         Write("rules.ruleset", """
