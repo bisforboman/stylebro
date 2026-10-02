@@ -102,8 +102,21 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
 
             if (!groupOf.TryGetValue(document.Id, out var group))
             {
-                var ids = document.GetLinkedDocumentIds().Add(document.Id);
-                group = new FileGroup(ids, await document.GetTextAsync(cancellationToken).ConfigureAwait(false));
+                // Only copies with the same text share edits. They usually do, but 'dotnet format' runs its whitespace
+                // and code style fixes first and can leave the copies of a multi-targeted file different; edits made
+                // for one copy's text don't fit another's (they ran past its end, "Changes must be within bounds").
+                var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+                var ids = ImmutableArray.Create(document.Id);
+                foreach (var linked in document.GetLinkedDocumentIds())
+                {
+                    if (!groupOf.ContainsKey(linked) && context.Solution.GetDocument(linked) is { } copy
+                        && (await copy.GetTextAsync(cancellationToken).ConfigureAwait(false)).ContentEquals(text))
+                    {
+                        ids = ids.Add(linked);
+                    }
+                }
+
+                group = new FileGroup(ids, text);
                 groups[document.Id] = group;
                 foreach (var id in ids)
                 {

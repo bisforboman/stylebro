@@ -438,5 +438,14 @@ internal static class CamelCaseRenamer
     private static ImmutableArray<ISymbol> GetTypeParameters(ISymbol member) =>
         member is IMethodSymbol method ? method.TypeParameters.CastArray<ISymbol>() : ImmutableArray<ISymbol>.Empty;
 
-    private static string GetFileKey(Document document) => document.FilePath ?? document.Id.Id.ToString();
+    /// <summary>
+    /// A physical file and its text: the copies of a multi-targeted file share edits only while their text is the same
+    /// ('dotnet format' runs its whitespace and code style fixes first and can leave the copies different; edits found in
+    /// one copy don't fit the other's text). See <see cref="LinkedFileFixAllProvider"/>.
+    /// </summary>
+    private static string GetFileKey(Document document)
+    {
+        var text = document.TryGetText(out var loaded) ? loaded : document.GetTextAsync().GetAwaiter().GetResult();
+        return (document.FilePath ?? document.Id.Id.ToString()) + "|" + Convert.ToBase64String(text.GetChecksum().ToArray());
+    }
 }
