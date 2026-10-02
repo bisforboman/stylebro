@@ -581,8 +581,10 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **BRO1109-BRO1113** (2026-09-30): FFMpegCore 15, Polly 411 (BRO1112 264 = its SA1124 count, BRO1113 147),
   OpenTelemetry 0, private app 1146 (BRO1110 1044, BRO1111 82), Newtonsoft.Json 1415 (1102 regions, incl. the
   `#region License` around every file header; the BOM stays), Serilog 5. All fixed in one pass, no new compile
-  errors, second run clean. Open question: the private app has 1044 BRO1110 but StyleCop 1.1.118 counted 740 SA1111
-  there, while the parity set (1.2 beta) is identical; likely a version difference, not yet checked.
+  errors, second run clean. Answered 2026-10-02: the private app's 1044 BRO1110 vs 740 SA1111 (1.1.118) are 739 shared +
+  305 extra (297 target-typed `new(...)`, 8 `: this(...)`/`: base(...)`), which StyleCop 1.2 doesn't check either
+  (added to the parity set); kept as a documented "reports more", like BRO1107/BRO1108's records. 1 StyleCop-only:
+  a trailing comment before `);` (skipped on purpose).
 - **BRO1601-BRO1611** (2026-10-01): FFMpegCore 154, Polly 256, OpenTelemetry 400, private app 2920 (almost all
   BRO1601 `<inheritdoc/>`), Newtonsoft.Json 1186, Serilog 404. All fixed in one pass, second run clean, no new
   compile errors (doc edits only). Found and fixed on the way: BRO1603 put a period after nested `</remarks>` (Polly,
@@ -619,6 +621,10 @@ suggest or push a release tag after each batch; mention it only when a release l
 - **Batch 3** (BRO1122-BRO1126, BRO1403; 2026-10-02): 0 in FFMpegCore, Polly, OpenTelemetry, the private app and
   Serilog; Newtonsoft.Json 38 (20 BRO1122, 9 BRO1123, 9 BRO1125) in 11 files, fixed in one pass, compiles, second run
   clean (lambdas keep their Allman layout).
+
+- **Migration re-measured with 71 rules** (2026-10-02): unchanged from 46 rules: Polly 3 files (2 IDE0047, 1 broken by
+  plain `dotnet format`), OpenTelemetry 1 (line ending), private app 10 (9 IDE2000, 1 BRO1104 target-typed `new()`).
+  None of the 25 newer rules changes anything in these StyleCop-clean repos.
 
 ## Known open questions
 

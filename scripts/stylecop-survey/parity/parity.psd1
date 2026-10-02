@@ -208,6 +208,20 @@
             Name     = 'parenthesis-placement'
             Map      = @('SA1110=BRO1109', 'SA1111=BRO1110')
             Expected = @(
+                # SA1111 (1.1.118 and 1.2) doesn't check target-typed new(...) or : this(...)/: base(...) initializers;
+                # BRO1110 treats them like any other argument list (found via the private app: 305 extra, 297 new()).
+                'only StyleBro: BRO1110 Initializers.cs(13,13)'
+                'only StyleBro: BRO1110 Initializers.cs(24,13)'
+                'only StyleBro: BRO1110 Initializers.cs(31,9)'
+                'StyleBro output only: Initializers.cs: [                0)]'
+                'StyleBro output only: Initializers.cs: [                y)]'
+                'StyleBro output only: Initializers.cs: [            0);]'
+                'StyleCop output only: Initializers.cs: [                0]'
+                'StyleCop output only: Initializers.cs: [            )]'
+                'StyleCop output only: Initializers.cs: [                y]'
+                'StyleCop output only: Initializers.cs: [            )]'
+                'StyleCop output only: Initializers.cs: [            0]'
+                'StyleCop output only: Initializers.cs: [        );]'
             )
         }
         @{
