@@ -59,11 +59,13 @@ public class LinkedFileFixAllTests
     }
 
     [Fact]
-    public async Task CopiesWithDifferentText_AreFixedOnTheirOwn()
+    public async Task CopiesWithDifferentText_AllGetTheFirstCopysFixedText()
     {
         // 'dotnet format' runs its whitespace and code style fixes before the analyzers' and can leave the copies of a
         // multi-targeted file different. Edits for one copy's text used to be applied to the other's ("Changes must be
-        // within bounds of SourceText" in Serilog).
+        // within bounds of SourceText" in Serilog); fixing each copy on its own gave different edits at the same places,
+        // which 'dotnet format' wrote as conflict markers (Newtonsoft.Json), and so did fixing only one copy. Every copy
+        // must end with the same text: the first copy's, fixed.
         var path = Path.Combine(Path.GetTempPath(), "Linked.cs");
         var shortText = "class C { string a = \"\"; }\n";
         var longText = "// a comment the other copy doesn't have\nclass C\n{\n    string a = \"\";\n    string b = \"\";\n}\n";
@@ -92,7 +94,7 @@ public class LinkedFileFixAllTests
         var fixedSolution = operations.OfType<Microsoft.CodeAnalysis.CodeActions.ApplyChangesOperation>().Single().ChangedSolution;
 
         Assert.Equal(shortText.Replace("\"\"", "string.Empty"), (await fixedSolution.GetDocument(ids[0])!.GetTextAsync()).ToString());
-        Assert.Equal(longText.Replace("\"\"", "string.Empty"), (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
+        Assert.Equal(shortText.Replace("\"\"", "string.Empty"), (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
     private static async Task<System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic>> GetDiagnosticsAsync(

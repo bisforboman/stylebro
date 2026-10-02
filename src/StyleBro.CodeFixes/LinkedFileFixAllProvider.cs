@@ -102,26 +102,23 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
 
             if (!groupOf.TryGetValue(document.Id, out var group))
             {
-                // Only copies with the same text share edits. They usually do, but 'dotnet format' runs its whitespace
-                // and code style fixes first and can leave the copies of a multi-targeted file different; edits made
-                // for one copy's text don't fit another's (they ran past its end, "Changes must be within bounds").
-                var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-                var ids = ImmutableArray.Create(document.Id);
-                foreach (var linked in document.GetLinkedDocumentIds())
-                {
-                    if (!groupOf.ContainsKey(linked) && context.Solution.GetDocument(linked) is { } copy
-                        && (await copy.GetTextAsync(cancellationToken).ConfigureAwait(false)).ContentEquals(text))
-                    {
-                        ids = ids.Add(linked);
-                    }
-                }
-
-                group = new FileGroup(ids, text);
+                var ids = document.GetLinkedDocumentIds().Add(document.Id);
+                group = new FileGroup(ids, await document.GetTextAsync(cancellationToken).ConfigureAwait(false));
                 groups[document.Id] = group;
                 foreach (var id in ids)
                 {
                     groupOf[id] = group;
                 }
+            }
+            else if (!(await document.GetTextAsync(cancellationToken).ConfigureAwait(false)).ContentEquals(group.Original))
+            {
+                // The copies of a multi-targeted file usually have the same text, but 'dotnet format' runs its whitespace
+                // and code style fixes first and can leave them different. Edits made for this copy's text don't fit the
+                // first copy's ("Changes must be within bounds" on Serilog), and every copy must end with the same text:
+                // copies fixed differently, or one fixed and one not, are written as conflict markers by 'dotnet
+                // format' (Newtonsoft.Json). So every copy gets the first copy's text with its fixes; what only this
+                // copy's '#if' code needs (fixes, and earlier whitespace edits) comes back on the next run.
+                continue;
             }
 
             // Exact changes for fixes that edit text (SourceText.WithChanges); a single whole-text change for fixes

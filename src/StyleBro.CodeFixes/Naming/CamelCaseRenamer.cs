@@ -72,10 +72,20 @@ internal static class CamelCaseRenamer
             }
         }
 
-        var documentsByFile = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
+        var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
+        var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
+        var paths = new HashSet<string>(StringComparer.Ordinal);
         foreach (var file in changes)
         {
-            var documents = documentsByFile[file.Key].ToList();
+            // Copies of one file whose text differs: every copy gets the first variant's text with its renames (see
+            // LinkedFileFixAllProvider); the other variants' edits don't fit that text.
+            var path = file.Key.Substring(0, file.Key.LastIndexOf('|'));
+            if (!paths.Add(path))
+            {
+                continue;
+            }
+
+            var documents = documentsByKey[file.Key].ToList();
             if (documents.Count == 0)
             {
                 continue;
@@ -83,7 +93,7 @@ internal static class CamelCaseRenamer
 
             var original = await documents[0].GetTextAsync(cancellationToken).ConfigureAwait(false);
             var merged = original.WithChanges(LinkedFileFixAllProvider.Merge(file.Value));
-            foreach (var document in documents)
+            foreach (var document in documentsByPath[path])
             {
                 solution = solution.WithDocumentText(document.Id, merged);
             }
