@@ -124,6 +124,12 @@ dotnet_diagnostic.BRO1125.severity = warning
 # BRO1126: using directives inside a namespace are fully qualified (SA1135)
 dotnet_diagnostic.BRO1126.severity = warning
 
+# BRO1127-BRO1130: query clause layout (SA1102-SA1105)
+dotnet_diagnostic.BRO1127.severity = warning
+dotnet_diagnostic.BRO1128.severity = warning
+dotnet_diagnostic.BRO1129.severity = warning
+dotnet_diagnostic.BRO1130.severity = warning
+
 # BRO1401: trailing comma in multi-line initializers (SA1413)
 dotnet_diagnostic.BRO1401.severity = warning
 

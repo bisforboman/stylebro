@@ -57,6 +57,10 @@ public static class DiagnosticIds
     public const string TupleElementName = "BRO1124";
     public const string LambdaSyntax = "BRO1125";
     public const string QualifiedUsing = "BRO1126";
+    public const string QueryClauseBlankLine = "BRO1127";
+    public const string QueryClausesOnSeparateLines = "BRO1128";
+    public const string QueryClauseAfterMultiLineClause = "BRO1129";
+    public const string MultiLineQueryClause = "BRO1130";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";

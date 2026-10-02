@@ -637,6 +637,46 @@ internal static class Descriptors
             + "namespace it's in. Replaces StyleCop SA1135.",
         helpLinkUri: HelpBase + DiagnosticIds.QualifiedUsing + ".md");
 
+    public static readonly DiagnosticDescriptor QueryClauseBlankLine = new(
+        id: DiagnosticIds.QueryClauseBlankLine,
+        title: "Query clause should follow previous clause",
+        messageFormat: "Remove the blank lines before the query clause",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "No blank line between the clauses of a query expression. Replaces StyleCop SA1102.",
+        helpLinkUri: HelpBase + DiagnosticIds.QueryClauseBlankLine + ".md");
+
+    public static readonly DiagnosticDescriptor QueryClausesOnSeparateLines = new(
+        id: DiagnosticIds.QueryClausesOnSeparateLines,
+        title: "Query clauses should be on separate lines or all on one line",
+        messageFormat: "Put each query clause on its own line",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A query's clauses are all on one line or each on its own line. Replaces StyleCop SA1103.",
+        helpLinkUri: HelpBase + DiagnosticIds.QueryClausesOnSeparateLines + ".md");
+
+    public static readonly DiagnosticDescriptor QueryClauseAfterMultiLineClause = new(
+        id: DiagnosticIds.QueryClauseAfterMultiLineClause,
+        title: "Query clause should begin on new line when previous clause spans multiple lines",
+        messageFormat: "Start the query clause on a new line: the clause before it spans several lines",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A clause after a clause that spans several lines starts on its own line. Replaces StyleCop SA1104.",
+        helpLinkUri: HelpBase + DiagnosticIds.QueryClauseAfterMultiLineClause + ".md");
+
+    public static readonly DiagnosticDescriptor MultiLineQueryClause = new(
+        id: DiagnosticIds.MultiLineQueryClause,
+        title: "Query clauses spanning multiple lines should begin on own line",
+        messageFormat: "Start the query clause on its own line: it spans several lines",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A clause that spans several lines starts on its own line. Replaces StyleCop SA1105.",
+        helpLinkUri: HelpBase + DiagnosticIds.MultiLineQueryClause + ".md");
+
     public static readonly DiagnosticDescriptor EmptyAttributeParentheses = new(
         id: DiagnosticIds.EmptyAttributeParentheses,
         title: "Attribute constructor should not use unnecessary parenthesis",

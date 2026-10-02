@@ -32,10 +32,10 @@ SA1027,SDK: IDE0055 formatting (`indent_style = space`)
 SA1028,SDK: IDE0055 formatting
 SA1100,"Not yet: StyleBro candidate. Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior."
 SA1101,SDK: IDE0009 (`dotnet_style_qualification_for_* = true`)
-SA1102,Not yet: StyleBro candidate. Not done yet. LINQ query clause layout (no blank line between clauses). 0 findings in the surveyed repos.
-SA1103,Not yet: StyleBro candidate. Not done yet. Query clauses all on one line or each on its own (like SA1117 for queries).
-SA1104,Not yet: StyleBro candidate. Not done yet. A clause after a multi-line clause starts on a new line.
-SA1105,Not yet: StyleBro candidate. Not done yet. A multi-line clause starts on its own line.
+SA1102,"StyleBro **BRO1127** (done), same positions as StyleCop except blank lines around a comment line"
+SA1103,"StyleBro **BRO1128** (done), always one clause per line (StyleCop's fix picks one line or split, varying between runs)"
+SA1104,"StyleBro **BRO1129** (done), same positions as StyleCop"
+SA1105,"StyleBro **BRO1130** (done), same positions as StyleCop"
 SA1106,StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported
 SA1107,SDK: IDE0055 (`csharp_preserve_single_line_statements = false`)
 SA1108,"Drop: StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning)."

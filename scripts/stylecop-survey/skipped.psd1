@@ -27,14 +27,6 @@
         # ---- Readability -------------------------------------------------------------------------------------------
         SA1100 = @{ Status = 'Candidate'; Why = 'Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior.'
             Revisit = 'Needs the semantic model; only safe when M isn''t virtual/overridable or the type is sealed. Decide whether to report the unsafe cases without a fix (design rule 3 says skip).' }
-        SA1102 = @{ Status = 'Candidate'; Why = 'Not done yet. LINQ query clause layout (no blank line between clauses). 0 findings in the surveyed repos.'
-            Revisit = 'Layout fix like BRO1107/BRO1108 (ParameterLayout) for query clauses; SA1102-SA1105 belong together. Low demand.' }
-        SA1103 = @{ Status = 'Candidate'; Why = 'Not done yet. Query clauses all on one line or each on its own (like SA1117 for queries).'
-            Revisit = 'Same approach as BRO1108; do SA1102-SA1105 as one batch.' }
-        SA1104 = @{ Status = 'Candidate'; Why = 'Not done yet. A clause after a multi-line clause starts on a new line.'
-            Revisit = 'Part of the SA1102-SA1105 batch.' }
-        SA1105 = @{ Status = 'Candidate'; Why = 'Not done yet. A multi-line clause starts on its own line.'
-            Revisit = 'Part of the SA1102-SA1105 batch.' }
         SA1108 = @{ Status = 'Drop'; Why = 'StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning).'
             Revisit = 'Possible rule: move it to the line above the statement. Probe what teams expect first.' }
         SA1109 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic for a region between `if (b)` and its block (probed).'

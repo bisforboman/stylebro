@@ -104,6 +104,11 @@ public class LinkedFileFixAllTests
         return diagnostics.Where(d => d.Location.SourceTree == tree).ToImmutableArray();
     }
 
+    private static string Apply(params TextChange[] changes)
+    {
+        return SourceText.From(Original).WithChanges(LinkedFileFixAllProvider.Merge(changes.ToList())).ToString();
+    }
+
     private sealed class Provider : Microsoft.CodeAnalysis.CodeFixes.FixAllContext.DiagnosticProvider
     {
         private readonly Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer analyzer;
@@ -121,10 +126,5 @@ public class LinkedFileFixAllTests
 
         public override Task<IEnumerable<Microsoft.CodeAnalysis.Diagnostic>> GetAllDiagnosticsAsync(Microsoft.CodeAnalysis.Project project, CancellationToken cancellationToken) =>
             Task.FromResult(Enumerable.Empty<Microsoft.CodeAnalysis.Diagnostic>());
-    }
-
-    private static string Apply(params TextChange[] changes)
-    {
-        return SourceText.From(Original).WithChanges(LinkedFileFixAllProvider.Merge(changes.ToList())).ToString();
     }
 }

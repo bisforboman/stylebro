@@ -19,16 +19,12 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-55 rules: 7 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+51 rules: 3 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
 | [SA1006](#sa1006) | Preprocessor keywords should not be preceded by space | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1100](#sa1100) | Do not prefix calls with base unless local implementation exists | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1102](#sa1102) | Query clause should follow previous clause | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1103](#sa1103) | Query clauses should be on separate lines or all on one line | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1104](#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | candidate | on / on / on | 0 / 0 / 0 |
-| [SA1105](#sa1105) | Query clauses spanning multiple lines should begin on own line | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
@@ -100,46 +96,6 @@ Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (
 **Why:** Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior.
 
 **To revisit:** Needs the semantic model; only safe when M isn't virtual/overridable or the type is sealed. Decide whether to report the unsafe cases without a fix (design rule 3 says skip).
-
-<a id="sa1102"></a>
-
-### SA1102: Query clause should follow previous clause
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. LINQ query clause layout (no blank line between clauses). 0 findings in the surveyed repos.
-
-**To revisit:** Layout fix like BRO1107/BRO1108 (ParameterLayout) for query clauses; SA1102-SA1105 belong together. Low demand.
-
-<a id="sa1103"></a>
-
-### SA1103: Query clauses should be on separate lines or all on one line
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. Query clauses all on one line or each on its own (like SA1117 for queries).
-
-**To revisit:** Same approach as BRO1108; do SA1102-SA1105 as one batch.
-
-<a id="sa1104"></a>
-
-### SA1104: Query clause should begin on new line when previous clause spans multiple lines
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A clause after a multi-line clause starts on a new line.
-
-**To revisit:** Part of the SA1102-SA1105 batch.
-
-<a id="sa1105"></a>
-
-### SA1105: Query clauses spanning multiple lines should begin on own line
-
-Readability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet. A multi-line clause starts on its own line.
-
-**To revisit:** Part of the SA1102-SA1105 batch.
 
 <a id="sa1316"></a>
 

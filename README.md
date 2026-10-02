@@ -45,6 +45,10 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1124](docs/rules/BRO1124.md) | Refer to tuple elements by name | SA1142 | Yes |
 | [BRO1125](docs/rules/BRO1125.md) | Use lambda syntax | SA1130 | Yes |
 | [BRO1126](docs/rules/BRO1126.md) | Using directives should be qualified | SA1135 | Yes |
+| [BRO1127](docs/rules/BRO1127.md) | Query clause should follow previous clause | SA1102 | Yes |
+| [BRO1128](docs/rules/BRO1128.md) | Query clauses should be on separate lines or all on one line | SA1103 | Yes |
+| [BRO1129](docs/rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Yes |
+| [BRO1130](docs/rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

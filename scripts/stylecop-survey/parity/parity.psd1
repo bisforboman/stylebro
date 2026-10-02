@@ -491,5 +491,20 @@
                 'StyleCop output only: Lambdas.cs: [            this.Changed +=  (s, e) =>             {]'
             )
         }
+            @{
+            Name     = 'query-layout'
+            Map      = @('SA1102=BRO1127', 'SA1103=BRO1128', 'SA1104=BRO1129', 'SA1105=BRO1130')
+            # StyleCop's SA1103 fix joins the query on one line or splits it, and under 'dotnet format' which one it applies
+            # changes from run to run, so the output isn't compared. StyleBro always splits.
+            CompareOutput = $false
+            Expected = @(
+                # A mixed query that also has a multi-line clause: BRO1128 is reported with BRO1130 so one run fixes it all.
+                'only StyleBro: BRO1128 Queries.cs(58,13)'
+                # Blank lines with a comment line between them, and clauses sharing a line across a comment: skipped (the fix
+                # would have to move the comment; StyleCop's SA1102 fix deletes it).
+                'only StyleCop: BRO1127 Queries.cs(50,13)'
+                'only StyleCop: BRO1128 Queries.cs(42,13)'
+            )
+        }
     )
 }

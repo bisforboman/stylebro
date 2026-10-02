@@ -216,6 +216,16 @@ suggest or push a release tag after each batch; mention it only when a release l
   Parity `readability-semantics`: 38/37 positions, 44 documented differences. Mutation-tested: every guard has a test
   (the value check needed the double-rounding float case; an explicit `global::` check was dead, `GetAliasInfo` covers it).
 
+- **BRO1127-BRO1130** (SA1102-SA1105, query clause layout, 2026-10-03; `Readability/QueryLayout.cs`, one analyzer + one
+  fix): StyleCop's SA110xQueryClauses logic (pairs of clause keywords, `into` handling, StyleCop's query indentation:
+  the from-line's indentation, +1 unit unless `from` or `(` starts that line). Every fix rewrites only the gap before a
+  clause keyword. BRO1128 always splits (StyleCop's SA1103 fix joins or splits, and under `dotnet format` which one it
+  applies changed between two identical runs, so the parity set `query-layout` compares positions only: 9/8, 3
+  documented). Deviations: BRO1128 also reported next to BRO1129/BRO1130 (StyleCop suppresses it, leaving a mixed
+  query for a second run); gaps with comments skipped, and BRO1128 skips a query with a commented same-line pair (the
+  fix couldn't make it consistent). Mutation-tested; 0 findings expected in the surveyed repos (none use queries
+  like this).
+
 ## BRO13xx: naming
 
 - **BRO1301** (SA1312) variables and **BRO1302** (SA1313) parameters begin with a lower-case letter

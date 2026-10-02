@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 86 StyleBro (86 done), 44 drop, 7 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 90 StyleBro (90 done), 44 drop, 3 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -30,10 +30,6 @@ Rules that look feasible but aren't covered yet, ordered by how many of the 3 te
 |---|---|---|---|---|
 | [SA1006](skipped-rules.md#sa1006) | Preprocessor keywords should not be preceded by space | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1100](skipped-rules.md#sa1100) | Do not prefix calls with base unless local implementation exists | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1102](skipped-rules.md#sa1102) | Query clause should follow previous clause | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1103](skipped-rules.md#sa1103) | Query clauses should be on separate lines or all on one line | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1104](skipped-rules.md#sa1104) | Query clause should begin on new line when previous clause spans multiple lines | on / on / on | 0 / 0 / 0 | candidate |
-| [SA1105](skipped-rules.md#sa1105) | Query clauses spanning multiple lines should begin on own line | on / on / on | 0 / 0 / 0 | candidate |
 | [SA1316](skipped-rules.md#sa1316) | Tuple element names should use correct casing | on / on / on | 0 / 0 / 0 | candidate |
 
 **Observation.** Polly turns off most of StyleCop's spacing, layout and naming rules and enforces the SDK equivalents instead: 101 IDE rule severities, including IDE0055 (formatting), IDE0011 (braces) and IDE1006 with 10 naming rules, plus `EnforceCodeStyleInBuild`. That is the model StyleBro's preset follows. All three repos turn off SA1200 (using placement) and SA1401 (fields should be private).
@@ -199,10 +195,10 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 |---|---|---|---|---|---|---|---|
 | SA1100 | Do not prefix calls with base unless local implementation exists | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet, and riskier than it looks: `base.M()` -> `this.M()` turns a non-virtual call into a virtual one, so a derived class that overrides M changes behavior. ([details](skipped-rules.md#sa1100)) |
 | SA1101 | Prefix local calls with this | on | yes | on / off / off | 0 / 4,007 / 17,153 | fixed | SDK: IDE0009 (`dotnet_style_qualification_for_* = true`) |
-| SA1102 | Query clause should follow previous clause | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. LINQ query clause layout (no blank line between clauses). 0 findings in the surveyed repos. ([details](skipped-rules.md#sa1102)) |
-| SA1103 | Query clauses should be on separate lines or all on one line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. Query clauses all on one line or each on its own (like SA1117 for queries). ([details](skipped-rules.md#sa1103)) |
-| SA1104 | Query clause should begin on new line when previous clause spans multiple lines | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A clause after a multi-line clause starts on a new line. ([details](skipped-rules.md#sa1104)) |
-| SA1105 | Query clauses spanning multiple lines should begin on own line | on | yes | on / on / on | 0 / 0 / 0 |  | Not yet: StyleBro candidate. Not done yet. A multi-line clause starts on its own line. ([details](skipped-rules.md#sa1105)) |
+| SA1102 | Query clause should follow previous clause | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1127** (done), same positions as StyleCop except blank lines around a comment line |
+| SA1103 | Query clauses should be on separate lines or all on one line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1128** (done), always one clause per line (StyleCop's fix picks one line or split, varying between runs) |
+| SA1104 | Query clause should begin on new line when previous clause spans multiple lines | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1129** (done), same positions as StyleCop |
+| SA1105 | Query clauses spanning multiple lines should begin on own line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1130** (done), same positions as StyleCop |
 | SA1106 | Code should not contain empty statements | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported |
 | SA1107 | Code should not contain multiple statements on one line | on | yes | on / off / off | 0 / 243 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_statements = false`) |
 | SA1108 | Block statements should not contain embedded comments | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning). ([details](skipped-rules.md#sa1108)) |

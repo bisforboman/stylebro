@@ -86,6 +86,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1124](rules/BRO1124.md) (SA1142) | `nameof(t.Item1)` | The fix would change the string. |
 | [BRO1125](rules/BRO1125.md) (SA1130) | Anonymous methods whose lambda wouldn't bind the same (another overload, no target type for `var`), `ref`/`out` parameters | StyleCop's fix for these changes behavior or doesn't compile. |
 | [BRO1126](rules/BRO1126.md) (SA1135) | A qualified name an enclosing namespace would hide | StyleCop's fix would refer to the wrong namespace. |
+| [BRO1127](rules/BRO1127.md), [BRO1128](rules/BRO1128.md) (SA1102, SA1103) | Blank lines with a comment line between clauses; a query whose clauses share a line across a comment | The fix would have to move the comment, or couldn't satisfy the rule. |
 | [BRO1403](rules/BRO1403.md) (SA1410) | `delegate() { }` that BRO1125 turns into a lambda | One fix per anonymous method; StyleCop reports both rules there. |
 
 ### Reports more than StyleCop
@@ -98,6 +99,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1306](rules/BRO1306.md) (SA1303, SA1311) | Constants and `static readonly` fields starting with `_` | StyleCop leaves them to SA1309; StyleBro renames to the full correct name in one pass. |
 | [BRO1123](rules/BRO1123.md) (SA1141) | Tuple types in locals, arrays, nullables, `typeof` and type arguments of calls | StyleCop only checks declarations and creations. |
 | [BRO1125](rules/BRO1125.md) (SA1130) | Calls like `list.ForEach(delegate (int item) { ... })` | StyleCop's overload check misses them; StyleBro binds the lambda and finds the same method. |
+| [BRO1128](rules/BRO1128.md) (SA1103) | A mixed query that also has SA1104/SA1105 findings | StyleCop leaves the rest of the query to a second run. |
 | [BRO1505](rules/BRO1505.md) (SA1516) | A member whose `///` directly follows the previous member, and file-scoped namespace declarations | StyleCop misses the first when it parses docs, and 1.1.118 misses the second (1.2 reports it). |
 | [BRO1002](rules/BRO1002.md) (SA1005) | Nothing extra; StyleCop 1.1.118 reported `//  two spaces`, 1.2 and StyleBro don't | |
 
@@ -126,6 +128,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1615](rules/BRO1615.md) (SA1633-SA1641) | Deletes a plain comment header (license text, notes) when it writes the XML header | Keeps any other comment below the new header; otherwise the same headers |
 | [BRO1123](rules/BRO1123.md), [BRO1124](rules/BRO1124.md) (SA1141, SA1142) | None under `dotnet format` (SA1141's has no Fix All, SA1142's throws) | Tuple syntax and element names |
 | [BRO1125](rules/BRO1125.md) (SA1130) | Leaves two spaces after `=`, pulls a body on its own line up behind `=>` | Keeps the layout |
+| [BRO1128](rules/BRO1128.md) (SA1103) | Joins the query on one line or splits it, whichever action comes first | Each clause on its own line |
 
 ### Same as StyleCop
 
@@ -135,5 +138,5 @@ Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-
 [BRO1113](rules/BRO1113.md), [BRO1304](rules/BRO1304.md), [BRO1305](rules/BRO1305.md), [BRO1501](rules/BRO1501.md),
 [BRO1502](rules/BRO1502.md), [BRO1503](rules/BRO1503.md), [BRO1504](rules/BRO1504.md), [BRO1506](rules/BRO1506.md),
 [BRO1507](rules/BRO1507.md), [BRO1602](rules/BRO1602.md), [BRO1605](rules/BRO1605.md), [BRO1608](rules/BRO1608.md),
-[BRO1609](rules/BRO1609.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
+[BRO1609](rules/BRO1609.md), [BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
 change nothing there.)
