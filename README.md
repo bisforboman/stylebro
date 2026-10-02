@@ -113,7 +113,7 @@ dotnet format analyzers --diagnostics BRO1001
 
 The preset (StyleBro's rule severities and the formatting options) comes with the package. To opt out and configure
 everything yourself: `<StyleBroPreset>none</StyleBroPreset>`. Coming from StyleCop? Use `stylebro-migrate --write`
-instead of `init` (below).
+instead of `init` (below). Checking it in CI: [docs/ci.md](docs/ci.md).
 
 ## Migrating from StyleCop
 
