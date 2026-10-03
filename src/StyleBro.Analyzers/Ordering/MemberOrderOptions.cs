@@ -21,6 +21,9 @@ internal enum MemberKind
     Method,
     Struct,
     Class,
+
+    /// <summary>A namespace inside a namespace or file: always first there, like StyleCop (not configurable).</summary>
+    Namespace,
 }
 
 /// <summary>Accessibility. Declaration order is the default order (StyleCop SA1202-compatible).</summary>
@@ -53,7 +56,7 @@ internal sealed class MemberOrderOptions
     public const string StaticFirstKey = "stylebro_member_static_first";
     public const string ReadonlyFirstKey = "stylebro_member_readonly_first";
 
-    private const int KindCount = (int)MemberKind.Class + 1;
+    private const int KindCount = (int)MemberKind.Namespace + 1;
     private const int AccessCount = (int)MemberAccess.Private + 1;
 
     private static readonly Dictionary<string, int> KindNames = new(StringComparer.OrdinalIgnoreCase)

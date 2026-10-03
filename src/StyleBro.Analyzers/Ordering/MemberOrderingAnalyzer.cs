@@ -29,16 +29,19 @@ public sealed class MemberOrderingAnalyzer : DiagnosticAnalyzer
             SyntaxKind.StructDeclaration,
             SyntaxKind.InterfaceDeclaration,
             SyntaxKind.RecordDeclaration,
-            SyntaxKind.RecordStructDeclaration);
+            SyntaxKind.RecordStructDeclaration,
+            SyntaxKind.NamespaceDeclaration,
+            SyntaxKind.FileScopedNamespaceDeclaration,
+            SyntaxKind.CompilationUnit);
     }
 
     private static void AnalyzeType(SyntaxNodeAnalysisContext context)
     {
-        var type = (TypeDeclarationSyntax)context.Node;
+        var container = context.Node;
         var options = MemberOrderOptions.Read(
-            context.Options.AnalyzerConfigOptionsProvider.GetOptions(type.SyntaxTree));
+            context.Options.AnalyzerConfigOptionsProvider.GetOptions(container.SyntaxTree));
 
-        var violation = MemberOrdering.FindFirstViolation(type, options);
+        var violation = MemberOrdering.FindFirstViolation(container, options, MemberOrdering.GetPartialAccess(container, context.SemanticModel, context.CancellationToken));
         if (violation is null)
         {
             return;

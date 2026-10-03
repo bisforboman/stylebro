@@ -1,5 +1,13 @@
 namespace Messy;
 
+/// <summary>Paper sizes.</summary>
+public enum Paper
+{
+    A4,
+    A5,
+    Letter,
+}
+
 /// <summary>Prints labels.</summary>
 public class Printer
 {
@@ -26,12 +34,4 @@ public class Printer
     {
         _copies = 0;
     }
-}
-
-/// <summary>Paper sizes.</summary>
-public enum Paper
-{
-    A4,
-    A5,
-    Letter,
 }

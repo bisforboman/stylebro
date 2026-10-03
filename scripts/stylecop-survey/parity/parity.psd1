@@ -4,6 +4,16 @@
 @{
     Sets = @(
         @{
+            Name     = 'namespace-order'
+            Map      = @('SA1201=BRO1001', 'SA1202=BRO1001', 'SA1204=BRO1001')
+            Expected = @(
+                # BRO1001 reports once per container (the first out-of-place element); the fix sorts all of it.
+                'only StyleCop: BRO1001 Types.cs(11,17)'
+                'only StyleCop: BRO1001 Types.cs(20,26)'
+                'only StyleCop: BRO1001 Types.cs(30,15)'
+            )
+        }
+        @{
             Name     = 'blank-line-runs'
             Map      = @('SA1507=BRO1517', 'SA1508=BRO1518', 'SA1513=BRO1519')
             Expected = @(

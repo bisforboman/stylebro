@@ -36,6 +36,114 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task TypesInANamespace_AreOrdered() => VerifyFixAsync(
+        """
+        namespace App
+        {
+            internal class Helper
+            {
+            }
+
+            public class {|BRO1001:Service|}
+            {
+            }
+
+            public enum Mode
+            {
+                On,
+            }
+
+            public static class Extensions
+            {
+            }
+
+            namespace Inner
+            {
+            }
+        }
+        """,
+        """
+        namespace App
+        {
+            namespace Inner
+            {
+            }
+
+            public enum Mode
+            {
+                On,
+            }
+
+            public static class Extensions
+            {
+            }
+
+            public class Service
+            {
+            }
+
+            internal class Helper
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task FileScopedNamespace_AndPartialParts_UseTheRealAccessibility() => VerifyFixAsync(
+        """
+        namespace App;
+
+        public partial class Order
+        {
+        }
+
+        internal class Helper
+        {
+        }
+
+        partial class {|BRO1001:Order|}
+        {
+        }
+
+        public interface IShape
+        {
+        }
+        """,
+        """
+        namespace App;
+
+        public interface IShape
+        {
+        }
+
+        public partial class Order
+        {
+        }
+
+        partial class Order
+        {
+        }
+
+        internal class Helper
+        {
+        }
+        """);
+
+    [Fact]
+    public Task TypesInAFile_NotReported_WhenTheyCarryTheHeaderOrTopLevelCode() => VerifyNoDiagnosticsAsync("""
+        // Copyright (c) Contoso.
+
+        public class Service
+        {
+        }
+
+        public enum Mode
+        {
+            On,
+        }
+        """);
+
+    [Fact]
     public Task FieldAfterMethod_IsMovedUp() => VerifyFixAsync(
         """
         class C

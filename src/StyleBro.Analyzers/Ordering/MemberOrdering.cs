@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -30,9 +31,56 @@ internal sealed class OrderingViolation
 /// </summary>
 internal static class MemberOrdering
 {
-    public static OrderingViolation? FindFirstViolation(TypeDeclarationSyntax type, MemberOrderOptions options)
+    /// <summary>
+    /// The members BRO1001 orders: a type's, and (StyleCop's SA1201/SA1202/SA1204 at the outer level) the types and
+    /// namespaces of a namespace or a file.
+    /// </summary>
+    public static SyntaxList<MemberDeclarationSyntax>? GetMembers(SyntaxNode container) => container switch
     {
-        var keys = GetKeys(type, options);
+        TypeDeclarationSyntax type => type.Members,
+        BaseNamespaceDeclarationSyntax ns => ns.Members,
+        CompilationUnitSyntax unit => unit.Members,
+        _ => null,
+    };
+
+    /// <summary>
+    /// The accessibility of each member that is a partial type without an access modifier, from its other parts (null for
+    /// the rest). By its modifiers alone such a part looks private or internal, and BRO1007 adds the real modifier in the
+    /// same run: sorting by the modifiers would then want another run.
+    /// </summary>
+    public static MemberAccess?[]? GetPartialAccess(SyntaxNode container, SemanticModel model, CancellationToken cancellationToken)
+    {
+        if (GetMembers(container) is not { } members)
+        {
+            return null;
+        }
+
+        MemberAccess?[]? result = null;
+        for (var i = 0; i < members.Count; i++)
+        {
+            if (members[i] is BaseTypeDeclarationSyntax type && type.Modifiers.Any(SyntaxKind.PartialKeyword)
+                && !type.Modifiers.Any(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.InternalKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.PrivateKeyword)
+                && model.GetDeclaredSymbol(type, cancellationToken) is { } symbol)
+            {
+                result ??= new MemberAccess?[members.Count];
+                result[i] = symbol.DeclaredAccessibility switch
+                {
+                    Accessibility.Public => MemberAccess.Public,
+                    Accessibility.Internal => MemberAccess.Internal,
+                    Accessibility.ProtectedOrInternal => MemberAccess.ProtectedInternal,
+                    Accessibility.Protected => MemberAccess.Protected,
+                    Accessibility.ProtectedAndInternal => MemberAccess.PrivateProtected,
+                    _ => MemberAccess.Private,
+                };
+            }
+        }
+
+        return result;
+    }
+
+    public static OrderingViolation? FindFirstViolation(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
+    {
+        var keys = GetKeys(container, options, partialAccess);
         if (keys is null)
         {
             return null;
@@ -50,7 +98,8 @@ internal static class MemberOrdering
                     j++;
                 }
 
-                return new OrderingViolation(type.Members[i], type.Members[j], Describe(keys[i], keys[j]));
+                var members = GetMembers(container)!.Value;
+                return new OrderingViolation(members[i], members[j], Describe(keys[i], keys[j]));
             }
 
             if (comparison > 0)
@@ -66,23 +115,23 @@ internal static class MemberOrdering
     /// Returns the type with its members sorted. Blank-line layout stays with the position ("slot"),
     /// while comments, doc comments and attributes travel with the member.
     /// </summary>
-    public static TypeDeclarationSyntax Sort(TypeDeclarationSyntax type, MemberOrderOptions options)
+    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
     {
-        var keys = GetKeys(type, options);
+        var keys = GetKeys(container, options, partialAccess);
         if (keys is null)
         {
-            return type;
+            return container;
         }
 
-        var members = type.Members;
+        var members = GetMembers(container)!.Value;
         var count = members.Count;
         var order = SortedOrder(keys);
         if (order.Select((source, slot) => source == slot).All(unchanged => unchanged))
         {
-            return type;
+            return container;
         }
 
-        var newLine = DetectNewLine(type);
+        var newLine = DetectNewLine(container);
         var split = members.Select(m => SplitLeadingTrivia(m.GetLeadingTrivia())).ToArray();
         var result = new MemberDeclarationSyntax[count];
 
@@ -111,11 +160,24 @@ internal static class MemberOrdering
             {
                 member = member.WithTrailingTrivia(member.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine(newLine)));
             }
+            else if (slot == count - 1 && !EndsWithNewLine(members[count - 1]) && EndsWithNewLine(member))
+            {
+                // The last slot keeps the file's ending: no line break after the last type when there was none.
+                var trailing = member.GetTrailingTrivia();
+                member = member.WithTrailingTrivia(trailing.RemoveAt(trailing.Count - 1));
+            }
 
             result[slot] = member;
         }
 
-        return type.WithMembers(SyntaxFactory.List(result));
+        var sorted = SyntaxFactory.List(result);
+        return container switch
+        {
+            TypeDeclarationSyntax type => type.WithMembers(sorted),
+            BaseNamespaceDeclarationSyntax ns => ns.WithMembers(sorted),
+            CompilationUnitSyntax unit => unit.WithMembers(sorted),
+            _ => container,
+        };
     }
 
     public static SyntaxToken GetNameToken(MemberDeclarationSyntax member)
@@ -133,6 +195,7 @@ internal static class MemberOrdering
             ConversionOperatorDeclarationSyntax conversion => conversion.OperatorKeyword,
             DelegateDeclarationSyntax del => del.Identifier,
             BaseTypeDeclarationSyntax nested => nested.Identifier,
+            BaseNamespaceDeclarationSyntax ns => ns.Name.GetFirstToken(),
             _ => member.GetFirstToken(),
         };
     }
@@ -143,6 +206,7 @@ internal static class MemberOrdering
         {
             DestructorDeclarationSyntax destructor => "~" + destructor.Identifier.ValueText,
             IndexerDeclarationSyntax => "this[]",
+            BaseNamespaceDeclarationSyntax ns => ns.Name.ToString(),
             OperatorDeclarationSyntax op => "operator " + op.OperatorToken.Text,
             ConversionOperatorDeclarationSyntax conversion =>
                 conversion.ImplicitOrExplicitKeyword.Text + " operator " + conversion.Type,
@@ -150,19 +214,27 @@ internal static class MemberOrdering
         };
     }
 
-    private static MemberKey[]? GetKeys(TypeDeclarationSyntax type, MemberOrderOptions options)
+    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess)
     {
-        var members = type.Members;
-        if (members.Count < 2 || HasDirectivesBetweenMembers(type))
+        if (GetMembers(container) is not { } members || members.Count < 2 || HasDirectivesBetweenMembers(members))
         {
             return null;
         }
 
-        var inInterface = type.IsKind(SyntaxKind.InterfaceDeclaration);
+        // A file's first type carries the file header in its leading trivia when nothing comes before it: moving the type
+        // would move the header. Left alone.
+        if (container is CompilationUnitSyntax && members[0].GetFirstToken().GetPreviousToken().IsKind(SyntaxKind.None)
+            && members[0].GetLeadingTrivia().Any(t => !t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
+        {
+            return null;
+        }
+
+        var inInterface = container.IsKind(SyntaxKind.InterfaceDeclaration);
+        var inNamespace = container is not TypeDeclarationSyntax;
         var keys = new MemberKey[members.Count];
         for (var i = 0; i < members.Count; i++)
         {
-            var key = GetKey(members[i], inInterface, options);
+            var key = GetKey(members[i], partialAccess?[i] ?? GetAccess(members[i], inInterface, inNamespace), options);
             if (key is null)
             {
                 // Unknown member (e.g. incomplete code while typing): leave the type alone.
@@ -173,7 +245,7 @@ internal static class MemberOrdering
         }
 
         // Sorting must not change what field initializers compute; skip the type if it could.
-        return InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys)) ? null : keys;
+        return container is TypeDeclarationSyntax type && InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys)) ? null : keys;
     }
 
     /// <summary>Maps each slot to the index of the member that belongs there after sorting.</summary>
@@ -183,7 +255,7 @@ internal static class MemberOrdering
         return Enumerable.Range(0, keys.Length).OrderBy(i => keys[i]).ToArray();
     }
 
-    private static MemberKey? GetKey(MemberDeclarationSyntax member, bool inInterface, MemberOrderOptions options)
+    private static MemberKey? GetKey(MemberDeclarationSyntax member, MemberAccess access, MemberOrderOptions options)
     {
         var kind = GetKind(member);
         if (kind is null)
@@ -195,12 +267,10 @@ internal static class MemberOrdering
         var isConstant = modifiers.Any(SyntaxKind.ConstKeyword);
         var isStatic = isConstant || modifiers.Any(SyntaxKind.StaticKeyword);
         var isReadonly = member is FieldDeclarationSyntax && modifiers.Any(SyntaxKind.ReadOnlyKeyword);
-        var access = GetAccess(member, inInterface);
-
         return new MemberKey(
             kind.Value,
             access,
-            options.KindRank(kind.Value),
+            kind.Value == MemberKind.Namespace ? -1 : options.KindRank(kind.Value),
             options.AccessRank(access),
             constantRank: options.ConstantsFirst && !isConstant ? 1 : 0,
             staticRank: options.StaticFirst && !isStatic ? 1 : 0,
@@ -226,11 +296,12 @@ internal static class MemberOrdering
             StructDeclarationSyntax => MemberKind.Struct,
             RecordDeclarationSyntax record => record.IsKind(SyntaxKind.RecordStructDeclaration) ? MemberKind.Struct : MemberKind.Class,
             ClassDeclarationSyntax => MemberKind.Class,
+            BaseNamespaceDeclarationSyntax => MemberKind.Namespace,
             _ => null,
         };
     }
 
-    private static MemberAccess GetAccess(MemberDeclarationSyntax member, bool inInterface)
+    private static MemberAccess GetAccess(MemberDeclarationSyntax member, bool inInterface, bool inNamespace)
     {
         // A static constructor has no access modifier. StyleCop treats it as public, so it comes before every instance
         // constructor (public ones too, since static comes first). Treating it as private moved it below them.
@@ -276,8 +347,9 @@ internal static class MemberOrdering
             return MemberAccess.Private;
         }
 
-        // No modifier: interface members are public, class/struct members (including nested types) private.
-        return inInterface ? MemberAccess.Public : MemberAccess.Private;
+        // No modifier: interface members are public, types in a namespace (and namespaces) internal, class/struct members
+        // (including nested types) private.
+        return inInterface ? MemberAccess.Public : inNamespace ? MemberAccess.Internal : MemberAccess.Private;
     }
 
     private static bool IsExplicitInterfaceImplementation(MemberDeclarationSyntax member)
@@ -296,9 +368,9 @@ internal static class MemberOrdering
     /// #region, #if, #pragma etc. between members define scopes that reordering would break,
     /// so such types are skipped entirely rather than risking a wrong fix.
     /// </summary>
-    private static bool HasDirectivesBetweenMembers(TypeDeclarationSyntax type)
+    private static bool HasDirectivesBetweenMembers(SyntaxList<MemberDeclarationSyntax> members)
     {
-        foreach (var member in type.Members)
+        foreach (var member in members)
         {
             if (member.GetLeadingTrivia().Any(t => t.IsDirective))
             {
@@ -306,7 +378,9 @@ internal static class MemberOrdering
             }
         }
 
-        return type.CloseBraceToken.LeadingTrivia.Any(t => t.IsDirective);
+        // What follows the last member: the closing brace, or for a file (and a file-scoped namespace) its end.
+        var after = members[members.Count - 1].GetLastToken().GetNextToken(includeZeroWidth: true);
+        return after.LeadingTrivia.Any(t => t.IsDirective);
     }
 
     /// <summary>
@@ -392,6 +466,7 @@ internal static class MemberOrdering
             MemberKind.Operator => "operators",
             MemberKind.Method => "methods",
             MemberKind.Struct => "structs",
+            MemberKind.Namespace => "namespaces",
             _ => "classes",
         };
     }

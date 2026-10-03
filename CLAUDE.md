@@ -130,6 +130,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - The Fix All rewriter sorts nested types before their parents in one pass.
 - Types with directives between members (`#region`, `#if`, `#pragma`) are skipped.
 - Types where sorting would swap dependent field/auto-property initializers are skipped (`InitializerOrder.cs`).
+- Since 2026-10-03 also the members of a namespace (block or file-scoped) and a file: StyleCop's OuterOrder (namespace,
+  delegate, enum, interface, struct, class) + access + static, a type without a modifier is internal there. Skipped: a
+  file whose first type carries the header (nothing before it), top-level statements (no kind), directives between
+  types. A modifier-less partial part gets its real accessibility from the semantic model (`GetPartialAccess`, read on
+  the original nodes in the fix): with the modifiers alone, BRO1007 adding `public` in the same run made BRO1001 want
+  a second run. The last slot keeps the file's ending (no final newline stays none). Parity `namespace-order`: output
+  identical, positions once per container.
 - Code: `src/StyleBro.Analyzers/Ordering/MemberOrdering.cs` (shared logic), `MemberOrderOptions.cs`,
   `MemberOrderingAnalyzer.cs`, `src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs`.
 
@@ -673,7 +680,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
     operators, then methods. Added the `conversion` kind. The full 14-kind order was checked against StyleCop
     with all 182 pairs (both orders), 0 differences. (2) The initializer guard treated constants as state and
     skipped a type for `Prop { get; set; } = SomeConst`; constants are now ignored.
-  - Not covered by StyleBro (by design): namespace-level ordering of types (part of SA1201).
+  - Namespace-level ordering of types (SA1201-SA1204 at the outer level): done 2026-10-03, see below.
 - **BRO1101/BRO1102** (2026-09-30): 0 findings in OpenTelemetry, Polly and the private app, which all keep SA1106
   and SA1133 on (so StyleBro is not stricter than StyleCop there; BRO1001 firing 674x in Polly confirmed the hook
   loaded). FFMpegCore and Serilog: 0 findings. Newtonsoft.Json: 66 findings (3 BRO1101, 63 BRO1102) in 4 files, all

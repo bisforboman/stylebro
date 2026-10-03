@@ -60,14 +60,14 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         var options = MemberOrderOptions.Read(
             document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
 
-        var targets = new HashSet<TypeDeclarationSyntax>();
+        var targets = new HashSet<SyntaxNode>();
         foreach (var diagnostic in diagnostics)
         {
             var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
-            var member = node.FirstAncestorOrSelf<MemberDeclarationSyntax>(m => m.Parent is TypeDeclarationSyntax);
-            if (member?.Parent is TypeDeclarationSyntax type)
+            var member = node.FirstAncestorOrSelf<MemberDeclarationSyntax>(m => m.Parent is { } parent && MemberOrdering.GetMembers(parent) is not null);
+            if (member?.Parent is { } container)
             {
-                targets.Add(type);
+                targets.Add(container);
             }
         }
 
@@ -76,20 +76,30 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var newRoot = new SortingRewriter(targets, options).Visit(root);
+        // Partial types' accessibility comes from the semantic model, which knows the original nodes only: read it now.
+        var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+        var partialAccess = new Dictionary<SyntaxNode, MemberAccess?[]?>();
+        foreach (var target in targets)
+        {
+            partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
+        }
+
+        var newRoot = new SortingRewriter(targets, options, partialAccess).Visit(root);
         return document.WithSyntaxRoot(newRoot);
     }
 
     /// <summary>Sorts the targeted types bottom-up, so nested types are sorted before their parents.</summary>
     private sealed class SortingRewriter : CSharpSyntaxRewriter
     {
-        private readonly HashSet<TypeDeclarationSyntax> targets;
+        private readonly HashSet<SyntaxNode> targets;
         private readonly MemberOrderOptions options;
+        private readonly Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess;
 
-        public SortingRewriter(HashSet<TypeDeclarationSyntax> targets, MemberOrderOptions options)
+        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess)
         {
             this.targets = targets;
             this.options = options;
+            this.partialAccess = partialAccess;
         }
 
         public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
@@ -104,11 +114,21 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         public override SyntaxNode? VisitRecordDeclaration(RecordDeclarationSyntax node) =>
             SortIfTargeted(node, base.VisitRecordDeclaration(node));
 
-        private SyntaxNode? SortIfTargeted(TypeDeclarationSyntax original, SyntaxNode? visited)
+        public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node) =>
+            SortIfTargeted(node, base.VisitNamespaceDeclaration(node));
+
+        public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
+            SortIfTargeted(node, base.VisitFileScopedNamespaceDeclaration(node));
+
+        public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node) =>
+            SortIfTargeted(node, base.VisitCompilationUnit(node));
+
+        private SyntaxNode? SortIfTargeted(SyntaxNode original, SyntaxNode? visited)
         {
             // 'original' is the node from the unmodified tree, so reference equality with the targets holds.
-            return targets.Contains(original) && visited is TypeDeclarationSyntax type
-                ? MemberOrdering.Sort(type, options)
+            // Sorting nested types doesn't move this container's own members, so the indexes still match.
+            return targets.Contains(original) && visited is not null
+                ? MemberOrdering.Sort(visited, options, partialAccess[original])
                 : visited;
         }
     }
