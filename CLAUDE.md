@@ -81,6 +81,12 @@ suggest or push a release tag after each batch; mention it only when a release l
   nuget.org Trusted Publishing policy (same repo/workflow, environment `prerelease`), added by the owner on nuget.org. The first failure (HTTP 401
   "No matching trust policy") was simply a missing policy.
 
+## Decision log
+
+`docs/decisions.md` records design questions put to the user: the question, the choices, the answer (user's request,
+2026-10-03). Add an entry whenever the user decides a design question. Open work from it: StyleBro versions of the SDK
+rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, IDE2000/2002/2003; not IDE0055).
+
 ## Design rules for every rule
 
 1. Every diagnostic has a code fix, and **Fix All works**. `dotnet format` applies fixes through Fix All.
