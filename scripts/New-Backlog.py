@@ -20,7 +20,16 @@ WORK = [
     ('Adoption', 'Getting started', 'One page from install to the first `dotnet format` run, for new projects and for StyleCop users.', 'Planned'),
     ('Adoption', 'IDE experience', "Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig.", 'Planned'),
     ('Adoption', 'Migration sample', 'A small sample repository that uses StyleCop, migrated with `stylebro-migrate` step by step.', 'Planned'),
-    ('Beyond StyleCop', 'Survey other analyzers', "Fixable style rules in popular analyzers (e.g. Roslynator's formatting rules) that the SDK doesn't cover; worthwhile ones become rule candidates here.", 'Planned'),
+    ('Beyond StyleCop', 'Survey other analyzers', "Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe.", 'Done (2026-10-03)'),
+]
+
+# Rules from other analyzers (docs/beyond-stylecop.md), worth doing if someone asks.
+MAYBE = [
+    ('Roslynator RCS0027/RCS0028', 'Operator placement when wrapping (`&&`, `+`, `?:` at line start or end)', 'Follows the SDK key `dotnet_style_operator_placement_when_wrapping`, which no SDK rule enforces. Syntax only.'),
+    ('Roslynator RCS0032/RCS0052', '`=>` and `=` placement when the line breaks there', 'Same fix as the operator rule.'),
+    ('Roslynator RCS1248', '`x == null` vs `x is null`', 'Semantic: skip user-defined `==`, expression trees, `is not` before C# 9.'),
+    ('Roslynator RCS0054', 'A split call chain has every call on its own line', 'Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part.'),
+    ('Roslynator RCS1253, Meziantou MA0177/MA0211', '`<summary>` on one line or on three', 'Text only, next to the BRO16xx rules.'),
 ]
 
 blocks = [
@@ -47,7 +56,7 @@ out.append('|---|---|')
 out.append(f'| Released | {done - len(unshipped)} |')
 out.append(f'| Done, not released yet | {len(unshipped)} |')
 out.append(f'| Planned | {len(PLANNED)} rules, {len(WORK)} work items |')
-out.append('| Maybe | none (moved to planned work) |')
+out.append(f'| Maybe | {len(MAYBE)} rules from other analyzers |')
 out.append('')
 mapping = open('docs/stylecop-mapping.md', encoding='utf-8').read()
 m = re.search(r'Of (\d+) rules: (\d+) SDK, (\d+) StyleBro .*?, (\d+) drop', mapping)
@@ -98,8 +107,12 @@ out.append('`dotnet format` once per target framework, which avoids the crash. A
 out.append('(dotnet/roslyn).\n')
 
 out.append('## Maybe\n')
-out.append('Nothing right now: the last maybes (SA1316, SA1108, namespace names) moved to planned work. Rules worth doing only if')
-out.append('someone asks go here.\n')
+out.append('The top five rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):\n')
+out.append('| Source | Rule | Notes |')
+out.append('|--------|------|-------|')
+for source, rule, notes in MAYBE:
+    out.append(f'| {source} | {rule} | {notes} |')
+out.append('')
 out.append('The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).\n')
 
 out.append('## All rules\n')

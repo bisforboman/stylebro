@@ -16,7 +16,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | Released | 71 |
 | Done, not released yet | 18 |
 | Planned | 0 rules, 9 work items |
-| Maybe | none (moved to planned work) |
+| Maybe | 5 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 104 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -43,7 +43,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Getting started | One page from install to the first `dotnet format` run, for new projects and for StyleCop users. | Planned |
 | Adoption | IDE experience | Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig. | Planned |
 | Adoption | Migration sample | A small sample repository that uses StyleCop, migrated with `stylebro-migrate` step by step. | Planned |
-| Beyond StyleCop | Survey other analyzers | Fixable style rules in popular analyzers (e.g. Roslynator's formatting rules) that the SDK doesn't cover; worthwhile ones become rule candidates here. | Planned |
+| Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |
 
 ### Read the SDK's own settings
 
@@ -66,8 +66,15 @@ IDE0055 (the SDK's whole formatter) isn't replaced: in multi-targeted repositori
 
 ## Maybe
 
-Nothing right now: the last maybes (SA1316, SA1108, namespace names) moved to planned work. Rules worth doing only if
-someone asks go here.
+The top five rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):
+
+| Source | Rule | Notes |
+|--------|------|-------|
+| Roslynator RCS0027/RCS0028 | Operator placement when wrapping (`&&`, `+`, `?:` at line start or end) | Follows the SDK key `dotnet_style_operator_placement_when_wrapping`, which no SDK rule enforces. Syntax only. |
+| Roslynator RCS0032/RCS0052 | `=>` and `=` placement when the line breaks there | Same fix as the operator rule. |
+| Roslynator RCS1248 | `x == null` vs `x is null` | Semantic: skip user-defined `==`, expression trees, `is not` before C# 9. |
+| Roslynator RCS0054 | A split call chain has every call on its own line | Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part. |
+| Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 
