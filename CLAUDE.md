@@ -376,7 +376,18 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   (public instance fields, properties, events, enum members; test JSON). Private fields are matched solution-wide
   only by their exact name (reflection): matching the word inside any string made common names like `count` block
   every rename, and the Messy sample stopped converging.
-- Remaining naming: SA1305 (Hungarian, StyleCop has no fix), protected fields, namespaces.
+- **BRO1310** (SA1305, Hungarian prefixes; 2026-10-03; `Naming/HungarianNames.cs`): the FIRST rule that is off by
+  default (`isEnabledByDefault: false`, preset `none`, like StyleCop). StyleCop's pattern `^[a-z]{1,2}[A-Z]`, its 14
+  common words, `stylebro_allowed_hungarian_prefixes`/`stylebro_allow_common_hungarian_prefixes` (migrate writes them
+  from namingRules), `*NativeMethods` classes skipped. No analyzer of its own: when on, CamelCaseNamingAnalyzer and
+  FieldNamingAnalyzer fold the prefix into the ONE rename they compute (`HungarianNames.GetVariableName`,
+  `FieldNames.GetRename(field, style, hungarian)`), reported as BRO1310, so `_iCount` -> `count` converges in one run;
+  the collision checks (`CamelCaseNames.CanRename`'s mapping, `TypeFacts.CountNewName` keyed by style + prefixes) use
+  the same mapping (parity found `xItem`/`yItem` both becoming `item`: CS1930). Pascal fields are BRO1306's.
+  Off-by-default plumbing: `Severities.IsOn(..., enabledByDefault: false)`; the test framework turns on EVERY supported
+  diagnostic, so `Verifier.RunAsync` suppresses off-by-default ids unless the test's .editorconfig sets them;
+  DocExamplesTests runs all analyzers supporting an id; the parity runner sets the BRO ids' severity too.
+- Remaining naming: protected readonly casing, namespaces.
 
 ## BRO16xx: documentation
 

@@ -111,6 +111,7 @@
         SA1612 = 'StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered'
         SA1627 = 'StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none'
         SA1300 = 'StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces not renamed'
+        SA1305 = 'StyleBro **BRO1310** (done, off by default like StyleCop), the prefix removed in the same rename as the other naming rules'
         SA1302 = 'StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop'
         SA1303 = 'StyleBro **BRO1306** (done), rename with Fix All'
         SA1304 = 'StyleBro **BRO1306** (done), rename with Fix All'

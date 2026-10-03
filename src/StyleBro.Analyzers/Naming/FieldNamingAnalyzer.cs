@@ -19,7 +19,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Descriptors.PrivateFieldNaming, Descriptors.FieldPascalCase, Descriptors.FieldPrefix, Descriptors.FieldUnderscore);
+        ImmutableArray.Create(Descriptors.PrivateFieldNaming, Descriptors.FieldPascalCase, Descriptors.FieldPrefix, Descriptors.FieldUnderscore, Descriptors.HungarianNotation);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -44,9 +44,13 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
 
         var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
         var style = FieldNames.GetStyle(options);
-        if (FieldNames.GetRename(field, style) is ({ } rule, { } newName)
+        var hungarian = Severities.IsOn(context.Compilation.Options, tree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
+            ? HungarianNames.Read(options)
+            : null;
+        var rename = FieldNames.GetRename(field, style, hungarian);
+        if (rename is ({ } rule, { } newName)
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
-            && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value))
+            && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 rule switch
@@ -54,6 +58,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
                     FieldRule.PascalCasing => Descriptors.FieldPascalCase,
                     FieldRule.Prefix => Descriptors.FieldPrefix,
                     FieldRule.Underscore => Descriptors.FieldUnderscore,
+                    FieldRule.Hungarian => Descriptors.HungarianNotation,
                     _ => Descriptors.PrivateFieldNaming,
                 },
                 location,

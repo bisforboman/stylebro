@@ -28,6 +28,9 @@ internal enum FieldRule
 
     /// <summary>BRO1308: no underscore inside the name (SA1310).</summary>
     Underscore,
+
+    /// <summary>BRO1310: no Hungarian prefix (SA1305), off by default.</summary>
+    Hungarian,
 }
 
 /// <summary>
@@ -91,7 +94,7 @@ internal static class FieldNames
     }
 
     /// <summary>The field's new name under whichever rule applies, or null when it already fits.</summary>
-    public static string? GetNewName(IFieldSymbol field, FieldStyle style) => GetRename(field, style)?.NewName;
+    public static string? GetNewName(IFieldSymbol field, FieldStyle style, HungarianNames? hungarian = null) => GetRename(field, style, hungarian)?.NewName;
 
     /// <summary>
     /// The rule that applies to <paramref name="field"/> and the new name, or null when the name fits (or has no safe
@@ -99,6 +102,26 @@ internal static class FieldNames
     /// non-private fields, <paramref name="style"/> for private fields, and camelCase for protected fields (StyleCop's
     /// SA1306). Enum members aren't fields for these rules (SA1300).
     /// </summary>
+    /// <remarks>
+    /// With <paramref name="hungarian"/> (BRO1310 is on), a Hungarian prefix is removed in the same rename, in the field's
+    /// style ('iCount' -> 'count' or '_count'). Not for PascalCase fields: BRO1306 makes them start upper-case, which
+    /// isn't a prefix any more.
+    /// </remarks>
+    public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyle style, HungarianNames? hungarian)
+    {
+        var rename = GetRename(field, style);
+        if (hungarian is null || IsPascalChecked(field) || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum
+            || HungarianNames.IsInNativeMethods(field)
+            || hungarian.GetNewName((rename?.NewName ?? field.Name).TrimStart('_')) is not { } stripped)
+        {
+            return rename;
+        }
+
+        var underscore = style == FieldStyle.UnderscoreCamelCase && (IsChecked(field) || field.Name.StartsWith("_", System.StringComparison.Ordinal));
+        return (FieldRule.Hungarian, underscore ? "_" + stripped : stripped);
+    }
+
+    /// <summary>Like the other overload, without BRO1310.</summary>
     public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyle style)
     {
         if (!IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum)
@@ -243,7 +266,7 @@ internal static class FieldNames
         CanRename(field, newName, style, TypeFacts.For(field.ContainingType, cancellationToken));
 
     /// <summary>Like the other overload, with the type's facts gathered once for all its fields.</summary>
-    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, TypeFacts facts)
+    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, TypeFacts facts, HungarianNames? hungarian = null)
     {
         var type = field.ContainingType;
         if (field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field))
@@ -260,7 +283,7 @@ internal static class FieldNames
         }
 
         // Another field of the type would get the same name (the field itself is one of them).
-        if (facts.CountNewName(style, newName) > 1)
+        if (facts.CountNewName(style, newName, hungarian) > 1)
         {
             return false;
         }
@@ -436,7 +459,7 @@ internal static class FieldNames
     internal sealed class TypeFacts
     {
         private readonly INamedTypeSymbol type;
-        private readonly System.Collections.Concurrent.ConcurrentDictionary<FieldStyle, System.Collections.Generic.Dictionary<string, int>> newNames = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<(FieldStyle, string?), System.Collections.Generic.Dictionary<string, int>> newNames = new();
 
         private TypeFacts(INamedTypeSymbol type)
         {
@@ -486,14 +509,14 @@ internal static class FieldNames
         }
 
         /// <summary>How many of the type's fields <see cref="GetNewName(IFieldSymbol, FieldStyle)"/> gives this name.</summary>
-        public int CountNewName(FieldStyle style, string newName)
+        public int CountNewName(FieldStyle style, string newName, HungarianNames? hungarian = null)
         {
-            var counts = newNames.GetOrAdd(style, s =>
+            var counts = newNames.GetOrAdd((style, hungarian?.Key), key =>
             {
                 var map = new System.Collections.Generic.Dictionary<string, int>(System.StringComparer.Ordinal);
                 foreach (var f in type.GetMembers().OfType<IFieldSymbol>())
                 {
-                    if (GetNewName(f, s) is { } name)
+                    if (GetNewName(f, key.Item1, hungarian) is { } name)
                     {
                         map[name] = map.TryGetValue(name, out var n) ? n + 1 : 1;
                     }

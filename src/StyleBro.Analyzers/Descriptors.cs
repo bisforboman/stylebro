@@ -727,6 +727,16 @@ internal static class Descriptors
         description: "'&&' and '||' (and the 'and'/'or' patterns) aren't mixed without parentheses. Replaces StyleCop SA1408.",
         helpLinkUri: HelpBase + DiagnosticIds.ConditionalPrecedence + ".md");
 
+    public static readonly DiagnosticDescriptor HungarianNotation = new(
+        id: DiagnosticIds.HungarianNotation,
+        title: "Field names should not use Hungarian notation",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "Variable, parameter and field names don't start with a type prefix ('iCount' -> 'count'). Off by default, like StyleCop's. Replaces StyleCop SA1305.",
+        helpLinkUri: HelpBase + DiagnosticIds.HungarianNotation + ".md");
+
     public static readonly DiagnosticDescriptor BaseCall = new(
         id: DiagnosticIds.BaseCall,
         title: "Do not prefix calls with base unless local implementation exists",

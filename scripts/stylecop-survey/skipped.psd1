@@ -35,8 +35,6 @@
         # ---- Naming ------------------------------------------------------------------------------------------------
         SA1301 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.'
             Revisit = 'Nothing to port.' }
-        SA1305 = @{ Status = 'Drop'; Why = 'Off by default, StyleCop has no fix. The fix would have to guess the name without the prefix (`strName` -> `name`, but `isOpen` is fine), configured by allowed prefixes. 82 / 1 / 14 findings with the rule on.'
-            Revisit = 'Possible with the BRO13xx renamer if the prefix list is explicit (`stylebro_hungarian_prefixes`); rename guards apply. Medium.' }
         SA1316 = @{ Status = 'Candidate'; Why = 'Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).'
             Revisit = 'Tuple element names aren''t symbols SymbolFinder renames; every use (deconstruction, `t.name`, inferred names) must change together. Medium, risky.' }
 

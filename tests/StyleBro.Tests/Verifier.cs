@@ -36,7 +36,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
             test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\n" + editorConfig));
         }
 
-        return test.RunAsync();
+        return RunAsync(test, editorConfig);
     }
 
     /// <summary>Like <see cref="VerifyFixAsync(string, string, string?, string?)"/>, for several files.</summary>
@@ -58,7 +58,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
             test.FixedState.Sources.Add(source);
         }
 
-        return test.RunAsync();
+        return RunAsync(test, editorConfig);
     }
 
     /// <summary>The diagnostics in <paramref name="sources"/> are reported, but the fix deliberately leaves them.</summary>
@@ -74,6 +74,27 @@ internal static class Verifier<TAnalyzer, TCodeFix>
         {
             test.TestState.Sources.Add(source);
             test.FixedState.Sources.Add(source);
+        }
+
+        return RunAsync(test, null);
+    }
+
+    /// <summary>
+    /// The framework turns on every supported diagnostic; rules that are off by default (BRO1310) stay off here unless the
+    /// test's .editorconfig turns them on, like in a build.
+    /// </summary>
+    private static Task RunAsync(CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier> test, string? editorConfig)
+    {
+        var off = new TAnalyzer().SupportedDiagnostics.Where(d => !d.IsEnabledByDefault).Select(d => d.Id)
+            .Where(id => editorConfig?.Contains($"dotnet_diagnostic.{id}.severity", StringComparison.Ordinal) != true).ToList();
+        if (off.Count > 0)
+        {
+            test.SolutionTransforms.Add((solution, projectId) =>
+            {
+                var options = solution.GetProject(projectId)!.CompilationOptions!;
+                return solution.WithProjectCompilationOptions(projectId, options.WithSpecificDiagnosticOptions(
+                    options.SpecificDiagnosticOptions.SetItems(off.Select(id => KeyValuePair.Create(id, Microsoft.CodeAnalysis.ReportDiagnostic.Suppress)))));
+            });
         }
 
         return test.RunAsync();

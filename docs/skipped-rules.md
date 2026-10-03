@@ -19,14 +19,13 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-49 rules: 1 candidate, 0 SDK not on yet, 34 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+48 rules: 1 candidate, 0 SDK not on yet, 33 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
 | [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
-| [SA1305](#sa1305) | Field names should not use Hungarian notation | drop | off / off / off | 82 / 1 / 14 |
 | [SA1401](#sa1401) | Fields should be private | drop | off / off / off | 141 / 48 / 39 |
 | [SA1402](#sa1402) | File may only contain a single type | drop | on / off / off | 0 / 34 / 1 |
 | [SA1403](#sa1403) | File may only contain a single namespace | drop | on / on / on | 0 / 0 / 0 |
@@ -106,16 +105,6 @@ Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTe
 **Why:** StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app.
 
 **To revisit:** Only if a deterministic extraction is acceptable (variable name from the parameter name). Probably stays a human job.
-
-<a id="sa1305"></a>
-
-### SA1305: Field names should not use Hungarian notation
-
-Naming rule. StyleCop: off by default, no code fix. Teams keeping it on (OTel / Polly / App): off / off / off. Diagnostics with every rule on (OTel / Polly / App): 82 / 1 / 14.
-
-**Why:** Off by default, StyleCop has no fix. The fix would have to guess the name without the prefix (`strName` -> `name`, but `isOpen` is fine), configured by allowed prefixes. 82 / 1 / 14 findings with the rule on.
-
-**To revisit:** Possible with the BRO13xx renamer if the prefix list is explicit (`stylebro_hungarian_prefixes`); rename guards apply. Medium.
 
 <a id="sa1401"></a>
 

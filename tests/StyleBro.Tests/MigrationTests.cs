@@ -41,6 +41,21 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void HungarianPrefixes_ComeFromStyleCopJson()
+    {
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+        Assert.Contains("dotnet_diagnostic.BRO1310.severity = none", lines);
+        Assert.DoesNotContain(lines, l => l.StartsWith("stylebro_allow", StringComparison.Ordinal) && l.Contains("hungarian"));
+
+        Write("stylecop.json", """{ "settings": { "namingRules": { "allowedHungarianPrefixes": ["db", "ui"], "allowCommonHungarianPrefixes": false } } }""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1305.severity = warning\n");
+        lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+        Assert.Contains("dotnet_diagnostic.BRO1310.severity = warning", lines);
+        Assert.Contains("stylebro_allowed_hungarian_prefixes = db, ui", lines);
+        Assert.Contains("stylebro_allow_common_hungarian_prefixes = false", lines);
+    }
+
+    [Fact]
     public void AccessModifiers_AreBro1404AndBro1007_EachWithItsStyleCopRule()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1400.severity = none\n");

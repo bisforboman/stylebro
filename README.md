@@ -71,6 +71,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1307](docs/rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Yes |
 | [BRO1308](docs/rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Yes |
 | [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
+| [BRO1310](docs/rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1402](docs/rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Yes |
 | [BRO1403](docs/rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Yes |

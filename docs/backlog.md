@@ -14,11 +14,11 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 17 |
+| Done, not released yet | 18 |
 | Planned | 0 |
-| Maybe | 3 new rules + 2 gaps in existing ones |
+| Maybe | 2 new rules + 2 gaps in existing ones |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 103 by StyleBro, 45 by the .NET SDK, 44 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 104 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -55,7 +55,6 @@ New rules:
 | StyleCop | Rule | Notes |
 |----------|------|-------|
 | SA1316 | Tuple element names should use correct casing | StyleCop's fix renames only the declaration and breaks every use; a safe rename must change deconstructions, `t.name` and inferred names together. 0 findings in the surveyed repos. |
-| SA1305 | Field names should not use Hungarian notation | Possible with the BRO13xx renamer and an explicit prefix list (`stylebro_hungarian_prefixes`). StyleCop has no fix. |
 | SA1108 | Block statements should not contain embedded comments | A fix could move the comment above the statement; probe what teams expect first. StyleCop has no fix. |
 
 Gaps in existing rules:
@@ -130,6 +129,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1307](rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Released |
 | [BRO1308](rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Released |
 | [BRO1309](rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Released |
+| [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Done |
 
 ### BRO14xx: Maintainability
 

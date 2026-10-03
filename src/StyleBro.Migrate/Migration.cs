@@ -109,6 +109,7 @@ internal static class Migration
         lines.Add($"stylebro_private_field_naming = {result.FieldStyle}");
         AddDocumentationScope(setup, lines);
         lines.Add($"{StyleBro.Analyzers.Layout.Braces.ConsecutiveUsingsKey} = {Bool(setup.Setting("layoutRules", "allowConsecutiveUsings") is not { ValueKind: JsonValueKind.False })}");
+        AddHungarianPrefixes(setup, lines);
         if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none"))
         {
             AddFileHeader(setup, lines);
@@ -375,6 +376,20 @@ internal static class Migration
         if (setup.Setting("documentationRules", "headerDecoration")?.GetString() is { Length: > 0 } decoration)
         {
             lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.DecorationKey} = {decoration}");
+        }
+    }
+
+    /// <summary>BRO1310's prefixes, from stylecop.json's namingRules (only what differs from the defaults).</summary>
+    private static void AddHungarianPrefixes(StyleCopSetup setup, List<string> lines)
+    {
+        if (setup.Setting("namingRules", "allowedHungarianPrefixes") is { ValueKind: JsonValueKind.Array } allowed && allowed.GetArrayLength() > 0)
+        {
+            lines.Add($"{StyleBro.Analyzers.Naming.HungarianNames.AllowedKey} = {string.Join(", ", allowed.EnumerateArray().Select(p => p.GetString()))}");
+        }
+
+        if (setup.Setting("namingRules", "allowCommonHungarianPrefixes") is { ValueKind: JsonValueKind.False })
+        {
+            lines.Add($"{StyleBro.Analyzers.Naming.HungarianNames.AllowCommonKey} = false");
         }
     }
 

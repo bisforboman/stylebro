@@ -27,7 +27,8 @@ public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
             DiagnosticIds.FieldPascalCase,
             DiagnosticIds.FieldPrefix,
             DiagnosticIds.FieldUnderscore,
-            DiagnosticIds.ElementPascalCase);
+            DiagnosticIds.ElementPascalCase,
+            DiagnosticIds.HungarianNotation);
 
     /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() => RenameFixAllProvider.Instance;
