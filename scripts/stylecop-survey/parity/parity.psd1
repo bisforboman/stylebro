@@ -4,6 +4,22 @@
 @{
     Sets = @(
         @{
+            Name     = 'parentheses'
+            Map      = @('SA1119=BRO1405')
+            Expected = @(
+                # Skipped: removing them turns the arguments into a generic method call (StyleCop's fix doesn't compile).
+                'only StyleCop: BRO1405 Parens.cs(25,24)'
+                'StyleBro output only: Parens.cs: [            Use(a < b, (b > (a + 1)));]'
+                'StyleCop output only: Parens.cs: [            Use(a < b, b > (a + 1));]'
+                'StyleCop fix doesn''t compile: Parens.cs(25,17) CS0307'
+                'StyleCop fix doesn''t compile: Parens.cs(25,21) CS0118'
+                'StyleCop fix doesn''t compile: Parens.cs(25,24) CS0118'
+                # StyleCop's fix leaves the spaces inside '( b )'.
+                'StyleBro output only: Parens.cs: [            Use(a + b, b);]'
+                'StyleCop output only: Parens.cs: [            Use(a + b,  b );]'
+            )
+        }
+        @{
             Name     = 'access-modifiers'
             Map      = @('SA1400=BRO1404', 'SA1205=BRO1007')
             Expected = @()

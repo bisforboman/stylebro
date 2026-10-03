@@ -492,8 +492,9 @@ public sealed class MigrationTests : IDisposable
 
         Assert.All(InitCommand.UnsafeWhenMultiTargeted, id => Assert.Contains($"dotnet_diagnostic.{id}.severity = suggestion", editorConfig));
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", editorConfig);
-        Assert.DoesNotContain("dotnet_diagnostic.IDE0047.severity = warning", InitCommand.Block(multiTargeted: true));
-        Assert.Contains("dotnet_diagnostic.IDE0047.severity = warning", InitCommand.Block());
+        Assert.DoesNotContain("dotnet_diagnostic.IDE0048.severity = warning", InitCommand.Block(multiTargeted: true));
+        Assert.Contains("dotnet_diagnostic.IDE0048.severity = warning", InitCommand.Block());
+        Assert.Contains("dotnet_diagnostic.IDE0047.severity = none", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0011.severity = none", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", InitCommand.Block());
     }

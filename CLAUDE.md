@@ -788,6 +788,11 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   sealed JsonTextWriter subclass calling `base.WriteValue("redacted")` from its `WriteValue(object)` override: same
   overload with `this.`), fixed, compiles, second run clean. Private app not run (its clone was busy with the delta).
 
+- **BRO1514-BRO1516** (2026-10-03): FFMpegCore, Polly, OpenTelemetry 0; private app 14 (8 files); Newtonsoft.Json 112
+  (8 target frameworks, 5 files); Serilog 213 (54 files; the repo where IDE0011 crashed `dotnet format`). All fixed in
+  one pass, no new compile errors, second run clean, no conflict markers (Polly's one marker file is the measurement
+  clone's committed plain-`dotnet format` baseline).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

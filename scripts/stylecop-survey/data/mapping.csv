@@ -49,8 +49,8 @@ SA1115,"StyleBro **BRO1119** (done), with a fix (StyleCop has none)"
 SA1116,"StyleBro **BRO1107** (done), also checks record and primary-constructor parameters"
 SA1117,"StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix"
 SA1118,"Drop: StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app."
-SA1119,SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`)
-SA1119_p,"Variant: SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047."
+SA1119,"StyleBro **BRO1405** (done; replaces IDE0047, whose fix breaks multi-targeted projects). Skips parentheses whose removal would change how the code parses (StyleCop's fix can make a generic call)"
+SA1119_p,"Variant: SA1119 for parenthesized patterns (`x is (1 or 2)`, 1.2 only). BRO1405 handles expressions only; the SDK's IDE0047 is off because its fix breaks multi-targeted projects."
 SA1120,"StyleBro **BRO1120** (done), same positions; the fix removes every empty comment at that end of the group in one run"
 SA1121,SDK: IDE0049 (`dotnet_style_predefined_type_* = true`)
 SA1122,"StyleBro **BRO1106** (done), same results as StyleCop"

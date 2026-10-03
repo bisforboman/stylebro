@@ -68,6 +68,7 @@ public static class DiagnosticIds
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";
     public const string AccessModifier = "BRO1404";
+    public const string UnnecessaryParentheses = "BRO1405";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

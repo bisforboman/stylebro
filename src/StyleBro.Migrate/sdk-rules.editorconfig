@@ -13,8 +13,9 @@ dotnet_diagnostic.IDE0040.severity = none
 dotnet_diagnostic.IDE0036.severity = warning
 # 'int' instead of 'Int32' (SA1121)
 dotnet_diagnostic.IDE0049.severity = warning
-# Parentheses that clarify precedence, and none that don't (SA1119, SA1407, SA1408)
-dotnet_diagnostic.IDE0047.severity = warning
+# Unnecessary parentheses (SA1119) are StyleBro's BRO1405: IDE0047's fix breaks multi-targeted projects
+dotnet_diagnostic.IDE0047.severity = none
+# Parentheses that clarify precedence (SA1407, SA1408)
 dotnet_diagnostic.IDE0048.severity = warning
 # Using directives outside the namespace (SA1200, the preset's choice)
 dotnet_diagnostic.IDE0065.severity = warning

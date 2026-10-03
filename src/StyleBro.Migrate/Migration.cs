@@ -493,7 +493,8 @@ internal static class Migration
         Rule("IDE0049", aliases ? [] : ["SA1121"]);
         lines.Add($"dotnet_style_predefined_type_for_locals_parameters_members = {Bool(setup.IsOn("SA1121") && !aliases)}");
         lines.Add($"dotnet_style_predefined_type_for_member_access = {Bool(setup.IsOn("SA1121") && !aliases)}");
-        Rule("IDE0047", "SA1119");
+        // StyleBro's BRO1405 replaces IDE0047 (which breaks multi-targeted projects and also removes 'a ?? (b ?? c)').
+        Rule("IDE0047");
         Rule("IDE0048", "SA1407", "SA1408");
         var clarity = setup.IsOn("SA1407") || setup.IsOn("SA1408") ? "always_for_clarity" : "never_if_unnecessary";
         lines.Add($"dotnet_style_parentheses_in_arithmetic_binary_operators = {clarity}");

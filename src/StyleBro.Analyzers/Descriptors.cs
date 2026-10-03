@@ -697,6 +697,16 @@ internal static class Descriptors
         description: "Every part of a partial type says its accessibility, so no part has to be found to know it. Replaces StyleCop SA1205.",
         helpLinkUri: HelpBase + DiagnosticIds.PartialAccessModifier + ".md");
 
+    public static readonly DiagnosticDescriptor UnnecessaryParentheses = new(
+        id: DiagnosticIds.UnnecessaryParentheses,
+        title: "Statement should not use unnecessary parenthesis",
+        messageFormat: "Remove the unnecessary parentheses",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Parentheses around a value, or around a whole expression in a statement, argument or initializer, add nothing. Replaces StyleCop SA1119.",
+        helpLinkUri: HelpBase + DiagnosticIds.UnnecessaryParentheses + ".md");
+
     public static readonly DiagnosticDescriptor BaseCall = new(
         id: DiagnosticIds.BaseCall,
         title: "Do not prefix calls with base unless local implementation exists",

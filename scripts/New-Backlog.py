@@ -1,0 +1,96 @@
+"""Writes docs/backlog.md: every rule StyleBro has (from README.md and the analyzer release files) and the planned and
+"maybe" ones listed below. Edit PLANNED and the "Maybe" tables here, then run from the repository root:
+python scripts/New-Backlog.py"""
+import re
+
+readme = open('README.md', encoding='utf-8').read()
+rows = re.findall(r'^\| \[(BRO\d{4})\]\(docs/rules/BRO\d{4}\.md\) \| (.*?) \| (.*?) \|', readme, re.M)
+unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
+
+PLANNED = [
+    ('BRO1406', 'Arithmetic expressions should declare precedence', 'SA1407', 'IDE0048'),
+    ('BRO1407', 'Conditional expressions should declare precedence', 'SA1408', 'IDE0048'),
+    ('BRO1517', 'Code should not contain multiple blank lines in a row', 'SA1507', 'IDE2000'),
+    ('BRO1518', 'Closing braces should not be preceded by a blank line', 'SA1508', 'IDE2002'),
+    ('BRO1519', 'Closing brace should be followed by a blank line', 'SA1513', 'IDE2003'),
+]
+
+blocks = [
+    ('10xx', 'Ordering, spacing and comments'),
+    ('11xx', 'Readability'),
+    ('13xx', 'Naming'),
+    ('14xx', 'Maintainability'),
+    ('15xx', 'Layout'),
+    ('16xx', 'Documentation'),
+]
+
+done = len(rows)
+out = []
+out.append('# Backlog\n')
+out.append('Every style rule StyleBro has or aims to add, with its status, and what\'s left open in existing rules. Update it')
+out.append('when work starts or lands; a finished rule also moves from `skipped.psd1` to `decisions.psd1` (see')
+out.append('`docs/stylecop-mapping.md`).\n')
+out.append('Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), **Planned** (decided, not started),')
+out.append('**Maybe** (worth doing if someone asks; why it isn\'t planned is in [skipped-rules.md](skipped-rules.md)).\n')
+out.append('## Summary\n')
+out.append('| | Rules |')
+out.append('|---|---|')
+out.append(f'| Released | {done - len(unshipped)} |')
+out.append(f'| Done, not released yet | {len(unshipped)} |')
+out.append(f'| Planned | {len(PLANNED)} |')
+out.append('| Maybe | 3 new rules + 6 gaps in existing ones |')
+out.append('')
+mapping = open('docs/stylecop-mapping.md', encoding='utf-8').read()
+m = re.search(r'Of (\d+) rules: (\d+) SDK, (\d+) StyleBro .*?, (\d+) drop', mapping)
+total, sdk, bro, drop = m.groups()
+out.append(f'StyleCop coverage ({total} diagnostics in StyleCop 1.2): {bro} by StyleBro, {sdk} by the .NET SDK, {drop} dropped by design (they')
+out.append('can\'t be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in')
+out.append('[stylecop-mapping.md](stylecop-mapping.md).\n')
+
+out.append('## Planned\n')
+out.append('Fix-safe replacements for SDK rules whose fixes crash `dotnet format` or write merge conflict markers in')
+out.append('multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)). When one is done, `init` and')
+out.append('`stylebro-migrate` turn it on and the SDK rule off. IDs are reserved, final when the rule ships.\n')
+out.append('| ID | Rule | StyleCop | Replaces SDK |')
+out.append('|----|------|----------|--------------|')
+for id, title, sa, ide in PLANNED:
+    out.append(f'| {id} | {title} | {sa} | {ide} |')
+out.append('')
+out.append('Not planned: IDE0055 (the SDK\'s whole formatter; `dotnet format`\'s whitespace pass still does that job safely). Also')
+out.append('to do: report the SDK fixer bugs upstream (dotnet/roslyn).\n')
+
+out.append('## Maybe\n')
+out.append('New rules:\n')
+out.append('| StyleCop | Rule | Notes |')
+out.append('|----------|------|-------|')
+out.append('| SA1316 | Tuple element names should use correct casing | StyleCop\'s fix renames only the declaration and breaks every use; a safe rename must change deconstructions, `t.name` and inferred names together. 0 findings in the surveyed repos. |')
+out.append('| SA1305 | Field names should not use Hungarian notation | Possible with the BRO13xx renamer and an explicit prefix list (`stylebro_hungarian_prefixes`). StyleCop has no fix. |')
+out.append('| SA1108 | Block statements should not contain embedded comments | A fix could move the comment above the statement; probe what teams expect first. StyleCop has no fix. |')
+out.append('')
+out.append('Gaps in existing rules:\n')
+out.append('| Rule | Gap |')
+out.append('|------|-----|')
+out.append('| BRO1303/BRO1306 (SA1306, SA1309) | Protected fields aren\'t renamed (`_x`, casing) |')
+out.append('| BRO1309 (SA1300) | Namespace names aren\'t checked |')
+out.append('| BRO1001 (SA1201) | Types aren\'t ordered within a namespace |')
+out.append('| BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) |')
+out.append('| BRO1405 (SA1119) | Parenthesized patterns (`x is (1 or 2)`, StyleCop 1.2) aren\'t checked |')
+out.append('| BRO1514-BRO1516 | stylecop.json `allowConsecutiveUsings: false` isn\'t configurable (StyleBro always allows `using (a) using (b) { }`) |')
+out.append('')
+out.append('The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).\n')
+
+out.append('## All rules\n')
+for block, name in blocks:
+    prefix = 'BRO' + block[:2]
+    out.append(f'### BRO{block}: {name}\n')
+    out.append('| ID | Rule | StyleCop | Status |')
+    out.append('|----|------|----------|--------|')
+    entries = [(id, title, sa, 'Done' if id in unshipped else 'Released') for id, title, sa in rows if id.startswith(prefix)]
+    entries += [(id, title, sa, 'Planned') for id, title, sa, _ in PLANNED if id.startswith(prefix)]
+    for id, title, sa, status in sorted(entries):
+        link = f'[{id}](rules/{id}.md)' if status != 'Planned' else id
+        out.append(f'| {link} | {title} | {sa} | {status} |')
+    out.append('')
+
+open('docs/backlog.md', 'w', encoding='utf-8', newline='').write('\n'.join(out).rstrip('\n') + '\n')
+print(done, len(unshipped))

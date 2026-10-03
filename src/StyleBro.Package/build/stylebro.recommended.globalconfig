@@ -129,6 +129,10 @@ dotnet_diagnostic.BRO1126.severity = warning
 dotnet_diagnostic.BRO1404.severity = warning
 dotnet_diagnostic.BRO1007.severity = warning
 
+# BRO1405: unnecessary parentheses (SA1119). Safe in multi-targeted projects, unlike IDE0047, and like StyleCop it
+# leaves parentheses inside operator expressions ('a ?? (b ?? c)') alone.
+dotnet_diagnostic.BRO1405.severity = warning
+
 # BRO1514-BRO1516: braces around child statements (SA1503, SA1519, SA1520). Safe in multi-targeted projects, unlike IDE0011.
 dotnet_diagnostic.BRO1514.severity = warning
 dotnet_diagnostic.BRO1515.severity = warning

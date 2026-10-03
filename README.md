@@ -53,6 +53,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1130](docs/rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Yes |
 | [BRO1131](docs/rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
+| [BRO1405](docs/rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Yes |
 | [BRO1514](docs/rules/BRO1514.md) | Braces should not be omitted | SA1503 | Yes |
 | [BRO1515](docs/rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Yes |
 | [BRO1516](docs/rules/BRO1516.md) | Use braces consistently | SA1520 | Yes |

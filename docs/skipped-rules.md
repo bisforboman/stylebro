@@ -537,9 +537,9 @@ Documentation rule. StyleCop: off by default, no code fix; SDK check: StyleCop r
 
 Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
-**Why:** SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047.
+**Why:** SA1119 for parenthesized patterns (`x is (1 or 2)`, 1.2 only). BRO1405 handles expressions only; the SDK's IDE0047 is off because its fix breaks multi-targeted projects.
 
-**To revisit:** Nothing separate to do.
+**To revisit:** Extend BRO1405 to ParenthesizedPatternSyntax with the same parse check. Small.
 
 <a id="sx1309s"></a>
 
@@ -574,16 +574,6 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 **To revisit:** Nothing to port. stylebro-migrate parses stylecop.json leniently (comments, trailing commas).
 
 ## Covered, with known differences
-
-<a id="sa1119"></a>
-
-### SA1119: Statement should not use unnecessary parenthesis
-
-**Covered by:** SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`)
-
-**Difference:** Covered by the SDK's IDE0047, which is a little broader: it also removes the parentheses in `a ?? (b ?? c)`, which SA1119 accepts (2 lines in Polly after migrating).
-
-**To revisit:** Nothing to configure in IDE0047. Only a BRO replacement for SA1119 would match exactly; not worth it so far.
 
 <a id="sa1206"></a>
 

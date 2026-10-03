@@ -97,8 +97,6 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
 
 - Per-project rulesets and global configs (`<CodeAnalysisRuleSet>` in a test project's props) can't be mapped to
   paths; the strictest one wins. Add the test project's exceptions to a `.editorconfig` in its directory.
-- The SDK's IDE0047 (unnecessary parentheses, for SA1119) is a little broader than SA1119: it also removes
-  parentheses around a right-hand `??` chain (`a ?? (b ?? c)`), which SA1119 accepts.
 - The SDK's IDE2000 (multiple blank lines, for SA1507) also counts blank lines at the start of a file and right
   before a closing brace, which StyleCop leaves to SA1517 and SA1508.
 - StyleCop's XML file header (`<copyright file=...>`, the default for SA1633) becomes [BRO1615](rules/BRO1615.md) with

@@ -12,11 +12,11 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 11 |
-| Planned | 6 |
-| Maybe | 3 new rules + 5 gaps in existing ones |
+| Done, not released yet | 12 |
+| Planned | 5 |
+| Maybe | 3 new rules + 6 gaps in existing ones |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 97 by StyleBro, 51 by the .NET SDK, 44 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 98 by StyleBro, 50 by the .NET SDK, 44 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -28,7 +28,6 @@ multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)). 
 
 | ID | Rule | StyleCop | Replaces SDK |
 |----|------|----------|--------------|
-| BRO1405 | Statement should not use unnecessary parentheses | SA1119 | IDE0047 |
 | BRO1406 | Arithmetic expressions should declare precedence | SA1407 | IDE0048 |
 | BRO1407 | Conditional expressions should declare precedence | SA1408 | IDE0048 |
 | BRO1517 | Code should not contain multiple blank lines in a row | SA1507 | IDE2000 |
@@ -56,6 +55,7 @@ Gaps in existing rules:
 | BRO1309 (SA1300) | Namespace names aren't checked |
 | BRO1001 (SA1201) | Types aren't ordered within a namespace |
 | BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) |
+| BRO1405 (SA1119) | Parenthesized patterns (`x is (1 or 2)`, StyleCop 1.2) aren't checked |
 | BRO1514-BRO1516 | stylecop.json `allowConsecutiveUsings: false` isn't configurable (StyleBro always allows `using (a) using (b) { }`) |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
@@ -132,7 +132,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1402](rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Released |
 | [BRO1403](rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Released |
 | [BRO1404](rules/BRO1404.md) | Access modifier should be declared | SA1400 | Done |
-| BRO1405 | Statement should not use unnecessary parentheses | SA1119 | Planned |
+| [BRO1405](rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Done |
 | BRO1406 | Arithmetic expressions should declare precedence | SA1407 | Planned |
 | BRO1407 | Conditional expressions should declare precedence | SA1408 | Planned |
 

@@ -123,15 +123,13 @@
             Revisit = 'Nothing to port.' }
 
         # ---- Variants ----------------------------------------------------------------------------------------------
-        SA1119_p = @{ Status = 'Variant'; Why = 'SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047.'
-            Revisit = 'Nothing separate to do.' }
+        SA1119_p = @{ Status = 'Variant'; Why = 'SA1119 for parenthesized patterns (`x is (1 or 2)`, 1.2 only). BRO1405 handles expressions only; the SDK''s IDE0047 is off because its fix breaks multi-targeted projects.'
+            Revisit = 'Extend BRO1405 to ParenthesizedPatternSyntax with the same parse check. Small.' }
         SX1309S = @{ Status = 'Variant'; Why = 'Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306''s (PascalCase), so a team using `_` for those has no StyleBro rule.'
             Revisit = 'With SX1309; decide whether `_camelCase` should extend to private static readonly fields.' }
     }
 
     Partial = @{
-        SA1119 = @{ Why = 'Covered by the SDK''s IDE0047, which is a little broader: it also removes the parentheses in `a ?? (b ?? c)`, which SA1119 accepts (2 lines in Polly after migrating).'
-            Revisit = 'Nothing to configure in IDE0047. Only a BRO replacement for SA1119 would match exactly; not worth it so far.' }
         SA1407 = @{ Why = 'Covered by IDE0048, but one `dotnet format` pass fixes only some cases (the SDK check fixes SA1407 or SA1408, varying between runs).'
             Revisit = 'Report to dotnet/format, or document "run twice" for the first run.' }
         SA1408 = @{ Why = 'Same as SA1407 (IDE0048).'
