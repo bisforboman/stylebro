@@ -15,8 +15,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 71 |
 | Done, not released yet | 18 |
-| Planned | 0 |
-| Maybe | 2 new rules + 1 gap in an existing one |
+| Planned | 0 rules, 9 work items |
+| Maybe | none (moved to planned work) |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 104 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -28,6 +28,22 @@ No new rules planned. The last batch, fix-safe replacements for the SDK rules wh
 or write merge conflict markers in multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)),
 is done: BRO1514-BRO1516 (IDE0011), BRO1404/BRO1007 (IDE0040), BRO1405-BRO1407 (IDE0047/IDE0048) and
 BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `stylebro-migrate` turn those SDK rules off.
+
+### Work beyond single rules
+
+StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([decisions.md](decisions.md)), in this order:
+
+| Area | Item | Notes | Status |
+|------|------|-------|--------|
+| Hardening | More real-world repos in the PR pipeline | 2-3 more public repos in `scripts/realworld/repos.psd1` (a StyleCop user, an app rather than a library, a large multi-targeted library). Every repo added so far found real bugs. | Planned |
+| Hardening | IDE0055 in multi-targeted repos | Find out why its fix crashes Roslyn's linked-file merge under `dotnet format` and whether a safe setup exists. Not a reimplementation: it's the SDK's whole formatter, and analyzers can't reference the formatting engine (RS1038). Today `init` writes it as a suggestion there. | Planned |
+| Parity | SA1316: tuple element names in PascalCase | Rename every use together (deconstructions, `t.name`, inferred names), configurable like `tupleElementNameCasing`. | Planned |
+| Parity | SA1108: no comments inside block statements | Probe what teams expect first (move the comment above the statement?); StyleCop has no fix. | Planned |
+| Parity | BRO1309: namespace names | Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first. | Planned |
+| Adoption | Getting started | One page from install to the first `dotnet format` run, for new projects and for StyleCop users. | Planned |
+| Adoption | IDE experience | Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig. | Planned |
+| Adoption | Migration sample | A small sample repository that uses StyleCop, migrated with `stylebro-migrate` step by step. | Planned |
+| Beyond StyleCop | Survey other analyzers | Fixable style rules in popular analyzers (e.g. Roslynator's formatting rules) that the SDK doesn't cover; worthwhile ones become rule candidates here. | Planned |
 
 ### Read the SDK's own settings
 
@@ -50,18 +66,8 @@ writes it as a suggestion in multi-targeted repositories). Also to do: report th
 
 ## Maybe
 
-New rules:
-
-| StyleCop | Rule | Notes |
-|----------|------|-------|
-| SA1316 | Tuple element names should use correct casing | StyleCop's fix renames only the declaration and breaks every use; a safe rename must change deconstructions, `t.name` and inferred names together. 0 findings in the surveyed repos. |
-| SA1108 | Block statements should not contain embedded comments | A fix could move the comment above the statement; probe what teams expect first. StyleCop has no fix. |
-
-Gaps in existing rules:
-
-| Rule | Gap |
-|------|-----|
-| BRO1309 (SA1300) | Namespace names aren't checked |
+Nothing right now: the last maybes (SA1316, SA1108, namespace names) moved to planned work. Rules worth doing only if
+someone asks go here.
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 
