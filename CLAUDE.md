@@ -66,6 +66,8 @@ suggest or push a release tag after each batch; mention it only when a release l
   BRO1107/BRO1108 on `VerifyFixAsync("""...""", """...""")` in tests, BRO1303 unified `_field`/`field` to `field`), 142
   files changed, builds, 397 tests pass, second run clean. CI runs
   `dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples`.
+- Before pushing, run the CI self-check locally: `dotnet format StyleBro.slnx --verify-no-changes --severity warn
+  --exclude samples` (the push of 2026-10-03 failed CI on doc summaries and blank lines in new code).
 - **GOTCHA (found 2026-10-03): two copies of every fixer.** `dotnet format` on a sample also loads the referenced
   StyleBro.Analyzers/CodeFixes projects, which carry the PUBLISHED StyleBro (self-check) as analyzers; with two fixers
   for one rule it picks either, so verify-format sometimes tested the release, not the code (BRO1519's blank lines came

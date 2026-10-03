@@ -107,7 +107,8 @@ public class BlankLineRunsTests
         """);
 
     [Fact]
-    public Task OtherRulesPlaces_AreLeftToThem() => VerifyNoDiagnosticsAsync("""
+    public Task OtherRulesPlaces_AreLeftToThem() => VerifyNoDiagnosticsAsync(
+        """
         public class C
         {
 

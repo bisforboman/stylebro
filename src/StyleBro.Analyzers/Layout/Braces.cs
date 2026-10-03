@@ -246,16 +246,16 @@ internal static class Braces
 
         public StatementSyntax Statement { get; }
 
-        /// <summary>Between the token before the statement and the statement: becomes the '{' and the line break.</summary>
+        /// <summary>Gets the span between the token before the statement and the statement, which becomes the '{' and the line break.</summary>
         public TextSpan Gap { get; }
 
-        /// <summary>Where the '}' goes: before the line break ending the statement's line, or the space before 'else'/'while'.</summary>
+        /// <summary>Gets the span where the '}' goes: before the line break ending the statement's line, or the space before 'else'/'while'.</summary>
         public TextSpan Close { get; }
 
-        /// <summary>'else' or 'while' when it follows the statement on its line.</summary>
+        /// <summary>Gets the keyword ('else' or 'while') that follows the statement and goes after the '}'.</summary>
         public SyntaxKind Following { get; }
 
-        /// <summary>The line of the owning statement's (or 'else' clause's) first token: its indentation is the braces'.</summary>
+        /// <summary>Gets the line of the owning statement's (or 'else' clause's) first token, whose indentation the braces get.</summary>
         public int OwnerLine { get; }
 
         public int FirstLine { get; }
