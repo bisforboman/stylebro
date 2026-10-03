@@ -48,7 +48,6 @@ Gaps in existing rules:
 | Rule | Gap |
 |------|-----|
 | BRO1309 (SA1300) | Namespace names aren't checked |
-| BRO1001 (SA1201) | Types aren't ordered within a namespace |
 | BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
