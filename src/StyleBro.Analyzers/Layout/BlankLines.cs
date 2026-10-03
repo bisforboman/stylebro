@@ -85,9 +85,10 @@ internal static class BlankLines
     /// <summary>
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
-    /// an opening brace or a 'case'/'default' label; and not for '///' and '////' (commented-out code).
+    /// an opening brace or a 'case'/'default' label; and not for '///' and '////' (commented-out code). Not for a comment
+    /// BRO1132 moves into a block when it's on (<paramref name="embeddedCommentsOn"/>): the blank line would stay behind.
     /// </summary>
-    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text)
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, bool embeddedCommentsOn)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
         {
@@ -110,7 +111,8 @@ internal static class BlankLines
         // The token before the comment: an opening brace, or the colon of a switch label, keeps the comment attached.
         var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
         return !previous.IsKind(SyntaxKind.OpenBraceToken)
-            && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax);
+            && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
+            && !(embeddedCommentsOn && Readability.EmbeddedComments.IsMoved(comment, text));
     }
 
     /// <summary>Deletes the given lines. Duplicates are ignored, so Fix All can pass overlapping sets.</summary>
