@@ -80,20 +80,23 @@ internal static class MemberOrdering
 
     public static OrderingViolation? FindFirstViolation(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
     {
-        var keys = GetKeys(container, options, partialAccess);
+        var keys = GetKeys(container, options, partialAccess, out var segments);
         if (keys is null)
         {
             return null;
         }
 
+        // Members are compared within their region only (segments only grow, so a later one never sorts earlier).
+        int Compare(int a, int b) => segments[a] != segments[b] ? segments[a].CompareTo(segments[b]) : keys[a].CompareTo(keys[b]);
+
         var maxIndex = 0;
         for (var i = 1; i < keys.Length; i++)
         {
-            var comparison = keys[i].CompareTo(keys[maxIndex]);
+            var comparison = Compare(i, maxIndex);
             if (comparison < 0)
             {
                 var j = 0;
-                while (keys[j].CompareTo(keys[i]) <= 0)
+                while (Compare(j, i) <= 0)
                 {
                     j++;
                 }
@@ -117,7 +120,7 @@ internal static class MemberOrdering
     /// </summary>
     public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
     {
-        var keys = GetKeys(container, options, partialAccess);
+        var keys = GetKeys(container, options, partialAccess, out var segments);
         if (keys is null)
         {
             return container;
@@ -125,7 +128,7 @@ internal static class MemberOrdering
 
         var members = GetMembers(container)!.Value;
         var count = members.Count;
-        var order = SortedOrder(keys);
+        var order = SortedOrder(keys, segments);
         if (order.Select((source, slot) => source == slot).All(unchanged => unchanged))
         {
             return container;
@@ -152,6 +155,12 @@ internal static class MemberOrdering
                 {
                     layout = layout.Insert(0, SyntaxFactory.EndOfLine(newLine));
                 }
+            }
+
+            // Likewise a doc comment moved right below a region line, which wants a blank line in between (BRO1513, SA1514).
+            if (EndsWithDirective(layout) && StartsWithDocComment(split[source].Content) && !StartsWithDocComment(split[slot].Content))
+            {
+                layout = layout.Add(SyntaxFactory.EndOfLine(newLine));
             }
 
             var member = members[source].WithLeadingTrivia(layout.AddRange(split[source].Content));
@@ -214,12 +223,15 @@ internal static class MemberOrdering
         };
     }
 
-    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess)
+    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess, out int[] segments)
     {
-        if (GetMembers(container) is not { } members || members.Count < 2 || HasDirectivesBetweenMembers(members))
+        segments = System.Array.Empty<int>();
+        if (GetMembers(container) is not { } members || members.Count < 2 || GetSegments(members) is not { } found)
         {
             return null;
         }
+
+        segments = found;
 
         // A file's first type carries the file header in its leading trivia when nothing comes before it: moving the type
         // would move the header. Left alone.
@@ -247,16 +259,16 @@ internal static class MemberOrdering
         // Sorting must not change what field initializers compute, nor an order the runtime sees (struct layout,
         // serialized members); skip the type if it could.
         return container is TypeDeclarationSyntax type
-            && (InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys)) || ObservableOrder.ReordersObservableMembers(type, SortedOrder(keys)))
+            && (InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys, segments)) || ObservableOrder.ReordersObservableMembers(type, SortedOrder(keys, segments)))
             ? null
             : keys;
     }
 
     /// <summary>Maps each slot to the index of the member that belongs there after sorting.</summary>
-    private static int[] SortedOrder(MemberKey[] keys)
+    private static int[] SortedOrder(MemberKey[] keys, int[] segments)
     {
-        // OrderBy is stable, so members with equal keys keep their relative order.
-        return Enumerable.Range(0, keys.Length).OrderBy(i => keys[i]).ToArray();
+        // OrderBy is stable, so members with equal keys keep their relative order; each region is sorted on its own.
+        return Enumerable.Range(0, keys.Length).OrderBy(i => segments[i]).ThenBy(i => keys[i]).ToArray();
     }
 
     private static MemberKey? GetKey(MemberDeclarationSyntax member, MemberAccess access, MemberOrderOptions options)
@@ -369,32 +381,74 @@ internal static class MemberOrdering
     }
 
     /// <summary>
-    /// #region, #if, #pragma etc. between members define scopes that reordering would break,
-    /// so such types are skipped entirely rather than risking a wrong fix.
+    /// The region each member is in (0, 1, ...): every '#region'/'#endregion' before a member starts a new one, and members
+    /// are sorted within their region only, so the regions keep their members and their place. Null (the type is skipped)
+    /// for any other directive between members ('#if', '#pragma': moving members across them changes what compiles or
+    /// what is suppressed) and for a doc comment above a region directive (it would stay with the position, not the member).
     /// </summary>
-    private static bool HasDirectivesBetweenMembers(SyntaxList<MemberDeclarationSyntax> members)
+    private static int[]? GetSegments(SyntaxList<MemberDeclarationSyntax> members)
     {
-        foreach (var member in members)
+        var segments = new int[members.Count];
+        var segment = 0;
+        for (var i = 0; i < members.Count; i++)
         {
-            if (member.GetLeadingTrivia().Any(t => t.IsDirective))
+            var trivia = members[i].GetLeadingTrivia();
+            if (!IsRegionsOnly(trivia))
             {
-                return true;
+                return null;
             }
+
+            if (i > 0 && LastDirective(trivia) >= 0)
+            {
+                segment++;
+            }
+
+            segments[i] = segment;
         }
 
         // What follows the last member: the closing brace, or for a file (and a file-scoped namespace) its end.
         var after = members[members.Count - 1].GetLastToken().GetNextToken(includeZeroWidth: true);
-        return after.LeadingTrivia.Any(t => t.IsDirective);
+        return IsRegionsOnly(after.LeadingTrivia) ? segments : null;
+    }
+
+    private static bool IsRegionsOnly(SyntaxTriviaList trivia)
+    {
+        var last = LastDirective(trivia);
+        for (var i = 0; i <= last; i++)
+        {
+            var kind = trivia[i].Kind();
+            if ((trivia[i].IsDirective && kind is not (SyntaxKind.RegionDirectiveTrivia or SyntaxKind.EndRegionDirectiveTrivia))
+                || kind is SyntaxKind.SingleLineDocumentationCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static int LastDirective(SyntaxTriviaList trivia)
+    {
+        for (var i = trivia.Count - 1; i >= 0; i--)
+        {
+            if (trivia[i].IsDirective)
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     /// <summary>
     /// Splits leading trivia into the blank-line layout (stays with the slot) and the member's
-    /// own content: indentation, comments and doc comments (moves with the member).
+    /// own content: indentation, comments and doc comments (moves with the member). Region directives, and anything above
+    /// them, are layout: they mark where a region starts or ends, not the member.
     /// </summary>
     private static (SyntaxTriviaList Layout, SyntaxTriviaList Content) SplitLeadingTrivia(SyntaxTriviaList trivia)
     {
-        var split = 0;
-        for (var i = 0; i < trivia.Count; i++)
+        var split = LastDirective(trivia) + 1;
+        for (var i = split; i < trivia.Count; i++)
         {
             var kind = trivia[i].Kind();
             if (kind == SyntaxKind.EndOfLineTrivia)
@@ -421,6 +475,13 @@ internal static class MemberOrdering
         var first = content.FirstOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia));
         return first.IsKind(SyntaxKind.SingleLineCommentTrivia) && !first.ToString().StartsWith("///", System.StringComparison.Ordinal);
     }
+
+    private static bool StartsWithDocComment(SyntaxTriviaList content) =>
+        content.FirstOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)).IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia);
+
+    /// <summary>Whether the last line of the layout is a directive (no blank line below it).</summary>
+    private static bool EndsWithDirective(SyntaxTriviaList layout) =>
+        layout.LastOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)).IsDirective;
 
     private static bool EndsWithNewLine(MemberDeclarationSyntax member)
     {

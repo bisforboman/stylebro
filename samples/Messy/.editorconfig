@@ -9,3 +9,7 @@ stylebro_file_header_company = Contoso
 # BRO1310 (Hungarian prefixes) is off by default; on for one file.
 [**/Hygrometer.cs]
 dotnet_diagnostic.BRO1310.severity = warning
+
+# BRO1001 inside regions: BRO1112 (remove regions, off in the preset) stays off here.
+[**/Kettle.cs]
+dotnet_diagnostic.BRO1112.severity = none
