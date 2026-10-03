@@ -292,7 +292,7 @@
             # StyleCop's SA1300 fix changes nothing under 'dotnet format'; positions only.
             CompareOutput = $false
             Expected = @(
-                # Namespaces aren't renamed: that also changes embedded resource names and breaks folder conventions.
+                # Namespaces are BRO1312's (set 'naming-namespaces').
                 'only StyleCop: BRO1309 Elements.cs(1,11)'
                 'only StyleCop: BRO1309 Elements.cs(1,17)'
             )
@@ -303,6 +303,21 @@
             # StyleCop's fix renames only the declaration (the uses then don't compile); positions only.
             CompareOutput = $false
             Expected = @(
+            )
+        }
+        @{
+            Name     = 'naming-namespaces'
+            Map      = @('SA1300=BRO1312')
+            Expected = @(
+                # 'taken' -> 'Taken' would merge it into the existing namespace 'Taken': not reported (StyleCop merges).
+                'only StyleCop: BRO1312 Taken.cs(5,11)'
+                'StyleBro output only: Taken.cs: [namespace taken.Inner]'
+                'StyleCop output only: Taken.cs: [namespace Taken.Inner]'
+                # StyleCop's fix renames only the declaration it's on: the using directive in the other file stays behind.
+                'StyleBro output only: FileScoped.cs: [using Probe.Lower;]'
+                'StyleCop output only: FileScoped.cs: [using probe.lower;]'
+                'StyleCop fix doesn''t compile: FileScoped.cs(3,7) CS0246'
+                'StyleCop fix doesn''t compile: FileScoped.cs(7,12) CS0246'
             )
         }
         @{

@@ -84,6 +84,10 @@ dotnet_diagnostic.BRO1310.severity = none
 # BRO1311: tuple element names in PascalCase (SA1316); stylebro_tuple_element_name_casing = camelCase for the other style
 dotnet_diagnostic.BRO1311.severity = warning
 
+# BRO1312: namespace names begin with an upper-case letter (SA1300 for namespaces). Off: renaming a namespace renames
+# every type in it (stored type names, other repositories); set to warning to opt in.
+dotnet_diagnostic.BRO1312.severity = none
+
 # BRO1109: opening parenthesis on the declaration line (SA1110)
 dotnet_diagnostic.BRO1109.severity = warning
 

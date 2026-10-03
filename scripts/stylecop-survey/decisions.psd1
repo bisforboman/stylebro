@@ -110,7 +110,7 @@
         SA1651 = 'StyleBro **BRO1609** (done), same results and output as StyleCop'
         SA1612 = 'StyleBro **BRO1611** (done), with a fix (StyleCop has none): stale tags renamed or removed, tags reordered'
         SA1627 = 'StyleBro **BRO1610** (done) for empty remarks, with a fix (removal); StyleCop has none'
-        SA1300 = 'StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces not renamed'
+        SA1300 = 'StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces: **BRO1312** (proposal, off by default)'
         SA1316 = 'StyleBro **BRO1311** (done), the name renamed with every use and override solution-wide; `stylebro_tuple_element_name_casing` from tupleElementNameCasing'
         SA1305 = 'StyleBro **BRO1310** (done, off by default like StyleCop), the prefix removed in the same rename as the other naming rules'
         SA1302 = 'StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop'

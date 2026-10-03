@@ -74,6 +74,7 @@ project or coming from StyleCop.
 | [BRO1307](docs/rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Yes |
 | [BRO1308](docs/rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Yes |
 | [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
+| [BRO1312](docs/rules/BRO1312.md) | Namespace names should begin with an upper-case letter (off by default) | SA1300 | Yes |
 | [BRO1310](docs/rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Yes |
 | [BRO1311](docs/rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |

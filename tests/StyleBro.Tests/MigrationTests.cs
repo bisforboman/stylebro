@@ -68,6 +68,15 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void AllowedNamespaceComponents_ComeFromStyleCopJson()
+    {
+        Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("stylebro_allowed_namespace", StringComparison.Ordinal));
+
+        Write("stylecop.json", """{ "settings": { "namingRules": { "allowedNamespaceComponents": ["eBay", "iOS"] } } }""");
+        Assert.Contains("stylebro_allowed_namespace_components = eBay, iOS", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+    }
+
+    [Fact]
     public void AccessModifiers_AreBro1404AndBro1007_EachWithItsStyleCopRule()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1400.severity = none\n");
