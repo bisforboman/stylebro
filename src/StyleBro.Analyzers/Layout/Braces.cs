@@ -15,6 +15,9 @@ namespace StyleBro.Analyzers.Layout;
 /// </summary>
 internal static class Braces
 {
+    /// <summary>StyleCop's allowConsecutiveUsings: 'using (a) using (b) { }' shares one block (default true).</summary>
+    public const string ConsecutiveUsingsKey = "stylebro_allow_consecutive_usings";
+
     public static readonly SyntaxKind[] Kinds =
     {
         SyntaxKind.IfStatement, SyntaxKind.DoStatement, SyntaxKind.WhileStatement, SyntaxKind.ForStatement,
@@ -27,7 +30,7 @@ internal static class Braces
     /// one in an if/else chain where another clause has braces is SA1520's, the rest SA1503's; a rule that is off leaves
     /// its statements to the next one. <paramref name="isOn"/> says whether a rule is on.
     /// </summary>
-    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn)
+    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn, bool allowConsecutiveUsings = true)
     {
         List<StatementSyntax> children;
         switch (node)
@@ -47,8 +50,7 @@ internal static class Braces
                 }
 
                 break;
-            case UsingStatementSyntax { Statement: UsingStatementSyntax }:
-                // StyleCop's allowConsecutiveUsings (default true): 'using (a) using (b) { }'.
+            case UsingStatementSyntax { Statement: UsingStatementSyntax } when allowConsecutiveUsings:
                 yield break;
             case CommonForEachStatementSyntax forEach:
                 children = new List<StatementSyntax> { forEach.Statement };
@@ -199,6 +201,10 @@ internal static class Braces
 
         return changes;
     }
+
+    /// <summary>The <see cref="ConsecutiveUsingsKey"/> setting.</summary>
+    public static bool AllowConsecutiveUsings(AnalyzerConfigOptions options) =>
+        !(options.TryGetValue(ConsecutiveUsingsKey, out var value) && bool.TryParse(value.Trim(), out var allowed) && !allowed);
 
     private static StatementSyntax GetChild(SyntaxNode node) => node switch
     {

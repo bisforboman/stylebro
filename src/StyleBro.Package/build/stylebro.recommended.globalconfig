@@ -142,6 +142,8 @@ dotnet_diagnostic.BRO1407.severity = warning
 dotnet_diagnostic.BRO1514.severity = warning
 dotnet_diagnostic.BRO1515.severity = warning
 dotnet_diagnostic.BRO1516.severity = warning
+# 'using (a) using (b) { }' shares one block (StyleCop's allowConsecutiveUsings, default true).
+stylebro_allow_consecutive_usings = true
 
 # BRO1517-BRO1519: one blank line at most, none before '}', one after a block (SA1507, SA1508, SA1513). Safe in
 # multi-targeted projects, unlike IDE2000/IDE2002/IDE2003.

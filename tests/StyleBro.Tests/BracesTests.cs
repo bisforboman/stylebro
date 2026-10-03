@@ -297,6 +297,40 @@ public class BracesTests
         editorConfig: "dotnet_diagnostic.BRO1515.severity = none\ndotnet_diagnostic.BRO1516.severity = none");
 
     [Fact]
+    public Task ConsecutiveUsings_GetBraces_WhenNotAllowed() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public void M(IDisposable x, IDisposable y)
+            {
+                using (x)
+                    {|BRO1515:using (y)
+                    {
+                    }|}
+            }
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            public void M(IDisposable x, IDisposable y)
+            {
+                using (x)
+                {
+                    using (y)
+                    {
+                    }
+                }
+            }
+        }
+        """,
+        editorConfig: "stylebro_allow_consecutive_usings = false");
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;
 

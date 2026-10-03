@@ -16,7 +16,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | Released | 71 |
 | Done, not released yet | 17 |
 | Planned | 0 |
-| Maybe | 3 new rules + 5 gaps in existing ones |
+| Maybe | 3 new rules + 4 gaps in existing ones |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 103 by StyleBro, 45 by the .NET SDK, 44 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -51,7 +51,6 @@ Gaps in existing rules:
 | BRO1309 (SA1300) | Namespace names aren't checked |
 | BRO1001 (SA1201) | Types aren't ordered within a namespace |
 | BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) |
-| BRO1514-BRO1516 | stylecop.json `allowConsecutiveUsings: false` isn't configurable (StyleBro always allows `using (a) using (b) { }`) |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 

@@ -108,6 +108,7 @@ internal static class Migration
         AddMemberOrder(setup, lines);
         lines.Add($"stylebro_private_field_naming = {result.FieldStyle}");
         AddDocumentationScope(setup, lines);
+        lines.Add($"{StyleBro.Analyzers.Layout.Braces.ConsecutiveUsingsKey} = {Bool(setup.Setting("layoutRules", "allowConsecutiveUsings") is not { ValueKind: JsonValueKind.False })}");
         if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none"))
         {
             AddFileHeader(setup, lines);

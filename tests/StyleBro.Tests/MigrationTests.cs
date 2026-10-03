@@ -32,6 +32,15 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void AllowConsecutiveUsings_ComesFromStyleCopJson()
+    {
+        Assert.Contains("stylebro_allow_consecutive_usings = true", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+
+        Write("stylecop.json", """{ "settings": { "layoutRules": { "allowConsecutiveUsings": false } } }""");
+        Assert.Contains("stylebro_allow_consecutive_usings = false", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+    }
+
+    [Fact]
     public void AccessModifiers_AreBro1404AndBro1007_EachWithItsStyleCopRule()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1400.severity = none\n");
