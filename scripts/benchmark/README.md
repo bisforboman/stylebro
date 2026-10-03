@@ -20,6 +20,11 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 | StyleBro 0.1.0-alpha.8 | 1,096 ms | FieldNamingAnalyzer 468 ms |
 | StyleBro after caching type facts in FieldNamingAnalyzer | ~800 ms | DocumentationAnalyzer ~160 ms, FieldNamingAnalyzer ~150 ms |
 | StyleCop.Analyzers 1.2.0-beta.556 (182 analyzers) | 1,671 ms | SA1121 152 ms, SA1101 108 ms |
+| StyleBro, 2026-10-03 (88 rules, 46 analyzers) | 1,082-1,350 ms (two runs) | DocumentationAnalyzer ~180-210 ms, FieldNamingAnalyzer ~140-200 ms, CommentTextAnalyzer ~115-200 ms, BlankLineRunsAnalyzer ~110-120 ms |
 
-Single runs vary by about 20%. In real builds the analyzers run concurrently with each other and with the compiler,
+Single runs vary by about 20% (the two 2026-10-03 runs of the same build differ by 25%). In real builds the analyzers run concurrently with each other and with the compiler,
 so the wall-clock cost is smaller: the private 30-project app built in the same time with and without StyleBro.
+
+2026-10-03: DirectiveSpacingAnalyzer walked every token (trivia included) of every file; it now walks only the
+directives and skips files without any (45 -> 23 ms). The blank-line analyzers each walk all tokens; merging them into
+one pass is the next step if analyzer time ever matters.

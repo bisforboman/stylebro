@@ -34,9 +34,16 @@ public sealed class DirectiveSpacingAnalyzer : DiagnosticAnalyzer
     /// </summary>
     internal static IEnumerable<(SyntaxToken Keyword, TextSpan Space)> GetSpaces(SyntaxNode root)
     {
-        foreach (var token in root.DescendantTokens(descendIntoTrivia: true))
+        // Only the directives, not every token of the file (most files have none).
+        if (!root.ContainsDirectives)
         {
-            if (!token.IsKind(SyntaxKind.HashToken) || !token.HasTrailingTrivia || token.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia))
+            yield break;
+        }
+
+        for (var directive = ((CSharpSyntaxNode)root).GetFirstDirective(); directive is not null; directive = directive.GetNextDirective())
+        {
+            var token = directive.HashToken;
+            if (!token.HasTrailingTrivia || token.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia))
             {
                 continue;
             }

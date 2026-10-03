@@ -19,6 +19,11 @@ internal static class BlankLineRuns
     /// <summary>Every finding in the tree: the rule, the diagnostic's span, and the edit that fixes it.</summary>
     public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn)
     {
+        // Asked per token: read each rule's severity once per file.
+        var known = new Dictionary<string, bool>();
+        var lookup = isOn;
+        isOn = id => known.TryGetValue(id, out var on) ? on : known[id] = lookup(id);
+
         if (root.DescendantTokens().All(t => t.IsKind(SyntaxKind.EndOfFileToken)) && text.ToString().Trim().Length == 0)
         {
             yield break;
