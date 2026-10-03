@@ -105,6 +105,36 @@ internal static class Program
         return 0;
     }
 
+    /// <summary>docs/stylecop-mapping.md's proposal for every StyleCop rule, without Markdown.</summary>
+    /// <summary>
+    /// A dropped rule's reason as the report shows it. The mapping is written for the project's own docs and carries survey
+    /// evidence (finding counts in the surveyed repositories, which decision it was); users only need the reason.
+    /// </summary>
+    internal static string UserFacingReason(string proposal)
+    {
+        var reason = Regex.Replace(proposal, @"^(Drop|Not applicable)[:.]\s*", string.Empty);
+        reason = Regex.Replace(reason, @"\s*\([^)]*\buser decision\)", string.Empty);
+        var sentences = Regex.Split(reason, @"(?<=\.)\s+").Where(s => !Regex.IsMatch(s, @"\bfindings?\b|private app", RegexOptions.IgnoreCase));
+        return string.Join(" ", sentences).Trim();
+    }
+
+    internal static Dictionary<string, string> LoadMapping()
+    {
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StyleCopMapping.csv")
+            ?? throw new InvalidOperationException("The StyleCop mapping isn't embedded.");
+        using var reader = new StreamReader(stream);
+        reader.ReadLine();
+        var mapping = new Dictionary<string, string>(StringComparer.Ordinal);
+        while (reader.ReadLine() is { } line)
+        {
+            var comma = line.IndexOf(',');
+            var proposal = line.Substring(comma + 1).Trim('"').Replace("\"\"", "\"").Replace("**", string.Empty).Replace("`", string.Empty);
+            mapping[line.Substring(0, comma)] = proposal;
+        }
+
+        return mapping;
+    }
+
     /// <summary>Which StyleCop rules are on, and why the ones StyleBro and the SDK don't cover aren't.</summary>
     private static void Report(StyleCopSetup setup, Migration.Result result)
     {
@@ -129,7 +159,7 @@ internal static class Program
             foreach (var id in group)
             {
                 var reason = result.Reasons.TryGetValue(id, out var r) ? r
-                    : group.Key.StartsWith("Dropped", StringComparison.Ordinal) ? Regex.Replace(mapping[id], @"^(Drop|Not applicable)[:.]\s*", string.Empty)
+                    : group.Key.StartsWith("Dropped", StringComparison.Ordinal) ? UserFacingReason(mapping[id])
                     : titles[id];
                 Console.WriteLine($"    {id}{(reason.Length == 0 ? string.Empty : ": " + reason)}");
             }
@@ -166,23 +196,5 @@ internal static class Program
         }
 
         return (added, files);
-    }
-
-    /// <summary>docs/stylecop-mapping.md's proposal for every StyleCop rule, without Markdown.</summary>
-    private static Dictionary<string, string> LoadMapping()
-    {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StyleCopMapping.csv")
-            ?? throw new InvalidOperationException("The StyleCop mapping isn't embedded.");
-        using var reader = new StreamReader(stream);
-        reader.ReadLine();
-        var mapping = new Dictionary<string, string>(StringComparer.Ordinal);
-        while (reader.ReadLine() is { } line)
-        {
-            var comma = line.IndexOf(',');
-            var proposal = line.Substring(comma + 1).Trim('"').Replace("\"\"", "\"").Replace("**", string.Empty).Replace("`", string.Empty);
-            mapping[line.Substring(0, comma)] = proposal;
-        }
-
-        return mapping;
     }
 }
