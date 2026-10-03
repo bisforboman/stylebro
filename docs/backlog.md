@@ -24,10 +24,25 @@ can't be fixed without inventing text or moving code between files), the rest va
 
 ## Planned
 
-Nothing right now. The last planned batch, fix-safe replacements for the SDK rules whose fixes crash `dotnet format`
+No new rules planned. The last batch, fix-safe replacements for the SDK rules whose fixes crash `dotnet format`
 or write merge conflict markers in multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)),
 is done: BRO1514-BRO1516 (IDE0011), BRO1404/BRO1007 (IDE0040), BRO1405-BRO1407 (IDE0047/IDE0048) and
 BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `stylebro-migrate` turn those SDK rules off.
+
+### Read the SDK's own settings
+
+Decided 2026-10-03 ([decisions.md](decisions.md)): where the SDK has an `.editorconfig` key for the same choice, StyleBro
+follows it. Precedence: a `stylebro_*` key, then the SDK key, then StyleCop's behavior (today's default, unchanged
+when neither is set). `stylebro-migrate` keeps writing what matches the StyleCop setup.
+
+| Rules | SDK key | What changes | Status |
+|-------|---------|--------------|--------|
+| BRO1303 (private fields) | `dotnet_naming_rule.*` / `dotnet_naming_style.*` | A naming rule for private fields (required prefix `_`, camel case) picks `camelCase` or `_camelCase` when `stylebro_private_field_naming` isn't set; a style the rule can't produce leaves the default. | Planned |
+| BRO1131 | `dotnet_style_qualification_for_method/_property/_field/_event` | `false` drops `base.` (`Reset()`) instead of writing `this.Reset()`, where the unqualified name binds the same. | Planned |
+| BRO1514-BRO1516 | `csharp_prefer_braces` | `when_multiline`: only multi-line child statements need braces (BRO1515); `false`: none. | Planned |
+| BRO1404 | `dotnet_style_require_accessibility_modifiers` | `never`/`omit_if_default`: not reported (or reported the other way, to be decided); `always`: interface members too. | Planned |
+| BRO1405-BRO1407 | `dotnet_style_parentheses_*` | `always_for_clarity` / `never_if_unnecessary` per operator group, instead of StyleCop's fixed families. | Planned |
+| All text fixes | `end_of_line` | New line breaks use the configured ending instead of the file's current one. | Planned |
 
 Not planned: IDE0055 (the SDK's whole formatter; `dotnet format`'s whitespace pass still does that job safely; `init`
 writes it as a suggestion in multi-targeted repositories). Also to do: report the SDK fixer bugs upstream
