@@ -13,6 +13,19 @@ namespace StyleBro.Analyzers.Layout;
 /// BRO1514 (SA1503) braces not omitted, BRO1515 (SA1519) not from a multi-line child statement, BRO1516 (SA1520) used
 /// consistently in an if/else chain. Which statements count, and which rule reports one, follow StyleCop.
 /// </summary>
+/// <summary>The SDK's csharp_prefer_braces.</summary>
+internal enum BracePreference
+{
+    /// <summary>'true', or not set: StyleCop's rules (SA1503, SA1519, SA1520).</summary>
+    Always,
+
+    /// <summary>'when_multiline': only multi-line statements (as the SDK's IDE0011 counts them) and inconsistent chains.</summary>
+    WhenMultiline,
+
+    /// <summary>'false': braces aren't required.</summary>
+    Never,
+}
+
 internal static class Braces
 {
     /// <summary>StyleCop's allowConsecutiveUsings: 'using (a) using (b) { }' shares one block (default true).</summary>
@@ -28,10 +41,22 @@ internal static class Braces
     /// <summary>
     /// The child statements without braces and the rule that reports each, like StyleCop: a multi-line one is SA1519's,
     /// one in an if/else chain where another clause has braces is SA1520's, the rest SA1503's; a rule that is off leaves
-    /// its statements to the next one. <paramref name="isOn"/> says whether a rule is on.
+    /// its statements to the next one. <paramref name="isOn"/> says whether a rule is on. With the SDK's
+    /// csharp_prefer_braces = when_multiline, single-line statements in a consistent chain aren't reported, and
+    /// "multi-line" is what the SDK's IDE0011 counts as such; with false, nothing is.
     /// </summary>
-    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn, bool allowConsecutiveUsings = true)
+    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(
+        SyntaxNode node,
+        SourceText text,
+        Func<string, bool> isOn,
+        bool allowConsecutiveUsings = true,
+        BracePreference preference = BracePreference.Always)
     {
+        if (preference == BracePreference.Never)
+        {
+            yield break;
+        }
+
         List<StatementSyntax> children;
         switch (node)
         {
@@ -68,8 +93,14 @@ internal static class Braces
                 continue;
             }
 
+            var multiLine = preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text);
+            if (preference == BracePreference.WhenMultiline && !multiLine && !inconsistent)
+            {
+                continue;
+            }
+
             string? id = null;
-            if (IsMultiLine(child, text) && isOn(DiagnosticIds.BracesMultiLine))
+            if (multiLine && isOn(DiagnosticIds.BracesMultiLine))
             {
                 id = DiagnosticIds.BracesMultiLine;
             }
@@ -206,6 +237,22 @@ internal static class Braces
     public static bool AllowConsecutiveUsings(AnalyzerConfigOptions options) =>
         !(options.TryGetValue(ConsecutiveUsingsKey, out var value) && bool.TryParse(value.Trim(), out var allowed) && !allowed);
 
+    /// <summary>The <see cref="BracePreference"/> from csharp_prefer_braces ('true:warning' style values too).</summary>
+    public static BracePreference GetPreference(AnalyzerConfigOptions options)
+    {
+        if (!options.TryGetValue("csharp_prefer_braces", out var value))
+        {
+            return BracePreference.Always;
+        }
+
+        return value.Split(':')[0].Trim().ToLowerInvariant() switch
+        {
+            "when_multiline" => BracePreference.WhenMultiline,
+            "false" => BracePreference.Never,
+            _ => BracePreference.Always,
+        };
+    }
+
     private static StatementSyntax GetChild(SyntaxNode node) => node switch
     {
         DoStatementSyntax s => s.Statement,
@@ -216,6 +263,32 @@ internal static class Braces
         LockStatementSyntax s => s.Statement,
         _ => throw new ArgumentException(node.Kind().ToString()),
     };
+
+    /// <summary>
+    /// The SDK's IDE0011 'multi-line': the statement doesn't fit on one line, and the part before the child statement, the
+    /// child statement, or the part after it (a do statement's 'while', not an 'else') spans lines.
+    /// </summary>
+    private static bool IsMultiLineForSdk(StatementSyntax child, SourceText text)
+    {
+        var owner = child.Parent!;
+        bool SameLine(SyntaxToken a, SyntaxToken b) => Line(text, a.SpanStart) == Line(text, b.Span.End);
+
+        if (SameLine(owner.GetFirstToken(), owner.GetLastToken()))
+        {
+            return false;
+        }
+
+        if (!SameLine(owner.GetFirstToken(), child.GetFirstToken().GetPreviousToken()) || !SameLine(child.GetFirstToken(), child.GetLastToken()))
+        {
+            return true;
+        }
+
+        return owner.GetLastToken() != child.GetLastToken()
+            && !(owner is IfStatementSyntax ifStatement && ifStatement.Statement == child)
+            && !SameLine(child.GetLastToken().GetNextToken(), owner.GetLastToken());
+    }
+
+    private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
 
     private static bool IsMultiLine(SyntaxNode node, SourceText text) =>
         text.Lines.GetLineFromPosition(node.SpanStart).LineNumber != text.Lines.GetLineFromPosition(node.Span.End).LineNumber;

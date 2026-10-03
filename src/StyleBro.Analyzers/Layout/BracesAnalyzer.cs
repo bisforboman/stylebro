@@ -23,7 +23,7 @@ public sealed class BracesAnalyzer : DiagnosticAnalyzer
                 var tree = c.Node.SyntaxTree;
                 var text = tree.GetText(c.CancellationToken);
                 var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
-                foreach (var (child, id) in Braces.GetFindings(c.Node, text, i => Severities.IsOn(c.Compilation.Options, tree, i, c.CancellationToken), Braces.AllowConsecutiveUsings(options)))
+                foreach (var (child, id) in Braces.GetFindings(c.Node, text, i => Severities.IsOn(c.Compilation.Options, tree, i, c.CancellationToken), Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options)))
                 {
                     if (Braces.GetChanges(new[] { child }, text, options) is not null)
                     {

@@ -62,15 +62,15 @@ out.append('follows it. Precedence: a `stylebro_*` key, then the SDK key, then S
 out.append('when neither is set). `stylebro-migrate` keeps writing what matches the StyleCop setup.\n')
 out.append('| Rules | SDK key | What changes | Status |')
 out.append('|-------|---------|--------------|--------|')
-for rules, key, change in [
-    ('BRO1303 (private fields)', '`dotnet_naming_rule.*` / `dotnet_naming_style.*`', 'A naming rule for private fields (required prefix `_`, camel case) picks `camelCase` or `_camelCase` when `stylebro_private_field_naming` isn\'t set; a style the rule can\'t produce leaves the default.'),
-    ('BRO1131', '`dotnet_style_qualification_for_method/_property/_field/_event`', '`false` drops `base.` (`Reset()`) instead of writing `this.Reset()`, where the unqualified name binds the same.'),
-    ('BRO1514-BRO1516', '`csharp_prefer_braces`', '`when_multiline`: only multi-line child statements need braces (BRO1515); `false`: none.'),
-    ('BRO1404', '`dotnet_style_require_accessibility_modifiers`', '`never`/`omit_if_default`: not reported (or reported the other way, to be decided); `always`: interface members too.'),
-    ('BRO1405-BRO1407', '`dotnet_style_parentheses_*`', '`always_for_clarity` / `never_if_unnecessary` per operator group, instead of StyleCop\'s fixed families.'),
-    ('All text fixes', '`end_of_line`', 'New line breaks use the configured ending instead of the file\'s current one.'),
+for rules, key, change, status in [
+    ('BRO1303 (private fields)', '`dotnet_naming_rule.*` / `dotnet_naming_style.*`', 'A naming rule for private fields (required prefix `_`, camel case) picks `camelCase` or `_camelCase` when `stylebro_private_field_naming` isn\'t set; a style the rule can\'t produce leaves the default.', 'Planned'),
+    ('BRO1131', '`dotnet_style_qualification_for_method/_property/_field/_event`', '`false` drops `base.` (`Reset()`) instead of writing `this.Reset()`, where the unqualified name binds the same.', 'Planned'),
+    ('BRO1514-BRO1516', '`csharp_prefer_braces`', '`when_multiline`: only multi-line child statements (as IDE0011 counts them) and inconsistent chains; `false`: none.', 'Done (2026-10-03)'),
+    ('BRO1404', '`dotnet_style_require_accessibility_modifiers`', '`never`/`omit_if_default`: not reported (or reported the other way, to be decided); `always`: interface members too.', 'Planned'),
+    ('BRO1405-BRO1407', '`dotnet_style_parentheses_*`', '`always_for_clarity` / `never_if_unnecessary` per operator group, instead of StyleCop\'s fixed families.', 'Planned'),
+    ('All text fixes', '`end_of_line`', 'Not needed: a full `dotnet format` run normalizes line endings to `end_of_line` in its whitespace pass before the analyzer fixes run, and those copy the file\'s ending.', 'Dropped'),
 ]:
-    out.append(f'| {rules} | {key} | {change} | Planned |')
+    out.append(f'| {rules} | {key} | {change} | {status} |')
 out.append('')
 out.append('Not planned: IDE0055 (the SDK\'s whole formatter; `dotnet format`\'s whitespace pass still does that job safely; `init`')
 out.append('writes it as a suggestion in multi-targeted repositories). Also to do: report the SDK fixer bugs upstream')

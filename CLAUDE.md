@@ -25,7 +25,8 @@ tool) with the same version; CI packs both too.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
 is starting out. Keep adding rules on `main` and release again once there's a critical mass of new rules. Don't
-suggest or push a release tag after each batch; mention it only when a release looks worth it.
+suggest or push a release tag after each batch. Since 2026-10-03 (user: "don't focus on releases yet, I'll let you know
+when we can do that"): don't suggest releases at all; the user says when.
 
 ## Layout
 

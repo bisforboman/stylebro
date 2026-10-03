@@ -297,6 +297,82 @@ public class BracesTests
         editorConfig: "dotnet_diagnostic.BRO1515.severity = none\ndotnet_diagnostic.BRO1516.severity = none");
 
     [Fact]
+    public Task PreferBracesWhenMultiline_ReportsOnlyMultiLineAndInconsistent() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b)
+            {
+                if (a > 0)
+                    a++;
+
+                for (var i = 0;
+                    i < b;
+                    i++)
+                    {|BRO1515:a++;|}
+
+                if (a == 1)
+                {
+                    return 1;
+                }
+                else
+                    {|BRO1516:return 2;|}
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int a, int b)
+            {
+                if (a > 0)
+                    a++;
+
+                for (var i = 0;
+                    i < b;
+                    i++)
+                {
+                    a++;
+                }
+
+                if (a == 1)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 2;
+                }
+            }
+        }
+        """,
+        editorConfig: "csharp_prefer_braces = when_multiline:warning");
+
+    [Fact]
+    public Task PreferBracesFalse_ReportsNothing() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a > 0)
+                    return Add(a,
+                        1);
+
+                if (a == 1)
+                {
+                    return 1;
+                }
+                else
+                    return 2;
+            }
+
+            private static int Add(int x, int y) => x + y;
+        }
+        """,
+        "csharp_prefer_braces = false");
+
+    [Fact]
     public Task ConsecutiveUsings_GetBraces_WhenNotAllowed() => VerifyFixAsync(
         """
         using System;
