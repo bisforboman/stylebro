@@ -193,7 +193,7 @@ internal static class Braces
         foreach (var lineNumber in wraps.SelectMany(w => w.InnerLines(text)).Distinct())
         {
             var line = text.Lines[lineNumber];
-            if (line.Span.IsEmpty || text.ToString(line.Span).Trim().Length == 0 || wraps.Any(w => SetsIndent(w.Gap, line) || SetsIndent(w.Close, line)))
+            if (line.Span.IsEmpty || text.ToString(line.Span).Trim().Length == 0)
             {
                 continue;
             }
@@ -303,9 +303,6 @@ internal static class Braces
 
         return text.ToString(TextSpan.FromBounds(line.Start, end));
     }
-
-    /// <summary>Whether an edit of this span already writes the line's indentation.</summary>
-    private static bool SetsIndent(TextSpan span, TextLine line) => span.Start < line.Start && line.Start <= span.End;
 
     private static bool NewLineBeforeElse(AnalyzerConfigOptions options) =>
         !(options.TryGetValue("csharp_new_line_before_else", out var value) && value.Trim().Equals("false", StringComparison.OrdinalIgnoreCase));

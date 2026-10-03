@@ -124,6 +124,8 @@ public class BlankLineRunsTests
 
 
                 a = false;
+                // BRO1506 also covers the blank line before '}' below a comment.
+
             }
             public void N()
             {

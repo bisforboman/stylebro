@@ -428,10 +428,16 @@ public class BracesTests
                 if (a) // why
                     a = false;
 
-                // A multi-line string inside.
+                // A multi-line string inside: its lines would be reindented.
                 if (a)
                     Console.WriteLine(@"one
-        two");
+                    two");
+
+                // A directive inside the statement.
+                if (a)
+        #if true
+                    a = false;
+        #endif
 
                 // Other code after it on the line.
                 if (a) a = false; a = true;
