@@ -326,6 +326,12 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   guards (in the type and solution-wide) also match the name inside a string. Fix: when a reference would see
   another MEMBER with the new name (a derived type's property hiding it), the rename is skipped (only locals and
   parameters are qualified around); this also applies to BRO1303.
+- **Protected fields** (2026-10-03, `FieldNames.GetRename`/`IsProtectedChecked`), StyleCop's defaults exactly:
+  non-readonly protected/private protected fields are camelCase (SA1306, BRO1303); a readonly one's casing isn't
+  checked (SA1306 skips it, SA1304 defers to SA1307, which checks public/internal only: Polly has both
+  `DurationOfBreak` and `absoluteExpirationTime`); a leading underscore (SA1309) is removed in the camelCase style and
+  kept in `_camelCase` (no underscore added: SX1309 is private). `IsDataMember` (word-inside-string guard) no longer
+  includes protected fields: in Messy it blocked `Total` because the referenced StyleBro projects' strings contain it.
 - **BRO1307** (SA1308, `m_`/`s_`/`t_` prefixes, lowercase only) and **BRO1308** (SA1310, underscore inside a field
   name): `FieldNames.GetRename` gives every field at most ONE rule and the COMPLETE new name (prefix > underscore >
   casing), so one rename converges and Fix All never gets two names for one field. Words are joined in the field's

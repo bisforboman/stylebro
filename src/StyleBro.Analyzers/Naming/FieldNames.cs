@@ -100,11 +100,19 @@ internal static class FieldNames
         }
 
         var name = field.Name;
+
+        // Protected fields, like StyleCop with its defaults: the others are camelCase (SA1306, BRO1303); a readonly one's
+        // casing isn't checked (SA1306 skips it, and SA1304 leaves non-internal fields to SA1307, which checks public and
+        // internal ones only). A leading underscore is SA1309's: removed in the camelCase style, kept in the _camelCase
+        // style (where SA1309 is off), which doesn't add one either (SX1309 is about private fields).
+        var isProtected = IsProtectedChecked(field);
+        var pascal = IsPascalChecked(field);
+
         var hasPrefix = name.Length >= 2 && name[0] is 'm' or 's' or 't' && name[1] == '_';
         var core = hasPrefix ? name.Substring(2) : name;
         if (hasPrefix || core.TrimStart('_').Contains('_'))
         {
-            var casing = IsPascalChecked(field) ? FieldCasing.Pascal
+            var casing = pascal ? FieldCasing.Pascal
                 : IsChecked(field) && style == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
                 : FieldCasing.Camel;
             return GetJoinedName(core, casing) is { } joined && joined != name
@@ -112,10 +120,13 @@ internal static class FieldNames
                 : null;
         }
 
-        var newName = IsPascalChecked(field) ? GetPascalName(name)
+        var camelStyle = style == FieldStyle.CamelCase;
+        var newName = isProtected && field.IsReadOnly ? (camelStyle ? WithoutLeadingUnderscores(name) : null)
+            : isProtected ? (camelStyle ? CamelCaseNames.GetNewName(name) : LowerAfterUnderscores(name))
+            : pascal ? GetPascalName(name)
             : IsChecked(field) ? GetNewName(name, style)
             : null;
-        return newName is null ? null : (IsPascalChecked(field) ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
+        return newName is null ? null : (pascal ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
     }
 
     /// <summary>'lowerConst' -> 'LowerConst', '_value' -> 'Value'. Null for one-letter prefixes (SA1308) and names that fit.</summary>
@@ -139,10 +150,12 @@ internal static class FieldNames
     /// <summary>
     /// Whether code outside the type may use the field's name as data: serializers write public instance fields under
     /// their name (Json.NET does by default), so their names are also looked for inside strings, not just as a whole
-    /// string.
+    /// string. Protected fields aren't written (and [Serializable] types are skipped anyway): they're guarded like
+    /// private ones, by their exact name.
     /// </summary>
     public static bool IsDataMember(IFieldSymbol field) =>
-        !field.IsConst && !field.IsStatic && field.DeclaredAccessibility != Accessibility.Private;
+        !field.IsConst && !field.IsStatic
+        && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal;
 
     /// <summary>
     /// Whether a serializer may write the type's members by name: [Serializable] (binary serialization writes every
@@ -251,6 +264,36 @@ internal static class FieldNames
         return !(facts.InferredNames.Contains(oldName) || (Word.Match(oldName) is { Success: true } m && m.Length == oldName.Length
             ? facts.Words.Contains(oldName)
             : facts.Texts.Any(t => Regex.IsMatch(t, @"(?<![\w@])" + Regex.Escape(oldName) + @"(?!\w)"))));
+    }
+
+    /// <summary>Protected and private protected fields that aren't constants or static readonly.</summary>
+    private static bool IsProtectedChecked(IFieldSymbol field) =>
+        IsSourceField(field)
+        && field.DeclaredAccessibility is Accessibility.Protected or Accessibility.ProtectedAndInternal
+        && !field.IsConst
+        && !(field.IsStatic && field.IsReadOnly);
+
+    /// <summary>'_size' -> 'size', '_Size' -> 'Size'; null without a leading underscore or a valid result.</summary>
+    private static string? WithoutLeadingUnderscores(string name)
+    {
+        var core = name.TrimStart('_');
+        return core.Length < name.Length && core.Length > 0 && char.IsLetter(core[0]) && SyntaxFacts.IsValidIdentifier(core)
+            && SyntaxFacts.GetKeywordKind(core) == SyntaxKind.None
+            ? core
+            : null;
+    }
+
+    /// <summary>'_Count' -> '_count'; null when it already starts lower-case after the underscores.</summary>
+    private static string? LowerAfterUnderscores(string name)
+    {
+        var index = name.Length - name.TrimStart('_').Length;
+        if (index == name.Length || !char.IsUpper(name[index]))
+        {
+            return null;
+        }
+
+        var result = name.Substring(0, index) + CamelCaseNames.GetNewName(name.Substring(index));
+        return SyntaxFacts.IsValidIdentifier(result) ? result : null;
     }
 
     /// <summary>

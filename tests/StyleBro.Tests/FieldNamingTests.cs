@@ -35,7 +35,7 @@ public class FieldNamingTests
             private static int {|BRO1303:Instances|};
             private static readonly int Max = 10;
             private const int Min = 0;
-            protected int _shared;
+            protected int {|BRO1303:_shared|};
             public int Visible;
             private event EventHandler Changed;
 
@@ -64,7 +64,7 @@ public class FieldNamingTests
             private static int instances;
             private static readonly int Max = 10;
             private const int Min = 0;
-            protected int _shared;
+            protected int shared;
             public int Visible;
             private event EventHandler Changed;
 
@@ -104,6 +104,59 @@ public class FieldNamingTests
             private int _done;
 
             public int Sum() => _count + _total + _done;
+        }
+        """,
+        editorConfig: Underscore);
+
+    [Fact]
+    public Task ProtectedFields_FollowStyleCop() => VerifyFixAsync(
+        """
+        public class C
+        {
+            protected int {|BRO1303:Count|};
+            protected int {|BRO1303:_total|};
+            protected readonly int limit = 1;
+            protected readonly int {|BRO1303:_size|} = 2;
+            private protected int {|BRO1303:Level|};
+            protected int fine;
+            protected readonly int Fine = 3;
+        }
+        """,
+        """
+        public class C
+        {
+            protected int count;
+            protected int total;
+            protected readonly int limit = 1;
+            protected readonly int size = 2;
+            private protected int level;
+            protected int fine;
+            protected readonly int Fine = 3;
+        }
+        """);
+
+    [Fact]
+    public Task ProtectedFields_KeepTheirUnderscore_InTheUnderscoreStyle() => VerifyFixAsync(
+        """
+        public class C
+        {
+            protected int {|BRO1303:_Count|};
+            protected int {|BRO1303:Total|};
+            protected readonly int _logger = 1;
+            protected readonly int limit = 2;
+            protected int fine;
+            protected int _alsoFine;
+        }
+        """,
+        """
+        public class C
+        {
+            protected int _count;
+            protected int total;
+            protected readonly int _logger = 1;
+            protected readonly int limit = 2;
+            protected int fine;
+            protected int _alsoFine;
         }
         """,
         editorConfig: Underscore);

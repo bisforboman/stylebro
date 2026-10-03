@@ -19,4 +19,11 @@ namespace Messy.Visibility
     partial class Order
     {
     }
+
+    public class Base
+    {
+        protected int Total;
+
+        protected readonly int Limit = 1;
+    }
 }
