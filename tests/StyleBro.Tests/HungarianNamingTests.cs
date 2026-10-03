@@ -100,6 +100,30 @@ public class HungarianNamingTests
     }
 
     [Fact]
+    public Task MemberNames_DoNotBlockARename() => Locals.VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(System.Exception error)
+            {
+                var {|BRO1310:rResult|} = error.HResult;
+                return rResult;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(System.Exception error)
+            {
+                var result = error.HResult;
+                return result;
+            }
+        }
+        """,
+        On);
+
+    [Fact]
     public Task NamesThatWouldCollide_AreNotReported() => Locals.VerifyNoDiagnosticsAsync(
         """
         using System.Linq;
