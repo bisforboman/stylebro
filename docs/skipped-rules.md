@@ -537,9 +537,9 @@ Documentation rule. StyleCop: off by default, no code fix; SDK check: StyleCop r
 
 Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
 
-**Why:** SA1119 for parenthesized patterns (`x is (1 or 2)`, 1.2 only). BRO1405 handles expressions only; the SDK's IDE0047 is off because its fix breaks multi-targeted projects.
+**Why:** Not a rule of its own: a Hidden diagnostic SA1119 reports on the `(` and `)` tokens so the IDE greys them out (StyleCop's ParenthesisDescriptor, read in its source). BRO1405 covers SA1119 itself.
 
-**To revisit:** Extend BRO1405 to ParenthesizedPatternSyntax with the same parse check. Small.
+**To revisit:** Nothing to port (an earlier note here took it for parenthesized patterns; StyleCop doesn't check those).
 
 <a id="sx1309s"></a>
 

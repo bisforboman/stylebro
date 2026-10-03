@@ -123,8 +123,8 @@
             Revisit = 'Nothing to port.' }
 
         # ---- Variants ----------------------------------------------------------------------------------------------
-        SA1119_p = @{ Status = 'Variant'; Why = 'SA1119 for parenthesized patterns (`x is (1 or 2)`, 1.2 only). BRO1405 handles expressions only; the SDK''s IDE0047 is off because its fix breaks multi-targeted projects.'
-            Revisit = 'Extend BRO1405 to ParenthesizedPatternSyntax with the same parse check. Small.' }
+        SA1119_p = @{ Status = 'Variant'; Why = 'Not a rule of its own: a Hidden diagnostic SA1119 reports on the `(` and `)` tokens so the IDE greys them out (StyleCop''s ParenthesisDescriptor, read in its source). BRO1405 covers SA1119 itself.'
+            Revisit = 'Nothing to port (an earlier note here took it for parenthesized patterns; StyleCop doesn''t check those).' }
         SX1309S = @{ Status = 'Variant'; Why = 'Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306''s (PascalCase), so a team using `_` for those has no StyleBro rule.'
             Revisit = 'With SX1309; decide whether `_camelCase` should extend to private static readonly fields.' }
     }
