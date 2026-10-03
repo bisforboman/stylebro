@@ -53,6 +53,13 @@ git -C $path checkout -q --force FETCH_HEAD
 git -C $path clean -fdxq
 $sln = Join-Path $path $r.Solution
 
+# Every result below comes from 'git diff'; a broken clone must fail the run, not look like 'nothing changed'.
+function Get-Diff([string[]]$options = @()) {
+    $out = git -C $path diff @options
+    if ($LASTEXITCODE -ne 0) { throw "git diff failed in $path (exit $LASTEXITCODE): the clone is broken." }
+    $out
+}
+
 function Invoke-Build {
     $env:CustomAfterMicrosoftCommonTargets = $hook
     try { $out = dotnet build $sln -nologo --no-incremental -p:TreatWarningsAsErrors=false -p:CodeAnalysisTreatWarningsAsErrors=false 2>&1 }
@@ -111,19 +118,19 @@ $before.Crashes | ForEach-Object { $problems.Add("analyzer crash: $_") }
 
 $runs = 0
 $converged = $false
-$state = (git -C $path diff | Out-String)
+$state = (Get-Diff | Out-String)
 while ($runs -lt 3) {
     $runs++
     [void](Invoke-Format)
-    $next = (git -C $path diff | Out-String)
+    $next = (Get-Diff | Out-String)
     if ($next -eq $state) { $converged = $true; break }
     $state = $next
 }
-$changed = @(git -C $path diff --name-only).Count
+$changed = @(Get-Diff '--name-only').Count
 $report.Add("- files changed: $changed; a run changed nothing after $runs run(s): $converged")
 if (-not $converged) { $problems.Add('the fixes did not converge in 3 runs') }
 
-$markers = @(git -C $path diff | Select-String '^\+(<<<<<<<|>>>>>>>) ')
+$markers = @(Get-Diff | Select-String '^\+(<<<<<<<|>>>>>>>) ')
 if ($markers.Count) { $problems.Add("conflict markers written: $($markers.Count) lines") }
 
 $after = Invoke-Build

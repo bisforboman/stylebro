@@ -33,6 +33,9 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| !string.IsNullOrEmpty(Get($"dotnet_naming_symbols.{symbols}.required_modifiers"))'; Replace = ''; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'; Find = '&& !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))'; Replace = ''; Tests = 'FieldNamingTests' }
 
+        # BRO1302: constructor parameters that name a member
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '            || NamesAMember(parameter)'; Replace = ''; Tests = 'CamelCaseNamingTests' }
+
         # BRO1310 (Hungarian prefixes)
         @{ File = 'src/StyleBro.Analyzers/Naming/HungarianNames.cs'; Find = '|| allowed.Contains(match.Groups["prefix"].Value)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/HungarianNames.cs'; Find = '&& !char.IsUpper(name[0])'; Replace = ''; Tests = 'HungarianNamingTests' }
@@ -47,6 +50,8 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (i > 0 && LastDirective(trivia) >= 0)'; Replace = 'if (false)'; Tests = 'MemberOrderingTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'var split = LastDirective(trivia) + 1;'; Replace = 'var split = 0;'; Tests = 'MemberOrderingTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (EndsWithDirective(layout) && StartsWithDocComment(split[source].Content) && !StartsWithDocComment(split[slot].Content))'; Replace = 'if (false)'; Tests = 'MemberOrderingTests' }
+
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (createsSeparation || createsComment || createsDoc)'; Replace = 'if (createsSeparation || createsComment)'; Tests = 'MemberOrderingTests' }
 
         # BRO1001: order the runtime sees
         @{ File = 'src/StyleBro.Analyzers/Ordering/ObservableOrder.cs'; Find = 'var layout = type is StructDeclarationSyntax || type.IsKind(SyntaxKind.RecordStructDeclaration) || HasAttribute(type.AttributeLists, "StructLayout");'; Replace = 'var layout = false;'; Tests = 'MemberOrderingTests' }

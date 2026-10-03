@@ -420,6 +420,30 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task DocsMovedBelowAFieldWithoutABlankLine_GetOne() => VerifyFixAsync(
+        """
+        class C
+        {
+            private const int Max = 1;
+            private int count;
+
+            /// <summary>Shared.</summary>
+            private static int {|BRO1001:shared|};
+        }
+        """,
+        """
+        class C
+        {
+            private const int Max = 1;
+
+            /// <summary>Shared.</summary>
+            private static int shared;
+
+            private int count;
+        }
+        """);
+
+    [Fact]
     public Task DocsMovedBelowARegionLine_GetABlankLine() => VerifyFixAsync(
         """
         class C
