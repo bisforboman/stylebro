@@ -847,6 +847,12 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   line-ending-only + the known BRO1104), OpenTelemetry 1 -> 3 -> 1 after a fix: BRO1518 counted LINES, StyleCop counts
   line-break trivia, so one blank line after `#endif` before `}` isn't SA1508's (a directive owns its line break).
 
+- **Protected fields + namespace-level ordering** (2026-10-03): BRO1303/BRO1306 renames (camelCase default) FFMpegCore 72,
+  Polly 466 (4 protected), private app 1079 (23 protected), Newtonsoft.Json 376 (8 protected), Serilog 197; compile;
+  tests: Polly all (4 frameworks), private app 6454/6454, Newtonsoft.Json 3613/3617 (the 4 locale failures). BRO1001
+  with namespace ordering: FFMpegCore 34, Polly 87, private app 881, Newtonsoft.Json 330, Serilog 46, OpenTelemetry 0;
+  all converge in one pass, no new compile errors, no conflict markers (e.g. FFMpegCore: interfaces moved above classes).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
