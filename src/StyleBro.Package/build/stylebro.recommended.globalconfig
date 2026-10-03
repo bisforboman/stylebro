@@ -133,6 +133,11 @@ dotnet_diagnostic.BRO1007.severity = warning
 # leaves parentheses inside operator expressions ('a ?? (b ?? c)') alone.
 dotnet_diagnostic.BRO1405.severity = warning
 
+# BRO1406, BRO1407: parentheses that show precedence in arithmetic and conditional expressions (SA1407, SA1408).
+# Safe in multi-targeted projects, unlike IDE0048.
+dotnet_diagnostic.BRO1406.severity = warning
+dotnet_diagnostic.BRO1407.severity = warning
+
 # BRO1514-BRO1516: braces around child statements (SA1503, SA1519, SA1520). Safe in multi-targeted projects, unlike IDE0011.
 dotnet_diagnostic.BRO1514.severity = warning
 dotnet_diagnostic.BRO1515.severity = warning

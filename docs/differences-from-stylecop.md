@@ -40,7 +40,6 @@ always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covere
 
 - **IDE2000** (for SA1507) also removes extra blank lines at the start of a file and right before `}`, which StyleCop
   leaves to SA1517 and SA1508.
-- **IDE0048** (for SA1407, SA1408) may need a second `dotnet format` run.
 - **IDE0036** (for SA1206, SA1207) enforces the SDK's whole modifier order, where StyleCop only checks that the access
   modifier comes first and `static` next. On six real repos it changed nothing StyleCop accepts.
 - **IDE0073** (for SA1633 with `xmlHeader: false`) writes a plain header; the XML header is [BRO1615](rules/BRO1615.md).
@@ -95,6 +94,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 
 | Rule | Also reported | Why |
 |---|---|---|
+| [BRO1407](rules/BRO1407.md) (SA1408) | `and`/`or` mixed in a pattern (`v is > 1 and < 5 or 10`) | StyleCop's current source checks patterns too; the released 1.2.0-beta.556 predates it. |
 | [BRO1104](rules/BRO1104.md) (SA1129) | Target-typed `new()` for value types | StyleCop 1.1.118 predates it; 1.2 reports it too. |
 | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | Record parameters, primary-constructor parameters and base arguments | StyleCop 1.2.0-beta.556 doesn't check them; they're lists like any other. |
 | [BRO1110](rules/BRO1110.md) (SA1111) | A `)` on its own line after target-typed `new(...)` and `: this(...)`/`: base(...)` arguments | StyleCop (1.1.118 and 1.2) doesn't check these lists; they're argument lists like any other. |
@@ -135,7 +135,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 ### Same as StyleCop
 
 Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-WithStyleCop.ps1`):
-[BRO1003](rules/BRO1003.md), [BRO1004](rules/BRO1004.md), [BRO1005](rules/BRO1005.md), [BRO1006](rules/BRO1006.md), [BRO1007](rules/BRO1007.md), [BRO1404](rules/BRO1404.md), [BRO1116](rules/BRO1116.md), [BRO1117](rules/BRO1117.md),
+[BRO1003](rules/BRO1003.md), [BRO1004](rules/BRO1004.md), [BRO1005](rules/BRO1005.md), [BRO1006](rules/BRO1006.md), [BRO1007](rules/BRO1007.md), [BRO1404](rules/BRO1404.md), [BRO1406](rules/BRO1406.md), [BRO1116](rules/BRO1116.md), [BRO1117](rules/BRO1117.md),
 [BRO1511](rules/BRO1511.md), [BRO1512](rules/BRO1512.md), [BRO1105](rules/BRO1105.md), [BRO1106](rules/BRO1106.md), [BRO1109](rules/BRO1109.md), [BRO1111](rules/BRO1111.md),
 [BRO1113](rules/BRO1113.md), [BRO1304](rules/BRO1304.md), [BRO1305](rules/BRO1305.md), [BRO1501](rules/BRO1501.md),
 [BRO1502](rules/BRO1502.md), [BRO1503](rules/BRO1503.md), [BRO1504](rules/BRO1504.md), [BRO1506](rules/BRO1506.md),

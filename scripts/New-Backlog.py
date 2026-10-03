@@ -8,8 +8,6 @@ rows = re.findall(r'^\| \[(BRO\d{4})\]\(docs/rules/BRO\d{4}\.md\) \| (.*?) \| (.
 unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
 
 PLANNED = [
-    ('BRO1406', 'Arithmetic expressions should declare precedence', 'SA1407', 'IDE0048'),
-    ('BRO1407', 'Conditional expressions should declare precedence', 'SA1408', 'IDE0048'),
     ('BRO1517', 'Code should not contain multiple blank lines in a row', 'SA1507', 'IDE2000'),
     ('BRO1518', 'Closing braces should not be preceded by a blank line', 'SA1508', 'IDE2002'),
     ('BRO1519', 'Closing brace should be followed by a blank line', 'SA1513', 'IDE2003'),

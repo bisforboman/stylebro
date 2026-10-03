@@ -97,7 +97,7 @@ steps:
   different, StyleBro gives all of them the first copy's fixed text, and a second run picks up what only another
   copy's `#if` code needed (Newtonsoft.Json, 8 target frameworks: clean after two runs). Several of the SDK's fixes
   aren't safe there: on Serilog and Newtonsoft.Json, IDE0011 (braces; replaced by StyleBro's BRO1514-BRO1516) and IDE0055 (formatting, at warning) crashed
-  `dotnet format` (nothing written), and IDE0040 (access modifiers; replaced by BRO1404/BRO1007), IDE0047/IDE0048 (parentheses; IDE0047 replaced by BRO1405) and the blank-line
+  `dotnet format` (nothing written), and IDE0040 (access modifiers; replaced by BRO1404/BRO1007), IDE0047/IDE0048 (parentheses; replaced by BRO1405-BRO1407) and the blank-line
   rules IDE2000/IDE2002/IDE2003 wrote merge conflict markers. In a repository with multi-targeted projects,
   `stylebro-migrate init` writes the remaining ones as suggestions (shown in the IDE, not fixed by `dotnet format --severity warn`;
   whitespace is still formatted). Turn them back to `warning` only after checking that `dotnet format` handles your

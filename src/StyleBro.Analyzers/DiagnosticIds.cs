@@ -69,6 +69,8 @@ public static class DiagnosticIds
     public const string EmptyDelegateParentheses = "BRO1403";
     public const string AccessModifier = "BRO1404";
     public const string UnnecessaryParentheses = "BRO1405";
+    public const string ArithmeticPrecedence = "BRO1406";
+    public const string ConditionalPrecedence = "BRO1407";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

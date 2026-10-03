@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 50 SDK, 98 StyleBro (98 done), 44 drop, 1 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 48 SDK, 100 StyleBro (100 done), 44 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -134,8 +134,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1404 | Code analysis suppression should have justification | on | yes | on / on / on | 0 / 0 / 0 |  | Drop: The justification of a SuppressMessage has to be written by a person. ([details](skipped-rules.md#sa1404)) |
 | SA1405 | Debug.Assert should provide message text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix; the message for Debug.Assert has to be written by a person. ([details](skipped-rules.md#sa1405)) |
 | SA1406 | Debug.Fail should provide message text | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix; the message for Debug.Fail has to be written by a person. ([details](skipped-rules.md#sa1406)) |
-| SA1407 | Arithmetic expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 5 | not fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass ([details](skipped-rules.md#sa1407)) |
-| SA1408 | Conditional expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 14 | fixed | SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass ([details](skipped-rules.md#sa1408)) |
+| SA1407 | Arithmetic expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 5 | not fixed | StyleBro **BRO1406** (done; replaces IDE0048, whose fix breaks multi-targeted projects and needed two runs), same positions and output as StyleCop |
+| SA1408 | Conditional expressions should declare precedence | on | yes | on / on / off | 0 / 0 / 14 | fixed | StyleBro **BRO1407** (done; replaces IDE0048). Also checks `and`/`or` patterns, like StyleCop's current source (after 1.2.0-beta.556) |
 | SA1409 | Remove unnecessary code | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for an empty `try { } finally { }` (probed). ([details](skipped-rules.md#sa1409)) |
 | SA1410 | Remove delegate parenthesis when possible | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1403** (done), only where BRO1125 doesn't turn the method into a lambda |
 | SA1411 | Attribute constructor should not use unnecessary parenthesis | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1402** (done), same positions; the fix also removes the space in `( )` |

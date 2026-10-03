@@ -4,6 +4,19 @@
 @{
     Sets = @(
         @{
+            Name     = 'precedence'
+            Map      = @('SA1407=BRO1406', 'SA1408=BRO1407')
+            Expected = @(
+                # BRO1407 also checks 'and'/'or' patterns, like StyleCop's current source (added after 1.2.0-beta.556).
+                'only StyleBro: BRO1407 Precedence.cs(18,41)'
+                'only StyleBro: BRO1407 Precedence.cs(23,38)'
+                'StyleBro output only: Precedence.cs: [            var p = a || (b && c) || (v is (> 1 and < 5) or 10 && a);]'
+                'StyleBro output only: Precedence.cs: [        public bool P(int v) => v is (> 1 and < 5) or 10;]'
+                'StyleCop output only: Precedence.cs: [            var p = a || (b && c) || (v is > 1 and < 5 or 10 && a);]'
+                'StyleCop output only: Precedence.cs: [        public bool P(int v) => v is > 1 and < 5 or 10;]'
+            )
+        }
+        @{
             Name     = 'parentheses'
             Map      = @('SA1119=BRO1405')
             Expected = @(

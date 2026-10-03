@@ -18,11 +18,11 @@ internal static class InitCommand
     /// <summary>
     /// Built-in rules whose 'dotnet format' fixes break multi-targeted projects (measured 2026-10-03 on Serilog and
     /// Newtonsoft.Json, without StyleBro): IDE0011 (now off: BRO1514-BRO1516) and IDE0055 (at warning, its fix runs in the style pass) crashed
-    /// 'dotnet format' in Roslyn's linked-file merge (nothing written); IDE0040 (now off: BRO1404/BRO1007), IDE0047 (now off: BRO1405), IDE0048 and, together with
+    /// 'dotnet format' in Roslyn's linked-file merge (nothing written); IDE0040 (now off: BRO1404/BRO1007), IDE0047 (now off: BRO1405), IDE0048 (now off: BRO1406/BRO1407) and, together with
     /// StyleBro's fixes, the blank-line rules IDE2000/IDE2002/IDE2003 wrote conflict markers. Their fixes edit each target framework's copy of a file separately, and 'dotnet format' can't merge
     /// copies that came out different. StyleBro's own fixes give every copy the same text.
     /// </summary>
-    public static readonly string[] UnsafeWhenMultiTargeted = { "IDE0048", "IDE0055", "IDE2000", "IDE2002", "IDE2003" };
+    public static readonly string[] UnsafeWhenMultiTargeted = { "IDE0055", "IDE2000", "IDE2002", "IDE2003" };
 
     public static int Run(string[] args)
     {

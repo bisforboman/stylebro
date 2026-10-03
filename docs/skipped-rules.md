@@ -585,26 +585,6 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 
 **To revisit:** Only if a team reports reorders StyleCop accepted (`async override` vs `override async`); then a BRO rule that only moves access modifiers and `static`.
 
-<a id="sa1407"></a>
-
-### SA1407: Arithmetic expressions should declare precedence
-
-**Covered by:** SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
-
-**Difference:** Covered by IDE0048, but one `dotnet format` pass fixes only some cases (the SDK check fixes SA1407 or SA1408, varying between runs).
-
-**To revisit:** Report to dotnet/format, or document "run twice" for the first run.
-
-<a id="sa1408"></a>
-
-### SA1408: Conditional expressions should declare precedence
-
-**Covered by:** SDK: IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`); fixed only in a separate `dotnet format` pass
-
-**Difference:** Same as SA1407 (IDE0048).
-
-**To revisit:** With SA1407.
-
 <a id="sa1507"></a>
 
 ### SA1507: Code should not contain multiple blank lines in a row

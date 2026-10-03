@@ -130,10 +130,6 @@
     }
 
     Partial = @{
-        SA1407 = @{ Why = 'Covered by IDE0048, but one `dotnet format` pass fixes only some cases (the SDK check fixes SA1407 or SA1408, varying between runs).'
-            Revisit = 'Report to dotnet/format, or document "run twice" for the first run.' }
-        SA1408 = @{ Why = 'Same as SA1407 (IDE0048).'
-            Revisit = 'With SA1407.' }
         SA1206 = @{ Why = 'IDE0036 (`csharp_preferred_modifier_order`) enforces the whole modifier order, while StyleCop only wants the access modifier first and `static` next. Measured on six repos (2026-10-02): IDE0036 reordered nothing that StyleCop accepts (Polly, OpenTelemetry, the private app, FFMpegCore, Serilog 0; Newtonsoft.Json 27 lines, all SA1206 violations such as `public new static`).'
             Revisit = 'Only if a team reports reorders StyleCop accepted (`async override` vs `override async`); then a BRO rule that only moves access modifiers and `static`.' }
         SA1507 = @{ Why = 'Covered by the SDK''s IDE2000, which also counts blank lines at the start of a file and right before `}`; StyleCop leaves those to SA1517/SA1508 (9 files in the private app, which has those off).'

@@ -14,6 +14,8 @@ BRO1130 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1131 | Readability | Warning  | BaseCallsAnalyzer
 BRO1404 | Maintainability | Warning  | AccessModifiersAnalyzer
 BRO1405 | Maintainability | Warning  | ParenthesesAnalyzer
+BRO1406 | Maintainability | Warning  | PrecedenceAnalyzer
+BRO1407 | Maintainability | Warning  | PrecedenceAnalyzer
 BRO1514 | Layout | Warning  | BracesAnalyzer
 BRO1515 | Layout | Warning  | BracesAnalyzer
 BRO1516 | Layout | Warning  | BracesAnalyzer

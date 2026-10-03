@@ -163,6 +163,10 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   `IsEquivalentTo` the tree with them replaced by their content (StyleCop's fix turned `F(a < b, (c > (d + 1)))` into a
   generic call: CS0307 in the parity set); the fix checks the pairs of one container together, adding them one by one.
   Parity `parentheses`: 14/13, 8 documented. The pattern variant (SA1119_p) isn't covered (backlog gap).
+- **BRO1406/BRO1407** (SA1407/SA1408, 2026-10-03, `Maintainability/Precedence.cs`, replace IDE0048): StyleCop's
+  families (`+ -`, `* /`, `<< >>`, `%` alone; `&&`/`and` vs `||`/`or`); the fix inserts `(`/`)` per operand, combined per
+  position (`((`/`))`) so nested operands are fixed in one pass. Also `and`/`or` patterns, like StyleCop's current
+  source; 1.2.0-beta.556 doesn't (parity `precedence`: 8/10, documented).
 - **BRO1514-BRO1516** (SA1503/SA1519/SA1520, 2026-10-03, `Layout/Braces.cs`, replace IDE0011 per docs/decisions.md):
   which statements and which id like StyleCop (multi-line -> BRO1515, inconsistent if/else chain -> BRO1516, else
   BRO1514; a rule that is off leaves its statements to the next, via `Severities.IsOn`; `using (a) using (b)` allowed).

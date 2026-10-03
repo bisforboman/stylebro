@@ -495,7 +495,8 @@ internal static class Migration
         lines.Add($"dotnet_style_predefined_type_for_member_access = {Bool(setup.IsOn("SA1121") && !aliases)}");
         // StyleBro's BRO1405 replaces IDE0047 (which breaks multi-targeted projects and also removes 'a ?? (b ?? c)').
         Rule("IDE0047");
-        Rule("IDE0048", "SA1407", "SA1408");
+        // StyleBro's BRO1406/BRO1407 replace IDE0048, whose fix breaks multi-targeted projects.
+        Rule("IDE0048");
         var clarity = setup.IsOn("SA1407") || setup.IsOn("SA1408") ? "always_for_clarity" : "never_if_unnecessary";
         lines.Add($"dotnet_style_parentheses_in_arithmetic_binary_operators = {clarity}");
         lines.Add($"dotnet_style_parentheses_in_other_binary_operators = {clarity}");

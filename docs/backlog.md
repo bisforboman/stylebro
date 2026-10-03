@@ -14,11 +14,11 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 12 |
-| Planned | 5 |
+| Done, not released yet | 14 |
+| Planned | 3 |
 | Maybe | 3 new rules + 6 gaps in existing ones |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 98 by StyleBro, 50 by the .NET SDK, 44 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 100 by StyleBro, 48 by the .NET SDK, 44 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -30,8 +30,6 @@ multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)). 
 
 | ID | Rule | StyleCop | Replaces SDK |
 |----|------|----------|--------------|
-| BRO1406 | Arithmetic expressions should declare precedence | SA1407 | IDE0048 |
-| BRO1407 | Conditional expressions should declare precedence | SA1408 | IDE0048 |
 | BRO1517 | Code should not contain multiple blank lines in a row | SA1507 | IDE2000 |
 | BRO1518 | Closing braces should not be preceded by a blank line | SA1508 | IDE2002 |
 | BRO1519 | Closing brace should be followed by a blank line | SA1513 | IDE2003 |
@@ -135,8 +133,8 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1403](rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Released |
 | [BRO1404](rules/BRO1404.md) | Access modifier should be declared | SA1400 | Done |
 | [BRO1405](rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Done |
-| BRO1406 | Arithmetic expressions should declare precedence | SA1407 | Planned |
-| BRO1407 | Conditional expressions should declare precedence | SA1408 | Planned |
+| [BRO1406](rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Done |
+| [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Done |
 
 ### BRO15xx: Layout
 

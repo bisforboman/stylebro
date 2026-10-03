@@ -707,6 +707,26 @@ internal static class Descriptors
         description: "Parentheses around a value, or around a whole expression in a statement, argument or initializer, add nothing. Replaces StyleCop SA1119.",
         helpLinkUri: HelpBase + DiagnosticIds.UnnecessaryParentheses + ".md");
 
+    public static readonly DiagnosticDescriptor ArithmeticPrecedence = new(
+        id: DiagnosticIds.ArithmeticPrecedence,
+        title: "Arithmetic expressions should declare precedence",
+        messageFormat: "Add parentheses to show the precedence",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An operation inside an arithmetic operation of another kind ('a + b * c', 'a * b % c', 'a << b + c') is in parentheses. Replaces StyleCop SA1407.",
+        helpLinkUri: HelpBase + DiagnosticIds.ArithmeticPrecedence + ".md");
+
+    public static readonly DiagnosticDescriptor ConditionalPrecedence = new(
+        id: DiagnosticIds.ConditionalPrecedence,
+        title: "Conditional expressions should declare precedence",
+        messageFormat: "Add parentheses to show the precedence",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'&&' and '||' (and the 'and'/'or' patterns) aren't mixed without parentheses. Replaces StyleCop SA1408.",
+        helpLinkUri: HelpBase + DiagnosticIds.ConditionalPrecedence + ".md");
+
     public static readonly DiagnosticDescriptor BaseCall = new(
         id: DiagnosticIds.BaseCall,
         title: "Do not prefix calls with base unless local implementation exists",
