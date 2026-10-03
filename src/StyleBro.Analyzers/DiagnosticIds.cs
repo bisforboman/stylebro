@@ -8,6 +8,7 @@ public static class DiagnosticIds
     public const string EventAccessorOrder = "BRO1004";
     public const string DocumentationLineSpace = "BRO1005";
     public const string DirectiveSpacing = "BRO1006";
+    public const string PartialAccessModifier = "BRO1007";
     public const string EmptyStatement = "BRO1101";
     public const string CombinedAttributes = "BRO1102";
     public const string ConstantOnLeft = "BRO1103";
@@ -66,6 +67,7 @@ public static class DiagnosticIds
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";
+    public const string AccessModifier = "BRO1404";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

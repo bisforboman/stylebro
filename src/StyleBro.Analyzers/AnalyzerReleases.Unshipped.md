@@ -6,11 +6,13 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 BRO1006 | Spacing | Warning  | DirectiveSpacingAnalyzer
+BRO1007 | Ordering | Warning  | AccessModifiersAnalyzer
 BRO1127 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1128 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1129 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1130 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1131 | Readability | Warning  | BaseCallsAnalyzer
+BRO1404 | Maintainability | Warning  | AccessModifiersAnalyzer
 BRO1514 | Layout | Warning  | BracesAnalyzer
 BRO1515 | Layout | Warning  | BracesAnalyzer
 BRO1516 | Layout | Warning  | BracesAnalyzer

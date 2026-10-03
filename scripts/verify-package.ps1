@@ -71,7 +71,7 @@ try {
     Migrate @('init', $repo, '--write')
     dotnet format $project --severity warn | Out-Host
     $style = Get-Content (Join-Path $app 'Style.cs') -Raw
-    Check ($style -match 'internal class Style') 'IDE0040 (from init) added the access modifier'
+    Check ($style -match 'internal class Style') 'BRO1404 (preset) added the access modifier'
     Check ($style -match 'public static int Count') 'IDE0036 (from init) fixed the modifier order'
     Check ($style -match 'Name = string\.Empty') 'BRO1106 was fixed'
     Check ($style -match 'int a = 1;\r?\n\s+int b = 2;') "the preset's csharp_preserve_single_line_statements = false applied"

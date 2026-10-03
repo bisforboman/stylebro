@@ -1,62 +1,181 @@
 # Backlog
 
-Style rules StyleBro aims to add, and what's left open in rules that exist. Update the status when work starts or
-lands; when a rule is done, it also moves from `skipped.psd1` to `decisions.psd1` (see `docs/stylecop-mapping.md`).
+Every style rule StyleBro has or aims to add, with its status, and what's left open in existing rules. Update it
+when work starts or lands; a finished rule also moves from `skipped.psd1` to `decisions.psd1` (see
+`docs/stylecop-mapping.md`).
 
-Status: **Planned** (decided, not started), **In progress**, **Done** (date), **Maybe** (worth doing if someone asks;
-the reason it isn't planned is in [skipped-rules.md](skipped-rules.md)).
+Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), **Planned** (decided, not started),
+**Maybe** (worth doing if someone asks; why it isn't planned is in [skipped-rules.md](skipped-rules.md)).
 
-Coverage today: 95 StyleCop rules by StyleBro, 53 by the SDK, 44 dropped by design (StyleCop 1.2, 197 diagnostics).
+## Summary
 
-## 1. Fix-safe replacements for SDK rules (multi-targeted projects)
+| | Rules |
+|---|---|
+| Released | 71 |
+| Done, not released yet | 11 |
+| Planned | 6 |
+| Maybe | 3 new rules + 5 gaps in existing ones |
 
-Decided 2026-10-03 ([decisions.md](decisions.md)): the SDK's fixers for these crash or write conflict markers in
-multi-targeted projects, so StyleBro ships its own. Once a rule is done, `init` and `stylebro-migrate` turn it on and
-the SDK rule off. IDs are reserved, not final until the rule ships.
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 97 by StyleBro, 51 by the .NET SDK, 44 dropped by design (they
+can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
+[stylecop-mapping.md](stylecop-mapping.md).
 
-| Planned ID | StyleCop | What | Replaces SDK | Status |
-|------------|----------|------|--------------|--------|
-| BRO1514 | SA1503 | Braces must not be omitted | IDE0011 | Done (2026-10-03) |
-| BRO1515 | SA1519 | Braces must not be omitted from a multi-line child statement | IDE0011 | Done (2026-10-03) |
-| BRO1516 | SA1520 | Use braces consistently in an if/else chain | IDE0011 | Done (2026-10-03) |
-| BRO1404 | SA1400 | Access modifier must be declared | IDE0040 | Planned |
-| BRO1007 | SA1205 | Partial elements must declare an access modifier | IDE0040 | Planned |
-| BRO1405 | SA1119 | Statement must not use unnecessary parentheses | IDE0047 | Planned |
-| BRO1406 | SA1407 | Arithmetic expressions must declare precedence | IDE0048 | Planned |
-| BRO1407 | SA1408 | Conditional expressions must declare precedence | IDE0048 | Planned |
-| BRO1517 | SA1507 | Code must not contain multiple blank lines in a row | IDE2000 | Planned |
-| BRO1518 | SA1508 | Closing braces must not be preceded by a blank line | IDE2002 | Planned |
-| BRO1519 | SA1513 | Closing brace must be followed by a blank line | IDE2003 | Planned |
+## Planned
 
-Not planned: IDE0055 (the SDK's whole formatter; `dotnet format`'s whitespace pass still does that job safely).
-Also to do: report the SDK fixer bugs upstream (dotnet/roslyn).
+Fix-safe replacements for SDK rules whose fixes crash `dotnet format` or write merge conflict markers in
+multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)). When one is done, `init` and
+`stylebro-migrate` turn it on and the SDK rule off. IDs are reserved, final when the rule ships.
 
-## 2. StyleCop rules not covered yet
+| ID | Rule | StyleCop | Replaces SDK |
+|----|------|----------|--------------|
+| BRO1405 | Statement should not use unnecessary parentheses | SA1119 | IDE0047 |
+| BRO1406 | Arithmetic expressions should declare precedence | SA1407 | IDE0048 |
+| BRO1407 | Conditional expressions should declare precedence | SA1408 | IDE0048 |
+| BRO1517 | Code should not contain multiple blank lines in a row | SA1507 | IDE2000 |
+| BRO1518 | Closing braces should not be preceded by a blank line | SA1508 | IDE2002 |
+| BRO1519 | Closing brace should be followed by a blank line | SA1513 | IDE2003 |
 
-| StyleCop | What | Status | Notes |
-|----------|------|--------|-------|
-| SA1316 | Tuple element names use the configured casing | Maybe | StyleCop's fix renames only the declaration and breaks every use; a safe rename must change deconstructions, `t.name` and inferred names together. 0 findings in the surveyed repos. |
-| SA1305 | No Hungarian notation in field names | Maybe | Possible with the BRO13xx renamer and an explicit prefix list (`stylebro_hungarian_prefixes`). StyleCop has no fix. |
-| SA1108 | No comment between a statement and its block | Maybe | A fix could move the comment above the statement; probe what teams expect first. StyleCop has no fix. |
+Not planned: IDE0055 (the SDK's whole formatter; `dotnet format`'s whitespace pass still does that job safely). Also
+to do: report the SDK fixer bugs upstream (dotnet/roslyn).
 
-The other dropped rules (missing documentation, one type per file, ...) can't be fixed by `dotnet format` without
-inventing text or moving code between files; reasons in [skipped-rules.md](skipped-rules.md).
+## Maybe
 
-## 3. Gaps in existing rules
+New rules:
 
-| Rule | Gap | Status |
-|------|-----|--------|
-| BRO1303/BRO1306 (SA1306, SA1309) | Protected fields aren't renamed (`_x`, casing) | Maybe |
-| BRO1309 (SA1300) | Namespace names aren't checked | Maybe |
-| BRO1001 (SA1201) | Types aren't ordered within a namespace | Maybe |
-| BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) | Maybe |
-| BRO1514-BRO1516 | stylecop.json `allowConsecutiveUsings: false` isn't configurable (StyleBro always allows `using (a) using (b) { }`) | Maybe |
+| StyleCop | Rule | Notes |
+|----------|------|-------|
+| SA1316 | Tuple element names should use correct casing | StyleCop's fix renames only the declaration and breaks every use; a safe rename must change deconstructions, `t.name` and inferred names together. 0 findings in the surveyed repos. |
+| SA1305 | Field names should not use Hungarian notation | Possible with the BRO13xx renamer and an explicit prefix list (`stylebro_hungarian_prefixes`). StyleCop has no fix. |
+| SA1108 | Block statements should not contain embedded comments | A fix could move the comment above the statement; probe what teams expect first. StyleCop has no fix. |
 
-## Done recently
+Gaps in existing rules:
 
-| ID | StyleCop | Done |
-|----|----------|------|
-| BRO1514-BRO1516 | SA1503, SA1519, SA1520 | 2026-10-03 |
-| BRO1006 | SA1006 | 2026-10-03 |
-| BRO1131 | SA1100 | 2026-10-03 |
-| BRO1127-BRO1130 | SA1102-SA1105 | 2026-10-03 |
+| Rule | Gap |
+|------|-----|
+| BRO1303/BRO1306 (SA1306, SA1309) | Protected fields aren't renamed (`_x`, casing) |
+| BRO1309 (SA1300) | Namespace names aren't checked |
+| BRO1001 (SA1201) | Types aren't ordered within a namespace |
+| BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) |
+| BRO1514-BRO1516 | stylecop.json `allowConsecutiveUsings: false` isn't configurable (StyleBro always allows `using (a) using (b) { }`) |
+
+The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
+
+## All rules
+
+### BRO10xx: Ordering, spacing and comments
+
+| ID | Rule | StyleCop | Status |
+|----|------|----------|--------|
+| [BRO1001](rules/BRO1001.md) | Members should be ordered | SA1201-SA1204, SA1214 | Released |
+| [BRO1002](rules/BRO1002.md) | Single-line comments should begin with a space | SA1005 | Released |
+| [BRO1003](rules/BRO1003.md) | Property accessors should follow order | SA1212 | Released |
+| [BRO1004](rules/BRO1004.md) | Event accessors should follow order | SA1213 | Released |
+| [BRO1005](rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Released |
+| [BRO1006](rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Done |
+| [BRO1007](rules/BRO1007.md) | Partial elements should declare an access modifier | SA1205 | Done |
+
+### BRO11xx: Readability
+
+| ID | Rule | StyleCop | Status |
+|----|------|----------|--------|
+| [BRO1101](rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Released |
+| [BRO1102](rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Released |
+| [BRO1103](rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Released |
+| [BRO1104](rules/BRO1104.md) | Use default instead of a value type's default constructor | SA1129 | Released |
+| [BRO1105](rules/BRO1105.md) | Constructor initializers should be on their own line | SA1128 | Released |
+| [BRO1106](rules/BRO1106.md) | Use string.Empty for empty strings | SA1122 | Released |
+| [BRO1107](rules/BRO1107.md) | Split parameters should start on the line after the declaration | SA1116 | Released |
+| [BRO1108](rules/BRO1108.md) | Parameters should be on the same line or on separate lines | SA1117 | Released |
+| [BRO1109](rules/BRO1109.md) | Opening parenthesis or bracket should be on the declaration line | SA1110 | Released |
+| [BRO1110](rules/BRO1110.md) | Closing parenthesis or bracket should be on the line of the last item | SA1111 | Released |
+| [BRO1111](rules/BRO1111.md) | Generic type constraints should be on their own line | SA1127 | Released |
+| [BRO1112](rules/BRO1112.md) | Do not use regions (off in the preset) | SA1124 | Released |
+| [BRO1113](rules/BRO1113.md) | Regions should not be placed inside code elements | SA1123 | Released |
+| [BRO1114](rules/BRO1114.md) | Do not combine fields | SA1132 | Released |
+| [BRO1115](rules/BRO1115.md) | Use shorthand for nullable types | SA1125 | Released |
+| [BRO1116](rules/BRO1116.md) | Closing parenthesis should be on line of opening parenthesis | SA1112 | Released |
+| [BRO1117](rules/BRO1117.md) | Comma should be on the same line as previous parameter | SA1113 | Released |
+| [BRO1118](rules/BRO1118.md) | Parameter list should follow declaration | SA1114 | Released |
+| [BRO1119](rules/BRO1119.md) | Parameter should follow comma | SA1115 | Released |
+| [BRO1120](rules/BRO1120.md) | Comments should contain text | SA1120 | Released |
+| [BRO1121](rules/BRO1121.md) | Enum values should be on separate lines | SA1136 | Released |
+| [BRO1122](rules/BRO1122.md) | Use literal suffix notation instead of casting | SA1139 | Released |
+| [BRO1123](rules/BRO1123.md) | Use tuple syntax | SA1141 | Released |
+| [BRO1124](rules/BRO1124.md) | Refer to tuple elements by name | SA1142 | Released |
+| [BRO1125](rules/BRO1125.md) | Use lambda syntax | SA1130 | Released |
+| [BRO1126](rules/BRO1126.md) | Using directives should be qualified | SA1135 | Released |
+| [BRO1127](rules/BRO1127.md) | Query clause should follow previous clause | SA1102 | Done |
+| [BRO1128](rules/BRO1128.md) | Query clauses should be on separate lines or all on one line | SA1103 | Done |
+| [BRO1129](rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Done |
+| [BRO1130](rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Done |
+| [BRO1131](rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Done |
+
+### BRO13xx: Naming
+
+| ID | Rule | StyleCop | Status |
+|----|------|----------|--------|
+| [BRO1301](rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Released |
+| [BRO1302](rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Released |
+| [BRO1303](rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Released |
+| [BRO1304](rules/BRO1304.md) | Interface names should begin with I | SA1302 | Released |
+| [BRO1305](rules/BRO1305.md) | Type parameter names should begin with T | SA1314 | Released |
+| [BRO1306](rules/BRO1306.md) | Constant, static readonly and non-private field names should be PascalCase | SA1303, SA1304, SA1307, SA1311 | Released |
+| [BRO1307](rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Released |
+| [BRO1308](rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Released |
+| [BRO1309](rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Released |
+
+### BRO14xx: Maintainability
+
+| ID | Rule | StyleCop | Status |
+|----|------|----------|--------|
+| [BRO1401](rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Released |
+| [BRO1402](rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Released |
+| [BRO1403](rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Released |
+| [BRO1404](rules/BRO1404.md) | Access modifier should be declared | SA1400 | Done |
+| BRO1405 | Statement should not use unnecessary parentheses | SA1119 | Planned |
+| BRO1406 | Arithmetic expressions should declare precedence | SA1407 | Planned |
+| BRO1407 | Conditional expressions should declare precedence | SA1408 | Planned |
+
+### BRO15xx: Layout
+
+| ID | Rule | StyleCop | Status |
+|----|------|----------|--------|
+| [BRO1501](rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Released |
+| [BRO1502](rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Released |
+| [BRO1503](rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Released |
+| [BRO1504](rules/BRO1504.md) | Single-line comments should be preceded by a blank line | SA1515 | Released |
+| [BRO1505](rules/BRO1505.md) | Elements should be separated by a blank line | SA1516 | Released |
+| [BRO1506](rules/BRO1506.md) | Single-line comments should not be followed by a blank line | SA1512 | Released |
+| [BRO1507](rules/BRO1507.md) | Files should not end with blank lines | SA1518 | Released |
+| [BRO1508](rules/BRO1508.md) | A block should not be on a single line | SA1501 | Released |
+| [BRO1509](rules/BRO1509.md) | An element should not be on a single line | SA1502 | Released |
+| [BRO1510](rules/BRO1510.md) | Accessors should all be single-line or all multi-line | SA1504 | Released |
+| [BRO1511](rules/BRO1511.md) | Element documentation headers should not be followed by blank line | SA1506 | Released |
+| [BRO1512](rules/BRO1512.md) | While-do footer should not be preceded by blank line | SA1511 | Released |
+| [BRO1513](rules/BRO1513.md) | Element documentation header should be preceded by blank line | SA1514 | Released |
+| [BRO1514](rules/BRO1514.md) | Braces should not be omitted | SA1503 | Done |
+| [BRO1515](rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Done |
+| [BRO1516](rules/BRO1516.md) | Use braces consistently | SA1520 | Done |
+| BRO1517 | Code should not contain multiple blank lines in a row | SA1507 | Planned |
+| BRO1518 | Closing braces should not be preceded by a blank line | SA1508 | Planned |
+| BRO1519 | Closing brace should be followed by a blank line | SA1513 | Planned |
+
+### BRO16xx: Documentation
+
+| ID | Rule | StyleCop | Status |
+|----|------|----------|--------|
+| [BRO1601](rules/BRO1601.md) | Overrides and implementations should inherit their documentation | SA1600 (these members) | Released |
+| [BRO1602](rules/BRO1602.md) | Single-line comments should not use documentation style slashes | SA1626 | Released |
+| [BRO1603](rules/BRO1603.md) | Documentation text should end with a period | SA1629 | Released |
+| [BRO1604](rules/BRO1604.md) | Property summary documentation should match accessors | SA1623 | Released |
+| [BRO1605](rules/BRO1605.md) | Property summary documentation should omit accessor with restricted access | SA1624 | Released |
+| [BRO1606](rules/BRO1606.md) | Constructor summary documentation should begin with standard text | SA1642 | Released |
+| [BRO1607](rules/BRO1607.md) | Destructor summary documentation should begin with standard text | SA1643 | Released |
+| [BRO1608](rules/BRO1608.md) | Void return value should not be documented | SA1617 | Released |
+| [BRO1609](rules/BRO1609.md) | Do not use placeholder elements | SA1651 | Released |
+| [BRO1610](rules/BRO1610.md) | Documentation text should not be empty | SA1627 | Released |
+| [BRO1611](rules/BRO1611.md) | Element parameter documentation should match element parameters | SA1612 | Released |
+| [BRO1612](rules/BRO1612.md) | Element parameter documentation should declare parameter name | SA1613 | Released |
+| [BRO1613](rules/BRO1613.md) | Generic type parameter documentation should match type parameters | SA1620 | Released |
+| [BRO1614](rules/BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | Released |
+| [BRO1615](rules/BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | Released |

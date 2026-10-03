@@ -152,6 +152,11 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Exempt like StyleCop 1.2: already spaced (incl. `//  two`), empty, `///`/`////`, `//--`. StyleCop 1.1.118 also
   reported `//  two spaces` (the only difference in the private app: 77 vs 78). Whitespace-only -> `//`.
 - Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
+- **BRO1404** (SA1400) and **BRO1007** (SA1205), 2026-10-03, `Maintainability/AccessModifiers.cs`, replace IDE0040:
+  StyleCop's declaration kinds and skips (interface members, explicit implementations, static ctors, partial members;
+  operators/finalizers aren't checked); partial types are BRO1007's. The fix inserts the symbol's DeclaredAccessibility
+  (the default, or another part's) before the first modifier, after attributes. Parity `access-modifiers`: 15/15,
+  identical. `init`/migrate write IDE0040 = none, which also fixes SA1205-without-SA1400 (only partial types now).
 - **BRO1514-BRO1516** (SA1503/SA1519/SA1520, 2026-10-03, `Layout/Braces.cs`, replace IDE0011 per docs/decisions.md):
   which statements and which id like StyleCop (multi-line -> BRO1515, inconsistent if/else chain -> BRO1516, else
   BRO1514; a rule that is off leaves its statements to the next, via `Severities.IsOn`; `using (a) using (b)` allowed).

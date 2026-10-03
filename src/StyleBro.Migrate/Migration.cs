@@ -479,9 +479,9 @@ internal static class Migration
         lines.Add($"csharp_prefer_braces = {(setup.IsOn("SA1503") ? "true" : setup.IsOn("SA1519") || setup.IsOn("SA1520") ? "when_multiline" : "false")}");
 
         // Access modifiers, type aliases, parentheses.
-        // IDE0040 asks for every missing modifier, so SA1205 (partial types) alone doesn't turn it on: with SA1400 off
-        // that changed every member without one (measured on a private app).
-        Rule("IDE0040", setup.IsOn("SA1400") ? ["SA1400", "SA1205"] : []);
+        // StyleBro's BRO1404/BRO1007 replace IDE0040, whose fix breaks multi-targeted projects (and which can't check
+        // SA1205's partial types without SA1400's every member).
+        Rule("IDE0040");
 
         // SA1400 doesn't ask for modifiers on interface members.
         lines.Add("dotnet_style_require_accessibility_modifiers = for_non_interface_members");

@@ -677,6 +677,26 @@ internal static class Descriptors
         description: "A clause that spans several lines starts on its own line. Replaces StyleCop SA1105.",
         helpLinkUri: HelpBase + DiagnosticIds.MultiLineQueryClause + ".md");
 
+    public static readonly DiagnosticDescriptor AccessModifier = new(
+        id: DiagnosticIds.AccessModifier,
+        title: "Access modifier should be declared",
+        messageFormat: "Declare the access modifier of '{0}' ({1})",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Types and members say who can use them instead of relying on the default. Replaces StyleCop SA1400.",
+        helpLinkUri: HelpBase + DiagnosticIds.AccessModifier + ".md");
+
+    public static readonly DiagnosticDescriptor PartialAccessModifier = new(
+        id: DiagnosticIds.PartialAccessModifier,
+        title: "Partial elements should declare an access modifier",
+        messageFormat: "Declare the access modifier of '{0}' ({1}) on this part too",
+        category: "Ordering",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Every part of a partial type says its accessibility, so no part has to be found to know it. Replaces StyleCop SA1205.",
+        helpLinkUri: HelpBase + DiagnosticIds.PartialAccessModifier + ".md");
+
     public static readonly DiagnosticDescriptor BaseCall = new(
         id: DiagnosticIds.BaseCall,
         title: "Do not prefix calls with base unless local implementation exists",

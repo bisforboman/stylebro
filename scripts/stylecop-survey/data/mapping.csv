@@ -77,7 +77,7 @@ SA1201,StyleBro **BRO1001** (done)
 SA1202,StyleBro **BRO1001** (done)
 SA1203,StyleBro **BRO1001** (done)
 SA1204,StyleBro **BRO1001** (done)
-SA1205,SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; adds the other part's modifier or the default; measured separately 2026-10-02: 9/9 fixed)
+SA1205,"StyleBro **BRO1007** (done; replaces IDE0040, whose fix breaks multi-targeted projects), same positions and output as StyleCop"
 SA1206,"SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order)"
 SA1207,SDK: IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`)
 SA1208,SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`)
@@ -105,7 +105,7 @@ SA1312,"StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name`"
 SA1313,"StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name`"
 SA1314,"StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop"
 SA1316,Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).
-SA1400,"SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn't ask for)"
+SA1400,"StyleBro **BRO1404** (done; replaces IDE0040), same positions and output as StyleCop"
 SA1401,Drop: Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on.
 SA1402,Drop: Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it).
 SA1403,Drop: StyleCop has no fix; splitting namespaces into files has the same problem as SA1402.

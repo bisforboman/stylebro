@@ -26,19 +26,19 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", on.Lines);
         Assert.Contains(on.Lines, l => l.StartsWith("csharp_preferred_modifier_order = public,private,protected,internal,", StringComparison.Ordinal));
         Assert.Contains("SA1207", on.Covered);
-        Assert.Contains("SA1205", on.Covered);  // IDE0040 also adds the modifier to every part of a partial type
 
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1206.severity = none\ndotnet_diagnostic.SA1207.severity = none\n");
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = none", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
     }
 
     [Fact]
-    public void AccessModifiers_IsIde0040_OnlyWhenSA1400IsOn()
+    public void AccessModifiers_AreBro1404AndBro1007_EachWithItsStyleCopRule()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1400.severity = none\n");
         var result = Migration.Generate(StyleCopSetup.Read(root), root);
         Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", result.Lines);
-        Assert.DoesNotContain("SA1205", result.Covered);
+        Assert.Contains("dotnet_diagnostic.BRO1404.severity = none", result.Lines);
+        Assert.Contains("dotnet_diagnostic.BRO1007.severity = warning", result.Lines);
     }
 
     [Fact]
@@ -492,9 +492,10 @@ public sealed class MigrationTests : IDisposable
 
         Assert.All(InitCommand.UnsafeWhenMultiTargeted, id => Assert.Contains($"dotnet_diagnostic.{id}.severity = suggestion", editorConfig));
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", editorConfig);
-        Assert.DoesNotContain("dotnet_diagnostic.IDE0040.severity = warning", InitCommand.Block(multiTargeted: true));
-        Assert.Contains("dotnet_diagnostic.IDE0040.severity = warning", InitCommand.Block());
+        Assert.DoesNotContain("dotnet_diagnostic.IDE0047.severity = warning", InitCommand.Block(multiTargeted: true));
+        Assert.Contains("dotnet_diagnostic.IDE0047.severity = warning", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0011.severity = none", InitCommand.Block());
+        Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", InitCommand.Block());
     }
 
     [Fact]
@@ -512,7 +513,7 @@ public sealed class MigrationTests : IDisposable
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         var first = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.StartsWith("root = true\n", first);
-        Assert.Contains("dotnet_diagnostic.IDE0040.severity = warning", first);
+        Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", first);
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
 

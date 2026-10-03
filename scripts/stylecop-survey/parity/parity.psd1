@@ -4,6 +4,11 @@
 @{
     Sets = @(
         @{
+            Name     = 'access-modifiers'
+            Map      = @('SA1400=BRO1404', 'SA1205=BRO1007')
+            Expected = @()
+        }
+        @{
             Name     = 'braces'
             Map      = @('SA1503=BRO1514', 'SA1519=BRO1515', 'SA1520=BRO1516')
             Expected = @(

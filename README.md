@@ -20,6 +20,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1004](docs/rules/BRO1004.md) | Event accessors should follow order | SA1213 | Yes |
 | [BRO1005](docs/rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Yes |
 | [BRO1006](docs/rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Yes |
+| [BRO1007](docs/rules/BRO1007.md) | Partial elements should declare an access modifier | SA1205 | Yes |
 | [BRO1101](docs/rules/BRO1101.md) | Code should not contain empty statements | SA1106 | Yes |
 | [BRO1102](docs/rules/BRO1102.md) | Each attribute should be in its own brackets | SA1133 | Yes |
 | [BRO1103](docs/rules/BRO1103.md) | Constants should be on the right-hand side of comparisons | SA1131 | Yes |
@@ -51,6 +52,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1129](docs/rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Yes |
 | [BRO1130](docs/rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Yes |
 | [BRO1131](docs/rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Yes |
+| [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
 | [BRO1514](docs/rules/BRO1514.md) | Braces should not be omitted | SA1503 | Yes |
 | [BRO1515](docs/rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Yes |
 | [BRO1516](docs/rules/BRO1516.md) | Use braces consistently | SA1520 | Yes |
@@ -106,8 +108,8 @@ Where the preset and the rules differ from StyleCop's defaults, and how to get S
 <PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" PrivateAssets="all" />
 ```
 
-Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0040 access modifiers, IDE0055
-formatting, ...). Their severities have to be in `.editorconfig`: `dotnet format` ignores severities
+Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036
+modifier order, ...). Their severities have to be in `.editorconfig`: `dotnet format` ignores severities
 from a package's preset.
 
 ```

@@ -124,6 +124,11 @@ dotnet_diagnostic.BRO1125.severity = warning
 # BRO1126: using directives inside a namespace are fully qualified (SA1135)
 dotnet_diagnostic.BRO1126.severity = warning
 
+# BRO1404, BRO1007: access modifiers declared, on every part of a partial type too (SA1400, SA1205). Safe in
+# multi-targeted projects, unlike IDE0040.
+dotnet_diagnostic.BRO1404.severity = warning
+dotnet_diagnostic.BRO1007.severity = warning
+
 # BRO1514-BRO1516: braces around child statements (SA1503, SA1519, SA1520). Safe in multi-targeted projects, unlike IDE0011.
 dotnet_diagnostic.BRO1514.severity = warning
 dotnet_diagnostic.BRO1515.severity = warning

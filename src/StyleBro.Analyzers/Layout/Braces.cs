@@ -285,6 +285,7 @@ internal static class Braces
             var lastLine = text.Lines.GetLineFromPosition(last.Span.End).LineNumber;
             TextSpan close;
             var following = SyntaxKind.None;
+
             // The statement's own 'else' follows the '}' as csharp_new_line_before_else says, wherever it was; a do
             // statement's 'while' keeps its line ('} while' only when it shared the statement's line).
             var nextOnLine = !next.IsKind(SyntaxKind.None) && text.Lines.GetLineFromPosition(next.SpanStart).LineNumber == lastLine;

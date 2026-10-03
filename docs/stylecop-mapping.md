@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 95 StyleBro (91 done), 44 drop, 1 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 51 SDK, 97 StyleBro (91 done), 44 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -127,7 +127,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 |---|---|---|---|---|---|---|---|
 | SA1119 | Statement should not use unnecessary parenthesis | on | yes | on / on / off | 0 / 0 / 1 | fixed | SDK: IDE0047 (`dotnet_style_parentheses_* = never_if_unnecessary`) ([details](skipped-rules.md#sa1119)) |
 | SA1119_p | Statement should not use unnecessary parenthesis | on | yes | on / off / on | 0 / 0 / 0 |  | Variant: SA1119 for parenthesized patterns (1.2 only), covered with SA1119 by IDE0047. ([details](skipped-rules.md#sa1119_p)) |
-| SA1400 | Access modifier should be declared | on | yes | on / on / off | 0 / 0 / 10 | fixed | SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn't ask for) |
+| SA1400 | Access modifier should be declared | on | yes | on / on / off | 0 / 0 / 10 | fixed | StyleBro **BRO1404** (done; replaces IDE0040), same positions and output as StyleCop |
 | SA1401 | Fields should be private | on | no | off / off / off | 141 / 48 / 39 |  | Drop: Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on. ([details](skipped-rules.md#sa1401)) |
 | SA1402 | File may only contain a single type | on | yes | on / off / off | 0 / 34 / 1 |  | Drop: Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it). ([details](skipped-rules.md#sa1402)) |
 | SA1403 | File may only contain a single namespace | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix; splitting namespaces into files has the same problem as SA1402. ([details](skipped-rules.md#sa1403)) |
@@ -174,7 +174,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1202 | Elements should be ordered by access | on | yes | on / off / off | 0 / 71 / 185 |  | StyleBro **BRO1001** (done) |
 | SA1203 | Constants should appear before fields | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1001** (done) |
 | SA1204 | Static elements should appear before instance elements | on | yes | on / on / off | 0 / 2 / 50 |  | StyleBro **BRO1001** (done) |
-| SA1205 | Partial elements should declare access | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; adds the other part's modifier or the default; measured separately 2026-10-02: 9/9 fixed) |
+| SA1205 | Partial elements should declare access | on | yes | on / on / on | 0 / 0 / 0 | fixed | StyleBro **BRO1007** (done; replaces IDE0040, whose fix breaks multi-targeted projects), same positions and output as StyleCop |
 | SA1206 | Declaration keywords should follow order | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0036 (`csharp_preferred_modifier_order`, the SDK default order) ([details](skipped-rules.md#sa1206)) |
 | SA1207 | Protected should come before internal | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0036 (`csharp_preferred_modifier_order`; `internal protected` -> `protected internal`) |
 | SA1208 | System using directives should be placed before other using directives | on | yes | on / on / off | 0 / 0 / 57 | fixed | SDK: using sorting in `dotnet format` (`dotnet_sort_system_directives_first = true`) |

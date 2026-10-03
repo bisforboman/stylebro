@@ -7,8 +7,8 @@
 dotnet_diagnostic.IDE0011.severity = none
 # Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
 dotnet_diagnostic.IDE0055.severity = warning
-# Explicit access modifiers, also on every part of a partial type (SA1400, SA1205)
-dotnet_diagnostic.IDE0040.severity = warning
+# Access modifiers (SA1400, SA1205) are StyleBro's BRO1404/BRO1007: IDE0040's fix breaks multi-targeted projects
+dotnet_diagnostic.IDE0040.severity = none
 # Modifier order: access modifier first, then static (SA1206, SA1207)
 dotnet_diagnostic.IDE0036.severity = warning
 # 'int' instead of 'Int32' (SA1121)
