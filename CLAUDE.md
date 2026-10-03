@@ -908,6 +908,11 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - Plain `dotnet format` with IDE0055 at warning crashes on multi-targeted repos (Roslyn's linked-file merge, no
   StyleBro needed; the style pass alone too). The whitespace pass formats only the first framework's code. With
   `TargetFramework=<tfm>` as an ENVIRONMENT variable MSBuild loads each project as an inner build: no linked copies.
+  The env var also reaches referenced projects that don't target that framework (Newtonsoft.Json's net46 tests -> the
+  library without net46: load failure, tests silently skipped, exit 0); a hook (`BeforeMicrosoftNETSdkTargets`, right
+  after the project file, before the SDK's multi-targeting decision) clears it for those. Setting the framework in that
+  hook instead does NOT work: the project file's own `'$(TargetFramework)' == 'net46'` conditions (DefineConstants)
+  were already evaluated without it.
   `FormatCommand`: `dotnet msbuild -getProperty:TargetFrameworks/-getProperty:TargetFramework` per project (`dotnet
   sln list`), restore once, then per framework `dotnet format <temp .slnf> --no-restore <options>` (the filter lists
   the projects that target it; works for .sln and .slnx). Measured: Serilog IDE0055 505 -> 0; with every StyleBro rule

@@ -12,12 +12,30 @@ namespace StyleBro.Migrate;
 /// safe in multi-targeted repositories. There 'dotnet format' loads one copy of every file per target framework, the
 /// SDK's IDE0055 fix edits each copy on its own (each sees other '#if' code), and Roslyn's linked-file merge crashes on
 /// the result: nothing is written. Its whitespace pass only formats the first framework's code. Loading the projects
-/// for one framework at a time (TargetFramework as an environment variable) leaves nothing to merge, so this runs
-/// 'dotnet format' once per target framework, each time on the projects that target it (a temporary solution filter).
-/// A repository without multi-targeted projects gets one plain run.
+/// for one framework at a time leaves nothing to merge, so this runs 'dotnet format' once per target framework, each
+/// time on the projects that target it (a temporary solution filter). A repository without multi-targeted projects
+/// gets one plain run.
 /// </summary>
+/// <remarks>
+/// The framework is chosen with TargetFramework as an environment variable: unlike a property set later, the project
+/// file's own conditions ('$(TargetFramework)' == 'net46' for DefineConstants, references) see it. It reaches every
+/// project, also referenced ones that don't target it (Newtonsoft.Json's net46 tests reference a library without net46,
+/// which then failed to load, and the tests were silently skipped), so <see cref="SelectFrameworkTargets"/> clears it
+/// again for those, right after their project file: they load as usual, and the per-framework global property Roslyn
+/// sets for each of their frameworks wins over the environment.
+/// </remarks>
 internal static class FormatCommand
 {
+    /// <summary>Imported right after each project file (BeforeMicrosoftNETSdkTargets), before the SDK decides whether it's multi-targeted.</summary>
+    public const string SelectFrameworkTargets = """
+        <Project>
+          <!-- stylebro-migrate format: TargetFramework comes from the environment; a project that doesn't target it loads as usual. -->
+          <PropertyGroup Condition="'$(StyleBroFormatFramework)' != '' and '$(TargetFrameworks)' != '' and !$([System.String]::Copy(';$(TargetFrameworks.Replace(' ', ''));').Contains(';$(TargetFramework);'))">
+            <TargetFramework></TargetFramework>
+          </PropertyGroup>
+        </Project>
+        """;
+
     public static int Run(string[] args)
     {
         // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
@@ -54,31 +72,40 @@ internal static class FormatCommand
         }
 
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+        var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
+        File.WriteAllText(select, SelectFrameworkTargets);
         var exit = 0;
-        foreach (var (framework, projects) in plan)
+        try
         {
-            Console.WriteLine($"== {framework} ({projects.Count} project(s))");
-            var filter = isSolution ? Path.Combine(Path.GetDirectoryName(workspacePath)!, $".stylebro-format-{framework}.slnf") : null;
-            try
+            foreach (var (framework, projects) in plan)
             {
-                if (filter is not null)
+                Console.WriteLine($"== {framework} ({projects.Count} project(s))");
+                var filter = isSolution ? Path.Combine(Path.GetDirectoryName(workspacePath)!, $".stylebro-format-{framework}.slnf") : null;
+                try
                 {
-                    File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), projects));
-                }
+                    if (filter is not null)
+                    {
+                        File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), projects));
+                    }
 
-                var code = Dotnet(root, framework, new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(passThrough));
-                if (exit == 0)
+                    var code = Dotnet(root, (framework, select), new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(passThrough));
+                    if (exit == 0)
+                    {
+                        exit = code;
+                    }
+                }
+                finally
                 {
-                    exit = code;
+                    if (filter is not null)
+                    {
+                        File.Delete(filter);
+                    }
                 }
             }
-            finally
-            {
-                if (filter is not null)
-                {
-                    File.Delete(filter);
-                }
-            }
+        }
+        finally
+        {
+            File.Delete(select);
         }
 
         return exit;
@@ -154,7 +181,7 @@ internal static class FormatCommand
         return output.Result;
     }
 
-    private static int Dotnet(string directory, string? targetFramework, IEnumerable<string> arguments)
+    private static int Dotnet(string directory, (string Name, string SelectTargets)? framework, IEnumerable<string> arguments)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory };
         foreach (var argument in arguments)
@@ -162,10 +189,12 @@ internal static class FormatCommand
             start.ArgumentList.Add(argument);
         }
 
-        // An environment variable, not '-p': MSBuild then loads each project as an inner build for this framework.
-        if (targetFramework is not null)
+        // See the remarks on the class: the environment, cleared again for projects without this framework.
+        if (framework is { } f)
         {
-            start.Environment["TargetFramework"] = targetFramework;
+            start.Environment["TargetFramework"] = f.Name;
+            start.Environment["StyleBroFormatFramework"] = f.Name;
+            start.Environment["BeforeMicrosoftNETSdkTargets"] = f.SelectTargets;
         }
 
         using var process = Process.Start(start)!;
