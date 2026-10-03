@@ -66,6 +66,7 @@ public static class DiagnosticIds
     public const string QueryClauseAfterMultiLineClause = "BRO1129";
     public const string MultiLineQueryClause = "BRO1130";
     public const string BaseCall = "BRO1131";
+    public const string EmbeddedComment = "BRO1132";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";

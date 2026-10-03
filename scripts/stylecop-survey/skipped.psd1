@@ -21,8 +21,6 @@
             Revisit = 'Nothing to port. stylebro-migrate parses stylecop.json leniently (comments, trailing commas).' }
 
         # ---- Readability -------------------------------------------------------------------------------------------
-        SA1108 = @{ Status = 'Drop'; Why = 'StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning).'
-            Revisit = 'Possible rule: move it to the line above the statement. Probe what teams expect first.' }
         SA1109 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic for a region between `if (b)` and its block (probed).'
             Revisit = 'Nothing to port. Regions are BRO1112/BRO1113.' }
         SA1118 = @{ Status = 'Drop'; Why = 'StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app.'

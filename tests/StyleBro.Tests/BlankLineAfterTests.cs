@@ -126,4 +126,47 @@ public class BlankLineAfterTests
             }
         }
         """);
+
+    [Fact]
+    public Task CommentBeforeOpenBrace_IsLeftToBro1132() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            void M(bool a)
+            {
+                if (a)
+                // moved into the block by BRO1132
+                {
+                }
+            }
+        }
+        """);
+
+    [Fact]
+    public Task CommentBeforeOpenBrace_WithBro1132Off_GetsTheBlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            void M(bool a)
+            {
+                if (a)
+                {|BRO1504:// stays here|}
+                {
+                }
+            }
+        }
+        """,
+        """
+        class C
+        {
+            void M(bool a)
+            {
+                if (a)
+
+                // stays here
+                {
+                }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1132.severity = none\n");
 }
