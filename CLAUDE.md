@@ -82,7 +82,7 @@ when we can do that"): don't suggest releases at all; the user says when.
 - **PR pipeline (2026-10-03, user's request: "verify new changes before merging to main")**: `main` is protected; changes
   land through pull requests whose checks pass. Work on a branch, push it, open a PR (`gh pr create`), let the checks
   run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: windows-latest, one
-  job per public repo in `scripts/realworld/repos.psd1`, `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
+  job per public repo in `scripts/realworld/repos.psd1`; 8 repos and 11 required checks since 2026-10-03, `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
   fails on analyzer crashes, new compile errors, conflict markers, no convergence within 3 runs, or tests that passed
   on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
   `scripts/mutation/Invoke-Mutations.ps1` breaks each guard in `scripts/mutation/mutations.psd1` and needs a test to
@@ -900,6 +900,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   attribute-less class by reflection (can't be recognized; `KnownFailures` in scripts/realworld/repos.psd1).
   Also found: `--verify-no-changes` fails on guard-kept renames (a fix that deliberately changes nothing still counts),
   so the real-world script tests convergence as "a run changes no file".
+
+- **Three more pipeline repos** (2026-10-03, hardening): Jellyfin (an application using StyleCop), FluentValidation
+  (net8/9/10), CsvHelper (seven frameworks, net462-net9.0; 3 tests fail on the untouched code). Found: (1) BRO1302
+  renamed CsvHelper's constructor parameters `Id`/`Name`, which CsvHelper binds to CSV headers by exact name: constructor
+  parameters named exactly like a member of their type now keep their name (`CamelCaseNamingAnalyzer.NamesAMember`);
+  (2) BRO1001 sorted a doc-commented field into a slot without a blank line above (Jellyfin, 3 files needed a second
+  run): the sort adds BRO1513's blank line; (3) the %TEMP% cleanup removed the work clones' empty `.git/refs` folders,
+  `git diff` failed, and the script read that as "nothing changed" (now it throws; run locally with
+  `-Work $env:USERPROFILE\.stylebro-realworld`). Results: Jellyfin 4,341 findings / 892 files, FluentValidation
+  2,433 / 216, CsvHelper 1,478 / 368; each converges in one run, no new compile errors or test failures.
 
 ## Known open questions
 
