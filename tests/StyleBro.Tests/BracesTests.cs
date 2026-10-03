@@ -433,10 +433,12 @@ public class BracesTests
                     Console.WriteLine(@"one
                     two");
 
-                // A directive inside the statement.
+                // A directive elsewhere in the if statement.
                 if (a)
-        #if true
                     a = false;
+        #if true
+                else
+                    a = true;
         #endif
 
                 // Other code after it on the line.

@@ -38,9 +38,9 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'partialAccess?[i] ?? '; Replace = ''; Tests = 'MemberOrderingTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'else if (slot == count - 1 && !EndsWithNewLine(members[count - 1]) && EndsWithNewLine(member))'; Replace = 'else if (false)'; Tests = 'MemberOrderingTests' }
 
-        # BRO1131 (base calls)
+        # BRO1131 (base calls). Not mutated: Speculation.SymbolAfterReplacing vs a position-based lookup of a DETACHED
+        # node (equivalent; the original bug passed the attached access.Name, which binds as a member-access name).
         @{ File = 'src/StyleBro.Analyzers/Readability/BaseCalls.cs'; Find = 'var dispatchesVirtually = (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) && !symbol.IsSealed;'; Replace = 'var dispatchesVirtually = false;'; Tests = 'BaseCallsTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/BaseCalls.cs'; Find = 'Speculation.SymbolAfterReplacing(model, original, plain, cancellationToken)'; Replace = 'model.GetSpeculativeSymbolInfo(access.SpanStart, plain, SpeculativeBindingOption.BindAsExpression).Symbol'; Tests = 'BaseCallsTests' }
 
     )
 }
