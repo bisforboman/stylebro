@@ -1,0 +1,15 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+
+# The team's changes to StyleCop's defaults.
+# No 'this.' prefix.
+dotnet_diagnostic.SA1101.severity = none
+# Private fields start with '_'.
+dotnet_diagnostic.SA1309.severity = none
+# No trailing commas in multi-line initializers.
+dotnet_diagnostic.SA1413.severity = none

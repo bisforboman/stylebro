@@ -17,9 +17,9 @@ WORK = [
     ('Parity', 'SA1316: tuple element names in PascalCase', 'BRO1311: renamed with every use, literal and override solution-wide (Roslyn\'s Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`.', 'Done (2026-10-03)'),
     ('Parity', 'SA1108: no comments inside block statements', 'Probe what teams expect first (move the comment above the statement?); StyleCop has no fix.', 'Planned'),
     ('Parity', 'BRO1309: namespace names', 'Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first.', 'Planned'),
-    ('Adoption', 'Getting started', 'One page from install to the first `dotnet format` run, for new projects and for StyleCop users.', 'Planned'),
+    ('Adoption', 'Getting started', 'docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines.', 'Done (2026-10-03)'),
     ('Adoption', 'IDE experience', "Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig.", 'Planned'),
-    ('Adoption', 'Migration sample', 'A small sample repository that uses StyleCop, migrated with `stylebro-migrate` step by step.', 'Planned'),
+    ('Adoption', 'Migration sample', 'samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards.', 'Done (2026-10-03)'),
     ('Beyond StyleCop', 'Survey other analyzers', "Fixable style rules in popular analyzers (e.g. Roslynator's formatting rules) that the SDK doesn't cover; worthwhile ones become rule candidates here.", 'Planned'),
 ]
 
