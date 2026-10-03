@@ -737,6 +737,16 @@ internal static class Descriptors
         description: "Variable, parameter and field names don't start with a type prefix ('iCount' -> 'count'). Off by default, like StyleCop's. Replaces StyleCop SA1305.",
         helpLinkUri: HelpBase + DiagnosticIds.HungarianNotation + ".md");
 
+    public static readonly DiagnosticDescriptor TupleElementCasing = new(
+        id: DiagnosticIds.TupleElementCasing,
+        title: "Tuple element names should use correct casing",
+        messageFormat: "Rename tuple element '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Element names in tuple types are PascalCase ('(int Count, string Name)'), or camelCase with stylebro_tuple_element_name_casing. Replaces StyleCop SA1316.",
+        helpLinkUri: HelpBase + DiagnosticIds.TupleElementCasing + ".md");
+
     public static readonly DiagnosticDescriptor BaseCall = new(
         id: DiagnosticIds.BaseCall,
         title: "Do not prefix calls with base unless local implementation exists",

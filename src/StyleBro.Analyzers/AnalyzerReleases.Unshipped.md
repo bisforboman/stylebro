@@ -13,6 +13,7 @@ BRO1129 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1130 | Readability | Warning  | QueryLayoutAnalyzer
 BRO1131 | Readability | Warning  | BaseCallsAnalyzer
 BRO1310 | Naming | Disabled | CamelCaseNamingAnalyzer
+BRO1311 | Naming | Warning | TupleElementNamingAnalyzer
 BRO1404 | Maintainability | Warning  | AccessModifiersAnalyzer
 BRO1405 | Maintainability | Warning  | ParenthesesAnalyzer
 BRO1406 | Maintainability | Warning  | PrecedenceAnalyzer

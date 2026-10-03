@@ -56,6 +56,17 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void TupleElementCasing_ComesFromStyleCopJson()
+    {
+        Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("stylebro_tuple_element_name_casing", StringComparison.Ordinal));
+
+        Write("stylecop.json", """{ "settings": { "namingRules": { "tupleElementNameCasing": "camelCase", "includeInferredTupleElementNames": true } } }""");
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Contains("stylebro_tuple_element_name_casing = camelCase", result.Lines);
+        Assert.Contains(result.Notes, n => n.Contains("includeInferredTupleElementNames", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void HungarianPrefixes_ComeFromStyleCopJson()
     {
         var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
