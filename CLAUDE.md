@@ -84,7 +84,8 @@ suggest or push a release tag after each batch; mention it only when a release l
 ## Decision log
 
 `docs/decisions.md` records design questions put to the user: the question, the choices, the answer (user's request,
-2026-10-03). Add an entry whenever the user decides a design question. Open work from it: StyleBro versions of the SDK
+2026-10-03). Add an entry whenever the user decides a design question. `docs/backlog.md` lists every rule StyleBro aims to add and open gaps
+(user's request, 2026-10-03: "easier to track progress and goals"); update its status when work starts or lands. Open work from it: StyleBro versions of the SDK
 rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, IDE2000/2002/2003; not IDE0055).
 
 ## Design rules for every rule
