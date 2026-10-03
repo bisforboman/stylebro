@@ -14,6 +14,18 @@
             )
         }
         @{
+            Name     = 'member-order-regions'
+            Map      = @('SA1201=BRO1001', 'SA1202=BRO1001', 'SA1203=BRO1001', 'SA1204=BRO1001', 'SA1214=BRO1001')
+            # StyleCop's fix moves members across regions; positions only.
+            CompareOutput = $false
+            Expected = @(
+                # BRO1001 reports once per type (the first out-of-place member); the fix sorts every region.
+                'only StyleCop: BRO1001 Regions.cs(14,17)'
+                # The order across regions isn't checked: the fix would have to move a member into another region.
+                'only StyleCop: BRO1001 Regions.cs(27,17)'
+            )
+        }
+        @{
             Name     = 'blank-line-runs'
             Map      = @('SA1507=BRO1517', 'SA1508=BRO1518', 'SA1513=BRO1519')
             Expected = @(

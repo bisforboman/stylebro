@@ -16,7 +16,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | Released | 71 |
 | Done, not released yet | 18 |
 | Planned | 0 |
-| Maybe | 2 new rules + 2 gaps in existing ones |
+| Maybe | 2 new rules + 1 gap in an existing one |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 104 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -62,7 +62,6 @@ Gaps in existing rules:
 | Rule | Gap |
 |------|-----|
 | BRO1309 (SA1300) | Namespace names aren't checked |
-| BRO1001 | Types with `#region`/`#if` between members are skipped (a region-heavy codebase needs a second run after BRO1112) |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 

@@ -139,7 +139,12 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Exception: a member led by a `//` comment moved into a later slot without a blank line gets one, otherwise the
   sort creates a BRO1504 violation and `dotnet format` needs a second run (seen in Newtonsoft.Json).
 - The Fix All rewriter sorts nested types before their parents in one pass.
-- Types with directives between members (`#region`, `#if`, `#pragma`) are skipped.
+- Regions (2026-10-03, user's pick from the backlog): every `#region`/`#endregion` line between members is a fence
+  (`GetSegments`); members are sorted within each stretch, compared as (segment, key), so the order ACROSS regions isn't
+  checked (StyleCop's is; the fix would move members into another region; parity `member-order-regions`). Region lines
+  and anything above them are slot layout (`SplitLeadingTrivia` starts after the last directive). Still skipped: `#if`,
+  `#pragma`, or a doc comment above a region line. A doc comment moved right below a region line gets BRO1513's blank
+  line (found in Messy: depending on fix order `dotnet format` needed a second run).
 - Types where sorting would swap dependent field/auto-property initializers are skipped (`InitializerOrder.cs`).
 - Since 2026-10-03 also the members of a namespace (block or file-scoped) and a file: StyleCop's OuterOrder (namespace,
   delegate, enum, interface, struct, class) + access + static, a type without a modifier is internal there. Skipped: a

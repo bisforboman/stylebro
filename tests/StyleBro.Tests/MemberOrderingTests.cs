@@ -353,7 +353,7 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task Regions_AreLeftAlone() => VerifyNoDiagnosticsAsync("""
+    public Task Regions_KeepTheirMembers_OrderAcrossThemIsNotChecked() => VerifyNoDiagnosticsAsync("""
         class C
         {
             #region Methods
@@ -361,6 +361,136 @@ public class MemberOrderingTests
             #endregion
 
             private int _x;
+        }
+        """);
+
+    [Fact]
+    public Task Regions_AreSortedOneByOne() => VerifyFixAsync(
+        """
+        class C
+        {
+            // Fields and constructors.
+            #region Setup
+
+            private int _count;
+
+            /// <summary>Creates it.</summary>
+            public C() { }
+
+            public const int {|BRO1001:Max|} = 3;
+
+            #endregion
+
+            #region Behavior
+            private void Reset() { }
+
+            public void Run() { }
+            #endregion
+
+            private void Last() { }
+
+            public int Count => _count;
+        }
+        """,
+        """
+        class C
+        {
+            // Fields and constructors.
+            #region Setup
+
+            public const int Max = 3;
+
+            private int _count;
+
+            /// <summary>Creates it.</summary>
+            public C() { }
+
+            #endregion
+
+            #region Behavior
+            public void Run() { }
+
+            private void Reset() { }
+            #endregion
+
+            public int Count => _count;
+
+            private void Last() { }
+        }
+        """);
+
+    [Fact]
+    public Task DocsMovedBelowARegionLine_GetABlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            #region Behavior
+            private void Reset() { }
+
+            /// <summary>Runs.</summary>
+            public void {|BRO1001:Run|}() { }
+            #endregion
+        }
+        """,
+        """
+        class C
+        {
+            #region Behavior
+
+            /// <summary>Runs.</summary>
+            public void Run() { }
+
+            private void Reset() { }
+            #endregion
+        }
+        """);
+
+    [Fact]
+    public Task Regions_InNamespaces_AreSortedOneByOne() => VerifyFixAsync(
+        """
+        namespace N
+        {
+            #region Types
+            class A { }
+
+            interface {|BRO1001:I|} { }
+            #endregion
+        }
+        """,
+        """
+        namespace N
+        {
+            #region Types
+            interface I { }
+
+            class A { }
+            #endregion
+        }
+        """);
+
+    [Fact]
+    public Task OtherDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            #region Methods
+            public void M() { }
+        #if DEBUG
+            public void D() { }
+        #endif
+            private int _x;
+            #endregion
+        }
+
+        class D
+        {
+            public void M() { }
+
+            /// <summary>Stays with the field.</summary>
+            #region Fields
+            private int _x;
+
+            public const int Max = 1;
+            #endregion
         }
         """);
 
