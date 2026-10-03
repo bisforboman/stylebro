@@ -16,13 +16,12 @@ namespace StyleBro.Migrate;
 internal static class InitCommand
 {
     /// <summary>
-    /// Built-in rules whose 'dotnet format' fixes break multi-targeted projects (measured 2026-10-03 on Serilog and
-    /// Newtonsoft.Json, without StyleBro): IDE0011 (now off: BRO1514-BRO1516) and IDE0055 (at warning, its fix runs in the style pass) crashed
-    /// 'dotnet format' in Roslyn's linked-file merge (nothing written); IDE0040 (now off: BRO1404/BRO1007), IDE0047 (now off: BRO1405), IDE0048 (now off: BRO1406/BRO1407) and, together with
-    /// StyleBro's fixes, the blank-line rules IDE2000/IDE2002/IDE2003 (now off: BRO1517-BRO1519) wrote conflict markers. Their fixes edit each target framework's copy of a file separately, and 'dotnet format' can't merge
-    /// copies that came out different. StyleBro's own fixes give every copy the same text.
+    /// What multi-targeted repositories need to know: plain 'dotnet format' crashes on IDE0055's fix there (Roslyn's
+    /// linked-file merge, measured on Serilog and Newtonsoft.Json without StyleBro); 'stylebro-migrate format' doesn't.
     /// </summary>
-    public static readonly string[] UnsafeWhenMultiTargeted = { "IDE0055" };
+    public const string MultiTargetedHint =
+        "Run 'stylebro-migrate format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted\n"
+        + "projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.";
 
     public static int Run(string[] args)
     {
@@ -35,13 +34,12 @@ internal static class InitCommand
         }
 
         var multiTargeted = MultiTargetedProjects(root).ToList();
-        var block = Block(multiTargeted.Count > 0);
+        var block = Block();
         var path = Path.Combine(root, ".editorconfig");
         if (multiTargeted.Count > 0)
         {
             Console.WriteLine($"{multiTargeted.Count} project(s) target several frameworks ({string.Join(", ", multiTargeted.Take(3))}{(multiTargeted.Count > 3 ? ", ..." : string.Empty)}).");
-            Console.WriteLine($"{string.Join(", ", UnsafeWhenMultiTargeted)} are written as suggestions: their 'dotnet format' fixes break multi-targeted");
-            Console.WriteLine("projects (a crash or merge conflict markers). The IDE still shows them.");
+            Console.WriteLine(MultiTargetedHint);
         }
 
         if (!write)
@@ -65,20 +63,9 @@ internal static class InitCommand
     }
 
     /// <summary>The block written into .editorconfig, between the stylebro-migrate markers.</summary>
-    public static string Block(bool multiTargeted = false)
+    public static string Block()
     {
         var template = Template().Replace("\r\n", "\n").TrimEnd('\n');
-        if (multiTargeted)
-        {
-            foreach (var id in UnsafeWhenMultiTargeted)
-            {
-                template = template.Replace(
-                    $"dotnet_diagnostic.{id}.severity = warning",
-                    $"# {id}: a suggestion here, its 'dotnet format' fix breaks multi-targeted projects (crash or conflict markers).\n"
-                    + $"dotnet_diagnostic.{id}.severity = suggestion");
-            }
-        }
-
         return Migration.BeginMarker + " (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)\n"
             + template + "\n" + Migration.EndMarker + "\n";
     }

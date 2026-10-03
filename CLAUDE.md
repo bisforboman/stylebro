@@ -903,6 +903,19 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Also found: `--verify-no-changes` fails on guard-kept renames (a fix that deliberately changes nothing still counts),
   so the real-world script tests convergence as "a run changes no file".
 
+## `stylebro-migrate format` (2026-10-03, IDE0055 investigation)
+
+- Plain `dotnet format` with IDE0055 at warning crashes on multi-targeted repos (Roslyn's linked-file merge, no
+  StyleBro needed; the style pass alone too). The whitespace pass formats only the first framework's code. With
+  `TargetFramework=<tfm>` as an ENVIRONMENT variable MSBuild loads each project as an inner build: no linked copies.
+  `FormatCommand`: `dotnet msbuild -getProperty:TargetFrameworks/-getProperty:TargetFramework` per project (`dotnet
+  sln list`), restore once, then per framework `dotnet format <temp .slnf> --no-restore <options>` (the filter lists
+  the projects that target it; works for .sln and .slnx). Measured: Serilog IDE0055 505 -> 0; with every StyleBro rule
+  + init: 183 files, second run 0, builds. `init` writes IDE0055 at warning everywhere now and prints a hint for
+  multi-targeted repos. Limit: per-framework indentation conflicts (Newtonsoft.Json's `else` inside `#if`).
+- Scratch scripts: `scratchpad/ide0055-*.ps1`, `try-format*.ps1`. Gotcha: an incremental build re-reports no warnings
+  (use `--no-incremental` when counting).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

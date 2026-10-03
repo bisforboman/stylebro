@@ -14,7 +14,8 @@ namespace StyleBro.Migrate;
 /// .editorconfig files, between markers so a second run replaces them, and carries StyleCop suppressions in the code
 /// ('#pragma warning disable SA1202', [SuppressMessage], &lt;NoWarn&gt;) over to the rules that replace them.
 /// 'stylebro-migrate baseline' writes a baseline instead (<see cref="BaselineCommand"/>), 'stylebro-migrate init' the
-/// built-in rule severities the preset relies on (<see cref="InitCommand"/>).
+/// built-in rule severities the preset relies on (<see cref="InitCommand"/>), 'stylebro-migrate format' runs 'dotnet
+/// format' safely in multi-targeted repositories (<see cref="FormatCommand"/>).
 /// </summary>
 internal static class Program
 {
@@ -28,6 +29,11 @@ internal static class Program
         if (args.FirstOrDefault() == "init")
         {
             return InitCommand.Run(args.Skip(1).ToArray());
+        }
+
+        if (args.FirstOrDefault() == "format")
+        {
+            return FormatCommand.Run(args.Skip(1).ToArray());
         }
 
         var write = args.Contains("--write");

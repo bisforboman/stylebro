@@ -12,8 +12,8 @@ PLANNED = [
 
 # Work beyond single rules (decided 2026-10-03, see decisions.md "After StyleCop parity"), in this order.
 WORK = [
-    ('Hardening', 'More real-world repos in the PR pipeline', '2-3 more public repos in `scripts/realworld/repos.psd1` (a StyleCop user, an app rather than a library, a large multi-targeted library). Every repo added so far found real bugs.', 'Planned'),
-    ('Hardening', 'IDE0055 in multi-targeted repos', "Find out why its fix crashes Roslyn's linked-file merge under `dotnet format` and whether a safe setup exists. Not a reimplementation: it's the SDK's whole formatter, and analyzers can't reference the formatting engine (RS1038). Today `init` writes it as a suggestion there.", 'Planned'),
+    ('Hardening', 'More real-world repos in the PR pipeline', 'Jellyfin (an application using StyleCop), FluentValidation and CsvHelper (seven target frameworks) added; they found a BRO1302 rename that broke CsvHelper at run time and a BRO1001 blank line that needed a second run.', 'Done (2026-10-03)'),
+    ('Hardening', 'IDE0055 in multi-targeted repos', "`dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md.", 'Done (2026-10-03)'),
     ('Parity', 'SA1316: tuple element names in PascalCase', 'Rename every use together (deconstructions, `t.name`, inferred names), configurable like `tupleElementNameCasing`.', 'Planned'),
     ('Parity', 'SA1108: no comments inside block statements', 'Probe what teams expect first (move the comment above the statement?); StyleCop has no fix.', 'Planned'),
     ('Parity', 'BRO1309: namespace names', 'Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first.', 'Planned'),
@@ -93,8 +93,8 @@ for rules, key, change, status in [
 ]:
     out.append(f'| {rules} | {key} | {change} | {status} |')
 out.append('')
-out.append('Not planned: IDE0055 (the SDK\'s whole formatter; `dotnet format`\'s whitespace pass still does that job safely; `init`')
-out.append('writes it as a suggestion in multi-targeted repositories). Also to do: report the SDK fixer bugs upstream')
+out.append('IDE0055 (the SDK\'s whole formatter) isn\'t replaced: in multi-targeted repositories `stylebro-migrate format` runs')
+out.append('`dotnet format` once per target framework, which avoids the crash. Also to do: report the SDK fixer bugs upstream')
 out.append('(dotnet/roslyn).\n')
 
 out.append('## Maybe\n')

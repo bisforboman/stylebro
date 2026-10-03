@@ -133,8 +133,9 @@ The preset (StyleBro's rule severities and the formatting options) comes with th
 everything yourself: `<StyleBroPreset>none</StyleBroPreset>`. Coming from StyleCop? Use `stylebro-migrate --write`
 instead of `init` (below). Checking it in CI: [docs/ci.md](docs/ci.md).
 
-Projects with several target frameworks: `init` keeps the built-in rules whose `dotnet format` fixes break them as
-suggestions, and the first `dotnet format` on existing code may need a second run (details in [docs/ci.md](docs/ci.md)).
+Projects with several target frameworks: run `stylebro-migrate format` instead of `dotnet format` (same options). Plain
+`dotnet format` crashes there on the SDK's formatting fix; the command runs it once per target framework (details in
+[docs/ci.md](docs/ci.md)).
 
 ## Migrating from StyleCop
 

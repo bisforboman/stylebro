@@ -31,9 +31,19 @@ stylebro-migrate init [path] [--write]
 
 Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order,
 IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
-a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. In a
-repository with multi-targeted projects, IDE0055 (formatting) is
-written as suggestions: their `dotnet format` fixes break such projects (a crash or merge conflict markers).
+a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too.
+
+## Formatting multi-targeted projects
+
+```
+stylebro-migrate format [folder, solution or project] [dotnet format options]
+```
+
+`dotnet format`, once per target framework. In a repository with multi-targeted projects, plain `dotnet format`
+crashes on the SDK's formatting fix (IDE0055): Roslyn can't merge the frameworks' copies of a file. This loads the
+projects for one framework at a time, so there's nothing to merge, and code behind `#if` gets formatted too. Without
+multi-targeted projects it's one plain `dotnet format` run. Options pass through (`--verify-no-changes`,
+`--severity warn`, ...).
 
 ## Baseline
 

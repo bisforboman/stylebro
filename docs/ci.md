@@ -92,13 +92,22 @@ steps:
 - **A large existing codebase:** commit a [baseline](baseline.md) so CI fails only on new violations. A baseline can't
   hide whitespace formatting; either run `dotnet format whitespace` once, or check only `dotnet format style` and
   `dotnet format analyzers` in CI until you do.
-- **Several target frameworks:** `dotnet format` checks every framework's copy of a file. StyleBro's fixes give all
-  copies the same text, so `#if` code doesn't cause conflicts; when `dotnet format`'s earlier passes leave the copies
-  different, StyleBro gives all of them the first copy's fixed text, and a second run picks up what only another
-  copy's `#if` code needed (Newtonsoft.Json, 8 target frameworks: clean after two runs). Several of the SDK's fixes
-  aren't safe there: on Serilog and Newtonsoft.Json, IDE0011 (braces; replaced by StyleBro's BRO1514-BRO1516) and IDE0055 (formatting, at warning) crashed
-  `dotnet format` (nothing written), and IDE0040 (access modifiers; replaced by BRO1404/BRO1007), IDE0047/IDE0048 (parentheses; replaced by BRO1405-BRO1407) and the blank-line
-  rules IDE2000/IDE2002/IDE2003 (replaced by BRO1517-BRO1519) wrote merge conflict markers. In a repository with multi-targeted projects,
-  `stylebro-migrate init` writes IDE0055 as a suggestion (shown in the IDE, not fixed by `dotnet format --severity warn`;
-  whitespace is still formatted). Turn them back to `warning` only after checking that `dotnet format` handles your
-  code.
+- **Several target frameworks:** use `stylebro-migrate format` instead of `dotnet format`, with the same options:
+
+  ```
+  stylebro-migrate format MySolution.sln --verify-no-changes --severity warn
+  ```
+
+  `dotnet format` loads one copy of every file per target framework, and the SDK's formatting fix (IDE0055) edits
+  each copy on its own: each sees other `#if` code, Roslyn can't merge the results, and `dotnet format` crashes
+  without writing anything (Serilog, Newtonsoft.Json). Its whitespace pass only formats the first framework's code,
+  so code behind `#if` stays unformatted while the other frameworks' builds report it. `stylebro-migrate format` runs
+  `dotnet format` once per target framework, each time on the projects that target it, loaded for that framework
+  alone: nothing to merge, and every framework's `#if` code gets fixed (Serilog: 505 IDE0055 warnings to 0; with all
+  StyleBro rules, the second run changes nothing). A repository without multi-targeted projects gets one plain
+  `dotnet format` run. The SDK fixes that wrote conflict markers there (IDE0011, IDE0040, IDE0047/IDE0048,
+  IDE2000/IDE2002/IDE2003) are replaced by StyleBro rules and off.
+
+  One limit: code that has to be indented differently for different frameworks, like an `else` inside `#if` followed
+  by a block after `#endif`, can't satisfy IDE0055 for all of them; the last framework's run wins and the build
+  reports it for the others (Newtonsoft.Json: 32 lines in 4 files). Restructure such code, or suppress IDE0055 there.
