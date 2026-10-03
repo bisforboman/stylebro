@@ -14,7 +14,9 @@ stylebro-migrate path/to/repo --write   # writes them
 The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version. From a clone of
 this repository: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
-Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `dotnet format`.
+Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `dotnet format`. The steps in order:
+[getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
+real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md).
 
 ## What it reads
 

@@ -4,6 +4,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 
 > StyleCop writes you a ticket. StyleBro just fixes it. Rule IDs use the `BRO` prefix.
 
+**New here?** [Getting started](docs/getting-started.md): from install to the first `dotnet format` run, for a new
+project or coming from StyleCop.
+
 ## Principles
 
 - **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run.
@@ -162,6 +165,7 @@ src/StyleBro.Package       packs both DLLs into analyzers/dotnet/cs + build/ pre
 src/StyleBro.Migrate       stylebro-migrate: StyleCop setup -> .editorconfig settings
 tests/StyleBro.Tests       Microsoft.CodeAnalysis.Testing: diagnostics, single fix, Fix All, idempotence
 samples/Messy           dotnet format integration sample (Input -> Expected)
+samples/StyleCopMigration  a StyleCop project to migrate step by step (see its README)
 scripts/verify-format.ps1
 ```
 
