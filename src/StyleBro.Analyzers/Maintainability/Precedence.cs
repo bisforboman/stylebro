@@ -29,7 +29,9 @@ internal static class Precedence
             BinaryPatternSyntax p => ((SyntaxNode)p.Left, (SyntaxNode)p.Right, p.OperatorToken),
             _ => (null!, null!, default),
         };
-        if (op.RawKind == 0)
+
+        // Not in preprocessor directives ('#if A || B && C'), like StyleCop.
+        if (op.RawKind == 0 || node.IsPartOfStructuredTrivia())
         {
             yield break;
         }

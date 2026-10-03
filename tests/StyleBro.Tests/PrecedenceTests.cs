@@ -49,6 +49,8 @@ public class PrecedenceTests
 
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
+        #if DEBUG || TRACE && RELEASE
+        #endif
         public class C
         {
             public bool M(int a, int b, int c, bool f, bool g)

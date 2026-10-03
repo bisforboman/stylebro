@@ -12,7 +12,7 @@ internal static class Parentheses
 {
     /// <summary>Whether StyleCop's SA1119 reports these parentheses and removing them keeps the code's meaning.</summary>
     public static bool IsUnnecessary(ParenthesizedExpressionSyntax node, SourceText text) =>
-        IsReportedByStyleCop(node) && ParsesTheSame(new[] { node }, text);
+        !node.IsPartOfStructuredTrivia() && IsReportedByStyleCop(node) && ParsesTheSame(new[] { node }, text);
 
     /// <summary>
     /// The pairs that can be removed together: each one is added only when the enclosing statement or member still parses

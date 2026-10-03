@@ -55,7 +55,11 @@ public class ParenthesesTests
 
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
+        #if !(DEBUG)
         using System;
+        #else
+        using System;
+        #endif
 
         public class C
         {
