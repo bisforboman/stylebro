@@ -18,7 +18,8 @@
   -->
   <PropertyGroup>
     <StyleBroSelfVersion>0.1.0-alpha.8</StyleBroSelfVersion>
-    <StyleBroSelf Condition="'$(MSBuildProjectName)' == 'StyleBro.Analyzers' or '$(MSBuildProjectName)' == 'StyleBro.CodeFixes'">download</StyleBroSelf>
+    <!-- StyleBroSelf=none from outside (scripts/verify-format.ps1) turns the self-check off everywhere. -->
+    <StyleBroSelf Condition="'$(StyleBroSelf)' == '' and ('$(MSBuildProjectName)' == 'StyleBro.Analyzers' or '$(MSBuildProjectName)' == 'StyleBro.CodeFixes')">download</StyleBroSelf>
     <StyleBroSelf Condition="'$(MSBuildProjectName)' == 'Messy' or '$(MSBuildProjectName)' == 'MultiTarget' or '$(MSBuildProjectName)' == 'StyleBro.Package'">none</StyleBroSelf>
   </PropertyGroup>
   <ItemGroup Condition="'$(StyleBroSelf)' == ''">

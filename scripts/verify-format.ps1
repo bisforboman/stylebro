@@ -8,6 +8,11 @@ $ErrorActionPreference = 'Stop'
 
 $root = Split-Path $PSScriptRoot -Parent
 
+# 'dotnet format' loads the referenced StyleBro.Analyzers/CodeFixes projects too, and with the self-check (Directory.Build.props)
+# they carry the PUBLISHED StyleBro as analyzers: two fixers per rule, and 'dotnet format' picks either one, so a run could
+# test the release instead of this code (found 2026-10-03: BRO1519's blank line came and went between runs).
+$env:StyleBroSelf = 'none'
+
 # Every rule in the release tracking files (shipped and unshipped), so a new rule can't be left out of the check.
 $ids = @(Select-String -Path (Join-Path $root 'src/StyleBro.Analyzers/AnalyzerReleases.*.md') -Pattern '^(BRO\d{4})\s*\|' |
     ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique)

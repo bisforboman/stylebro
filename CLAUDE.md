@@ -66,6 +66,12 @@ suggest or push a release tag after each batch; mention it only when a release l
   BRO1107/BRO1108 on `VerifyFixAsync("""...""", """...""")` in tests, BRO1303 unified `_field`/`field` to `field`), 142
   files changed, builds, 397 tests pass, second run clean. CI runs
   `dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples`.
+- **GOTCHA (found 2026-10-03): two copies of every fixer.** `dotnet format` on a sample also loads the referenced
+  StyleBro.Analyzers/CodeFixes projects, which carry the PUBLISHED StyleBro (self-check) as analyzers; with two fixers
+  for one rule it picks either, so verify-format sometimes tested the release, not the code (BRO1519's blank lines came
+  and went: 1 run in 3-4). verify-format.ps1 now sets `StyleBroSelf=none` (an explicit value wins in
+  Directory.Build.props). The CI self-check (`dotnet format StyleBro.slnx`) can likewise pick the dev fixers through
+  Messy's project references; harmless while they agree.
 - C# files under `src/` and `tests/` use LF line endings (normalized 2026-09-30; a few had become mixed from scripted
   edits inserting CRLF, which then made exact-text replacements fail). Keep new edits LF.
 - `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
