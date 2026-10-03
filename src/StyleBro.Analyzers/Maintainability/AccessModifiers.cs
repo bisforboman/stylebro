@@ -3,6 +3,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Maintainability;
 
@@ -21,13 +22,40 @@ internal static class AccessModifiers
         SyntaxKind.IndexerDeclaration, SyntaxKind.ConstructorDeclaration,
     };
 
-    /// <summary>The rule, where the diagnostic goes, where the modifier goes and its text; null when nothing is missing.</summary>
-    public static (string Id, SyntaxToken Location, int Position, string Modifier)? GetFinding(MemberDeclarationSyntax node, SemanticModel model, CancellationToken cancellationToken)
+    /// <summary>
+    /// The SDK's dotnet_style_require_accessibility_modifiers: 'for_non_interface_members' (or not set) is StyleCop's
+    /// SA1400/SA1205; 'always' also asks for them on interface members (C# 8 and later); 'never' and 'omit_if_default' ask
+    /// for none (removing modifiers isn't what these rules do).
+    /// </summary>
+    public static (bool Required, bool InInterfaces) GetPreference(AnalyzerConfigOptions options)
     {
+        if (!options.TryGetValue("dotnet_style_require_accessibility_modifiers", out var value))
+        {
+            return (true, false);
+        }
+
+        return value.Split(':')[0].Trim().ToLowerInvariant() switch
+        {
+            "always" => (true, true),
+            "never" or "omit_if_default" => (false, false),
+            _ => (true, false),
+        };
+    }
+
+    /// <summary>The rule, where the diagnostic goes, where the modifier goes and its text; null when nothing is missing.</summary>
+    public static (string Id, SyntaxToken Location, int Position, string Modifier)? GetFinding(
+        MemberDeclarationSyntax node,
+        SemanticModel model,
+        CancellationToken cancellationToken,
+        (bool Required, bool InInterfaces)? configured = null)
+    {
+        var preference = configured ?? (true, false);
         var modifiers = node.Modifiers;
-        if (modifiers.Any(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword or SyntaxKind.PrivateKeyword)
+        var inInterface = node.Parent is InterfaceDeclarationSyntax;
+        if (!preference.Required
+            || modifiers.Any(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword or SyntaxKind.PrivateKeyword)
             || modifiers.Any(m => m.IsKind(SyntaxKind.FileKeyword))
-            || node.Parent is InterfaceDeclarationSyntax)
+            || (inInterface && (!preference.InInterfaces || ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion < LanguageVersion.CSharp8)))
         {
             return null;
         }

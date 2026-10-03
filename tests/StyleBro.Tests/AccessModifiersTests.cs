@@ -147,6 +147,44 @@ public class AccessModifiersTests
         """);
 
     [Fact]
+    public Task Always_AlsoAsksForInterfaceMembers() => VerifyFixAsync(
+        """
+        public interface IShape
+        {
+            double {|BRO1404:Area|}();
+
+            string {|BRO1404:Name|} { get; }
+        }
+        """,
+        """
+        public interface IShape
+        {
+            public double Area();
+
+            public string Name { get; }
+        }
+        """,
+        editorConfig: "dotnet_style_require_accessibility_modifiers = always:warning");
+
+    [Theory]
+    [InlineData("never")]
+    [InlineData("omit_if_default")]
+    public Task NeverAndOmitIfDefault_AskForNothing(string value) => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            int count;
+
+            void M() => count++;
+        }
+
+        partial class P
+        {
+        }
+        """,
+        "dotnet_style_require_accessibility_modifiers = " + value);
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;
 

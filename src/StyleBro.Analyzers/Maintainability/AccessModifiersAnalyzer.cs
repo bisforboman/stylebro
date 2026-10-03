@@ -21,7 +21,7 @@ public sealed class AccessModifiersAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                if (AccessModifiers.GetFinding((MemberDeclarationSyntax)c.Node, c.SemanticModel, c.CancellationToken) is { } finding)
+                if (AccessModifiers.GetFinding((MemberDeclarationSyntax)c.Node, c.SemanticModel, c.CancellationToken, AccessModifiers.GetPreference(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree))) is { } finding)
                 {
                     var descriptor = finding.Id == DiagnosticIds.PartialAccessModifier ? Descriptors.PartialAccessModifier : Descriptors.AccessModifier;
                     c.ReportDiagnostic(Diagnostic.Create(descriptor, finding.Location.GetLocation(), finding.Location.ValueText, finding.Modifier));

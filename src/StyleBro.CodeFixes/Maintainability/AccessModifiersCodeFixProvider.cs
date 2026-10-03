@@ -54,11 +54,12 @@ public sealed class AccessModifiersCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var preference = AccessModifiers.GetPreference(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
             var node = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent?.AncestorsAndSelf().OfType<MemberDeclarationSyntax>().FirstOrDefault();
-            if (node is not null && AccessModifiers.GetFinding(node, model, cancellationToken) is { } finding)
+            if (node is not null && AccessModifiers.GetFinding(node, model, cancellationToken, preference) is { } finding)
             {
                 changes.Add(new TextChange(new TextSpan(finding.Position, 0), finding.Modifier + " "));
             }
