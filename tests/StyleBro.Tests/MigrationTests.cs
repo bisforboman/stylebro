@@ -567,10 +567,33 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void Format_KeepsTheProjectsThatTargetTheFramework_AndThoseThatReferenceThem()
+    {
+        // Serilog: TestDummies (no net8.0) references Serilog (net8.0), so it's loaded for net8.0 too; Newtonsoft.Json:
+        // the library (no net46) is referenced by the net46 tests, so it loads as usual.
+        var projects = new Dictionary<string, (string[] Frameworks, string[] References)>
+        {
+            ["Serilog"] = (new[] { "net8.0", "netstandard2.0" }, Array.Empty<string>()),
+            ["TestDummies"] = (new[] { "netstandard2.0", "net462" }, new[] { "Serilog" }),
+            ["Serilog.Tests"] = (new[] { "net8.0", "net48" }, new[] { "Serilog", "TestDummies" }),
+            ["Lib"] = (new[] { "net45" }, Array.Empty<string>()),
+            ["Lib.Tests"] = (new[] { "net46" }, new[] { "Lib" }),
+        };
+
+        Assert.Equal(new[] { "Serilog", "Serilog.Tests", "TestDummies" }, FormatCommand.Keep(projects, "net8.0").OrderBy(p => p));
+        Assert.Equal(new[] { "Lib.Tests" }, FormatCommand.Keep(projects, "net46"));
+    }
+
+    [Fact]
     public void Format_ReadsTheFrameworks_AndWritesASolutionFilter()
     {
-        Assert.Equal(new[] { "net8.0", "net10.0" }, FormatCommand.ParseFrameworks("""{ "Properties": { "TargetFrameworks": "net8.0; net10.0;", "TargetFramework": "" } }"""));
-        Assert.Equal(new[] { "net8.0" }, FormatCommand.ParseFrameworks("""{ "Properties": { "TargetFrameworks": "", "TargetFramework": "net8.0" } }"""));
+        Assert.Equal(new[] { "net8.0", "net10.0" }, FormatCommand.ParseProject("""{ "Properties": { "TargetFrameworks": "net8.0; net10.0;", "TargetFramework": "" } }""").Frameworks);
+        var single = FormatCommand.ParseProject("""{ "Properties": { "TargetFrameworks": "", "TargetFramework": "net8.0" }, "Items": { "ProjectReference": [ { "Identity": "../Lib/Lib.csproj", "FullPath": "C:/r/Lib/Lib.csproj" } ] } }""");
+        Assert.Equal(new[] { "net8.0" }, single.Frameworks);
+        Assert.Equal(new[] { "C:/r/Lib/Lib.csproj" }, single.References);
+
+        Assert.Equal(new[] { "src/Lib/" }, FormatCommand.Include(root, root, new[] { Path.Combine("src", "Lib", "Lib.csproj"), Path.Combine("src", "Lib", "Other.csproj") }));
+        Assert.Equal(new[] { "**/*.cs" }, FormatCommand.Include(root, root, new[] { "App.csproj" }));
 
         using var filter = JsonDocument.Parse(FormatCommand.SolutionFilter("App.slnx", new[] { "src\\Lib\\Lib.csproj" }));
         Assert.Equal("App.slnx", filter.RootElement.GetProperty("solution").GetProperty("path").GetString());
