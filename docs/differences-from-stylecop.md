@@ -64,6 +64,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | Rule | Not reported | Why |
 |---|---|---|
 | [BRO1001](rules/BRO1001.md) (SA1201-SA1204, SA1214) | Types with `#region`/`#if`/`#pragma` between members; types where sorting would change what initializers compute. One diagnostic per type, not per member. | Moving members across directives or reordering dependent initializers changes behavior. |
+| [BRO1514](rules/BRO1514.md), [BRO1515](rules/BRO1515.md), [BRO1516](rules/BRO1516.md) (SA1503, SA1519, SA1520) | A comment or directive where the braces would go, `#if` in the owning statement, a multi-line string in the statement, other code after it on its line | The fix can't place the braces without moving the comment or reindenting string contents; StyleCop's formatter-based fix does. |
 | [BRO1101](rules/BRO1101.md) (SA1106) | `while (x) ;` and labeled `end: ;` | StyleCop's fix hides a likely bug in the first and breaks the build in the second. |
 | [BRO1102](rules/BRO1102.md) (SA1133) | Attribute lists with a comment between the attributes | StyleCop's fix drops the comment. |
 | [BRO1103](rules/BRO1103.md) (SA1131) | Comparisons using a type's own `==`/`<` | A user-defined operator may not be symmetric. |

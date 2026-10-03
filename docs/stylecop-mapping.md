@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 56 SDK, 92 StyleBro (91 done), 44 drop, 1 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 53 SDK, 95 StyleBro (91 done), 44 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -102,7 +102,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1500 | Braces for multi-line statements should not share line | on | yes | on / on / off | 0 / 0 / 6 | fixed | SDK: IDE0055 (`csharp_new_line_before_open_brace = all`) |
 | SA1501 | Statement should not be on a single line | on | yes | on / on / off | 0 / 0 / 1 | fixed | StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported |
 | SA1502 | Element should not be on a single line | on | yes | on / on / off | 0 / 0 / 356 | fixed | StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509) |
-| SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
+| SA1503 | Braces should not be omitted | on | yes | on / off / off | 0 / 0 / 14 | fixed | StyleBro **BRO1514** (done; replaces IDE0011, whose fix breaks multi-targeted projects). Skips comments/directives where the braces go and multi-line strings |
 | SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments |
 | SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
 | SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1511** (done), same positions and output as StyleCop |
@@ -118,8 +118,8 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 0 / 44 / 5,873 | not fixed | StyleBro **BRO1505** (done), same positions as StyleCop |
 | SA1517 | Code should not contain blank lines at start of file | on | yes | on / on / off | 0 / 0 / 11 | fixed | SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template` |
 | SA1518 | Use line endings correctly at end of file | on | yes | off / off / off | 2 / 40 / 31 | not fixed | StyleBro **BRO1507** (done), same results as StyleCop's default setting |
-| SA1519 | Braces should not be omitted from multi-line child statement | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
-| SA1520 | Use braces consistently | on | yes | on / on / on | 0 / 0 / 0 | fixed | SDK: IDE0011 (`csharp_prefer_braces = true`) |
+| SA1519 | Braces should not be omitted from multi-line child statement | on | yes | on / on / on | 0 / 0 / 0 | fixed | StyleBro **BRO1515** (done; replaces IDE0011). Same skips as BRO1514 |
+| SA1520 | Use braces consistently | on | yes | on / on / on | 0 / 0 / 0 | fixed | StyleBro **BRO1516** (done; replaces IDE0011). Same skips as BRO1514 |
 
 ### Maintainability
 

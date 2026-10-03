@@ -17,7 +17,7 @@ Fixing a failure is the same everywhere: run `dotnet format` locally and commit 
 <Project>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <!-- Report the built-in .NET rules (IDE0011, IDE0040, IDE0055, ...) on build too. -->
+    <!-- Report the built-in .NET rules (IDE0040, IDE0055, ...) on build too. -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
@@ -96,9 +96,9 @@ steps:
   copies the same text, so `#if` code doesn't cause conflicts; when `dotnet format`'s earlier passes leave the copies
   different, StyleBro gives all of them the first copy's fixed text, and a second run picks up what only another
   copy's `#if` code needed (Newtonsoft.Json, 8 target frameworks: clean after two runs). Several of the SDK's fixes
-  aren't safe there: on Serilog and Newtonsoft.Json, IDE0011 (braces) and IDE0055 (formatting, at warning) crashed
+  aren't safe there: on Serilog and Newtonsoft.Json, IDE0011 (braces; replaced by StyleBro's BRO1514-BRO1516) and IDE0055 (formatting, at warning) crashed
   `dotnet format` (nothing written), and IDE0040 (access modifiers), IDE0047/IDE0048 (parentheses) and the blank-line
   rules IDE2000/IDE2002/IDE2003 wrote merge conflict markers. In a repository with multi-targeted projects,
-  `stylebro-migrate init` writes those as suggestions (shown in the IDE, not fixed by `dotnet format --severity warn`;
+  `stylebro-migrate init` writes the remaining ones as suggestions (shown in the IDE, not fixed by `dotnet format --severity warn`;
   whitespace is still formatted). Turn them back to `warning` only after checking that `dotnet format` handles your
   code.

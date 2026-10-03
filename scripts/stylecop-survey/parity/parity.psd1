@@ -4,6 +4,19 @@
 @{
     Sets = @(
         @{
+            Name     = 'braces'
+            Map      = @('SA1503=BRO1514', 'SA1519=BRO1515', 'SA1520=BRO1516')
+            Expected = @(
+                # Skipped: a comment where the brace would go, a line break inside a token (multi-line string).
+                'only StyleCop: BRO1514 Braces.cs(75,17)'
+                'only StyleCop: BRO1515 Braces.cs(78,17)'
+                'StyleCop output only: Braces.cs: [            {]'
+                'StyleCop output only: Braces.cs: [            }]'
+                'StyleCop output only: Braces.cs: [            {]'
+                'StyleCop output only: Braces.cs: [            }]'
+            )
+        }
+        @{
             Name     = 'base-calls'
             Map      = @('SA1100=BRO1131')
             Expected = @(

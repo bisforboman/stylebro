@@ -474,7 +474,8 @@ internal static class Migration
         }
 
         // Braces.
-        Rule("IDE0011", "SA1503", "SA1519", "SA1520");
+        // StyleBro's BRO1514-BRO1516 replace IDE0011, whose fix breaks multi-targeted projects.
+        Rule("IDE0011");
         lines.Add($"csharp_prefer_braces = {(setup.IsOn("SA1503") ? "true" : setup.IsOn("SA1519") || setup.IsOn("SA1520") ? "when_multiline" : "false")}");
 
         // Access modifiers, type aliases, parentheses.

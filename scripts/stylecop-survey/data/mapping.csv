@@ -123,7 +123,7 @@ SA1414,Drop: StyleCop has no fix (1.2 only); tuple element names in signatures h
 SA1500,SDK: IDE0055 (`csharp_new_line_before_open_brace = all`)
 SA1501,"StyleBro **BRO1508** (done). Differs from StyleCop: blocks with a comment inside, and a switch-section block on the line of `switch (x) {`, are not reported"
 SA1502,"StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)"
-SA1503,SDK: IDE0011 (`csharp_prefer_braces = true`)
+SA1503,"StyleBro **BRO1514** (done; replaces IDE0011, whose fix breaks multi-targeted projects). Skips comments/directives where the braces go and multi-line strings"
 SA1504,"StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments"
 SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"
 SA1506,"StyleBro **BRO1511** (done), same positions and output as StyleCop"
@@ -139,8 +139,8 @@ SA1515,"StyleBro **BRO1504** (done), same results as StyleCop"
 SA1516,"StyleBro **BRO1505** (done), same positions as StyleCop"
 SA1517,SDK: only as a side effect of IDE0073 (file header); not fixed without `file_header_template`
 SA1518,"StyleBro **BRO1507** (done), same results as StyleCop's default setting"
-SA1519,SDK: IDE0011 (`csharp_prefer_braces = true`)
-SA1520,SDK: IDE0011 (`csharp_prefer_braces = true`)
+SA1519,StyleBro **BRO1515** (done; replaces IDE0011). Same skips as BRO1514
+SA1520,StyleBro **BRO1516** (done; replaces IDE0011). Same skips as BRO1514
 SA1600,"StyleBro **BRO1601** (done) for overrides and implementations only (`<inheritdoc/>`); other missing documentation is not reported (no placeholder stubs, user decision)"
 SA1601,"Drop: Missing documentation on a partial element; the only fix is placeholder text (no stubs, user decision)."
 SA1602,"Drop: Missing documentation on enum members; the only fix is placeholder text (no stubs, user decision). 530 findings in the private app."

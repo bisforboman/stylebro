@@ -6,7 +6,7 @@ lands; when a rule is done, it also moves from `skipped.psd1` to `decisions.psd1
 Status: **Planned** (decided, not started), **In progress**, **Done** (date), **Maybe** (worth doing if someone asks;
 the reason it isn't planned is in [skipped-rules.md](skipped-rules.md)).
 
-Coverage today: 92 StyleCop rules by StyleBro, 56 by the SDK, 44 dropped by design (StyleCop 1.2, 197 diagnostics).
+Coverage today: 95 StyleCop rules by StyleBro, 53 by the SDK, 44 dropped by design (StyleCop 1.2, 197 diagnostics).
 
 ## 1. Fix-safe replacements for SDK rules (multi-targeted projects)
 
@@ -16,9 +16,9 @@ the SDK rule off. IDs are reserved, not final until the rule ships.
 
 | Planned ID | StyleCop | What | Replaces SDK | Status |
 |------------|----------|------|--------------|--------|
-| BRO1514 | SA1503 | Braces must not be omitted | IDE0011 | In progress |
-| BRO1515 | SA1519 | Braces must not be omitted from a multi-line child statement | IDE0011 | In progress |
-| BRO1516 | SA1520 | Use braces consistently in an if/else chain | IDE0011 | In progress |
+| BRO1514 | SA1503 | Braces must not be omitted | IDE0011 | Done (2026-10-03) |
+| BRO1515 | SA1519 | Braces must not be omitted from a multi-line child statement | IDE0011 | Done (2026-10-03) |
+| BRO1516 | SA1520 | Use braces consistently in an if/else chain | IDE0011 | Done (2026-10-03) |
 | BRO1404 | SA1400 | Access modifier must be declared | IDE0040 | Planned |
 | BRO1007 | SA1205 | Partial elements must declare an access modifier | IDE0040 | Planned |
 | BRO1405 | SA1119 | Statement must not use unnecessary parentheses | IDE0047 | Planned |
@@ -56,6 +56,7 @@ inventing text or moving code between files; reasons in [skipped-rules.md](skipp
 
 | ID | StyleCop | Done |
 |----|----------|------|
+| BRO1514-BRO1516 | SA1503, SA1519, SA1520 | 2026-10-03 |
 | BRO1006 | SA1006 | 2026-10-03 |
 | BRO1131 | SA1100 | 2026-10-03 |
 | BRO1127-BRO1130 | SA1102-SA1105 | 2026-10-03 |

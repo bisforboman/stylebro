@@ -152,6 +152,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Exempt like StyleCop 1.2: already spaced (incl. `//  two`), empty, `///`/`////`, `//--`. StyleCop 1.1.118 also
   reported `//  two spaces` (the only difference in the private app: 77 vs 78). Whitespace-only -> `//`.
 - Shared logic in `src/StyleBro.Analyzers/Readability/`, fixes in `src/StyleBro.CodeFixes/Readability/`.
+- **BRO1514-BRO1516** (SA1503/SA1519/SA1520, 2026-10-03, `Layout/Braces.cs`, replace IDE0011 per docs/decisions.md):
+  which statements and which id like StyleCop (multi-line -> BRO1515, inconsistent if/else chain -> BRO1516, else
+  BRO1514; a rule that is off leaves its statements to the next, via `Severities.IsOn`; `using (a) using (b)` allowed).
+  The fix is text edits computed for ALL wrapped statements at once: gap edit (`{` + line break + indentation),
+  reindent of the statement's other lines (shift relative to the statement's first line, or to the owner line when it
+  shared it), closing `}` before the line break (innermost first when several close at one place). The statement's own
+  `else` follows `}` per csharp_new_line_before_else wherever it was; a do-while `while` keeps its line. Line edits skip
+  lines whose start a gap/close edit covers (else they overlap). Skipped: comments/directives in the gap, `#if` in the
+  parent, a token spanning lines (multi-line strings), other code after it on its line. Parity `braces`: 15/13, output
+  identical apart from the 2 skips. `init` writes IDE0011 = none; migrate writes `Rule("IDE0011")` (none).
 - **BRO1131** (SA1100, 2026-10-03, `Readability/BaseCalls.cs`) `base.` -> `this.`: StyleCop's check (speculative
   `this` binds to the same symbol, so no override/hiding member), plus a deviation: virtual/abstract/override (not
   sealed) members are skipped unless the enclosing type is sealed (a derived override would run instead).

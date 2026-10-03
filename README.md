@@ -51,6 +51,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1129](docs/rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Yes |
 | [BRO1130](docs/rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Yes |
 | [BRO1131](docs/rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Yes |
+| [BRO1514](docs/rules/BRO1514.md) | Braces should not be omitted | SA1503 | Yes |
+| [BRO1515](docs/rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Yes |
+| [BRO1516](docs/rules/BRO1516.md) | Use braces consistently | SA1520 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |
@@ -103,8 +106,8 @@ Where the preset and the rules differ from StyleCop's defaults, and how to get S
 <PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" PrivateAssets="all" />
 ```
 
-Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0011 braces, IDE0040 access
-modifiers, IDE0055 formatting, ...). Their severities have to be in `.editorconfig`: `dotnet format` ignores severities
+Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0040 access modifiers, IDE0055
+formatting, ...). Their severities have to be in `.editorconfig`: `dotnet format` ignores severities
 from a package's preset.
 
 ```

@@ -79,4 +79,7 @@ public static class DiagnosticIds
     public const string BlankLineAfterDocumentation = "BRO1511";
     public const string BlankLineBeforeWhile = "BRO1512";
     public const string BlankLineBeforeDocumentation = "BRO1513";
+    public const string BracesOmitted = "BRO1514";
+    public const string BracesMultiLine = "BRO1515";
+    public const string BracesConsistent = "BRO1516";
 }

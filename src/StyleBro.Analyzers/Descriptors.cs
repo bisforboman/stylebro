@@ -797,6 +797,36 @@ internal static class Descriptors
         description: "The 'while' of a 'do ... while' follows the block directly. Replaces StyleCop SA1511.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeWhile + ".md");
 
+    public static readonly DiagnosticDescriptor BracesOmitted = new(
+        id: DiagnosticIds.BracesOmitted,
+        title: "Braces should not be omitted",
+        messageFormat: "Put the statement in braces",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The child statement of an if, else, loop, using, lock or fixed statement is a block. Replaces StyleCop SA1503.",
+        helpLinkUri: HelpBase + DiagnosticIds.BracesOmitted + ".md");
+
+    public static readonly DiagnosticDescriptor BracesMultiLine = new(
+        id: DiagnosticIds.BracesMultiLine,
+        title: "Braces should not be omitted from multi-line child statement",
+        messageFormat: "Put the multi-line statement in braces",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A child statement that spans several lines is a block. Replaces StyleCop SA1519.",
+        helpLinkUri: HelpBase + DiagnosticIds.BracesMultiLine + ".md");
+
+    public static readonly DiagnosticDescriptor BracesConsistent = new(
+        id: DiagnosticIds.BracesConsistent,
+        title: "Use braces consistently",
+        messageFormat: "Put the statement in braces like the other clauses of the if statement",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When one clause of an if/else chain has braces, all of them do. Replaces StyleCop SA1520.",
+        helpLinkUri: HelpBase + DiagnosticIds.BracesConsistent + ".md");
+
     public static readonly DiagnosticDescriptor BlankLineBeforeDocumentation = new(
         id: DiagnosticIds.BlankLineBeforeDocumentation,
         title: "Element documentation header should be preceded by blank line",

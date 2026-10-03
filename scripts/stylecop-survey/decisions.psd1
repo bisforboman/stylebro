@@ -28,9 +28,6 @@
         SA1400 = 'IDE0040 (`dotnet_style_require_accessibility_modifiers = for_non_interface_members`; `always` would also add `public` to interface members, which SA1400 doesn''t ask for)'
         SA1408 = 'IDE0048 (`dotnet_style_parentheses_* = always_for_clarity`)'
         SA1500 = 'IDE0055 (`csharp_new_line_before_open_brace = all`)'
-        SA1503 = 'IDE0011 (`csharp_prefer_braces = true`)'
-        SA1519 = 'IDE0011 (`csharp_prefer_braces = true`)'
-        SA1520 = 'IDE0011 (`csharp_prefer_braces = true`)'
         SA1507 = 'IDE2000 (experimental)'
         SA1508 = 'IDE2002 (experimental)'
         SA1513 = 'IDE2003 (experimental)'
@@ -40,6 +37,9 @@
 
     # Explicit proposals. They override the SDK check result and the default proposal for untested rules.
     Proposals = @{
+        SA1503 = 'StyleBro **BRO1514** (done; replaces IDE0011, whose fix breaks multi-targeted projects). Skips comments/directives where the braces go and multi-line strings'
+        SA1519 = 'StyleBro **BRO1515** (done; replaces IDE0011). Same skips as BRO1514'
+        SA1520 = 'StyleBro **BRO1516** (done; replaces IDE0011). Same skips as BRO1514'
         SA1004 = 'StyleBro **BRO1005** (done), same positions and output as StyleCop'
         SA1006 = 'StyleBro **BRO1006** (done), same positions and output as StyleCop'
         SA1112 = 'StyleBro **BRO1116** (done), same positions and output as StyleCop'

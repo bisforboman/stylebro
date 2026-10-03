@@ -3,8 +3,8 @@
 # order, ...) come from StyleBro's preset. The severities have to be here: 'dotnet format' ignores rule severities in a
 # package's global config. Add <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> to report them on build too.
 
-# Braces on all control statements (SA1503, SA1519, SA1520)
-dotnet_diagnostic.IDE0011.severity = warning
+# Braces (SA1503, SA1519, SA1520) are StyleBro's BRO1514-BRO1516: IDE0011's fix breaks multi-targeted projects
+dotnet_diagnostic.IDE0011.severity = none
 # Formatting: spacing, indentation, line breaks (SA1000-SA1028, SA1107, SA1134, SA1137, SA1500)
 dotnet_diagnostic.IDE0055.severity = warning
 # Explicit access modifiers, also on every part of a partial type (SA1400, SA1205)
