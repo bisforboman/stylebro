@@ -1,3 +1,7 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
 using StyleBro.Analyzers.Naming;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Naming.TupleElementNamingAnalyzer, StyleBro.CodeFixes.Naming.TupleElementNamingCodeFixProvider>;
 
@@ -268,4 +272,29 @@ public class TupleElementNamingTests
             public (int Width, int Height) Size() => (Width: 1, Height: 2);
         }
         """);
+
+    [Fact]
+    public async Task NamesForcedByALibraryMember_AreNotReported()
+    {
+        // A referenced assembly whose interface names the tuple elements: the implementation has to use the same names.
+        var library = CSharpCompilation.Create(
+            "Library",
+            new[] { CSharpSyntaxTree.ParseText("public interface IScores { (int count, int total) Get(); }") },
+            await ReferenceAssemblies.Default.ResolveAsync(LanguageNames.CSharp, CancellationToken.None),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        using var image = new MemoryStream();
+        Assert.True(library.Emit(image).Success);
+
+        var test = new CSharpCodeFixTest<TupleElementNamingAnalyzer, StyleBro.CodeFixes.Naming.TupleElementNamingCodeFixProvider, DefaultVerifier>
+        {
+            TestCode = """
+                public class Scores : IScores
+                {
+                    public (int count, int total) Get() => (1, 2);
+                }
+                """,
+        };
+        test.TestState.AdditionalReferences.Add(MetadataReference.CreateFromImage(image.ToArray()));
+        await test.RunAsync();
+    }
 }
