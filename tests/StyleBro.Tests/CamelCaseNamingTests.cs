@@ -408,4 +408,39 @@ public class CamelCaseNamingTests
             public override int Run(int Speed) => Speed + speed;
         }
         """);
+
+    [Fact]
+    public Task ConstructorParametersNamedLikeAMember_KeepTheirName() => VerifyFixAsync(
+        """
+        public class Point
+        {
+            public Point(int X, int {|BRO1302:Other|})
+            {
+                this.X = X;
+                Y = Other;
+            }
+
+            public int X { get; }
+
+            public int Y { get; }
+
+            public void Move(int {|BRO1302:Y|}) { }
+        }
+        """,
+        """
+        public class Point
+        {
+            public Point(int X, int other)
+            {
+                this.X = X;
+                Y = other;
+            }
+
+            public int X { get; }
+
+            public int Y { get; }
+
+            public void Move(int y) { }
+        }
+        """);
 }

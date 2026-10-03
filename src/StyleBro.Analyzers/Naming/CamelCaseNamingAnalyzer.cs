@@ -44,6 +44,17 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     /// Whether a parameter keeps the name of the parameter it overrides or implements. Like StyleCop, such a parameter
     /// isn't reported: its name comes from the base, and renaming the base renames it too.
     /// </summary>
+    /// <summary>
+    /// A constructor parameter named exactly like a property or field of its type ('Point(int X) { this.X = X; }'):
+    /// serializers bind constructor parameters to members by name, CsvHelper case-sensitively, so the name is a contract
+    /// (a CsvHelper test broke when 'Id' became 'id').
+    /// </summary>
+    public static bool NamesAMember(IParameterSymbol parameter)
+    {
+        return parameter.ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.Constructor, ContainingType: { } type }
+            && type.GetMembers(parameter.Name).Any(m => m is IPropertySymbol or IFieldSymbol);
+    }
+
     public static bool InheritsName(IParameterSymbol parameter)
     {
         return GetBaseMembers(parameter.ContainingSymbol).Any(b =>
@@ -137,6 +148,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             || node.Parent?.Parent is RecordDeclarationSyntax
             || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { } parameter
             || InheritsName(parameter)
+            || NamesAMember(parameter)
             || parameter.ContainingSymbol is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null })
         {
             return;

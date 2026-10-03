@@ -11,4 +11,9 @@
         # attribute that would show the order matters (docs/rules/BRO1001.md, Not reported).
         KnownFailures = @('Newtonsoft.Json.Tests.Serialization.CamelCasePropertyNamesContractResolverTests.MemberSearchFlags') }
     Serilog       = @{ Url = 'https://github.com/serilog/serilog'; Commit = 'bebc7719004f76187ae72e64ce138ec2540f2070'; Solution = 'Serilog.sln'; Tests = 'dotnet' }
+    # An application (a media server) that uses StyleCop.Analyzers.
+    Jellyfin      = @{ Url = 'https://github.com/jellyfin/jellyfin'; Commit = '305a96471509f11de4d3a93e1ea268d4fd2af76c'; Solution = 'Jellyfin.sln'; Tests = 'dotnet' }
+    FluentValidation = @{ Url = 'https://github.com/FluentValidation/FluentValidation'; Commit = 'fa3c160b17796ff67d6aa5ae6c4b05b471f1a791'; Solution = 'FluentValidation.sln'; Tests = 'dotnet' }
+    # Seven target frameworks (net462 to net9.0). Three tests fail on the untouched code too; only new failures count.
+    CsvHelper     = @{ Url = 'https://github.com/JoshClose/CsvHelper'; Commit = '33970e5183383bdac1fbce3b3fbcdf46b318ca52'; Solution = 'CsvHelper.sln'; Tests = 'dotnet' }
 }

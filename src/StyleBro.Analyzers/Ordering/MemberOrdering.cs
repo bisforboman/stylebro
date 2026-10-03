@@ -151,7 +151,11 @@ internal static class MemberOrdering
             {
                 var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source]) && !NeedsSeparation(members[slot - 1], members[slot]);
                 var createsComment = StartsWithLineComment(split[source].Content) && !StartsWithLineComment(split[slot].Content);
-                if (createsSeparation || createsComment)
+
+                // A doc comment arriving where a member without one sat (field below field: no blank line needed before)
+                // wants one too (BRO1513, SA1514; found in Jellyfin). Below a region line the next check adds it.
+                var createsDoc = !EndsWithDirective(layout) && StartsWithDocComment(split[source].Content) && !StartsWithDocComment(split[slot].Content);
+                if (createsSeparation || createsComment || createsDoc)
                 {
                     layout = layout.Insert(0, SyntaxFactory.EndOfLine(newLine));
                 }
