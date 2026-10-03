@@ -63,7 +63,7 @@ out.append('when neither is set). `stylebro-migrate` keeps writing what matches 
 out.append('| Rules | SDK key | What changes | Status |')
 out.append('|-------|---------|--------------|--------|')
 for rules, key, change, status in [
-    ('BRO1303 (private fields)', '`dotnet_naming_rule.*` / `dotnet_naming_style.*`', 'A naming rule for private fields (required prefix `_`, camel case) picks `camelCase` or `_camelCase` when `stylebro_private_field_naming` isn\'t set; a style the rule can\'t produce leaves the default.', 'Planned'),
+    ('BRO1303 (private fields)', '`dotnet_naming_rule.*` / `dotnet_naming_style.*`', 'A naming rule for private fields (required prefix `_`, camel case) picks `camelCase` or `_camelCase` when `stylebro_private_field_naming` isn\'t set (the preset no longer sets it); a style the rule can\'t produce leaves the default. BRO1307 leaves a one-letter prefix a naming rule asks for (`s_`).', 'Done (2026-10-03)'),
     ('BRO1131', '`dotnet_style_qualification_for_method/_property/_field/_event`', '`false` drops `base.` (`Reset()`) instead of writing `this.Reset()`, where the unqualified name binds the same.', 'Done (2026-10-03)'),
     ('BRO1514-BRO1516', '`csharp_prefer_braces`', '`when_multiline`: only multi-line child statements (as IDE0011 counts them) and inconsistent chains; `false`: none.', 'Done (2026-10-03)'),
     ('BRO1404', '`dotnet_style_require_accessibility_modifiers`', '`never`/`omit_if_default`: not reported (removing modifiers is not what these rules do); `always`: interface members too (C# 8+).', 'Done (2026-10-03)'),

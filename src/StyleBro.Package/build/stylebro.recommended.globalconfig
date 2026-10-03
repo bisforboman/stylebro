@@ -56,9 +56,9 @@ dotnet_diagnostic.BRO1301.severity = warning
 dotnet_diagnostic.BRO1302.severity = warning
 
 # BRO1303: private field names are camelCase (SA1306/SA1309). For '_count' instead of 'count', set
-# stylebro_private_field_naming = _camelCase in .editorconfig.
+# stylebro_private_field_naming = _camelCase in .editorconfig, or have a dotnet_naming_rule for private fields with
+# required_prefix = _ (not set here, so such a rule can take effect).
 dotnet_diagnostic.BRO1303.severity = warning
-stylebro_private_field_naming = camelCase
 
 # BRO1304: interface names begin with I (SA1302)
 dotnet_diagnostic.BRO1304.severity = warning

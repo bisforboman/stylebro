@@ -854,6 +854,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   with namespace ordering: FFMpegCore 34, Polly 87, private app 881, Newtonsoft.Json 330, Serilog 46, OpenTelemetry 0;
   all converge in one pass, no new compile errors, no conflict markers (e.g. FFMpegCore: interfaces moved above classes).
 
+- **Following the SDK's settings** (2026-10-03, docs/decisions.md; precedence `stylebro_*` > SDK key > StyleCop):
+  `csharp_prefer_braces` (BRO1514-1516: when_multiline with IDE0011's multi-line definition incl. split headers;
+  false = nothing), `dotnet_style_qualification_for_*` (BRO1131: false drops `base.` where the plain name binds the same,
+  checked with `Speculation.SymbolAfterReplacing` on the whole statement: a position-based speculative lookup missed a
+  parameter shadowing the field), `dotnet_style_require_accessibility_modifiers` (BRO1404/BRO1007: always = interface
+  members too, never/omit_if_default = nothing), `dotnet_style_parentheses_in_*_binary_operators` (never_if_unnecessary
+  turns BRO1406/BRO1407 off; removal stays SA1119), `dotnet_naming_rule.*` (BRO1303 style when no stylebro key; the
+  preset no longer sets `stylebro_private_field_naming`; BRO1307 leaves prefixes a naming rule requires, e.g. `s_`).
+  `end_of_line` dropped: the full `dotnet format` whitespace pass normalizes endings before the analyzer fixes run.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

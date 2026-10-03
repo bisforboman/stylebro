@@ -42,8 +42,11 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var style = FieldNames.GetStyle(context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree));
-        if (FieldNames.GetRename(field, style) is ({ } rule, { } newName) && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value))
+        var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
+        var style = FieldNames.GetStyle(options);
+        if (FieldNames.GetRename(field, style) is ({ } rule, { } newName)
+            && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
+            && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 rule switch

@@ -50,11 +50,18 @@ internal static class FieldNames
         Pascal,
     }
 
+    /// <summary>
+    /// The private field style: <see cref="StyleKey"/> when set; otherwise the SDK's naming rule for private fields, when
+    /// one asks for camel case with no prefix or with '_'; otherwise camelCase.
+    /// </summary>
     public static FieldStyle GetStyle(AnalyzerConfigOptions options)
     {
-        return options.TryGetValue(StyleKey, out var value) && value.Trim() == "_camelCase"
-            ? FieldStyle.UnderscoreCamelCase
-            : FieldStyle.CamelCase;
+        if (options.TryGetValue(StyleKey, out var value))
+        {
+            return value.Trim() == "_camelCase" ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase;
+        }
+
+        return GetStyleFromNamingRules(options) ?? FieldStyle.CamelCase;
     }
 
     /// <summary>
@@ -264,6 +271,81 @@ internal static class FieldNames
         return !(facts.InferredNames.Contains(oldName) || (Word.Match(oldName) is { Success: true } m && m.Length == oldName.Length
             ? facts.Words.Contains(oldName)
             : facts.Texts.Any(t => Regex.IsMatch(t, @"(?<![\w@])" + Regex.Escape(oldName) + @"(?!\w)"))));
+    }
+
+    /// <summary>
+    /// Whether an active SDK naming rule for fields asks for this one-letter prefix ('s_' for static fields, as the .NET
+    /// runtime does): BRO1307 then leaves such names alone instead of contradicting the team's own rule.
+    /// </summary>
+    public static bool IsPrefixRequiredByNamingRule(string prefix, AnalyzerConfigOptions options)
+    {
+        string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
+        foreach (var key in options.Keys)
+        {
+            if (!key.StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) || !key.EndsWith(".symbols", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var rule = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
+            var kinds = Get($"dotnet_naming_symbols.{Get(key)}.applicable_kinds");
+            if (Get($"dotnet_naming_rule.{rule}.style") is { } style
+                && Get($"dotnet_naming_rule.{rule}.severity") is not ("none" or "silent")
+                && (kinds is null || kinds.Split(',').Select(k => k.Trim()).Any(k => k is "*" or "field"))
+                && Get($"dotnet_naming_style.{style}.required_prefix") == prefix)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The style of the SDK naming rule (dotnet_naming_rule.*) that covers private instance fields: its symbols apply to
+    /// fields (or '*') and private (or '*') with no required modifiers ('static' or 'readonly' rules are for other fields),
+    /// it isn't turned off, and its style is camel case without a prefix or with '_' (anything else: null). The lowest
+    /// 'priority' wins, then the rule name, so the choice doesn't depend on key order.
+    /// </summary>
+    private static FieldStyle? GetStyleFromNamingRules(AnalyzerConfigOptions options)
+    {
+        string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
+        static bool Has(string? list, string item) =>
+            list is null || list.Split(',').Select(p => p.Trim()).Any(p => p == "*" || p.Equals(item, System.StringComparison.OrdinalIgnoreCase));
+
+        var candidates = new System.Collections.Generic.List<(int Priority, string Name, FieldStyle Style)>();
+        foreach (var key in options.Keys)
+        {
+            if (!key.StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) || !key.EndsWith(".symbols", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var rule = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
+            var symbols = Get(key);
+            var style = Get($"dotnet_naming_rule.{rule}.style");
+            if (symbols is null || style is null || Get($"dotnet_naming_rule.{rule}.severity") is "none" or "silent"
+                || !Has(Get($"dotnet_naming_symbols.{symbols}.applicable_kinds"), "field")
+                || !Has(Get($"dotnet_naming_symbols.{symbols}.applicable_accessibilities"), "private")
+                || !string.IsNullOrEmpty(Get($"dotnet_naming_symbols.{symbols}.required_modifiers"))
+                || Get($"dotnet_naming_style.{style}.capitalization") != "camel_case"
+                || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
+                || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator")))
+            {
+                continue;
+            }
+
+            var prefix = Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty;
+            if (prefix is not ("" or "_"))
+            {
+                continue;
+            }
+
+            var priority = int.TryParse(Get($"dotnet_naming_rule.{rule}.priority"), out var p) ? p : int.MaxValue;
+            candidates.Add((priority, rule, prefix == "_" ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase));
+        }
+
+        return candidates.Count == 0 ? null : candidates.OrderBy(c => c.Priority).ThenBy(c => c.Name, System.StringComparer.Ordinal).First().Style;
     }
 
     /// <summary>Protected and private protected fields that aren't constants or static readonly.</summary>

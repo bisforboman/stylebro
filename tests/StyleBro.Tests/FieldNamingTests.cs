@@ -109,6 +109,66 @@ public class FieldNamingTests
         editorConfig: Underscore);
 
     [Fact]
+    public Task NamingRuleForPrivateFields_PicksTheStyle() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private int {|BRO1303:count|};
+            private static int s_total;
+
+            public int Next() => ++count + s_total;
+        }
+        """,
+        """
+        public class C
+        {
+            private int _count;
+            private static int s_total;
+
+            public int Next() => ++_count + s_total;
+        }
+        """,
+        editorConfig: """
+            dotnet_naming_rule.private_fields.symbols = private_fields
+            dotnet_naming_rule.private_fields.style = underscore_camel
+            dotnet_naming_rule.private_fields.severity = warning
+            dotnet_naming_rule.private_fields.priority = 2
+            dotnet_naming_symbols.private_fields.applicable_kinds = field
+            dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+            dotnet_naming_style.underscore_camel.required_prefix = _
+            dotnet_naming_style.underscore_camel.capitalization = camel_case
+            dotnet_naming_rule.static_fields.symbols = static_fields
+            dotnet_naming_rule.static_fields.style = s_camel
+            dotnet_naming_rule.static_fields.severity = warning
+            dotnet_naming_rule.static_fields.priority = 1
+            dotnet_naming_symbols.static_fields.applicable_kinds = field
+            dotnet_naming_symbols.static_fields.applicable_accessibilities = private
+            dotnet_naming_symbols.static_fields.required_modifiers = static
+            dotnet_naming_style.s_camel.required_prefix = s_
+            dotnet_naming_style.s_camel.capitalization = camel_case
+            """);
+
+    [Fact]
+    public Task StyleBroKey_WinsOverANamingRule() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private int count;
+
+            public int Next() => ++count;
+        }
+        """,
+        """
+        stylebro_private_field_naming = camelCase
+        dotnet_naming_rule.private_fields.symbols = private_fields
+        dotnet_naming_rule.private_fields.style = underscore_camel
+        dotnet_naming_symbols.private_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+        dotnet_naming_style.underscore_camel.required_prefix = _
+        dotnet_naming_style.underscore_camel.capitalization = camel_case
+        """);
+
+    [Fact]
     public Task ProtectedFields_FollowStyleCop() => VerifyFixAsync(
         """
         public class C
