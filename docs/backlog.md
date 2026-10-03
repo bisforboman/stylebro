@@ -14,11 +14,11 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 18 |
+| Done, not released yet | 19 |
 | Planned | 0 rules, 9 work items |
 | Maybe | none (moved to planned work) |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 104 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 105 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -37,7 +37,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 |------|------|-------|--------|
 | Hardening | More real-world repos in the PR pipeline | Jellyfin (an application using StyleCop), FluentValidation and CsvHelper (seven target frameworks) added; they found a BRO1302 rename that broke CsvHelper at run time and a BRO1001 blank line that needed a second run. | Done (2026-10-03) |
 | Hardening | IDE0055 in multi-targeted repos | `dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md. | Done (2026-10-03) |
-| Parity | SA1316: tuple element names in PascalCase | Rename every use together (deconstructions, `t.name`, inferred names), configurable like `tupleElementNameCasing`. | Planned |
+| Parity | SA1316: tuple element names in PascalCase | BRO1311: renamed with every use, literal and override solution-wide (Roslyn's Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`. | Done (2026-10-03) |
 | Parity | SA1108: no comments inside block statements | Probe what teams expect first (move the comment above the statement?); StyleCop has no fix. | Planned |
 | Parity | BRO1309: namespace names | Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first. | Planned |
 | Adoption | Getting started | One page from install to the first `dotnet format` run, for new projects and for StyleCop users. | Planned |
@@ -135,6 +135,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1308](rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Released |
 | [BRO1309](rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Released |
 | [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Done |
+| [BRO1311](rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Done |
 
 ### BRO14xx: Maintainability
 

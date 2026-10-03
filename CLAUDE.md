@@ -395,6 +395,17 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Off-by-default plumbing: `Severities.IsOn(..., enabledByDefault: false)`; the test framework turns on EVERY supported
   diagnostic, so `Verifier.RunAsync` suppresses off-by-default ids unless the test's .editorconfig sets them;
   DocExamplesTests runs all analyzers supporting an id; the parity runner sets the BRO ids' severity too.
+- **BRO1311** (SA1316, tuple element casing; 2026-10-03; `Naming/TupleElementNames.cs`, `TupleElementNamingAnalyzer`,
+  fix `TupleElementRenamer`): StyleCop's reports exactly (tuple TYPE elements, first letter, `_` skipped, names forced by
+  a LIBRARY member whose own declaration names them; overrides of solution members ARE reported; parity
+  `tuple-element-casing` 12/12). `stylebro_tuple_element_name_casing` (PascalCase default) from tupleElementNameCasing;
+  includeInferredTupleElementNames isn't supported (report note). Probed: Roslyn's `Renamer` crashes on tuple
+  elements ("Unexpected null" in ConflictResolver) and `FindReferencesAsync` matches elements of DIFFERENT tuple types
+  by name; GetTypeInfo's (Converted)Type elements of a literal point at the literal's own names. So the fix renames by
+  declarations, solution-wide per name: all tuple type elements (not library-forced), literal names whose TARGET (from
+  the operation parent: assignment/return/initializer/argument) is renamed, uses (`.x`, `?.x`, patterns) of elements
+  declared at renamed places; a use that a tuple/anonymous object infers a name from gets the old name written out
+  (`(first: pair.First, 2)`). Safety net: a rename that adds compile errors or CS8123 warnings is dropped (warning stays).
 - Remaining naming: protected readonly casing, namespaces.
 
 ## BRO16xx: documentation

@@ -110,6 +110,7 @@ internal static class Migration
         AddDocumentationScope(setup, lines);
         lines.Add($"{StyleBro.Analyzers.Layout.Braces.ConsecutiveUsingsKey} = {Bool(setup.Setting("layoutRules", "allowConsecutiveUsings") is not { ValueKind: JsonValueKind.False })}");
         AddHungarianPrefixes(setup, lines);
+        AddTupleElementCasing(setup, lines, result);
         if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none"))
         {
             AddFileHeader(setup, lines);
@@ -374,6 +375,21 @@ internal static class Migration
         if (setup.Setting("documentationRules", "headerDecoration")?.GetString() is { Length: > 0 } decoration)
         {
             lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.DecorationKey} = {decoration}");
+        }
+    }
+
+    /// <summary>BRO1311's casing, from stylecop.json's namingRules (only camelCase; PascalCase is the default).</summary>
+    private static void AddTupleElementCasing(StyleCopSetup setup, List<string> lines, Result result)
+    {
+        if (setup.Setting("namingRules", "tupleElementNameCasing") is { ValueKind: JsonValueKind.String } casing
+            && string.Equals(casing.GetString(), "camelCase", StringComparison.OrdinalIgnoreCase))
+        {
+            lines.Add($"{StyleBro.Analyzers.Naming.TupleElementNames.CasingKey} = camelCase");
+        }
+
+        if (setup.Setting("namingRules", "includeInferredTupleElementNames") is { ValueKind: JsonValueKind.True } && setup.IsOn("SA1316"))
+        {
+            result.Notes.Add("stylecop.json sets includeInferredTupleElementNames: BRO1311 checks names in tuple types only, not names a tuple literal infers.");
         }
     }
 

@@ -104,7 +104,7 @@ SA1311,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1312,"StyleBro **BRO1301** (done), rename with Fix All; also fixes `_name`"
 SA1313,"StyleBro **BRO1302** (done), rename with Fix All incl. named arguments and overrides; also fixes `_name`"
 SA1314,"StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop"
-SA1316,Not yet: StyleBro candidate. Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).
+SA1316,"StyleBro **BRO1311** (done), the name renamed with every use and override solution-wide; `stylebro_tuple_element_name_casing` from tupleElementNameCasing"
 SA1400,"StyleBro **BRO1404** (done; replaces IDE0040), same positions and output as StyleCop"
 SA1401,Drop: Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on.
 SA1402,Drop: Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it).
