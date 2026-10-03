@@ -142,8 +142,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - Regions (2026-10-03, user's pick from the backlog): every `#region`/`#endregion` line between members is a fence
   (`GetSegments`); members are sorted within each stretch, compared as (segment, key), so the order ACROSS regions isn't
   checked (StyleCop's is; the fix would move members into another region; parity `member-order-regions`). Region lines
-  and anything above them are slot layout (`SplitLeadingTrivia` starts after the last directive). Still skipped: `#if`,
-  `#pragma`, or a doc comment above a region line. A doc comment moved right below a region line gets BRO1513's blank
+  and anything above them are slot layout (`SplitLeadingTrivia` starts after the last directive). `#pragma`/`#nullable` are
+  fences too. Still skipped: conditional directives (multi-targeting: each TFM's copy has other members there), or a doc
+  comment above a directive. A doc comment moved right below a region line gets BRO1513's blank
   line (found in Messy: depending on fix order `dotnet format` needed a second run).
 - Types where sorting would swap dependent field/auto-property initializers are skipped (`InitializerOrder.cs`).
 - Since 2026-10-03 also the members of a namespace (block or file-scoped) and a file: StyleCop's OuterOrder (namespace,

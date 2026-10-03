@@ -381,10 +381,12 @@ internal static class MemberOrdering
     }
 
     /// <summary>
-    /// The region each member is in (0, 1, ...): every '#region'/'#endregion' before a member starts a new one, and members
-    /// are sorted within their region only, so the regions keep their members and their place. Null (the type is skipped)
-    /// for any other directive between members ('#if', '#pragma': moving members across them changes what compiles or
-    /// what is suppressed) and for a doc comment above a region directive (it would stay with the position, not the member).
+    /// The stretch each member is in (0, 1, ...): every directive before a member ('#region', '#endregion', '#pragma',
+    /// '#nullable') starts a new one, and members are sorted within their stretch only, so regions keep their members and
+    /// every member keeps the pragma and nullable state it had. Null (the type is skipped) for conditional directives
+    /// ('#if', '#else', ...: in a multi-targeted project each target framework's copy of the file has other members
+    /// there and would need other edits) and for a doc comment above a directive (it would stay with the position, not
+    /// the member).
     /// </summary>
     private static int[]? GetSegments(SyntaxList<MemberDeclarationSyntax> members)
     {
@@ -393,7 +395,7 @@ internal static class MemberOrdering
         for (var i = 0; i < members.Count; i++)
         {
             var trivia = members[i].GetLeadingTrivia();
-            if (!IsRegionsOnly(trivia))
+            if (!IsSortableAcross(trivia))
             {
                 return null;
             }
@@ -408,16 +410,16 @@ internal static class MemberOrdering
 
         // What follows the last member: the closing brace, or for a file (and a file-scoped namespace) its end.
         var after = members[members.Count - 1].GetLastToken().GetNextToken(includeZeroWidth: true);
-        return IsRegionsOnly(after.LeadingTrivia) ? segments : null;
+        return IsSortableAcross(after.LeadingTrivia) ? segments : null;
     }
 
-    private static bool IsRegionsOnly(SyntaxTriviaList trivia)
+    private static bool IsSortableAcross(SyntaxTriviaList trivia)
     {
         var last = LastDirective(trivia);
         for (var i = 0; i <= last; i++)
         {
             var kind = trivia[i].Kind();
-            if ((trivia[i].IsDirective && kind is not (SyntaxKind.RegionDirectiveTrivia or SyntaxKind.EndRegionDirectiveTrivia))
+            if (kind is SyntaxKind.IfDirectiveTrivia or SyntaxKind.ElifDirectiveTrivia or SyntaxKind.ElseDirectiveTrivia or SyntaxKind.EndIfDirectiveTrivia
                 || kind is SyntaxKind.SingleLineDocumentationCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia)
             {
                 return false;
@@ -442,8 +444,8 @@ internal static class MemberOrdering
 
     /// <summary>
     /// Splits leading trivia into the blank-line layout (stays with the slot) and the member's
-    /// own content: indentation, comments and doc comments (moves with the member). Region directives, and anything above
-    /// them, are layout: they mark where a region starts or ends, not the member.
+    /// own content: indentation, comments and doc comments (moves with the member). Directives, and anything above them,
+    /// are layout: they mark where a region or a pragma's scope starts or ends, not the member.
     /// </summary>
     private static (SyntaxTriviaList Layout, SyntaxTriviaList Content) SplitLeadingTrivia(SyntaxTriviaList trivia)
     {

@@ -469,16 +469,41 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task OtherDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync("""
+    public Task Pragmas_AreFencesToo() => VerifyFixAsync(
+        """
         class C
         {
-            #region Methods
+        #pragma warning disable CS0169
             public void M() { }
-        #if DEBUG
-            public void D() { }
-        #endif
+
+            private int {|BRO1001:_x|};
+        #pragma warning restore CS0169
+
+            public void N() { }
+        }
+        """,
+        """
+        class C
+        {
+        #pragma warning disable CS0169
             private int _x;
-            #endregion
+
+            public void M() { }
+        #pragma warning restore CS0169
+
+            public void N() { }
+        }
+        """);
+
+    [Fact]
+    public Task ConditionalDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+        #if true
+            public void D() { }
+
+            private int _x;
+        #endif
         }
 
         class D
