@@ -20,8 +20,14 @@ public sealed class PrecedenceAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
+                var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree);
                 foreach (var (operand, id) in Precedence.GetFindings(c.Node))
                 {
+                    if (!Precedence.IsWanted(id, options))
+                    {
+                        continue;
+                    }
+
                     var descriptor = id == DiagnosticIds.ArithmeticPrecedence ? Descriptors.ArithmeticPrecedence : Descriptors.ConditionalPrecedence;
                     c.ReportDiagnostic(Diagnostic.Create(descriptor, operand.GetLocation()));
                 }

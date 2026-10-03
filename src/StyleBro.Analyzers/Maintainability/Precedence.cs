@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Maintainability;
@@ -19,6 +20,19 @@ internal static class Precedence
         SyntaxKind.ModuloExpression, SyntaxKind.LeftShiftExpression, SyntaxKind.RightShiftExpression,
         SyntaxKind.LogicalAndExpression, SyntaxKind.LogicalOrExpression, SyntaxKind.AndPattern, SyntaxKind.OrPattern,
     };
+
+    /// <summary>
+    /// Whether the SDK's dotnet_style_parentheses_in_arithmetic_binary_operators (BRO1406) or
+    /// dotnet_style_parentheses_in_other_binary_operators (BRO1407) allows adding parentheses: 'never_if_unnecessary' turns
+    /// the rule off; 'always_for_clarity' or not set keeps StyleCop's rule.
+    /// </summary>
+    public static bool IsWanted(string id, AnalyzerConfigOptions options)
+    {
+        var key = id == DiagnosticIds.ArithmeticPrecedence
+            ? "dotnet_style_parentheses_in_arithmetic_binary_operators"
+            : "dotnet_style_parentheses_in_other_binary_operators";
+        return !(options.TryGetValue(key, out var value) && value.Split(':')[0].Trim().Equals("never_if_unnecessary", System.StringComparison.OrdinalIgnoreCase));
+    }
 
     /// <summary>The operands of this operation that need parentheses, with the rule for each.</summary>
     public static IEnumerable<(SyntaxNode Operand, string Id)> GetFindings(SyntaxNode node)

@@ -67,7 +67,7 @@ for rules, key, change, status in [
     ('BRO1131', '`dotnet_style_qualification_for_method/_property/_field/_event`', '`false` drops `base.` (`Reset()`) instead of writing `this.Reset()`, where the unqualified name binds the same.', 'Done (2026-10-03)'),
     ('BRO1514-BRO1516', '`csharp_prefer_braces`', '`when_multiline`: only multi-line child statements (as IDE0011 counts them) and inconsistent chains; `false`: none.', 'Done (2026-10-03)'),
     ('BRO1404', '`dotnet_style_require_accessibility_modifiers`', '`never`/`omit_if_default`: not reported (removing modifiers is not what these rules do); `always`: interface members too (C# 8+).', 'Done (2026-10-03)'),
-    ('BRO1405-BRO1407', '`dotnet_style_parentheses_*`', '`always_for_clarity` / `never_if_unnecessary` per operator group, instead of StyleCop\'s fixed families.', 'Planned'),
+    ('BRO1406/BRO1407', '`dotnet_style_parentheses_in_arithmetic_binary_operators` / `_in_other_binary_operators`', '`never_if_unnecessary` turns the rule off (no parentheses added). Removing stays SA1119 (BRO1405): following the SDK\'s broader removal would bring back the `a ?? (b ?? c)` difference in migrated StyleCop repos. `always_for_clarity` keeps StyleCop\'s operator families.', 'Done (2026-10-03)'),
     ('All text fixes', '`end_of_line`', 'Not needed: a full `dotnet format` run normalizes line endings to `end_of_line` in its whitespace pass before the analyzer fixes run, and those copy the file\'s ending.', 'Dropped'),
 ]:
     out.append(f'| {rules} | {key} | {change} | {status} |')

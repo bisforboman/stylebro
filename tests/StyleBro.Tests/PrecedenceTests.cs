@@ -48,6 +48,22 @@ public class PrecedenceTests
         """);
 
     [Fact]
+    public Task NeverIfUnnecessary_TurnsTheGroupOff() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public bool M(int a, int b, bool f, bool g) => a + b * a > 0 || {|BRO1407:f && g|};
+        }
+        """,
+        """
+        public class C
+        {
+            public bool M(int a, int b, bool f, bool g) => a + b * a > 0 || (f && g);
+        }
+        """,
+        editorConfig: "dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:silent");
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         #if DEBUG || TRACE && RELEASE
         #endif
