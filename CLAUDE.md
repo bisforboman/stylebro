@@ -811,10 +811,21 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   sealed JsonTextWriter subclass calling `base.WriteValue("redacted")` from its `WriteValue(object)` override: same
   overload with `this.`), fixed, compiles, second run clean. Private app not run (its clone was busy with the delta).
 
+- **GOTCHA (2026-10-03):** `Measure-MigrationDelta.ps1 -ResetTargetRepo` leaves its clone at two extra commits
+  ("baseline: plain dotnet format", which in Polly holds a file with conflict markers, and "stylebro-migrate"), and the
+  real-world script resets to HEAD, i.e. to those. Reset the clone to upstream (`git reset --hard HEAD~2`) before a
+  real-world run. Today's first runs of BRO1006/BRO1131/BRO1514-BRO1516/BRO1404/BRO1007/BRO1405 on Polly,
+  OpenTelemetry and the private app used the migrated state; rerun on upstream (see below).
 - **BRO1514-BRO1516** (2026-10-03): FFMpegCore, Polly, OpenTelemetry 0; private app 14 (8 files); Newtonsoft.Json 112
   (8 target frameworks, 5 files); Serilog 213 (54 files; the repo where IDE0011 crashed `dotnet format`). All fixed in
   one pass, no new compile errors, second run clean, no conflict markers (Polly's one marker file is the measurement
   clone's committed plain-`dotnet format` baseline).
+
+- **Today's rules on upstream repos** (2026-10-03; BRO1006, BRO1007, BRO1131, BRO1404-BRO1407, BRO1514-BRO1519):
+  Polly 45 (all BRO1518; SA1508 is off there), OpenTelemetry 2 (BRO1518), private app 168, FFMpegCore 5, Newtonsoft.Json
+  905 (581 BRO1519, 287 BRO1405), Serilog 27 (the other three from the earlier runs). Every repo: fixed in one pass, no new
+  compile errors, second run clean, no conflict markers. Found on the way: BRO1405-BRO1407 reported expressions inside
+  `#if` directives (Newtonsoft.Json, 69 left after a run), fixed.
 
 ## Known open questions
 
