@@ -130,14 +130,12 @@ internal static class Migration
             result.Notes.Add($"Kept the repository's own settings for: {string.Join(", ", kept.Select(KeyOf))}.");
         }
 
-        // Built-in rules whose 'dotnet format' fixes break multi-targeted projects stay on (StyleCop enforced them), but
-        // the report says so: once there's something to fix, 'dotnet format' may crash or write conflict markers.
-        var unsafeOn = InitCommand.UnsafeWhenMultiTargeted.Where(id => lines.Any(l => l.StartsWith($"dotnet_diagnostic.{id}.severity = ", StringComparison.Ordinal)
-            && !l.EndsWith("= none", StringComparison.Ordinal) && !l.EndsWith("= suggestion", StringComparison.Ordinal) && !l.EndsWith("= silent", StringComparison.Ordinal))).ToList();
-        if (unsafeOn.Count > 0 && InitCommand.MultiTargetedProjects(root).Any())
+        // IDE0055 on in a multi-targeted repository: plain 'dotnet format' crashes there, 'stylebro-migrate format' doesn't.
+        var formattingOn = lines.Any(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal)
+            && !l.EndsWith("= none", StringComparison.Ordinal) && !l.EndsWith("= suggestion", StringComparison.Ordinal) && !l.EndsWith("= silent", StringComparison.Ordinal));
+        if (formattingOn && InitCommand.MultiTargetedProjects(root).Any())
         {
-            result.Notes.Add($"This repository has multi-targeted projects: the SDK's 'dotnet format' fixes for {string.Join(", ", unsafeOn)} can break them "
-                + "(a crash, or merge conflict markers when a fix differs between target frameworks). If that happens, set them to suggestion.");
+            result.Notes.Add("This repository has multi-targeted projects. " + InitCommand.MultiTargetedHint.Replace("\n", " "));
         }
 
         return result;

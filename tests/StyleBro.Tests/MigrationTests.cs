@@ -1,3 +1,4 @@
+using System.Text.Json;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
@@ -507,17 +508,16 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
-    public void Init_InAMultiTargetedRepository_WritesTheUnsafeRulesAsSuggestions()
+    public void Init_InAMultiTargetedRepository_KeepsFormattingOn()
     {
         Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFrameworks>net8.0;net10.0</TargetFrameworks></PropertyGroup></Project>");
 
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
 
-        Assert.All(InitCommand.UnsafeWhenMultiTargeted, id => Assert.Contains($"dotnet_diagnostic.{id}.severity = suggestion", editorConfig));
+        // 'stylebro-migrate format' makes IDE0055 safe there; init points to it instead of turning the rule down.
+        Assert.Contains("dotnet_diagnostic.IDE0055.severity = warning", editorConfig);
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", editorConfig);
-        Assert.DoesNotContain("dotnet_diagnostic.IDE0055.severity = warning", InitCommand.Block(multiTargeted: true));
-        Assert.Contains("dotnet_diagnostic.IDE0055.severity = warning", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0048.severity = none", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0047.severity = none", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0011.severity = none", InitCommand.Block());
@@ -547,6 +547,34 @@ public sealed class MigrationTests : IDisposable
         Write(".editorconfig", migrated);
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         Assert.Equal(migrated, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+    }
+
+    [Fact]
+    public void Format_PlansOneRunPerTargetFramework_WithTheProjectsThatTargetIt()
+    {
+        var frameworks = new Dictionary<string, string[]>
+        {
+            ["src\\Lib\\Lib.csproj"] = new[] { "net8.0", "netstandard2.0" },
+            ["test\\Tests\\Tests.csproj"] = new[] { "net8.0" },
+        };
+
+        var plan = FormatCommand.Plan(frameworks);
+
+        Assert.Equal(new[] { "net8.0", "netstandard2.0" }, plan.Select(p => p.Framework));
+        Assert.Equal(new[] { "src\\Lib\\Lib.csproj", "test\\Tests\\Tests.csproj" }, plan[0].Projects);
+        Assert.Equal(new[] { "src\\Lib\\Lib.csproj" }, plan[1].Projects);
+        Assert.Empty(FormatCommand.Plan(new Dictionary<string, string[]> { ["a.csproj"] = new[] { "net8.0" }, ["b.csproj"] = new[] { "net10.0" } }));
+    }
+
+    [Fact]
+    public void Format_ReadsTheFrameworks_AndWritesASolutionFilter()
+    {
+        Assert.Equal(new[] { "net8.0", "net10.0" }, FormatCommand.ParseFrameworks("""{ "Properties": { "TargetFrameworks": "net8.0; net10.0;", "TargetFramework": "" } }"""));
+        Assert.Equal(new[] { "net8.0" }, FormatCommand.ParseFrameworks("""{ "Properties": { "TargetFrameworks": "", "TargetFramework": "net8.0" } }"""));
+
+        using var filter = JsonDocument.Parse(FormatCommand.SolutionFilter("App.slnx", new[] { "src\\Lib\\Lib.csproj" }));
+        Assert.Equal("App.slnx", filter.RootElement.GetProperty("solution").GetProperty("path").GetString());
+        Assert.Equal("src\\Lib\\Lib.csproj", filter.RootElement.GetProperty("solution").GetProperty("projects")[0].GetString());
     }
 
     private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)

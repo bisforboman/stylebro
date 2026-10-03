@@ -128,6 +128,25 @@ internal static class BaselineCommand
         return new Result(new Baseline(counts), perRule, whitespace, notCovered);
     }
 
+    public static string? FindWorkspace(string root)
+    {
+        foreach (var pattern in new[] { "*.slnx", "*.sln", "*.csproj" })
+        {
+            var found = Directory.GetFiles(root, pattern);
+            if (found.Length == 1)
+            {
+                return Path.GetFileName(found[0]);
+            }
+
+            if (found.Length > 1)
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
     private static void Report(Result result)
     {
         var total = result.PerRule.Values.Sum();
@@ -164,25 +183,6 @@ internal static class BaselineCommand
         process.BeginErrorReadLine();
         process.WaitForExit();
         return process.ExitCode;
-    }
-
-    private static string? FindWorkspace(string root)
-    {
-        foreach (var pattern in new[] { "*.slnx", "*.sln", "*.csproj" })
-        {
-            var found = Directory.GetFiles(root, pattern);
-            if (found.Length == 1)
-            {
-                return Path.GetFileName(found[0]);
-            }
-
-            if (found.Length > 1)
-            {
-                return null;
-            }
-        }
-
-        return null;
     }
 
     private static void RestoreAside(string path, string aside)

@@ -35,8 +35,8 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 
 | Area | Item | Notes | Status |
 |------|------|-------|--------|
-| Hardening | More real-world repos in the PR pipeline | 2-3 more public repos in `scripts/realworld/repos.psd1` (a StyleCop user, an app rather than a library, a large multi-targeted library). Every repo added so far found real bugs. | Planned |
-| Hardening | IDE0055 in multi-targeted repos | Find out why its fix crashes Roslyn's linked-file merge under `dotnet format` and whether a safe setup exists. Not a reimplementation: it's the SDK's whole formatter, and analyzers can't reference the formatting engine (RS1038). Today `init` writes it as a suggestion there. | Planned |
+| Hardening | More real-world repos in the PR pipeline | Jellyfin (an application using StyleCop), FluentValidation and CsvHelper (seven target frameworks) added; they found a BRO1302 rename that broke CsvHelper at run time and a BRO1001 blank line that needed a second run. | Done (2026-10-03) |
+| Hardening | IDE0055 in multi-targeted repos | `dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md. | Done (2026-10-03) |
 | Parity | SA1316: tuple element names in PascalCase | Rename every use together (deconstructions, `t.name`, inferred names), configurable like `tupleElementNameCasing`. | Planned |
 | Parity | SA1108: no comments inside block statements | Probe what teams expect first (move the comment above the statement?); StyleCop has no fix. | Planned |
 | Parity | BRO1309: namespace names | Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first. | Planned |
@@ -60,8 +60,8 @@ when neither is set). `stylebro-migrate` keeps writing what matches the StyleCop
 | BRO1406/BRO1407 | `dotnet_style_parentheses_in_arithmetic_binary_operators` / `_in_other_binary_operators` | `never_if_unnecessary` turns the rule off (no parentheses added). Removing stays SA1119 (BRO1405): following the SDK's broader removal would bring back the `a ?? (b ?? c)` difference in migrated StyleCop repos. `always_for_clarity` keeps StyleCop's operator families. | Done (2026-10-03) |
 | All text fixes | `end_of_line` | Not needed: a full `dotnet format` run normalizes line endings to `end_of_line` in its whitespace pass before the analyzer fixes run, and those copy the file's ending. | Dropped |
 
-Not planned: IDE0055 (the SDK's whole formatter; `dotnet format`'s whitespace pass still does that job safely; `init`
-writes it as a suggestion in multi-targeted repositories). Also to do: report the SDK fixer bugs upstream
+IDE0055 (the SDK's whole formatter) isn't replaced: in multi-targeted repositories `stylebro-migrate format` runs
+`dotnet format` once per target framework, which avoids the crash. Also to do: report the SDK fixer bugs upstream
 (dotnet/roslyn).
 
 ## Maybe
