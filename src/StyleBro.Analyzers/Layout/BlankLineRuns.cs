@@ -222,6 +222,13 @@ internal static class BlankLineRuns
             return null;
         }
 
+        // Like StyleCop, count the line breaks between, not the lines: a directive ends with its own line break, so one blank
+        // line after '#endif' isn't reported (OpenTelemetry enforces SA1508 and has those).
+        if (separating.Skip(index + 1).Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia)) < 2)
+        {
+            return null;
+        }
+
         var stopEnd = index >= 0 ? stop.Span.End : previous.Span.End;
         var stopLine = text.Lines.GetLineFromPosition(stopEnd).LineNumber;
         var braceLine = text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;

@@ -93,6 +93,14 @@ public class BlankLineRunsTests
                 {
                 };
                 var s = $"{c.Value}";
+                if (a)
+                {
+        #if DEBUG
+                    a = false;
+        #endif
+
+                }
+
                 return items.Length + s.Length;
             }
         }

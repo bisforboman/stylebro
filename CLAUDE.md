@@ -827,6 +827,11 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   compile errors, second run clean, no conflict markers. Found on the way: BRO1405-BRO1407 reported expressions inside
   `#if` directives (Newtonsoft.Json, 69 left after a run), fixed.
 
+- **Migration re-measured with the SDK replacements** (2026-10-03): Polly 3 -> 1 (the 2 IDE0047 lines are gone: BRO1405 is
+  SA1119 exactly; the 1 is the file plain `dotnet format` breaks), private app 16 -> 7 (the 9 IDE2000 files are gone; 6
+  line-ending-only + the known BRO1104), OpenTelemetry 1 -> 3 -> 1 after a fix: BRO1518 counted LINES, StyleCop counts
+  line-break trivia, so one blank line after `#endif` before `}` isn't SA1508's (a directive owns its line break).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
