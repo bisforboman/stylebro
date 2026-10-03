@@ -36,6 +36,70 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task ObservableOrder_IsKept() => VerifyNoDiagnosticsAsync("""
+        using System.Runtime.InteropServices;
+        using System.Runtime.Serialization;
+
+        // Struct fields: the memory layout.
+        public struct Header
+        {
+            private int size;
+            public int Version;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class Native
+        {
+            private int handle;
+            public int Flags;
+        }
+
+        // Serialized in declaration order.
+        [DataContract]
+        public class Message
+        {
+            [DataMember]
+            public string Text { get; set; }
+
+            [DataMember]
+            public int Id;
+        }
+        """);
+
+    [Fact]
+    public Task StructMembersOtherThanFields_AreStillOrdered() => VerifyFixAsync(
+        """
+        public struct Point
+        {
+            public int X;
+            public int Y;
+
+            public override string ToString() => X + "," + Y;
+
+            public {|BRO1001:Point|}(int x, int y)
+            {
+                X = x;
+                Y = y;
+            }
+        }
+        """,
+        """
+        public struct Point
+        {
+            public int X;
+            public int Y;
+
+            public Point(int x, int y)
+            {
+                X = x;
+                Y = y;
+            }
+
+            public override string ToString() => X + "," + Y;
+        }
+        """);
+
+    [Fact]
     public Task TypesInANamespace_AreOrdered() => VerifyFixAsync(
         """
         namespace App

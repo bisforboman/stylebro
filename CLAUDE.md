@@ -874,6 +874,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   preset no longer sets `stylebro_private_field_naming`; BRO1307 leaves prefixes a naming rule requires, e.g. `s_`).
   `end_of_line` dropped: the full `dotnet format` whitespace pass normalizes endings before the analyzer fixes run.
 
+- **Hardening pass, all 88 rules together** (2026-10-03): every repo compiles after one pass, no conflict markers;
+  tests: Polly all, private app 6454/6454, Serilog all, FFMpegCore only its 4 known cancellation failures, but
+  Newtonsoft.Json 3 new failures: BRO1001 changed the order of serialized members (Json.NET writes declaration
+  order; its tests compare JSON). Fixed with `Ordering/ObservableOrder.cs`: a type is skipped when the sort would
+  change the relative order of instance fields of a struct / [StructLayout] type (memory layout) or of fields and
+  properties of a type with a serializer attribute on it or a member. Left: `MemberSearchFlags` serializes an
+  attribute-less class by reflection (can't be recognized; `KnownFailures` in scripts/realworld/repos.psd1).
+  Also found: `--verify-no-changes` fails on guard-kept renames (a fix that deliberately changes nothing still counts),
+  so the real-world script tests convergence as "a run changes no file".
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

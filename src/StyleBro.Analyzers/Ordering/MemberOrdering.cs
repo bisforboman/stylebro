@@ -244,8 +244,12 @@ internal static class MemberOrdering
             keys[i] = key.Value;
         }
 
-        // Sorting must not change what field initializers compute; skip the type if it could.
-        return container is TypeDeclarationSyntax type && InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys)) ? null : keys;
+        // Sorting must not change what field initializers compute, nor an order the runtime sees (struct layout,
+        // serialized members); skip the type if it could.
+        return container is TypeDeclarationSyntax type
+            && (InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys)) || ObservableOrder.ReordersObservableMembers(type, SortedOrder(keys)))
+            ? null
+            : keys;
     }
 
     /// <summary>Maps each slot to the index of the member that belongs there after sorting.</summary>
