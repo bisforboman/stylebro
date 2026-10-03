@@ -104,13 +104,13 @@ internal static class FieldNames
     /// </summary>
     /// <remarks>
     /// With <paramref name="hungarian"/> (BRO1310 is on), a Hungarian prefix is removed in the same rename, in the field's
-    /// style ('iCount' -> 'count' or '_count'). Not for PascalCase fields: BRO1306 makes them start upper-case, which
+    /// style ('iCount' -> 'count' or '_count'). PascalCase fields keep BRO1306's rename: it starts upper-case, which
     /// isn't a prefix any more.
     /// </remarks>
     public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyle style, HungarianNames? hungarian)
     {
         var rename = GetRename(field, style);
-        if (hungarian is null || IsPascalChecked(field) || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum
+        if (hungarian is null || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum
             || HungarianNames.IsInNativeMethods(field)
             || hungarian.GetNewName((rename?.NewName ?? field.Name).TrimStart('_')) is not { } stripped)
         {
