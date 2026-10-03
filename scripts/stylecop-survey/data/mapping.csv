@@ -94,7 +94,7 @@ SA1301,Drop: StyleCop never reports it. Off by default and no diagnostic (probed
 SA1302,"StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop"
 SA1303,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1304,"StyleBro **BRO1306** (done), rename with Fix All"
-SA1305,"Drop: Off by default, StyleCop has no fix. The fix would have to guess the name without the prefix (`strName` -> `name`, but `isOpen` is fine), configured by allowed prefixes. 82 / 1 / 14 findings with the rule on."
+SA1305,"StyleBro **BRO1310** (done, off by default like StyleCop), the prefix removed in the same rename as the other naming rules"
 SA1306,StyleBro **BRO1303** (done) for private and protected fields; `stylebro_private_field_naming` picks `count` (default) or `_count`
 SA1307,"StyleBro **BRO1306** (done), rename with Fix All"
 SA1308,"StyleBro **BRO1307** (done), rename to the complete correct name in one pass"

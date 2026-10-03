@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -60,7 +61,7 @@ internal static class CamelCaseNames
     /// member name (the rename would change it), and the member may not contain '#if' (code that isn't compiled
     /// can't be renamed reliably).
     /// </summary>
-    public static bool CanRename(SyntaxNode declaration, string oldName, string newName)
+    public static bool CanRename(SyntaxNode declaration, string oldName, string newName, Func<string, string?>? getNewName = null)
     {
         var scope = GetScope(declaration);
         if (scope.ContainsDirectives && scope.DescendantTrivia(descendIntoTrivia: true).Any(t => t.IsKind(SyntaxKind.IfDirectiveTrivia)))
@@ -78,7 +79,7 @@ internal static class CamelCaseNames
 
             var text = token.ValueText;
             if (text == newName
-                || (text != oldName && GetNewName(text) == newName)
+                || (text != oldName && (getNewName ?? GetNewName)(text) == newName)
                 || (text == oldName && IsInferredMemberName(token)))
             {
                 return false;

@@ -78,6 +78,9 @@ dotnet_diagnostic.BRO1308.severity = warning
 # BRO1309: types and members begin with an upper-case letter (SA1300, not namespaces)
 dotnet_diagnostic.BRO1309.severity = warning
 
+# BRO1310: no Hungarian prefixes (SA1305). Off, like StyleCop; set to warning to opt in.
+dotnet_diagnostic.BRO1310.severity = none
+
 # BRO1109: opening parenthesis on the declaration line (SA1110)
 dotnet_diagnostic.BRO1109.severity = warning
 

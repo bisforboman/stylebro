@@ -61,6 +61,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 |---|---|---|
 | [BRO1001](rules/BRO1001.md) (SA1201-SA1204, SA1214) | Types with `#region`/`#if`/`#pragma` between members; types where sorting would change what initializers compute, a struct's (or `[StructLayout]` type's) field layout, or the order a serializer writes attributed members in. One diagnostic per type, not per member. | Moving members across directives or reordering dependent initializers changes behavior. |
 | [BRO1514](rules/BRO1514.md), [BRO1515](rules/BRO1515.md), [BRO1516](rules/BRO1516.md) (SA1503, SA1519, SA1520) | A comment or directive where the braces would go, `#if` in the owning statement, a multi-line string in the statement, other code after it on its line | The fix can't place the braces without moving the comment or reindenting string contents; StyleCop's formatter-based fix does. |
+| [BRO1310](rules/BRO1310.md) (SA1305) | Constant, `static readonly`, public and internal fields; names where another name in the member would get the same new name (`xItem`, `yItem`) | Pascal fields are [BRO1306](rules/BRO1306.md)'s, which removes the prefix; the rename must not collide. |
 | [BRO1405](rules/BRO1405.md) (SA1119) | Parentheses whose removal changes how the code parses (`F(a < b, (c > (d + 1)))` would become a generic call) | StyleCop's fix doesn't compile there. Its fix also leaves the spaces of `( b )` behind; StyleBro's removes them. |
 | [BRO1517](rules/BRO1517.md), [BRO1518](rules/BRO1518.md), [BRO1519](rules/BRO1519.md) (SA1507, SA1508, SA1513) | Places another StyleBro blank-line rule fixes when it's on: after `{` (BRO1503), below a comment (BRO1506), a comment, documentation or member after `}` (BRO1504, BRO1513, BRO1505); also a `}` with code or a comment after it on its line | Two fixes adding or removing the same blank line would conflict under `dotnet format`. |
 | [BRO1101](rules/BRO1101.md) (SA1106) | `while (x) ;` and labeled `end: ;` | StyleCop's fix hides a likely bug in the first and breaks the build in the second. |
@@ -93,6 +94,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 
 | Rule | Also reported | Why |
 |---|---|---|
+| [BRO1310](rules/BRO1310.md) (SA1305) | A prefix after a leading underscore (`_iCount`) | StyleCop reports it once SA1309 removed the underscore; StyleBro does both in one rename. |
 | [BRO1407](rules/BRO1407.md) (SA1408) | `and`/`or` mixed in a pattern (`v is > 1 and < 5 or 10`) | StyleCop's current source checks patterns too; the released 1.2.0-beta.556 predates it. |
 | [BRO1104](rules/BRO1104.md) (SA1129) | Target-typed `new()` for value types | StyleCop 1.1.118 predates it; 1.2 reports it too. |
 | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | Record parameters, primary-constructor parameters and base arguments | StyleCop 1.2.0-beta.556 doesn't check them; they're lists like any other. |

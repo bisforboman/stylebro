@@ -19,7 +19,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
 
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Descriptors.VariableCasing, Descriptors.ParameterCasing);
+        ImmutableArray.Create(Descriptors.VariableCasing, Descriptors.ParameterCasing, Descriptors.HungarianNotation);
 
     /// <summary>The name token of a variable declaration, for every declaration kind BRO1301 checks.</summary>
     public static SyntaxToken GetIdentifier(SyntaxNode node)
@@ -148,7 +148,19 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier)
     {
         var oldName = identifier.ValueText;
-        if (CamelCaseNames.GetNewName(oldName) is { } newName && CamelCaseNames.CanRename(context.Node, oldName, newName))
+
+        // BRO1310: the Hungarian prefix goes in the same rename ('_iCount' -> 'count'), so one run converges.
+        var hungarian = Severities.IsOn(context.Compilation.Options, context.Node.SyntaxTree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
+            && !HungarianNames.IsInNativeMethods(context.Node)
+            ? HungarianNames.Read(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree))
+            : null;
+        var newName = HungarianNames.GetVariableName(oldName, hungarian);
+        if (newName is not null && newName != CamelCaseNames.GetNewName(oldName))
+        {
+            descriptor = Descriptors.HungarianNotation;
+        }
+
+        if (newName is not null && CamelCaseNames.CanRename(context.Node, oldName, newName, name => HungarianNames.GetVariableName(name, hungarian)))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 descriptor,

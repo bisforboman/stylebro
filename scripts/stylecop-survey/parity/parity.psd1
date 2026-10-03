@@ -286,6 +286,28 @@
             )
         }
         @{
+            Name     = 'naming-hungarian'
+            Map      = @('SA1305=BRO1310')
+            # StyleCop has no fix for SA1305; positions only.
+            CompareOutput = $false
+            Expected = @(
+                # Constant, static readonly and public fields are PascalCase (BRO1306), which removes the prefix.
+                'only StyleCop: BRO1310 Hungarian.cs(8,23)'
+                'only StyleCop: BRO1310 Hungarian.cs(9,33)'
+                'only StyleCop: BRO1310 Hungarian.cs(13,16)'
+                # Another name in the member would get the same new name (the shared rename guard): 'oValue' and the
+                # field 'pValue', 'nItem' and the query's 'xItem', 'xItem' and 'yItem', 'nSize' and the method 'Size'.
+                'only StyleCop: BRO1310 Hungarian.cs(21,41)'
+                'only StyleCop: BRO1310 Hungarian.cs(24,22)'
+                'only StyleCop: BRO1310 Hungarian.cs(44,27)'
+                'only StyleCop: BRO1310 Hungarian.cs(44,47)'
+                'only StyleCop: BRO1310 Hungarian.cs(54,34)'
+                # '_iTotal': StyleCop's pattern doesn't look past the underscore, but BRO1303's rename to 'iTotal' would
+                # make it report next time; StyleBro does both in one rename.
+                'only StyleBro: BRO1310 Hungarian.cs(11,17)'
+            )
+        }
+        @{
             Name     = 'parenthesis-placement'
             Map      = @('SA1110=BRO1109', 'SA1111=BRO1110')
             Expected = @(

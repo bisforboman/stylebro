@@ -9,7 +9,7 @@ namespace StyleBro.Analyzers;
 /// </summary>
 internal static class Severities
 {
-    public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken)
+    public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool enabledByDefault = true)
     {
         var severity = ReportDiagnostic.Default;
         if (compilationOptions?.SyntaxTreeOptionsProvider is { } provider
@@ -18,7 +18,16 @@ internal static class Severities
             return severity is not (ReportDiagnostic.Suppress or ReportDiagnostic.Hidden);
         }
 
-        return compilationOptions is null || !compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity)
-            || severity is not (ReportDiagnostic.Suppress or ReportDiagnostic.Hidden);
+        if (compilationOptions is null || !compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity))
+        {
+            return enabledByDefault;
+        }
+
+        return severity switch
+        {
+            ReportDiagnostic.Suppress or ReportDiagnostic.Hidden => false,
+            ReportDiagnostic.Default => enabledByDefault,
+            _ => true,
+        };
     }
 }

@@ -101,16 +101,16 @@ public partial class DocExamplesTests
         Assert.True(errors.Count == 0, $"{id}: the {which} example doesn't compile:\n" + string.Join("\n", errors));
     }
 
-    private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(Document document, DiagnosticAnalyzer analyzer, string id)
+    private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(Document document, ImmutableArray<DiagnosticAnalyzer> analyzer, string id)
     {
         var compilation = await document.Project.GetCompilationAsync();
-        var all = await compilation!.WithAnalyzers(ImmutableArray.Create(analyzer), document.Project.AnalyzerOptions)
+        var all = await compilation!.WithAnalyzers(analyzer, document.Project.AnalyzerOptions)
             .GetAnalyzerDiagnosticsAsync();
         return all.Where(d => d.Id == id).ToImmutableArray();
     }
 
     private static async Task<Document> FixAllAsync(
-        Document document, CodeFixProvider fixer, DiagnosticAnalyzer analyzer, string id, ImmutableArray<Diagnostic> diagnostics)
+        Document document, CodeFixProvider fixer, ImmutableArray<DiagnosticAnalyzer> analyzer, string id, ImmutableArray<Diagnostic> diagnostics)
     {
         // Find the fix's equivalence key from one registered code action, then run its Fix All on the document.
         CodeAction? first = null;
@@ -132,12 +132,14 @@ public partial class DocExamplesTests
         return solution.GetDocument(document.Id)!;
     }
 
-    private static DiagnosticAnalyzer FindAnalyzer(string id)
+    // Several analyzers can report one id (BRO1310: variables and parameters, fields).
+    private static ImmutableArray<DiagnosticAnalyzer> FindAnalyzer(string id)
     {
         return typeof(StyleBro.Analyzers.DiagnosticIds).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t))
             .Select(t => (DiagnosticAnalyzer)Activator.CreateInstance(t)!)
-            .Single(a => a.SupportedDiagnostics.Any(d => d.Id == id));
+            .Where(a => a.SupportedDiagnostics.Any(d => d.Id == id))
+            .ToImmutableArray();
     }
 
     private static CodeFixProvider FindCodeFix(string id)
@@ -161,10 +163,10 @@ public partial class DocExamplesTests
 
     private sealed class DocumentDiagnosticProvider : FixAllContext.DiagnosticProvider
     {
-        private readonly DiagnosticAnalyzer analyzer;
+        private readonly ImmutableArray<DiagnosticAnalyzer> analyzer;
         private readonly string id;
 
-        public DocumentDiagnosticProvider(DiagnosticAnalyzer analyzer, string id)
+        public DocumentDiagnosticProvider(ImmutableArray<DiagnosticAnalyzer> analyzer, string id)
         {
             this.analyzer = analyzer;
             this.id = id;

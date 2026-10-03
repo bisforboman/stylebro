@@ -53,8 +53,9 @@ foreach ($s in $config.Sets) {
     $pairs = @{}; foreach ($m in $s.Map) { $sa, $bro = $m -split '='; $pairs[$sa] = $bro }
     $cases = Join-Path $PSScriptRoot "parity/$($s.Name)"
     $sc = Join-Path $work "$($s.Name)/stylecop"; $sb = Join-Path $work "$($s.Name)/stylebro"
+    # The BRO ids are set too, for rules that are off by default (BRO1310).
     New-Project $sc @($pairs.Keys) $cases $false $s
-    New-Project $sb @($pairs.Keys) $cases $true $s
+    New-Project $sb (@($pairs.Keys) + @($pairs.Values | Sort-Object -Unique)) $cases $true $s
 
     # Positions, from the project that has both analyzers.
     $pattern = '(?<file>\w+\.cs)\((?<pos>\d+,\d+)\): warning (?<id>' + ((@($pairs.Keys) + @($pairs.Values)) -join '|') + '):'

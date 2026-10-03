@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 45 SDK, 103 StyleBro (103 done), 44 drop, 1 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 45 SDK, 104 StyleBro (104 done), 43 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -151,7 +151,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1302 | Interface names should begin with I | on | yes | on / off / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop |
 | SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1304 | Non-private readonly fields should begin with upper-case letter | on | yes | on / off / on | 0 / 1 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
-| SA1305 | Field names should not use Hungarian notation | off | no | off / off / off | 82 / 1 / 14 |  | Drop: Off by default, StyleCop has no fix. The fix would have to guess the name without the prefix (`strName` -> `name`, but `isOpen` is fine), configured by allowed prefixes. 82 / 1 / 14 findings with the rule on. ([details](skipped-rules.md#sa1305)) |
+| SA1305 | Field names should not use Hungarian notation | off | no | off / off / off | 82 / 1 / 14 |  | StyleBro **BRO1310** (done, off by default like StyleCop), the prefix removed in the same rename as the other naming rules |
 | SA1306 | Field names should begin with lower-case letter | on | yes | on / off / off | 0 / 4 / 11 | not fixed | StyleBro **BRO1303** (done) for private and protected fields; `stylebro_private_field_naming` picks `count` (default) or `_count` |
 | SA1307 | Accessible fields should begin with upper-case letter | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1306** (done), rename with Fix All |
 | SA1308 | Variable names should not be prefixed | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1307** (done), rename to the complete correct name in one pass |

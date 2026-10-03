@@ -39,6 +39,7 @@ public static class DiagnosticIds
     public const string FieldPrefix = "BRO1307";
     public const string FieldUnderscore = "BRO1308";
     public const string ElementPascalCase = "BRO1309";
+    public const string HungarianNotation = "BRO1310";
     public const string InheritDocumentation = "BRO1601";
     public const string DocumentationSlashesInComment = "BRO1602";
     public const string DocumentationEndsWithPeriod = "BRO1603";
