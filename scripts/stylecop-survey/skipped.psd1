@@ -35,8 +35,6 @@
         # ---- Naming ------------------------------------------------------------------------------------------------
         SA1301 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.'
             Revisit = 'Nothing to port.' }
-        SA1316 = @{ Status = 'Candidate'; Why = 'Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).'
-            Revisit = 'Tuple element names aren''t symbols SymbolFinder renames; every use (deconstruction, `t.name`, inferred names) must change together. Medium, risky.' }
 
         # ---- Maintainability ---------------------------------------------------------------------------------------
         SA1401 = @{ Status = 'Drop'; Why = 'Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on.'

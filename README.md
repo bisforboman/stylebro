@@ -4,6 +4,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 
 > StyleCop writes you a ticket. StyleBro just fixes it. Rule IDs use the `BRO` prefix.
 
+**New here?** [Getting started](docs/getting-started.md): from install to the first `dotnet format` run, for a new
+project or coming from StyleCop.
+
 ## Principles
 
 - **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run.
@@ -72,6 +75,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1308](docs/rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Yes |
 | [BRO1309](docs/rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Yes |
 | [BRO1310](docs/rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Yes |
+| [BRO1311](docs/rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1402](docs/rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Yes |
 | [BRO1403](docs/rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Yes |
@@ -162,6 +166,7 @@ src/StyleBro.Package       packs both DLLs into analyzers/dotnet/cs + build/ pre
 src/StyleBro.Migrate       stylebro-migrate: StyleCop setup -> .editorconfig settings
 tests/StyleBro.Tests       Microsoft.CodeAnalysis.Testing: diagnostics, single fix, Fix All, idempotence
 samples/Messy           dotnet format integration sample (Input -> Expected)
+samples/StyleCopMigration  a StyleCop project to migrate step by step (see its README)
 scripts/verify-format.ps1
 ```
 
