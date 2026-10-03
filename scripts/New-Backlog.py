@@ -10,6 +10,19 @@ unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/Analyzer
 PLANNED = [
 ]
 
+# Work beyond single rules (decided 2026-10-03, see decisions.md "After StyleCop parity"), in this order.
+WORK = [
+    ('Hardening', 'More real-world repos in the PR pipeline', '2-3 more public repos in `scripts/realworld/repos.psd1` (a StyleCop user, an app rather than a library, a large multi-targeted library). Every repo added so far found real bugs.', 'Planned'),
+    ('Hardening', 'IDE0055 in multi-targeted repos', "Find out why its fix crashes Roslyn's linked-file merge under `dotnet format` and whether a safe setup exists. Not a reimplementation: it's the SDK's whole formatter, and analyzers can't reference the formatting engine (RS1038). Today `init` writes it as a suggestion there.", 'Planned'),
+    ('Parity', 'SA1316: tuple element names in PascalCase', 'Rename every use together (deconstructions, `t.name`, inferred names), configurable like `tupleElementNameCasing`.', 'Planned'),
+    ('Parity', 'SA1108: no comments inside block statements', 'Probe what teams expect first (move the comment above the statement?); StyleCop has no fix.', 'Planned'),
+    ('Parity', 'BRO1309: namespace names', 'Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first.', 'Planned'),
+    ('Adoption', 'Getting started', 'One page from install to the first `dotnet format` run, for new projects and for StyleCop users.', 'Planned'),
+    ('Adoption', 'IDE experience', "Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig.", 'Planned'),
+    ('Adoption', 'Migration sample', 'A small sample repository that uses StyleCop, migrated with `stylebro-migrate` step by step.', 'Planned'),
+    ('Beyond StyleCop', 'Survey other analyzers', "Fixable style rules in popular analyzers (e.g. Roslynator's formatting rules) that the SDK doesn't cover; worthwhile ones become rule candidates here.", 'Planned'),
+]
+
 blocks = [
     ('10xx', 'Ordering, spacing and comments'),
     ('11xx', 'Readability'),
@@ -33,8 +46,8 @@ out.append('| | Rules |')
 out.append('|---|---|')
 out.append(f'| Released | {done - len(unshipped)} |')
 out.append(f'| Done, not released yet | {len(unshipped)} |')
-out.append(f'| Planned | {len(PLANNED)} |')
-out.append('| Maybe | 2 new rules + 1 gap in an existing one |')
+out.append(f'| Planned | {len(PLANNED)} rules, {len(WORK)} work items |')
+out.append('| Maybe | none (moved to planned work) |')
 out.append('')
 mapping = open('docs/stylecop-mapping.md', encoding='utf-8').read()
 m = re.search(r'Of (\d+) rules: (\d+) SDK, (\d+) StyleBro .*?, (\d+) drop', mapping)
@@ -55,6 +68,14 @@ else:
     out.append('or write merge conflict markers in multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)),')
     out.append('is done: BRO1514-BRO1516 (IDE0011), BRO1404/BRO1007 (IDE0040), BRO1405-BRO1407 (IDE0047/IDE0048) and')
     out.append('BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `stylebro-migrate` turn those SDK rules off.\n')
+
+out.append('### Work beyond single rules\n')
+out.append('StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([decisions.md](decisions.md)), in this order:\n')
+out.append('| Area | Item | Notes | Status |')
+out.append('|------|------|-------|--------|')
+for area, item, notes, status in WORK:
+    out.append(f'| {area} | {item} | {notes} | {status} |')
+out.append('')
 
 out.append('### Read the SDK\'s own settings\n')
 out.append('Decided 2026-10-03 ([decisions.md](decisions.md)): where the SDK has an `.editorconfig` key for the same choice, StyleBro')
@@ -77,17 +98,8 @@ out.append('writes it as a suggestion in multi-targeted repositories). Also to d
 out.append('(dotnet/roslyn).\n')
 
 out.append('## Maybe\n')
-out.append('New rules:\n')
-out.append('| StyleCop | Rule | Notes |')
-out.append('|----------|------|-------|')
-out.append('| SA1316 | Tuple element names should use correct casing | StyleCop\'s fix renames only the declaration and breaks every use; a safe rename must change deconstructions, `t.name` and inferred names together. 0 findings in the surveyed repos. |')
-out.append('| SA1108 | Block statements should not contain embedded comments | A fix could move the comment above the statement; probe what teams expect first. StyleCop has no fix. |')
-out.append('')
-out.append('Gaps in existing rules:\n')
-out.append('| Rule | Gap |')
-out.append('|------|-----|')
-out.append('| BRO1309 (SA1300) | Namespace names aren\'t checked |')
-out.append('')
+out.append('Nothing right now: the last maybes (SA1316, SA1108, namespace names) moved to planned work. Rules worth doing only if')
+out.append('someone asks go here.\n')
 out.append('The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).\n')
 
 out.append('## All rules\n')
