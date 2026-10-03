@@ -19,11 +19,10 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-48 rules: 1 candidate, 0 SDK not on yet, 33 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+47 rules: 0 candidate, 0 SDK not on yet, 33 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
-| [SA1316](#sa1316) | Tuple element names should use correct casing | candidate | on / on / on | 0 / 0 / 0 |
 | [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
 | [SA1401](#sa1401) | Fields should be private | drop | off / off / off | 141 / 48 / 39 |
@@ -71,18 +70,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SX1309S](#sx1309s) | Static field names should begin with underscore | variant | off / off / off | 19 / 1 / 0 |
 | [SA0001](#sa0001) | XML comment analysis disabled | n/a | on / off / off | 0 / 0 / 0 |
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
-
-## Not yet: StyleBro candidates
-
-<a id="sa1316"></a>
-
-### SA1316: Tuple element names should use correct casing
-
-Naming rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not done yet (StyleCop 1.2 only). Tuple element names in PascalCase (configurable: tupleElementNameCasing).
-
-**To revisit:** Tuple element names aren't symbols SymbolFinder renames; every use (deconstruction, `t.name`, inferred names) must change together. Medium, risky.
 
 ## Dropped: no safe automatic fix
 

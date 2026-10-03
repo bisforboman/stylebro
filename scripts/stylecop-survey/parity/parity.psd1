@@ -298,6 +298,14 @@
             )
         }
         @{
+            Name     = 'tuple-element-casing'
+            Map      = @('SA1316=BRO1311')
+            # StyleCop's fix renames only the declaration (the uses then don't compile); positions only.
+            CompareOutput = $false
+            Expected = @(
+            )
+        }
+        @{
             Name     = 'naming-hungarian'
             Map      = @('SA1305=BRO1310')
             # StyleCop has no fix for SA1305; positions only.

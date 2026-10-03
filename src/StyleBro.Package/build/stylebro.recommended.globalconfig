@@ -81,6 +81,9 @@ dotnet_diagnostic.BRO1309.severity = warning
 # BRO1310: no Hungarian prefixes (SA1305). Off, like StyleCop; set to warning to opt in.
 dotnet_diagnostic.BRO1310.severity = none
 
+# BRO1311: tuple element names in PascalCase (SA1316); stylebro_tuple_element_name_casing = camelCase for the other style
+dotnet_diagnostic.BRO1311.severity = warning
+
 # BRO1109: opening parenthesis on the declaration line (SA1110)
 dotnet_diagnostic.BRO1109.severity = warning
 

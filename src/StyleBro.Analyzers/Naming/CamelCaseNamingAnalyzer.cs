@@ -41,10 +41,6 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Whether a parameter keeps the name of the parameter it overrides or implements. Like StyleCop, such a parameter
-    /// isn't reported: its name comes from the base, and renaming the base renames it too.
-    /// </summary>
-    /// <summary>
     /// A constructor parameter named exactly like a property or field of its type ('Point(int X) { this.X = X; }'):
     /// serializers bind constructor parameters to members by name, CsvHelper case-sensitively, so the name is a contract
     /// (a CsvHelper test broke when 'Id' became 'id').
@@ -55,6 +51,10 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             && type.GetMembers(parameter.Name).Any(m => m is IPropertySymbol or IFieldSymbol);
     }
 
+    /// <summary>
+    /// Whether a parameter keeps the name of the parameter it overrides or implements. Like StyleCop, such a parameter
+    /// isn't reported: its name comes from the base, and renaming the base renames it too.
+    /// </summary>
     public static bool InheritsName(IParameterSymbol parameter)
     {
         return GetBaseMembers(parameter.ContainingSymbol).Any(b =>
