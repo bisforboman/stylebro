@@ -913,6 +913,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   after the project file, before the SDK's multi-targeting decision) clears it for those. Setting the framework in that
   hook instead does NOT work: the project file's own `'$(TargetFramework)' == 'net46'` conditions (DefineConstants)
   were already evaluated without it.
+  Clearing it for EVERY project without the framework broke the other direction: Serilog's TestDummies
+  (netstandard2.0) references Serilog, which then offered only net8.0, so TestDummies and the tests using it didn't
+  load. Final rule (`FormatCommand.Keep`): keep the forced framework for projects that target it and projects that
+  reference one of those (transitively); clear it for the rest. Plus `--include` with the run's project folders
+  (TRAILING SLASH: `src/Lib` silently matches nothing), else referenced multi-targeted projects get formatted and their
+  copies merged (conflict markers). Final measurements: Serilog one run, nothing left; Newtonsoft.Json one run + a
+  second run touching 1 file (braces in net20-only LinqBridge.cs), only guard-held renames left.
   `FormatCommand`: `dotnet msbuild -getProperty:TargetFrameworks/-getProperty:TargetFramework` per project (`dotnet
   sln list`), restore once, then per framework `dotnet format <temp .slnf> --no-restore <options>` (the filter lists
   the projects that target it; works for .sln and .slnx). Measured: Serilog IDE0055 505 -> 0; with every StyleBro rule

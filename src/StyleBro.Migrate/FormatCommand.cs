@@ -19,18 +19,23 @@ namespace StyleBro.Migrate;
 /// <remarks>
 /// The framework is chosen with TargetFramework as an environment variable: unlike a property set later, the project
 /// file's own conditions ('$(TargetFramework)' == 'net46' for DefineConstants, references) see it. It reaches every
-/// project, also referenced ones that don't target it (Newtonsoft.Json's net46 tests reference a library without net46,
-/// which then failed to load, and the tests were silently skipped), so <see cref="SelectFrameworkTargets"/> clears it
-/// again for those, right after their project file: they load as usual, and the per-framework global property Roslyn
-/// sets for each of their frameworks wins over the environment.
+/// project the run loads, also referenced ones, so <see cref="SelectFrameworkTargets"/> clears it again, right after
+/// the project file, for projects that should load as usual (<see cref="Keep"/>): forcing a library onto a framework it
+/// doesn't have failed (Newtonsoft.Json's net46 tests: no net46 reference assemblies for the library, the tests were
+/// skipped silently), and clearing it for every project without the framework failed too (Serilog's TestDummies,
+/// netstandard2.0, references Serilog, which then offered only net8.0: TestDummies and the tests that use it didn't load).
 /// </remarks>
 internal static class FormatCommand
 {
-    /// <summary>Imported right after each project file (BeforeMicrosoftNETSdkTargets), before the SDK decides whether it's multi-targeted.</summary>
+    /// <summary>
+    /// Imported right after each project file (BeforeMicrosoftNETSdkTargets), before the SDK decides whether it's
+    /// multi-targeted: a multi-targeted project not on the keep list loads as usual (Roslyn's per-framework global
+    /// property then wins over the environment).
+    /// </summary>
     public const string SelectFrameworkTargets = """
         <Project>
-          <!-- stylebro-migrate format: TargetFramework comes from the environment; a project that doesn't target it loads as usual. -->
-          <PropertyGroup Condition="'$(StyleBroFormatFramework)' != '' and '$(TargetFrameworks)' != '' and !$([System.String]::Copy(';$(TargetFrameworks.Replace(' ', ''));').Contains(';$(TargetFramework);'))">
+          <!-- stylebro-migrate format: TargetFramework comes from the environment; projects not on the keep list load as usual. -->
+          <PropertyGroup Condition="'$(StyleBroFormatKeep)' != '' and '$(TargetFrameworks)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))">
             <TargetFramework></TargetFramework>
           </PropertyGroup>
         </Project>
@@ -57,8 +62,9 @@ internal static class FormatCommand
         }
 
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
-        var frameworks = ReadFrameworks(workspacePath);
-        var plan = Plan(frameworks);
+        var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
+        var projects = ReadProjects(workspacePath);
+        var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
         if (plan.Count <= 1)
         {
             return Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough));
@@ -77,18 +83,25 @@ internal static class FormatCommand
         var exit = 0;
         try
         {
-            foreach (var (framework, projects) in plan)
+            foreach (var (framework, selected) in plan)
             {
-                Console.WriteLine($"== {framework} ({projects.Count} project(s))");
-                var filter = isSolution ? Path.Combine(Path.GetDirectoryName(workspacePath)!, $".stylebro-format-{framework}.slnf") : null;
+                Console.WriteLine($"== {framework} ({selected.Count} project(s))");
+                var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
                 try
                 {
                     if (filter is not null)
                     {
-                        File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), projects));
+                        File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
                     }
 
-                    var code = Dotnet(root, (framework, select), new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(passThrough));
+                    var arguments = new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(passThrough);
+                    if (!passThrough.Contains("--include"))
+                    {
+                        arguments = arguments.Append("--include").Concat(Include(root, solutionDirectory, selected));
+                    }
+
+                    var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
+                    var code = Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), arguments);
                     if (exit == 0)
                     {
                         exit = code;
@@ -130,6 +143,45 @@ internal static class FormatCommand
             .ToList();
     }
 
+    /// <summary>
+    /// The projects a run loads for its framework (by full path): those that target it, and those that reference one of
+    /// them, directly or not, so the reference resolves (it only offers the run's framework then). The rest load as usual.
+    /// </summary>
+    public static HashSet<string> Keep(IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> projects, string framework)
+    {
+        var keep = new HashSet<string>(
+            projects.Where(p => p.Value.Frameworks.Contains(framework, StringComparer.OrdinalIgnoreCase)).Select(p => p.Key),
+            StringComparer.OrdinalIgnoreCase);
+        for (var added = true; added;)
+        {
+            added = false;
+            foreach (var (project, info) in projects)
+            {
+                if (!keep.Contains(project) && info.References.Any(keep.Contains))
+                {
+                    added = keep.Add(project) || added;
+                }
+            }
+        }
+
+        return keep;
+    }
+
+    /// <summary>
+    /// The folders of a run's projects, relative to <paramref name="root"/>, for 'dotnet format --include'. Referenced
+    /// projects that load as usual (multi-targeted) would get their files formatted too, merging the frameworks' copies
+    /// again (Newtonsoft.Json: conflict markers in the library during the tests' net6.0 run). Only the run's own projects
+    /// are edited; the others get their own runs.
+    /// </summary>
+    public static IEnumerable<string> Include(string root, string solutionDirectory, IEnumerable<string> projects)
+    {
+        // A folder needs the trailing '/': 'src/Lib' matches nothing (silently), 'src/Lib/' its files.
+        return projects
+            .Select(p => Path.GetRelativePath(root, Path.GetDirectoryName(Path.GetFullPath(Path.Combine(solutionDirectory, p)))!))
+            .Select(folder => folder == "." ? "**/*.cs" : folder.Replace(Path.DirectorySeparatorChar, '/') + "/")
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
     /// <summary>A solution filter (.slnf) next to the solution, with the given projects (paths as the solution lists them).</summary>
     public static string SolutionFilter(string solutionFileName, IEnumerable<string> projects)
     {
@@ -138,21 +190,25 @@ internal static class FormatCommand
             new JsonSerializerOptions { WriteIndented = true });
     }
 
-    /// <summary>The target frameworks of each project: 'TargetFrameworks' split, else 'TargetFramework'.</summary>
-    public static string[] ParseFrameworks(string msbuildJson)
+    /// <summary>A project's target frameworks ('TargetFrameworks' split, else 'TargetFramework') and project references (full paths).</summary>
+    public static (string[] Frameworks, string[] References) ParseProject(string msbuildJson)
     {
         using var json = JsonDocument.Parse(msbuildJson);
         var properties = json.RootElement.GetProperty("Properties");
         var several = properties.TryGetProperty("TargetFrameworks", out var s) ? s.GetString() : null;
         var one = properties.TryGetProperty("TargetFramework", out var o) ? o.GetString() : null;
-        return (string.IsNullOrWhiteSpace(several) ? one ?? string.Empty : several)
+        var frameworks = (string.IsNullOrWhiteSpace(several) ? one ?? string.Empty : several)
             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
+        var references = json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("ProjectReference", out var refs)
+            ? refs.EnumerateArray().Select(r => r.GetProperty("FullPath").GetString()!).ToArray()
+            : Array.Empty<string>();
+        return (frameworks, references);
     }
 
-    /// <summary>Each C# project of the solution (paths relative to the solution, as it lists them) or the project itself.</summary>
-    private static Dictionary<string, string[]> ReadFrameworks(string workspacePath)
+    /// <summary>Each C# project of the solution (keyed by its path as the solution lists it) or the project itself.</summary>
+    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References)> ReadProjects(string workspacePath)
     {
         var directory = Path.GetDirectoryName(workspacePath)!;
         var projects = workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
@@ -163,7 +219,12 @@ internal static class FormatCommand
                 .ToArray();
         return projects.ToDictionary(
             p => p,
-            p => ParseFrameworks(Capture(directory, "msbuild", Path.Combine(directory, p), "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-nologo")));
+            p =>
+            {
+                var fullPath = Path.GetFullPath(Path.Combine(directory, p));
+                var (frameworks, references) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-nologo"));
+                return (fullPath, frameworks, references);
+            });
     }
 
     private static string Capture(string directory, params string[] arguments)
@@ -181,7 +242,7 @@ internal static class FormatCommand
         return output.Result;
     }
 
-    private static int Dotnet(string directory, (string Name, string SelectTargets)? framework, IEnumerable<string> arguments)
+    private static int Dotnet(string directory, (string Name, string SelectTargets, string Keep)? framework, IEnumerable<string> arguments)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory };
         foreach (var argument in arguments)
@@ -189,11 +250,11 @@ internal static class FormatCommand
             start.ArgumentList.Add(argument);
         }
 
-        // See the remarks on the class: the environment, cleared again for projects without this framework.
+        // See the remarks on the class: the environment, cleared again for projects that should load as usual.
         if (framework is { } f)
         {
             start.Environment["TargetFramework"] = f.Name;
-            start.Environment["StyleBroFormatFramework"] = f.Name;
+            start.Environment["StyleBroFormatKeep"] = f.Keep;
             start.Environment["BeforeMicrosoftNETSdkTargets"] = f.SelectTargets;
         }
 
