@@ -519,12 +519,13 @@ internal static class Migration
             lines.Add($"dotnet_separate_import_directive_groups = {Bool(groups == "require")}");
         }
 
-        // Blank lines (experimental in the SDK).
-        Rule("IDE2000", "SA1507");
+        // Blank lines: StyleBro's BRO1517-BRO1519 replace the SDK's experimental IDE2000/IDE2002/IDE2003, whose fixes break
+        // multi-targeted projects (the options stay for the IDE).
+        Rule("IDE2000");
         lines.Add($"dotnet_style_allow_multiple_blank_lines_experimental = {Bool(!setup.IsOn("SA1507"))}");
-        Rule("IDE2002", "SA1508");
+        Rule("IDE2002");
         lines.Add($"csharp_style_allow_blank_lines_between_consecutive_braces_experimental = {Bool(!setup.IsOn("SA1508"))}");
-        Rule("IDE2003", "SA1513");
+        Rule("IDE2003");
         lines.Add($"dotnet_style_allow_statement_immediately_after_block_experimental = {Bool(!setup.IsOn("SA1513"))}");
 
         // 'this.' qualification: required (SA1101, IDE0009) or removed (StyleCop's SX1101, IDE0003).

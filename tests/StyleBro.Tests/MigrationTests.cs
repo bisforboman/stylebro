@@ -267,7 +267,7 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.IDE0009.severity = none", lines);
         Assert.Contains("dotnet_style_qualification_for_field = false", lines);
         Assert.Contains("dotnet_diagnostic.IDE0065.severity = none", lines);
-        Assert.Contains("dotnet_diagnostic.IDE2000.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1517.severity = none", lines);
         Assert.Contains("dotnet_style_allow_multiple_blank_lines_experimental = true", lines);
     }
 

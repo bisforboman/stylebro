@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 48 SDK, 100 StyleBro (100 done), 44 drop, 1 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 45 SDK, 103 StyleBro (103 done), 44 drop, 1 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -106,13 +106,13 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1504 | All accessors should be single-line or multi-line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments |
 | SA1505 | Opening braces should not be followed by blank line | on | yes | on / on / off | 0 / 0 / 37 | not fixed | StyleBro **BRO1503** (done), same results as StyleCop |
 | SA1506 | Element documentation headers should not be followed by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1511** (done), same positions and output as StyleCop |
-| SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | SDK: IDE2000 (experimental) ([details](skipped-rules.md#sa1507)) |
-| SA1508 | Closing braces should not be preceded by blank line | on | yes | on / off / off | 0 / 46 / 85 | fixed | SDK: IDE2002 (experimental) |
+| SA1507 | Code should not contain multiple blank lines in a row | on | yes | on / off / on | 0 / 0 / 0 | fixed | StyleBro **BRO1517** (done; replaces IDE2000, whose fix breaks multi-targeted projects). Leaves runs after `{`, before `}` and below a comment to BRO1503/BRO1518/BRO1506 |
+| SA1508 | Closing braces should not be preceded by blank line | on | yes | on / off / off | 0 / 46 / 85 | fixed | StyleBro **BRO1518** (done; replaces IDE2002). Leaves blank lines below a comment and in empty blocks to BRO1506/BRO1503 |
 | SA1509 | Opening braces should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1501** (done), same results as StyleCop |
 | SA1510 | Chained statement blocks should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1502** (done), same results as StyleCop |
 | SA1511 | While-do footer should not be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1512** (done), same positions and output as StyleCop |
 | SA1512 | Single-line comments should not be followed by blank line | on | yes | off / off / on | 82 / 46 / 0 | not fixed | StyleBro **BRO1506** (done), same results as StyleCop |
-| SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 0 / 0 / 119 | fixed | SDK: IDE2003 (experimental) |
+| SA1513 | Closing brace should be followed by blank line | on | yes | on / on / off | 0 / 0 / 119 | fixed | StyleBro **BRO1519** (done; replaces IDE2003). Leaves a comment, documentation or member after `}` to BRO1504/BRO1513/BRO1505 |
 | SA1514 | Element documentation header should be preceded by blank line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1513** (done); documentation right below a comment is not reported (it would conflict with SA1512/BRO1506) |
 | SA1515 | Single-line comment should be preceded by blank line | on | yes | on / on / off | 0 / 0 / 31 | not fixed | StyleBro **BRO1504** (done), same results as StyleCop |
 | SA1516 | Elements should be separated by blank line | on | yes | on / off / off | 0 / 44 / 5,873 | not fixed | StyleBro **BRO1505** (done), same positions as StyleCop |

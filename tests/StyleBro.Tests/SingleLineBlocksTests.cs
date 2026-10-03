@@ -36,14 +36,17 @@ public class SingleLineBlocksTests
                 {
                     return;
                 }
+
                 if (b)
                 {
                 }
+
                 if (b)
                 {
                     Console.WriteLine();
                     Console.WriteLine();
                 }
+
                 if (b)
                 {
                     return;
@@ -52,10 +55,12 @@ public class SingleLineBlocksTests
                 {
                     Console.WriteLine();
                 }
+
                 while (b)
                 {
                     b = false;
                 }
+
                 do
                 {
                     b = false;
@@ -72,9 +77,11 @@ public class SingleLineBlocksTests
                 {
                     b = true;
                 }
+
                 {
                     b = true;
                 }
+
                 if (b)
                 {
                     return;

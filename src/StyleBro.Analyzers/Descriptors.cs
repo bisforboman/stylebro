@@ -877,6 +877,36 @@ internal static class Descriptors
         description: "When one clause of an if/else chain has braces, all of them do. Replaces StyleCop SA1520.",
         helpLinkUri: HelpBase + DiagnosticIds.BracesConsistent + ".md");
 
+    public static readonly DiagnosticDescriptor MultipleBlankLines = new(
+        id: DiagnosticIds.MultipleBlankLines,
+        title: "Code should not contain multiple blank lines in a row",
+        messageFormat: "Keep one blank line",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Two or more blank lines in a row become one. Replaces StyleCop SA1507.",
+        helpLinkUri: HelpBase + DiagnosticIds.MultipleBlankLines + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBeforeCloseBrace = new(
+        id: DiagnosticIds.BlankLineBeforeCloseBrace,
+        title: "Closing braces should not be preceded by blank line",
+        messageFormat: "Remove the blank lines before the closing brace",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A closing brace directly follows the code above it. Replaces StyleCop SA1508.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeCloseBrace + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineAfterCloseBrace = new(
+        id: DiagnosticIds.BlankLineAfterCloseBrace,
+        title: "Closing brace should be followed by blank line",
+        messageFormat: "Add a blank line after the closing brace",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A statement after a block is separated from it by a blank line. Replaces StyleCop SA1513.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineAfterCloseBrace + ".md");
+
     public static readonly DiagnosticDescriptor BlankLineBeforeDocumentation = new(
         id: DiagnosticIds.BlankLineBeforeDocumentation,
         title: "Element documentation header should be preceded by blank line",

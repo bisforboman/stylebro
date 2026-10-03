@@ -585,16 +585,6 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 
 **To revisit:** Only if a team reports reorders StyleCop accepted (`async override` vs `override async`); then a BRO rule that only moves access modifiers and `static`.
 
-<a id="sa1507"></a>
-
-### SA1507: Code should not contain multiple blank lines in a row
-
-**Covered by:** SDK: IDE2000 (experimental)
-
-**Difference:** Covered by the SDK's IDE2000, which also counts blank lines at the start of a file and right before `}`; StyleCop leaves those to SA1517/SA1508 (9 files in the private app, which has those off).
-
-**To revisit:** Nothing to configure in IDE2000.
-
 <a id="sa1600"></a>
 
 ### SA1600: Elements should be documented

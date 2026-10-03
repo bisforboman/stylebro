@@ -8,9 +8,6 @@ rows = re.findall(r'^\| \[(BRO\d{4})\]\(docs/rules/BRO\d{4}\.md\) \| (.*?) \| (.
 unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
 
 PLANNED = [
-    ('BRO1517', 'Code should not contain multiple blank lines in a row', 'SA1507', 'IDE2000'),
-    ('BRO1518', 'Closing braces should not be preceded by a blank line', 'SA1508', 'IDE2002'),
-    ('BRO1519', 'Closing brace should be followed by a blank line', 'SA1513', 'IDE2003'),
 ]
 
 blocks = [
@@ -47,16 +44,20 @@ out.append('can\'t be fixed without inventing text or moving code between files)
 out.append('[stylecop-mapping.md](stylecop-mapping.md).\n')
 
 out.append('## Planned\n')
-out.append('Fix-safe replacements for SDK rules whose fixes crash `dotnet format` or write merge conflict markers in')
-out.append('multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)). When one is done, `init` and')
-out.append('`stylebro-migrate` turn it on and the SDK rule off. IDs are reserved, final when the rule ships.\n')
-out.append('| ID | Rule | StyleCop | Replaces SDK |')
-out.append('|----|------|----------|--------------|')
-for id, title, sa, ide in PLANNED:
-    out.append(f'| {id} | {title} | {sa} | {ide} |')
-out.append('')
-out.append('Not planned: IDE0055 (the SDK\'s whole formatter; `dotnet format`\'s whitespace pass still does that job safely). Also')
-out.append('to do: report the SDK fixer bugs upstream (dotnet/roslyn).\n')
+if PLANNED:
+    out.append('| ID | Rule | StyleCop | Replaces SDK |')
+    out.append('|----|------|----------|--------------|')
+    for id, title, sa, ide in PLANNED:
+        out.append(f'| {id} | {title} | {sa} | {ide} |')
+    out.append('')
+else:
+    out.append('Nothing right now. The last planned batch, fix-safe replacements for the SDK rules whose fixes crash `dotnet format`')
+    out.append('or write merge conflict markers in multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)),')
+    out.append('is done: BRO1514-BRO1516 (IDE0011), BRO1404/BRO1007 (IDE0040), BRO1405-BRO1407 (IDE0047/IDE0048) and')
+    out.append('BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `stylebro-migrate` turn those SDK rules off.\n')
+out.append('Not planned: IDE0055 (the SDK\'s whole formatter; `dotnet format`\'s whitespace pass still does that job safely; `init`')
+out.append('writes it as a suggestion in multi-targeted repositories). Also to do: report the SDK fixer bugs upstream')
+out.append('(dotnet/roslyn).\n')
 
 out.append('## Maybe\n')
 out.append('New rules:\n')

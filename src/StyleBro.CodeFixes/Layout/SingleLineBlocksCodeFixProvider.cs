@@ -65,7 +65,7 @@ public sealed class SingleLineBlocksCodeFixProvider : CodeFixProvider
             {
                 if (SingleLineBlocks.GetBraces(node) is { } braces && braces.Open == brace)
                 {
-                    changes.AddRange(SingleLineBlocks.GetChanges(node, text, options, trailingComma) ?? []);
+                    changes.AddRange(SingleLineBlocks.GetChanges(node, text, options, trailingComma, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken)) ?? []);
                     break;
                 }
             }

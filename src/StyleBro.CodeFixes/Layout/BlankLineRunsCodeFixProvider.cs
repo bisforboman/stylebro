@@ -8,17 +8,19 @@ using StyleBro.Analyzers.Layout;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace StyleBro.CodeFixes.Layout;
 
-/// <summary>Fix for BRO1514-BRO1516: puts the statement in braces.</summary>
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(BracesCodeFixProvider))]
-public sealed class BracesCodeFixProvider : CodeFixProvider
+/// <summary>
+/// Fix for BRO1517-BRO1519. The findings are computed again on the document as it is now and matched to the
+/// diagnostics by rule and span, so a diagnostic another fix has already dealt with changes nothing.
+/// </summary>
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(BlankLineRunsCodeFixProvider))]
+public sealed class BlankLineRunsCodeFixProvider : CodeFixProvider
 {
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.BracesOmitted, DiagnosticIds.BracesMultiLine, DiagnosticIds.BracesConsistent);
+        ImmutableArray.Create(DiagnosticIds.MultipleBlankLines, DiagnosticIds.BlankLineBeforeCloseBrace, DiagnosticIds.BlankLineAfterCloseBrace);
 
     /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
@@ -31,9 +33,9 @@ public sealed class BracesCodeFixProvider : CodeFixProvider
         {
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    "Add braces",
+                    diagnostic.Id == DiagnosticIds.BlankLineAfterCloseBrace ? "Add a blank line" : "Remove the blank lines",
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
-                    equivalenceKey: nameof(BracesCodeFixProvider)),
+                    equivalenceKey: nameof(BlankLineRunsCodeFixProvider)),
                 diagnostic);
         }
 
@@ -52,19 +54,12 @@ public sealed class BracesCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var statements = new List<StatementSyntax>();
-        foreach (var diagnostic in diagnostics)
-        {
-            var span = diagnostic.Location.SourceSpan;
-            if (root.FindNode(span).AncestorsAndSelf().OfType<StatementSyntax>().FirstOrDefault(s => s.Span == span) is { } statement)
-            {
-                statements.Add(statement);
-            }
-        }
-
-        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
-        return Braces.GetChanges(statements, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken)) is { } changes
-            ? document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)))
-            : document;
+        var wanted = new HashSet<(string, int, int)>(diagnostics.Select(d => (d.Id, d.Location.SourceSpan.Start, d.Location.SourceSpan.End)));
+        var options = document.Project.CompilationOptions;
+        var changes = BlankLineRuns.GetFindings(root, text, id => Severities.IsOn(options, root.SyntaxTree, id, cancellationToken))
+            .Where(f => wanted.Contains((f.Id, f.Location.Start, f.Location.End)))
+            .Select(f => f.Change)
+            .ToList();
+        return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
     }
 }

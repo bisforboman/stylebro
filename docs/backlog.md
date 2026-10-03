@@ -14,28 +14,24 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 14 |
-| Planned | 3 |
+| Done, not released yet | 17 |
+| Planned | 0 |
 | Maybe | 3 new rules + 6 gaps in existing ones |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 100 by StyleBro, 48 by the .NET SDK, 44 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 103 by StyleBro, 45 by the .NET SDK, 44 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
 ## Planned
 
-Fix-safe replacements for SDK rules whose fixes crash `dotnet format` or write merge conflict markers in
-multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)). When one is done, `init` and
-`stylebro-migrate` turn it on and the SDK rule off. IDs are reserved, final when the rule ships.
+Nothing right now. The last planned batch, fix-safe replacements for the SDK rules whose fixes crash `dotnet format`
+or write merge conflict markers in multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)),
+is done: BRO1514-BRO1516 (IDE0011), BRO1404/BRO1007 (IDE0040), BRO1405-BRO1407 (IDE0047/IDE0048) and
+BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `stylebro-migrate` turn those SDK rules off.
 
-| ID | Rule | StyleCop | Replaces SDK |
-|----|------|----------|--------------|
-| BRO1517 | Code should not contain multiple blank lines in a row | SA1507 | IDE2000 |
-| BRO1518 | Closing braces should not be preceded by a blank line | SA1508 | IDE2002 |
-| BRO1519 | Closing brace should be followed by a blank line | SA1513 | IDE2003 |
-
-Not planned: IDE0055 (the SDK's whole formatter; `dotnet format`'s whitespace pass still does that job safely). Also
-to do: report the SDK fixer bugs upstream (dotnet/roslyn).
+Not planned: IDE0055 (the SDK's whole formatter; `dotnet format`'s whitespace pass still does that job safely; `init`
+writes it as a suggestion in multi-targeted repositories). Also to do: report the SDK fixer bugs upstream
+(dotnet/roslyn).
 
 ## Maybe
 
@@ -156,9 +152,9 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1514](rules/BRO1514.md) | Braces should not be omitted | SA1503 | Done |
 | [BRO1515](rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Done |
 | [BRO1516](rules/BRO1516.md) | Use braces consistently | SA1520 | Done |
-| BRO1517 | Code should not contain multiple blank lines in a row | SA1507 | Planned |
-| BRO1518 | Closing braces should not be preceded by a blank line | SA1508 | Planned |
-| BRO1519 | Closing brace should be followed by a blank line | SA1513 | Planned |
+| [BRO1517](rules/BRO1517.md) | Code should not contain multiple blank lines in a row | SA1507 | Done |
+| [BRO1518](rules/BRO1518.md) | Closing braces should not be preceded by blank line | SA1508 | Done |
+| [BRO1519](rules/BRO1519.md) | Closing brace should be followed by blank line | SA1513 | Done |
 
 ### BRO16xx: Documentation
 

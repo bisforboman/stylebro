@@ -4,6 +4,17 @@
 @{
     Sets = @(
         @{
+            Name     = 'blank-line-runs'
+            Map      = @('SA1507=BRO1517', 'SA1508=BRO1518', 'SA1513=BRO1519')
+            Expected = @(
+                # BRO1519 leaves a comment after '}' to BRO1504 and the next member to BRO1505 (they add the same line).
+                'only StyleCop: BRO1519 Blank.cs(45,14)'
+                'only StyleCop: BRO1519 Blank.cs(49,10)'
+                'StyleCop output only: Blank.cs: []'
+                'StyleCop output only: Blank.cs: []'
+            )
+        }
+        @{
             Name     = 'precedence'
             Map      = @('SA1407=BRO1406', 'SA1408=BRO1407')
             Expected = @(

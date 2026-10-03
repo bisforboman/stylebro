@@ -173,6 +173,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   families (`+ -`, `* /`, `<< >>`, `%` alone; `&&`/`and` vs `||`/`or`); the fix inserts `(`/`)` per operand, combined per
   position (`((`/`))`) so nested operands are fixed in one pass. Also `and`/`or` patterns, like StyleCop's current
   source; 1.2.0-beta.556 doesn't (parity `precedence`: 8/10, documented).
+- **BRO1517-BRO1519** (SA1507/SA1508/SA1513, 2026-10-03, `Layout/BlankLineRuns.cs`, one tree analyzer + one fix,
+  replace IDE2000/IDE2002/IDE2003): StyleCop's logic, minus places another blank-line rule fixes when it's on (after
+  `{` BRO1503, below `//` BRO1506, before `}` BRO1518 for BRO1517; a comment/doc/member after `}` BRO1504/BRO1513/
+  BRO1505 for BRO1519), so two fixes never edit the same lines. The fix recomputes findings and matches rule + span.
+  Shape-changing fixes add BRO1519's blank line themselves (`BlankLineRuns.WantsBlankLineAfter`): BRO1514's wrap
+  (closing edit) and BRO1508/BRO1509's expansion (insert after `}`, or inside the gap before a following block's `{`
+  with `gapIsReplaced`, else an iterative fix removed it). Parity `blank-line-runs`: 7/5, the 2 hand-offs documented.
 - **BRO1514-BRO1516** (SA1503/SA1519/SA1520, 2026-10-03, `Layout/Braces.cs`, replace IDE0011 per docs/decisions.md):
   which statements and which id like StyleCop (multi-line -> BRO1515, inconsistent if/else chain -> BRO1516, else
   BRO1514; a rule that is off leaves its statements to the next, via `Severities.IsOn`; `using (a) using (b)` allowed).

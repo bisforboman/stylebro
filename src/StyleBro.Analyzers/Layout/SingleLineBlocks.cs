@@ -72,7 +72,7 @@ internal static class SingleLineBlocks
     /// with other code that stays, like <c>case 1: { ... }</c> after <c>switch (x) {</c> on the same line).
     /// </summary>
     /// <param name="trailingComma">Whether an expanded enum gets a trailing comma (BRO1401 is on; see <see cref="WantsTrailingComma"/>).</param>
-    public static List<TextChange>? GetChanges(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, bool trailingComma = true)
+    public static List<TextChange>? GetChanges(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, bool trailingComma = true, Func<string, bool>? isOn = null)
     {
         if (node.ContainsDiagnostics || GetBraces(node) is not { } braces || braces.Open.IsMissing || braces.Close.IsMissing
             || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart))
@@ -92,7 +92,12 @@ internal static class SingleLineBlocks
 
         // Before '{': its own line, unless .editorconfig keeps braces on the line before (K&R style).
         var beforeOpen = braces.Open.GetPreviousToken();
-        if (!Gap(beforeOpen, braces.Open, NewLineBeforeBrace(node, options) ? lineBreak + baseIndent : " ", text, changes))
+        var newLine = NewLineBeforeBrace(node, options);
+
+        // A block right after another block's '}' gets BRO1519's blank line in this edit (it covers the gap).
+        var blank = newLine && isOn is not null && beforeOpen.IsKind(SyntaxKind.CloseBraceToken)
+            && BlankLineRuns.WantsBlankLineAfter(beforeOpen.Parent!, beforeOpen, braces.Open, isOn, gapIsReplaced: true) ? lineBreak : string.Empty;
+        if (!Gap(beforeOpen, braces.Open, newLine ? blank + lineBreak + baseIndent : " ", text, changes))
         {
             return null;
         }
@@ -148,6 +153,15 @@ internal static class SingleLineBlocks
             && Line(text, closeBefore.SpanStart) == Line(text, beforeKeyword.SpanStart))
         {
             Gap(closeBefore, beforeKeyword, lineBreak + baseIndent, text, changes);
+        }
+
+        // The '}' on its own line now: a statement on the next line gets BRO1519's blank line in the same run.
+        var next = braces.Close.GetNextToken();
+        if (isOn is not null && next.RawKind != 0 && Line(text, next.SpanStart) > Line(text, braces.Close.SpanStart)
+            && braces.Close.TrailingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
+            && BlankLineRuns.WantsBlankLineAfter(braces.Close.Parent!, braces.Close, next, isOn))
+        {
+            changes.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), lineBreak));
         }
 
         return changes;

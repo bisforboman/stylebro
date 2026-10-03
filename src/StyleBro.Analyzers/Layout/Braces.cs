@@ -94,7 +94,7 @@ internal static class Braces
     /// around it. Null when any statement can't be wrapped safely (comments or directives where the braces go, a line
     /// break inside a token, other code after it on its line).
     /// </summary>
-    public static List<TextChange>? GetChanges(IReadOnlyCollection<StatementSyntax> statements, SourceText text, AnalyzerConfigOptions options)
+    public static List<TextChange>? GetChanges(IReadOnlyCollection<StatementSyntax> statements, SourceText text, AnalyzerConfigOptions options, Func<string, bool>? isOn = null)
     {
         var unit = Indentation.GetUnit(options);
         var braceOnNewLine = SingleLineBlocks.NewLineBeforeBrace(SyntaxFactory.Block(), options);
@@ -189,6 +189,9 @@ internal static class Braces
                 SyntaxKind.WhileKeyword => " ",
                 SyntaxKind.ElseKeyword when !NewLineBeforeElse(options) => " ",
                 SyntaxKind.ElseKeyword => eol + NewIndent(outer.OwnerLine),
+
+                // The new '}' followed by a statement: BRO1519's blank line now, so one run converges.
+                _ when isOn is not null && BlankLineRuns.WantsBlankLineAfter(outer.Statement.Parent!, default, outer.Statement.GetLastToken().GetNextToken(), isOn) => eol,
                 _ => string.Empty,
             };
             changes.Add(new TextChange(outer.Close, closing + suffix));

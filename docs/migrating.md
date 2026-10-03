@@ -97,8 +97,6 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
 
 - Per-project rulesets and global configs (`<CodeAnalysisRuleSet>` in a test project's props) can't be mapped to
   paths; the strictest one wins. Add the test project's exceptions to a `.editorconfig` in its directory.
-- The SDK's IDE2000 (multiple blank lines, for SA1507) also counts blank lines at the start of a file and right
-  before a closing brace, which StyleCop leaves to SA1517 and SA1508.
 - StyleCop's XML file header (`<copyright file=...>`, the default for SA1633) becomes [BRO1615](rules/BRO1615.md) with
   stylecop.json's `companyName`, `copyrightText` (custom `variables` filled in) and `headerDecoration`; a plain
   header (`"xmlHeader": false`) becomes IDE0073's `file_header_template`. BRO1615 is one rule for SA1633-SA1641, so

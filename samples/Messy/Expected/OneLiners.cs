@@ -36,6 +36,7 @@ public class Thermostat
         else
         {
         }
+
         try
         {
             Heat();
@@ -44,6 +45,7 @@ public class Thermostat
         {
             Cool();
         }
+
         System.Action log = () => { Cool(); };
         log();
     }

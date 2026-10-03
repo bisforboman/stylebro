@@ -59,6 +59,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 | [BRO1514](docs/rules/BRO1514.md) | Braces should not be omitted | SA1503 | Yes |
 | [BRO1515](docs/rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Yes |
 | [BRO1516](docs/rules/BRO1516.md) | Use braces consistently | SA1520 | Yes |
+| [BRO1517](docs/rules/BRO1517.md) | Code should not contain multiple blank lines in a row | SA1507 | Yes |
+| [BRO1518](docs/rules/BRO1518.md) | Closing braces should not be preceded by blank line | SA1508 | Yes |
+| [BRO1519](docs/rules/BRO1519.md) | Closing brace should be followed by blank line | SA1513 | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

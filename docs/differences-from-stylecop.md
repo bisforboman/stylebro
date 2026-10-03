@@ -38,8 +38,6 @@ Where StyleBro relies on an SDK rule instead of shipping its own (its options co
 `stylebro-migrate init`), `dotnet format` fixes with the SDK's logic, which isn't
 always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covered-with-known-differences).
 
-- **IDE2000** (for SA1507) also removes extra blank lines at the start of a file and right before `}`, which StyleCop
-  leaves to SA1517 and SA1508.
 - **IDE0036** (for SA1206, SA1207) enforces the SDK's whole modifier order, where StyleCop only checks that the access
   modifier comes first and `static` next. On six real repos it changed nothing StyleCop accepts.
 - **IDE0073** (for SA1633 with `xmlHeader: false`) writes a plain header; the XML header is [BRO1615](rules/BRO1615.md).
@@ -64,6 +62,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1001](rules/BRO1001.md) (SA1201-SA1204, SA1214) | Types with `#region`/`#if`/`#pragma` between members; types where sorting would change what initializers compute. One diagnostic per type, not per member. | Moving members across directives or reordering dependent initializers changes behavior. |
 | [BRO1514](rules/BRO1514.md), [BRO1515](rules/BRO1515.md), [BRO1516](rules/BRO1516.md) (SA1503, SA1519, SA1520) | A comment or directive where the braces would go, `#if` in the owning statement, a multi-line string in the statement, other code after it on its line | The fix can't place the braces without moving the comment or reindenting string contents; StyleCop's formatter-based fix does. |
 | [BRO1405](rules/BRO1405.md) (SA1119) | Parentheses whose removal changes how the code parses (`F(a < b, (c > (d + 1)))` would become a generic call) | StyleCop's fix doesn't compile there. Its fix also leaves the spaces of `( b )` behind; StyleBro's removes them. |
+| [BRO1517](rules/BRO1517.md), [BRO1518](rules/BRO1518.md), [BRO1519](rules/BRO1519.md) (SA1507, SA1508, SA1513) | Places another StyleBro blank-line rule fixes when it's on: after `{` (BRO1503), below a comment (BRO1506), a comment, documentation or member after `}` (BRO1504, BRO1513, BRO1505); also a `}` with code or a comment after it on its line | Two fixes adding or removing the same blank line would conflict under `dotnet format`. |
 | [BRO1101](rules/BRO1101.md) (SA1106) | `while (x) ;` and labeled `end: ;` | StyleCop's fix hides a likely bug in the first and breaks the build in the second. |
 | [BRO1102](rules/BRO1102.md) (SA1133) | Attribute lists with a comment between the attributes | StyleCop's fix drops the comment. |
 | [BRO1103](rules/BRO1103.md) (SA1131) | Comparisons using a type's own `==`/`<` | A user-defined operator may not be symmetric. |

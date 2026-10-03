@@ -143,6 +143,12 @@ dotnet_diagnostic.BRO1514.severity = warning
 dotnet_diagnostic.BRO1515.severity = warning
 dotnet_diagnostic.BRO1516.severity = warning
 
+# BRO1517-BRO1519: one blank line at most, none before '}', one after a block (SA1507, SA1508, SA1513). Safe in
+# multi-targeted projects, unlike IDE2000/IDE2002/IDE2003.
+dotnet_diagnostic.BRO1517.severity = warning
+dotnet_diagnostic.BRO1518.severity = warning
+dotnet_diagnostic.BRO1519.severity = warning
+
 # BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
 dotnet_diagnostic.BRO1131.severity = warning
 

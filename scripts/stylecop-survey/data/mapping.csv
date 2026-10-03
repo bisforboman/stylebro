@@ -127,13 +127,13 @@ SA1503,"StyleBro **BRO1514** (done; replaces IDE0011, whose fix breaks multi-tar
 SA1504,"StyleBro **BRO1510** (done), same positions as StyleCop; the fix decides per property (StyleCop's applies one direction to the whole project) and keeps comments"
 SA1505,"StyleBro **BRO1503** (done), same results as StyleCop"
 SA1506,"StyleBro **BRO1511** (done), same positions and output as StyleCop"
-SA1507,SDK: IDE2000 (experimental)
-SA1508,SDK: IDE2002 (experimental)
+SA1507,"StyleBro **BRO1517** (done; replaces IDE2000, whose fix breaks multi-targeted projects). Leaves runs after `{`, before `}` and below a comment to BRO1503/BRO1518/BRO1506"
+SA1508,StyleBro **BRO1518** (done; replaces IDE2002). Leaves blank lines below a comment and in empty blocks to BRO1506/BRO1503
 SA1509,"StyleBro **BRO1501** (done), same results as StyleCop"
 SA1510,"StyleBro **BRO1502** (done), same results as StyleCop"
 SA1511,"StyleBro **BRO1512** (done), same positions and output as StyleCop"
 SA1512,"StyleBro **BRO1506** (done), same results as StyleCop"
-SA1513,SDK: IDE2003 (experimental)
+SA1513,"StyleBro **BRO1519** (done; replaces IDE2003). Leaves a comment, documentation or member after `}` to BRO1504/BRO1513/BRO1505"
 SA1514,StyleBro **BRO1513** (done); documentation right below a comment is not reported (it would conflict with SA1512/BRO1506)
 SA1515,"StyleBro **BRO1504** (done), same results as StyleCop"
 SA1516,"StyleBro **BRO1505** (done), same positions as StyleCop"
