@@ -74,6 +74,48 @@ public class BaseCallsTests
         """);
 
     [Fact]
+    public Task QualificationFalse_DropsTheQualifier_WhereThePlainNameMeansTheSame() => VerifyFixAsync(
+        """
+        public class Base
+        {
+            public int Count;
+
+            public int this[int i] => i;
+
+            public void Reset()
+            {
+            }
+        }
+
+        public class Derived : Base
+        {
+            public int Total(int Count) => {|BRO1131:base|}.Count + {|BRO1131:base|}[1];
+
+            public void Clear() => {|BRO1131:base|}.Reset();
+        }
+        """,
+        """
+        public class Base
+        {
+            public int Count;
+
+            public int this[int i] => i;
+
+            public void Reset()
+            {
+            }
+        }
+
+        public class Derived : Base
+        {
+            public int Total(int Count) => this.Count + this[1];
+
+            public void Clear() => Reset();
+        }
+        """,
+        editorConfig: "dotnet_style_qualification_for_method = false\ndotnet_style_qualification_for_field = false:silent");
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         public class Base
         {

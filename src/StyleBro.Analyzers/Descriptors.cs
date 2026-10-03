@@ -730,7 +730,7 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor BaseCall = new(
         id: DiagnosticIds.BaseCall,
         title: "Do not prefix calls with base unless local implementation exists",
-        messageFormat: "Use 'this' instead of 'base': the type has no member of its own with this name",
+        messageFormat: "'base.' isn't needed: the type has no member of its own with this name",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,

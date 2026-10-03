@@ -31,7 +31,7 @@ public sealed class BaseCallsCodeFixProvider : CodeFixProvider
         {
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    "Use 'this' instead of 'base'",
+                    "Remove the 'base' qualifier",
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
                     equivalenceKey: nameof(BaseCallsCodeFixProvider)),
                 diagnostic);
@@ -53,13 +53,14 @@ public sealed class BaseCallsCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
             if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true) is BaseExpressionSyntax node
-                && BaseCalls.CanUseThis(node, model, cancellationToken))
+                && BaseCalls.GetChange(node, model, options, cancellationToken) is { } change)
             {
-                changes.Add(new TextChange(node.Token.Span, "this"));
+                changes.Add(change);
             }
         }
 
