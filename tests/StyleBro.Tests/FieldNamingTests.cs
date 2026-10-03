@@ -149,6 +149,56 @@ public class FieldNamingTests
             """);
 
     [Fact]
+    public Task ProtectedField_IsRenamed_WhenItsNameIsOnlyAWordInAnotherTypesString() => VerifyFixAsync(
+        """
+        public class C
+        {
+            protected int {|BRO1303:Total|};
+
+            public int Next() => ++Total;
+        }
+
+        public class Report
+        {
+            public string Title => "Total of the month";
+        }
+        """,
+        """
+        public class C
+        {
+            protected int total;
+
+            public int Next() => ++total;
+        }
+
+        public class Report
+        {
+            public string Title => "Total of the month";
+        }
+        """);
+
+    [Fact]
+    public Task NamingRuleWithRequiredModifiers_DoesNotPickThePrivateFieldStyle() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private int count;
+
+            public int Next() => ++count;
+        }
+        """,
+        """
+        dotnet_naming_rule.readonly_fields.symbols = readonly_fields
+        dotnet_naming_rule.readonly_fields.style = underscore_camel
+        dotnet_naming_rule.readonly_fields.severity = warning
+        dotnet_naming_symbols.readonly_fields.applicable_kinds = field
+        dotnet_naming_symbols.readonly_fields.applicable_accessibilities = private
+        dotnet_naming_symbols.readonly_fields.required_modifiers = readonly
+        dotnet_naming_style.underscore_camel.required_prefix = _
+        dotnet_naming_style.underscore_camel.capitalization = camel_case
+        """);
+
+    [Fact]
     public Task StyleBroKey_WinsOverANamingRule() => VerifyNoDiagnosticsAsync(
         """
         public class C
@@ -179,7 +229,7 @@ public class FieldNamingTests
             protected readonly int {|BRO1303:_size|} = 2;
             private protected int {|BRO1303:Level|};
             protected int fine;
-            protected readonly int Fine = 3;
+            protected readonly int Ready = 3;
         }
         """,
         """
@@ -191,7 +241,7 @@ public class FieldNamingTests
             protected readonly int size = 2;
             private protected int level;
             protected int fine;
-            protected readonly int Fine = 3;
+            protected readonly int Ready = 3;
         }
         """);
 

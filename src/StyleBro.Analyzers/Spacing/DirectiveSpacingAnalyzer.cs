@@ -42,7 +42,7 @@ public sealed class DirectiveSpacingAnalyzer : DiagnosticAnalyzer
             }
 
             var keyword = token.GetNextToken(includeDirectives: true);
-            if (!keyword.IsKind(SyntaxKind.None) && !keyword.IsKind(SyntaxKind.EndOfDirectiveToken) && !keyword.IsMissing && keyword.SpanStart > token.Span.End)
+            if (!keyword.IsKind(SyntaxKind.None) && !keyword.IsMissing && keyword.SpanStart > token.Span.End)
             {
                 yield return (keyword, TextSpan.FromBounds(token.Span.End, keyword.SpanStart));
             }

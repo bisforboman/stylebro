@@ -77,7 +77,17 @@ when we can do that"): don't suggest releases at all; the user says when.
   Messy's project references; harmless while they agree.
 - C# files under `src/` and `tests/` use LF line endings (normalized 2026-09-30; a few had become mixed from scripted
   edits inserting CRLF, which then made exact-text replacements fail). Keep new edits LF.
-- `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg.
+- `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg; a `parity` job
+  runs every StyleCop parity set (`Compare-WithStyleCop.ps1`).
+- **PR pipeline (2026-10-03, user's request: "verify new changes before merging to main")**: `main` is protected; changes
+  land through pull requests whose checks pass. Work on a branch, push it, open a PR (`gh pr create`), let the checks
+  run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: windows-latest, one
+  job per public repo in `scripts/realworld/repos.psd1`, `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
+  fails on analyzer crashes, new compile errors, conflict markers, no convergence within 3 runs, or tests that passed
+  on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
+  `scripts/mutation/Invoke-Mutations.ps1` breaks each guard in `scripts/mutation/mutations.psd1` and needs a test to
+  fail; add an entry for every new guard). All scripts run locally too (mutations in a separate worktree: they undo
+  each mutation with `git checkout`, so commit first).
 - `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
   Publishing (`NuGet/login@v1`, no stored API key) and creates a GitHub release (prerelease if the version has a `-`).

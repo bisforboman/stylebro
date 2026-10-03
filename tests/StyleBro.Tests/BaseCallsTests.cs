@@ -92,6 +92,12 @@ public class BaseCallsTests
             public int Total(int Count) => {|BRO1131:base|}.Count + {|BRO1131:base|}[1];
 
             public void Clear() => {|BRO1131:base|}.Reset();
+
+            public int Local()
+            {
+                var Count = 2;
+                return {|BRO1131:base|}.Count + Count;
+            }
         }
         """,
         """
@@ -111,6 +117,12 @@ public class BaseCallsTests
             public int Total(int Count) => this.Count + this[1];
 
             public void Clear() => Reset();
+
+            public int Local()
+            {
+                var Count = 2;
+                return this.Count + Count;
+            }
         }
         """,
         editorConfig: "dotnet_style_qualification_for_method = false\ndotnet_style_qualification_for_field = false:silent");

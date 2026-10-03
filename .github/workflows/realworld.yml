@@ -1,0 +1,38 @@
+name: Real world
+
+# Every StyleBro rule on public repositories at pinned commits (scripts/realworld/repos.psd1): no analyzer crashes, no
+# new compile errors, no merge-conflict markers, the fixes converge, and no test that passed before fails afterwards.
+# Windows, because Polly and Serilog also target .NET Framework.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: realworld-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  realworld:
+    name: Real world (${{ matrix.repo }})
+    runs-on: windows-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: [FFMpegCore, Polly, OpenTelemetry, Newtonsoft, Serilog]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          # The repositories build with older SDKs' target frameworks too.
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Run StyleBro on ${{ matrix.repo }}
+        shell: pwsh
+        run: ./scripts/realworld/Invoke-RealWorld.ps1 -Repo ${{ matrix.repo }} -Tests -Work "${{ runner.temp }}/realworld"

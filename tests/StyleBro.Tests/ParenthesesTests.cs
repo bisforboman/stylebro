@@ -54,6 +54,29 @@ public class ParenthesesTests
         """);
 
     [Fact]
+    public Task RemovalsThatOnlyBreakTogether_AreNotBothApplied() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(int a, int b) => Use({|BRO1405:(a < b)|}, {|BRO1405:(b > (a + 1))|});
+
+            private static void Use(bool x, bool y)
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(int a, int b) => Use(a < b, (b > (a + 1)));
+
+            private static void Use(bool x, bool y)
+            {
+            }
+        }
+        """);
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         #if !(DEBUG)
         using System;
@@ -63,6 +86,10 @@ public class ParenthesesTests
 
         public class C
         {
+        #if !(DEBUG)
+            public int D => 1;
+        #endif
+
             public object M(int a, int b, string s, int? n, bool f)
             {
                 // Inside an operator expression: they say how it groups, or make it clearer.
