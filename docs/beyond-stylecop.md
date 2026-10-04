@@ -289,6 +289,8 @@ the two rules agree. New lines are one indentation unit deeper than the line the
 in the gaps and `#if`. #752 asks the same for chains of binary operators; that is harder (mixed operators and
 precedence) and could come later.
 
+Done (2026-10-04): [BRO1524](rules/BRO1524.md) (chains are skipped, see decisions.md).
+
 #### 2. No blank line after attributes (SA1521, #738)
 
 `[Fact]`, a blank line, then `public void Test()`: the blank line goes. A text fix like BRO1511's. Skip when a comment

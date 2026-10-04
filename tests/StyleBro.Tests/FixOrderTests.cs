@@ -46,6 +46,23 @@ public class FixOrderTests
         "BRO1135");
 
     [Fact]
+    public Task Conditionals_ATokenOnTheWrongSideAndOneWithoutLineBreak() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t)
+            {
+                var x = a ? s :
+                    t;
+                return a ?
+                    x : t;
+            }
+        }
+        """,
+        "BRO1520",
+        "BRO1524");
+
+    [Fact]
     public Task Ordering_AMultiLineFieldSortedAboveAField() => AssertConvergesInEveryOrderAsync(
         """
         public class C

@@ -158,6 +158,7 @@ change nothing there.)
 
 Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1520.severity`,
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1135.severity` =
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1524.severity` =
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1616.severity` =
 `warning`); `stylebro-migrate` writes
 them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on in `.editorconfig` to use
@@ -169,4 +170,5 @@ them.
 | [BRO1521](rules/BRO1521.md) | `=>` of expression bodies and switch arms at the end of the line (`stylebro_arrow_placement_when_wrapping`) | Roslynator RCS0032 |
 | [BRO1522](rules/BRO1522.md) | `=` of assignments and initializers at the end of the line (`stylebro_equals_placement_when_wrapping`) | Roslynator RCS0052 |
 | [BRO1135](rules/BRO1135.md) | Integer literal suffixes in upper case (`1L`, `2U`, `3UL`); real suffixes (`f`, `d`, `m`) aren't checked | Sonar S818, StyleCop issue #1563 |
+| [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
 | [BRO1616](rules/BRO1616.md) | `<summary>` tags on lines of their own (`stylebro_summary_layout = multi_line`), or the summary on one line when its text is one line and fits (`single_line_when_fits`) | Roslynator RCS1253, Meziantou MA0177/MA0211 |
