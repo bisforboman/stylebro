@@ -159,6 +159,18 @@ namespace Parity
                 lines */
             {
             }
+
+            if (a
+                && !a) // multi-line header
+            {
+            }
+            else if (!a
+                || a) // multi-line else if
+            {
+            }
+            else // one-line else after them: reported
+            {
+            }
         }
     }
 }

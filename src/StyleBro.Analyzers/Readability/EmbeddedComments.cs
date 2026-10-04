@@ -43,8 +43,10 @@ internal static class EmbeddedComments
     };
 
     /// <summary>
-    /// The comments to move, empty when there are none or the fix can't move them safely: a directive between the header
-    /// and '{', a comment spanning lines, or code after '{' on its line (a single-line block, nowhere to put a line).
+    /// The comments to move, empty when there are none or the fix can't move them safely: a header spanning several lines
+    /// (the comment usually explains its last line, not the block: a user decision, see docs/decisions.md), a directive
+    /// between the header and '{', a comment spanning lines, or code after '{' on its line (a single-line block, nowhere
+    /// to put a line).
     /// </summary>
     public static ImmutableArray<SyntaxTrivia> GetComments(SyntaxToken openBrace, SourceText text)
     {
@@ -59,9 +61,13 @@ internal static class EmbeddedComments
             return ImmutableArray<SyntaxTrivia>.Empty;
         }
 
+        // The statement or clause that owns the block; its first token starts the header ('else', 'catch', the 'if' of an
+        // 'else if', 'switch', ...).
+        var owner = (openBrace.Parent is BlockSyntax block ? block.Parent : openBrace.Parent)!;
         var gap = previous.TrailingTrivia.Concat(openBrace.LeadingTrivia).ToList();
         var comments = gap.Where(IsComment).ToImmutableArray();
         if (comments.IsEmpty
+            || Line(text, owner.GetFirstToken().SpanStart) != Line(text, previous.SpanStart)
             || gap.Any(t => t.IsDirective)
             || comments.Any(c => Line(text, c.Span.Start) != Line(text, c.Span.End))
             || Line(text, openBrace.GetNextToken().SpanStart) == Line(text, openBrace.SpanStart))

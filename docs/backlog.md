@@ -18,7 +18,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | Planned | 0 rules, 9 work items |
 | Maybe | 5 rules from other analyzers |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 105 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -38,7 +38,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | More real-world repos in the PR pipeline | Jellyfin (an application using StyleCop), FluentValidation and CsvHelper (seven target frameworks) added; they found a BRO1302 rename that broke CsvHelper at run time and a BRO1001 blank line that needed a second run. | Done (2026-10-03) |
 | Hardening | IDE0055 in multi-targeted repos | `dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md. | Done (2026-10-03) |
 | Parity | SA1316: tuple element names in PascalCase | BRO1311: renamed with every use, literal and override solution-wide (Roslyn's Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`. | Done (2026-10-03) |
-| Parity | SA1108: no comments inside block statements | Probed and prototyped as BRO1132 (moves the comment into the block); what the fix does awaits a decision, see docs/proposals/sa1108.md. | In progress |
+| Parity | SA1108: no comments inside block statements | BRO1132: the comment moves into the block, right after `{`; multi-line headers skipped (decisions.md, proposals/sa1108.md). | Done (2026-10-04) |
 | Parity | BRO1309: namespace names | Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first. | Planned |
 | Adoption | Getting started | docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines. | Done (2026-10-03) |
 | Adoption | IDE experience | Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig. | Planned |

@@ -38,7 +38,7 @@ SA1104,"StyleBro **BRO1129** (done), same positions as StyleCop"
 SA1105,"StyleBro **BRO1130** (done), same positions as StyleCop"
 SA1106,StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported
 SA1107,SDK: IDE0055 (`csharp_preserve_single_line_statements = false`)
-SA1108,"StyleBro **BRO1132** (done), same positions as StyleCop; StyleCop has no fix, StyleBro moves the comment into the block. Not reported: single-line blocks and comments spanning lines"
+SA1108,"StyleBro **BRO1132** (done), same positions as StyleCop; StyleCop has no fix, StyleBro moves the comment into the block. Not reported: headers spanning several lines (user decision), single-line blocks, comments spanning lines"
 SA1109,Drop: StyleCop never reports it. Off by default and no diagnostic for a region between `if (b)` and its block (probed).
 SA1110,"StyleBro **BRO1109** (done), same results and output as StyleCop"
 SA1111,"StyleBro **BRO1110** (done), same results and output as StyleCop"
