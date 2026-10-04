@@ -111,6 +111,11 @@ internal static class Migration
         lines.Add($"{StyleBro.Analyzers.Layout.Braces.ConsecutiveUsingsKey} = {Bool(setup.Setting("layoutRules", "allowConsecutiveUsings") is not { ValueKind: JsonValueKind.False })}");
         AddHungarianPrefixes(setup, lines);
         AddTupleElementCasing(setup, lines, result);
+        if (setup.Setting("namingRules", "allowedNamespaceComponents") is { ValueKind: JsonValueKind.Array } components && components.GetArrayLength() > 0)
+        {
+            lines.Add($"{StyleBro.Analyzers.Naming.NamespaceNames.AllowedKey} = {string.Join(", ", components.EnumerateArray().Select(c => c.GetString()))}");
+        }
+
         if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none"))
         {
             AddFileHeader(setup, lines);

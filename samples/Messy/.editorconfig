@@ -13,3 +13,7 @@ dotnet_diagnostic.BRO1310.severity = warning
 # BRO1001 inside regions: BRO1112 (remove regions, off in the preset) stays off here.
 [**/Kettle.cs]
 dotnet_diagnostic.BRO1112.severity = none
+
+# BRO1312 (namespace names) is off by default; on for one file.
+[**/Catalog.cs]
+dotnet_diagnostic.BRO1312.severity = warning

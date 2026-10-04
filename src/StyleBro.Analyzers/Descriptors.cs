@@ -206,6 +206,17 @@ internal static class Descriptors
             + "Replaces StyleCop SA1300 (except for namespaces).",
         helpLinkUri: HelpBase + DiagnosticIds.ElementPascalCase + ".md");
 
+    public static readonly DiagnosticDescriptor NamespacePascalCase = new(
+        id: DiagnosticIds.NamespacePascalCase,
+        title: "Namespace names should begin with an upper-case letter",
+        messageFormat: "Rename namespace '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "Every part of a namespace name is PascalCase. Off by default: renaming a namespace renames every type in it. "
+            + "Replaces StyleCop SA1300 (namespaces).",
+        helpLinkUri: HelpBase + DiagnosticIds.NamespacePascalCase + ".md");
+
     public static readonly DiagnosticDescriptor OpenParenthesisOnNameLine = new(
         id: DiagnosticIds.OpenParenthesisOnNameLine,
         title: "Opening parenthesis or bracket should be on the declaration line",
