@@ -94,6 +94,44 @@ public class FixOrderTests
         "BRO1504",
         "BRO1506");
 
+    [Fact]
+    public Task Regions_AHeaderRegionBelowUsings() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Text;
+        #region License
+        // header
+        #endregion
+
+        namespace N
+        {
+            public class C
+            {
+            }
+        }
+        """,
+        "BRO1112",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506");
+
+    [Fact]
+    public Task Regions_BlankLinesAroundAnEndRegionBeforeABrace() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            #region Methods
+
+            public void M()
+            {
+            }
+
+            #endregion
+
+        }
+        """,
+        "BRO1112",
+        "BRO1518");
+
     private static async Task AssertConvergesInEveryOrderAsync(string source, params string[] ids)
     {
         foreach (var order in Orders(ids))
