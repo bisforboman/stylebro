@@ -206,6 +206,17 @@ internal static class Descriptors
             + "Replaces StyleCop SA1300 (except for namespaces).",
         helpLinkUri: HelpBase + DiagnosticIds.ElementPascalCase + ".md");
 
+    public static readonly DiagnosticDescriptor NamespacePascalCase = new(
+        id: DiagnosticIds.NamespacePascalCase,
+        title: "Namespace names should begin with an upper-case letter",
+        messageFormat: "Rename namespace '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "Every part of a namespace name is PascalCase. Off by default: renaming a namespace renames every type in it. "
+            + "Replaces StyleCop SA1300 (namespaces).",
+        helpLinkUri: HelpBase + DiagnosticIds.NamespacePascalCase + ".md");
+
     public static readonly DiagnosticDescriptor OpenParenthesisOnNameLine = new(
         id: DiagnosticIds.OpenParenthesisOnNameLine,
         title: "Opening parenthesis or bracket should be on the declaration line",
@@ -946,6 +957,42 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "A documentation comment is separated from the code above it by a blank line, except after an opening brace. Replaces StyleCop SA1514.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLineBeforeDocumentation + ".md");
+
+    public static readonly DiagnosticDescriptor OperatorPlacement = new(
+        id: DiagnosticIds.OperatorPlacement,
+        title: "Place the operator consistently when an expression wraps",
+        messageFormat: "Put '{0}' at the {1} of the line",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When the line breaks next to a binary operator or the conditional operator's '?' or ':', the operator "
+            + "goes at the beginning of the next line (dotnet_style_operator_placement_when_wrapping = beginning_of_line, the "
+            + "default) or at the end of the broken line (end_of_line). Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.OperatorPlacement + ".md");
+
+    public static readonly DiagnosticDescriptor ArrowPlacement = new(
+        id: DiagnosticIds.ArrowPlacement,
+        title: "Place '=>' consistently when an expression body wraps",
+        messageFormat: "Put '{0}' at the {1} of the line",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When the line breaks next to the '=>' of an expression body or a switch expression arm, the '=>' goes "
+            + "at the end of the broken line (stylebro_arrow_placement_when_wrapping = end_of_line, the default) or at the "
+            + "beginning of the next line (beginning_of_line). Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.ArrowPlacement + ".md");
+
+    public static readonly DiagnosticDescriptor EqualsPlacement = new(
+        id: DiagnosticIds.EqualsPlacement,
+        title: "Place '=' consistently when an assignment wraps",
+        messageFormat: "Put '{0}' at the {1} of the line",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When the line breaks next to the '=' of an assignment or an initializer, the '=' goes at the end of "
+            + "the broken line (stylebro_equals_placement_when_wrapping = end_of_line, the default) or at the beginning of "
+            + "the next line (beginning_of_line). Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.EqualsPlacement + ".md");
 
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }

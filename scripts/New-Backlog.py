@@ -16,17 +16,16 @@ WORK = [
     ('Hardening', 'IDE0055 in multi-targeted repos', "`dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md.", 'Done (2026-10-03)'),
     ('Parity', 'SA1316: tuple element names in PascalCase', 'BRO1311: renamed with every use, literal and override solution-wide (Roslyn\'s Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`.', 'Done (2026-10-03)'),
     ('Parity', 'SA1108: no comments inside block statements', 'BRO1132: the comment moves into the block, right after `{`; multi-line headers skipped (decisions.md, proposals/sa1108.md).', 'Done (2026-10-04)'),
-    ('Parity', 'BRO1309: namespace names', 'Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first.', 'Planned'),
+    ('Parity', 'BRO1309: namespace names', 'BRO1312, opt-in (off by default, on through `stylebro-migrate` with SA1300); the root namespace is left out. See docs/proposals/namespace-names.md.', 'Done (2026-10-04)'),
     ('Adoption', 'Getting started', 'docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines.', 'Done (2026-10-03)'),
     ('Adoption', 'IDE experience', "Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig.", 'Planned'),
     ('Adoption', 'Migration sample', 'samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards.', 'Done (2026-10-03)'),
     ('Beyond StyleCop', 'Survey other analyzers', "Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe.", 'Done (2026-10-03)'),
+    ('Beyond StyleCop', 'Operator, `=>` and `=` placement when wrapping (survey #1, #2)', 'BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
 ]
 
 # Rules from other analyzers (docs/beyond-stylecop.md), worth doing if someone asks.
 MAYBE = [
-    ('Roslynator RCS0027/RCS0028', 'Operator placement when wrapping (`&&`, `+`, `?:` at line start or end)', 'Follows the SDK key `dotnet_style_operator_placement_when_wrapping`, which no SDK rule enforces. Syntax only.'),
-    ('Roslynator RCS0032/RCS0052', '`=>` and `=` placement when the line breaks there', 'Same fix as the operator rule.'),
     ('Roslynator RCS1248', '`x == null` vs `x is null`', 'Semantic: skip user-defined `==`, expression trees, `is not` before C# 9.'),
     ('Roslynator RCS0054', 'A split call chain has every call on its own line', 'Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part.'),
     ('Roslynator RCS1253, Meziantou MA0177/MA0211', '`<summary>` on one line or on three', 'Text only, next to the BRO16xx rules.'),
@@ -107,7 +106,7 @@ out.append('`dotnet format` once per target framework, which avoids the crash. A
 out.append('(dotnet/roslyn).\n')
 
 out.append('## Maybe\n')
-out.append('The top five rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):\n')
+out.append('The next rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):\n')
 out.append('| Source | Rule | Notes |')
 out.append('|--------|------|-------|')
 for source, rule, notes in MAYBE:

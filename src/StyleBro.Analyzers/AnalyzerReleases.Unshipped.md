@@ -15,6 +15,7 @@ BRO1131 | Readability | Warning  | BaseCallsAnalyzer
 BRO1132 | Readability | Warning  | EmbeddedCommentAnalyzer
 BRO1310 | Naming | Disabled | CamelCaseNamingAnalyzer
 BRO1311 | Naming | Warning | TupleElementNamingAnalyzer
+BRO1312 | Naming | Disabled | NamespaceNamingAnalyzer
 BRO1404 | Maintainability | Warning  | AccessModifiersAnalyzer
 BRO1405 | Maintainability | Warning  | ParenthesesAnalyzer
 BRO1406 | Maintainability | Warning  | PrecedenceAnalyzer
@@ -25,3 +26,6 @@ BRO1516 | Layout | Warning  | BracesAnalyzer
 BRO1517 | Layout | Warning  | BlankLineRunsAnalyzer
 BRO1518 | Layout | Warning  | BlankLineRunsAnalyzer
 BRO1519 | Layout | Warning  | BlankLineRunsAnalyzer
+BRO1520 | Layout | Warning  | WrappingPlacementAnalyzer
+BRO1521 | Layout | Warning  | WrappingPlacementAnalyzer
+BRO1522 | Layout | Warning  | WrappingPlacementAnalyzer

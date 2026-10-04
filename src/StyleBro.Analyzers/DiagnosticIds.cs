@@ -41,6 +41,7 @@ public static class DiagnosticIds
     public const string ElementPascalCase = "BRO1309";
     public const string HungarianNotation = "BRO1310";
     public const string TupleElementCasing = "BRO1311";
+    public const string NamespacePascalCase = "BRO1312";
     public const string InheritDocumentation = "BRO1601";
     public const string DocumentationSlashesInComment = "BRO1602";
     public const string DocumentationEndsWithPeriod = "BRO1603";
@@ -93,4 +94,7 @@ public static class DiagnosticIds
     public const string MultipleBlankLines = "BRO1517";
     public const string BlankLineBeforeCloseBrace = "BRO1518";
     public const string BlankLineAfterCloseBrace = "BRO1519";
+    public const string OperatorPlacement = "BRO1520";
+    public const string ArrowPlacement = "BRO1521";
+    public const string EqualsPlacement = "BRO1522";
 }

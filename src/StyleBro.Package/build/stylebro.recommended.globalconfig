@@ -84,6 +84,10 @@ dotnet_diagnostic.BRO1310.severity = none
 # BRO1311: tuple element names in PascalCase (SA1316); stylebro_tuple_element_name_casing = camelCase for the other style
 dotnet_diagnostic.BRO1311.severity = warning
 
+# BRO1312: namespace names begin with an upper-case letter (SA1300 for namespaces). Off: renaming a namespace renames
+# every type in it (stored type names, other repositories); set to warning to opt in.
+dotnet_diagnostic.BRO1312.severity = none
+
 # BRO1109: opening parenthesis on the declaration line (SA1110)
 dotnet_diagnostic.BRO1109.severity = warning
 
@@ -156,6 +160,14 @@ stylebro_allow_consecutive_usings = true
 dotnet_diagnostic.BRO1517.severity = warning
 dotnet_diagnostic.BRO1518.severity = warning
 dotnet_diagnostic.BRO1519.severity = warning
+
+# BRO1520-BRO1522: where an operator, '=>' or '=' goes when the line breaks next to it. Not StyleCop rules (stylebro-migrate
+# turns them off). Placement: dotnet_style_operator_placement_when_wrapping (default beginning_of_line),
+# stylebro_arrow_placement_when_wrapping (default end_of_line), stylebro_equals_placement_when_wrapping (default
+# end_of_line); not set here, so an .editorconfig value takes effect.
+dotnet_diagnostic.BRO1520.severity = warning
+dotnet_diagnostic.BRO1521.severity = warning
+dotnet_diagnostic.BRO1522.severity = warning
 
 # BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
 dotnet_diagnostic.BRO1131.severity = warning

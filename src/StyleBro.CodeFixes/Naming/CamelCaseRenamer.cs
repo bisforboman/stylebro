@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using StyleBro.Analyzers;
 using StyleBro.Analyzers.Naming;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -30,8 +31,20 @@ internal static class CamelCaseRenamer
         var changes = new Dictionary<string, List<TextChange>>();
         HashSet<string>? strings = null;
         var done = new HashSet<(string File, int Start)>();
+        var namespaces = new List<(string, string)>();
         foreach (var (document, diagnostic) in items)
         {
+            if (diagnostic.Id == DiagnosticIds.NamespacePascalCase)
+            {
+                if (diagnostic.Properties.TryGetValue(NamespaceNames.NamespaceKey, out var oldNamespace) && oldNamespace is not null
+                    && diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newPart) && newPart is not null)
+                {
+                    namespaces.Add((oldNamespace, newPart));
+                }
+
+                continue;
+            }
+
             if (!diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName) || newName is null
                 || !done.Add((GetFileKey(document), diagnostic.Location.SourceSpan.Start)))
             {
@@ -72,6 +85,7 @@ internal static class CamelCaseRenamer
             }
         }
 
+        await NamespaceRenamer.AddChangesAsync(solution, namespaces, changes, cancellationToken).ConfigureAwait(false);
         var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
         var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
         var paths = new HashSet<string>(StringComparer.Ordinal);
@@ -100,6 +114,17 @@ internal static class CamelCaseRenamer
         }
 
         return solution;
+    }
+
+    /// <summary>
+    /// A physical file and its text: the copies of a multi-targeted file share edits only while their text is the same
+    /// ('dotnet format' runs its whitespace and code style fixes first and can leave the copies different; edits found in
+    /// one copy don't fit the other's text). See <see cref="LinkedFileFixAllProvider"/>.
+    /// </summary>
+    internal static string GetFileKey(Document document)
+    {
+        var text = document.TryGetText(out var loaded) ? loaded : document.GetTextAsync().GetAwaiter().GetResult();
+        return (document.FilePath ?? document.Id.Id.ToString()) + "|" + Convert.ToBase64String(text.GetChecksum().ToArray());
     }
 
     /// <summary>
@@ -447,15 +472,4 @@ internal static class CamelCaseRenamer
 
     private static ImmutableArray<ISymbol> GetTypeParameters(ISymbol member) =>
         member is IMethodSymbol method ? method.TypeParameters.CastArray<ISymbol>() : ImmutableArray<ISymbol>.Empty;
-
-    /// <summary>
-    /// A physical file and its text: the copies of a multi-targeted file share edits only while their text is the same
-    /// ('dotnet format' runs its whitespace and code style fixes first and can leave the copies different; edits found in
-    /// one copy don't fit the other's text). See <see cref="LinkedFileFixAllProvider"/>.
-    /// </summary>
-    private static string GetFileKey(Document document)
-    {
-        var text = document.TryGetText(out var loaded) ? loaded : document.GetTextAsync().GetAwaiter().GetResult();
-        return (document.FilePath ?? document.Id.Id.ToString()) + "|" + Convert.ToBase64String(text.GetChecksum().ToArray());
-    }
 }

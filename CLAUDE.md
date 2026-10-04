@@ -519,6 +519,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   56/52 positions, 4 documented; output not compared (StyleCop's fix misindents nested blocks, writes CRLF into LF
   files). Replaces the SDK option the preset couldn't use (`csharp_preserve_single_line_blocks = false` also expands
   `{ get; set; }`).
+- **BRO1520-BRO1522** (2026-10-04, first rules beyond StyleCop, `Layout/WrappingPlacement.cs`, one analyzer + one fix):
+  operator (binary + `?`/`:`, SDK key `dotnet_style_operator_placement_when_wrapping`, default beginning), `=>`
+  (expression bodies + switch arms, not lambdas; `stylebro_arrow_placement_when_wrapping`, default end: owner), `=`
+  (assignments incl. compound + EqualsValueClause; `stylebro_equals_placement_when_wrapping`, default end); defaults
+  from a survey of the 8 reference repos (docs/decisions.md). Only the token moves (edit = both gaps; the gap with the
+  line break is kept from the break on). Skipped: any non-whitespace trivia in the gaps, break on both sides, missing
+  tokens, `{`/`[` after the token, a query after it (BRO1127-BRO1130 indent clauses by whether `from` starts the line:
+  Messy showed `select` re-indented), `=>` after a `where` (BRO1111's). Probed: no SDK rule (IDE0055 included) enforces
+  the SDK key. Migration writes them `none` (no SA ids); MigrationTests requires rules without SA ids to be listed
+  under "Rules beyond StyleCop" in differences-from-stylecop.md.
 - **BRO1510** (SA1504) accessors with block bodies all single-line or all multi-line (`Layout/AccessorLayout.cs`).
   Probed: only lists where EVERY accessor has a block body (`get => x;`/`get;` next to a multi-line `set {}` is fine),
   only multi-line lists (a one-line list is BRO1509's), diagnostic on the first accessor's keyword. StyleCop's fix has

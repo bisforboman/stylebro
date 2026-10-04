@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 20 |
-| Planned | 0 rules, 9 work items |
-| Maybe | 5 rules from other analyzers |
+| Done, not released yet | 24 |
+| Planned | 0 rules, 10 work items |
+| Maybe | 3 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -39,11 +39,12 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | IDE0055 in multi-targeted repos | `dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md. | Done (2026-10-03) |
 | Parity | SA1316: tuple element names in PascalCase | BRO1311: renamed with every use, literal and override solution-wide (Roslyn's Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`. | Done (2026-10-03) |
 | Parity | SA1108: no comments inside block statements | BRO1132: the comment moves into the block, right after `{`; multi-line headers skipped (decisions.md, proposals/sa1108.md). | Done (2026-10-04) |
-| Parity | BRO1309: namespace names | Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first. | Planned |
+| Parity | BRO1309: namespace names | BRO1312, opt-in (off by default, on through `stylebro-migrate` with SA1300); the root namespace is left out. See docs/proposals/namespace-names.md. | Done (2026-10-04) |
 | Adoption | Getting started | docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines. | Done (2026-10-03) |
 | Adoption | IDE experience | Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig. | Planned |
 | Adoption | Migration sample | samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards. | Done (2026-10-03) |
 | Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |
+| Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 
 ### Read the SDK's own settings
 
@@ -66,12 +67,10 @@ IDE0055 (the SDK's whole formatter) isn't replaced: in multi-targeted repositori
 
 ## Maybe
 
-The top five rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):
+The next rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):
 
 | Source | Rule | Notes |
 |--------|------|-------|
-| Roslynator RCS0027/RCS0028 | Operator placement when wrapping (`&&`, `+`, `?:` at line start or end) | Follows the SDK key `dotnet_style_operator_placement_when_wrapping`, which no SDK rule enforces. Syntax only. |
-| Roslynator RCS0032/RCS0052 | `=>` and `=` placement when the line breaks there | Same fix as the operator rule. |
 | Roslynator RCS1248 | `x == null` vs `x is null` | Semantic: skip user-defined `==`, expression trees, `is not` before C# 9. |
 | Roslynator RCS0054 | A split call chain has every call on its own line | Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part. |
 | Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
@@ -144,6 +143,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1309](rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Released |
 | [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Done |
 | [BRO1311](rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Done |
+| [BRO1312](rules/BRO1312.md) | Namespace names should begin with an upper-case letter (off by default) | SA1300 | Done |
 
 ### BRO14xx: Maintainability
 
@@ -180,6 +180,9 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1517](rules/BRO1517.md) | Code should not contain multiple blank lines in a row | SA1507 | Done |
 | [BRO1518](rules/BRO1518.md) | Closing braces should not be preceded by blank line | SA1508 | Done |
 | [BRO1519](rules/BRO1519.md) | Closing brace should be followed by blank line | SA1513 | Done |
+| [BRO1520](rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Done |
+| [BRO1521](rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Done |
+| [BRO1522](rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Done |
 
 ### BRO16xx: Documentation
 
