@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 27 |
-| Planned | 0 rules, 15 work items |
-| Maybe | 5 rules from other analyzers |
+| Done, not released yet | 28 |
+| Planned | 0 rules, 16 work items |
+| Maybe | 4 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -134,8 +134,8 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1130](rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Done |
 | [BRO1131](rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Done |
 | [BRO1132](rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Done |
-| [BRO1135](rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Done |
 | [BRO1133](rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Done |
+| [BRO1135](rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Done |
 
 ### BRO13xx: Naming
 
