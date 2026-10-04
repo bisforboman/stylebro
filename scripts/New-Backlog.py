@@ -38,7 +38,6 @@ MAYBE = [
     ('StyleCop issue #651', 'A split conditional expression has the condition, `? a` and `: b` each on its own line', 'Like BRO1108; operator side from BRO1520\'s setting.'),
     ('StyleCop issue #2252', 'Option: `if (x) return;` (jump statement on the `if` line) without braces', 'An option for BRO1514, off by default.'),
     ('StyleCop issue #738 (SA1521)', 'No blank line between an attribute and its element', 'Text fix like BRO1511; must agree with BRO1505.'),
-    ('StyleCop issue #2252', 'Option: `if (x) return;` (jump statement on the `if` line) without braces', 'An option for BRO1514, off by default.'),
     ('StyleCop issue #605', 'No comment between a declaration\'s header and its `{`', 'Extend BRO1132\'s move to types and members.'),
     ('StyleCop issue #1563, Sonar S818', 'Upper-case literal suffixes: `1ul` -> `1UL`', 'Text only, next to BRO1122.'),
 ]
