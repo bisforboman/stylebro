@@ -15,8 +15,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 71 |
 | Done, not released yet | 24 |
-| Planned | 0 rules, 11 work items |
-| Maybe | 8 rules from other analyzers |
+| Planned | 0 rules, 12 work items |
+| Maybe | 7 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -46,6 +46,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |
 | Beyond StyleCop | Survey StyleCop's issue tracker | Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there. | Done (2026-10-04) |
 | Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | Braceless `if (x) return;` (StyleCop issue #2252) | `stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md). | Done (2026-10-04) |
 
 ### Read the SDK's own settings
 
@@ -77,7 +78,6 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 | Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
 | StyleCop issue #651 | A split conditional expression has the condition, `? a` and `: b` each on its own line | Like BRO1108; operator side from BRO1520's setting. |
 | StyleCop issue #738 (SA1521) | No blank line between an attribute and its element | Text fix like BRO1511; must agree with BRO1505. |
-| StyleCop issue #2252 | Option: `if (x) return;` (jump statement on the `if` line) without braces | An option for BRO1514, off by default. |
 | StyleCop issue #605 | No comment between a declaration's header and its `{` | Extend BRO1132's move to types and members. |
 | StyleCop issue #1563, Sonar S818 | Upper-case literal suffixes: `1ul` -> `1UL` | Text only, next to BRO1122. |
 
