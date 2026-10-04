@@ -45,9 +45,9 @@ internal static class ParameterDocumentation
     }
 
     /// <summary>Empty '&lt;remarks&gt;' elements ('&lt;remarks&gt;&lt;/remarks&gt;', '&lt;remarks/&gt;' or only whitespace).</summary>
-    public static IEnumerable<XmlNodeSyntax> GetEmptyRemarks(SyntaxNode root)
+    public static IEnumerable<XmlNodeSyntax> GetEmptyRemarks(IEnumerable<SyntaxTrivia> trivia)
     {
-        foreach (var documentation in root.DescendantTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>())
+        foreach (var documentation in trivia.Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>())
         {
             foreach (var node in documentation.Content)
             {

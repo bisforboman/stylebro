@@ -50,12 +50,12 @@ internal static class DocumentationPeriods
     /// code sample, or elements without text, or with a period followed only by closing punctuation ('(see above.)').
     /// Elements named in <see cref="ExcludeKey"/> aren't checked.
     /// </summary>
-    public static IEnumerable<int> GetMissingPeriods(SyntaxNode root, AnalyzerConfigOptions options)
+    public static IEnumerable<int> GetMissingPeriods(IEnumerable<SyntaxTrivia> trivia, AnalyzerConfigOptions options)
     {
         var excluded = GetExcluded(options);
-        foreach (var trivia in root.DescendantTrivia(descendIntoTrivia: false))
+        foreach (var comment in trivia)
         {
-            if (trivia.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
+            if (comment.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
             {
                 continue;
             }

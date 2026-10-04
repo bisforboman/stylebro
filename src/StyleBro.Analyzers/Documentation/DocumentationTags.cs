@@ -33,9 +33,9 @@ internal static class DocumentationTags
     }
 
     /// <summary>Every '&lt;placeholder&gt;' element in the tree's documentation comments.</summary>
-    public static IEnumerable<XmlElementSyntax> GetPlaceholders(SyntaxNode root)
+    public static IEnumerable<XmlElementSyntax> GetPlaceholders(IEnumerable<SyntaxTrivia> trivia)
     {
-        return root.DescendantTrivia()
+        return trivia
             .Select(t => t.GetStructure())
             .OfType<DocumentationCommentTriviaSyntax>()
             .SelectMany(d => d.DescendantNodes().OfType<XmlElementSyntax>())

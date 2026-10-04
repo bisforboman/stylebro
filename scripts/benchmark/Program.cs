@@ -2,6 +2,8 @@
 // all analyzers together, single-threaded, median of the runs after a warm-up run. See README.md.
 //
 //   dotnet run -c Release --project scripts/benchmark -- <analyzer dll> <source folder> [runs] [preprocessor symbols]
+//
+// STYLEBRO_BENCH_ONLY=NameA,NameB times only those analyzers (to compare two builds of one analyzer with less noise).
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -19,6 +21,7 @@ var analyzers = assembly.GetTypes()
     .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t) && t.GetCustomAttribute<DiagnosticAnalyzerAttribute>() is not null)
     .Select(t => (DiagnosticAnalyzer)Activator.CreateInstance(t)!)
     .Where(a => a is not DiagnosticSuppressor)
+    .Where(a => Environment.GetEnvironmentVariable("STYLEBRO_BENCH_ONLY") is not { } only || only.Split(',').Contains(a.GetType().Name))
     .ToImmutableArray();
 
 var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose, preprocessorSymbols: symbols);

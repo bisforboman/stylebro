@@ -105,28 +105,32 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
             ParameterDocumentation.MemberKinds.Concat(ParameterDocumentation.TypeParameterMemberKinds).Distinct().ToArray());
         context.RegisterSyntaxTreeAction(c =>
         {
-            var root = c.Tree.GetRoot(c.CancellationToken);
+            // One walk over the tree for all four checks: only comments matter to them.
+            var trivia = c.Tree.GetRoot(c.CancellationToken).DescendantTrivia()
+                .Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) || t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)
+                    || t.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                .ToList();
             var text = c.Tree.GetText(c.CancellationToken);
-            foreach (var comment in DocumentationComments.GetMisplacedDocumentationComments(root))
+            foreach (var comment in DocumentationComments.GetMisplacedDocumentationComments(trivia))
             {
                 c.ReportDiagnostic(Diagnostic.Create(
                     Descriptors.DocumentationSlashesInComment,
                     Location.Create(c.Tree, DocumentationComments.GetReportSpan(comment, text))));
             }
 
-            foreach (var remarks in ParameterDocumentation.GetEmptyRemarks(root))
+            foreach (var remarks in ParameterDocumentation.GetEmptyRemarks(trivia))
             {
                 c.ReportDiagnostic(Diagnostic.Create(
                     Descriptors.EmptyRemarks,
                     Location.Create(c.Tree, Microsoft.CodeAnalysis.Text.TextSpan.FromBounds(DocumentationTags.GetStart(remarks), remarks.Span.End))));
             }
 
-            foreach (var placeholder in DocumentationTags.GetPlaceholders(root))
+            foreach (var placeholder in DocumentationTags.GetPlaceholders(trivia))
             {
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.PlaceholderElement, placeholder.StartTag.GetLocation()));
             }
 
-            foreach (var position in DocumentationPeriods.GetMissingPeriods(root, c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)))
+            foreach (var position in DocumentationPeriods.GetMissingPeriods(trivia, c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)))
             {
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.DocumentationEndsWithPeriod, Location.Create(c.Tree, new Microsoft.CodeAnalysis.Text.TextSpan(position, 0))));
             }

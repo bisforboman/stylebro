@@ -83,9 +83,9 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var changes = new List<TextChange>();
-        var misplaced = DocumentationComments.GetMisplacedDocumentationComments(root).ToList();
+        var misplaced = DocumentationComments.GetMisplacedDocumentationComments(root.DescendantTrivia()).ToList();
         var missingPeriods = new HashSet<int>(DocumentationPeriods.GetMissingPeriods(
-            root, document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)));
+            root.DescendantTrivia(), document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)));
         var fixedMembers = new HashSet<(SyntaxNode, ParameterDocumentation.TagKind)>();
         foreach (var diagnostic in diagnostics)
         {
@@ -128,7 +128,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             }
             else if (diagnostic.Id == DiagnosticIds.EmptyRemarks)
             {
-                if (ParameterDocumentation.GetEmptyRemarks(root).FirstOrDefault(r => DocumentationTags.GetStart(r) == span.Start) is { } remarks)
+                if (ParameterDocumentation.GetEmptyRemarks(root.DescendantTrivia()).FirstOrDefault(r => DocumentationTags.GetStart(r) == span.Start) is { } remarks)
                 {
                     changes.Add(DocumentationTags.GetRemoval(remarks, text));
                 }
@@ -152,7 +152,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             }
             else if (diagnostic.Id == DiagnosticIds.PlaceholderElement)
             {
-                if (DocumentationTags.GetPlaceholders(root).FirstOrDefault(p => p.StartTag.Span == span) is { } placeholder)
+                if (DocumentationTags.GetPlaceholders(root.DescendantTrivia()).FirstOrDefault(p => p.StartTag.Span == span) is { } placeholder)
                 {
                     changes.AddRange(DocumentationTags.GetUnwrap(placeholder));
                 }

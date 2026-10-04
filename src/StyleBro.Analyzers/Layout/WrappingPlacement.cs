@@ -118,6 +118,12 @@ internal static class WrappingPlacement
             return null;
         }
 
+        if (!previous.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia) && !token.LeadingTrivia.Any(SyntaxKind.EndOfLineTrivia)
+            && !token.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia) && !next.LeadingTrivia.Any(SyntaxKind.EndOfLineTrivia))
+        {
+            return null;
+        }
+
         var before = previous.TrailingTrivia.Concat(token.LeadingTrivia).ToList();
         var after = token.TrailingTrivia.Concat(next.LeadingTrivia).ToList();
         if (!before.Concat(after).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia)))

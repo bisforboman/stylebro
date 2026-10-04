@@ -129,7 +129,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeVariable(SyntaxNodeAnalysisContext context)
     {
         var identifier = GetIdentifier(context.Node);
-        if (identifier.IsKind(SyntaxKind.None) || identifier.IsMissing)
+        if (identifier.IsKind(SyntaxKind.None) || identifier.IsMissing || HungarianNames.GetVariableName(identifier.ValueText, GetHungarian(context)) is null)
         {
             return;
         }
@@ -145,6 +145,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     {
         var node = (ParameterSyntax)context.Node;
         if (node.Identifier.IsMissing
+            || HungarianNames.GetVariableName(node.Identifier.ValueText, GetHungarian(context)) is null
             || node.Parent?.Parent is RecordDeclarationSyntax
             || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { } parameter
             || InheritsName(parameter)
@@ -157,15 +158,17 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         Report(context, Descriptors.ParameterCasing, node.Identifier);
     }
 
-    private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier)
-    {
-        var oldName = identifier.ValueText;
-
-        // BRO1310: the Hungarian prefix goes in the same rename ('_iCount' -> 'count'), so one run converges.
-        var hungarian = Severities.IsOn(context.Compilation.Options, context.Node.SyntaxTree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
+    // BRO1310 (null when off): the Hungarian prefix goes in the same rename ('_iCount' -> 'count'), so one run converges.
+    private static HungarianNames? GetHungarian(SyntaxNodeAnalysisContext context) =>
+        Severities.IsOn(context.Compilation.Options, context.Node.SyntaxTree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
             && !HungarianNames.IsInNativeMethods(context.Node)
             ? HungarianNames.Read(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree))
             : null;
+
+    private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier)
+    {
+        var oldName = identifier.ValueText;
+        var hungarian = GetHungarian(context);
         var newName = HungarianNames.GetVariableName(oldName, hungarian);
         if (newName is not null && newName != CamelCaseNames.GetNewName(oldName))
         {

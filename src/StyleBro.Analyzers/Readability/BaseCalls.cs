@@ -38,14 +38,14 @@ internal static class BaseCalls
         }
 
         var symbol = model.GetSymbolInfo(node.Parent, cancellationToken).Symbol;
-        if (symbol is null
-            || !SymbolEqualityComparer.Default.Equals(symbol, model.GetSpeculativeSymbolInfo(node.Parent.SpanStart, speculative, SpeculativeBindingOption.BindAsExpression).Symbol))
+        if (symbol is null)
         {
             return false;
         }
 
         var dispatchesVirtually = (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) && !symbol.IsSealed;
-        return !dispatchesVirtually || model.GetEnclosingSymbol(node.SpanStart, cancellationToken)?.ContainingType is { IsSealed: true };
+        return (!dispatchesVirtually || model.GetEnclosingSymbol(node.SpanStart, cancellationToken)?.ContainingType is { IsSealed: true })
+            && SymbolEqualityComparer.Default.Equals(symbol, model.GetSpeculativeSymbolInfo(node.Parent.SpanStart, speculative, SpeculativeBindingOption.BindAsExpression).Symbol);
     }
 
     /// <summary>

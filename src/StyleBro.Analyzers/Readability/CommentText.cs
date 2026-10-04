@@ -13,14 +13,20 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class CommentText
 {
+    /// <summary>The tree's comments and documentation comments, in order: what both checks read.</summary>
+    public static List<SyntaxTrivia> GetComments(SyntaxNode root) =>
+        root.DescendantTrivia()
+            .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia) || t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
+            .ToList();
+
     /// <summary>
     /// BRO1005: the whitespace after '///' that isn't exactly one space (where the diagnostic goes, and what the fix
     /// replaces with one space): none at all, or several before a top-level tag. Like StyleCop: not lines with nothing
     /// after '///', and not lines inside &lt;code&gt;.
     /// </summary>
-    public static IEnumerable<TextSpan> GetBadDocumentationSpaces(SyntaxNode root, SourceText text)
+    public static IEnumerable<TextSpan> GetBadDocumentationSpaces(IEnumerable<SyntaxTrivia> trivia, SourceText text)
     {
-        foreach (var documentation in root.DescendantTrivia(descendIntoTrivia: true).Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)))
+        foreach (var documentation in trivia.Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)))
         {
             // Like StyleCop: a missing space is reported on any line, extra spaces only before a top-level tag
             // ('///   <param ...>'); indented text and nested tags ('///   <para>') are fine.
@@ -61,9 +67,9 @@ internal static class CommentText
     /// lines in the middle separate paragraphs). The fix removes all empty comments at that end of the group, so one
     /// pass is enough.
     /// </summary>
-    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(SyntaxNode root, SourceText text)
+    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text)
     {
-        var comments = root.DescendantTrivia()
+        var comments = trivia
             .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
             .ToList();
         var group = new List<SyntaxTrivia>();

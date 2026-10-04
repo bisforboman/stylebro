@@ -37,6 +37,11 @@ internal static class CallChains
 
     private static IEnumerable<(SyntaxToken Link, TextChange Change)> GetFindings(ExpressionSyntax chain, SourceText text)
     {
+        if (Line(text, chain.SpanStart) == Line(text, chain.Span.End))
+        {
+            yield break;
+        }
+
         var links = new List<(SyntaxToken Token, bool Call)>();
         Walk(chain, links);
         links.Reverse();
