@@ -128,6 +128,18 @@ public class BlankLineAfterTests
         """);
 
     [Fact]
+    public Task CommentAfterCollectionExpressionBracket_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            int[] a =
+            [
+                // first, like after an opening brace (StyleCop #3766)
+                1,
+            ];
+        }
+        """);
+
+    [Fact]
     public Task CommentBeforeOpenBrace_IsLeftToBro1132() => VerifyNoDiagnosticsAsync("""
         class C
         {

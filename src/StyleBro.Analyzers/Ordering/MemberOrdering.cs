@@ -470,10 +470,11 @@ internal static class MemberOrdering
         return (SyntaxFactory.TriviaList(trivia.Take(split)), SyntaxFactory.TriviaList(trivia.Skip(split)));
     }
 
-    /// <summary>Whether two neighbouring members need a blank line between them: all but two fields (BRO1505).</summary>
+    /// <summary>Whether two neighbouring members need a blank line between them: all but two fields, unless the first spans several lines (BRO1505).</summary>
     private static bool NeedsSeparation(MemberDeclarationSyntax previous, MemberDeclarationSyntax current)
     {
-        return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);
+        return previous is not FieldDeclarationSyntax field || current is not FieldDeclarationSyntax
+            || Layout.ElementSeparation.IsMultiLineField(field, field.SyntaxTree.GetText());
     }
 
     private static bool StartsWithLineComment(SyntaxTriviaList content)
