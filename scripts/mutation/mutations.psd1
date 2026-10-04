@@ -3,6 +3,20 @@
 # survives is a guard no test covers. Add one for every new guard.
 @{
     Mutations = @(
+        # BRO1616 (summary layout)
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (end.Name.LocalName.ValueText != "summary")'; Replace = 'if (false)'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (prefix.Trim() != "///" || '; Replace = 'if ('; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = ' || text.ToString(TextSpan.FromBounds(end.Span.End, endLine.End)).Trim().Length > 0)'; Replace = ')'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (segments.Count == 0)'; Replace = 'if (false)'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'return singleLine ? null :'; Replace = 'return false ? null :'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = '&& segments.Count == 1'; Replace = ''; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = '&& !summary.Content.SelectMany(c => c.DescendantNodesAndSelf()).Any(IsBlockElement)'; Replace = ''; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = '&& (start.Span.End - startLine.Start) + first.Length + end.Span.Length <= maxLength'; Replace = ''; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'return textAfterStart || textBeforeEnd ?'; Replace = 'return true ?'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (afterStart)'; Replace = 'if (true)'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (beforeEnd)'; Replace = 'if (true)'; Tests = 'SummaryLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (line.Start >= contentStart)'; Replace = 'if (false)'; Tests = 'SummaryLayoutTests' }
+
         # BRO1514-BRO1516 (braces)
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'statement.ContainsDirectives || parent.ContainsDirectives'; Replace = 'false'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'if (statement.DescendantTokens().Any('; Replace = 'if (false && statement.DescendantTokens().Any('; Tests = 'BracesTests' }
