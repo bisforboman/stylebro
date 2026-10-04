@@ -161,7 +161,7 @@ since (not released; see [decisions](decisions.md), 2026-10-04). Where `master` 
 
 | Rule | Follows `master` | beta.556 |
 |---|---|---|
-| [BRO1104](rules/BRO1104.md) (SA1129) | `new nint()` -> `default(nint)` unless C# 11 on .NET 7+ (`nint.Zero`) | Always `nint.Zero` (CS0117 on older runtimes) |
+| [BRO1104](rules/BRO1104.md) (SA1129) | `new nint()` -> `default(nint)` (also on .NET 7+: the fix must agree across a multi-targeted project's frameworks) | Always `nint.Zero` (CS0117 on older runtimes); `master`: `nint.Zero` on C# 11 + .NET 7+ |
 | [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md) (SA1623, SA1624) | `init` accessors: `Gets or initializes` or `Gets`, `Initializes`; `Gets or initializes` is a wrong prefix elsewhere | Ignores `init`; its fix writes `Gets or sets or initializes` |
 | [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) | Not checked |
 | [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line property patterns | Not checked |
