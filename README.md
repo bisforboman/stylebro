@@ -70,6 +70,7 @@ project or coming from StyleCop.
 | [BRO1521](docs/rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Yes |
 | [BRO1522](docs/rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Yes |
 | [BRO1523](docs/rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Yes |
+| [BRO1524](docs/rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

@@ -47,6 +47,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Survey StyleCop's issue tracker | Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there. | Done (2026-10-04) |
 | Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Call chain layout (survey #4, Roslynator RCS0054) | BRO1523: in a split call chain every call after the first line starts its own line; the chain keeps its own indentation. Defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | Split conditional expressions (StyleCop issue #651) | BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520's setting; chains skipped. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | `<summary>` on one line or on three (survey #5) | BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Braceless `if (x) return;` (StyleCop issue #2252) | `stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md). | Done (2026-10-04) |
 
@@ -77,7 +78,6 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 |--------|------|-------|
 | Roslynator RCS1248 | `x == null` vs `x is null` | Semantic: skip user-defined `==`, expression trees, `is not` before C# 9. |
 | Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
-| StyleCop issue #651 | A split conditional expression has the condition, `? a` and `: b` each on its own line | Like BRO1108; operator side from BRO1520's setting. |
 | StyleCop issue #738 (SA1521) | No blank line between an attribute and its element | Text fix like BRO1511; must agree with BRO1505. |
 | StyleCop issue #605 | No comment between a declaration's header and its `{` | Extend BRO1132's move to types and members. |
 | StyleCop issue #1563, Sonar S818 | Upper-case literal suffixes: `1ul` -> `1UL` | Text only, next to BRO1122. |
@@ -191,6 +191,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1521](rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Done |
 | [BRO1522](rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Done |
 | [BRO1523](rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Done |
+| [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Done |
 
 ### BRO16xx: Documentation
 
