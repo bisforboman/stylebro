@@ -64,4 +64,67 @@ public class RegionsTests
         #endif
         }
         """);
+
+    [Fact]
+    public Task RemovingRegions_SortsTheMembers_WhenMemberOrderingIsOn() => VerifyFixAsync(
+        """
+        public class C
+        {
+            {|BRO1112:#region Methods|}
+
+            public void M()
+            {
+            }
+
+            #endregion
+
+            {|BRO1112:#region Fields|}
+
+            private int a;
+
+            #endregion
+        }
+        """,
+        """
+        public class C
+        {
+            private int a;
+
+            public void M()
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task RemovingRegions_LeavesTheOrder_WhenMemberOrderingIsOff() => VerifyFixAsync(
+        """
+        public class C
+        {
+            {|BRO1112:#region Methods|}
+
+            public void M()
+            {
+            }
+
+            #endregion
+
+            {|BRO1112:#region Fields|}
+
+            private int a;
+
+            #endregion
+        }
+        """,
+        """
+        public class C
+        {
+            public void M()
+            {
+            }
+
+            private int a;
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1001.severity = none");
 }

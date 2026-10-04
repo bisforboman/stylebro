@@ -253,6 +253,22 @@ internal static class Braces
         };
     }
 
+    /// <summary>The first 'if' of the if/else chain that <paramref name="statement"/> is a clause of, or null.</summary>
+    public static IfStatementSyntax? GetChain(StatementSyntax statement)
+    {
+        if ((statement.Parent is ElseClauseSyntax @else ? @else.Parent : statement.Parent) is not IfStatementSyntax chain)
+        {
+            return null;
+        }
+
+        while (chain.Parent is ElseClauseSyntax { Parent: IfStatementSyntax outer })
+        {
+            chain = outer;
+        }
+
+        return chain;
+    }
+
     private static StatementSyntax GetChild(SyntaxNode node) => node switch
     {
         DoStatementSyntax s => s.Statement,
