@@ -89,7 +89,6 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1510](rules/BRO1510.md) (SA1504) | One-line accessors where one has an attribute on its own line above it | The attribute isn't part of the accessor's layout; StyleCop counts its line ([#3434](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3434)). |
 | [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and implicit interface implementations | See "Missing documentation" above; explicit implementations like StyleCop's `master`. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:`; a period followed by a closing quote or bracket (`"done."`) | Already ends a sentence; StyleCop's fix writes `question?.` and `"done.".`. |
-| [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and interface implementations | See "Missing documentation" above. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:`; a period followed by a closing quote or bracket (`"done."`); a trailing `<c>"... ."</c>` | Already ends a sentence; StyleCop's fix writes `question?.`, `"done.".` and `</c>.` (StyleCop bug [#2784](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2784), open). |
 | [BRO1606](rules/BRO1606.md) (SA1642) | A summary whose first `<para>` starts with the standard sentence | StyleCop fixed this after 1.2.0-beta.556; beta.556's fix writes the sentence twice. |
 | [BRO1611](rules/BRO1611.md) (SA1612) | Constructors and operators | Matches StyleCop 1.2, which doesn't check them either. |

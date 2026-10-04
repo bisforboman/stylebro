@@ -15,7 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 71 |
 | Done, not released yet | 31 |
-| Planned | 0 rules, 27 work items |
+| Planned | 0 rules, 28 work items |
 | Maybe | 18 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -61,7 +61,6 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Superseding StyleCop | StyleCop's open bugs | Every open bug report on a rule StyleBro replaces, checked against StyleBro with a test: fixed where StyleBro shares it, and a page listing the StyleCop bugs StyleBro doesn't have. | Planned |
 | Superseding StyleCop | Parity with StyleCop's `master` | The unreleased commits since 1.2.0-beta.556 that change a replaced rule: BRO1104 `new nint()`, BRO1604/BRO1605 `init`, BRO1611 primary constructors, BRO1401 property patterns, BRO1505 single-line properties and BRO1601 explicit implementations follow `master`, BRO1606/BRO1607 report blank summaries; BRO1606 `<para>` and BRO1311 keep their behavior (decisions.md). `Compare-WithStyleCop.ps1 -StyleCopFeed` runs the parity sets against a local `master` build. | Done (2026-10-04) |
 | Superseding StyleCop | StyleCop's open bugs | 54 reports checked against StyleBro: 34 not shared, 12 by design or not applicable, 8 shared (7 fixed, 1 kept like StyleCop by decision; decisions.md). Listed in differences-from-stylecop.md. | Done (2026-10-04) |
-| Superseding StyleCop | Parity with StyleCop's `master` | The unreleased commits since 1.2.0-beta.556 that change a replaced rule: BRO1104 `new nint()`, BRO1604/BRO1605 `init`, BRO1611 primary constructors, BRO1401 property patterns follow `master`, BRO1606/BRO1607 report blank summaries; BRO1505, BRO1601, BRO1606 `<para>` and BRO1311 keep their behavior (decisions.md). `Compare-WithStyleCop.ps1 -StyleCopFeed` runs the parity sets against a local `master` build. | Done (2026-10-04) |
 | Superseding StyleCop | The remaining tracker candidates | beyond-stylecop.md #6-#10 and #12 (listed under Maybe); #11 stays rejected (changes what reflection and serializers see). | Planned |
 | Superseding StyleCop | The remaining other-analyzer candidates | beyond-stylecop.md survey #6-#10 and #12-#18 (listed under Maybe). | Planned |
 
