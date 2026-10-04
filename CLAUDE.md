@@ -541,6 +541,12 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Messy showed `select` re-indented), `=>` after a `where` (BRO1111's). Probed: no SDK rule (IDE0055 included) enforces
   the SDK key. Migration writes them `none` (no SA ids); MigrationTests requires rules without SA ids to be listed
   under "Rules beyond StyleCop" in differences-from-stylecop.md.
+- **BRO1524** (2026-10-04, StyleCop issue #651, beyond StyleCop, `Layout/ConditionalLayout.cs`): once a line break sits
+  right next to `?` or `:` (not inside a part), a `?`/`:` with no line break on either side gets one, on the side
+  BRO1520's key asks for; a token with its break on the wrong side stays BRO1520's (disjoint gaps; FixOrderTests case).
+  New line indented like the first part already starting a line. Skipped: chains (whenFalse is a conditional, or it is
+  one's whenFalse: list layouts would become staircases; decisions.md), comments/directives in the gaps, a moved part
+  spanning lines, syntax errors. Survey: 13 findings in the 8 repos, plus 18 skipped chain links.
 - **BRO1510** (SA1504) accessors with block bodies all single-line or all multi-line (`Layout/AccessorLayout.cs`).
   Probed: only lists where EVERY accessor has a block body (`get => x;`/`get;` next to a multi-line `set {}` is fine),
   only multi-line lists (a one-line list is BRO1509's), diagnostic on the first accessor's keyword. StyleCop's fix has

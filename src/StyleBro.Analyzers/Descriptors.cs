@@ -1006,5 +1006,17 @@ internal static class Descriptors
             + "the next line (beginning_of_line). Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.EqualsPlacement + ".md");
 
+    public static readonly DiagnosticDescriptor ConditionalLayout = new(
+        id: DiagnosticIds.ConditionalLayout,
+        title: "A split conditional expression has the condition, '?' and ':' parts on their own lines",
+        messageFormat: "Break the line {0} '{1}': the conditional expression is split, so each part starts its own line",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A conditional expression is on one line, or the condition, the '? a' part and the ': b' part each start "
+            + "their own line, with '?' and ':' on the side dotnet_style_operator_placement_when_wrapping asks for (the "
+            + "beginning of the line by default). Not a StyleCop rule (proposed in StyleCop's issue #651).",
+        helpLinkUri: HelpBase + DiagnosticIds.ConditionalLayout + ".md");
+
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }
