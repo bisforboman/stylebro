@@ -96,7 +96,10 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                     .FirstOrDefault(n => n is MemberDeclarationSyntax);
                 if (member is not null && !DocumentationComments.HasDocumentation(member))
                 {
-                    changes.Add(DocumentationComments.GetInheritDocChange(member, text));
+                    changes.Add(DocumentationComments.GetInheritDocChange(
+                        member,
+                        text,
+                        Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineBeforeDocumentation, cancellationToken)));
                 }
             }
             else if (diagnostic.Id is DiagnosticIds.PropertySummaryWording or DiagnosticIds.PropertySummaryRestrictedSetter)

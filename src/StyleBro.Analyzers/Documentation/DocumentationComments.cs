@@ -59,7 +59,12 @@ internal static class DocumentationComments
     /// The edit for BRO1601: '/// &lt;inheritdoc/&gt;' on its own line right before the member (after a plain comment
     /// or blank line before it, like StyleCop's fix), at the member's indentation.
     /// </summary>
-    public static TextChange GetInheritDocChange(SyntaxNode member, SourceText text)
+    /// <remarks>
+    /// With <paramref name="blankLineBefore"/> (BRO1513 is on), a blank line goes above the new comment when the line
+    /// above holds code: neighbouring single-line properties may sit together (BRO1505), but a documented one may not,
+    /// and without it 'dotnet format' needed a second run.
+    /// </remarks>
+    public static TextChange GetInheritDocChange(SyntaxNode member, SourceText text, bool blankLineBefore = false)
     {
         var line = text.Lines.GetLineFromPosition(member.SpanStart);
         var indentation = text.ToString(TextSpan.FromBounds(line.Start, member.SpanStart));
@@ -67,6 +72,11 @@ internal static class DocumentationComments
         if (lineBreak.Length == 0)
         {
             lineBreak = "\n";
+        }
+
+        if (blankLineBefore && indentation.Trim().Length == 0 && Layout.DocumentationBlankLines.WantsBlankLineAbove(line, text))
+        {
+            return new TextChange(new TextSpan(line.Start, 0), lineBreak + indentation + "/// <inheritdoc/>" + lineBreak);
         }
 
         return new TextChange(new TextSpan(member.SpanStart, 0), "/// <inheritdoc/>" + lineBreak + indentation);
