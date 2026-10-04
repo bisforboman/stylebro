@@ -20,6 +20,10 @@ namespace Messy.Shortcuts
 
         public decimal Precise { get; } = (decimal)1.50;
 
+        public ulong Mask { get; } = 0xFFUL;
+
+        public long Retries { get; } = 5L;
+
         public List<(string, int)> Counts { get; } = new List<(string, int)>();
 
         public (string Name, int Count) Top() => ("none", 0);

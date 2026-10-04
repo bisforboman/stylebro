@@ -79,6 +79,19 @@ public class FixOrderTests
         "BRO1506");
 
     [Fact]
+    public Task LiteralSuffixes_ACastOfALowerCaseSuffix() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public long M(long a) => a + (long)1u;
+
+            public ulong N() => (ulong)2l;
+        }
+        """,
+        "BRO1122",
+        "BRO1135");
+
+    [Fact]
     public Task Attributes_TheOnlyBlankLineBeforeAnElementIsBelowItsAttribute() => AssertConvergesInEveryOrderAsync(
         """
         using System;

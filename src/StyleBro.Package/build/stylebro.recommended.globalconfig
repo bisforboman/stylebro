@@ -185,6 +185,9 @@ dotnet_diagnostic.BRO1132.severity = warning
 # BRO1134: the same for types, namespaces, members, accessors and local functions (StyleCop issue #605, never
 # implemented there; stylebro-migrate turns it off)
 dotnet_diagnostic.BRO1134.severity = warning
+# BRO1135: integer literal suffixes in upper case ('1L', not '1l', which looks like '11'). Not a StyleCop rule
+# (stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1135.severity = warning
 # BRO1133: null checks in one form, '== null' or 'is null' (stylebro_null_check_style, default pattern_matching; not set
 # here, so an .editorconfig value takes effect). Not a StyleCop rule (stylebro-migrate turns it off).
 dotnet_diagnostic.BRO1133.severity = warning

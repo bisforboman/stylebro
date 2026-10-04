@@ -11,10 +11,28 @@ namespace StyleBro.Analyzers.Readability;
 /// <summary>
 /// Shared logic for BRO1122 (StyleCop SA1139): <c>1L</c> instead of <c>(long)1</c>. Like StyleCop: casts to int, uint,
 /// long, ulong, float, double and decimal of a numeric literal, optionally signed and parenthesized, that aren't
-/// redundant (IDE0004's) and have a constant value.
+/// redundant (IDE0004's) and have a constant value. BRO1122 writes upper-case suffixes, which is what BRO1135 wants.
 /// </summary>
 internal static class LiteralSuffixes
 {
+    /// <summary>
+    /// BRO1135: the numeric literal's text with its integer suffix ('u', 'l', 'ul', 'lu' in any case) in upper case, or
+    /// null when it has none in lower case. Real literals never end in 'u' or 'l' ('f', 'd', 'm' and the exponent's 'e'
+    /// aren't checked), and in hex literals the suffix letters can't be digits.
+    /// </summary>
+    public static string? GetUpperCaseSuffix(SyntaxToken literal)
+    {
+        var text = literal.Text;
+        var start = text.Length;
+        while (start > 0 && text[start - 1] is 'u' or 'U' or 'l' or 'L')
+        {
+            start--;
+        }
+
+        var suffix = text.Substring(start);
+        return suffix.Any(char.IsLower) ? text.Substring(0, start) + suffix.ToUpperInvariant() : null;
+    }
+
     /// <summary>
     /// The edit that replaces the cast with the suffixed literal, or null. Unlike StyleCop, the new literal must have
     /// exactly the cast's value, not just its type: <c>(decimal)0.1234567890123456789</c> rounds through double, and

@@ -415,12 +415,32 @@ IDE0048) and the blank-line rules (IDE2000, IDE2002, IDE2003). IDE0055 is the SD
 reimplemented; the safe part (`dotnet format`'s whitespace pass, which isn't affected) keeps doing that job, and only
 the rule's warning-level enforcement stays a suggestion in multi-targeted repos.
 
+## Which literal suffixes BRO1135 upper-cases (2026-10-04)
 ## Braceless jump statements on the `if` line (2026-10-04)
 
 Agent's proposal, 2026-10-04, for the owner to review.
 
 ### Question
 
+StyleCop issue [#1563](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1563) asks for upper-case literal
+suffixes (`50l` -> `50L`, `50.4m` -> `50.4M`). In the issue, maintainers and commenters wanted `L` but preferred lower
+case for `m`/`f` (and the exponent's `e`); Sonar's S818 reports only `l` and leaves `ul` alone; the compiler warns
+(CS0078) about `l` only. Which suffixes should the rule cover?
+
+### Choices
+
+1. **Integer suffixes** (`u`, `l` and their combinations): `1l` -> `1L`, `1u` -> `1U`, `1ul` -> `1UL`. One way to write
+   an integer suffix; real suffixes stay as written.
+2. **`l` only** (S818, CS0078): the one letter that looks like a digit.
+3. **Every suffix** (the issue as written): also `f`, `d`, `m`.
+
+### Answer (proposed)
+
+**Choice 1** (BRO1135). Survey of the 8 reference repositories (line-based, outside strings and comments): lower-case
+integer suffixes only in OpenTelemetry (24 `u`, 1 `ul`, e.g. `0x9E3779B1u`), no `l` anywhere; real suffixes are
+written in lower case almost everywhere (e.g. Newtonsoft.Json 517 lower vs 40 upper, Jellyfin 92 vs 0), so choice 3
+would rewrite hundreds of literals against the common style. Choice 2 would report nothing in these repos; choice 1
+finds 25. Not a StyleCop rule, so `stylebro-migrate` turns it off; the preset turns it on.
 StyleCop issue [#2252](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2252) (12 reactions; #1175 asked
 the same) wants `if (x) return;` without braces while every other child statement still needs them. Which statements,
 where, and how does it combine with the other brace rules?

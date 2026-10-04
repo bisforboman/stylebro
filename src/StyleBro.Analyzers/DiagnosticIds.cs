@@ -70,6 +70,7 @@ public static class DiagnosticIds
     public const string BaseCall = "BRO1131";
     public const string EmbeddedComment = "BRO1132";
     public const string DeclarationComment = "BRO1134";
+    public const string LiteralSuffixCase = "BRO1135";
     public const string NullCheckStyle = "BRO1133";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";

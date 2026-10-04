@@ -17,6 +17,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | Done, not released yet | 29 |
 | Planned | 0 rules, 17 work items |
 | Maybe | 7 rules from other analyzers |
+| Maybe | 6 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -47,6 +48,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Survey StyleCop's issue tracker | Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there. | Done (2026-10-04) |
 | Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Comments in declaration headers (StyleCop issue #605) | BRO1134: BRO1132's move for types, namespaces, members, accessors and local functions; multi-line headers skipped. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | Upper-case literal suffixes (StyleCop issue #1563, Sonar S818) | BRO1135: integer suffixes (`1l` -> `1L`, `1ul` -> `1UL`); real suffixes (`f`, `d`, `m`) left alone, lower case is the norm there. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | No blank line after attributes (StyleCop's proposed SA1521, issue #738) | BRO1525: also between stacked attribute lists; comments and directives in the gap skipped. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Null check style (survey #3) | BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Split conditional expressions (StyleCop issue #651) | BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520's setting; chains skipped. Off after `stylebro-migrate`. | Done (2026-10-04) |
@@ -84,7 +86,6 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 | StyleCop issue #2252 | Option: `if (x) return;` (jump statement on the `if` line) without braces | An option for BRO1514, off by default. |
 | StyleCop issue #738 (SA1521) | No blank line between an attribute and its element | Text fix like BRO1511; must agree with BRO1505. |
 | StyleCop issue #605 | No comment between a declaration's header and its `{` | Extend BRO1132's move to types and members. |
-| StyleCop issue #1563, Sonar S818 | Upper-case literal suffixes: `1ul` -> `1UL` | Text only, next to BRO1122. |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 
@@ -140,6 +141,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1132](rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Done |
 | [BRO1133](rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Done |
 | [BRO1134](rules/BRO1134.md) | Declarations should not contain embedded comments | (none; StyleCop issue #605) | Done |
+| [BRO1135](rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Done |
 
 ### BRO13xx: Naming
 

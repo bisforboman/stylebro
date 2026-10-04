@@ -800,6 +800,17 @@ internal static class Descriptors
         description: "A comment between the header of a type, namespace, member, accessor or local function and its '{' belongs "
             + "inside the body. Not a StyleCop rule (proposed in StyleCop issue #605; BRO1132 does the same for statements).",
         helpLinkUri: HelpBase + DiagnosticIds.DeclarationComment + ".md");
+
+    public static readonly DiagnosticDescriptor LiteralSuffixCase = new(
+        id: DiagnosticIds.LiteralSuffixCase,
+        title: "Integer literal suffixes should be upper case",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'1L' instead of '1l', which looks like '11'; 'U' and 'UL' likewise. Real suffixes ('f', 'd', 'm') aren't "
+            + "checked. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffixCase + ".md");
     public static readonly DiagnosticDescriptor NullCheckStyle = new(
         id: DiagnosticIds.NullCheckStyle,
         title: "Check for null in one form",
