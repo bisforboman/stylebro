@@ -5,8 +5,8 @@ namespace Messy.Wrapping
         private readonly int limit
             = 10;
 
-        public int Limit =>
-            limit * 2;
+        public int Limit
+            => limit * 2;
 
         public bool Allowed(bool admin, bool owner, int count) =>
             admin ||

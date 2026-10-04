@@ -967,8 +967,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "When the line breaks next to the '=>' of an expression body or a switch expression arm, the '=>' goes "
-            + "at the beginning of the next line (stylebro_arrow_placement_when_wrapping = beginning_of_line, the default) or "
-            + "at the end of the broken line (end_of_line). Not a StyleCop rule.",
+            + "at the end of the broken line (stylebro_arrow_placement_when_wrapping = end_of_line, the default) or at the "
+            + "beginning of the next line (beginning_of_line). Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.ArrowPlacement + ".md");
 
     public static readonly DiagnosticDescriptor EqualsPlacement = new(

@@ -159,7 +159,7 @@ dotnet_diagnostic.BRO1519.severity = warning
 
 # BRO1520-BRO1522: where an operator, '=>' or '=' goes when the line breaks next to it. Not StyleCop rules (stylebro-migrate
 # turns them off). Placement: dotnet_style_operator_placement_when_wrapping (default beginning_of_line),
-# stylebro_arrow_placement_when_wrapping (default beginning_of_line), stylebro_equals_placement_when_wrapping (default
+# stylebro_arrow_placement_when_wrapping (default end_of_line), stylebro_equals_placement_when_wrapping (default
 # end_of_line); not set here, so an .editorconfig value takes effect.
 dotnet_diagnostic.BRO1520.severity = warning
 dotnet_diagnostic.BRO1521.severity = warning

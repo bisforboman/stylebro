@@ -31,7 +31,7 @@ internal static class WrappingPlacement
     public static IEnumerable<(string Id, SyntaxToken Token, bool Beginning, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, AnalyzerConfigOptions options)
     {
         var operators = Read(options, OperatorKey, beginning: true);
-        var arrows = Read(options, ArrowKey, beginning: true);
+        var arrows = Read(options, ArrowKey, beginning: false);
         var equals = Read(options, EqualsKey, beginning: false);
         foreach (var node in root.DescendantNodes())
         {

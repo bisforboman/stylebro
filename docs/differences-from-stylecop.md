@@ -158,5 +158,5 @@ them.
 | Rule | What it checks | From |
 |---|---|---|
 | [BRO1520](rules/BRO1520.md) | Binary operators and `?`/`:` at the beginning of the line when an expression wraps (`dotnet_style_operator_placement_when_wrapping`) | Roslynator RCS0027/RCS0028 |
-| [BRO1521](rules/BRO1521.md) | `=>` of expression bodies and switch arms at the beginning of the line (`stylebro_arrow_placement_when_wrapping`) | Roslynator RCS0032 |
+| [BRO1521](rules/BRO1521.md) | `=>` of expression bodies and switch arms at the end of the line (`stylebro_arrow_placement_when_wrapping`) | Roslynator RCS0032 |
 | [BRO1522](rules/BRO1522.md) | `=` of assignments and initializers at the end of the line (`stylebro_equals_placement_when_wrapping`) | Roslynator RCS0052 |

@@ -80,63 +80,26 @@ public class WrappingPlacementTests
         "dotnet_style_operator_placement_when_wrapping = end_of_line\nstylebro_arrow_placement_when_wrapping = end_of_line\n");
 
     [Fact]
-    public Task Arrows_MoveToTheBeginningOfTheLine() => VerifyFixAsync(
-        """
-        public class C
-        {
-            public int P {|BRO1521:=>|}
-                1;
-
-            public int Q
-            {
-                get {|BRO1521:=>|}
-                    2;
-            }
-
-            public string M(int x) {|BRO1521:=>|}
-                x switch
-                {
-                    1 {|BRO1521:=>|}
-                        "one",
-                    _ => "other",
-                };
-
-            public int Already
-                => 3;
-        }
-        """,
-        """
-        public class C
-        {
-            public int P
-                => 1;
-
-            public int Q
-            {
-                get
-                    => 2;
-            }
-
-            public string M(int x)
-                => x switch
-                {
-                    1
-                        => "one",
-                    _ => "other",
-                };
-
-            public int Already
-                => 3;
-        }
-        """);
-
-    [Fact]
-    public Task Arrows_EndOfLine() => VerifyFixAsync(
+    public Task Arrows_MoveToTheEndOfTheLine() => VerifyFixAsync(
         """
         public class C
         {
             public int P
                 {|BRO1521:=>|} 1;
+
+            public int Q
+            {
+                get
+                    {|BRO1521:=>|} 2;
+            }
+
+            public string M(int x)
+                {|BRO1521:=>|} x switch
+                {
+                    1
+                        {|BRO1521:=>|} "one",
+                    _ => "other",
+                };
 
             public int Already =>
                 3;
@@ -148,11 +111,48 @@ public class WrappingPlacementTests
             public int P =>
                 1;
 
+            public int Q
+            {
+                get =>
+                    2;
+            }
+
+            public string M(int x) =>
+                x switch
+                {
+                    1 =>
+                        "one",
+                    _ => "other",
+                };
+
             public int Already =>
                 3;
         }
+        """);
+
+    [Fact]
+    public Task Arrows_BeginningOfLine() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int P {|BRO1521:=>|}
+                1;
+
+            public int Already
+                => 3;
+        }
         """,
-        "stylebro_arrow_placement_when_wrapping = end_of_line:warning\n");
+        """
+        public class C
+        {
+            public int P
+                => 1;
+
+            public int Already
+                => 3;
+        }
+        """,
+        "stylebro_arrow_placement_when_wrapping = beginning_of_line:warning\n");
 
     [Fact]
     public Task Equals_MoveToTheEndOfTheLine() => VerifyFixAsync(
@@ -248,8 +248,7 @@ public class WrappingPlacementTests
                 + @"
                 x";
         }
-        """",
-        "stylebro_arrow_placement_when_wrapping = end_of_line\n");
+        """");
 
     [Fact]
     public Task Skipped() => VerifyNoDiagnosticsAsync(
@@ -291,13 +290,13 @@ public class WrappingPlacementTests
                 return c && d && e && h && i;
             }
 
-            public System.Collections.Generic.IEnumerable<int> Query(int[] values) =>
-                from v in values
+            public System.Collections.Generic.IEnumerable<int> Query(int[] values)
+                => from v in values
                 select v;
 
             public static T Convert<T>(object value)
-                where T : class =>
-                value as T;
+                where T : class
+                => value as T;
         }
         """);
 

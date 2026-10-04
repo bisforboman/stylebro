@@ -520,7 +520,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   `{ get; set; }`).
 - **BRO1520-BRO1522** (2026-10-04, first rules beyond StyleCop, `Layout/WrappingPlacement.cs`, one analyzer + one fix):
   operator (binary + `?`/`:`, SDK key `dotnet_style_operator_placement_when_wrapping`, default beginning), `=>`
-  (expression bodies + switch arms, not lambdas; `stylebro_arrow_placement_when_wrapping`, default beginning), `=`
+  (expression bodies + switch arms, not lambdas; `stylebro_arrow_placement_when_wrapping`, default end: owner), `=`
   (assignments incl. compound + EqualsValueClause; `stylebro_equals_placement_when_wrapping`, default end); defaults
   from a survey of the 8 reference repos (docs/decisions.md). Only the token moves (edit = both gaps; the gap with the
   line break is kept from the break on). Skipped: any non-whitespace trivia in the gaps, break on both sides, missing

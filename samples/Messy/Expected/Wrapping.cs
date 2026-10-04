@@ -5,11 +5,11 @@ namespace Messy.Wrapping
         private readonly int _limit =
             10;
 
-        public int Limit
-            => _limit * 2;
+        public int Limit =>
+            _limit * 2;
 
-        public bool Allowed(bool admin, bool owner, int count)
-            => admin
+        public bool Allowed(bool admin, bool owner, int count) =>
+            admin
                 || (owner
                 && count < _limit);
 

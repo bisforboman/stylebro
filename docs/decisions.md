@@ -43,14 +43,17 @@ All operators together: beginning in six repositories, end in Serilog, FFMpegCor
 3. **Two rules** like the survey's pairing (operators; `=>` and `=` together): `=>` and `=` have opposite majorities, so
    they need separate options anyway.
 
-Defaults: operators `beginning_of_line` (the SDK's default, and the survey's majority), `=>` `beginning_of_line` (four
-repositories to three, 1,259 to 901 tokens), `=` `end_of_line` (518 to 6). Scope of `=>`: expression bodies and switch
-arms; lambdas left out (5,299 to 9 at the end, and a block body's `{` belongs on its own line). Preset: all three at
-warning; `stylebro-migrate` writes them as `none` (no StyleCop rule asks for them).
+Proposed defaults: operators `beginning_of_line` (the SDK's default, and the survey's majority), `=>` `beginning_of_line`
+(four repositories to three, 1,259 to 901 tokens), `=` `end_of_line` (518 to 6). Scope of `=>`: expression bodies and
+switch arms; lambdas left out (5,299 to 9 at the end, and a block body's `{` belongs on its own line). Preset: all three
+at warning; `stylebro-migrate` writes them as `none` (no StyleCop rule asks for them).
 
 ### Answer
 
-**Choice 1.** Defaults chosen from the survey (agent's proposal, 2026-10-04, for the owner to review); configurable.
+**Choice 1** (user's decision, 2026-10-04), with these defaults, all configurable: operators `beginning_of_line` (the
+SDK's default and the survey's majority), `=` `end_of_line` (the survey), `=>` `end_of_line` (the owner's choice over the
+proposed `beginning_of_line`: one convention for every `=>`, like lambdas and StyleBro's own code). All three at warning
+in the preset; off after `stylebro-migrate`.
 
 ## SA1108: where a comment between a statement's header and its block goes (2026-10-04)
 
