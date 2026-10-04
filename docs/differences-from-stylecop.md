@@ -147,3 +147,16 @@ Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-
 [BRO1507](rules/BRO1507.md), [BRO1602](rules/BRO1602.md), [BRO1605](rules/BRO1605.md), [BRO1608](rules/BRO1608.md),
 [BRO1609](rules/BRO1609.md), [BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
 change nothing there.)
+
+## Rules beyond StyleCop
+
+Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1520.severity`,
+`dotnet_diagnostic.BRO1521.severity` and `dotnet_diagnostic.BRO1522.severity` = `warning`); `stylebro-migrate` writes
+them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on in `.editorconfig` to use
+them.
+
+| Rule | What it checks | From |
+|---|---|---|
+| [BRO1520](rules/BRO1520.md) | Binary operators and `?`/`:` at the beginning of the line when an expression wraps (`dotnet_style_operator_placement_when_wrapping`) | Roslynator RCS0027/RCS0028 |
+| [BRO1521](rules/BRO1521.md) | `=>` of expression bodies and switch arms at the end of the line (`stylebro_arrow_placement_when_wrapping`) | Roslynator RCS0032 |
+| [BRO1522](rules/BRO1522.md) | `=` of assignments and initializers at the end of the line (`stylebro_equals_placement_when_wrapping`) | Roslynator RCS0052 |
