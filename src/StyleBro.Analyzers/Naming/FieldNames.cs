@@ -481,7 +481,7 @@ internal static class FieldNames
             foreach (var reference in type.DeclaringSyntaxReferences)
             {
                 var declaration = reference.GetSyntax(cancellationToken);
-                foreach (var token in declaration.DescendantTokens(descendIntoTrivia: true))
+                foreach (var token in declaration.DescendantTokens())
                 {
                     if (token.IsKind(SyntaxKind.StringLiteralToken))
                     {
@@ -493,8 +493,20 @@ internal static class FieldNames
                     }
                 }
 
-                facts.Texts.AddRange(declaration.DescendantTrivia(descendIntoTrivia: true)
-                    .Where(t => t.IsKind(SyntaxKind.DisabledTextTrivia)).Select(t => t.ToString()));
+                // Code excluded by '#if', and strings in directives ('#line 1 "file"'); both need a directive. Only
+                // directives are opened: building every documentation comment's XML structure cost most of this
+                // analyzer's time.
+                foreach (var trivia in declaration.ContainsDirectives ? declaration.DescendantTrivia() : Enumerable.Empty<SyntaxTrivia>())
+                {
+                    if (trivia.IsKind(SyntaxKind.DisabledTextTrivia))
+                    {
+                        facts.Texts.Add(trivia.ToString());
+                    }
+                    else if (trivia.IsDirective)
+                    {
+                        facts.Texts.AddRange(trivia.GetStructure()!.DescendantTokens().Where(t => t.IsKind(SyntaxKind.StringLiteralToken)).Select(t => t.ValueText));
+                    }
+                }
             }
 
             foreach (var text in facts.Texts)

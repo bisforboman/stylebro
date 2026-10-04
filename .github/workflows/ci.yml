@@ -57,3 +57,35 @@ jobs:
           $env:StyleBroSelf = 'none'
           dotnet build src/StyleBro.CodeFixes -nologo -v q
           ./scripts/stylecop-survey/Compare-WithStyleCop.ps1
+
+  # The PR's analyzers against the base branch's, alternated in one process on Newtonsoft.Json's main project
+  # (scripts/benchmark, compare mode): fails when an analyzer or the total is clearly slower. Results in the job summary.
+  performance:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Compare analyzer speed with the base branch
+        shell: pwsh
+        run: |
+          $env:StyleBroSelf = 'none'
+          $work = '${{ runner.temp }}'
+          dotnet build src/StyleBro.Analyzers -c Release -nologo -v q -o "$work/head"
+          git worktree add "$work/base-src" "origin/${{ github.base_ref }}"
+          dotnet build "$work/base-src/src/StyleBro.Analyzers" -c Release -nologo -v q -o "$work/base"
+
+          # The same pinned commit as the real-world check.
+          $nj = (Import-PowerShellDataFile scripts/realworld/repos.psd1).Newtonsoft
+          git init -q "$work/nj"
+          git -C "$work/nj" fetch -q --depth 1 $nj.Url $nj.Commit
+          git -C "$work/nj" checkout -q FETCH_HEAD
+
+          dotnet run -c Release --project scripts/benchmark -- compare "$work/base/StyleBro.Analyzers.dll" "$work/head/StyleBro.Analyzers.dll" "$work/nj/Src/Newtonsoft.Json" 10
+          exit $LASTEXITCODE
