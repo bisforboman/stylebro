@@ -232,6 +232,20 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   `GetMovingRule` which rule moves the comment (`NeedsBlankLineAbove` takes an isOn predicate). Fixed for both: the
   comment goes below blank lines after `{` (above them BRO1506 could be left for a second run; FixOrderTests). Survey: 7
   findings in the 8 repos (+2 multi-line headers skipped).
+- **BRO1133** (2026-10-04, beyond StyleCop: Roslynator RCS1248, `Readability/NullChecks.cs`, semantic)
+  `stylebro_null_check_style = pattern_matching` (default, owner's decision over the survey's majority, docs/decisions.md)
+  | `equality_operator`.
+  The fix only swaps the operator (`==` <-> `is`, `!=` <-> `is not`); pattern mode also turns `null == x` into `x is null`
+  (equality mode leaves it to BRO1103; the fix finds a check by its START, which BRO1103's swap keeps, so both converge
+  in one run, Messy `Lookups.cs`). Skipped: an operator that isn't built-in, the core library's (null-safe) or lifted
+  (records, classes with `==`; checked by speculative binding for `is` -> `==`), dynamic, non-nullable value types, `is`
+  in expression trees (IOperation parents: an anonymous function converted to a System.Linq.Expressions type, also
+  query clauses over IQueryable), `is not` < C# 9 / `is` < C# 7, operands looser than `is` (whitelist), `is` checks
+  whose parent binds tighter than `==` (whitelist of parents), comments/line breaks in the removed text; `is null` ->
+  `== null` on a nullable value type with a lifted user-defined `==` (CI: Jellyfin's BannedApiAnalyzers bans
+  `Guid.operator ==`, RS0030 after the fix). Pointers have no
+  operator symbol (that guard was dead per mutation testing). Probed: no SDK rule rewrites `x == null` (IDE0041/0150/
+  0083/0078 only produce patterns from other shapes).
 - **BRO1006** (SA1006, 2026-10-03, `Spacing/DirectiveSpacingAnalyzer.cs`) `# if` -> `#if`: StyleCop's check (a `#` whose
   trailing trivia has no line break, reported on the next token); empty `# ` directives skipped. Parity `directive-spacing`: 8/8, identical.
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter

@@ -800,6 +800,17 @@ internal static class Descriptors
         description: "A comment between the header of a type, namespace, member, accessor or local function and its '{' belongs "
             + "inside the body. Not a StyleCop rule (proposed in StyleCop issue #605; BRO1132 does the same for statements).",
         helpLinkUri: HelpBase + DiagnosticIds.DeclarationComment + ".md");
+    public static readonly DiagnosticDescriptor NullCheckStyle = new(
+        id: DiagnosticIds.NullCheckStyle,
+        title: "Check for null in one form",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Null checks use 'is null' and 'is not null' (stylebro_null_check_style = pattern_matching, the default) or "
+            + "'== null' and '!= null' (equality_operator). Checks whose meaning would change, such as a user-defined '==', "
+            + "aren't reported. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.NullCheckStyle + ".md");
 
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
