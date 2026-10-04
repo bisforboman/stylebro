@@ -305,6 +305,12 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   fix couldn't make it consistent). Mutation-tested; 0 findings expected in the surveyed repos (none use queries
   like this).
 
+- **BRO1135** (2026-10-04, beyond StyleCop: issue #1563, Sonar S818; `LiteralSuffixes.GetUpperCaseSuffix`, reported by
+  `LiteralSuffixAnalyzer`, fixed by `LiteralSuffixCodeFixProvider` next to BRO1122): integer suffixes upper case
+  (`1l` -> `1L`, `ul`/`Ul`/`uL` -> `UL`, `lu` -> `LU`; hex/binary too). Real suffixes (`f`/`d`/`m`) not checked: lower
+  case is the norm in the reference repos (S818 itself checks only `l`). BRO1122 writes upper case, so the two converge
+  in any order (FixOrderTests). Survey: 25 in OpenTelemetry (24 `u`, 1 `ul`), 0 elsewhere, no `l` anywhere.
+
 ## BRO13xx: naming
 
 - **BRO1301** (SA1312) variables and **BRO1302** (SA1313) parameters begin with a lower-case letter

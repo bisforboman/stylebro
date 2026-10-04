@@ -175,6 +175,10 @@ dotnet_diagnostic.BRO1131.severity = warning
 # BRO1132: a comment between a statement's header and its '{' moves into the block (SA1108)
 dotnet_diagnostic.BRO1132.severity = warning
 
+# BRO1135: integer literal suffixes in upper case ('1L', not '1l', which looks like '11'). Not a StyleCop rule
+# (stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1135.severity = warning
+
 # BRO1006: no space between '#' and a preprocessor keyword (SA1006)
 dotnet_diagnostic.BRO1006.severity = warning
 

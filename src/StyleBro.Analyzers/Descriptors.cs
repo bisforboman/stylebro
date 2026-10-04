@@ -778,6 +778,17 @@ internal static class Descriptors
         description: "A comment between a statement's header and its '{' belongs inside the block. Replaces StyleCop SA1108.",
         helpLinkUri: HelpBase + DiagnosticIds.EmbeddedComment + ".md");
 
+    public static readonly DiagnosticDescriptor LiteralSuffixCase = new(
+        id: DiagnosticIds.LiteralSuffixCase,
+        title: "Integer literal suffixes should be upper case",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'1L' instead of '1l', which looks like '11'; 'U' and 'UL' likewise. Real suffixes ('f', 'd', 'm') aren't "
+            + "checked. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffixCase + ".md");
+
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
         title: "Preprocessor keywords should not be preceded by a space",

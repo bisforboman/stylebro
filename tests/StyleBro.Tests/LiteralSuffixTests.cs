@@ -21,7 +21,7 @@ public class LiteralSuffixTests
             long j = {|BRO1122:(long)1_000|};
             float k = {|BRO1122:(float)1e3|};
             int l = {|BRO1122:(int)1L|};
-            long m = {|BRO1122:(long)1u|};
+            long m = {|BRO1122:(long){|BRO1135:1u|}|};
         }
         """,
         """
