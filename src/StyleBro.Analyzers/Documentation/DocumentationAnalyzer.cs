@@ -126,7 +126,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.PlaceholderElement, placeholder.StartTag.GetLocation()));
             }
 
-            foreach (var position in DocumentationPeriods.GetMissingPeriods(root))
+            foreach (var position in DocumentationPeriods.GetMissingPeriods(root, c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)))
             {
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.DocumentationEndsWithPeriod, Location.Create(c.Tree, new Microsoft.CodeAnalysis.Text.TextSpan(position, 0))));
             }

@@ -375,6 +375,43 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void NonEnglishDocumentationCulture_TurnsOffTheEnglishSentenceRules()
+    {
+        Write("Directory.Build.props", "<Project><PropertyGroup><GenerateDocumentationFile>true</GenerateDocumentationFile></PropertyGroup></Project>");
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "documentationCulture": "de-DE" } } }""");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        foreach (var id in new[] { "BRO1604", "BRO1605", "BRO1606", "BRO1607" })
+        {
+            Assert.Contains($"dotnet_diagnostic.{id}.severity = none", result.Lines);
+        }
+
+        Assert.Contains("dotnet_diagnostic.BRO1603.severity = warning", result.Lines);
+        Assert.Contains("de-DE", result.Reasons["SA1642"]);
+        Assert.Contains(result.Notes, n => n.Contains("documentationCulture", StringComparison.Ordinal));
+
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "documentationCulture": "en-GB" } } }""");
+
+        Assert.Contains("dotnet_diagnostic.BRO1606.severity = warning", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+    }
+
+    [Fact]
+    public void ExcludeFromPunctuationCheck_IsWrittenWhenItDiffersFromTheDefault()
+    {
+        static List<string> Excluded(List<string> lines) =>
+            lines.Where(l => l.StartsWith("stylebro_exclude_from_punctuation_check", StringComparison.Ordinal)).ToList();
+
+        Assert.Empty(Excluded(Migration.Generate(StyleCopSetup.Read(root), root).Lines));
+
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "excludeFromPunctuationCheck": [ "seealso" ] } } }""");
+        Assert.Empty(Excluded(Migration.Generate(StyleCopSetup.Read(root), root).Lines));
+
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "excludeFromPunctuationCheck": [ "seealso", "example", "summary" ] } } }""");
+        Assert.Equal(["stylebro_exclude_from_punctuation_check = seealso, example, summary"], Excluded(Migration.Generate(StyleCopSetup.Read(root), root).Lines));
+    }
+
+    [Fact]
     public void NoWarn_IsCarriedOver()
     {
         var replacements = Migration.Generate(StyleCopSetup.Read(root), root).Replacements;

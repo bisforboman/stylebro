@@ -84,7 +84,8 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var changes = new List<TextChange>();
         var misplaced = DocumentationComments.GetMisplacedDocumentationComments(root).ToList();
-        var missingPeriods = new HashSet<int>(DocumentationPeriods.GetMissingPeriods(root));
+        var missingPeriods = new HashSet<int>(DocumentationPeriods.GetMissingPeriods(
+            root, document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)));
         var fixedMembers = new HashSet<(SyntaxNode, ParameterDocumentation.TagKind)>();
         foreach (var diagnostic in diagnostics)
         {

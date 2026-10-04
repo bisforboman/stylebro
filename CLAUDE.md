@@ -969,6 +969,17 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   `FixOrderTests` runs every order of a case's ids, one Fix All each (single copy: multi-copy cases need a real repo).
   Result: every reference repo needs 2 runs (one that changes, one clean), so Invoke-RealWorld now fails above 2.
 
+- **Tracker bugs** (2026-10-04, docs/beyond-stylecop.md "Possible bugs to check", all fixed): BRO1504 treats a
+  collection expression's `[` like `{` (StyleCop #3766); BRO1603 accepts a period before closing `)`/`]`/`"`/`'`
+  (#2860), puts the period after a trailing entity (`&gt;.`), and skips `stylebro_exclude_from_punctuation_check` tags
+  (StyleCop's excludeFromPunctuationCheck, default `seealso`; never checked anyway); BRO1606 judges a summary that
+  starts with `<para>` by the paragraph (fix inserts inside it); BRO1510 measures an accessor from its keyword, not
+  its attribute line (StyleCop #3434 counts it: documented both ways in parity `accessor-layout`); BRO1505 wants a
+  blank line below a multi-line field, exactly SA1516's measure (from the end of the last attribute list's trivia),
+  and BRO1001's sort (`NeedsSeparation`) and BRO1114's split add it (FixOrderTests). Migrate: non-English
+  `documentationCulture` turns BRO1604-BRO1607 off with a note; `excludeFromPunctuationCheck` != `["seealso"]` is
+  written.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

@@ -34,6 +34,12 @@ namespace Probe2
             return;
         }
 
+        public int[] Collection() =>
+        [
+            // first in a collection expression (StyleCop #3766, fixed after 1.2.0-beta.556)
+            1,
+        ];
+
         public string Raw(int x) => $"""
 
             {x}
