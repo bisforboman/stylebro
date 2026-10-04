@@ -14,10 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 25 |
-| Planned | 0 rules, 13 work items |
+| Done, not released yet | 26 |
+| Planned | 0 rules, 14 work items |
 | Maybe | 8 rules from other analyzers |
-| Maybe | 7 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
