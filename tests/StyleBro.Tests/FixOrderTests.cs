@@ -33,6 +33,23 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task Conditionals_ATokenOnTheWrongSideAndOneWithoutLineBreak() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t)
+            {
+                var x = a ? s :
+                    t;
+                return a ?
+                    x : t;
+            }
+        }
+        """,
+        "BRO1520",
+        "BRO1524");
+
+    [Fact]
     public Task Ordering_MembersOfRegionsThatAreRemoved() => AssertConvergesInEveryOrderAsync(
         """
         public class C
