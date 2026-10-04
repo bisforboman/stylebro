@@ -109,6 +109,16 @@ internal static class ElementSeparation
         return false;
     }
 
+    /// <summary>
+    /// Whether a field spans several lines, like StyleCop's SA1516: from the line where the last attribute list's
+    /// trivia ends (attributes on their own lines don't count) or the field's first line, to its last line.
+    /// </summary>
+    public static bool IsMultiLineField(FieldDeclarationSyntax field, SourceText text)
+    {
+        var start = field.AttributeLists.Count > 0 ? field.AttributeLists.Last().FullSpan.End : field.SpanStart;
+        return text.Lines.GetLineFromPosition(start).LineNumber != text.Lines.GetLineFromPosition(field.Span.End).LineNumber;
+    }
+
     private static List<SyntaxNode> GetElements(SyntaxNode node)
     {
         return node switch
@@ -145,16 +155,6 @@ internal static class ElementSeparation
         }
 
         return current.SpanStart;
-    }
-
-    /// <summary>
-    /// Whether a field spans several lines, like StyleCop's SA1516: from the line where the last attribute list's trivia ends (attributes on their own lines
-    /// don't count) or the field's first line, to its last line.
-    /// </summary>
-    public static bool IsMultiLineField(FieldDeclarationSyntax field, SourceText text)
-    {
-        var start = field.AttributeLists.Count > 0 ? field.AttributeLists.Last().FullSpan.End : field.SpanStart;
-        return text.Lines.GetLineFromPosition(start).LineNumber != text.Lines.GetLineFromPosition(field.Span.End).LineNumber;
     }
 
     private static bool IsMultiLine(SyntaxNode node, SourceText text)
