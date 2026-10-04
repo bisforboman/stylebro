@@ -9,6 +9,9 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'if (preference == BracePreference.Never)'; Replace = 'if (false)'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text)'; Replace = 'IsMultiLine(child, text)'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.CodeFixes/Layout/BracesCodeFixProvider.cs'; Find = '.Where(c => Braces.GetChanges(new[] { c }, text, options) is not null)'; Replace = ''; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = '&& Line(text, ifStatement.IfKeyword.SpanStart) == Line(text, child.Span.End)'; Replace = ''; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'child is ReturnStatementSyntax or ThrowStatementSyntax'; Replace = 'child is StatementSyntax or ThrowStatementSyntax'; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'if (allowed is not null && reported'; Replace = 'if (false'; Tests = 'BracesTests' }
 
         # Removing regions also does what BRO1001 and BRO1506 then want, only when they're on
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (!IsOn(DiagnosticIds.MemberOrdering))'; Replace = 'if (false)'; Tests = 'RegionsTests' }

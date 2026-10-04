@@ -349,6 +349,145 @@ public class BracesTests
         editorConfig: "csharp_prefer_braces = when_multiline:warning");
 
     [Fact]
+    public Task SingleLineJumps_AllowedWithTheOption() => VerifyNoDiagnosticsAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public int M(int a, List<int> items)
+            {
+                if (a < 0) throw new ArgumentException(nameof(a));
+                if (a == 0) return 0;
+                foreach (var item in items)
+                {
+                    if (item == 1) continue;
+                    if (item == 2) break;
+                    if (item == 3) goto done;
+                }
+
+                if (a == 1) return 1; else if (a == 2) return 2;
+
+            done:
+                return a;
+            }
+
+            public IEnumerable<int> N(bool a)
+            {
+                if (a) yield break;
+                yield return 1;
+            }
+        }
+        """,
+        editorConfig: "stylebro_allow_single_line_jump_statements = true");
+
+    [Fact]
+    public Task SingleLineJumps_OtherStatementsStillGetBraces() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a == 0)
+                    {|BRO1514:return 0;|}
+
+                if (a == 1) {|BRO1514:a++;|}
+
+                if (a > 1 &&
+                    a < 5) {|BRO1514:return 1;|}
+
+                // Braces on the 'else' make the chain inconsistent: the jump gets them too.
+                if (a == 5) {|BRO1516:return 2;|}
+                else {|BRO1514:return 3;|}
+            }
+
+            public int N(int a)
+            {
+                if (a == 0) {|BRO1516:return 0;|}
+                else
+                {
+                    return 1;
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a == 0)
+                {
+                    return 0;
+                }
+
+                if (a == 1)
+                {
+                    a++;
+                }
+
+                if (a > 1 &&
+                    a < 5)
+                {
+                    return 1;
+                }
+
+                // Braces on the 'else' make the chain inconsistent: the jump gets them too.
+                if (a == 5)
+                {
+                    return 2;
+                }
+                else
+                {
+                    return 3;
+                }
+            }
+
+            public int N(int a)
+            {
+                if (a == 0)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+        }
+        """,
+        editorConfig: "stylebro_allow_single_line_jump_statements = true");
+
+    [Fact]
+    public Task SingleLineJumps_GetBracesByDefault() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a == 0) {|BRO1514:return 0;|}
+
+                return a;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a == 0)
+                {
+                    return 0;
+                }
+
+                return a;
+            }
+        }
+        """);
+
+    [Fact]
     public Task PreferBracesFalse_ReportsNothing() => VerifyNoDiagnosticsAsync(
         """
         public class C

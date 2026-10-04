@@ -298,6 +298,8 @@ An option for BRO1514 (for example `stylebro_braces_allow_single_line_jump = tru
 `continue` on the `if` line stay without braces; on the next line they still get braces. StyleCop's maintainers were
 split on it; #1175 asked the same. Off by default, so nothing changes for StyleCop users.
 
+Done (2026-10-04): `stylebro_allow_single_line_jump_statements` ([BRO1514](rules/BRO1514.md#configuration)).
+
 #### 4. Comments in declaration headers (#605)
 
 `class C // note` followed by `{` on the next line, also for methods, properties and accessors. BRO1132 already moves

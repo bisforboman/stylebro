@@ -219,6 +219,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   lines whose start a gap/close edit covers (else they overlap). Skipped: comments/directives in the gap, `#if` in the
   parent, a token spanning lines (multi-line strings), other code after it on its line. Parity `braces`: 15/13, output
   identical apart from the 2 skips. `init` writes IDE0011 = none; migrate writes `Rule("IDE0011")` (none).
+  `stylebro_allow_single_line_jump_statements` (StyleCop issue #2252, default false, 2026-10-04, agent's proposal in
+  docs/decisions.md): a jump (`return`/`throw`/`break`/`continue`/`goto`/`yield break`) ending on its `if` keyword's
+  line isn't BRO1514's; if another clause of the chain is reported, the allowed jumps get BRO1516 in the same run.
 - **BRO1131** (SA1100, 2026-10-03, `Readability/BaseCalls.cs`) `base.` -> `this.`: StyleCop's check (speculative
   `this` binds to the same symbol, so no override/hiding member), plus a deviation: virtual/abstract/override (not
   sealed) members are skipped unless the enclosing type is sealed (a derived override would run instead).
