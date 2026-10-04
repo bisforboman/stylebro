@@ -76,6 +76,8 @@ rule with several options, or rules next to #1. The SDK's experimental IDE2006 o
 
 ### 3. Null check style (RCS1248)
 
+Done (2026-10-04): [BRO1133](rules/BRO1133.md).
+
 `if (x == null)` -> `if (x is null)`, or the reverse. Off by default, needs `roslynator_null_check_style`. SDK: IDE0041
 only rewrites `ReferenceEquals(x, null)`, IDE0150 only `x is object`. Value: high; teams argue about it, and `is null`
 avoids user-defined `==`. Effort: medium, semantic. Skip types with a user-defined `==` (the rewrite changes behavior),

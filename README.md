@@ -56,6 +56,7 @@ project or coming from StyleCop.
 | [BRO1130](docs/rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Yes |
 | [BRO1131](docs/rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Yes |
 | [BRO1132](docs/rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Yes |
+| [BRO1133](docs/rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
 | [BRO1405](docs/rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Yes |
 | [BRO1406](docs/rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Yes |
