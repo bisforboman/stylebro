@@ -16,8 +16,9 @@ internal static class ElementSeparation
     /// <summary>
     /// Pairs of neighbouring elements (previous, current) that need a blank line and don't have one. Elements are the
     /// usings, extern aliases, assembly attributes and members of a file or namespace, the members of a type, and the
-    /// accessors of a property, indexer or event. Like StyleCop, these pairs don't need one: two fields; two usings,
-    /// two extern aliases or two attribute lists; and two accessors that are both on a single line.
+    /// accessors of a property, indexer or event. Like StyleCop, these pairs don't need one: two fields (unless the first
+    /// spans several lines); two usings, two extern aliases or two attribute lists; and two accessors that are both on a
+    /// single line.
     /// </summary>
     public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text)
     {
@@ -76,7 +77,8 @@ internal static class ElementSeparation
 
         return (previous, current) switch
         {
-            (FieldDeclarationSyntax, FieldDeclarationSyntax) => false,
+            // Like StyleCop: two fields need one only when the first spans several lines (a multi-line initializer).
+            (FieldDeclarationSyntax field, FieldDeclarationSyntax) => IsMultiLineField(field, text),
             (UsingDirectiveSyntax, UsingDirectiveSyntax) => false,
             (ExternAliasDirectiveSyntax, ExternAliasDirectiveSyntax) => false,
             (AttributeListSyntax, AttributeListSyntax) => false,
@@ -143,6 +145,16 @@ internal static class ElementSeparation
         }
 
         return current.SpanStart;
+    }
+
+    /// <summary>
+    /// Whether a field spans several lines, like StyleCop's SA1516: from the line where the last attribute list's trivia ends (attributes on their own lines
+    /// don't count) or the field's first line, to its last line.
+    /// </summary>
+    public static bool IsMultiLineField(FieldDeclarationSyntax field, SourceText text)
+    {
+        var start = field.AttributeLists.Count > 0 ? field.AttributeLists.Last().FullSpan.End : field.SpanStart;
+        return text.Lines.GetLineFromPosition(start).LineNumber != text.Lines.GetLineFromPosition(field.Span.End).LineNumber;
     }
 
     private static bool IsMultiLine(SyntaxNode node, SourceText text)
