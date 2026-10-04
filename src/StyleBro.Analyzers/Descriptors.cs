@@ -778,6 +778,17 @@ internal static class Descriptors
         description: "A comment between a statement's header and its '{' belongs inside the block. Replaces StyleCop SA1108.",
         helpLinkUri: HelpBase + DiagnosticIds.EmbeddedComment + ".md");
 
+    public static readonly DiagnosticDescriptor DeclarationComment = new(
+        id: DiagnosticIds.DeclarationComment,
+        title: "Declarations should not contain embedded comments",
+        messageFormat: "Move the comment into the declaration's body",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A comment between the header of a type, namespace, member, accessor or local function and its '{' belongs "
+            + "inside the body. Not a StyleCop rule (proposed in StyleCop issue #605; BRO1132 does the same for statements).",
+        helpLinkUri: HelpBase + DiagnosticIds.DeclarationComment + ".md");
+
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
         title: "Preprocessor keywords should not be preceded by a space",

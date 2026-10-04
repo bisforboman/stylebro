@@ -113,7 +113,6 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
         {
             var removedText = await regionsRemoved.GetTextAsync(cancellationToken).ConfigureAwait(false);
             var removedRoot = await regionsRemoved.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-            var embeddedCommentsOn = IsOn(DiagnosticIds.EmbeddedComment);
             var insertions = new List<TextChange>();
             foreach (var change in regionChanges)
             {
@@ -125,7 +124,7 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
 
                 var line = removedText.Lines.GetLineFromPosition(position);
                 var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
-                if (BlankLines.NeedsBlankLineAbove(comment, removedText, embeddedCommentsOn))
+                if (BlankLines.NeedsBlankLineAbove(comment, removedText, IsOn))
                 {
                     var above = removedText.Lines[line.LineNumber - 1];
                     var lineBreak = removedText.ToString(TextSpan.FromBounds(above.End, above.EndIncludingLineBreak));

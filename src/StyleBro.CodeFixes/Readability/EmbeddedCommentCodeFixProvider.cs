@@ -11,8 +11,8 @@ using Microsoft.CodeAnalysis.CodeFixes;
 namespace StyleBro.CodeFixes.Readability;
 
 /// <summary>
-/// Fix for BRO1132: moves every comment between a header and its '{' into the block (all of one block at once, so a
-/// single fix and Fix All give the same edits).
+/// Fix for BRO1132 and BRO1134: moves every comment between a header and its '{' into the block (all of one block at
+/// once, so a single fix and Fix All give the same edits).
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(EmbeddedCommentCodeFixProvider))]
 public sealed class EmbeddedCommentCodeFixProvider : CodeFixProvider
@@ -21,7 +21,7 @@ public sealed class EmbeddedCommentCodeFixProvider : CodeFixProvider
 
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.EmbeddedComment);
+        ImmutableArray.Create(DiagnosticIds.EmbeddedComment, DiagnosticIds.DeclarationComment);
 
     /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>

@@ -40,10 +40,9 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
             }
         }
 
-        var embeddedCommentsOn = Severities.IsOn(options, context.Tree, DiagnosticIds.EmbeddedComment, context.CancellationToken);
         foreach (var trivia in root.DescendantTrivia())
         {
-            if (BlankLines.NeedsBlankLineAbove(trivia, text, embeddedCommentsOn))
+            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken)))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.BlankLineBeforeComment, trivia.GetLocation()));
             }

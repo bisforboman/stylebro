@@ -304,6 +304,9 @@ split on it; #1175 asked the same. Off by default, so nothing changes for StyleC
 such a comment into the block for `if`, `while` and the other statements; the same move works for types and members.
 Skip multi-line headers like BRO1132 does.
 
+Done (2026-10-04): [BRO1134](rules/BRO1134.md), a new id next to BRO1132 (SA1108 covers statements only, and
+`stylebro-migrate` maps BRO1132 to SA1108).
+
 ### Requested fixes and options StyleBro already has
 
 - Code fixes StyleCop never shipped: SA1108 ([#819](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/819), BRO1132),

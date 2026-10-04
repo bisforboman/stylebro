@@ -222,6 +222,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - **BRO1131** (SA1100, 2026-10-03, `Readability/BaseCalls.cs`) `base.` -> `this.`: StyleCop's check (speculative
   `this` binds to the same symbol, so no override/hiding member), plus a deviation: virtual/abstract/override (not
   sealed) members are skipped unless the enclosing type is sealed (a derived override would run instead).
+- **BRO1134** (2026-10-04, StyleCop issue #605, beyond StyleCop): BRO1132's (SA1108) move for declarations, a new id so
+  migrate's SA1108 -> BRO1132 mapping doesn't widen. Shares `Readability/EmbeddedComments.cs`, EmbeddedCommentAnalyzer
+  and the fix (`GetDeclarationOpenBrace`: types, block namespaces, block-bodied methods/ctors/operators/finalizers,
+  accessor lists, accessor bodies, local functions; header start skips attribute lists). BRO1504's exemption now asks
+  `GetMovingRule` which rule moves the comment (`NeedsBlankLineAbove` takes an isOn predicate). Fixed for both: the
+  comment goes below blank lines after `{` (above them BRO1506 could be left for a second run; FixOrderTests). Survey: 7
+  findings in the 8 repos (+2 multi-line headers skipped).
 - **BRO1006** (SA1006, 2026-10-03, `Spacing/DirectiveSpacingAnalyzer.cs`) `# if` -> `#if`: StyleCop's check (a `#` whose
   trailing trivia has no line break, reported on the next token); empty `# ` directives skipped. Parity `directive-spacing`: 8/8, identical.
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
