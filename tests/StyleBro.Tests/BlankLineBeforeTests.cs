@@ -261,6 +261,62 @@ public class BlankLineBeforeTests
         """);
 
     [Fact]
+    public Task InitializerElements_KeepTheirGroupingBlankLine() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+
+        class C
+        {
+            Dictionary<string, int> ports = new Dictionary<string, int>
+            {
+                { "http", 80 },
+                { "https", 443 },
+
+                { "ssh", 22 },
+            };
+
+            int[,] grid = new int[,]
+            {
+                { 1, 2 },
+
+                { 3, 4 },
+            };
+
+            List<int> numbers = new List<int>
+
+            {|BRO1501:{|}
+                1,
+            };
+        }
+        """,
+        """
+        using System.Collections.Generic;
+
+        class C
+        {
+            Dictionary<string, int> ports = new Dictionary<string, int>
+            {
+                { "http", 80 },
+                { "https", 443 },
+
+                { "ssh", 22 },
+            };
+
+            int[,] grid = new int[,]
+            {
+                { 1, 2 },
+
+                { 3, 4 },
+            };
+
+            List<int> numbers = new List<int>
+            {
+                1,
+            };
+        }
+        """);
+
+    [Fact]
     public Task DoWhile_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C
         {

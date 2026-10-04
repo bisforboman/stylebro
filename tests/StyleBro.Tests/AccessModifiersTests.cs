@@ -217,5 +217,13 @@ public class AccessModifiersTests
         file class Local
         {
         }
+
+        file partial class FileLocal
+        {
+        }
+
+        partial class FileLocal
+        {
+        }
         """);
 }

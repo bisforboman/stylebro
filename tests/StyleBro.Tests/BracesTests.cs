@@ -546,6 +546,32 @@ public class BracesTests
         editorConfig: "stylebro_allow_consecutive_usings = false");
 
     [Fact]
+    public Task InASingleLineBlock_ReportedWhenItStaysOneLine() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool a)
+            {
+                if (a) { if (a) {|BRO1514:a = false;|} else a = true; }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool a)
+            {
+                if (a) { if (a)
+                {
+                    a = false;
+                }
+                else a = true; }
+            }
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1508.severity = none");
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;
 
@@ -582,6 +608,9 @@ public class BracesTests
 
                 // Other code after it on the line.
                 if (a) a = false; a = true;
+
+                // In a single-line block: BRO1508's expansion adds the braces.
+                if (a) { if (a) a = false; else a = true; }
 
         #if DEBUG
                 if (a)

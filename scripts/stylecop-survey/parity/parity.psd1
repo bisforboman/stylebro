@@ -149,7 +149,13 @@
         @{
             Name     = 'blank-lines'
             Map      = @('SA1509=BRO1501', 'SA1510=BRO1502')
-            Expected = @()
+            Expected = @(
+                # A blank line grouping an initializer's entries stays (StyleCop #2832, owner's decision 2026-10-04).
+                'only StyleCop: BRO1501 Initializers.cs(13,13)'
+                'only StyleCop: BRO1501 Initializers.cs(20,13)'
+                'StyleBro output only: Initializers.cs: []'
+                'StyleBro output only: Initializers.cs: []'
+            )
         }
         @{
             Name     = 'blank-lines-comments'
@@ -159,6 +165,13 @@
                 # 1.2.0-beta.556, #3766).
                 'only StyleCop: BRO1504 More.cs(39,13)'
                 'StyleCop output only: More.cs: []'
+                # A comment right after '=>' is like one after '{' (StyleCop #3392/#3550, owner's decision 2026-10-04).
+                'only StyleCop: BRO1504 Arrows.cs(11,17)'
+                'only StyleCop: BRO1504 Arrows.cs(17,13)'
+                'only StyleCop: BRO1504 Arrows.cs(21,13)'
+                'StyleCop output only: Arrows.cs: []'
+                'StyleCop output only: Arrows.cs: []'
+                'StyleCop output only: Arrows.cs: []'
             )
         }
         @{

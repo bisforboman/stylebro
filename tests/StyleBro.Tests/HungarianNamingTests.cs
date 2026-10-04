@@ -89,6 +89,32 @@ public class HungarianNamingTests
         editorConfig: On + "\nstylebro_private_field_naming = _camelCase");
 
     [Fact]
+    public Task ParametersOfNativeMethods_KeepTheirNames() => Locals.VerifyNoDiagnosticsAsync(
+        """
+        using System;
+        using System.Runtime.InteropServices;
+
+        public class C
+        {
+            [DllImport("user32.dll")]
+            private static extern int GetWindowText(IntPtr hWnd, IntPtr lpString, int nMaxCount);
+
+            [System.Runtime.InteropServices.DllImportAttribute("kernel32.dll")]
+            private static extern void SetFlags(int dwFlags);
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+            private static extern void Native(int dwFlags);
+
+            public void M()
+            {
+                [DllImport("kernel32.dll")]
+                static extern void Local(int dwFlags);
+            }
+        }
+        """,
+        editorConfig: On);
+
+    [Fact]
     public void OffByDefault()
     {
         // The test framework turns on every supported diagnostic, so this checks what a build without configuration sees.
