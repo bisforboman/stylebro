@@ -60,33 +60,53 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
-        var changes = new Dictionary<int, TextChange>();
-        foreach (var diagnostic in diagnostics)
+
+        // One entry per list: its span, the position of its '(' and whether every item moves (BRO1108) or only the first.
+        var remaining = diagnostics
+            .Select(d => (Diagnostic: d, List: root.FindNode(d.Location.SourceSpan).Parent))
+            .Where(f => f.List is not null)
+            .GroupBy(f => f.List!)
+            .Select(g => (Span: g.Key.Span, Open: ParameterLayout.GetList(g.Key).Open.SpanStart, All: g.Any(f => f.Diagnostic.Id != DiagnosticIds.SplitParametersStartOnNewLine)))
+            .ToList();
+
+        // A list inside a moved item moves with it, so nested lists are fixed in rounds, outer lists first, each round
+        // on the text the previous one left: the same result as fixing them one by one.
+        var rounds = new List<List<TextChange>>();
+        var current = root;
+        var currentText = text;
+        while (remaining.Count > 0)
         {
-            var item = root.FindNode(diagnostic.Location.SourceSpan);
-            var list = item.Parent;
-            if (list is null)
+            var round = remaining.Where(l => !remaining.Any(o => o != l && o.Span.Contains(l.Span))).ToList();
+            remaining = remaining.Except(round).ToList();
+            var changes = new Dictionary<int, TextChange>();
+            foreach (var list in round)
             {
-                continue;
+                var open = rounds.Aggregate(list.Open, Map);
+                if (current.FindToken(open) is var token && token.SpanStart == open && token.Parent is { } node
+                    && ParameterLayout.GetList(node).Open == token
+                    && (list.All ? ParameterLayout.GetFirstMisplacedItem(node, currentText) ?? ParameterLayout.GetFirstItemToMove(node, currentText)
+                        : ParameterLayout.GetFirstItemToMove(node, currentText)) is not null)
+                {
+                    foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All))
+                    {
+                        changes[change.Span.Start] = change;
+                    }
+                }
             }
 
-            if (diagnostic.Id == DiagnosticIds.SplitParametersStartOnNewLine)
+            var ordered = changes.Values.OrderBy(c => c.Span.Start).ToList();
+            rounds.Add(ordered);
+            currentText = currentText.WithChanges(ordered);
+            if (remaining.Count > 0)
             {
-                if (ParameterLayout.GetFirstItemToMove(list, text) is not null)
-                {
-                    var first = ParameterLayout.GetChanges(list, text, indentUnit).First();
-                    changes[first.Span.Start] = first;
-                }
-            }
-            else if (ParameterLayout.GetFirstMisplacedItem(list, text) is not null)
-            {
-                foreach (var change in ParameterLayout.GetChanges(list, text, indentUnit))
-                {
-                    changes[change.Span.Start] = change;
-                }
+                current = await root.SyntaxTree.WithChangedText(currentText).GetRootAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        return document.WithText(text.WithChanges(changes.Values));
+        return document.WithText(currentText);
     }
+
+    /// <summary>Where a position (between edits, never inside one) is after a round of edits.</summary>
+    private static int Map(int position, List<TextChange> changes) =>
+        position + changes.Where(c => c.Span.End <= position).Sum(c => c.NewText!.Length - c.Span.Length);
 }

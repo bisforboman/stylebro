@@ -25,7 +25,8 @@ public sealed class BracesAnalyzer : DiagnosticAnalyzer
                 var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
                 foreach (var (child, id) in Braces.GetFindings(c.Node, text, i => Severities.IsOn(c.Compilation.Options, tree, i, c.CancellationToken), Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options)))
                 {
-                    if (Braces.GetChanges(new[] { child }, text, options) is not null)
+                    if (Braces.GetChanges(new[] { child }, text, options) is not null
+                        && !Braces.IsLeftToExpansion(child, text, options, i => Severities.IsOn(c.Compilation.Options, tree, i, c.CancellationToken)))
                     {
                         var descriptor = id == DiagnosticIds.BracesMultiLine ? Descriptors.BracesMultiLine
                             : id == DiagnosticIds.BracesConsistent ? Descriptors.BracesConsistent

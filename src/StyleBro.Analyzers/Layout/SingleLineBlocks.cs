@@ -164,6 +164,12 @@ internal static class SingleLineBlocks
             changes.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), lineBreak));
         }
 
+        // The statements' braces (BRO1514-BRO1516 leave statements of a single-line block to this expansion).
+        if (isOn is not null && node is BlockSyntax block)
+        {
+            Braces.AddToExpansion(block, text, changes, options, isOn);
+        }
+
         return changes;
     }
 

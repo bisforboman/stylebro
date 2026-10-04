@@ -85,7 +85,7 @@ internal static class BlankLines
     /// <summary>
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
-    /// an opening brace or a 'case'/'default' label; and not for '///' and '////' (commented-out code). Not for a comment
+    /// an opening brace, '=>' or a 'case'/'default' label; and not for '///' and '////' (commented-out code). Not for a comment
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
     /// behind.
     /// </summary>
@@ -109,10 +109,12 @@ internal static class BlankLines
             return false;
         }
 
-        // The token before the comment: an opening brace (or a collection expression's '[', like StyleCop's #3766), or
-        // the colon of a switch label, keeps the comment attached.
+        // The token before the comment: an opening brace (or a collection expression's '[', like StyleCop's #3766), the
+        // colon of a switch label, or '=>' (a switch arm, lambda or expression body, StyleCop's #3392) keeps the comment
+        // attached.
         var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
         return !previous.IsKind(SyntaxKind.OpenBraceToken)
+            && !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)
             && !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule));
@@ -129,11 +131,13 @@ internal static class BlankLines
     /// <summary>
     /// Whether BRO1501 applies to the token: an opening brace, except one whose previous token is a closing brace, such
     /// as a block following another block. That exception matches StyleCop's SA1509, including when a comment sits
-    /// between the two braces.
+    /// between the two braces. Unlike SA1509, not the brace of an initializer's element (<c>{ "ssh", 22 }</c> in a
+    /// dictionary initializer, an inner array's <c>{ 1, 2 }</c>): a blank line there groups entries (StyleCop #2832).
     /// </summary>
     public static bool IsCheckedOpenBrace(SyntaxToken token)
     {
-        return token.IsKind(SyntaxKind.OpenBraceToken) && !token.GetPreviousToken().IsKind(SyntaxKind.CloseBraceToken);
+        return token.IsKind(SyntaxKind.OpenBraceToken) && !token.GetPreviousToken().IsKind(SyntaxKind.CloseBraceToken)
+            && !(token.Parent is InitializerExpressionSyntax { Parent: InitializerExpressionSyntax });
     }
 
     /// <summary>Whether the token is 'else', 'catch' or 'finally' continuing an if or try statement (BRO1502).</summary>

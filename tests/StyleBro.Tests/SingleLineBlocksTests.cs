@@ -91,6 +91,95 @@ public class SingleLineBlocksTests
         """);
 
     [Fact]
+    public Task StatementsWithoutBraces_GetThemInTheSameEdit() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool x) {|BRO1509:{|} if (x) return; }
+
+            public int N(bool x) {|BRO1509:{|} if (x) M(x); else M(!x); return 1; }
+
+            public void O(bool x)
+            {
+                if (x) {|BRO1508:{|} while (!x) x = true; }
+            }
+
+            public void P(bool x) {|BRO1509:{|} if (x) {|BRO1508:{|} if (!x) M(x); else M(!x); } }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool x)
+            {
+                if (x)
+                {
+                    return;
+                }
+            }
+
+            public int N(bool x)
+            {
+                if (x)
+                {
+                    M(x);
+                }
+                else
+                {
+                    M(!x);
+                }
+
+                return 1;
+            }
+
+            public void O(bool x)
+            {
+                if (x)
+                {
+                    while (!x)
+                    {
+                        x = true;
+                    }
+                }
+            }
+
+            public void P(bool x)
+            {
+                if (x)
+                {
+                    if (!x)
+                    {
+                        M(x);
+                    }
+                    else
+                    {
+                        M(!x);
+                    }
+                }
+            }
+        }
+        """);
+
+    [Fact]
+    public Task StatementsWithoutBraces_KeepThem_WhenTheBraceRulesAreOff() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool x) {|BRO1509:{|} if (x) return; }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool x)
+            {
+                if (x) return;
+            }
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1514.severity = none\ndotnet_diagnostic.BRO1515.severity = none\ndotnet_diagnostic.BRO1516.severity = none");
+
+    [Fact]
     public Task NestedBlocks_SingleFixAndFixAllAgree() => VerifyFixAsync(
         """
         public class C

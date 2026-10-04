@@ -33,6 +33,28 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool x) { if (x) return; }
+
+            public int N(bool x) { if (x) M(x); else M(!x); return 1; }
+
+            public void O(bool x)
+            {
+                if (x) { if (!x) return; }
+            }
+
+            public void P(bool x) { if (x) { if (!x) M(x); else M(!x); } }
+        }
+        """,
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1519");
+
+    [Fact]
     public Task DeclarationComments_MovedNextToBlankLinesAndDocumentation() => AssertConvergesInEveryOrderAsync(
         """
         public class C // note

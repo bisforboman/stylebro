@@ -162,6 +162,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     private static HungarianNames? GetHungarian(SyntaxNodeAnalysisContext context) =>
         Severities.IsOn(context.Compilation.Options, context.Node.SyntaxTree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
             && !HungarianNames.IsInNativeMethods(context.Node)
+            && !HungarianNames.IsExternParameter(context.Node)
             ? HungarianNames.Read(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree))
             : null;
 
