@@ -811,6 +811,7 @@ internal static class Descriptors
         description: "'1L' instead of '1l', which looks like '11'; 'U' and 'UL' likewise. Real suffixes ('f', 'd', 'm') aren't "
             + "checked. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffixCase + ".md");
+
     public static readonly DiagnosticDescriptor NullCheckStyle = new(
         id: DiagnosticIds.NullCheckStyle,
         title: "Check for null in one form",
