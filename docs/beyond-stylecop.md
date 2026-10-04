@@ -301,6 +301,8 @@ An option for BRO1514 (for example `stylebro_braces_allow_single_line_jump = tru
 `continue` on the `if` line stay without braces; on the next line they still get braces. StyleCop's maintainers were
 split on it; #1175 asked the same. Off by default, so nothing changes for StyleCop users.
 
+Done (2026-10-04): `stylebro_allow_single_line_jump_statements` ([BRO1514](rules/BRO1514.md#configuration)).
+
 #### 4. Comments in declaration headers (#605)
 
 `class C // note` followed by `{` on the next line, also for methods, properties and accessors. BRO1132 already moves
@@ -343,7 +345,9 @@ Skip multi-line headers like BRO1132 does.
 
 ### Possible bugs to check
 
-Confirmed with throwaway tests on `main` (2026-10-04) unless noted; not fixed here.
+Confirmed with throwaway tests on `main` (2026-10-04) unless noted. All seven were fixed on 2026-10-04 (owner's
+decision: fix all, and honor both stylecop.json settings in migrate); each rule page says how StyleBro now compares
+with StyleCop.
 
 1. **BRO1504, comment at the start of a collection expression.** `int[] a =`, `[`, `    // first`, `    1,`, `];` is
    reported (only `{` counts as the start of a scope). StyleCop beta.556 does the same; fixed upstream for

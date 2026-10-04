@@ -129,6 +129,62 @@ public class ElementSeparationTests
         """);
 
     [Fact]
+    public Task FieldAfterAMultiLineField_GetsABlankLine() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            int[] a = new[]
+            {
+                1,
+            };
+        {|BRO1505:|}    int b;
+            int c;
+            string d =
+                "x";
+        {|BRO1505:|}    [Obsolete]
+            int e;
+            int f;
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            int[] a = new[]
+            {
+                1,
+            };
+
+            int b;
+            int c;
+            string d =
+                "x";
+
+            [Obsolete]
+            int e;
+            int f;
+        }
+        """);
+
+    [Fact]
+    public Task AttributeLinesDoNotMakeAFieldMultiLine() => VerifyNoDiagnosticsAsync("""
+        using System;
+
+        class C
+        {
+            [Obsolete]
+            int a;
+            int b;
+            [Obsolete] [NonSerialized]
+            int c;
+            int d;
+        }
+        """);
+
+    [Fact]
     public Task TwoMembersOnOneLine_AreSplit() => VerifyFixAsync(
         """
         class C

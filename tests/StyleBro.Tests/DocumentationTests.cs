@@ -297,6 +297,82 @@ public class DocumentationTests
         """);
 
     [Fact]
+    public Task PeriodBeforeClosingPunctuation_IsNotReported() => VerifyNoDiagnosticsAsync("""
+        /// <summary>Gets the list (see above.)</summary>
+        public class Texts
+        {
+            /// <summary>Gets the word "done."</summary>
+            public void A()
+            {
+            }
+
+            /// <summary>Gets the word 'done.'</summary>
+            /// <remarks>Ends in brackets [like this.]</remarks>
+            public void B()
+            {
+            }
+
+            /// <summary>Gets the word &quot;done.&quot;</summary>
+            public void C()
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task TextEndingInAnEntity_GetsThePeriodAfterIt() => VerifyFixAsync(
+        """
+        /// <summary>Gets the List&lt;T&gt;{|BRO1603:|}</summary>
+        public class Texts
+        {
+            /// <summary>Gets a closing parenthesis ({|BRO1603:|}</summary>
+            /// <remarks>Gets the word &quot;done&quot;{|BRO1603:|}</remarks>
+            public void A()
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Gets the List&lt;T&gt;.</summary>
+        public class Texts
+        {
+            /// <summary>Gets a closing parenthesis (.</summary>
+            /// <remarks>Gets the word &quot;done&quot;.</remarks>
+            public void A()
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task ExcludedTags_AreNotCheckedForPeriods() => VerifyFixAsync(
+        """
+        /// <summary>Not checked</summary>
+        /// <remarks>Checked{|BRO1603:|}</remarks>
+        public class Texts
+        {
+            /// <remarks>Has a paragraph.
+            /// <para>Not checked either</para></remarks>
+            public void A()
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Not checked</summary>
+        /// <remarks>Checked.</remarks>
+        public class Texts
+        {
+            /// <remarks>Has a paragraph.
+            /// <para>Not checked either</para></remarks>
+            public void A()
+            {
+            }
+        }
+        """,
+        "stylebro_exclude_from_punctuation_check = summary, para\n");
+
+    [Fact]
     public Task PropertySummaries_MatchTheAccessors() => VerifyFixAsync(
         """
         /// <summary>Words.</summary>
@@ -612,6 +688,63 @@ public class DocumentationTests
         {
             /// <summary>Initializes a new instance of the <see cref="Pair{TKey, TValue}" /> class.</summary>
             public Pair()
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task ConstructorSummariesInAParagraph_AreJudgedByTheParagraph() => VerifyFixAsync(
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary><para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>
+            public Words()
+            {
+            }
+
+            /// <summary>
+            /// <para>Prevents a default instance of the <see cref="Words"/> class from being created.</para>
+            /// <para>Use the factory.</para>
+            /// </summary>
+            /// <param name="b">The b.</param>
+            private Words(byte b)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}
+            /// <para>Creates a words object.</para>
+            /// </summary>
+            /// <param name="x">The x.</param>
+            public Words(int x)
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary><para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>
+            public Words()
+            {
+            }
+
+            /// <summary>
+            /// <para>Prevents a default instance of the <see cref="Words"/> class from being created.</para>
+            /// <para>Use the factory.</para>
+            /// </summary>
+            /// <param name="b">The b.</param>
+            private Words(byte b)
+            {
+            }
+
+            /// <summary>
+            /// <para>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</para>
+            /// </summary>
+            /// <param name="x">The x.</param>
+            public Words(int x)
             {
             }
         }

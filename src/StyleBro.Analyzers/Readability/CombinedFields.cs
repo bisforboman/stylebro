@@ -16,8 +16,8 @@ internal static class CombinedFields
     /// The edit that gives every variable its own declaration, or null when the declaration has one variable or can't be
     /// split safely (a comment or directive inside it, or other code on its first line). Every new declaration gets the
     /// attributes, modifiers and type, and the documentation comment if there is one: StyleCop's fix keeps attributes on
-    /// the first field only, which takes them away from the others. Event fields are separated by a blank line, which
-    /// BRO1505 wants between them.
+    /// the first field only, which takes them away from the others. Event fields, and a field that spans several lines from
+    /// the next, are separated by a blank line, which BRO1505 wants between them.
     /// </summary>
     public static TextChange? GetChange(BaseFieldDeclarationSyntax declaration, SourceText text)
     {
@@ -50,8 +50,12 @@ internal static class CombinedFields
         // Attributes, modifiers and type. A line break between the type and the first name (Serilog writes
         // 'const string' and then each constant on its own line) becomes a space: every new declaration is one line.
         var prefix = text.ToString(TextSpan.FromBounds(declaration.SpanStart, variables[0].SpanStart)).TrimEnd() + " ";
-        var separator = declaration is EventFieldDeclarationSyntax ? lineBreak + lineBreak : lineBreak;
-        var parts = variables.Select((v, i) => (i == 0 ? string.Empty : separator + docText + indent) + prefix + text.ToString(v.Span) + declaration.SemicolonToken.Text);
+
+        // BRO1505 wants a blank line between event fields, and below a field that spans several lines.
+        var parts = variables.Select((v, i) => (i == 0 ? string.Empty
+                : (declaration is EventFieldDeclarationSyntax || text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0 ? lineBreak + lineBreak : lineBreak)
+                    + docText + indent)
+            + prefix + text.ToString(v.Span) + declaration.SemicolonToken.Text);
         return new TextChange(declaration.Span, string.Concat(parts));
     }
 }

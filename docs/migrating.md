@@ -36,7 +36,8 @@ real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md)
 - StyleCop's alternative rules: SX1101 (no `this.`) turns on the SDK's IDE0003, SX1309 (fields begin with `_`) sets
   BRO1303 to `_camelCase`, and SA1412 (UTF-8 with BOM) writes `charset = utf-8-bom`.
 - `stylecop.json`: `elementOrder`, `usingDirectivesPlacement`, `systemUsingDirectivesFirst`,
-  `blankLinesBetweenUsingGroups`, `allowBuiltInTypeAliases`, indentation, and the file header settings.
+  `blankLinesBetweenUsingGroups`, `allowBuiltInTypeAliases`, indentation, the file header settings,
+  `documentationCulture` and `excludeFromPunctuationCheck`.
 
 ## What it writes
 
@@ -54,6 +55,11 @@ tool again replaces the block, so put your own settings outside it.
 
 - **Documentation scope.** `documentExposedElements`, `documentInternalElements` and `documentPrivateElements`
   become [BRO1601](rules/BRO1601.md)'s `stylebro_document_*` settings.
+- **Documentation language and punctuation.** A `documentationCulture` other than English (`de-DE`, `fr-FR`; any
+  `en-*` counts as English) turns off [BRO1604](rules/BRO1604.md)-[BRO1607](rules/BRO1607.md), which write English
+  summary sentences (StyleCop checks translated ones); the report says so. `excludeFromPunctuationCheck`, when it
+  differs from StyleCop's default (`["seealso"]`), becomes [BRO1603](rules/BRO1603.md)'s
+  `stylebro_exclude_from_punctuation_check`.
 
 Every key the preset sets is written, and `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>` in the
 root `Directory.Build.props`, created if needed): the block replaces it. That matters because an `.editorconfig`
