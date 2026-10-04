@@ -562,6 +562,11 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Messy showed `select` re-indented), `=>` after a `where` (BRO1111's). Probed: no SDK rule (IDE0055 included) enforces
   the SDK key. Migration writes them `none` (no SA ids); MigrationTests requires rules without SA ids to be listed
   under "Rules beyond StyleCop" in differences-from-stylecop.md.
+- **BRO1525** (2026-10-04, StyleCop's proposed SA1521 / issue #738, never implemented; beyond StyleCop, so no SA id in
+  the descriptor or migrate would map it; `Layout/AttributeBlankLines.cs`): blank lines after any attribute list except
+  assembly/module ones (before the element or the next list) are removed as whole lines. Skipped: any comment/doc/
+  directive in the gap, syntax errors in the element. BRO1505 doesn't count a blank line below an attribute (element
+  code starts at `[`), so no coupling is needed (FixOrderTests case). Survey: 9 findings in the 8 repos.
 - **BRO1524** (2026-10-04, StyleCop issue #651, beyond StyleCop, `Layout/ConditionalLayout.cs`): once a line break sits
   right next to `?` or `:` (not inside a part), a `?`/`:` with no line break on either side gets one, on the side
   BRO1520's key asks for; a token with its break on the wrong side stays BRO1520's (disjoint gaps; FixOrderTests case).

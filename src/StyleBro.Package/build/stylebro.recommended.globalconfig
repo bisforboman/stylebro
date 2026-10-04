@@ -169,6 +169,9 @@ dotnet_diagnostic.BRO1520.severity = warning
 dotnet_diagnostic.BRO1521.severity = warning
 dotnet_diagnostic.BRO1522.severity = warning
 
+# BRO1525: no blank line after an attribute list (StyleCop's proposed SA1521, never implemented; stylebro-migrate turns it
+# off)
+dotnet_diagnostic.BRO1525.severity = warning
 # BRO1524: a split conditional expression has the condition, '? a' and ': b' on their own lines (StyleCop issue #651,
 # never implemented there; stylebro-migrate turns it off). The '?'/':' side follows BRO1520's setting.
 dotnet_diagnostic.BRO1524.severity = warning
