@@ -280,6 +280,110 @@ public class EmbeddedCommentTests
         "indent_size = 2");
 
     [Fact]
+    public Task MultiLineHeaders_AreSkipped_EachClauseJudgedOnItsOwn() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(string path, bool a, bool b)
+            {
+                if (a
+                    && !string.IsNullOrEmpty(path) // path must exist
+                    && path.StartsWith("http")) // scheme must be HTTP
+                {
+                    // all conditions met
+                    return 1;
+                }
+                else if (b
+                    && a) // both
+                {
+                    return 2;
+                }
+                else {|BRO1132:// neither|}
+                {
+                    return 3;
+                }
+            }
+
+            public void N(int x)
+            {
+                while (x > 0
+                    && x < 10) // in range
+                {
+                    x--;
+                }
+
+                switch (x
+                    + 1) // shifted
+                {
+                    default:
+                        break;
+                }
+
+                try
+                {
+                    x++;
+                }
+                catch (System.Exception e)
+                    when (e.Message.Length > 0) // with a message
+                {
+                    x = 0;
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(string path, bool a, bool b)
+            {
+                if (a
+                    && !string.IsNullOrEmpty(path) // path must exist
+                    && path.StartsWith("http")) // scheme must be HTTP
+                {
+                    // all conditions met
+                    return 1;
+                }
+                else if (b
+                    && a) // both
+                {
+                    return 2;
+                }
+                else
+                {
+                    // neither
+                    return 3;
+                }
+            }
+
+            public void N(int x)
+            {
+                while (x > 0
+                    && x < 10) // in range
+                {
+                    x--;
+                }
+
+                switch (x
+                    + 1) // shifted
+                {
+                    default:
+                        break;
+                }
+
+                try
+                {
+                    x++;
+                }
+                catch (System.Exception e)
+                    when (e.Message.Length > 0) // with a message
+                {
+                    x = 0;
+                }
+            }
+        }
+        """);
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync(
         """
         public class C
