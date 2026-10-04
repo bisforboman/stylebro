@@ -2,7 +2,9 @@
 
 Times analyzers the way the compiler's `ReportAnalyzer` does (each analyzer's own execution time), but without the
 noise of a full build: one compilation of a folder of sources, all analyzers together, single-threaded, the median of
-several runs after a warm-up run.
+several runs after a warm-up run. Since 2026-10-05 every run (and every build in compare mode) gets freshly parsed
+sources, as a real build does: nothing one run built (red nodes, structured trivia, a per-tree cache) carries over to
+the next, so the analyzer that walks a tree first pays for it. Numbers from before then aren't comparable.
 
 ```bash
 dotnet build src/StyleBro.Analyzers
@@ -38,6 +40,8 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 | StyleBro, 2026-10-04 (55 analyzers) | 806-858 ms (three runs) | DocumentationAnalyzer ~120 ms, FieldNamingAnalyzer ~125-160 ms, CommentTextAnalyzer ~57 ms, NullCheckAnalyzer ~35 ms |
 | StyleBro after the walk merges below | 709-752 ms (three runs, alternated with the row above) | FieldNamingAnalyzer ~150-200 ms, DocumentationAnalyzer ~45-70 ms, CommentTextAnalyzer ~33 ms, NullCheckAnalyzer ~6 ms |
 | StyleBro after the cheap-checks-first changes below | 669-743 ms (three runs, alternated with 670-747 ms for the row above) | CamelCaseNamingAnalyzer 17 -> 2 ms, BaseCallsAnalyzer 15 -> 5 ms, CallChainAnalyzer ~20 -> 14 ms, EmbeddedCommentAnalyzer ~29 -> 24 ms |
+| StyleBro, 2026-10-05, fresh sources per run (compare mode, fastest run each) | 595 ms | FieldNamingAnalyzer 59 ms, DocumentationAnalyzer 51 ms, BlankLineAfterAnalyzer 47 ms, BlankLineRunsAnalyzer 45 ms |
+| StyleBro with one shared walk per tree (`TreeWalk`, same run) | 386 ms | FieldNamingAnalyzer 53 ms, DocumentationAnalyzer 37 ms, CommentSpacingAnalyzer 32 ms |
 
 Single runs vary by about 20% (the two 2026-10-03 runs of the same build differ by 25%). In real builds the analyzers run concurrently with each other and with the compiler,
 so the wall-clock cost is smaller: the private 30-project app built in the same time with and without StyleBro.
@@ -57,5 +61,10 @@ FieldNamingAnalyzer, profiled with `dotnet-trace` (most of its time was in `Type
 tokens INTO trivia to find strings in directives, which made Roslyn build the XML structure of every documentation
 comment; it now opens only directives, and skips the trivia walk for declarations without any (-25 to -30 % in
 alternated runs, same diagnostics).
+2026-10-05: one walk per tree. A bare walk of every token of Newtonsoft.Json costs ~35-40 ms (a probe analyzer that
+does nothing else), and about 16 analyzers each walked every token, trivia or node of every file. `TreeWalk` (in
+StyleBro.Analyzers) walks a tree once and keeps its tokens and nodes as arrays (trivia comes from the tokens) while the
+tree lives; reading the array costs ~2 ms. The analyzers stay separate (ids, tests and fixes unchanged); whichever
+runs first pays the walk. 595 -> 386 ms, same diagnostics.
 `STYLEBRO_BENCH_ONLY=Name1,Name2` times only those analyzers (alone they pay shared costs such as building the red tree
 or binding, so compare builds, not analyzers).

@@ -33,7 +33,7 @@ internal static class WrappingPlacement
         var operators = Read(options, OperatorKey, beginning: true);
         var arrows = Read(options, ArrowKey, beginning: false);
         var equals = Read(options, EqualsKey, beginning: false);
-        foreach (var node in root.DescendantNodes())
+        foreach (var node in TreeWalk.Nodes(root))
         {
             switch (node)
             {

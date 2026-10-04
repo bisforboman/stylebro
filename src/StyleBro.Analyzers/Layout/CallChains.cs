@@ -19,7 +19,7 @@ internal static class CallChains
     /// <summary>Every link that should start its line, with the edit that puts it there.</summary>
     public static IEnumerable<(SyntaxToken Link, TextChange Change)> GetFindings(SyntaxNode root, SourceText text)
     {
-        foreach (var node in root.DescendantNodes())
+        foreach (var node in TreeWalk.Nodes(root))
         {
             if (node is not (InvocationExpressionSyntax or ElementAccessExpressionSyntax or ConditionalAccessExpressionSyntax
                 or MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression })

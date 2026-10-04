@@ -32,7 +32,7 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
     {
         var root = context.Tree.GetRoot(context.CancellationToken);
         var text = context.Tree.GetText(context.CancellationToken);
-        foreach (var token in root.DescendantTokens())
+        foreach (var token in TreeWalk.Tokens(root))
         {
             if (token.IsKind(SyntaxKind.OpenBraceToken) && BlankLines.GetBlankLinesBelow(token, text).Count > 0)
             {
@@ -40,7 +40,7 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
             }
         }
 
-        foreach (var trivia in root.DescendantTrivia())
+        foreach (var trivia in TreeWalk.Trivia(root))
         {
             if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken)))
             {

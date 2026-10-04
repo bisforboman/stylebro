@@ -20,7 +20,7 @@ internal static class Regions
     /// </summary>
     public static IEnumerable<(RegionDirectiveTriviaSyntax Region, EndRegionDirectiveTriviaSyntax EndRegion, bool InCodeElement)> GetRegions(SyntaxNode root)
     {
-        foreach (var trivia in root.DescendantTrivia())
+        foreach (var trivia in TreeWalk.Trivia(root))
         {
             // Not in code an '#if' turns off: there the region's surroundings are plain text, so whether it's BRO1112's
             // or BRO1113's, and what removing it means for the code around it, is only known where the code is active.

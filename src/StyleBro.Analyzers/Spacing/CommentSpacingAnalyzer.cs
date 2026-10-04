@@ -23,7 +23,7 @@ public sealed class CommentSpacingAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterSyntaxTreeAction(c =>
         {
-            foreach (var trivia in c.Tree.GetRoot(c.CancellationToken).DescendantTrivia())
+            foreach (var trivia in TreeWalk.Trivia(c.Tree.GetRoot(c.CancellationToken)))
             {
                 if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && CommentSpacing.GetFixedText(trivia.ToString()) is not null)
                 {

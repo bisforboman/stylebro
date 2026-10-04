@@ -25,7 +25,7 @@ public sealed class TrailingBlankLinesAnalyzer : DiagnosticAnalyzer
         {
             var root = c.Tree.GetRoot(c.CancellationToken);
             var text = c.Tree.GetText(c.CancellationToken);
-            foreach (var trivia in root.DescendantTrivia())
+            foreach (var trivia in TreeWalk.Trivia(root))
             {
                 if (TrailingBlankLines.GetBlankLinesAfterComment(trivia, text).Count > 0)
                 {

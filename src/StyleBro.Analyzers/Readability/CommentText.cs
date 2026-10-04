@@ -15,7 +15,7 @@ internal static class CommentText
 {
     /// <summary>The tree's comments and documentation comments, in order: what both checks read.</summary>
     public static List<SyntaxTrivia> GetComments(SyntaxNode root) =>
-        root.DescendantTrivia()
+        TreeWalk.Trivia(root)
             .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia) || t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
             .ToList();
 
