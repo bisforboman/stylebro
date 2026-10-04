@@ -136,5 +136,12 @@ namespace Probe
         public Generic()
         {
         }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="x">The x.</param>
+        public Generic(int x)
+        {
+        }
     }
 }

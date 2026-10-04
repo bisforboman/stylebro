@@ -16,13 +16,18 @@ internal static class ParameterDocumentation
 {
     /// <summary>
     /// The declarations whose '&lt;param&gt;' tags BRO1611 checks: like StyleCop 1.2's SA1612, not constructors or
-    /// operators (probed: StyleCop reports neither stale nor out-of-order tags there).
+    /// operators (probed: StyleCop reports neither stale nor out-of-order tags there). Like StyleCop master (24dd9011),
+    /// also the primary constructor parameters of classes, structs and records (a type without one isn't checked).
     /// </summary>
     public static readonly SyntaxKind[] MemberKinds =
     [
         SyntaxKind.MethodDeclaration,
         SyntaxKind.IndexerDeclaration,
         SyntaxKind.DelegateDeclaration,
+        SyntaxKind.ClassDeclaration,
+        SyntaxKind.StructDeclaration,
+        SyntaxKind.RecordDeclaration,
+        SyntaxKind.RecordStructDeclaration,
     ];
 
     /// <summary>The declarations whose '&lt;typeparam&gt;' tags BRO1613/BRO1614 check (StyleCop's SA1620/SA1621).</summary>
@@ -210,6 +215,7 @@ internal static class ParameterDocumentation
             BaseMethodDeclarationSyntax method => method.ParameterList,
             DelegateDeclarationSyntax @delegate => @delegate.ParameterList,
             IndexerDeclarationSyntax indexer => (BaseParameterListSyntax)indexer.ParameterList,
+            TypeDeclarationSyntax type => type.ParameterList,
             _ => null,
         };
 

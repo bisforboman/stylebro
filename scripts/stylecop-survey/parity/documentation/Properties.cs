@@ -32,5 +32,11 @@ namespace Probe
 
         /// <summary>Gets or sets the protected-set thing.</summary>
         public int ProtectedSet { get; protected set; }
+
+        /// <summary>Gets or sets the init thing.</summary>
+        public int InitThing { get; init; }
+
+        /// <summary>Gets or initializes the set thing.</summary>
+        public int SetThing { get; set; }
     }
 }

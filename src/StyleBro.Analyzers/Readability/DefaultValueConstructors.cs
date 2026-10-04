@@ -48,7 +48,9 @@ internal static class DefaultValueConstructors
             return typeText + "." + zero;
         }
 
-        if (!IsParameterDefaultValue(creation) && GetEmptyMember(type) is { } empty)
+        if (!IsParameterDefaultValue(creation)
+            && GetEmptyMember(type) is { } empty
+            && (typeText is not ("nint" or "nuint") || SupportsNumericIntPtr(model.Compilation)))
         {
             return typeText + "." + empty;
         }
@@ -76,6 +78,17 @@ internal static class DefaultValueConstructors
                 _ => null,
             },
         };
+    }
+
+    /// <summary>
+    /// Whether 'nint.Zero' compiles: like StyleCop master, C# 11 and a runtime with 'RuntimeFeature.NumericIntPtr'
+    /// (.NET 7+). Elsewhere 'nint' isn't 'IntPtr' and has no 'Zero' member (CS0117).
+    /// </summary>
+    private static bool SupportsNumericIntPtr(Compilation compilation)
+    {
+        return compilation is CSharpCompilation { LanguageVersion: >= LanguageVersion.CSharp11 } csharp
+            && csharp.GetTypeByMetadataName("System.Runtime.CompilerServices.RuntimeFeature") is { } runtimeFeature
+            && runtimeFeature.GetMembers("NumericIntPtr").Any(m => m is IFieldSymbol { IsConst: true });
     }
 
     private static bool IsParameterDefaultValue(SyntaxNode node)

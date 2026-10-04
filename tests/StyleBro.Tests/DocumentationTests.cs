@@ -455,6 +455,77 @@ public class DocumentationTests
         }
         """);
 
+    // Like StyleCop master (eb498962): 'init' counts as a setter that says 'initializes'; 'Gets' alone is fine for
+    // get+init; 'Gets or initializes' is a wrong prefix elsewhere (beta.556's fix wrote 'Gets or sets or initializes').
+    [Fact]
+    public Task InitAccessors_SayInitializes() => VerifyFixAsync(
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary>Gets or sets the id.</summary>
+            public int {|BRO1604:Id|} { get; init; }
+
+            /// <summary>The name.</summary>
+            public string {|BRO1604:Name|} { get; init; }
+
+            /// <summary>Sets the seed.</summary>
+            public int {|BRO1604:Seed|} { init { } }
+
+            /// <summary>Gets or initializes the code.</summary>
+            public int {|BRO1605:Code|} { get; private init; }
+
+            /// <summary>Whether it is new.</summary>
+            public bool {|BRO1604:IsNew|} { get; init; }
+
+            /// <summary>Gets or initializes the value.</summary>
+            public int {|BRO1604:Value|} { get; set; }
+
+            /// <summary>Gets or initializes the count.</summary>
+            public int {|BRO1604:Count|} { get; }
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary>Gets or initializes the id.</summary>
+            public int Id { get; init; }
+
+            /// <summary>Gets or initializes the name.</summary>
+            public string Name { get; init; }
+
+            /// <summary>Initializes the seed.</summary>
+            public int Seed { init { } }
+
+            /// <summary>Gets the code.</summary>
+            public int Code { get; private init; }
+
+            /// <summary>Gets or initializes a value indicating whether it is new.</summary>
+            public bool IsNew { get; init; }
+
+            /// <summary>Gets or sets the value.</summary>
+            public int Value { get; set; }
+
+            /// <summary>Gets the count.</summary>
+            public int Count { get; }
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task RightPropertySummaries_AreNotReported() => VerifyNoDiagnosticsAsync("""
         /// <summary>Words.</summary>
@@ -481,8 +552,20 @@ public class DocumentationTests
             /// <summary><see cref="Words"/> count.</summary>
             public int Count { get; set; }
 
-            /// <summary>Gets or sets the id.</summary>
+            /// <summary>Gets or initializes the id.</summary>
             public int Id { get; init; }
+
+            /// <summary>Gets the key.</summary>
+            public int Key { get; init; }
+
+            /// <summary>Gets a value indicating whether it is new.</summary>
+            public bool IsNew { get; init; }
+
+            /// <summary>Initializes the seed.</summary>
+            public int Seed { init { } }
+
+            /// <summary>Gets the code.</summary>
+            public int Code { get; private init; }
 
             /// <summary>Gets an item.</summary>
             /// <param name="i">The index.</param>
@@ -578,6 +661,19 @@ public class DocumentationTests
             {
             }
 
+            /// {|BRO1606:<summary>|}  </summary>
+            /// <param name="f">The f.</param>
+            public Words(float f)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}
+            /// </summary>
+            /// <param name="l">The l.</param>
+            public Words(long l)
+            {
+            }
+
             /// {|BRO1607:<summary>|}Cleans up.</summary>
             ~Words()
             {
@@ -635,6 +731,20 @@ public class DocumentationTests
             {
             }
 
+            /// <summary>Initializes a new instance of the <see cref="Words"/> class.</summary>
+            /// <param name="f">The f.</param>
+            public Words(float f)
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Words"/> class.
+            /// </summary>
+            /// <param name="l">The l.</param>
+            public Words(long l)
+            {
+            }
+
             /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>
             ~Words()
             {
@@ -677,6 +787,12 @@ public class DocumentationTests
             }
 
             public Words(string s)
+            {
+            }
+
+            /** <summary>
+                </summary> */
+            public Words(long l)
             {
             }
         }
@@ -870,6 +986,92 @@ public class DocumentationTests
             /// <param name="a">The a.</param>
             /// <param name="b">The b.</param>
             public void Swapped(int a, int b)
+            {
+            }
+        }
+        """);
+
+    // Like StyleCop master (24dd9011): primary constructor parameters of classes, structs and records.
+    [Fact]
+    public Task PrimaryConstructorParameterTags_AreChecked() => VerifyFixAsync(
+        """
+        /// <summary>Renamed.</summary>
+        /// <param name="{|BRO1611:value|}">The input.</param>
+        public class Renamed(int input)
+        {
+            /// <summary>Gets the input.</summary>
+            public int Input => input;
+        }
+
+        /// <summary>Swapped.</summary>
+        /// <param name="{|BRO1611:b|}">The b.</param>
+        /// <param name="{|BRO1611:a|}">The a.</param>
+        public record Swapped(int a, int b);
+
+        /// <summary>Stale.</summary>
+        /// <param name="a">The a.</param>
+        /// <param name="{|BRO1611:old|}">Old.</param>
+        public readonly record struct Stale(int a);
+
+        /// <summary>Struct.</summary>
+        /// <param name="a">The a.</param>
+        /// <param name="b">The b.</param>
+        /// <param name="{|BRO1611:old|}">Old.</param>
+        public struct Point(int a, int b)
+        {
+            /// <summary>Gets the sum.</summary>
+            public int Sum => a + b;
+        }
+
+        /// <summary>No parameter list: not checked.</summary>
+        /// <param name="old">Old.</param>
+        public class Plain
+        {
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Renamed.</summary>
+        /// <param name="input">The input.</param>
+        public class Renamed(int input)
+        {
+            /// <summary>Gets the input.</summary>
+            public int Input => input;
+        }
+
+        /// <summary>Swapped.</summary>
+        /// <param name="a">The a.</param>
+        /// <param name="b">The b.</param>
+        public record Swapped(int a, int b);
+
+        /// <summary>Stale.</summary>
+        /// <param name="a">The a.</param>
+        public readonly record struct Stale(int a);
+
+        /// <summary>Struct.</summary>
+        /// <param name="a">The a.</param>
+        /// <param name="b">The b.</param>
+        public struct Point(int a, int b)
+        {
+            /// <summary>Gets the sum.</summary>
+            public int Sum => a + b;
+        }
+
+        /// <summary>No parameter list: not checked.</summary>
+        /// <param name="old">Old.</param>
+        public class Plain
+        {
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
             {
             }
         }
