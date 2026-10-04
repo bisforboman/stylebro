@@ -429,6 +429,18 @@ internal static class Descriptors
             + "Replaces StyleCop SA1633 (XML header), SA1634, SA1635, SA1636, SA1637, SA1638, SA1640 and SA1641.",
         helpLinkUri: HelpBase + DiagnosticIds.FileHeader + ".md");
 
+    public static readonly DiagnosticDescriptor SummaryLayout = new(
+        id: DiagnosticIds.SummaryLayout,
+        title: "Write the summary's tags consistently on their own lines or on the text's line",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A '<summary>' has its tags on lines of their own (stylebro_summary_layout = multi_line, the default), or, "
+            + "with single_line_when_fits, is written on one line when its text is one line, fits within max_line_length and "
+            + "has no '<para>', '<code>' or '<list>'. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.SummaryLayout + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",
