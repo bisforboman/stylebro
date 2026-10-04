@@ -56,6 +56,7 @@ public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var embeddedCommentsOn = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.EmbeddedComment, cancellationToken);
         var blankLines = new List<TextLine>();
         var insertions = new Dictionary<int, TextChange>();
         foreach (var diagnostic in diagnostics)
@@ -65,7 +66,7 @@ public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
             {
                 blankLines.AddRange(BlankLines.GetBlankLinesBelow(root.FindToken(start), text));
             }
-            else if (BlankLines.NeedsBlankLineAbove(root.FindTrivia(start), text))
+            else if (BlankLines.NeedsBlankLineAbove(root.FindTrivia(start), text, embeddedCommentsOn))
             {
                 var line = text.Lines.GetLineFromPosition(start);
                 var above = text.Lines[line.LineNumber - 1];

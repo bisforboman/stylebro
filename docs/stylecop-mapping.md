@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 45 SDK, 105 StyleBro (105 done), 43 drop, 0 not yet done, 4 not applicable or variants.
+Status: **draft (2026-09-30)**. Of 197 rules: 45 SDK, 106 StyleBro (106 done), 42 drop, 0 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
@@ -198,7 +198,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1105 | Query clauses spanning multiple lines should begin on own line | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1130** (done), same positions as StyleCop |
 | SA1106 | Code should not contain empty statements | on | yes | on / on / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported |
 | SA1107 | Code should not contain multiple statements on one line | on | yes | on / off / off | 0 / 243 / 0 | fixed | SDK: IDE0055 (`csharp_preserve_single_line_statements = false`) |
-| SA1108 | Block statements should not contain embedded comments | on | no | on / on / on | 0 / 0 / 0 |  | Drop: StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning). ([details](skipped-rules.md#sa1108)) |
+| SA1108 | Block statements should not contain embedded comments | on | no | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1132** (done), same positions as StyleCop; StyleCop has no fix, StyleBro moves the comment into the block. Not reported: headers spanning several lines (user decision), single-line blocks, comments spanning lines |
 | SA1109 | Block statements should not contain embedded regions | off | no | off / on / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic for a region between `if (b)` and its block (probed). ([details](skipped-rules.md#sa1109)) |
 | SA1110 | Opening parenthesis or bracket should be on declaration line | on | yes | on / on / off | 0 / 0 / 3 |  | StyleBro **BRO1109** (done), same results and output as StyleCop |
 | SA1111 | Closing parenthesis should be on line of last parameter | on | yes | on / on / off | 0 / 0 / 740 |  | StyleBro **BRO1110** (done), same results and output as StyleCop |

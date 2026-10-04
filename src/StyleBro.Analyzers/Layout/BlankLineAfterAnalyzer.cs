@@ -21,10 +21,14 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxTreeAction(AnalyzeTree);
+        context.RegisterCompilationStartAction(start =>
+        {
+            var options = start.Compilation.Options;
+            start.RegisterSyntaxTreeAction(c => AnalyzeTree(c, options));
+        });
     }
 
-    private static void AnalyzeTree(SyntaxTreeAnalysisContext context)
+    private static void AnalyzeTree(SyntaxTreeAnalysisContext context, CompilationOptions options)
     {
         var root = context.Tree.GetRoot(context.CancellationToken);
         var text = context.Tree.GetText(context.CancellationToken);
@@ -36,9 +40,10 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
             }
         }
 
+        var embeddedCommentsOn = Severities.IsOn(options, context.Tree, DiagnosticIds.EmbeddedComment, context.CancellationToken);
         foreach (var trivia in root.DescendantTrivia())
         {
-            if (BlankLines.NeedsBlankLineAbove(trivia, text))
+            if (BlankLines.NeedsBlankLineAbove(trivia, text, embeddedCommentsOn))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.BlankLineBeforeComment, trivia.GetLocation()));
             }

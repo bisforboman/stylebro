@@ -768,6 +768,16 @@ internal static class Descriptors
         description: "'base.' suggests the type overrides or hides the member. Replaces StyleCop SA1100.",
         helpLinkUri: HelpBase + DiagnosticIds.BaseCall + ".md");
 
+    public static readonly DiagnosticDescriptor EmbeddedComment = new(
+        id: DiagnosticIds.EmbeddedComment,
+        title: "Block statements should not contain embedded comments",
+        messageFormat: "Move the comment into the block",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A comment between a statement's header and its '{' belongs inside the block. Replaces StyleCop SA1108.",
+        helpLinkUri: HelpBase + DiagnosticIds.EmbeddedComment + ".md");
+
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
         title: "Preprocessor keywords should not be preceded by a space",

@@ -19,11 +19,10 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-47 rules: 0 candidate, 0 SDK not on yet, 33 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+46 rules: 0 candidate, 0 SDK not on yet, 32 drop, 10 not in StyleCop, 2 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
-| [SA1108](#sa1108) | Block statements should not contain embedded comments | drop | on / on / on | 0 / 0 / 0 |
 | [SA1118](#sa1118) | Parameter should not span multiple lines | drop | on / on / off | 0 / 0 / 126 |
 | [SA1401](#sa1401) | Fields should be private | drop | off / off / off | 141 / 48 / 39 |
 | [SA1402](#sa1402) | File may only contain a single type | drop | on / off / off | 0 / 34 / 1 |
@@ -72,16 +71,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
 
 ## Dropped: no safe automatic fix
-
-<a id="sa1108"></a>
-
-### SA1108: Block statements should not contain embedded comments
-
-Readability rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / Polly / App): on / on / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** StyleCop has no fix. A comment between `if (x)` and `{` would have to move, and there is no right place for it automatically (above the statement or inside the block change its meaning).
-
-**To revisit:** Possible rule: move it to the line above the statement. Probe what teams expect first.
 
 <a id="sa1118"></a>
 

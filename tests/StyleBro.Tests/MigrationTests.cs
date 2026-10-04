@@ -42,6 +42,20 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void TheReport_ShowsNoSurveyNotes()
+    {
+        // The mapping's reasons carry survey evidence for the project's docs; the report shows users only the reason.
+        foreach (var (id, proposal) in Program.LoadMapping().Where(m => m.Value.StartsWith("Drop", StringComparison.Ordinal) || m.Value.StartsWith("Not applicable", StringComparison.Ordinal)))
+        {
+            var reason = Program.UserFacingReason(proposal);
+            Assert.False(string.IsNullOrWhiteSpace(reason), id);
+            Assert.DoesNotMatch(@"(?i)findings|private app|user decision", reason);
+        }
+
+        Assert.Equal("Missing documentation on enum members; the only fix is placeholder text.", Program.UserFacingReason("Drop: Missing documentation on enum members; the only fix is placeholder text (no stubs, user decision). 530 findings in the surveyed app."));
+    }
+
+    [Fact]
     public void TupleElementCasing_ComesFromStyleCopJson()
     {
         Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("stylebro_tuple_element_name_casing", StringComparison.Ordinal));

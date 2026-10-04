@@ -84,6 +84,20 @@
             )
         }
         @{
+            Name     = 'embedded-comments'
+            Map      = @('SA1108=BRO1132')
+            # StyleCop has no fix for SA1108; positions only.
+            CompareOutput = $false
+            Expected = @(
+                # Skipped: a single-line block (no line inside it to move the comment to), a comment spanning lines.
+                'only StyleCop: BRO1132 Comments.cs(155,20)'
+                'only StyleCop: BRO1132 Comments.cs(158,20)'
+                # Skipped (user decision): a header spanning several lines; the comment explains its last line.
+                'only StyleCop: BRO1132 Comments.cs(164,24)'
+                'only StyleCop: BRO1132 Comments.cs(168,23)'
+            )
+        }
+        @{
             Name     = 'base-calls'
             Map      = @('SA1100=BRO1131')
             Expected = @(

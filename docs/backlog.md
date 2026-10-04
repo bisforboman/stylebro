@@ -14,11 +14,11 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 20 |
+| Done, not released yet | 21 |
 | Planned | 0 rules, 9 work items |
-| Maybe | none (moved to planned work) |
+| Maybe | 5 rules from other analyzers |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 105 by StyleBro, 45 by the .NET SDK, 43 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -38,12 +38,12 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | More real-world repos in the PR pipeline | Jellyfin (an application using StyleCop), FluentValidation and CsvHelper (seven target frameworks) added; they found a BRO1302 rename that broke CsvHelper at run time and a BRO1001 blank line that needed a second run. | Done (2026-10-03) |
 | Hardening | IDE0055 in multi-targeted repos | `dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md. | Done (2026-10-03) |
 | Parity | SA1316: tuple element names in PascalCase | BRO1311: renamed with every use, literal and override solution-wide (Roslyn's Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`. | Done (2026-10-03) |
-| Parity | SA1108: no comments inside block statements | Probe what teams expect first (move the comment above the statement?); StyleCop has no fix. | Planned |
+| Parity | SA1108: no comments inside block statements | BRO1132: the comment moves into the block, right after `{`; multi-line headers skipped (decisions.md, proposals/sa1108.md). | Done (2026-10-04) |
 | Parity | BRO1309: namespace names | BRO1312, opt-in (off by default, on through `stylebro-migrate` with SA1300); the root namespace is left out. See docs/proposals/namespace-names.md. | Done (2026-10-04) |
 | Adoption | Getting started | docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines. | Done (2026-10-03) |
 | Adoption | IDE experience | Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig. | Planned |
 | Adoption | Migration sample | samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards. | Done (2026-10-03) |
-| Beyond StyleCop | Survey other analyzers | Fixable style rules in popular analyzers (e.g. Roslynator's formatting rules) that the SDK doesn't cover; worthwhile ones become rule candidates here. | Planned |
+| Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |
 
 ### Read the SDK's own settings
 
@@ -66,8 +66,15 @@ IDE0055 (the SDK's whole formatter) isn't replaced: in multi-targeted repositori
 
 ## Maybe
 
-Nothing right now: the last maybes (SA1316, SA1108, namespace names) moved to planned work. Rules worth doing only if
-someone asks go here.
+The top five rules from other analyzers, from the survey in [beyond-stylecop.md](beyond-stylecop.md) (more there):
+
+| Source | Rule | Notes |
+|--------|------|-------|
+| Roslynator RCS0027/RCS0028 | Operator placement when wrapping (`&&`, `+`, `?:` at line start or end) | Follows the SDK key `dotnet_style_operator_placement_when_wrapping`, which no SDK rule enforces. Syntax only. |
+| Roslynator RCS0032/RCS0052 | `=>` and `=` placement when the line breaks there | Same fix as the operator rule. |
+| Roslynator RCS1248 | `x == null` vs `x is null` | Semantic: skip user-defined `==`, expression trees, `is not` before C# 9. |
+| Roslynator RCS0054 | A split call chain has every call on its own line | Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part. |
+| Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 
@@ -120,6 +127,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1129](rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Done |
 | [BRO1130](rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Done |
 | [BRO1131](rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Done |
+| [BRO1132](rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Done |
 
 ### BRO13xx: Naming
 
