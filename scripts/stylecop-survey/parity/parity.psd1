@@ -154,7 +154,12 @@
         @{
             Name     = 'blank-lines-comments'
             Map      = @('SA1505=BRO1503', 'SA1515=BRO1504')
-            Expected = @()
+            Expected = @(
+                # A comment right after a collection expression's '[' is like one after '{' (StyleCop fixed this after
+                # 1.2.0-beta.556, #3766).
+                'only StyleCop: BRO1504 More.cs(39,13)'
+                'StyleCop output only: More.cs: []'
+            )
         }
         @{
             Name     = 'element-separation'
@@ -405,13 +410,23 @@
                 # Text ending with '?', '!' or ':' is a finished sentence; StyleCop turns it into 'question?.'.
                 'only StyleCop: BRO1603 Periods.cs(16,43)'
                 'only StyleCop: BRO1603 Periods.cs(37,40)'
-                'only StyleCop: BRO1603 Periods.cs(43,47)'
+                'only StyleCop: BRO1603 Periods.cs(52,47)'
                 'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?</summary>]'
                 'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:</summary>]'
                 'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!.</summary>]'
+                # A period followed by closing punctuation ends the sentence ('"done."'; StyleCop accepts only '.)', #2860).
+                'only StyleCop: BRO1603 Periods.cs(46,52)'
+                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a quoted "sentence."</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a quoted "sentence.".</summary>]'
+                # Text ending in an entity: the period goes after it; StyleCop 1.2.0-beta.556 reports the ';' and its fix
+                # replaces it (#3802, fixed after beta.556).
+                'only StyleBro: BRO1603 Periods.cs(49,55)'
+                'only StyleCop: BRO1603 Periods.cs(49,54)'
+                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with an entity List&lt;T&gt;.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an entity List&lt;T&gt.</summary>]'
                 # A bool's summary may use the plain verb ('Gets the open state'); StyleCop requires 'a value indicating
                 # whether' and puts it in front of any text ('whether gets the return value condition').
                 'only StyleCop: BRO1604 Bools.cs(10,21)'
@@ -444,6 +459,13 @@
                 'StyleCop output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class.Cleans up.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct.Makes a point.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class.Makes one.</summary>]'
+                # A summary that starts with '<para>' is judged by the paragraph (StyleCop fixed this after 1.2.0-beta.556);
+                # StyleBro's fix puts the sentence inside the paragraph, StyleCop's in front of it.
+                'only StyleCop: BRO1606 Words.cs(31,13)'
+                'StyleBro output only: Words.cs: [        /// <summary><para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary><para>Initializes a new instance of the <see cref="Words"/> class. Creates a words object from a float.</para></summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
+                'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Creates a words object from a float.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Initializes a new instance of Words with the given name.</summary>]'
             )
         }
@@ -482,6 +504,10 @@
             # decides per accessor list and never drops a comment. Positions only; StyleBro's output must still be clean.
             CompareOutput = $false
             Expected = @(
+                # An attribute line above an accessor doesn't make it multi-line in StyleBro; StyleCop counts it (#3434),
+                # so it reports two one-line accessors and misses a one-line accessor next to a multi-line one.
+                'only StyleCop: BRO1510 More.cs(21,13)'
+                'only StyleBro: BRO1510 More.cs(28,13)'
             )
         }
         @{
