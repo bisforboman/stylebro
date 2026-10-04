@@ -72,6 +72,8 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
         var changes = Regions.GetChanges(directives, text).ToList();
         var removed = document.WithText(text.WithChanges(changes));
         bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
+        var regionsRemoved = removed;
+        var regionChanges = changes.ToList();
 
         // A '//' comment right above removed lines can end up with a blank line below it, which BRO1506 removes: now,
         // rather than in another run (Newtonsoft.Json's samples: '// output' + '#endregion' + a blank line).
@@ -104,6 +106,40 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
             }
         }
 
+        // A '//' comment right below removed lines can end up below code, where BRO1504 wants a blank line above it:
+        // now, rather than in another run (Newtonsoft.Json's Friend.cs: 'using ...;' + '#region License' + the header).
+        // Judged on the text without the region lines only: the blank lines BRO1506 removes are below comments.
+        if (IsOn(DiagnosticIds.BlankLineBeforeComment))
+        {
+            var removedText = await regionsRemoved.GetTextAsync(cancellationToken).ConfigureAwait(false);
+            var removedRoot = await regionsRemoved.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+            var embeddedCommentsOn = IsOn(DiagnosticIds.EmbeddedComment);
+            var insertions = new List<TextChange>();
+            foreach (var change in regionChanges)
+            {
+                var position = change.Span.Start - regionChanges.Where(c => c.Span.Start < change.Span.Start).Sum(c => c.Span.Length);
+                if (position <= 0 || position >= removedText.Length || removedRoot is null)
+                {
+                    continue;
+                }
+
+                var line = removedText.Lines.GetLineFromPosition(position);
+                var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
+                if (BlankLines.NeedsBlankLineAbove(comment, removedText, embeddedCommentsOn))
+                {
+                    var above = removedText.Lines[line.LineNumber - 1];
+                    var lineBreak = removedText.ToString(TextSpan.FromBounds(above.End, above.EndIncludingLineBreak));
+                    insertions.Add(new TextChange(new TextSpan(change.Span.End, 0), lineBreak.Length > 0 ? lineBreak : "\n"));
+                }
+            }
+
+            if (insertions.Count > 0)
+            {
+                changes.AddRange(insertions);
+                removed = document.WithText(text.WithChanges(changes));
+            }
+        }
+
         if (!IsOn(DiagnosticIds.MemberOrdering))
         {
             return removed;
@@ -119,7 +155,9 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
             edits.Add(new TextChange(TextSpan.FromBounds(ToOriginal(sort.Span.Start), ToOriginal(sort.Span.End)), sort.NewText!));
         }
 
-        edits.AddRange(changes.Where(c => !edits.Any(e => e.Span.Contains(c.Span))));
+        // Against the sorts only (ToList): a lazy Where saw the changes it had already added, and the BRO1504 insertion
+        // at the end of a removed run counted as inside that run.
+        edits.AddRange(changes.Where(c => !edits.Any(e => e.Span.Contains(c.Span))).ToList());
         return document.WithText(text.WithChanges(edits));
 
         // A position in the text without the region lines (only deletions), in the original text.

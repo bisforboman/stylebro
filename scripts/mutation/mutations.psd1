@@ -14,6 +14,8 @@
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (!IsOn(DiagnosticIds.MemberOrdering))'; Replace = 'if (false)'; Tests = 'RegionsTests' }
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineAfterComment))'; Replace = 'if (true)'; Tests = 'RegionsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/Regions.cs'; Find = 'RegionDirectiveTriviaSyntax { IsActive: true } region'; Replace = 'RegionDirectiveTriviaSyntax region'; Tests = 'RegionsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/Regions.cs'; Find = 'if (beforeText.Length == 0 && after + 1 < text.Lines.Count'; Replace = 'if (false && after + 1 < text.Lines.Count'; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineBeforeComment))'; Replace = 'if (false)'; Tests = 'FixOrderTests' }
 
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }

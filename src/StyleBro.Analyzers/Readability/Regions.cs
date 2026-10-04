@@ -57,6 +57,13 @@ internal static class Regions
             if (afterText.Length == 0 && (beforeText.Length == 0 || beforeText.EndsWith("{")))
             {
                 extra.Add(after);
+
+                // Blank lines on both sides, then '}': the one left would precede '}' (BRO1518; a second run in
+                // Newtonsoft.Json's Issue1307.cs).
+                if (beforeText.Length == 0 && after + 1 < text.Lines.Count && text.Lines[after + 1].ToString().TrimStart().StartsWith("}"))
+                {
+                    extra.Add(before);
+                }
             }
             else if (beforeText.Length == 0 && afterText.StartsWith("}"))
             {

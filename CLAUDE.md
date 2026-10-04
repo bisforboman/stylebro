@@ -949,7 +949,14 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   edits of each sorted container's span: a whole-text edit lost the linked-file merge to the copy where the code is
   inside an inactive `#if` (it only removes the header's `#region License`, an edit at offset 0). (3) BRO1112/BRO1113 +
   BRO1506: `// output` + `#endregion` + blank line left a blank line below a comment (528 in Newtonsoft.Json's samples);
-  the regions fix removes it when BRO1506 is on. `FixOrderTests` runs every order of a case's ids, one Fix All each.
+  the regions fix removes it when BRO1506 is on. (4) Regions inside an inactive `#if` (Roslyn parses them, IsActive
+  false) came out as BRO1112 in that copy; when BRO1112 ran before BRO1113, that copy's plain removal won the merge and
+  skipped (3) (11 Newtonsoft.Json samples). Inactive regions aren't reported now. Found by bisecting ids on one file
+  (`dotnet format ... --include <file>` from the repo root) and logging each copy's edits in LinkedFileFixAllProvider.
+  (5) Removing regions can create BRO1504's case (`using ...;` + `#region License` + header comment: the comment now
+  follows code) and BRO1518's (blank, `#endregion`, blank, `}`); the regions fix inserts / removes those blank lines
+  too. These showed up in 1 Newtonsoft.Json run of 5: a single clean real-world run proves little, repeat it.
+  `FixOrderTests` runs every order of a case's ids, one Fix All each (single copy: multi-copy cases need a real repo).
   Result: every reference repo needs 2 runs (one that changes, one clean), so Invoke-RealWorld now fails above 2.
 
 ## Known open questions
