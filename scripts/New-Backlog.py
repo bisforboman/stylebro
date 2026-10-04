@@ -31,17 +31,36 @@ WORK = [
     ('Beyond StyleCop', 'Split conditional expressions (StyleCop issue #651)', 'BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520\'s setting; chains skipped. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', '`<summary>` on one line or on three (survey #5)', 'BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Braceless `if (x) return;` (StyleCop issue #2252)', '`stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md).', 'Done (2026-10-04)'),
+    ('Performance', 'Cheap checks first, one walk per tree', 'DocumentationAnalyzer, CommentTextAnalyzer, NullCheckAnalyzer, WrappingPlacementAnalyzer, CamelCaseNamingAnalyzer, BaseCallsAnalyzer, CallChainAnalyzer, EmbeddedCommentAnalyzer: same diagnostics, all 55 analyzers ~830 -> ~700 ms on Newtonsoft.Json (scripts/benchmark/README.md).', 'Done (2026-10-04)'),
+    ('Performance', 'CI regression check', '`scripts/benchmark` compare mode: the PR build and main\'s alternated in one process on Newtonsoft.Json; fails when an analyzer or the total is clearly slower.', 'In progress'),
+    ('Performance', 'FieldNamingAnalyzer', 'The slowest analyzer (~150 ms): profile it and look for a gain that keeps every rename guard.', 'Planned'),
+    ('Performance', 'One token pass for the layout analyzers', 'About ten analyzers each walk every token of every file (~150-250 ms together); one shared pass, without changing what any rule reports or how the fixes converge.', 'Planned'),
+    ('Superseding StyleCop', "StyleCop's open bugs", "Every open bug report on a rule StyleBro replaces, checked against StyleBro with a test: fixed where StyleBro shares it, and a page listing the StyleCop bugs StyleBro doesn't have.", 'Planned'),
+    ('Superseding StyleCop', "Parity with StyleCop's `master`", "The ~20 unreleased commits since 1.2.0-beta.556 that change what a replaced rule reports (e.g. SA1413 property patterns, SA1516 properties, beyond-stylecop.md): follow them, and compare the parity sets with `master` too.", 'Planned'),
+    ('Superseding StyleCop', 'The remaining tracker candidates', 'beyond-stylecop.md #6-#10 and #12 (listed under Maybe); #11 stays rejected (changes what reflection and serializers see).', 'Planned'),
+    ('Superseding StyleCop', 'The remaining other-analyzer candidates', 'beyond-stylecop.md survey #6-#10 and #12-#18 (listed under Maybe).', 'Planned'),
 ]
 
-# Rules from other analyzers (docs/beyond-stylecop.md), worth doing if someone asks.
+# Candidates from StyleCop's issue tracker and other analyzers (docs/beyond-stylecop.md); planned as a group (WORK).
 MAYBE = [
-    ('Roslynator RCS1248', '`x == null` vs `x is null`', 'Semantic: skip user-defined `==`, expression trees, `is not` before C# 9.'),
-    ('Roslynator RCS0054', 'A split call chain has every call on its own line', 'Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part.'),
-    ('Roslynator RCS1253, Meziantou MA0177/MA0211', '`<summary>` on one line or on three', 'Text only, next to the BRO16xx rules.'),
-    ('StyleCop issue #651', 'A split conditional expression has the condition, `? a` and `: b` each on its own line', 'Like BRO1108; operator side from BRO1520\'s setting.'),
-    ('StyleCop issue #2252', 'Option: `if (x) return;` (jump statement on the `if` line) without braces', 'An option for BRO1514, off by default.'),
-    ('StyleCop issue #738 (SA1521)', 'No blank line between an attribute and its element', 'Text fix like BRO1511; must agree with BRO1505.'),
-    ('StyleCop issue #605', 'No comment between a declaration\'s header and its `{`', 'Extend BRO1132\'s move to types and members.'),
+    ('StyleCop #758 (SA1653)', '`cref="List&lt;T&gt;"` -> `cref="List{T}"`', 'Text only.'),
+    ('StyleCop #3546, #1490', 'Option: tool marker comments (`// ReSharper disable once ...`) need no BRO1504 blank line', 'A prefix list option.'),
+    ('StyleCop #762', '`(x) => x` -> `x => x`', 'Keep the parentheses with a type, modifier or attribute.'),
+    ('StyleCop #760, Roslynator RCS1134', 'No redundant `return;` / `yield break;` at the end', 'Skip when a comment or label is on it.'),
+    ('StyleCop #2641, #3793', 'Option: camelCase private constants and static readonly fields', 'BRO1306 could follow `dotnet_naming_rule.*` like BRO1303.'),
+    ('StyleCop #1949 (SA1315), SDK CA1725', 'A parameter keeps the name of the member it overrides or implements', "BRO1302's renamer; callers' named arguments change."),
+    ('Roslynator RCS0061', 'Blank line between switch sections', 'Text fix.'),
+    ('Roslynator RCS1081, Sonar S1659', 'One local per declaration', 'Like BRO1114 for locals.'),
+    ('Roslynator RCS1214, RCS1192, RCS1262', 'Unneeded `$`, `@`, raw string', 'Keep strings whose meaning would change.'),
+    ('Meziantou MA0154', '`langword` in doc comments (`<see langword="null"/>`)', 'Text only.'),
+    ('Roslynator RCS1050', 'Object creation parentheses', 'Either style, configurable.'),
+    ('Roslynator RCS0041, RCS1006', '`else { if }` -> `else if`', 'Skip when comments would move.'),
+    ('Roslynator RCS1251, Meziantou MA0206', 'Empty record body `{ }` -> `;`', 'Text only.'),
+    ('Roslynator RCS1042, Sonar S1939', 'Redundant base type or interface', 'Semantic.'),
+    ('Roslynator RCS1232', 'Doc comment elements in a fixed order', 'Like BRO1611\'s reorder.'),
+    ('Meziantou MA0071, Roslynator RCS1211', 'No `else` after a jump', 'Changes indentation of the else branch.'),
+    ('Sonar S4136', 'Overloads together', "Must agree with BRO1001's order."),
+    ('Roslynator RCS1046, Meziantou MA0137', '`Async` suffix on async methods', "Renamer; public API names change."),
 ]
 
 blocks = [
@@ -61,14 +80,14 @@ out.append('Every style rule StyleBro has or aims to add, with its status, and w
 out.append('when work starts or lands; a finished rule also moves from `skipped.psd1` to `decisions.psd1` (see')
 out.append('`docs/stylecop-mapping.md`).\n')
 out.append('Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), **Planned** (decided, not started),')
-out.append('**Maybe** (worth doing if someone asks; why it isn\'t planned is in [skipped-rules.md](skipped-rules.md)).\n')
+out.append('**Maybe** (candidates without an id yet, from the StyleCop tracker and other analyzers; planned as a group under Work, see [beyond-stylecop.md](beyond-stylecop.md)).\n')
 out.append('## Summary\n')
 out.append('| | Rules |')
 out.append('|---|---|')
 out.append(f'| Released | {done - len(unshipped)} |')
 out.append(f'| Done, not released yet | {len(unshipped)} |')
 out.append(f'| Planned | {len(PLANNED)} rules, {len(WORK)} work items |')
-out.append(f'| Maybe | {len(MAYBE)} rules from other analyzers |')
+out.append(f'| Maybe | {len(MAYBE)} candidates from the StyleCop tracker and other analyzers |')
 out.append('')
 mapping = open('docs/stylecop-mapping.md', encoding='utf-8').read()
 m = re.search(r'Of (\d+) rules: (\d+) SDK, (\d+) StyleBro .*?, (\d+) drop', mapping)
