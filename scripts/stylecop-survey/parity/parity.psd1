@@ -154,7 +154,12 @@
         @{
             Name     = 'blank-lines-comments'
             Map      = @('SA1505=BRO1503', 'SA1515=BRO1504')
-            Expected = @()
+            Expected = @(
+                # A comment right after a collection expression's '[' is like one after '{' (StyleCop fixed this after
+                # 1.2.0-beta.556, #3766).
+                'only StyleCop: BRO1504 More.cs(39,13)'
+                'StyleCop output only: More.cs: []'
+            )
         }
         @{
             Name     = 'element-separation'
