@@ -207,7 +207,8 @@ stylebro_document_private_elements = false
 # BRO1602: '//' instead of '///' for plain comments (SA1626)
 dotnet_diagnostic.BRO1602.severity = warning
 
-# BRO1603: documentation text ends with a period (SA1629)
+# BRO1603: documentation text ends with a period (SA1629); tags left out: stylebro_exclude_from_punctuation_check
+# (default seealso, like stylecop.json's excludeFromPunctuationCheck)
 dotnet_diagnostic.BRO1603.severity = warning
 
 # BRO1604/BRO1605: property summaries begin with the accessors' words (SA1623, SA1624)

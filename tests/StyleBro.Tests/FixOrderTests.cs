@@ -55,6 +55,35 @@ public class FixOrderTests
         "BRO1520");
 
     [Fact]
+    public Task Ordering_AMultiLineFieldSortedAboveAField() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            private int b;
+            private static int[] a = new[]
+            {
+                1,
+            };
+        }
+        """,
+        "BRO1001",
+        "BRO1505");
+
+    [Fact]
+    public Task CombinedFields_AMultiLineFieldSplitFromTheNext() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            private int[] a = new[]
+            {
+                1,
+            }, b;
+        }
+        """,
+        "BRO1114",
+        "BRO1505");
+
+    [Fact]
     public Task Ordering_MembersOfRegionsThatAreRemoved() => AssertConvergesInEveryOrderAsync(
         """
         public class C

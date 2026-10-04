@@ -69,7 +69,7 @@ public sealed class BracesCodeFixProvider : CodeFixProvider
         // which 'dotnet format' may have fixed already in this run (it fixes one id at a time, in no fixed order).
         foreach (var chain in statements.Select(Braces.GetChain).OfType<IfStatementSyntax>().Distinct().ToList())
         {
-            statements.AddRange(Braces.GetFindings(chain, text, IsOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options))
+            statements.AddRange(Braces.GetFindings(chain, text, IsOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options))
                 .Select(f => f.Child)
                 .Where(c => Braces.GetChanges(new[] { c }, text, options) is not null));
         }
