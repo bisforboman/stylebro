@@ -504,6 +504,10 @@
             # decides per accessor list and never drops a comment. Positions only; StyleBro's output must still be clean.
             CompareOutput = $false
             Expected = @(
+                # An attribute line above an accessor doesn't make it multi-line in StyleBro; StyleCop counts it (#3434),
+                # so it reports two one-line accessors and misses a one-line accessor next to a multi-line one.
+                'only StyleCop: BRO1510 More.cs(21,13)'
+                'only StyleBro: BRO1510 More.cs(28,13)'
             )
         }
         @{
