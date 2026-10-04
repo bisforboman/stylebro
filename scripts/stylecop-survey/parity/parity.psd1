@@ -181,8 +181,10 @@
                 # With documentation generated, StyleCop 1.2.0-beta.556 no longer reports a member whose '///' comment
                 # directly follows the previous member (no blank line); it did with documentation off. BRO1505 reports it either way.
                 'only StyleBro: BRO1505 Cases.cs(38,1)'
-                # BRO1505: the blank line also goes above a '///' doc comment; StyleCop's fix leaves that one out.
-                'StyleBro output only: Cases.cs: []'
+                # BRO1505: two single-line properties may sit together, like StyleCop's master (2aeb4e3d); beta.556
+                # wants a blank line. (In the output that blank line and the one BRO1505 adds above a '///' doc comment,
+                # which StyleCop's fix leaves out, look the same, so Cases.cs shows no output difference.)
+                'only StyleCop: BRO1505 Cases.cs(15,1)'
                 # BRO1505: two members on one line: StyleBro adds a blank line and keeps the indentation; StyleCop's
                 # fix leaves a trailing space and puts the second member at column 0.
                 'StyleBro output only: FileScoped.cs: [    public void M() { }]'
@@ -418,6 +420,8 @@
                 # a real fix); a public method or an internal class without documentation would need written text.
                 'only StyleCop: BRO1601 Inherit.cs(56,21)'
                 'only StyleCop: BRO1601 Inherit.cs(67,20)'
+                # BRO1601: explicit interface implementations aren't reported, like StyleCop's master (2959cac8).
+                'only StyleCop: BRO1601 Inherit.cs(44,26)'
             )
         }
         @{

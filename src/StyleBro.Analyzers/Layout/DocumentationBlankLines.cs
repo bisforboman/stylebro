@@ -83,9 +83,22 @@ internal static class DocumentationBlankLines
 
         // A documentation comment's Span starts after its first '///'; FullSpan starts at it.
         var line = text.Lines.GetLineFromPosition(documentation.FullSpan.Start);
-        if (line.LineNumber == 0 || text.ToString(TextSpan.FromBounds(line.Start, documentation.FullSpan.Start)).Trim().Length > 0)
+        return text.ToString(TextSpan.FromBounds(line.Start, documentation.FullSpan.Start)).Trim().Length == 0
+            && WantsBlankLineAbove(line, text)
+            ? line.Start
+            : null;
+    }
+
+    /// <summary>
+    /// Whether a documentation comment starting <paramref name="line"/> wants a blank line above it (BRO1513): the line
+    /// above holds code. Also asked by BRO1601's fix, which inserts '/// &lt;inheritdoc/&gt;' and adds the blank line
+    /// in the same run.
+    /// </summary>
+    public static bool WantsBlankLineAbove(TextLine line, SourceText text)
+    {
+        if (line.LineNumber == 0)
         {
-            return null;
+            return false;
         }
 
         var above = text.ToString(text.Lines[line.LineNumber - 1].Span).Trim();
@@ -96,9 +109,9 @@ internal static class DocumentationBlankLines
         if (above.Length == 0 || above.EndsWith("{") || above.StartsWith("//") || above.StartsWith("/*") || above.EndsWith("*/")
             || (directive is not null && !(directive.StartsWith("endif") || directive.StartsWith("region") || directive.StartsWith("endregion"))))
         {
-            return null;
+            return false;
         }
 
-        return line.Start;
+        return true;
     }
 }

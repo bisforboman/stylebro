@@ -4,6 +4,114 @@ namespace StyleBro.Tests;
 
 public class DocumentationTests
 {
+    // Two single-line properties may sit together (BRO1505), but a documented one wants a blank line above its docs
+    // (BRO1513): the inserted '<inheritdoc/>' brings it along, so 'dotnet format' converges in one run (FFMpegCore).
+    [Fact]
+    public Task InheritDoc_BelowCode_GetsTheBlankLineBRO1513Wants() => VerifyFixAsync(
+        """
+        /// <summary>Something.</summary>
+        public interface IThing
+        {
+            /// <summary>Gets the name.</summary>
+            string Name { get; }
+        }
+
+        /// <summary>A thing.</summary>
+        public class Thing : IThing
+        {
+            /// <summary>Gets the size.</summary>
+            public int Size { get; }
+            public string {|BRO1601:Name|} => "thing";
+        }
+        """,
+        """
+        /// <summary>Something.</summary>
+        public interface IThing
+        {
+            /// <summary>Gets the name.</summary>
+            string Name { get; }
+        }
+
+        /// <summary>A thing.</summary>
+        public class Thing : IThing
+        {
+            /// <summary>Gets the size.</summary>
+            public int Size { get; }
+
+            /// <inheritdoc/>
+            public string Name => "thing";
+        }
+        """);
+
+    // Like StyleCop's unreleased master (2959cac8): an explicit implementation is only reachable through the interface,
+    // whose documentation tools show.
+    [Fact]
+    public Task ExplicitInterfaceImplementations_AreNotReported() => VerifyFixAsync(
+        """
+        using System;
+
+        /// <summary>Something.</summary>
+        public interface IThing
+        {
+            /// <summary>Gets the name.</summary>
+            string Name { get; }
+
+            /// <summary>Raised on change.</summary>
+            event EventHandler Changed;
+
+            /// <summary>Runs.</summary>
+            void Run();
+        }
+
+        /// <summary>A thing.</summary>
+        public class Thing : IThing
+        {
+            string IThing.Name => "thing";
+
+            event EventHandler IThing.Changed
+            {
+                add { }
+                remove { }
+            }
+
+            void IThing.Run()
+            {
+            }
+        }
+        """,
+        """
+        using System;
+
+        /// <summary>Something.</summary>
+        public interface IThing
+        {
+            /// <summary>Gets the name.</summary>
+            string Name { get; }
+
+            /// <summary>Raised on change.</summary>
+            event EventHandler Changed;
+
+            /// <summary>Runs.</summary>
+            void Run();
+        }
+
+        /// <summary>A thing.</summary>
+        public class Thing : IThing
+        {
+            string IThing.Name => "thing";
+
+            event EventHandler IThing.Changed
+            {
+                add { }
+                remove { }
+            }
+
+            void IThing.Run()
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task OverridesAndImplementations_GetInheritDoc() => VerifyFixAsync(
         """
@@ -50,7 +158,7 @@ public class DocumentationTests
             {
             }
 
-            void IDisposable.{|BRO1601:Dispose|}()
+            void IDisposable.Dispose()
             {
             }
 
@@ -121,7 +229,6 @@ public class DocumentationTests
             {
             }
 
-            /// <inheritdoc/>
             void IDisposable.Dispose()
             {
             }

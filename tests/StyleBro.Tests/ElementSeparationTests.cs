@@ -184,6 +184,50 @@ public class ElementSeparationTests
         }
         """);
 
+    // Like StyleCop's unreleased master (2aeb4e3d): two single-line properties may sit together (attribute lines don't
+    // count); a property spanning several lines needs a blank line on both sides.
+    [Fact]
+    public Task SingleLineProperties_MaySitTogether() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            public int A { get; set; }
+            public int B { get; set; }
+            [Obsolete]
+            public int C1 => 1;
+        {|BRO1505:|}    public int D
+            {
+                get => 1;
+            }
+        {|BRO1505:|}    public int E { get; set; }
+            public int F { get; } = 2;
+        {|BRO1505:|}    public void M() { }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            public int A { get; set; }
+            public int B { get; set; }
+            [Obsolete]
+            public int C1 => 1;
+
+            public int D
+            {
+                get => 1;
+            }
+
+            public int E { get; set; }
+            public int F { get; } = 2;
+
+            public void M() { }
+        }
+        """);
+
     [Fact]
     public Task TwoMembersOnOneLine_AreSplit() => VerifyFixAsync(
         """
