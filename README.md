@@ -66,6 +66,9 @@ project or coming from StyleCop.
 | [BRO1517](docs/rules/BRO1517.md) | Code should not contain multiple blank lines in a row | SA1507 | Yes |
 | [BRO1518](docs/rules/BRO1518.md) | Closing braces should not be preceded by blank line | SA1508 | Yes |
 | [BRO1519](docs/rules/BRO1519.md) | Closing brace should be followed by blank line | SA1513 | Yes |
+| [BRO1520](docs/rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Yes |
+| [BRO1521](docs/rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Yes |
+| [BRO1522](docs/rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

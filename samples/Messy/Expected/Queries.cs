@@ -16,7 +16,7 @@ public class Queries
 
     public IEnumerable<int> InRange(int[] amounts) =>
         from a in amounts
-        where a > 10 &&
-            a < 100
+        where a > 10
+            && a < 100
         select a;
 }
