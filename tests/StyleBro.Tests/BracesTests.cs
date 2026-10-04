@@ -451,4 +451,45 @@ public class BracesTests
             }
         }
         """);
+
+    [Fact]
+    public Task ElseChain_GetsAllItsBracesAtOnce_ExceptWhereTheyCantGo() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a == 1) // why
+                    return 1;
+                else if (a == 2)
+                    {|BRO1514:return 2;|}
+                else
+                    {|BRO1515:return Add(a,
+                        3);|}
+            }
+
+            private static int Add(int x, int y) => x + y;
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int a)
+            {
+                if (a == 1) // why
+                    return 1;
+                else if (a == 2)
+                {
+                    return 2;
+                }
+                else
+                {
+                    return Add(a,
+                        3);
+                }
+            }
+
+            private static int Add(int x, int y) => x + y;
+        }
+        """);
 }

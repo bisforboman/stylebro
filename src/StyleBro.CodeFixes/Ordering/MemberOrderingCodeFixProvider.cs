@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers;
@@ -44,6 +45,36 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         }
 
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Sorts every container of the document that BRO1001 reports. For fixes that change what BRO1001 sees, so it
+    /// doesn't need another 'dotnet format' run (BRO1112: removing '#region's lets it sort across them).
+    /// </summary>
+    internal static async Task<Document> SortAllAsync(Document document, CancellationToken cancellationToken)
+    {
+        var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+        var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+        if (root is null || model is null)
+        {
+            return document;
+        }
+
+        var options = MemberOrderOptions.Read(
+            document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var partialAccess = new Dictionary<SyntaxNode, MemberAccess?[]?>();
+        foreach (var container in root.DescendantNodesAndSelf(n => MemberOrdering.GetMembers(n) is not null).Where(n => MemberOrdering.GetMembers(n) is not null))
+        {
+            var access = MemberOrdering.GetPartialAccess(container, model, cancellationToken);
+            if (MemberOrdering.FindFirstViolation(container, options, access) is not null)
+            {
+                partialAccess[container] = access;
+            }
+        }
+
+        return partialAccess.Count == 0
+            ? document
+            : document.WithSyntaxRoot(new SortingRewriter(new HashSet<SyntaxNode>(partialAccess.Keys), options, partialAccess).Visit(root));
     }
 
     private static async Task<Document> FixDocumentAsync(

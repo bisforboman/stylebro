@@ -63,7 +63,18 @@ public sealed class BracesCodeFixProvider : CodeFixProvider
         }
 
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
-        return Braces.GetChanges(statements, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken)) is { } changes
+        bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
+
+        // An if/else chain gets all its braces at once: braces on one clause turn the others into BRO1516's findings,
+        // which 'dotnet format' may have fixed already in this run (it fixes one id at a time, in no fixed order).
+        foreach (var chain in statements.Select(Braces.GetChain).OfType<IfStatementSyntax>().Distinct().ToList())
+        {
+            statements.AddRange(Braces.GetFindings(chain, text, IsOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options))
+                .Select(f => f.Child)
+                .Where(c => Braces.GetChanges(new[] { c }, text, options) is not null));
+        }
+
+        return Braces.GetChanges(statements, text, options, IsOn) is { } changes
             ? document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)))
             : document;
     }

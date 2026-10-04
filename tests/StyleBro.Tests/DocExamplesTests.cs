@@ -62,14 +62,7 @@ public partial class DocExamplesTests
         }
     }
 
-    [GeneratedRegex(@"### Before\s*\n```csharp\n(?<before>.*?)```\s*\n### After\s*\n```csharp\n(?<after>.*?)```", RegexOptions.Singleline)]
-    private static partial Regex ExamplePattern();
-
-    [GeneratedRegex(@"```ini
-(?<config>.*?)```", RegexOptions.Singleline)]
-    private static partial Regex ConfigPattern();
-
-    private static Document CreateDocument(string code, string? editorConfig)
+    internal static Document CreateDocument(string code, string? editorConfig)
     {
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
             .Split(Path.PathSeparator)
@@ -94,14 +87,7 @@ public partial class DocExamplesTests
         return project.AddDocument("Example.cs", SourceText.From(code), filePath: "/Example.cs");
     }
 
-    private static async Task AssertCompilesAsync(Document document, string id, string which)
-    {
-        var compilation = await document.Project.GetCompilationAsync();
-        var errors = compilation!.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
-        Assert.True(errors.Count == 0, $"{id}: the {which} example doesn't compile:\n" + string.Join("\n", errors));
-    }
-
-    private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(Document document, ImmutableArray<DiagnosticAnalyzer> analyzer, string id)
+    internal static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(Document document, ImmutableArray<DiagnosticAnalyzer> analyzer, string id)
     {
         var compilation = await document.Project.GetCompilationAsync();
         var all = await compilation!.WithAnalyzers(analyzer, document.Project.AnalyzerOptions)
@@ -109,7 +95,7 @@ public partial class DocExamplesTests
         return all.Where(d => d.Id == id).ToImmutableArray();
     }
 
-    private static async Task<Document> FixAllAsync(
+    internal static async Task<Document> FixAllAsync(
         Document document, CodeFixProvider fixer, ImmutableArray<DiagnosticAnalyzer> analyzer, string id, ImmutableArray<Diagnostic> diagnostics)
     {
         // Find the fix's equivalence key from one registered code action, then run its Fix All on the document.
@@ -133,7 +119,7 @@ public partial class DocExamplesTests
     }
 
     // Several analyzers can report one id (BRO1310: variables and parameters, fields).
-    private static ImmutableArray<DiagnosticAnalyzer> FindAnalyzer(string id)
+    internal static ImmutableArray<DiagnosticAnalyzer> FindAnalyzer(string id)
     {
         return typeof(StyleBro.Analyzers.DiagnosticIds).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t))
@@ -142,12 +128,26 @@ public partial class DocExamplesTests
             .ToImmutableArray();
     }
 
-    private static CodeFixProvider FindCodeFix(string id)
+    internal static CodeFixProvider FindCodeFix(string id)
     {
         return typeof(StyleBro.CodeFixes.LinkedFileFixAllProvider).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(CodeFixProvider).IsAssignableFrom(t) && t.GetCustomAttribute<ExportCodeFixProviderAttribute>() is not null)
             .Select(t => (CodeFixProvider)Activator.CreateInstance(t)!)
             .Single(f => f.FixableDiagnosticIds.Contains(id));
+    }
+
+    [GeneratedRegex(@"### Before\s*\n```csharp\n(?<before>.*?)```\s*\n### After\s*\n```csharp\n(?<after>.*?)```", RegexOptions.Singleline)]
+    private static partial Regex ExamplePattern();
+
+    [GeneratedRegex(@"```ini
+(?<config>.*?)```", RegexOptions.Singleline)]
+    private static partial Regex ConfigPattern();
+
+    private static async Task AssertCompilesAsync(Document document, string id, string which)
+    {
+        var compilation = await document.Project.GetCompilationAsync();
+        var errors = compilation!.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+        Assert.True(errors.Count == 0, $"{id}: the {which} example doesn't compile:\n" + string.Join("\n", errors));
     }
 
     private static string FindRepoRoot()

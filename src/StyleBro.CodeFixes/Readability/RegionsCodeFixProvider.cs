@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Readability;
+using StyleBro.CodeFixes.Ordering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -66,6 +67,11 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
             }
         }
 
-        return document.WithText(text.WithChanges(Regions.GetChanges(directives, text)));
+        var fixedDocument = document.WithText(text.WithChanges(Regions.GetChanges(directives, text)));
+
+        // BRO1001 sorts within each region; without them it sorts across, now rather than in another run.
+        return Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken)
+            ? await MemberOrderingCodeFixProvider.SortAllAsync(fixedDocument, cancellationToken).ConfigureAwait(false)
+            : fixedDocument;
     }
 }
