@@ -39,8 +39,9 @@ internal static class ConstructorSummaries
             ? new[] { standard, "Prevents a default instance of the " + tail + " from being created." }
             : new[] { standard };
 
-        // The summary's first line of text, after '<summary>' or after the '///' of the next line.
-        if (GetTextStart(summary, text) is not { } start)
+        // The summary's first line of text, after '<summary>' or after the '///' of the next line. A summary that starts
+        // with a paragraph is judged by the paragraph's text (like StyleCop after 1.2.0-beta.556).
+        if (GetTextStart(GetFirstParagraph(summary) ?? summary, text) is not { } start)
         {
             return null;
         }
@@ -96,6 +97,13 @@ internal static class ConstructorSummaries
         }
 
         return documentation.Content.OfType<XmlElementSyntax>().FirstOrDefault(e => e.StartTag.Name.LocalName.ValueText == "summary");
+    }
+
+    /// <summary>The '&lt;para&gt;' the summary's content starts with, or null.</summary>
+    private static XmlElementSyntax? GetFirstParagraph(XmlElementSyntax summary)
+    {
+        return summary.Content.FirstOrDefault(n => n is not XmlTextSyntax t || t.TextTokens.Any(token => token.Text.Trim().Length > 0))
+            is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "para" } para ? para : null;
     }
 
     /// <summary>Where the summary's content starts, skipping line breaks, indentation and the '///' of the next line.</summary>

@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Documentation;
 
@@ -12,6 +14,15 @@ namespace StyleBro.Analyzers.Documentation;
 /// </summary>
 internal static class DocumentationPeriods
 {
+    /// <summary>Tags whose text isn't checked, comma-separated: StyleCop's excludeFromPunctuationCheck.</summary>
+    public const string ExcludeKey = "stylebro_exclude_from_punctuation_check";
+
+    /// <summary>StyleCop's default for excludeFromPunctuationCheck.</summary>
+    public const string DefaultExcluded = "seealso";
+
+    /// <summary>Closing punctuation that may follow a sentence's period: '(see above.)', '"done."'.</summary>
+    private static readonly char[] ClosingPunctuation = [')', ']', '"', '\''];
+
     private static readonly HashSet<string> TextElements = new()
     {
         "summary", "remarks", "param", "typeparam", "returns", "value", "exception",
@@ -36,10 +47,12 @@ internal static class DocumentationPeriods
     /// The positions where a period is missing: after the last text of each top-level summary, remarks, param,
     /// typeparam, returns, value and exception element. Not reported: text that ends with '.', '?', '!' or ':' (a
     /// question, an exclamation or an introduction is a finished sentence), with a block element such as a list or a
-    /// code sample, or elements without text.
+    /// code sample, or elements without text, or with a period followed only by closing punctuation ('(see above.)').
+    /// Elements named in <see cref="ExcludeKey"/> aren't checked.
     /// </summary>
-    public static IEnumerable<int> GetMissingPeriods(SyntaxNode root)
+    public static IEnumerable<int> GetMissingPeriods(SyntaxNode root, AnalyzerConfigOptions options)
     {
+        var excluded = GetExcluded(options);
         foreach (var trivia in root.DescendantTrivia(descendIntoTrivia: false))
         {
             if (trivia.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
@@ -49,7 +62,8 @@ internal static class DocumentationPeriods
 
             foreach (var element in documentation.Content.OfType<XmlElementSyntax>())
             {
-                if (TextElements.Contains(element.StartTag.Name.LocalName.ValueText) && GetInsertionPoint(element) is { } position)
+                var name = element.StartTag.Name.LocalName.ValueText;
+                if (TextElements.Contains(name) && !excluded.Contains(name) && GetInsertionPoint(element, excluded) is { } position)
                 {
                     yield return position;
                 }
@@ -57,7 +71,14 @@ internal static class DocumentationPeriods
         }
     }
 
-    private static int? GetInsertionPoint(XmlElementSyntax element)
+    /// <summary>The tags <see cref="ExcludeKey"/> names (StyleCop's default when it isn't set).</summary>
+    public static HashSet<string> GetExcluded(AnalyzerConfigOptions options)
+    {
+        var value = options.TryGetValue(ExcludeKey, out var configured) ? configured : DefaultExcluded;
+        return new HashSet<string>(value.Split(',').Select(t => t.Trim()).Where(t => t.Length > 0), StringComparer.Ordinal);
+    }
+
+    private static int? GetInsertionPoint(XmlElementSyntax element, HashSet<string> excluded)
     {
         // The last piece of content that isn't whitespace or a line's '///'.
         for (var i = element.Content.Count - 1; i >= 0; i--)
@@ -65,18 +86,24 @@ internal static class DocumentationPeriods
             switch (element.Content[i])
             {
                 case XmlTextSyntax text:
-                    var last = text.TextTokens.LastOrDefault(t => t.IsKind(SyntaxKind.XmlTextLiteralToken) && t.Text.Trim().Length > 0);
+                    // Entities count as text ('List&lt;T&gt;': the period goes after '&gt;').
+                    var last = text.TextTokens.LastOrDefault(t => t.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken
+                        && t.Text.Trim().Length > 0);
                     if (last == default)
                     {
                         continue;
                     }
 
-                    var trimmed = last.Text.TrimEnd();
-                    return trimmed[trimmed.Length - 1] is '.' or '?' or '!' or ':' ? null : last.SpanStart + trimmed.Length;
+                    // A period may be followed by closing punctuation: '(see above.)', '"done."'.
+                    var ending = string.Concat(text.TextTokens.TakeWhile(t => t != last).Append(last).Select(t => t.ValueText))
+                        .TrimEnd().TrimEnd(ClosingPunctuation);
+                    return ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':' ? null
+                        : last.IsKind(SyntaxKind.XmlEntityLiteralToken) ? last.Span.End
+                        : last.SpanStart + last.Text.TrimEnd().Length;
                 case XmlElementSyntax child:
                     var name = child.StartTag.Name.LocalName.ValueText;
-                    return BlockElements.Contains(name) ? null
-                        : ContainerElements.Contains(name) ? GetInsertionPoint(child)
+                    return BlockElements.Contains(name) || excluded.Contains(name) ? null
+                        : ContainerElements.Contains(name) ? GetInsertionPoint(child, excluded)
                         : child.Span.End;
                 case XmlEmptyElementSyntax empty:
                     return BlockElements.Contains(empty.Name.LocalName.ValueText) ? null : empty.Span.End;

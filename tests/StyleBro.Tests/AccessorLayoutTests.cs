@@ -133,6 +133,66 @@ public class AccessorLayoutTests
         """);
 
     [Fact]
+    public Task AttributeLines_DoNotMakeAnAccessorMultiLine() => VerifyFixAsync(
+        """
+        using System.Diagnostics;
+
+        public class C
+        {
+            private int x;
+
+            public int OneLineEach
+            {
+                [DebuggerStepThrough]
+                get { return this.x; }
+                set { this.x = value; }
+            }
+
+            public int Mixed
+            {
+                [DebuggerStepThrough]
+                {|BRO1510:get|} { return this.x; }
+
+                set
+                {
+                    this.x = value;
+                    this.x++;
+                }
+            }
+        }
+        """,
+        """
+        using System.Diagnostics;
+
+        public class C
+        {
+            private int x;
+
+            public int OneLineEach
+            {
+                [DebuggerStepThrough]
+                get { return this.x; }
+                set { this.x = value; }
+            }
+
+            public int Mixed
+            {
+                [DebuggerStepThrough]
+                get
+                {
+                    return this.x;
+                }
+
+                set
+                {
+                    this.x = value;
+                    this.x++;
+                }
+            }
+        }
+        """);
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         public class C
         {
