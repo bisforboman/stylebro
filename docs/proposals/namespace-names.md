@@ -1,6 +1,8 @@
 # Proposal: namespace names (SA1300 for namespaces)
 
-Status: prototype on branch `proposal/namespace-names`, not merged. The owner decides.
+Status: **decided 2026-10-04: ship opt-in** as recommended below (see [decisions.md](../decisions.md)). BRO1312 is
+off by default, `stylebro-migrate` turns it on with SA1300, the root namespace isn't reported, public namespaces are
+renamed, and the resource, config and XAML limits are documented.
 
 BRO1309 replaces StyleCop's SA1300 for types and members but skips namespaces, so `namespace myCompany.data;` is
 not reported. This page collects what StyleCop does, everything a namespace rename can affect (with experiments),
