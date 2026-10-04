@@ -119,6 +119,19 @@ missed, or a rule where StyleBro deliberately differs ([differences-from-styleco
 Then check the report from step 1 for rules your team relied on that nothing enforces any more. Details:
 [migrating.md](migrating.md). CI: [ci.md](ci.md).
 
+## Newer C# and APIs (optional)
+
+To also rewrite code into newer C# and newer APIs (target-typed `new()`, collection expressions, file-scoped
+namespaces, `ArgumentNullException.ThrowIfNull`, ...) with the SDK's own rules, after either path:
+
+```
+stylebro-migrate init --modernize --write
+dotnet format
+```
+
+Rules that would break a multi-targeted project's older framework are written as suggestions there, with a note on
+how to turn them on. Tiers, examples and the rules left out: [modernizing.md](modernizing.md).
+
 ## Multi-targeted repositories
 
 If any project sets several `<TargetFrameworks>`, use `stylebro-migrate format` wherever this page says

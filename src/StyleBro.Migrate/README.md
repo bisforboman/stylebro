@@ -33,6 +33,15 @@ Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 forma
 IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
 a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too.
 
+```
+stylebro-migrate init [path] --modernize [--write]
+```
+
+Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()`, collection expressions,
+`ThrowIfNull`, ...), in their own block; rules that would break a multi-targeted project's older framework become
+suggestions there. Works after `--write` too. Details:
+[docs/modernizing.md](https://github.com/bisforboman/stylebro/blob/main/docs/modernizing.md).
+
 ## Formatting multi-targeted projects
 
 ```
