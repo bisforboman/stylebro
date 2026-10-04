@@ -28,7 +28,7 @@ public sealed class DocumentationBlankLinesAnalyzer : DiagnosticAnalyzer
         {
             var root = c.Tree.GetRoot(c.CancellationToken);
             var text = c.Tree.GetText(c.CancellationToken);
-            foreach (var node in root.DescendantNodes())
+            foreach (var node in TreeWalk.Nodes(root))
             {
                 if (node is MemberDeclarationSyntax member and not BaseNamespaceDeclarationSyntax && !member.ContainsDiagnostics)
                 {

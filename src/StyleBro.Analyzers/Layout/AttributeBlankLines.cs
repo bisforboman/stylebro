@@ -21,7 +21,7 @@ internal static class AttributeBlankLines
     /// </summary>
     public static IEnumerable<TextSpan> GetFindings(SyntaxNode root, SourceText text)
     {
-        foreach (var list in root.DescendantNodes().OfType<AttributeListSyntax>())
+        foreach (var list in TreeWalk.Nodes(root).OfType<AttributeListSyntax>())
         {
             if (list.Parent is null or CompilationUnitSyntax || list.Parent.ContainsDiagnostics)
             {

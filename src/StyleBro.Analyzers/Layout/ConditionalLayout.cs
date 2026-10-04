@@ -21,7 +21,7 @@ internal static class ConditionalLayout
     public static IEnumerable<(SyntaxToken Token, bool Beginning, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, AnalyzerConfigOptions options)
     {
         var beginning = WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true);
-        foreach (var conditional in root.DescendantNodes().OfType<ConditionalExpressionSyntax>())
+        foreach (var conditional in TreeWalk.Nodes(root).OfType<ConditionalExpressionSyntax>())
         {
             foreach (var finding in Find(conditional, text, beginning))
             {

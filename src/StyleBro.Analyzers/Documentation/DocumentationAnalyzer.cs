@@ -106,7 +106,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxTreeAction(c =>
         {
             // One walk over the tree for all four checks: only comments matter to them.
-            var trivia = c.Tree.GetRoot(c.CancellationToken).DescendantTrivia()
+            var trivia = TreeWalk.Trivia(c.Tree.GetRoot(c.CancellationToken))
                 .Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) || t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)
                     || t.IsKind(SyntaxKind.SingleLineCommentTrivia))
                 .ToList();

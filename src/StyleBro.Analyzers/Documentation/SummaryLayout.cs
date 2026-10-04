@@ -33,7 +33,7 @@ internal static class SummaryLayout
         var maxLength = options.TryGetValue(MaxLineLengthKey, out var max) && int.TryParse(max.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var length) && length > 0
             ? length
             : int.MaxValue;
-        foreach (var trivia in root.DescendantTrivia(descendIntoTrivia: false))
+        foreach (var trivia in TreeWalk.Trivia(root))
         {
             // '/** */' comments too: their start tag's line doesn't begin with '///', so they're skipped below.
             if (trivia.GetStructure() is not DocumentationCommentTriviaSyntax documentation)

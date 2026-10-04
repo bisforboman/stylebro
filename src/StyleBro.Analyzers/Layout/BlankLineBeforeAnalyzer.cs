@@ -28,7 +28,7 @@ public sealed class BlankLineBeforeAnalyzer : DiagnosticAnalyzer
     {
         var root = context.Tree.GetRoot(context.CancellationToken);
         var text = context.Tree.GetText(context.CancellationToken);
-        foreach (var token in root.DescendantTokens())
+        foreach (var token in TreeWalk.Tokens(root))
         {
             var descriptor = BlankLines.IsCheckedOpenBrace(token) ? Descriptors.BlankLineBeforeOpenBrace
                 : BlankLines.IsChainedBlockKeyword(token) ? Descriptors.BlankLineBeforeChainedBlock

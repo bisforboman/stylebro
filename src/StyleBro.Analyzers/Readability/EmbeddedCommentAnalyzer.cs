@@ -26,7 +26,7 @@ public sealed class EmbeddedCommentAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var text = c.Tree.GetText(c.CancellationToken);
-                foreach (var node in c.Tree.GetRoot(c.CancellationToken).DescendantNodes())
+                foreach (var node in TreeWalk.Nodes(c.Tree.GetRoot(c.CancellationToken)))
                 {
                     foreach (var comment in EmbeddedComments.GetComments(EmbeddedComments.GetOpenBrace(node), text))
                     {

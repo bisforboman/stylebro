@@ -28,15 +28,12 @@ var builds = dlls.Select((dll, i) => Load(Path.GetFullPath(dll), $"build{i}")).T
 
 var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose, preprocessorSymbols: symbols);
 var separator = Path.DirectorySeparatorChar;
-var trees = Directory.GetFiles(sources, "*.cs", SearchOption.AllDirectories)
+var files = Directory.GetFiles(sources, "*.cs", SearchOption.AllDirectories)
     .Where(f => !f.Contains($"{separator}obj{separator}") && !f.Contains($"{separator}bin{separator}"))
-    .Select(f => CSharpSyntaxTree.ParseText(File.ReadAllText(f), parse, f))
-    .ToImmutableArray();
-var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator).Select(p => MetadataReference.CreateFromFile(p));
-var compilation = CSharpCompilation.Create(
-    "Benchmark", trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
-Console.WriteLine($"{trees.Length} files, {string.Join(" / ", builds.Select(b => b.Analyzers.Length))} analyzers, {runs} runs");
-compilation.GetDiagnostics();
+    .Select(f => (Path: f, Text: File.ReadAllText(f)))
+    .ToArray();
+var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator).Select(p => (MetadataReference)MetadataReference.CreateFromFile(p)).ToArray();
+Console.WriteLine($"{files.Length} files, {string.Join(" / ", builds.Select(b => b.Analyzers.Length))} analyzers, {runs} runs");
 
 // Run 0 is the warm-up (and gives the diagnostic counts).
 await Measure(0, runs);
@@ -86,6 +83,14 @@ async Task Measure(int first, int last)
     {
         foreach (var build in i % 2 == 0 ? builds : builds.Reverse())
         {
+            // Freshly parsed sources for every run of every build, as a build sees them: nothing a previous run built
+            // (red nodes, structured trivia, a cache an analyzer keeps per tree) carries over. Binding isn't timed.
+            var compilation = CSharpCompilation.Create(
+                "Benchmark",
+                files.Select(f => CSharpSyntaxTree.ParseText(f.Text, parse, f.Path)),
+                references,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+            compilation.GetDiagnostics();
             GC.Collect();
             GC.WaitForPendingFinalizers();
             var options = new CompilationWithAnalyzersOptions(

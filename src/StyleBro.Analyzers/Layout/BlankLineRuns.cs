@@ -24,12 +24,12 @@ internal static class BlankLineRuns
         var lookup = isOn;
         isOn = id => known.TryGetValue(id, out var on) ? on : known[id] = lookup(id);
 
-        if (root.DescendantTokens().All(t => t.IsKind(SyntaxKind.EndOfFileToken)) && text.ToString().Trim().Length == 0)
+        if (TreeWalk.Tokens(root).All(t => t.IsKind(SyntaxKind.EndOfFileToken)) && text.ToString().Trim().Length == 0)
         {
             yield break;
         }
 
-        foreach (var token in root.DescendantTokens())
+        foreach (var token in TreeWalk.Tokens(root))
         {
             if (isOn(DiagnosticIds.MultipleBlankLines) && MultipleBlankLines(token, text, isOn) is { } multiple)
             {
