@@ -97,6 +97,43 @@ public class LinkedFileFixAllTests
         Assert.Equal(shortText.Replace("\"\"", "string.Empty"), (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
+    [Fact]
+    public async Task RemovingRegions_SortsInTheCopiesWhereTheCodeIsActive()
+    {
+        // Newtonsoft.Json's samples: a '#region' around the file header, the rest inside '#if'. The copy where the code
+        // is inactive only removes the header's region; the active copy also sorts. That sort used to be one whole-text
+        // edit, which lost the merge to the header edit, so BRO1001 sorted on the next run.
+        var path = Path.Combine(Path.GetTempPath(), "Regions.cs");
+        var text = "#region License\n// header\n#endregion\n\n#if ACTIVE\nnamespace N\n{\n    #region Classes\n    public class B\n    {\n    }\n    #endregion\n\n    #region Interfaces\n    public interface IA\n    {\n    }\n    #endregion\n}\n#endif\n";
+        var workspace = new Microsoft.CodeAnalysis.AdhocWorkspace();
+        var solution = workspace.CurrentSolution;
+        var ids = new List<Microsoft.CodeAnalysis.DocumentId>();
+        foreach (var symbols in new[] { Array.Empty<string>(), new[] { "ACTIVE" } })
+        {
+            var project = Microsoft.CodeAnalysis.ProjectId.CreateNewId();
+            var document = Microsoft.CodeAnalysis.DocumentId.CreateNewId(project);
+            solution = solution
+                .AddProject(project, "p" + symbols.Length, "p" + symbols.Length, Microsoft.CodeAnalysis.LanguageNames.CSharp)
+                .WithProjectParseOptions(project, new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions(preprocessorSymbols: symbols))
+                .AddDocument(document, "Regions.cs", SourceText.From(text), filePath: path);
+            ids.Add(document);
+        }
+
+        var analyzer = new StyleBro.Analyzers.Readability.RegionsAnalyzer();
+        var fixer = new StyleBro.CodeFixes.Readability.RegionsCodeFixProvider();
+        var first = solution.GetDocument(ids[0])!;
+        var diagnostics = await GetDiagnosticsAsync(first, analyzer);
+        Microsoft.CodeAnalysis.CodeActions.CodeAction? action = null;
+        await fixer.RegisterCodeFixesAsync(new Microsoft.CodeAnalysis.CodeFixes.CodeFixContext(first, diagnostics[0], (a, _) => action ??= a, CancellationToken.None));
+        var context = new Microsoft.CodeAnalysis.CodeFixes.FixAllContext(
+            first, fixer, Microsoft.CodeAnalysis.CodeFixes.FixAllScope.Solution, action!.EquivalenceKey, new[] { "BRO1112" }, new Provider(analyzer), CancellationToken.None);
+        var operations = await (await fixer.GetFixAllProvider()!.GetFixAsync(context))!.GetOperationsAsync(CancellationToken.None);
+        var fixedSolution = operations.OfType<Microsoft.CodeAnalysis.CodeActions.ApplyChangesOperation>().Single().ChangedSolution;
+
+        var expected = "// header\n\n#if ACTIVE\nnamespace N\n{\n    public interface IA\n    {\n    }\n\n    public class B\n    {\n    }\n}\n#endif\n";
+        Assert.Equal(expected, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
+    }
+
     private static async Task<System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic>> GetDiagnosticsAsync(
         Microsoft.CodeAnalysis.Document document, Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer analyzer)
     {

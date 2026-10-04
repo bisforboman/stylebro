@@ -83,7 +83,8 @@ when we can do that"): don't suggest releases at all; the user says when.
   land through pull requests whose checks pass. Work on a branch, push it, open a PR (`gh pr create`), let the checks
   run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: windows-latest, one
   job per public repo in `scripts/realworld/repos.psd1`, `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
-  fails on analyzer crashes, new compile errors, conflict markers, no convergence within 3 runs, or tests that passed
+  fails on analyzer crashes, new compile errors, conflict markers, a second run that still changes files (since
+  2026-10-04; `MaxRuns` in repos.psd1 for a documented exception), or tests that passed
   on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
   `scripts/mutation/Invoke-Mutations.ps1` breaks each guard in `scripts/mutation/mutations.psd1` and needs a test to
   fail; add an entry for every new guard). All scripts run locally too (mutations in a separate worktree: they undo
@@ -250,8 +251,8 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   (SA1123, regions inside a `{ }` block; a region in an expression body, e.g. between switch-expression arms after
   `=>`, is SA1124 in StyleCop 1.2, probed; the private app had one, StyleCop quiet because SA1124 is off there): the fix removes each `#region`/`#endregion` line pair, one edit per run of
   removed lines, and drops a neighboring blank line that would double a blank line, follow `{` or precede `}`. A run
-  at the end of the file takes the preceding line break along. Removing regions lets BRO1001 see the type, so a
-  region-heavy codebase needs a second `dotnet format` run (documented in BRO1112.md).
+  at the end of the file takes the preceding line break along. Removing regions lets BRO1001 sort across them; since
+  2026-10-04 the fix does that sort itself (and BRO1506's blank-line removal below a comment), see the convergence note.
 - **BRO1003/BRO1004** (SA1212/SA1213, `Ordering/AccessorOrder.cs`): swap the two accessors; one-line lists swap the
   accessor text, otherwise "slots" (comments above + the accessor + a trailing comment) so blank lines stay put;
   auto-properties `{ set; get; }` count like in StyleCop. **BRO1114** (SA1132, `Readability/CombinedFields.cs`): one
@@ -938,6 +939,18 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   multi-targeted repos. Limit: per-framework indentation conflicts (Newtonsoft.Json's `else` inside `#if`).
 - Scratch scripts: `scratchpad/ide0055-*.ps1`, `try-format*.ps1`. Gotcha: an incremental build re-reports no warnings
   (use `--no-incremental` when counting).
+
+- **Convergence: one run everywhere** (2026-10-04). `dotnet format` fixes one id at a time (one Fix All each, fresh
+  diagnostics) in an order that changes between processes, so the same repo converged in one run or two. Causes found:
+  (1) BRO1514-BRO1516: braces on one clause of an if/else chain make the others BRO1516's, which may already have run
+  (Newtonsoft.Json's net20-only LinqBridge.cs: `if (!e.MoveNext()) yield return x; else do { ... } while (...);`);
+  the fix now wraps every finding of the chain. (2) BRO1112 + BRO1001: BRO1001 sorts within regions, so removing them
+  left a sort for the next run (FFMpegCore, Newtonsoft.Json's samples); the regions fix now sorts when BRO1001 is on, as
+  edits of each sorted container's span: a whole-text edit lost the linked-file merge to the copy where the code is
+  inside an inactive `#if` (it only removes the header's `#region License`, an edit at offset 0). (3) BRO1112/BRO1113 +
+  BRO1506: `// output` + `#endregion` + blank line left a blank line below a comment (528 in Newtonsoft.Json's samples);
+  the regions fix removes it when BRO1506 is on. `FixOrderTests` runs every order of a case's ids, one Fix All each.
+  Result: every reference repo needs 2 runs (one that changes, one clean), so Invoke-RealWorld now fails above 2.
 
 ## Known open questions
 

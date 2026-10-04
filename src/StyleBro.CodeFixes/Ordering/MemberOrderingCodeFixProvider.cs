@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Ordering;
 
@@ -48,16 +49,18 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
     }
 
     /// <summary>
-    /// Sorts every container of the document that BRO1001 reports. For fixes that change what BRO1001 sees, so it
-    /// doesn't need another 'dotnet format' run (BRO1112: removing '#region's lets it sort across them).
+    /// The edits that sort every container of the document that BRO1001 reports: one per outermost container, replacing
+    /// its span. For fixes that change what BRO1001 sees, so it doesn't need another 'dotnet format' run (BRO1112:
+    /// removing '#region's lets it sort across them). Edits of a span rather than the whole text, so they still merge
+    /// with the other copies' edits of a multi-targeted file.
     /// </summary>
-    internal static async Task<Document> SortAllAsync(Document document, CancellationToken cancellationToken)
+    internal static async Task<List<TextChange>> GetSortChangesAsync(Document document, CancellationToken cancellationToken)
     {
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
         if (root is null || model is null)
         {
-            return document;
+            return new List<TextChange>();
         }
 
         var options = MemberOrderOptions.Read(
@@ -72,9 +75,11 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             }
         }
 
-        return partialAccess.Count == 0
-            ? document
-            : document.WithSyntaxRoot(new SortingRewriter(new HashSet<SyntaxNode>(partialAccess.Keys), options, partialAccess).Visit(root));
+        var targets = new HashSet<SyntaxNode>(partialAccess.Keys);
+        var rewriter = new SortingRewriter(targets, options, partialAccess);
+        return targets.Where(t => !t.Ancestors().Any(targets.Contains))
+            .Select(t => new TextChange(t.Span, rewriter.Visit(t)!.ToString()))
+            .ToList();
     }
 
     private static async Task<Document> FixDocumentAsync(
