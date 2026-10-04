@@ -169,6 +169,10 @@ dotnet_diagnostic.BRO1520.severity = warning
 dotnet_diagnostic.BRO1521.severity = warning
 dotnet_diagnostic.BRO1522.severity = warning
 
+# BRO1525: no blank line after an attribute list (StyleCop's proposed SA1521, never implemented; stylebro-migrate turns it
+# off)
+dotnet_diagnostic.BRO1525.severity = warning
+
 # BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
 dotnet_diagnostic.BRO1131.severity = warning
 

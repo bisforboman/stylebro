@@ -26,6 +26,11 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (breakBefore == breakAfter || '; Replace = 'if ('; Tests = 'WrappingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = ' when !arrow.ArrowToken.GetPreviousToken().Parent!.AncestorsAndSelf().Any(a => a is TypeParameterConstraintClauseSyntax)'; Replace = ''; Tests = 'WrappingPlacementTests' }
 
+        # BRO1525 (no blank line after attributes)
+        @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (list.Parent is null or CompilationUnitSyntax || '; Replace = 'if ('; Tests = 'AttributeBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = ' || list.Parent.ContainsDiagnostics)'; Replace = ')'; Tests = 'AttributeBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (!close.TrailingTrivia.Concat('; Replace = 'if (false && !close.TrailingTrivia.Concat('; Tests = 'AttributeBlankLinesTests' }
+
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }
 

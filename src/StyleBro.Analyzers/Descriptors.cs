@@ -994,5 +994,16 @@ internal static class Descriptors
             + "the next line (beginning_of_line). Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.EqualsPlacement + ".md");
 
+    public static readonly DiagnosticDescriptor BlankLineAfterAttributes = new(
+        id: DiagnosticIds.BlankLineAfterAttributes,
+        title: "Attributes should not be followed by a blank line",
+        messageFormat: "Remove the blank line after the attribute",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "No blank line between an attribute list and the element it applies to, or the element's next attribute "
+            + "list. Not a StyleCop rule: proposed in StyleCop issue #738 and never implemented there.",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineAfterAttributes + ".md");
+
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }

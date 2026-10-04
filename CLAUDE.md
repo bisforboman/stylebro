@@ -529,6 +529,11 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Messy showed `select` re-indented), `=>` after a `where` (BRO1111's). Probed: no SDK rule (IDE0055 included) enforces
   the SDK key. Migration writes them `none` (no SA ids); MigrationTests requires rules without SA ids to be listed
   under "Rules beyond StyleCop" in differences-from-stylecop.md.
+- **BRO1525** (2026-10-04, StyleCop's proposed SA1521 / issue #738, never implemented; beyond StyleCop, so no SA id in
+  the descriptor or migrate would map it; `Layout/AttributeBlankLines.cs`): blank lines after any attribute list except
+  assembly/module ones (before the element or the next list) are removed as whole lines. Skipped: any comment/doc/
+  directive in the gap, syntax errors in the element. BRO1505 doesn't count a blank line below an attribute (element
+  code starts at `[`), so no coupling is needed (FixOrderTests case). Survey: 9 findings in the 8 repos.
 - **BRO1510** (SA1504) accessors with block bodies all single-line or all multi-line (`Layout/AccessorLayout.cs`).
   Probed: only lists where EVERY accessor has a block body (`get => x;`/`get;` next to a multi-line `set {}` is fine),
   only multi-line lists (a one-line list is BRO1509's), diagnostic on the first accessor's keyword. StyleCop's fix has
