@@ -51,6 +51,8 @@ It is a survey (2026-10-03), not a plan. The top five are in the "Maybe" section
 
 ### 1. Operator placement when wrapping (RCS0027, RCS0028)
 
+Done (2026-10-04): [BRO1520](rules/BRO1520.md).
+
 ```csharp
 // before (option: before)                // after
 if (isValid &&                             if (isValid
@@ -66,6 +68,8 @@ if (isValid &&                             if (isValid
   `#if` around the operator. No StyleCop rule competes.
 
 ### 2. `=>` and `=` placement (RCS0032, RCS0052)
+
+Done (2026-10-04): [BRO1521](rules/BRO1521.md) and [BRO1522](rules/BRO1522.md).
 
 `int P =>` + newline + `value;` vs `int P` + newline + `=> value;`. Same shape as #1 and the same fix code; could be one
 rule with several options, or rules next to #1. The SDK's experimental IDE2006 only removes blank lines after `=>`.
