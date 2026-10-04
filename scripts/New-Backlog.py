@@ -24,6 +24,7 @@ WORK = [
     ('Beyond StyleCop', "Survey StyleCop's issue tracker", 'Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Operator, `=>` and `=` placement when wrapping (survey #1, #2)', 'BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Null check style (survey #3)', 'BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
+    ('Beyond StyleCop', '`<summary>` on one line or on three (survey #5)', 'BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Braceless `if (x) return;` (StyleCop issue #2252)', '`stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md).', 'Done (2026-10-04)'),
 ]
 
