@@ -164,7 +164,7 @@ them.
 
 | Rule | What it checks | From |
 |---|---|---|
-| [BRO1133](rules/BRO1133.md) | Null checks as `== null`/`!= null` (`stylebro_null_check_style = equality_operator`, the default) or `is null`/`is not null` (`pattern_matching`) | Roslynator RCS1248 |
+| [BRO1133](rules/BRO1133.md) | Null checks as `is null`/`is not null` (`stylebro_null_check_style = pattern_matching`, the default) or `== null`/`!= null` (`equality_operator`) | Roslynator RCS1248 |
 | [BRO1520](rules/BRO1520.md) | Binary operators and `?`/`:` at the beginning of the line when an expression wraps (`dotnet_style_operator_placement_when_wrapping`) | Roslynator RCS0027/RCS0028 |
 | [BRO1521](rules/BRO1521.md) | `=>` of expression bodies and switch arms at the end of the line (`stylebro_arrow_placement_when_wrapping`) | Roslynator RCS0032 |
 | [BRO1522](rules/BRO1522.md) | `=` of assignments and initializers at the end of the line (`stylebro_equals_placement_when_wrapping`) | Roslynator RCS0052 |

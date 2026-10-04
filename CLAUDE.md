@@ -223,7 +223,8 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   `this` binds to the same symbol, so no override/hiding member), plus a deviation: virtual/abstract/override (not
   sealed) members are skipped unless the enclosing type is sealed (a derived override would run instead).
 - **BRO1133** (2026-10-04, beyond StyleCop: Roslynator RCS1248, `Readability/NullChecks.cs`, semantic)
-  `stylebro_null_check_style = equality_operator` (default, survey: 7 of 8 repos, docs/decisions.md) | `pattern_matching`.
+  `stylebro_null_check_style = pattern_matching` (default, owner's decision over the survey's majority, docs/decisions.md)
+  | `equality_operator`.
   The fix only swaps the operator (`==` <-> `is`, `!=` <-> `is not`); pattern mode also turns `null == x` into `x is null`
   (equality mode leaves it to BRO1103; the fix finds a check by its START, which BRO1103's swap keeps, so both converge
   in one run, Messy `Lookups.cs`). Skipped: an operator that isn't built-in, the core library's (null-safe) or lifted

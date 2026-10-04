@@ -45,8 +45,9 @@ one `dotnet format` run (BRO1133 finds the check again by its start, which the s
 
 ### Answer
 
-**Choice 1.** Default chosen from the survey (agent's proposal, 2026-10-04, for the owner to review); configurable. At
-warning in the preset; off after `stylebro-migrate`.
+**Choice 2:** `pattern_matching` (owner's decision, 2026-10-04): the form that never calls a user-defined `==`;
+configurable; records skipped. The survey's majority (choice 1, the agent's proposal) stays available as
+`equality_operator`. At warning in the preset; off after `stylebro-migrate`.
 
 ## Placement of operators, `=>` and `=` when a line wraps (2026-10-04)
 

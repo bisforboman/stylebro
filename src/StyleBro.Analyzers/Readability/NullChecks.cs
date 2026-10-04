@@ -17,7 +17,7 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class NullChecks
 {
-    /// <summary>equality_operator ('x == null') or pattern_matching ('x is null').</summary>
+    /// <summary>pattern_matching ('x is null', the default) or equality_operator ('x == null').</summary>
     public const string StyleKey = "stylebro_null_check_style";
 
     /// <summary>
@@ -36,7 +36,7 @@ internal static class NullChecks
     }
 
     private static bool PrefersPattern(AnalyzerConfigOptions options) =>
-        options.TryGetValue(StyleKey, out var value) && value.Split(':')[0].Trim().ToLowerInvariant() == "pattern_matching";
+        !options.TryGetValue(StyleKey, out var value) || value.Split(':')[0].Trim().ToLowerInvariant() != "equality_operator";
 
     // 'x == null' -> 'x is null', 'x != null' -> 'x is not null', 'null == x' -> 'x is null'.
     private static (string, ImmutableArray<TextChange>)? ToPattern(BinaryExpressionSyntax binary, SemanticModel model, CancellationToken cancellationToken)

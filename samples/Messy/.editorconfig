@@ -14,9 +14,14 @@ dotnet_diagnostic.BRO1310.severity = warning
 [**/Kettle.cs]
 dotnet_diagnostic.BRO1112.severity = none
 
-# BRO1133 (null checks) in the pattern form for one file: 'null == key' is BRO1103's too, and the two fixes converge in one run.
-[**/Lookups.cs]
-stylebro_null_check_style = pattern_matching
+# BRO1133 (null checks) in the '== null' form for one file (Lookups.cs has the default 'is null' form, where 'null == key'
+# is BRO1103's too and the two fixes converge in one run).
+[**/NullChecks.cs]
+stylebro_null_check_style = equality_operator
+
+# Checks.cs shows BRO1103 turning 'null == name' into 'name == null' (with the default, BRO1133 would make it 'name is null').
+[**/Checks.cs]
+stylebro_null_check_style = equality_operator
 
 # BRO1312 (namespace names) is off by default; on for one file.
 [**/Catalog.cs]

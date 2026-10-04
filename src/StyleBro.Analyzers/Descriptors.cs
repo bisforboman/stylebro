@@ -785,8 +785,8 @@ internal static class Descriptors
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Null checks use '== null' and '!= null' (stylebro_null_check_style = equality_operator, the default) or "
-            + "'is null' and 'is not null' (pattern_matching). Checks whose meaning would change, such as a user-defined '==', "
+        description: "Null checks use 'is null' and 'is not null' (stylebro_null_check_style = pattern_matching, the default) or "
+            + "'== null' and '!= null' (equality_operator). Checks whose meaning would change, such as a user-defined '==', "
             + "aren't reported. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.NullCheckStyle + ".md");
 

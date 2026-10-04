@@ -12,8 +12,10 @@ public class NullCheckTests
 {
     private const string Pattern = "stylebro_null_check_style = pattern_matching\n";
 
+    private const string Equality = "stylebro_null_check_style = equality_operator\n";
+
     [Fact]
-    public Task EqualityOperator_IsTheDefault() => VerifyFixAsync(
+    public Task EqualityOperator_FromTheOption() => VerifyFixAsync(
         """
         using System;
         using System.Linq;
@@ -49,10 +51,11 @@ public class NullCheckTests
                 return new[] { o }.Any(a => a == null) & (s == null);
             }
         }
-        """);
+        """,
+        Equality);
 
     [Fact]
-    public Task PatternMatching_FromTheOption() => VerifyFixAsync(
+    public Task PatternMatching_IsTheDefault() => VerifyFixAsync(
         """
         public class C
         {
@@ -84,8 +87,7 @@ public class NullCheckTests
                 return t is not null && c?.P is null && this.P is not null && M(s, o, n, t, c).ToString() is not null;
             }
         }
-        """,
-        Pattern);
+        """);
 
     [Fact]
     public Task NullOnTheLeft_BecomesAPattern() => VerifyFixAsync(
@@ -156,7 +158,8 @@ public class NullCheckTests
         {
             public bool M(Money m, dynamic d) => m is null || m is not null || d is null;
         }
-        """);
+        """,
+        Equality);
 
     [Fact]
     public Task LiftedOperators_AreFine() => VerifyFixAsync(
@@ -213,7 +216,8 @@ public class NullCheckTests
         {
             public bool M(Guid? g, int? n) => g is null || g is not null || n == null;
         }
-        """);
+        """,
+        Equality);
 
     [Fact]
     public Task ExpressionTrees_AreLeftAlone() => VerifyFixAsync(
@@ -275,7 +279,8 @@ public class NullCheckTests
             public bool M(bool b, object o) => b == o is null || b != o is not null || o is
                 not null || o is /* c */ not null || o is "" || o is { } || o is not (null);
         }
-        """);
+        """,
+        Equality);
 
     [Fact]
     public Task Pointers_AreLeftAlone() => VerifyAsync(
