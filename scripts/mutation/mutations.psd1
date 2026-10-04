@@ -162,15 +162,20 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'else if (slot == count - 1 && !EndsWithNewLine(members[count - 1]) && EndsWithNewLine(member))'; Replace = 'else if (false)'; Tests = 'MemberOrderingTests' }
 
         # BRO1132 (embedded comments)
-        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '|| Line(text, owner.GetFirstToken().SpanStart) != Line(text, previous.SpanStart)'; Replace = ''; Tests = 'EmbeddedCommentTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '|| Line(text, GetHeaderStart(owner).SpanStart) != Line(text, previous.SpanStart)'; Replace = ''; Tests = 'EmbeddedCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '|| gap.Any(t => t.IsDirective)'; Replace = ''; Tests = 'EmbeddedCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '|| comments.Any(c => Line(text, c.Span.Start) != Line(text, c.Span.End))'; Replace = ''; Tests = 'EmbeddedCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '|| Line(text, openBrace.GetNextToken().SpanStart) == Line(text, openBrace.SpanStart)'; Replace = ''; Tests = 'EmbeddedCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '&& !trivia.ToString().StartsWith("////", System.StringComparison.Ordinal)'; Replace = ''; Tests = 'EmbeddedCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'when block.Parent is not null && BlockOwners.Any(block.Parent.IsKind)'; Replace = ''; Tests = 'EmbeddedCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'next.IsKind(SyntaxKind.CloseBraceToken)'; Replace = 'false'; Tests = 'EmbeddedCommentTests' }
+
+        # BRO1134 (comments in declaration headers; shares EmbeddedComments.cs with BRO1132)
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'openBrace.Parent is BlockSyntax or AccessorListSyntax ?'; Replace = 'openBrace.Parent is BlockSyntax ?'; Tests = 'DeclarationCommentTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'while (token.Parent is AttributeListSyntax list && list.Parent == owner)'; Replace = 'while (token.Parent is AttributeListSyntax list && list.Parent == null)'; Tests = 'DeclarationCommentTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '&& line.Start < next.SpanStart && text.ToString(line.Span).Trim().Length == 0'; Replace = '&& false'; Tests = 'DeclarationCommentTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '!(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))'; Replace = 'true'; Tests = 'BlankLineAfterTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))'; Replace = ''; Tests = 'BlankLineAfterTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(embeddedCommentsOn && Readability.EmbeddedComments.IsMoved(comment, text))'; Replace = ''; Tests = 'BlankLineAfterTests' }
 
         # BRO1131 (base calls). Not mutated: Speculation.SymbolAfterReplacing vs a position-based lookup of a DETACHED
         # node (equivalent; the original bug passed the attached access.Name, which binds as a member-access name).

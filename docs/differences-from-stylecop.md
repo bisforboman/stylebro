@@ -159,6 +159,7 @@ change nothing there.)
 Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1133.severity`,
 `dotnet_diagnostic.BRO1520.severity`, `dotnet_diagnostic.BRO1521.severity` and `dotnet_diagnostic.BRO1522.severity` =
 Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1520.severity`,
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1134.severity` =
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1523.severity` =
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1135.severity` =
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1525.severity` =
@@ -174,6 +175,7 @@ them.
 | [BRO1520](rules/BRO1520.md) | Binary operators and `?`/`:` at the beginning of the line when an expression wraps (`dotnet_style_operator_placement_when_wrapping`) | Roslynator RCS0027/RCS0028 |
 | [BRO1521](rules/BRO1521.md) | `=>` of expression bodies and switch arms at the end of the line (`stylebro_arrow_placement_when_wrapping`) | Roslynator RCS0032 |
 | [BRO1522](rules/BRO1522.md) | `=` of assignments and initializers at the end of the line (`stylebro_equals_placement_when_wrapping`) | Roslynator RCS0052 |
+| [BRO1134](rules/BRO1134.md) | A comment between a type's, namespace's, member's, accessor's or local function's header and its `{` moves into the body, like BRO1132 (SA1108) for statements | StyleCop issue [#605](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/605) (proposed, never implemented) |
 | [BRO1523](rules/BRO1523.md) | In a call chain split over several lines, every call after the first line starts its own line | Roslynator RCS0054 |
 | [BRO1135](rules/BRO1135.md) | Integer literal suffixes in upper case (`1L`, `2U`, `3UL`); real suffixes (`f`, `d`, `m`) aren't checked | Sonar S818, StyleCop issue #1563 |
 | [BRO1525](rules/BRO1525.md) | No blank line between an attribute list and its element or the element's next attribute list | StyleCop's proposed SA1521 ([#738](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/738), never implemented) |

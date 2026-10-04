@@ -4,13 +4,16 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Readability;
 
-/// <summary>BRO1132: a comment between a statement's header and its '{'. One diagnostic per comment, on the comment.</summary>
+/// <summary>
+/// BRO1132: a comment between a statement's header and its '{'; BRO1134: the same for a declaration. One diagnostic per
+/// comment, on the comment.
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EmbeddedCommentAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Descriptors.EmbeddedComment);
+        ImmutableArray.Create(Descriptors.EmbeddedComment, Descriptors.DeclarationComment);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -28,6 +31,11 @@ public sealed class EmbeddedCommentAnalyzer : DiagnosticAnalyzer
                     foreach (var comment in EmbeddedComments.GetComments(EmbeddedComments.GetOpenBrace(node), text))
                     {
                         c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmbeddedComment, comment.GetLocation()));
+                    }
+
+                    foreach (var comment in EmbeddedComments.GetComments(EmbeddedComments.GetDeclarationOpenBrace(node), text))
+                    {
+                        c.ReportDiagnostic(Diagnostic.Create(Descriptors.DeclarationComment, comment.GetLocation()));
                     }
                 }
             });

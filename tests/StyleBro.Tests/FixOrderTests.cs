@@ -33,6 +33,52 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task DeclarationComments_MovedNextToBlankLinesAndDocumentation() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C // note
+        {
+
+            /// <summary>Docs.</summary>
+            public void M()
+            // why
+            {
+                M();
+            }
+        }
+        """,
+        "BRO1134",
+        "BRO1503",
+        "BRO1504",
+        "BRO1506",
+        "BRO1513");
+
+    [Fact]
+    public Task EmbeddedComments_MovedAboveABlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C // note
+        {
+
+            private int x;
+
+            public int M() // why
+            {
+
+                if (x > 0) // positive
+                {
+
+                    return x;
+                }
+
+                return 0;
+            }
+        }
+        """,
+        "BRO1132",
+        "BRO1134",
+        "BRO1503",
+        "BRO1506");
+
+    [Fact]
     public Task CallChains_WithSplitArgumentsAndAWrappedOperator() => AssertConvergesInEveryOrderAsync(
         """
         using System.Linq;

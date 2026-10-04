@@ -181,4 +181,38 @@ public class BlankLineAfterTests
         }
         """,
         "dotnet_diagnostic.BRO1132.severity = none\n");
+
+    [Fact]
+    public Task CommentBeforeADeclarationsOpenBrace_IsLeftToBro1134() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            void M()
+            // moved into the body by BRO1134
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task CommentBeforeADeclarationsOpenBrace_WithBro1134Off_GetsTheBlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            void M()
+            {|BRO1504:// stays here|}
+            {
+            }
+        }
+        """,
+        """
+        class C
+        {
+            void M()
+
+            // stays here
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1134.severity = none\n");
 }

@@ -86,9 +86,10 @@ internal static class BlankLines
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
     /// an opening brace or a 'case'/'default' label; and not for '///' and '////' (commented-out code). Not for a comment
-    /// BRO1132 moves into a block when it's on (<paramref name="embeddedCommentsOn"/>): the blank line would stay behind.
+    /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
+    /// behind.
     /// </summary>
-    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, bool embeddedCommentsOn)
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
         {
@@ -114,7 +115,7 @@ internal static class BlankLines
         return !previous.IsKind(SyntaxKind.OpenBraceToken)
             && !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
-            && !(embeddedCommentsOn && Readability.EmbeddedComments.IsMoved(comment, text));
+            && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule));
     }
 
     /// <summary>Deletes the given lines. Duplicates are ignored, so Fix All can pass overlapping sets.</summary>
