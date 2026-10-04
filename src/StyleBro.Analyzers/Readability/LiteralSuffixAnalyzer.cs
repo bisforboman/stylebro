@@ -6,13 +6,13 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Readability;
 
-/// <summary>BRO1122: '1L' instead of '(long)1'. The diagnostic is on the cast.</summary>
+/// <summary>BRO1122: '1L' instead of '(long)1', on the cast; BRO1135: '1L' instead of '1l', on the literal.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class LiteralSuffixAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Descriptors.LiteralSuffix);
+        ImmutableArray.Create(Descriptors.LiteralSuffix, Descriptors.LiteralSuffixCase);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -28,5 +28,14 @@ public sealed class LiteralSuffixAnalyzer : DiagnosticAnalyzer
                 }
             },
             SyntaxKind.CastExpression);
+        context.RegisterSyntaxNodeAction(
+            c =>
+            {
+                if (LiteralSuffixes.GetUpperCaseSuffix(((LiteralExpressionSyntax)c.Node).Token) is { } newText)
+                {
+                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.LiteralSuffixCase, c.Node.GetLocation(), newText));
+                }
+            },
+            SyntaxKind.NumericLiteralExpression);
     }
 }

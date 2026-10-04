@@ -139,6 +139,8 @@ SDK: none (IDE0090 is about `new()`). Effort: low; target-typed `new() { }` need
 Sonar has a fix (`LiteralSuffixUpperCaseCodeFix`). The compiler warns (CS0078) about `l` only. Effort: low, next to
 BRO1122. Hex digits are not suffixes (`0xff` stays).
 
+Done (2026-10-04): [BRO1135](rules/BRO1135.md), integer suffixes only.
+
 ### 12. `else if` (RCS0041, RCS1006)
 
 RCS0041 joins `else` and `if` that sit on two lines; RCS1006 turns `else { if (...) ... }` (the block holds only the

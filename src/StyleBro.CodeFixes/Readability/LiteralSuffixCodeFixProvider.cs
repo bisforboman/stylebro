@@ -12,13 +12,13 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1122: replaces the cast with the suffixed literal.</summary>
+/// <summary>Fix for BRO1122 (replaces the cast with the suffixed literal) and BRO1135 (upper-cases the suffix).</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(LiteralSuffixCodeFixProvider))]
 public sealed class LiteralSuffixCodeFixProvider : CodeFixProvider
 {
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.LiteralSuffix);
+        ImmutableArray.Create(DiagnosticIds.LiteralSuffix, DiagnosticIds.LiteralSuffixCase);
 
     /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
@@ -31,9 +31,9 @@ public sealed class LiteralSuffixCodeFixProvider : CodeFixProvider
         {
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    "Use the literal suffix",
+                    diagnostic.Id == DiagnosticIds.LiteralSuffixCase ? "Upper-case the literal suffix" : "Use the literal suffix",
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
-                    equivalenceKey: nameof(LiteralSuffixCodeFixProvider)),
+                    equivalenceKey: nameof(LiteralSuffixCodeFixProvider) + diagnostic.Id),
                 diagnostic);
         }
 
@@ -56,7 +56,12 @@ public sealed class LiteralSuffixCodeFixProvider : CodeFixProvider
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
-            if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true) is CastExpressionSyntax cast
+            var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
+            if (node is LiteralExpressionSyntax literal && LiteralSuffixes.GetUpperCaseSuffix(literal.Token) is { } newText)
+            {
+                changes.Add(new TextChange(literal.Token.Span, newText));
+            }
+            else if (node is CastExpressionSyntax cast
                 && LiteralSuffixes.GetChange(cast, model, cancellationToken) is { } change)
             {
                 changes.Add(change);
