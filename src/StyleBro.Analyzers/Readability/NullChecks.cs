@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -160,6 +161,11 @@ internal static class NullChecks
     // Patterns aren't allowed in expression trees (CS8122): a lambda, or a query clause, converted to an Expression.
     private static bool IsInExpressionTree(SyntaxNode node, SemanticModel model, CancellationToken cancellationToken)
     {
+        if (!node.Ancestors().Any(a => a is AnonymousFunctionExpressionSyntax or QueryExpressionSyntax))
+        {
+            return false;
+        }
+
         for (var operation = model.GetOperation(node, cancellationToken); operation is not null; operation = operation.Parent)
         {
             if (operation is IAnonymousFunctionOperation

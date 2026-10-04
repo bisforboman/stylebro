@@ -74,13 +74,13 @@ internal static class DocumentationComments
     /// BRO1602: the '///' comments that don't document anything: not directly before a type, member or enum member.
     /// '////' (commented-out code) isn't a documentation comment.
     /// </summary>
-    public static IEnumerable<SyntaxTrivia> GetMisplacedDocumentationComments(SyntaxNode root)
+    public static IEnumerable<SyntaxTrivia> GetMisplacedDocumentationComments(IEnumerable<SyntaxTrivia> trivia)
     {
-        foreach (var trivia in root.DescendantTrivia())
+        foreach (var comment in trivia)
         {
-            if (IsTripleSlashComment(trivia) && !DocumentsAMember(trivia))
+            if (IsTripleSlashComment(comment) && !DocumentsAMember(comment))
             {
-                yield return trivia;
+                yield return comment;
             }
         }
     }

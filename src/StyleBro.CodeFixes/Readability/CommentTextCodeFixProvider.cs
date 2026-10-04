@@ -54,8 +54,9 @@ public sealed class CommentTextCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var changes = new List<TextChange>();
-        var spaces = CommentText.GetBadDocumentationSpaces(root, text).ToList();
-        var empty = CommentText.GetEmptyComments(root, text).ToList();
+        var comments = CommentText.GetComments(root);
+        var spaces = CommentText.GetBadDocumentationSpaces(comments, text).ToList();
+        var empty = CommentText.GetEmptyComments(comments, text).ToList();
         foreach (var diagnostic in diagnostics)
         {
             var span = diagnostic.Location.SourceSpan;

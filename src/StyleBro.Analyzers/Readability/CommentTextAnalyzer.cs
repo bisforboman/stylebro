@@ -23,14 +23,14 @@ public sealed class CommentTextAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterSyntaxTreeAction(c =>
         {
-            var root = c.Tree.GetRoot(c.CancellationToken);
+            var trivia = CommentText.GetComments(c.Tree.GetRoot(c.CancellationToken));
             var text = c.Tree.GetText(c.CancellationToken);
-            foreach (var span in CommentText.GetBadDocumentationSpaces(root, text))
+            foreach (var span in CommentText.GetBadDocumentationSpaces(trivia, text))
             {
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.DocumentationLineSpace, Location.Create(c.Tree, span)));
             }
 
-            foreach (var (reported, _) in CommentText.GetEmptyComments(root, text))
+            foreach (var (reported, _) in CommentText.GetEmptyComments(trivia, text))
             {
                 c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmptyComment, Location.Create(c.Tree, reported.Span)));
             }
