@@ -22,5 +22,15 @@ namespace Messy.Wrapping
             return label
                 + " (" + count + ")";
         }
+
+        public string Size(int count)
+        {
+            var size = count > 100
+                ? "large"
+                : "small";
+            return count == 0
+                ? "empty"
+                : size;
+        }
     }
 }

@@ -47,6 +47,13 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (list.Parent is null or CompilationUnitSyntax || '; Replace = 'if ('; Tests = 'AttributeBlankLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = ' || list.Parent.ContainsDiagnostics)'; Replace = ')'; Tests = 'AttributeBlankLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (!close.TrailingTrivia.Concat('; Replace = 'if (false && !close.TrailingTrivia.Concat('; Tests = 'AttributeBlankLinesTests' }
+        # BRO1524 (split conditional expressions)
+        @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (conditional.ContainsDiagnostics'; Replace = 'if (false'; Tests = 'ConditionalLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = '|| conditional.WhenFalse is ConditionalExpressionSyntax'; Replace = ''; Tests = 'ConditionalLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = '|| (conditional.Parent is ConditionalExpressionSyntax parent && parent.WhenFalse == conditional)'; Replace = ''; Tests = 'ConditionalLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (gaps.SelectMany(g => g).Any('; Replace = 'if (false && gaps.SelectMany(g => g).Any('; Tests = 'ConditionalLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (before || after || Line(text, part.SpanStart) != Line(text, part.Span.End))'; Replace = 'if (before || after)'; Tests = 'ConditionalLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (before || after || '; Replace = 'if (after || '; Tests = 'ConditionalLayoutTests' }
         # BRO1603 (periods): closing punctuation, entities, excluded tags; BRO1606: a summary starting with <para>
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '.TrimEnd().TrimEnd(ClosingPunctuation)'; Replace = '.TrimEnd()'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 't.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken'; Replace = 't.IsKind(SyntaxKind.XmlTextLiteralToken)'; Tests = 'DocumentationTests' }
