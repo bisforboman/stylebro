@@ -16,15 +16,21 @@ internal static class PropertySummaries
     /// <summary>Prefixes a summary may already start with, longest first, so the fix can replace a wrong one.</summary>
     private static readonly string[] KnownPrefixes =
     [
+        "Gets or initializes a value indicating whether",
         "Gets or sets a value indicating whether",
+        "Initializes a value indicating whether",
         "Gets a value indicating whether",
         "Sets a value indicating whether",
+        "Gets or initializes whether",
         "Gets or sets whether",
+        "Initializes whether",
         "Gets whether",
         "Sets whether",
         "Indicates whether",
         "Determines whether",
+        "Gets or initializes",
         "Gets or sets",
+        "Initializes",
         "Gets",
         "Sets",
         "Whether",
@@ -33,18 +39,15 @@ internal static class PropertySummaries
     /// <summary>
     /// The finding for a property, or null when its summary is right or can't be checked. The words follow the
     /// accessors other code can use: 'Gets or sets', 'Gets' (no setter, or a private or internal setter; a protected
-    /// one counts, like in StyleCop), 'Sets' (write-only); a bool gets 'a value indicating whether' after them. Not checked:
-    /// indexers, 'init' accessors, and summaries that don't start with text.
+    /// one counts, like in StyleCop), 'Sets' (write-only); a bool gets 'a value indicating whether' after them. An
+    /// 'init' accessor counts like a setter with 'initializes', and like StyleCop master a property with 'get' and
+    /// 'init' may also say just 'Gets'. Not checked: indexers, and summaries that don't start with text.
     /// </summary>
     public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text)
     {
-        if (property.AccessorList is { } accessors && accessors.Accessors.Any(a => a.IsKind(SyntaxKind.InitAccessorDeclaration)))
-        {
-            return null;
-        }
-
         var getter = property.ExpressionBody is not null || property.AccessorList?.Accessors.Any(a => a.IsKind(SyntaxKind.GetAccessorDeclaration)) == true;
-        var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration));
+        var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration) || a.IsKind(SyntaxKind.InitAccessorDeclaration));
+        var initOnly = setter is not null && setter.IsKind(SyntaxKind.InitAccessorDeclaration);
 
         // Like StyleCop, a protected setter is usable (by derived types); a private or internal one isn't.
         var restrictedSetter = setter is not null
@@ -52,11 +55,16 @@ internal static class PropertySummaries
             && !setter.Modifiers.Any(m => m.IsKind(SyntaxKind.ProtectedKeyword) && setter.Modifiers.Any(n => n.IsKind(SyntaxKind.InternalKeyword)));
         var visibleSetter = setter is not null && !restrictedSetter;
 
-        var verb = getter && visibleSetter ? "Gets or sets" : getter ? "Gets" : visibleSetter ? "Sets" : null;
+        var verb = getter && visibleSetter ? (initOnly ? "Gets or initializes" : "Gets or sets")
+            : getter ? "Gets"
+            : visibleSetter ? (initOnly ? "Initializes" : "Sets")
+            : null;
         if (verb is null)
         {
             return null;
         }
+
+        string[] accepted = initOnly && getter && visibleSetter ? [verb, "Gets"] : [verb];
 
         var isBool = property.Type is PredefinedTypeSyntax { Keyword.RawKind: (int)SyntaxKind.BoolKeyword }
             || (property.Type is NullableTypeSyntax { ElementType: PredefinedTypeSyntax { Keyword.RawKind: (int)SyntaxKind.BoolKeyword } });
@@ -76,7 +84,7 @@ internal static class PropertySummaries
         // putting the phrase in front of other text doesn't make a sentence ('a value indicating whether the open
         // state'). Only a summary that already says 'whether' gets the full phrase.
         var longForm = verb + " a value indicating whether";
-        if (old == verb || (isBool && old == longForm))
+        if (accepted.Any(v => old == v || (isBool && old == v + " a value indicating whether")))
         {
             return null;
         }
@@ -102,7 +110,7 @@ internal static class PropertySummaries
         return new Finding(
             property.Identifier,
             prefix,
-            restrictedSetter && old == "Gets or sets",
+            restrictedSetter && (old.StartsWith("Gets or sets", StringComparison.Ordinal) || old.StartsWith("Gets or initializes", StringComparison.Ordinal)),
             new TextSpan(start, afterOld + 1),
             prefix + " " + lowered);
     }

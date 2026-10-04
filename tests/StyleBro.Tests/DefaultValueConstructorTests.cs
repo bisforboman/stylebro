@@ -1,9 +1,29 @@
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
+using StyleBro.Analyzers.Readability;
+using StyleBro.CodeFixes.Readability;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Readability.DefaultValueConstructorAnalyzer, StyleBro.CodeFixes.Readability.DefaultValueConstructorCodeFixProvider>;
 
 namespace StyleBro.Tests;
 
 public class DefaultValueConstructorTests
 {
+    private const string NativeIntegers = """
+        using System;
+
+        class C
+        {
+            void M()
+            {
+                nint a = {|BRO1104:new nint()|};
+                nuint b = {|BRO1104:new nuint()|};
+                var c = {|BRO1104:new IntPtr()|};
+                var d = {|BRO1104:new UIntPtr()|};
+            }
+        }
+        """;
+
     [Fact]
     public Task ValueTypes_BecomeDefault() => VerifyFixAsync(
         """
@@ -149,4 +169,34 @@ public class DefaultValueConstructorTests
             }
         }
         """);
+
+    // Like StyleCop master: 'nint.Zero' only compiles with C# 11 on a runtime with numeric IntPtr (.NET 7+); the test
+    // framework's default references are .NET Core 3.1.
+    [Fact]
+    public Task NativeIntegers_WithoutNumericIntPtr_BecomeDefault() => VerifyFixAsync(
+        NativeIntegers,
+        Fixed("default(nint)", "default(nuint)"));
+
+    [Theory]
+    [InlineData(LanguageVersion.CSharp11, "nint.Zero", "nuint.Zero")]
+    [InlineData(LanguageVersion.CSharp10, "default(nint)", "default(nuint)")]
+    public Task NativeIntegers_OnNet8_DependOnTheLanguageVersion(LanguageVersion version, string nint, string nuint)
+    {
+        var test = new CSharpCodeFixTest<DefaultValueConstructorAnalyzer, DefaultValueConstructorCodeFixProvider, DefaultVerifier>
+        {
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+            TestCode = NativeIntegers,
+            FixedCode = Fixed(nint, nuint),
+        };
+        test.SolutionTransforms.Add((solution, projectId) => solution.WithProjectParseOptions(
+            projectId,
+            ((CSharpParseOptions)solution.GetProject(projectId)!.ParseOptions!).WithLanguageVersion(version)));
+        return test.RunAsync();
+    }
+
+    private static string Fixed(string nint, string nuint) => NativeIntegers
+        .Replace("{|BRO1104:new nint()|}", nint, StringComparison.Ordinal)
+        .Replace("{|BRO1104:new nuint()|}", nuint, StringComparison.Ordinal)
+        .Replace("{|BRO1104:new IntPtr()|}", "IntPtr.Zero", StringComparison.Ordinal)
+        .Replace("{|BRO1104:new UIntPtr()|}", "UIntPtr.Zero", StringComparison.Ordinal);
 }

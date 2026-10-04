@@ -247,4 +247,48 @@ public class TrailingCommaTests
             }
         }
         """);
+
+    // Like StyleCop master (94671b70): multi-line property patterns, also nested ones in one pass.
+    [Fact]
+    public Task MultiLinePropertyPatterns_GetATrailingComma() => VerifyFixAsync(
+        """
+        class P
+        {
+            public int X { get; set; }
+
+            public P Next { get; set; }
+        }
+
+        class C
+        {
+            bool M(object o) => o is P { X: 1 } && o is P
+            {
+                X: 1,
+                {|BRO1401:Next: P
+                {
+                    {|BRO1401:X: 2|}
+                }|}
+            };
+        }
+        """,
+        """
+        class P
+        {
+            public int X { get; set; }
+
+            public P Next { get; set; }
+        }
+
+        class C
+        {
+            bool M(object o) => o is P { X: 1 } && o is P
+            {
+                X: 1,
+                Next: P
+                {
+                    X: 2,
+                },
+            };
+        }
+        """);
 }

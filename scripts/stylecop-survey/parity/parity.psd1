@@ -224,6 +224,10 @@
                 # '2,}' breaks SA1001 (comma followed by whitespace).
                 'StyleBro output only: CommaEdges.cs: [                B = 2, };]'
                 'StyleCop output only: CommaEdges.cs: [                B = 2,};]'
+                # BRO1401: multi-line property patterns, like StyleCop master (94671b70); beta.556 doesn't check them.
+                'only StyleBro: BRO1401 Commas.cs(72,17)'
+                'StyleBro output only: Commas.cs: [                Y: 2,]'
+                'StyleCop output only: Commas.cs: [                Y: 2]'
             )
         }
         @{
@@ -441,6 +445,13 @@
                 'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether gets whether it is closed.</summary>]'
                 'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets is it closed.</summary>]'
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets a value indicating whether is it closed.</summary>]'
+                # 'init' accessors, like StyleCop master (eb498962): 'Gets or initializes' (or 'Gets') for get+init, and
+                # 'Gets or initializes' is a wrong prefix on get+set; beta.556 ignores 'init' and its fix writes
+                # 'Gets or sets or initializes'.
+                'StyleBro output only: Properties.cs: [        /// <summary>Gets or initializes the init thing.</summary>]'
+                'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets the set thing.</summary>]'
+                'StyleCop output only: Properties.cs: [        /// <summary>Gets the init thing.</summary>]'
+                'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets or initializes the set thing.</summary>]'
             )
         }
         @{
@@ -478,6 +489,9 @@
                 # StyleCop counts a stale tag when numbering positions, so after 'old' it reports 'b' as out of order;
                 # without the stale tag 'b' is where it belongs, so BRO1611 only reports 'old'.
                 'only StyleCop: BRO1611 Params.cs(62,26)'
+                # Primary constructor parameters (records here), like StyleCop master (24dd9011); beta.556 doesn't check them.
+                'only StyleBro: BRO1611 Params.cs(173,22)'
+                'only StyleBro: BRO1611 Params.cs(174,22)'
             )
         }
         @{

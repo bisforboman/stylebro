@@ -168,4 +168,9 @@ namespace Probe
         /// <returns>The sum.</returns>
         public static Others operator +(Others a, Others b) => a;
     }
+
+    /// <summary>A primary constructor.</summary>
+    /// <param name="b">The b.</param>
+    /// <param name="a">The a.</param>
+    public record Primary(int a, int b);
 }

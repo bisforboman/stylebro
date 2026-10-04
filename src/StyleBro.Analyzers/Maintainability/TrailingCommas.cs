@@ -10,9 +10,9 @@ internal static class TrailingCommas
 {
     /// <summary>
     /// The last item of a multi-line list that has no trailing comma, or null. Like StyleCop's SA1413, the lists are
-    /// array, object, collection and 'with' initializers, anonymous objects, enums and switch expressions; a list is
-    /// multi-line when its braces are on different lines. The comma goes right after the last item's code, so before
-    /// a trailing comment ('2 // last' becomes '2, // last').
+    /// array, object, collection and 'with' initializers, anonymous objects, enums, switch expressions and (like
+    /// StyleCop master) property patterns; a list is multi-line when its braces are on different lines. The comma goes
+    /// right after the last item's code, so before a trailing comment ('2 // last' becomes '2, // last').
     /// Lists with a preprocessor directive between their braces are skipped: which item is last can then depend on
     /// the build configuration, and in a multi-targeted project each target framework would want a different edit to
     /// the same file, which 'dotnet format' merges into conflict markers.
@@ -74,6 +74,8 @@ internal static class TrailingCommas
                 => Describe(enumDeclaration.Members, enumDeclaration.OpenBraceToken, enumDeclaration.CloseBraceToken),
             SwitchExpressionSyntax switchExpression
                 => Describe(switchExpression.Arms, switchExpression.OpenBraceToken, switchExpression.CloseBraceToken),
+            PropertyPatternClauseSyntax propertyPattern
+                => Describe(propertyPattern.Subpatterns, propertyPattern.OpenBraceToken, propertyPattern.CloseBraceToken),
             _ => null,
         };
     }
