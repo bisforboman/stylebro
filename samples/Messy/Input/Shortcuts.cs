@@ -20,6 +20,10 @@ namespace Messy.Shortcuts
 
         public decimal Precise { get; } = (decimal)1.50;
 
+        public ulong Mask { get; } = 0xFFul;
+
+        public long Retries { get; } = (long)5u;
+
         public List<ValueTuple<string, int>> Counts { get; } = new List<ValueTuple<string, int>>();
 
         public (string Name, int Count) Top() => ValueTuple.Create("none", 0);
