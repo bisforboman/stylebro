@@ -70,7 +70,7 @@ internal static class EmbeddedComments
         }
 
         var previous = openBrace.GetPreviousToken();
-        if (previous.IsMissing)
+        if (previous.IsMissing || !(previous.TrailingTrivia.Any(IsComment) || openBrace.LeadingTrivia.Any(IsComment)))
         {
             return ImmutableArray<SyntaxTrivia>.Empty;
         }

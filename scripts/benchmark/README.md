@@ -23,6 +23,7 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 | StyleBro, 2026-10-03 (88 rules, 46 analyzers) | 1,082-1,350 ms (two runs) | DocumentationAnalyzer ~180-210 ms, FieldNamingAnalyzer ~140-200 ms, CommentTextAnalyzer ~115-200 ms, BlankLineRunsAnalyzer ~110-120 ms |
 | StyleBro, 2026-10-04 (55 analyzers) | 806-858 ms (three runs) | DocumentationAnalyzer ~120 ms, FieldNamingAnalyzer ~125-160 ms, CommentTextAnalyzer ~57 ms, NullCheckAnalyzer ~35 ms |
 | StyleBro after the walk merges below | 709-752 ms (three runs, alternated with the row above) | FieldNamingAnalyzer ~150-200 ms, DocumentationAnalyzer ~45-70 ms, CommentTextAnalyzer ~33 ms, NullCheckAnalyzer ~6 ms |
+| StyleBro after the cheap-checks-first changes below | 669-743 ms (three runs, alternated with 670-747 ms for the row above) | CamelCaseNamingAnalyzer 17 -> 2 ms, BaseCallsAnalyzer 15 -> 5 ms, CallChainAnalyzer ~20 -> 14 ms, EmbeddedCommentAnalyzer ~29 -> 24 ms |
 
 Single runs vary by about 20% (the two 2026-10-03 runs of the same build differ by 25%). In real builds the analyzers run concurrently with each other and with the compiler,
 so the wall-clock cost is smaller: the private 30-project app built in the same time with and without StyleBro.
@@ -35,5 +36,8 @@ one pass is the next step if analyzer time ever matters.
 of every doc comment); each now walks once and keeps only the comments. NullCheckAnalyzer built the operation tree for
 every null check to rule out expression trees; it now does so only inside a lambda or query. WrappingPlacementAnalyzer
 skips operators with no line break around them before building trivia lists. Same diagnostics before and after.
+Then cheap checks first: CamelCaseNamingAnalyzer checks the name before looking up the symbol (most names need no
+rename), BaseCallsAnalyzer rules out virtual calls before the speculative bind, CallChainAnalyzer skips chains on one
+line, EmbeddedCommentAnalyzer skips braces without a comment before them. Same diagnostics again.
 `STYLEBRO_BENCH_ONLY=Name1,Name2` times only those analyzers (alone they pay shared costs such as building the red tree
 or binding, so compare builds, not analyzers).
