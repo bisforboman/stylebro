@@ -89,7 +89,7 @@ SA1213,"StyleBro **BRO1004** (done), same positions and output as StyleCop"
 SA1214,StyleBro **BRO1001** (done)
 SA1216,SDK: using sorting in `dotnet format`
 SA1217,SDK: using sorting in `dotnet format`
-SA1300,"StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces: **BRO1312** (proposal, off by default)"
+SA1300,"StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces: **BRO1312** (done, opt-in: off by default, `stylebro-migrate` turns it on with SA1300)"
 SA1301,Drop: StyleCop never reports it. Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility.
 SA1302,"StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop"
 SA1303,"StyleBro **BRO1306** (done), rename with Fix All"

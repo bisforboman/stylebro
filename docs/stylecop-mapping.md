@@ -145,7 +145,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
-| SA1300 | Element should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces: **BRO1312** (proposal, off by default) |
+| SA1300 | Element should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1309** (done), rename with Fix All incl. overrides/implementations; namespaces: **BRO1312** (done, opt-in: off by default, `stylebro-migrate` turns it on with SA1300) |
 | SA1301 | Element should begin with lower-case letter | off | no | off / off / off | 0 / 0 / 0 |  | Drop: StyleCop never reports it. Off by default and no diagnostic (probed). StyleCop keeps the id for compatibility. ([details](skipped-rules.md#sa1301)) |
 | SA1302 | Interface names should begin with I | on | yes | on / off / on | 0 / 0 / 0 | not fixed | StyleBro **BRO1304** (done), rename with Fix All, same results as StyleCop |
 | SA1303 | Const field names should begin with upper-case letter | on | yes | on / off / off | 0 / 0 / 4 | not fixed | StyleBro **BRO1306** (done), rename with Fix All |
