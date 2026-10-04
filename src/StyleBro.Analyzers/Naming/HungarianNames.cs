@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -55,6 +56,31 @@ internal sealed class HungarianNames
     /// <summary>Like StyleCop, names inside a '*NativeMethods' class keep their Win32 prefixes ('lpBuffer').</summary>
     public static bool IsInNativeMethods(SyntaxNode node) =>
         node.Ancestors().OfType<ClassDeclarationSyntax>().Any(c => c.Identifier.ValueText.EndsWith("NativeMethods", StringComparison.Ordinal));
+
+    /// <summary>
+    /// A parameter of an extern, [DllImport] or [LibraryImport] method or local function keeps the native API's name
+    /// ('hWnd', 'dwFlags'), like BRO1309 leaves such methods alone (StyleCop #2859).
+    /// </summary>
+    public static bool IsExternParameter(SyntaxNode node)
+    {
+        var (modifiers, attributes) = node.Parent?.Parent switch
+        {
+            MethodDeclarationSyntax method => (method.Modifiers, method.AttributeLists),
+            LocalFunctionStatementSyntax function => (function.Modifiers, function.AttributeLists),
+            _ => (default, default),
+        };
+        return node is ParameterSyntax
+            && (modifiers.Any(SyntaxKind.ExternKeyword)
+                || attributes.SelectMany(list => list.Attributes).Any(a => GetName(a.Name) is "DllImport" or "DllImportAttribute" or "LibraryImport" or "LibraryImportAttribute"));
+
+        static string GetName(NameSyntax name) => name switch
+        {
+            QualifiedNameSyntax qualified => qualified.Right.Identifier.ValueText,
+            AliasQualifiedNameSyntax alias => alias.Name.Identifier.ValueText,
+            SimpleNameSyntax simple => simple.Identifier.ValueText,
+            _ => string.Empty,
+        };
+    }
 
     /// <inheritdoc cref="IsInNativeMethods(SyntaxNode)"/>
     public static bool IsInNativeMethods(ISymbol symbol)

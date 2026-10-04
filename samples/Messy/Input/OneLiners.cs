@@ -16,6 +16,8 @@ public class Thermostat
         log();
     }
 
+    public void Hold(bool idle) { if (idle) return; Heat(); }
+
     private void Heat() { target++; }
 
     private void Cool() { target--; }

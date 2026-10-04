@@ -42,7 +42,10 @@ internal static class DefaultValueConstructors
             : type.ToMinimalDisplayString(model, creation.SpanStart);
 
         // Like StyleCop: an enum's zero member, and the well-known "empty" members. Those members are not
-        // constants, so a parameter's default value (which must be constant) gets 'default(T)' instead.
+        // constants, so a parameter's default value (which must be constant) gets 'default(T)' instead. 'nint.Zero'
+        // compiles only with C# 11 on .NET 7+, and a multi-targeted project analyzes the same file once per target
+        // framework: an answer that depended on it would differ between the copies. So 'nint'/'nuint' always get
+        // 'default(nint)', which means the same everywhere.
         if (type.TypeKind == TypeKind.Enum && GetZeroMember(type) is { } zero)
         {
             return typeText + "." + zero;
@@ -50,7 +53,7 @@ internal static class DefaultValueConstructors
 
         if (!IsParameterDefaultValue(creation)
             && GetEmptyMember(type) is { } empty
-            && (typeText is not ("nint" or "nuint") || SupportsNumericIntPtr(model.Compilation)))
+            && typeText is not ("nint" or "nuint"))
         {
             return typeText + "." + empty;
         }
@@ -78,17 +81,6 @@ internal static class DefaultValueConstructors
                 _ => null,
             },
         };
-    }
-
-    /// <summary>
-    /// Whether 'nint.Zero' compiles: like StyleCop master, C# 11 and a runtime with 'RuntimeFeature.NumericIntPtr'
-    /// (.NET 7+). Elsewhere 'nint' isn't 'IntPtr' and has no 'Zero' member (CS0117).
-    /// </summary>
-    private static bool SupportsNumericIntPtr(Compilation compilation)
-    {
-        return compilation is CSharpCompilation { LanguageVersion: >= LanguageVersion.CSharp11 } csharp
-            && csharp.GetTypeByMetadataName("System.Runtime.CompilerServices.RuntimeFeature") is { } runtimeFeature
-            && runtimeFeature.GetMembers("NumericIntPtr").Any(m => m is IFieldSymbol { IsConst: true });
     }
 
     private static bool IsParameterDefaultValue(SyntaxNode node)

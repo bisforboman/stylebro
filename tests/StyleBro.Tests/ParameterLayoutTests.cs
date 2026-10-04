@@ -151,7 +151,7 @@ public class ParameterLayoutTests
                 M(
                     1,
                     M(
-                    1, 2, 3, 4),
+                        1, 2, 3, 4),
                     3,
                     4);
                 M(
@@ -163,6 +163,72 @@ public class ParameterLayoutTests
             }
         }
         """);
+
+    [Fact]
+    public Task MovedLambda_TakesItsBodyAlong() => VerifyFixAsync(
+        """
+        using System;
+        using System.Threading;
+        using System.Threading.Tasks;
+
+        class C
+        {
+            void M(CancellationToken token)
+            {
+                Func<Task, Task<string>> f = task =>
+                    Task.Factory.StartNew<string>({|BRO1107:() =>
+                    {
+                        throw new InvalidOperationException();
+                    }|}, {|BRO1108:token|});
+            }
+        }
+        """,
+        """
+        using System;
+        using System.Threading;
+        using System.Threading.Tasks;
+
+        class C
+        {
+            void M(CancellationToken token)
+            {
+                Func<Task, Task<string>> f = task =>
+                    Task.Factory.StartNew<string>(
+                        () =>
+                        {
+                            throw new InvalidOperationException();
+                        },
+                        token);
+            }
+        }
+        """);
+
+    [Fact]
+    public Task MovedItem_WithAMultiLineString_KeepsItsLines() => VerifyFixAsync(
+        """"
+        class C
+        {
+            void M(string a, int b)
+            {
+                M({|BRO1107:"""
+                    text
+                    """|}, {|BRO1108:1|});
+            }
+        }
+        """",
+        """"
+        class C
+        {
+            void M(string a, int b)
+            {
+                M(
+                    """
+                    text
+                    """,
+                    1);
+            }
+        }
+        """");
 
     [Fact]
     public Task FixAll_FixesNestedLists() => VerifyFixAsync(
@@ -189,22 +255,7 @@ public class ParameterLayoutTests
                 M(
                     M(
                         1,
-                    2),
-                    3);
-            }
-        }
-        """,
-        batchFixedSource: """
-        class C
-        {
-            int M(int a, int b) => a;
-    
-            void N()
-            {
-                M(
-                    M(
-                    1,
-                    2),
+                        2),
                     3);
             }
         }

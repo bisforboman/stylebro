@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,6 +22,9 @@ internal static class QualifiedUsings
         genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
 
+    /// <summary>For the directive's own (non-generic) type: <c>System.Int32</c>, not <c>int</c>.</summary>
+    private static readonly SymbolDisplayFormat QualifiedNoKeywords = Qualified.RemoveMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+
     /// <summary>
     /// The fully qualified name, or null when the directive is fine or can't be fixed safely. Like StyleCop: not for
     /// names starting with 'global::' or an alias, and not for a type in the namespace the directive is in. Unlike
@@ -42,7 +46,7 @@ internal static class QualifiedUsings
             return null;
         }
 
-        var qualified = symbol.ToDisplayString(Qualified);
+        var qualified = Expected(name, symbol, top: true, model, cancellationToken);
         if (qualified == Canonical(name)
             || (symbol is INamedTypeSymbol && symbol.ContainingNamespace?.ToDisplayString(Qualified) == container.Name.ToString()))
         {
@@ -61,6 +65,49 @@ internal static class QualifiedUsings
         }
 
         return qualified;
+    }
+
+    /// <summary>
+    /// The fully qualified name for <paramref name="syntax"/>. The directive's own type is always written as a name
+    /// (<c>System.ValueTuple&lt;...&gt;</c>, <c>System.Nullable&lt;...&gt;</c>, <c>System.Int32</c>): the shorthand
+    /// forms need C# 12 there (CS9058); inside type arguments they are fine. A type argument that starts with an alias
+    /// is kept as written, like a directive that starts with one (StyleCop #3884).
+    /// </summary>
+    private static string Expected(TypeSyntax syntax, ISymbol symbol, bool top, SemanticModel model, CancellationToken cancellationToken)
+    {
+        var last = syntax is QualifiedNameSyntax qualified ? qualified.Right : syntax;
+        var type = symbol as INamedTypeSymbol;
+        var arguments = type is null ? ImmutableArray<ITypeSymbol>.Empty : (type.TupleUnderlyingType ?? type).TypeArguments;
+        if (last is not GenericNameSyntax generic || type is null || type.ContainingType is { IsGenericType: true }
+            || arguments.Length != generic.TypeArgumentList.Arguments.Count
+            || (!top && (type.IsTupleType || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)))
+        {
+            return symbol.ToDisplayString(top && type is { SpecialType: not SpecialType.None } ? QualifiedNoKeywords : Qualified);
+        }
+
+        var builder = new StringBuilder();
+        var container = (ISymbol?)type.ContainingType ?? type.ContainingNamespace;
+        if (container is not null and not INamespaceSymbol { IsGlobalNamespace: true })
+        {
+            builder.Append(container.ToDisplayString(Qualified)).Append('.');
+        }
+
+        builder.Append(type.Name).Append('<');
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var written = generic.TypeArgumentList.Arguments[i];
+            builder.Append(i > 0 ? ", " : string.Empty);
+            if (written is NameSyntax argument && StartsWithAlias(argument, model, cancellationToken))
+            {
+                Append(builder, argument);
+            }
+            else
+            {
+                builder.Append(Expected(written, arguments[i], top: false, model, cancellationToken));
+            }
+        }
+
+        return builder.Append('>').ToString();
     }
 
     /// <summary>The name as written, normalized like StyleCop's canonical string ('A.B&lt;int, C&gt;').</summary>

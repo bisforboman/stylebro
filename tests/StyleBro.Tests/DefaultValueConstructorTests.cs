@@ -170,23 +170,24 @@ public class DefaultValueConstructorTests
         }
         """);
 
-    // Like StyleCop master: 'nint.Zero' only compiles with C# 11 on a runtime with numeric IntPtr (.NET 7+); the test
-    // framework's default references are .NET Core 3.1.
+    // 'nint.Zero' only compiles with C# 11 on .NET 7+ (StyleCop master checks for that), but a multi-targeted project
+    // analyzes the same file once per target framework, so the fix would differ between the copies. 'default(nint)'
+    // everywhere, also where 'nint.Zero' would compile. The test framework's default references are .NET Core 3.1.
     [Fact]
-    public Task NativeIntegers_WithoutNumericIntPtr_BecomeDefault() => VerifyFixAsync(
+    public Task NativeIntegers_BecomeDefault() => VerifyFixAsync(
         NativeIntegers,
         Fixed("default(nint)", "default(nuint)"));
 
     [Theory]
-    [InlineData(LanguageVersion.CSharp11, "nint.Zero", "nuint.Zero")]
-    [InlineData(LanguageVersion.CSharp10, "default(nint)", "default(nuint)")]
-    public Task NativeIntegers_OnNet8_DependOnTheLanguageVersion(LanguageVersion version, string nint, string nuint)
+    [InlineData(LanguageVersion.CSharp11)]
+    [InlineData(LanguageVersion.CSharp10)]
+    public Task NativeIntegers_OnNet8_BecomeDefaultToo(LanguageVersion version)
     {
         var test = new CSharpCodeFixTest<DefaultValueConstructorAnalyzer, DefaultValueConstructorCodeFixProvider, DefaultVerifier>
         {
             ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
             TestCode = NativeIntegers,
-            FixedCode = Fixed(nint, nuint),
+            FixedCode = Fixed("default(nint)", "default(nuint)"),
         };
         test.SolutionTransforms.Add((solution, projectId) => solution.WithProjectParseOptions(
             projectId,

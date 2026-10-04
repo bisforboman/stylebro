@@ -51,6 +51,8 @@ public class CommentSpacingTests
             ////commented out code
             ///not a doc position
             //---------------------
+            //-:cnd:noEmit
+            //+:cnd:noEmit
             /*block*/
             /// <summary>A doc comment.</summary>
             void M() { }

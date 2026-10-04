@@ -6,7 +6,8 @@ internal static class CommentSpacing
     /// <summary>
     /// The corrected text of a '//' comment, or null when it's fine. Matches StyleCop's SA1005: comments that are
     /// empty or already start with a space are fine, and so are '///...' (including '////' commented-out code) and
-    /// '//--' separators. Tabs and other whitespace after '//' become a single space; a comment with nothing but
+    /// '//--' separators. Also fine: the 'dotnet new' template markers '//-:' and '//+:' (StyleCop #2689: a space breaks
+    /// them). Tabs and other whitespace after '//' become a single space; a comment with nothing but
     /// whitespace becomes '//'.
     /// </summary>
     public static string? GetFixedText(string comment)
@@ -14,7 +15,9 @@ internal static class CommentSpacing
         if (comment.Length <= 2
             || comment[2] == ' '
             || comment[2] == '/'
-            || comment.StartsWith("//--", System.StringComparison.Ordinal))
+            || comment.StartsWith("//--", System.StringComparison.Ordinal)
+            || comment.StartsWith("//-:", System.StringComparison.Ordinal)
+            || comment.StartsWith("//+:", System.StringComparison.Ordinal))
         {
             return null;
         }
