@@ -128,6 +128,30 @@ public class BlankLineAfterTests
         """);
 
     [Fact]
+    public Task CommentAfterAnArrow_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        using System;
+
+        class C
+        {
+            int M(int x) => x switch
+            {
+                2 =>
+                    // quoting from somewhere (StyleCop #3392)
+                    20,
+                _ => 0,
+            };
+
+            Func<int> F() => () =>
+                // a lambda body
+                1;
+
+            int P =>
+                // an expression body
+                1;
+        }
+        """);
+
+    [Fact]
     public Task CommentAfterCollectionExpressionBracket_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C
         {

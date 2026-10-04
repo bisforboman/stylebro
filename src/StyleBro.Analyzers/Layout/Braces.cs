@@ -256,6 +256,78 @@ internal static class Braces
         return changes;
     }
 
+    /// <summary>
+    /// Whether the statement is left to BRO1508/BRO1509: its block is on a single line and that rule (on) expands it, adding
+    /// the braces in the same edit (<see cref="AddToExpansion"/>). Wrapping it inside the single-line block first would
+    /// leave a half-expanded block, and the block's '}' on its line hides the rest of the statements until the block
+    /// is expanded, so 'dotnet format' would need a second run.
+    /// </summary>
+    public static bool IsLeftToExpansion(StatementSyntax child, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn) =>
+        child.Ancestors().OfType<BlockSyntax>().FirstOrDefault() is { } block
+        && SingleLineBlocks.GetBraces(block) is { } braces
+        && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
+        && SingleLineBlocks.IsReported(block, text, options);
+
+    /// <summary>
+    /// Adds BRO1514-BRO1516's braces to the expansion of a single-line block (<paramref name="expansion"/>, BRO1508/
+    /// BRO1509's edits): <c>void M(bool x) { if (x) return; }</c> gets its method body and the braces in one run, in any
+    /// fix order. The findings and their edits are computed on the expanded text, for the statements directly in the
+    /// block (a nested single-line block's are its own expansion's), and mapped back; nothing is added when an edit
+    /// falls outside the statements.
+    /// </summary>
+    public static void AddToExpansion(BlockSyntax block, SourceText text, List<TextChange> expansion, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    {
+        if (!block.Statements.Any(s => s.DescendantNodesAndSelf().Any(n => Kinds.Contains(n.Kind()))))
+        {
+            return;
+        }
+
+        var sorted = expansion.OrderBy(c => c.Span.Start).ToList();
+        var expanded = text.WithChanges(sorted);
+        var root = CSharpSyntaxTree.ParseText(expanded, (CSharpParseOptions)block.SyntaxTree.Options).GetRoot();
+        var items = new List<(StatementSyntax Old, StatementSyntax New, int Shift)>();
+        foreach (var statement in block.Statements)
+        {
+            var shift = sorted.Where(c => c.Span.End <= statement.SpanStart).Sum(c => c.NewText!.Length - c.Span.Length);
+            if (root.FindNode(new TextSpan(statement.SpanStart + shift, statement.Span.Length)) is not StatementSyntax found
+                || !found.IsKind(statement.Kind()) || found.Span.Length != statement.Span.Length)
+            {
+                return;
+            }
+
+            items.Add((statement, found, shift));
+        }
+
+        var newBlock = items[0].New.Parent;
+        var children = items
+            .SelectMany(i => i.New.DescendantNodesAndSelf())
+            .Where(n => Kinds.Contains(n.Kind()) && n.Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock)
+            .SelectMany(n => GetFindings(n, expanded, isOn, AllowConsecutiveUsings(options), GetPreference(options), AllowSingleLineJumps(options)))
+            .Select(f => f.Child)
+            .Where(c => GetChanges(new[] { c }, expanded, options) is not null)
+            .ToList();
+        if (children.Count == 0 || GetChanges(children, expanded, options, isOn) is not { } wraps)
+        {
+            return;
+        }
+
+        // Every edit is inside a statement or at its end (a '}' inserted there goes before the expansion's line break:
+        // an insertion sorts before a replacement at the same position).
+        var mapped = new List<TextChange>();
+        foreach (var change in wraps)
+        {
+            var item = items.FirstOrDefault(i => change.Span.Start >= i.New.SpanStart && change.Span.End <= i.New.Span.End);
+            if (item.Old is null)
+            {
+                return;
+            }
+
+            mapped.Add(new TextChange(new TextSpan(change.Span.Start - item.Shift, change.Span.Length), change.NewText!));
+        }
+
+        expansion.AddRange(mapped);
+    }
+
     /// <summary>The <see cref="ConsecutiveUsingsKey"/> setting.</summary>
     public static bool AllowConsecutiveUsings(AnalyzerConfigOptions options) =>
         !(options.TryGetValue(ConsecutiveUsingsKey, out var value) && bool.TryParse(value.Trim(), out var allowed) && !allowed);

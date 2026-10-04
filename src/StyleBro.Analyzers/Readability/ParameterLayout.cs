@@ -71,11 +71,13 @@ internal static class ParameterLayout
     }
 
     /// <summary>
-    /// The edits that put every item on its own line, starting on the line after the opening parenthesis, one
-    /// indentation level deeper than the line with the parenthesis. Items already at the start of a line keep their
-    /// indentation; everything else in the list stays as it is.
+    /// The edits that put every item on its own line (with <paramref name="firstOnly"/>, only the first item: BRO1107),
+    /// starting on the line after the opening parenthesis, one indentation level deeper than the line with the
+    /// parenthesis. A moved item's later lines (a lambda's block body) move by the same amount, unlike StyleCop's fix
+    /// (StyleCop #1620, #3183). Items already at the start of a line keep their indentation; everything else in the
+    /// list stays as it is.
     /// </summary>
-    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit)
+    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false)
     {
         var (open, items) = GetList(list);
         var openLine = text.Lines.GetLineFromPosition(open.SpanStart);
@@ -93,6 +95,15 @@ internal static class ParameterLayout
             {
                 // Replace the spaces between the previous token ('(' or ',') and the item with a line break.
                 yield return new TextChange(TextSpan.FromBounds(previousEnd, item.SpanStart), lineBreak + indentation);
+                foreach (var change in Reindent(item, text, indentation))
+                {
+                    yield return change;
+                }
+            }
+
+            if (firstOnly)
+            {
+                yield break;
             }
 
             previousEnd = item.GetLastToken().GetNextToken().Span.End; // the ',' after the item
@@ -110,6 +121,35 @@ internal static class ParameterLayout
             _ => (default, []),
         };
     }
+
+    /// <summary>
+    /// The edits that move the later lines of an item that now starts a line at <paramref name="indentation"/>: each
+    /// line indented at least as deep as the item's old line keeps its depth relative to it. Nothing when a token spans
+    /// lines (a multi-line string: its text can't be reindented).
+    /// </summary>
+    private static IEnumerable<TextChange> Reindent(SyntaxNode item, SourceText text, string indentation)
+    {
+        var first = Line(text, item.SpanStart);
+        var last = Line(text, item.Span.End);
+        if (first == last || item.DescendantTokens().Any(t => Line(text, t.SpanStart) != Line(text, t.Span.End)))
+        {
+            yield break;
+        }
+
+        var prefix = LeadingWhitespace(text, text.Lines[first]);
+        for (var number = first + 1; number <= last; number++)
+        {
+            var line = text.Lines[number];
+            var old = LeadingWhitespace(text, line);
+            if (old.Length < line.Span.Length && old.StartsWith(prefix, System.StringComparison.Ordinal) && indentation != prefix)
+            {
+                yield return new TextChange(new TextSpan(line.Start, old.Length), indentation + old.Substring(prefix.Length));
+            }
+        }
+    }
+
+    private static string LeadingWhitespace(SourceText text, TextLine line) =>
+        new(text.ToString(line.Span).TakeWhile(c => c is ' ' or '\t').ToArray());
 
     /// <summary>
     /// Skipped: lists with syntax errors, and lists with a comment or directive between the opening parenthesis and

@@ -108,7 +108,9 @@ internal static class AccessModifiers
             Accessibility.ProtectedAndInternal => "private protected",
             _ => null,
         };
-        if (modifier is null || string.IsNullOrEmpty(symbol!.Name))
+
+        // A part of a file-local type: another part says 'file', and an access modifier here is CS9052.
+        if (modifier is null || string.IsNullOrEmpty(symbol!.Name) || symbol is INamedTypeSymbol { IsFileLocal: true })
         {
             return null;
         }

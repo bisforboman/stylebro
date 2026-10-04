@@ -78,6 +78,21 @@ internal static class DocumentationPeriods
         return new HashSet<string>(value.Split(',').Select(t => t.Trim()).Where(t => t.Length > 0), StringComparer.Ordinal);
     }
 
+    /// <summary>
+    /// A trailing <c>&lt;c&gt;"User logged in."&lt;/c&gt;</c>: a quoted sentence whose period sits inside the quote, so
+    /// another one after the element would be doubled (StyleCop #2784).
+    /// </summary>
+    private static bool IsQuotedSentence(XmlElementSyntax element)
+    {
+        if (element.StartTag.Name.LocalName.ValueText != "c")
+        {
+            return false;
+        }
+
+        var text = string.Concat(element.Content.OfType<XmlTextSyntax>().SelectMany(t => t.TextTokens).Select(t => t.ValueText)).TrimEnd();
+        return text.Length > 1 && text[text.Length - 1] is '"' or '\'' && text.TrimEnd(ClosingPunctuation).EndsWith(".", StringComparison.Ordinal);
+    }
+
     private static int? GetInsertionPoint(XmlElementSyntax element, HashSet<string> excluded)
     {
         // The last piece of content that isn't whitespace or a line's '///'.
@@ -102,7 +117,7 @@ internal static class DocumentationPeriods
                         : last.SpanStart + last.Text.TrimEnd().Length;
                 case XmlElementSyntax child:
                     var name = child.StartTag.Name.LocalName.ValueText;
-                    return BlockElements.Contains(name) || excluded.Contains(name) ? null
+                    return BlockElements.Contains(name) || excluded.Contains(name) || IsQuotedSentence(child) ? null
                         : ContainerElements.Contains(name) ? GetInsertionPoint(child, excluded)
                         : child.Span.End;
                 case XmlEmptyElementSyntax empty:

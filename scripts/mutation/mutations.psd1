@@ -88,7 +88,7 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '.TrimEnd().TrimEnd(ClosingPunctuation)'; Replace = '.TrimEnd()'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 't.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken'; Replace = 't.IsKind(SyntaxKind.XmlTextLiteralToken)'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '&& !excluded.Contains(name) && '; Replace = '&& '; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = ' || excluded.Contains(name) ? null'; Replace = ' ? null'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = ' || excluded.Contains(name) || IsQuotedSentence'; Replace = ' || IsQuotedSentence'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'GetTextStart(paragraph ?? summary'; Replace = 'GetTextStart(summary'; Tests = 'DocumentationTests' }
 
         # Following StyleCop master: BRO1104 nint, BRO1604/BRO1605 init, BRO1611 primary constructors, BRO1606 blank summaries
@@ -206,5 +206,25 @@
         @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = '|| (IsLookedUp(name) && !model.LookupSymbols(name.SpanStart, name: newPart).IsEmpty))'; Replace = ')'; Tests = 'NamespaceNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = 'else if (text == newPart && IsLookedUp(name) && SeesMembersOf(model, name, parentName)'; Replace = 'else if (false'; Tests = 'NamespaceNamingTests' }
 
+        # StyleCop's open bugs (2026-10-04)
+        @{ File = 'src/StyleBro.Analyzers/Readability/QualifiedUsings.cs'; Find = 'if (written is NameSyntax argument && StartsWithAlias(argument, model, cancellationToken))'; Replace = 'if (written is NameSyntax argument && false)'; Tests = 'QualifiedUsingsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/QualifiedUsings.cs'; Find = '|| (!top && (type.IsTupleType || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T))'; Replace = ''; Tests = 'QualifiedUsingsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/QualifiedUsings.cs'; Find = 'top && type is { SpecialType: not SpecialType.None } ? QualifiedNoKeywords : Qualified'; Replace = 'Qualified'; Tests = 'QualifiedUsingsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = ' || symbol is INamedTypeSymbol { IsFileLocal: true })'; Replace = ')'; Tests = 'AccessModifiersTests' }
+        @{ File = 'src/StyleBro.Analyzers/Spacing/CommentSpacing.cs'; Find = '|| comment.StartsWith("//-:", System.StringComparison.Ordinal)'; Replace = ''; Tests = 'CommentSpacingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Spacing/CommentSpacing.cs'; Find = '|| comment.StartsWith("//+:", System.StringComparison.Ordinal)'; Replace = ''; Tests = 'CommentSpacingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)'; Replace = ''; Tests = 'BlankLineAfterTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(token.Parent is InitializerExpressionSyntax { Parent: InitializerExpressionSyntax })'; Replace = ''; Tests = 'BlankLineBeforeTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& !HungarianNames.IsExternParameter(context.Node)'; Replace = ''; Tests = 'HungarianNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/HungarianNames.cs'; Find = '(modifiers.Any(SyntaxKind.ExternKeyword)'; Replace = '(false'; Tests = 'HungarianNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '|| IsQuotedSentence(child)'; Replace = ''; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 'text[text.Length - 1] is ''"'' or ''\'''''; Replace = 'true'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'if (first == last || item.DescendantTokens()'; Replace = 'if (first == last || false && item.DescendantTokens()'; Tests = 'ParameterLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'foreach (var change in Reindent(item, text, indentation))'; Replace = 'foreach (var change in Reindent(item, text, indentation).Take(0))'; Tests = 'ParameterLayoutTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/ParameterLayoutCodeFixProvider.cs'; Find = '!remaining.Any(o => o != l && o.Span.Contains(l.Span))'; Replace = 'true'; Tests = 'ParameterLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BracesAnalyzer.cs'; Find = '&& !Braces.IsLeftToExpansion('; Replace = '&& true || !Braces.IsLeftToExpansion('; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = '&& isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)'; Replace = ''; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'Braces.AddToExpansion(block, text, changes, options, isOn);'; Replace = ''; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = ' && n.Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock'; Replace = ''; Tests = 'SingleLineBlocksTests' }
     )
 }

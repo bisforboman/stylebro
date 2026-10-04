@@ -320,6 +320,37 @@ public class DocumentationTests
         """);
 
     [Fact]
+    public Task QuotedSentenceInATrailingCodeElement_IsNotReported() => VerifyFixAsync(
+        """
+        public class Logs
+        {
+            /// <summary>Writes a message.</summary>
+            /// <param name="message">Example: <c>"User {User} logged in."</c></param>
+            /// <param name="other">Example: <c>'Done.'</c></param>
+            /// <param name="third">Example: <c>&quot;Done.&quot;</c></param>
+            /// <param name="fourth">Example: <c>"Not a sentence"</c>{|BRO1603:|}</param>
+            /// <param name="fifth">Calls <c>Done.</c>{|BRO1603:|}</param>
+            public void Write(string message, string other, string third, string fourth, string fifth)
+            {
+            }
+        }
+        """,
+        """
+        public class Logs
+        {
+            /// <summary>Writes a message.</summary>
+            /// <param name="message">Example: <c>"User {User} logged in."</c></param>
+            /// <param name="other">Example: <c>'Done.'</c></param>
+            /// <param name="third">Example: <c>&quot;Done.&quot;</c></param>
+            /// <param name="fourth">Example: <c>"Not a sentence"</c>.</param>
+            /// <param name="fifth">Calls <c>Done.</c>.</param>
+            public void Write(string message, string other, string third, string fourth, string fifth)
+            {
+            }
+        }
+        """);
+
+    [Fact]
     public Task TextEndingInAnEntity_GetsThePeriodAfterIt() => VerifyFixAsync(
         """
         /// <summary>Gets the List&lt;T&gt;{|BRO1603:|}</summary>
