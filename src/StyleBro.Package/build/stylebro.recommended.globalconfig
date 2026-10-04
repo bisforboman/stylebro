@@ -238,6 +238,11 @@ dotnet_diagnostic.BRO1613.severity = warning
 # your .editorconfig (also stylebro_file_header_copyright, stylebro_file_header_decoration; see docs/rules/BRO1615.md).
 dotnet_diagnostic.BRO1615.severity = warning
 
+# BRO1616: a <summary>'s tags on lines of their own (stylebro_summary_layout = multi_line, the default), or one line when the
+# text fits (single_line_when_fits). Not a StyleCop rule (stylebro-migrate turns it off); the layout isn't set here, so
+# an .editorconfig value takes effect.
+dotnet_diagnostic.BRO1616.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 

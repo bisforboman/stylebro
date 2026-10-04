@@ -29,3 +29,4 @@ BRO1519 | Layout | Warning  | BlankLineRunsAnalyzer
 BRO1520 | Layout | Warning  | WrappingPlacementAnalyzer
 BRO1521 | Layout | Warning  | WrappingPlacementAnalyzer
 BRO1522 | Layout | Warning  | WrappingPlacementAnalyzer
+BRO1616 | Documentation | Warning  | SummaryLayoutAnalyzer
