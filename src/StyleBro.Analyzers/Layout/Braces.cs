@@ -31,6 +31,9 @@ internal static class Braces
     /// <summary>StyleCop's allowConsecutiveUsings: 'using (a) using (b) { }' shares one block (default true).</summary>
     public const string ConsecutiveUsingsKey = "stylebro_allow_consecutive_usings";
 
+    /// <summary>StyleCop issue #2252: 'if (x) return;' (a jump statement on the 'if' line) without braces (default false).</summary>
+    public const string SingleLineJumpsKey = "stylebro_allow_single_line_jump_statements";
+
     public static readonly SyntaxKind[] Kinds =
     {
         SyntaxKind.IfStatement, SyntaxKind.DoStatement, SyntaxKind.WhileStatement, SyntaxKind.ForStatement,
@@ -43,14 +46,16 @@ internal static class Braces
     /// one in an if/else chain where another clause has braces is SA1520's, the rest SA1503's; a rule that is off leaves
     /// its statements to the next one. <paramref name="isOn"/> says whether a rule is on. With the SDK's
     /// csharp_prefer_braces = when_multiline, single-line statements in a consistent chain aren't reported, and
-    /// "multi-line" is what the SDK's IDE0011 counts as such; with false, nothing is.
+    /// "multi-line" is what the SDK's IDE0011 counts as such; with false, nothing is. With
+    /// <paramref name="allowSingleLineJumps"/>, a jump statement on its 'if' line is fine unless BRO1516 wants braces.
     /// </summary>
     public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(
         SyntaxNode node,
         SourceText text,
         Func<string, bool> isOn,
         bool allowConsecutiveUsings = true,
-        BracePreference preference = BracePreference.Always)
+        BracePreference preference = BracePreference.Always,
+        bool allowSingleLineJumps = false)
     {
         if (preference == BracePreference.Never)
         {
@@ -86,6 +91,8 @@ internal static class Braces
         }
 
         var inconsistent = node is IfStatementSyntax && children.Any(c => c is BlockSyntax);
+        List<StatementSyntax>? allowed = null;
+        var reported = false;
         foreach (var child in children)
         {
             if (child is BlockSyntax)
@@ -113,9 +120,25 @@ internal static class Braces
                 id = DiagnosticIds.BracesOmitted;
             }
 
+            if (id == DiagnosticIds.BracesOmitted && allowSingleLineJumps && IsSingleLineJump(child, text))
+            {
+                (allowed ??= new List<StatementSyntax>()).Add(child);
+                continue;
+            }
+
             if (id is not null)
             {
+                reported = true;
                 yield return (child, id);
+            }
+        }
+
+        // Braces on another clause make the chain inconsistent: the allowed jumps get theirs in the same run.
+        if (allowed is not null && reported && node is IfStatementSyntax && isOn(DiagnosticIds.BracesConsistent))
+        {
+            foreach (var child in allowed)
+            {
+                yield return (child, DiagnosticIds.BracesConsistent);
             }
         }
     }
@@ -237,6 +260,10 @@ internal static class Braces
     public static bool AllowConsecutiveUsings(AnalyzerConfigOptions options) =>
         !(options.TryGetValue(ConsecutiveUsingsKey, out var value) && bool.TryParse(value.Trim(), out var allowed) && !allowed);
 
+    /// <summary>The <see cref="SingleLineJumpsKey"/> setting.</summary>
+    public static bool AllowSingleLineJumps(AnalyzerConfigOptions options) =>
+        options.TryGetValue(SingleLineJumpsKey, out var value) && bool.TryParse(value.Trim(), out var allowed) && allowed;
+
     /// <summary>The <see cref="BracePreference"/> from csharp_prefer_braces ('true:warning' style values too).</summary>
     public static BracePreference GetPreference(AnalyzerConfigOptions options)
     {
@@ -303,6 +330,16 @@ internal static class Braces
             && !(owner is IfStatementSyntax ifStatement && ifStatement.Statement == child)
             && !SameLine(child.GetLastToken().GetNextToken(), owner.GetLastToken());
     }
+
+    /// <summary>
+    /// An 'if' statement's (not an 'else' clause's) child that is a jump statement ('return', 'throw', 'break',
+    /// 'continue', 'goto', 'yield break') and ends on the line of the 'if' keyword.
+    /// </summary>
+    private static bool IsSingleLineJump(StatementSyntax child, SourceText text) =>
+        child.Parent is IfStatementSyntax ifStatement
+        && child is ReturnStatementSyntax or ThrowStatementSyntax or BreakStatementSyntax or ContinueStatementSyntax or GotoStatementSyntax
+            or YieldStatementSyntax { RawKind: (int)SyntaxKind.YieldBreakStatement }
+        && Line(text, ifStatement.IfKeyword.SpanStart) == Line(text, child.Span.End);
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
 

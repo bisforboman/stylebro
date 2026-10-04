@@ -40,6 +40,15 @@ namespace Probe
         /// <summary>Ends with a closing paren (see above)</summary>
         public int H { get; set; }
 
+        /// <summary>Ends with a period in parens (see above.)</summary>
+        public int H2 { get; set; }
+
+        /// <summary>Ends with a quoted "sentence."</summary>
+        public int H3 { get; set; }
+
+        /// <summary>Ends with an entity List&lt;T&gt;</summary>
+        public int H4 { get; set; }
+
         /// <summary>Ends with an exclamation!</summary>
         public int I { get; set; }
 
