@@ -69,6 +69,7 @@ project or coming from StyleCop.
 | [BRO1520](docs/rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Yes |
 | [BRO1521](docs/rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Yes |
 | [BRO1522](docs/rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Yes |
+| [BRO1523](docs/rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

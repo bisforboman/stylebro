@@ -33,6 +33,28 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task CallChains_WithSplitArgumentsAndAWrappedOperator() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public bool M(int[] items, int a, int b) =>
+                items
+                    .Where(i => Check(i, a,
+                        b)).Select(i => i
+                    ).Any() &&
+                    items.Contains(b);
+
+            private static bool Check(int i, int a, int b) => i > a + b;
+        }
+        """,
+        "BRO1523",
+        "BRO1108",
+        "BRO1110",
+        "BRO1520");
+
+    [Fact]
     public Task Ordering_MembersOfRegionsThatAreRemoved() => AssertConvergesInEveryOrderAsync(
         """
         public class C

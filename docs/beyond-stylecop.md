@@ -83,6 +83,9 @@ expression trees (`is` patterns don't compile there), and `is not null` before C
 
 ### 4. Call chain layout (RCS0054)
 
+Done (2026-10-04): [BRO1523](rules/BRO1523.md). Only split chains, the first line free, call steps (`.WriteTo.Sink(x)`
+stays together), the chain's own indentation; see decisions.md.
+
 ```csharp
 // before                                  // after
 var names = people.Where(p => p.Active)    var names = people

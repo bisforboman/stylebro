@@ -26,6 +26,19 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (breakBefore == breakAfter || '; Replace = 'if ('; Tests = 'WrappingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = ' when !arrow.ArrowToken.GetPreviousToken().Parent!.AncestorsAndSelf().Any(a => a is TypeParameterConstraintClauseSyntax)'; Replace = ''; Tests = 'WrappingPlacementTests' }
 
+        # BRO1523 (call chain layout)
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'if (!starts.Contains(true) || '; Replace = 'if ('; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| chain.ContainsDirectives '; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| chain.ContainsDiagnostics'; Replace = '|| false'; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| chain.Ancestors().Any(a => a is InterpolationSyntax)'; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| !links[i - 1].Call '; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| line == firstLine '; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| !links.Skip(i).Any(l => l.Call)'; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'if (previous.TrailingTrivia.Concat(token.LeadingTrivia).Any('; Replace = 'if (false && previous.TrailingTrivia.Concat(token.LeadingTrivia).Any('; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'if (Enumerable.Range(line + 1, Line(text, end) - line)'; Replace = 'if (false && Enumerable.Range(line + 1, Line(text, end) - line)'; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '.Any(l => l.Trim().Length > 0 && '; Replace = '.Any(l => '; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'ConditionalAccessExpressionSyntax => true,'; Replace = 'ConditionalAccessExpressionSyntax => false,'; Tests = 'CallChainTests' }
+
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }
 

@@ -169,6 +169,10 @@ dotnet_diagnostic.BRO1520.severity = warning
 dotnet_diagnostic.BRO1521.severity = warning
 dotnet_diagnostic.BRO1522.severity = warning
 
+# BRO1523: in a call chain split over several lines, every call after the first line starts its own line. Not a
+# StyleCop rule (stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1523.severity = warning
+
 # BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
 dotnet_diagnostic.BRO1131.severity = warning
 
