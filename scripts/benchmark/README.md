@@ -53,5 +53,9 @@ skips operators with no line break around them before building trivia lists. Sam
 Then cheap checks first: CamelCaseNamingAnalyzer checks the name before looking up the symbol (most names need no
 rename), BaseCallsAnalyzer rules out virtual calls before the speculative bind, CallChainAnalyzer skips chains on one
 line, EmbeddedCommentAnalyzer skips braces without a comment before them. Same diagnostics again.
+FieldNamingAnalyzer, profiled with `dotnet-trace` (most of its time was in `TypeFacts.For`): it walked each type's
+tokens INTO trivia to find strings in directives, which made Roslyn build the XML structure of every documentation
+comment; it now opens only directives, and skips the trivia walk for declarations without any (-25 to -30 % in
+alternated runs, same diagnostics).
 `STYLEBRO_BENCH_ONLY=Name1,Name2` times only those analyzers (alone they pay shared costs such as building the red tree
 or binding, so compare builds, not analyzers).
