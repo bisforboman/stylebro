@@ -33,6 +33,28 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task Attributes_TheOnlyBlankLineBeforeAnElementIsBelowItsAttribute() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public void M()
+            {
+            }
+            [Obsolete]
+
+
+            public void N()
+            {
+            }
+        }
+        """,
+        "BRO1505",
+        "BRO1517",
+        "BRO1525");
+
+    [Fact]
     public Task Conditionals_ATokenOnTheWrongSideAndOneWithoutLineBreak() => AssertConvergesInEveryOrderAsync(
         """
         public class C

@@ -298,6 +298,9 @@ sits between, and blank lines inside `#if`. Must agree with BRO1505, which count
 element's code: if that blank line was the only one between two members, BRO1505 then wants one above the attribute
 (check the order-independence as for BRO1509).
 
+Done (2026-10-04): [BRO1525](rules/BRO1525.md) (stacked attribute lists too). BRO1505 turned out not to count a blank
+line below an attribute (an element's code starts at its first attribute), so the two fixes never depend on each other.
+
 #### 3. Braceless jump statements (#2252)
 
 An option for BRO1514 (for example `stylebro_braces_allow_single_line_jump = true`): `return`, `throw`, `break` and
