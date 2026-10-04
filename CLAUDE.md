@@ -469,6 +469,15 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   GOTCHA from probing: `dotnet format` printed "Unable to fix SA1633. Code fix SettingsFileCodeFixProvider doesn't
   support Fix All" but StyleCop's FileHeaderCodeFixProvider still ran; a backup copy of the probe files INSIDE the
   probe project got rewritten too and hid it. Keep probe backups outside the project folder.
+- **BRO1616** (2026-10-04, beyond StyleCop: Roslynator RCS1253, Meziantou MA0177/MA0211; `Documentation/SummaryLayout.cs`,
+  own `SummaryLayoutAnalyzer` + fix, so the other doc tests don't see it): `stylebro_summary_layout = multi_line`
+  (default; survey of the 8 repos: 14,329 three-line to 148 one-line summaries of one text line) | `single_line_when_fits`
+  (one text line, no `<para>`/`<code>`/`<list>`, joined line <= `max_line_length`, no limit when unset). Summary only.
+  Edits only the gaps between a tag and its text (line break + the start line's indentation + `/// `, or nothing), so
+  BRO1603/BRO1005 stay independent; a summary with text on a tag's line gets its tags on own lines in both layouts.
+  Skipped: empty, a tag sharing its line with other content (also how `/** */` is skipped: the prefix isn't `///`),
+  missing/misspelled end tag; a one-line summary is never split in single_line_when_fits (not a line-length rule).
+  The repo's .editorconfig sets `single_line_when_fits` (StyleBro's own code: 291 one-line to 4; Messy inherits it).
 - XML-based rules (BRO1603-BRO1611) need `GenerateDocumentationFile` (the compiler only parses docs then), like
   StyleCop's SA0001. Messy and the parity projects enable it. Structured doc nodes on continuation lines include the
   `///` in their span: locate elements by their first token (`DocumentationTags.GetStart`).

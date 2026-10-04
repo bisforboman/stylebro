@@ -57,6 +57,7 @@ public static class DiagnosticIds
     public const string TypeParameterTagsMatch = "BRO1613";
     public const string TypeParameterTagHasName = "BRO1614";
     public const string FileHeader = "BRO1615";
+    public const string SummaryLayout = "BRO1616";
     public const string LiteralSuffix = "BRO1122";
     public const string TupleSyntax = "BRO1123";
     public const string TupleElementName = "BRO1124";
