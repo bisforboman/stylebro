@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 24 |
-| Planned | 0 rules, 10 work items |
-| Maybe | 3 rules from other analyzers |
+| Done, not released yet | 25 |
+| Planned | 0 rules, 11 work items |
+| Maybe | 2 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -45,6 +45,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Migration sample | samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards. | Done (2026-10-03) |
 | Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |
 | Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | Null check style (survey #3) | BRO1133: `x == null` or `x is null` (`stylebro_null_check_style`); default from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 
 ### Read the SDK's own settings
 
@@ -71,7 +72,6 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 
 | Source | Rule | Notes |
 |--------|------|-------|
-| Roslynator RCS1248 | `x == null` vs `x is null` | Semantic: skip user-defined `==`, expression trees, `is not` before C# 9. |
 | Roslynator RCS0054 | A split call chain has every call on its own line | Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part. |
 | Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
 
@@ -127,6 +127,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1130](rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Done |
 | [BRO1131](rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Done |
 | [BRO1132](rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Done |
+| [BRO1133](rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Done |
 
 ### BRO13xx: Naming
 

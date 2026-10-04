@@ -17,6 +17,20 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/Regions.cs'; Find = 'if (beforeText.Length == 0 && after + 1 < text.Lines.Count'; Replace = 'if (false && after + 1 < text.Lines.Count'; Tests = 'FixOrderTests' }
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineBeforeComment))'; Replace = 'if (false)'; Tests = 'FixOrderTests' }
 
+        # BRO1133 (null check style)
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)'; Replace = '(LanguageVersion.CSharp7)'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)'; Replace = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp1)'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '|| !IsSimpleOperand(operand)'; Replace = ''; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '|| IsInExpressionTree(binary, model, cancellationToken)'; Replace = ''; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '!trivia.IsKind(SyntaxKind.WhitespaceTrivia) && !trivia.IsKind(SyntaxKind.EndOfLineTrivia)'; Replace = 'false'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = 'if (constant?.Expression.IsKind(SyntaxKind.NullLiteralExpression) != true'; Replace = 'if (constant is null'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '|| !IsLooseParent(isPattern)'; Replace = ''; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '&& !IsSingleSpace(isPattern.IsKeyword, unary.OperatorToken)'; Replace = '&& false'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = 'type.TypeKind == TypeKind.Dynamic'; Replace = 'false'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '|| (type.IsValueType && type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T))'; Replace = ')'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = 'return op.MethodKind == MethodKind.BuiltinOperator'; Replace = 'return true'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '&& op.Parameters[0].Type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T'; Replace = ''; Tests = 'NullCheckTests' }
+
         # BRO1520-BRO1522 (operator, '=>' and '=' placement when wrapping)
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (token.IsMissing || previous.IsMissing || next.IsMissing'; Replace = 'if (false'; Tests = 'WrappingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'next.Kind() is SyntaxKind.OpenBraceToken or SyntaxKind.OpenBracketToken'; Replace = 'next.Kind() is SyntaxKind.OpenBracketToken'; Tests = 'WrappingPlacementTests' }

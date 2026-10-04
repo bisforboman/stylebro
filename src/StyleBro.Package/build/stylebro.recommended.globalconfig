@@ -175,6 +175,10 @@ dotnet_diagnostic.BRO1131.severity = warning
 # BRO1132: a comment between a statement's header and its '{' moves into the block (SA1108)
 dotnet_diagnostic.BRO1132.severity = warning
 
+# BRO1133: null checks in one form, '== null' or 'is null' (stylebro_null_check_style, default equality_operator; not set
+# here, so an .editorconfig value takes effect). Not a StyleCop rule (stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1133.severity = warning
+
 # BRO1006: no space between '#' and a preprocessor keyword (SA1006)
 dotnet_diagnostic.BRO1006.severity = warning
 

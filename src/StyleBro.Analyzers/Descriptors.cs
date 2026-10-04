@@ -778,6 +778,18 @@ internal static class Descriptors
         description: "A comment between a statement's header and its '{' belongs inside the block. Replaces StyleCop SA1108.",
         helpLinkUri: HelpBase + DiagnosticIds.EmbeddedComment + ".md");
 
+    public static readonly DiagnosticDescriptor NullCheckStyle = new(
+        id: DiagnosticIds.NullCheckStyle,
+        title: "Check for null in one form",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Null checks use '== null' and '!= null' (stylebro_null_check_style = equality_operator, the default) or "
+            + "'is null' and 'is not null' (pattern_matching). Checks whose meaning would change, such as a user-defined '==', "
+            + "aren't reported. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.NullCheckStyle + ".md");
+
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
         title: "Preprocessor keywords should not be preceded by a space",

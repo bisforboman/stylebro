@@ -222,6 +222,17 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - **BRO1131** (SA1100, 2026-10-03, `Readability/BaseCalls.cs`) `base.` -> `this.`: StyleCop's check (speculative
   `this` binds to the same symbol, so no override/hiding member), plus a deviation: virtual/abstract/override (not
   sealed) members are skipped unless the enclosing type is sealed (a derived override would run instead).
+- **BRO1133** (2026-10-04, beyond StyleCop: Roslynator RCS1248, `Readability/NullChecks.cs`, semantic)
+  `stylebro_null_check_style = equality_operator` (default, survey: 7 of 8 repos, docs/decisions.md) | `pattern_matching`.
+  The fix only swaps the operator (`==` <-> `is`, `!=` <-> `is not`); pattern mode also turns `null == x` into `x is null`
+  (equality mode leaves it to BRO1103; the fix finds a check by its START, which BRO1103's swap keeps, so both converge
+  in one run, Messy `Lookups.cs`). Skipped: an operator that isn't built-in, the core library's (null-safe) or lifted
+  (records, classes with `==`; checked by speculative binding for `is` -> `==`), dynamic, non-nullable value types, `is`
+  in expression trees (IOperation parents: an anonymous function converted to a System.Linq.Expressions type, also
+  query clauses over IQueryable), `is not` < C# 9 / `is` < C# 7, operands looser than `is` (whitelist), `is` checks
+  whose parent binds tighter than `==` (whitelist of parents), comments/line breaks in the removed text. Pointers have no
+  operator symbol (that guard was dead per mutation testing). Probed: no SDK rule rewrites `x == null` (IDE0041/0150/
+  0083/0078 only produce patterns from other shapes).
 - **BRO1006** (SA1006, 2026-10-03, `Spacing/DirectiveSpacingAnalyzer.cs`) `# if` -> `#if`: StyleCop's check (a `#` whose
   trailing trivia has no line break, reported on the next token); empty `# ` directives skipped. Parity `directive-spacing`: 8/8, identical.
 - **BRO1106** (SA1122) `""`/`@""` -> `string.Empty`, except constant contexts (const, attribute args, parameter
