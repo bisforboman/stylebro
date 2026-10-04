@@ -44,13 +44,15 @@ internal static class DocumentationComments
     /// Whether every symbol the declaration declares overrides a member or implements an interface member, so its
     /// documentation can come from there, and needs documentation at all: like StyleCop's SA1600, by the member's
     /// effective accessibility (a public member of an internal type is internal) and the three settings above
-    /// (defaults: exposed and internal yes, private no).
+    /// (defaults: exposed and internal yes, private no). Explicit interface implementations ('void IDisposable.Dispose()')
+    /// need none: they're only reachable through the interface, whose documentation tools show (like StyleCop's
+    /// unreleased master, 2959cac8).
     /// </summary>
     public static bool InheritsDocumentation(IEnumerable<ISymbol> symbols, AnalyzerConfigOptions options)
     {
         var list = symbols.ToList();
         return list.Count > 0 && list.All(s =>
-            NeedsDocumentation(s, options) && (s.IsOverride || ImplementsInterfaceMember(s)));
+            !IsExplicitImplementation(s) && NeedsDocumentation(s, options) && (s.IsOverride || ImplementsInterfaceMember(s)));
     }
 
     /// <summary>
@@ -193,6 +195,14 @@ internal static class DocumentationComments
     }
 
     /// <summary>Implicit and explicit implementations alike: FindImplementationForInterfaceMember returns both.</summary>
+    private static bool IsExplicitImplementation(ISymbol symbol) => symbol switch
+    {
+        IMethodSymbol method => method.ExplicitInterfaceImplementations.Length > 0,
+        IPropertySymbol property => property.ExplicitInterfaceImplementations.Length > 0,
+        IEventSymbol @event => @event.ExplicitInterfaceImplementations.Length > 0,
+        _ => false,
+    };
+
     private static bool ImplementsInterfaceMember(ISymbol symbol)
     {
         var type = symbol.ContainingType;

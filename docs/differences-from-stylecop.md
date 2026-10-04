@@ -83,7 +83,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1513](rules/BRO1513.md) (SA1514) | Documentation right below a `//` comment | The blank line would break BRO1506 (SA1512), and the two fixes would undo each other. |
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment right after a collection expression's `[` | It starts the list like a comment after `{`; StyleCop fixed this after 1.2.0-beta.556 ([#3766](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3766)). |
 | [BRO1510](rules/BRO1510.md) (SA1504) | One-line accessors where one has an attribute on its own line above it | The attribute isn't part of the accessor's layout; StyleCop counts its line ([#3434](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3434)). |
-| [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and interface implementations | See "Missing documentation" above. |
+| [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and implicit interface implementations | See "Missing documentation" above; explicit implementations like StyleCop's `master`. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:`; a period followed by a closing quote or bracket (`"done."`) | Already ends a sentence; StyleCop's fix writes `question?.` and `"done.".`. |
 | [BRO1606](rules/BRO1606.md) (SA1642) | A summary whose first `<para>` starts with the standard sentence | StyleCop fixed this after 1.2.0-beta.556; beta.556's fix writes the sentence twice. |
 | [BRO1611](rules/BRO1611.md) (SA1612) | Constructors and operators | Matches StyleCop 1.2, which doesn't check them either. |
@@ -165,13 +165,14 @@ since (not released; see [decisions](decisions.md), 2026-10-04). Where `master` 
 | [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md) (SA1623, SA1624) | `init` accessors: `Gets or initializes` or `Gets`, `Initializes`; `Gets or initializes` is a wrong prefix elsewhere | Ignores `init`; its fix writes `Gets or sets or initializes` |
 | [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) | Not checked |
 | [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line property patterns | Not checked |
+| [BRO1505](rules/BRO1505.md) (SA1516) | No blank line needed between two single-line properties | Wants one |
+| [BRO1601](rules/BRO1601.md) (SA1600) | Explicit interface implementations not reported | Reported |
 
 Where `master` changed behavior StyleBro keeps (the owner's decision):
 
 | Rule | `master` | StyleBro (like beta.556) |
 |---|---|---|
-| [BRO1505](rules/BRO1505.md) (SA1516) | No blank line needed between two single-line properties | Wants one |
-| [BRO1601](rules/BRO1601.md) (SA1600) | Explicit interface implementations not reported | Adds `<inheritdoc/>` to them too |
+| [BRO1505](rules/BRO1505.md) (SA1516) | Two fields need a blank line when the second spans several lines | Only when the first does |
 | [BRO1606](rules/BRO1606.md) (SA1642) | Any summary that starts with `<para>` is accepted, text not checked | Checks the paragraph's text |
 | [BRO1311](rules/BRO1311.md) (SA1316) | Names in an override's or implementation's signature not reported | Reported, renamed together with the base |
 

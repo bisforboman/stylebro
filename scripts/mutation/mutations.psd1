@@ -105,9 +105,13 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/AccessorLayout.cs'; Find = '(accessor.Modifiers.Count > 0 ? accessor.Modifiers[0] : accessor.Keyword).SpanStart'; Replace = 'accessor.SpanStart'; Tests = 'AccessorLayoutTests' }
 
         # BRO1505: a field below a field that spans several lines; BRO1001's sort and BRO1114's split add that blank line
-        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '=> IsMultiLineField(field, text),'; Replace = '=> false,'; Tests = 'ElementSeparationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'field.AttributeLists.Count > 0 ? field.AttributeLists.Last().FullSpan.End : field.SpanStart'; Replace = 'field.SpanStart'; Tests = 'ElementSeparationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = '|| Layout.ElementSeparation.IsMultiLineField(field, field.SyntaxTree.GetText())'; Replace = ''; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '=> SpansSeveralLines(field, text),'; Replace = '=> false,'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'member.AttributeLists.Count > 0 ? member.AttributeLists.Last().FullSpan.End : member.SpanStart'; Replace = 'member.SpanStart'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText());'; Replace = 'return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);'; Tests = 'FixOrderTests' }
+        # Following StyleCop master (owner's decision 2026-10-04): single-line properties together, no inheritdoc on explicit implementations
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => SpansSeveralLines(property, text) || SpansSeveralLines(next, text),'; Replace = ''; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'SpansSeveralLines(property, text) || SpansSeveralLines(next, text),'; Replace = 'SpansSeveralLines(property, text),'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '!IsExplicitImplementation(s) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = ' || text.ToString(variables[i - 1].Span).IndexOf(''\n'') >= 0'; Replace = ''; Tests = 'FixOrderTests' }
 
         # BRO1404/BRO1007 (access modifiers)
