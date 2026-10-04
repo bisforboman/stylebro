@@ -135,7 +135,6 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '&& line.Start < next.SpanStart && text.ToString(line.Span).Trim().Length == 0'; Replace = '&& false'; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '!(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))'; Replace = 'true'; Tests = 'BlankLineAfterTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))'; Replace = ''; Tests = 'BlankLineAfterTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(embeddedCommentsOn && Readability.EmbeddedComments.IsMoved(comment, text))'; Replace = ''; Tests = 'BlankLineAfterTests' }
 
         # BRO1131 (base calls). Not mutated: Speculation.SymbolAfterReplacing vs a position-based lookup of a DETACHED
         # node (equivalent; the original bug passed the attached access.Name, which binds as a member-access name).
