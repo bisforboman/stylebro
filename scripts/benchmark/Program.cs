@@ -2,27 +2,29 @@
 // all analyzers together, single-threaded, median of the runs after a warm-up run. See README.md.
 //
 //   dotnet run -c Release --project scripts/benchmark -- <analyzer dll> <source folder> [runs] [preprocessor symbols]
+//   dotnet run -c Release --project scripts/benchmark -- compare <base dll> <head dll> <source folder> [runs]
+//
+// compare runs both builds in this process on the same compilation, alternating, so machine noise hits both alike, and
+// exits with 1 when the head build is clearly slower (the CI performance check).
 //
 // STYLEBRO_BENCH_ONLY=NameA,NameB times only those analyzers (to compare two builds of one analyzer with less noise).
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-var dll = Path.GetFullPath(args[0]);
-var sources = args[1];
-var runs = args.Length > 2 ? int.Parse(args[2]) : 5;
-var symbols = args.Length > 3 ? args[3].Split(';', StringSplitOptions.RemoveEmptyEntries) : Array.Empty<string>();
+CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+var compare = args.Length > 0 && args[0] == "compare";
+var dlls = compare ? new[] { args[1], args[2] } : new[] { args[0] };
+var rest = args.Skip(dlls.Length + (compare ? 1 : 0)).ToArray();
+var sources = rest[0];
+var runs = rest.Length > 1 ? int.Parse(rest[1]) : 5;
+var symbols = rest.Length > 2 ? rest[2].Split(';', StringSplitOptions.RemoveEmptyEntries) : Array.Empty<string>();
 
-var assembly = new AssemblyLoadContext("analyzers").LoadFromAssemblyPath(dll);
-var analyzers = assembly.GetTypes()
-    .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t) && t.GetCustomAttribute<DiagnosticAnalyzerAttribute>() is not null)
-    .Select(t => (DiagnosticAnalyzer)Activator.CreateInstance(t)!)
-    .Where(a => a is not DiagnosticSuppressor)
-    .Where(a => Environment.GetEnvironmentVariable("STYLEBRO_BENCH_ONLY") is not { } only || only.Split(',').Contains(a.GetType().Name))
-    .ToImmutableArray();
+var builds = dlls.Select((dll, i) => Load(Path.GetFullPath(dll), $"build{i}")).ToArray();
 
 var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose, preprocessorSymbols: symbols);
 var separator = Path.DirectorySeparatorChar;
@@ -33,37 +35,137 @@ var trees = Directory.GetFiles(sources, "*.cs", SearchOption.AllDirectories)
 var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator).Select(p => MetadataReference.CreateFromFile(p));
 var compilation = CSharpCompilation.Create(
     "Benchmark", trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
-Console.WriteLine($"{trees.Length} files, {analyzers.Length} analyzers, {runs} runs");
+Console.WriteLine($"{trees.Length} files, {string.Join(" / ", builds.Select(b => b.Analyzers.Length))} analyzers, {runs} runs");
 compilation.GetDiagnostics();
 
-var times = analyzers.ToDictionary(a => a, _ => new List<double>());
-var counts = new Dictionary<string, int>();
-for (var i = 0; i <= runs; i++)
+// Run 0 is the warm-up (and gives the diagnostic counts).
+await Measure(0, runs);
+
+if (!compare)
 {
-    var options = new CompilationWithAnalyzersOptions(
-        new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty), null, concurrentAnalysis: false, logAnalyzerExecutionTime: true);
-    var withAnalyzers = compilation.WithAnalyzers(analyzers, options);
-    var diagnostics = await withAnalyzers.GetAnalyzerDiagnosticsAsync();
-    if (i == 0)
+    var build = builds[0];
+    Console.WriteLine("     Time  Reports  Analyzer");
+    foreach (var name in build.Times.Keys.OrderByDescending(build.Median))
     {
-        counts = diagnostics.GroupBy(d => d.Id).ToDictionary(g => g.Key, g => g.Count());
-        continue;
+        Console.WriteLine($"{build.Median(name),7:N1} ms  {build.Reports(name),7}  {name}");
     }
 
-    foreach (var analyzer in analyzers)
+    Console.WriteLine($"{build.Total(),7:N1} ms           total");
+    return 0;
+}
+
+// Each analyzer's fastest run: other work on the machine only ever adds time, so more runs only bring a build closer to
+// its real speed. A slowdown found after the first round is measured again (up to two more rounds): noise goes away,
+// a real regression stays. Thresholds for "clearly slower": the total more than 10 % and 25 ms slower, one analyzer more
+// than 50 % and 15 ms slower, or a new analyzer above 60 ms. ponytail: fixed thresholds, tune them if the check flaps.
+var (baseBuild, head) = (builds[0], builds[1]);
+var (problems, lines) = Evaluate();
+for (var round = 1; round < 3 && problems.Count > 0; round++)
+{
+    Console.WriteLine($"Slower after round {round}: {string.Join("; ", problems)}. Measuring again.");
+    await Measure(round * runs + 1, (round + 1) * runs);
+    (problems, lines) = Evaluate();
+}
+
+var report = string.Join('\n', new[] { "## Analyzer performance (Newtonsoft.Json, base vs head, alternated, fastest run each)", "" }
+    .Concat(lines)
+    .Concat(problems.Count == 0 ? new[] { "", "No regression." } : new[] { "", "**Slower:**", "" }.Concat(problems.Select(p => "- " + p))));
+Console.WriteLine(report);
+if (Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY") is { Length: > 0 } summary)
+{
+    File.AppendAllText(summary, report + "\n");
+}
+
+return problems.Count == 0 ? 0 : 1;
+
+// The builds take turns in every run, and which goes first alternates too (the second build of a run measured 3-25 ms
+// slower on unchanged analyzers); a collection before each keeps one build from paying for the other's garbage.
+async Task Measure(int first, int last)
+{
+    for (var i = first; i <= last; i++)
     {
-        times[analyzer].Add((await withAnalyzers.GetAnalyzerTelemetryInfoAsync(analyzer, CancellationToken.None)).ExecutionTime.TotalMilliseconds);
+        foreach (var build in i % 2 == 0 ? builds : builds.Reverse())
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            var options = new CompilationWithAnalyzersOptions(
+                new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty), null, concurrentAnalysis: false, logAnalyzerExecutionTime: true);
+            var withAnalyzers = compilation.WithAnalyzers(build.Analyzers, options);
+            var diagnostics = await withAnalyzers.GetAnalyzerDiagnosticsAsync();
+            if (i == 0)
+            {
+                build.Counts = diagnostics.GroupBy(d => d.Id).ToDictionary(g => g.Key, g => g.Count());
+                continue;
+            }
+
+            foreach (var analyzer in build.Analyzers)
+            {
+                build.Times[analyzer.GetType().Name].Add((await withAnalyzers.GetAnalyzerTelemetryInfoAsync(analyzer, CancellationToken.None)).ExecutionTime.TotalMilliseconds);
+            }
+        }
     }
 }
 
-var results = analyzers
-    .Select(a => (Name: a.GetType().Name, Ms: times[a].OrderBy(t => t).ElementAt(runs / 2), Diagnostics: a.SupportedDiagnostics.Sum(d => counts.GetValueOrDefault(d.Id))))
-    .OrderByDescending(r => r.Ms)
-    .ToList();
-Console.WriteLine("     Time  Reports  Analyzer");
-foreach (var (name, ms, reports) in results)
+(List<string> Problems, List<string> Lines) Evaluate()
 {
-    Console.WriteLine($"{ms,7:N1} ms  {reports,7}  {name}");
+    var problems = new List<string>();
+    var lines = new List<string> { "| Analyzer | Base | Head | Change | Reports (base / head) |", "|---|---:|---:|---:|---:|" };
+    foreach (var name in head.Times.Keys.Union(baseBuild.Times.Keys).OrderByDescending(n => Math.Max(head.Fastest(n), baseBuild.Fastest(n))))
+    {
+        var (b, h) = (baseBuild.Fastest(name), head.Fastest(name));
+        var isNew = !baseBuild.Times.ContainsKey(name);
+        var removed = !head.Times.ContainsKey(name);
+        if (isNew && h > 60)
+        {
+            problems.Add($"{name} is new and takes {h:N1} ms");
+        }
+        else if (!isNew && !removed && h > b * 1.5 && h - b > 15)
+        {
+            problems.Add($"{name}: {b:N1} -> {h:N1} ms");
+        }
+
+        var change = isNew ? "new" : removed ? "removed" : Signed(h - b);
+        lines.Add($"| {name} | {(isNew ? "" : $"{b:N1} ms")} | {(removed ? "" : $"{h:N1} ms")} | {change} | {baseBuild.Reports(name)} / {head.Reports(name)} |");
+    }
+
+    var (baseTotal, headTotal) = (baseBuild.Times.Keys.Sum(baseBuild.Fastest), head.Times.Keys.Sum(head.Fastest));
+    lines.Add($"| **total** | **{baseTotal:N1} ms** | **{headTotal:N1} ms** | **{Signed(headTotal - baseTotal)}** | |");
+    if (headTotal > baseTotal * 1.1 && headTotal - baseTotal > 25)
+    {
+        problems.Add($"total: {baseTotal:N1} -> {headTotal:N1} ms");
+    }
+
+    return (problems, lines);
 }
 
-Console.WriteLine($"{results.Sum(r => r.Ms),7:N1} ms           total");
+static string Signed(double ms) => (Math.Round(ms, 1) is var r && r == 0 ? "+0.0" : r.ToString("+0.0;-0.0")) + " ms";
+
+static Build Load(string dll, string name)
+{
+    var assembly = new AssemblyLoadContext(name).LoadFromAssemblyPath(dll);
+    var analyzers = assembly.GetTypes()
+        .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t) && t.GetCustomAttribute<DiagnosticAnalyzerAttribute>() is not null)
+        .Select(t => (DiagnosticAnalyzer)Activator.CreateInstance(t)!)
+        .Where(a => a is not DiagnosticSuppressor)
+        .Where(a => Environment.GetEnvironmentVariable("STYLEBRO_BENCH_ONLY") is not { } only || only.Split(',').Contains(a.GetType().Name))
+        .ToImmutableArray();
+    return new Build(analyzers);
+}
+
+sealed class Build(ImmutableArray<DiagnosticAnalyzer> analyzers)
+{
+    public ImmutableArray<DiagnosticAnalyzer> Analyzers { get; } = analyzers;
+
+    public Dictionary<string, List<double>> Times { get; } = analyzers.ToDictionary(a => a.GetType().Name, _ => new List<double>());
+
+    public Dictionary<string, int> Counts { get; set; } = new();
+
+    public double Median(string name) => Times.TryGetValue(name, out var t) ? t.OrderBy(x => x).ElementAt(t.Count / 2) : 0;
+
+    public double Fastest(string name) => Times.TryGetValue(name, out var t) ? t.Min() : 0;
+
+    public double Total() => Times.Keys.Sum(Median);
+
+    public int Reports(string name) =>
+        Analyzers.FirstOrDefault(a => a.GetType().Name == name)?.SupportedDiagnostics.Sum(d => Counts.GetValueOrDefault(d.Id)) ?? 0;
+}
