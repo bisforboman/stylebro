@@ -793,6 +793,9 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor LiteralSuffixCase = new(
         id: DiagnosticIds.LiteralSuffixCase,
         title: "Integer literal suffixes should be upper case",
+    public static readonly DiagnosticDescriptor NullCheckStyle = new(
+        id: DiagnosticIds.NullCheckStyle,
+        title: "Check for null in one form",
         messageFormat: "Use '{0}'",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
@@ -800,6 +803,10 @@ internal static class Descriptors
         description: "'1L' instead of '1l', which looks like '11'; 'U' and 'UL' likewise. Real suffixes ('f', 'd', 'm') aren't "
             + "checked. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffixCase + ".md");
+        description: "Null checks use 'is null' and 'is not null' (stylebro_null_check_style = pattern_matching, the default) or "
+            + "'== null' and '!= null' (equality_operator). Checks whose meaning would change, such as a user-defined '==', "
+            + "aren't reported. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.NullCheckStyle + ".md");
 
     public static readonly DiagnosticDescriptor DirectiveSpacing = new(
         id: DiagnosticIds.DirectiveSpacing,
