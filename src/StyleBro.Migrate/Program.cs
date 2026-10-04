@@ -138,7 +138,9 @@ internal static class Program
     /// <summary>Which StyleCop rules are on, and why the ones StyleBro and the SDK don't cover aren't.</summary>
     private static void Report(StyleCopSetup setup, Migration.Result result)
     {
-        var on = StyleCopSetup.Rules.Where(r => setup.IsOn(r.Id)).Select(r => r.Id).ToList();
+        // SA0001 says that XML documentation isn't parsed: with a GenerateDocumentationFile project it can't fire, so it
+        // isn't a rule the repository loses.
+        var on = StyleCopSetup.Rules.Where(r => setup.IsOn(r.Id) && !(r.Id == "SA0001" && setup.DocumentationParsed)).Select(r => r.Id).ToList();
         var uncovered = on.Where(id => !result.Covered.Contains(id)).ToList();
         Console.WriteLine($"StyleCop rules on: {on.Count}; enforced by StyleBro or the SDK after migrating: {on.Count - uncovered.Count}");
         if (uncovered.Count == 0)
