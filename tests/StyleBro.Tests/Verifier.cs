@@ -62,7 +62,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     }
 
     /// <summary>The diagnostics in <paramref name="sources"/> are reported, but the fix deliberately leaves them.</summary>
-    public static Task VerifyNotFixedAsync(string[] sources)
+    public static Task VerifyNotFixedAsync(string[] sources, string? editorConfig = null)
     {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
         {
@@ -76,7 +76,12 @@ internal static class Verifier<TAnalyzer, TCodeFix>
             test.FixedState.Sources.Add(source);
         }
 
-        return RunAsync(test, null);
+        if (editorConfig is not null)
+        {
+            test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\n" + editorConfig));
+        }
+
+        return RunAsync(test, editorConfig);
     }
 
     /// <summary>

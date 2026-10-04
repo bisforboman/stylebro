@@ -16,7 +16,7 @@ WORK = [
     ('Hardening', 'IDE0055 in multi-targeted repos', "`dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md.", 'Done (2026-10-03)'),
     ('Parity', 'SA1316: tuple element names in PascalCase', 'BRO1311: renamed with every use, literal and override solution-wide (Roslyn\'s Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`.', 'Done (2026-10-03)'),
     ('Parity', 'SA1108: no comments inside block statements', 'BRO1132: the comment moves into the block, right after `{`; multi-line headers skipped (decisions.md, proposals/sa1108.md).', 'Done (2026-10-04)'),
-    ('Parity', 'BRO1309: namespace names', 'Rename namespaces declared in source; check what it does to embedded resource names and folder conventions first.', 'Planned'),
+    ('Parity', 'BRO1309: namespace names', 'BRO1312, opt-in (off by default, on through `stylebro-migrate` with SA1300); the root namespace is left out. See docs/proposals/namespace-names.md.', 'Done (2026-10-04)'),
     ('Adoption', 'Getting started', 'docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines.', 'Done (2026-10-03)'),
     ('Adoption', 'IDE experience', "Check Visual Studio and Rider: light bulbs and Fix All, severities from the preset, `init`'s .editorconfig.", 'Planned'),
     ('Adoption', 'Migration sample', 'samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards.', 'Done (2026-10-03)'),
