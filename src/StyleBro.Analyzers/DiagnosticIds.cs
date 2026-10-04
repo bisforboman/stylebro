@@ -99,4 +99,5 @@ public static class DiagnosticIds
     public const string OperatorPlacement = "BRO1520";
     public const string ArrowPlacement = "BRO1521";
     public const string EqualsPlacement = "BRO1522";
+    public const string ConditionalLayout = "BRO1524";
 }

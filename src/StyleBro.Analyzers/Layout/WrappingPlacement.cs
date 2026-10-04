@@ -90,6 +90,16 @@ internal static class WrappingPlacement
         }
     }
 
+    /// <summary>A placement key: beginning_of_line or end_of_line ('end_of_line:warning' style values too).</summary>
+    public static bool Read(AnalyzerConfigOptions options, string key, bool beginning) =>
+        !options.TryGetValue(key, out var value) ? beginning
+        : value.Split(':')[0].Trim().ToLowerInvariant() switch
+        {
+            "beginning_of_line" => true,
+            "end_of_line" => false,
+            _ => beginning,
+        };
+
     /// <summary>
     /// The edit that moves <paramref name="token"/> to the wanted side of the line break, or null when it's already there,
     /// there's no line break next to it, or the case is skipped: a line break on both sides, anything but whitespace and
@@ -135,14 +145,4 @@ internal static class WrappingPlacement
             return new TextChange(TextSpan.FromBounds(previous.Span.End, next.SpanStart), " " + token.Text + gap.Substring(gap.IndexOfAny(LineBreaks)));
         }
     }
-
-    /// <summary>A placement key: beginning_of_line or end_of_line ('end_of_line:warning' style values too).</summary>
-    private static bool Read(AnalyzerConfigOptions options, string key, bool beginning) =>
-        !options.TryGetValue(key, out var value) ? beginning
-        : value.Split(':')[0].Trim().ToLowerInvariant() switch
-        {
-            "beginning_of_line" => true,
-            "end_of_line" => false,
-            _ => beginning,
-        };
 }
