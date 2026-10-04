@@ -31,6 +31,8 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = 'return op.MethodKind == MethodKind.BuiltinOperator'; Replace = 'return true'; Tests = 'NullCheckTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '&& op.Parameters[0].Type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T'; Replace = ''; Tests = 'NullCheckTests' }
 
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '&& symbol is IMethodSymbol { MethodKind: not MethodKind.BuiltinOperator }'; Replace = '&& false'; Tests = 'NullCheckTests' }
+
         # BRO1520-BRO1522 (operator, '=>' and '=' placement when wrapping)
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (token.IsMissing || previous.IsMissing || next.IsMissing'; Replace = 'if (false'; Tests = 'WrappingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'next.Kind() is SyntaxKind.OpenBraceToken or SyntaxKind.OpenBracketToken'; Replace = 'next.Kind() is SyntaxKind.OpenBracketToken'; Tests = 'WrappingPlacementTests' }

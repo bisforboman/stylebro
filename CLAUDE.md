@@ -230,7 +230,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   (records, classes with `==`; checked by speculative binding for `is` -> `==`), dynamic, non-nullable value types, `is`
   in expression trees (IOperation parents: an anonymous function converted to a System.Linq.Expressions type, also
   query clauses over IQueryable), `is not` < C# 9 / `is` < C# 7, operands looser than `is` (whitelist), `is` checks
-  whose parent binds tighter than `==` (whitelist of parents), comments/line breaks in the removed text. Pointers have no
+  whose parent binds tighter than `==` (whitelist of parents), comments/line breaks in the removed text; `is null` ->
+  `== null` on a nullable value type with a lifted user-defined `==` (CI: Jellyfin's BannedApiAnalyzers bans
+  `Guid.operator ==`, RS0030 after the fix). Pointers have no
   operator symbol (that guard was dead per mutation testing). Probed: no SDK rule rewrites `x == null` (IDE0041/0150/
   0083/0078 only produce patterns from other shapes).
 - **BRO1006** (SA1006, 2026-10-03, `Spacing/DirectiveSpacingAnalyzer.cs`) `# if` -> `#if`: StyleCop's check (a `#` whose

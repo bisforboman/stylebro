@@ -197,6 +197,25 @@ public class NullCheckTests
         Pattern);
 
     [Fact]
+    public Task LiftedOperators_AreNotIntroduced() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public bool M(Guid? g, int? n) => g is null || g is not null || {|BRO1133:n is null|};
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            public bool M(Guid? g, int? n) => g is null || g is not null || n == null;
+        }
+        """);
+
+    [Fact]
     public Task ExpressionTrees_AreLeftAlone() => VerifyFixAsync(
         """
         using System;

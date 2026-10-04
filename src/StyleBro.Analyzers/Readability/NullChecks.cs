@@ -97,7 +97,13 @@ internal static class NullChecks
             not ? SyntaxKind.NotEqualsExpression : SyntaxKind.EqualsExpression,
             isPattern.Expression.WithoutTrivia(),
             SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression));
-        if (!MeansTheSame(Speculation.SymbolAfterReplacing(model, isPattern, replacement, cancellationToken), model.GetTypeInfo(isPattern.Expression, cancellationToken).Type, model))
+
+        // On a nullable value type, '==' would name the underlying type's operator (lifted) where the code named none:
+        // harmless at run time, but a banned-API list may forbid it (Jellyfin bans Guid's '==').
+        var symbol = Speculation.SymbolAfterReplacing(model, isPattern, replacement, cancellationToken);
+        var type = model.GetTypeInfo(isPattern.Expression, cancellationToken).Type;
+        if (!MeansTheSame(symbol, type, model)
+            || (type?.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T && symbol is IMethodSymbol { MethodKind: not MethodKind.BuiltinOperator }))
         {
             return null;
         }
