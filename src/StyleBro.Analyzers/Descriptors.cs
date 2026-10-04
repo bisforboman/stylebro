@@ -1040,6 +1040,18 @@ internal static class Descriptors
             + "the next line (beginning_of_line). Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.EqualsPlacement + ".md");
 
+    public static readonly DiagnosticDescriptor CallChainLayout = new(
+        id: DiagnosticIds.CallChainLayout,
+        title: "Each call of a split call chain starts its own line",
+        messageFormat: "Start '{0}' on its own line, like the chain's other calls",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "When a member access chain is split over several lines (a '.' or '?.' of the chain starts a line), "
+            + "every call after the chain's first line starts its own line. The first line may hold any number of calls, "
+            + "and a member that only leads to the next call ('.WriteTo.Sink(x)') stays with it. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.CallChainLayout + ".md");
+
     public static readonly DiagnosticDescriptor BlankLineAfterAttributes = new(
         id: DiagnosticIds.BlankLineAfterAttributes,
         title: "Attributes should not be followed by a blank line",

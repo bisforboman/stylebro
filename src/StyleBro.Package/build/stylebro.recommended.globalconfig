@@ -169,6 +169,9 @@ dotnet_diagnostic.BRO1520.severity = warning
 dotnet_diagnostic.BRO1521.severity = warning
 dotnet_diagnostic.BRO1522.severity = warning
 
+# BRO1523: in a call chain split over several lines, every call after the first line starts its own line. Not a
+# StyleCop rule (stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1523.severity = warning
 # BRO1525: no blank line after an attribute list (StyleCop's proposed SA1521, never implemented; stylebro-migrate turns it
 # off)
 dotnet_diagnostic.BRO1525.severity = warning

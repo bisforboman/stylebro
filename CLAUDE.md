@@ -568,6 +568,18 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Messy showed `select` re-indented), `=>` after a `where` (BRO1111's). Probed: no SDK rule (IDE0055 included) enforces
   the SDK key. Migration writes them `none` (no SA ids); MigrationTests requires rules without SA ids to be listed
   under "Rules beyond StyleCop" in differences-from-stylecop.md.
+- **BRO1523** (2026-10-04, Roslynator RCS0054, `Layout/CallChains.cs`, one analyzer + one fix): a chain = the outermost
+  invocation/element access/conditional access/member access; its links = every `.`/`?.` (the `?` token) on the spine.
+  Only SPLIT chains (a link starts a line); a link must start its line when it follows a call (`).X`, also `)[0].X`,
+  `)!.X`), its step contains a call (trailing `.Arguments`/`.Result` exempt) and it isn't on the chain's first line
+  (first line free, like RCS0054); `.WriteTo.Sink(x)` is one step (RCS0054 splits it: Serilog 142 of 182 chains).
+  Defaults from the survey in decisions.md (110 calls in 79 of 20,959 split chains change). Indentation NOT checked: a
+  new line copies the leading whitespace of the nearest line-starting link above (else below), so Polly's aligned
+  chains stay. Edit = the gap before the link only. Skipped: comment in the gap, directives/syntax errors anywhere in
+  the chain, interpolation holes, a multi-line step whose other lines don't start with the new indentation (decided on
+  the step's own lines, which other links' moves never change: a first version used the line's indentation, which
+  changes when an earlier link on the same line moves, i.e. a second-run finding). FixOrderTests case with
+  BRO1108/BRO1110/BRO1520.
 - **BRO1525** (2026-10-04, StyleCop's proposed SA1521 / issue #738, never implemented; beyond StyleCop, so no SA id in
   the descriptor or migrate would map it; `Layout/AttributeBlankLines.cs`): blank lines after any attribute list except
   assembly/module ones (before the element or the next list) are removed as whole lines. Skipped: any comment/doc/
