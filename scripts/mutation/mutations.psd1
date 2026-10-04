@@ -9,6 +9,15 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'if (preference == BracePreference.Never)'; Replace = 'if (false)'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text)'; Replace = 'IsMultiLine(child, text)'; Tests = 'BracesTests' }
 
+        # BRO1520-BRO1522 (operator, '=>' and '=' placement when wrapping)
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (token.IsMissing || previous.IsMissing || next.IsMissing'; Replace = 'if (false'; Tests = 'WrappingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'next.Kind() is SyntaxKind.OpenBraceToken or SyntaxKind.OpenBracketToken'; Replace = 'next.Kind() is SyntaxKind.OpenBracketToken'; Tests = 'WrappingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'next.Kind() is SyntaxKind.OpenBraceToken or SyntaxKind.OpenBracketToken'; Replace = 'next.Kind() is SyntaxKind.OpenBraceToken'; Tests = 'WrappingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = '|| next.Parent is FromClauseSyntax { Parent: QueryExpressionSyntax }'; Replace = ''; Tests = 'WrappingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (!before.Concat(after).All('; Replace = 'if (false && !before.Concat(after).All('; Tests = 'WrappingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (breakBefore == breakAfter || '; Replace = 'if ('; Tests = 'WrappingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = ' when !arrow.ArrowToken.GetPreviousToken().Parent!.AncestorsAndSelf().Any(a => a is TypeParameterConstraintClauseSyntax)'; Replace = ''; Tests = 'WrappingPlacementTests' }
+
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }
 

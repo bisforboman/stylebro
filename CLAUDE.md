@@ -518,6 +518,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   56/52 positions, 4 documented; output not compared (StyleCop's fix misindents nested blocks, writes CRLF into LF
   files). Replaces the SDK option the preset couldn't use (`csharp_preserve_single_line_blocks = false` also expands
   `{ get; set; }`).
+- **BRO1520-BRO1522** (2026-10-04, first rules beyond StyleCop, `Layout/WrappingPlacement.cs`, one analyzer + one fix):
+  operator (binary + `?`/`:`, SDK key `dotnet_style_operator_placement_when_wrapping`, default beginning), `=>`
+  (expression bodies + switch arms, not lambdas; `stylebro_arrow_placement_when_wrapping`, default end: owner), `=`
+  (assignments incl. compound + EqualsValueClause; `stylebro_equals_placement_when_wrapping`, default end); defaults
+  from a survey of the 8 reference repos (docs/decisions.md). Only the token moves (edit = both gaps; the gap with the
+  line break is kept from the break on). Skipped: any non-whitespace trivia in the gaps, break on both sides, missing
+  tokens, `{`/`[` after the token, a query after it (BRO1127-BRO1130 indent clauses by whether `from` starts the line:
+  Messy showed `select` re-indented), `=>` after a `where` (BRO1111's). Probed: no SDK rule (IDE0055 included) enforces
+  the SDK key. Migration writes them `none` (no SA ids); MigrationTests requires rules without SA ids to be listed
+  under "Rules beyond StyleCop" in differences-from-stylecop.md.
 - **BRO1510** (SA1504) accessors with block bodies all single-line or all multi-line (`Layout/AccessorLayout.cs`).
   Probed: only lists where EVERY accessor has a block body (`get => x;`/`get;` next to a multi-line `set {}` is fine),
   only multi-line lists (a one-line list is BRO1509's), diagnostic on the first accessor's keyword. StyleCop's fix has
@@ -947,33 +957,8 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - Name checked 2026-09-29: NuGet IDs `StyleBro` and `StyleBro.Analyzers` are free (0 search hits);
   a `stylebro` GitHub user/org is free; no similar C# projects on GitHub. `StyleBro.Analyzers` is now taken by us.
 
-## Next steps (in order)
+## Next steps
 
-1. ~~Make everything build and pass (tests + verify-format).~~ Done, re-verified after the rename.
-2. Real-world testing: run `dotnet format analyzers --diagnostics BRO1001` on some real repos and check they
-   still build and the second run changes nothing. Compare with StyleCop's SA1201-SA1204 on a repo that uses
-   StyleCop; differences are bugs or deliberate, documented choices.
-3. ~~Check the name, create the repo, publish.~~ Done: public at `github.com/bisforboman/stylebro` (MIT);
-   `StyleBro.Analyzers 0.1.0-alpha.1` published to nuget.org on 2026-09-30 by release.yml (tag at `bc053c2`).
-   To release: move the Unshipped rules to Shipped, bump `<Version>` in StyleBro.Package.csproj (as for alpha.3/alpha.4),
-   push a tag `vX.Y.Z[-suffix]`; a prerelease publishes on its own, a stable version needs the `release` approval.
-4. Scope = migration parity, not "port every StyleCop rule". `docs/stylecop-mapping.md` (draft, 2026-09-30) maps
-   all 197 StyleCop diagnostics to SDK / StyleBro / drop, from: the rule inventory read from the StyleCop DLLs
-   (1.1.118 + 1.2.0-beta.556), config surveys and all-rules-on counts in OpenTelemetry, Polly and the private app,
-   and an SDK check (75 rules: 49 fixed by `dotnet format` with SDK settings alone). Key findings:
-   - `dotnet format` cannot fix naming (IDE1006: "doesn't support Fix All"), so a StyleBro rename fix is a real gap.
-   - Done: SA1133 (BRO1102), SA1106 (BRO1101), SA1509/SA1510 (BRO1501/BRO1502), SA1131 (BRO1103), SA1129
-     (BRO1104), SA1128 (BRO1105), SA1005 (BRO1002), SA1413 (BRO1401), SA1122 (BRO1106), SA1505 (BRO1503),
-     SA1515 (BRO1504), SA1516 (BRO1505), SA1512 (BRO1506), SA1518 (BRO1507), SA1116/SA1117
-     (BRO1107/BRO1108), SA1312/SA1313 (BRO1301/BRO1302), SA1306/SA1309 for private fields (BRO1303), SA1302/SA1314
-     (BRO1304/BRO1305), SA1303/SA1304/SA1307/SA1311 (BRO1306), SA1308/SA1310/SA1300 (BRO1307-BRO1309),
-     SA1110/SA1111/SA1127/SA1124/SA1123 (BRO1109-BRO1113), documentation rules (BRO1601-BRO1611, see BRO16xx).
-     Left: SA1305 (Hungarian, no StyleCop fix), SA1613 (unnamed `<param>`), and the untested rest (77).
-   - 107 rules untested yet, mostly documentation (SA16xx).
-   - The preset only claims IDE0011 + IDE0055 today; the SDK settings verified in the check should go into it.
-     Some are opinionated (SA1101 `this.` is off in 2 of 3 repos), so decide per setting.
-5. Documentation rules (BRO16xx): XML doc stubs, `<inheritdoc/>` on overrides/interface implementations,
-   `<param>` kept in sync with the parameters. These need the semantic model.
-6. ~~StyleCop migration tool~~ Done (`src/StyleBro.Migrate`, see "Migration tool"); published as a .NET tool from alpha.5.
-7. Later: blank-line layout rules (the SDK's IDE2000 series is only experimental), baseline support
-   (fail only on new violations).
+`docs/backlog.md` is the list (generated by `python scripts/New-Backlog.py`; the planned work and the maybes live in
+that script). StyleCop parity is complete (every rule is StyleBro, SDK, or dropped by design with a reason in
+`docs/skipped-rules.md`). Work in progress and decisions go through PRs and `docs/decisions.md`.

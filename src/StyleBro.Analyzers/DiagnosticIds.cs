@@ -94,4 +94,7 @@ public static class DiagnosticIds
     public const string MultipleBlankLines = "BRO1517";
     public const string BlankLineBeforeCloseBrace = "BRO1518";
     public const string BlankLineAfterCloseBrace = "BRO1519";
+    public const string OperatorPlacement = "BRO1520";
+    public const string ArrowPlacement = "BRO1521";
+    public const string EqualsPlacement = "BRO1522";
 }

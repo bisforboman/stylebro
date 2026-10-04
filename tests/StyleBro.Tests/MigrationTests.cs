@@ -290,8 +290,25 @@ public sealed class MigrationTests : IDisposable
         var rules = Migration.StyleBroRules();
 
         Assert.NotEmpty(rules);
-        Assert.All(rules, r => Assert.NotEmpty(r.StyleCop));
         Assert.Equal(["SA1201", "SA1202", "SA1203", "SA1204", "SA1214"], rules.Single(r => r.Id == "BRO1001").StyleCop);
+
+        // A rule without a StyleCop rule is one beyond StyleCop: listed as such on the differences page.
+        var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
+        var beyond = page.Substring(page.IndexOf("## Rules beyond StyleCop", StringComparison.Ordinal));
+        beyond = beyond.Substring(0, beyond.IndexOf("\n## ", 1, StringComparison.Ordinal) is var end and > 0 ? end : beyond.Length);
+        Assert.All(rules.Where(r => r.StyleCop.Count == 0), r => Assert.True(
+            beyond.Contains($"[{r.Id}](rules/{r.Id}.md)", StringComparison.Ordinal),
+            $"{r.Id} names no StyleCop rule it replaces; add 'Replaces StyleCop SAxxxx' to its description or list it under 'Rules beyond StyleCop'."));
+    }
+
+    [Fact]
+    public void RulesBeyondStyleCop_AreTurnedOff()
+    {
+        // A StyleCop-clean repository shouldn't change because of rules StyleCop doesn't have.
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+
+        Assert.All(Migration.StyleBroRules().Where(r => r.StyleCop.Count == 0), r => Assert.Contains($"dotnet_diagnostic.{r.Id}.severity = none", lines));
+        Assert.Contains("dotnet_diagnostic.BRO1520.severity = none", lines);
     }
 
     [Fact]
