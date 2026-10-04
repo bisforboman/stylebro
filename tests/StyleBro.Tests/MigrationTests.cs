@@ -492,8 +492,9 @@ public sealed class MigrationTests : IDisposable
         // A repository with a plain file header and SX1101 turns on IDE0073 and IDE0003 too.
         Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1101.severity = warning\n");
-        var ids = File.ReadAllLines(preset).Concat(InitCommand.Template().Split('\n')).Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
-            .Select(l => System.Text.RegularExpressions.Regex.Match(l, @"^dotnet_diagnostic\.(IDE\d{4})\.severity"))
+        var ids = File.ReadAllLines(preset).Concat(InitCommand.Template().Split('\n')).Concat(InitCommand.ModernizeTemplate().Split('\n'))
+            .Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
+            .Select(l => System.Text.RegularExpressions.Regex.Match(l, @"^dotnet_diagnostic\.((?:IDE|CA)\d{4})\.severity"))
             .Where(m => m.Success)
             .Select(m => m.Groups[1].Value)
             .ToHashSet();
@@ -610,6 +611,87 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.IDE0047.severity = none", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0011.severity = none", InitCommand.Block());
         Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", InitCommand.Block());
+    }
+
+    [Fact]
+    public void Modernize_InASingleTargetRepository_TurnsEveryTierOn()
+    {
+        Write("src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>");
+
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--modernize" }));
+        var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+
+        Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", editorConfig);
+        Assert.Contains("dotnet_diagnostic.IDE0041.severity = warning", editorConfig);
+        Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", editorConfig);
+        Assert.Contains("dotnet_diagnostic.CA1510.severity = warning", editorConfig);
+        Assert.Contains("csharp_style_namespace_declarations = file_scoped", editorConfig);
+        Assert.DoesNotContain("suggestion", editorConfig);
+
+        // Debated or conflicting rules stay opt-in by hand (docs/modernizing.md).
+        Assert.All(new[] { "IDE0251", "IDE0290", "IDE0305", "IDE0066", "IDE0063", "CA1866", "IDE0038", "CA1860" }, id => Assert.DoesNotContain(id, editorConfig));
+    }
+
+    [Fact]
+    public void Modernize_InAMultiTargetedRepository_MakesLanguageAndApiRulesSuggestions()
+    {
+        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks></PropertyGroup></Project>");
+
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--modernize" }));
+        var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+
+        Assert.Contains("dotnet_diagnostic.IDE0041.severity = warning", editorConfig);
+        Assert.Contains("dotnet_diagnostic.IDE0090.severity = suggestion", editorConfig);
+        Assert.Contains("dotnet_diagnostic.CA1510.severity = suggestion", editorConfig);
+        Assert.Contains("dotnet_diagnostic.IDE0330.severity = suggestion", editorConfig);
+    }
+
+    [Fact]
+    public void Modernize_WithLangVersionInDirectoryBuildProps_TurnsLanguageRulesOn()
+    {
+        Write("Directory.Build.props", "<Project><PropertyGroup><LangVersion>latest</LangVersion></PropertyGroup></Project>");
+        Write("src/Directory.Build.props", "<Project><Import Project=\"$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))\" /></Project>");
+        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFrameworks>net48;net8.0</TargetFrameworks></PropertyGroup></Project>");
+
+        Assert.True(InitCommand.SetsLangVersion(root, Path.Combine("src", "Lib", "Lib.csproj")));
+        var block = InitCommand.Modernize(root, InitCommand.MultiTargetedProjects(root).ToList()).Block;
+        Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", block);
+        Assert.Contains("dotnet_diagnostic.CA1510.severity = suggestion", block);
+
+        // A Directory.Build.props that doesn't import its parent's hides the LangVersion above it.
+        Write("src/Directory.Build.props", "<Project />");
+        Assert.False(InitCommand.SetsLangVersion(root, Path.Combine("src", "Lib", "Lib.csproj")));
+    }
+
+    [Fact]
+    public void Modernize_IsIdempotent_KeepsOwnKeys_AndInitWithoutItLeavesTheBlock()
+    {
+        Write(".editorconfig", "root = true\n\n[*.cs]\ncsharp_style_namespace_declarations = block_scoped\n");
+
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--modernize" }));
+        var first = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.Contains(InitCommand.ModernizeBegin, first);
+        Assert.DoesNotContain("file_scoped", first);
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--modernize" }));
+        Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+
+        // Next to settings from 'stylebro-migrate --write' the modernize block is still added.
+        Write(".editorconfig", Migration.Apply("root = true\n", Migration.Render(new[] { ("[*.cs]", new List<string> { "dotnet_diagnostic.IDE0040.severity = none" }) })));
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--modernize" }));
+        var migrated = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", migrated);
+        Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", migrated);
+        Assert.DoesNotContain("stylebro-migrate init:", migrated);
+    }
+
+    [Fact]
+    public void Init_WithoutModernize_WritesNoModernizationRules()
+    {
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+
+        Assert.DoesNotContain("modernize", File.ReadAllText(Path.Combine(root, ".editorconfig")));
     }
 
     [Fact]

@@ -22,6 +22,13 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
     {
         "IDE0003", "IDE0009", "IDE0011", "IDE0036", "IDE0040", "IDE0047", "IDE0048", "IDE0049", "IDE0055", "IDE0065", "IDE0073",
         "IDE2000", "IDE2002", "IDE2003",
+
+        // init --modernize
+        "IDE0016", "IDE0017", "IDE0018", "IDE0019", "IDE0020", "IDE0028", "IDE0029", "IDE0030", "IDE0031", "IDE0041", "IDE0054",
+        "IDE0056", "IDE0057", "IDE0062", "IDE0074", "IDE0078", "IDE0083", "IDE0090", "IDE0150", "IDE0161", "IDE0170", "IDE0180",
+        "IDE0240", "IDE0241", "IDE0250", "IDE0270", "IDE0300", "IDE0301", "IDE0302", "IDE0303", "IDE0304", "IDE0306", "IDE0330",
+        "IDE0340", "IDE0360", "CA1510", "CA1511", "CA1512", "CA1513", "CA1825", "CA1829", "CA1834", "CA1847", "CA1850", "CA1864",
+        "CA1865", "CA1872", "CA2249", "CA2263",
     };
 
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = CreateDescriptors();
