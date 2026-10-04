@@ -101,6 +101,12 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
   a changed public API).
 - **Not covered yet:** candidates for future StyleBro rules. See [stylecop-mapping.md](stylecop-mapping.md).
 
+## Modernizing afterwards
+
+StyleCop has no rules for newer C# or APIs, so the migration turns none on. To add the SDK's modernization rules
+(their own block, kept when you run `stylebro-migrate --write` again): `stylebro-migrate init --modernize --write`,
+see [modernizing.md](modernizing.md).
+
 ## Limits
 
 - Per-project rulesets and global configs (`<CodeAnalysisRuleSet>` in a test project's props) can't be mapped to

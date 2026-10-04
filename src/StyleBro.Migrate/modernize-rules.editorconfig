@@ -1,0 +1,67 @@
+[*.cs]
+# Built-in .NET rules that rewrite code into newer C# and newer APIs (docs/modernizing.md). 'dotnet format' applies them.
+# Rule options not set here use the SDK's defaults, which already prefer the newer form.
+
+# Tier A: C# 7.3 or older, no new API; safe in every project
+# ReferenceEquals(x, null) -> x is null
+dotnet_diagnostic.IDE0041.severity = warning
+# Tuple swap: (a, b) = (b, a)
+dotnet_diagnostic.IDE0180.severity = warning
+# readonly struct
+dotnet_diagnostic.IDE0250.severity = warning
+# Throw expressions, object initializers, out var, pattern matching instead of as/is + cast
+dotnet_diagnostic.IDE0016.severity = warning
+dotnet_diagnostic.IDE0017.severity = warning
+dotnet_diagnostic.IDE0018.severity = warning
+dotnet_diagnostic.IDE0019.severity = warning
+dotnet_diagnostic.IDE0020.severity = warning
+# ?? and ?.
+dotnet_diagnostic.IDE0029.severity = warning
+dotnet_diagnostic.IDE0030.severity = warning
+dotnet_diagnostic.IDE0031.severity = warning
+dotnet_diagnostic.IDE0270.severity = warning
+# Compound assignment: x += 1
+dotnet_diagnostic.IDE0054.severity = warning
+# Redundant and unnecessary #nullable directives
+dotnet_diagnostic.IDE0240.severity = warning
+dotnet_diagnostic.IDE0241.severity = warning
+# Array.Empty<T>(), Count instead of Count(), Append('a')
+dotnet_diagnostic.CA1825.severity = warning
+dotnet_diagnostic.CA1829.severity = warning
+dotnet_diagnostic.CA1834.severity = warning
+
+# Tier B: newer C# (target-typed new, collection expressions, patterns, file-scoped namespaces, ...)
+dotnet_diagnostic.IDE0090.severity = {lang}
+dotnet_diagnostic.IDE0300.severity = {lang}
+dotnet_diagnostic.IDE0301.severity = {lang}
+dotnet_diagnostic.IDE0302.severity = {lang}
+dotnet_diagnostic.IDE0303.severity = {lang}
+dotnet_diagnostic.IDE0304.severity = {lang}
+dotnet_diagnostic.IDE0306.severity = {lang}
+dotnet_diagnostic.IDE0028.severity = {lang}
+dotnet_diagnostic.IDE0150.severity = {lang}
+dotnet_diagnostic.IDE0078.severity = {lang}
+dotnet_diagnostic.IDE0083.severity = {lang}
+dotnet_diagnostic.IDE0170.severity = {lang}
+dotnet_diagnostic.IDE0074.severity = {lang}
+dotnet_diagnostic.IDE0062.severity = {lang}
+dotnet_diagnostic.IDE0161.severity = {lang}
+csharp_style_namespace_declarations = file_scoped
+dotnet_diagnostic.IDE0340.severity = {lang}
+dotnet_diagnostic.IDE0360.severity = {lang}
+
+# Tier C: newer APIs (ThrowIfNull, TryAdd, Contains(char), ranges, System.Threading.Lock, ...)
+dotnet_diagnostic.CA1510.severity = {api}
+dotnet_diagnostic.CA1511.severity = {api}
+dotnet_diagnostic.CA1512.severity = {api}
+dotnet_diagnostic.CA1513.severity = {api}
+dotnet_diagnostic.CA1847.severity = {api}
+dotnet_diagnostic.CA1865.severity = {api}
+dotnet_diagnostic.CA2249.severity = {api}
+dotnet_diagnostic.CA1864.severity = {api}
+dotnet_diagnostic.CA1850.severity = {api}
+dotnet_diagnostic.CA1872.severity = {api}
+dotnet_diagnostic.CA2263.severity = {api}
+dotnet_diagnostic.IDE0056.severity = {api}
+dotnet_diagnostic.IDE0057.severity = {api}
+dotnet_diagnostic.IDE0330.severity = {api}

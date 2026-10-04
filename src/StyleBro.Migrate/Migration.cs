@@ -195,7 +195,7 @@ internal static class Migration
         }
     }
 
-    /// <summary>The keys the root .editorconfig sets for all C# files, outside the generated block.</summary>
+    /// <summary>The keys the root .editorconfig sets for all C# files, outside the generated blocks (init/--write and --modernize).</summary>
     public static HashSet<string> OwnKeys(string root)
     {
         var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -209,9 +209,9 @@ internal static class Migration
         foreach (var raw in File.ReadAllLines(path))
         {
             var line = raw.Trim();
-            if (line.StartsWith(BeginMarker, StringComparison.Ordinal) || line.StartsWith(EndMarker, StringComparison.Ordinal))
+            if (line.StartsWith("# BEGIN stylebro-", StringComparison.Ordinal) || line.StartsWith("# END stylebro-", StringComparison.Ordinal))
             {
-                inBlock = line.StartsWith(BeginMarker, StringComparison.Ordinal);
+                inBlock = line.StartsWith("# BEGIN stylebro-", StringComparison.Ordinal);
                 inCSharp = false;
             }
             else if (line.StartsWith("[", StringComparison.Ordinal))
@@ -312,7 +312,7 @@ internal static class Migration
     }
 
     /// <summary>The .editorconfig with the block replaced, or appended when there's none yet.</summary>
-    public static string Apply(string? existing, string block)
+    public static string Apply(string? existing, string block, string beginMarker = BeginMarker, string endMarker = EndMarker)
     {
         if (string.IsNullOrEmpty(existing))
         {
@@ -320,8 +320,8 @@ internal static class Migration
         }
 
         var normalized = existing.Replace("\r\n", "\n");
-        var begin = normalized.IndexOf(BeginMarker, StringComparison.Ordinal);
-        var end = normalized.IndexOf(EndMarker, StringComparison.Ordinal);
+        var begin = normalized.IndexOf(beginMarker, StringComparison.Ordinal);
+        var end = normalized.IndexOf(endMarker, StringComparison.Ordinal);
         if (begin >= 0 && end > begin)
         {
             var after = normalized.IndexOf('\n', end);
