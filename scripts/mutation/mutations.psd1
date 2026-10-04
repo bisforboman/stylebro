@@ -18,7 +18,6 @@
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineBeforeComment))'; Replace = 'if (false)'; Tests = 'FixOrderTests' }
 
         # BRO1135 (upper-case integer literal suffixes)
-        @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = ' || literal.Value is float or double or decimal'; Replace = ''; Tests = 'LiteralSuffixCaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = 'return suffix.Any(char.IsLower) ?'; Replace = 'return true ?'; Tests = 'LiteralSuffixCaseTests' }
 
         # BRO1520-BRO1522 (operator, '=>' and '=' placement when wrapping)

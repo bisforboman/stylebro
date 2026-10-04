@@ -16,17 +16,12 @@ namespace StyleBro.Analyzers.Readability;
 internal static class LiteralSuffixes
 {
     /// <summary>
-    /// BRO1135: the literal's text with its integer suffix ('u', 'l', 'ul', 'lu' in any case) in upper case, or null when
-    /// it has none in lower case. Real literals ('f', 'd', 'm', the exponent's 'e') aren't checked; in hex literals the
-    /// suffix letters can't be digits.
+    /// BRO1135: the numeric literal's text with its integer suffix ('u', 'l', 'ul', 'lu' in any case) in upper case, or
+    /// null when it has none in lower case. Real literals never end in 'u' or 'l' ('f', 'd', 'm' and the exponent's 'e'
+    /// aren't checked), and in hex literals the suffix letters can't be digits.
     /// </summary>
     public static string? GetUpperCaseSuffix(SyntaxToken literal)
     {
-        if (!literal.IsKind(SyntaxKind.NumericLiteralToken) || literal.Value is float or double or decimal)
-        {
-            return null;
-        }
-
         var text = literal.Text;
         var start = text.Length;
         while (start > 0 && text[start - 1] is 'u' or 'U' or 'l' or 'L')
