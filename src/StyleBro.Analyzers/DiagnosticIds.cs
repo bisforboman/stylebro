@@ -100,5 +100,6 @@ public static class DiagnosticIds
     public const string ArrowPlacement = "BRO1521";
     public const string EqualsPlacement = "BRO1522";
     public const string CallChainLayout = "BRO1523";
+    public const string BlankLineAfterAttributes = "BRO1525";
     public const string ConditionalLayout = "BRO1524";
 }

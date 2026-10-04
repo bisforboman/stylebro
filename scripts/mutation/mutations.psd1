@@ -71,6 +71,10 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'if (Enumerable.Range(line + 1, Line(text, end) - line)'; Replace = 'if (false && Enumerable.Range(line + 1, Line(text, end) - line)'; Tests = 'CallChainTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '.Any(l => l.Trim().Length > 0 && '; Replace = '.Any(l => '; Tests = 'CallChainTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'ConditionalAccessExpressionSyntax => true,'; Replace = 'ConditionalAccessExpressionSyntax => false,'; Tests = 'CallChainTests' }
+        # BRO1525 (no blank line after attributes)
+        @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (list.Parent is null or CompilationUnitSyntax || '; Replace = 'if ('; Tests = 'AttributeBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = ' || list.Parent.ContainsDiagnostics)'; Replace = ')'; Tests = 'AttributeBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (!close.TrailingTrivia.Concat('; Replace = 'if (false && !close.TrailingTrivia.Concat('; Tests = 'AttributeBlankLinesTests' }
         # BRO1524 (split conditional expressions)
         @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (conditional.ContainsDiagnostics'; Replace = 'if (false'; Tests = 'ConditionalLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = '|| conditional.WhenFalse is ConditionalExpressionSyntax'; Replace = ''; Tests = 'ConditionalLayoutTests' }
