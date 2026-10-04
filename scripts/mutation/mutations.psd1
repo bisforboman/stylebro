@@ -90,6 +90,16 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '&& !excluded.Contains(name) && '; Replace = '&& '; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = ' || excluded.Contains(name) || IsQuotedSentence'; Replace = ' || IsQuotedSentence'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'GetFirstParagraph(summary) ?? summary'; Replace = 'summary'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = ' || excluded.Contains(name) ? null'; Replace = ' ? null'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'GetTextStart(paragraph ?? summary'; Replace = 'GetTextStart(summary'; Tests = 'DocumentationTests' }
+
+        # Following StyleCop master: BRO1104 nint, BRO1604/BRO1605 init, BRO1611 primary constructors, BRO1606 blank summaries
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& typeText is not ("nint" or "nuint"))'; Replace = ')'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '? [verb, "Gets"] : [verb]'; Replace = '? [verb] : [verb]'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = ' || old.StartsWith("Gets or initializes", StringComparison.Ordinal)'; Replace = ''; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ParameterDocumentation.cs'; Find = 'TypeDeclarationSyntax type => type.ParameterList,'; Replace = ''; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'return paragraph is null ? GetBlankFinding(member, summary, text, standard) : null;'; Replace = 'return null;'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'if (!Regex.IsMatch(prefix, '; Replace = 'if (false && Regex.IsMatch(prefix, '; Tests = 'DocumentationTests' }
 
         # BRO1510: an attribute line doesn't make an accessor multi-line
         @{ File = 'src/StyleBro.Analyzers/Layout/AccessorLayout.cs'; Find = '(accessor.Modifiers.Count > 0 ? accessor.Modifiers[0] : accessor.Keyword).SpanStart'; Replace = 'accessor.SpanStart'; Tests = 'AccessorLayoutTests' }

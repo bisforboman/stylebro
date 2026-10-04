@@ -159,6 +159,27 @@ Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-
 [BRO1609](rules/BRO1609.md), [BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
 change nothing there.)
 
+### Compared with StyleCop's unreleased `master`
+
+The tables above compare with the last release, 1.2.0-beta.556. StyleCop's `master` has changed some of these rules
+since (not released; see [decisions](decisions.md), 2026-10-04). Where `master` fixed a gap, StyleBro follows it:
+
+| Rule | Follows `master` | beta.556 |
+|---|---|---|
+| [BRO1104](rules/BRO1104.md) (SA1129) | `new nint()` -> `default(nint)` (also on .NET 7+: the fix must agree across a multi-targeted project's frameworks) | Always `nint.Zero` (CS0117 on older runtimes); `master`: `nint.Zero` on C# 11 + .NET 7+ |
+| [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md) (SA1623, SA1624) | `init` accessors: `Gets or initializes` or `Gets`, `Initializes`; `Gets or initializes` is a wrong prefix elsewhere | Ignores `init`; its fix writes `Gets or sets or initializes` |
+| [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) | Not checked |
+| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line property patterns | Not checked |
+
+Where `master` changed behavior StyleBro keeps (the owner's decision):
+
+| Rule | `master` | StyleBro (like beta.556) |
+|---|---|---|
+| [BRO1505](rules/BRO1505.md) (SA1516) | No blank line needed between two single-line properties | Wants one |
+| [BRO1601](rules/BRO1601.md) (SA1600) | Explicit interface implementations not reported | Adds `<inheritdoc/>` to them too |
+| [BRO1606](rules/BRO1606.md) (SA1642) | Any summary that starts with `<para>` is accepted, text not checked | Checks the paragraph's text |
+| [BRO1311](rules/BRO1311.md) (SA1316) | Names in an override's or implementation's signature not reported | Reported, renamed together with the base |
+
 ## Rules beyond StyleCop
 
 Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1133.severity`,

@@ -41,9 +41,10 @@ internal static class ConstructorSummaries
 
         // The summary's first line of text, after '<summary>' or after the '///' of the next line. A summary that starts
         // with a paragraph is judged by the paragraph's text (like StyleCop after 1.2.0-beta.556).
-        if (GetTextStart(GetFirstParagraph(summary) ?? summary, text) is not { } start)
+        var paragraph = GetFirstParagraph(summary);
+        if (GetTextStart(paragraph ?? summary, text) is not { } start)
         {
-            return null;
+            return paragraph is null ? GetBlankFinding(member, summary, text, standard) : null;
         }
 
         // Like StyleCop, only the beginning counts: 'Initializes a new instance of the <see cref="X"/> class
@@ -86,6 +87,32 @@ internal static class ConstructorSummaries
         var remaining = rest.Substring(replaceLength);
         var separator = remaining.Length == 0 || remaining.StartsWith("</", StringComparison.Ordinal) ? string.Empty : " ";
         return new Finding(summary.StartTag.GetLocation(), member is DestructorDeclarationSyntax, new TextSpan(start, replaceLength), standard + separator);
+    }
+
+    /// <summary>
+    /// A whitespace-only summary gets the standard sentence, like StyleCop master: on one line it replaces the
+    /// whitespace; a multi-line summary gets it on a line of its own. Skipped when the '&lt;/summary&gt;' line holds more
+    /// than the '///' (the fix couldn't write the new line's prefix).
+    /// </summary>
+    private static Finding? GetBlankFinding(BaseMethodDeclarationSyntax member, XmlElementSyntax summary, SourceText text, string standard)
+    {
+        var inside = TextSpan.FromBounds(summary.StartTag.Span.End, summary.EndTag.SpanStart);
+        var startLine = text.Lines.GetLineFromPosition(inside.Start);
+        var endLine = text.Lines.GetLineFromPosition(inside.End);
+        var isDestructor = member is DestructorDeclarationSyntax;
+        if (startLine.LineNumber == endLine.LineNumber)
+        {
+            return new Finding(summary.StartTag.GetLocation(), isDestructor, inside, standard);
+        }
+
+        var prefix = text.ToString(TextSpan.FromBounds(endLine.Start, inside.End));
+        if (!Regex.IsMatch(prefix, @"^[ \t]*///[ \t]*$"))
+        {
+            return null;
+        }
+
+        var lineBreak = text.ToString(TextSpan.FromBounds(startLine.End, startLine.EndIncludingLineBreak));
+        return new Finding(summary.StartTag.GetLocation(), isDestructor, inside, lineBreak + prefix.TrimEnd() + " " + standard + lineBreak + prefix);
     }
 
     private static XmlElementSyntax? GetSummary(SyntaxNode member)

@@ -42,13 +42,18 @@ internal static class DefaultValueConstructors
             : type.ToMinimalDisplayString(model, creation.SpanStart);
 
         // Like StyleCop: an enum's zero member, and the well-known "empty" members. Those members are not
-        // constants, so a parameter's default value (which must be constant) gets 'default(T)' instead.
+        // constants, so a parameter's default value (which must be constant) gets 'default(T)' instead. 'nint.Zero'
+        // compiles only with C# 11 on .NET 7+, and a multi-targeted project analyzes the same file once per target
+        // framework: an answer that depended on it would differ between the copies. So 'nint'/'nuint' always get
+        // 'default(nint)', which means the same everywhere.
         if (type.TypeKind == TypeKind.Enum && GetZeroMember(type) is { } zero)
         {
             return typeText + "." + zero;
         }
 
-        if (!IsParameterDefaultValue(creation) && GetEmptyMember(type) is { } empty)
+        if (!IsParameterDefaultValue(creation)
+            && GetEmptyMember(type) is { } empty
+            && typeText is not ("nint" or "nuint"))
         {
             return typeText + "." + empty;
         }

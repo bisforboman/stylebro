@@ -7,11 +7,29 @@
 # CompareOutput = $false skips the output comparison (for StyleCop rules without a working fix). Optional per set:
 # StyleCopJson (stylecop.json for both projects) and EditorConfig (extra .editorconfig lines, e.g. StyleBro settings).
 # Several StyleCop rules may map to one StyleBro rule; StyleCop's reports at the same position then count once.
-param([string[]]$Set)
+#
+# The 'Expected' entries are written against StyleCop 1.2.0-beta.556 (the last release). To compare with another build,
+# e.g. StyleCop's unreleased master, pass its package: -StyleCopPackage/-StyleCopVersion and -StyleCopFeed (a folder
+# with the .nupkg; restored into an isolated folder so the odd version stays out of the global cache). For master:
+#   git clone --filter=blob:none https://github.com/DotNetAnalyzers/StyleCopAnalyzers sc
+#   git -C sc -c core.longpaths=true checkout -f origin/master      # plain checkout fails on Windows (long paths)
+#   dotnet build sc/StyleCop.Analyzers/StyleCop.Analyzers.CodeFixes -c Release -p:NBGV_GitEngine=Disabled  # SDK 6
+#   pwsh scripts/stylecop-survey/Compare-WithStyleCop.ps1 -StyleCopPackage StyleCop.Analyzers.Unstable `
+#       -StyleCopVersion 1.2.0-g -StyleCopFeed <folder with StyleCop.Analyzers.Unstable.1.2.0-g.nupkg>
+# Differences that are expected against master but not beta.556 then show up as failures; the rule pages and
+# docs/differences-from-stylecop.md ("Compared with StyleCop's unreleased master") say which are deliberate.
+param(
+    [string[]]$Set,
+    [string]$StyleCopPackage = 'StyleCop.Analyzers',
+    [string]$StyleCopVersion = '1.2.0-beta.556',
+    [string]$StyleCopFeed)
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $config = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'parity/parity.psd1')
 $work = Join-Path ([IO.Path]::GetTempPath()) 'stylebro-parity'
+$restore = if ($StyleCopFeed) {
+    "<RestoreAdditionalProjectSources>$((Resolve-Path $StyleCopFeed).Path)</RestoreAdditionalProjectSources><RestorePackagesPath>$(Join-Path $work 'packages')</RestorePackagesPath>"
+} else { '' }
 $unknown = @($Set | Where-Object { $_ -notin $config.Sets.Name })
 if ($unknown) { throw "Unknown set(s): $($unknown -join ', '). Known: $($config.Sets.Name -join ', ')." }
 
@@ -31,8 +49,8 @@ function New-Project([string]$dir, [string[]]$ids, [string]$cases, [bool]$withSt
     }
     Set-Content (Join-Path $dir 'p.csproj') @"
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Library</OutputType><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion><GenerateDocumentationFile>true</GenerateDocumentationFile><NoWarn>CS0168;CS0219;CS8321;CS0660;CS0661;CS1718;CS0665;CS0414;CS0642;CS0164;CS0162;CS1591;CS1587;CS1572;CS1573;CS0067</NoWarn></PropertyGroup>
-  <ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />$bro</ItemGroup>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Library</OutputType><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion><GenerateDocumentationFile>true</GenerateDocumentationFile><NoWarn>CS0168;CS0219;CS8321;CS0660;CS0661;CS1718;CS0665;CS0414;CS0642;CS0164;CS0162;CS1591;CS1587;CS1572;CS1573;CS0067</NoWarn>$restore</PropertyGroup>
+  <ItemGroup><PackageReference Include="$StyleCopPackage" Version="$StyleCopVersion" PrivateAssets="all" />$bro</ItemGroup>
 </Project>
 "@
     Set-Content (Join-Path $dir '.editorconfig') ("root = true`n[*.cs]`ndotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = none`n" +
