@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using StyleBro.Analyzers;
+using StyleBro.Analyzers.Layout;
 using StyleBro.Analyzers.Readability;
 using StyleBro.CodeFixes.Ordering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Readability;
 
@@ -67,11 +69,74 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
             }
         }
 
-        var fixedDocument = document.WithText(text.WithChanges(Regions.GetChanges(directives, text)));
+        var changes = Regions.GetChanges(directives, text).ToList();
+        var removed = document.WithText(text.WithChanges(changes));
+        bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
 
-        // BRO1001 sorts within each region; without them it sorts across, now rather than in another run.
-        return Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken)
-            ? await MemberOrderingCodeFixProvider.SortAllAsync(fixedDocument, cancellationToken).ConfigureAwait(false)
-            : fixedDocument;
+        // A '//' comment right above removed lines can end up with a blank line below it, which BRO1506 removes: now,
+        // rather than in another run (Newtonsoft.Json's samples: '// output' + '#endregion' + a blank line).
+        if (IsOn(DiagnosticIds.BlankLineAfterComment))
+        {
+            var removedText = await removed.GetTextAsync(cancellationToken).ConfigureAwait(false);
+            var removedRoot = await removed.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+            var blanks = new List<TextChange>();
+            foreach (var change in changes)
+            {
+                // Where the removed lines were, in the text without them (the changes are deletions).
+                var position = change.Span.Start - changes.Where(c => c.Span.Start < change.Span.Start).Sum(c => c.Span.Length);
+                if (position <= 0 || removedRoot is null)
+                {
+                    continue;
+                }
+
+                var line = removedText.Lines.GetLineFromPosition(position - 1);
+                var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
+                foreach (var blank in TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText))
+                {
+                    blanks.Add(new TextChange(TextSpan.FromBounds(ToOriginal(blank.Start), ToOriginal(blank.EndIncludingLineBreak)), string.Empty));
+                }
+            }
+
+            if (blanks.Count > 0)
+            {
+                changes.AddRange(blanks);
+                removed = document.WithText(text.WithChanges(changes));
+            }
+        }
+
+        if (!IsOn(DiagnosticIds.MemberOrdering))
+        {
+            return removed;
+        }
+
+        // BRO1001 sorts within each region; without them it sorts across, now rather than in another run. Each sorted
+        // container replaces its span in the original text, so the edits still merge with other copies' (multi-targeting).
+        var sorts = await MemberOrderingCodeFixProvider.GetSortChangesAsync(removed, cancellationToken).ConfigureAwait(false);
+        var edits = new List<TextChange>();
+        foreach (var sort in sorts)
+        {
+            // Removed lines hold no tokens, so they're inside a container's span or outside it, never across its edge.
+            edits.Add(new TextChange(TextSpan.FromBounds(ToOriginal(sort.Span.Start), ToOriginal(sort.Span.End)), sort.NewText!));
+        }
+
+        edits.AddRange(changes.Where(c => !edits.Any(e => e.Span.Contains(c.Span))));
+        return document.WithText(text.WithChanges(edits));
+
+        // A position in the text without the region lines (only deletions), in the original text.
+        int ToOriginal(int position)
+        {
+            var shift = 0;
+            foreach (var change in changes.OrderBy(c => c.Span.Start))
+            {
+                if (change.Span.Start - shift > position)
+                {
+                    break;
+                }
+
+                shift += change.Span.Length - change.NewText!.Length;
+            }
+
+            return position + shift;
+        }
     }
 }

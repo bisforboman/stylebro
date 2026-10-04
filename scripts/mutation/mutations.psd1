@@ -10,8 +10,9 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text)'; Replace = 'IsMultiLine(child, text)'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.CodeFixes/Layout/BracesCodeFixProvider.cs'; Find = '.Where(c => Braces.GetChanges(new[] { c }, text, options) is not null)'; Replace = ''; Tests = 'BracesTests' }
 
-        # BRO1112 removing regions sorts with BRO1001 only when BRO1001 is on
-        @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'return Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken)'; Replace = 'return true'; Tests = 'RegionsTests' }
+        # Removing regions also does what BRO1001 and BRO1506 then want, only when they're on
+        @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (!IsOn(DiagnosticIds.MemberOrdering))'; Replace = 'if (false)'; Tests = 'RegionsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineAfterComment))'; Replace = 'if (true)'; Tests = 'RegionsTests' }
 
         # BRO1520-BRO1522 (operator, '=>' and '=' placement when wrapping)
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (token.IsMissing || previous.IsMissing || next.IsMissing'; Replace = 'if (false'; Tests = 'WrappingPlacementTests' }

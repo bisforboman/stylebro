@@ -2,11 +2,10 @@
 # Runs every StyleBro rule on a public repository (scripts/realworld/repos.psd1) and checks what a user would see:
 #   - no analyzer crashes (AD0001) and no new compile errors after 'dotnet format'
 #   - no merge-conflict markers written into the source (multi-targeted projects)
-#   - the fixes converge: at most 3 'dotnet format' runs until a run changes no file (not '--verify-no-changes': it also
-#     fails on warnings whose fix deliberately changes nothing, like the renames the string guards keep back)
+#   - the fixes converge in one run: the second 'dotnet format' run changes no file (not '--verify-no-changes': it also
+#     fails on warnings whose fix deliberately changes nothing, like the renames the string guards keep back); a repo
+#     with a documented exception sets MaxRuns in repos.psd1
 #   - with -Tests: no test that passed on the untouched code fails after the fixes
-# Whether the second run is already clean is reported but not required: removing '#region's (BRO1112) lets BRO1001 sort
-# on the next run, and renames kept back by the guards stay as warnings.
 #
 #   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>]
 param(
@@ -127,8 +126,10 @@ while ($runs -lt 3) {
     $state = $next
 }
 $changed = @(Get-Diff '--name-only').Count
-$report.Add("- files changed: $changed; a run changed nothing after $runs run(s): $converged")
+$allowed = if ($r.MaxRuns) { $r.MaxRuns } else { 2 }
+$report.Add("- files changed: $changed; runs until no changes: $(if ($converged) { $runs } else { "more than $runs" }) (allowed: $allowed)")
 if (-not $converged) { $problems.Add('the fixes did not converge in 3 runs') }
+elseif ($runs -gt $allowed) { $problems.Add("$runs runs until no changes, allowed $allowed (one that changes, one clean; MaxRuns in repos.psd1 for a documented exception)") }
 
 $markers = @(Get-Diff | Select-String '^\+(<<<<<<<|>>>>>>>) ')
 if ($markers.Count) { $problems.Add("conflict markers written: $($markers.Count) lines") }

@@ -1,7 +1,8 @@
 # Public repositories the real-world check runs StyleBro on, pinned to the commits the results in CLAUDE.md were
 # measured on. Tests: 'dotnet' (dotnet test), 'mtp' (Microsoft Testing Platform: run the test executables), or $null
 # (no tests: OpenTelemetry's depend on the machine, see CLAUDE.md). KnownFailures: tests the fixes are known to break, each
-# a documented limit (they don't fail the check).
+# a documented limit (they don't fail the check). MaxRuns: 'dotnet format' runs until a run changes nothing, when a repo
+# needs more than 2 (one that changes, one clean) for a documented reason.
 @{
     FFMpegCore    = @{ Url = 'https://github.com/rosenbjerg/FFMpegCore'; Commit = '1fd8c88c45bc683c0c2cd0fe7e9a2f74642e9646'; Solution = 'FFMpegCore.sln'; Tests = 'dotnet' }
     Polly         = @{ Url = 'https://github.com/App-vNext/Polly'; Commit = '0275bc22a5a8defb77415313112454a558d0f43a'; Solution = 'Polly.slnx'; Tests = 'mtp' }

@@ -55,6 +55,25 @@ public class FixOrderTests
         "BRO1001",
         "BRO1112");
 
+    [Fact]
+    public Task Regions_ACommentAboveTheRemovedLines() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int M()
+            {
+                #region Usage
+                var x = 1;
+                // x is 1
+                #endregion
+
+                return x;
+            }
+        }
+        """,
+        "BRO1113",
+        "BRO1506");
+
     private static async Task AssertConvergesInEveryOrderAsync(string source, params string[] ids)
     {
         foreach (var order in Orders(ids))

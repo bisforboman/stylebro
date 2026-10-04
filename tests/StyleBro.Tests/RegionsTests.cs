@@ -127,4 +127,62 @@ public class RegionsTests
         }
         """,
         editorConfig: "dotnet_diagnostic.BRO1001.severity = none");
+
+    [Fact]
+    public Task ACommentAboveTheRemovedLines_LosesTheBlankLineBelowIt() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M()
+            {
+                {|BRO1113:#region Usage|}
+                var x = 1;
+                // x is 1
+                #endregion
+
+                return x;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M()
+            {
+                var x = 1;
+                // x is 1
+                return x;
+            }
+        }
+        """);
+
+    [Fact]
+    public Task ACommentAboveTheRemovedLines_KeepsTheBlankLine_WhenBRO1506IsOff() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M()
+            {
+                {|BRO1113:#region Usage|}
+                var x = 1;
+                // x is 1
+                #endregion
+
+                return x;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M()
+            {
+                var x = 1;
+                // x is 1
+
+                return x;
+            }
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1506.severity = none");
 }
