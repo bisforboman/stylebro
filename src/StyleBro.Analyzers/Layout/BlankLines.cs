@@ -109,9 +109,11 @@ internal static class BlankLines
             return false;
         }
 
-        // The token before the comment: an opening brace, or the colon of a switch label, keeps the comment attached.
+        // The token before the comment: an opening brace (or a collection expression's '[', like StyleCop's #3766), or
+        // the colon of a switch label, keeps the comment attached.
         var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
         return !previous.IsKind(SyntaxKind.OpenBraceToken)
+            && !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule));
     }

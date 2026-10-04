@@ -9,6 +9,9 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'if (preference == BracePreference.Never)'; Replace = 'if (false)'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text)'; Replace = 'IsMultiLine(child, text)'; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.CodeFixes/Layout/BracesCodeFixProvider.cs'; Find = '.Where(c => Braces.GetChanges(new[] { c }, text, options) is not null)'; Replace = ''; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = '&& Line(text, ifStatement.IfKeyword.SpanStart) == Line(text, child.Span.End)'; Replace = ''; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'child is ReturnStatementSyntax or ThrowStatementSyntax'; Replace = 'child is StatementSyntax or ThrowStatementSyntax'; Tests = 'BracesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = 'if (allowed is not null && reported'; Replace = 'if (false'; Tests = 'BracesTests' }
 
         # Removing regions also does what BRO1001 and BRO1506 then want, only when they're on
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (!IsOn(DiagnosticIds.MemberOrdering))'; Replace = 'if (false)'; Tests = 'RegionsTests' }
@@ -25,6 +28,22 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (!before.Concat(after).All('; Replace = 'if (false && !before.Concat(after).All('; Tests = 'WrappingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = 'if (breakBefore == breakAfter || '; Replace = 'if ('; Tests = 'WrappingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/WrappingPlacement.cs'; Find = ' when !arrow.ArrowToken.GetPreviousToken().Parent!.AncestorsAndSelf().Any(a => a is TypeParameterConstraintClauseSyntax)'; Replace = ''; Tests = 'WrappingPlacementTests' }
+
+        # BRO1603 (periods): closing punctuation, entities, excluded tags; BRO1606: a summary starting with <para>
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '.TrimEnd().TrimEnd(ClosingPunctuation)'; Replace = '.TrimEnd()'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 't.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken'; Replace = 't.IsKind(SyntaxKind.XmlTextLiteralToken)'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '&& !excluded.Contains(name) && '; Replace = '&& '; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = ' || excluded.Contains(name) ? null'; Replace = ' ? null'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'GetFirstParagraph(summary) ?? summary'; Replace = 'summary'; Tests = 'DocumentationTests' }
+
+        # BRO1510: an attribute line doesn't make an accessor multi-line
+        @{ File = 'src/StyleBro.Analyzers/Layout/AccessorLayout.cs'; Find = '(accessor.Modifiers.Count > 0 ? accessor.Modifiers[0] : accessor.Keyword).SpanStart'; Replace = 'accessor.SpanStart'; Tests = 'AccessorLayoutTests' }
+
+        # BRO1505: a field below a field that spans several lines; BRO1001's sort and BRO1114's split add that blank line
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '=> IsMultiLineField(field, text),'; Replace = '=> false,'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'field.AttributeLists.Count > 0 ? field.AttributeLists.Last().FullSpan.End : field.SpanStart'; Replace = 'field.SpanStart'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = '|| Layout.ElementSeparation.IsMultiLineField(field, field.SyntaxTree.GetText())'; Replace = ''; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = ' || text.ToString(variables[i - 1].Span).IndexOf(''\n'') >= 0'; Replace = ''; Tests = 'FixOrderTests' }
 
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }
@@ -101,6 +120,8 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'while (token.Parent is AttributeListSyntax list && list.Parent == owner)'; Replace = 'while (token.Parent is AttributeListSyntax list && list.Parent == null)'; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = '&& line.Start < next.SpanStart && text.ToString(line.Span).Trim().Length == 0'; Replace = '&& false'; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '!(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))'; Replace = 'true'; Tests = 'BlankLineAfterTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))'; Replace = ''; Tests = 'BlankLineAfterTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !(embeddedCommentsOn && Readability.EmbeddedComments.IsMoved(comment, text))'; Replace = ''; Tests = 'BlankLineAfterTests' }
 
         # BRO1131 (base calls). Not mutated: Speculation.SymbolAfterReplacing vs a position-based lookup of a DETACHED
         # node (equivalent; the original bug passed the attached access.Name, which binds as a member-access name).

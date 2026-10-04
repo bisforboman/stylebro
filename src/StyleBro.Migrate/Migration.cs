@@ -31,6 +31,16 @@ internal static class Migration
         "BRO1603", "BRO1604", "BRO1605", "BRO1606", "BRO1607", "BRO1608", "BRO1609", "BRO1610", "BRO1611",
     };
 
+    /// <summary>
+    /// The StyleBro rules that write English sentences (property summary verbs, the constructor and finalizer sentences).
+    /// StyleCop checks the rules they replace against translated texts when stylecop.json's documentationCulture isn't
+    /// English, so they're off then. The other documentation rules check structure or punctuation, not wording.
+    /// </summary>
+    private static readonly HashSet<string> EnglishWordingRules = new(StringComparer.Ordinal)
+    {
+        "BRO1604", "BRO1605", "BRO1606", "BRO1607",
+    };
+
     private static readonly Regex StyleCopIds = new(@"SA(\d{4})(?:-SA(\d{4}))?");
 
     /// <summary>Every StyleBro rule and the StyleCop rules it replaces, read from the analyzers' descriptions.</summary>
@@ -75,6 +85,17 @@ internal static class Migration
                 relevant = [];
             }
 
+            if (NonEnglishCulture(setup) is { } culture && EnglishWordingRules.Contains(id))
+            {
+                foreach (var sa in relevant.Where(setup.IsOn))
+                {
+                    result.Reasons[sa] = $"stylecop.json's documentationCulture is {culture}: StyleCop checks the translated text, {id} writes English";
+                }
+
+                severity = Severity.None;
+                relevant = [];
+            }
+
             // The XML header rule only stands in for StyleCop's XML header; a plain header is IDE0073's (below).
             if (id == StyleBro.Analyzers.DiagnosticIds.FileHeader && !XmlHeader(setup))
             {
@@ -108,6 +129,12 @@ internal static class Migration
         AddMemberOrder(setup, lines);
         lines.Add($"stylebro_private_field_naming = {result.FieldStyle}");
         AddDocumentationScope(setup, lines);
+        AddPunctuationExclusions(setup, lines);
+        if (NonEnglishCulture(setup) is { } documentationCulture)
+        {
+            result.Notes.Add($"stylecop.json's documentationCulture is {documentationCulture}: {string.Join(", ", EnglishWordingRules.OrderBy(r => r, StringComparer.Ordinal))} (English summary sentences) are off.");
+        }
+
         lines.Add($"{StyleBro.Analyzers.Layout.Braces.ConsecutiveUsingsKey} = {Bool(setup.Setting("layoutRules", "allowConsecutiveUsings") is not { ValueKind: JsonValueKind.False })}");
         AddHungarianPrefixes(setup, lines);
         AddTupleElementCasing(setup, lines, result);
@@ -409,6 +436,29 @@ internal static class Migration
         if (setup.Setting("namingRules", "allowCommonHungarianPrefixes") is { ValueKind: JsonValueKind.False })
         {
             lines.Add($"{StyleBro.Analyzers.Naming.HungarianNames.AllowCommonKey} = false");
+        }
+    }
+
+    /// <summary>stylecop.json's documentationCulture when it isn't English (StyleCop's default is en-US), else null.</summary>
+    private static string? NonEnglishCulture(StyleCopSetup setup)
+    {
+        var culture = setup.Setting("documentationRules", "documentationCulture")?.GetString();
+        return string.IsNullOrEmpty(culture) || string.Equals(culture, "en", StringComparison.OrdinalIgnoreCase)
+            || culture.StartsWith("en-", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : culture;
+    }
+
+    /// <summary>BRO1603's excluded tags, from stylecop.json's excludeFromPunctuationCheck when it isn't StyleCop's default.</summary>
+    private static void AddPunctuationExclusions(StyleCopSetup setup, List<string> lines)
+    {
+        if (setup.Setting("documentationRules", "excludeFromPunctuationCheck") is { ValueKind: JsonValueKind.Array } excluded)
+        {
+            var tags = excluded.EnumerateArray().Select(t => t.GetString()).ToList();
+            if (!tags.SequenceEqual([StyleBro.Analyzers.Documentation.DocumentationPeriods.DefaultExcluded]))
+            {
+                lines.Add($"{StyleBro.Analyzers.Documentation.DocumentationPeriods.ExcludeKey} = {string.Join(", ", tags)}");
+            }
         }
     }
 

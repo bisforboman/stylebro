@@ -28,6 +28,18 @@ namespace Probe
         {
         }
 
+        /// <summary><para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>
+        /// <param name="d">The d.</param>
+        public Words(double d)
+        {
+        }
+
+        /// <summary><para>Creates a words object from a float.</para></summary>
+        /// <param name="f">The f.</param>
+        public Words(float f)
+        {
+        }
+
         /// <summary>Initializes the static members.</summary>
         static Words()
         {

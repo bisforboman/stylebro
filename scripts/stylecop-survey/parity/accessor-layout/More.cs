@@ -15,6 +15,24 @@ namespace Probe
             }
         }
 
+        public int AttributeAbove
+        {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return this.x; }
+            set { this.x = value; }
+        }
+
+        public int AttributeAboveMixed
+        {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return this.x; }
+            set
+            {
+                this.x = value;
+                this.y = value;
+            }
+        }
+
         public int WithComment
         {
             get { return this.x; }

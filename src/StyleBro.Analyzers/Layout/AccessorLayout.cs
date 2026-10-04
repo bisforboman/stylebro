@@ -143,8 +143,12 @@ internal static class AccessorLayout
         return SingleLineBlocks.Gap(previous, body.CloseBraceToken, lineBreak + indent, text, changes);
     }
 
+    /// <summary>
+    /// From the first modifier or the keyword to the end: an attribute on its own line above the accessor doesn't make
+    /// it multi-line (StyleCop's SA1504 counts it, #3434).
+    /// </summary>
     private static bool IsSingleLine(AccessorDeclarationSyntax accessor, SourceText text) =>
-        Line(text, accessor.SpanStart) == Line(text, accessor.Span.End);
+        Line(text, (accessor.Modifiers.Count > 0 ? accessor.Modifiers[0] : accessor.Keyword).SpanStart) == Line(text, accessor.Span.End);
 
     private static bool StartsLine(AccessorDeclarationSyntax accessor, SourceText text)
     {
