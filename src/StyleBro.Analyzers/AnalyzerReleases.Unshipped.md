@@ -30,3 +30,4 @@ BRO1520 | Layout | Warning  | WrappingPlacementAnalyzer
 BRO1521 | Layout | Warning  | WrappingPlacementAnalyzer
 BRO1522 | Layout | Warning  | WrappingPlacementAnalyzer
 BRO1523 | Layout | Warning  | CallChainAnalyzer
+BRO1616 | Documentation | Warning  | SummaryLayoutAnalyzer

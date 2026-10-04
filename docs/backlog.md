@@ -17,6 +17,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | Done, not released yet | 25 |
 | Planned | 0 rules, 13 work items |
 | Maybe | 6 rules from other analyzers |
+| Maybe | 7 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -47,6 +48,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Survey StyleCop's issue tracker | Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there. | Done (2026-10-04) |
 | Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Call chain layout (survey #4, Roslynator RCS0054) | BRO1523: in a split call chain every call after the first line starts its own line; the chain keeps its own indentation. Defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | `<summary>` on one line or on three (survey #5) | BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Braceless `if (x) return;` (StyleCop issue #2252) | `stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md). | Done (2026-10-04) |
 
 ### Read the SDK's own settings
@@ -210,3 +212,4 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1613](rules/BRO1613.md) | Generic type parameter documentation should match type parameters | SA1620 | Released |
 | [BRO1614](rules/BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | Released |
 | [BRO1615](rules/BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | Released |
+| [BRO1616](rules/BRO1616.md) | Write the summary's tags consistently on their own lines or on the text's line | (none; Roslynator RCS1253, Meziantou MA0177/MA0211) | Done |

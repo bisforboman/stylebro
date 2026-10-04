@@ -101,6 +101,8 @@ bodies reindented, conditional access (`?.`) counts as a link, and `#if` inside 
 
 ### 5. Summary layout (RCS1253, MA0177, MA0211)
 
+Done (2026-10-04): [BRO1616](rules/BRO1616.md).
+
 `/// <summary>Gets the name.</summary>` vs the three-line form. Off by default in Roslynator; Meziantou has both
 directions as separate rules. SDK: none. Effort: low, text only, same doc helpers as BRO1603. Single-line only when
 the text is one line. Fits next to BRO1601-BRO1615.
