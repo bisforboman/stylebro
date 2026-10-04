@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 29 |
-| Planned | 0 rules, 17 work items |
-| Maybe | 6 rules from other analyzers |
+| Done, not released yet | 30 |
+| Planned | 0 rules, 18 work items |
+| Maybe | 7 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -46,6 +46,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |
 | Beyond StyleCop | Survey StyleCop's issue tracker | Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there. | Done (2026-10-04) |
 | Beyond StyleCop | Operator, `=>` and `=` placement when wrapping (survey #1, #2) | BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | Call chain layout (survey #4, Roslynator RCS0054) | BRO1523: in a split call chain every call after the first line starts its own line; the chain keeps its own indentation. Defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Upper-case literal suffixes (StyleCop issue #1563, Sonar S818) | BRO1135: integer suffixes (`1l` -> `1L`, `1ul` -> `1UL`); real suffixes (`f`, `d`, `m`) left alone, lower case is the norm there. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | No blank line after attributes (StyleCop's proposed SA1521, issue #738) | BRO1525: also between stacked attribute lists; comments and directives in the gap skipped. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Null check style (survey #3) | BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
@@ -78,6 +79,7 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 
 | Source | Rule | Notes |
 |--------|------|-------|
+| Roslynator RCS1248 | `x == null` vs `x is null` | Semantic: skip user-defined `==`, expression trees, `is not` before C# 9. |
 | Roslynator RCS0054 | A split call chain has every call on its own line | Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part. |
 | Roslynator RCS1253, Meziantou MA0177/MA0211 | `<summary>` on one line or on three | Text only, next to the BRO16xx rules. |
 | StyleCop issue #651 | A split conditional expression has the condition, `? a` and `: b` each on its own line | Like BRO1108; operator side from BRO1520's setting. |
@@ -195,6 +197,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1520](rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Done |
 | [BRO1521](rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Done |
 | [BRO1522](rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Done |
+| [BRO1523](rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Done |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Done |
 | [BRO1525](rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Done |
 

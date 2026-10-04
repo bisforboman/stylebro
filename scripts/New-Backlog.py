@@ -23,6 +23,7 @@ WORK = [
     ('Beyond StyleCop', 'Survey other analyzers', "Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe.", 'Done (2026-10-03)'),
     ('Beyond StyleCop', "Survey StyleCop's issue tracker", 'Proposals, requested fixes and options, and known bugs checked against StyleBro, in [beyond-stylecop.md](beyond-stylecop.md#from-stylecops-issue-tracker); the top five are under Maybe, possible bugs listed there.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Operator, `=>` and `=` placement when wrapping (survey #1, #2)', 'BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
+    ('Beyond StyleCop', 'Call chain layout (survey #4, Roslynator RCS0054)', 'BRO1523: in a split call chain every call after the first line starts its own line; the chain keeps its own indentation. Defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Upper-case literal suffixes (StyleCop issue #1563, Sonar S818)', 'BRO1135: integer suffixes (`1l` -> `1L`, `1ul` -> `1UL`); real suffixes (`f`, `d`, `m`) left alone, lower case is the norm there. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'No blank line after attributes (StyleCop\'s proposed SA1521, issue #738)', 'BRO1525: also between stacked attribute lists; comments and directives in the gap skipped. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Null check style (survey #3)', 'BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
@@ -33,6 +34,7 @@ WORK = [
 
 # Rules from other analyzers (docs/beyond-stylecop.md), worth doing if someone asks.
 MAYBE = [
+    ('Roslynator RCS1248', '`x == null` vs `x is null`', 'Semantic: skip user-defined `==`, expression trees, `is not` before C# 9.'),
     ('Roslynator RCS0054', 'A split call chain has every call on its own line', 'Like BRO1108 for chains; indentation of lambdas inside the chain is the hard part.'),
     ('Roslynator RCS1253, Meziantou MA0177/MA0211', '`<summary>` on one line or on three', 'Text only, next to the BRO16xx rules.'),
     ('StyleCop issue #651', 'A split conditional expression has the condition, `? a` and `: b` each on its own line', 'Like BRO1108; operator side from BRO1520\'s setting.'),
