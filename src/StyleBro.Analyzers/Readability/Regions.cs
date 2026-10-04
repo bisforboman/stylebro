@@ -22,7 +22,11 @@ internal static class Regions
     {
         foreach (var trivia in root.DescendantTrivia())
         {
-            if (trivia.GetStructure() is RegionDirectiveTriviaSyntax region
+            // Not in code an '#if' turns off: there the region's surroundings are plain text, so whether it's BRO1112's
+            // or BRO1113's, and what removing it means for the code around it, is only known where the code is active.
+            // In a multi-targeted project the inactive copy's removal won the merge and left BRO1506's blank line
+            // (Newtonsoft.Json's samples, a second run).
+            if (trivia.GetStructure() is RegionDirectiveTriviaSyntax { IsActive: true } region
                 && region.GetRelatedDirectives().OfType<EndRegionDirectiveTriviaSyntax>().FirstOrDefault() is { } endRegion)
             {
                 yield return (region, endRegion, IsInCodeElement(trivia));

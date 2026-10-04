@@ -185,4 +185,45 @@ public class RegionsTests
         }
         """,
         editorConfig: "dotnet_diagnostic.BRO1506.severity = none");
+
+    [Fact]
+    public Task RegionsInCodeAnIfTurnsOff_AreNotReported() => VerifyFixAsync(
+        """
+        {|BRO1112:#region License|}
+        // header
+        #endregion
+
+        #if NEVER
+        public class C
+        {
+            public void M()
+            {
+                #region Usage
+                var x = 1;
+                // x is 1
+                #endregion
+
+                x++;
+            }
+        }
+        #endif
+        """,
+        """
+        // header
+
+        #if NEVER
+        public class C
+        {
+            public void M()
+            {
+                #region Usage
+                var x = 1;
+                // x is 1
+                #endregion
+
+                x++;
+            }
+        }
+        #endif
+        """);
 }
