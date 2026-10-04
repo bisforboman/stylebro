@@ -14,10 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 26 |
-| Planned | 0 rules, 14 work items |
+| Done, not released yet | 27 |
+| Planned | 0 rules, 15 work items |
 | Maybe | 8 rules from other analyzers |
-| Maybe | 6 rules from other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -194,8 +193,8 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1520](rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Done |
 | [BRO1521](rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Done |
 | [BRO1522](rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Done |
-| [BRO1525](rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Done |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Done |
+| [BRO1525](rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Done |
 
 ### BRO16xx: Documentation
 
