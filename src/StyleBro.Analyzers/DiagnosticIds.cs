@@ -93,6 +93,7 @@ public static class DiagnosticIds
     public const string ArithmeticPrecedence = "BRO1406";
     public const string ConditionalPrecedence = "BRO1407";
     public const string RedundantBaseType = "BRO1408";
+    public const string InternalTypePublicMethod = "BRO1409";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

@@ -14,8 +14,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 46 |
-| Planned | 0 rules, 34 work items |
+| Done, not released yet | 47 |
+| Planned | 0 rules, 35 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -66,9 +66,10 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Superseding StyleCop | StyleCop's open bugs | Every open bug report on a rule StyleBro replaces, checked against StyleBro with a test: fixed where StyleBro shares it, and a page listing the StyleCop bugs StyleBro doesn't have. | Planned |
 | Superseding StyleCop | Parity with StyleCop's `master` | The unreleased commits since 1.2.0-beta.556 that change a replaced rule: BRO1104 `new nint()`, BRO1604/BRO1605 `init`, BRO1611 primary constructors, BRO1401 property patterns, BRO1505 single-line properties and BRO1601 explicit implementations follow `master`, BRO1606/BRO1607 report blank summaries; BRO1606 `<para>` and BRO1311 keep their behavior (decisions.md). `Compare-WithStyleCop.ps1 -StyleCopFeed` runs the parity sets against a local `master` build. | Done (2026-10-04) |
 | Superseding StyleCop | StyleCop's open bugs | 54 reports checked against StyleBro: 34 not shared, 12 by design or not applicable, 8 shared (7 fixed, 1 kept like StyleCop by decision; decisions.md). Listed in differences-from-stylecop.md. | Done (2026-10-04) |
-| Superseding StyleCop | The remaining tracker candidates | beyond-stylecop.md #6-#10 and #12 (listed under Maybe); #11 stays rejected (changes what reflection and serializers see). | Planned |
+| Superseding StyleCop | The remaining tracker candidates | beyond-stylecop.md #6-#10 and #12 (listed under Maybe); #11 was rejected (changes what reflection and serializers see), then built as a narrow variant (BRO1409). | Planned |
 | Superseding StyleCop | The remaining other-analyzer candidates | beyond-stylecop.md survey #6-#10 and #12-#18 (listed under Maybe). | Planned |
 | Beyond StyleCop | Readability batch B (StyleCop issues #762, #760; survey #7, #8, #10, #12, #13, #14) | BRO1136 `x => x`, BRO1137 redundant `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string, BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses (`stylebro_object_creation_parentheses`, default omit), BRO1142 one local per declaration, BRO1408 redundant base type. On in the preset, off after `stylebro-migrate`. | Done (2026-10-05) |
+| Beyond StyleCop | Public methods of internal types (StyleCop issue #2981) | BRO1409, off by default: `public` -> `internal` on ordinary methods of internal types only; members reflection, serializers, frameworks or the compiler look for are left out, names in strings or `nameof` not fixed. See decisions.md. Off after `stylebro-migrate`. | Done (2026-10-05) |
 
 ### Read the SDK's own settings
 
@@ -191,6 +192,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1406](rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Done |
 | [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Done |
 | [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Done |
+| [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public (off by default) | (none; StyleCop issue #2981, never implemented) | Done |
 
 ### BRO15xx: Layout
 

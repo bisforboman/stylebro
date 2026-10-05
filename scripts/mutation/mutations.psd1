@@ -367,5 +367,30 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = '&& isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)'; Replace = ''; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'Braces.AddToExpansion(block, text, changes, options, isOn);'; Replace = ''; Tests = 'FixOrderTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = ' && n.Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock'; Replace = ''; Tests = 'SingleLineBlocksTests' }
+
+        # BRO1409 (public methods of internal types): the analyzer's skips, then the fix's guards
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.OverrideKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.VirtualKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.AbstractKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.ExternKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.PartialKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| method.AttributeLists.Count > 0'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| method.Parent is not TypeDeclarationSyntax or InterfaceDeclarationSyntax'; Replace = '|| method.Parent is not TypeDeclarationSyntax'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| ConventionNames.Contains(method.Identifier.ValueText)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| HasConditionalDirectives(method)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if ((type.BaseList is { } list && HasConditionalDirectives(list)) || '; Replace = 'if ('; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = ' || type.OpenBraceToken.LeadingTrivia.Any(IsConditional))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'node.ContainsDirectives && node.DescendantTrivia().Any(IsConditional)'; Replace = 'node.ContainsDirectives'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| type.Modifiers.Any(SyntaxKind.PrivateKeyword))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| IsVisibleOutside(type)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if (current.GetAttributes().Length > 0)'; Replace = 'if (false)'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if (!current.Locations.Any(l => l.IsInSource))'; Replace = 'if (false)'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| GetImplementations(model.Compilation, cancellationToken).Contains(symbol.OriginalDefinition))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                        pending.Push(type);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '|| strings.Contains(method.Identifier.ValueText)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'else if (withNameof && token'; Replace = 'else if (false && token'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'if (!Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken))'; Replace = 'if (true)'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '.Where(s => changes.Any(c => s.Span.Contains(c.Span)))'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'return derived.Any(d => d.Locations.Any(l => l.IsInSource && project.GetDocument(l.SourceTree) is null));'; Replace = 'return false;'; Tests = 'InternalTypeMethodTests' }
     )
 }
