@@ -453,5 +453,15 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = ': !IsBuiltIn(model, target, node.Expression, negated, cancellationToken))'; Replace = ': false)'; Tests = 'HasValueTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '&& Severities.IsOn(model.Compilation.Options, node.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken)'; Replace = '&& false'; Tests = 'HasValueTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '&& Severities.IsOn(model.Compilation.Options, node.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken)'; Replace = '&& true'; Tests = 'HasValueTests' }
+        # Generated code and C# versions (real-world: eShopOnWeb's Razor pages, Mapperly's generated accessors, LibGit2Sharp's net472)
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = ' || NamespaceNames.HasGeneratedPart(type))'; Replace = ')'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| ((symbol as INamedTypeSymbol ?? symbol.ContainingType) is { } owner && NamespaceNames.HasGeneratedPart(owner))'; Replace = ''; Tests = 'PascalCaseNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PrefixNamingAnalyzer.cs'; Find = '&& (symbol.DeclaringType is not { } owner || !NamespaceNames.HasGeneratedPart(owner))'; Replace = ''; Tests = 'PrefixNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if (document is null or SourceGeneratedDocument'; Replace = 'if (document is null'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| NamespaceNames.IsGenerated(tree))'; Replace = '|| false)'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'documents.AddRange(await project.GetSourceGeneratedDocumentsAsync(cancellationToken).ConfigureAwait(false));'; Replace = ''; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/NullCheckCodeFixProvider.cs'; Find = 'NullChecks.GetFix(e, model, options, cancellationToken, version)'; Replace = 'NullChecks.GetFix(e, model, options, cancellationToken)'; Tests = 'NullCheckTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/AccessModifiersCodeFixProvider.cs'; Find = 'preference, version)'; Replace = 'preference)'; Tests = 'AccessModifiersTests' }
+        @{ File = 'src/StyleBro.CodeFixes/LinkedFileFixAllProvider.cs'; Find = '.Min();'; Replace = '.Max();'; Tests = 'NullCheckTests' }
     )
 }

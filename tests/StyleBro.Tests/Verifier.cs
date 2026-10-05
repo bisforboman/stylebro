@@ -84,6 +84,36 @@ internal static class Verifier<TAnalyzer, TCodeFix>
         return RunAsync(test, editorConfig);
     }
 
+    /// <summary>Like <see cref="VerifyNotFixedAsync(string[], string?)"/>, for files with their names ('/0/Page.g.cs').</summary>
+    public static Task VerifyNotFixedAsync(params (string Name, string Text)[] sources)
+    {
+        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+        {
+            NumberOfIncrementalIterations = 1,
+            NumberOfFixAllIterations = 1,
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
+        };
+        foreach (var source in sources)
+        {
+            test.TestState.Sources.Add(source);
+            test.FixedState.Sources.Add(source);
+        }
+
+        return RunAsync(test, null);
+    }
+
+    /// <summary>No diagnostics in files with their names ('/0/Page.g.cs').</summary>
+    public static Task VerifyNoDiagnosticsAsync(params (string Name, string Text)[] sources)
+    {
+        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>();
+        foreach (var source in sources)
+        {
+            test.TestState.Sources.Add(source);
+        }
+
+        return RunAsync(test, null);
+    }
+
     /// <summary>
     /// The framework turns on every supported diagnostic; rules that are off by default (BRO1310) stay off here unless the
     /// test's .editorconfig turns them on, like in a build.

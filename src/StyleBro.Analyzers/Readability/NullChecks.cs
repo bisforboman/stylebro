@@ -23,14 +23,20 @@ internal static class NullChecks
 
     /// <summary>
     /// The form <paramref name="node"/> should take ("is null", "== null", ...) and the edits that make it so, or null when
-    /// it is no null check in the other form or is skipped.
+    /// it is no null check in the other form or is skipped. <paramref name="languageVersion"/>: the lowest C# version the
+    /// file is compiled with (the fix knows its other copies); by default the tree's own.
     /// </summary>
-    public static (string Form, ImmutableArray<TextChange> Changes)? GetFix(ExpressionSyntax node, SemanticModel model, AnalyzerConfigOptions options, CancellationToken cancellationToken)
+    public static (string Form, ImmutableArray<TextChange> Changes)? GetFix(
+        ExpressionSyntax node,
+        SemanticModel model,
+        AnalyzerConfigOptions options,
+        CancellationToken cancellationToken,
+        LanguageVersion? languageVersion = null)
     {
         var pattern = PrefersPattern(options);
         return node switch
         {
-            BinaryExpressionSyntax binary when pattern => ToPattern(binary, model, cancellationToken),
+            BinaryExpressionSyntax binary when pattern => ToPattern(binary, model, cancellationToken, languageVersion ?? ((CSharpParseOptions)binary.SyntaxTree.Options).LanguageVersion),
             IsPatternExpressionSyntax isPattern when !pattern => ToEquality(isPattern, model, cancellationToken),
             _ => null,
         };
@@ -72,7 +78,7 @@ internal static class NullChecks
     }
 
     // 'x == null' -> 'x is null', 'x != null' -> 'x is not null', 'null == x' -> 'x is null'.
-    private static (string, ImmutableArray<TextChange>)? ToPattern(BinaryExpressionSyntax binary, SemanticModel model, CancellationToken cancellationToken)
+    private static (string, ImmutableArray<TextChange>)? ToPattern(BinaryExpressionSyntax binary, SemanticModel model, CancellationToken cancellationToken, LanguageVersion languageVersion)
     {
         var not = binary.IsKind(SyntaxKind.NotEqualsExpression);
         if (!not && !binary.IsKind(SyntaxKind.EqualsExpression))
@@ -83,7 +89,7 @@ internal static class NullChecks
         var nullOnLeft = binary.Left.IsKind(SyntaxKind.NullLiteralExpression);
         var operand = nullOnLeft ? binary.Right : binary.Left;
         if ((nullOnLeft ? binary.Left : binary.Right) is not LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression }
-            || ((CSharpParseOptions)binary.SyntaxTree.Options).LanguageVersion < (not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)
+            || languageVersion < (not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)
             || !IsSimpleOperand(operand)
             || !MeansTheSame(model.GetSymbolInfo(binary, cancellationToken).Symbol, model.GetTypeInfo(operand, cancellationToken).Type, model)
             || IsInExpressionTree(binary, model, cancellationToken))

@@ -188,6 +188,7 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
             || InheritsName(symbol)
             || (symbol is not INamedTypeSymbol && symbol.ContainingType is { } type
                 && (FieldNames.HasRelatedMemberName(type, symbol) || (symbol is IPropertySymbol && FieldNames.IsSerialized(type))))
+            || ((symbol as INamedTypeSymbol ?? symbol.ContainingType) is { } owner && NamespaceNames.HasGeneratedPart(owner))
             || IsNameTaken(context, declaration, symbol, newName))
         {
             return;

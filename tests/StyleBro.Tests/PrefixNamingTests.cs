@@ -284,4 +284,18 @@ public class PrefixNamingTests
             }
             """,
         ]);
+
+    [Fact]
+    public Task TypeParametersOfATypeWithAGeneratedPart_KeepTheirNames() => VerifyNoDiagnosticsAsync(
+        ("/0/Grid.razor.cs", """
+            public partial class Grid<item>
+            {
+            }
+            """),
+        ("/0/Grid.razor.g.cs", """
+            public partial class Grid<item>
+            {
+                public item Value { get; set; }
+            }
+            """));
 }
