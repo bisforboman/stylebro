@@ -125,7 +125,9 @@ internal static class ElseIfs
 
         // ... and after it. When any changed, the joined chains get all their braces now.
         var joined = text.WithChanges(sorted);
-        var root = CSharpSyntaxTree.ParseText(joined, (CSharpParseOptions)chain.SyntaxTree.Options).GetRoot();
+
+        // Incremental: a full parse of the joined file cost ~10 ms per candidate in a 100 KB file (per edit in the IDE).
+        var root = chain.SyntaxTree.WithChangedText(joined).GetRoot();
         var after = parts.Select(p => Map(p.If.SpanStart))
             .Select(start => root.FindToken(start).Parent is IfStatementSyntax joinedIf && joinedIf.SpanStart == start ? Braces.GetChain(joinedIf) : null)
             .OfType<IfStatementSyntax>().Distinct().SelectMany(c => Findings(c, joined)).ToList();

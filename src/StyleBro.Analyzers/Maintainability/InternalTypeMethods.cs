@@ -27,8 +27,7 @@ internal static class InternalTypeMethods
         "ConfigureContainer", "Invoke", "InvokeAsync", "PrintMembers", "Equals", "GetHashCode", "ToString",
     };
 
-    /// <summary>Per compilation: every source method that implements an interface member for some source type.</summary>
-    private static readonly ConditionalWeakTable<Compilation, HashSet<IMethodSymbol>> Implementations = new();
+    private static readonly ConditionalWeakTable<Compilation, Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>> DerivedTypes = new();
 
     /// <summary>
     /// The <c>public</c> keyword to replace with <c>internal</c>, or null. Syntax checks first (cheap), then the symbol.
@@ -67,7 +66,7 @@ internal static class InternalTypeMethods
             || symbol.ContainingType is not { } type
             || IsVisibleOutside(type)
             || HasAttributesOrForeignBase(type)
-            || GetImplementations(model.Compilation, cancellationToken).Contains(symbol.OriginalDefinition))
+            || ImplementsInterfaceMember(symbol, model.Compilation, cancellationToken))
         {
             return null;
         }
@@ -157,40 +156,68 @@ internal static class InternalTypeMethods
     }
 
     /// <summary>
-    /// Methods that implement an interface member for some type of the compilation, also for a derived type that
-    /// implements the interface with an inherited method (<c>class D : B, IDisposable</c>, <c>B.Dispose</c> public).
+    /// Whether the method implements an interface member for its type or for a derived type that implements the
+    /// interface with the inherited method (<c>class D : B, IDisposable</c>, <c>B.Dispose</c> public). Only interface
+    /// members with the method's name can be implemented by it (implicitly), and only by the type and the types derived
+    /// from it. Checking every interface member of every type of the compilation took ~70 ms per edit in a big file:
+    /// the IDE gets a new compilation for every edit.
     /// </summary>
-    private static HashSet<IMethodSymbol> GetImplementations(Compilation compilation, CancellationToken cancellationToken) =>
-        Implementations.GetValue(compilation, c =>
+    private static bool ImplementsInterfaceMember(IMethodSymbol method, Compilation compilation, CancellationToken cancellationToken)
+    {
+        var type = method.ContainingType;
+        IEnumerable<INamedTypeSymbol> candidates = type.TypeKind == TypeKind.Class && !type.IsSealed && !type.IsStatic
+            && GetDerivedTypes(compilation, cancellationToken).TryGetValue(type.OriginalDefinition, out var derived)
+                ? derived.Prepend(type)
+                : new[] { type };
+        foreach (var candidate in candidates)
         {
-            var result = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+            foreach (var @interface in candidate.AllInterfaces)
+            {
+                foreach (var member in @interface.GetMembers(method.Name))
+                {
+                    if (member is IMethodSymbol
+                        && candidate.FindImplementationForInterfaceMember(member) is IMethodSymbol implementation
+                        && SymbolEqualityComparer.Default.Equals(implementation.OriginalDefinition, method.OriginalDefinition))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Per compilation: each source class with the source classes derived from it (directly or not).</summary>
+    private static Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>> GetDerivedTypes(Compilation compilation, CancellationToken cancellationToken) =>
+        DerivedTypes.GetValue(compilation, c =>
+        {
+            var result = new Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>(SymbolEqualityComparer.Default);
             var pending = new Stack<INamespaceOrTypeSymbol>();
             pending.Push(c.Assembly.GlobalNamespace);
             while (pending.Count > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                foreach (var member in pending.Pop().GetMembers())
+                var container = pending.Pop();
+                if (container is INamespaceSymbol ns)
                 {
-                    if (member is INamespaceSymbol ns)
+                    foreach (var child in ns.GetNamespaceMembers())
                     {
-                        pending.Push(ns);
+                        pending.Push(child);
                     }
-                    else if (member is INamedTypeSymbol type)
+                }
+
+                foreach (var type in container.GetTypeMembers())
+                {
+                    pending.Push(type);
+                    for (var current = type.BaseType; current is not null && current.Locations.Any(l => l.IsInSource); current = current.BaseType)
                     {
-                        pending.Push(type);
-                        if (type.TypeKind is TypeKind.Class or TypeKind.Struct)
+                        if (!result.TryGetValue(current.OriginalDefinition, out var list))
                         {
-                            foreach (var @interface in type.AllInterfaces)
-                            {
-                                foreach (var interfaceMember in @interface.GetMembers())
-                                {
-                                    if (interfaceMember is IMethodSymbol && type.FindImplementationForInterfaceMember(interfaceMember) is IMethodSymbol implementation)
-                                    {
-                                        result.Add(implementation.OriginalDefinition);
-                                    }
-                                }
-                            }
+                            result[current.OriginalDefinition] = list = new List<INamedTypeSymbol>();
                         }
+
+                        list.Add(type);
                     }
                 }
             }

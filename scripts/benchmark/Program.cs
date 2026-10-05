@@ -8,6 +8,12 @@
 // exits with 1 when the head build is clearly slower (the CI performance check).
 //
 // STYLEBRO_BENCH_ONLY=NameA,NameB times only those analyzers (to compare two builds of one analyzer with less noise).
+//
+//   dotnet run -c Release --project scripts/benchmark -- file <analyzer dll> <source folder> [N | file;file...] [runs]
+//
+// file times each analyzer on ONE document, as the IDE analyzes the open file on every edit: syntax and semantic
+// diagnostics of that tree only (the N largest files, default 10, or the given files, which may lie outside the folder).
+// --all-rules (any mode) also turns on the rules that are off by default.
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Reflection;
@@ -17,10 +23,15 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-var compare = args.Length > 0 && args[0] == "compare";
-var dlls = compare ? new[] { args[1], args[2] } : new[] { args[0] };
-var rest = args.Skip(dlls.Length + (compare ? 1 : 0)).ToArray();
+var allRules = args.Contains("--all-rules");
+args = args.Where(a => a != "--all-rules").ToArray();
+var mode = args[0] is "compare" or "file" ? args[0] : "";
+var compare = mode == "compare";
+var dlls = compare ? new[] { args[1], args[2] } : new[] { args[mode == "" ? 0 : 1] };
+var rest = args.Skip(dlls.Length + (mode == "" ? 0 : 1)).ToArray();
 var sources = rest[0];
+var fileTargets = mode == "file" ? (rest.Length > 1 ? rest[1] : "10") : "";
+rest = mode == "file" ? rest.Where((_, i) => i != 1).ToArray() : rest;
 var runs = rest.Length > 1 ? int.Parse(rest[1]) : 5;
 var symbols = rest.Length > 2 ? rest[2].Split(';', StringSplitOptions.RemoveEmptyEntries) : Array.Empty<string>();
 
@@ -33,7 +44,18 @@ var files = Directory.GetFiles(sources, "*.cs", SearchOption.AllDirectories)
     .Select(f => (Path: f, Text: File.ReadAllText(f)))
     .ToArray();
 var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator).Select(p => (MetadataReference)MetadataReference.CreateFromFile(p)).ToArray();
+// --all-rules: every rule a build supports at warning, also the ones that are off by default.
+var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable)
+    .WithSpecificDiagnosticOptions(allRules
+        ? builds.SelectMany(b => b.Analyzers).SelectMany(a => a.SupportedDiagnostics).Where(d => !d.IsEnabledByDefault)
+            .Select(d => d.Id).Distinct().Select(id => KeyValuePair.Create(id, ReportDiagnostic.Warn))
+        : Array.Empty<KeyValuePair<string, ReportDiagnostic>>());
 Console.WriteLine($"{files.Length} files, {string.Join(" / ", builds.Select(b => b.Analyzers.Length))} analyzers, {runs} runs");
+if (mode == "file")
+{
+    await PerFile(builds[0]);
+    return 0;
+}
 
 // Run 0 is the warm-up (and gives the diagnostic counts).
 await Measure(0, runs);
@@ -89,7 +111,7 @@ async Task Measure(int first, int last)
                 "Benchmark",
                 files.Select(f => CSharpSyntaxTree.ParseText(f.Text, parse, f.Path)),
                 references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+                compilationOptions);
             compilation.GetDiagnostics();
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -109,6 +131,86 @@ async Task Measure(int first, int last)
             }
         }
     }
+}
+
+// Per file: in every run each target gets a fresh tree (the other files are parsed once: one document's analysis doesn't
+// walk them) in a new compilation. Its semantic model is bound first (not timed: the IDE has usually bound it), then a new
+// CompilationWithAnalyzers (its telemetry adds up) runs the syntax and semantic analysis of that tree only: tree, node
+// and semantic model actions, and the symbol actions of the symbols declared there. The runs go round the files, so
+// machine noise spreads over all of them; each analyzer's fastest run counts (other work only adds time).
+async Task PerFile(Build build)
+{
+    var targets = int.TryParse(fileTargets, out var count)
+        ? files.OrderByDescending(f => f.Text.Length).Take(count).Select(f => f.Path).ToArray()
+        : fileTargets.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(Path.GetFullPath).ToArray();
+    files = files.Concat(targets.Where(t => files.All(f => f.Path != t)).Select(t => (t, File.ReadAllText(t)))).ToArray();
+    var trees = files.ToDictionary(f => f.Path, f => CSharpSyntaxTree.ParseText(f.Text, parse, f.Path));
+    var times = targets.ToDictionary(t => t, _ => build.Analyzers.ToDictionary(a => a.GetType().Name, _ => new List<double>()));
+    var reports = targets.ToDictionary(t => t, _ => new Dictionary<string, int>());
+    for (var run = 0; run <= runs; run++)
+    {
+        foreach (var target in targets)
+        {
+            var tree = CSharpSyntaxTree.ParseText(files.First(f => f.Path == target).Text, parse, target);
+            var compilation = CSharpCompilation.Create("Benchmark", trees.Values.Where(t => t.FilePath != target).Append(tree), references, compilationOptions);
+            var options = new CompilationWithAnalyzersOptions(
+                new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty), null, concurrentAnalysis: false, logAnalyzerExecutionTime: true);
+            var withAnalyzers = compilation.WithAnalyzers(build.Analyzers, options);
+            var model = withAnalyzers.Compilation.GetSemanticModel(tree);
+            model.GetDiagnostics();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            var diagnostics = (await withAnalyzers.GetAnalyzerSyntaxDiagnosticsAsync(tree, CancellationToken.None))
+                .AddRange(await withAnalyzers.GetAnalyzerSemanticDiagnosticsAsync(model, null, CancellationToken.None));
+            foreach (var analyzer in build.Analyzers)
+            {
+                var name = analyzer.GetType().Name;
+                if (run == 0)
+                {
+                    reports[target][name] = diagnostics.Count(d => analyzer.SupportedDiagnostics.Any(s => s.Id == d.Id));
+                }
+                else
+                {
+                    times[target][name].Add((await withAnalyzers.GetAnalyzerTelemetryInfoAsync(analyzer, CancellationToken.None)).ExecutionTime.TotalMilliseconds);
+                }
+            }
+        }
+    }
+
+    static double Fastest(List<double> t) => t.Min();
+    var root = Path.GetFullPath(sources);
+    string Name(string path) => path.StartsWith(root) ? Path.GetRelativePath(root, path) : Path.GetFileName(path);
+    double Kb(string path) => files.First(f => f.Path == path).Text.Length / 1024.0;
+    foreach (var target in targets)
+    {
+        var fastest = times[target].ToDictionary(p => p.Key, p => Fastest(p.Value));
+        Console.WriteLine();
+        Console.WriteLine($"{Name(target)}: {Kb(target):N0} KB, {fastest.Values.Sum():N1} ms, {reports[target].Values.Sum()} reports");
+        foreach (var (name, ms) in fastest.OrderByDescending(p => p.Value).Where(p => p.Value >= 0.5).Take(8))
+        {
+            Console.WriteLine($"{ms,9:N1} ms  {reports[target][name],6}  {name}");
+        }
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("Slowest analyzers on one file (fastest run, and microseconds per KB of that file):");
+    var worst = build.Analyzers.Select(a => a.GetType().Name)
+        .Select(name => targets.Select(t => (Name: name, File: t, Ms: Fastest(times[t][name]))).MaxBy(x => x.Ms))
+        .OrderByDescending(x => x.Ms).Take(15);
+    foreach (var (name, file, ms) in worst)
+    {
+        Console.WriteLine($"{ms,9:N1} ms  {ms * 1000 / Kb(file),6:N0} us/KB  {name}  ({Name(file)})");
+    }
+
+    Console.WriteLine($"{targets.Average(t => times[t].Values.Sum(Fastest)),9:N1} ms  average total per file");
+    if (Environment.GetEnvironmentVariable("STYLEBRO_BENCH_CSV") is { Length: > 0 } csv)
+    {
+        File.WriteAllLines(csv, targets.SelectMany(t => times[t].Select(p => $"{Name(t)},{Kb(t):F0},{p.Key},{Fastest(p.Value):F2},{reports[t][p.Key]}")).Prepend("file,kb,analyzer,ms,reports"));
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("Reports (all files): " + string.Join(", ", build.Analyzers.Select(a => a.GetType().Name).OrderBy(n => n)
+        .Select(n => (Name: n, Count: targets.Sum(t => reports[t][n]))).Where(x => x.Count > 0).Select(x => $"{x.Name} {x.Count}")));
 }
 
 (List<string> Problems, List<string> Lines) Evaluate()

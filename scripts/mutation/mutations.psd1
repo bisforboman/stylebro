@@ -262,7 +262,8 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/HungarianNames.cs'; Find = '&& !char.IsUpper(name[0])'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& !HungarianNames.IsInNativeMethods(context.Node)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = ', name => HungarianNames.GetVariableName(name, hungarian))'; Replace = ')'; Tests = 'HungarianNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'declaration.ContainsDirectives ? declaration.DescendantTrivia()'; Replace = 'false ? declaration.DescendantTrivia()'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'declaration.ContainsDirectives ? declaration.GetFirstDirective()'; Replace = 'false ? declaration.GetFirstDirective()'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'facts.Texts.Add(list[i].ToString());'; Replace = ''; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| HungarianNames.IsInNativeMethods(field)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'if (GetNewName(f, key.Item1, hungarian) is { } name)'; Replace = 'if (GetNewName(f, key.Item1) is { } name)'; Tests = 'HungarianNamingTests' }
 
@@ -400,8 +401,10 @@
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| IsVisibleOutside(type)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if (current.GetAttributes().Length > 0)'; Replace = 'if (false)'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if (!current.Locations.Any(l => l.IsInSource))'; Replace = 'if (false)'; Tests = 'InternalTypeMethodTests' }
-        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| GetImplementations(model.Compilation, cancellationToken).Contains(symbol.OriginalDefinition))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
-        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                        pending.Push(type);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| ImplementsInterfaceMember(symbol, model.Compilation, cancellationToken))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '? derived.Prepend(type)'; Replace = '? new[] { type }'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                        pending.Push(child);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                    pending.Push(type);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '|| strings.Contains(method.Identifier.ValueText)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'else if (withNameof && token'; Replace = 'else if (false && token'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'if (!Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken))'; Replace = 'if (true)'; Tests = 'InternalTypeMethodTests' }

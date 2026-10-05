@@ -560,8 +560,19 @@ internal static class FieldNames
             foreach (var reference in type.DeclaringSyntaxReferences)
             {
                 var declaration = reference.GetSyntax(cancellationToken);
-                foreach (var token in declaration.DescendantTokens())
+
+                // The tree's shared token array (TreeWalk), from the declaration's first token to its last.
+                var tokens = TreeWalk.Tokens(declaration.SyntaxTree.GetRoot(cancellationToken));
+                var (low, high) = (0, tokens.Count);
+                while (low < high)
                 {
+                    var middle = (low + high) / 2;
+                    (low, high) = tokens[middle].FullSpan.Start < declaration.FullSpan.Start ? (middle + 1, high) : (low, middle);
+                }
+
+                for (var i = low; i < tokens.Count && tokens[i].FullSpan.End <= declaration.FullSpan.End; i++)
+                {
+                    var token = tokens[i];
                     if (token.IsKind(SyntaxKind.StringLiteralToken))
                     {
                         facts.Texts.Add(token.ValueText);
@@ -572,18 +583,21 @@ internal static class FieldNames
                     }
                 }
 
-                // Code excluded by '#if', and strings in directives ('#line 1 "file"'); both need a directive. Only
-                // directives are opened: building every documentation comment's XML structure cost most of this
-                // analyzer's time.
-                foreach (var trivia in declaration.ContainsDirectives ? declaration.DescendantTrivia() : Enumerable.Empty<SyntaxTrivia>())
+                // Code excluded by '#if' (always right after a directive in the same trivia list), and strings in
+                // directives ('#line 1 "file"'). Found from the directives (Roslyn skips subtrees without any): walking
+                // all trivia cost ~40 % of this analyzer on a big file, and opening doc comments built their XML.
+                for (var directive = declaration.ContainsDirectives ? declaration.GetFirstDirective() : null;
+                    directive is not null && directive.SpanStart < declaration.FullSpan.End;
+                    directive = directive.GetNextDirective())
                 {
-                    if (trivia.IsKind(SyntaxKind.DisabledTextTrivia))
+                    facts.Texts.AddRange(directive.DescendantTokens().Where(t => t.IsKind(SyntaxKind.StringLiteralToken)).Select(t => t.ValueText));
+                    var list = directive.ParentTrivia.Token.LeadingTrivia;
+                    for (var i = list.IndexOf(directive.ParentTrivia) + 1; i < list.Count && !list[i].IsDirective; i++)
                     {
-                        facts.Texts.Add(trivia.ToString());
-                    }
-                    else if (trivia.IsDirective)
-                    {
-                        facts.Texts.AddRange(trivia.GetStructure()!.DescendantTokens().Where(t => t.IsKind(SyntaxKind.StringLiteralToken)).Select(t => t.ValueText));
+                        if (list[i].IsKind(SyntaxKind.DisabledTextTrivia))
+                        {
+                            facts.Texts.Add(list[i].ToString());
+                        }
                     }
                 }
             }
