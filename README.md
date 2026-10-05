@@ -72,6 +72,7 @@ project or coming from StyleCop.
 | [BRO1406](docs/rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Yes |
 | [BRO1407](docs/rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Yes |
 | [BRO1408](docs/rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Yes |
+| [BRO1409](docs/rules/BRO1409.md) | Methods of internal types should be internal, not public (off by default) | (none; StyleCop issue #2981, never implemented) | Yes |
 | [BRO1514](docs/rules/BRO1514.md) | Braces should not be omitted | SA1503 | Yes |
 | [BRO1515](docs/rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Yes |
 | [BRO1516](docs/rules/BRO1516.md) | Use braces consistently | SA1520 | Yes |

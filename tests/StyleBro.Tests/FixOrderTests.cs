@@ -33,6 +33,32 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task InternalMethods_SortedBelowPublicOnes() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        internal class C
+        {
+            public void Run()
+            {
+            }
+
+            internal void Stop()
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+
+            private void Wait()
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1409.severity = warning\n",
+        "BRO1001",
+        "BRO1409");
+
+    [Fact]
     public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderAsync(
         """
         public class C
