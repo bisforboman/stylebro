@@ -633,7 +633,7 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
-    public void Modernize_InAMultiTargetedRepository_MakesLanguageAndApiRulesSuggestions()
+    public void Modernize_InAMultiTargetedRepository_MakesLanguageRulesSuggestions_ApiRulesStayWarnings()
     {
         Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks></PropertyGroup></Project>");
 
@@ -642,8 +642,10 @@ public sealed class MigrationTests : IDisposable
 
         Assert.Contains("dotnet_diagnostic.IDE0041.severity = warning", editorConfig);
         Assert.Contains("dotnet_diagnostic.IDE0090.severity = suggestion", editorConfig);
-        Assert.Contains("dotnet_diagnostic.CA1510.severity = suggestion", editorConfig);
-        Assert.Contains("dotnet_diagnostic.IDE0330.severity = suggestion", editorConfig);
+
+        // The multi-target guard (MultiTargetSuppressor) hides the API rules where a framework lacks the API.
+        Assert.Contains("dotnet_diagnostic.CA1510.severity = warning", editorConfig);
+        Assert.Contains("dotnet_diagnostic.IDE0330.severity = warning", editorConfig);
     }
 
     [Fact]
@@ -656,7 +658,7 @@ public sealed class MigrationTests : IDisposable
         Assert.True(InitCommand.SetsLangVersion(root, Path.Combine("src", "Lib", "Lib.csproj")));
         var block = InitCommand.Modernize(root, InitCommand.MultiTargetedProjects(root).ToList()).Block;
         Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", block);
-        Assert.Contains("dotnet_diagnostic.CA1510.severity = suggestion", block);
+        Assert.Contains("dotnet_diagnostic.CA1510.severity = warning", block);
 
         // A Directory.Build.props that doesn't import its parent's hides the LangVersion above it.
         Write("src/Directory.Build.props", "<Project />");
@@ -684,6 +686,16 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", migrated);
         Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", migrated);
         Assert.DoesNotContain("stylebro-migrate init:", migrated);
+    }
+
+    [Fact]
+    public void TheMultiTargetGuard_CoversExactlyTierC()
+    {
+        var tierC = InitCommand.ModernizeTemplate().Replace("\r\n", "\n").Split("# Tier C")[1].Split('\n')
+            .Where(l => l.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal))
+            .Select(l => l.Split('.')[1]);
+
+        Assert.Equal(tierC.Order(), StyleBro.Analyzers.Modernize.MultiTargetSuppressor.Minimums.Keys.Order());
     }
 
     [Fact]

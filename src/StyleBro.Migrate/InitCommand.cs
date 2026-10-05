@@ -97,9 +97,10 @@ internal static class InitCommand
     /// <summary>
     /// The --modernize block: the SDK's rules that rewrite code into newer C# (tier B) and newer APIs (tier C), at warning
     /// where that's safe, else at suggestion with a note why. In a multi-targeted project the rules fire per target
-    /// framework and 'dotnet format' writes the newer framework's edit into the shared file: the API rules break the older
-    /// framework's build (CA1847 silently binds to LINQ there), the language rules too unless LangVersion is set (else each
-    /// framework gets its own C# version). Keys the root .editorconfig sets itself are left out.
+    /// framework and 'dotnet format' writes the newer framework's edit into the shared file: the language rules break the
+    /// older framework's build unless LangVersion is set (else each framework gets its own C# version). The API rules would
+    /// too, but StyleBro's MultiTargetSuppressor hides them there, so they are always warnings. Keys the root .editorconfig
+    /// sets itself are left out.
     /// </summary>
     public static (string? Block, List<string> Notes) Modernize(string root, IReadOnlyList<string> multiTargeted)
     {
@@ -114,14 +115,13 @@ internal static class InitCommand
 
         if (multiTargeted.Count > 0)
         {
-            notes.Add("Modernize: the newer-API rules (tier C) are suggestions: the repository has multi-targeted projects, the rules check the API per target framework,\n"
-                + "  and 'dotnet format' would write e.g. ArgumentNullException.ThrowIfNull into code an older framework compiles too (CA1847's Contains(char) even binds to LINQ there).\n"
-                + "  To use them in single-target projects, set them to warning in an .editorconfig in those projects' folders.");
+            notes.Add("Modernize: the newer-API rules (tier C) are warnings; in multi-targeted projects StyleBro's multi-target guard hides them where a target framework lacks the API\n"
+                + "  (e.g. ArgumentNullException.ThrowIfNull in a net48;net8.0 project). The guard comes with the StyleBro.Analyzers package: projects without it would get fixes that break their older framework.");
         }
 
         var own = Migration.OwnKeys(root);
         var lines = ModernizeTemplate().Replace("\r\n", "\n").TrimEnd('\n').Split('\n')
-            .Select(l => l.Replace("{lang}", withoutLangVersion.Count == 0 ? "warning" : "suggestion").Replace("{api}", multiTargeted.Count == 0 ? "warning" : "suggestion"))
+            .Select(l => l.Replace("{lang}", withoutLangVersion.Count == 0 ? "warning" : "suggestion"))
             .Where(l => l.StartsWith('#') || !l.Contains('=') || !own.Contains(l.Substring(0, l.IndexOf('=')).Trim()));
         var block = ModernizeBegin + " (stylebro-migrate init --modernize: built-in .NET modernization rules; edits inside are replaced)\n"
             + string.Join("\n", lines) + "\n" + ModernizeEnd + "\n";

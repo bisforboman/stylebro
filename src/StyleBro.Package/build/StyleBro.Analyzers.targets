@@ -22,4 +22,16 @@
   <ItemGroup Condition="'$(StyleBroBaseline)' != '' and '$(StyleBroBaseline)' != 'none' and Exists('$(StyleBroBaseline)')">
     <AdditionalFiles Include="$(StyleBroBaseline)" />
   </ItemGroup>
+
+  <!--
+    The multi-target guard (docs/modernizing.md): the project's target frameworks for MultiTargetSuppressor. Inner builds
+    still see the full TargetFrameworks list. Comma-separated because ';' starts a comment in the generated editorconfig.
+  -->
+  <PropertyGroup>
+    <StyleBroTargetFrameworks Condition="'$(StyleBroTargetFrameworks)' == '' and '$(TargetFrameworks)' != ''">$(TargetFrameworks.Replace(';', ','))</StyleBroTargetFrameworks>
+    <StyleBroTargetFrameworks Condition="'$(StyleBroTargetFrameworks)' == ''">$(TargetFramework)</StyleBroTargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
+  </ItemGroup>
 </Project>

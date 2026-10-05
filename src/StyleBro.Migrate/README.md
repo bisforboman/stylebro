@@ -38,8 +38,8 @@ stylebro-migrate init [path] --modernize [--write]
 ```
 
 Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()`, collection expressions,
-`ThrowIfNull`, ...), in their own block; rules that would break a multi-targeted project's older framework become
-suggestions there. Works after `--write` too. Details:
+`ThrowIfNull`, ...), in their own block; in multi-targeted projects the newer-API rules are hidden where a target framework lacks the API
+(StyleBro's multi-target guard) and the newer-C# rules are suggestions unless `LangVersion` is set. Works after `--write` too. Details:
 [docs/modernizing.md](https://github.com/bisforboman/stylebro/blob/main/docs/modernizing.md).
 
 ## Formatting multi-targeted projects

@@ -50,18 +50,19 @@ csharp_style_namespace_declarations = file_scoped
 dotnet_diagnostic.IDE0340.severity = {lang}
 dotnet_diagnostic.IDE0360.severity = {lang}
 
-# Tier C: newer APIs (ThrowIfNull, TryAdd, Contains(char), ranges, System.Threading.Lock, ...)
-dotnet_diagnostic.CA1510.severity = {api}
-dotnet_diagnostic.CA1511.severity = {api}
-dotnet_diagnostic.CA1512.severity = {api}
-dotnet_diagnostic.CA1513.severity = {api}
-dotnet_diagnostic.CA1847.severity = {api}
-dotnet_diagnostic.CA1865.severity = {api}
-dotnet_diagnostic.CA2249.severity = {api}
-dotnet_diagnostic.CA1864.severity = {api}
-dotnet_diagnostic.CA1850.severity = {api}
-dotnet_diagnostic.CA1872.severity = {api}
-dotnet_diagnostic.CA2263.severity = {api}
-dotnet_diagnostic.IDE0056.severity = {api}
-dotnet_diagnostic.IDE0057.severity = {api}
-dotnet_diagnostic.IDE0330.severity = {api}
+# Tier C: newer APIs (ThrowIfNull, TryAdd, Contains(char), ranges, System.Threading.Lock, ...). In a multi-targeted project
+# StyleBro's multi-target guard hides them where a target framework lacks the API (MultiTargetSuppressor).
+dotnet_diagnostic.CA1510.severity = warning
+dotnet_diagnostic.CA1511.severity = warning
+dotnet_diagnostic.CA1512.severity = warning
+dotnet_diagnostic.CA1513.severity = warning
+dotnet_diagnostic.CA1847.severity = warning
+dotnet_diagnostic.CA1865.severity = warning
+dotnet_diagnostic.CA2249.severity = warning
+dotnet_diagnostic.CA1864.severity = warning
+dotnet_diagnostic.CA1850.severity = warning
+dotnet_diagnostic.CA1872.severity = warning
+dotnet_diagnostic.CA2263.severity = warning
+dotnet_diagnostic.IDE0056.severity = warning
+dotnet_diagnostic.IDE0057.severity = warning
+dotnet_diagnostic.IDE0330.severity = warning
