@@ -737,6 +737,109 @@ public class FixOrderTests
         "BRO1303",
         "BRO1306");
 
+    [Fact]
+    public Task AutoAccessors_NextToTheBlankLineRules() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int A { get; set; }
+            public int B
+            {
+                get;
+                set;
+            }
+            public int D { get; set; }
+            public int E
+            {
+                get;
+                private set;
+            }
+            public void M()
+            {
+            }
+        }
+        """,
+        "BRO1505",
+        "BRO1519",
+        "BRO1527");
+
+    [Fact]
+    public Task AutoAccessors_BlankLineAfterTheBraceWithoutBro1505() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int B
+            {
+                get;
+                set;
+            }
+            public int D { get; set; }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1519",
+        "BRO1527");
+
+    // sameText: false because BRO1001 adds a blank line when its sort puts the still multi-line B below D (BRO1505
+    // wants one there), and none when BRO1527 put B on one line first. Both results are clean.
+    [Fact]
+    public Task AutoAccessors_SortedNextToAOneLineProperty() => AssertConvergesInEveryOrderCoreAsync(
+        """
+        public class C
+        {
+            internal int B
+            {
+                get;
+                set;
+            }
+
+            public int A { get; set; }
+            public int D { get; set; }
+        }
+        """,
+        null,
+        false,
+        "BRO1001",
+        "BRO1505",
+        "BRO1527");
+
+    [Fact]
+    public Task EmptyTypeBody_NextToASemicolonAndASingleLineBlock() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class A { };
+
+        public struct B { }
+
+        public interface I
+        {
+        };
+        """,
+        "dotnet_diagnostic.BRO1145.severity = warning\n",
+        "BRO1101",
+        "BRO1145",
+        "BRO1509");
+
+    [Fact]
+    public Task RecordClass_NextToAnEmptyRecordBody() => AssertConvergesInEveryOrderAsync(
+        """
+        public record class A(int X) { };
+
+        public sealed record class B(int X)
+        {
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            internal static class IsExternalInit
+            {
+            }
+        }
+        """,
+        "BRO1101",
+        "BRO1140",
+        "BRO1146",
+        "BRO1509");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

@@ -62,3 +62,7 @@ dotnet_naming_style.underscore_camel.capitalization = camel_case
 # BRO1504: tool markers need no blank line above them (stylebro_comment_blank_line_exempt_prefixes) in one file.
 [**/Reference.cs]
 stylebro_comment_blank_line_exempt_prefixes = ReSharper
+
+# BRO1145 (empty class body -> ;) is off by default; on for one file.
+[**/Badges.cs]
+dotnet_diagnostic.BRO1145.severity = warning

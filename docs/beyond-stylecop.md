@@ -169,7 +169,8 @@ Done (2026-10-05): [BRO1139](rules/BRO1139.md); adds the braces BRO1514/BRO1516 
 `record R(int X) { }` -> `record R(int X);`. Effort: low. BRO1101 already treats the bodiless form; check that the two
 fixes don't fight over the `;`.
 
-Done (2026-10-05): [BRO1140](rules/BRO1140.md).
+Done (2026-10-05): [BRO1140](rules/BRO1140.md). MA0206 for classes, structs and interfaces (`class Marker;`, C# 12):
+[BRO1145](rules/BRO1145.md), off by default.
 
 ### 14. Redundant base (RCS1042, S1939)
 
@@ -232,6 +233,8 @@ for identifiers that C# 14 reads as keywords (Sonar S8367, S8368, S8380 report t
 Done (2026-10-05): [BRO1144](rules/BRO1144.md) writes `@field`, `@extension`, `@partial` there. The same survey found
 [BRO1001](rules/BRO1001.md) skipping every type with an extension block and [BRO1509](rules/BRO1509.md) not expanding a
 one-line extension block: both handle them now (decisions.md).
+Done (2026-10-05): RCS0042 as [BRO1527](rules/BRO1527.md), MA0174 (`record class` -> `record`) as
+[BRO1146](rules/BRO1146.md).
 
 ## Rejected
 
