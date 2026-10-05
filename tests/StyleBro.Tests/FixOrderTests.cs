@@ -55,6 +55,28 @@ public class FixOrderTests
         "BRO1519");
 
     [Fact]
+    public Task DocumentationElements_OrderedWhileTagsAreSortedRenamedOrRewritten() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            /// <returns>Never <c>null</c>.</returns>
+            /// <param name="b">B, see <see cref="M&lt;T, U&gt;"/>.</param>
+            /// <remarks></remarks>
+            /// <summary>Adds.</summary>
+            /// <typeparam name="U">U.</typeparam>
+            /// <param name="old">A.</param>
+            /// <typeparam name="T">T.</typeparam>
+            /// <param name="c">C.</param>
+            public object M<T, U>(int a, int b, int c) => a + b + c;
+        }
+        """,
+        "BRO1610",
+        "BRO1611",
+        "BRO1613",
+        "BRO1618",
+        "BRO1619");
+
+    [Fact]
     public Task DeclarationComments_MovedNextToBlankLinesAndDocumentation() => AssertConvergesInEveryOrderAsync(
         """
         public class C // note

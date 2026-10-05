@@ -261,8 +261,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   the line where the previous item ENDS. BRO1107 only when item 1 starts below `(` (first two on one line = BRO1108).
   One fix: BRO1107 = the first edit of BRO1108's "each item on its own line" (never joins lines; items already
   starting a line keep their indentation). Skipped: syntax errors, comments/directives in the gaps. StyleCop
-  1.2.0-beta.556 misses records/primary constructors (documented deviation) and has no working SA1117 fix. Nested
-  split lists: single fix and Fix All differ in the inner list's indentation (test uses `batchFixedSource`).
+  1.2.0-beta.556 misses records/primary constructors (documented deviation) and has no working SA1117 fix. An item
+  moved to its own line takes its later lines along (a lambda body; StyleCop #1620/#3183, 2026-10-04); nested split
+  lists are fixed outer first, in rounds, so single fix and Fix All give the same result (no `batchFixedSource`).
 - **BRO1109** (SA1110) `(`/`[` on the name's line and **BRO1110** (SA1111) `)`/`]` on the last item's line
   (`Readability/ParenthesisPlacement.cs`, same list kinds as BRO1107). BRO1109 only for lists that belong to a name
   (declarations, calls, `new`, element access, attributes, constructor initializers; not lambdas); the fix swaps the

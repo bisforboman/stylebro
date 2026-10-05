@@ -108,6 +108,9 @@ project or coming from StyleCop.
 | [BRO1614](docs/rules/BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | Yes |
 | [BRO1615](docs/rules/BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | Yes |
 | [BRO1616](docs/rules/BRO1616.md) | Write the summary's tags consistently on their own lines or on the text's line | (none; Roslynator RCS1253, Meziantou MA0177/MA0211) | Yes |
+| [BRO1617](docs/rules/BRO1617.md) | Write a cref's type arguments in braces | (none; StyleCop's proposed SA1653) | Yes |
+| [BRO1618](docs/rules/BRO1618.md) | Write a C# keyword in documentation as `<see langword="..."/>` | (none; Meziantou MA0154) | Yes |
+| [BRO1619](docs/rules/BRO1619.md) | Put the documentation elements in the standard order | (none) | Yes |
 | [BRO1501](docs/rules/BRO1501.md) | Opening braces should not be preceded by a blank line | SA1509 | Yes |
 | [BRO1502](docs/rules/BRO1502.md) | Chained blocks should not be preceded by a blank line | SA1510 | Yes |
 | [BRO1503](docs/rules/BRO1503.md) | Opening braces should not be followed by a blank line | SA1505 | Yes |
