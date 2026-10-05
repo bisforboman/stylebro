@@ -7,6 +7,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 **New here?** [Getting started](docs/getting-started.md): from install to the first `dotnet format` run, for a new
 project or coming from StyleCop.
 
+**Deciding whether to switch from StyleCop?** [StyleBro vs StyleCop](docs/stylebro-vs-stylecop.md): coverage, speed,
+correctness and migration, with measured numbers.
+
 ## Principles
 
 - **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run.
