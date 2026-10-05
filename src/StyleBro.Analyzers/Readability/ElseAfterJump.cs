@@ -24,8 +24,7 @@ internal static class ElseAfterJump
     /// between its last statement and '}', a body that spans lines but starts on the 'else' line, lines that aren't
     /// indented one level deeper than the 'if', strings or comments spanning lines, 'using' declarations (they would be
     /// disposed later), and names declared in the body that the enclosing block also uses (they would clash). Also not an
-    /// 'if' branch without braces that BRO1516 wants braces on (the 'else' block makes the chain inconsistent): without
-    /// the 'else' it would become BRO1514's, which may already have run; BRO1516 adds them, the next run removes the 'else'.
+    /// 'if' branch without braces that a brace rule wants braces on (<see cref="GetBranchToWrap"/>) but can't wrap.
     /// </summary>
     public static bool IsCandidate(IfStatementSyntax node, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
@@ -45,9 +44,7 @@ internal static class ElseAfterJump
             return false;
         }
 
-        if (node.Statement is not BlockSyntax && elseClause.Statement is BlockSyntax
-            && Braces.GetFindings(node, text, isOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options))
-                .Any(f => f.Child == node.Statement && f.Id == DiagnosticIds.BracesConsistent))
+        if (GetBranchToWrap(node, text, options, isOn) is { } branch && Braces.GetChanges(new[] { branch }, text, options) is null)
         {
             return false;
         }
@@ -98,6 +95,18 @@ internal static class ElseAfterJump
         return declared.Count == 0
             || !block.DescendantTokens().Any(t => t.IsKind(SyntaxKind.IdentifierToken) && !elseClause.Statement.FullSpan.Contains(t.SpanStart) && declared.Contains(t.ValueText));
     }
+
+    /// <summary>
+    /// The 'if' branch without braces when a brace rule (BRO1514-BRO1516) wants braces on it, else null. The fix adds those
+    /// braces before it removes the 'else', so the result is the same whichever runs first: the 'else' block makes the
+    /// chain inconsistent (BRO1516), and without the 'else' the branch would be BRO1514's, which may have run already.
+    /// </summary>
+    public static StatementSyntax? GetBranchToWrap(IfStatementSyntax node, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn) =>
+        node.Statement is not BlockSyntax
+        && Braces.GetFindings(node, text, isOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options))
+            .Any(f => f.Child == node.Statement)
+            ? node.Statement
+            : null;
 
     /// <summary>
     /// The edits that remove the 'else' of every given candidate together: the gap from the 'if' branch to the body's first

@@ -233,10 +233,11 @@ public class ElseAfterJumpTests
             }
         }
         """,
-        On);
+        On + "dotnet_diagnostic.BRO1514.severity = none\n");
 
+    // The braces BRO1514 wants on the 'if' branch come in the same fix (dotnet format may have run BRO1514 already).
     [Fact]
-    public Task InconsistentBraces_LeftToBro1516_WhenItIsOn() => VerifyNoDiagnosticsAsync(
+    public Task WithoutBraces_Bro1514sBracesInTheSameFix() => VerifyFixAsync(
         """
         public class C
         {
@@ -244,17 +245,118 @@ public class ElseAfterJumpTests
             {
                 if (x)
                     return 1;
-                else
+                {|BRO1143:else|}
+                    System.Console.WriteLine();
+
+                if (!x) return 3; {|BRO1143:else|} return 4;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x)
+                {
+                    return 1;
+                }
+
+                System.Console.WriteLine();
+
+                if (!x)
+                {
+                    return 3;
+                }
+
+                return 4;
+            }
+        }
+        """,
+        On);
+
+    // BRO1516 wants braces on the 'if' branch (the 'else' block makes the chain inconsistent): they come in the same fix,
+    // also when BRO1514 is off, so the result doesn't depend on which rule 'dotnet format' runs first.
+    [Theory]
+    [InlineData("")]
+    [InlineData("dotnet_diagnostic.BRO1514.severity = none\n")]
+    public Task InconsistentBraces_Bro1516sBracesInTheSameFix(string config) => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x)
+                    return 1;
+                {|BRO1143:else|}
                 {
                     return 2;
                 }
             }
         }
         """,
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x)
+                {
+                    return 1;
+                }
+
+                return 2;
+            }
+        }
+        """,
+        On + config);
+
+    [Fact]
+    public Task InconsistentBraces_Nested_AllInOnePass() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(bool x, bool y)
+            {
+                if (x)
+                    return 1;
+                {|BRO1143:else|}
+                {
+                    y = !y;
+                    if (y)
+                        return 2;
+                    {|BRO1143:else|}
+                    {
+                        return 3;
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(bool x, bool y)
+            {
+                if (x)
+                {
+                    return 1;
+                }
+
+                y = !y;
+                if (y)
+                {
+                    return 2;
+                }
+
+                return 3;
+            }
+        }
+        """,
         On);
 
     [Fact]
-    public Task InconsistentBraces_WhenBro1516IsOff() => VerifyFixAsync(
+    public Task InconsistentBraces_NoBraceRuleOn() => VerifyFixAsync(
         """
         public class C
         {
@@ -280,7 +382,52 @@ public class ElseAfterJumpTests
             }
         }
         """,
-        On + "dotnet_diagnostic.BRO1516.severity = none\n");
+        On + "dotnet_diagnostic.BRO1514.severity = none\ndotnet_diagnostic.BRO1516.severity = none\n");
+
+    // A branch a brace rule wants braces on but that can't be wrapped (a comment where the '{' goes) isn't reported.
+    [Fact]
+    public Task InconsistentBraces_BranchThatCantBeWrapped() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x) // one
+                    return 1;
+                else
+                {
+                    return 2;
+                }
+            }
+        }
+        """,
+        On);
+
+    // Only the 'if' branch's own finding counts: here the brace rules want braces on the 'else' statement alone.
+    [Fact]
+    public Task BracesWantedOnTheElseOnly() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x) return 1;
+                {|BRO1143:else|}
+                    return 2;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x) return 1;
+                return 2;
+            }
+        }
+        """,
+        On + "dotnet_diagnostic.BRO1516.severity = none\nstylebro_allow_single_line_jump_statements = true\n");
 
     [Fact]
     public Task Nested_AllMoveOutInOnePass() => VerifyFixAsync(
