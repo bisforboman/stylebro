@@ -34,6 +34,7 @@ dotnet_diagnostic.BRO1143.severity = warning
 # BRO1001 keeping overloads together (stylebro_keep_overloads_together, default false) for one file.
 [**/Uploader.cs]
 stylebro_keep_overloads_together = true
+
 # BRO1504: tool markers need no blank line above them (stylebro_comment_blank_line_exempt_prefixes) in one file.
 [**/Reference.cs]
 stylebro_comment_blank_line_exempt_prefixes = ReSharper
