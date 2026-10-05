@@ -108,7 +108,9 @@ function Get-FailedTests {
         }
     }
     else {
-        dotnet test $sln -nologo -p:TreatWarningsAsErrors=false 2>&1 | Select-String '^\s+Failed (\S+)' |
+        # TestFilter (repos.psd1): leaves out tests that depend on something other than the code, e.g. the network.
+        $filter = if ($r.TestFilter) { @('--filter', $r.TestFilter) } else { @() }
+        dotnet test $sln -nologo -p:TreatWarningsAsErrors=false @filter 2>&1 | Select-String '^\s+Failed (\S+)' |
             ForEach-Object { [void]$failed.Add($_.Matches[0].Groups[1].Value) }
     }
     # The comma keeps an empty set a set (PowerShell would unroll it to $null).
