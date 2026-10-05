@@ -32,6 +32,32 @@ public class FixOrderTests
         "BRO1515",
         "BRO1516");
 
+    [Fact]
+    public Task InternalMethods_SortedBelowPublicOnes() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        internal class C
+        {
+            public void Run()
+            {
+            }
+
+            internal void Stop()
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+
+            private void Wait()
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1409.severity = warning\n",
+        "BRO1001",
+        "BRO1409");
+
     // sameText: false because the order BRO1508 first expands P's inner block inside the single-line method body and
     // leaves 'public void P(bool x) { if (x)' (no rule reports it); the other orders expand the method too.
     [Fact]

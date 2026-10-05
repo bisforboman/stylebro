@@ -1244,5 +1244,18 @@ internal static class Descriptors
             + "(Roslynator RCS1042, Sonar S1939).",
         helpLinkUri: HelpBase + DiagnosticIds.RedundantBaseType + ".md");
 
+    public static readonly DiagnosticDescriptor InternalTypePublicMethod = new(
+        id: DiagnosticIds.InternalTypePublicMethod,
+        title: "Methods of internal types should be internal, not public",
+        messageFormat: "'{0}' can't be seen outside the assembly: declare it internal",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "An ordinary method declared public in a type that is internal (or private, or nested in one) is internal "
+            + "in effect; 'internal' says so. Off by default. Only methods: properties, constructors and anything an interface, "
+            + "a base type, an attribute or a convention needs stay public, because reflection and serializers see public "
+            + "members only (StyleCop issue #2981, never implemented).",
+        helpLinkUri: HelpBase + DiagnosticIds.InternalTypePublicMethod + ".md");
+
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }

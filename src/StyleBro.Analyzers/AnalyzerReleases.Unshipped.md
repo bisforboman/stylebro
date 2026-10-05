@@ -34,6 +34,7 @@ BRO1405 | Maintainability | Warning  | ParenthesesAnalyzer
 BRO1406 | Maintainability | Warning  | PrecedenceAnalyzer
 BRO1407 | Maintainability | Warning  | PrecedenceAnalyzer
 BRO1408 | Maintainability | Warning  | RedundantBaseTypeAnalyzer
+BRO1409 | Maintainability | Disabled | InternalTypeMethodAnalyzer
 BRO1514 | Layout | Warning  | BracesAnalyzer
 BRO1515 | Layout | Warning  | BracesAnalyzer
 BRO1516 | Layout | Warning  | BracesAnalyzer
