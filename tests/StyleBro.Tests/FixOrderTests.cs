@@ -32,10 +32,8 @@ public class FixOrderTests
         "BRO1515",
         "BRO1516");
 
-    // sameText: false because the order BRO1508 first expands P's inner block inside the single-line method body and
-    // leaves 'public void P(bool x) { if (x)' (no rule reports it); the other orders expand the method too.
     [Fact]
-    public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderCoreAsync(
+    public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderAsync(
         """
         public class C
         {
@@ -51,8 +49,30 @@ public class FixOrderTests
             public void P(bool x) { if (x) { if (!x) M(x); else M(!x); } }
         }
         """,
-        null,
-        false,
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1519");
+
+    [Fact]
+    public Task SingleLineBlocks_InsideOtherSingleLineBlocks() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool x) { }
+
+            public void Q(bool x) { void L() { if (x) { M(x); } } L(); }
+
+            public int R { get { if (true) { return 1; } return 0; } }
+
+            public void S(bool x) { System.Action a = () => { if (x) { M(x); } }; a(); }
+
+            public void T(bool x) { if (x) M(x); { if (!x) { M(x); } } }
+        }
+
+        public class D { public void M(bool x) { if (x) { return; } } }
+        """,
+        "BRO1505",
         "BRO1508",
         "BRO1509",
         "BRO1514",

@@ -74,100 +74,23 @@ internal static class SingleLineBlocks
     /// <param name="trailingComma">Whether an expanded enum gets a trailing comma (BRO1401 is on; see <see cref="WantsTrailingComma"/>).</param>
     public static List<TextChange>? GetChanges(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, bool trailingComma = true, Func<string, bool>? isOn = null)
     {
-        if (node.ContainsDiagnostics || GetBraces(node) is not { } braces || braces.Open.IsMissing || braces.Close.IsMissing
-            || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart))
+        var changes = GetOwnChanges(node, text, options, trailingComma, isOn);
+        if (changes is null || isOn is null)
         {
-            return null;
+            return changes;
         }
 
-        var unit = Indentation.GetUnit(options);
-        if (StartIndent(Owner(node), text, options, unit) is not { } baseIndent)
+        // The edits assume every enclosing single-line block is expanded too: expand those (when their rule is on) in the
+        // same edit. Otherwise BRO1508 expanding an inner block first leaves 'void M() { if (x)' on a line, which no rule
+        // reports any more (the method body's braces are on different lines then).
+        foreach (var ancestor in node.Ancestors())
         {
-            return null;
-        }
-
-        var lineBreak = LineBreak(text, braces.Open.SpanStart);
-        var inner = baseIndent + unit;
-        var changes = new List<TextChange>();
-
-        // Before '{': its own line, unless .editorconfig keeps braces on the line before (K&R style).
-        var beforeOpen = braces.Open.GetPreviousToken();
-        var newLine = NewLineBeforeBrace(node, options);
-
-        // A block right after another block's '}' gets BRO1519's blank line in this edit (it covers the gap).
-        var blank = newLine && isOn is not null && beforeOpen.IsKind(SyntaxKind.CloseBraceToken)
-            && BlankLineRuns.WantsBlankLineAfter(beforeOpen.Parent!, beforeOpen, braces.Open, isOn, gapIsReplaced: true) ? lineBreak : string.Empty;
-        if (!Gap(beforeOpen, braces.Open, newLine ? blank + lineBreak + baseIndent : " ", text, changes))
-        {
-            return null;
-        }
-
-        // Inside: every item on its own line, one level deeper (also enum values: StyleCop's SA1502 fix keeps them on one
-        // line, which its SA1136 then reports).
-        var items = GetItems(node);
-        if (items.Count == 0)
-        {
-            if (!Gap(braces.Open, braces.Close, lineBreak + baseIndent, text, changes))
+            if (GetBraces(ancestor) is { } braces
+                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
+                && GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
             {
-                return null;
+                changes.AddRange(enclosing);
             }
-        }
-        else
-        {
-            if (!Gap(braces.Open, items[0].GetFirstToken(), lineBreak + inner, text, changes))
-            {
-                return null;
-            }
-
-            // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges.
-            for (var i = 1; i < items.Count; i++)
-            {
-                // Enum values: one per line (StyleCop's SA1136, BRO1121), no blank lines; the comma stays where it is.
-                var separator = node is not (BlockSyntax or EnumDeclarationSyntax) && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text) ? lineBreak + lineBreak : lineBreak;
-                if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
-                {
-                    return null;
-                }
-            }
-
-            // An expanded enum is a multi-line list, so BRO1401 wants a trailing comma: add it now, so the result doesn't
-            // depend on whether 'dotnet format' runs BRO1401's fix before or after this one.
-            var comma = node is EnumDeclarationSyntax @enum && @enum.Members.SeparatorCount < @enum.Members.Count && trailingComma ? "," : string.Empty;
-            if (!Gap(items[items.Count - 1].GetLastToken(), braces.Close, comma + lineBreak + baseIndent, text, changes))
-            {
-                return null;
-            }
-        }
-
-        // 'else', 'catch' and 'finally' on the line of the '}' before them get their own line (the SDK's
-        // csharp_new_line_before_else/catch/finally, default true). A comment there: left as it is.
-        var nextKeyword = braces.Close.GetNextToken();
-        if (IsClauseKeyword(nextKeyword, options) && Line(text, nextKeyword.SpanStart) == Line(text, braces.Close.SpanStart))
-        {
-            Gap(braces.Close, nextKeyword, lineBreak + baseIndent, text, changes);
-        }
-
-        var beforeKeyword = Owner(node) is ElseClauseSyntax or CatchClauseSyntax or FinallyClauseSyntax ? Owner(node).GetFirstToken() : default;
-        if (beforeKeyword.RawKind != 0 && IsClauseKeyword(beforeKeyword, options)
-            && beforeKeyword.GetPreviousToken() is { RawKind: (int)SyntaxKind.CloseBraceToken } closeBefore
-            && Line(text, closeBefore.SpanStart) == Line(text, beforeKeyword.SpanStart))
-        {
-            Gap(closeBefore, beforeKeyword, lineBreak + baseIndent, text, changes);
-        }
-
-        // The '}' on its own line now: a statement on the next line gets BRO1519's blank line in the same run.
-        var next = braces.Close.GetNextToken();
-        if (isOn is not null && next.RawKind != 0 && Line(text, next.SpanStart) > Line(text, braces.Close.SpanStart)
-            && braces.Close.TrailingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
-            && BlankLineRuns.WantsBlankLineAfter(braces.Close.Parent!, braces.Close, next, isOn))
-        {
-            changes.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), lineBreak));
-        }
-
-        // The statements' braces (BRO1514-BRO1516 leave statements of a single-line block to this expansion).
-        if (isOn is not null && node is BlockSyntax block)
-        {
-            Braces.AddToExpansion(block, text, changes, options, isOn);
         }
 
         return changes;
@@ -248,6 +171,113 @@ internal static class SingleLineBlocks
         }
 
         return "\n";
+    }
+
+    private static List<TextChange>? GetOwnChanges(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, bool trailingComma, Func<string, bool>? isOn)
+    {
+        if (node.ContainsDiagnostics || GetBraces(node) is not { } braces || braces.Open.IsMissing || braces.Close.IsMissing
+            || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart))
+        {
+            return null;
+        }
+
+        var unit = Indentation.GetUnit(options);
+        if (StartIndent(Owner(node), text, options, unit) is not { } baseIndent)
+        {
+            return null;
+        }
+
+        var lineBreak = LineBreak(text, braces.Open.SpanStart);
+        var inner = baseIndent + unit;
+        var changes = new List<TextChange>();
+
+        // Before '{': its own line, unless .editorconfig keeps braces on the line before (K&R style).
+        var beforeOpen = braces.Open.GetPreviousToken();
+        var newLine = NewLineBeforeBrace(node, options);
+
+        // A block right after another block's '}' gets BRO1519's blank line in this edit (it covers the gap).
+        var blank = newLine && isOn is not null && beforeOpen.IsKind(SyntaxKind.CloseBraceToken)
+            && BlankLineRuns.WantsBlankLineAfter(beforeOpen.Parent!, beforeOpen, braces.Open, isOn, gapIsReplaced: true) ? lineBreak : string.Empty;
+        if (!Gap(beforeOpen, braces.Open, newLine ? blank + lineBreak + baseIndent : " ", text, changes))
+        {
+            return null;
+        }
+
+        // Inside: every item on its own line, one level deeper (also enum values: StyleCop's SA1502 fix keeps them on one
+        // line, which its SA1136 then reports).
+        var items = GetItems(node);
+        if (items.Count == 0)
+        {
+            if (!Gap(braces.Open, braces.Close, lineBreak + baseIndent, text, changes))
+            {
+                return null;
+            }
+        }
+        else
+        {
+            if (!Gap(braces.Open, items[0].GetFirstToken(), lineBreak + inner, text, changes))
+            {
+                return null;
+            }
+
+            // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges.
+            for (var i = 1; i < items.Count; i++)
+            {
+                // Enum values: one per line (StyleCop's SA1136, BRO1121), no blank lines; the comma stays where it is.
+                // A statement after one ending in '}' (a local function, a nested block) gets BRO1519's blank line.
+                var previous = items[i].GetFirstToken().GetPreviousToken();
+                var blankLine = node is BlockSyntax
+                    ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
+                        && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
+                    : node is not EnumDeclarationSyntax && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text);
+                var separator = blankLine ? lineBreak + lineBreak : lineBreak;
+                if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
+                {
+                    return null;
+                }
+            }
+
+            // An expanded enum is a multi-line list, so BRO1401 wants a trailing comma: add it now, so the result doesn't
+            // depend on whether 'dotnet format' runs BRO1401's fix before or after this one.
+            var comma = node is EnumDeclarationSyntax @enum && @enum.Members.SeparatorCount < @enum.Members.Count && trailingComma ? "," : string.Empty;
+            if (!Gap(items[items.Count - 1].GetLastToken(), braces.Close, comma + lineBreak + baseIndent, text, changes))
+            {
+                return null;
+            }
+        }
+
+        // 'else', 'catch' and 'finally' on the line of the '}' before them get their own line (the SDK's
+        // csharp_new_line_before_else/catch/finally, default true). A comment there: left as it is.
+        var nextKeyword = braces.Close.GetNextToken();
+        if (IsClauseKeyword(nextKeyword, options) && Line(text, nextKeyword.SpanStart) == Line(text, braces.Close.SpanStart))
+        {
+            Gap(braces.Close, nextKeyword, lineBreak + baseIndent, text, changes);
+        }
+
+        var beforeKeyword = Owner(node) is ElseClauseSyntax or CatchClauseSyntax or FinallyClauseSyntax ? Owner(node).GetFirstToken() : default;
+        if (beforeKeyword.RawKind != 0 && IsClauseKeyword(beforeKeyword, options)
+            && beforeKeyword.GetPreviousToken() is { RawKind: (int)SyntaxKind.CloseBraceToken } closeBefore
+            && Line(text, closeBefore.SpanStart) == Line(text, beforeKeyword.SpanStart))
+        {
+            Gap(closeBefore, beforeKeyword, lineBreak + baseIndent, text, changes);
+        }
+
+        // The '}' on its own line now: a statement on the next line gets BRO1519's blank line in the same run.
+        var next = braces.Close.GetNextToken();
+        if (isOn is not null && next.RawKind != 0 && Line(text, next.SpanStart) > Line(text, braces.Close.SpanStart)
+            && braces.Close.TrailingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
+            && BlankLineRuns.WantsBlankLineAfter(braces.Close.Parent!, braces.Close, next, isOn))
+        {
+            changes.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), lineBreak));
+        }
+
+        // The statements' braces (BRO1514-BRO1516 leave statements of a single-line block to this expansion).
+        if (isOn is not null && node is BlockSyntax block)
+        {
+            Braces.AddToExpansion(block, text, changes, options, isOn);
+        }
+
+        return changes;
     }
 
     /// <summary>
