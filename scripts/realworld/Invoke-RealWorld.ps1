@@ -46,20 +46,14 @@ if ($Enable) {
     $enableItem = "<EditorConfigFiles Include=`"$enableConfig`" />"
 }
 
-# The target frameworks like the package's build targets pass them (the multi-target guard: MultiTargetSuppressor, BRO1147).
 Set-Content $hook @"
 <Project>
-  <PropertyGroup>
-    <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == '' and '`$(TargetFrameworks)' != ''">`$(TargetFrameworks.Replace(';', ','))</StyleBroTargetFrameworks>
-    <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == ''">`$(TargetFramework)</StyleBroTargetFrameworks>
-  </PropertyGroup>
   <ItemGroup>
-    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <Analyzer Include="$(Join-Path $bin 'StyleBro.Analyzers.dll')" />
     <Analyzer Include="$(Join-Path $bin 'StyleBro.CodeFixes.dll')" />
     $enableItem
   </ItemGroup>
-  <!-- What the package's build targets pass to the analyzers (multi-target guards: MultiTargetSuppressor, BRO1145). -->
+  <!-- What the package's build targets pass to the analyzers (multi-target guards: MultiTargetSuppressor, BRO1145, BRO1147). -->
   <PropertyGroup>
     <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == '' and '`$(TargetFrameworks)' != ''">`$(TargetFrameworks.Replace(';', ','))</StyleBroTargetFrameworks>
     <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == ''">`$(TargetFramework)</StyleBroTargetFrameworks>
