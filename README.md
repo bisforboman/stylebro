@@ -59,6 +59,7 @@ project or coming from StyleCop.
 | [BRO1134](docs/rules/BRO1134.md) | Declarations should not contain embedded comments | (none; StyleCop issue #605) | Yes |
 | [BRO1135](docs/rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Yes |
 | [BRO1133](docs/rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Yes |
+| [BRO1143](docs/rules/BRO1143.md) | No 'else' after a branch that ends in a jump (off by default) | (none; Meziantou MA0071, Roslynator RCS1211) | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
 | [BRO1405](docs/rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Yes |
 | [BRO1406](docs/rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Yes |
@@ -75,6 +76,7 @@ project or coming from StyleCop.
 | [BRO1523](docs/rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Yes |
 | [BRO1525](docs/rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Yes |
 | [BRO1524](docs/rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Yes |
+| [BRO1526](docs/rules/BRO1526.md) | Blank line between switch sections | (none; Roslynator RCS0061) | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

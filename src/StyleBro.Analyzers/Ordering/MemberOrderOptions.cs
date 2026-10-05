@@ -45,6 +45,7 @@ internal enum MemberAccess
 /// stylebro_member_constants_first  = true
 /// stylebro_member_static_first     = true
 /// stylebro_member_readonly_first   = true
+/// stylebro_keep_overloads_together = false
 /// </code>
 /// Kinds or accessibilities left out of a configured list keep their default relative order, after the listed ones.
 /// </summary>
@@ -55,6 +56,7 @@ internal sealed class MemberOrderOptions
     public const string ConstantsFirstKey = "stylebro_member_constants_first";
     public const string StaticFirstKey = "stylebro_member_static_first";
     public const string ReadonlyFirstKey = "stylebro_member_readonly_first";
+    public const string KeepOverloadsTogetherKey = "stylebro_keep_overloads_together";
 
     private const int KindCount = (int)MemberKind.Namespace + 1;
     private const int AccessCount = (int)MemberAccess.Private + 1;
@@ -87,7 +89,7 @@ internal sealed class MemberOrderOptions
         ["private"] = (int)MemberAccess.Private,
     };
 
-    public static readonly MemberOrderOptions Default = new(null, null, true, true, true);
+    public static readonly MemberOrderOptions Default = new(null, null, true, true, true, false);
 
     private readonly int[] kindRanks;
     private readonly int[] accessRanks;
@@ -97,13 +99,15 @@ internal sealed class MemberOrderOptions
         List<int>? accessOrder,
         bool constantsFirst,
         bool staticFirst,
-        bool readonlyFirst)
+        bool readonlyFirst,
+        bool keepOverloadsTogether)
     {
         kindRanks = BuildRanks(kindOrder, KindCount);
         accessRanks = BuildRanks(accessOrder, AccessCount);
         ConstantsFirst = constantsFirst;
         StaticFirst = staticFirst;
         ReadonlyFirst = readonlyFirst;
+        KeepOverloadsTogether = keepOverloadsTogether;
     }
 
     public bool ConstantsFirst { get; }
@@ -111,6 +115,9 @@ internal sealed class MemberOrderOptions
     public bool StaticFirst { get; }
 
     public bool ReadonlyFirst { get; }
+
+    /// <summary>Gets a value indicating whether methods and operators with the same name stay next to each other (Sonar S4136).</summary>
+    public bool KeepOverloadsTogether { get; }
 
     public int KindRank(MemberKind kind) => kindRanks[(int)kind];
 
@@ -123,13 +130,14 @@ internal sealed class MemberOrderOptions
         var constantsFirst = ReadBool(options, ConstantsFirstKey, true);
         var staticFirst = ReadBool(options, StaticFirstKey, true);
         var readonlyFirst = ReadBool(options, ReadonlyFirstKey, true);
+        var keepOverloadsTogether = ReadBool(options, KeepOverloadsTogetherKey, false);
 
-        if (kindOrder is null && accessOrder is null && constantsFirst && staticFirst && readonlyFirst)
+        if (kindOrder is null && accessOrder is null && constantsFirst && staticFirst && readonlyFirst && !keepOverloadsTogether)
         {
             return Default;
         }
 
-        return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst);
+        return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether);
     }
 
     /// <summary>Configured entries rank first (in configured order); the rest follow in default order.</summary>

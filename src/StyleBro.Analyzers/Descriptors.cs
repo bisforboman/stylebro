@@ -1074,5 +1074,29 @@ internal static class Descriptors
             + "beginning of the line by default). Not a StyleCop rule (proposed in StyleCop's issue #651).",
         helpLinkUri: HelpBase + DiagnosticIds.ConditionalLayout + ".md");
 
+    public static readonly DiagnosticDescriptor ElseAfterJump = new(
+        id: DiagnosticIds.ElseAfterJump,
+        title: "No 'else' after a branch that ends in a jump",
+        messageFormat: "Remove 'else': the 'if' branch ends in a jump, so the 'else' body can follow the 'if' statement",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "When the 'if' branch ends in return, throw, break, continue, goto or yield break, the 'else' is removed "
+            + "and its body follows the 'if' statement, one level less indented. Off by default (a matter of taste). Not a "
+            + "StyleCop rule (Meziantou MA0071, Roslynator RCS1211).",
+        helpLinkUri: HelpBase + DiagnosticIds.ElseAfterJump + ".md");
+
+    public static readonly DiagnosticDescriptor BlankLineBetweenSwitchSections = new(
+        id: DiagnosticIds.BlankLineBetweenSwitchSections,
+        title: "Blank line between switch sections",
+        messageFormat: "{0} between the switch sections",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Switch sections are separated by a blank line (stylebro_blank_line_between_switch_sections = include, "
+            + "the default), or not (omit), or not after a section that ends in a block (omit_after_block). Not a StyleCop "
+            + "rule (Roslynator RCS0061).",
+        helpLinkUri: HelpBase + DiagnosticIds.BlankLineBetweenSwitchSections + ".md");
+
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }

@@ -77,6 +77,40 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (list.Parent is null or CompilationUnitSyntax || '; Replace = 'if ('; Tests = 'AttributeBlankLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = ' || list.Parent.ContainsDiagnostics)'; Replace = ')'; Tests = 'AttributeBlankLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AttributeBlankLines.cs'; Find = 'if (!close.TrailingTrivia.Concat('; Replace = 'if (false && !close.TrailingTrivia.Concat('; Tests = 'AttributeBlankLinesTests' }
+        # BRO1526 (blank line between switch sections)
+        @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = 'if (node.Sections.Count < 2 || node.ContainsDiagnostics)'; Replace = 'if (node.Sections.Count < 2)'; Tests = 'SwitchSectionBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = 'if (!previous.TrailingTrivia.LastOrDefault().IsKind(SyntaxKind.EndOfLineTrivia)'; Replace = 'if (false'; Tests = 'SwitchSectionBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = '|| !next.LeadingTrivia.All('; Replace = '|| false && !next.LeadingTrivia.All('; Tests = 'SwitchSectionBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = '|| (previous.IsKind(SyntaxKind.CloseBraceToken) && BlankLineRuns.JudgesGapAfter('; Replace = '|| (false && BlankLineRuns.JudgesGapAfter('; Tests = 'SwitchSectionBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = ' && node.Sections[i - 1].Statements.Last() is not BlockSyntax'; Replace = ''; Tests = 'SwitchSectionBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'return OpeningLine(brace, text) != braceLine'; Replace = 'return true'; Tests = 'SwitchSectionBlankLinesTests' }
+        # BRO1143 (no 'else' after a jump)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'node.Parent is not BlockSyntax block'; Replace = 'node.FirstAncestorOrSelf<BlockSyntax>() is not { } block'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| node.Else is not { Statement: not IfStatementSyntax } elseClause'; Replace = '|| node.Else is not { } elseClause'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| !EndsInJump(node.Statement)'; Replace = ''; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| node.ContainsDiagnostics'; Replace = ''; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| node.ContainsDirectives'; Replace = ''; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'BlockSyntax { Statements.Count: 0 } => null,'; Replace = ''; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (!OnlyWhitespace(elseClause.ElseKeyword.GetPreviousToken(), body.First.GetFirstToken())'; Replace = 'if (false'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| (elseClause.Statement is BlockSyntax closing && !OnlyWhitespace('; Replace = '|| (elseClause.Statement is BlockSyntax closing && false && !OnlyWhitespace('; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '.Any(f => f.Child == node.Statement && f.Id == DiagnosticIds.BracesConsistent))'; Replace = '.Any(f => false))'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (ifLine.Start + indent.Length != node.SpanStart)'; Replace = 'if (false)'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (lastLine != firstLine.LineNumber)'; Replace = 'if (false)'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (!text.ToString(line.Span).StartsWith(indent + unit, StringComparison.Ordinal) && '; Replace = 'if (false && '; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (elseClause.Statement.DescendantTokens().Any(t => SpansLines(text, t.Span))'; Replace = 'if (false'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| elseClause.Statement.DescendantTrivia().Any('; Replace = '|| false && elseClause.Statement.DescendantTrivia().Any('; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (statements.Any(s => s is LocalDeclarationStatementSyntax { UsingKeyword.RawKind: not 0 }))'; Replace = 'if (false)'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| !block.DescendantTokens().Any('; Replace = '|| true || !block.DescendantTokens().Any('; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'YieldStatementSyntax yield => yield.IsKind(SyntaxKind.YieldBreakStatement),'; Replace = 'YieldStatementSyntax => true,'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'block.Statements.Count > 0 && EndsInJump(block.Statements.Last()),'; Replace = 'block.Statements.Count > 0,'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '&& text.Lines.GetLineFromPosition(branch.OpenBraceToken.SpanStart).LineNumber != text.Lines.GetLineFromPosition(branch.CloseBraceToken.SpanStart).LineNumber'; Replace = ''; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'BlankLineRuns.WantsBlankLineAfter(branch, branch.CloseBraceToken, item.First.GetFirstToken(), isOn, gapIsReplaced: true);'; Replace = 'true;'; Tests = 'ElseAfterJumpTests' }
+        # BRO1001 stylebro_keep_overloads_together (Sonar S4136)
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (options.KeepOverloadsTogether)'; Replace = 'if (true)'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = ' || keys[i].CompareTo(keys[anchor]) < 0))'; Replace = '))'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = '? (segments[i], method.'; Replace = '? (0, method.'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (anchors is not null && anchors[a] != anchors[b])'; Replace = 'if (false)'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = '.ThenBy(i => anchors[i]).'; Replace = '.'; Tests = 'MemberOrderingTests' }
         # BRO1524 (split conditional expressions)
         @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (conditional.ContainsDiagnostics'; Replace = 'if (false'; Tests = 'ConditionalLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = '|| conditional.WhenFalse is ConditionalExpressionSyntax'; Replace = ''; Tests = 'ConditionalLayoutTests' }

@@ -564,6 +564,213 @@ public class MemberOrderingTests
         editorConfig: "stylebro_member_order = method, field\n");
 
     [Fact]
+    public Task Overloads_StayTogether_AtTheFirstOverloadsPlace() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void Load(int id)
+            {
+            }
+
+            public void Save()
+            {
+            }
+
+            public void Close()
+            {
+            }
+
+            private void {|BRO1001:Load|}(string name)
+            {
+            }
+
+            private void Save(int version)
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void Load(int id)
+            {
+            }
+
+            private void Load(string name)
+            {
+            }
+
+            public void Save()
+            {
+            }
+
+            private void Save(int version)
+            {
+            }
+
+            public void Close()
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_keep_overloads_together = true\n");
+
+    [Fact]
+    public Task Overloads_KeptTogether_AreSortedAmongThemselves_AndNotAcrossRegions() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private void Run(int x)
+            {
+            }
+
+            public void {|BRO1001:Stop|}()
+            {
+            }
+
+            public void Run()
+            {
+            }
+
+            #region More
+            public static void Run(long l)
+            {
+            }
+            #endregion
+        }
+        """,
+        """
+        public class C
+        {
+            public void Stop()
+            {
+            }
+
+            public void Run()
+            {
+            }
+
+            private void Run(int x)
+            {
+            }
+
+            #region More
+            public static void Run(long l)
+            {
+            }
+            #endregion
+        }
+        """,
+        editorConfig: "stylebro_keep_overloads_together = true\n");
+
+    [Fact]
+    public Task Overloads_KeptTogether_GoWhereTheirBestOverloadGoes() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private void Run(int x)
+            {
+            }
+
+            protected void Stop()
+            {
+            }
+
+            public void {|BRO1001:Run|}()
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void Run()
+            {
+            }
+
+            private void Run(int x)
+            {
+            }
+
+            protected void Stop()
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_keep_overloads_together = true\n");
+
+    [Fact]
+    public Task Overloads_KeptTogether_AlreadyGrouped_NoDiagnostic() => VerifyNoDiagnosticsAsync(
+        """
+        using System;
+
+        public class C : IDisposable
+        {
+            public static C operator +(C a, C b) => a;
+
+            public static C operator -(C a, C b) => a;
+
+            public static C operator +(C a, int b) => a;
+
+            public void A()
+            {
+            }
+
+            private void A(int x)
+            {
+            }
+
+            public void B()
+            {
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_keep_overloads_together = true\n");
+
+    [Fact]
+    public Task Overloads_ByDefault_FollowTheAccessOrder() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void A()
+            {
+            }
+
+            private void A(int x)
+            {
+            }
+
+            public void {|BRO1001:B|}()
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void A()
+            {
+            }
+
+            public void B()
+            {
+            }
+
+            private void A(int x)
+            {
+            }
+        }
+        """);
+
+    [Fact]
     public Task ConversionsAndOperators_ComeBeforeMethods() => VerifyFixAsync(
         """
         class C

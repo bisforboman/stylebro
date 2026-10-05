@@ -26,3 +26,11 @@ stylebro_null_check_style = equality_operator
 # BRO1312 (namespace names) is off by default; on for one file.
 [**/Catalog.cs]
 dotnet_diagnostic.BRO1312.severity = warning
+
+# BRO1143 (no 'else' after a jump) is off by default; on for one file.
+[**/Fares.cs]
+dotnet_diagnostic.BRO1143.severity = warning
+
+# BRO1001 keeping overloads together (stylebro_keep_overloads_together, default false) for one file.
+[**/Uploader.cs]
+stylebro_keep_overloads_together = true
