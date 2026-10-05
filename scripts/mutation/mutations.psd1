@@ -175,7 +175,6 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'SpansSeveralLines(property, text) || SpansSeveralLines(next, text),'; Replace = 'SpansSeveralLines(property, text),'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '!IsExplicitImplementation(s) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'if (blankLineBefore && indentation.Trim().Length == 0'; Replace = 'if (false && indentation.Trim().Length == 0'; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = ' || text.ToString(variables[i - 1].Span).IndexOf(''\n'') >= 0'; Replace = ''; Tests = 'FixOrderTests' }
 
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }

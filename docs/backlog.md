@@ -14,12 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 39 |
-| Planned | 0 rules, 31 work items |
-| Maybe | 10 candidates from the StyleCop tracker and other analyzers |
-| Done, not released yet | 34 |
-| Planned | 0 rules, 31 work items |
-| Maybe | 14 candidates from the StyleCop tracker and other analyzers |
+| Done, not released yet | 42 |
+| Planned | 0 rules, 32 work items |
+| Maybe | 6 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -96,24 +93,9 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 
 | Source | Rule | Notes |
 |--------|------|-------|
-| StyleCop #758 (SA1653) | `cref="List&lt;T&gt;"` -> `cref="List{T}"` | Text only. |
-| StyleCop #3546, #1490 | Option: tool marker comments (`// ReSharper disable once ...`) need no BRO1504 blank line | A prefix list option. |
 | StyleCop #2641, #3793 | Option: camelCase private constants and static readonly fields | BRO1306 could follow `dotnet_naming_rule.*` like BRO1303. |
 | StyleCop #1949 (SA1315), SDK CA1725 | A parameter keeps the name of the member it overrides or implements | BRO1302's renamer; callers' named arguments change. |
 | Roslynator RCS0061 | Blank line between switch sections | Text fix. |
-| Meziantou MA0154 | `langword` in doc comments (`<see langword="null"/>`) | Text only. |
-| Roslynator RCS1232 | Doc comment elements in a fixed order | Like BRO1611's reorder. |
-| StyleCop #762 | `(x) => x` -> `x => x` | Keep the parentheses with a type, modifier or attribute. |
-| StyleCop #760, Roslynator RCS1134 | No redundant `return;` / `yield break;` at the end | Skip when a comment or label is on it. |
-| StyleCop #2641, #3793 | Option: camelCase private constants and static readonly fields | BRO1306 could follow `dotnet_naming_rule.*` like BRO1303. |
-| StyleCop #1949 (SA1315), SDK CA1725 | A parameter keeps the name of the member it overrides or implements | BRO1302's renamer; callers' named arguments change. |
-| Roslynator RCS0061 | Blank line between switch sections | Text fix. |
-| Roslynator RCS1081, Sonar S1659 | One local per declaration | Like BRO1114 for locals. |
-| Roslynator RCS1214, RCS1192, RCS1262 | Unneeded `$`, `@`, raw string | Keep strings whose meaning would change. |
-| Roslynator RCS1050 | Object creation parentheses | Either style, configurable. |
-| Roslynator RCS0041, RCS1006 | `else { if }` -> `else if` | Skip when comments would move. |
-| Roslynator RCS1251, Meziantou MA0206 | Empty record body `{ }` -> `;` | Text only. |
-| Roslynator RCS1042, Sonar S1939 | Redundant base type or interface | Semantic. |
 | Meziantou MA0071, Roslynator RCS1211 | No `else` after a jump | Changes indentation of the else branch. |
 | Sonar S4136 | Overloads together | Must agree with BRO1001's order. |
 | Roslynator RCS1046, Meziantou MA0137 | `Async` suffix on async methods | Renamer; public API names change. |

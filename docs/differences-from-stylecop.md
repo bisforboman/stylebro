@@ -205,22 +205,12 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 - `dotnet_diagnostic.BRO1524.severity`
 - `dotnet_diagnostic.BRO1525.severity`
 - `dotnet_diagnostic.BRO1616.severity`
+- `dotnet_diagnostic.BRO1617.severity`
+- `dotnet_diagnostic.BRO1618.severity`
+- `dotnet_diagnostic.BRO1619.severity`
 
 `stylebro-migrate` writes them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on
 in `.editorconfig` to use them.
-Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1133.severity`,
-`dotnet_diagnostic.BRO1520.severity`, `dotnet_diagnostic.BRO1521.severity` and `dotnet_diagnostic.BRO1522.severity` =
-Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1520.severity`,
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1134.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1523.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1135.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1525.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1524.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1616.severity` =
-`dotnet_diagnostic.BRO1617.severity`, `dotnet_diagnostic.BRO1618.severity` and `dotnet_diagnostic.BRO1619.severity` =
-`warning`); `stylebro-migrate` writes
-them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on in `.editorconfig` to use
-them.
 
 | Rule | What it checks | From |
 |---|---|---|
