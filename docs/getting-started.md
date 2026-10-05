@@ -129,8 +129,9 @@ stylebro-migrate init --modernize --write
 dotnet format
 ```
 
-Rules that would break a multi-targeted project's older framework are written as suggestions there, with a note on
-how to turn them on. Tiers, examples and the rules left out: [modernizing.md](modernizing.md).
+In multi-targeted projects, StyleBro's multi-target guard hides the newer-API rules where a target framework lacks the
+API, and the newer-C# rules are suggestions unless the project sets `LangVersion`. Tiers, examples and the rules left out:
+[modernizing.md](modernizing.md).
 
 ## Multi-targeted repositories
 

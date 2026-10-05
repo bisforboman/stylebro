@@ -5,7 +5,9 @@
 #   2. <StyleBroPreset>none</StyleBroPreset> turns it off;
 #   3. after 'stylebro-migrate init --write', 'dotnet format' fixes the built-in rules too (their severities come from
 #      .editorconfig) and applies the preset's formatting options; a second run changes nothing;
-#   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported.
+#   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported;
+#   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
+#      single-target project and not in a netstandard2.0;net10.0 one, which still builds.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -20,10 +22,10 @@ function Check([bool]$ok, [string]$what) {
     if ($ok) { Write-Host "  ok: $what" } else { Write-Host "  FAILED: $what"; $failures.Add($what) }
 }
 
-function Build([string[]]$extra = @()) {
-    $out = dotnet build $project --nologo --no-incremental -p:TreatWarningsAsErrors=false @extra 2>&1
+function Build([string[]]$extra = @(), [string]$path = $project) {
+    $out = dotnet build $path --nologo --no-incremental -p:TreatWarningsAsErrors=false @extra 2>&1
     if ($LASTEXITCODE -ne 0) { $out | Write-Host; throw 'The consumer project does not build.' }
-    return @($out | ForEach-Object { if ("$_" -match '(\w+\.cs)\(\d+,\d+\): warning ((BRO|IDE)\d{4})') { "$($Matches[2]) $($Matches[1])" } } | Sort-Object -Unique)
+    return @($out | ForEach-Object { if ("$_" -match '(\w+\.cs)\(\d+,\d+\): warning ((BRO|IDE|CA)\d{4})') { "$($Matches[2]) $($Matches[1])" } } | Sort-Object -Unique)
 }
 
 function Migrate([string[]]$arguments) {
@@ -41,7 +43,7 @@ try {
     Set-Content (Join-Path $repo 'nuget.config') @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-  <packageSources><clear /><add key="local" value="$feed" /></packageSources>
+  <packageSources><clear /><add key="local" value="$feed" /><add key="nuget.org" value="https://api.nuget.org/v3/index.json" /></packageSources>
 </configuration>
 "@
     Set-Content $project @"
@@ -86,6 +88,26 @@ try {
     Check (-not ((Build) -contains 'BRO1106 Old.cs')) 'the baselined violation is not reported'
     Add-Content (Join-Path $app 'Old.cs') "`ninternal class Newer`n{`n    public string Name = `"`";`n}`n"
     Check ((Build) -contains 'BRO1106 Old.cs') 'a new violation in the same file is reported'
+
+    Write-Host '== 5. Multi-target guard'
+    $multi = Join-Path $repo 'src/Multi'
+    New-Item -ItemType Directory -Force $multi | Out-Null
+    $multiProject = Join-Path $multi 'Multi.csproj'
+    Set-Content $multiProject ((Get-Content $project -Raw).Replace('<TargetFramework>net10.0</TargetFramework>', '<TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks><EnableNETAnalyzers>true</EnableNETAnalyzers><LangVersion>latest</LangVersion>'))
+    $modern = "namespace App;`n`ninternal static class Modern`n{`n    public static string Inner(string text)`n    {`n        if (text == null)`n        {`n            throw new System.ArgumentNullException(nameof(text));`n        }`n`n        return text.Substring(1, text.Length - 2);`n    }`n}`n"
+    Set-Content (Join-Path $app 'Modern.cs') $modern -NoNewline
+    Set-Content (Join-Path $multi 'Modern.cs') $modern -NoNewline
+    Migrate @('init', $repo, '--write', '--modernize')
+    $without = Build @('-p:StyleBroTargetFrameworks=net10.0', '-p:EnforceCodeStyleInBuild=true') $multiProject
+    Check ($without -contains 'CA1510 Modern.cs' -and $without -contains 'IDE0057 Modern.cs') 'without the framework list, CA1510 and IDE0057 are reported in the multi-targeted project'
+    Check (-not ((Build @('-p:EnforceCodeStyleInBuild=true') $multiProject) -match '^(CA1510|IDE0057) ')) 'with it, CA1510 and IDE0057 are hidden there'
+    dotnet format $project --severity warn | Out-Host
+    dotnet format $multiProject --severity warn | Out-Host
+    $single = Get-Content (Join-Path $app 'Modern.cs') -Raw
+    Check ($single -match 'ArgumentNullException\.ThrowIfNull\(text\)' -and $single -match 'text\[1\.\.\^1\]') 'the single-target project got ThrowIfNull and the range (CA1510, IDE0057)'
+    $kept = Get-Content (Join-Path $multi 'Modern.cs') -Raw
+    Check ($kept -match 'throw new System\.ArgumentNullException' -and $kept -match 'Substring\(1') 'the multi-targeted project kept its code (netstandard2.0 has neither API)'
+    Build @() $multiProject | Out-Null
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
