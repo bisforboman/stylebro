@@ -134,6 +134,56 @@ public class LinkedFileFixAllTests
         Assert.Equal(expected, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
     }
 
+    [Fact]
+    public async Task RenameThatIsUnsafeInOneCopy_ChangesNoCopy()
+    {
+        // Polly: an abstract member of a multi-targeted library was renamed in the copies where it was safe, while the
+        // test project (referencing one target framework) kept its override: CS0115. A rename is all or nothing.
+        var path = Path.Combine(Path.GetTempPath(), "Base.cs");
+        var text = "public abstract class Base\n{\n    public abstract void run();\n}\n";
+        var corlib = Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var workspace = new Microsoft.CodeAnalysis.AdhocWorkspace();
+        var solution = workspace.CurrentSolution;
+        var ids = new List<Microsoft.CodeAnalysis.DocumentId>();
+        var projects = new List<Microsoft.CodeAnalysis.ProjectId>();
+        foreach (var name in new[] { "net8", "net10" })
+        {
+            var project = Microsoft.CodeAnalysis.ProjectId.CreateNewId();
+            var document = Microsoft.CodeAnalysis.DocumentId.CreateNewId(project);
+            solution = solution
+                .AddProject(project, name, name, Microsoft.CodeAnalysis.LanguageNames.CSharp)
+                .WithProjectCompilationOptions(project, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary))
+                .AddMetadataReference(project, corlib)
+                .AddDocument(document, "Base.cs", SourceText.From(text), filePath: path);
+            ids.Add(document);
+            projects.Add(project);
+        }
+
+        // The tests reference the first copy only, and their derived type already has the new name.
+        var tests = Microsoft.CodeAnalysis.ProjectId.CreateNewId();
+        solution = solution
+            .AddProject(tests, "tests", "tests", Microsoft.CodeAnalysis.LanguageNames.CSharp)
+            .WithProjectCompilationOptions(tests, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary))
+            .AddMetadataReference(tests, corlib)
+            .AddProjectReference(tests, new Microsoft.CodeAnalysis.ProjectReference(projects[0]))
+            .AddDocument(Microsoft.CodeAnalysis.DocumentId.CreateNewId(tests), "Derived.cs", SourceText.From(
+                "public class Derived : Base\n{\n    public override void run()\n    {\n    }\n\n    public void Run()\n    {\n    }\n}\n"));
+
+        var analyzer = new StyleBro.Analyzers.Naming.PascalCaseNamingAnalyzer();
+        var fixer = new StyleBro.CodeFixes.Naming.CamelCaseNamingCodeFixProvider();
+        var first = solution.GetDocument(ids[1])!;
+        var diagnostics = await GetDiagnosticsAsync(first, analyzer);
+        Microsoft.CodeAnalysis.CodeActions.CodeAction? action = null;
+        await fixer.RegisterCodeFixesAsync(new Microsoft.CodeAnalysis.CodeFixes.CodeFixContext(first, diagnostics.Single(), (a, _) => action ??= a, CancellationToken.None));
+        var context = new Microsoft.CodeAnalysis.CodeFixes.FixAllContext(
+            first, fixer, Microsoft.CodeAnalysis.CodeFixes.FixAllScope.Solution, action!.EquivalenceKey, new[] { "BRO1309" }, new Provider(analyzer), CancellationToken.None);
+        var operations = await (await fixer.GetFixAllProvider()!.GetFixAsync(context))!.GetOperationsAsync(CancellationToken.None);
+        var fixedSolution = operations.OfType<Microsoft.CodeAnalysis.CodeActions.ApplyChangesOperation>().Single().ChangedSolution;
+
+        Assert.Equal(text, (await fixedSolution.GetDocument(ids[0])!.GetTextAsync()).ToString());
+        Assert.Equal(text, (await fixedSolution.GetDocument(ids[1])!.GetTextAsync()).ToString());
+    }
+
     private static async Task<System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Diagnostic>> GetDiagnosticsAsync(
         Microsoft.CodeAnalysis.Document document, Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer analyzer)
     {
