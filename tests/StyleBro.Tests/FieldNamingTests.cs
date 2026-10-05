@@ -1,4 +1,10 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
 using StyleBro.Analyzers.Naming;
+using StyleBro.CodeFixes.Naming;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Naming.FieldNamingAnalyzer, StyleBro.CodeFixes.Naming.CamelCaseNamingCodeFixProvider>;
 
 namespace StyleBro.Tests;
@@ -804,4 +810,109 @@ public class FieldNamingTests
         }
         """,
         Underscore);
+
+    [Fact]
+    public Task FieldsOfATypeWithAGeneratedPart_KeepTheirNames() => VerifyNoDiagnosticsAsync(
+        ("/0/List.razor.cs", """
+            public partial class List
+            {
+                private int _count;
+
+                public int Get() => _count;
+            }
+            """),
+        ("/0/List.razor.g.cs", """
+            public partial class List
+            {
+                public int Render() => _count;
+            }
+            """));
+
+    [Fact]
+    public Task AReferenceInGeneratedCode_KeepsTheName() => VerifyNotFixedAsync(
+        ("/0/Test0.cs", """
+            public class Dto
+            {
+                public int {|BRO1306:total|};
+            }
+            """),
+        ("/0/Page.g.cs", """
+            public class Page
+            {
+                public int Read(Dto dto) => dto.total;
+            }
+            """));
+
+    [Fact]
+    public Task AReferenceInSourceGeneratorOutput_KeepsTheName() => new GeneratorTest<ReferenceGenerator>("""
+        public class Dto
+        {
+            public int {|BRO1306:total|};
+        }
+        """).RunAsync();
+
+    [Fact]
+    public Task TheNameInSourceGeneratorStrings_KeepsTheName() => new GeneratorTest<AccessorGenerator>("""
+        public class Dto
+        {
+            private int {|BRO1303:_intValue|};
+
+            public int Get() => _intValue;
+        }
+        """).RunAsync();
+
+    /// <summary>Like Mapperly, which reaches private fields by name: 'UnsafeAccessor(UnsafeAccessorKind.Field, Name = "intValue")'.</summary>
+    private sealed class AccessorGenerator : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context) =>
+            context.RegisterPostInitializationOutput(c => c.AddSource("Accessor.cs", """
+                static class Accessor
+                {
+                    public const string Name = "_intValue";
+                }
+                """));
+    }
+
+    /// <summary>Generated code that uses a field (hint name without '.g.cs' and no header: only the document kind tells).</summary>
+    private sealed class ReferenceGenerator : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context) =>
+            context.RegisterPostInitializationOutput(c => c.AddSource("Reader.cs", """
+                static class Reader
+                {
+                    public static int Read(Dto dto) => dto.total;
+                }
+                """));
+    }
+
+    /// <summary>
+    /// The diagnostic in the source is reported, and the fix leaves it (the generator's output can't be renamed). The
+    /// generator is an analyzer reference of the project, as in a real workspace, so its output is source-generated documents.
+    /// </summary>
+    private sealed class GeneratorTest<TGenerator> : CSharpCodeFixTest<FieldNamingAnalyzer, CamelCaseNamingCodeFixProvider, DefaultVerifier>
+        where TGenerator : IIncrementalGenerator, new()
+    {
+        public GeneratorTest(string source)
+        {
+            TestState.Sources.Add(source);
+            FixedState.Sources.Add(source);
+            NumberOfIncrementalIterations = 1;
+            NumberOfFixAllIterations = 1;
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck;
+            SolutionTransforms.Add((solution, projectId) => solution.AddAnalyzerReference(projectId, new GeneratorReference(new TGenerator())));
+        }
+    }
+
+    private sealed class GeneratorReference(IIncrementalGenerator generator) : AnalyzerReference
+    {
+        public override string FullPath => string.Empty;
+
+        public override object Id => generator.GetType();
+
+        public override ImmutableArray<DiagnosticAnalyzer> GetAnalyzers(string language) => ImmutableArray<DiagnosticAnalyzer>.Empty;
+
+        public override ImmutableArray<DiagnosticAnalyzer> GetAnalyzersForAllLanguages() => ImmutableArray<DiagnosticAnalyzer>.Empty;
+
+        public override ImmutableArray<ISourceGenerator> GetGenerators(string language) => ImmutableArray.Create(generator.AsSourceGenerator());
+    }
 }

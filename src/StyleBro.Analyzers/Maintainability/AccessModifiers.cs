@@ -47,7 +47,8 @@ internal static class AccessModifiers
         MemberDeclarationSyntax node,
         SemanticModel model,
         CancellationToken cancellationToken,
-        (bool Required, bool InInterfaces)? configured = null)
+        (bool Required, bool InInterfaces)? configured = null,
+        LanguageVersion? languageVersion = null)
     {
         var preference = configured ?? (true, false);
         var modifiers = node.Modifiers;
@@ -55,7 +56,7 @@ internal static class AccessModifiers
         if (!preference.Required
             || modifiers.Any(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword or SyntaxKind.PrivateKeyword)
             || modifiers.Any(m => m.IsKind(SyntaxKind.FileKeyword))
-            || (inInterface && (!preference.InInterfaces || ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion < LanguageVersion.CSharp8)))
+            || (inInterface && (!preference.InInterfaces || (languageVersion ?? ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion) < LanguageVersion.CSharp8)))
         {
             return null;
         }

@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repo: [FFMpegCore, Polly, OpenTelemetry, Newtonsoft, Serilog, Jellyfin, FluentValidation, CsvHelper]
+        repo: [FFMpegCore, Polly, OpenTelemetry, Newtonsoft, Serilog, Jellyfin, FluentValidation, CsvHelper, eShopOnWeb, MediatR, LibGit2Sharp, Mapperly]
     steps:
       - uses: actions/checkout@v7
 
