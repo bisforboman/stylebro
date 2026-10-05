@@ -16,7 +16,8 @@ Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29):
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
-(see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Migration tool
+(see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Since
+2026-10-05: 118 rules, 842 tests. Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
 0.1.0-alpha.8 (71 rules + baseline support + the BRO1117 crash fix, 2026-10-02) is the latest on nuget.org with
 StyleBro.Migrate; earlier: alpha.7 (71 rules), alpha.6 (54 rules,
@@ -1042,6 +1043,82 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   and BRO1001's sort (`NeedsSeparation`) and BRO1114's split add it (FixOrderTests). Migrate: non-English
   `documentationCulture` turns BRO1604-BRO1607 off with a note; `excludeFromPunctuationCheck` != `["seealso"]` is
   written.
+
+## Added 2026-10-04/05 (performance, superseding StyleCop, beyond StyleCop)
+
+Decisions for all of this are in `docs/decisions.md`; rule details on the rule pages.
+
+**Performance** (owner: "performance is an important metric for analyzers"):
+- `TreeWalk` (src/StyleBro.Analyzers/TreeWalk.cs): one walk per tree, tokens and nodes cached as arrays in a
+  ConditionalWeakTable (trivia from the tokens, in document order). A bare walk of Newtonsoft.Json costs ~35-40 ms,
+  reading the array ~2 ms; ~16 analyzers used to walk every file themselves. Use `TreeWalk.Tokens/Trivia/Nodes(root)`
+  for every whole-tree walk. 595 -> 386 ms total, same diagnostics.
+- Cheap syntax checks before semantic work everywhere (CamelCaseNaming checks the name before the symbol, BaseCalls
+  rules out virtual calls before the speculative bind, NullCheck only builds the operation tree inside lambdas/queries).
+  FieldNamingAnalyzer's TypeFacts no longer descend into trivia (that built every doc comment's XML; profiled with
+  `dotnet-trace`, installed as a global tool) and skip the trivia walk without directives.
+- `scripts/benchmark`: every run (and every build in compare mode) gets freshly parsed sources, so a per-tree cache
+  or red nodes can't carry over (numbers before 2026-10-05 aren't comparable). `compare <base> <head>` alternates
+  both builds in one process (order alternates, GC before each), fastest run per analyzer, up to two more rounds
+  before a slowdown counts; fails at total >10 % and 25 ms, one analyzer >50 % and 15 ms, a new analyzer >60 ms.
+  `STYLEBRO_BENCH_ONLY=Name,...` times only those. CI job `performance` runs it on every PR; a REQUIRED check.
+
+**StyleCop**: the open-bug sweep (54 open reports on replaced rules: 34 not shared, 8 shared and fixed or kept by
+decision, 12 n/a; table in differences-from-stylecop.md), parity with StyleCop's unreleased `master` (31 changes,
+gaps fixed; `Compare-WithStyleCop.ps1 -StyleCopPackage/-StyleCopVersion/-StyleCopFeed` runs the parity sets against a
+locally built master), and its open PRs (checked 2026-10-05: nothing missing).
+- BRO1104 writes `default(nint)` for `new nint()` everywhere (not `nint.Zero` on .NET 7+ like master): a choice that
+  depends on the target framework gives a multi-targeted project's copies different fixes. Same trap as `#if`.
+- BRO1505: two single-line properties may sit together (master); BRO1601: no `<inheritdoc/>` on explicit interface
+  implementations (master), and its inserted doc comment brings BRO1513's blank line when the line above is code.
+- BRO1501 keeps blank lines that group initializer entries (#2832); BRO1504: no blank line needed after `=>` (#3392).
+
+**New rules** (ON in the preset and OFF after `stylebro-migrate` unless noted; a rule StyleCop doesn't have is turned
+off by migrate automatically: its description names no SA id. GOTCHA: an `SAxxxx` in a description makes
+`Migration.ExpandIds` treat the rule as a StyleCop replacement):
+- BRO1617 generic crefs in braces, BRO1618 `<see langword>` for a keyword alone in `<c>`, BRO1619 top-level doc
+  element order (stable sort reusing BRO1611's slots); `Documentation/DocumentationStyle.cs`. BRO1504 option
+  `stylebro_comment_blank_line_exempt_prefixes`.
+- BRO1136 `(x) => x`, BRO1137 redundant trailing `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string,
+  BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses
+  (`stylebro_object_creation_parentheses`), BRO1142 one local per declaration (in CombinedFields), BRO1408 redundant
+  base type. Shared fix base `NodeCodeFixProvider`, `Trivia.IsBlank`.
+- BRO1526 switch-section blank lines (`stylebro_blank_line_between_switch_sections`, default include; defers to
+  BRO1519 after a `}` it judges), BRO1143 no `else` after a jump (OFF by default; adds the brace rules' braces on the
+  `if` branch so it converges in one run), BRO1001 `stylebro_keep_overloads_together` (default false).
+- BRO1306 follows `dotnet_naming_rule.*` for private constants/static readonly fields; BRO1313 parameter names like
+  the base (OFF); BRO1314 `Async` suffix (OFF; skips tests, controllers, hubs, attributed methods). The renamer is
+  all-or-nothing across linked copies (a partial rename broke Polly's build) and skips members that also implement
+  something it can't rename.
+- BRO1409 `internal` instead of `public` on ordinary methods of internal types (OFF; the narrow variant of StyleCop
+  #11: properties/fields/constructors stay, reflection, serializers, DI and test runners see public members only;
+  many more skips, see the rule page; its fix sorts with BRO1001 in the same run).
+- BRO1139 leaves an `else` after a jump to BRO1143 when that rule is on.
+
+**`stylebro-migrate init --modernize`** (docs/modernizing.md): the SDK's modernization rules in tiers (A everywhere,
+B needs LangVersion set in multi-targeted projects, C needs a newer API). `Modernize/MultiTargetSuppressor` hides tier
+C in a project with 2+ frameworks when one lacks the API (table of minimum versions; maintenance: a new tier C rule
+needs a row, `TheMultiTargetGuard_CoversExactlyTierC` enforces it). The package targets pass
+`StyleBroTargetFrameworks` (`;` replaced by `,`: `CompilerVisibleProperty TargetFrameworks` breaks because `;` starts
+an editorconfig comment). verify-package check 5 tests it end to end.
+
+**Fix order** (lessons):
+- `FixOrderTests` asserts that EVERY order gives identical TEXT, not only that no diagnostic is left: the BRO1139 /
+  BRO1143 clash and a BRO1508/BRO1509 one (inner block expanded alone, `void M() { if (x)` left on a line nobody
+  reports) both left no diagnostics. BRO1508/BRO1509's fix now also expands every enclosing single-line block whose
+  rule is on, and adds BRO1519's blank line after a local function.
+- `Severities.IsOn` without `enabledByDefault` uses the rule's own default from its descriptor (it treated every
+  unconfigured rule as on, also BRO1143/BRO1310/..., wherever a fix only got an `isOn` callback).
+
+**Gotchas from parallel agent work**:
+- Real-world `-Work` folders: OUTSIDE the repo tree (inside, the repo's Directory.Build.props/Packages.props leak into
+  the clones, which then fail to build and the script reports 0 findings as "all good") and unique per agent (the
+  default folder hit another agent's DLL lock; scratchpad clones lost `.git`). `Invoke-RealWorld.ps1 -Enable <ids>`
+  turns on off-by-default rules.
+- `$$` in unit-test markup is the caret position (raw `$$"""` strings are tested in samples/Messy only).
+- Parallel rule PRs conflict in the same list files; a local `.git/info/attributes` union-merges them, but check for
+  resurrected lines (backlog MAYBE entries, an old paragraph under a rewritten one, stale mutation entries) and
+  same-named Messy samples (two `Uploader.cs` with a class `Uploader`).
 
 ## Known open questions
 
