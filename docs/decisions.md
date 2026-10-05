@@ -2,6 +2,19 @@
 
 Design questions that came up while building StyleBro, the choices considered, and what was decided. Newest first.
 
+## Readability batch B: eight rules beyond StyleCop (2026-10-05)
+
+### Question
+
+Which of these candidates (StyleCop issues #762 and #760, and survey #7, #8, #10, #12, #13 and #14 in
+[beyond-stylecop.md](beyond-stylecop.md)) should StyleBro build, and how should they be configured: `(x) => x`,
+redundant `return;`/`yield break;`, unneeded `$`/`@`/raw strings, `else if`, empty record bodies, object creation
+parentheses, one local per declaration, redundant base types?
+
+### Choices
+
+1. Build them all, on in the preset (`warning`), off after `stylebro-migrate` like the other rules beyond StyleCop.
+2. Build them off by default (opt-in, like BRO1310).
 ## Naming batch: camelCase constants, base parameter names, Async suffix (2026-10-05)
 
 ### Question
@@ -44,6 +57,9 @@ MA0154, survey #15): should they be built, on by default, and what does `stylebr
 
 ### Decision
 
+The owner: **choice 1**, all eight, as BRO1136-BRO1142 and BRO1408. Object creation parentheses get
+`stylebro_object_creation_parentheses = omit | include` with `omit` as the default; target-typed `new() { }` keeps its
+parentheses. One rule for the three string forms (BRO1138). BRO1408 covers `enum E : int` and `class C : object` only.
 The owner: build all four, on in the preset and off after `stylebro-migrate`. BRO1617 (`cref="List{T}"`), BRO1618
 (`<see langword="null"/>` for a keyword alone in `<c>`; reserved keywords plus MA0154's contextual ones, kept
 conservative), BRO1619 (top-level elements in the order summary, typeparam, param, returns, value, exception, remarks,

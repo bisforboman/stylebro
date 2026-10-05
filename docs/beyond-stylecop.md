@@ -121,11 +121,15 @@ when a section ends in a block.
 Effort: low, extend BRO1114. Skip `for` initializers and `using`/`fixed` declarations (splitting changes the scopes
 or doesn't compile).
 
+Done (2026-10-05): [BRO1142](rules/BRO1142.md).
+
 ### 8. Unneeded `$`, `@`, raw string (RCS1214, RCS1192, RCS1262)
 
 `$"Done"` -> `"Done"`, `@"Done"` -> `"Done"`, `"""Done"""` -> `"Done"`. Fixes exist. SDK: IDE0071 simplifies holes,
 not a `$` without holes (check). Effort: low, text only; the fix must unescape `{{`/`}}` and keep `@` when the text has
 `\`, `"` or a line break.
+
+Done (2026-10-05): [BRO1138](rules/BRO1138.md); no SDK rule does this (IDE0071 only simplifies holes).
 
 ### 9. `langword` in doc comments (MA0154)
 
@@ -138,6 +142,8 @@ Done (2026-10-05): [BRO1618](rules/BRO1618.md), with the reserved keywords and M
 
 `new List<int>() { 1 }` vs `new List<int> { 1 }`. Off by default, needs `roslynator_object_creation_parentheses_style`.
 SDK: none (IDE0090 is about `new()`). Effort: low; target-typed `new() { }` needs its parentheses.
+
+Done (2026-10-05): [BRO1141](rules/BRO1141.md), `stylebro_object_creation_parentheses = omit` (default) or `include`.
 
 ### 11. Upper-case literal suffixes (S818)
 
@@ -152,14 +158,20 @@ RCS0041 joins `else` and `if` that sit on two lines; RCS1006 turns `else { if (.
 `if`) into `else if`. The first is a gap rewrite; the second needs the inner statement reindented, and a comment in the
 block is a skip.
 
+Done (2026-10-05): [BRO1139](rules/BRO1139.md); adds the braces BRO1514/BRO1516 want when the join changes which of them reports.
+
 ### 13. Empty record body (RCS1251, MA0206)
 
 `record R(int X) { }` -> `record R(int X);`. Effort: low. BRO1101 already treats the bodiless form; check that the two
 fixes don't fight over the `;`.
 
+Done (2026-10-05): [BRO1140](rules/BRO1140.md).
+
 ### 14. Redundant base (RCS1042, S1939)
 
 `enum E : int` and `class C : object`. Semantic (`Int32`, aliases). Effort: low. Low value; most code doesn't do it.
+
+Done (2026-10-05): [BRO1408](rules/BRO1408.md), `enum E : int` and `class C : object` only (no redundant interfaces).
 
 ### 15. Doc comment element order (RCS1232)
 
@@ -282,6 +294,9 @@ below is "the maintainers agreed and nobody built it" more than "many people ask
 | 5 | [#1563](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1563) (2 reactions, 8 comments) | Upper-case literal suffixes: `1ul` -> `1UL` | Same as #11 above (Sonar S818); CS0078 warns about `l` only | Low |
 | 6 | [#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758) (SA1653, maintainers liked it) | `cref="List&lt;T&gt;"` -> `cref="List{T}"` | No SDK rule | Low, text only |
 | 7 | [#3546](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3546), [#1490](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1490) | Option: tool marker comments (`// ReSharper disable once ...`, `// @formatter:off`) don't need BRO1504's blank line | BRO1504 treats them like any comment (the workaround is `////`) | Low (a prefix list option) |
+| 8 | [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) | `(x) => x` -> `x => x` (a maintainer suggested folding it into SA1119) | No SDK rule (check) | Low; keep the parentheses with a type, modifier or attribute. Done (2026-10-05): [BRO1136](rules/BRO1136.md) |
+| 9 | [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760) | Redundant `return;` at the end of a void method (and `yield break;` at the end of an iterator) | No SDK rule (check); Roslynator RCS1134 | Low; skip when a comment or label is on it. Done (2026-10-05): [BRO1137](rules/BRO1137.md) |
+| 10 | [#2641](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2641) (4 reactions, 9 comments, wontfix), [#3793](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3793) | camelCase private constants and static readonly fields | BRO1306 always wants PascalCase. Could follow `dotnet_naming_rule.*` like BRO1303 does | Low (an option); the renamer exists |
 | 8 | [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) | `(x) => x` -> `x => x` (a maintainer suggested folding it into SA1119) | No SDK rule (check) | Low; keep the parentheses with a type, modifier or attribute |
 | 9 | [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760) | Redundant `return;` at the end of a void method (and `yield break;` at the end of an iterator) | No SDK rule (check); Roslynator RCS1134 | Low; skip when a comment or label is on it |
 | 10 | [#2641](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2641) (4 reactions, 9 comments, wontfix), [#3793](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3793) | camelCase private constants and static readonly fields | BRO1306 always wants PascalCase. Could follow `dotnet_naming_rule.*` like BRO1303 does | Low (an option); the renamer exists. Done (2026-10-05): BRO1306 follows a naming rule for private constants / static readonly fields ([BRO1306](rules/BRO1306.md#configuration)) |

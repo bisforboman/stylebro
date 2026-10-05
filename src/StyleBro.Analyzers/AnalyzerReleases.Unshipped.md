@@ -16,6 +16,13 @@ BRO1132 | Readability | Warning  | EmbeddedCommentAnalyzer
 BRO1134 | Readability | Warning  | EmbeddedCommentAnalyzer
 BRO1135 | Readability | Warning  | LiteralSuffixAnalyzer
 BRO1133 | Readability | Warning  | NullCheckAnalyzer
+BRO1136 | Readability | Warning  | LambdaParenthesesAnalyzer
+BRO1137 | Readability | Warning  | RedundantJumpAnalyzer
+BRO1138 | Readability | Warning  | StringPrefixAnalyzer
+BRO1139 | Readability | Warning  | ElseIfAnalyzer
+BRO1140 | Readability | Warning  | EmptyRecordBodyAnalyzer
+BRO1141 | Readability | Warning  | ObjectCreationParenthesesAnalyzer
+BRO1142 | Readability | Warning  | CombinedFieldsAnalyzer
 BRO1310 | Naming | Disabled | CamelCaseNamingAnalyzer
 BRO1311 | Naming | Warning | TupleElementNamingAnalyzer
 BRO1312 | Naming | Disabled | NamespaceNamingAnalyzer
@@ -25,6 +32,7 @@ BRO1404 | Maintainability | Warning  | AccessModifiersAnalyzer
 BRO1405 | Maintainability | Warning  | ParenthesesAnalyzer
 BRO1406 | Maintainability | Warning  | PrecedenceAnalyzer
 BRO1407 | Maintainability | Warning  | PrecedenceAnalyzer
+BRO1408 | Maintainability | Warning  | RedundantBaseTypeAnalyzer
 BRO1514 | Layout | Warning  | BracesAnalyzer
 BRO1515 | Layout | Warning  | BracesAnalyzer
 BRO1516 | Layout | Warning  | BracesAnalyzer

@@ -202,6 +202,24 @@ dotnet_diagnostic.BRO1135.severity = warning
 # BRO1133: null checks in one form, '== null' or 'is null' (stylebro_null_check_style, default pattern_matching; not set
 # here, so an .editorconfig value takes effect). Not a StyleCop rule (stylebro-migrate turns it off).
 dotnet_diagnostic.BRO1133.severity = warning
+# BRO1136-BRO1142, BRO1408: not StyleCop rules (stylebro-migrate turns them off).
+# BRO1136: 'x => x' instead of '(x) => x' (StyleCop issue #762)
+dotnet_diagnostic.BRO1136.severity = warning
+# BRO1137: no redundant 'return;' or 'yield break;' at the end of a body (StyleCop issue #760)
+dotnet_diagnostic.BRO1137.severity = warning
+# BRO1138: no unneeded '$', '@' or raw string on a literal
+dotnet_diagnostic.BRO1138.severity = warning
+# BRO1139: 'else if' on one line
+dotnet_diagnostic.BRO1139.severity = warning
+# BRO1140: 'record R(int X);' instead of an empty body
+dotnet_diagnostic.BRO1140.severity = warning
+# BRO1141: object creation with an initializer without empty parentheses (stylebro_object_creation_parentheses,
+# default omit; not set here, so an .editorconfig value takes effect)
+dotnet_diagnostic.BRO1141.severity = warning
+# BRO1142: one local per declaration
+dotnet_diagnostic.BRO1142.severity = warning
+# BRO1408: no 'enum E : int' or 'class C : object'
+dotnet_diagnostic.BRO1408.severity = warning
 
 # BRO1006: no space between '#' and a preprocessor keyword (SA1006)
 dotnet_diagnostic.BRO1006.severity = warning

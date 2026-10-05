@@ -1129,5 +1129,96 @@ internal static class Descriptors
             + "beginning of the line by default). Not a StyleCop rule (proposed in StyleCop's issue #651).",
         helpLinkUri: HelpBase + DiagnosticIds.ConditionalLayout + ".md");
 
+    public static readonly DiagnosticDescriptor LambdaParentheses = new(
+        id: DiagnosticIds.LambdaParentheses,
+        title: "A lambda's single parameter should not be in parentheses",
+        messageFormat: "Remove the parentheses around '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'x => x' instead of '(x) => x' when the lambda has one parameter without a type, modifier, attribute or "
+            + "default value. Not a StyleCop rule (StyleCop issue #762).",
+        helpLinkUri: HelpBase + DiagnosticIds.LambdaParentheses + ".md");
+
+    public static readonly DiagnosticDescriptor RedundantJump = new(
+        id: DiagnosticIds.RedundantJump,
+        title: "Remove a redundant 'return;' or 'yield break;'",
+        messageFormat: "Remove the redundant '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A 'return;' as the last statement of a method's, accessor's, constructor's, local function's or "
+            + "lambda's body, and a 'yield break;' as the last statement of an iterator's body, do nothing. Not a StyleCop "
+            + "rule (StyleCop issue #760; Roslynator RCS1134).",
+        helpLinkUri: HelpBase + DiagnosticIds.RedundantJump + ".md");
+
+    public static readonly DiagnosticDescriptor UnneededStringPrefix = new(
+        id: DiagnosticIds.UnneededStringPrefix,
+        title: "A string literal should be a plain string when nothing needs more",
+        messageFormat: "Write this string as {0}",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'$' without interpolations, '@' on text without a backslash, quote or line break, and a single-line raw "
+            + "string without a backslash or quote: the plain string says the same. Not a StyleCop rule (Roslynator "
+            + "RCS1214, RCS1192, RCS1262).",
+        helpLinkUri: HelpBase + DiagnosticIds.UnneededStringPrefix + ".md");
+
+    public static readonly DiagnosticDescriptor ElseIf = new(
+        id: DiagnosticIds.ElseIf,
+        title: "Write 'else if' on one line",
+        messageFormat: "Write 'else if'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An 'if' that follows 'else' on the next line, or is the only statement of the else's block, becomes "
+            + "'else if'. Not a StyleCop rule (Roslynator RCS0041, RCS1006).",
+        helpLinkUri: HelpBase + DiagnosticIds.ElseIf + ".md");
+
+    public static readonly DiagnosticDescriptor EmptyRecordBody = new(
+        id: DiagnosticIds.EmptyRecordBody,
+        title: "A record with an empty body should end with ';'",
+        messageFormat: "Replace the empty body of '{0}' with ';'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'record R(int X);' instead of 'record R(int X) { }'. Not a StyleCop rule (Roslynator RCS1251, "
+            + "Meziantou MA0206).",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyRecordBody + ".md");
+
+    public static readonly DiagnosticDescriptor ObjectCreationParentheses = new(
+        id: DiagnosticIds.ObjectCreationParentheses,
+        title: "Object creation with an initializer: parentheses in one style",
+        messageFormat: "{0} the empty parentheses",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'new List<int> { 1 }' (stylebro_object_creation_parentheses = omit, the default) or "
+            + "'new List<int>() { 1 }' (include) when the creation has an initializer and no arguments. Not a StyleCop rule "
+            + "(Roslynator RCS1050).",
+        helpLinkUri: HelpBase + DiagnosticIds.ObjectCreationParentheses + ".md");
+
+    public static readonly DiagnosticDescriptor CombinedLocals = new(
+        id: DiagnosticIds.CombinedLocals,
+        title: "Do not combine local variables",
+        messageFormat: "Declare '{0}' in a declaration of its own",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "One local per declaration: 'int a = 1, b;' becomes two declarations, like BRO1114 for fields. Not "
+            + "'using' declarations or 'for' initializers. Not a StyleCop rule (Roslynator RCS1081, Sonar S1659).",
+        helpLinkUri: HelpBase + DiagnosticIds.CombinedLocals + ".md");
+
+    public static readonly DiagnosticDescriptor RedundantBaseType = new(
+        id: DiagnosticIds.RedundantBaseType,
+        title: "Remove a redundant base type",
+        messageFormat: "Remove the redundant base type '{0}'",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'enum E : int' and 'class C : object' say what the declaration means without them. Not a StyleCop rule "
+            + "(Roslynator RCS1042, Sonar S1939).",
+        helpLinkUri: HelpBase + DiagnosticIds.RedundantBaseType + ".md");
+
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }
