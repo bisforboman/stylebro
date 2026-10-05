@@ -7,11 +7,13 @@
 #     with a documented exception sets MaxRuns in repos.psd1
 #   - with -Tests: no test that passed on the untouched code fails after the fixes
 #
-#   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>]
+#   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>] [-Enable BRO1313,BRO1314]
+# -Enable turns on rules that are off by default (they don't run otherwise).
 param(
     [Parameter(Mandatory)][string]$Repo,
     [string]$Work = (Join-Path ([IO.Path]::GetTempPath()) 'stylebro-realworld'),
     [switch]$Tests,
+    [string[]]$Enable = @(),
     [string]$Configuration = 'Release'
 )
 $ErrorActionPreference = 'Stop'
@@ -32,11 +34,22 @@ $bin = Join-Path $Work 'stylebro-bin'
 New-Item -ItemType Directory -Force $bin | Out-Null
 Copy-Item (Join-Path $root "src/StyleBro.CodeFixes/bin/$Configuration/netstandard2.0/StyleBro.*.dll") $bin -Force
 $hook = Join-Path $Work 'stylebro-hook.targets'
+
+# -Enable: rules that are off by default, turned on through a global config (EditorConfigFiles, not
+# GlobalAnalyzerConfigFiles: the SDK has already converted those when this hook is imported).
+$enableItem = ''
+if ($Enable) {
+    $enableConfig = Join-Path $Work 'stylebro-enable.globalconfig'
+    Set-Content $enableConfig (@('is_global = true') + @($Enable | ForEach-Object { "dotnet_diagnostic.$_.severity = warning" }))
+    $enableItem = "<EditorConfigFiles Include=`"$enableConfig`" />"
+}
+
 Set-Content $hook @"
 <Project>
   <ItemGroup>
     <Analyzer Include="$(Join-Path $bin 'StyleBro.Analyzers.dll')" />
     <Analyzer Include="$(Join-Path $bin 'StyleBro.CodeFixes.dll')" />
+    $enableItem
   </ItemGroup>
 </Project>
 "@

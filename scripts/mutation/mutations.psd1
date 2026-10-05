@@ -134,7 +134,7 @@
         # BRO1303/BRO1306/BRO1307 (fields)
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'var newName = isProtected && field.IsReadOnly ?'; Replace = 'var newName = false ?'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '&& field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal;'; Replace = '&& field.DeclaredAccessibility != Accessibility.Private;'; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| !string.IsNullOrEmpty(Get($"dotnet_naming_symbols.{symbols}.required_modifiers"))'; Replace = ''; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'GetNamingRules(options, m => m.Length == 0)'; Replace = 'GetNamingRules(options, m => true)'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'; Find = '&& !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))'; Replace = ''; Tests = 'FieldNamingTests' }
 
         # BRO1302: constructor parameters that name a member
@@ -194,6 +194,42 @@
         # BRO1131 (base calls). Not mutated: Speculation.SymbolAfterReplacing vs a position-based lookup of a DETACHED
         # node (equivalent; the original bug passed the attached access.Name, which binds as a member-access name).
         @{ File = 'src/StyleBro.Analyzers/Readability/BaseCalls.cs'; Find = 'var dispatchesVirtually = (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) && !symbol.IsSealed;'; Replace = 'var dispatchesVirtually = false;'; Tests = 'BaseCallsTests' }
+
+        # BRO1306 option: camelCase private constants / static readonly fields when a naming rule asks for it
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'field.DeclaredAccessibility != Accessibility.Private || !IsSourceField(field)'; Replace = '!IsSourceField(field)'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| !modifiersMatch(modifiers))'; Replace = ')'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '.ThenByDescending(r => r.Modifiers)'; Replace = ''; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '.OrderBy(r => r.Priority).ThenByDescending'; Replace = '.OrderBy(r => 0).ThenByDescending'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '            _ => null,
+        };
+    }'; Replace = '            _ => FieldStyle.CamelCase,
+        };
+    }'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'm => m.Contains("const") && m.All(x => x is "const" or "static")'; Replace = 'm => m.Length > 0'; Tests = 'FieldNamingTests' }
+
+        # BRO1313 (parameter names like the base)
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| node.Identifier.ValueText.Trim(''_'').Length == 0'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| member is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null }
+            || (!member.IsOverride'; Replace = '|| (!member.IsOverride'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (result is not null && result != name)'; Replace = 'if (false)'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.CanRename(node, oldName, newName, getNewName))'; Replace = ')'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (depth < 8 && baseParameter'; Replace = 'if (false && baseParameter'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& CamelCaseNames.CanRename(declaration, name, renamed, getNewName) ? renamed'; Replace = '? renamed'; Tests = 'ParameterMatchesBaseTests' }
+
+        # BRO1314 (Async suffix): the analyzer's skips, then the rename's
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '&& method.Name != "Main"'; Replace = ''; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '&& method.Name.IndexOf("Async", System.StringComparison.Ordinal) < 0'; Replace = ''; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = 'return method.MethodKind == MethodKind.Ordinary'; Replace = 'return true'; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = 'or "ExcludeFromCodeCoverageAttribute" or "PureAttribute")'; Replace = 'or "ExcludeFromCodeCoverageAttribute" or "PureAttribute" or "FactAttribute")'; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '&& !IsEventHandler(method)'; Replace = ''; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = 'if (current.Name is "Controller" or "ControllerBase" or "Hub"'; Replace = 'if (false'; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| current.Name.EndsWith("Controller", System.StringComparison.Ordinal)'; Replace = ''; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| current.GetAttributes().Any(a => a.AttributeClass?.Name == "ApiControllerAttribute")'; Replace = ''; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '? type.Arity <= 1 && ns.ToDisplayString() == "System.Threading.Tasks"'; Replace = '? true'; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = 'newName = (casingOn ? newName ?? symbol.Name : symbol.Name) + "Async";'; Replace = 'newName = (newName ?? symbol.Name) + "Async";'; Tests = 'AsyncSuffixTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !symbols.Contains(b, SymbolEqualityComparer.Default)))
+                ||'; Replace = 'if ('; Tests = 'AsyncSuffixTests' }
 
         # BRO1312 (namespace names): the analyzer's skips, then the rename's
         @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| allowed.Contains(oldName)'; Replace = ''; Tests = 'NamespaceNamingTests' }

@@ -216,7 +216,11 @@ internal static class CamelCaseRenamer
         else if (IsTypeMember(symbol))
         {
             await AddRelatedMembersAsync(solution, symbol, symbols, cancellationToken).ConfigureAwait(false);
-            if (await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
+
+            // An implementation that also implements or overrides a member that isn't renamed (another interface's
+            // 'Run', a library's) would stop doing so.
+            if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !symbols.Contains(b, SymbolEqualityComparer.Default)))
+                || await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
             {
                 return null;
             }

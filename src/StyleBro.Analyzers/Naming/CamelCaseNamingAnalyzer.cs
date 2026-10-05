@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -19,7 +20,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
 
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Descriptors.VariableCasing, Descriptors.ParameterCasing, Descriptors.HungarianNotation);
+        ImmutableArray.Create(Descriptors.VariableCasing, Descriptors.ParameterCasing, Descriptors.HungarianNotation, Descriptors.ParameterMatchesBase);
 
     /// <summary>The name token of a variable declaration, for every declaration kind BRO1301 checks.</summary>
     public static SyntaxToken GetIdentifier(SyntaxNode node)
@@ -126,6 +127,40 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// BRO1313: the name <paramref name="parameter"/> gets from the members its member overrides or implements, or null
+    /// when it has none or they disagree. A base parameter in source counts with the name it will have after its own
+    /// rename (its base's, or its BRO1302/BRO1310 name), so a chain of overrides converges in one run.
+    /// </summary>
+    internal static string? GetBaseName(IParameterSymbol parameter, Func<string, string?> getNewName, int depth = 0)
+    {
+        string? result = null;
+        foreach (var member in GetBaseMembers(parameter.ContainingSymbol))
+        {
+            if (GetParameters(member) is not { } parameters || parameter.Ordinal >= parameters.Length)
+            {
+                continue;
+            }
+
+            var baseParameter = parameters[parameter.Ordinal];
+            var name = baseParameter.Name;
+            if (depth < 8 && baseParameter.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is { } declaration)
+            {
+                name = GetBaseName(baseParameter, getNewName, depth + 1)
+                    ?? (getNewName(name) is { } renamed && CamelCaseNames.CanRename(declaration, name, renamed, getNewName) ? renamed : name);
+            }
+
+            if (result is not null && result != name)
+            {
+                return null;
+            }
+
+            result = name;
+        }
+
+        return result;
+    }
+
     private static void AnalyzeVariable(SyntaxNodeAnalysisContext context)
     {
         var identifier = GetIdentifier(context.Node);
@@ -144,6 +179,11 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeParameter(SyntaxNodeAnalysisContext context)
     {
         var node = (ParameterSyntax)context.Node;
+        if (!node.Identifier.IsMissing && ReportBaseName(context, node))
+        {
+            return;
+        }
+
         if (node.Identifier.IsMissing
             || HungarianNames.GetVariableName(node.Identifier.ValueText, GetHungarian(context)) is null
             || node.Parent?.Parent is RecordDeclarationSyntax
@@ -156,6 +196,45 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         }
 
         Report(context, Descriptors.ParameterCasing, node.Identifier);
+    }
+
+    /// <summary>
+    /// BRO1313 (off by default): a parameter of an override or interface implementation takes the base member's name.
+    /// True when reported; otherwise BRO1302 decides. Not reported: discards ('_'), partial methods, bases that disagree,
+    /// names that would clash in the member (<see cref="CamelCaseNames.CanRename"/>).
+    /// </summary>
+    private static bool ReportBaseName(SyntaxNodeAnalysisContext context, ParameterSyntax node)
+    {
+        if (node.Parent?.Parent is not (MethodDeclarationSyntax or IndexerDeclarationSyntax)
+            || node.Identifier.ValueText.Trim('_').Length == 0
+            || !Severities.IsOn(context.Compilation.Options, node.SyntaxTree, DiagnosticIds.ParameterMatchesBase, context.CancellationToken, enabledByDefault: false)
+            || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { ContainingSymbol: { } member } parameter
+            || member is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null }
+            || (!member.IsOverride && member.ContainingType.AllInterfaces.IsEmpty))
+        {
+            return false;
+        }
+
+        var hungarian = GetHungarian(context);
+        Func<string, string?> getNewName = name => HungarianNames.GetVariableName(name, hungarian);
+        var casingOn = Severities.IsOn(context.Compilation.Options, node.SyntaxTree, DiagnosticIds.ParameterCasing, context.CancellationToken);
+        var oldName = parameter.Name;
+        if (GetBaseName(parameter, casingOn ? getNewName : _ => null) is not { } newName
+            || newName == oldName
+            || !SyntaxFacts.IsValidIdentifier(newName)
+            || SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None
+            || !CamelCaseNames.CanRename(node, oldName, newName, getNewName))
+        {
+            return false;
+        }
+
+        context.ReportDiagnostic(Diagnostic.Create(
+            Descriptors.ParameterMatchesBase,
+            node.Identifier.GetLocation(),
+            ImmutableDictionary<string, string?>.Empty.Add(NewNameKey, newName),
+            oldName,
+            newName));
+        return true;
     }
 
     // BRO1310 (null when off): the Hungarian prefix goes in the same rename ('_iCount' -> 'count'), so one run converges.

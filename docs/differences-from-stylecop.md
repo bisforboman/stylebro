@@ -209,6 +209,8 @@ them.
 | [BRO1525](rules/BRO1525.md) | No blank line between an attribute list and its element or the element's next attribute list | StyleCop's proposed SA1521 ([#738](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/738), never implemented) |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
 | [BRO1616](rules/BRO1616.md) | `<summary>` tags on lines of their own (`stylebro_summary_layout = multi_line`), or the summary on one line when its text is one line and fits (`single_line_when_fits`) | Roslynator RCS1253, Meziantou MA0177/MA0211 |
+| [BRO1313](rules/BRO1313.md) | Off by default. A parameter of an override or interface implementation has the base member's parameter name (named arguments updated) | StyleCop's proposed SA1315 ([#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949), never implemented); SDK CA1725 (no fix) |
+| [BRO1314](rules/BRO1314.md) | Off by default. Methods returning `Task`, `Task<T>`, `ValueTask`, `ValueTask<T>` or `IAsyncEnumerable<T>` end in `Async`; tests, controllers, hubs, event handlers and attributed methods skipped | Roslynator RCS1046, Meziantou MA0137 |
 
 ## StyleCop's open bugs
 
