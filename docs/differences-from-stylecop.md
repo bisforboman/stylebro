@@ -204,6 +204,7 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 - `dotnet_diagnostic.BRO1523.severity`
 - `dotnet_diagnostic.BRO1524.severity`
 - `dotnet_diagnostic.BRO1525.severity`
+- `dotnet_diagnostic.BRO1526.severity`
 - `dotnet_diagnostic.BRO1616.severity`
 - `dotnet_diagnostic.BRO1617.severity`
 - `dotnet_diagnostic.BRO1618.severity`
@@ -223,6 +224,8 @@ in `.editorconfig` to use them.
 | [BRO1135](rules/BRO1135.md) | Integer literal suffixes in upper case (`1L`, `2U`, `3UL`); real suffixes (`f`, `d`, `m`) aren't checked | Sonar S818, StyleCop issue #1563 |
 | [BRO1525](rules/BRO1525.md) | No blank line between an attribute list and its element or the element's next attribute list | StyleCop's proposed SA1521 ([#738](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/738), never implemented) |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
+| [BRO1526](rules/BRO1526.md) | A blank line between switch sections (`stylebro_blank_line_between_switch_sections = include`, the default), none (`omit`), or none after a section that ends in a block (`omit_after_block`); after a multi-line block BRO1519 (SA1513) decides. The preset turns it on (`dotnet_diagnostic.BRO1526.severity = warning`) | Roslynator RCS0061 |
+| [BRO1143](rules/BRO1143.md) | No `else` after an `if` branch that ends in `return`, `throw`, `break`, `continue`, `goto` or `yield break`. Off by default, also in the preset (a matter of taste) | Meziantou MA0071, Roslynator RCS1211 |
 | [BRO1616](rules/BRO1616.md) | `<summary>` tags on lines of their own (`stylebro_summary_layout = multi_line`), or the summary on one line when its text is one line and fits (`single_line_when_fits`) | Roslynator RCS1253, Meziantou MA0177/MA0211 |
 | [BRO1136](rules/BRO1136.md) | `x => x` instead of `(x) => x` for one parameter without a type, modifier or attribute | StyleCop issue [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) (proposed, never implemented) |
 | [BRO1137](rules/BRO1137.md) | No `return;` as the last statement of a body, no `yield break;` as the last statement of an iterator | StyleCop issue [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760), Roslynator RCS1134 |

@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 44 |
-| Planned | 0 rules, 33 work items |
-| Maybe | 3 candidates from the StyleCop tracker and other analyzers |
+| Done, not released yet | 46 |
+| Planned | 0 rules, 34 work items |
+| Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -57,6 +57,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | `<summary>` on one line or on three (survey #5) | BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Naming: camelCase constants, base parameter names, `Async` suffix (StyleCop #2641/#3793, #1949; Roslynator RCS1046) | BRO1306 follows a `dotnet_naming_rule` that asks for camelCase private constants or static readonly fields; BRO1313 (parameters named like the base member) and BRO1314 (`Async` on methods returning Task/ValueTask/IAsyncEnumerable), both off by default. See decisions.md. | Done (2026-10-05) |
 | Beyond StyleCop | Braceless `if (x) return;` (StyleCop issue #2252) | `stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md). | Done (2026-10-04) |
+| Beyond StyleCop | Switch section blank lines, no `else` after a jump, overloads together (survey #6, #16, #17) | BRO1526 (`stylebro_blank_line_between_switch_sections`, default include; after a multi-line block BRO1519 decides), BRO1143 (off by default; `else if` chains skipped), BRO1001 option `stylebro_keep_overloads_together` (default false). See decisions.md. BRO1526 off after `stylebro-migrate`. | Done (2026-10-05) |
 | Beyond StyleCop | Documentation batch A (StyleCop issues #758, #3546/#1490; Meziantou MA0154; survey #15) | BRO1617 cref type arguments in braces (`List{T}`), BRO1618 `<see langword="null"/>` for a keyword alone in `<c>`, BRO1619 top-level doc elements in a fixed order (stable, so BRO1611 keeps `<param>` order); `stylebro_comment_blank_line_exempt_prefixes` for BRO1504. On in the preset, off after `stylebro-migrate` (decisions.md). | Done (2026-10-05) |
 | Performance | Cheap checks first, one walk per tree | DocumentationAnalyzer, CommentTextAnalyzer, NullCheckAnalyzer, WrappingPlacementAnalyzer, CamelCaseNamingAnalyzer, BaseCallsAnalyzer, CallChainAnalyzer, EmbeddedCommentAnalyzer: same diagnostics, all 55 analyzers ~830 -> ~700 ms on Newtonsoft.Json (scripts/benchmark/README.md). | Done (2026-10-04) |
 | Performance | CI regression check | `scripts/benchmark` compare mode: the PR build and main's alternated in one process on Newtonsoft.Json; fails when an analyzer or the total is clearly slower. | In progress |
@@ -94,9 +95,6 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 
 | Source | Rule | Notes |
 |--------|------|-------|
-| Roslynator RCS0061 | Blank line between switch sections | Text fix. |
-| Meziantou MA0071, Roslynator RCS1211 | No `else` after a jump | Changes indentation of the else branch. |
-| Sonar S4136 | Overloads together | Must agree with BRO1001's order. |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 
@@ -160,6 +158,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1140](rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Done |
 | [BRO1141](rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Done |
 | [BRO1142](rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Done |
+| [BRO1143](rules/BRO1143.md) | No 'else' after a branch that ends in a jump (off by default) | (none; Meziantou MA0071, Roslynator RCS1211) | Done |
 
 ### BRO13xx: Naming
 
@@ -222,6 +221,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1523](rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Done |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Done |
 | [BRO1525](rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Done |
+| [BRO1526](rules/BRO1526.md) | Blank line between switch sections | (none; Roslynator RCS0061) | Done |
 
 ### BRO16xx: Documentation
 

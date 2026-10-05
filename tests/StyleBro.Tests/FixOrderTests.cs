@@ -158,6 +158,124 @@ public class FixOrderTests
         "BRO1135");
 
     [Fact]
+    public Task SwitchSections_Include() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                    {
+                        break;
+                    }
+                    case 2:
+                        break;
+
+
+                    case 3:
+                        if (x > 0)
+                        {
+                            return;
+                        }
+
+                        break;
+                    default:
+                    {
+                        break;
+
+                    }
+                }
+            }
+        }
+        """,
+        "BRO1517",
+        "BRO1518",
+        "BRO1519",
+        "BRO1526");
+
+    [Theory]
+    [InlineData("omit")]
+    [InlineData("omit_after_block")]
+    public Task SwitchSections_Omit(string mode) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                    {
+                        break;
+                    }
+                    case 2:
+                        break;
+
+
+                    case 3:
+                        break;
+
+                    case 4: { break; }
+
+                    default:
+                        break;
+                }
+            }
+        }
+        """,
+        "stylebro_blank_line_between_switch_sections = " + mode + "\n",
+        "BRO1517",
+        "BRO1519",
+        "BRO1526");
+
+    [Fact]
+    public Task ElseAfterJump_BracesAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool x, bool y)
+            {
+                if (x)
+                {
+                    return 1;
+                }
+                else
+                {
+                    if (y) { return 2; } else { return 3; }
+                }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1143",
+        "BRO1508",
+        "BRO1517",
+        "BRO1518",
+        "BRO1519");
+
+    [Fact]
+    public Task ElseAfterJump_WithoutBraces() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x)
+                    return 1;
+                else
+                    return 2;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1143",
+        "BRO1514",
+        "BRO1516",
+        "BRO1519");
+
+    [Fact]
     public Task Attributes_TheOnlyBlankLineBeforeAnElementIsBelowItsAttribute() => AssertConvergesInEveryOrderAsync(
         """
         using System;
@@ -426,11 +544,14 @@ public class FixOrderTests
         "BRO1106",
         "BRO1138");
 
-    private static async Task AssertConvergesInEveryOrderAsync(string source, params string[] ids)
+    private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
+        AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
+
+    private static async Task AssertConvergesInEveryOrderWithConfigAsync(string source, string? editorConfig, params string[] ids)
     {
         foreach (var order in Orders(ids))
         {
-            var document = CreateDocument(source, null);
+            var document = CreateDocument(source, editorConfig is null ? null : "root = true\n\n[*.cs]\n" + editorConfig);
             foreach (var id in order)
             {
                 var analyzers = FindAnalyzer(id);

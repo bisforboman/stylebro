@@ -115,6 +115,10 @@ Options `include`, `omit`, `omit_after_block`. SDK: none; StyleCop has no rule (
 which BRO1519 already handles, but not after `break;`). Effort: low; reuse `BlankLineRuns`. Must agree with BRO1519
 when a section ends in a block.
 
+Done (2026-10-05): [BRO1526](rules/BRO1526.md), default `include`. After a multi-line block BRO1519 (SA1513) decides
+when it's on, so with `omit`/`omit_after_block` a blank line stays there (the owner kept SA1513's behavior, see
+decisions.md); comments and directives between sections skipped.
+
 ### 7. One local per declaration (RCS1081, S1659)
 
 `int a = 1, b;` -> two statements. BRO1114 does this for fields only (like StyleCop). Fix exists in both packages.
@@ -188,11 +192,17 @@ the rule page. Comments with other top-level elements (`<inheritdoc/>`, custom t
 teams want the symmetric form). Effort: medium: unindent the else body, skip when a local declared there would clash
 with one in the enclosing block, skip comments on `else`.
 
+Done (2026-10-05): [BRO1143](rules/BRO1143.md), off by default (also in the preset). `else if` chains skipped; nested
+candidates fixed in one pass; an inconsistent chain (`if (x) return;` + `else { }`) waits for BRO1516's braces.
+
 ### 17. Overloads together (S4136)
 
 Sonar has no fix. For StyleBro it is an extra sort key in BRO1001 (keep members with the same name next to each
 other, inside the kind/access order). Conflicts with StyleCop's access order when overloads differ in access, so an
 option, off by default.
+
+Done (2026-10-05): `stylebro_keep_overloads_together` for [BRO1001](rules/BRO1001.md) (default `false`): methods only,
+the group sorts at its best overload's place.
 
 ### 18. Async suffix (RCS1046, MA0137)
 

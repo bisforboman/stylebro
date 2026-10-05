@@ -115,6 +115,20 @@ internal static class BlankLineRuns
             && owner.AncestorsAndSelf().Any(a => a is MemberDeclarationSyntax m && m.GetLastToken() == brace));
     }
 
+    /// <summary>
+    /// Whether BRO1519 judges the gap between this '}' and the next token: the block spans lines, the '}' ends its line
+    /// with no comment after it, and <see cref="WantsBlankLineAfter"/>. With <paramref name="gapIsReplaced"/> blank lines
+    /// already in the gap don't count, so it also says where BRO1519 keeps a blank line (BRO1526 leaves those places to it).
+    /// </summary>
+    public static bool JudgesGapAfter(SyntaxToken brace, SyntaxToken next, SourceText text, Func<string, bool> isOn, bool gapIsReplaced)
+    {
+        var braceLine = text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;
+        return OpeningLine(brace, text) != braceLine
+            && brace.TrailingTrivia.LastOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)) is { RawKind: (int)SyntaxKind.EndOfLineTrivia }
+            && !brace.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
+            && WantsBlankLineAfter(brace.Parent!, brace, next, isOn, gapIsReplaced);
+    }
+
     /// <summary>SA1507: a run of two or more blank lines in a token's leading trivia; the fix keeps one.</summary>
     private static (TextSpan Location, TextChange Change)? MultipleBlankLines(SyntaxToken token, SourceText text, Func<string, bool> isOn)
     {
@@ -257,11 +271,7 @@ internal static class BlankLineRuns
     private static (TextSpan Location, TextChange Change)? MissingBlankLineAfterCloseBrace(SyntaxToken brace, SourceText text, Func<string, bool> isOn)
     {
         var next = brace.GetNextToken(includeZeroWidth: true, includeSkipped: true);
-        var braceLine = text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;
-        if (OpeningLine(brace, text) == braceLine
-            || brace.TrailingTrivia.LastOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)) is not { RawKind: (int)SyntaxKind.EndOfLineTrivia }
-            || brace.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
-            || !WantsBlankLineAfter(brace.Parent!, brace, next, isOn))
+        if (!JudgesGapAfter(brace, next, text, isOn, gapIsReplaced: false))
         {
             return null;
         }

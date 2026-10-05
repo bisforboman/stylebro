@@ -80,14 +80,13 @@ internal static class MemberOrdering
 
     public static OrderingViolation? FindFirstViolation(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
     {
-        var keys = GetKeys(container, options, partialAccess, out var segments);
+        var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
         if (keys is null)
         {
             return null;
         }
 
-        // Members are compared within their region only (segments only grow, so a later one never sorts earlier).
-        int Compare(int a, int b) => segments[a] != segments[b] ? segments[a].CompareTo(segments[b]) : keys[a].CompareTo(keys[b]);
+        int Compare(int a, int b) => CompareMembers(keys, segments, anchors, a, b);
 
         var maxIndex = 0;
         for (var i = 1; i < keys.Length; i++)
@@ -102,7 +101,10 @@ internal static class MemberOrdering
                 }
 
                 var members = GetMembers(container)!.Value;
-                return new OrderingViolation(members[i], members[j], Describe(keys[i], keys[j]));
+                var reason = anchors is null || anchors[i] == anchors[j] ? Describe(keys[i], keys[j])
+                    : keys[anchors[i]].CompareTo(keys[anchors[j]]) != 0 ? Describe(keys[anchors[i]], keys[anchors[j]])
+                    : $"overloads of '{GetDisplayName(members[anchors[i] != i ? anchors[i] : anchors[j]])}' should be next to each other";
+                return new OrderingViolation(members[i], members[j], reason);
             }
 
             if (comparison > 0)
@@ -120,7 +122,7 @@ internal static class MemberOrdering
     /// </summary>
     public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
     {
-        var keys = GetKeys(container, options, partialAccess, out var segments);
+        var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
         if (keys is null)
         {
             return container;
@@ -128,7 +130,7 @@ internal static class MemberOrdering
 
         var members = GetMembers(container)!.Value;
         var count = members.Count;
-        var order = SortedOrder(keys, segments);
+        var order = SortedOrder(keys, segments, anchors);
         if (order.Select((source, slot) => source == slot).All(unchanged => unchanged))
         {
             return container;
@@ -227,9 +229,10 @@ internal static class MemberOrdering
         };
     }
 
-    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess, out int[] segments)
+    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess, out int[] segments, out int[]? anchors)
     {
         segments = System.Array.Empty<int>();
+        anchors = null;
         if (GetMembers(container) is not { } members || members.Count < 2 || GetSegments(members) is not { } found)
         {
             return null;
@@ -260,19 +263,79 @@ internal static class MemberOrdering
             keys[i] = key.Value;
         }
 
+        if (options.KeepOverloadsTogether)
+        {
+            anchors = GetAnchors(members, keys, found);
+        }
+
         // Sorting must not change what field initializers compute, nor an order the runtime sees (struct layout,
         // serialized members); skip the type if it could.
         return container is TypeDeclarationSyntax type
-            && (InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys, segments)) || ObservableOrder.ReordersObservableMembers(type, SortedOrder(keys, segments)))
+            && (InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys, segments, anchors)) || ObservableOrder.ReordersObservableMembers(type, SortedOrder(keys, segments, anchors)))
             ? null
             : keys;
     }
 
+    /// <summary>
+    /// stylebro_keep_overloads_together: each method's group of overloads (same name, same region) sorts at the place of
+    /// the overload that sorts first, the others right behind it in their own order. Constructors and indexers are their
+    /// own kinds, so always together; operators aren't grouped ('==' and '!=' pairs stay as written). Every member's
+    /// anchor is the index of that first overload (its own index when it has no overloads).
+    /// </summary>
+    private static int[] GetAnchors(SyntaxList<MemberDeclarationSyntax> members, MemberKey[] keys, int[] segments)
+    {
+        (int, string)? Group(int i) => members[i] is MethodDeclarationSyntax method
+            ? (segments[i], method.ExplicitInterfaceSpecifier?.Name + "." + method.Identifier.ValueText)
+            : null;
+
+        var anchors = Enumerable.Range(0, keys.Length).ToArray();
+        var first = new Dictionary<(int, string), int>();
+        for (var i = 0; i < members.Count; i++)
+        {
+            if (Group(i) is { } group && (!first.TryGetValue(group, out var anchor) || keys[i].CompareTo(keys[anchor]) < 0))
+            {
+                first[group] = i;
+            }
+        }
+
+        for (var i = 0; i < members.Count; i++)
+        {
+            if (Group(i) is { } group)
+            {
+                anchors[i] = first[group];
+            }
+        }
+
+        return anchors;
+    }
+
+    /// <summary>
+    /// Members are compared within their region only (segments only grow, so a later one never sorts earlier); with
+    /// overloads kept together, by their group's first overload first (its key, then its position).
+    /// </summary>
+    private static int CompareMembers(MemberKey[] keys, int[] segments, int[]? anchors, int a, int b)
+    {
+        if (segments[a] != segments[b])
+        {
+            return segments[a].CompareTo(segments[b]);
+        }
+
+        if (anchors is not null && anchors[a] != anchors[b])
+        {
+            var c = keys[anchors[a]].CompareTo(keys[anchors[b]]);
+            return c != 0 ? c : anchors[a].CompareTo(anchors[b]);
+        }
+
+        return keys[a].CompareTo(keys[b]);
+    }
+
     /// <summary>Maps each slot to the index of the member that belongs there after sorting.</summary>
-    private static int[] SortedOrder(MemberKey[] keys, int[] segments)
+    private static int[] SortedOrder(MemberKey[] keys, int[] segments, int[]? anchors)
     {
         // OrderBy is stable, so members with equal keys keep their relative order; each region is sorted on its own.
-        return Enumerable.Range(0, keys.Length).OrderBy(i => segments[i]).ThenBy(i => keys[i]).ToArray();
+        return anchors is null
+            ? Enumerable.Range(0, keys.Length).OrderBy(i => segments[i]).ThenBy(i => keys[i]).ToArray()
+            : Enumerable.Range(0, keys.Length).OrderBy(i => segments[i]).ThenBy(i => keys[anchors[i]]).ThenBy(i => anchors[i]).ThenBy(i => keys[i]).ToArray();
     }
 
     private static MemberKey? GetKey(MemberDeclarationSyntax member, MemberAccess access, MemberOrderOptions options)

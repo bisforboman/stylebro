@@ -77,6 +77,7 @@ public static class DiagnosticIds
     public const string DeclarationComment = "BRO1134";
     public const string LiteralSuffixCase = "BRO1135";
     public const string NullCheckStyle = "BRO1133";
+    public const string ElseAfterJump = "BRO1143";
     public const string LambdaParentheses = "BRO1136";
     public const string RedundantJump = "BRO1137";
     public const string UnneededStringPrefix = "BRO1138";
@@ -117,4 +118,5 @@ public static class DiagnosticIds
     public const string CallChainLayout = "BRO1523";
     public const string BlankLineAfterAttributes = "BRO1525";
     public const string ConditionalLayout = "BRO1524";
+    public const string BlankLineBetweenSwitchSections = "BRO1526";
 }

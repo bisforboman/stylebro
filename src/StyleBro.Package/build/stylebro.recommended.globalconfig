@@ -187,6 +187,14 @@ dotnet_diagnostic.BRO1525.severity = warning
 # never implemented there; stylebro-migrate turns it off). The '?'/':' side follows BRO1520's setting.
 dotnet_diagnostic.BRO1524.severity = warning
 
+# BRO1526: a blank line between switch sections (stylebro_blank_line_between_switch_sections, default include; not set
+# here, so an .editorconfig value takes effect). Not a StyleCop rule (Roslynator RCS0061; stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1526.severity = warning
+
+# BRO1143: no 'else' after an 'if' branch that ends in a jump (Meziantou MA0071, Roslynator RCS1211). Off: a matter of
+# taste; set to warning to opt in.
+dotnet_diagnostic.BRO1143.severity = none
+
 # BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
 dotnet_diagnostic.BRO1131.severity = warning
 
