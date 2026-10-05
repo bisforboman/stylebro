@@ -7,6 +7,24 @@ public class FieldNamingTests
 {
     private const string Underscore = "stylebro_private_field_naming = _camelCase";
 
+    private const string CamelConstants = """
+        dotnet_naming_rule.private_constants.symbols = private_constants
+        dotnet_naming_rule.private_constants.style = camel
+        dotnet_naming_rule.private_constants.severity = warning
+        dotnet_naming_symbols.private_constants.applicable_kinds = field
+        dotnet_naming_symbols.private_constants.applicable_accessibilities = private
+        dotnet_naming_symbols.private_constants.required_modifiers = const
+        dotnet_naming_rule.private_statics.symbols = private_statics
+        dotnet_naming_rule.private_statics.style = underscore_camel
+        dotnet_naming_rule.private_statics.severity = warning
+        dotnet_naming_symbols.private_statics.applicable_kinds = field
+        dotnet_naming_symbols.private_statics.applicable_accessibilities = private
+        dotnet_naming_symbols.private_statics.required_modifiers = static, readonly
+        dotnet_naming_style.camel.capitalization = camel_case
+        dotnet_naming_style.underscore_camel.required_prefix = _
+        dotnet_naming_style.underscore_camel.capitalization = camel_case
+        """;
+
     [Theory]
     [InlineData("Count", false, "count")]
     [InlineData("_count", false, "count")]
@@ -595,4 +613,143 @@ public class FieldNamingTests
         }
         """,
         editorConfig: Underscore);
+
+    [Fact]
+    public Task NamingRules_CanAskForCamelCasePrivateConstantsAndStaticReadonlyFields() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public const int MaxCount = 3;
+            private const int {|BRO1306:Limit|} = 2;
+            private const int {|BRO1308:MIN_SIZE|} = 1;
+            private const int fine = 4;
+            internal static readonly string Shared = "";
+            private static readonly string {|BRO1306:Cache|} = "";
+            private static readonly string {|BRO1306:empty|} = "";
+            private static readonly string _ready = "";
+            private int count;
+
+            public int Sum() => MaxCount + Limit + MIN_SIZE + fine + Shared.Length + Cache.Length + empty.Length + _ready.Length + count;
+        }
+        """,
+        """
+        public class C
+        {
+            public const int MaxCount = 3;
+            private const int limit = 2;
+            private const int minSize = 1;
+            private const int fine = 4;
+            internal static readonly string Shared = "";
+            private static readonly string _cache = "";
+            private static readonly string _empty = "";
+            private static readonly string _ready = "";
+            private int count;
+
+            public int Sum() => MaxCount + limit + minSize + fine + Shared.Length + _cache.Length + _empty.Length + _ready.Length + count;
+        }
+        """,
+        CamelConstants);
+
+    [Fact]
+    public Task NamingRuleForStatics_WithAnotherStyle_KeepsPascalCase() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private const int {|BRO1306:limit|} = 2;
+            private static readonly string {|BRO1306:cache|} = "";
+            private static readonly string s_shared = "";
+
+            public int Sum() => limit + cache.Length + s_shared.Length;
+        }
+        """,
+        """
+        public class C
+        {
+            private const int Limit = 2;
+            private static readonly string Cache = "";
+            private static readonly string s_shared = "";
+
+            public int Sum() => Limit + Cache.Length + s_shared.Length;
+        }
+        """,
+        """
+        dotnet_naming_rule.private_fields.symbols = private_fields
+        dotnet_naming_rule.private_fields.style = camel
+        dotnet_naming_rule.private_fields.severity = warning
+        dotnet_naming_symbols.private_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+        dotnet_naming_rule.statics.symbols = statics
+        dotnet_naming_rule.statics.style = s_camel
+        dotnet_naming_rule.statics.severity = warning
+        dotnet_naming_symbols.statics.applicable_kinds = field
+        dotnet_naming_symbols.statics.applicable_accessibilities = private
+        dotnet_naming_symbols.statics.required_modifiers = static
+        dotnet_naming_rule.constants.symbols = constants
+        dotnet_naming_rule.constants.style = pascal
+        dotnet_naming_rule.constants.severity = warning
+        dotnet_naming_symbols.constants.applicable_kinds = field
+        dotnet_naming_symbols.constants.required_modifiers = const
+        dotnet_naming_rule.camel_constants.symbols = constants
+        dotnet_naming_rule.camel_constants.style = camel
+        dotnet_naming_rule.camel_constants.severity = none
+        dotnet_naming_style.camel.capitalization = camel_case
+        dotnet_naming_style.pascal.capitalization = pascal_case
+        dotnet_naming_style.s_camel.required_prefix = s_
+        dotnet_naming_style.s_camel.capitalization = camel_case
+        """);
+
+    [Fact]
+    public Task NamingRuleWithMoreModifiers_WinsWithoutPriority() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private static readonly string Cache = "";
+
+            public int Get() => Cache.Length;
+        }
+        """,
+        """
+        dotnet_naming_rule.a_statics.symbols = statics
+        dotnet_naming_rule.a_statics.style = camel
+        dotnet_naming_rule.b_static_readonly.symbols = static_readonly
+        dotnet_naming_rule.b_static_readonly.style = pascal
+        dotnet_naming_symbols.statics.applicable_kinds = field
+        dotnet_naming_symbols.statics.required_modifiers = static
+        dotnet_naming_symbols.static_readonly.applicable_kinds = field
+        dotnet_naming_symbols.static_readonly.required_modifiers = static, readonly
+        dotnet_naming_style.camel.capitalization = camel_case
+        dotnet_naming_style.pascal.capitalization = pascal_case
+        """);
+
+    [Fact]
+    public Task NamingRulePriority_PicksTheConstantStyle() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private const int {|BRO1306:Limit|} = 2;
+
+            public int Get() => Limit;
+        }
+        """,
+        """
+        public class C
+        {
+            private const int limit = 2;
+
+            public int Get() => limit;
+        }
+        """,
+        """
+        dotnet_naming_rule.a_pascal.symbols = constants
+        dotnet_naming_rule.a_pascal.style = pascal
+        dotnet_naming_rule.a_pascal.priority = 2
+        dotnet_naming_rule.b_camel.symbols = constants
+        dotnet_naming_rule.b_camel.style = camel
+        dotnet_naming_rule.b_camel.priority = 1
+        dotnet_naming_symbols.constants.applicable_kinds = field
+        dotnet_naming_symbols.constants.applicable_accessibilities = private
+        dotnet_naming_symbols.constants.required_modifiers = const
+        dotnet_naming_style.camel.capitalization = camel_case
+        dotnet_naming_style.pascal.capitalization = pascal_case
+        """);
 }

@@ -51,7 +51,12 @@ internal static class CamelCaseRenamer
                 continue;
             }
 
-            // Every copy of the file: '#if' code can hold references that only one target framework sees.
+            // Every copy of the file: '#if' code can hold references that only one target framework sees. All or nothing:
+            // when one copy's rename isn't safe (another project sees an override or a clash there), the other copies'
+            // edits would rename the shared file without it (Polly: an abstract member renamed, the test project's
+            // override left behind).
+            var itemChanges = new List<(string File, TextChange Change)>();
+            var safe = true;
             foreach (var id in document.GetLinkedDocumentIds().Add(document.Id))
             {
                 var copy = solution.GetDocument(id);
@@ -65,23 +70,30 @@ internal static class CamelCaseRenamer
                 var token = root.FindToken(diagnostic.Location.SourceSpan.Start);
                 if (token.Span != diagnostic.Location.SourceSpan
                     || token.Parent is not { } declaration
-                    || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol
-                    || (IsReachableByName(symbol)
-                        && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
-                    || await GetChangesAsync(solution, symbol, newName, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
+                    || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol)
                 {
                     continue;
                 }
 
-                foreach (var (file, change) in symbolChanges)
+                if ((IsReachableByName(symbol)
+                        && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
+                    || await GetChangesAsync(solution, symbol, newName, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
-                    if (!changes.TryGetValue(file, out var list))
-                    {
-                        changes[file] = list = new List<TextChange>();
-                    }
-
-                    list.Add(change);
+                    safe = false;
+                    break;
                 }
+
+                itemChanges.AddRange(symbolChanges);
+            }
+
+            foreach (var (file, change) in safe ? itemChanges : new List<(string File, TextChange Change)>())
+            {
+                if (!changes.TryGetValue(file, out var list))
+                {
+                    changes[file] = list = new List<TextChange>();
+                }
+
+                list.Add(change);
             }
         }
 
@@ -216,7 +228,13 @@ internal static class CamelCaseRenamer
         else if (IsTypeMember(symbol))
         {
             await AddRelatedMembersAsync(solution, symbol, symbols, cancellationToken).ConfigureAwait(false);
-            if (await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
+
+            // An implementation that also implements or overrides a member that isn't renamed (another interface's
+            // 'Run', a library's) would stop doing so. Compared by name, not symbol: another project's view of a
+            // multi-targeted library is a different (retargeted) symbol for the same member.
+            var renamed = new HashSet<string>(symbols.Select(s => s.OriginalDefinition.ToDisplayString()));
+            if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString())))
+                || await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
             {
                 return null;
             }

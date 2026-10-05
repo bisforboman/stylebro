@@ -88,6 +88,14 @@ dotnet_diagnostic.BRO1311.severity = warning
 # every type in it (stored type names, other repositories); set to warning to opt in.
 dotnet_diagnostic.BRO1312.severity = none
 
+# BRO1313: parameters of overrides and implementations have the base member's names (StyleCop's proposed SA1315, CA1725).
+# Off: the rename changes named arguments in other repositories; set to warning to opt in.
+dotnet_diagnostic.BRO1313.severity = none
+
+# BRO1314: methods returning Task/ValueTask/IAsyncEnumerable end in Async (Roslynator RCS1046). Off: renames public API;
+# set to warning to opt in.
+dotnet_diagnostic.BRO1314.severity = none
+
 # BRO1109: opening parenthesis on the declaration line (SA1110)
 dotnet_diagnostic.BRO1109.severity = warning
 

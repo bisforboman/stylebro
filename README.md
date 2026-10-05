@@ -87,6 +87,8 @@ project or coming from StyleCop.
 | [BRO1310](docs/rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Yes |
 | [BRO1311](docs/rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Yes |
 | [BRO1312](docs/rules/BRO1312.md) | Namespace names should begin with an upper-case letter (off by default) | SA1300 | Yes |
+| [BRO1313](docs/rules/BRO1313.md) | Parameter names should match the base member (off by default) | (none; SA1315 proposed, never implemented; SDK CA1725) | Yes |
+| [BRO1314](docs/rules/BRO1314.md) | Asynchronous method names should end with Async (off by default) | (none; Roslynator RCS1046, Meziantou MA0137) | Yes |
 | [BRO1401](docs/rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Yes |
 | [BRO1402](docs/rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Yes |
 | [BRO1403](docs/rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Yes |

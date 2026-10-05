@@ -32,6 +32,7 @@ WORK = [
     ('Beyond StyleCop', 'Null check style (survey #3)', 'BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Split conditional expressions (StyleCop issue #651)', 'BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520\'s setting; chains skipped. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
     ('Beyond StyleCop', '`<summary>` on one line or on three (survey #5)', 'BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`.', 'Done (2026-10-04)'),
+    ('Beyond StyleCop', 'Naming: camelCase constants, base parameter names, `Async` suffix (StyleCop #2641/#3793, #1949; Roslynator RCS1046)', 'BRO1306 follows a `dotnet_naming_rule` that asks for camelCase private constants or static readonly fields; BRO1313 (parameters named like the base member) and BRO1314 (`Async` on methods returning Task/ValueTask/IAsyncEnumerable), both off by default. See decisions.md.', 'Done (2026-10-05)'),
     ('Beyond StyleCop', 'Braceless `if (x) return;` (StyleCop issue #2252)', '`stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md).', 'Done (2026-10-04)'),
     ('Beyond StyleCop', 'Documentation batch A (StyleCop issues #758, #3546/#1490; Meziantou MA0154; survey #15)', 'BRO1617 cref type arguments in braces (`List{T}`), BRO1618 `<see langword="null"/>` for a keyword alone in `<c>`, BRO1619 top-level doc elements in a fixed order (stable, so BRO1611 keeps `<param>` order); `stylebro_comment_blank_line_exempt_prefixes` for BRO1504. On in the preset, off after `stylebro-migrate` (decisions.md).', 'Done (2026-10-05)'),
     ('Performance', 'Cheap checks first, one walk per tree', 'DocumentationAnalyzer, CommentTextAnalyzer, NullCheckAnalyzer, WrappingPlacementAnalyzer, CamelCaseNamingAnalyzer, BaseCallsAnalyzer, CallChainAnalyzer, EmbeddedCommentAnalyzer: same diagnostics, all 55 analyzers ~830 -> ~700 ms on Newtonsoft.Json (scripts/benchmark/README.md).', 'Done (2026-10-04)'),
@@ -49,8 +50,6 @@ WORK = [
 MAYBE = [
     ('StyleCop #762', '`(x) => x` -> `x => x`', 'Keep the parentheses with a type, modifier or attribute.'),
     ('StyleCop #760, Roslynator RCS1134', 'No redundant `return;` / `yield break;` at the end', 'Skip when a comment or label is on it.'),
-    ('StyleCop #2641, #3793', 'Option: camelCase private constants and static readonly fields', 'BRO1306 could follow `dotnet_naming_rule.*` like BRO1303.'),
-    ('StyleCop #1949 (SA1315), SDK CA1725', 'A parameter keeps the name of the member it overrides or implements', "BRO1302's renamer; callers' named arguments change."),
     ('Roslynator RCS0061', 'Blank line between switch sections', 'Text fix.'),
     ('Roslynator RCS1081, Sonar S1659', 'One local per declaration', 'Like BRO1114 for locals.'),
     ('Roslynator RCS1214, RCS1192, RCS1262', 'Unneeded `$`, `@`, raw string', 'Keep strings whose meaning would change.'),
@@ -60,7 +59,6 @@ MAYBE = [
     ('Roslynator RCS1042, Sonar S1939', 'Redundant base type or interface', 'Semantic.'),
     ('Meziantou MA0071, Roslynator RCS1211', 'No `else` after a jump', 'Changes indentation of the else branch.'),
     ('Sonar S4136', 'Overloads together', "Must agree with BRO1001's order."),
-    ('Roslynator RCS1046, Meziantou MA0137', '`Async` suffix on async methods', "Renamer; public API names change."),
 ]
 
 blocks = [

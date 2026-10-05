@@ -42,6 +42,8 @@ public static class DiagnosticIds
     public const string HungarianNotation = "BRO1310";
     public const string TupleElementCasing = "BRO1311";
     public const string NamespacePascalCase = "BRO1312";
+    public const string ParameterMatchesBase = "BRO1313";
+    public const string AsyncSuffix = "BRO1314";
     public const string InheritDocumentation = "BRO1601";
     public const string DocumentationSlashesInComment = "BRO1602";
     public const string DocumentationEndsWithPeriod = "BRO1603";

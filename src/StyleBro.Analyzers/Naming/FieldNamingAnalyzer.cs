@@ -30,11 +30,15 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         {
             // Each type's strings and names are read once for all its fields (they were read per field before).
             var facts = new ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>>(SymbolEqualityComparer.Default);
-            start.RegisterSymbolAction(c => AnalyzeField(c, facts), SymbolKind.Field);
+            var styles = new ConcurrentDictionary<SyntaxTree, FieldStyles>();
+            start.RegisterSymbolAction(c => AnalyzeField(c, facts, styles), SymbolKind.Field);
         });
     }
 
-    private static void AnalyzeField(SymbolAnalysisContext context, ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>> cache)
+    private static void AnalyzeField(
+        SymbolAnalysisContext context,
+        ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>> cache,
+        ConcurrentDictionary<SyntaxTree, FieldStyles> styles)
     {
         var field = (IFieldSymbol)context.Symbol;
         if (field.Locations.FirstOrDefault(l => l.IsInSource) is not { SourceTree: { } tree } location)
@@ -43,7 +47,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         }
 
         var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
-        var style = FieldNames.GetStyle(options);
+        var style = styles.GetOrAdd(tree, _ => FieldNames.GetStyles(options));
         var hungarian = Severities.IsOn(context.Compilation.Options, tree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
             ? HungarianNames.Read(options)
             : null;
