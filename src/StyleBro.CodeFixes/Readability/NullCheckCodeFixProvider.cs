@@ -58,6 +58,7 @@ public sealed class NullCheckCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var version = LinkedFileFixAllProvider.GetLowestLanguageVersion(document);
         var changes = new List<TextChange>();
         foreach (var start in diagnostics.Select(d => d.Location.SourceSpan.Start).Distinct())
         {
@@ -68,7 +69,7 @@ public sealed class NullCheckCodeFixProvider : CodeFixProvider
 
             var fix = root.FindToken(start).Parent?.AncestorsAndSelf().OfType<ExpressionSyntax>()
                 .Where(e => e.SpanStart == start)
-                .Select(e => NullChecks.GetFix(e, model, options, cancellationToken))
+                .Select(e => NullChecks.GetFix(e, model, options, cancellationToken, version))
                 .FirstOrDefault(f => f is not null);
             if (fix is { } found)
             {

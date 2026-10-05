@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes;
@@ -47,6 +48,19 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
             ct => FixAllAsync(fixAllContext, ct),
             fixAllContext.CodeActionEquivalenceKey));
     }
+
+    /// <summary>
+    /// The lowest C# version among the document's copies: a file linked into several projects, or a project whose target
+    /// frameworks get different default versions (net472: 7.3), is compiled with each, and a fix must compile in all of
+    /// them (LibGit2Sharp: 'is not null' broke the net472 tests). Rules that need a newer version check it on the fix side.
+    /// </summary>
+    internal static LanguageVersion GetLowestLanguageVersion(Document document) =>
+        document.GetLinkedDocumentIds().Add(document.Id)
+            .Select(id => document.Project.Solution.GetDocument(id)?.Project.ParseOptions)
+            .OfType<CSharpParseOptions>()
+            .Select(o => o.LanguageVersion)
+            .DefaultIfEmpty(LanguageVersion.Latest)
+            .Min();
 
     /// <summary>Identical changes are kept once; a change that conflicts with an accepted one is dropped.</summary>
     internal static List<TextChange> Merge(List<TextChange> changes)
