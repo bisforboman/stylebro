@@ -263,4 +263,19 @@ public class ParameterMatchesBaseTests
         }
         """,
         On + "\ndotnet_diagnostic.BRO1310.severity = warning");
+
+    [Fact]
+    public Task BaseNamesThatAreField_AreNotTaken() => VerifyNoDiagnosticsAsync(
+        """
+        public abstract class Shape
+        {
+            public abstract void Run(int field);
+        }
+
+        public class Circle : Shape
+        {
+            public override void Run(int size) => System.Console.WriteLine(size);
+        }
+        """,
+        On);
 }

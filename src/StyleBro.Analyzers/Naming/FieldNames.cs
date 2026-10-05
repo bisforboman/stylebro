@@ -286,7 +286,7 @@ internal static class FieldNames
             return null;
         }
 
-        var camel = char.IsLower(core[0]) ? core : CamelCaseNames.GetNewName(core);
+        var camel = char.IsLower(core[0]) ? core : CamelCaseNames.ToCamelCase(core);
         var result = camel is null ? null : "_" + camel;
         return result != name ? result : null;
     }
@@ -461,8 +461,7 @@ internal static class FieldNames
     private static string? WithoutLeadingUnderscores(string name)
     {
         var core = name.TrimStart('_');
-        return core.Length < name.Length && core.Length > 0 && char.IsLetter(core[0]) && SyntaxFacts.IsValidIdentifier(core)
-            && SyntaxFacts.GetKeywordKind(core) == SyntaxKind.None
+        return core.Length < name.Length && core.Length > 0 && char.IsLetter(core[0]) && CamelCaseNames.IsUsableName(core)
             ? core
             : null;
     }
@@ -476,7 +475,7 @@ internal static class FieldNames
             return null;
         }
 
-        var result = name.Substring(0, index) + CamelCaseNames.GetNewName(name.Substring(index));
+        var result = name.Substring(0, index) + CamelCaseNames.ToCamelCase(name.Substring(index));
         return SyntaxFacts.IsValidIdentifier(result) ? result : null;
     }
 
@@ -509,7 +508,7 @@ internal static class FieldNames
         var result = casing switch
         {
             FieldCasing.Pascal => Capitalize(first, several) + rest,
-            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.GetNewName(first) ?? first) + rest,
+            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.ToCamelCase(first) ?? first) + rest,
         };
 
         if (casing == FieldCasing.UnderscoreCamel)
@@ -517,7 +516,7 @@ internal static class FieldNames
             result = "_" + result;
         }
 
-        return SyntaxFacts.IsValidIdentifier(result) && SyntaxFacts.GetKeywordKind(result) == SyntaxKind.None ? result : null;
+        return CamelCaseNames.IsUsableName(result) ? result : null;
     }
 
     private static string Capitalize(string word, bool lowerRest)

@@ -38,6 +38,9 @@ public class FieldNamingTests
     [InlineData("m_count", false, null)]
     [InlineData("s_count", true, null)]
     [InlineData("M_Count", false, null)]
+    [InlineData("_field", false, null)]
+    [InlineData("Field", false, null)]
+    [InlineData("Field", true, "_field")]
     public void NewName(string name, bool underscore, string? expected) =>
         Assert.Equal(expected, FieldNames.GetNewName(name, underscore ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase));
 
@@ -752,4 +755,53 @@ public class FieldNamingTests
         dotnet_naming_style.camel.capitalization = camel_case
         dotnet_naming_style.pascal.capitalization = pascal_case
         """);
+
+    [Fact]
+    public Task NothingIsRenamedToField_ACSharp14KeywordInAccessors() => VerifyNoDiagnosticsAsync(
+        """
+        public class A
+        {
+            private int _field;
+
+            public int Value { get => _field; set => _field = value; }
+        }
+
+        public class B
+        {
+            private int Field;
+            private int m_field;
+            private int field_;
+            protected int _field;
+
+            public int Value => Field + m_field + field_ + _field;
+        }
+
+        public class C
+        {
+            protected readonly int _field;
+            private int m_Field;
+
+            public int Value => _field + m_Field;
+        }
+        """);
+
+    [Fact]
+    public Task UnderscoreStyle_StillGivesUnderscoreField() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private int {|BRO1303:Field|};
+
+            public int Value => Field;
+        }
+        """,
+        """
+        public class C
+        {
+            private int _field;
+
+            public int Value => _field;
+        }
+        """,
+        Underscore);
 }

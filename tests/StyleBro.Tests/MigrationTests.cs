@@ -643,6 +643,10 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.IDE0041.severity = warning", editorConfig);
         Assert.Contains("dotnet_diagnostic.IDE0090.severity = suggestion", editorConfig);
 
+        // SDK 10's IDE0031 writes C# 14's 'node?.Count = 2;' (CS8370 in a net48 copy), IDE0350 '(out r)'.
+        Assert.Contains("dotnet_diagnostic.IDE0031.severity = suggestion", editorConfig);
+        Assert.Contains("dotnet_diagnostic.IDE0350.severity = suggestion", editorConfig);
+
         // The multi-target guard (MultiTargetSuppressor) hides the API rules where a framework lacks the API.
         Assert.Contains("dotnet_diagnostic.CA1510.severity = warning", editorConfig);
         Assert.Contains("dotnet_diagnostic.IDE0330.severity = warning", editorConfig);

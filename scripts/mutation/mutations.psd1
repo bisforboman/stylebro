@@ -322,6 +322,12 @@
             || (!member.IsOverride'; Replace = '|| (!member.IsOverride'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (result is not null && result != name)'; Replace = 'if (false)'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        # Names a rename never produces: 'field' (C# 14 keyword in accessors), 'value' inside a property/indexer/event
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'CamelCaseNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'HungarianNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'if (newName == "value" && scope is BasePropertyDeclarationSyntax)'; Replace = 'if (false)'; Tests = 'CamelCaseNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.CanRename(node, oldName, newName, getNewName))'; Replace = ')'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (depth < 8 && baseParameter'; Replace = 'if (false && baseParameter'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& CamelCaseNames.CanRename(declaration, name, renamed, getNewName) ? renamed'; Replace = '? renamed'; Tests = 'ParameterMatchesBaseTests' }

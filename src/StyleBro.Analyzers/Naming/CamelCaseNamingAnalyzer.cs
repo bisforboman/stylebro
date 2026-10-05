@@ -221,8 +221,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         var oldName = parameter.Name;
         if (GetBaseName(parameter, casingOn ? getNewName : _ => null) is not { } newName
             || newName == oldName
-            || !SyntaxFacts.IsValidIdentifier(newName)
-            || SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None
+            || !CamelCaseNames.IsUsableName(newName)
             || !CamelCaseNames.CanRename(node, oldName, newName, getNewName))
         {
             return false;
