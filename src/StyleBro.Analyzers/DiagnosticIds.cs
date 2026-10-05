@@ -78,6 +78,13 @@ public static class DiagnosticIds
     public const string LiteralSuffixCase = "BRO1135";
     public const string NullCheckStyle = "BRO1133";
     public const string ElseAfterJump = "BRO1143";
+    public const string LambdaParentheses = "BRO1136";
+    public const string RedundantJump = "BRO1137";
+    public const string UnneededStringPrefix = "BRO1138";
+    public const string ElseIf = "BRO1139";
+    public const string EmptyRecordBody = "BRO1140";
+    public const string ObjectCreationParentheses = "BRO1141";
+    public const string CombinedLocals = "BRO1142";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";
@@ -85,6 +92,7 @@ public static class DiagnosticIds
     public const string UnnecessaryParentheses = "BRO1405";
     public const string ArithmeticPrecedence = "BRO1406";
     public const string ConditionalPrecedence = "BRO1407";
+    public const string RedundantBaseType = "BRO1408";
     public const string BlankLineBeforeOpenBrace = "BRO1501";
     public const string BlankLineBeforeChainedBlock = "BRO1502";
     public const string BlankLineAfterOpenBrace = "BRO1503";

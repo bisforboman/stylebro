@@ -3,6 +3,51 @@
 # survives is a guard no test covers. Add one for every new guard.
 @{
     Mutations = @(
+        # BRO1136 (lambda parentheses)
+        @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'if (lambda.ParameterList.Parameters.Count != 1'; Replace = 'if (lambda.ParameterList.Parameters.Count < 1'; Tests = 'LambdaParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'is not { Type: null } parameter'; Replace = 'is not { } parameter'; Tests = 'LambdaParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = '|| parameter.AttributeLists.Count > 0'; Replace = ''; Tests = 'LambdaParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = '|| lambda.AttributeLists.Count > 0'; Replace = ''; Tests = 'LambdaParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = '|| lambda.ReturnType is not null'; Replace = ''; Tests = 'LambdaParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = '.Any(t => !t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))'; Replace = '.Any(t => false))'; Tests = 'LambdaParenthesesTests' }
+        # BRO1137 (redundant return; / yield break;)
+        @{ File = 'src/StyleBro.Analyzers/Readability/RedundantJumps.cs'; Find = '|| block.Statements.Last() != statement'; Replace = ''; Tests = 'RedundantJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/RedundantJumps.cs'; Find = '|| block.Parent is not (BaseMethodDeclarationSyntax'; Replace = '|| block.Parent is (ArgumentSyntax'; Tests = 'RedundantJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/RedundantJumps.cs'; Find = '|| statement.DescendantTrivia().Any('; Replace = '|| statement.DescendantTrivia().All('; Tests = 'RedundantJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/RedundantJumps.cs'; Find = '.OfType<YieldStatementSyntax>().Skip(1).Any()'; Replace = '.OfType<YieldStatementSyntax>().Any()'; Tests = 'RedundantJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/RedundantJumps.cs'; Find = 'n == block || !IsFunction(n)'; Replace = 'true'; Tests = 'RedundantJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/RedundantJumps.cs'; Find = 'while (first > 0 &&'; Replace = 'while (false &&'; Tests = 'RedundantJumpTests' }
+        # BRO1138 (unneeded $, @, raw string)
+        @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = '.ConvertedType?.SpecialType is SpecialType.System_String or SpecialType.System_Object'; Replace = '.ConvertedType is not null'; Tests = 'StringPrefixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = 'if (content.Length == 0)'; Replace = 'if (false)'; Tests = 'StringPrefixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = 'content.Length == 0 || content.Any('; Replace = 'content.Any('; Tests = 'StringPrefixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = "c is '\\' or '`"' or"; Replace = 'c is'; Tests = 'StringPrefixTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = '? Plain(content, string.Empty) ?? raw : raw;'; Replace = '? raw : raw;'; Tests = 'StringPrefixTests' }
+        # BRO1139 (else if)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = '&& !block.CloseBraceToken.GetNextToken().IsKind(SyntaxKind.ElseKeyword)'; Replace = ''; Tests = 'ElseIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = '|| gaps.Any('; Replace = '|| gaps.All('; Tests = 'ElseIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (indent < shift)'; Replace = 'if (false)'; Tests = 'ElseIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'return shift < 0 ? null :'; Replace = 'return false ? null :'; Tests = 'ElseIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (lineEdits.Count > 0 && parts[0].If.DescendantTokens()'; Replace = 'if (false && parts[0].If.DescendantTokens()'; Tests = 'ElseIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (after.All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))'; Replace = 'if (true)'; Tests = 'ElseIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (after.All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))'; Replace = 'if (false)'; Tests = 'ElseIfTests' }
+        # BRO1140 (empty record body)
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'if (record.ParameterList is null || '; Replace = 'if ('; Tests = 'EmptyRecordBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = '|| record.Members.Count > 0'; Replace = ''; Tests = 'EmptyRecordBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'return Trivia.IsBlank(record, span) ?'; Replace = 'return true ?'; Tests = 'EmptyRecordBodyTests' }
+        # BRO1141 (object creation parentheses)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = 'if (creation.Initializer is null || '; Replace = 'if ('; Tests = 'ObjectCreationParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = '|| arguments.Arguments.Count > 0'; Replace = ''; Tests = 'ObjectCreationParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = '|| !Trivia.IsBlank(creation, span)'; Replace = ''; Tests = 'ObjectCreationParenthesesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = 'return include ? new TextChange'; Replace = 'return false ? new TextChange'; Tests = 'ObjectCreationParenthesesTests' }
+        # BRO1142 (one local per declaration)
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'declaration.UsingKeyword.IsKind(SyntaxKind.None) ?'; Replace = 'true ?'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'if (sameLine && declaration is not LocalDeclarationStatementSyntax)'; Replace = 'if (false)'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(declaration is FieldDeclarationSyntax && text.ToString('; Replace = '(true && text.ToString('; Tests = 'CombinedFieldsTests' }
+        # BRO1408 (redundant base type)
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = 'EnumUnderlyingType.SpecialType: SpecialType.System_Int32'; Replace = 'EnumUnderlyingType: not null'; Tests = 'RedundantBaseTypeTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = '.Type?.SpecialType == SpecialType.System_Object'; Replace = '.Type is not null'; Tests = 'RedundantBaseTypeTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = 'return Trivia.IsBlank(declaration, span) ?'; Replace = 'return true ?'; Tests = 'RedundantBaseTypeTests' }
         # BRO1617-BRO1619 (documentation style) and BRO1504's exempt prefixes
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'if (cref.ContainsDiagnostics)'; Replace = 'if (false)'; Tests = 'DocumentationStyleTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'token.Text != entity || '; Replace = ''; Tests = 'DocumentationStyleTests' }
@@ -165,7 +210,6 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'SpansSeveralLines(property, text) || SpansSeveralLines(next, text),'; Replace = 'SpansSeveralLines(property, text),'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '!IsExplicitImplementation(s) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'if (blankLineBefore && indentation.Trim().Length == 0'; Replace = 'if (false && indentation.Trim().Length == 0'; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = ' || text.ToString(variables[i - 1].Span).IndexOf(''\n'') >= 0'; Replace = ''; Tests = 'FixOrderTests' }
 
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }

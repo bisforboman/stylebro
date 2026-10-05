@@ -45,18 +45,11 @@ WORK = [
     ('Superseding StyleCop', "StyleCop's open bugs", "54 reports checked against StyleBro: 34 not shared, 12 by design or not applicable, 8 shared (7 fixed, 1 kept like StyleCop by decision; decisions.md). Listed in differences-from-stylecop.md.", 'Done (2026-10-04)'),
     ('Superseding StyleCop', 'The remaining tracker candidates', 'beyond-stylecop.md #6-#10 and #12 (listed under Maybe); #11 stays rejected (changes what reflection and serializers see).', 'Planned'),
     ('Superseding StyleCop', 'The remaining other-analyzer candidates', 'beyond-stylecop.md survey #6-#10 and #12-#18 (listed under Maybe).', 'Planned'),
+    ('Beyond StyleCop', 'Readability batch B (StyleCop issues #762, #760; survey #7, #8, #10, #12, #13, #14)', 'BRO1136 `x => x`, BRO1137 redundant `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string, BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses (`stylebro_object_creation_parentheses`, default omit), BRO1142 one local per declaration, BRO1408 redundant base type. On in the preset, off after `stylebro-migrate`.', 'Done (2026-10-05)'),
 ]
 
 # Candidates from StyleCop's issue tracker and other analyzers (docs/beyond-stylecop.md); planned as a group (WORK).
 MAYBE = [
-    ('StyleCop #762', '`(x) => x` -> `x => x`', 'Keep the parentheses with a type, modifier or attribute.'),
-    ('StyleCop #760, Roslynator RCS1134', 'No redundant `return;` / `yield break;` at the end', 'Skip when a comment or label is on it.'),
-    ('Roslynator RCS1081, Sonar S1659', 'One local per declaration', 'Like BRO1114 for locals.'),
-    ('Roslynator RCS1214, RCS1192, RCS1262', 'Unneeded `$`, `@`, raw string', 'Keep strings whose meaning would change.'),
-    ('Roslynator RCS1050', 'Object creation parentheses', 'Either style, configurable.'),
-    ('Roslynator RCS0041, RCS1006', '`else { if }` -> `else if`', 'Skip when comments would move.'),
-    ('Roslynator RCS1251, Meziantou MA0206', 'Empty record body `{ }` -> `;`', 'Text only.'),
-    ('Roslynator RCS1042, Sonar S1939', 'Redundant base type or interface', 'Semantic.'),
 ]
 
 blocks = [

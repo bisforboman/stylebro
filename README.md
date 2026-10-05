@@ -60,10 +60,18 @@ project or coming from StyleCop.
 | [BRO1135](docs/rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Yes |
 | [BRO1133](docs/rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Yes |
 | [BRO1143](docs/rules/BRO1143.md) | No 'else' after a branch that ends in a jump (off by default) | (none; Meziantou MA0071, Roslynator RCS1211) | Yes |
+| [BRO1136](docs/rules/BRO1136.md) | A lambda's single parameter should not be in parentheses | (none; StyleCop issue #762) | Yes |
+| [BRO1137](docs/rules/BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; StyleCop issue #760, Roslynator RCS1134) | Yes |
+| [BRO1138](docs/rules/BRO1138.md) | A string literal should be a plain string when nothing needs more | (none; Roslynator RCS1214/RCS1192/RCS1262) | Yes |
+| [BRO1139](docs/rules/BRO1139.md) | Write 'else if' on one line | (none; Roslynator RCS0041/RCS1006) | Yes |
+| [BRO1140](docs/rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Yes |
+| [BRO1141](docs/rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Yes |
+| [BRO1142](docs/rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
 | [BRO1405](docs/rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Yes |
 | [BRO1406](docs/rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Yes |
 | [BRO1407](docs/rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Yes |
+| [BRO1408](docs/rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Yes |
 | [BRO1514](docs/rules/BRO1514.md) | Braces should not be omitted | SA1503 | Yes |
 | [BRO1515](docs/rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Yes |
 | [BRO1516](docs/rules/BRO1516.md) | Use braces consistently | SA1520 | Yes |

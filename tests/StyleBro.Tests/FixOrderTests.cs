@@ -443,6 +443,107 @@ public class FixOrderTests
         "BRO1112",
         "BRO1518");
 
+    [Fact]
+    public Task RedundantReturn_InSingleLineBodiesAndBelowABlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M() { return; }
+
+            public void N(bool b)
+            {
+                if (b) { M(); }
+
+                return;
+            }
+
+            public void O(bool b) { if (b) M(); return; }
+        }
+        """,
+        "BRO1137",
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1518",
+        "BRO1519");
+
+    [Fact]
+    public Task EmptyRecordBody_NextToASemicolonAndASingleLineBlock() => AssertConvergesInEveryOrderAsync(
+        """
+        public record A(int X) { };
+
+        public record B(int X) { }
+
+        namespace System.Runtime.CompilerServices
+        {
+            internal static class IsExternalInit
+            {
+            }
+        }
+        """,
+        "BRO1101",
+        "BRO1140",
+        "BRO1509");
+
+    [Fact]
+    public Task ElseIf_NextToTheBraceRules() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                if (x == 1)
+                {
+                    M(1);
+                }
+                else
+                {
+                    if (x == 2)
+                        M(2);
+                    else
+                        M(3);
+                }
+
+                if (x == 1)
+                    M(1);
+                else
+                    if (x == 2) M(2);
+
+                if (x == 1) { M(1); } else { if (x == 2) { M(2); } }
+            }
+        }
+        """,
+        "BRO1139",
+        "BRO1508",
+        "BRO1514",
+        "BRO1515",
+        "BRO1516");
+
+    [Fact]
+    public Task CombinedLocals_InASingleLineBlock() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int M() { int a = 1, b = 2; return a + b; }
+        }
+        """,
+        "BRO1142",
+        "BRO1509");
+
+    [Fact]
+    public Task Strings_EmptyOnesAreLeftToBro1106() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public string A = @"";
+            public string B = $"";
+            public string D = $@"";
+            public string E = @"text";
+        }
+        """,
+        "BRO1106",
+        "BRO1138");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 
