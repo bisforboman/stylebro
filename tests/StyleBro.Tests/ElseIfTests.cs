@@ -195,6 +195,35 @@ public class ElseIfTests
         }
         """);
 
+    // With BRO1143 on, an 'else' after a jump is BRO1143's: it removes the 'else', which flattens more than joining it,
+    // and it skips 'else if' chains, so joining first would leave a different result depending on the fix order.
+    [Fact]
+    public Task ElseAfterAJump_IsLeftToBRO1143WhenItIsOn() => Verify.VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public int M(int age, bool student)
+            {
+                if (age < 6)
+                {
+                    return 0;
+                }
+                else
+                {
+                    if (student)
+                    {
+                        return 5;
+                    }
+                    else
+                    {
+                        return 10;
+                    }
+                }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning");
+
     [Fact]
     public Task ElsesThatCantBeJoined_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
         """
