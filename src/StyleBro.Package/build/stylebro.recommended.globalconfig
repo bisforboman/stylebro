@@ -271,6 +271,13 @@ dotnet_diagnostic.BRO1615.severity = warning
 # an .editorconfig value takes effect.
 dotnet_diagnostic.BRO1616.severity = warning
 
+# BRO1617-BRO1619: a cref's type arguments in braces (List{T}, not List&lt;T&gt;), <see langword="null"/> instead of
+# <c>null</c>, and top-level documentation elements in the order summary, typeparam, param, returns, value, exception,
+# remarks, example, seealso. Not StyleCop rules (stylebro-migrate turns them off).
+dotnet_diagnostic.BRO1617.severity = warning
+dotnet_diagnostic.BRO1618.severity = warning
+dotnet_diagnostic.BRO1619.severity = warning
+
 # BRO1501: no blank line before an opening brace (SA1509)
 dotnet_diagnostic.BRO1501.severity = warning
 

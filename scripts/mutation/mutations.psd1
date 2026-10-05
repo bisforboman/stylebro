@@ -3,6 +3,25 @@
 # survives is a guard no test covers. Add one for every new guard.
 @{
     Mutations = @(
+        # BRO1617-BRO1619 (documentation style) and BRO1504's exempt prefixes
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'if (cref.ContainsDiagnostics)'; Replace = 'if (false)'; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'token.Text != entity || '; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'token.Parent is not (TypeArgumentListSyntax or TypeParameterListSyntax)'; Replace = 'false'; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'return changes.Count == 0 ? null :'; Replace = 'return false ? null :'; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'if (element.StartTag.Name.LocalName.ValueText != "c"'; Replace = 'if (false'; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = '|| element.StartTag.Attributes.Count > 0'; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = '|| element.EndTag.Name.LocalName.ValueText != "c"'; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = '{ TextTokens.Count: 1 }'; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = '&& !word.StartsWith("__", StringComparison.Ordinal)'; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = '|| ContextualKeywords.Contains(word)'; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'DescendantNodes(n => !IsCode(n))'; Replace = 'DescendantNodes()'; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'if (plain.TextTokens.Any('; Replace = 'if (false && plain.TextTokens.Any('; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = 'if (rank < 0)'; Replace = 'if (false)'; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'; Find = ' || !elements.All(e => ParameterDocumentation.IsOnOwnLines(e.Node, text))'; Replace = ''; Tests = 'DocumentationStyleTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = 'if (exemptPrefixes.Any(p => commentText.StartsWith(p, StringComparison.Ordinal)))'; Replace = 'if (false)'; Tests = 'BlankLineAfterTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = 'commentText.StartsWith(p, StringComparison.Ordinal)'; Replace = 'commentText.StartsWith(p, StringComparison.OrdinalIgnoreCase)'; Tests = 'BlankLineAfterTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '.Where(p => p.Length > 0)'; Replace = ''; Tests = 'BlankLineAfterTests' }
+
         # BRO1616 (summary layout)
         @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (end.Name.LocalName.ValueText != "summary")'; Replace = 'if (false)'; Tests = 'SummaryLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/SummaryLayout.cs'; Find = 'if (prefix.Trim() != "///" || '; Replace = 'if ('; Tests = 'SummaryLayoutTests' }

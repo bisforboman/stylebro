@@ -84,6 +84,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment right after a collection expression's `[` | It starts the list like a comment after `{`; StyleCop fixed this after 1.2.0-beta.556 ([#3766](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3766)). |
 | [BRO1501](rules/BRO1501.md) (SA1509) | The brace of an entry in an initializer (`{ "ssh", 22 }` after a blank line in a dictionary initializer) | The blank line groups the entries; StyleCop's fix removes it (StyleCop bug [#2832](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2832), open; user decision 2026-10-04). |
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment right after `=>` (switch expression arm, lambda, expression body) | It starts what comes after the arrow; StyleCop's fix puts a blank line between them (StyleCop bug [#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392), open; user decision 2026-10-04). |
+| [BRO1504](rules/BRO1504.md) (SA1515) | A comment whose text starts with a prefix in `stylebro_comment_blank_line_exempt_prefixes` (default none; e.g. `ReSharper, @formatter`) | Tool markers belong to the line below them (StyleCop issues [#3546](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3546), [#1490](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1490)); with the default, the same as StyleCop. |
 | [BRO1310](rules/BRO1310.md) (SA1305) | Parameters of `extern`, `[DllImport]` and `[LibraryImport]` methods | They keep the native API's names, like BRO1309 leaves the methods alone (StyleCop bug [#2859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2859), open). |
 | [BRO1002](rules/BRO1002.md) (SA1005) | `dotnet new` template markers `//-:` and `//+:` | A space breaks them (StyleCop bug [#2689](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2689), open). |
 | [BRO1510](rules/BRO1510.md) (SA1504) | One-line accessors where one has an attribute on its own line above it | The attribute isn't part of the accessor's layout; StyleCop counts its line ([#3434](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3434)). |
@@ -193,6 +194,7 @@ Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO152
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1525.severity` =
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1524.severity` =
 `dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1616.severity` =
+`dotnet_diagnostic.BRO1617.severity`, `dotnet_diagnostic.BRO1618.severity` and `dotnet_diagnostic.BRO1619.severity` =
 `warning`); `stylebro-migrate` writes
 them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on in `.editorconfig` to use
 them.
@@ -211,6 +213,9 @@ them.
 | [BRO1526](rules/BRO1526.md) | A blank line between switch sections (`stylebro_blank_line_between_switch_sections = include`, the default), none (`omit`), or none after a section that ends in a block (`omit_after_block`); after a multi-line block BRO1519 (SA1513) decides. The preset turns it on (`dotnet_diagnostic.BRO1526.severity = warning`) | Roslynator RCS0061 |
 | [BRO1143](rules/BRO1143.md) | No `else` after an `if` branch that ends in `return`, `throw`, `break`, `continue`, `goto` or `yield break`. Off by default, also in the preset (a matter of taste) | Meziantou MA0071, Roslynator RCS1211 |
 | [BRO1616](rules/BRO1616.md) | `<summary>` tags on lines of their own (`stylebro_summary_layout = multi_line`), or the summary on one line when its text is one line and fits (`single_line_when_fits`) | Roslynator RCS1253, Meziantou MA0177/MA0211 |
+| [BRO1617](rules/BRO1617.md) | A cref's type arguments in braces: `cref="List{T}"`, not `cref="List&lt;T&gt;"` | StyleCop's proposed SA1653 ([#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758), never implemented) |
+| [BRO1618](rules/BRO1618.md) | A C# keyword alone in `<c>` (`<c>null</c>`) is written `<see langword="null"/>` | Meziantou MA0154 |
+| [BRO1619](rules/BRO1619.md) | Top-level documentation elements in the order summary, typeparam, param, returns, value, exception, remarks, example, seealso | (none; Roslynator RCS1232 orders `<param>` tags only) |
 
 ## StyleCop's open bugs
 
