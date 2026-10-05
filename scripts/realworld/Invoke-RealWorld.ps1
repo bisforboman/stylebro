@@ -38,6 +38,8 @@ $hook = Join-Path $Work 'stylebro-hook.targets'
 # -Enable: rules that are off by default, turned on through a global config (EditorConfigFiles, not
 # GlobalAnalyzerConfigFiles: the SDK has already converted those when this hook is imported).
 $enableItem = ''
+# 'pwsh Invoke-RealWorld.ps1 -Enable A,B' (from another shell, or CI) passes one string "A,B".
+$Enable = @($Enable | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 if ($Enable) {
     $enableConfig = Join-Path $Work 'stylebro-enable.globalconfig'
     Set-Content $enableConfig (@('is_global = true') + @($Enable | ForEach-Object { "dotnet_diagnostic.$_.severity = warning" }))

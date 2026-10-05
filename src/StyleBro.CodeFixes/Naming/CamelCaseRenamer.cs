@@ -154,7 +154,8 @@ internal static class CamelCaseRenamer
         {
             // Source generators' output too: Mapperly reaches private fields by name ('UnsafeAccessor(..., Name = "intValue")').
             documents.AddRange(project.Documents);
-            documents.AddRange(await project.GetSourceGeneratedDocumentsAsync(cancellationToken).ConfigureAwait(false));        }
+            documents.AddRange(await project.GetSourceGeneratedDocumentsAsync(cancellationToken).ConfigureAwait(false));
+        }
 
         foreach (var document in documents)
         {
