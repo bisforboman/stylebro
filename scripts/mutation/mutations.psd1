@@ -105,6 +105,7 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'block.Statements.Count > 0 && EndsInJump(block.Statements.Last()),'; Replace = 'block.Statements.Count > 0,'; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '&& text.Lines.GetLineFromPosition(branch.OpenBraceToken.SpanStart).LineNumber != text.Lines.GetLineFromPosition(branch.CloseBraceToken.SpanStart).LineNumber'; Replace = ''; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'BlankLineRuns.WantsBlankLineAfter(branch, branch.CloseBraceToken, item.First.GetFirstToken(), isOn, gapIsReplaced: true);'; Replace = 'true;'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'nested => EndsInJump(nested.Statement) && EndsInJump(inner.Statement),'; Replace = 'nested => EndsInJump(nested.Statement),'; Tests = 'ElseAfterJumpTests' }
         # BRO1001 stylebro_keep_overloads_together (Sonar S4136)
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (options.KeepOverloadsTogether)'; Replace = 'if (true)'; Tests = 'MemberOrderingTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = ' || keys[i].CompareTo(keys[anchor]) < 0))'; Replace = '))'; Tests = 'MemberOrderingTests' }

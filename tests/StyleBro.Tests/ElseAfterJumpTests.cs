@@ -343,6 +343,56 @@ public class ElseAfterJumpTests
         On);
 
     [Fact]
+    public Task AnInnerIfElseThatJumps_CountsAsAJump_BothGoInOnePass() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public int M(bool x, bool y)
+            {
+                if (x)
+                {
+                    if (y)
+                    {
+                        return 1;
+                    }
+                    {|BRO1143:else|}
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
+                {|BRO1143:else|}
+                {
+                    return 2;
+                }
+            }
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            public int M(bool x, bool y)
+            {
+                if (x)
+                {
+                    if (y)
+                    {
+                        return 1;
+                    }
+
+                    throw new InvalidOperationException();
+                }
+
+                return 2;
+            }
+        }
+        """,
+        On);
+
+    [Fact]
     public Task Tabs() => VerifyFixAsync(
         "public class C\n{\n\tpublic int M(bool x)\n\t{\n\t\tif (x)\n\t\t{\n\t\t\treturn 1;\n\t\t}\n\t\t{|BRO1143:else|}\n\t\t{\n\t\t\tx = !x;\n\t\t\treturn 2;\n\t\t}\n\t}\n}\n",
         "public class C\n{\n\tpublic int M(bool x)\n\t{\n\t\tif (x)\n\t\t{\n\t\t\treturn 1;\n\t\t}\n\n\t\tx = !x;\n\t\treturn 2;\n\t}\n}\n",
@@ -372,6 +422,24 @@ public class ElseAfterJumpTests
                 if (x)
                 {
                     Console.WriteLine();
+                }
+                else
+                {
+                    return 2;
+                }
+
+                // An inner if/else where only one branch jumps.
+                if (x)
+                {
+                    if (y > 0)
+                    {
+                        return 1;
+                    }
+                    // kept: the comment skips the inner 'else'
+                    else
+                    {
+                        y++;
+                    }
                 }
                 else
                 {

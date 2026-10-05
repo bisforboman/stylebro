@@ -157,6 +157,9 @@ internal static class ElseAfterJump
         BlockSyntax block => block.Statements.Count > 0 && EndsInJump(block.Statements.Last()),
         ReturnStatementSyntax or ThrowStatementSyntax or BreakStatementSyntax or ContinueStatementSyntax or GotoStatementSyntax => true,
         YieldStatementSyntax yield => yield.IsKind(SyntaxKind.YieldBreakStatement),
+
+        // An inner if/else whose branches both jump: otherwise fixing the inner one would make this one a candidate next run.
+        IfStatementSyntax { Else: { } inner } nested => EndsInJump(nested.Statement) && EndsInJump(inner.Statement),
         _ => false,
     };
 
