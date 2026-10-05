@@ -143,20 +143,26 @@ internal static class CamelCaseRenamer
     /// Every string literal in the solution. A field whose name is one of them is left alone: code can reach a private
     /// field by name through reflection, also from other projects the analyzer can't see (Polly's tests read
     /// '_blockedUntil' with GetField), and renaming it would still compile but break at run time. Its diagnostic stays
-    /// for a manual rename.
+    /// for a manual rename. With <paramref name="withNameof"/>, also the names in <c>nameof(...)</c> (BRO1409:
+    /// <c>GetMethod(nameof(Run))</c> finds public methods only).
     /// </summary>
-    private static async Task<HashSet<string>> GetStringLiteralsAsync(Solution solution, CancellationToken cancellationToken)
+    internal static async Task<HashSet<string>> GetStringLiteralsAsync(Solution solution, CancellationToken cancellationToken, bool withNameof = false)
     {
         var strings = new HashSet<string>();
         foreach (var document in solution.Projects.SelectMany(p => p.Documents))
         {
             if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is { } root)
             {
-                foreach (var token in root.DescendantTokens())
+                foreach (var token in TreeWalk.Tokens(root))
                 {
                     if (token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
                     {
                         strings.Add(token.ValueText);
+                    }
+                    else if (withNameof && token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"
+                        && token.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 1 } invocation)
+                    {
+                        strings.Add(invocation.ArgumentList.Arguments[0].Expression.GetLastToken().ValueText);
                     }
                 }
             }

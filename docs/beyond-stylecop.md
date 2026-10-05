@@ -310,7 +310,7 @@ below is "the maintainers agreed and nobody built it" more than "many people ask
 | 8 | [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) | `(x) => x` -> `x => x` (a maintainer suggested folding it into SA1119) | No SDK rule (check) | Low; keep the parentheses with a type, modifier or attribute |
 | 9 | [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760) | Redundant `return;` at the end of a void method (and `yield break;` at the end of an iterator) | No SDK rule (check); Roslynator RCS1134 | Low; skip when a comment or label is on it |
 | 10 | [#2641](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2641) (4 reactions, 9 comments, wontfix), [#3793](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3793) | camelCase private constants and static readonly fields | BRO1306 always wants PascalCase. Could follow `dotnet_naming_rule.*` like BRO1303 does | Low (an option); the renamer exists. Done (2026-10-05): BRO1306 follows a naming rule for private constants / static readonly fields ([BRO1306](rules/BRO1306.md#configuration)) |
-| 11 | [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (3 reactions, 15 comments) | No `public` on members of an internal type: `internal` says the same | No SDK rule | High: implicit interface implementations, overrides and operators must stay `public`, and serializers, data binding and reflection see only public members, so the rewrite can change run-time behavior |
+| 11 | [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (3 reactions, 15 comments) | No `public` on members of an internal type: `internal` says the same | No SDK rule | High: implicit interface implementations, overrides and operators must stay `public`, and serializers, data binding and reflection see only public members, so the rewrite can change run-time behavior. Rejected at first; Done (narrow variant, 2026-10-05): [BRO1409](rules/BRO1409.md), off by default, see below |
 | 12 | [#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949) (SA1315) | A parameter has the same name as in the member it overrides or implements | SDK CA1725 reports it (check whether `dotnet format` can fix it) | Medium: BRO1302's renamer could do it, but callers' named arguments change. Done (2026-10-05): [BRO1313](rules/BRO1313.md), off by default |
 
 #### 1. Conditional expression layout (#651)
@@ -366,6 +366,21 @@ type parameter list, so operator crefs and crefs the compiler can't read are lef
 
 Done (2026-10-05): `stylebro_comment_blank_line_exempt_prefixes` ([BRO1504](rules/BRO1504.md#configuration)),
 comma-separated and case-sensitive, default empty.
+
+#### 11. Public members of internal types (#2981)
+
+Rejected at first: `public` vs `internal` on a member of an internal type looks like a pure style question, but
+reflection's defaults (`GetMethods()`, `GetProperties()`, `BindingFlags.Public`) and most libraries built on them see
+public members only: System.Text.Json, Newtonsoft.Json and XmlSerializer (properties, fields), WPF/WinForms data binding,
+ASP.NET model binding, AutoMapper and Dapper, `Activator.CreateInstance` and Microsoft.Extensions.DependencyInjection
+(public constructors), and test frameworks (public test methods). The owner asked whether reflection really cares and
+decided on 2026-10-05 ([decisions.md](decisions.md)) to build a narrow, safe variant.
+
+Done (narrow variant, 2026-10-05): [BRO1409](rules/BRO1409.md), off by default. Ordinary methods only; overrides,
+`virtual`/`abstract`, interface implementations (also through a derived class), attributed methods and types, types with
+a base from another assembly, convention names (`Dispose`, `GetEnumerator`, `Add`, `Main`, `Configure`, `Invoke`, ...)
+and `extern`/`partial` methods are left out, and a method whose name is a string literal or `nameof` anywhere in the
+solution is reported but not fixed.
 
 ### Requested fixes and options StyleBro already has
 
