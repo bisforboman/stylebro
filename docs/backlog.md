@@ -14,12 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 42 |
-| Planned | 0 rules, 32 work items |
-| Maybe | 6 candidates from the StyleCop tracker and other analyzers |
-| Done, not released yet | 36 |
-| Planned | 0 rules, 32 work items |
-| Maybe | 11 candidates from the StyleCop tracker and other analyzers |
+| Done, not released yet | 44 |
+| Planned | 0 rules, 33 work items |
+| Maybe | 3 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -97,10 +94,6 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 
 | Source | Rule | Notes |
 |--------|------|-------|
-| StyleCop #2641, #3793 | Option: camelCase private constants and static readonly fields | BRO1306 could follow `dotnet_naming_rule.*` like BRO1303. |
-| StyleCop #1949 (SA1315), SDK CA1725 | A parameter keeps the name of the member it overrides or implements | BRO1302's renamer; callers' named arguments change. |
-| StyleCop #762 | `(x) => x` -> `x => x` | Keep the parentheses with a type, modifier or attribute. |
-| StyleCop #760, Roslynator RCS1134 | No redundant `return;` / `yield break;` at the end | Skip when a comment or label is on it. |
 | Roslynator RCS0061 | Blank line between switch sections | Text fix. |
 | Meziantou MA0071, Roslynator RCS1211 | No `else` after a jump | Changes indentation of the else branch. |
 | Sonar S4136 | Overloads together | Must agree with BRO1001's order. |

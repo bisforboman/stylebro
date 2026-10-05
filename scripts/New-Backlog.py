@@ -49,10 +49,6 @@ WORK = [
 
 # Candidates from StyleCop's issue tracker and other analyzers (docs/beyond-stylecop.md); planned as a group (WORK).
 MAYBE = [
-    ('StyleCop #2641, #3793', 'Option: camelCase private constants and static readonly fields', 'BRO1306 could follow `dotnet_naming_rule.*` like BRO1303.'),
-    ('StyleCop #1949 (SA1315), SDK CA1725', 'A parameter keeps the name of the member it overrides or implements', "BRO1302's renamer; callers' named arguments change."),
-    ('StyleCop #762', '`(x) => x` -> `x => x`', 'Keep the parentheses with a type, modifier or attribute.'),
-    ('StyleCop #760, Roslynator RCS1134', 'No redundant `return;` / `yield break;` at the end', 'Skip when a comment or label is on it.'),
     ('Roslynator RCS0061', 'Blank line between switch sections', 'Text fix.'),
     ('Meziantou MA0071, Roslynator RCS1211', 'No `else` after a jump', 'Changes indentation of the else branch.'),
     ('Sonar S4136', 'Overloads together', "Must agree with BRO1001's order."),
