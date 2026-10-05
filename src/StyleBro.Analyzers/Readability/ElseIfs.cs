@@ -36,7 +36,15 @@ internal static class ElseIfs
     /// </summary>
     public static List<TextChange>? GetChanges(ElseClauseSyntax elseClause, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
-        if (GetPart(elseClause, text) is null)
+        // An 'else' BRO1143 removes (the 'if' branch ends in a jump) isn't joined: removing it flattens the code more, and
+        // once joined, BRO1143 skips the 'else if' chain, so which one 'dotnet format' ran first decided the result.
+        Part? Joinable(ElseClauseSyntax e) =>
+            GetPart(e, text) is { } part
+            && !(isOn(DiagnosticIds.ElseAfterJump) && e.Parent is IfStatementSyntax owner && ElseAfterJump.IsCandidate(owner, text, options, isOn))
+                ? part
+                : null;
+
+        if (Joinable(elseClause) is null)
         {
             return null;
         }
@@ -44,13 +52,13 @@ internal static class ElseIfs
         var top = elseClause;
         foreach (var ancestor in elseClause.Ancestors().OfType<ElseClauseSyntax>())
         {
-            if (GetPart(ancestor, text) is not null)
+            if (Joinable(ancestor) is not null)
             {
                 top = ancestor;
             }
         }
 
-        var parts = top.DescendantNodesAndSelf().OfType<ElseClauseSyntax>().Select(e => GetPart(e, text)).OfType<Part>().ToList();
+        var parts = top.DescendantNodesAndSelf().OfType<ElseClauseSyntax>().Select(Joinable).OfType<Part>().ToList();
         var changes = new List<TextChange>();
         foreach (var part in parts)
         {
