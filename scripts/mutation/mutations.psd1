@@ -74,6 +74,10 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'declaration.UsingKeyword.IsKind(SyntaxKind.None) ?'; Replace = 'true ?'; Tests = 'CombinedFieldsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'if (sameLine && declaration is not LocalDeclarationStatementSyntax)'; Replace = 'if (false)'; Tests = 'CombinedFieldsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(declaration is FieldDeclarationSyntax && text.ToString('; Replace = '(true && text.ToString('; Tests = 'CombinedFieldsTests' }
+        # BRO1144 (C# 14 contextual keywords; the C# 14 'field' type check is covered by samples/Messy, Roslyn 4.8 can't parse it)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'MemberAccessExpressionSyntax access => access.Name != name,'; Replace = 'MemberAccessExpressionSyntax access => true,'; Tests = 'ContextualKeywordTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax => false,'; Replace = 'MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax => true,'; Tests = 'ContextualKeywordTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'return first == token;'; Replace = 'return true;'; Tests = 'ContextualKeywordTests' }
         # BRO1408 (redundant base type)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = 'EnumUnderlyingType.SpecialType: SpecialType.System_Int32'; Replace = 'EnumUnderlyingType: not null'; Tests = 'RedundantBaseTypeTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = '.Type?.SpecialType == SpecialType.System_Object'; Replace = '.Type is not null'; Tests = 'RedundantBaseTypeTests' }
