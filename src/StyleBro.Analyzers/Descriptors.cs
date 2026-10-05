@@ -217,6 +217,28 @@ internal static class Descriptors
             + "Replaces StyleCop SA1300 (namespaces).",
         helpLinkUri: HelpBase + DiagnosticIds.NamespacePascalCase + ".md");
 
+    public static readonly DiagnosticDescriptor ParameterMatchesBase = new(
+        id: DiagnosticIds.ParameterMatchesBase,
+        title: "Parameter names should match the base member",
+        messageFormat: "Rename '{0}' to '{1}', like in the member it overrides or implements",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "A parameter of an override or interface implementation has the name of the base member's parameter "
+            + "(proposed for StyleCop in issue #1949; the SDK's CA1725 reports it without a fix). Off by default.",
+        helpLinkUri: HelpBase + DiagnosticIds.ParameterMatchesBase + ".md");
+
+    public static readonly DiagnosticDescriptor AsyncSuffix = new(
+        id: DiagnosticIds.AsyncSuffix,
+        title: "Asynchronous method names should end with Async",
+        messageFormat: "Rename '{0}' to '{1}'",
+        category: "Naming",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "A method that returns Task, Task<T>, ValueTask, ValueTask<T> or IAsyncEnumerable<T> ends in 'Async' "
+            + "(Roslynator RCS1046, Meziantou MA0137). Off by default.",
+        helpLinkUri: HelpBase + DiagnosticIds.AsyncSuffix + ".md");
+
     public static readonly DiagnosticDescriptor OpenParenthesisOnNameLine = new(
         id: DiagnosticIds.OpenParenthesisOnNameLine,
         title: "Opening parenthesis or bracket should be on the declaration line",

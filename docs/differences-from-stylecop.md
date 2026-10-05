@@ -232,6 +232,8 @@ in `.editorconfig` to use them.
 | [BRO1141](rules/BRO1141.md) | `new T { ... }` without empty parentheses (`stylebro_object_creation_parentheses = omit`, the default) or with them (`include`) | Roslynator RCS1050 |
 | [BRO1142](rules/BRO1142.md) | One local per declaration, like BRO1114 (SA1132) for fields | Roslynator RCS1081, Sonar S1659 |
 | [BRO1408](rules/BRO1408.md) | No `enum E : int` or `class C : object` | Roslynator RCS1042, Sonar S1939 |
+| [BRO1313](rules/BRO1313.md) | Off by default. A parameter of an override or interface implementation has the base member's parameter name (named arguments updated) | StyleCop's proposed SA1315 ([#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949), never implemented); SDK CA1725 (no fix) |
+| [BRO1314](rules/BRO1314.md) | Off by default. Methods returning `Task`, `Task<T>`, `ValueTask`, `ValueTask<T>` or `IAsyncEnumerable<T>` end in `Async`; tests, controllers, hubs, event handlers and attributed methods skipped | Roslynator RCS1046, Meziantou MA0137 |
 | [BRO1617](rules/BRO1617.md) | A cref's type arguments in braces: `cref="List{T}"`, not `cref="List&lt;T&gt;"` | StyleCop's proposed SA1653 ([#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758), never implemented) |
 | [BRO1618](rules/BRO1618.md) | A C# keyword alone in `<c>` (`<c>null</c>`) is written `<see langword="null"/>` | Meziantou MA0154 |
 | [BRO1619](rules/BRO1619.md) | Top-level documentation elements in the order summary, typeparam, param, returns, value, exception, remarks, example, seealso | (none; Roslynator RCS1232 orders `<param>` tags only) |
