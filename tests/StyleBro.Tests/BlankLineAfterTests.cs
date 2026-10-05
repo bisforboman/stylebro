@@ -239,4 +239,50 @@ public class BlankLineAfterTests
         }
         """,
         "dotnet_diagnostic.BRO1134.severity = none\n");
+
+    [Fact]
+    public Task ExemptPrefixes_ToolMarkersNeedNoBlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            int M(int a)
+            {
+                a++;
+                // ReSharper disable once UnusedVariable
+                var b = a;
+                a++;
+                //@formatter:off
+                a++;
+                // @formatter:on
+                a++;
+                {|BRO1504:// Resharper is a different word: the prefixes are case-sensitive.|}
+                a++;
+                {|BRO1504:// A plain comment.|}
+                return a;
+            }
+        }
+        """,
+        """
+        class C
+        {
+            int M(int a)
+            {
+                a++;
+                // ReSharper disable once UnusedVariable
+                var b = a;
+                a++;
+                //@formatter:off
+                a++;
+                // @formatter:on
+                a++;
+
+                // Resharper is a different word: the prefixes are case-sensitive.
+                a++;
+
+                // A plain comment.
+                return a;
+            }
+        }
+        """,
+        "stylebro_comment_blank_line_exempt_prefixes = ReSharper, @formatter,\n");
 }

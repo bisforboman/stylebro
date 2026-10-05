@@ -40,9 +40,10 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
             }
         }
 
+        var exempt = BlankLines.GetExemptPrefixes(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree));
         foreach (var trivia in TreeWalk.Trivia(root))
         {
-            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken)))
+            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken), exempt))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.BlankLineBeforeComment, trivia.GetLocation()));
             }
