@@ -306,7 +306,7 @@ internal static class FieldNames
     public static bool CanRename(IFieldSymbol field, string newName, FieldStyles style, TypeFacts facts, HungarianNames? hungarian = null)
     {
         var type = field.ContainingType;
-        if (field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field))
+        if (field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field) || NamespaceNames.HasGeneratedPart(type))
         {
             return false;
         }

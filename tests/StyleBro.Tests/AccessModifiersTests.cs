@@ -1,3 +1,9 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
+using StyleBro.Analyzers.Maintainability;
+using StyleBro.CodeFixes.Maintainability;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Maintainability.AccessModifiersAnalyzer, StyleBro.CodeFixes.Maintainability.AccessModifiersCodeFixProvider>;
 
 namespace StyleBro.Tests;
@@ -226,4 +232,36 @@ public class AccessModifiersTests
         {
         }
         """);
+
+    [Fact]
+    public Task InterfaceMembers_NeedCSharp8_InEveryCopyOfTheFile()
+    {
+        // The file is compiled with C# 7.3 in another project too (net472's default): a modifier there doesn't compile.
+        var test = new CSharpCodeFixTest<AccessModifiersAnalyzer, AccessModifiersCodeFixProvider, DefaultVerifier>
+        {
+            NumberOfIncrementalIterations = -2,
+            NumberOfFixAllIterations = -2,
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
+
+            // The framework's '#pragma warning disable' check edits the first project's copy only.
+            TestBehaviors = TestBehaviors.SkipSuppressionCheck,
+        };
+        const string Source = "public interface IShape\n{\n    double Area();\n}\n";
+        const string EditorConfig = "root = true\n\n[*]\ndotnet_style_require_accessibility_modifiers = always:warning\n";
+        test.TestState.Sources.Add(("/0/Test0.cs", "public interface IShape\n{\n    double {|BRO1404:Area|}();\n}\n"));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", EditorConfig));
+        test.TestState.AdditionalProjects["Old"].Sources.Add(("/0/Test0.cs", Source));
+        test.TestState.AdditionalProjects["Old"].AnalyzerConfigFiles.Add(("/.editorconfig", EditorConfig));
+        test.FixedState.MarkupHandling = MarkupMode.Allow;
+        test.FixedState.Sources.Add(("/0/Test0.cs", "public interface IShape\n{\n    double {|BRO1404:Area|}();\n}\n"));
+        test.FixedState.AnalyzerConfigFiles.Add(("/.editorconfig", EditorConfig));
+        test.FixedState.AdditionalProjects["Old"].Sources.Add(("/0/Test0.cs", Source));
+        test.FixedState.AdditionalProjects["Old"].AnalyzerConfigFiles.Add(("/.editorconfig", EditorConfig));
+        test.SolutionTransforms.Add((solution, _) =>
+        {
+            var old = solution.Projects.Single(p => p.Name == "Old");
+            return solution.WithProjectParseOptions(old.Id, ((CSharpParseOptions)old.ParseOptions!).WithLanguageVersion(LanguageVersion.CSharp7_3));
+        });
+        return test.RunAsync();
+    }
 }

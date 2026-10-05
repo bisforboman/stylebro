@@ -17,4 +17,12 @@
     FluentValidation = @{ Url = 'https://github.com/FluentValidation/FluentValidation'; Commit = 'fa3c160b17796ff67d6aa5ae6c4b05b471f1a791'; Solution = 'FluentValidation.sln'; Tests = 'dotnet' }
     # Seven target frameworks (net462 to net9.0). Three tests fail on the untouched code too; only new failures count.
     CsvHelper     = @{ Url = 'https://github.com/JoshClose/CsvHelper'; Commit = '33970e5183383bdac1fbce3b3fbcdf46b318ca52'; Solution = 'CsvHelper.sln'; Tests = 'dotnet' }
+    # An ASP.NET Core application: MVC controllers, Razor Pages, Blazor WebAssembly, minimal API endpoints, DI, EF Core.
+    eShopOnWeb    = @{ Url = 'https://github.com/dotnet-architecture/eShopOnWeb'; Commit = '4da8212117e87d808d4bbc7da6286fd2147ce606'; Solution = 'eShopOnWeb.sln'; Tests = 'dotnet' }
+    # Generic interfaces and open generics resolved through DI.
+    MediatR       = @{ Url = 'https://github.com/jbogard/MediatR'; Commit = '916ef1b3d68ccdc96db8f914eaf1b32fc7db52c5'; Solution = 'MediatR.slnx'; Tests = 'dotnet' }
+    # P/Invoke into libgit2 (native binaries come from a NuGet package), net472 + net8.0 with #if.
+    LibGit2Sharp  = @{ Url = 'https://github.com/libgit2/libgit2sharp'; Commit = 'eaa698d078941fd5e3cc82b59b885cd35d8cc0f8'; Solution = 'LibGit2Sharp.sln'; Tests = 'dotnet' }
+    # A Roslyn source generator on the newest C#.
+    Mapperly      = @{ Url = 'https://github.com/riok/mapperly'; Commit = 'f87d48b12a6010a224ca26ad112fb48c07cd6d5d'; Solution = 'Riok.Mapperly.slnx'; Tests = 'dotnet' }
 }
