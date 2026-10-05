@@ -167,7 +167,8 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'BlockSyntax { Statements.Count: 0 } => null,'; Replace = ''; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (!OnlyWhitespace(elseClause.ElseKeyword.GetPreviousToken(), body.First.GetFirstToken())'; Replace = 'if (false'; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| (elseClause.Statement is BlockSyntax closing && !OnlyWhitespace('; Replace = '|| (elseClause.Statement is BlockSyntax closing && false && !OnlyWhitespace('; Tests = 'ElseAfterJumpTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '.Any(f => f.Child == node.Statement && f.Id == DiagnosticIds.BracesConsistent))'; Replace = '.Any(f => false))'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (GetBranchToWrap(node, text, options, isOn) is { } branch && Braces.GetChanges(new[] { branch }, text, options) is null)'; Replace = 'if (false)'; Tests = 'ElseAfterJumpTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '.Any(f => f.Child == node.Statement)'; Replace = '.Any()'; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (ifLine.Start + indent.Length != node.SpanStart)'; Replace = 'if (false)'; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (lastLine != firstLine.LineNumber)'; Replace = 'if (false)'; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'if (!text.ToString(line.Span).StartsWith(indent + unit, StringComparison.Ordinal) && '; Replace = 'if (false && '; Tests = 'ElseAfterJumpTests' }

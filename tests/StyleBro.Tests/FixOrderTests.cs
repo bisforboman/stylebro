@@ -58,8 +58,10 @@ public class FixOrderTests
         "BRO1001",
         "BRO1409");
 
+    // sameText: false because the order BRO1508 first expands P's inner block inside the single-line method body and
+    // leaves 'public void P(bool x) { if (x)' (no rule reports it); the other orders expand the method too.
     [Fact]
-    public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderAsync(
+    public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderCoreAsync(
         """
         public class C
         {
@@ -75,6 +77,8 @@ public class FixOrderTests
             public void P(bool x) { if (x) { if (!x) M(x); else M(!x); } }
         }
         """,
+        null,
+        false,
         "BRO1508",
         "BRO1509",
         "BRO1514",
@@ -290,6 +294,82 @@ public class FixOrderTests
             {
                 if (x)
                     return 1;
+                else
+                    return 2;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1143",
+        "BRO1514",
+        "BRO1516",
+        "BRO1519");
+
+    // An 'if' branch without braces next to an 'else' block: BRO1143's fix adds BRO1516's braces itself (it needed a
+    // second run before). With BRO1514 off too, so the braces come from BRO1516 alone.
+    [Theory]
+    [InlineData("")]
+    [InlineData("dotnet_diagnostic.BRO1514.severity = none\n")]
+    public Task ElseAfterJump_BranchWithoutBraces_ElseBlock(string config) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x)
+                    return 1;
+                else
+                {
+                    return 2;
+                }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n" + config,
+        "BRO1143",
+        "BRO1514",
+        "BRO1516",
+        "BRO1519");
+
+    [Fact]
+    public Task ElseAfterJump_BranchesWithoutBraces_Nested() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool x, bool y)
+            {
+                if (x)
+                    return 1;
+                else
+                {
+                    y = !y;
+                    if (y)
+                        return 2;
+                    else
+                    {
+                        return 3;
+                    }
+                }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1143",
+        "BRO1514",
+        "BRO1516",
+        "BRO1519");
+
+    [Fact]
+    public Task ElseAfterJump_BranchBlock_ElseWithoutBraces() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool x)
+            {
+                if (x)
+                {
+                    return 1;
+                }
                 else
                     return 2;
             }
@@ -606,8 +686,12 @@ public class FixOrderTests
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 
-    private static async Task AssertConvergesInEveryOrderWithConfigAsync(string source, string? editorConfig, params string[] ids)
+    private static Task AssertConvergesInEveryOrderWithConfigAsync(string source, string? editorConfig, params string[] ids) =>
+        AssertConvergesInEveryOrderCoreAsync(source, editorConfig, true, ids);
+
+    private static async Task AssertConvergesInEveryOrderCoreAsync(string source, string? editorConfig, bool sameText, params string[] ids)
     {
+        string? first = null;
         foreach (var order in Orders(ids))
         {
             var document = CreateDocument(source, editorConfig is null ? null : "root = true\n\n[*.cs]\n" + editorConfig);
@@ -626,6 +710,11 @@ public class FixOrderTests
                 var left = await GetDiagnosticsAsync(document, FindAnalyzer(id), id);
                 Assert.True(left.Length == 0, $"Order {string.Join(", ", order)} leaves {id}:\n{await document.GetTextAsync()}");
             }
+
+            // Every order gives the same text, not only a clean one.
+            var final = (await document.GetTextAsync()).ToString();
+            first ??= final;
+            Assert.True(!sameText || first == final, $"Order {string.Join(", ", order)} gives other text:\n{final}\nthan the first order:\n{first}");
         }
     }
 

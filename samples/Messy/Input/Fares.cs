@@ -29,4 +29,15 @@ public class Fares
         else
             return "paid";
     }
+
+    public decimal Discount(decimal price, bool member)
+    {
+        if (!member)
+            return 0m;
+        else
+        {
+            var rate = price > 100m ? 0.1m : 0.05m;
+            return price * rate;
+        }
+    }
 }
