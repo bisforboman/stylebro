@@ -24,6 +24,7 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = "c is '\\' or '`"' or"; Replace = 'c is'; Tests = 'StringPrefixTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/StringPrefixes.cs'; Find = '? Plain(content, string.Empty) ?? raw : raw;'; Replace = '? raw : raw;'; Tests = 'StringPrefixTests' }
         # BRO1139 (else if)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = '&& !(isOn(DiagnosticIds.ElseAfterJump) && e.Parent is IfStatementSyntax owner && ElseAfterJump.IsCandidate(owner, text, options, isOn))'; Replace = '&& true'; Tests = 'ElseIfTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = '&& !block.CloseBraceToken.GetNextToken().IsKind(SyntaxKind.ElseKeyword)'; Replace = ''; Tests = 'ElseIfTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = '|| gaps.Any('; Replace = '|| gaps.All('; Tests = 'ElseIfTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (indent < shift)'; Replace = 'if (false)'; Tests = 'ElseIfTests' }

@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -9,8 +12,19 @@ namespace StyleBro.Analyzers;
 /// </summary>
 internal static class Severities
 {
-    public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool enabledByDefault = true)
+    // Each StyleBro rule's own default, from its descriptor: an unconfigured rule that is off by default (BRO1143,
+    // BRO1310, ...) must count as off, also where a fix only gets an 'isOn' callback (BRO1139 asking about BRO1143 treated
+    // it as on in every project that never configured it).
+    private static readonly Dictionary<string, bool> Defaults = typeof(Descriptors)
+        .GetFields(BindingFlags.Public | BindingFlags.Static)
+        .Select(f => f.GetValue(null))
+        .OfType<DiagnosticDescriptor>()
+        .GroupBy(d => d.Id)
+        .ToDictionary(g => g.Key, g => g.First().IsEnabledByDefault);
+
+    public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool? enabledByDefault = null)
     {
+        var byDefault = enabledByDefault ?? (!Defaults.TryGetValue(id, out var known) || known);
         var severity = ReportDiagnostic.Default;
         if (compilationOptions?.SyntaxTreeOptionsProvider is { } provider
             && (provider.TryGetDiagnosticValue(tree, id, cancellationToken, out severity) || provider.TryGetGlobalDiagnosticValue(id, cancellationToken, out severity)))
@@ -20,13 +34,13 @@ internal static class Severities
 
         if (compilationOptions is null || !compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity))
         {
-            return enabledByDefault;
+            return byDefault;
         }
 
         return severity switch
         {
             ReportDiagnostic.Suppress or ReportDiagnostic.Hidden => false,
-            ReportDiagnostic.Default => enabledByDefault,
+            ReportDiagnostic.Default => byDefault,
             _ => true,
         };
     }
