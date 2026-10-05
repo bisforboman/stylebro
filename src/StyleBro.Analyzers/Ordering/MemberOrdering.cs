@@ -209,6 +209,7 @@ internal static class MemberOrdering
             OperatorDeclarationSyntax op => op.OperatorToken,
             ConversionOperatorDeclarationSyntax conversion => conversion.OperatorKeyword,
             DelegateDeclarationSyntax del => del.Identifier,
+            TypeDeclarationSyntax extension when CSharp14.IsExtensionBlock(extension) => extension.Keyword,
             BaseTypeDeclarationSyntax nested => nested.Identifier,
             BaseNamespaceDeclarationSyntax ns => ns.Name.GetFirstToken(),
             _ => member.GetFirstToken(),
@@ -220,6 +221,7 @@ internal static class MemberOrdering
         return member switch
         {
             DestructorDeclarationSyntax destructor => "~" + destructor.Identifier.ValueText,
+            TypeDeclarationSyntax extension when CSharp14.IsExtensionBlock(extension) => "extension" + extension.ParameterList,
             IndexerDeclarationSyntax => "this[]",
             BaseNamespaceDeclarationSyntax ns => ns.Name.ToString(),
             OperatorDeclarationSyntax op => "operator " + op.OperatorToken.Text,
@@ -380,6 +382,7 @@ internal static class MemberOrdering
             RecordDeclarationSyntax record => record.IsKind(SyntaxKind.RecordStructDeclaration) ? MemberKind.Struct : MemberKind.Class,
             ClassDeclarationSyntax => MemberKind.Class,
             BaseNamespaceDeclarationSyntax => MemberKind.Namespace,
+            _ when CSharp14.IsExtensionBlock(member) => MemberKind.Extension,
             _ => null,
         };
     }
@@ -598,6 +601,7 @@ internal static class MemberOrdering
             MemberKind.Indexer => "indexers",
             MemberKind.Conversion => "conversion operators",
             MemberKind.Operator => "operators",
+            MemberKind.Extension => "extension blocks",
             MemberKind.Method => "methods",
             MemberKind.Struct => "structs",
             MemberKind.Namespace => "namespaces",
