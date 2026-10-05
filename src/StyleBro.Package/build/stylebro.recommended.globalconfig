@@ -191,6 +191,10 @@ dotnet_diagnostic.BRO1524.severity = warning
 # here, so an .editorconfig value takes effect). Not a StyleCop rule (Roslynator RCS0061; stylebro-migrate turns it off).
 dotnet_diagnostic.BRO1526.severity = warning
 
+# BRO1527: auto-accessors on the declaration's line ('{ get; set; }'). Not a StyleCop rule (Roslynator RCS0042;
+# stylebro-migrate turns it off).
+dotnet_diagnostic.BRO1527.severity = warning
+
 # BRO1143: no 'else' after an 'if' branch that ends in a jump (Meziantou MA0071, Roslynator RCS1211). Off: a matter of
 # taste; set to warning to opt in.
 dotnet_diagnostic.BRO1143.severity = none
@@ -228,6 +232,12 @@ dotnet_diagnostic.BRO1141.severity = warning
 dotnet_diagnostic.BRO1142.severity = warning
 # BRO1408: no 'enum E : int' or 'class C : object'
 dotnet_diagnostic.BRO1408.severity = warning
+# BRO1146: 'record R' instead of 'record class R' (Meziantou MA0174; stylebro-migrate turns it off)
+dotnet_diagnostic.BRO1146.severity = warning
+
+# BRO1145: 'class Marker;' instead of 'class Marker { }' (C# 12; Meziantou MA0206). Off: a matter of taste, and it needs
+# C# 12 in every target framework; set to warning to opt in.
+dotnet_diagnostic.BRO1145.severity = none
 
 # BRO1409: 'internal', not 'public', on ordinary methods of internal types (StyleCop issue #2981). Off: reflection and
 # serializers see public members only; set to warning to opt in.

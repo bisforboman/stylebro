@@ -24,6 +24,8 @@ BRO1139 | Readability | Warning  | ElseIfAnalyzer
 BRO1140 | Readability | Warning  | EmptyRecordBodyAnalyzer
 BRO1141 | Readability | Warning  | ObjectCreationParenthesesAnalyzer
 BRO1142 | Readability | Warning  | CombinedFieldsAnalyzer
+BRO1145 | Readability | Disabled | EmptyTypeBodyAnalyzer
+BRO1146 | Readability | Warning  | RecordClassKeywordAnalyzer
 BRO1310 | Naming | Disabled | CamelCaseNamingAnalyzer
 BRO1311 | Naming | Warning | TupleElementNamingAnalyzer
 BRO1312 | Naming | Disabled | NamespaceNamingAnalyzer
@@ -48,6 +50,7 @@ BRO1523 | Layout | Warning  | CallChainAnalyzer
 BRO1525 | Layout | Warning  | AttributeBlankLinesAnalyzer
 BRO1524 | Layout | Warning  | ConditionalLayoutAnalyzer
 BRO1526 | Layout | Warning  | SwitchSectionBlankLinesAnalyzer
+BRO1527 | Layout | Warning  | AutoAccessorLinesAnalyzer
 BRO1616 | Documentation | Warning  | SummaryLayoutAnalyzer
 BRO1617 | Documentation | Warning  | DocumentationStyleAnalyzer
 BRO1618 | Documentation | Warning  | DocumentationStyleAnalyzer

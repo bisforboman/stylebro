@@ -149,7 +149,15 @@ internal static class CamelCaseRenamer
     internal static async Task<HashSet<string>> GetStringLiteralsAsync(Solution solution, CancellationToken cancellationToken, bool withNameof = false)
     {
         var strings = new HashSet<string>();
-        foreach (var document in solution.Projects.SelectMany(p => p.Documents))
+        var documents = new List<Document>();
+        foreach (var project in solution.Projects)
+        {
+            // Source generators' output too: Mapperly reaches private fields by name ('UnsafeAccessor(..., Name = "intValue")').
+            documents.AddRange(project.Documents);
+            documents.AddRange(await project.GetSourceGeneratedDocumentsAsync(cancellationToken).ConfigureAwait(false));
+        }
+
+        foreach (var document in documents)
         {
             if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is { } root)
             {
@@ -324,7 +332,11 @@ internal static class CamelCaseRenamer
 
         async Task<bool> TryAddAsync(Document? document, TextSpan span, string replacement)
         {
-            if (document is null)
+            // Generated code can't be renamed with the rest (a tool writes it again): a Razor page's or a source generator's
+            // reference would be left behind.
+            if (document is null or SourceGeneratedDocument
+                || await document.GetSyntaxTreeAsync(cancellationToken).ConfigureAwait(false) is not { } tree
+                || NamespaceNames.IsGenerated(tree))
             {
                 return false;
             }

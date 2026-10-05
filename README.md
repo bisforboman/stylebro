@@ -70,6 +70,8 @@ correctness and migration, with measured numbers.
 | [BRO1140](docs/rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Yes |
 | [BRO1141](docs/rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Yes |
 | [BRO1142](docs/rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Yes |
+| [BRO1145](docs/rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' (off by default) | (none; Meziantou MA0206) | Yes |
+| [BRO1146](docs/rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
 | [BRO1405](docs/rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Yes |
 | [BRO1406](docs/rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Yes |
@@ -89,6 +91,7 @@ correctness and migration, with measured numbers.
 | [BRO1525](docs/rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Yes |
 | [BRO1524](docs/rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Yes |
 | [BRO1526](docs/rules/BRO1526.md) | Blank line between switch sections | (none; Roslynator RCS0061) | Yes |
+| [BRO1527](docs/rules/BRO1527.md) | Auto-accessors should be on one line | (none; Roslynator RCS0042) | Yes |
 | [BRO1301](docs/rules/BRO1301.md) | Variable names should begin with a lower-case letter | SA1312 | Yes |
 | [BRO1302](docs/rules/BRO1302.md) | Parameter names should begin with a lower-case letter | SA1313 | Yes |
 | [BRO1303](docs/rules/BRO1303.md) | Private field names should be camelCase | SA1306, SA1309 | Yes |

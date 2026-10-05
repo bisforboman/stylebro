@@ -58,6 +58,7 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
             && PrefixNames.GetTypeParameterName(symbol.Name) is { } newName
             && !InheritsName(symbol)
             && symbol.DeclaringMethod is not ({ PartialDefinitionPart: not null } or { PartialImplementationPart: not null })
+            && (symbol.DeclaringType is not { } owner || !NamespaceNames.HasGeneratedPart(owner))
             && !PrefixNames.IsTypeNameTaken(newName, context.SemanticModel.Compilation)
             && context.SemanticModel.LookupSymbols(node.SpanStart, name: newName).IsEmpty)
         {
