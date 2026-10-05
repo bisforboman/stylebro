@@ -750,10 +750,8 @@ public class FixOrderTests
         "BRO1519",
         "BRO1527");
 
-    // sameText: false because BRO1001 adds a blank line when its sort puts the still multi-line B below D (BRO1505
-    // wants one there), and none when BRO1527 put B on one line first. Both results are clean.
     [Fact]
-    public Task AutoAccessors_SortedNextToAOneLineProperty() => AssertConvergesInEveryOrderCoreAsync(
+    public Task AutoAccessors_SortedNextToAOneLineProperty() => AssertConvergesInEveryOrderAsync(
         """
         public class C
         {
@@ -767,10 +765,64 @@ public class FixOrderTests
             public int D { get; set; }
         }
         """,
-        null,
-        false,
         "BRO1001",
         "BRO1505",
+        "BRO1527");
+
+    // E counts as one line (its attribute line doesn't count); G and H stay multi-line after BRO1527's fix (the line break
+    // before the name, the initializer), so they need their blank lines in every order.
+    [Fact]
+    public Task AutoAccessors_NextToPropertiesThatStayMultiLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int A { get; set; }
+            [System.Obsolete]
+            public int E
+            {
+                get;
+                set;
+            }
+            public int F { get; set; }
+            public int
+                G
+            {
+                get;
+                set;
+            }
+            public int[] H
+            {
+                get;
+                set;
+            } = new[]
+            {
+                1,
+            };
+            public int I { get; set; }
+        }
+        """,
+        "BRO1505",
+        "BRO1519",
+        "BRO1527");
+
+    [Fact]
+    public Task AutoAccessors_SortedNextToAOneLinePropertyWithoutBro1505() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            internal int B
+            {
+                get;
+                set;
+            }
+
+            public int A { get; set; }
+            public int D { get; set; }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1001",
+        "BRO1519",
         "BRO1527");
 
     [Fact]

@@ -17,16 +17,23 @@ public sealed class ElementSeparationAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxTreeAction(c =>
+        context.RegisterCompilationStartAction(start =>
         {
-            var text = c.Tree.GetText(c.CancellationToken);
-            foreach (var (previous, current) in ElementSeparation.GetViolations(c.Tree.GetRoot(c.CancellationToken), text))
+            var compilationOptions = start.Compilation.Options;
+            start.RegisterSyntaxTreeAction(c =>
             {
-                if (ElementSeparation.GetChange(previous, current, text) is not null)
+                var text = c.Tree.GetText(c.CancellationToken);
+                var autoAccessorLines = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.AutoAccessorsOnOneLine, c.CancellationToken)
+                    ? c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)
+                    : null;
+                foreach (var (previous, current) in ElementSeparation.GetViolations(c.Tree.GetRoot(c.CancellationToken), text, autoAccessorLines))
                 {
-                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.ElementsSeparatedByBlankLine, ElementSeparation.GetLocation(current)));
+                    if (ElementSeparation.GetChange(previous, current, text) is not null)
+                    {
+                        c.ReportDiagnostic(Diagnostic.Create(Descriptors.ElementsSeparatedByBlankLine, ElementSeparation.GetLocation(current)));
+                    }
                 }
-            }
+            });
         });
     }
 }

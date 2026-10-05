@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Ordering;
@@ -76,7 +77,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         }
 
         var targets = new HashSet<SyntaxNode>(partialAccess.Keys);
-        var rewriter = new SortingRewriter(targets, options, partialAccess);
+        var rewriter = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken));
         return targets.Where(t => !t.Ancestors().Any(targets.Contains))
             .Select(t => new TextChange(t.Span, rewriter.Visit(t)!.ToString()))
             .ToList();
@@ -120,9 +121,15 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
         }
 
-        var newRoot = new SortingRewriter(targets, options, partialAccess).Visit(root);
+        var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken)).Visit(root);
         return document.WithSyntaxRoot(newRoot);
     }
+
+    /// <summary>The file's options when BRO1527 is on: its fix puts multi-line auto-properties on one line, so the sort judges them so.</summary>
+    private static AnalyzerConfigOptions? GetAutoAccessorLines(Document document, SyntaxTree tree, CancellationToken cancellationToken) =>
+        Severities.IsOn(document.Project.CompilationOptions, tree, DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken)
+            ? document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(tree)
+            : null;
 
     /// <summary>Sorts the targeted types bottom-up, so nested types are sorted before their parents.</summary>
     private sealed class SortingRewriter : CSharpSyntaxRewriter
@@ -130,12 +137,14 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         private readonly HashSet<SyntaxNode> targets;
         private readonly MemberOrderOptions options;
         private readonly Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess;
+        private readonly AnalyzerConfigOptions? autoAccessorLines;
 
-        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess)
+        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess, AnalyzerConfigOptions? autoAccessorLines)
         {
             this.targets = targets;
             this.options = options;
             this.partialAccess = partialAccess;
+            this.autoAccessorLines = autoAccessorLines;
         }
 
         public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
@@ -164,7 +173,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             // 'original' is the node from the unmodified tree, so reference equality with the targets holds.
             // Sorting nested types doesn't move this container's own members, so the indexes still match.
             return targets.Contains(original) && visited is not null
-                ? MemberOrdering.Sort(visited, options, partialAccess[original])
+                ? MemberOrdering.Sort(visited, options, partialAccess[original], autoAccessorLines)
                 : visited;
         }
     }
