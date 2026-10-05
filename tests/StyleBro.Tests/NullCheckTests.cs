@@ -322,6 +322,34 @@ public class NullCheckTests
         LanguageVersion.CSharp6,
         Pattern);
 
+    [Fact]
+    public Task IsNot_NeedsCSharp9_InEveryCopyOfTheFile()
+    {
+        // The file is compiled with C# 8 in another project too (LibGit2Sharp: net472's default C# 7.3 in a multi-targeted
+        // project). The fix doesn't write 'is not null' there; 'is null' works in both.
+        var test = new CSharpCodeFixTest<NullCheckAnalyzer, NullCheckCodeFixProvider, DefaultVerifier>
+        {
+            NumberOfIncrementalIterations = -3,
+            NumberOfFixAllIterations = -3,
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
+
+            // The framework's '#pragma warning disable' check edits the first project's copy only.
+            TestBehaviors = TestBehaviors.SkipSuppressionCheck,
+        };
+        const string Old = "public class C\n{\n    public bool M(string s) => {|BRO1133:s == null|} || s != null;\n}\n";
+        test.TestState.Sources.Add(("/0/Test0.cs", "public class C\n{\n    public bool M(string s) => {|BRO1133:s == null|} || {|BRO1133:s != null|};\n}\n"));
+        test.TestState.AdditionalProjects["Old"].Sources.Add(("/0/Test0.cs", Old));
+        test.FixedState.MarkupHandling = MarkupMode.Allow;
+        test.FixedState.Sources.Add(("/0/Test0.cs", "public class C\n{\n    public bool M(string s) => s is null || {|BRO1133:s != null|};\n}\n"));
+        test.FixedState.AdditionalProjects["Old"].Sources.Add(("/0/Test0.cs", "public class C\n{\n    public bool M(string s) => s is null || s != null;\n}\n"));
+        test.SolutionTransforms.Add((solution, _) =>
+        {
+            var old = solution.Projects.Single(p => p.Name == "Old");
+            return solution.WithProjectParseOptions(old.Id, ((CSharpParseOptions)old.ParseOptions!).WithLanguageVersion(LanguageVersion.CSharp8));
+        });
+        return test.RunAsync();
+    }
+
     private static Task VerifyAsync(string source, LanguageVersion version, string editorConfig, string? fixedSource = null, bool allowUnsafe = false)
     {
         var test = new CSharpCodeFixTest<NullCheckAnalyzer, NullCheckCodeFixProvider, DefaultVerifier>

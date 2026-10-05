@@ -298,4 +298,21 @@ public class PascalCaseNamingTests
             }
             """,
         ]);
+
+    [Fact]
+    public Task ATypeWithAGeneratedPart_KeepsItsAndItsMembersNames() => VerifyNoDiagnosticsAsync(
+        ("/0/list.razor.cs", """
+            public partial class list
+            {
+                private void reload()
+                {
+                }
+            }
+            """),
+        ("/0/list.razor.g.cs", """
+            public partial class list
+            {
+                public void Render() => reload();
+            }
+            """));
 }

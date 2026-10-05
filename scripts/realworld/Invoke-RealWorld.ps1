@@ -38,6 +38,8 @@ $hook = Join-Path $Work 'stylebro-hook.targets'
 # -Enable: rules that are off by default, turned on through a global config (EditorConfigFiles, not
 # GlobalAnalyzerConfigFiles: the SDK has already converted those when this hook is imported).
 $enableItem = ''
+# 'pwsh Invoke-RealWorld.ps1 -Enable A,B' (from another shell, or CI) passes one string "A,B".
+$Enable = @($Enable | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 if ($Enable) {
     $enableConfig = Join-Path $Work 'stylebro-enable.globalconfig'
     Set-Content $enableConfig (@('is_global = true') + @($Enable | ForEach-Object { "dotnet_diagnostic.$_.severity = warning" }))
@@ -116,7 +118,9 @@ function Get-FailedTests {
         }
     }
     else {
-        dotnet test $sln -nologo -p:TreatWarningsAsErrors=false 2>&1 | Select-String '^\s+Failed (\S+)' |
+        # TestFilter (repos.psd1): leaves out tests that depend on something other than the code, e.g. the network.
+        $filter = if ($r.TestFilter) { @('--filter', $r.TestFilter) } else { @() }
+        dotnet test $sln -nologo -p:TreatWarningsAsErrors=false @filter 2>&1 | Select-String '^\s+Failed (\S+)' |
             ForEach-Object { [void]$failed.Add($_.Matches[0].Groups[1].Value) }
     }
     # The comma keeps an empty set a set (PowerShell would unroll it to $null).
