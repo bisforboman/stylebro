@@ -58,6 +58,7 @@ public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var blankLines = new List<TextLine>();
         var insertions = new Dictionary<int, TextChange>();
+        var exempt = BlankLines.GetExemptPrefixes(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
         foreach (var diagnostic in diagnostics)
         {
             var start = diagnostic.Location.SourceSpan.Start;
@@ -65,7 +66,7 @@ public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
             {
                 blankLines.AddRange(BlankLines.GetBlankLinesBelow(root.FindToken(start), text));
             }
-            else if (BlankLines.NeedsBlankLineAbove(root.FindTrivia(start), text, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken)))
+            else if (BlankLines.NeedsBlankLineAbove(root.FindTrivia(start), text, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken), exempt))
             {
                 var line = text.Lines.GetLineFromPosition(start);
                 var above = text.Lines[line.LineNumber - 1];

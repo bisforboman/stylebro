@@ -195,6 +195,24 @@ internal static class ParameterDocumentation
     public static SyntaxToken? GetNameToken(XmlElementSyntax tag) =>
         tag.StartTag.Attributes.OfType<XmlNameAttributeSyntax>().FirstOrDefault()?.Identifier.Identifier;
 
+    /// <summary>Whether the tag has its '///' lines to itself.</summary>
+    public static bool IsOnOwnLines(XmlNodeSyntax tag, SourceText text)
+    {
+        var start = DocumentationTags.GetStart(tag);
+        var first = text.Lines.GetLineFromPosition(start);
+        var last = text.Lines.GetLineFromPosition(tag.Span.End);
+        return text.ToString(TextSpan.FromBounds(first.Start, start)).Trim() == "///"
+            && text.ToString(TextSpan.FromBounds(tag.Span.End, last.End)).Trim().Length == 0;
+    }
+
+    /// <summary>The tag's lines, without the final line break.</summary>
+    public static TextSpan GetLines(XmlNodeSyntax tag, SourceText text)
+    {
+        var first = text.Lines.GetLineFromPosition(DocumentationTags.GetStart(tag));
+        var last = text.Lines.GetLineFromPosition(tag.Span.End);
+        return TextSpan.FromBounds(first.Start, last.End);
+    }
+
     private static List<string>? GetTypeParameterNames(SyntaxNode member)
     {
         var list = member switch
@@ -224,24 +242,6 @@ internal static class ParameterDocumentation
 
     /// <summary>The name in the tag, or null for a tag without one (no 'name' attribute, or an empty one).</summary>
     private static string? GetName(XmlElementSyntax tag) => GetNameToken(tag)?.ValueText is { Length: > 0 } name ? name : null;
-
-    /// <summary>Whether the tag has its '///' lines to itself.</summary>
-    private static bool IsOnOwnLines(XmlElementSyntax tag, SourceText text)
-    {
-        var start = DocumentationTags.GetStart(tag);
-        var first = text.Lines.GetLineFromPosition(start);
-        var last = text.Lines.GetLineFromPosition(tag.Span.End);
-        return text.ToString(TextSpan.FromBounds(first.Start, start)).Trim() == "///"
-            && text.ToString(TextSpan.FromBounds(tag.Span.End, last.End)).Trim().Length == 0;
-    }
-
-    /// <summary>The tag's lines, without the final line break.</summary>
-    private static TextSpan GetLines(XmlElementSyntax tag, SourceText text)
-    {
-        var first = text.Lines.GetLineFromPosition(DocumentationTags.GetStart(tag));
-        var last = text.Lines.GetLineFromPosition(tag.Span.End);
-        return TextSpan.FromBounds(first.Start, last.End);
-    }
 
     /// <summary>One problem: where it's reported, which rule, and the message.</summary>
     public sealed class Problem

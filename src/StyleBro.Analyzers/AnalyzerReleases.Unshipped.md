@@ -44,3 +44,6 @@ BRO1523 | Layout | Warning  | CallChainAnalyzer
 BRO1525 | Layout | Warning  | AttributeBlankLinesAnalyzer
 BRO1524 | Layout | Warning  | ConditionalLayoutAnalyzer
 BRO1616 | Documentation | Warning  | SummaryLayoutAnalyzer
+BRO1617 | Documentation | Warning  | DocumentationStyleAnalyzer
+BRO1618 | Documentation | Warning  | DocumentationStyleAnalyzer
+BRO1619 | Documentation | Warning  | DocumentationStyleAnalyzer

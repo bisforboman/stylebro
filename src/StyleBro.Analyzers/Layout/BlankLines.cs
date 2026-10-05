@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Layout;
@@ -14,6 +15,9 @@ namespace StyleBro.Analyzers.Layout;
 /// </summary>
 internal static class BlankLines
 {
+    /// <summary>BRO1504's option: comma-separated prefixes of comment text that needs no blank line above (default none).</summary>
+    public const string ExemptPrefixesKey = "stylebro_comment_blank_line_exempt_prefixes";
+
     /// <summary>
     /// The blank lines directly above <paramref name="token"/>, when it starts its line. Only whole lines inside the
     /// token's leading trivia count, so text inside a (raw) string literal is never touched. The scan stops at the
@@ -82,18 +86,34 @@ internal static class BlankLines
         return lines;
     }
 
+    /// <summary>The prefixes in <see cref="ExemptPrefixesKey"/>, trimmed, without empty entries.</summary>
+    public static IReadOnlyList<string> GetExemptPrefixes(AnalyzerConfigOptions options) =>
+        options.TryGetValue(ExemptPrefixesKey, out var value)
+            ? value.Split(',').Select(p => p.Trim()).Where(p => p.Length > 0).ToArray()
+            : [];
+
     /// <summary>
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
     /// an opening brace, '=>' or a 'case'/'default' label; and not for '///' and '////' (commented-out code). Not for a comment
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
-    /// behind.
+    /// behind. Not for a comment whose text starts with one of <paramref name="exemptPrefixes"/> (tool markers such as
+    /// '// ReSharper disable once ...', from <see cref="ExemptPrefixesKey"/>).
     /// </summary>
-    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn)
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
         {
             return false;
+        }
+
+        if (exemptPrefixes.Count > 0)
+        {
+            var commentText = comment.ToString().Substring(2).TrimStart();
+            if (exemptPrefixes.Any(p => commentText.StartsWith(p, StringComparison.Ordinal)))
+            {
+                return false;
+            }
         }
 
         var line = text.Lines.GetLineFromPosition(comment.SpanStart);

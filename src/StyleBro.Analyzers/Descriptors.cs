@@ -441,6 +441,39 @@ internal static class Descriptors
             + "has no '<para>', '<code>' or '<list>'. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.SummaryLayout + ".md");
 
+    public static readonly DiagnosticDescriptor GenericCrefBraces = new(
+        id: DiagnosticIds.GenericCrefBraces,
+        title: "Write a cref's type arguments in braces",
+        messageFormat: "Write the type arguments of '{0}' in braces",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A cref names a generic type or member with braces, 'List{T}', not with escaped angle brackets, "
+            + "'List&lt;T&gt;'. Not a StyleCop rule (StyleCop's proposed SA1653, issue #758).",
+        helpLinkUri: HelpBase + DiagnosticIds.GenericCrefBraces + ".md");
+
+    public static readonly DiagnosticDescriptor LangwordElement = new(
+        id: DiagnosticIds.LangwordElement,
+        title: "Write a C# keyword in documentation as <see langword=\"...\"/>",
+        messageFormat: "Use <see langword=\"{0}\"/>",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A C# keyword alone in '<c>' ('<c>null</c>') is written '<see langword=\"null\"/>', which documentation "
+            + "tools link to the keyword's page. Not a StyleCop rule (Meziantou MA0154).",
+        helpLinkUri: HelpBase + DiagnosticIds.LangwordElement + ".md");
+
+    public static readonly DiagnosticDescriptor DocumentationElementOrder = new(
+        id: DiagnosticIds.DocumentationElementOrder,
+        title: "Put the documentation elements in the standard order",
+        messageFormat: "{0}",
+        category: "Documentation",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The top-level elements of a documentation comment come in the order summary, typeparam, param, returns, "
+            + "value, exception, remarks, example, seealso. Not a StyleCop rule.",
+        helpLinkUri: HelpBase + DiagnosticIds.DocumentationElementOrder + ".md");
+
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",

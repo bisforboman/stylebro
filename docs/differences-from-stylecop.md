@@ -84,6 +84,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment right after a collection expression's `[` | It starts the list like a comment after `{`; StyleCop fixed this after 1.2.0-beta.556 ([#3766](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3766)). |
 | [BRO1501](rules/BRO1501.md) (SA1509) | The brace of an entry in an initializer (`{ "ssh", 22 }` after a blank line in a dictionary initializer) | The blank line groups the entries; StyleCop's fix removes it (StyleCop bug [#2832](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2832), open; user decision 2026-10-04). |
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment right after `=>` (switch expression arm, lambda, expression body) | It starts what comes after the arrow; StyleCop's fix puts a blank line between them (StyleCop bug [#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392), open; user decision 2026-10-04). |
+| [BRO1504](rules/BRO1504.md) (SA1515) | A comment whose text starts with a prefix in `stylebro_comment_blank_line_exempt_prefixes` (default none; e.g. `ReSharper, @formatter`) | Tool markers belong to the line below them (StyleCop issues [#3546](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3546), [#1490](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1490)); with the default, the same as StyleCop. |
 | [BRO1310](rules/BRO1310.md) (SA1305) | Parameters of `extern`, `[DllImport]` and `[LibraryImport]` methods | They keep the native API's names, like BRO1309 leaves the methods alone (StyleCop bug [#2859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2859), open). |
 | [BRO1002](rules/BRO1002.md) (SA1005) | `dotnet new` template markers `//-:` and `//+:` | A space breaks them (StyleCop bug [#2689](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2689), open). |
 | [BRO1510](rules/BRO1510.md) (SA1504) | One-line accessors where one has an attribute on its own line above it | The attribute isn't part of the accessor's layout; StyleCop counts its line ([#3434](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3434)). |
@@ -207,6 +208,19 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 
 `stylebro-migrate` writes them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on
 in `.editorconfig` to use them.
+Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1133.severity`,
+`dotnet_diagnostic.BRO1520.severity`, `dotnet_diagnostic.BRO1521.severity` and `dotnet_diagnostic.BRO1522.severity` =
+Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1520.severity`,
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1134.severity` =
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1523.severity` =
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1135.severity` =
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1525.severity` =
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1524.severity` =
+`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1616.severity` =
+`dotnet_diagnostic.BRO1617.severity`, `dotnet_diagnostic.BRO1618.severity` and `dotnet_diagnostic.BRO1619.severity` =
+`warning`); `stylebro-migrate` writes
+them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on in `.editorconfig` to use
+them.
 
 | Rule | What it checks | From |
 |---|---|---|
@@ -228,6 +242,9 @@ in `.editorconfig` to use them.
 | [BRO1141](rules/BRO1141.md) | `new T { ... }` without empty parentheses (`stylebro_object_creation_parentheses = omit`, the default) or with them (`include`) | Roslynator RCS1050 |
 | [BRO1142](rules/BRO1142.md) | One local per declaration, like BRO1114 (SA1132) for fields | Roslynator RCS1081, Sonar S1659 |
 | [BRO1408](rules/BRO1408.md) | No `enum E : int` or `class C : object` | Roslynator RCS1042, Sonar S1939 |
+| [BRO1617](rules/BRO1617.md) | A cref's type arguments in braces: `cref="List{T}"`, not `cref="List&lt;T&gt;"` | StyleCop's proposed SA1653 ([#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758), never implemented) |
+| [BRO1618](rules/BRO1618.md) | A C# keyword alone in `<c>` (`<c>null</c>`) is written `<see langword="null"/>` | Meziantou MA0154 |
+| [BRO1619](rules/BRO1619.md) | Top-level documentation elements in the order summary, typeparam, param, returns, value, exception, remarks, example, seealso | (none; Roslynator RCS1232 orders `<param>` tags only) |
 
 ## StyleCop's open bugs
 

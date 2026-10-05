@@ -136,6 +136,8 @@ Done (2026-10-05): [BRO1138](rules/BRO1138.md); no SDK rule does this (IDE0071 o
 `<c>null</c>`, `<c>true</c>` -> `<see langword="null"/>`. Meziantou turns it on (info) and has a fix; the .NET runtime
 repo writes docs this way. Effort: low. Only C# keywords.
 
+Done (2026-10-05): [BRO1618](rules/BRO1618.md), with the reserved keywords and MA0154's contextual ones.
+
 ### 10. Object creation parentheses (RCS1050)
 
 `new List<int>() { 1 }` vs `new List<int> { 1 }`. Off by default, needs `roslynator_object_creation_parentheses_style`.
@@ -175,6 +177,10 @@ Done (2026-10-05): [BRO1408](rules/BRO1408.md), `enum E : int` and `class C : ob
 
 BRO1611 already orders `<param>` tags. A fixed order for the top-level elements is the same move. Only when every
 element has its own lines (like BRO1611).
+
+Done (2026-10-05): [BRO1619](rules/BRO1619.md). RCS1232 itself turned out to order `<param>` tags only (BRO1611's job);
+the top-level order (summary, typeparam, param, returns, value, exception, remarks, example, seealso) is justified on
+the rule page. Comments with other top-level elements (`<inheritdoc/>`, custom tags) are skipped.
 
 ### 16. No `else` after a jump (MA0071, RCS1211)
 
@@ -334,6 +340,16 @@ Skip multi-line headers like BRO1132 does.
 
 Done (2026-10-04): [BRO1134](rules/BRO1134.md), a new id next to BRO1132 (SA1108 covers statements only, and
 `stylebro-migrate` maps BRO1132 to SA1108).
+
+#### 6. Generic crefs in braces (SA1653, #758)
+
+Done (2026-10-05): [BRO1617](rules/BRO1617.md). Every `cref` attribute; only `&lt;`/`&gt;` around a type argument or
+type parameter list, so operator crefs and crefs the compiler can't read are left alone.
+
+#### 7. Tool marker comments and BRO1504 (#3546, #1490)
+
+Done (2026-10-05): `stylebro_comment_blank_line_exempt_prefixes` ([BRO1504](rules/BRO1504.md#configuration)),
+comma-separated and case-sensitive, default empty.
 
 ### Requested fixes and options StyleBro already has
 
