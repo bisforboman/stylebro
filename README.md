@@ -69,6 +69,7 @@ project or coming from StyleCop.
 | [BRO1140](docs/rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Yes |
 | [BRO1141](docs/rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Yes |
 | [BRO1142](docs/rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Yes |
+| [BRO1144](docs/rules/BRO1144.md) | Escape identifiers that C# 14 reads as keywords | (none; Sonar S8367/S8368/S8380, no fix) | Yes |
 | [BRO1145](docs/rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' (off by default) | (none; Meziantou MA0206) | Yes |
 | [BRO1146](docs/rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |

@@ -15,6 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 71 |
 | Done, not released yet | 52 |
+| Done, not released yet | 51 |
 | Planned | 0 rules, 36 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
@@ -70,6 +71,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Readability batch B (StyleCop issues #762, #760; survey #7, #8, #10, #12, #13, #14) | BRO1136 `x => x`, BRO1137 redundant `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string, BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses (`stylebro_object_creation_parentheses`, default omit), BRO1142 one local per declaration, BRO1408 redundant base type. On in the preset, off after `stylebro-migrate`. | Done (2026-10-05) |
 | Beyond StyleCop | Public methods of internal types (StyleCop issue #2981) | BRO1409, off by default: `public` -> `internal` on ordinary methods of internal types only; members reflection, serializers, frameworks or the compiler look for are left out, names in strings or `nameof` not fixed. See decisions.md. Off after `stylebro-migrate`. | Done (2026-10-05) |
 | Beyond StyleCop | Redundant `!` and `HasValue` (newer-rules survey #5, #6; Sonar S8969, Meziantou MA0171) | BRO1147 (a null-forgiving `!` on a value already not null; skips multi-targeted projects, type arguments, `null!`) and BRO1148 (`x.HasValue` -> `x is not null`, in BRO1133's form), both off by default (decisions.md). The SDK's IDE0370 works too once its severity is set (rule page). | Done (2026-10-05) |
+| Beyond StyleCop | C# 14: keywords and extension blocks (survey 2026-10-05) | BRO1144 `@field`/`@extension`/`@partial` where C# 14 reads the name as a keyword (Sonar S8367/S8368/S8380, no fix elsewhere); BRO1001 sorts extension blocks right before methods and sorts their members; BRO1509 expands a one-line extension block. On in the preset, BRO1144 off after `stylebro-migrate`. See decisions.md. | Done (2026-10-05) |
 | Beyond StyleCop | Declaration forms (Roslynator RCS0042, Meziantou MA0206, MA0174) | BRO1527 auto-accessors on one line (blank lines BRO1505/BRO1519 want added in the same fix), BRO1146 `record` instead of `record class` (on in the preset, off after `stylebro-migrate`); BRO1145 `class Marker;` for empty bodies (C# 12; off by default, skipped in multi-targeted projects unless every framework gets C# 12). See decisions.md. | Done (2026-10-05) |
 
 ### Read the SDK's own settings
@@ -161,6 +163,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1141](rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Done |
 | [BRO1142](rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Done |
 | [BRO1143](rules/BRO1143.md) | No 'else' after a branch that ends in a jump (off by default) | (none; Meziantou MA0071, Roslynator RCS1211) | Done |
+| [BRO1144](rules/BRO1144.md) | Escape identifiers that C# 14 reads as keywords | (none; Sonar S8367/S8368/S8380, no fix) | Done |
 | [BRO1145](rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' (off by default) | (none; Meziantou MA0206) | Done |
 | [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Done |
 | [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` (off by default) | (none; Sonar S8969, IDE0370) | Done |

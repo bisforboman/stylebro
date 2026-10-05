@@ -25,27 +25,45 @@ public sealed class SingleLineBlocksAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                if (SingleLineBlocks.GetBraces(c.Node) is not { } braces)
-                {
-                    return;
-                }
+                Analyze(c, c.Node);
 
-                var text = c.Node.SyntaxTree.GetText(c.CancellationToken);
-                var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree);
-                if (!SingleLineBlocks.IsReported(c.Node, text, options))
+                // C# 14 extension blocks have a kind Roslyn 4.8 can't register for: checked from their class.
+                if (c.Node is ClassDeclarationSyntax type)
                 {
-                    return;
+                    foreach (var member in type.Members)
+                    {
+                        if (CSharp14.IsExtensionBlock(member))
+                        {
+                            Analyze(c, member);
+                        }
+                    }
                 }
-
-                c.ReportDiagnostic(braces.IsElement
-                    ? Diagnostic.Create(Descriptors.SingleLineElement, braces.Open.GetLocation(), GetName(c.Node))
-                    : Diagnostic.Create(Descriptors.SingleLineStatementBlock, braces.Open.GetLocation()));
             },
             SingleLineBlocks.Kinds);
     }
 
+    private static void Analyze(SyntaxNodeAnalysisContext c, SyntaxNode node)
+    {
+        if (SingleLineBlocks.GetBraces(node) is not { } braces)
+        {
+            return;
+        }
+
+        var text = node.SyntaxTree.GetText(c.CancellationToken);
+        var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree);
+        if (!SingleLineBlocks.IsReported(node, text, options))
+        {
+            return;
+        }
+
+        c.ReportDiagnostic(braces.IsElement
+            ? Diagnostic.Create(Descriptors.SingleLineElement, braces.Open.GetLocation(), GetName(node))
+            : Diagnostic.Create(Descriptors.SingleLineStatementBlock, braces.Open.GetLocation()));
+    }
+
     private static string GetName(SyntaxNode node) => node switch
     {
+        TypeDeclarationSyntax extension when CSharp14.IsExtensionBlock(extension) => "extension" + extension.ParameterList,
         BaseTypeDeclarationSyntax type => type.Identifier.ValueText,
         NamespaceDeclarationSyntax ns => ns.Name.ToString(),
         BlockSyntax { Parent: MethodDeclarationSyntax method } => method.Identifier.ValueText,

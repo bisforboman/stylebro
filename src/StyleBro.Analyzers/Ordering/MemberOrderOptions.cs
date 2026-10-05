@@ -18,6 +18,9 @@ internal enum MemberKind
     Indexer,
     Conversion,
     Operator,
+
+    /// <summary>A C# 14 extension block: right before the methods (its members are sorted inside it).</summary>
+    Extension,
     Method,
     Struct,
     Class,
@@ -40,7 +43,7 @@ internal enum MemberAccess
 /// <summary>
 /// Ordering options read from .editorconfig / .globalconfig:
 /// <code>
-/// stylebro_member_order            = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, method, struct, class
+/// stylebro_member_order            = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class
 /// stylebro_member_access_order     = public, internal, protected_internal, protected, private_protected, private
 /// stylebro_member_constants_first  = true
 /// stylebro_member_static_first     = true
@@ -74,6 +77,7 @@ internal sealed class MemberOrderOptions
         ["indexer"] = (int)MemberKind.Indexer,
         ["conversion"] = (int)MemberKind.Conversion,
         ["operator"] = (int)MemberKind.Operator,
+        ["extension"] = (int)MemberKind.Extension,
         ["method"] = (int)MemberKind.Method,
         ["struct"] = (int)MemberKind.Struct,
         ["class"] = (int)MemberKind.Class,

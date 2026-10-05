@@ -234,6 +234,13 @@ check `csharp_preserve_single_line_statements` first), Meziantou [MA0175](https:
   decides per `!` from the operand's flow state, and skips multi-targeted projects.
 - **`HasValue` (Meziantou MA0171).** Done (2026-10-05): [BRO1148](rules/BRO1148.md), off by default (also in the
   preset), in BRO1133's form.
+### C# 14
+
+A follow-up survey (2026-10-05) of the analyzers' rules since 2025 and of StyleBro on C# 14 code found no fixer anywhere
+for identifiers that C# 14 reads as keywords (Sonar S8367, S8368, S8380 report them; the compiler warns with CS9258).
+Done (2026-10-05): [BRO1144](rules/BRO1144.md) writes `@field`, `@extension`, `@partial` there. The same survey found
+[BRO1001](rules/BRO1001.md) skipping every type with an extension block and [BRO1509](rules/BRO1509.md) not expanding a
+one-line extension block: both handle them now (decisions.md).
 Done (2026-10-05): RCS0042 as [BRO1527](rules/BRO1527.md), MA0174 (`record class` -> `record`) as
 [BRO1146](rules/BRO1146.md).
 

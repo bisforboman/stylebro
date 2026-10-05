@@ -1210,6 +1210,19 @@ internal static class Descriptors
             + "Meziantou MA0206).",
         helpLinkUri: HelpBase + DiagnosticIds.EmptyRecordBody + ".md");
 
+    public static readonly DiagnosticDescriptor ContextualKeyword = new(
+        id: DiagnosticIds.ContextualKeyword,
+        title: "Escape identifiers that C# 14 reads as keywords",
+        messageFormat: "C# 14 reads '{0}' here as a keyword: write '@{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'@field' for a member or local named 'field' used in a property accessor, '@extension' for a type named "
+            + "'extension' (and members of that type), '@partial' for a method returning a type named 'partial': C# 14 reads "
+            + "these as keywords, which changes what the code means or breaks the build. '@' means the same in every C# "
+            + "version. Not a StyleCop rule (Sonar S8367, S8368, S8380 report it without a fix).",
+        helpLinkUri: HelpBase + DiagnosticIds.ContextualKeyword + ".md");
+
     public static readonly DiagnosticDescriptor ObjectCreationParentheses = new(
         id: DiagnosticIds.ObjectCreationParentheses,
         title: "Object creation with an initializer: parentheses in one style",
