@@ -407,5 +407,31 @@
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'if (!Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken))'; Replace = 'if (true)'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '.Where(s => changes.Any(c => s.Span.Contains(c.Span)))'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'return derived.Any(d => d.Locations.Any(l => l.IsInSource && project.GetDocument(l.SourceTree) is null));'; Replace = 'return false;'; Tests = 'InternalTypeMethodTests' }
+        # BRO1147 (redundant null-forgiving '!')
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| operand is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression or (int)SyntaxKind.DefaultLiteralExpression }'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| operand is DefaultExpressionSyntax'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| operand.HasTrailingTrivia'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| node.Parent is ArgumentSyntax { RefKindKeyword.RawKind: not 0 }'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| MultiTargetSuppressor.GetFrameworks(options).Count > 1)'; Replace = '|| MultiTargetSuppressor.GetFrameworks(options).Count > 2)'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| context.WarningsEnabled() != project.WarningsEnabled()'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| context.AnnotationsEnabled() != project.AnnotationsEnabled()'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'return IsFlat(info.Type) && StateWithout('; Replace = 'return true && StateWithout('; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'StateWithout(node, model, cancellationToken) == NullableFlowState.NotNull'; Replace = 'info.Nullability.FlowState == NullableFlowState.NotNull'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '&& (named.ContainingType is null || IsFlat(named.ContainingType))'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '&& named.TypeArguments.All(a => a.IsValueType && IsFlat(a))'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'named.TypeArguments.All(a => a.IsValueType && IsFlat(a))'; Replace = 'named.TypeArguments.Length == 0'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'case EqualsValueClauseSyntax clause when clause.Parent is not VariableDeclaratorSyntax { Parent.Parent: LocalDeclarationStatementSyntax }:'; Replace = 'case EqualsValueClauseSyntax clause when false:'; Tests = 'NullForgivingTests' }
+        # BRO1148 (HasValue -> null check)
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| node.Span.End - node.Expression.Span.End != HasValue.Length)'; Replace = ')'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = 'if ((negated && node.SpanStart - target.SpanStart != 1)'; Replace = 'if ((false)'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| !NullChecks.IsLooseParent(judged)'; Replace = ''; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| target.Parent is ArgumentSyntax { Parent.Parent: InvocationExpressionSyntax'; Replace = '|| target.Parent is CastExpressionSyntax { Parent.Parent: InvocationExpressionSyntax'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '(negated ? LanguageVersion.CSharp7 : LanguageVersion.CSharp9)'; Replace = 'LanguageVersion.CSharp7'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| (pattern && ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion'; Replace = '|| (false && ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = 'is not IPropertySymbol { ContainingType.OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })'; Replace = 'is not IPropertySymbol)'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '? NullChecks.IsInExpressionTree(target, model, cancellationToken)'; Replace = '? false'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = ': !IsBuiltIn(model, target, node.Expression, negated, cancellationToken))'; Replace = ': false)'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '&& Severities.IsOn(model.Compilation.Options, node.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken)'; Replace = '&& false'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '&& Severities.IsOn(model.Compilation.Options, node.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken)'; Replace = '&& true'; Tests = 'HasValueTests' }
     )
 }

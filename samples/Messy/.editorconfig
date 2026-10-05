@@ -62,3 +62,11 @@ dotnet_naming_style.underscore_camel.capitalization = camel_case
 # BRO1504: tool markers need no blank line above them (stylebro_comment_blank_line_exempt_prefixes) in one file.
 [**/Reference.cs]
 stylebro_comment_blank_line_exempt_prefixes = ReSharper
+
+# BRO1147 (redundant null-forgiving '!') and BRO1148 ('x is not null' instead of 'x.HasValue') are off by default; on for
+# one file each.
+[**/Greetings.cs]
+dotnet_diagnostic.BRO1147.severity = warning
+
+[**/Bookings.cs]
+dotnet_diagnostic.BRO1148.severity = warning

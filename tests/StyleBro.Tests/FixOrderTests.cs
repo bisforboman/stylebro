@@ -707,6 +707,32 @@ public class FixOrderTests
         "BRO1106",
         "BRO1138");
 
+    // BRO1148 writes the form BRO1133 asks for, so BRO1133 never sees a check to rewrite; BRO1405 removes parentheses
+    // around 'x.HasValue', and BRO1148 only replaces it where '!= null' binds the same.
+    [Theory]
+    [InlineData("pattern_matching")]
+    [InlineData("equality_operator")]
+    public Task HasValue_InTheFormOfBro1133(string style) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public bool M(int? n, string s, bool b)
+            {
+                var x = (n.HasValue);
+                if (!n.HasValue || s == null || s is not null)
+                {
+                    return b == (n.HasValue);
+                }
+
+                return x && (!n.HasValue) && b;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1148.severity = warning\nstylebro_null_check_style = " + style + "\n",
+        "BRO1133",
+        "BRO1148",
+        "BRO1405");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

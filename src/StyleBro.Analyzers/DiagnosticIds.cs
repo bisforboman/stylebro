@@ -85,6 +85,8 @@ public static class DiagnosticIds
     public const string EmptyRecordBody = "BRO1140";
     public const string ObjectCreationParentheses = "BRO1141";
     public const string CombinedLocals = "BRO1142";
+    public const string RedundantNullForgiving = "BRO1147";
+    public const string HasValueNullCheck = "BRO1148";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";

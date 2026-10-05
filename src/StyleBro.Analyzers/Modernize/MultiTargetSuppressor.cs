@@ -54,12 +54,7 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
     /// <inheritdoc/>
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
-        if (!context.Options.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue(Property, out var value))
-        {
-            return;
-        }
-
-        var frameworks = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 0).ToList();
+        var frameworks = GetFrameworks(context.Options.AnalyzerConfigOptionsProvider.GlobalOptions);
         if (frameworks.Count < 2)
         {
             // Single target: the rule itself checks that the API exists.
@@ -74,6 +69,15 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
             }
         }
     }
+
+    /// <summary>
+    /// The project's target frameworks from <see cref="Property"/>; empty without the package's build targets (a project
+    /// that references StyleBro's DLLs directly), so callers can't tell a single target from an unknown one.
+    /// </summary>
+    internal static List<string> GetFrameworks(AnalyzerConfigOptions options) =>
+        options.TryGetValue(Property, out var value)
+            ? value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 0).ToList()
+            : new List<string>();
 
     /// <summary>Whether a target framework (net48, netstandard2.1, netcoreapp3.1, net8.0-windows, ...) reaches the minimum.</summary>
     internal static bool Has(string framework, (Version Core, Version? Standard) minimum)
