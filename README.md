@@ -67,6 +67,7 @@ project or coming from StyleCop.
 | [BRO1140](docs/rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Yes |
 | [BRO1141](docs/rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Yes |
 | [BRO1142](docs/rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Yes |
+| [BRO1144](docs/rules/BRO1144.md) | Escape identifiers that C# 14 reads as keywords | (none; Sonar S8367/S8368/S8380, no fix) | Yes |
 | [BRO1404](docs/rules/BRO1404.md) | Access modifier should be declared | SA1400 | Yes |
 | [BRO1405](docs/rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Yes |
 | [BRO1406](docs/rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Yes |

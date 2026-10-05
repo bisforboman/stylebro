@@ -197,6 +197,7 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 - `dotnet_diagnostic.BRO1140.severity`
 - `dotnet_diagnostic.BRO1141.severity`
 - `dotnet_diagnostic.BRO1142.severity`
+- `dotnet_diagnostic.BRO1144.severity`
 - `dotnet_diagnostic.BRO1408.severity`
 - `dotnet_diagnostic.BRO1520.severity`
 - `dotnet_diagnostic.BRO1521.severity`
@@ -234,6 +235,7 @@ in `.editorconfig` to use them.
 | [BRO1140](rules/BRO1140.md) | `record R(int X);` instead of an empty body | Roslynator RCS1251, Meziantou MA0206 |
 | [BRO1141](rules/BRO1141.md) | `new T { ... }` without empty parentheses (`stylebro_object_creation_parentheses = omit`, the default) or with them (`include`) | Roslynator RCS1050 |
 | [BRO1142](rules/BRO1142.md) | One local per declaration, like BRO1114 (SA1132) for fields | Roslynator RCS1081, Sonar S1659 |
+| [BRO1144](rules/BRO1144.md) | `@field`, `@extension`, `@partial` where C# 14 reads the identifier as a keyword (a member or local named `field` used in a property accessor, a type named `extension` and members of that type, a method returning a type named `partial`) | Sonar S8367, S8368, S8380 (no fix); compiler CS9258, CS9272, CS9273, CS9306 |
 | [BRO1408](rules/BRO1408.md) | No `enum E : int` or `class C : object` | Roslynator RCS1042, Sonar S1939 |
 | [BRO1409](rules/BRO1409.md) | Off by default. `internal`, not `public`, on an ordinary method of a type that can't be seen outside the assembly; properties, constructors, interface implementations, overrides, attributed methods and types, types with a base from another assembly and convention names (`Dispose`, `GetEnumerator`, ...) are left out, and a name found in a string or `nameof` isn't fixed | StyleCop issue [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (proposed, never implemented) |
 | [BRO1313](rules/BRO1313.md) | Off by default. A parameter of an override or interface implementation has the base member's parameter name (named arguments updated) | StyleCop's proposed SA1315 ([#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949), never implemented); SDK CA1725 (no fix) |

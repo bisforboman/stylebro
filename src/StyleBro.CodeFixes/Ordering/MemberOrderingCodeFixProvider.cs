@@ -120,7 +120,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
         }
 
-        var newRoot = new SortingRewriter(targets, options, partialAccess).Visit(root);
+        var newRoot = new SortingRewriter(targets, options, partialAccess).Visit(root)!;
         return document.WithSyntaxRoot(newRoot);
     }
 
@@ -138,26 +138,9 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             this.partialAccess = partialAccess;
         }
 
-        public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
-            SortIfTargeted(node, base.VisitClassDeclaration(node));
-
-        public override SyntaxNode? VisitStructDeclaration(StructDeclarationSyntax node) =>
-            SortIfTargeted(node, base.VisitStructDeclaration(node));
-
-        public override SyntaxNode? VisitInterfaceDeclaration(InterfaceDeclarationSyntax node) =>
-            SortIfTargeted(node, base.VisitInterfaceDeclaration(node));
-
-        public override SyntaxNode? VisitRecordDeclaration(RecordDeclarationSyntax node) =>
-            SortIfTargeted(node, base.VisitRecordDeclaration(node));
-
-        public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node) =>
-            SortIfTargeted(node, base.VisitNamespaceDeclaration(node));
-
-        public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
-            SortIfTargeted(node, base.VisitFileScopedNamespaceDeclaration(node));
-
-        public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node) =>
-            SortIfTargeted(node, base.VisitCompilationUnit(node));
+        // One override for every container, also C# 14 extension blocks, whose Visit method Roslyn 4.8 doesn't have.
+        public override SyntaxNode? Visit(SyntaxNode? node) =>
+            node is null ? null : SortIfTargeted(node, base.Visit(node));
 
         private SyntaxNode? SortIfTargeted(SyntaxNode original, SyntaxNode? visited)
         {
