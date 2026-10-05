@@ -7,7 +7,8 @@
 #      .editorconfig) and applies the preset's formatting options; a second run changes nothing;
 #   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported;
 #   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
-#      single-target project and not in a netstandard2.0;net10.0 one, which still builds.
+#      single-target project and not in a netstandard2.0;net10.0 one, which still builds;
+#   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -108,6 +109,17 @@ try {
     $kept = Get-Content (Join-Path $multi 'Modern.cs') -Raw
     Check ($kept -match 'throw new System\.ArgumentNullException' -and $kept -match 'Substring\(1') 'the multi-targeted project kept its code (netstandard2.0 has neither API)'
     Build @() $multiProject | Out-Null
+
+    Write-Host '== 6. BRO1145 (C# 12) in a multi-targeted project'
+    $guard = Join-Path $repo 'src/Guard'
+    New-Item -ItemType Directory -Force $guard | Out-Null
+    $guardProject = Join-Path $guard 'Guard.csproj'
+    Set-Content $guardProject ((Get-Content $project -Raw).Replace('<TargetFramework>net10.0</TargetFramework>', '<TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>'))
+    Set-Content (Join-Path $guard '.editorconfig') "[*.cs]`ndotnet_diagnostic.BRO1145.severity = warning`n"
+    Set-Content (Join-Path $guard 'Marker.cs') "namespace App`n{`n    public class Marker`n    {`n    }`n}`n" -NoNewline
+    Check (-not ((Build @() $guardProject) -contains 'BRO1145 Marker.cs')) 'without LangVersion, netstandard2.0;net10.0 gets no BRO1145'
+    Check ((Build @('-p:LangVersion=12') $guardProject) -contains 'BRO1145 Marker.cs') 'with LangVersion set, it is reported'
+    Check ((Build @('-p:StyleBroTargetFrameworks=net10.0') $guardProject) -contains 'BRO1145 Marker.cs') 'with one framework, it is reported'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
