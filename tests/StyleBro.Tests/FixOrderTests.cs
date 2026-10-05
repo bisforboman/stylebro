@@ -33,6 +33,32 @@ public class FixOrderTests
         "BRO1516");
 
     [Fact]
+    public Task InternalMethods_SortedBelowPublicOnes() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        internal class C
+        {
+            public void Run()
+            {
+            }
+
+            internal void Stop()
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+
+            private void Wait()
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1409.severity = warning\n",
+        "BRO1001",
+        "BRO1409");
+
+    [Fact]
     public Task Braces_InASingleLineBlock() => AssertConvergesInEveryOrderAsync(
         """
         public class C
@@ -273,6 +299,39 @@ public class FixOrderTests
         "BRO1143",
         "BRO1514",
         "BRO1516",
+        "BRO1519");
+
+    // BRO1139 joins 'else { if }' into 'else if'; BRO1143 removes an 'else' after a jump and skips 'else if' chains. With
+    // both on, BRO1139 leaves such an 'else' to BRO1143, so the order 'dotnet format' picks doesn't change the result
+    // (samples/Messy/Input/Fares.cs failed verify-format in 2 of 3 runs before).
+    [Fact]
+    public Task ElseIf_LeavesAnElseAfterAJumpToBRO1143() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(int age, bool student)
+            {
+                if (age < 6)
+                {
+                    return 0;
+                }
+                else
+                {
+                    if (student)
+                    {
+                        return 5;
+                    }
+                    else
+                    {
+                        return 10;
+                    }
+                }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1139",
+        "BRO1143",
         "BRO1519");
 
     [Fact]

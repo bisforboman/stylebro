@@ -27,6 +27,10 @@ stylebro_null_check_style = equality_operator
 [**/Catalog.cs]
 dotnet_diagnostic.BRO1312.severity = warning
 
+# BRO1409 (internal, not public, on methods of internal types) is off by default; on for one file.
+[**/Postage.cs]
+dotnet_diagnostic.BRO1409.severity = warning
+
 # BRO1143 (no 'else' after a jump) is off by default; on for one file.
 [**/Fares.cs]
 dotnet_diagnostic.BRO1143.severity = warning

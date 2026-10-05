@@ -122,7 +122,10 @@ public class HungarianNamingTests
         var options = new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary);
         Assert.False(StyleBro.Analyzers.Descriptors.HungarianNotation.IsEnabledByDefault);
         Assert.False(StyleBro.Analyzers.Severities.IsOn(options, tree, "BRO1310", default, enabledByDefault: false));
-        Assert.True(StyleBro.Analyzers.Severities.IsOn(options, tree, "BRO1310", default));
+
+        // Without the argument, the rule's own default (its descriptor) counts: off, like the build sees it.
+        Assert.False(StyleBro.Analyzers.Severities.IsOn(options, tree, "BRO1310", default));
+        Assert.True(StyleBro.Analyzers.Severities.IsOn(options, tree, "BRO1504", default));
     }
 
     [Fact]

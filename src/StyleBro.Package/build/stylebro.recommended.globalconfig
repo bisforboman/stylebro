@@ -229,6 +229,10 @@ dotnet_diagnostic.BRO1142.severity = warning
 # BRO1408: no 'enum E : int' or 'class C : object'
 dotnet_diagnostic.BRO1408.severity = warning
 
+# BRO1409: 'internal', not 'public', on ordinary methods of internal types (StyleCop issue #2981). Off: reflection and
+# serializers see public members only; set to warning to opt in.
+dotnet_diagnostic.BRO1409.severity = none
+
 # BRO1006: no space between '#' and a preprocessor keyword (SA1006)
 dotnet_diagnostic.BRO1006.severity = warning
 
