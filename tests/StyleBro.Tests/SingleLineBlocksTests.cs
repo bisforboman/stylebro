@@ -180,6 +180,81 @@ public class SingleLineBlocksTests
         editorConfig: "dotnet_diagnostic.BRO1514.severity = none\ndotnet_diagnostic.BRO1515.severity = none\ndotnet_diagnostic.BRO1516.severity = none");
 
     [Fact]
+    public Task InnerBlock_ExpandsTheEnclosingBody_AndALocalFunctionGetsABlankLineAfterIt() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool x) {|BRO1509:{|} if (x) {|BRO1508:{|} M(x); } }
+
+            public void N(bool x) {|BRO1509:{|} void L() {|BRO1509:{|} M(x); } L(); }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool x)
+            {
+                if (x)
+                {
+                    M(x);
+                }
+            }
+
+            public void N(bool x)
+            {
+                void L()
+                {
+                    M(x);
+                }
+
+                L();
+            }
+        }
+        """);
+
+    [Fact]
+    public Task LocalFunction_GetsNoBlankLineAfterIt_WhenBRO1519IsOff() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void N(bool x) {|BRO1509:{|} void L() {|BRO1509:{|} N(x); } L(); }
+        }
+        """,
+        """
+        public class C
+        {
+            public void N(bool x)
+            {
+                void L()
+                {
+                    N(x);
+                }
+                L();
+            }
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1519.severity = none\n");
+
+    [Fact]
+    public Task InnerBlock_LeavesTheEnclosingBody_WhenBRO1509IsOff() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool x) { if (x) {|BRO1508:{|} M(x); } }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool x) { if (x)
+                {
+                    M(x);
+                } }
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1509.severity = none\n");
+
+    [Fact]
     public Task NestedBlocks_SingleFixAndFixAllAgree() => VerifyFixAsync(
         """
         public class C

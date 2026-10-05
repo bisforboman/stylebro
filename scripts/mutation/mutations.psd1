@@ -378,6 +378,10 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = '&& isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)'; Replace = ''; Tests = 'BracesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'Braces.AddToExpansion(block, text, changes, options, isOn);'; Replace = ''; Tests = 'FixOrderTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/Braces.cs'; Find = ' && n.Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock'; Replace = ''; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'changes.AddRange(enclosing);'; Replace = ''; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'previous.IsKind(SyntaxKind.CloseBraceToken)'; Replace = 'true'; Tests = 'SingleLineBlocksTests' }
 
         # BRO1409 (public methods of internal types): the analyzer's skips, then the fix's guards
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.OverrideKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }

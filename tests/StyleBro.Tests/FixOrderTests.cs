@@ -85,6 +85,30 @@ public class FixOrderTests
         "BRO1519");
 
     [Fact]
+    public Task SingleLineBlocks_InsideOtherSingleLineBlocks() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool x) { }
+
+            public void Q(bool x) { void L() { if (x) { M(x); } } L(); }
+
+            public int R { get { if (true) { return 1; } return 0; } }
+
+            public void S(bool x) { System.Action a = () => { if (x) { M(x); } }; a(); }
+
+            public void T(bool x) { if (x) M(x); { if (!x) { M(x); } } }
+        }
+
+        public class D { public void M(bool x) { if (x) { return; } } }
+        """,
+        "BRO1505",
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1519");
+
+    [Fact]
     public Task DocumentationElements_OrderedWhileTagsAreSortedRenamedOrRewritten() => AssertConvergesInEveryOrderAsync(
         """
         public class C
