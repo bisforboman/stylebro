@@ -87,6 +87,8 @@ public static class DiagnosticIds
     public const string CombinedLocals = "BRO1142";
     public const string RedundantNullForgiving = "BRO1147";
     public const string HasValueNullCheck = "BRO1148";
+    public const string EmptyTypeBody = "BRO1145";
+    public const string RecordClassKeyword = "BRO1146";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";
@@ -122,4 +124,5 @@ public static class DiagnosticIds
     public const string BlankLineAfterAttributes = "BRO1525";
     public const string ConditionalLayout = "BRO1524";
     public const string BlankLineBetweenSwitchSections = "BRO1526";
+    public const string AutoAccessorsOnOneLine = "BRO1527";
 }

@@ -41,10 +41,30 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (lineEdits.Count > 0 && parts[0].If.DescendantTokens()'; Replace = 'if (false && parts[0].If.DescendantTokens()'; Tests = 'ElseIfTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (after.All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))'; Replace = 'if (true)'; Tests = 'ElseIfTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseIfs.cs'; Find = 'if (after.All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))'; Replace = 'if (false)'; Tests = 'ElseIfTests' }
-        # BRO1140 (empty record body)
-        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'if (record.ParameterList is null || '; Replace = 'if ('; Tests = 'EmptyRecordBodyTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = '|| record.Members.Count > 0'; Replace = ''; Tests = 'EmptyRecordBodyTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'return Trivia.IsBlank(record, span) ?'; Replace = 'return true ?'; Tests = 'EmptyRecordBodyTests' }
+        # BRO1140 (empty record body) and BRO1145 (empty class, struct or interface body)
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'record.ParameterList is null ? null : '; Replace = ''; Tests = 'EmptyRecordBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = '|| type.Members.Count > 0'; Replace = ''; Tests = 'EmptyRecordBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'return Trivia.IsBlank(type, span) ?'; Replace = 'return true ?'; Tests = 'EmptyRecordBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = '.LanguageVersion >= LanguageVersion.CSharp12 ?'; Replace = '.LanguageVersion >= LanguageVersion.CSharp1 ?'; Tests = 'EmptyTypeBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'if (frameworks.Count < 2 || '; Replace = 'if ('; Tests = 'EmptyTypeBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'frameworks.All(f => MultiTargetSuppressor.Has(f, (new Version(8, 0), null)))'; Replace = 'false'; Tests = 'EmptyTypeBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = 'return !string.IsNullOrWhiteSpace(langVersion) && '; Replace = 'return '; Tests = 'EmptyTypeBodyTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = ' && !string.Equals(langVersion!.Trim(), defaultVersion?.Trim(), StringComparison.OrdinalIgnoreCase)'; Replace = ''; Tests = 'EmptyTypeBodyTests' }
+        # BRO1146 (record class)
+        @{ File = 'src/StyleBro.Analyzers/Readability/RecordClassKeywords.cs'; Find = 'return Trivia.IsBlank(record, span) ?'; Replace = 'return true ?'; Tests = 'RecordClassKeywordTests' }
+        # BRO1527 (auto-accessors on one line)
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '|| list.Accessors.Count == 0 '; Replace = ''; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (Line(text, before.Span.End) == Line(text, close.SpanStart)'; Replace = 'if (false'; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'preserve.Trim().Equals("false", StringComparison.OrdinalIgnoreCase)'; Replace = 'false'; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'a.Body is not null || '; Replace = ''; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'a.ExpressionBody is not null || '; Replace = ''; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'a.AttributeLists.Count > 0 || '; Replace = ''; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = ' || Line(text, a.SpanStart) != Line(text, a.Span.End))'; Replace = ')'; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '&& Line(text, initializer.SpanStart) != Line(text, close.SpanStart)'; Replace = '&& false'; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (list.Accessors.Any(a => !Trivia.IsBlank(a, a.Span)))'; Replace = 'if (false)'; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (!gaps.All(gap => SingleLineBlocks.Gap(gap.Before, gap.After, " ", text, changes)))'; Replace = 'if (!gaps.All(gap => SingleLineBlocks.Gap(gap.Before, gap.After, " ", text, changes) || true))'; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (isOn(DiagnosticIds.ElementsSeparatedByBlankLine) && '; Replace = 'if ('; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (BlankLineRuns.JudgesGapAfter(close, next, text, isOn, gapIsReplaced: false))'; Replace = 'if (false)'; Tests = 'AutoAccessorLinesTests' }
         # BRO1141 (object creation parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = 'if (creation.Initializer is null || '; Replace = 'if ('; Tests = 'ObjectCreationParenthesesTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = '|| arguments.Arguments.Count > 0'; Replace = ''; Tests = 'ObjectCreationParenthesesTests' }
@@ -415,9 +435,9 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| MultiTargetSuppressor.GetFrameworks(options).Count > 1)'; Replace = '|| MultiTargetSuppressor.GetFrameworks(options).Count > 2)'; Tests = 'NullForgivingTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| context.WarningsEnabled() != project.WarningsEnabled()'; Replace = ''; Tests = 'NullForgivingTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| context.AnnotationsEnabled() != project.AnnotationsEnabled()'; Replace = ''; Tests = 'NullForgivingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'return IsFlat(info.Type) && StateWithout('; Replace = 'return true && StateWithout('; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'return IsFlat(model.GetTypeInfo(operand, cancellationToken).Type)'; Replace = 'return true'; Tests = 'NullForgivingTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'StateWithout(node, model, cancellationToken) == NullableFlowState.NotNull'; Replace = 'info.Nullability.FlowState == NullableFlowState.NotNull'; Tests = 'NullForgivingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '&& (named.ContainingType is null || IsFlat(named.ContainingType))'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'named => (named.ContainingType is null || IsFlat(named.ContainingType))'; Replace = 'named => (true)'; Tests = 'NullForgivingTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '&& named.TypeArguments.All(a => a.IsValueType && IsFlat(a))'; Replace = ''; Tests = 'NullForgivingTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'named.TypeArguments.All(a => a.IsValueType && IsFlat(a))'; Replace = 'named.TypeArguments.Length == 0'; Tests = 'NullForgivingTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'case EqualsValueClauseSyntax clause when clause.Parent is not VariableDeclaratorSyntax { Parent.Parent: LocalDeclarationStatementSyntax }:'; Replace = 'case EqualsValueClauseSyntax clause when false:'; Tests = 'NullForgivingTests' }

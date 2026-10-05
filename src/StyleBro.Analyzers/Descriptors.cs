@@ -1281,5 +1281,39 @@ internal static class Descriptors
             + "MA0171).",
         helpLinkUri: HelpBase + DiagnosticIds.HasValueNullCheck + ".md");
 
+    public static readonly DiagnosticDescriptor EmptyTypeBody = new(
+        id: DiagnosticIds.EmptyTypeBody,
+        title: "A class, struct or interface with an empty body should end with ';'",
+        messageFormat: "Replace the empty body of '{0}' with ';'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "'class Marker;' instead of 'class Marker { }' (C# 12). Off by default. Not reported below C# 12, or in a "
+            + "project with several target frameworks unless every one defaults to C# 12 or LangVersion is set. Not a StyleCop "
+            + "rule (Meziantou MA0206).",
+        helpLinkUri: HelpBase + DiagnosticIds.EmptyTypeBody + ".md");
+
+    public static readonly DiagnosticDescriptor RecordClassKeyword = new(
+        id: DiagnosticIds.RecordClassKeyword,
+        title: "Write 'record' without 'class'",
+        messageFormat: "Remove 'class' from the declaration of record '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'record R' instead of 'record class R': a record is a class unless it says 'struct'. Not a StyleCop rule "
+            + "(Meziantou MA0174).",
+        helpLinkUri: HelpBase + DiagnosticIds.RecordClassKeyword + ".md");
+
+    public static readonly DiagnosticDescriptor AutoAccessorsOnOneLine = new(
+        id: DiagnosticIds.AutoAccessorsOnOneLine,
+        title: "Auto-accessors should be on one line",
+        messageFormat: "Put the auto-accessors on the declaration's line",
+        category: "Layout",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A list of auto-accessors only ('get;', 'private set;', 'init;') spread over several lines goes on the "
+            + "declaration's line: 'public int Simple { get; set; }'. Not a StyleCop rule (Roslynator RCS0042).",
+        helpLinkUri: HelpBase + DiagnosticIds.AutoAccessorsOnOneLine + ".md");
+
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
 }

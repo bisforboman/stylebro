@@ -70,3 +70,6 @@ dotnet_diagnostic.BRO1147.severity = warning
 
 [**/Bookings.cs]
 dotnet_diagnostic.BRO1148.severity = warning
+# BRO1145 (empty class body -> ;) is off by default; on for one file.
+[**/Badges.cs]
+dotnet_diagnostic.BRO1145.severity = warning

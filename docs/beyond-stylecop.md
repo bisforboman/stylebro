@@ -169,7 +169,8 @@ Done (2026-10-05): [BRO1139](rules/BRO1139.md); adds the braces BRO1514/BRO1516 
 `record R(int X) { }` -> `record R(int X);`. Effort: low. BRO1101 already treats the bodiless form; check that the two
 fixes don't fight over the `;`.
 
-Done (2026-10-05): [BRO1140](rules/BRO1140.md).
+Done (2026-10-05): [BRO1140](rules/BRO1140.md). MA0206 for classes, structs and interfaces (`class Marker;`, C# 12):
+[BRO1145](rules/BRO1145.md), off by default.
 
 ### 14. Redundant base (RCS1042, S1939)
 
@@ -233,6 +234,8 @@ check `csharp_preserve_single_line_statements` first), Meziantou [MA0175](https:
   decides per `!` from the operand's flow state, and skips multi-targeted projects.
 - **`HasValue` (Meziantou MA0171).** Done (2026-10-05): [BRO1148](rules/BRO1148.md), off by default (also in the
   preset), in BRO1133's form.
+Done (2026-10-05): RCS0042 as [BRO1527](rules/BRO1527.md), MA0174 (`record class` -> `record`) as
+[BRO1146](rules/BRO1146.md).
 
 ## Rejected
 
