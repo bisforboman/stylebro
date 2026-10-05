@@ -13,13 +13,16 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1114: one declaration per field, each with the attributes, modifiers, type and documentation.</summary>
+/// <summary>
+/// Fix for BRO1114 and BRO1142: one declaration per field (each with the attributes, modifiers, type and documentation)
+/// or local.
+/// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CombinedFieldsCodeFixProvider))]
 public sealed class CombinedFieldsCodeFixProvider : CodeFixProvider
 {
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.CombinedFields);
+        ImmutableArray.Create(DiagnosticIds.CombinedFields, DiagnosticIds.CombinedLocals);
 
     /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
@@ -32,7 +35,7 @@ public sealed class CombinedFieldsCodeFixProvider : CodeFixProvider
         {
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    "Declare each field separately",
+                    "Declare each variable separately",
                     ct => FixDocumentAsync(context.Document, ImmutableArray.Create(diagnostic), ct),
                     equivalenceKey: nameof(CombinedFieldsCodeFixProvider)),
                 diagnostic);
@@ -56,8 +59,10 @@ public sealed class CombinedFieldsCodeFixProvider : CodeFixProvider
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
-            if (root.FindToken(diagnostic.Location.SourceSpan.Start).Parent?.AncestorsAndSelf().OfType<BaseFieldDeclarationSyntax>().FirstOrDefault() is { } declaration
-                && CombinedFields.GetChange(declaration, text) is { } change)
+            var declaration = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent?.AncestorsAndSelf()
+                .FirstOrDefault(n => n is BaseFieldDeclarationSyntax or LocalDeclarationStatementSyntax);
+            if ((declaration is BaseFieldDeclarationSyntax field ? CombinedFields.GetChange(field, text)
+                : declaration is LocalDeclarationStatementSyntax local ? CombinedFields.GetChange(local, text) : null) is { } change)
             {
                 changes.Add(change);
             }

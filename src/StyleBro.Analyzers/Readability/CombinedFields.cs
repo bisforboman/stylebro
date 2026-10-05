@@ -7,8 +7,8 @@ using Microsoft.CodeAnalysis.Text;
 namespace StyleBro.Analyzers.Readability;
 
 /// <summary>
-/// Shared logic for BRO1114 (StyleCop SA1132: one field per declaration). Fields and event fields count, locals don't
-/// (like StyleCop).
+/// Shared logic for BRO1114 (StyleCop SA1132: one field per declaration; fields and event fields, like StyleCop) and
+/// BRO1142 (one local per declaration; not a StyleCop rule).
 /// </summary>
 internal static class CombinedFields
 {
@@ -19,9 +19,22 @@ internal static class CombinedFields
     /// the first field only, which takes them away from the others. Event fields, and a field that spans several lines from
     /// the next, are separated by a blank line, which BRO1505 wants between them.
     /// </summary>
-    public static TextChange? GetChange(BaseFieldDeclarationSyntax declaration, SourceText text)
+    public static TextChange? GetChange(BaseFieldDeclarationSyntax declaration, SourceText text) =>
+        GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text);
+
+    /// <summary>
+    /// The same for a local declaration. Not 'using' declarations (each variable's lifetime would stay the same, but
+    /// the dispose order is part of the code's meaning); 'for' initializers and 'fixed' aren't local declaration
+    /// statements. Locals get no blank lines between them, and a local that shares its line with other code (in a
+    /// single-line block, which BRO1508/BRO1509 expand) is split on that line: <c>{ int a, b; }</c> becomes
+    /// <c>{ int a; int b; }</c>, so the expansion and the split converge in either order.
+    /// </summary>
+    public static TextChange? GetChange(LocalDeclarationStatementSyntax declaration, SourceText text) =>
+        declaration.UsingKeyword.IsKind(SyntaxKind.None) ? GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text) : null;
+
+    private static TextChange? GetChange(SyntaxNode declaration, VariableDeclarationSyntax variableDeclaration, SyntaxToken semicolon, SourceText text)
     {
-        var variables = declaration.Declaration.Variables;
+        var variables = variableDeclaration.Variables;
         if (variables.Count < 2 || declaration.ContainsDirectives || declaration.ContainsDiagnostics
             || declaration.DescendantTrivia(declaration.Span).Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia)))
         {
@@ -30,7 +43,8 @@ internal static class CombinedFields
 
         var line = text.Lines.GetLineFromPosition(declaration.SpanStart);
         var indent = text.ToString(TextSpan.FromBounds(line.Start, declaration.SpanStart));
-        if (indent.Trim().Length > 0)
+        var sameLine = indent.Trim().Length > 0;
+        if (sameLine && declaration is not LocalDeclarationStatementSyntax)
         {
             return null;
         }
@@ -53,9 +67,10 @@ internal static class CombinedFields
 
         // BRO1505 wants a blank line between event fields, and below a field that spans several lines.
         var parts = variables.Select((v, i) => (i == 0 ? string.Empty
-                : (declaration is EventFieldDeclarationSyntax || text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0 ? lineBreak + lineBreak : lineBreak)
+                : sameLine ? " "
+                : (declaration is EventFieldDeclarationSyntax || (declaration is FieldDeclarationSyntax && text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0) ? lineBreak + lineBreak : lineBreak)
                     + docText + indent)
-            + prefix + text.ToString(v.Span) + declaration.SemicolonToken.Text);
+            + prefix + text.ToString(v.Span) + semicolon.Text);
         return new TextChange(declaration.Span, string.Concat(parts));
     }
 }

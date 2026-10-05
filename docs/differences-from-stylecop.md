@@ -184,18 +184,29 @@ Where `master` changed behavior StyleBro keeps (the owner's decision):
 
 ## Rules beyond StyleCop
 
-Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1133.severity`,
-`dotnet_diagnostic.BRO1520.severity`, `dotnet_diagnostic.BRO1521.severity` and `dotnet_diagnostic.BRO1522.severity` =
-Rules StyleCop doesn't have. The preset turns them on (`dotnet_diagnostic.BRO1520.severity`,
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1134.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1523.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1135.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1525.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1524.severity` =
-`dotnet_diagnostic.BRO1521.severity`, `dotnet_diagnostic.BRO1522.severity` and `dotnet_diagnostic.BRO1616.severity` =
-`warning`); `stylebro-migrate` writes
-them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on in `.editorconfig` to use
-them.
+Rules StyleCop doesn't have. The preset turns them on at `warning`:
+
+- `dotnet_diagnostic.BRO1133.severity`
+- `dotnet_diagnostic.BRO1134.severity`
+- `dotnet_diagnostic.BRO1135.severity`
+- `dotnet_diagnostic.BRO1136.severity`
+- `dotnet_diagnostic.BRO1137.severity`
+- `dotnet_diagnostic.BRO1138.severity`
+- `dotnet_diagnostic.BRO1139.severity`
+- `dotnet_diagnostic.BRO1140.severity`
+- `dotnet_diagnostic.BRO1141.severity`
+- `dotnet_diagnostic.BRO1142.severity`
+- `dotnet_diagnostic.BRO1408.severity`
+- `dotnet_diagnostic.BRO1520.severity`
+- `dotnet_diagnostic.BRO1521.severity`
+- `dotnet_diagnostic.BRO1522.severity`
+- `dotnet_diagnostic.BRO1523.severity`
+- `dotnet_diagnostic.BRO1524.severity`
+- `dotnet_diagnostic.BRO1525.severity`
+- `dotnet_diagnostic.BRO1616.severity`
+
+`stylebro-migrate` writes them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on
+in `.editorconfig` to use them.
 
 | Rule | What it checks | From |
 |---|---|---|
@@ -209,6 +220,14 @@ them.
 | [BRO1525](rules/BRO1525.md) | No blank line between an attribute list and its element or the element's next attribute list | StyleCop's proposed SA1521 ([#738](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/738), never implemented) |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
 | [BRO1616](rules/BRO1616.md) | `<summary>` tags on lines of their own (`stylebro_summary_layout = multi_line`), or the summary on one line when its text is one line and fits (`single_line_when_fits`) | Roslynator RCS1253, Meziantou MA0177/MA0211 |
+| [BRO1136](rules/BRO1136.md) | `x => x` instead of `(x) => x` for one parameter without a type, modifier or attribute | StyleCop issue [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) (proposed, never implemented) |
+| [BRO1137](rules/BRO1137.md) | No `return;` as the last statement of a body, no `yield break;` as the last statement of an iterator | StyleCop issue [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760), Roslynator RCS1134 |
+| [BRO1138](rules/BRO1138.md) | No `$` without interpolations, no `@` without a backslash, quote or line break, no single-line raw string a plain string can write | Roslynator RCS1214, RCS1192, RCS1262 |
+| [BRO1139](rules/BRO1139.md) | `else if` on one line: an `if` on the line after `else`, or alone in the else's block | Roslynator RCS0041, RCS1006 |
+| [BRO1140](rules/BRO1140.md) | `record R(int X);` instead of an empty body | Roslynator RCS1251, Meziantou MA0206 |
+| [BRO1141](rules/BRO1141.md) | `new T { ... }` without empty parentheses (`stylebro_object_creation_parentheses = omit`, the default) or with them (`include`) | Roslynator RCS1050 |
+| [BRO1142](rules/BRO1142.md) | One local per declaration, like BRO1114 (SA1132) for fields | Roslynator RCS1081, Sonar S1659 |
+| [BRO1408](rules/BRO1408.md) | No `enum E : int` or `class C : object` | Roslynator RCS1042, Sonar S1939 |
 
 ## StyleCop's open bugs
 

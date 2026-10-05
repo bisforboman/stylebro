@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 31 |
-| Planned | 0 rules, 30 work items |
-| Maybe | 18 candidates from the StyleCop tracker and other analyzers |
+| Done, not released yet | 39 |
+| Planned | 0 rules, 31 work items |
+| Maybe | 10 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -65,6 +65,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Superseding StyleCop | StyleCop's open bugs | 54 reports checked against StyleBro: 34 not shared, 12 by design or not applicable, 8 shared (7 fixed, 1 kept like StyleCop by decision; decisions.md). Listed in differences-from-stylecop.md. | Done (2026-10-04) |
 | Superseding StyleCop | The remaining tracker candidates | beyond-stylecop.md #6-#10 and #12 (listed under Maybe); #11 stays rejected (changes what reflection and serializers see). | Planned |
 | Superseding StyleCop | The remaining other-analyzer candidates | beyond-stylecop.md survey #6-#10 and #12-#18 (listed under Maybe). | Planned |
+| Beyond StyleCop | Readability batch B (StyleCop issues #762, #760; survey #7, #8, #10, #12, #13, #14) | BRO1136 `x => x`, BRO1137 redundant `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string, BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses (`stylebro_object_creation_parentheses`, default omit), BRO1142 one local per declaration, BRO1408 redundant base type. On in the preset, off after `stylebro-migrate`. | Done (2026-10-05) |
 
 ### Read the SDK's own settings
 
@@ -93,18 +94,10 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 |--------|------|-------|
 | StyleCop #758 (SA1653) | `cref="List&lt;T&gt;"` -> `cref="List{T}"` | Text only. |
 | StyleCop #3546, #1490 | Option: tool marker comments (`// ReSharper disable once ...`) need no BRO1504 blank line | A prefix list option. |
-| StyleCop #762 | `(x) => x` -> `x => x` | Keep the parentheses with a type, modifier or attribute. |
-| StyleCop #760, Roslynator RCS1134 | No redundant `return;` / `yield break;` at the end | Skip when a comment or label is on it. |
 | StyleCop #2641, #3793 | Option: camelCase private constants and static readonly fields | BRO1306 could follow `dotnet_naming_rule.*` like BRO1303. |
 | StyleCop #1949 (SA1315), SDK CA1725 | A parameter keeps the name of the member it overrides or implements | BRO1302's renamer; callers' named arguments change. |
 | Roslynator RCS0061 | Blank line between switch sections | Text fix. |
-| Roslynator RCS1081, Sonar S1659 | One local per declaration | Like BRO1114 for locals. |
-| Roslynator RCS1214, RCS1192, RCS1262 | Unneeded `$`, `@`, raw string | Keep strings whose meaning would change. |
 | Meziantou MA0154 | `langword` in doc comments (`<see langword="null"/>`) | Text only. |
-| Roslynator RCS1050 | Object creation parentheses | Either style, configurable. |
-| Roslynator RCS0041, RCS1006 | `else { if }` -> `else if` | Skip when comments would move. |
-| Roslynator RCS1251, Meziantou MA0206 | Empty record body `{ }` -> `;` | Text only. |
-| Roslynator RCS1042, Sonar S1939 | Redundant base type or interface | Semantic. |
 | Roslynator RCS1232 | Doc comment elements in a fixed order | Like BRO1611's reorder. |
 | Meziantou MA0071, Roslynator RCS1211 | No `else` after a jump | Changes indentation of the else branch. |
 | Sonar S4136 | Overloads together | Must agree with BRO1001's order. |
@@ -165,6 +158,13 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1133](rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Done |
 | [BRO1134](rules/BRO1134.md) | Declarations should not contain embedded comments | (none; StyleCop issue #605) | Done |
 | [BRO1135](rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Done |
+| [BRO1136](rules/BRO1136.md) | A lambda's single parameter should not be in parentheses | (none; StyleCop issue #762) | Done |
+| [BRO1137](rules/BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; StyleCop issue #760, Roslynator RCS1134) | Done |
+| [BRO1138](rules/BRO1138.md) | A string literal should be a plain string when nothing needs more | (none; Roslynator RCS1214/RCS1192/RCS1262) | Done |
+| [BRO1139](rules/BRO1139.md) | Write 'else if' on one line | (none; Roslynator RCS0041/RCS1006) | Done |
+| [BRO1140](rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Done |
+| [BRO1141](rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Done |
+| [BRO1142](rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Done |
 
 ### BRO13xx: Naming
 
@@ -194,6 +194,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1405](rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Done |
 | [BRO1406](rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Done |
 | [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Done |
+| [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Done |
 
 ### BRO15xx: Layout
 

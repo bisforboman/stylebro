@@ -6,13 +6,16 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Readability;
 
-/// <summary>BRO1114: one field per declaration. The diagnostic is on the declaration's first token (its attribute if it has one).</summary>
+/// <summary>
+/// BRO1114: one field per declaration; BRO1142: one local per declaration. The diagnostic is on the declaration's first
+/// token (its attribute if it has one).
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class CombinedFieldsAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Descriptors.CombinedFields);
+        ImmutableArray.Create(Descriptors.CombinedFields, Descriptors.CombinedLocals);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -33,5 +36,19 @@ public sealed class CombinedFieldsAnalyzer : DiagnosticAnalyzer
             },
             SyntaxKind.FieldDeclaration,
             SyntaxKind.EventFieldDeclaration);
+        context.RegisterSyntaxNodeAction(
+            c =>
+            {
+                var declaration = (LocalDeclarationStatementSyntax)c.Node;
+                if (declaration.Declaration.Variables.Count > 1
+                    && CombinedFields.GetChange(declaration, c.Node.SyntaxTree.GetText(c.CancellationToken)) is not null)
+                {
+                    c.ReportDiagnostic(Diagnostic.Create(
+                        Descriptors.CombinedLocals,
+                        declaration.GetFirstToken().GetLocation(),
+                        declaration.Declaration.Variables[1].Identifier.ValueText));
+                }
+            },
+            SyntaxKind.LocalDeclarationStatement);
     }
 }
