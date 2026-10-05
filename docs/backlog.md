@@ -14,9 +14,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 71 |
-| Done, not released yet | 36 |
-| Planned | 0 rules, 32 work items |
-| Maybe | 14 candidates from the StyleCop tracker and other analyzers |
+| Done, not released yet | 38 |
+| Planned | 0 rules, 33 work items |
+| Maybe | 8 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
@@ -55,6 +55,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Null check style (survey #3) | BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | Split conditional expressions (StyleCop issue #651) | BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520's setting; chains skipped. Off after `stylebro-migrate`. | Done (2026-10-04) |
 | Beyond StyleCop | `<summary>` on one line or on three (survey #5) | BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`. | Done (2026-10-04) |
+| Beyond StyleCop | Naming: camelCase constants, base parameter names, `Async` suffix (StyleCop #2641/#3793, #1949; Roslynator RCS1046) | BRO1306 follows a `dotnet_naming_rule` that asks for camelCase private constants or static readonly fields; BRO1313 (parameters named like the base member) and BRO1314 (`Async` on methods returning Task/ValueTask/IAsyncEnumerable), both off by default. See decisions.md. | Done (2026-10-05) |
 | Beyond StyleCop | Braceless `if (x) return;` (StyleCop issue #2252) | `stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md). | Done (2026-10-04) |
 | Beyond StyleCop | Switch section blank lines, no `else` after a jump, overloads together (survey #6, #16, #17) | BRO1526 (`stylebro_blank_line_between_switch_sections`, default include; after a multi-line block BRO1519 decides), BRO1143 (off by default; `else if` chains skipped), BRO1001 option `stylebro_keep_overloads_together` (default false). See decisions.md. BRO1526 off after `stylebro-migrate`. | Done (2026-10-05) |
 | Beyond StyleCop | Documentation batch A (StyleCop issues #758, #3546/#1490; Meziantou MA0154; survey #15) | BRO1617 cref type arguments in braces (`List{T}`), BRO1618 `<see langword="null"/>` for a keyword alone in `<c>`, BRO1619 top-level doc elements in a fixed order (stable, so BRO1611 keeps `<param>` order); `stylebro_comment_blank_line_exempt_prefixes` for BRO1504. On in the preset, off after `stylebro-migrate` (decisions.md). | Done (2026-10-05) |
@@ -95,18 +96,12 @@ The next rules from other analyzers, from the survey in [beyond-stylecop.md](bey
 |--------|------|-------|
 | StyleCop #762 | `(x) => x` -> `x => x` | Keep the parentheses with a type, modifier or attribute. |
 | StyleCop #760, Roslynator RCS1134 | No redundant `return;` / `yield break;` at the end | Skip when a comment or label is on it. |
-| StyleCop #2641, #3793 | Option: camelCase private constants and static readonly fields | BRO1306 could follow `dotnet_naming_rule.*` like BRO1303. |
-| StyleCop #1949 (SA1315), SDK CA1725 | A parameter keeps the name of the member it overrides or implements | BRO1302's renamer; callers' named arguments change. |
 | Roslynator RCS1081, Sonar S1659 | One local per declaration | Like BRO1114 for locals. |
 | Roslynator RCS1214, RCS1192, RCS1262 | Unneeded `$`, `@`, raw string | Keep strings whose meaning would change. |
 | Roslynator RCS1050 | Object creation parentheses | Either style, configurable. |
 | Roslynator RCS0041, RCS1006 | `else { if }` -> `else if` | Skip when comments would move. |
 | Roslynator RCS1251, Meziantou MA0206 | Empty record body `{ }` -> `;` | Text only. |
 | Roslynator RCS1042, Sonar S1939 | Redundant base type or interface | Semantic. |
-| Roslynator RCS1232 | Doc comment elements in a fixed order | Like BRO1611's reorder. |
-| Meziantou MA0071, Roslynator RCS1211 | No `else` after a jump | Changes indentation of the else branch. |
-| Sonar S4136 | Overloads together | Must agree with BRO1001's order. |
-| Roslynator RCS1046, Meziantou MA0137 | `Async` suffix on async methods | Renamer; public API names change. |
 
 The other dropped StyleCop rules (missing documentation, one type per file, ...) are in [skipped-rules.md](skipped-rules.md).
 
@@ -181,6 +176,8 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Done |
 | [BRO1311](rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Done |
 | [BRO1312](rules/BRO1312.md) | Namespace names should begin with an upper-case letter (off by default) | SA1300 | Done |
+| [BRO1313](rules/BRO1313.md) | Parameter names should match the base member (off by default) | (none; SA1315 proposed, never implemented; SDK CA1725) | Done |
+| [BRO1314](rules/BRO1314.md) | Asynchronous method names should end with Async (off by default) | (none; Roslynator RCS1046, Meziantou MA0137) | Done |
 
 ### BRO14xx: Maintainability
 

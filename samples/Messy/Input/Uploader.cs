@@ -1,21 +1,17 @@
 namespace Messy;
 
-public class Uploader
+public interface IUploader
 {
-    public void Send(byte[] data)
-    {
-        Send(data, 0);
-    }
+    Task Upload(string path, int retries);
+}
 
-    public void Cancel()
-    {
-    }
+public class Uploader : IUploader
+{
+    private const int MaxRetries = 3;
+    private static readonly string Prefix = "up-";
 
-    private void Send(byte[] data, int retries)
-    {
-        if (retries > 3)
-        {
-            Cancel();
-        }
-    }
+    /// <inheritdoc/>
+    public Task Upload(string file, int retries) => Send(Prefix + file, retries > MaxRetries ? MaxRetries : retries);
+
+    private Task Send(string name, int count) => Task.Delay(count + name.Length);
 }

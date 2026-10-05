@@ -32,9 +32,29 @@ dotnet_diagnostic.BRO1312.severity = warning
 dotnet_diagnostic.BRO1143.severity = warning
 
 # BRO1001 keeping overloads together (stylebro_keep_overloads_together, default false) for one file.
-[**/Uploader.cs]
+[**/Transfer.cs]
 stylebro_keep_overloads_together = true
 
+# BRO1313 (parameter names like the base) and BRO1314 (Async suffix) are off by default; on for one file. The naming
+# rules ask BRO1306 for camelCase private constants and _camelCase private static readonly fields.
+[**/Uploader.cs]
+dotnet_diagnostic.BRO1313.severity = warning
+dotnet_diagnostic.BRO1314.severity = warning
+dotnet_naming_rule.private_constants.symbols = private_constants
+dotnet_naming_rule.private_constants.style = camel
+dotnet_naming_rule.private_constants.severity = suggestion
+dotnet_naming_symbols.private_constants.applicable_kinds = field
+dotnet_naming_symbols.private_constants.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants.required_modifiers = const
+dotnet_naming_rule.private_statics.symbols = private_statics
+dotnet_naming_rule.private_statics.style = underscore_camel
+dotnet_naming_rule.private_statics.severity = suggestion
+dotnet_naming_symbols.private_statics.applicable_kinds = field
+dotnet_naming_symbols.private_statics.applicable_accessibilities = private
+dotnet_naming_symbols.private_statics.required_modifiers = static, readonly
+dotnet_naming_style.camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
 # BRO1504: tool markers need no blank line above them (stylebro_comment_blank_line_exempt_prefixes) in one file.
 [**/Reference.cs]
 stylebro_comment_blank_line_exempt_prefixes = ReSharper

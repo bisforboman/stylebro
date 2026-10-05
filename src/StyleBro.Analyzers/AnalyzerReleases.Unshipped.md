@@ -20,6 +20,8 @@ BRO1143 | Readability | Disabled | ElseAfterJumpAnalyzer
 BRO1310 | Naming | Disabled | CamelCaseNamingAnalyzer
 BRO1311 | Naming | Warning | TupleElementNamingAnalyzer
 BRO1312 | Naming | Disabled | NamespaceNamingAnalyzer
+BRO1313 | Naming | Disabled | CamelCaseNamingAnalyzer
+BRO1314 | Naming | Disabled | PascalCaseNamingAnalyzer
 BRO1404 | Maintainability | Warning  | AccessModifiersAnalyzer
 BRO1405 | Maintainability | Warning  | ParenthesesAnalyzer
 BRO1406 | Maintainability | Warning  | PrecedenceAnalyzer

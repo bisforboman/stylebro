@@ -14,6 +14,28 @@ internal enum FieldStyle
     UnderscoreCamelCase,
 }
 
+/// <summary>
+/// The field styles from the configuration: private instance fields (<see cref="Private"/>), and private constants and
+/// private static readonly fields when an SDK naming rule asks for camel case for them (null: PascalCase, like StyleCop).
+/// </summary>
+internal readonly struct FieldStyles
+{
+    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly)
+    {
+        Private = @private;
+        Constant = constant;
+        StaticReadOnly = staticReadOnly;
+    }
+
+    public FieldStyle Private { get; }
+
+    public FieldStyle? Constant { get; }
+
+    public FieldStyle? StaticReadOnly { get; }
+
+    public static implicit operator FieldStyles(FieldStyle style) => new(style, null, null);
+}
+
 /// <summary>Which field naming rule applies to a field.</summary>
 internal enum FieldRule
 {
@@ -68,6 +90,16 @@ internal static class FieldNames
     }
 
     /// <summary>
+    /// <see cref="GetStyle"/>, plus the style of private constants and private static readonly fields: camelCase or
+    /// _camelCase when the SDK naming rule that singles them out (one requiring 'const', or 'static'/'readonly') asks for
+    /// it (StyleCop issues #2641, #3793); otherwise null, PascalCase like StyleCop.
+    /// </summary>
+    public static FieldStyles GetStyles(AnalyzerConfigOptions options) => new(
+        GetStyle(options),
+        GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
+        GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")));
+
+    /// <summary>
     /// Private fields that StyleCop's SA1306 checks (BRO1303): not constants and not static readonly (those are
     /// PascalCase).
     /// </summary>
@@ -94,7 +126,7 @@ internal static class FieldNames
     }
 
     /// <summary>The field's new name under whichever rule applies, or null when it already fits.</summary>
-    public static string? GetNewName(IFieldSymbol field, FieldStyle style, HungarianNames? hungarian = null) => GetRename(field, style, hungarian)?.NewName;
+    public static string? GetNewName(IFieldSymbol field, FieldStyles style, HungarianNames? hungarian = null) => GetRename(field, style, hungarian)?.NewName;
 
     /// <summary>
     /// The rule that applies to <paramref name="field"/> and the new name, or null when the name fits (or has no safe
@@ -107,7 +139,7 @@ internal static class FieldNames
     /// style ('iCount' -> 'count' or '_count'). PascalCase fields keep BRO1306's rename: it starts upper-case, which
     /// isn't a prefix any more.
     /// </remarks>
-    public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyle style, HungarianNames? hungarian)
+    public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyles style, HungarianNames? hungarian)
     {
         var rename = GetRename(field, style);
         if (hungarian is null || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum
@@ -117,12 +149,14 @@ internal static class FieldNames
             return rename;
         }
 
-        var underscore = style == FieldStyle.UnderscoreCamelCase && (IsChecked(field) || field.Name.StartsWith("_", System.StringComparison.Ordinal));
+        var underscore = GetCamelStaticStyle(field, style) is { } camelStatic
+            ? camelStatic == FieldStyle.UnderscoreCamelCase
+            : style.Private == FieldStyle.UnderscoreCamelCase && (IsChecked(field) || field.Name.StartsWith("_", System.StringComparison.Ordinal));
         return (FieldRule.Hungarian, underscore ? "_" + stripped : stripped);
     }
 
     /// <summary>Like the other overload, without BRO1310.</summary>
-    public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyle style)
+    public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyles style)
     {
         if (!IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum)
         {
@@ -135,28 +169,31 @@ internal static class FieldNames
         // casing isn't checked (SA1306 skips it, and SA1304 leaves non-internal fields to SA1307, which checks public and
         // internal ones only). A leading underscore is SA1309's: removed in the camelCase style, kept in the _camelCase
         // style (where SA1309 is off), which doesn't add one either (SX1309 is about private fields).
+        // A private constant or static readonly field that a naming rule wants in camel case is BRO1306's too.
         var isProtected = IsProtectedChecked(field);
-        var pascal = IsPascalChecked(field);
+        var camelStatic = GetCamelStaticStyle(field, style);
+        var pascal = camelStatic is null && IsPascalChecked(field);
 
         var hasPrefix = name.Length >= 2 && name[0] is 'm' or 's' or 't' && name[1] == '_';
         var core = hasPrefix ? name.Substring(2) : name;
         if (hasPrefix || core.TrimStart('_').Contains('_'))
         {
             var casing = pascal ? FieldCasing.Pascal
-                : IsChecked(field) && style == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
+                : (camelStatic ?? (IsChecked(field) ? style.Private : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
                 : FieldCasing.Camel;
             return GetJoinedName(core, casing) is { } joined && joined != name
                 ? (hasPrefix ? FieldRule.Prefix : FieldRule.Underscore, joined)
                 : null;
         }
 
-        var camelStyle = style == FieldStyle.CamelCase;
+        var camelStyle = style.Private == FieldStyle.CamelCase;
         var newName = isProtected && field.IsReadOnly ? (camelStyle ? WithoutLeadingUnderscores(name) : null)
             : isProtected ? (camelStyle ? CamelCaseNames.GetNewName(name) : LowerAfterUnderscores(name))
             : pascal ? GetPascalName(name)
-            : IsChecked(field) ? GetNewName(name, style)
+            : camelStatic is { } staticStyle ? GetNewName(name, staticStyle)
+            : IsChecked(field) ? GetNewName(name, style.Private)
             : null;
-        return newName is null ? null : (pascal ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
+        return newName is null ? null : (pascal || camelStatic is not null ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
     }
 
     /// <summary>'lowerConst' -> 'LowerConst', '_value' -> 'Value'. Null for one-letter prefixes (SA1308) and names that fit.</summary>
@@ -262,11 +299,11 @@ internal static class FieldNames
     /// anonymous type member or tuple element name. Locals and parameters with the new name are no reason to skip:
     /// the fix qualifies the references they would hide ('this.count').
     /// </summary>
-    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, CancellationToken cancellationToken) =>
+    public static bool CanRename(IFieldSymbol field, string newName, FieldStyles style, CancellationToken cancellationToken) =>
         CanRename(field, newName, style, TypeFacts.For(field.ContainingType, cancellationToken));
 
     /// <summary>Like the other overload, with the type's facts gathered once for all its fields.</summary>
-    public static bool CanRename(IFieldSymbol field, string newName, FieldStyle style, TypeFacts facts, HungarianNames? hungarian = null)
+    public static bool CanRename(IFieldSymbol field, string newName, FieldStyles style, TypeFacts facts, HungarianNames? hungarian = null)
     {
         var type = field.ContainingType;
         if (field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field))
@@ -332,11 +369,36 @@ internal static class FieldNames
     /// </summary>
     private static FieldStyle? GetStyleFromNamingRules(AnalyzerConfigOptions options)
     {
+        return GetNamingRules(options, m => m.Length == 0)
+            .Select(r => (r.Priority, r.Name, Style: ToFieldStyle(options, r.Style)))
+            .Where(r => r.Style is not null)
+            .OrderBy(r => r.Priority).ThenBy(r => r.Name, System.StringComparer.Ordinal)
+            .Select(r => r.Style)
+            .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// The style of the naming rule for private fields whose required modifiers fit <paramref name="modifiersMatch"/>
+    /// (constants, or static readonly fields): the first by 'priority', then the most required modifiers (the more
+    /// specific rule), then the name. Null unless that rule asks for camel case without a prefix or with '_'.
+    /// </summary>
+    private static FieldStyle? GetStaticStyleFromNamingRules(AnalyzerConfigOptions options, System.Func<string[], bool> modifiersMatch)
+    {
+        var rule = GetNamingRules(options, modifiersMatch)
+            .OrderBy(r => r.Priority).ThenByDescending(r => r.Modifiers).ThenBy(r => r.Name, System.StringComparer.Ordinal)
+            .FirstOrDefault();
+        return rule.Style is null ? null : ToFieldStyle(options, rule.Style);
+    }
+
+    /// <summary>The active naming rules for private fields whose required modifiers fit <paramref name="modifiersMatch"/>.</summary>
+    private static System.Collections.Generic.IEnumerable<(int Priority, string Name, int Modifiers, string Style)> GetNamingRules(
+        AnalyzerConfigOptions options,
+        System.Func<string[], bool> modifiersMatch)
+    {
         string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
         static bool Has(string? list, string item) =>
             list is null || list.Split(',').Select(p => p.Trim()).Any(p => p == "*" || p.Equals(item, System.StringComparison.OrdinalIgnoreCase));
 
-        var candidates = new System.Collections.Generic.List<(int Priority, string Name, FieldStyle Style)>();
         foreach (var key in options.Keys)
         {
             if (!key.StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) || !key.EndsWith(".symbols", System.StringComparison.Ordinal))
@@ -347,29 +409,46 @@ internal static class FieldNames
             var rule = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
             var symbols = Get(key);
             var style = Get($"dotnet_naming_rule.{rule}.style");
+            var modifiers = (Get($"dotnet_naming_symbols.{symbols}.required_modifiers") ?? string.Empty)
+                .Split(',').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray();
             if (symbols is null || style is null || Get($"dotnet_naming_rule.{rule}.severity") is "none" or "silent"
                 || !Has(Get($"dotnet_naming_symbols.{symbols}.applicable_kinds"), "field")
                 || !Has(Get($"dotnet_naming_symbols.{symbols}.applicable_accessibilities"), "private")
-                || !string.IsNullOrEmpty(Get($"dotnet_naming_symbols.{symbols}.required_modifiers"))
-                || Get($"dotnet_naming_style.{style}.capitalization") != "camel_case"
-                || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
-                || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator")))
-            {
-                continue;
-            }
-
-            var prefix = Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty;
-            if (prefix is not ("" or "_"))
+                || !modifiersMatch(modifiers))
             {
                 continue;
             }
 
             var priority = int.TryParse(Get($"dotnet_naming_rule.{rule}.priority"), out var p) ? p : int.MaxValue;
-            candidates.Add((priority, rule, prefix == "_" ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase));
+            yield return (priority, rule, modifiers.Length, style);
+        }
+    }
+
+    /// <summary>A naming style that is camel case without a prefix (camelCase) or with '_' (_camelCase); otherwise null.</summary>
+    private static FieldStyle? ToFieldStyle(AnalyzerConfigOptions options, string style)
+    {
+        string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
+        if (Get($"dotnet_naming_style.{style}.capitalization") != "camel_case"
+            || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
+            || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator")))
+        {
+            return null;
         }
 
-        return candidates.Count == 0 ? null : candidates.OrderBy(c => c.Priority).ThenBy(c => c.Name, System.StringComparer.Ordinal).First().Style;
+        return (Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty) switch
+        {
+            "" => FieldStyle.CamelCase,
+            "_" => FieldStyle.UnderscoreCamelCase,
+            _ => null,
+        };
     }
+
+    /// <summary>The camel style a naming rule asks for when <paramref name="field"/> is a private constant or static readonly field.</summary>
+    private static FieldStyle? GetCamelStaticStyle(IFieldSymbol field, FieldStyles style) =>
+        field.DeclaredAccessibility != Accessibility.Private || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum ? null
+        : field.IsConst ? style.Constant
+        : field.IsStatic && field.IsReadOnly ? style.StaticReadOnly
+        : null;
 
     /// <summary>Protected and private protected fields that aren't constants or static readonly.</summary>
     private static bool IsProtectedChecked(IFieldSymbol field) =>
@@ -453,13 +532,13 @@ internal static class FieldNames
         !field.IsImplicitlyDeclared && field.Locations.Any(l => l.IsInSource);
 
     /// <summary>
-    /// What <see cref="CanRename(IFieldSymbol, string, FieldStyle, TypeFacts)"/> needs from a type's declarations, read
+    /// What <see cref="CanRename(IFieldSymbol, string, FieldStyles, TypeFacts, HungarianNames?)"/> needs from a type's declarations, read
     /// once: the words in its strings and in code excluded by '#if', and its inferred anonymous/tuple member names.
     /// </summary>
     internal sealed class TypeFacts
     {
         private readonly INamedTypeSymbol type;
-        private readonly System.Collections.Concurrent.ConcurrentDictionary<(FieldStyle, string?), System.Collections.Generic.Dictionary<string, int>> newNames = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<(FieldStyles, string?), System.Collections.Generic.Dictionary<string, int>> newNames = new();
 
         private TypeFacts(INamedTypeSymbol type)
         {
@@ -520,8 +599,8 @@ internal static class FieldNames
             return facts;
         }
 
-        /// <summary>How many of the type's fields <see cref="GetNewName(IFieldSymbol, FieldStyle)"/> gives this name.</summary>
-        public int CountNewName(FieldStyle style, string newName, HungarianNames? hungarian = null)
+        /// <summary>How many of the type's fields <see cref="GetNewName(IFieldSymbol, FieldStyles, HungarianNames?)"/> gives this name.</summary>
+        public int CountNewName(FieldStyles style, string newName, HungarianNames? hungarian = null)
         {
             var counts = newNames.GetOrAdd((style, hungarian?.Key), key =>
             {
