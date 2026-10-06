@@ -144,7 +144,7 @@ internal static class InitCommand
     /// <summary>Project files under the root that set several target frameworks (relative paths).</summary>
     public static IEnumerable<string> MultiTargetedProjects(string root)
     {
-        var several = new Regex(@"<TargetFrameworks>[^<]*;[^<]*</TargetFrameworks>", RegexOptions.IgnoreCase);
+        var several = new Regex("<TargetFrameworks>[^<]*;[^<]*</TargetFrameworks>", RegexOptions.IgnoreCase);
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             || f.EndsWith(".props", StringComparison.OrdinalIgnoreCase)))
         {

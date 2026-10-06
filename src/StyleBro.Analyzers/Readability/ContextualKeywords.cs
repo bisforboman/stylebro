@@ -36,8 +36,10 @@ internal static class ContextualKeywords
         {
             case "field":
                 return IsFieldName(token, parent, getModel);
+
             case "extension":
                 return token.IsKind(SyntaxKind.IdentifierToken) && (NamesAType(token, parent) || StartsAMember(token, parent));
+
             case "partial":
                 // 'partial F()' (a method or local function returning a type named 'partial') reads as a partial member.
                 return parent is IdentifierNameSyntax name
@@ -47,6 +49,7 @@ internal static class ContextualKeywords
                         LocalFunctionStatementSyntax local => local.ReturnType == name,
                         _ => false,
                     };
+
             default:
                 return false;
         }

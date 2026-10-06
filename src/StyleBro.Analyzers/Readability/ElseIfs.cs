@@ -5,13 +5,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using StyleBro.Analyzers.Layout;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers.Layout;
 
 namespace StyleBro.Analyzers.Readability;
 
 /// <summary>
-/// Shared logic for BRO1139: <c>else if</c> on one line, for an <c>if</c> that follows <c>else</c> on the next line or
+/// Shared logic for BRO1139: <c>else if</c> on one line, for an <see langword="if"/> that follows <see langword="else"/> on the next line or
 /// is the only statement of the else's block.
 /// </summary>
 internal static class ElseIfs
@@ -21,11 +21,11 @@ internal static class ElseIfs
         GetChanges(elseClause, text, options, isOn) is not null;
 
     /// <summary>
-    /// The edits that join <c>else</c> and <c>if</c>, or null. The gap between them becomes one space, a block's
-    /// <c>}</c> goes, and the if's other lines move left by as much as the <c>if</c> moved relative to the else's line.
+    /// The edits that join <see langword="else"/> and <see langword="if"/>, or null. The gap between them becomes one space, a block's
+    /// <c>}</c> goes, and the if's other lines move left by as much as the <see langword="if"/> moved relative to the else's line.
     /// Every reported else clause nested in the same outermost one is fixed together (their lines move by the sum), so a
     /// single fix and Fix All give the same text. Skipped: comments or directives in the gaps (around the if), a block
-    /// followed by another <c>else</c> (that <c>else</c> would then belong to the inner <c>if</c>), a line that isn't
+    /// followed by another <see langword="else"/> (that <see langword="else"/> would then belong to the inner <see langword="if"/>), a line that isn't
     /// indented far enough to move, and a token spanning lines (a multi-line string) when lines move.
     /// <para>
     /// Joining <c>else { if (b) Y(); }</c> into the chain can make it inconsistent (braces on one clause, none on
@@ -120,7 +120,9 @@ internal static class ElseIfs
 
         // The brace rules' findings before the join (the outer chains, and the inner chains that were in a block) ...
         var before = parts.Select(p => Braces.GetChain(p.Else.Statement)).Concat(parts.Select(p => p.If).Where(i => i.Parent is BlockSyntax))
-            .OfType<IfStatementSyntax>().Distinct().SelectMany(c => Findings(c, text))
+            .OfType<IfStatementSyntax>()
+            .Distinct()
+            .SelectMany(c => Findings(c, text))
             .ToDictionary(f => Map(f.Child.SpanStart), f => f.Id);
 
         // ... and after it. When any changed, the joined chains get all their braces now.
@@ -130,7 +132,10 @@ internal static class ElseIfs
         var root = chain.SyntaxTree.WithChangedText(joined).GetRoot();
         var after = parts.Select(p => Map(p.If.SpanStart))
             .Select(start => root.FindToken(start).Parent is IfStatementSyntax joinedIf && joinedIf.SpanStart == start ? Braces.GetChain(joinedIf) : null)
-            .OfType<IfStatementSyntax>().Distinct().SelectMany(c => Findings(c, joined)).ToList();
+            .OfType<IfStatementSyntax>()
+            .Distinct()
+            .SelectMany(c => Findings(c, joined))
+            .ToList();
         if (after.All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))
         {
             return changes;
@@ -166,7 +171,9 @@ internal static class ElseIfs
             inner = only;
             close = block.CloseBraceToken;
             gaps = elseClause.ElseKeyword.TrailingTrivia.Concat(block.OpenBraceToken.LeadingTrivia).Concat(block.OpenBraceToken.TrailingTrivia)
-                .Concat(inner.GetLeadingTrivia()).Concat(inner.GetTrailingTrivia()).Concat(block.CloseBraceToken.LeadingTrivia);
+                .Concat(inner.GetLeadingTrivia())
+                .Concat(inner.GetTrailingTrivia())
+                .Concat(block.CloseBraceToken.LeadingTrivia);
         }
         else
         {

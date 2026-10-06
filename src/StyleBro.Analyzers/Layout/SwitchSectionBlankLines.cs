@@ -27,7 +27,8 @@ internal static class SwitchSectionBlankLines
     }
 
     public static Mode ReadMode(AnalyzerConfigOptions options) =>
-        !options.TryGetValue(OptionKey, out var value) ? Mode.Include
+        !options.TryGetValue(OptionKey, out var value)
+        ? Mode.Include
         : value.Split(':')[0].Trim().ToLowerInvariant() switch
         {
             "omit" => Mode.Omit,

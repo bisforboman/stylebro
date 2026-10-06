@@ -30,9 +30,11 @@ internal static class BaseCalls
                 }
 
                 break;
+
             case ElementAccessExpressionSyntax element when element.Expression == node:
                 speculative = element.WithExpression(SyntaxFactory.ThisExpression());
                 break;
+
             default:
                 return false;
         }

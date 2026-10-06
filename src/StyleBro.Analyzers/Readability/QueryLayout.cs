@@ -40,10 +40,13 @@ internal static class QueryLayout
         var indent = GetIndent(query, text, options);
         var lineBreak = SingleLineBlocks.LineBreak(text, query.SpanStart);
         var sameLine = new List<SyntaxToken>();
-        bool allSame = true, allSeparate = true, blocked = false;
+        bool allSame = true;
+        bool allSeparate = true;
+        bool blocked = false;
         for (var i = 0; i < tokens.Count - 1; i++)
         {
-            SyntaxToken first = tokens[i], second = tokens[i + 1];
+            SyntaxToken first = tokens[i];
+            SyntaxToken second = tokens[i + 1];
             if (second.Parent is QueryContinuationSyntax)
             {
                 continue;
@@ -142,15 +145,19 @@ internal static class QueryLayout
             case FromClauseSyntax from:
                 tokens.Add(from.FromKeyword);
                 break;
+
             case LetClauseSyntax let:
                 tokens.Add(let.LetKeyword);
                 break;
+
             case WhereClauseSyntax where:
                 tokens.Add(where.WhereKeyword);
                 break;
+
             case JoinClauseSyntax join:
                 tokens.Add(join.JoinKeyword);
                 break;
+
             case OrderByClauseSyntax orderBy:
                 tokens.Add(orderBy.OrderByKeyword);
                 break;

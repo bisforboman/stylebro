@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
-using StyleBro.Analyzers.Modernize;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers.Modernize;
 
 namespace StyleBro.Analyzers.Readability;
 

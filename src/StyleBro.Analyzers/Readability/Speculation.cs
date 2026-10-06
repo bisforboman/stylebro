@@ -33,14 +33,17 @@ internal static class Speculation
                     container = statement.ReplaceNode(original, replacement);
                     model.TryGetSpeculativeSemanticModel(statement.SpanStart, (StatementSyntax)container, out speculative);
                     break;
+
                 case EqualsValueClauseSyntax clause when clause.Parent is not VariableDeclaratorSyntax { Parent.Parent: LocalDeclarationStatementSyntax }:
                     container = clause.ReplaceNode(original, replacement);
                     model.TryGetSpeculativeSemanticModel(clause.SpanStart, (EqualsValueClauseSyntax)container, out speculative);
                     break;
+
                 case ArrowExpressionClauseSyntax arrow:
                     container = arrow.ReplaceNode(original, replacement);
                     model.TryGetSpeculativeSemanticModel(arrow.SpanStart, (ArrowExpressionClauseSyntax)container, out speculative);
                     break;
+
                 default:
                     continue;
             }
@@ -73,14 +76,17 @@ internal static class Speculation
                     container = statement.ReplaceNode(original, replacement);
                     model.TryGetSpeculativeSemanticModel(statement.SpanStart, (StatementSyntax)container, out speculative);
                     break;
+
                 case EqualsValueClauseSyntax clause when clause.Parent is not VariableDeclaratorSyntax { Parent.Parent: LocalDeclarationStatementSyntax }:
                     container = clause.ReplaceNode(original, replacement);
                     model.TryGetSpeculativeSemanticModel(clause.SpanStart, (EqualsValueClauseSyntax)container, out speculative);
                     break;
+
                 case ArrowExpressionClauseSyntax arrow:
                     container = arrow.ReplaceNode(original, replacement);
                     model.TryGetSpeculativeSemanticModel(arrow.SpanStart, (ArrowExpressionClauseSyntax)container, out speculative);
                     break;
+
                 default:
                     continue;
             }

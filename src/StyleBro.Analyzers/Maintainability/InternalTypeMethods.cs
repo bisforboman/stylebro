@@ -9,8 +9,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace StyleBro.Analyzers.Maintainability;
 
 /// <summary>
-/// Shared logic for BRO1409: an ordinary method declared <c>public</c> in a type that can't be seen outside the assembly
-/// gains nothing from <c>public</c>; <c>internal</c> says what it means. Deliberately narrow: reflection's defaults and
+/// Shared logic for BRO1409: an ordinary method declared <see langword="public"/> in a type that can't be seen outside the assembly
+/// gains nothing from <see langword="public"/>; <see langword="internal"/> says what it means. Deliberately narrow: reflection's defaults and
 /// most reflection-based libraries see public members only, so everything that such code (or the compiler) looks for is
 /// left alone. See docs/rules/BRO1409.md.
 /// </summary>
@@ -29,9 +29,7 @@ internal static class InternalTypeMethods
 
     private static readonly ConditionalWeakTable<Compilation, Dictionary<INamedTypeSymbol, List<INamedTypeSymbol>>> DerivedTypes = new();
 
-    /// <summary>
-    /// The <c>public</c> keyword to replace with <c>internal</c>, or null. Syntax checks first (cheap), then the symbol.
-    /// </summary>
+    /// <summary>The <see langword="public"/> keyword to replace with <see langword="internal"/>, or null. Syntax checks first (cheap), then the symbol.</summary>
     public static SyntaxToken? GetPublicKeyword(MethodDeclarationSyntax method, SemanticModel model, CancellationToken cancellationToken)
     {
         var keyword = default(SyntaxToken);
@@ -42,6 +40,7 @@ internal static class InternalTypeMethods
                 case SyntaxKind.PublicKeyword:
                     keyword = modifier;
                     break;
+
                 case SyntaxKind.OverrideKeyword:
                 case SyntaxKind.VirtualKeyword:
                 case SyntaxKind.AbstractKeyword:
@@ -75,7 +74,7 @@ internal static class InternalTypeMethods
     }
 
     /// <summary>
-    /// Syntax only: whether some enclosing type declaration doesn't say <c>public</c> or <c>protected</c> (no modifier:
+    /// Syntax only: whether some enclosing type declaration doesn't say <see langword="public"/> or <see langword="protected"/> (no modifier:
     /// internal or private, or another part says it; the symbol decides). Skips the symbol work in public types.
     /// </summary>
     private static bool MayBeHidden(MethodDeclarationSyntax method)
@@ -126,7 +125,7 @@ internal static class InternalTypeMethods
 
     /// <summary>
     /// A type (or a containing type) with an attribute, or deriving from a type from a referenced assembly other than
-    /// <c>object</c>/<c>ValueType</c>: frameworks call public methods of such types by convention (controllers, hubs,
+    /// <see langword="object"/>/<c>ValueType</c>: frameworks call public methods of such types by convention (controllers, hubs,
     /// test base classes, MonoBehaviour messages) or by reflection.
     /// </summary>
     private static bool HasAttributesOrForeignBase(INamedTypeSymbol type)

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using StyleBro.Analyzers;
-using StyleBro.Analyzers.Layout;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers;
+using StyleBro.Analyzers.Layout;
 
 namespace StyleBro.CodeFixes.Layout;
 

@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using StyleBro.Analyzers;
-using StyleBro.Analyzers.Maintainability;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StyleBro.Analyzers;
+using StyleBro.Analyzers.Maintainability;
 
 namespace StyleBro.CodeFixes.Maintainability;
 

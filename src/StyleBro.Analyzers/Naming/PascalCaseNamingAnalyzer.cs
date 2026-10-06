@@ -235,7 +235,6 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
             return !CamelCaseNames.CanRename(declaration, symbol.Name, newName);
         }
 
-
         return (symbol is INamedTypeSymbol && PrefixNames.IsTypeNameTaken(newName, context.SemanticModel.Compilation))
             || !context.SemanticModel.LookupSymbols(declaration.SpanStart, name: newName).IsEmpty;
     }

@@ -95,7 +95,8 @@ internal sealed class Baseline
             .ThenBy(e => e.Key.Fingerprint, StringComparer.Ordinal))
         {
             builder.Append(entry.Key.Id).Append('\t').Append(entry.Key.Path).Append('\t').Append(entry.Key.Fingerprint).Append('\t')
-                .Append(entry.Value).Append('\n');
+                .Append(entry.Value)
+                .Append('\n');
         }
 
         return builder.ToString();
@@ -133,7 +134,7 @@ internal sealed class Baseline
 
         /// <inheritdoc/>
         public override int GetHashCode() =>
-            (StringComparer.Ordinal.GetHashCode(Id) * 31 + StringComparer.OrdinalIgnoreCase.GetHashCode(Path)) * 31
+            (((StringComparer.Ordinal.GetHashCode(Id) * 31) + StringComparer.OrdinalIgnoreCase.GetHashCode(Path)) * 31)
             + StringComparer.Ordinal.GetHashCode(Fingerprint);
     }
 }

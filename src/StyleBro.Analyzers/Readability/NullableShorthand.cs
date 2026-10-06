@@ -10,8 +10,8 @@ namespace StyleBro.Analyzers.Readability;
 
 /// <summary>
 /// Shared logic for BRO1115 (StyleCop SA1125: <c>int?</c> instead of <c>Nullable&lt;int&gt;</c>). Like StyleCop, also
-/// <c>System.Nullable&lt;int&gt;</c>, <c>global::System.Nullable&lt;int&gt;</c>, nested type arguments, <c>typeof</c> and
-/// <c>default</c>; not <c>typeof(Nullable&lt;&gt;)</c>, <c>nameof</c> or <c>cref</c>.
+/// <c>System.Nullable&lt;int&gt;</c>, <c>global::System.Nullable&lt;int&gt;</c>, nested type arguments, <see langword="typeof"/> and
+/// <see langword="default"/>; not <c>typeof(Nullable&lt;&gt;)</c>, <see langword="nameof"/> or <c>cref</c>.
 /// </summary>
 internal static class NullableShorthand
 {

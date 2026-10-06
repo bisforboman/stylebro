@@ -178,9 +178,7 @@ internal static class Migration
         return result;
     }
 
-    /// <summary>
-    /// The settings for a scope: the lines whose value differs from the repository-wide ones (<paramref name="main"/>).
-    /// </summary>
+    /// <summary>The settings for a scope: the lines whose value differs from the repository-wide ones (<paramref name="main"/>).</summary>
     public static List<string> GenerateScope(StyleCopSetup setup, Scope scope, string root, Result main)
     {
         var inScope = Generate(setup.For(scope), root, main.FieldStyle);
@@ -209,7 +207,8 @@ internal static class Migration
             return keys;
         }
 
-        bool inBlock = false, inCSharp = false;
+        bool inBlock = false;
+        bool inCSharp = false;
         foreach (var raw in File.ReadAllLines(path))
         {
             var line = raw.Trim();
@@ -696,7 +695,8 @@ internal static class Migration
     /// <summary>Private instance and static fields (not constants, not static readonly), by whether they start with '_'.</summary>
     private static (int Underscore, int Plain) CountPrivateFields(string root)
     {
-        int underscore = 0, plain = 0;
+        int underscore = 0;
+        int plain = 0;
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
         {
             var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(file));

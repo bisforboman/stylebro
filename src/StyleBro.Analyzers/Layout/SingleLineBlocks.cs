@@ -47,14 +47,19 @@ internal static class SingleLineBlocks
         {
             case BlockSyntax { Parent: AnonymousFunctionExpressionSyntax or AccessorDeclarationSyntax }:
                 return null;
+
             case BlockSyntax block:
                 return (block.OpenBraceToken, block.CloseBraceToken, block.Parent is BaseMethodDeclarationSyntax or LocalFunctionStatementSyntax);
+
             case BaseTypeDeclarationSyntax type when !type.OpenBraceToken.IsMissing && type.OpenBraceToken.RawKind != 0:
                 return (type.OpenBraceToken, type.CloseBraceToken, true);
+
             case NamespaceDeclarationSyntax ns:
                 return (ns.OpenBraceToken, ns.CloseBraceToken, true);
+
             case AccessorListSyntax list when list.Accessors.Any(a => a.Body is not null):
                 return (list.OpenBraceToken, list.CloseBraceToken, true);
+
             default:
                 return null;
         }
@@ -310,6 +315,7 @@ internal static class SingleLineBlocks
         {
             case ElseClauseSyntax or CatchClauseSyntax or FinallyClauseSyntax:
                 return node.Parent is { } statement ? StartIndent(statement, text, options, unit) : null;
+
             case IfStatementSyntax { Parent: ElseClauseSyntax elseClause }:
                 return StartIndent(elseClause, text, options, unit);
         }

@@ -72,8 +72,10 @@ internal static class InitializerOrder
                 return field.Declaration.Variables
                     .Where(v => v.Initializer is not null)
                     .Select(v => v.Initializer!.Value);
+
             case PropertyDeclarationSyntax { Initializer: { } initializer }:
                 return new[] { initializer.Value };
+
             default:
                 return Enumerable.Empty<ExpressionSyntax>();
         }
@@ -110,6 +112,7 @@ internal static class InitializerOrder
                     case BaseFieldDeclarationSyntax field when !field.Modifiers.Any(SyntaxKind.ConstKeyword):
                         memberNames.UnionWith(field.Declaration.Variables.Select(v => v.Identifier.ValueText));
                         break;
+
                     case MethodDeclarationSyntax or PropertyDeclarationSyntax or EventDeclarationSyntax or DelegateDeclarationSyntax:
                         memberNames.Add(MemberOrdering.GetNameToken(member).ValueText);
                         break;
@@ -127,6 +130,7 @@ internal static class InitializerOrder
                     {
                         case SimpleNameSyntax name when IsStateReference(name):
                             return true;
+
                         case ImplicitObjectCreationExpressionSyntax when CreatesThisType(GetDeclaredType(member)):
                             return true;
                     }

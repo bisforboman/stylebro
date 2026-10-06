@@ -121,7 +121,8 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     private static Task RunAsync(CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier> test, string? editorConfig)
     {
         var off = new TAnalyzer().SupportedDiagnostics.Where(d => !d.IsEnabledByDefault).Select(d => d.Id)
-            .Where(id => editorConfig?.Contains($"dotnet_diagnostic.{id}.severity", StringComparison.Ordinal) != true).ToList();
+            .Where(id => editorConfig?.Contains($"dotnet_diagnostic.{id}.severity", StringComparison.Ordinal) != true)
+            .ToList();
         if (off.Count > 0)
         {
             test.SolutionTransforms.Add((solution, projectId) =>

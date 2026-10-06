@@ -27,9 +27,7 @@ internal static class CamelCaseNames
     /// </summary>
     public static string? GetNewName(string name) => ToCamelCase(name) is { } result && IsUsableName(result) ? result : null;
 
-    /// <summary>
-    /// Like <see cref="GetNewName"/>, but 'Field' -> 'field' too: for names that get a prefix ('_field') or more words.
-    /// </summary>
+    /// <summary>Like <see cref="GetNewName"/>, but 'Field' -> 'field' too: for names that get a prefix ('_field') or more words.</summary>
     public static string? ToCamelCase(string name)
     {
         if (name.Length == 0 || char.IsLower(name[0]))

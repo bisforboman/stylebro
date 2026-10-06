@@ -66,16 +66,16 @@ internal static class TrailingCommas
             InitializerExpressionSyntax initializer when initializer.Kind() is SyntaxKind.ArrayInitializerExpression
                 or SyntaxKind.ObjectInitializerExpression
                 or SyntaxKind.CollectionInitializerExpression
-                or SyntaxKind.WithInitializerExpression
-                => Describe(initializer.Expressions, initializer.OpenBraceToken, initializer.CloseBraceToken),
-            AnonymousObjectCreationExpressionSyntax anonymous
-                => Describe(anonymous.Initializers, anonymous.OpenBraceToken, anonymous.CloseBraceToken),
-            EnumDeclarationSyntax enumDeclaration
-                => Describe(enumDeclaration.Members, enumDeclaration.OpenBraceToken, enumDeclaration.CloseBraceToken),
-            SwitchExpressionSyntax switchExpression
-                => Describe(switchExpression.Arms, switchExpression.OpenBraceToken, switchExpression.CloseBraceToken),
-            PropertyPatternClauseSyntax propertyPattern
-                => Describe(propertyPattern.Subpatterns, propertyPattern.OpenBraceToken, propertyPattern.CloseBraceToken),
+                or SyntaxKind.WithInitializerExpression =>
+                Describe(initializer.Expressions, initializer.OpenBraceToken, initializer.CloseBraceToken),
+            AnonymousObjectCreationExpressionSyntax anonymous =>
+                Describe(anonymous.Initializers, anonymous.OpenBraceToken, anonymous.CloseBraceToken),
+            EnumDeclarationSyntax enumDeclaration =>
+                Describe(enumDeclaration.Members, enumDeclaration.OpenBraceToken, enumDeclaration.CloseBraceToken),
+            SwitchExpressionSyntax switchExpression =>
+                Describe(switchExpression.Arms, switchExpression.OpenBraceToken, switchExpression.CloseBraceToken),
+            PropertyPatternClauseSyntax propertyPattern =>
+                Describe(propertyPattern.Subpatterns, propertyPattern.OpenBraceToken, propertyPattern.CloseBraceToken),
             _ => null,
         };
     }

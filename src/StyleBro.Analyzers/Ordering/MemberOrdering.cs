@@ -8,24 +8,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Ordering;
 
-internal sealed class OrderingViolation
-{
-    public OrderingViolation(MemberDeclarationSyntax member, MemberDeclarationSyntax shouldPrecede, string reason)
-    {
-        Member = member;
-        ShouldPrecede = shouldPrecede;
-        Reason = reason;
-    }
-
-    /// <summary>Gets the out-of-place member.</summary>
-    public MemberDeclarationSyntax Member { get; }
-
-    /// <summary>Gets the first earlier member that <see cref="Member"/> should come before.</summary>
-    public MemberDeclarationSyntax ShouldPrecede { get; }
-
-    public string Reason { get; }
-}
-
 /// <summary>
 /// Shared ordering logic used by both the analyzer and the code fix, so they can never disagree
 /// (which is what keeps the fix idempotent: sorted output never produces a diagnostic).
@@ -622,4 +604,22 @@ internal static class MemberOrdering
             _ => "private",
         };
     }
+}
+
+internal sealed class OrderingViolation
+{
+    public OrderingViolation(MemberDeclarationSyntax member, MemberDeclarationSyntax shouldPrecede, string reason)
+    {
+        Member = member;
+        ShouldPrecede = shouldPrecede;
+        Reason = reason;
+    }
+
+    /// <summary>Gets the out-of-place member.</summary>
+    public MemberDeclarationSyntax Member { get; }
+
+    /// <summary>Gets the first earlier member that <see cref="Member"/> should come before.</summary>
+    public MemberDeclarationSyntax ShouldPrecede { get; }
+
+    public string Reason { get; }
 }

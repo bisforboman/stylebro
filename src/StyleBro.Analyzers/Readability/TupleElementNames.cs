@@ -11,7 +11,7 @@ internal static class TupleElementNames
 {
     /// <summary>
     /// The element's name for an <c>ItemN</c> member access (<c>t.Item1</c>, <c>t?.Item1</c>), or null. Not inside
-    /// <c>nameof</c>, where the name is the result.
+    /// <see langword="nameof"/>, where the name is the result.
     /// </summary>
     public static string? GetName(IdentifierNameSyntax name, SemanticModel model, CancellationToken cancellationToken)
     {

@@ -49,7 +49,7 @@ public sealed class MigrationTests : IDisposable
         {
             var reason = Program.UserFacingReason(proposal);
             Assert.False(string.IsNullOrWhiteSpace(reason), id);
-            Assert.DoesNotMatch(@"(?i)findings|private app|user decision", reason);
+            Assert.DoesNotMatch("(?i)findings|private app|user decision", reason);
         }
 
         Assert.Equal("Missing documentation on enum members; the only fix is placeholder text.", Program.UserFacingReason("Drop: Missing documentation on enum members; the only fix is placeholder text (no stubs, user decision). 530 findings in the surveyed app."));
