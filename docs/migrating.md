@@ -11,10 +11,29 @@ stylebro-migrate path/to/repo           # dry run: prints the report and the set
 stylebro-migrate path/to/repo --write   # writes them
 ```
 
-The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version. From a clone of
-this repository: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
+The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version. Several fixes on this
+page are newer than the latest release (0.1.0-alpha.8): [which version](getting-started.md#which-version) says how to
+build both packages from a clone. To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
-Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `dotnet format`. The steps in order:
+Then swap the package (below) and run `dotnet format`, or `stylebro-migrate format` if any project sets several
+`<TargetFrameworks>` (`--write` ends with the one your repository needs).
+
+## Swap the package
+
+Remove StyleCop and add StyleBro wherever the repository references StyleCop. Look for both package ids,
+`StyleCop.Analyzers` and the prerelease `StyleCop.Analyzers.Unstable`, in `.csproj`, `Directory.Build.props` and
+`Directory.Packages.props`. With central package management the reference is often a `GlobalPackageReference`, which
+applies to every project:
+
+```xml
+<!-- Directory.Packages.props, before -->
+<GlobalPackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556" />
+
+<!-- after -->
+<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" />
+```
+
+`stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
 real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md).
 
@@ -27,7 +46,12 @@ real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md)
   When several rulesets or global configs disagree (one per project type), the strictest wins, so production code
   keeps everything StyleCop enforced there.
 - Sub-directory `.editorconfig` files and path-specific sections (like `[tests/**.cs]`) are translated in place: they
-  get the settings that differ from the repository-wide ones, in the same file and section.
+  get the settings that differ from the repository-wide ones, in the same file and section. A folder that turns every
+  analyzer off (`dotnet_analyzer_diagnostic.severity = none`, common for vendored code) gets every replacing rule as
+  `none`: a rule the root turns on by its id would win over the folder's bulk setting.
+- Git submodules and other nested repositories (folders with their own `.git` file or folder) are skipped: their
+  settings, code and project files belong to another repository, and nothing in them is changed. Files a project
+  links from a submodule are another matter: see [excluding vendored code](getting-started.md#excluding-vendored-code).
 - The StyleCop.Analyzers version in the project files: with 1.1.x, the rules added in 1.2 (SA1141, SA1142, SA1316,
   SA1414) count as off.
 - Whether any project sets `GenerateDocumentationFile`. Without it the build doesn't parse XML documentation and
@@ -49,7 +73,10 @@ tool again replaces the block, so put your own settings outside it.
   off doesn't get the full sort, so BRO1001 stays off and the report lists SA1203/SA1204 as partly covered. Rules
   that `stylecop.json` makes moot don't count: SA1203 when `elementOrder` leaves out `constant`, and so on.
 - **Private field naming.** [BRO1303](rules/BRO1303.md) uses `_camelCase` when SA1309 (no leading underscore) is off
-  and most of the repository's private fields start with `_`, and `camelCase` otherwise.
+  and most of the repository's private fields start with `_`, and `camelCase` otherwise. Private constants and
+  `static readonly` fields are pinned to StyleCop's PascalCase (`stylebro_private_static_field_naming = PascalCase`,
+  [BRO1306](rules/BRO1306.md)): without it BRO1306 would follow a camel-case `dotnet_naming_rule` for static fields that
+  StyleCop never enforced (IDE1006 off), and rename fields StyleCop was happy with.
 - **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order, IDE0065 using placement, and so
   on) get the strongest severity of the StyleCop rules they cover, with options from `stylecop.json`.
 
@@ -114,4 +141,6 @@ see [modernizing.md](modernizing.md).
 - StyleCop's XML file header (`<copyright file=...>`, the default for SA1633) becomes [BRO1615](rules/BRO1615.md) with
   stylecop.json's `companyName`, `copyrightText` (custom `variables` filled in) and `headerDecoration`; a plain
   header (`"xmlHeader": false`) becomes IDE0073's `file_header_template`. BRO1615 is one rule for SA1633-SA1641, so
-  it's off when any of them is off.
+  it's off when any of them is off. With a plain header StyleCop's SA1633 only asks for a header and SA1636 compares
+  its text (line by line, ignoring leading and trailing spaces; only while SA1635 is on too). IDE0073 always compares
+  the text, so it's on only when SA1633, SA1635 and SA1636 all are.

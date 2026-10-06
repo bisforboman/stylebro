@@ -83,8 +83,15 @@ internal static class InitCommand
             Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
         }
 
+        Console.WriteLine($"Next: run '{FormatCommandName(multiTargeted.Count > 0)}'.");
         return 0;
     }
+
+    /// <summary>The command that formats the repository: 'stylebro-migrate format' when it has multi-targeted projects.</summary>
+    public static string FormatCommandName(string root) => FormatCommandName(MultiTargetedProjects(root).Any());
+
+    /// <summary>The command that formats a repository with or without multi-targeted projects.</summary>
+    public static string FormatCommandName(bool multiTargeted) => multiTargeted ? "stylebro-migrate format" : "dotnet format";
 
     /// <summary>The block written into .editorconfig, between the stylebro-migrate markers.</summary>
     public static string Block()

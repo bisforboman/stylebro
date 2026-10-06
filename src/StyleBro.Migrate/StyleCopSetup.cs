@@ -35,8 +35,11 @@ internal sealed record Scope(string File, string Section, IReadOnlyDictionary<st
 /// </summary>
 internal sealed class StyleCopSetup
 {
+    /// <summary>The key ReadConfig files a 'dotnet_analyzer_diagnostic.severity' (every rule) under, next to the categories.</summary>
+    private const string AllRules = "*";
+
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*)\.severity$", RegexOptions.IgnoreCase);
-    private static readonly Regex PackageVersion = new(@"Include=""StyleCop\.Analyzers""[^>]*?Version=""([^""]+)""|Include=""StyleCop\.Analyzers""[^>]*>\s*<Version>([^<]+)</Version>", RegexOptions.IgnoreCase);
+    private static readonly Regex PackageVersion = new(@"Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?Version=""([^""]+)""|Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*>\s*<Version>([^<]+)</Version>", RegexOptions.IgnoreCase);
     private static readonly Regex DocumentationFile = new(@"<GenerateDocumentationFile>\s*true\s*<|<DocumentationFile>", RegexOptions.IgnoreCase);
     private static readonly Regex CategoryKey = new(@"^dotnet_analyzer_diagnostic\.category-StyleCop\.CSharp\.(\w+)\.severity$", RegexOptions.IgnoreCase);
 
@@ -190,7 +193,10 @@ internal sealed class StyleCopSetup
         return braces.Success && braces.Groups[1].Value.Split(',').Any(e => e.Trim() == "cs");
     }
 
-    /// <summary>Files in the repository, skipping build output and version control.</summary>
+    /// <summary>
+    /// Files in the repository, skipping build output, version control and nested repositories (git submodules and other
+    /// folders with their own '.git' file or folder): their settings and code belong to another repository.
+    /// </summary>
     public static IEnumerable<string> EnumerateFiles(string root)
     {
         var pending = new Stack<string>();
@@ -206,12 +212,19 @@ internal sealed class StyleCopSetup
             foreach (var child in Directory.EnumerateDirectories(directory))
             {
                 var name = Path.GetFileName(child);
-                if (name is not ("bin" or "obj" or ".git" or ".vs" or "node_modules" or "artifacts"))
+                if (name is not ("bin" or "obj" or ".git" or ".vs" or "node_modules" or "artifacts") && !IsNestedRepository(child))
                 {
                     pending.Push(child);
                 }
             }
         }
+    }
+
+    /// <summary>Whether a folder is its own git repository (a submodule has a '.git' file, a nested clone a '.git' folder).</summary>
+    public static bool IsNestedRepository(string directory)
+    {
+        var git = Path.Combine(directory, ".git");
+        return File.Exists(git) || Directory.Exists(git);
     }
 
     /// <summary>A .csproj, .props or .targets file.</summary>
@@ -300,6 +313,10 @@ internal sealed class StyleCopSetup
             {
                 target.ByCategory[category.Groups[1].Value] = severity;
             }
+            else if (key.Equals("dotnet_analyzer_diagnostic.severity", StringComparison.OrdinalIgnoreCase))
+            {
+                target.ByCategory[AllRules] = severity;
+            }
         }
 
         AddCurrent();
@@ -308,9 +325,12 @@ internal sealed class StyleCopSetup
         foreach (var (section, byRule, byCategory) in sections)
         {
             var severities = new Dictionary<string, Severity>();
-            foreach (var (id, category, _, _) in Rules)
+            foreach (var (id, category, defaultSeverity, _) in Rules)
             {
-                if (byRule.TryGetValue(id, out var severity) || byCategory.TryGetValue(category, out severity))
+                // 'dotnet_analyzer_diagnostic.severity' (every rule; a folder of vendored code often sets it to none)
+                // comes last, and like in the compiler it doesn't turn on rules that are off by default.
+                if (byRule.TryGetValue(id, out var severity) || byCategory.TryGetValue(category, out severity)
+                    || (byCategory.TryGetValue(AllRules, out severity) && (defaultSeverity > Severity.None || severity == Severity.None)))
                 {
                     severities[id] = severity;
                 }
