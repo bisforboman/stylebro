@@ -77,7 +77,7 @@ internal static class CamelCaseRenamer
 
                 if ((IsReachableByName(symbol)
                         && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
-                    || await GetChangesAsync(solution, symbol, newName, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
+                    || await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
                     safe = false;
                     break;
@@ -219,6 +219,7 @@ internal static class CamelCaseRenamer
         Solution solution,
         ISymbol symbol,
         string newName,
+        bool keepObservableNames,
         CancellationToken cancellationToken)
     {
         var oldName = symbol.Name;
@@ -258,7 +259,10 @@ internal static class CamelCaseRenamer
         {
             // A related parameter that can't be renamed safely keeps its name (it's then no longer reported either,
             // since the same conflict blocks its own rename); the reported symbol itself was checked by the analyzer.
-            if (!SymbolEqualityComparer.Default.Equals(current, symbol) && IsMemberScoped(current) && !await CanRenameAsync(current).ConfigureAwait(false))
+            if (!SymbolEqualityComparer.Default.Equals(current, symbol)
+                && IsMemberScoped(current)
+                && (!await CanRenameAsync(current).ConfigureAwait(false)
+                    || (keepObservableNames && current is IParameterSymbol && await IsObservableAsync(current).ConfigureAwait(false))))
             {
                 continue;
             }
@@ -320,6 +324,23 @@ internal static class CamelCaseRenamer
             }
 
             return true;
+        }
+
+        // BRO1313: an override's parameter renamed along with its base's keeps a name that reaches run time (nameof).
+        async Task<bool> IsObservableAsync(ISymbol related)
+        {
+            foreach (var location in related.Locations.Where(l => l.IsInSource))
+            {
+                if (solution.GetDocument(location.SourceTree) is { } document
+                    && await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is { } model
+                    && (await location.SourceTree!.GetRootAsync(cancellationToken).ConfigureAwait(false)).FindToken(location.SourceSpan.Start).Parent?.Parent?.Parent is { } member
+                    && CamelCaseNames.IsNameObservable(member, oldName, model, cancellationToken))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         async Task<bool> TryAddAsync(Document? document, TextSpan span, string replacement)
