@@ -38,7 +38,7 @@ Where the preset and the rules differ from StyleCop's defaults, and how to get S
 ## Usage
 
 ```xml
-<PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" PrivateAssets="all" />
+<PackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" PrivateAssets="all" />
 ```
 
 Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036
@@ -49,9 +49,6 @@ from a package's preset.
 dotnet tool install --global StyleBro.Migrate --prerelease
 stylebro-migrate init --write      # adds a block to .editorconfig
 ```
-
-`init` and `format` are newer than the latest release (0.1.0-alpha.8); until the next one, build the packages from a
-clone: [which version](docs/getting-started.md#which-version).
 
 ```
 dotnet format                      # whitespace + style + analyzers, including StyleBro

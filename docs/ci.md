@@ -21,7 +21,7 @@ Fixing a failure is the same everywhere: run `dotnet format` locally and commit 
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
