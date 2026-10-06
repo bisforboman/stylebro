@@ -503,5 +503,10 @@
         @{ File = 'src/StyleBro.CodeFixes/Readability/NullCheckCodeFixProvider.cs'; Find = 'NullChecks.GetFix(e, model, options, cancellationToken, version)'; Replace = 'NullChecks.GetFix(e, model, options, cancellationToken)'; Tests = 'NullCheckTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/AccessModifiersCodeFixProvider.cs'; Find = 'preference, version)'; Replace = 'preference)'; Tests = 'AccessModifiersTests' }
         @{ File = 'src/StyleBro.CodeFixes/LinkedFileFixAllProvider.cs'; Find = '.Min();'; Replace = '.Max();'; Tests = 'NullCheckTests' }
+        # stylebro-migrate: pinned static field casing, nested repositories, bulk severity, IDE0073 vs SA1636
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'if (options.TryGetValue(StaticStyleKey, out var value))'; Replace = 'if (false && options.TryGetValue(StaticStyleKey, out var value))'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '&& !IsNestedRepository(child)'; Replace = ''; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '(defaultSeverity > Severity.None || severity == Severity.None)'; Replace = 'true'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (setup.IsOn("SA1633") && textOff.Count == 0)'; Replace = 'if (setup.IsOn("SA1633"))'; Tests = 'MigrationTests' }
     )
 }

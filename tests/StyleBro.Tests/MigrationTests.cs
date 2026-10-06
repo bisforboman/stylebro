@@ -206,6 +206,20 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void PlainHeader_WithTheTextRuleOff_LeavesIde0073Off()
+    {
+        // With a plain header SA1633 only wants a header; SA1636 compares the text. IDE0073 always compares it.
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1636.severity = none\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("file_header_template", StringComparison.Ordinal));
+        Assert.Contains("dotnet_diagnostic.IDE0073.severity = none", result.Lines);
+        Assert.Contains("SA1633", result.Reasons.Keys);
+    }
+
+    [Fact]
     public void XmlHeader_WithOneHeaderRuleOff_Bro1615StaysOff()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1636.severity = none\n");
@@ -784,6 +798,109 @@ public sealed class MigrationTests : IDisposable
         using var filter = JsonDocument.Parse(FormatCommand.SolutionFilter("App.slnx", new[] { "src\\Lib\\Lib.csproj" }));
         Assert.Equal("App.slnx", filter.RootElement.GetProperty("solution").GetProperty("path").GetString());
         Assert.Equal("src\\Lib\\Lib.csproj", filter.RootElement.GetProperty("solution").GetProperty("projects")[0].GetString());
+    }
+
+    [Fact]
+    public void StaticFieldCasing_IsPinnedToStyleCopsPascalCase()
+    {
+        // A camel-case naming rule for static fields that StyleCop never enforced (IDE1006 off) must not rename them.
+        Write(".editorconfig", "[*.cs]\ndotnet_naming_rule.static_fields.symbols = static_fields\ndotnet_naming_symbols.static_fields.required_modifiers = static\n");
+
+        Assert.Contains($"{StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey} = PascalCase", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+    }
+
+    [Fact]
+    public void Submodules_AreSkipped()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1101.severity = none\n");
+        Write("ext/Lib/.git", "gitdir: ../../.git/modules/ext/Lib\n");
+        Write("ext/Lib/.editorconfig", "[*.cs]\ndotnet_diagnostic.SA1101.severity = warning\n");
+        Write("ext/Lib/src/Code.cs", "#pragma warning disable SA1202\nclass C { }\n");
+        Write("ext/Lib/src/Lib.csproj", "<Project><PropertyGroup><TargetFrameworks>net8.0;net48</TargetFrameworks></PropertyGroup></Project>");
+        Write("ext/Clone/.git/HEAD", "ref: refs/heads/main\n");
+        Write("ext/Clone/Code.cs", "class D { }\n");
+
+        var files = StyleCopSetup.EnumerateFiles(root).Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).ToList();
+
+        Assert.Equal(new[] { ".editorconfig" }, files);
+        Assert.Empty(StyleCopSetup.Read(root).Scopes);
+        Assert.Empty(InitCommand.MultiTargetedProjects(root));
+        Assert.Equal(0, Program.Main(new[] { root, "--write" }));
+        Assert.Equal("#pragma warning disable SA1202\nclass C { }\n", File.ReadAllText(Path.Combine(root, "ext/Lib/src/Code.cs")));
+        Assert.DoesNotContain(Migration.BeginMarker, File.ReadAllText(Path.Combine(root, "ext/Lib/.editorconfig")));
+    }
+
+    [Fact]
+    public void AllRulesOff_InAFolder_TurnsTheReplacingRulesOffThere()
+    {
+        // A folder of vendored code: 'dotnet_analyzer_diagnostic.severity = none' silences StyleCop there, but not the
+        // StyleBro and SDK rules the root block turns on by id (an id beats the bulk setting). So they're written off.
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
+        Write("ext/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = none\n");
+
+        var setup = StyleCopSetup.Read(root);
+        var result = Migration.Generate(setup, root);
+        var scope = Assert.Single(setup.Scopes);
+        var lines = Migration.GenerateScope(setup, scope, root, result);
+
+        Assert.Contains("dotnet_diagnostic.BRO1306.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.IDE0065.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.IDE0055.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1514.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.IDE0073.severity = none", lines);
+    }
+
+    [Fact]
+    public void AllRulesBulkSeverity_DoesNotTurnOnRulesThatAreOffByDefault()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = error\n");
+
+        var setup = StyleCopSetup.Read(root);
+
+        Assert.Equal(Severity.Error, setup.Severities["SA1101"]);
+        Assert.False(setup.IsOn("SA1305"));
+    }
+
+    [Fact]
+    public void NextStep_NamesStyleBroFormat_WhenMultiTargeted()
+    {
+        Assert.Contains("run 'dotnet format'", Program.NextStep(root));
+        Assert.Equal("dotnet format", InitCommand.FormatCommandName(root));
+
+        Write("src/Lib/Lib.csproj", "<Project><PropertyGroup><TargetFrameworks>net8.0;net48</TargetFrameworks></PropertyGroup></Project>");
+
+        Assert.Contains("run 'stylebro-migrate format'", Program.NextStep(root));
+        Assert.Equal("stylebro-migrate format", InitCommand.FormatCommandName(root));
+    }
+
+    [Fact]
+    public void FormatReports_AreMergedPerFile_WithoutDuplicates()
+    {
+        const string Net8 = """
+            [{ "DocumentId": { "Id": "1" }, "FileName": "A.cs", "FilePath": "C:\\r\\A.cs",
+               "FileChanges": [{ "LineNumber": 1, "CharNumber": 1, "DiagnosticId": "BRO1001", "FormatDescription": "x" }] }]
+            """;
+        const string Net48 = """
+            [{ "DocumentId": { "Id": "2" }, "FileName": "A.cs", "FilePath": "C:\\r\\A.cs",
+               "FileChanges": [{ "LineNumber": 1, "CharNumber": 1, "DiagnosticId": "BRO1001", "FormatDescription": "x" },
+                               { "LineNumber": 9, "CharNumber": 1, "DiagnosticId": "IDE0055", "FormatDescription": "y" }] },
+             { "DocumentId": { "Id": "3" }, "FileName": "B.cs", "FilePath": "C:\\r\\B.cs", "FileChanges": [] }]
+            """;
+
+        using var merged = JsonDocument.Parse(FormatCommand.MergeReports(new[] { Net8, Net48 }));
+
+        var files = merged.RootElement.EnumerateArray().ToList();
+        Assert.Equal(new[] { "A.cs", "B.cs" }, files.Select(f => f.GetProperty("FileName").GetString()));
+        Assert.Equal(new[] { "BRO1001", "IDE0055" }, files[0].GetProperty("FileChanges").EnumerateArray().Select(c => c.GetProperty("DiagnosticId").GetString()));
+    }
+
+    [Fact]
+    public void FormatOutput_ShowsEachLineOnce()
+    {
+        var shown = new HashSet<string>();
+        var lines = new[] { "Warnings were encountered while loading the workspace.", "A.cs(1,1): warning BRO1001", string.Empty, "Warnings were encountered while loading the workspace.", "A.cs(1,1): warning BRO1001", string.Empty };
+
+        Assert.Equal(new[] { lines[0], lines[1], string.Empty, string.Empty }, lines.Where(l => FormatCommand.IsNewLine(shown, l)));
     }
 
     private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)

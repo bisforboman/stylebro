@@ -127,7 +127,11 @@ internal static class Migration
         }
 
         AddMemberOrder(setup, lines);
-        lines.Add($"stylebro_private_field_naming = {result.FieldStyle}");
+        lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = {result.FieldStyle}");
+
+        // StyleCop wants private constants and static readonly fields in PascalCase (SA1303, SA1311), whatever the SDK's
+        // naming rules say: pinned, so BRO1306 doesn't follow a naming rule StyleCop never enforced.
+        lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey} = PascalCase");
         AddDocumentationScope(setup, lines);
         AddPunctuationExclusions(setup, lines);
         if (NonEnglishCulture(setup) is { } documentationCulture)
@@ -624,10 +628,25 @@ internal static class Migration
         }
 
         // File header: a plain header is IDE0073's file_header_template; the XML header is BRO1615's (above).
-        if (setup.IsOn("SA1633") && !XmlHeader(setup))
+        // With a plain header StyleCop's SA1633 only wants one; the text is SA1636's (checked only while SA1635 is on too,
+        // line by line, trimmed). IDE0073 compares the text, so it's on only when StyleCop compared it as well. Off is
+        // written too: a folder whose StyleCop rules are off must override the repository-wide 'warning'.
+        if (!XmlHeader(setup))
         {
-            Rule("IDE0073", "SA1633");
-            lines.Add("file_header_template = " + CopyrightTemplate(setup).Replace("{companyName}", Company(setup)));
+            var textOff = new[] { "SA1635", "SA1636" }.Where(sa => !setup.IsOn(sa)).ToList();
+            if (setup.IsOn("SA1633") && textOff.Count == 0)
+            {
+                Rule("IDE0073", "SA1633", "SA1635", "SA1636");
+                lines.Add("file_header_template = " + CopyrightTemplate(setup).Replace("{companyName}", Company(setup)));
+            }
+            else
+            {
+                Rule("IDE0073");
+                if (setup.IsOn("SA1633"))
+                {
+                    result.Reasons["SA1633"] = $"IDE0073 also checks the header's text, which StyleCop didn't here ({string.Join(", ", textOff)} off)";
+                }
+            }
         }
     }
 

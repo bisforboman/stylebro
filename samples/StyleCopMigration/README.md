@@ -83,6 +83,7 @@ stylebro_member_constants_first = true
 stylebro_member_static_first = true
 stylebro_member_readonly_first = true
 stylebro_private_field_naming = _camelCase
+stylebro_private_static_field_naming = PascalCase
 stylebro_document_exposed_elements = true
 stylebro_document_internal_elements = false
 stylebro_document_private_elements = false

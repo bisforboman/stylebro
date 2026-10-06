@@ -64,6 +64,91 @@ The owner: **skip without doc generation** (choice 1). The signal has to be the 
 `dotnet format`, which parses documentation comments even where the build doesn't: the package's build targets make
 `GenerateDocumentationFile` compiler-visible (the SDK always sets it, `true` also when only `DocumentationFile` is set).
 Without the package's targets (the analyzer referenced directly), the compiler's documentation mode decides.
+## README: where the rule list goes (2026-10-06)
+
+### Question
+
+The README's rule table had grown to 124 rows, too long for a start page. Where should the list go, and should the
+contributor sections stay?
+
+### Choices
+
+1. The full table on its own page (`docs/rules/README.md`, grouped by area), a six-row summary in the README.
+2. Keep the table in the README, each area collapsed.
+3. Only a link from the README.
+
+And: move Repository layout / Developing / Roadmap to `CONTRIBUTING.md`, or keep them.
+
+### Decision
+
+The owner: choice 1, and move the contributor sections to `CONTRIBUTING.md`. The index adds a Default column (on,
+off, off in the preset); `DocExamplesTests.TheRuleIndex_ListsEveryRulePage` keeps it complete, and New-Backlog.py
+reads the titles from it.
+
+## Migrate skips submodules (2026-10-06)
+
+### Question
+
+A first run on Nerdbank.Streams: `stylebro-migrate --write` wrote a settings block into `ext/MessagePack/.editorconfig`
+and added suppressions to 68 files there, all inside a git submodule (another repository's code). And the files a
+project links from that submodule got StyleBro and SDK warnings (IDE0073, IDE0065, BRO1514, BRO1306) that
+`stylebro-migrate format` never fixes, because it formats each project's own folder only. What should the tools do
+with nested repositories, and how do users exclude vendored code?
+
+### Choices
+
+1. Skip every folder that is its own git repository (a `.git` file or folder below the root) in migrate, `init`,
+   `format` and `baseline`; document `generated_code = true` for vendored folders and linked files.
+2. Keep walking submodules and leave it to the user to revert those changes.
+3. A `--exclude` option for migrate.
+
+### Decision
+
+The owner: choice 1, "docs + migrate skips submodules". Before, `--write` in a repository with a submodule at
+`ext/MessagePack`:
+
+```
+ M .editorconfig
+ M ext/MessagePack/.editorconfig                     <- another repository's file
+ M ext/MessagePack/benchmark/.../Answer.cs           <- and 67 more
+```
+
+After: only the repository's own files change. Agent's choices: all four commands walk files through one function
+(`StyleCopSetup.EnumerateFiles`), so the skip is there; `format` and `baseline` don't walk files themselves. Found on the
+way: the linked files' warnings came from the root block turning rules on by id, which beats the
+`dotnet_analyzer_diagnostic.severity = none` that `ext/.editorconfig` set for vendored code. Migrate now reads that bulk
+key (it didn't before) and writes every replacing rule as `none` into such a folder, IDE0073 included. Verified
+with dotnet format and the build that `generated_code = true` makes StyleBro, the SDK rules and the whitespace pass
+skip a folder; getting-started.md documents it.
+
+## Migrate pins StyleCop casing (2026-10-06)
+
+### Question
+
+Nerdbank.Streams has a `dotnet_naming_rule` asking for camel case on static fields (at `suggestion`) and IDE1006 off
+("StyleCop handles these for us"). After `stylebro-migrate --write`, BRO1306 followed that naming rule and renamed 178
+fields StyleCop was happy with. Should migrate follow the repository's naming rules or StyleCop's casing?
+
+### Choices
+
+1. Pin StyleCop's casing: `--write` writes explicit `stylebro_*` keys, which win over `dotnet_naming_rule`; a new
+   project without migrate keeps following its naming rules.
+2. Follow the naming rules (what happened), and document how to opt out.
+3. Follow a naming rule only when IDE1006 is on.
+
+### Decision
+
+The owner: choice 1. Before:
+
+```csharp
+private static readonly Version ProtocolVersion = new(1, 0);   // StyleCop-clean
+private static readonly Version protocolVersion = new(1, 0);   // after migrate + dotnet format
+```
+
+After: unchanged. Agent's choices: private instance fields already had a key (`stylebro_private_field_naming`, written
+by migrate); private constants and `static readonly` fields had none, so `stylebro_private_static_field_naming`
+(`PascalCase`, `camelCase`, `_camelCase`, for both) was added, documented on [BRO1306](rules/BRO1306.md); migrate
+writes `PascalCase`. Nerdbank.Streams after the fix: 0 renames, 0 changes from `stylebro-migrate format`.
 
 ## Renames to C# 14 contextual keywords (2026-10-05)
 

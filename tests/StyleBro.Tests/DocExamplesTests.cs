@@ -31,6 +31,15 @@ public partial class DocExamplesTests
         return data;
     }
 
+    [Fact]
+    public void TheRuleIndex_ListsEveryRulePage()
+    {
+        var index = File.ReadAllText(Path.Combine(RulesFolder, "README.md"));
+        var listed = Regex.Matches(index, @"^\| \[(BRO\d{4})\]\(\1\.md\) \|", RegexOptions.Multiline).Select(m => m.Groups[1].Value);
+        var pages = Directory.GetFiles(RulesFolder, "BRO*.md").Select(Path.GetFileNameWithoutExtension);
+        Assert.Equal(pages.Order(StringComparer.Ordinal), listed.Order(StringComparer.Ordinal));
+    }
+
     [Theory]
     [MemberData(nameof(Rules))]
     public async Task ExampleIsFixedAsDocumented(string id)
