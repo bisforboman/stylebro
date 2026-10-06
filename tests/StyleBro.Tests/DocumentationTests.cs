@@ -541,7 +541,7 @@ public class DocumentationTests
             public int {|BRO1605:InternalSet|} { get; internal set; }
 
             /// <summary>Is it closed.</summary>
-            public bool {|BRO1604:IsClosed|} { get; set; }
+            public bool IsClosed { get; set; }
 
             /// <summary>Whether it is paid.</summary>
             public bool {|BRO1604:IsPaid|} { get; set; }
@@ -580,7 +580,7 @@ public class DocumentationTests
             /// <summary>Gets the internal thing.</summary>
             public int InternalSet { get; internal set; }
 
-            /// <summary>Gets or sets is it closed.</summary>
+            /// <summary>Is it closed.</summary>
             public bool IsClosed { get; set; }
 
             /// <summary>Gets or sets a value indicating whether it is paid.</summary>

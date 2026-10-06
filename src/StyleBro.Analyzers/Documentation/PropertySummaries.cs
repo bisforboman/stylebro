@@ -46,7 +46,7 @@ internal static class PropertySummaries
     private static readonly string[] Verbs =
     [
         "Returns", "Specifies", "Indicates", "Determines", "Contains", "Controls", "Defines", "Represents", "Provides",
-        "Allows", "Enables", "Describes", "Stores", "Holds",
+        "Allows", "Enables", "Describes", "Stores", "Holds", "Is", "Has", "Can",
     ];
 
     /// <summary>
