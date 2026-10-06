@@ -84,7 +84,14 @@ internal static class ConstructorSummaries
             }
         }
 
+        // The kept text becomes the second sentence: one that starts in lower case or with a condition ('construct a
+        // bag', 'If true, ...') wouldn't read as one, so it's left alone.
         var remaining = rest.Substring(replaceLength);
+        if (remaining.Length > 0 && (char.IsLower(remaining[0]) || PropertySummaries.StartsWithAnyWord(remaining, PropertySummaries.Conditions)))
+        {
+            return null;
+        }
+
         var separator = remaining.Length == 0 || remaining.StartsWith("</", StringComparison.Ordinal) ? string.Empty : " ";
         return new Finding(summary.StartTag.GetLocation(), member is DestructorDeclarationSyntax, new TextSpan(start, replaceLength), standard + separator);
     }

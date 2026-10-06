@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Documentation;
 
@@ -69,6 +70,21 @@ internal static class DocumentationPeriods
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// The edit for BRO1603: a period at <paramref name="position"/>. Spaces between it and a closing tag on the same line
+    /// go ('true &lt;/returns&gt;' -> 'true.&lt;/returns&gt;'), else they'd stay after the period.
+    /// </summary>
+    public static TextChange GetPeriodChange(int position, SourceText text)
+    {
+        var end = position;
+        while (end < text.Length && text[end] is ' ' or '\t')
+        {
+            end++;
+        }
+
+        return new TextChange(TextSpan.FromBounds(position, end < text.Length && text[end] == '<' ? end : position), ".");
     }
 
     /// <summary>The tags <see cref="ExcludeKey"/> names (StyleCop's default when it isn't set).</summary>

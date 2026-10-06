@@ -36,5 +36,7 @@
     <!-- BRO1145 (C# 12 syntax): the SDK sets LangVersion to MaxSupportedLangVersion unless the project sets it. -->
     <CompilerVisibleProperty Include="LangVersion" />
     <CompilerVisibleProperty Include="MaxSupportedLangVersion" />
+    <!-- BRO1601 asks for documentation only where the project generates it (the same in a build and 'dotnet format'). -->
+    <CompilerVisibleProperty Include="GenerateDocumentationFile" />
   </ItemGroup>
 </Project>

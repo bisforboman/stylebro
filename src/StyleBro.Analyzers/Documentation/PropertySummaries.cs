@@ -37,11 +37,26 @@ internal static class PropertySummaries
     ];
 
     /// <summary>
+    /// Words that can't follow other words of a sentence: a condition ('If true, the text is checked', 'True if ...').
+    /// BRO1604 doesn't put 'Gets' in front of them, nor BRO1606 its sentence.
+    /// </summary>
+    public static readonly string[] Conditions = ["If", "When", "Whenever", "Unless", "While", "Whether", "True", "False"];
+
+    /// <summary>A summary that starts with a verb of its own: 'Gets' in front of it isn't a sentence ('Gets returns ...').</summary>
+    private static readonly string[] Verbs =
+    [
+        "Returns", "Specifies", "Indicates", "Determines", "Contains", "Controls", "Defines", "Represents", "Provides",
+        "Allows", "Enables", "Describes", "Stores", "Holds",
+    ];
+
+    /// <summary>
     /// The finding for a property, or null when its summary is right or can't be checked. The words follow the
     /// accessors other code can use: 'Gets or sets', 'Gets' (no setter, or a private or internal setter; a protected
     /// one counts, like in StyleCop), 'Sets' (write-only); a bool gets 'a value indicating whether' after them. An
     /// 'init' accessor counts like a setter with 'initializes', and like StyleCop master a property with 'get' and
-    /// 'init' may also say just 'Gets'. Not checked: indexers, and summaries that don't start with text.
+    /// 'init' may also say just 'Gets'. Not checked: indexers, summaries that don't start with text, and summaries
+    /// without a known prefix that start with a condition or a verb ('If true, ...', 'Returns ...'): the words in front
+    /// wouldn't make a sentence.
     /// </summary>
     public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text)
     {
@@ -85,6 +100,11 @@ internal static class PropertySummaries
         // state'). Only a summary that already says 'whether' gets the full phrase.
         var longForm = verb + " a value indicating whether";
         if (accepted.Any(v => old == v || (isBool && old == v + " a value indicating whether")))
+        {
+            return null;
+        }
+
+        if (old.Length == 0 && (StartsWithAnyWord(rest, Conditions) || StartsWithAnyWord(rest, Verbs)))
         {
             return null;
         }
@@ -146,6 +166,13 @@ internal static class PropertySummaries
         }
 
         return null;
+    }
+
+    /// <summary>Whether <paramref name="text"/> starts with one of <paramref name="words"/> as a whole word, ignoring case.</summary>
+    public static bool StartsWithAnyWord(string text, string[] words)
+    {
+        return words.Any(w => text.StartsWith(w, StringComparison.OrdinalIgnoreCase)
+            && (text.Length == w.Length || !char.IsLetterOrDigit(text[w.Length])));
     }
 
     private static bool StartsWithWord(string text, string words)

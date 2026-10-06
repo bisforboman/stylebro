@@ -252,6 +252,23 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '!IsExplicitImplementation(s) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'if (blankLineBefore && indentation.Trim().Length == 0'; Replace = 'if (false && indentation.Trim().Length == 0'; Tests = 'DocumentationTests' }
 
+        # First-run fixes (2026-10-06): BRO1601 conditional directives and doc generation, BRO1603 spaces before a closing
+        # tag, BRO1604/BRO1606 text that can't follow the standard words, BRO1134 a comment ending the header's line
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationAnalyzer.cs'; Find = '|| DocumentationComments.HasConditionalDirective((MemberDeclarationSyntax)context.Node)'; Replace = ''; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'var end = member.AttributeLists.Count > 0 ? member.AttributeLists.Last().GetLastToken().GetNextToken().SpanStart : member.SpanStart;'; Replace = 'var end = member.SpanStart;'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationAnalyzer.cs'; Find = '|| !DocumentationComments.GeneratesDocumentation(context.Node.SyntaxTree, options)'; Replace = ''; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '? string.Equals(value.Trim(), "true", System.StringComparison.OrdinalIgnoreCase)'; Replace = '? true'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = ': tree.Options.DocumentationMode >= DocumentationMode.Parse;'; Replace = ': true;'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '&& value.Trim().Length > 0'; Replace = ''; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = "end < text.Length && text[end] == '<' ? end : position"; Replace = 'position'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = 'if (old.Length == 0 && (StartsWithAnyWord(rest, Conditions) || StartsWithAnyWord(rest, Verbs)))'; Replace = 'if (false)'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = ' || StartsWithAnyWord(rest, Verbs)))'; Replace = '))'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = '(char.IsLower(remaining[0]) || '; Replace = '('; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = ' || PropertySummaries.StartsWithAnyWord(remaining, PropertySummaries.Conditions)))'; Replace = '))'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'comments = comments.RemoveAll(c => previous.TrailingTrivia.Contains(c));'; Replace = ''; Tests = 'DeclarationCommentTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'GetDeclarationOpenBrace(openBrace.Parent!) == openBrace && Line('; Replace = 'Line('; Tests = 'DeclarationCommentTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = ' && Line(text, openBrace.SpanStart) != Line(text, previous.SpanStart))'; Replace = ')'; Tests = 'DeclarationCommentTests' }
+
         # BRO1404/BRO1007 (access modifiers)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/AccessModifiers.cs'; Find = 'if (!preference.Required'; Replace = 'if (false'; Tests = 'AccessModifiersTests' }
 
