@@ -460,7 +460,16 @@
                 'StyleCop output only: Bools.cs: [        /// <summary>Gets or sets a value indicating whether gets or sets the flag.</summary>]'
                 'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether the open state.</summary>]'
                 'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether gets whether it is closed.</summary>]'
-                'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets is it closed.</summary>]'
+                # A summary phrased as a question or with a verb of its own ('Is it closed', 'Has a trailing space') is left
+                # alone: 'Gets or sets' in front wouldn't make a sentence. StyleCop reports and prefixes it.
+                'only StyleCop: BRO1604 Periods.cs(59,20)'
+                'only StyleCop: BRO1604 Periods.cs(67,20)'
+                'only StyleCop: BRO1604 Properties.cs(25,21)'
+                'StyleBro output only: Periods.cs: [        /// <summary>Has a trailing space.</summary>]'
+                'StyleBro output only: Periods.cs: [        /// Has code at the end:]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets has a trailing space. </summary>]'
+                'StyleCop output only: Periods.cs: [        /// Gets or sets has code at the end:]'
+                'StyleBro output only: Properties.cs: [        /// <summary>Is it closed.</summary>]'
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets a value indicating whether is it closed.</summary>]'
                 # 'init' accessors, like StyleCop master (eb498962): 'Gets or initializes' (or 'Gets') for get+init, and
                 # 'Gets or initializes' is a wrong prefix on get+set; beta.556 ignores 'init' and its fix writes
