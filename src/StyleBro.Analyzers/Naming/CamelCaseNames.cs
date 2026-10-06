@@ -82,6 +82,36 @@ internal static class CamelCaseNames
             && !names.Identifiers.Any(text => text != oldName && map(text) == newName);
     }
 
+    /// <summary>
+    /// BRO1313: whether the parameter's name reaches run time from its member's code: <c>nameof(key)</c>, or an argument
+    /// a <c>[CallerArgumentExpression]</c> parameter captures (<c>ArgumentNullException.ThrowIfNull(key)</c>). Both
+    /// usually end up as an exception's ParamName, which callers and tests compare (Newtonsoft.Json's
+    /// <c>JObject.ContainsKey(null)</c> test expects "propertyName").
+    /// </summary>
+    public static bool IsNameObservable(SyntaxNode member, string name, SemanticModel model, System.Threading.CancellationToken cancellationToken)
+    {
+        foreach (var identifier in member.DescendantNodes().OfType<IdentifierNameSyntax>())
+        {
+            if (identifier.Identifier.ValueText != name || identifier.Parent is not ArgumentSyntax argument)
+            {
+                continue;
+            }
+
+            if (argument.Parent?.Parent is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }
+                || (model.GetOperation(argument, cancellationToken) is Microsoft.CodeAnalysis.Operations.IArgumentOperation { Parameter: { } target }
+                    && target.ContainingSymbol is IMethodSymbol method
+                    && method.Parameters.Any(p => p.GetAttributes().Any(a =>
+                        a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
+                        && a.ConstructorArguments.Length == 1
+                        && a.ConstructorArguments[0].Value as string == target.Name))))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>The member whose code can refer to a variable or parameter by its simple name.</summary>
     public static SyntaxNode GetScope(SyntaxNode node)
     {

@@ -77,7 +77,7 @@ dotnet_diagnostic.BRO1310.severity = none
 dotnet_diagnostic.BRO1401.severity = none
 # ...
 dotnet_diagnostic.BRO1615.severity = warning
-stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, method, struct, class
+stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class
 stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private
 stylebro_member_constants_first = true
 stylebro_member_static_first = true

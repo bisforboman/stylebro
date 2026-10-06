@@ -24,6 +24,9 @@ BRO1139 | Readability | Warning  | ElseIfAnalyzer
 BRO1140 | Readability | Warning  | EmptyRecordBodyAnalyzer
 BRO1141 | Readability | Warning  | ObjectCreationParenthesesAnalyzer
 BRO1142 | Readability | Warning  | CombinedFieldsAnalyzer
+BRO1147 | Readability | Disabled | NullForgivingAnalyzer
+BRO1148 | Readability | Disabled | HasValueAnalyzer
+BRO1144 | Readability | Warning  | ContextualKeywordAnalyzer
 BRO1145 | Readability | Disabled | EmptyTypeBodyAnalyzer
 BRO1146 | Readability | Warning  | RecordClassKeywordAnalyzer
 BRO1310 | Naming | Disabled | CamelCaseNamingAnalyzer

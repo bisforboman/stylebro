@@ -53,7 +53,7 @@ Set-Content $hook @"
     <Analyzer Include="$(Join-Path $bin 'StyleBro.CodeFixes.dll')" />
     $enableItem
   </ItemGroup>
-  <!-- What the package's build targets pass to the analyzers (multi-target guards: MultiTargetSuppressor, BRO1145). -->
+  <!-- What the package's build targets pass to the analyzers (multi-target guards: MultiTargetSuppressor, BRO1145, BRO1147). -->
   <PropertyGroup>
     <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == '' and '`$(TargetFrameworks)' != ''">`$(TargetFrameworks.Replace(';', ','))</StyleBroTargetFrameworks>
     <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == ''">`$(TargetFramework)</StyleBroTargetFrameworks>

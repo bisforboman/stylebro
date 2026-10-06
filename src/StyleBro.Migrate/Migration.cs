@@ -483,7 +483,7 @@ internal static class Migration
     {
         // StyleCop's kind and access order (BRO1001's defaults); stylecop.json's elementOrder decides which of
         // constant/static/readonly order members within an accessibility.
-        lines.Add("stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, method, struct, class");
+        lines.Add("stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class");
         lines.Add("stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private");
         var items = setup.Setting("orderingRules", "elementOrder") is { ValueKind: JsonValueKind.Array } order
             ? order.EnumerateArray().Select(e => e.GetString()).ToHashSet()

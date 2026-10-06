@@ -707,6 +707,62 @@ public class FixOrderTests
         "BRO1106",
         "BRO1138");
 
+    // BRO1148 writes the form BRO1133 asks for, so BRO1133 never sees a check to rewrite; BRO1405 removes parentheses
+    // around 'x.HasValue', and BRO1148 only replaces it where '!= null' binds the same.
+    [Theory]
+    [InlineData("pattern_matching")]
+    [InlineData("equality_operator")]
+    public Task HasValue_InTheFormOfBro1133(string style) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public bool M(int? n, string s, bool b)
+            {
+                var x = (n.HasValue);
+                if (!n.HasValue || s == null || s is not null)
+                {
+                    return b == (n.HasValue);
+                }
+
+                return x && (!n.HasValue) && b;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1148.severity = warning\nstylebro_null_check_style = " + style + "\n",
+        "BRO1133",
+        "BRO1148",
+        "BRO1405");
+
+    [Fact]
+    public Task ContextualKeywords_AFieldNamedFieldThatIsRenamed() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            private const int field = 2;
+            private int other;
+
+            public int P
+            {
+                get => field + this.other;
+            }
+        }
+
+        public class D
+        {
+            private int field;
+
+            public int P
+            {
+                get => field;
+                set => field = value;
+            }
+        }
+        """,
+        "stylebro_private_field_naming = _camelCase\ndotnet_naming_rule.c.symbols = c\ndotnet_naming_rule.c.style = p\ndotnet_naming_rule.c.severity = warning\ndotnet_naming_symbols.c.applicable_kinds = field\ndotnet_naming_symbols.c.required_modifiers = const\ndotnet_naming_style.p.capitalization = pascal_case\n",
+        "BRO1144",
+        "BRO1303",
+        "BRO1306");
+
     [Fact]
     public Task AutoAccessors_NextToTheBlankLineRules() => AssertConvergesInEveryOrderAsync(
         """

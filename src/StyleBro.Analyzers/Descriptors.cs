@@ -1210,6 +1210,19 @@ internal static class Descriptors
             + "Meziantou MA0206).",
         helpLinkUri: HelpBase + DiagnosticIds.EmptyRecordBody + ".md");
 
+    public static readonly DiagnosticDescriptor ContextualKeyword = new(
+        id: DiagnosticIds.ContextualKeyword,
+        title: "Escape identifiers that C# 14 reads as keywords",
+        messageFormat: "C# 14 reads '{0}' here as a keyword: write '@{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'@field' for a member or local named 'field' used in a property accessor, '@extension' for a type named "
+            + "'extension' (and members of that type), '@partial' for a method returning a type named 'partial': C# 14 reads "
+            + "these as keywords, which changes what the code means or breaks the build. '@' means the same in every C# "
+            + "version. Not a StyleCop rule (Sonar S8367, S8368, S8380 report it without a fix).",
+        helpLinkUri: HelpBase + DiagnosticIds.ContextualKeyword + ".md");
+
     public static readonly DiagnosticDescriptor ObjectCreationParentheses = new(
         id: DiagnosticIds.ObjectCreationParentheses,
         title: "Object creation with an initializer: parentheses in one style",
@@ -1256,6 +1269,30 @@ internal static class Descriptors
             + "a base type, an attribute or a convention needs stay public, because reflection and serializers see public "
             + "members only (StyleCop issue #2981, never implemented).",
         helpLinkUri: HelpBase + DiagnosticIds.InternalTypePublicMethod + ".md");
+
+    public static readonly DiagnosticDescriptor RedundantNullForgiving = new(
+        id: DiagnosticIds.RedundantNullForgiving,
+        title: "Remove a redundant null-forgiving operator",
+        messageFormat: "Remove the '!': the compiler already knows the value isn't null here",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "A '!' whose operand's flow state is already not-null hides nothing. Off by default. Not reported: "
+            + "'null!' and 'default!', type parameters and types with type arguments, '#nullable' changing the project's "
+            + "setting, and projects with several target frameworks. Not a StyleCop rule (Sonar S8969, the SDK's IDE0370).",
+        helpLinkUri: HelpBase + DiagnosticIds.RedundantNullForgiving + ".md");
+
+    public static readonly DiagnosticDescriptor HasValueNullCheck = new(
+        id: DiagnosticIds.HasValueNullCheck,
+        title: "Check a nullable value type for null instead of calling HasValue",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "'x.HasValue' becomes 'x is not null' and '!x.HasValue' 'x is null' (or '!= null' / '== null', following "
+            + "stylebro_null_check_style), so every null check has one form. Off by default. Not a StyleCop rule (Meziantou "
+            + "MA0171).",
+        helpLinkUri: HelpBase + DiagnosticIds.HasValueNullCheck + ".md");
 
     public static readonly DiagnosticDescriptor EmptyTypeBody = new(
         id: DiagnosticIds.EmptyTypeBody,

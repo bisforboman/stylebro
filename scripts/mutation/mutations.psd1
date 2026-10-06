@@ -74,6 +74,10 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'declaration.UsingKeyword.IsKind(SyntaxKind.None) ?'; Replace = 'true ?'; Tests = 'CombinedFieldsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'if (sameLine && declaration is not LocalDeclarationStatementSyntax)'; Replace = 'if (false)'; Tests = 'CombinedFieldsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(declaration is FieldDeclarationSyntax && text.ToString('; Replace = '(true && text.ToString('; Tests = 'CombinedFieldsTests' }
+        # BRO1144 (C# 14 contextual keywords; the C# 14 'field' type check is covered by samples/Messy, Roslyn 4.8 can't parse it)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'MemberAccessExpressionSyntax access => access.Name != name,'; Replace = 'MemberAccessExpressionSyntax access => true,'; Tests = 'ContextualKeywordTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax => false,'; Replace = 'MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax => true,'; Tests = 'ContextualKeywordTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'return first == token;'; Replace = 'return true;'; Tests = 'ContextualKeywordTests' }
         # BRO1408 (redundant base type)
         @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = 'EnumUnderlyingType.SpecialType: SpecialType.System_Int32'; Replace = 'EnumUnderlyingType: not null'; Tests = 'RedundantBaseTypeTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/RedundantBaseTypes.cs'; Find = '.Type?.SpecialType == SpecialType.System_Object'; Replace = '.Type is not null'; Tests = 'RedundantBaseTypeTests' }
@@ -343,7 +347,11 @@
             || (!member.IsOverride'; Replace = '|| (!member.IsOverride'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (result is not null && result != name)'; Replace = 'if (false)'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.CanRename(node, oldName, newName, getNewName))'; Replace = ')'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.CanRename(node, oldName, newName, getNewName)'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| CamelCaseNames.IsNameObservable(node.Parent!.Parent!, oldName, context.SemanticModel, context.CancellationToken))'; Replace = ')'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'argument.Parent?.Parent is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }'; Replace = 'false'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = '&& a.ConstructorArguments[0].Value as string == target.Name'; Replace = '&& false'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (keepObservableNames && current is IParameterSymbol && await IsObservableAsync(current).ConfigureAwait(false))'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (depth < 8 && baseParameter'; Replace = 'if (false && baseParameter'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& CamelCaseNames.CanRename(declaration, name, renamed, getNewName) ? renamed'; Replace = '? renamed'; Tests = 'ParameterMatchesBaseTests' }
 
@@ -430,6 +438,32 @@
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'if (!Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken))'; Replace = 'if (true)'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '.Where(s => changes.Any(c => s.Span.Contains(c.Span)))'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'return derived.Any(d => d.Locations.Any(l => l.IsInSource && project.GetDocument(l.SourceTree) is null));'; Replace = 'return false;'; Tests = 'InternalTypeMethodTests' }
+        # BRO1147 (redundant null-forgiving '!')
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| operand is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NullLiteralExpression or (int)SyntaxKind.DefaultLiteralExpression }'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| operand is DefaultExpressionSyntax'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| operand.HasTrailingTrivia'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| node.Parent is ArgumentSyntax { RefKindKeyword.RawKind: not 0 }'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| MultiTargetSuppressor.GetFrameworks(options).Count > 1)'; Replace = '|| MultiTargetSuppressor.GetFrameworks(options).Count > 2)'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| context.WarningsEnabled() != project.WarningsEnabled()'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '|| context.AnnotationsEnabled() != project.AnnotationsEnabled()'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'return IsFlat(model.GetTypeInfo(operand, cancellationToken).Type)'; Replace = 'return true'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'StateWithout(node, model, cancellationToken) == NullableFlowState.NotNull'; Replace = 'info.Nullability.FlowState == NullableFlowState.NotNull'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'named => (named.ContainingType is null || IsFlat(named.ContainingType))'; Replace = 'named => (true)'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = '&& named.TypeArguments.All(a => a.IsValueType && IsFlat(a))'; Replace = ''; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'named.TypeArguments.All(a => a.IsValueType && IsFlat(a))'; Replace = 'named.TypeArguments.Length == 0'; Tests = 'NullForgivingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NullForgiving.cs'; Find = 'case EqualsValueClauseSyntax clause when clause.Parent is not VariableDeclaratorSyntax { Parent.Parent: LocalDeclarationStatementSyntax }:'; Replace = 'case EqualsValueClauseSyntax clause when false:'; Tests = 'NullForgivingTests' }
+        # BRO1148 (HasValue -> null check)
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| node.Span.End - node.Expression.Span.End != HasValue.Length)'; Replace = ')'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = 'if ((negated && node.SpanStart - target.SpanStart != 1)'; Replace = 'if ((false)'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| !NullChecks.IsLooseParent(judged)'; Replace = ''; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| target.Parent is ArgumentSyntax { Parent.Parent: InvocationExpressionSyntax'; Replace = '|| target.Parent is CastExpressionSyntax { Parent.Parent: InvocationExpressionSyntax'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '(negated ? LanguageVersion.CSharp7 : LanguageVersion.CSharp9)'; Replace = 'LanguageVersion.CSharp7'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '|| (pattern && ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion'; Replace = '|| (false && ((CSharpParseOptions)node.SyntaxTree.Options).LanguageVersion'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = 'is not IPropertySymbol { ContainingType.OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })'; Replace = 'is not IPropertySymbol)'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '? NullChecks.IsInExpressionTree(target, model, cancellationToken)'; Replace = '? false'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = ': !IsBuiltIn(model, target, node.Expression, negated, cancellationToken))'; Replace = ': false)'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '&& Severities.IsOn(model.Compilation.Options, node.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken)'; Replace = '&& false'; Tests = 'HasValueTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/HasValueChecks.cs'; Find = '&& Severities.IsOn(model.Compilation.Options, node.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken)'; Replace = '&& true'; Tests = 'HasValueTests' }
         # Generated code and C# versions (real-world: eShopOnWeb's Razor pages, Mapperly's generated accessors, LibGit2Sharp's net472)
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = ' || NamespaceNames.HasGeneratedPart(type))'; Replace = ')'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| ((symbol as INamedTypeSymbol ?? symbol.ContainingType) is { } owner && NamespaceNames.HasGeneratedPart(owner))'; Replace = ''; Tests = 'PascalCaseNamingTests' }

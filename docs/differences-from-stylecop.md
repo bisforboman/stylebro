@@ -197,6 +197,7 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 - `dotnet_diagnostic.BRO1140.severity`
 - `dotnet_diagnostic.BRO1141.severity`
 - `dotnet_diagnostic.BRO1142.severity`
+- `dotnet_diagnostic.BRO1144.severity`
 - `dotnet_diagnostic.BRO1146.severity`
 - `dotnet_diagnostic.BRO1408.severity`
 - `dotnet_diagnostic.BRO1520.severity`
@@ -228,6 +229,8 @@ in `.editorconfig` to use them.
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
 | [BRO1526](rules/BRO1526.md) | A blank line between switch sections (`stylebro_blank_line_between_switch_sections = include`, the default), none (`omit`), or none after a section that ends in a block (`omit_after_block`); after a multi-line block BRO1519 (SA1513) decides. The preset turns it on (`dotnet_diagnostic.BRO1526.severity = warning`) | Roslynator RCS0061 |
 | [BRO1143](rules/BRO1143.md) | No `else` after an `if` branch that ends in `return`, `throw`, `break`, `continue`, `goto` or `yield break`. Off by default, also in the preset (a matter of taste) | Meziantou MA0071, Roslynator RCS1211 |
+| [BRO1147](rules/BRO1147.md) | No null-forgiving `!` on a value whose flow state is already not-null. Off by default, also in the preset; skips projects with several target frameworks | Sonar S8969, the SDK's IDE0370 |
+| [BRO1148](rules/BRO1148.md) | `x is not null` / `x is null` (or `!= null` / `== null`, BRO1133's option) instead of `x.HasValue` / `!x.HasValue` on a nullable value type. Off by default, also in the preset | Meziantou MA0171 |
 | [BRO1616](rules/BRO1616.md) | `<summary>` tags on lines of their own (`stylebro_summary_layout = multi_line`), or the summary on one line when its text is one line and fits (`single_line_when_fits`) | Roslynator RCS1253, Meziantou MA0177/MA0211 |
 | [BRO1136](rules/BRO1136.md) | `x => x` instead of `(x) => x` for one parameter without a type, modifier or attribute | StyleCop issue [#762](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/762) (proposed, never implemented) |
 | [BRO1137](rules/BRO1137.md) | No `return;` as the last statement of a body, no `yield break;` as the last statement of an iterator | StyleCop issue [#760](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/760), Roslynator RCS1134 |
@@ -236,6 +239,7 @@ in `.editorconfig` to use them.
 | [BRO1140](rules/BRO1140.md) | `record R(int X);` instead of an empty body | Roslynator RCS1251, Meziantou MA0206 |
 | [BRO1141](rules/BRO1141.md) | `new T { ... }` without empty parentheses (`stylebro_object_creation_parentheses = omit`, the default) or with them (`include`) | Roslynator RCS1050 |
 | [BRO1142](rules/BRO1142.md) | One local per declaration, like BRO1114 (SA1132) for fields | Roslynator RCS1081, Sonar S1659 |
+| [BRO1144](rules/BRO1144.md) | `@field`, `@extension`, `@partial` where C# 14 reads the identifier as a keyword (a member or local named `field` used in a property accessor, a type named `extension` and members of that type, a method returning a type named `partial`) | Sonar S8367, S8368, S8380 (no fix); compiler CS9258, CS9272, CS9273, CS9306 |
 | [BRO1145](rules/BRO1145.md) | Off by default. `class Marker;` instead of `class Marker { }` for classes, structs and interfaces (C# 12); not reported below C# 12, or in a multi-targeted project unless every framework defaults to C# 12 or the project sets LangVersion | Meziantou MA0206 |
 | [BRO1146](rules/BRO1146.md) | `record R` instead of `record class R` (`record struct` stays) | Meziantou MA0174 |
 | [BRO1527](rules/BRO1527.md) | Auto-accessors only (`get;`, `private set;`, `init;`) spread over several lines go on the declaration's line: `public int Simple { get; set; }` | Roslynator RCS0042 |
