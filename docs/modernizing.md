@@ -24,12 +24,19 @@ your settings stay. The CA rules need the .NET analyzers, which are on by defaul
 
 | Tier | Needs | Rules | Severity |
 |---|---|---|---|
-| A | C# 7.3 or older, no new API | IDE0016-IDE0020, IDE0029-IDE0031, IDE0041, IDE0054, IDE0180, IDE0240, IDE0241, IDE0250, IDE0270, CA1825, CA1829, CA1834 | warning |
-| B | a newer C# version | IDE0028, IDE0062, IDE0074, IDE0078, IDE0083, IDE0090, IDE0150, IDE0161 (with `csharp_style_namespace_declarations = file_scoped`), IDE0170, IDE0300-IDE0304, IDE0306, IDE0340, IDE0360 | warning, or suggestion when a multi-targeted project doesn't set `LangVersion` |
+| A | C# 7.3 or older, no new API | IDE0016-IDE0020, IDE0029, IDE0030, IDE0041, IDE0054, IDE0180, IDE0240, IDE0241, IDE0250, IDE0270, CA1825, CA1829, CA1834 | warning |
+| B | a newer C# version | IDE0028, IDE0031, IDE0062, IDE0074, IDE0078, IDE0083, IDE0090, IDE0150, IDE0161 (with `csharp_style_namespace_declarations = file_scoped`), IDE0170, IDE0300-IDE0304, IDE0306, IDE0340, IDE0350, IDE0360 | warning, or suggestion when a multi-targeted project doesn't set `LangVersion` |
 | C | a newer API | CA1510-CA1513, CA1847, CA1850, CA1864, CA1865, CA1872, CA2249, CA2263, IDE0056, IDE0057, IDE0330 | warning; the [multi-target guard](#the-multi-target-guard) hides them where a framework lacks the API |
 
 `dotnet format` fixes warnings, not suggestions (its default `--severity` is `warn`), so a suggestion only shows up in
 the IDE. The command prints a note for every tier it turned down, with the reason and how to turn it on.
+
+IDE0031 (`?.`) was tier A until SDK 10: its fix now also writes C# 14's null-conditional assignment
+(`if (node != null) { node.Count = 2; }` -> `node?.Count = 2;`), and in a `net48;net10.0` project without `LangVersion`
+the net48 build failed with CS8370 (probed). IDE0350 (SDK 10, `(int x) => x + 1` -> `x => x + 1`) is tier B because
+lambdas with modifiers (`(out int r)` -> `(out r)`) need C# 14. It leaves the parentheses out where it can, so it ends
+where StyleBro's BRO1136 (`(x) => x` -> `x => x`) would, and one `dotnet format` run is enough (probed). When the SDK
+is updated, check tier A the same way.
 
 ## Examples
 

@@ -15,10 +15,9 @@ dotnet_diagnostic.IDE0017.severity = warning
 dotnet_diagnostic.IDE0018.severity = warning
 dotnet_diagnostic.IDE0019.severity = warning
 dotnet_diagnostic.IDE0020.severity = warning
-# ?? and ?.
+# ??
 dotnet_diagnostic.IDE0029.severity = warning
 dotnet_diagnostic.IDE0030.severity = warning
-dotnet_diagnostic.IDE0031.severity = warning
 dotnet_diagnostic.IDE0270.severity = warning
 # Compound assignment: x += 1
 dotnet_diagnostic.IDE0054.severity = warning
@@ -49,6 +48,9 @@ dotnet_diagnostic.IDE0161.severity = {lang}
 csharp_style_namespace_declarations = file_scoped
 dotnet_diagnostic.IDE0340.severity = {lang}
 dotnet_diagnostic.IDE0360.severity = {lang}
+# ?. (SDK 10 also writes C# 14's null-conditional assignment 'node?.Count = 2;') and (int x) => x -> x => x
+dotnet_diagnostic.IDE0031.severity = {lang}
+dotnet_diagnostic.IDE0350.severity = {lang}
 
 # Tier C: newer APIs (ThrowIfNull, TryAdd, Contains(char), ranges, System.Threading.Lock, ...). In a multi-targeted project
 # StyleBro's multi-target guard hides them where a target framework lacks the API (MultiTargetSuppressor).

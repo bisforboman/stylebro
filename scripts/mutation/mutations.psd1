@@ -351,7 +351,13 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| member is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null }
             || (!member.IsOverride'; Replace = '|| (!member.IsOverride'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (result is not null && result != name)'; Replace = 'if (false)'; Tests = 'ParameterMatchesBaseTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.IsUsableName(newName)'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        # Names a rename never produces: 'field' (C# 14 keyword in accessors), 'value' inside a property/indexer/event
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'CamelCaseNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'HungarianNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'if (newName == "value" && scope is BasePropertyDeclarationSyntax)'; Replace = 'if (false)'; Tests = 'CamelCaseNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.CanRename(node, oldName, newName, getNewName)'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| CamelCaseNames.IsNameObservable(node.Parent!.Parent!, oldName, context.SemanticModel, context.CancellationToken))'; Replace = ')'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'argument.Parent?.Parent is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }'; Replace = 'false'; Tests = 'ParameterMatchesBaseTests' }

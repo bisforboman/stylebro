@@ -17,9 +17,14 @@ internal static class CamelCaseNames
     /// or has no safe replacement. Leading underscores go; a leading run of capitals is lowered as a whole, except the
     /// capital that starts the next word: 'Value' -> 'value', '_value' -> 'value', 'URL' -> 'url',
     /// 'HTMLParser' -> 'htmlParser'. Null for names that are only underscores, would start with a digit, or would
-    /// become a keyword ('Class' -> 'class').
+    /// become a keyword ('Class' -> 'class') or 'field' (see <see cref="IsUsableName"/>).
     /// </summary>
-    public static string? GetNewName(string name)
+    public static string? GetNewName(string name) => ToCamelCase(name) is { } result && IsUsableName(result) ? result : null;
+
+    /// <summary>
+    /// Like <see cref="GetNewName"/>, but 'Field' -> 'field' too: for names that get a prefix ('_field') or more words.
+    /// </summary>
+    public static string? ToCamelCase(string name)
     {
         if (name.Length == 0 || char.IsLower(name[0]))
         {
@@ -54,16 +59,31 @@ internal static class CamelCaseNames
     }
 
     /// <summary>
+    /// Whether a rename may produce <paramref name="name"/>: a valid identifier that isn't a keyword, and not 'field'.
+    /// In C# 14 'field' is a keyword inside property accessors ('get => field;' is the backing field), so a field
+    /// renamed to it changes what the property reads (CS9258), and a local renamed to it doesn't compile (CS9273).
+    /// Roslyn 4.8 doesn't know that, so it is excluded everywhere, whatever the language version.
+    /// </summary>
+    public static bool IsUsableName(string name) =>
+        SyntaxFacts.IsValidIdentifier(name) && SyntaxFacts.GetKeywordKind(name) == SyntaxKind.None && name != "field";
+
+    /// <summary>
     /// Whether renaming the variable or parameter declared by <paramref name="declaration"/> can't change what any
     /// name binds to. Checked by syntax, conservatively, over the member that contains the declaration (for a primary
     /// constructor parameter, the whole type): no identifier there may already be <paramref name="newName"/> or get
     /// the same new name from another rename, the old name may not be an inferred tuple element or anonymous type
     /// member name (the rename would change it), and the member may not contain '#if' (code that isn't compiled
-    /// can't be renamed reliably).
+    /// can't be renamed reliably). Never 'value' inside a property, indexer or event: their set/init/add/remove
+    /// accessors declare an implicit 'value' parameter that no identifier shows (CS0136).
     /// </summary>
     public static bool CanRename(SyntaxNode declaration, string oldName, string newName, Func<string, string?>? getNewName = null)
     {
         var scope = GetScope(declaration);
+        if (newName == "value" && scope is BasePropertyDeclarationSyntax)
+        {
+            return false;
+        }
+
         if (scope.ContainsDirectives && scope.DescendantTrivia(descendIntoTrivia: true).Any(t => t.IsKind(SyntaxKind.IfDirectiveTrivia)))
         {
             return false;
