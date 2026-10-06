@@ -126,7 +126,8 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
    rather than a wrong fix.
 4. Configuration goes through `.editorconfig` keys prefixed `stylebro_`, read via `AnalyzerConfigOptionsProvider`
    in both the analyzer and the fix.
-5. Every rule gets a `docs/rules/BROxxxx.md`, a row in `AnalyzerReleases.Unshipped.md`, unit tests covering
+5. Every rule gets a `docs/rules/BROxxxx.md`, a row in `docs/rules/README.md` (the rule index; README.md has only a
+   summary per area, and New-Backlog.py reads the index) and in `AnalyzerReleases.Unshipped.md`, unit tests covering
    the single fix + Fix All, and a case in `samples/Messy`. Rule pages share one structure: intro, `## Example`
    with `### Before`/`### After` csharp blocks, `## Why`, then as needed How the fix works / Configuration /
    Not reported / Compared with StyleCop. Every rule is also listed in `docs/differences-from-stylecop.md` (under
