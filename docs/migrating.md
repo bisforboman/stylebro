@@ -11,9 +11,8 @@ stylebro-migrate path/to/repo           # dry run: prints the report and the set
 stylebro-migrate path/to/repo --write   # writes them
 ```
 
-The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version. Several fixes on this
-page are newer than the latest release (0.1.0-alpha.8): [which version](getting-started.md#which-version) says how to
-build both packages from a clone. To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
+The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.2.0-alpha.1;
+[which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
 Then swap the package (below) and run `dotnet format`, or `stylebro-migrate format` if any project sets several
 `<TargetFrameworks>` (`--write` ends with the one your repository needs).
@@ -30,7 +29,7 @@ applies to every project:
 <GlobalPackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556" />
 
 <!-- after -->
-<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" />
+<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" />
 ```
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:

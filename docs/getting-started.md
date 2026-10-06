@@ -10,26 +10,19 @@ Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your pro
 
 ### Which version
 
-The latest release on nuget.org is **0.1.0-alpha.8**. This page describes the code on `main`, which is ahead of it:
-
-- `stylebro-migrate init`, `stylebro-migrate format` and the migration fixes on this page aren't in alpha.8;
-- alpha.8's package doesn't hand its preset to the compiler (fixed since), so its rules run at their default severities;
-- many rules are newer than alpha.8 ([backlog.md](backlog.md) lists them).
-
-Until the next release, build both packages from a clone into a local folder and use that version (any version
-string works; `0.1.0-dev.1` here):
+The latest release on nuget.org is **0.2.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
+that exact version. Everything on this page is in it. To try the code on `main` before the next release, build both
+packages from a clone into a local folder (any version string works; `0.2.0-dev.1` here):
 
 ```
 git clone https://github.com/bisforboman/stylebro
-dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.1.0-dev.1
-dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.1.0-dev.1
-dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.1.0-dev.1
+dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.2.0-dev.1
+dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.2.0-dev.1
+dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.2.0-dev.1
 ```
 
-Add the folder as a package source in your repository's `nuget.config`
-(`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.1.0-dev.1` wherever this page says
-`0.1.0-alpha.8`. With alpha.8 from nuget.org instead (`dotnet tool install --global StyleBro.Migrate --prerelease`), only
-`stylebro-migrate path/to/repo [--write]` and `stylebro-migrate baseline` exist.
+Then add the folder as a package source in your repository's `nuget.config`
+(`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.2.0-dev.1` wherever this page says `0.2.0-alpha.1`.
 
 ## A. A new project, or no StyleCop
 
@@ -40,7 +33,7 @@ Add it to every project, for example in `Directory.Build.props` at the repositor
 ```xml
 <Project>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
@@ -50,7 +43,7 @@ With central package management, the version goes in `Directory.Packages.props` 
 ```xml
 <!-- Directory.Packages.props -->
 <ItemGroup>
-  <PackageVersion Include="StyleBro.Analyzers" Version="0.1.0-alpha.8" />
+  <PackageVersion Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" />
 </ItemGroup>
 
 <!-- Directory.Build.props -->

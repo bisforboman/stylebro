@@ -12,7 +12,7 @@
     <ToolCommandName>stylebro-migrate</ToolCommandName>
     <PackageId>StyleBro.Migrate</PackageId>
     <!-- Released together with StyleBro.Analyzers: release.yml overrides this with the tag's version. -->
-    <Version>0.1.0-alpha.8</Version>
+    <Version>0.2.0-alpha.1</Version>
     <Description>Generates StyleBro and .NET SDK settings from a repository's StyleCop configuration, so moving from StyleCop.Analyzers to StyleBro keeps the code's style.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/bisforboman/stylebro</PackageProjectUrl>

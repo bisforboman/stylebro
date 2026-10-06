@@ -13,8 +13,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 
 | | Rules |
 |---|---|
-| Released | 71 |
-| Done, not released yet | 53 |
+| Released | 124 |
+| Done, not released yet | 0 |
 | Planned | 0 rules, 37 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
@@ -112,8 +112,8 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1003](rules/BRO1003.md) | Property accessors should follow order | SA1212 | Released |
 | [BRO1004](rules/BRO1004.md) | Event accessors should follow order | SA1213 | Released |
 | [BRO1005](rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Released |
-| [BRO1006](rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Done |
-| [BRO1007](rules/BRO1007.md) | Partial elements should declare an access modifier | SA1205 | Done |
+| [BRO1006](rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Released |
+| [BRO1007](rules/BRO1007.md) | Partial elements should declare an access modifier | SA1205 | Released |
 
 ### BRO11xx: Readability
 
@@ -145,28 +145,28 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1124](rules/BRO1124.md) | Refer to tuple elements by name | SA1142 | Released |
 | [BRO1125](rules/BRO1125.md) | Use lambda syntax | SA1130 | Released |
 | [BRO1126](rules/BRO1126.md) | Using directives should be qualified | SA1135 | Released |
-| [BRO1127](rules/BRO1127.md) | Query clause should follow previous clause | SA1102 | Done |
-| [BRO1128](rules/BRO1128.md) | Query clauses should be on separate lines or all on one line | SA1103 | Done |
-| [BRO1129](rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Done |
-| [BRO1130](rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Done |
-| [BRO1131](rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Done |
-| [BRO1132](rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Done |
-| [BRO1133](rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Done |
-| [BRO1134](rules/BRO1134.md) | Declarations should not contain embedded comments | (none; StyleCop issue #605) | Done |
-| [BRO1135](rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Done |
-| [BRO1136](rules/BRO1136.md) | A lambda's single parameter should not be in parentheses | (none; StyleCop issue #762) | Done |
-| [BRO1137](rules/BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; StyleCop issue #760, Roslynator RCS1134) | Done |
-| [BRO1138](rules/BRO1138.md) | A string literal should be a plain string when nothing needs more | (none; Roslynator RCS1214/RCS1192/RCS1262) | Done |
-| [BRO1139](rules/BRO1139.md) | Write 'else if' on one line | (none; Roslynator RCS0041/RCS1006) | Done |
-| [BRO1140](rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Done |
-| [BRO1141](rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Done |
-| [BRO1142](rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Done |
-| [BRO1143](rules/BRO1143.md) | No 'else' after a branch that ends in a jump | (none; Meziantou MA0071, Roslynator RCS1211) | Done |
-| [BRO1144](rules/BRO1144.md) | Escape identifiers that C# 14 reads as keywords | (none; Sonar S8367/S8368/S8380, no fix) | Done |
-| [BRO1145](rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' | (none; Meziantou MA0206) | Done |
-| [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Done |
-| [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | Done |
-| [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | Done |
+| [BRO1127](rules/BRO1127.md) | Query clause should follow previous clause | SA1102 | Released |
+| [BRO1128](rules/BRO1128.md) | Query clauses should be on separate lines or all on one line | SA1103 | Released |
+| [BRO1129](rules/BRO1129.md) | Query clause should begin on new line when previous clause spans multiple lines | SA1104 | Released |
+| [BRO1130](rules/BRO1130.md) | Query clauses spanning multiple lines should begin on own line | SA1105 | Released |
+| [BRO1131](rules/BRO1131.md) | Do not prefix calls with base unless local implementation exists | SA1100 | Released |
+| [BRO1132](rules/BRO1132.md) | Block statements should not contain embedded comments | SA1108 | Released |
+| [BRO1133](rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Released |
+| [BRO1134](rules/BRO1134.md) | Declarations should not contain embedded comments | (none; StyleCop issue #605) | Released |
+| [BRO1135](rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Released |
+| [BRO1136](rules/BRO1136.md) | A lambda's single parameter should not be in parentheses | (none; StyleCop issue #762) | Released |
+| [BRO1137](rules/BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; StyleCop issue #760, Roslynator RCS1134) | Released |
+| [BRO1138](rules/BRO1138.md) | A string literal should be a plain string when nothing needs more | (none; Roslynator RCS1214/RCS1192/RCS1262) | Released |
+| [BRO1139](rules/BRO1139.md) | Write 'else if' on one line | (none; Roslynator RCS0041/RCS1006) | Released |
+| [BRO1140](rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Released |
+| [BRO1141](rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Released |
+| [BRO1142](rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Released |
+| [BRO1143](rules/BRO1143.md) | No 'else' after a branch that ends in a jump | (none; Meziantou MA0071, Roslynator RCS1211) | Released |
+| [BRO1144](rules/BRO1144.md) | Escape identifiers that C# 14 reads as keywords | (none; Sonar S8367/S8368/S8380, no fix) | Released |
+| [BRO1145](rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' | (none; Meziantou MA0206) | Released |
+| [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Released |
+| [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | Released |
+| [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | Released |
 
 ### BRO13xx: Naming
 
@@ -181,11 +181,11 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1307](rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Released |
 | [BRO1308](rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Released |
 | [BRO1309](rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Released |
-| [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation | SA1305 | Done |
-| [BRO1311](rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Done |
-| [BRO1312](rules/BRO1312.md) | Namespace names should begin with an upper-case letter | SA1300 | Done |
-| [BRO1313](rules/BRO1313.md) | Parameter names should match the base member | (none; SA1315 proposed, never implemented; SDK CA1725) | Done |
-| [BRO1314](rules/BRO1314.md) | Asynchronous method names should end with Async | (none; Roslynator RCS1046, Meziantou MA0137) | Done |
+| [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation | SA1305 | Released |
+| [BRO1311](rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Released |
+| [BRO1312](rules/BRO1312.md) | Namespace names should begin with an upper-case letter | SA1300 | Released |
+| [BRO1313](rules/BRO1313.md) | Parameter names should match the base member | (none; SA1315 proposed, never implemented; SDK CA1725) | Released |
+| [BRO1314](rules/BRO1314.md) | Asynchronous method names should end with Async | (none; Roslynator RCS1046, Meziantou MA0137) | Released |
 
 ### BRO14xx: Maintainability
 
@@ -194,12 +194,12 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1401](rules/BRO1401.md) | Use a trailing comma in multi-line initializers | SA1413 | Released |
 | [BRO1402](rules/BRO1402.md) | Attribute constructor should not use unnecessary parenthesis | SA1411 | Released |
 | [BRO1403](rules/BRO1403.md) | Remove delegate parenthesis when possible | SA1410 | Released |
-| [BRO1404](rules/BRO1404.md) | Access modifier should be declared | SA1400 | Done |
-| [BRO1405](rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Done |
-| [BRO1406](rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Done |
-| [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Done |
-| [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Done |
-| [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | Done |
+| [BRO1404](rules/BRO1404.md) | Access modifier should be declared | SA1400 | Released |
+| [BRO1405](rules/BRO1405.md) | Statement should not use unnecessary parenthesis | SA1119 | Released |
+| [BRO1406](rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Released |
+| [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Released |
+| [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Released |
+| [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | Released |
 
 ### BRO15xx: Layout
 
@@ -218,20 +218,20 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1511](rules/BRO1511.md) | Element documentation headers should not be followed by blank line | SA1506 | Released |
 | [BRO1512](rules/BRO1512.md) | While-do footer should not be preceded by blank line | SA1511 | Released |
 | [BRO1513](rules/BRO1513.md) | Element documentation header should be preceded by blank line | SA1514 | Released |
-| [BRO1514](rules/BRO1514.md) | Braces should not be omitted | SA1503 | Done |
-| [BRO1515](rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Done |
-| [BRO1516](rules/BRO1516.md) | Use braces consistently | SA1520 | Done |
-| [BRO1517](rules/BRO1517.md) | Code should not contain multiple blank lines in a row | SA1507 | Done |
-| [BRO1518](rules/BRO1518.md) | Closing braces should not be preceded by blank line | SA1508 | Done |
-| [BRO1519](rules/BRO1519.md) | Closing brace should be followed by blank line | SA1513 | Done |
-| [BRO1520](rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Done |
-| [BRO1521](rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Done |
-| [BRO1522](rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Done |
-| [BRO1523](rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Done |
-| [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Done |
-| [BRO1525](rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Done |
-| [BRO1526](rules/BRO1526.md) | Blank line between switch sections | (none; Roslynator RCS0061) | Done |
-| [BRO1527](rules/BRO1527.md) | Auto-accessors should be on one line | (none; Roslynator RCS0042) | Done |
+| [BRO1514](rules/BRO1514.md) | Braces should not be omitted | SA1503 | Released |
+| [BRO1515](rules/BRO1515.md) | Braces should not be omitted from multi-line child statement | SA1519 | Released |
+| [BRO1516](rules/BRO1516.md) | Use braces consistently | SA1520 | Released |
+| [BRO1517](rules/BRO1517.md) | Code should not contain multiple blank lines in a row | SA1507 | Released |
+| [BRO1518](rules/BRO1518.md) | Closing braces should not be preceded by blank line | SA1508 | Released |
+| [BRO1519](rules/BRO1519.md) | Closing brace should be followed by blank line | SA1513 | Released |
+| [BRO1520](rules/BRO1520.md) | Place the operator consistently when an expression wraps | (none; Roslynator RCS0027/RCS0028) | Released |
+| [BRO1521](rules/BRO1521.md) | Place '=>' consistently when an expression body wraps | (none; Roslynator RCS0032) | Released |
+| [BRO1522](rules/BRO1522.md) | Place '=' consistently when an assignment wraps | (none; Roslynator RCS0052) | Released |
+| [BRO1523](rules/BRO1523.md) | Each call of a split call chain starts its own line | (none; Roslynator RCS0054) | Released |
+| [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, '?' and ':' parts on their own lines | (none; StyleCop issue #651) | Released |
+| [BRO1525](rules/BRO1525.md) | Attributes should not be followed by a blank line | (none; SA1521 proposed, never implemented) | Released |
+| [BRO1526](rules/BRO1526.md) | Blank line between switch sections | (none; Roslynator RCS0061) | Released |
+| [BRO1527](rules/BRO1527.md) | Auto-accessors should be on one line | (none; Roslynator RCS0042) | Released |
 
 ### BRO16xx: Documentation
 
@@ -252,7 +252,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1613](rules/BRO1613.md) | Generic type parameter documentation should match type parameters | SA1620 | Released |
 | [BRO1614](rules/BRO1614.md) | Generic type parameter documentation should declare parameter name | SA1621 | Released |
 | [BRO1615](rules/BRO1615.md) | File should have the XML copyright header (needs `stylebro_file_header_company`) | SA1633-SA1638, SA1640, SA1641 | Released |
-| [BRO1616](rules/BRO1616.md) | Write the summary's tags consistently on their own lines or on the text's line | (none; Roslynator RCS1253, Meziantou MA0177/MA0211) | Done |
-| [BRO1617](rules/BRO1617.md) | Write a cref's type arguments in braces | (none; StyleCop's proposed SA1653) | Done |
-| [BRO1618](rules/BRO1618.md) | Write a C# keyword in documentation as `<see langword="..."/>` | (none; Meziantou MA0154) | Done |
-| [BRO1619](rules/BRO1619.md) | Put the documentation elements in the standard order | (none) | Done |
+| [BRO1616](rules/BRO1616.md) | Write the summary's tags consistently on their own lines or on the text's line | (none; Roslynator RCS1253, Meziantou MA0177/MA0211) | Released |
+| [BRO1617](rules/BRO1617.md) | Write a cref's type arguments in braces | (none; StyleCop's proposed SA1653) | Released |
+| [BRO1618](rules/BRO1618.md) | Write a C# keyword in documentation as `<see langword="..."/>` | (none; Meziantou MA0154) | Released |
+| [BRO1619](rules/BRO1619.md) | Put the documentation elements in the standard order | (none) | Released |
