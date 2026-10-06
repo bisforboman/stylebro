@@ -264,6 +264,76 @@ public class ParameterMatchesBaseTests
         """,
         On + "\ndotnet_diagnostic.BRO1310.severity = warning");
 
+    // Newtonsoft.Json: JObject.ContainsKey(propertyName) throws ArgumentNullException(nameof(propertyName)), and a test
+    // expects that ParamName. An override renamed along with its base keeps such a name too.
+    [Fact]
+    public Task NamesThatReachRunTime_AreKept() => VerifyFixAsync(
+        """
+        using System;
+        using System.Runtime.CompilerServices;
+
+        public interface IStore
+        {
+            bool Has(string key);
+
+            void Run(int id);
+
+            void Check(string value);
+        }
+
+        public class Store : IStore
+        {
+            public bool Has(string propertyName) => propertyName != null ? true : throw new ArgumentNullException(nameof(propertyName));
+
+            public virtual void Run(int {|BRO1313:number|}) => Console.WriteLine(number);
+
+            public void Check(string text) => Guard.NotNull(text);
+        }
+
+        public class Derived : Store
+        {
+            public override void Run(int number) => throw new ArgumentOutOfRangeException(nameof(number));
+        }
+
+        public static class Guard
+        {
+            public static void NotNull(object argument, [CallerArgumentExpression("argument")] string name = "") => Console.WriteLine(name);
+        }
+        """,
+        """
+        using System;
+        using System.Runtime.CompilerServices;
+
+        public interface IStore
+        {
+            bool Has(string key);
+
+            void Run(int id);
+
+            void Check(string value);
+        }
+
+        public class Store : IStore
+        {
+            public bool Has(string propertyName) => propertyName != null ? true : throw new ArgumentNullException(nameof(propertyName));
+
+            public virtual void Run(int id) => Console.WriteLine(id);
+
+            public void Check(string text) => Guard.NotNull(text);
+        }
+
+        public class Derived : Store
+        {
+            public override void Run(int number) => throw new ArgumentOutOfRangeException(nameof(number));
+        }
+
+        public static class Guard
+        {
+            public static void NotNull(object argument, [CallerArgumentExpression("argument")] string name = "") => Console.WriteLine(name);
+        }
+        """,
+        On);
+
     [Fact]
     public Task BaseNamesThatAreField_AreNotTaken() => VerifyNoDiagnosticsAsync(
         """

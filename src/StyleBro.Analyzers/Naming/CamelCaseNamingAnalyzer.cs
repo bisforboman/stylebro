@@ -201,7 +201,8 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// BRO1313 (off by default): a parameter of an override or interface implementation takes the base member's name.
     /// True when reported; otherwise BRO1302 decides. Not reported: discards ('_'), partial methods, bases that disagree,
-    /// names that would clash in the member (<see cref="CamelCaseNames.CanRename"/>).
+    /// names that would clash in the member (<see cref="CamelCaseNames.CanRename"/>), names that reach run time
+    /// (<see cref="CamelCaseNames.IsNameObservable"/>).
     /// </summary>
     private static bool ReportBaseName(SyntaxNodeAnalysisContext context, ParameterSyntax node)
     {
@@ -222,7 +223,8 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         if (GetBaseName(parameter, casingOn ? getNewName : _ => null) is not { } newName
             || newName == oldName
             || !CamelCaseNames.IsUsableName(newName)
-            || !CamelCaseNames.CanRename(node, oldName, newName, getNewName))
+            || !CamelCaseNames.CanRename(node, oldName, newName, getNewName)
+            || CamelCaseNames.IsNameObservable(node.Parent!.Parent!, oldName, context.SemanticModel, context.CancellationToken))
         {
             return false;
         }

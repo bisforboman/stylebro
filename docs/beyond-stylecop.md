@@ -226,6 +226,14 @@ not), [RCS0042](https://josefpihrt.github.io/docs/roslynator/analyzers/RCS0042) 
 check `csharp_preserve_single_line_statements` first), Meziantou [MA0175](https://github.com/meziantou/Meziantou.Analyzer/blob/main/docs/Rules/MA0175.md)
 (`record class` -> `record`), Sonar [S3253](https://rules.sonarsource.com/csharp/RSPEC-3253/) (redundant `: base()`).
 
+### Newer rules (survey of 2026-10-05)
+
+- **Redundant null-forgiving `!` (Sonar S8969/S8970).** Done (2026-10-05): [BRO1147](rules/BRO1147.md), off by default
+  (also in the preset). The SDK's IDE0370 does the same in SDK 10 builds and `dotnet format` once its severity is set
+  explicitly (`EnforceOnBuild.WhenExplicitlyEnabled`; the survey's probe didn't set it). BRO1147 works with older SDKs,
+  decides per `!` from the operand's flow state, and skips multi-targeted projects.
+- **`HasValue` (Meziantou MA0171).** Done (2026-10-05): [BRO1148](rules/BRO1148.md), off by default (also in the
+  preset), in BRO1133's form.
 ### C# 14
 
 A follow-up survey (2026-10-05) of the analyzers' rules since 2025 and of StyleBro on C# 14 code found no fixer anywhere
@@ -481,7 +489,7 @@ BRO1401 leaves patterns out, like beta.556; a parity follow-up once StyleCop rel
 | [#1357](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1357) file headers with a date | A fix would write the current year: not deterministic |
 | [#3721](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3721) `case A: case B:` -> `case A or B:` | Opinion; the maintainers prefer separate labels |
 | [#3827](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3827) `$` without holes | Closed by the maintainers; already #8 above |
-| [#3458](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3458) `Equals` -> `==`, [#3440](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3440) `&` -> `&&`, [#1455](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1455) `HasValue` -> `!= null`, [#2333](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2333) `default(T)` -> `null` | Change behavior (NaN, side effects) or taste; IDE0034 covers `default` |
+| [#3458](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3458) `Equals` -> `==`, [#3440](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3440) `&` -> `&&`, [#1455](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1455) `HasValue` -> `!= null`, [#2333](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2333) `default(T)` -> `null` | Change behavior (NaN, side effects) or taste; IDE0034 covers `default`. `HasValue` came back as the off-by-default [BRO1148](rules/BRO1148.md) (2026-10-05) |
 | [#3029](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3029) private auto-properties -> fields, [#2780](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2780) internal fields -> properties | Changes what reflection and serializers see |
 | [#3068](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3068) blank line after a braceless `if` | Only for code without braces, which BRO1514 asks for |
 | [#1613](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1613) `} = value;` after accessors | BRO1519 already doesn't report `} = value;` |

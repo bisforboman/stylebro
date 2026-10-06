@@ -42,8 +42,40 @@ internal static class NullChecks
         };
     }
 
-    private static bool PrefersPattern(AnalyzerConfigOptions options) =>
+    internal static bool PrefersPattern(AnalyzerConfigOptions options) =>
         !options.TryGetValue(StyleKey, out var value) || value.Split(':')[0].Trim().ToLowerInvariant() != "equality_operator";
+
+    // Places where 'x == null' binds the same as 'x is null' did: '==' binds looser than 'is', so no operator of the
+    // same or a tighter level may take the check as an operand ('b == x is null' would become '(b == x) == null'). BRO1148
+    // asks the same for the 'x.HasValue' it replaces.
+    internal static bool IsLooseParent(ExpressionSyntax isPattern) =>
+        isPattern.Parent is ParenthesizedExpressionSyntax or ArgumentSyntax or EqualsValueClauseSyntax or ArrowExpressionClauseSyntax
+            or ReturnStatementSyntax or YieldStatementSyntax or IfStatementSyntax or WhileStatementSyntax or DoStatementSyntax
+            or ForStatementSyntax or LambdaExpressionSyntax or WhenClauseSyntax or InterpolationSyntax or InitializerExpressionSyntax
+            or AnonymousObjectMemberDeclaratorSyntax or SwitchExpressionArmSyntax or ConditionalExpressionSyntax or AssignmentExpressionSyntax
+        || isPattern.Parent.IsKind(SyntaxKind.LogicalAndExpression) || isPattern.Parent.IsKind(SyntaxKind.LogicalOrExpression)
+        || isPattern.Parent.IsKind(SyntaxKind.BitwiseAndExpression) || isPattern.Parent.IsKind(SyntaxKind.BitwiseOrExpression)
+        || isPattern.Parent.IsKind(SyntaxKind.ExclusiveOrExpression);
+
+    // Patterns aren't allowed in expression trees (CS8122): a lambda, or a query clause, converted to an Expression.
+    internal static bool IsInExpressionTree(SyntaxNode node, SemanticModel model, CancellationToken cancellationToken)
+    {
+        if (!node.Ancestors().Any(a => a is AnonymousFunctionExpressionSyntax or QueryExpressionSyntax))
+        {
+            return false;
+        }
+
+        for (var operation = model.GetOperation(node, cancellationToken); operation is not null; operation = operation.Parent)
+        {
+            if (operation is IAnonymousFunctionOperation
+                && operation.Parent?.Type?.ContainingNamespace?.ToDisplayString() == "System.Linq.Expressions")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // 'x == null' -> 'x is null', 'x != null' -> 'x is not null', 'null == x' -> 'x is null'.
     private static (string, ImmutableArray<TextChange>)? ToPattern(BinaryExpressionSyntax binary, SemanticModel model, CancellationToken cancellationToken, LanguageVersion languageVersion)
@@ -149,38 +181,7 @@ internal static class NullChecks
             or ThisExpressionSyntax or AwaitExpressionSyntax
             or PostfixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.SuppressNullableWarningExpression };
 
-    // Places where 'x == null' binds the same as 'x is null' did: '==' binds looser than 'is', so no operator of the
-    // same or a tighter level may take the check as an operand ('b == x is null' would become '(b == x) == null').
-    private static bool IsLooseParent(IsPatternExpressionSyntax isPattern) =>
-        isPattern.Parent is ParenthesizedExpressionSyntax or ArgumentSyntax or EqualsValueClauseSyntax or ArrowExpressionClauseSyntax
-            or ReturnStatementSyntax or YieldStatementSyntax or IfStatementSyntax or WhileStatementSyntax or DoStatementSyntax
-            or ForStatementSyntax or LambdaExpressionSyntax or WhenClauseSyntax or InterpolationSyntax or InitializerExpressionSyntax
-            or AnonymousObjectMemberDeclaratorSyntax or SwitchExpressionArmSyntax or ConditionalExpressionSyntax or AssignmentExpressionSyntax
-        || isPattern.Parent.IsKind(SyntaxKind.LogicalAndExpression) || isPattern.Parent.IsKind(SyntaxKind.LogicalOrExpression)
-        || isPattern.Parent.IsKind(SyntaxKind.BitwiseAndExpression) || isPattern.Parent.IsKind(SyntaxKind.BitwiseOrExpression)
-        || isPattern.Parent.IsKind(SyntaxKind.ExclusiveOrExpression);
-
     // 'is not' becomes '!=' only when one space separates them (a line break or comment there would be lost).
     private static bool IsSingleSpace(SyntaxToken isKeyword, SyntaxToken notKeyword) =>
         notKeyword.SpanStart - isKeyword.Span.End == 1 && !isKeyword.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia) && notKeyword.LeadingTrivia.Count == 0;
-
-    // Patterns aren't allowed in expression trees (CS8122): a lambda, or a query clause, converted to an Expression.
-    private static bool IsInExpressionTree(SyntaxNode node, SemanticModel model, CancellationToken cancellationToken)
-    {
-        if (!node.Ancestors().Any(a => a is AnonymousFunctionExpressionSyntax or QueryExpressionSyntax))
-        {
-            return false;
-        }
-
-        for (var operation = model.GetOperation(node, cancellationToken); operation is not null; operation = operation.Parent)
-        {
-            if (operation is IAnonymousFunctionOperation
-                && operation.Parent?.Type?.ContainingNamespace?.ToDisplayString() == "System.Linq.Expressions")
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

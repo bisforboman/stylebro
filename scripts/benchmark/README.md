@@ -35,13 +35,14 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 |---|---|---|
 | StyleBro 0.1.0-alpha.8 | 1,096 ms | FieldNamingAnalyzer 468 ms |
 | StyleBro after caching type facts in FieldNamingAnalyzer | ~800 ms | DocumentationAnalyzer ~160 ms, FieldNamingAnalyzer ~150 ms |
-| StyleCop.Analyzers 1.2.0-beta.556 (182 analyzers) | 1,671 ms | SA1121 152 ms, SA1101 108 ms |
+| StyleCop.Analyzers 1.2.0-beta.556 (182 analyzers), old method (not comparable, see the 2026-10-05 row) | 1,671 ms | SA1121 152 ms, SA1101 108 ms |
 | StyleBro, 2026-10-03 (88 rules, 46 analyzers) | 1,082-1,350 ms (two runs) | DocumentationAnalyzer ~180-210 ms, FieldNamingAnalyzer ~140-200 ms, CommentTextAnalyzer ~115-200 ms, BlankLineRunsAnalyzer ~110-120 ms |
 | StyleBro, 2026-10-04 (55 analyzers) | 806-858 ms (three runs) | DocumentationAnalyzer ~120 ms, FieldNamingAnalyzer ~125-160 ms, CommentTextAnalyzer ~57 ms, NullCheckAnalyzer ~35 ms |
 | StyleBro after the walk merges below | 709-752 ms (three runs, alternated with the row above) | FieldNamingAnalyzer ~150-200 ms, DocumentationAnalyzer ~45-70 ms, CommentTextAnalyzer ~33 ms, NullCheckAnalyzer ~6 ms |
 | StyleBro after the cheap-checks-first changes below | 669-743 ms (three runs, alternated with 670-747 ms for the row above) | CamelCaseNamingAnalyzer 17 -> 2 ms, BaseCallsAnalyzer 15 -> 5 ms, CallChainAnalyzer ~20 -> 14 ms, EmbeddedCommentAnalyzer ~29 -> 24 ms |
 | StyleBro, 2026-10-05, fresh sources per run (compare mode, fastest run each) | 595 ms | FieldNamingAnalyzer 59 ms, DocumentationAnalyzer 51 ms, BlankLineAfterAnalyzer 47 ms, BlankLineRunsAnalyzer 45 ms |
 | StyleBro with one shared walk per tree (`TreeWalk`, same run) | 386 ms | FieldNamingAnalyzer 53 ms, DocumentationAnalyzer 37 ms, CommentSpacingAnalyzer 32 ms |
+| StyleCop.Analyzers 1.2.0-beta.556 (182 analyzers) vs StyleBro `main` (66 analyzers), 2026-10-05, compare mode, three runs on a busy machine | StyleCop 1,291-2,171 ms, StyleBro 411-687 ms (3.1-3.4x in each run) | SA1121 88-159 ms, SA1101 85-143 ms; FieldNamingAnalyzer 52-72 ms, DocumentationAnalyzer 36-66 ms |
 
 Single runs vary by about 20% (the two 2026-10-03 runs of the same build differ by 25%). In real builds the analyzers run concurrently with each other and with the compiler,
 so the wall-clock cost is smaller: the private 30-project app built in the same time with and without StyleBro.

@@ -1270,6 +1270,30 @@ internal static class Descriptors
             + "members only (StyleCop issue #2981, never implemented).",
         helpLinkUri: HelpBase + DiagnosticIds.InternalTypePublicMethod + ".md");
 
+    public static readonly DiagnosticDescriptor RedundantNullForgiving = new(
+        id: DiagnosticIds.RedundantNullForgiving,
+        title: "Remove a redundant null-forgiving operator",
+        messageFormat: "Remove the '!': the compiler already knows the value isn't null here",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "A '!' whose operand's flow state is already not-null hides nothing. Off by default. Not reported: "
+            + "'null!' and 'default!', type parameters and types with type arguments, '#nullable' changing the project's "
+            + "setting, and projects with several target frameworks. Not a StyleCop rule (Sonar S8969, the SDK's IDE0370).",
+        helpLinkUri: HelpBase + DiagnosticIds.RedundantNullForgiving + ".md");
+
+    public static readonly DiagnosticDescriptor HasValueNullCheck = new(
+        id: DiagnosticIds.HasValueNullCheck,
+        title: "Check a nullable value type for null instead of calling HasValue",
+        messageFormat: "Use '{0}'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: false,
+        description: "'x.HasValue' becomes 'x is not null' and '!x.HasValue' 'x is null' (or '!= null' / '== null', following "
+            + "stylebro_null_check_style), so every null check has one form. Off by default. Not a StyleCop rule (Meziantou "
+            + "MA0171).",
+        helpLinkUri: HelpBase + DiagnosticIds.HasValueNullCheck + ".md");
+
     public static readonly DiagnosticDescriptor EmptyTypeBody = new(
         id: DiagnosticIds.EmptyTypeBody,
         title: "A class, struct or interface with an empty body should end with ';'",

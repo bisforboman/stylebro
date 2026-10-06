@@ -79,6 +79,8 @@ file. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md).
 
 ## B. Coming from StyleCop
 
+Still deciding? [StyleBro vs StyleCop](stylebro-vs-stylecop.md) compares the two with measured numbers.
+
 `stylebro-migrate` reads your StyleCop setup (rulesets, global configs, `.editorconfig` files, `stylecop.json`) and
 writes StyleBro and SDK settings that enforce the same things, so code StyleCop was happy with stays as it is. A
 walk-through on a small project, with real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md).
