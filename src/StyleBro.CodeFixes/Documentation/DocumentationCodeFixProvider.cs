@@ -164,7 +164,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             {
                 if (missingPeriods.Contains(span.Start))
                 {
-                    changes.Add(new TextChange(new TextSpan(span.Start, 0), "."));
+                    changes.Add(DocumentationPeriods.GetPeriodChange(span.Start, text));
                 }
             }
             else if (misplaced.FirstOrDefault(t => DocumentationComments.GetReportSpan(t, text) == span) is { } comment && comment != default)

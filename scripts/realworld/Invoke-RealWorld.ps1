@@ -62,6 +62,7 @@ Set-Content $hook @"
     <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <CompilerVisibleProperty Include="LangVersion" />
     <CompilerVisibleProperty Include="MaxSupportedLangVersion" />
+    <CompilerVisibleProperty Include="GenerateDocumentationFile" />
   </ItemGroup>
 </Project>
 "@

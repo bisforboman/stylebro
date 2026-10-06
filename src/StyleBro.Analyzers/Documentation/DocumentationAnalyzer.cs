@@ -139,7 +139,10 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeMember(SyntaxNodeAnalysisContext context)
     {
-        if (DocumentationComments.HasDocumentation(context.Node))
+        var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree);
+        if (DocumentationComments.HasDocumentation(context.Node)
+            || !DocumentationComments.GeneratesDocumentation(context.Node.SyntaxTree, options)
+            || DocumentationComments.HasConditionalDirective((MemberDeclarationSyntax)context.Node))
         {
             return;
         }
@@ -152,7 +155,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
             _ => (GetIdentifier(context.Node), new List<ISymbol?> { context.SemanticModel.GetDeclaredSymbol(context.Node, context.CancellationToken) }),
         };
 
-        if (symbols.All(s => s is not null) && DocumentationComments.InheritsDocumentation(symbols!, context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree)))
+        if (symbols.All(s => s is not null) && DocumentationComments.InheritsDocumentation(symbols!, options))
         {
             context.ReportDiagnostic(Diagnostic.Create(Descriptors.InheritDocumentation, identifier.GetLocation(), identifier.ValueText));
         }

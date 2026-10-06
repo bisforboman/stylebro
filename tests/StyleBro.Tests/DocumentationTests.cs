@@ -1,3 +1,9 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
+using StyleBro.Analyzers.Documentation;
+using StyleBro.CodeFixes.Documentation;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Documentation.DocumentationAnalyzer, StyleBro.CodeFixes.Documentation.DocumentationCodeFixProvider>;
 
 namespace StyleBro.Tests;
@@ -335,7 +341,7 @@ public class DocumentationTests
             {
             }
 
-            /// <summary>Has a trailing space. </summary>
+            /// <summary>Has a trailing space.</summary>
             /// <param name="value">The value.</param>
             /// <returns>The result.</returns>
             /// <exception cref="ArgumentException">When bad.</exception>
@@ -535,7 +541,7 @@ public class DocumentationTests
             public int {|BRO1605:InternalSet|} { get; internal set; }
 
             /// <summary>Is it closed.</summary>
-            public bool {|BRO1604:IsClosed|} { get; set; }
+            public bool IsClosed { get; set; }
 
             /// <summary>Whether it is paid.</summary>
             public bool {|BRO1604:IsPaid|} { get; set; }
@@ -574,7 +580,7 @@ public class DocumentationTests
             /// <summary>Gets the internal thing.</summary>
             public int InternalSet { get; internal set; }
 
-            /// <summary>Gets or sets is it closed.</summary>
+            /// <summary>Is it closed.</summary>
             public bool IsClosed { get; set; }
 
             /// <summary>Gets or sets a value indicating whether it is paid.</summary>
@@ -1380,6 +1386,178 @@ public class DocumentationTests
         /// <typeparam name="T">The type.</typeparam>
         public struct Holder<T>
         {
+        }
+        """);
+
+    // An '#if' above a member or between its attributes: each target framework's copy wanted '<inheritdoc/>' in another
+    // place, and BRO1602 turned the other copy's into '//' (Dapper's WrappedReader: never converged). A '#region' is fine.
+    [Fact]
+    public Task ConditionalDirectiveAboveTheMember_IsNotReported() => VerifyFixAsync(
+        """
+        using System;
+
+        /// <summary>A base.</summary>
+        public class B : IDisposable
+        {
+        #if NET5_0_OR_GREATER
+            [Obsolete("x")]
+        #endif
+            public override string ToString() => "b";
+
+            [Obsolete("y")]
+        #if NET5_0_OR_GREATER
+            [CLSCompliant(false)]
+        #endif
+            public override int GetHashCode() => 1;
+
+        #if !NET5_0_OR_GREATER
+            [Obsolete("z")]
+        #endif
+            public override bool Equals(object o) => false;
+
+            #region Other
+            public void {|BRO1601:Dispose|}()
+            {
+            }
+            #endregion
+        }
+        """,
+        """
+        using System;
+
+        /// <summary>A base.</summary>
+        public class B : IDisposable
+        {
+        #if NET5_0_OR_GREATER
+            [Obsolete("x")]
+        #endif
+            public override string ToString() => "b";
+
+            [Obsolete("y")]
+        #if NET5_0_OR_GREATER
+            [CLSCompliant(false)]
+        #endif
+            public override int GetHashCode() => 1;
+
+        #if !NET5_0_OR_GREATER
+            [Obsolete("z")]
+        #endif
+            public override bool Equals(object o) => false;
+
+            #region Other
+
+            /// <inheritdoc/>
+            public void Dispose()
+            {
+            }
+            #endregion
+        }
+        """);
+
+    // The owner's decision (docs/decisions.md): no '<inheritdoc/>' where the project generates no documentation, like
+    // StyleCop's SA0001. The package passes GenerateDocumentationFile (the same in a build and under 'dotnet format',
+    // which parses documentation comments anyway); without it, the compiler's documentation mode decides.
+    [Theory]
+    [InlineData(null, DocumentationMode.Diagnose, true)]
+    [InlineData(null, DocumentationMode.Parse, true)]
+    [InlineData(null, DocumentationMode.None, false)]
+    [InlineData("true", DocumentationMode.None, true)]
+    [InlineData("True", DocumentationMode.None, true)]
+    [InlineData("false", DocumentationMode.Diagnose, false)]
+    [InlineData("", DocumentationMode.Diagnose, true)]
+    public Task InheritDoc_OnlyWhereTheProjectGeneratesDocumentation(string? property, DocumentationMode mode, bool reported)
+    {
+        var test = new CSharpCodeFixTest<DocumentationAnalyzer, DocumentationCodeFixProvider, DefaultVerifier>
+        {
+            TestCode = $$"""
+                /// <summary>A thing.</summary>
+                public class Thing
+                {
+                    public override string {{(reported ? "{|BRO1601:ToString|}" : "ToString")}}() => "thing";
+                }
+                """,
+            FixedCode = $$"""
+                /// <summary>A thing.</summary>
+                public class Thing
+                {
+                    {{(reported ? "/// <inheritdoc/>\n    " : string.Empty)}}public override string ToString() => "thing";
+                }
+                """,
+        };
+        if (property is not null)
+        {
+            test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", $"is_global = true\nbuild_property.GenerateDocumentationFile = {property}\n"));
+        }
+
+        test.SolutionTransforms.Add((solution, projectId) => solution.WithProjectParseOptions(
+            projectId,
+            ((CSharpParseOptions)solution.GetProject(projectId)!.ParseOptions!).WithDocumentationMode(mode)));
+        return test.RunAsync();
+    }
+
+    // GuardClauses: 'evaluates to true </returns>' became 'true. </returns>'.
+    [Fact]
+    public Task PeriodBeforeAClosingTag_TakesThePlaceOfTheSpaces() => VerifyFixAsync(
+        """
+        /// <summary>A guard{|BRO1603:|} </summary>
+        public class Guard
+        {
+            /// <summary>Checks <see cref="Guard"/>{|BRO1603:|}  </summary>
+            /// <param name="input">The input{|BRO1603:|}
+            /// </param>
+            /// <returns>Whatever the input evaluates to true{|BRO1603:|} </returns>
+            public bool Check(bool input) => input;
+        }
+        """,
+        """
+        /// <summary>A guard.</summary>
+        public class Guard
+        {
+            /// <summary>Checks <see cref="Guard"/>.</summary>
+            /// <param name="input">The input.
+            /// </param>
+            /// <returns>Whatever the input evaluates to true.</returns>
+            public bool Check(bool input) => input;
+        }
+        """);
+
+    // Dapper: 'If true, the command-text is inspected' became 'Gets or sets if true, ...', and a constructor summary
+    // 'construct a dynamic parameter bag' became '... class. construct a dynamic parameter bag'. Text that can't follow
+    // the standard words as a sentence is left alone.
+    [Fact]
+    public Task SummariesThatCantFollowTheStandardWords_AreNotReported() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary>construct a dynamic parameter bag.</summary>
+            public Words()
+            {
+            }
+
+            /// <summary>If set, the words are loaded.</summary>
+            /// <param name="x">The x.</param>
+            public Words(int x)
+            {
+            }
+
+            /// <summary>When given, the words are copied.</summary>
+            /// <param name="s">The s.</param>
+            public Words(string s)
+            {
+            }
+
+            /// <summary>If true, the command-text is inspected.</summary>
+            public bool Inspect { get; set; }
+
+            /// <summary>True if it is open.</summary>
+            public bool IsOpen { get; }
+
+            /// <summary>Returns the name.</summary>
+            public string Name { get; set; }
+
+            /// <summary>whenever it changes, it's saved.</summary>
+            public int Count { get; set; }
         }
         """);
 }

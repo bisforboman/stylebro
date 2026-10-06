@@ -5,39 +5,47 @@ namespace StyleBro.Tests;
 public class DeclarationCommentTests
 {
     [Fact]
-    public Task CommentsAfterTheHeader_MoveIntoTheBody() => VerifyFixAsync(
+    public Task CommentsBetweenTheHeaderAndTheBrace_MoveIntoTheBody() => VerifyFixAsync(
         """
         using System;
 
-        namespace N {|BRO1134:// the namespace|}
+        namespace N
+        {|BRO1134:// the namespace|}
         {
-            public interface I {|BRO1134:// the interface|}
+            public interface I
+            {|BRO1134:// the interface|}
             {
                 int P { get; }
             }
 
             [Serializable] // an attribute's comment stays
-            public class C : I {|BRO1134:// the class|}
+            public class C : I
+            {|BRO1134:// the class|}
             {
                 private int value;
 
-                public C() {|BRO1134:// the constructor|}
+                public C()
+                {|BRO1134:// the constructor|}
                 {
                     this.value = 1;
                 }
 
-                public int P {|BRO1134:// the property|}
+                public int P
+                {|BRO1134:// the property|}
                 {
-                    get {|BRO1134:// the getter|}
+                    get
+                    {|BRO1134:// the getter|}
                     {
                         return this.value;
                     }
                 }
 
                 [Obsolete]
-                public void M() {|BRO1134:/* the method */|}
+                public void M()
+                {|BRO1134:/* the method */|}
                 {
-                    void Local() {|BRO1134:// the local function|}
+                    void Local()
+                    {|BRO1134:// the local function|}
                     {
                     }
 
@@ -45,7 +53,8 @@ public class DeclarationCommentTests
                 }
             }
 
-            public enum E {|BRO1134:// the enum|}
+            public enum E
+            {|BRO1134:// the enum|}
             {
                 A,
             }
@@ -132,7 +141,8 @@ public class DeclarationCommentTests
     [Fact]
     public Task BlankLinesAfterTheBrace_StayAboveTheComment() => VerifyFixAsync(
         """
-        public class C {|BRO1134:// note|}
+        public class C
+        {|BRO1134:// note|}
         {
 
             private int x;
@@ -152,7 +162,8 @@ public class DeclarationCommentTests
         """
         public class C
         {
-            public void M(bool b) {|BRO1134:// method|}
+            public void M(bool b)
+            {|BRO1134:// method|}
             {
                 if (b) {|BRO1132:// statement|}
                 {
@@ -172,6 +183,49 @@ public class DeclarationCommentTests
                     // statement
                     M(false);
                 }
+            }
+        }
+        """);
+
+    // The owner's decision (docs/decisions.md): a comment ending the header's line is a note on the header and stays.
+    [Fact]
+    public Task CommentEndingTheHeadersLine_Stays_OneOnItsOwnLineMoves() => VerifyFixAsync(
+        """
+        public class C // legacy name
+        {
+            public int GetHashCollissions() // legacy incorrect spelling, oops
+            {
+                return 0;
+            }
+
+            public int P /* note */
+            {|BRO1134:// moves|}
+            {
+                get { return 0; }
+            }
+
+            public void M() {|BRO1134:/* before the brace on its line */|} {
+                M();
+            }
+        }
+        """,
+        """
+        public class C // legacy name
+        {
+            public int GetHashCollissions() // legacy incorrect spelling, oops
+            {
+                return 0;
+            }
+
+            public int P /* note */
+            {
+                // moves
+                get { return 0; }
+            }
+
+            public void M() {
+                /* before the brace on its line */
+                M();
             }
         }
         """);

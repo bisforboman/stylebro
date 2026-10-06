@@ -10,8 +10,9 @@ namespace StyleBro.Analyzers.Documentation;
 
 /// <summary>
 /// Shared logic for BRO1601 (StyleCop SA1600 for overrides and implementations: '/// &lt;inheritdoc/&gt;') and BRO1602
-/// (SA1626: '///' used for a plain comment). Works whether or not the project generates documentation (without it,
-/// the compiler parses '///' as plain comments).
+/// (SA1626: '///' used for a plain comment). Text-based, so BRO1602 works whether or not the project generates
+/// documentation (without it, the compiler parses '///' as plain comments); BRO1601 asks for documentation only where
+/// the project generates it.
 /// </summary>
 internal static class DocumentationComments
 {
@@ -23,6 +24,13 @@ internal static class DocumentationComments
 
     /// <summary>Private elements (and members of private types) need documentation: StyleCop's documentPrivateElements.</summary>
     public const string PrivateElementsKey = "stylebro_document_private_elements";
+
+    /// <summary>
+    /// The SDK property that turns on documentation generation; the package's build targets make it compiler-visible. The
+    /// SDK always sets it (true when DocumentationFile is set), so it's the same in a build and under 'dotnet format',
+    /// which parses documentation comments even where the build doesn't.
+    /// </summary>
+    public const string GenerateDocumentationFileProperty = "build_property.GenerateDocumentationFile";
 
     /// <summary>The member declarations BRO1601 checks.</summary>
     public static readonly SyntaxKind[] MemberKinds =
@@ -38,6 +46,32 @@ internal static class DocumentationComments
     public static bool HasDocumentation(SyntaxNode member)
     {
         return member.GetLeadingTrivia().Any(IsDocumentationComment);
+    }
+
+    /// <summary>
+    /// Whether the project generates documentation: like StyleCop's documentation rules (SA0001), BRO1601 asks for none
+    /// otherwise. From <see cref="GenerateDocumentationFileProperty"/>; without the package's build targets (an analyzer
+    /// referenced directly), from whether the compiler parses documentation comments.
+    /// </summary>
+    public static bool GeneratesDocumentation(SyntaxTree tree, AnalyzerConfigOptions options)
+    {
+        return options.TryGetValue(GenerateDocumentationFileProperty, out var value) && value.Trim().Length > 0
+            ? string.Equals(value.Trim(), "true", System.StringComparison.OrdinalIgnoreCase)
+            : tree.Options.DocumentationMode >= DocumentationMode.Parse;
+    }
+
+    /// <summary>
+    /// Whether an '#if', '#elif', '#else' or '#endif' sits above the member or between its attributes. Then the member
+    /// may start with a different token in each target framework's copy ('[Obsolete]' only under '#if NET5_0_OR_GREATER'),
+    /// and the '&lt;inheritdoc/&gt;' each copy wants lands in a different place: one copy then sees the other's as a
+    /// '///' that documents nothing (BRO1602), and the two fixes never converge.
+    /// </summary>
+    public static bool HasConditionalDirective(MemberDeclarationSyntax member)
+    {
+        var end = member.AttributeLists.Count > 0 ? member.AttributeLists.Last().GetLastToken().GetNextToken().SpanStart : member.SpanStart;
+        return member.DescendantTrivia(TextSpan.FromBounds(member.FullSpan.Start, end)).Any(t =>
+            t.IsKind(SyntaxKind.IfDirectiveTrivia) || t.IsKind(SyntaxKind.ElifDirectiveTrivia)
+            || t.IsKind(SyntaxKind.ElseDirectiveTrivia) || t.IsKind(SyntaxKind.EndIfDirectiveTrivia));
     }
 
     /// <summary>

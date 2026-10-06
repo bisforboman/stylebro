@@ -57,7 +57,8 @@ internal static class EmbeddedComments
     };
 
     /// <summary>
-    /// The comments to move, empty when there are none or the fix can't move them safely: a header spanning several lines
+    /// The comments to move, empty when there are none or the fix can't move them safely (for a declaration, a comment
+    /// ending the header's line above '{' isn't one to move): a header spanning several lines
     /// (the comment usually explains its last line, not the block: a user decision, see docs/decisions.md), a directive
     /// between the header and '{', a comment spanning lines, or code after '{' on its line (a single-line block, nowhere
     /// to put a line).
@@ -80,6 +81,14 @@ internal static class EmbeddedComments
         var owner = (openBrace.Parent is BlockSyntax or AccessorListSyntax ? openBrace.Parent.Parent : openBrace.Parent)!;
         var gap = previous.TrailingTrivia.Concat(openBrace.LeadingTrivia).ToList();
         var comments = gap.Where(IsComment).ToImmutableArray();
+
+        // BRO1134: a comment that ends the header's line, with '{' on a later line, is a note on the header and stays
+        // (a user decision, see docs/decisions.md); comments on lines of their own still move.
+        if (GetDeclarationOpenBrace(openBrace.Parent!) == openBrace && Line(text, openBrace.SpanStart) != Line(text, previous.SpanStart))
+        {
+            comments = comments.RemoveAll(c => previous.TrailingTrivia.Contains(c));
+        }
+
         if (comments.IsEmpty
             || Line(text, GetHeaderStart(owner).SpanStart) != Line(text, previous.SpanStart)
             || gap.Any(t => t.IsDirective)

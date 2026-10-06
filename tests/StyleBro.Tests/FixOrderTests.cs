@@ -133,7 +133,8 @@ public class FixOrderTests
     [Fact]
     public Task DeclarationComments_MovedNextToBlankLinesAndDocumentation() => AssertConvergesInEveryOrderAsync(
         """
-        public class C // note
+        public class C
+        // note
         {
 
             /// <summary>Docs.</summary>
@@ -153,12 +154,14 @@ public class FixOrderTests
     [Fact]
     public Task EmbeddedComments_MovedAboveABlankLine() => AssertConvergesInEveryOrderAsync(
         """
-        public class C // note
+        public class C
+        // note
         {
 
             private int x;
 
-            public int M() // why
+            public int M()
+            // why
             {
 
                 if (x > 0) // positive
