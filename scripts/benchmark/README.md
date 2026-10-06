@@ -25,9 +25,73 @@ away and a real regression stays. Checked on a busy machine: a build against its
 and the build before the 2026-10-04 speed-ups against the one after failed on DocumentationAnalyzer, CommentTextAnalyzer
 and the total.
 
+`--all-rules` (any mode) also turns on the rules that are off by default (through the compilation options).
+
 The optional fourth argument sets preprocessor symbols (`HAVE_ASYNC;NET8_0`). Missing references don't matter much:
 the sources are compiled against the .NET runtime only, so code using other packages binds partly. Compare two builds
 of the analyzers on the same sources rather than reading the absolute numbers.
+
+## Per file (IDE)
+
+Visual Studio analyzes the open document on every edit, in a new compilation: the syntax tree, syntax node and semantic
+model actions of that file, and the symbol actions of the symbols declared in it. Whole-project numbers hide an analyzer
+that is slow on one big file or grows faster than the file, so `file` times one document at a time:
+
+```bash
+dotnet run -c Release --project scripts/benchmark -- file path/to/StyleBro.Analyzers.dll path/to/sources 10 7 "SYMBOL_A;SYMBOL_B" --all-rules
+dotnet run -c Release --project scripts/benchmark -- file path/to/StyleBro.Analyzers.dll path/to/sources "a.cs;b.cs" 7
+```
+
+The third argument is a number (the N largest files of the folder, default 10) or `;`-separated files, which may lie
+outside the folder (they are compiled with it). For every run each file gets a freshly parsed tree in a new compilation
+(the other files are parsed once), its semantic model is bound first (not timed: the IDE has usually bound it), and a new
+`CompilationWithAnalyzers` (its telemetry adds up per instance) runs `GetAnalyzerSyntaxDiagnosticsAsync(tree)` and
+`GetAnalyzerSemanticDiagnosticsAsync(model, null)`. The runs go round the files, each analyzer's fastest run counts. It
+prints each file's slowest analyzers, the slowest analyzer per file with microseconds per KB, and the reports per
+analyzer (to check that a change keeps the diagnostics). `STYLEBRO_BENCH_CSV=path` also writes every
+file/analyzer/time/reports row. Shared costs land on whichever analyzer comes first: building the tree's red nodes and
+`TreeWalk` arrays, and the driver's generated-code check (a walk of the whole tree on a file's first reported diagnostic).
+So an analyzer that reports little and is first can look slow; profile before blaming it (`dotnet-trace collect --format
+speedscope -- dotnet scripts/benchmark/bin/Release/net10.0/Benchmark.dll file ...` with `STYLEBRO_BENCH_ONLY`).
+
+Results (2026-10-05, `--all-rules`, 7 runs, three alternated rounds of origin/main and this change, fastest run each; the
+machine was busy with other builds and medians were 2-3x the fastest runs, so read the differences, not the absolute
+numbers). Newtonsoft.Json's 10 largest files with its netstandard2.0 symbols (LinqBridge.cs is `#if !HAVE_LINQ`, so
+empty), and the largest files of Jellyfin's MediaBrowser.Controller (compiled without its project references):
+
+| File | KB | Before | After | Slowest analyzer after |
+|---|---:|---:|---:|---|
+| NJ Serialization/JsonSerializerInternalReader.cs | 128 | 30.0 ms | 24.8 ms | CommentSpacingAnalyzer 2.3 ms |
+| NJ Linq/JToken.cs | 112 | 34.5 ms | 24.7 ms | FieldNamingAnalyzer 2.9 ms |
+| NJ JsonTextReader.cs | 102 | 26.7 ms | 21.9 ms | FieldNamingAnalyzer 3.0 ms |
+| NJ JsonWriter.Async.cs | 94 | 16.2 ms | 13.6 ms | DocumentationAnalyzer 1.9 ms |
+| NJ Converters/XmlNodeConverter.cs | 84 | 58.2 ms | 23.8 ms | InternalTypeMethodAnalyzer 2.8 ms |
+| NJ JsonTextReader.Async.cs | 79 | 19.0 ms | 15.4 ms | FieldNamingAnalyzer 2.6 ms |
+| NJ JsonTextWriter.Async.cs | 79 | 22.8 ms | 19.4 ms | BaseCallsAnalyzer 3.3 ms |
+| NJ Serialization/DefaultContractResolver.cs | 77 | 18.0 ms | 16.6 ms | CommentSpacingAnalyzer 1.4 ms |
+| NJ JsonWriter.cs | 65 | 18.9 ms | 14.6 ms | DocumentationAnalyzer 1.5 ms |
+| Jellyfin MediaEncoding/EncodingHelper.cs | 348 | 170.1 ms | 98.9 ms | EmbeddedCommentAnalyzer 10.6 ms (shared costs, see above) |
+| Jellyfin Entities/BaseItem.cs | 103 | 43.5 ms | 37.4 ms | PascalCaseNamingAnalyzer 4.6 ms |
+| Jellyfin Entities/Folder.cs | 78 | 90.6 ms | 27.0 ms | DocumentationAnalyzer 6.0 ms |
+
+Scaling (a file's namespace block repeated 1, 2, 4 and 8 times, namespaces renamed): before, the total grew 20x for 8x
+the size of JsonTextReader.cs (31 -> 616 ms) and ElseIfAnalyzer alone 405 ms at 787 KB; after, 23 -> 192 ms (8.4x), and
+no analyzer grows clearly faster than the file.
+
+What was slow, all with the same diagnostics before and after (reports per analyzer compared on every file):
+
+- ElseIfAnalyzer (BRO1139, quadratic): for each `else` whose join might change the brace rules' findings it parsed the
+  whole joined FILE again (~10 ms per candidate in a 100 KB file, 47 ms on EncodingHelper.cs). Now an incremental reparse
+  (`SyntaxTree.WithChangedText`), as in `Braces.AddToExpansion` (the fix side).
+- InternalTypeMethodAnalyzer (BRO1409, off by default): asked every interface member of every type of the compilation
+  for its implementation, once per compilation, and the IDE makes a new compilation per edit (58 ms on Folder.cs, 30 ms
+  on XmlNodeConverter.cs). Now only the method's type and the types derived from it, and only interface members with
+  the method's name (derived types from one cheap walk over the type declarations per compilation).
+- CamelCaseNamingAnalyzer (BRO1301/BRO1302): walked the whole member (into doc comments) once per variable or parameter
+  it reports; the scope's identifiers are now collected once. The Hungarian prefix settings (BRO1310) were parsed for
+  every variable; now once per options object.
+- FieldNamingAnalyzer: walked every trivia of a type with any directive to find disabled code; now goes from directive to
+  directive, and reads the type's tokens from `TreeWalk`'s shared array.
 
 ## Results (2026-10-02, Newtonsoft.Json's main project, 242 files)
 
@@ -42,6 +106,7 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 | StyleBro after the cheap-checks-first changes below | 669-743 ms (three runs, alternated with 670-747 ms for the row above) | CamelCaseNamingAnalyzer 17 -> 2 ms, BaseCallsAnalyzer 15 -> 5 ms, CallChainAnalyzer ~20 -> 14 ms, EmbeddedCommentAnalyzer ~29 -> 24 ms |
 | StyleBro, 2026-10-05, fresh sources per run (compare mode, fastest run each) | 595 ms | FieldNamingAnalyzer 59 ms, DocumentationAnalyzer 51 ms, BlankLineAfterAnalyzer 47 ms, BlankLineRunsAnalyzer 45 ms |
 | StyleBro with one shared walk per tree (`TreeWalk`, same run) | 386 ms | FieldNamingAnalyzer 53 ms, DocumentationAnalyzer 37 ms, CommentSpacingAnalyzer 32 ms |
+| StyleBro, 2026-10-05, before / after the per-file fixes (compare mode, busy machine) | 600 / 571 ms | ElseIfAnalyzer 27 -> 10 ms, FieldNamingAnalyzer 82 -> 78 ms |
 | StyleCop.Analyzers 1.2.0-beta.556 (182 analyzers) vs StyleBro `main` (66 analyzers), 2026-10-05, compare mode, three runs on a busy machine | StyleCop 1,291-2,171 ms, StyleBro 411-687 ms (3.1-3.4x in each run) | SA1121 88-159 ms, SA1101 85-143 ms; FieldNamingAnalyzer 52-72 ms, DocumentationAnalyzer 36-66 ms |
 
 Single runs vary by about 20% (the two 2026-10-03 runs of the same build differ by 25%). In real builds the analyzers run concurrently with each other and with the compiler,

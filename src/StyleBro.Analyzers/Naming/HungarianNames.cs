@@ -25,6 +25,8 @@ internal sealed class HungarianNames
 
     private static readonly Regex Prefix = new(@"^(?<prefix>[a-z]{1,2})[A-Z]");
 
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<AnalyzerConfigOptions, HungarianNames> Cache = new();
+
     private readonly HashSet<string> allowed;
 
     private HungarianNames(HashSet<string> allowed)
@@ -36,22 +38,25 @@ internal sealed class HungarianNames
     /// <summary>Gets the allowed prefixes as one string, for caches: equal settings give equal keys.</summary>
     public string Key { get; }
 
-    /// <summary>The settings for a file: StyleCop's allowedHungarianPrefixes and allowCommonHungarianPrefixes (default true).</summary>
-    public static HungarianNames Read(AnalyzerConfigOptions options)
+    /// <summary>
+    /// The settings for a file: StyleCop's allowedHungarianPrefixes and allowCommonHungarianPrefixes (default true). Read
+    /// once per options object (the naming analyzers ask for every variable and field).
+    /// </summary>
+    public static HungarianNames Read(AnalyzerConfigOptions options) => Cache.GetValue(options, o =>
     {
         var allowed = new HashSet<string>(StringComparer.Ordinal);
-        if (options.TryGetValue(AllowedKey, out var list))
+        if (o.TryGetValue(AllowedKey, out var list))
         {
             allowed.UnionWith(list.Split(',').Select(p => p.Trim()).Where(p => p.Length > 0));
         }
 
-        if (!(options.TryGetValue(AllowCommonKey, out var common) && common.Trim().Equals("false", StringComparison.OrdinalIgnoreCase)))
+        if (!(o.TryGetValue(AllowCommonKey, out var common) && common.Trim().Equals("false", StringComparison.OrdinalIgnoreCase)))
         {
             allowed.UnionWith(Common);
         }
 
         return new HungarianNames(allowed);
-    }
+    });
 
     /// <summary>Like StyleCop, names inside a '*NativeMethods' class keep their Win32 prefixes ('lpBuffer').</summary>
     public static bool IsInNativeMethods(SyntaxNode node) =>

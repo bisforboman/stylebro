@@ -284,7 +284,7 @@ internal static class Braces
 
         var sorted = expansion.OrderBy(c => c.Span.Start).ToList();
         var expanded = text.WithChanges(sorted);
-        var root = CSharpSyntaxTree.ParseText(expanded, (CSharpParseOptions)block.SyntaxTree.Options).GetRoot();
+        var root = block.SyntaxTree.WithChangedText(expanded).GetRoot();
         var items = new List<(StatementSyntax Old, StatementSyntax New, int Shift)>();
         foreach (var statement in block.Statements)
         {

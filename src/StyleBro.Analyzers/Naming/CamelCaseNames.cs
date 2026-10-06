@@ -13,6 +13,12 @@ namespace StyleBro.Analyzers.Naming;
 internal static class CamelCaseNames
 {
     /// <summary>
+    /// A scope's identifiers, read once: every variable and parameter of a member asks about the same scope, and walking
+    /// a big method once per renamed name cost ~10 ms per edit in a 350 KB file.
+    /// </summary>
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SyntaxNode, ScopeNames> Scopes = new();
+
+    /// <summary>
     /// The camelCase name for <paramref name="name"/>, or null when the name already begins with a lower-case letter
     /// or has no safe replacement. Leading underscores go; a leading run of capitals is lowered as a whole, except the
     /// capital that starts the next word: 'Value' -> 'value', '_value' -> 'value', 'URL' -> 'url',
@@ -89,24 +95,11 @@ internal static class CamelCaseNames
             return false;
         }
 
-        foreach (var token in scope.DescendantTokens(descendIntoTrivia: true))
-        {
-            // XML element names in doc comments ('<param>') are identifier tokens too, but never bind to anything.
-            if (!token.IsKind(SyntaxKind.IdentifierToken) || token.Parent is XmlNameSyntax)
-            {
-                continue;
-            }
-
-            var text = token.ValueText;
-            if (text == newName
-                || (text != oldName && (getNewName ?? GetNewName)(text) == newName)
-                || (text == oldName && IsInferredMemberName(token)))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        var names = Scopes.GetValue(scope, ScopeNames.Collect);
+        var map = getNewName ?? GetNewName;
+        return !names.Identifiers.Contains(newName)
+            && !names.Inferred.Contains(oldName)
+            && !names.Identifiers.Any(text => text != oldName && map(text) == newName);
     }
 
     /// <summary>
@@ -164,5 +157,32 @@ internal static class CamelCaseNames
         return token.Parent is IdentifierNameSyntax name
             && (name.Parent is AnonymousObjectMemberDeclaratorSyntax { NameEquals: null }
                 || name.Parent is ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax });
+    }
+
+    private sealed class ScopeNames
+    {
+        public System.Collections.Generic.HashSet<string> Identifiers { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets the names used as inferred tuple element or anonymous type member names.</summary>
+        public System.Collections.Generic.HashSet<string> Inferred { get; } = new(StringComparer.Ordinal);
+
+        public static ScopeNames Collect(SyntaxNode scope)
+        {
+            var names = new ScopeNames();
+            foreach (var token in scope.DescendantTokens(descendIntoTrivia: true))
+            {
+                // XML element names in doc comments ('<param>') are identifier tokens too, but never bind to anything.
+                if (token.IsKind(SyntaxKind.IdentifierToken) && token.Parent is not XmlNameSyntax)
+                {
+                    names.Identifiers.Add(token.ValueText);
+                    if (IsInferredMemberName(token))
+                    {
+                        names.Inferred.Add(token.ValueText);
+                    }
+                }
+            }
+
+            return names;
+        }
     }
 }
