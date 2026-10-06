@@ -1120,6 +1120,52 @@ an editorconfig comment). verify-package check 5 tests it end to end.
   resurrected lines (backlog MAYBE entries, an old paragraph under a rewritten one, stale mutation entries) and
   same-named Messy samples (two `Uploader.cs` with a class `Uploader`).
 
+## Added 2026-10-05/06 (more real-world repos, C# 14, IDE speed)
+
+Decisions in `docs/decisions.md`, details on the rule pages and in the PRs (#48-#56).
+
+**New rules** (beyond StyleCop; off after `stylebro-migrate`):
+- BRO1527 auto-accessors on one line (on; skips bodies, attributes, comments, `csharp_preserve_single_line_blocks =
+  false`), BRO1145 empty class/struct/interface body -> `;` (OFF; C# 12+, multi-target LangVersion guard), BRO1146
+  `record class` -> `record` (#52). BRO1505 and BRO1001 judge a property BRO1527 collapses as one-line
+  (`AutoAccessorLines.BecomesOneLine`), so the sort and the collapse give the same text in every order (#55).
+- BRO1144 (on) escapes identifiers C# 14 reads as keywords (`field` in accessors, `extension`, `partial`) with `@`;
+  BRO1001 sorts extension blocks right before the methods (owner: "With methods, first"), BRO1509 expands one-line
+  ones (#53). StyleBro builds against Roslyn 4.8, which has no C# 14 nodes: `CSharp14.cs` detects them by runtime type
+  name, unit tests can't parse C# 14, so samples/Messy (net10.0) covers it. A renamed member named `field` takes the
+  keyword uses along (checked 2026-10-06 with a throwaway C# 14 project; Messy can't show it: BRO1303's string guard
+  sees "field" in the referenced StyleBro projects).
+- BRO1147 redundant `!` and BRO1148 `HasValue` -> null check (both OFF, #54). Not IDE0370 in init (owner).
+- Never rename to `field` (C# 14 keyword) or to `value` inside a property/indexer/event (`CamelCaseNames.IsUsableName`);
+  IDE0031 moved to modernize tier B (writes `x?.P = v`, C# 14), IDE0350 added there (#49).
+- BRO1313 keeps a parameter whose name reaches run time (`nameof`, `[CallerArgumentExpression]`: ParamName changed in
+  Newtonsoft.Json); BRO1302 keeps renaming such names (owner, like SA1313; #56).
+
+**Multi-target/LangVersion guards**: the package targets pass `StyleBroTargetFrameworks`, `LangVersion` and
+`MaxSupportedLangVersion` as compiler-visible properties; `LinkedFileFixAllProvider.GetLowestLanguageVersion` lets a
+fix write only what every copy's language version accepts. Without the package targets (a bare `<Analyzer>`), the
+guards can't see the frameworks: documented. Invoke-RealWorld's hook passes the same properties.
+
+**Real world** (#51): eShopOnWeb (Razor/Blazor), MediatR (open generics), LibGit2Sharp (P/Invoke, net472+net8.0),
+Mapperly (source generator, newest C#), all REQUIRED checks now (16 required in total). Found: renames broke Razor
+pages (a type with a generated part isn't renamed, `NamespaceNames.HasGeneratedPart`; the fix drops a rename with a
+reference in generated code). `-Enable A,B` from another shell was ONE string and enabled nothing before #51 (now
+split on commas); confirm an -Enable run really reports the rule. `TestFilter` in repos.psd1 leaves out tests that
+need the network (LibGit2Sharp's fetch/clone/push failed on CI only).
+
+**Performance** (#50, owner asked what the IDE pays per edit): `scripts/benchmark file <dll> <folder> [N | a.cs;b.cs]
+[runs] [symbols] [--all-rules]` analyzes each file in its own compilation (the IDE's view), semantic model bound
+first and not counted. Fixed: ElseIfAnalyzer re-parsed per `if` (quadratic), plus several analyzers that scaled
+worse than the file; now time grows with file size (8x size -> 8.4x time). Jellyfin EncodingHelper.cs 170 -> 99 ms,
+Newtonsoft XmlNodeConverter 58 -> 24 ms. Whole project (Newtonsoft.Json, 72 analyzers, 2026-10-06): ~485 ms; StyleCop
+1.2 is 3.1-3.4x slower (docs/stylebro-vs-stylecop.md, #48).
+
+**Lessons**:
+- A keep-both merge resolution can cut through a raw string when the shared lines sit outside the conflict: build
+  before trusting mutation results (a compile error "kills" every mutation). After a merge, also check
+  that every mutation entry's Find text still exists (a refactor leaves stale entries).
+- Check that a "two runs" note is really fix order: the `field` case was a guard keeping the rename back.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
