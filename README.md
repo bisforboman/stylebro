@@ -60,6 +60,8 @@ project or coming from StyleCop.
 | [BRO1135](docs/rules/BRO1135.md) | Integer literal suffixes should be upper case | (none; Sonar S818) | Yes |
 | [BRO1133](docs/rules/BRO1133.md) | Check for null in one form | (none; Roslynator RCS1248) | Yes |
 | [BRO1143](docs/rules/BRO1143.md) | No 'else' after a branch that ends in a jump (off by default) | (none; Meziantou MA0071, Roslynator RCS1211) | Yes |
+| [BRO1147](docs/rules/BRO1147.md) | No redundant null-forgiving `!` (off by default) | (none; Sonar S8969, IDE0370) | Yes |
+| [BRO1148](docs/rules/BRO1148.md) | `x is not null` instead of `x.HasValue` (off by default) | (none; Meziantou MA0171) | Yes |
 | [BRO1136](docs/rules/BRO1136.md) | A lambda's single parameter should not be in parentheses | (none; StyleCop issue #762) | Yes |
 | [BRO1137](docs/rules/BRO1137.md) | Remove a redundant 'return;' or 'yield break;' | (none; StyleCop issue #760, Roslynator RCS1134) | Yes |
 | [BRO1138](docs/rules/BRO1138.md) | A string literal should be a plain string when nothing needs more | (none; Roslynator RCS1214/RCS1192/RCS1262) | Yes |

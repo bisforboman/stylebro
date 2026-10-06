@@ -13,6 +13,8 @@
     <!-- Documentation rules read '///' comments as XML, which the compiler only does when it generates documentation. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- BRO1147 (redundant '!') needs nullable analysis on for the project: it skips a '#nullable enable' file in a project without it. -->
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

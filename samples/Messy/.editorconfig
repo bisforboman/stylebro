@@ -63,6 +63,13 @@ dotnet_naming_style.underscore_camel.capitalization = camel_case
 [**/Reference.cs]
 stylebro_comment_blank_line_exempt_prefixes = ReSharper
 
+# BRO1147 (redundant null-forgiving '!') and BRO1148 ('x is not null' instead of 'x.HasValue') are off by default; on for
+# one file each.
+[**/Greetings.cs]
+dotnet_diagnostic.BRO1147.severity = warning
+
+[**/Bookings.cs]
+dotnet_diagnostic.BRO1148.severity = warning
 # BRO1145 (empty class body -> ;) is off by default; on for one file.
 [**/Badges.cs]
 dotnet_diagnostic.BRO1145.severity = warning

@@ -199,6 +199,14 @@ dotnet_diagnostic.BRO1527.severity = warning
 # taste; set to warning to opt in.
 dotnet_diagnostic.BRO1143.severity = none
 
+# BRO1147: no null-forgiving '!' on a value the compiler already knows isn't null (Sonar S8969, the SDK's IDE0370). Off:
+# the owner's decision; set to warning to opt in. Skips projects with several target frameworks.
+dotnet_diagnostic.BRO1147.severity = none
+
+# BRO1148: 'x is not null' instead of 'x.HasValue' on a nullable value type, in BRO1133's form (Meziantou MA0171). Off:
+# many teams prefer HasValue; set to warning to opt in.
+dotnet_diagnostic.BRO1148.severity = none
+
 # BRO1131: 'this.' instead of 'base.' when the type has no member of its own (SA1100)
 dotnet_diagnostic.BRO1131.severity = warning
 
