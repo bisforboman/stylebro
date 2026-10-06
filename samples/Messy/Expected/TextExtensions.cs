@@ -23,8 +23,8 @@ public static class TextExtensions
     public static int Twice(int x) => x * 2;
 }
 
-// A primary constructor parameter named 'field' (a private field named 'field' gets renamed in this sample's '_camelCase'
-// style, and the renamers don't handle C# 14's 'field' keyword yet: see BRO1144.md).
+// A primary constructor parameter named 'field' (a private field named 'field' would be kept by BRO1303's string guard
+// here: the StyleBro projects this sample references contain the string "field").
 public class BackingStore(int field)
 {
     public int Reading
