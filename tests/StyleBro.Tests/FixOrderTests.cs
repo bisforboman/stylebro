@@ -708,6 +708,36 @@ public class FixOrderTests
         "BRO1138");
 
     [Fact]
+    public Task ContextualKeywords_AFieldNamedFieldThatIsRenamed() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            private const int field = 2;
+            private int other;
+
+            public int P
+            {
+                get => field + this.other;
+            }
+        }
+
+        public class D
+        {
+            private int field;
+
+            public int P
+            {
+                get => field;
+                set => field = value;
+            }
+        }
+        """,
+        "stylebro_private_field_naming = _camelCase\ndotnet_naming_rule.c.symbols = c\ndotnet_naming_rule.c.style = p\ndotnet_naming_rule.c.severity = warning\ndotnet_naming_symbols.c.applicable_kinds = field\ndotnet_naming_symbols.c.required_modifiers = const\ndotnet_naming_style.p.capitalization = pascal_case\n",
+        "BRO1144",
+        "BRO1303",
+        "BRO1306");
+
+    [Fact]
     public Task AutoAccessors_NextToTheBlankLineRules() => AssertConvergesInEveryOrderAsync(
         """
         public class C

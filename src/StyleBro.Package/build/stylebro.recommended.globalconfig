@@ -9,7 +9,7 @@ global_level = -1
 
 # BRO1001: members ordered by kind, accessibility, const/static/readonly (SA1201-SA1204, SA1214)
 dotnet_diagnostic.BRO1001.severity = warning
-stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, method, struct, class
+stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class
 stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private
 stylebro_member_constants_first = true
 stylebro_member_static_first = true
@@ -230,6 +230,8 @@ dotnet_diagnostic.BRO1140.severity = warning
 dotnet_diagnostic.BRO1141.severity = warning
 # BRO1142: one local per declaration
 dotnet_diagnostic.BRO1142.severity = warning
+# BRO1144: '@field', '@extension', '@partial' where C# 14 reads the identifier as a keyword
+dotnet_diagnostic.BRO1144.severity = warning
 # BRO1408: no 'enum E : int' or 'class C : object'
 dotnet_diagnostic.BRO1408.severity = warning
 # BRO1146: 'record R' instead of 'record class R' (Meziantou MA0174; stylebro-migrate turns it off)
