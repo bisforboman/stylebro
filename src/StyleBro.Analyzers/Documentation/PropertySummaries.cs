@@ -13,6 +13,12 @@ namespace StyleBro.Analyzers.Documentation;
 /// </summary>
 internal static class PropertySummaries
 {
+    /// <summary>
+    /// Words that can't follow other words of a sentence: a condition ('If true, the text is checked', 'True if ...').
+    /// BRO1604 doesn't put 'Gets' in front of them, nor BRO1606 its sentence.
+    /// </summary>
+    public static readonly string[] Conditions = ["If", "When", "Whenever", "Unless", "While", "Whether", "True", "False"];
+
     /// <summary>Prefixes a summary may already start with, longest first, so the fix can replace a wrong one.</summary>
     private static readonly string[] KnownPrefixes =
     [
@@ -35,12 +41,6 @@ internal static class PropertySummaries
         "Sets",
         "Whether",
     ];
-
-    /// <summary>
-    /// Words that can't follow other words of a sentence: a condition ('If true, the text is checked', 'True if ...').
-    /// BRO1604 doesn't put 'Gets' in front of them, nor BRO1606 its sentence.
-    /// </summary>
-    public static readonly string[] Conditions = ["If", "When", "Whenever", "Unless", "While", "Whether", "True", "False"];
 
     /// <summary>A summary that starts with a verb of its own: 'Gets' in front of it isn't a sentence ('Gets returns ...').</summary>
     private static readonly string[] Verbs =
@@ -135,6 +135,13 @@ internal static class PropertySummaries
             prefix + " " + lowered);
     }
 
+    /// <summary>Whether <paramref name="text"/> starts with one of <paramref name="words"/> as a whole word, ignoring case.</summary>
+    public static bool StartsWithAnyWord(string text, string[] words)
+    {
+        return words.Any(w => text.StartsWith(w, StringComparison.OrdinalIgnoreCase)
+            && (text.Length == w.Length || !char.IsLetterOrDigit(text[w.Length])));
+    }
+
     /// <summary>Where the summary's text starts, or null when there's no summary or it starts with an element.</summary>
     private static int? GetSummaryTextStart(SyntaxNode member)
     {
@@ -166,13 +173,6 @@ internal static class PropertySummaries
         }
 
         return null;
-    }
-
-    /// <summary>Whether <paramref name="text"/> starts with one of <paramref name="words"/> as a whole word, ignoring case.</summary>
-    public static bool StartsWithAnyWord(string text, string[] words)
-    {
-        return words.Any(w => text.StartsWith(w, StringComparison.OrdinalIgnoreCase)
-            && (text.Length == w.Length || !char.IsLetterOrDigit(text[w.Length])));
     }
 
     private static bool StartsWithWord(string text, string words)

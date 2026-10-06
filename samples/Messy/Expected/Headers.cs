@@ -1,8 +1,7 @@
 namespace Messy.Headers
 {
-    public class Lamp
+    public class Lamp // a simple lamp
     {
-        // a simple lamp
         private bool _on;
 
         public void Toggle()
