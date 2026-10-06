@@ -100,10 +100,14 @@ internal static class Program
         }
 
         Console.WriteLine(write
-            ? "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'dotnet format'."
+            ? NextStep(root)
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
         return 0;
     }
+
+    /// <summary>What to do after --write: swap the packages and format (with 'stylebro-migrate format' when multi-targeted).</summary>
+    internal static string NextStep(string root) =>
+        $"Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run '{InitCommand.FormatCommandName(root)}'.";
 
     /// <summary>docs/stylecop-mapping.md's proposal for every StyleCop rule, without Markdown.</summary>
     /// <summary>

@@ -660,6 +660,41 @@ public class FieldNamingTests
         CamelConstants);
 
     [Fact]
+    public Task StaticStyleKey_PascalCase_WinsOverTheNamingRules() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private const int Limit = 2;
+            private static readonly string Cache = "";
+
+            public int Sum() => Limit + Cache.Length;
+        }
+        """,
+        CamelConstants + "\nstylebro_private_static_field_naming = PascalCase");
+
+    [Fact]
+    public Task StaticStyleKey_CamelCase_RenamesWithoutANamingRule() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private const int {|BRO1306:Limit|} = 2;
+            private static readonly string {|BRO1306:Cache|} = "";
+
+            public int Sum() => Limit + Cache.Length;
+        }
+        """,
+        """
+        public class C
+        {
+            private const int limit = 2;
+            private static readonly string cache = "";
+
+            public int Sum() => limit + cache.Length;
+        }
+        """,
+        "stylebro_private_static_field_naming = camelCase");
+
+    [Fact]
     public Task NamingRuleForStatics_WithAnotherStyle_KeepsPascalCase() => VerifyFixAsync(
         """
         public class C

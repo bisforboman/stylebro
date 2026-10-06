@@ -65,6 +65,12 @@ internal static class FieldNames
 {
     public const string StyleKey = "stylebro_private_field_naming";
 
+    /// <summary>
+    /// The style of private constants and private static readonly fields: PascalCase (StyleCop's), camelCase or _camelCase.
+    /// When unset, an SDK naming rule that singles them out decides (else PascalCase).
+    /// </summary>
+    public const string StaticStyleKey = "stylebro_private_static_field_naming";
+
     /// <summary>A whole word: a run of \w characters not directly after another one or an '@'.</summary>
     private static readonly Regex Word = new(@"(?<![\w@])\w+");
 
@@ -94,10 +100,28 @@ internal static class FieldNames
     /// _camelCase when the SDK naming rule that singles them out (one requiring 'const', or 'static'/'readonly') asks for
     /// it (StyleCop issues #2641, #3793); otherwise null, PascalCase like StyleCop.
     /// </summary>
-    public static FieldStyles GetStyles(AnalyzerConfigOptions options) => new(
-        GetStyle(options),
-        GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
-        GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")));
+    /// <remarks>
+    /// <see cref="StaticStyleKey"/> wins over the naming rules for both: 'stylebro-migrate --write' sets it to PascalCase,
+    /// so a naming rule StyleCop never enforced (IDE1006 off) doesn't rename a StyleCop-clean repository's fields.
+    /// </remarks>
+    public static FieldStyles GetStyles(AnalyzerConfigOptions options)
+    {
+        if (options.TryGetValue(StaticStyleKey, out var value))
+        {
+            FieldStyle? style = value.Split(':')[0].Trim() switch
+            {
+                "camelCase" => FieldStyle.CamelCase,
+                "_camelCase" => FieldStyle.UnderscoreCamelCase,
+                _ => null,
+            };
+            return new(GetStyle(options), style, style);
+        }
+
+        return new(
+            GetStyle(options),
+            GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
+            GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")));
+    }
 
     /// <summary>
     /// Private fields that StyleCop's SA1306 checks (BRO1303): not constants and not static readonly (those are

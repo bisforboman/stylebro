@@ -165,6 +165,9 @@ dotnet tool install --global StyleBro.Migrate --prerelease
 stylebro-migrate init --write      # adds a block to .editorconfig
 ```
 
+`init` and `format` are newer than the latest release (0.1.0-alpha.8); until the next one, build the packages from a
+clone: [which version](docs/getting-started.md#which-version).
+
 ```
 dotnet format                      # whitespace + style + analyzers, including StyleBro
 dotnet format analyzers --diagnostics BRO1001
