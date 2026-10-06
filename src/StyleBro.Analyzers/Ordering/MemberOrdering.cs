@@ -4,6 +4,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Ordering;
 
@@ -120,7 +121,7 @@ internal static class MemberOrdering
     /// Returns the type with its members sorted. Blank-line layout stays with the position ("slot"),
     /// while comments, doc comments and attributes travel with the member.
     /// </summary>
-    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
+    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null, AnalyzerConfigOptions? autoAccessorLines = null)
     {
         var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
         if (keys is null)
@@ -151,7 +152,7 @@ internal static class MemberOrdering
             // the blank line in exactly those cases; violations that already existed are left to those rules.
             if (slot > 0 && !layout.Any(SyntaxKind.EndOfLineTrivia))
             {
-                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source]) && !NeedsSeparation(members[slot - 1], members[slot]);
+                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines) && !NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines);
                 var createsComment = StartsWithLineComment(split[source].Content) && !StartsWithLineComment(split[slot].Content);
 
                 // A doc comment arriving where a member without one sat (field below field: no blank line needed before)
@@ -536,10 +537,10 @@ internal static class MemberOrdering
         return (SyntaxFactory.TriviaList(trivia.Take(split)), SyntaxFactory.TriviaList(trivia.Skip(split)));
     }
 
-    /// <summary>Whether two neighbouring members need a blank line between them (BRO1505's rule).</summary>
-    private static bool NeedsSeparation(MemberDeclarationSyntax previous, MemberDeclarationSyntax current)
+    /// <summary>Whether two neighbouring members need a blank line between them (BRO1505's rule; options when BRO1527 is on).</summary>
+    private static bool NeedsSeparation(MemberDeclarationSyntax previous, MemberDeclarationSyntax current, AnalyzerConfigOptions? autoAccessorLines)
     {
-        return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText());
+        return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines);
     }
 
     private static bool StartsWithLineComment(SyntaxTriviaList content)

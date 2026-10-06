@@ -19,8 +19,8 @@ internal static class AutoAccessorLines
     /// The edits that put the list on one line, or null when it already is or is skipped: an accessor with a body,
     /// attributes or a line break inside it, a comment or directive anywhere from the declaration's name to the '}', an
     /// initializer that doesn't start on the '}' line, or <c>csharp_preserve_single_line_blocks = false</c> (the SDK's
-    /// formatter would expand the list again). <paramref name="isOn"/> adds the blank lines that BRO1505/BRO1519 want
-    /// next to the multi-line declaration, so the result doesn't depend on which fix 'dotnet format' runs first.
+    /// formatter would expand the list again). <paramref name="isOn"/> adds the blank line that BRO1519 wants after
+    /// the multi-line declaration, so the result doesn't depend on which fix 'dotnet format' runs first.
     /// </summary>
     public static List<TextChange>? GetChanges(BasePropertyDeclarationSyntax declaration, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
@@ -59,31 +59,30 @@ internal static class AutoAccessorLines
             return null;
         }
 
-        AddBlankLines(declaration, close, text, isOn, changes);
+        AddBlankLines(close, text, isOn, changes);
         return changes;
     }
 
     /// <summary>
-    /// Next to a multi-line declaration BRO1505 wants a blank line (and BRO1519 after its '}' when BRO1505 is off); next
-    /// to a one-line property it may not. Added here too: identical edits from both fixes are merged.
+    /// Whether the fix leaves the property on one line as BRO1505 measures it (from below its attributes to its end):
+    /// BRO1505 and BRO1001's sort judge it like that already while BRO1527 is on.
     /// </summary>
-    private static void AddBlankLines(BasePropertyDeclarationSyntax declaration, SyntaxToken close, SourceText text, Func<string, bool> isOn, List<TextChange> changes)
+    public static bool BecomesOneLine(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions options)
     {
-        if (isOn(DiagnosticIds.ElementsSeparatedByBlankLine) && declaration.Parent is TypeDeclarationSyntax type)
-        {
-            var index = type.Members.IndexOf(declaration);
-            foreach (var (previous, current) in new[] { (index - 1, index), (index, index + 1) })
-            {
-                if (previous >= 0 && current < type.Members.Count
-                    && ElementSeparation.NeedsBlankLine(type.Members[previous], type.Members[current], text)
-                    && !ElementSeparation.HasBlankLineBetween(type.Members[previous], type.Members[current], text)
-                    && ElementSeparation.GetChange(type.Members[previous], type.Members[current], text) is { } blankLine)
-                {
-                    changes.Add(blankLine);
-                }
-            }
-        }
+        var start = property.AttributeLists.Count > 0 ? property.AttributeLists.Last().FullSpan.End : property.SpanStart;
+        return property.AccessorList is { } list
+            && Line(text, start) == Line(text, list.OpenBraceToken.GetPreviousToken().Span.End)
+            && Line(text, list.CloseBraceToken.SpanStart) == Line(text, property.Span.End)
+            && GetChanges(property, text, options, _ => false) is not null;
+    }
 
+    /// <summary>
+    /// After a multi-line declaration's '}' BRO1519 wants a blank line when BRO1505 is off; after a one-line one it doesn't.
+    /// Added here too: identical edits from both fixes are merged. BRO1505 needs nothing here: it judges this declaration as
+    /// one-line already.
+    /// </summary>
+    private static void AddBlankLines(SyntaxToken close, SourceText text, Func<string, bool> isOn, List<TextChange> changes)
+    {
         var next = close.GetNextToken(includeZeroWidth: true, includeSkipped: true);
         if (BlankLineRuns.JudgesGapAfter(close, next, text, isOn, gapIsReplaced: false))
         {

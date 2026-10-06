@@ -61,7 +61,8 @@ public sealed class ElementSeparationCodeFixProvider : CodeFixProvider
         var trailingComma = SingleLineBlocks.WantsTrailingComma(document.Project.CompilationOptions, root.SyntaxTree, cancellationToken);
         var reported = new HashSet<int>(diagnostics.Select(d => d.Location.SourceSpan.Start));
         var changes = new List<TextChange>();
-        foreach (var (previous, current) in ElementSeparation.GetViolations(root, text))
+        var autoAccessorLines = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken) ? options : null;
+        foreach (var (previous, current) in ElementSeparation.GetViolations(root, text, autoAccessorLines))
         {
             if (!reported.Contains(current.FullSpan.Start))
             {

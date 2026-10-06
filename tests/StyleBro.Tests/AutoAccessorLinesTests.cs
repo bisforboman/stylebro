@@ -164,8 +164,9 @@ public class AutoAccessorLinesTests
         """,
         "csharp_preserve_single_line_blocks = false\n");
 
+    // BRO1505 judges B as one-line already while this rule is on, so it wants no blank lines around it either way.
     [Fact]
-    public Task BlankLinesNextToTheProperty_AddedWhenBro1505WantsThem() => Verify.VerifyFixAsync(
+    public Task NoBlankLinesNextToTheProperty_WhenBro1505IsOn() => Verify.VerifyFixAsync(
         """
         public class C
         {
@@ -182,9 +183,7 @@ public class AutoAccessorLinesTests
         public class C
         {
             public int A { get; set; }
-
             public int B { get; set; }
-
             public int D { get; set; }
         }
         """,

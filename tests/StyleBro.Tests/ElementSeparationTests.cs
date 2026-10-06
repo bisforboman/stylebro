@@ -228,6 +228,53 @@ public class ElementSeparationTests
         }
         """);
 
+    // An auto-property that BRO1527 puts on one line counts as one line while BRO1527 is on (so the result doesn't depend
+    // on which fix runs first), and as several lines while it's off.
+    [Fact]
+    public Task MultiLineAutoProperty_CountsAsOneLineWhileBro1527IsOn() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            public int A { get; set; }
+            public int B
+            {
+                get;
+                set;
+            }
+            public int D { get; set; }
+        }
+        """);
+
+    [Fact]
+    public Task MultiLineAutoProperty_CountsAsSeveralLinesWhileBro1527IsOff() => VerifyFixAsync(
+        """
+        class C
+        {
+            public int A { get; set; }
+        {|BRO1505:|}    public int B
+            {
+                get;
+                set;
+            }
+        {|BRO1505:|}    public int D { get; set; }
+        }
+        """,
+        """
+        class C
+        {
+            public int A { get; set; }
+
+            public int B
+            {
+                get;
+                set;
+            }
+
+            public int D { get; set; }
+        }
+        """,
+        "dotnet_diagnostic.BRO1527.severity = none\n");
+
     [Fact]
     public Task TwoMembersOnOneLine_AreSplit() => VerifyFixAsync(
         """
