@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace StyleBro.Migrate;
 
@@ -71,10 +72,29 @@ internal static class FormatCommand
         }
 
         Console.WriteLine($"Multi-targeted: one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
-        var restore = Dotnet(root, null, new[] { "restore", workspacePath });
+
+        // The restore's own output (its "Build succeeded" block) only matters when it fails.
+        var restoreOutput = new List<string>();
+        var restore = Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
         if (restore != 0)
         {
+            restoreOutput.ForEach(Console.WriteLine);
             return restore;
+        }
+
+        // Every run would write its own format-report.json over the last one: each gets a folder, merged at the end.
+        var reportIndex = passThrough.IndexOf("--report");
+        var report = reportIndex >= 0 && reportIndex + 1 < passThrough.Count ? passThrough[reportIndex + 1] : null;
+        var reportFolders = new List<string>();
+
+        // The runs print the same diagnostics and workspace warnings once per framework: each line is shown once.
+        var shown = new HashSet<string>(StringComparer.Ordinal);
+        void Show(string line)
+        {
+            if (IsNewLine(shown, line))
+            {
+                Console.WriteLine(line);
+            }
         }
 
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
@@ -94,14 +114,22 @@ internal static class FormatCommand
                         File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
                     }
 
-                    var arguments = new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(passThrough);
+                    var options = passThrough.ToList();
+                    if (report is not null)
+                    {
+                        var folder = Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}");
+                        reportFolders.Add(folder);
+                        options[reportIndex + 1] = folder;
+                    }
+
+                    var arguments = new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(options);
                     if (!passThrough.Contains("--include"))
                     {
                         arguments = arguments.Append("--include").Concat(Include(root, solutionDirectory, selected));
                     }
 
                     var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
-                    var code = Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), arguments);
+                    var code = Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), arguments, Show);
                     if (exit == 0)
                     {
                         exit = code;
@@ -119,10 +147,61 @@ internal static class FormatCommand
         finally
         {
             File.Delete(select);
+            if (report is not null)
+            {
+                WriteMergedReport(Path.GetFullPath(report), reportFolders);
+            }
         }
 
         return exit;
     }
+
+    /// <summary>
+    /// format-report.json files merged: one entry per file (the first run's), with every distinct change of all runs
+    /// (a change both frameworks see is listed once), in the order they came.
+    /// </summary>
+    public static string MergeReports(IEnumerable<string> reports)
+    {
+        var merged = new JsonArray();
+        var byPath = new Dictionary<string, (JsonArray Changes, HashSet<string> Seen)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var report in reports)
+        {
+            foreach (var document in JsonNode.Parse(report)?.AsArray() ?? new JsonArray())
+            {
+                if (document is not JsonObject entry)
+                {
+                    continue;
+                }
+
+                var path = entry["FilePath"]?.GetValue<string>() ?? entry["FileName"]?.GetValue<string>() ?? string.Empty;
+                var changes = entry["FileChanges"]?.AsArray() ?? new JsonArray();
+                if (!byPath.TryGetValue(path, out var target))
+                {
+                    var copy = (JsonObject)entry.DeepClone();
+                    copy["FileChanges"] = target.Changes = new JsonArray();
+                    target.Seen = new HashSet<string>(StringComparer.Ordinal);
+                    byPath[path] = target;
+                    merged.Add(copy);
+                }
+
+                foreach (var change in changes)
+                {
+                    if (change is not null && target.Seen.Add(change.ToJsonString()))
+                    {
+                        target.Changes.Add(change.DeepClone());
+                    }
+                }
+            }
+        }
+
+        return merged.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    /// <summary>
+    /// Whether an output line is shown: not when it was already (a diagnostic every framework's run reports, the
+    /// workspace warning); blank lines always are.
+    /// </summary>
+    public static bool IsNewLine(ISet<string> shown, string line) => line.Trim().Length == 0 || shown.Add(line);
 
     /// <summary>
     /// The runs: every target framework with the projects that target it, in a stable order. One entry (or none) means a
@@ -207,6 +286,32 @@ internal static class FormatCommand
         return (frameworks, references);
     }
 
+    /// <summary>
+    /// Merges the runs' format-report.json files into the one 'dotnet format --report' would write: a path with an
+    /// extension is the file, otherwise a folder that gets format-report.json. The temporary folders are deleted.
+    /// </summary>
+    private static void WriteMergedReport(string report, IEnumerable<string> folders)
+    {
+        var reports = new List<string>();
+        foreach (var folder in folders)
+        {
+            var file = Path.Combine(folder, "format-report.json");
+            if (File.Exists(file))
+            {
+                reports.Add(File.ReadAllText(file));
+            }
+
+            if (Directory.Exists(folder))
+            {
+                Directory.Delete(folder, recursive: true);
+            }
+        }
+
+        var path = Path.HasExtension(report) ? report : Path.Combine(report, "format-report.json");
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, MergeReports(reports));
+    }
+
     /// <summary>Each C# project of the solution (keyed by its path as the solution lists it) or the project itself.</summary>
     private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References)> ReadProjects(string workspacePath)
     {
@@ -242,9 +347,10 @@ internal static class FormatCommand
         return output.Result;
     }
 
-    private static int Dotnet(string directory, (string Name, string SelectTargets, string Keep)? framework, IEnumerable<string> arguments)
+    /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
+    private static int Dotnet(string directory, (string Name, string SelectTargets, string Keep)? framework, IEnumerable<string> arguments, Action<string>? output = null)
     {
-        var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory };
+        var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = output is not null, RedirectStandardError = output is not null };
         foreach (var argument in arguments)
         {
             start.ArgumentList.Add(argument);
@@ -258,7 +364,32 @@ internal static class FormatCommand
             start.Environment["BeforeMicrosoftNETSdkTargets"] = f.SelectTargets;
         }
 
-        using var process = Process.Start(start)!;
+        using var process = new Process { StartInfo = start };
+        if (output is not null)
+        {
+            var gate = new object();
+            void Forward(object sender, DataReceivedEventArgs e)
+            {
+                if (e.Data is not null)
+                {
+                    lock (gate)
+                    {
+                        output(e.Data);
+                    }
+                }
+            }
+
+            process.OutputDataReceived += Forward;
+            process.ErrorDataReceived += Forward;
+        }
+
+        process.Start();
+        if (output is not null)
+        {
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+        }
+
         process.WaitForExit();
         return process.ExitCode;
     }

@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Layout;
@@ -18,16 +19,17 @@ internal static class ElementSeparation
     /// usings, extern aliases, assembly attributes and members of a file or namespace, the members of a type, and the
     /// accessors of a property, indexer or event. Like StyleCop, these pairs don't need one: two fields (unless the first
     /// spans several lines); two single-line properties (like StyleCop's unreleased master); two usings, two extern
-    /// aliases or two attribute lists; and two accessors that are both on a single line.
+    /// aliases or two attribute lists; and two accessors that are both on a single line. <paramref name="autoAccessorLines"/>:
+    /// see <see cref="NeedsBlankLine"/>.
     /// </summary>
-    public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text)
+    public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text, AnalyzerConfigOptions? autoAccessorLines)
     {
         foreach (var node in root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax or TypeDeclarationSyntax or MemberDeclarationSyntax or AccessorListSyntax))
         {
             var elements = GetElements(node);
             for (var i = 1; i < elements.Count; i++)
             {
-                if (NeedsBlankLine(elements[i - 1], elements[i], text) && !HasBlankLineBetween(elements[i - 1], elements[i], text))
+                if (NeedsBlankLine(elements[i - 1], elements[i], text, autoAccessorLines) && !HasBlankLineBetween(elements[i - 1], elements[i], text))
                 {
                     yield return (elements[i - 1], elements[i]);
                 }
@@ -67,8 +69,12 @@ internal static class ElementSeparation
         return new TextChange(between, lineBreak + lineBreak + indentation);
     }
 
-    /// <summary>Whether two neighbouring elements need a blank line between them (BRO1505; also used by BRO1509's fix).</summary>
-    public static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text)
+    /// <summary>
+    /// Whether two neighbouring elements need a blank line between them (BRO1505; also used by BRO1509's fix and BRO1001's
+    /// sort). <paramref name="autoAccessorLines"/> is the file's options when BRO1527 is on (else null): a property its fix
+    /// puts on one line counts as one-line already, so the result doesn't depend on which fix 'dotnet format' runs first.
+    /// </summary>
+    public static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text, AnalyzerConfigOptions? autoAccessorLines = null)
     {
         if (previous.ContainsDiagnostics || current.ContainsDiagnostics)
         {
@@ -81,7 +87,7 @@ internal static class ElementSeparation
             (FieldDeclarationSyntax field, FieldDeclarationSyntax) => SpansSeveralLines(field, text),
 
             // Like StyleCop's master (unreleased, 2aeb4e3d): two properties need one only when either spans several lines.
-            (PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => SpansSeveralLines(property, text) || SpansSeveralLines(next, text),
+            (PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),
             (UsingDirectiveSyntax, UsingDirectiveSyntax) => false,
             (ExternAliasDirectiveSyntax, ExternAliasDirectiveSyntax) => false,
             (AttributeListSyntax, AttributeListSyntax) => false,
@@ -120,6 +126,11 @@ internal static class ElementSeparation
     {
         var start = member.AttributeLists.Count > 0 ? member.AttributeLists.Last().FullSpan.End : member.SpanStart;
         return text.Lines.GetLineFromPosition(start).LineNumber != text.Lines.GetLineFromPosition(member.Span.End).LineNumber;
+    }
+
+    private static bool IsMultiLineProperty(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions? autoAccessorLines)
+    {
+        return SpansSeveralLines(property, text) && !(autoAccessorLines is not null && AutoAccessorLines.BecomesOneLine(property, text, autoAccessorLines));
     }
 
     private static List<SyntaxNode> GetElements(SyntaxNode node)

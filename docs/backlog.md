@@ -130,7 +130,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1109](rules/BRO1109.md) | Opening parenthesis or bracket should be on the declaration line | SA1110 | Released |
 | [BRO1110](rules/BRO1110.md) | Closing parenthesis or bracket should be on the line of the last item | SA1111 | Released |
 | [BRO1111](rules/BRO1111.md) | Generic type constraints should be on their own line | SA1127 | Released |
-| [BRO1112](rules/BRO1112.md) | Do not use regions (off in the preset) | SA1124 | Released |
+| [BRO1112](rules/BRO1112.md) | Do not use regions | SA1124 | Released |
 | [BRO1113](rules/BRO1113.md) | Regions should not be placed inside code elements | SA1123 | Released |
 | [BRO1114](rules/BRO1114.md) | Do not combine fields | SA1132 | Released |
 | [BRO1115](rules/BRO1115.md) | Use shorthand for nullable types | SA1125 | Released |
@@ -161,12 +161,12 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1140](rules/BRO1140.md) | A record with an empty body should end with ';' | (none; Roslynator RCS1251) | Done |
 | [BRO1141](rules/BRO1141.md) | Object creation with an initializer: parentheses in one style | (none; Roslynator RCS1050) | Done |
 | [BRO1142](rules/BRO1142.md) | Do not combine local variables | (none; Roslynator RCS1081) | Done |
-| [BRO1143](rules/BRO1143.md) | No 'else' after a branch that ends in a jump (off by default) | (none; Meziantou MA0071, Roslynator RCS1211) | Done |
+| [BRO1143](rules/BRO1143.md) | No 'else' after a branch that ends in a jump | (none; Meziantou MA0071, Roslynator RCS1211) | Done |
 | [BRO1144](rules/BRO1144.md) | Escape identifiers that C# 14 reads as keywords | (none; Sonar S8367/S8368/S8380, no fix) | Done |
-| [BRO1145](rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' (off by default) | (none; Meziantou MA0206) | Done |
+| [BRO1145](rules/BRO1145.md) | A class, struct or interface with an empty body should end with ';' | (none; Meziantou MA0206) | Done |
 | [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Done |
-| [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` (off by default) | (none; Sonar S8969, IDE0370) | Done |
-| [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` (off by default) | (none; Meziantou MA0171) | Done |
+| [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | Done |
+| [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | Done |
 
 ### BRO13xx: Naming
 
@@ -181,11 +181,11 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1307](rules/BRO1307.md) | Field names should not begin with a prefix | SA1308 | Released |
 | [BRO1308](rules/BRO1308.md) | Field names should not contain an underscore | SA1310 | Released |
 | [BRO1309](rules/BRO1309.md) | Element names should begin with an upper-case letter | SA1300 | Released |
-| [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation (off by default) | SA1305 | Done |
+| [BRO1310](rules/BRO1310.md) | Field names should not use Hungarian notation | SA1305 | Done |
 | [BRO1311](rules/BRO1311.md) | Tuple element names should use correct casing | SA1316 | Done |
-| [BRO1312](rules/BRO1312.md) | Namespace names should begin with an upper-case letter (off by default) | SA1300 | Done |
-| [BRO1313](rules/BRO1313.md) | Parameter names should match the base member (off by default) | (none; SA1315 proposed, never implemented; SDK CA1725) | Done |
-| [BRO1314](rules/BRO1314.md) | Asynchronous method names should end with Async (off by default) | (none; Roslynator RCS1046, Meziantou MA0137) | Done |
+| [BRO1312](rules/BRO1312.md) | Namespace names should begin with an upper-case letter | SA1300 | Done |
+| [BRO1313](rules/BRO1313.md) | Parameter names should match the base member | (none; SA1315 proposed, never implemented; SDK CA1725) | Done |
+| [BRO1314](rules/BRO1314.md) | Asynchronous method names should end with Async | (none; Roslynator RCS1046, Meziantou MA0137) | Done |
 
 ### BRO14xx: Maintainability
 
@@ -199,7 +199,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1406](rules/BRO1406.md) | Arithmetic expressions should declare precedence | SA1407 | Done |
 | [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Done |
 | [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Done |
-| [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public (off by default) | (none; StyleCop issue #2981, never implemented) | Done |
+| [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | Done |
 
 ### BRO15xx: Layout
 

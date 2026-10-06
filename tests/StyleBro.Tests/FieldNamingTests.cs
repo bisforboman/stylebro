@@ -44,6 +44,9 @@ public class FieldNamingTests
     [InlineData("m_count", false, null)]
     [InlineData("s_count", true, null)]
     [InlineData("M_Count", false, null)]
+    [InlineData("_field", false, null)]
+    [InlineData("Field", false, null)]
+    [InlineData("Field", true, "_field")]
     public void NewName(string name, bool underscore, string? expected) =>
         Assert.Equal(expected, FieldNames.GetNewName(name, underscore ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase));
 
@@ -657,6 +660,41 @@ public class FieldNamingTests
         CamelConstants);
 
     [Fact]
+    public Task StaticStyleKey_PascalCase_WinsOverTheNamingRules() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private const int Limit = 2;
+            private static readonly string Cache = "";
+
+            public int Sum() => Limit + Cache.Length;
+        }
+        """,
+        CamelConstants + "\nstylebro_private_static_field_naming = PascalCase");
+
+    [Fact]
+    public Task StaticStyleKey_CamelCase_RenamesWithoutANamingRule() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private const int {|BRO1306:Limit|} = 2;
+            private static readonly string {|BRO1306:Cache|} = "";
+
+            public int Sum() => Limit + Cache.Length;
+        }
+        """,
+        """
+        public class C
+        {
+            private const int limit = 2;
+            private static readonly string cache = "";
+
+            public int Sum() => limit + cache.Length;
+        }
+        """,
+        "stylebro_private_static_field_naming = camelCase");
+
+    [Fact]
     public Task NamingRuleForStatics_WithAnotherStyle_KeepsPascalCase() => VerifyFixAsync(
         """
         public class C
@@ -758,6 +796,55 @@ public class FieldNamingTests
         dotnet_naming_style.camel.capitalization = camel_case
         dotnet_naming_style.pascal.capitalization = pascal_case
         """);
+
+    [Fact]
+    public Task NothingIsRenamedToField_ACSharp14KeywordInAccessors() => VerifyNoDiagnosticsAsync(
+        """
+        public class A
+        {
+            private int _field;
+
+            public int Value { get => _field; set => _field = value; }
+        }
+
+        public class B
+        {
+            private int Field;
+            private int m_field;
+            private int field_;
+            protected int _field;
+
+            public int Value => Field + m_field + field_ + _field;
+        }
+
+        public class C
+        {
+            protected readonly int _field;
+            private int m_Field;
+
+            public int Value => _field + m_Field;
+        }
+        """);
+
+    [Fact]
+    public Task UnderscoreStyle_StillGivesUnderscoreField() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private int {|BRO1303:Field|};
+
+            public int Value => Field;
+        }
+        """,
+        """
+        public class C
+        {
+            private int _field;
+
+            public int Value => _field;
+        }
+        """,
+        Underscore);
 
     [Fact]
     public Task FieldsOfATypeWithAGeneratedPart_KeepTheirNames() => VerifyNoDiagnosticsAsync(

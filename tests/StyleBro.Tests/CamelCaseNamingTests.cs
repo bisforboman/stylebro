@@ -20,6 +20,8 @@ public class CamelCaseNamingTests
     [InlineData("___", null)]
     [InlineData("_1", null)]
     [InlineData("Class", null)]
+    [InlineData("Field", null)]
+    [InlineData("_field", null)]
     public void NewName(string name, string? expected) => Assert.Equal(expected, CamelCaseNames.GetNewName(name));
 
     [Fact]
@@ -441,6 +443,49 @@ public class CamelCaseNamingTests
             public int Y { get; }
 
             public void Move(int y) { }
+        }
+        """);
+
+    [Fact]
+    public Task NothingIsRenamedToField_ACSharp14KeywordInAccessors() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            int P
+            {
+                get
+                {
+                    var Field = 2;
+                    return Field;
+                }
+            }
+
+            void M(int Field) => System.Console.WriteLine(Field);
+        }
+        """);
+
+    [Fact]
+    public Task NothingIsRenamedToValue_InsideAPropertyIndexerOrEvent() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            int x;
+
+            int P
+            {
+                get => x;
+                set
+                {
+                    var Value = 2;
+                    x = Value;
+                }
+            }
+
+            int this[int Value]
+            {
+                get => Value;
+                set => x = value;
+            }
         }
         """);
 }

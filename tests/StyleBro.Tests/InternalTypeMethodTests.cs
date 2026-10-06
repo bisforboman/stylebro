@@ -528,6 +528,36 @@ public class InternalTypeMethodTests
         On);
 
     [Fact]
+    public Task InheritedImplementations_InNamespacesAndNestedTypes_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
+        """
+        namespace App.Inner
+        {
+            internal interface IRunner
+            {
+                void Run();
+            }
+
+            internal class Base
+            {
+                public void Run()
+                {
+                }
+            }
+        }
+
+        namespace App.Other
+        {
+            internal class Outer
+            {
+                internal class Implementer : App.Inner.Base, App.Inner.IRunner
+                {
+                }
+            }
+        }
+        """,
+        On);
+
+    [Fact]
     public Task MethodsWithDirectives_AreSkipped() => Verify.VerifyNoDiagnosticsAsync(
         """
         internal class D

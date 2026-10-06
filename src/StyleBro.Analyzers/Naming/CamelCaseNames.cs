@@ -13,13 +13,24 @@ namespace StyleBro.Analyzers.Naming;
 internal static class CamelCaseNames
 {
     /// <summary>
+    /// A scope's identifiers, read once: every variable and parameter of a member asks about the same scope, and walking
+    /// a big method once per renamed name cost ~10 ms per edit in a 350 KB file.
+    /// </summary>
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<SyntaxNode, ScopeNames> Scopes = new();
+
+    /// <summary>
     /// The camelCase name for <paramref name="name"/>, or null when the name already begins with a lower-case letter
     /// or has no safe replacement. Leading underscores go; a leading run of capitals is lowered as a whole, except the
     /// capital that starts the next word: 'Value' -> 'value', '_value' -> 'value', 'URL' -> 'url',
     /// 'HTMLParser' -> 'htmlParser'. Null for names that are only underscores, would start with a digit, or would
-    /// become a keyword ('Class' -> 'class').
+    /// become a keyword ('Class' -> 'class') or 'field' (see <see cref="IsUsableName"/>).
     /// </summary>
-    public static string? GetNewName(string name)
+    public static string? GetNewName(string name) => ToCamelCase(name) is { } result && IsUsableName(result) ? result : null;
+
+    /// <summary>
+    /// Like <see cref="GetNewName"/>, but 'Field' -> 'field' too: for names that get a prefix ('_field') or more words.
+    /// </summary>
+    public static string? ToCamelCase(string name)
     {
         if (name.Length == 0 || char.IsLower(name[0]))
         {
@@ -54,39 +65,41 @@ internal static class CamelCaseNames
     }
 
     /// <summary>
+    /// Whether a rename may produce <paramref name="name"/>: a valid identifier that isn't a keyword, and not 'field'.
+    /// In C# 14 'field' is a keyword inside property accessors ('get => field;' is the backing field), so a field
+    /// renamed to it changes what the property reads (CS9258), and a local renamed to it doesn't compile (CS9273).
+    /// Roslyn 4.8 doesn't know that, so it is excluded everywhere, whatever the language version.
+    /// </summary>
+    public static bool IsUsableName(string name) =>
+        SyntaxFacts.IsValidIdentifier(name) && SyntaxFacts.GetKeywordKind(name) == SyntaxKind.None && name != "field";
+
+    /// <summary>
     /// Whether renaming the variable or parameter declared by <paramref name="declaration"/> can't change what any
     /// name binds to. Checked by syntax, conservatively, over the member that contains the declaration (for a primary
     /// constructor parameter, the whole type): no identifier there may already be <paramref name="newName"/> or get
     /// the same new name from another rename, the old name may not be an inferred tuple element or anonymous type
     /// member name (the rename would change it), and the member may not contain '#if' (code that isn't compiled
-    /// can't be renamed reliably).
+    /// can't be renamed reliably). Never 'value' inside a property, indexer or event: their set/init/add/remove
+    /// accessors declare an implicit 'value' parameter that no identifier shows (CS0136).
     /// </summary>
     public static bool CanRename(SyntaxNode declaration, string oldName, string newName, Func<string, string?>? getNewName = null)
     {
         var scope = GetScope(declaration);
+        if (newName == "value" && scope is BasePropertyDeclarationSyntax)
+        {
+            return false;
+        }
+
         if (scope.ContainsDirectives && scope.DescendantTrivia(descendIntoTrivia: true).Any(t => t.IsKind(SyntaxKind.IfDirectiveTrivia)))
         {
             return false;
         }
 
-        foreach (var token in scope.DescendantTokens(descendIntoTrivia: true))
-        {
-            // XML element names in doc comments ('<param>') are identifier tokens too, but never bind to anything.
-            if (!token.IsKind(SyntaxKind.IdentifierToken) || token.Parent is XmlNameSyntax)
-            {
-                continue;
-            }
-
-            var text = token.ValueText;
-            if (text == newName
-                || (text != oldName && (getNewName ?? GetNewName)(text) == newName)
-                || (text == oldName && IsInferredMemberName(token)))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        var names = Scopes.GetValue(scope, ScopeNames.Collect);
+        var map = getNewName ?? GetNewName;
+        return !names.Identifiers.Contains(newName)
+            && !names.Inferred.Contains(oldName)
+            && !names.Identifiers.Any(text => text != oldName && map(text) == newName);
     }
 
     /// <summary>
@@ -144,5 +157,32 @@ internal static class CamelCaseNames
         return token.Parent is IdentifierNameSyntax name
             && (name.Parent is AnonymousObjectMemberDeclaratorSyntax { NameEquals: null }
                 || name.Parent is ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax });
+    }
+
+    private sealed class ScopeNames
+    {
+        public System.Collections.Generic.HashSet<string> Identifiers { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets the names used as inferred tuple element or anonymous type member names.</summary>
+        public System.Collections.Generic.HashSet<string> Inferred { get; } = new(StringComparer.Ordinal);
+
+        public static ScopeNames Collect(SyntaxNode scope)
+        {
+            var names = new ScopeNames();
+            foreach (var token in scope.DescendantTokens(descendIntoTrivia: true))
+            {
+                // XML element names in doc comments ('<param>') are identifier tokens too, but never bind to anything.
+                if (token.IsKind(SyntaxKind.IdentifierToken) && token.Parent is not XmlNameSyntax)
+                {
+                    names.Identifiers.Add(token.ValueText);
+                    if (IsInferredMemberName(token))
+                    {
+                        names.Inferred.Add(token.ValueText);
+                    }
+                }
+            }
+
+            return names;
+        }
     }
 }

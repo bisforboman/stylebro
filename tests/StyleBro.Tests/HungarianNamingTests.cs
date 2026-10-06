@@ -217,6 +217,35 @@ public class HungarianNamingTests
         """,
         On + "\nstylebro_allowed_hungarian_prefixes = db, x");
 
+    [Fact]
+    public Task NothingIsRenamedToField_ACSharp14KeywordInAccessors() => Locals.VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public int P
+            {
+                get
+                {
+                    var iField = 2;
+                    return iField;
+                }
+            }
+        }
+        """,
+        On);
+
+    [Fact]
+    public Task FieldsAreNotRenamedToField_ACSharp14KeywordInAccessors() => Fields.VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private int iField;
+
+            public int P => iField;
+        }
+        """,
+        On);
+
     private sealed class TestOptions(params (string Key, string Value)[] values) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions
     {
         public override bool TryGetValue(string key, out string value)

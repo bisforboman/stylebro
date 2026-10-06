@@ -63,7 +63,13 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '&& Line(text, initializer.SpanStart) != Line(text, close.SpanStart)'; Replace = '&& false'; Tests = 'AutoAccessorLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (list.Accessors.Any(a => !Trivia.IsBlank(a, a.Span)))'; Replace = 'if (false)'; Tests = 'AutoAccessorLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (!gaps.All(gap => SingleLineBlocks.Gap(gap.Before, gap.After, " ", text, changes)))'; Replace = 'if (!gaps.All(gap => SingleLineBlocks.Gap(gap.Before, gap.After, " ", text, changes) || true))'; Tests = 'AutoAccessorLinesTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (isOn(DiagnosticIds.ElementsSeparatedByBlankLine) && '; Replace = 'if ('; Tests = 'AutoAccessorLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '&& Line(text, start) == Line(text, list.OpenBraceToken.GetPreviousToken().Span.End)'; Replace = ''; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '&& Line(text, list.CloseBraceToken.SpanStart) == Line(text, property.Span.End)'; Replace = ''; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'var start = property.AttributeLists.Count > 0 ? property.AttributeLists.Last().FullSpan.End : property.SpanStart;'; Replace = 'var start = property.SpanStart;'; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '!(autoAccessorLines is not null && '; Replace = '!(false && '; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparationAnalyzer.cs'; Find = 'var autoAccessorLines = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.AutoAccessorsOnOneLine, c.CancellationToken)'; Replace = 'var autoAccessorLines = true'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Layout/ElementSeparationCodeFixProvider.cs'; Find = 'DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken) ? options : null;'; Replace = 'DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken) ? options : options;'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'Severities.IsOn(document.Project.CompilationOptions, tree, DiagnosticIds.AutoAccessorsOnOneLine, cancellationToken)'; Replace = 'false'; Tests = 'FixOrderTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (BlankLineRuns.JudgesGapAfter(close, next, text, isOn, gapIsReplaced: false))'; Replace = 'if (false)'; Tests = 'AutoAccessorLinesTests' }
         # BRO1141 (object creation parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/ObjectCreationParentheses.cs'; Find = 'if (creation.Initializer is null || '; Replace = 'if ('; Tests = 'ObjectCreationParenthesesTests' }
@@ -239,10 +245,10 @@
         # BRO1505: a field below a field that spans several lines; BRO1001's sort and BRO1114's split add that blank line
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '=> SpansSeveralLines(field, text),'; Replace = '=> false,'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'member.AttributeLists.Count > 0 ? member.AttributeLists.Last().FullSpan.End : member.SpanStart'; Replace = 'member.SpanStart'; Tests = 'ElementSeparationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText());'; Replace = 'return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);'; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines);'; Replace = 'return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);'; Tests = 'FixOrderTests' }
         # Following StyleCop master (owner's decision 2026-10-04): single-line properties together, no inheritdoc on explicit implementations
-        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => SpansSeveralLines(property, text) || SpansSeveralLines(next, text),'; Replace = ''; Tests = 'ElementSeparationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'SpansSeveralLines(property, text) || SpansSeveralLines(next, text),'; Replace = 'SpansSeveralLines(property, text),'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),'; Replace = ''; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),'; Replace = 'IsMultiLineProperty(property, text, autoAccessorLines),'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '!IsExplicitImplementation(s) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'if (blankLineBefore && indentation.Trim().Length == 0'; Replace = 'if (false && indentation.Trim().Length == 0'; Tests = 'DocumentationTests' }
 
@@ -286,7 +292,8 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/HungarianNames.cs'; Find = '&& !char.IsUpper(name[0])'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& !HungarianNames.IsInNativeMethods(context.Node)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = ', name => HungarianNames.GetVariableName(name, hungarian))'; Replace = ')'; Tests = 'HungarianNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'declaration.ContainsDirectives ? declaration.DescendantTrivia()'; Replace = 'false ? declaration.DescendantTrivia()'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'declaration.ContainsDirectives ? declaration.GetFirstDirective()'; Replace = 'false ? declaration.GetFirstDirective()'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'facts.Texts.Add(list[i].ToString());'; Replace = ''; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| HungarianNames.IsInNativeMethods(field)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'if (GetNewName(f, key.Item1, hungarian) is { } name)'; Replace = 'if (GetNewName(f, key.Item1) is { } name)'; Tests = 'HungarianNamingTests' }
 
@@ -345,7 +352,13 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| member is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null }
             || (!member.IsOverride'; Replace = '|| (!member.IsOverride'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if (result is not null && result != name)'; Replace = 'if (false)'; Tests = 'ParameterMatchesBaseTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| SyntaxFacts.GetKeywordKind(newName) != SyntaxKind.None'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.IsUsableName(newName)'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
+        # Names a rename never produces: 'field' (C# 14 keyword in accessors), 'value' inside a property/indexer/event
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'CamelCaseNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'HungarianNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = ' && name != "field";'; Replace = ';'; Tests = 'ParameterMatchesBaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'if (newName == "value" && scope is BasePropertyDeclarationSyntax)'; Replace = 'if (false)'; Tests = 'CamelCaseNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !CamelCaseNames.CanRename(node, oldName, newName, getNewName)'; Replace = ''; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| CamelCaseNames.IsNameObservable(node.Parent!.Parent!, oldName, context.SemanticModel, context.CancellationToken))'; Replace = ')'; Tests = 'ParameterMatchesBaseTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'argument.Parent?.Parent is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }'; Replace = 'false'; Tests = 'ParameterMatchesBaseTests' }
@@ -428,8 +441,10 @@
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| IsVisibleOutside(type)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if (current.GetAttributes().Length > 0)'; Replace = 'if (false)'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'if (!current.Locations.Any(l => l.IsInSource))'; Replace = 'if (false)'; Tests = 'InternalTypeMethodTests' }
-        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| GetImplementations(model.Compilation, cancellationToken).Contains(symbol.OriginalDefinition))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
-        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                        pending.Push(type);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '|| ImplementsInterfaceMember(symbol, model.Compilation, cancellationToken))'; Replace = ')'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '? derived.Prepend(type)'; Replace = '? new[] { type }'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                        pending.Push(child);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                    pending.Push(type);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '|| strings.Contains(method.Identifier.ValueText)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'else if (withNameof && token'; Replace = 'else if (false && token'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'if (!Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken))'; Replace = 'if (true)'; Tests = 'InternalTypeMethodTests' }
@@ -471,5 +486,10 @@
         @{ File = 'src/StyleBro.CodeFixes/Readability/NullCheckCodeFixProvider.cs'; Find = 'NullChecks.GetFix(e, model, options, cancellationToken, version)'; Replace = 'NullChecks.GetFix(e, model, options, cancellationToken)'; Tests = 'NullCheckTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/AccessModifiersCodeFixProvider.cs'; Find = 'preference, version)'; Replace = 'preference)'; Tests = 'AccessModifiersTests' }
         @{ File = 'src/StyleBro.CodeFixes/LinkedFileFixAllProvider.cs'; Find = '.Min();'; Replace = '.Max();'; Tests = 'NullCheckTests' }
+        # stylebro-migrate: pinned static field casing, nested repositories, bulk severity, IDE0073 vs SA1636
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'if (options.TryGetValue(StaticStyleKey, out var value))'; Replace = 'if (false && options.TryGetValue(StaticStyleKey, out var value))'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '&& !IsNestedRepository(child)'; Replace = ''; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '(defaultSeverity > Severity.None || severity == Severity.None)'; Replace = 'true'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (setup.IsOn("SA1633") && textOff.Count == 0)'; Replace = 'if (setup.IsOn("SA1633"))'; Tests = 'MigrationTests' }
     )
 }

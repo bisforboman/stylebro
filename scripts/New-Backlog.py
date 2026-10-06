@@ -1,10 +1,10 @@
-"""Writes docs/backlog.md: every rule StyleBro has (from README.md and the analyzer release files) and the planned and
+"""Writes docs/backlog.md: every rule StyleBro has (from docs/rules/README.md and the analyzer release files) and the planned and
 "maybe" ones listed below. Edit PLANNED and the "Maybe" tables here, then run from the repository root:
 python scripts/New-Backlog.py"""
 import re
 
-readme = open('README.md', encoding='utf-8').read()
-rows = re.findall(r'^\| \[(BRO\d{4})\]\(docs/rules/BRO\d{4}\.md\) \| (.*?) \| (.*?) \|', readme, re.M)
+readme = open('docs/rules/README.md', encoding='utf-8').read()
+rows = re.findall(r'^\| \[(BRO\d{4})\]\(BRO\d{4}\.md\) \| (.*?) \| (.*?) \|', readme, re.M)
 unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
 
 PLANNED = [

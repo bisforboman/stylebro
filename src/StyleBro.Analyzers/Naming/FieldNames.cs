@@ -65,6 +65,12 @@ internal static class FieldNames
 {
     public const string StyleKey = "stylebro_private_field_naming";
 
+    /// <summary>
+    /// The style of private constants and private static readonly fields: PascalCase (StyleCop's), camelCase or _camelCase.
+    /// When unset, an SDK naming rule that singles them out decides (else PascalCase).
+    /// </summary>
+    public const string StaticStyleKey = "stylebro_private_static_field_naming";
+
     /// <summary>A whole word: a run of \w characters not directly after another one or an '@'.</summary>
     private static readonly Regex Word = new(@"(?<![\w@])\w+");
 
@@ -94,10 +100,28 @@ internal static class FieldNames
     /// _camelCase when the SDK naming rule that singles them out (one requiring 'const', or 'static'/'readonly') asks for
     /// it (StyleCop issues #2641, #3793); otherwise null, PascalCase like StyleCop.
     /// </summary>
-    public static FieldStyles GetStyles(AnalyzerConfigOptions options) => new(
-        GetStyle(options),
-        GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
-        GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")));
+    /// <remarks>
+    /// <see cref="StaticStyleKey"/> wins over the naming rules for both: 'stylebro-migrate --write' sets it to PascalCase,
+    /// so a naming rule StyleCop never enforced (IDE1006 off) doesn't rename a StyleCop-clean repository's fields.
+    /// </remarks>
+    public static FieldStyles GetStyles(AnalyzerConfigOptions options)
+    {
+        if (options.TryGetValue(StaticStyleKey, out var value))
+        {
+            FieldStyle? style = value.Split(':')[0].Trim() switch
+            {
+                "camelCase" => FieldStyle.CamelCase,
+                "_camelCase" => FieldStyle.UnderscoreCamelCase,
+                _ => null,
+            };
+            return new(GetStyle(options), style, style);
+        }
+
+        return new(
+            GetStyle(options),
+            GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
+            GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")));
+    }
 
     /// <summary>
     /// Private fields that StyleCop's SA1306 checks (BRO1303): not constants and not static readonly (those are
@@ -286,7 +310,7 @@ internal static class FieldNames
             return null;
         }
 
-        var camel = char.IsLower(core[0]) ? core : CamelCaseNames.GetNewName(core);
+        var camel = char.IsLower(core[0]) ? core : CamelCaseNames.ToCamelCase(core);
         var result = camel is null ? null : "_" + camel;
         return result != name ? result : null;
     }
@@ -461,8 +485,7 @@ internal static class FieldNames
     private static string? WithoutLeadingUnderscores(string name)
     {
         var core = name.TrimStart('_');
-        return core.Length < name.Length && core.Length > 0 && char.IsLetter(core[0]) && SyntaxFacts.IsValidIdentifier(core)
-            && SyntaxFacts.GetKeywordKind(core) == SyntaxKind.None
+        return core.Length < name.Length && core.Length > 0 && char.IsLetter(core[0]) && CamelCaseNames.IsUsableName(core)
             ? core
             : null;
     }
@@ -476,7 +499,7 @@ internal static class FieldNames
             return null;
         }
 
-        var result = name.Substring(0, index) + CamelCaseNames.GetNewName(name.Substring(index));
+        var result = name.Substring(0, index) + CamelCaseNames.ToCamelCase(name.Substring(index));
         return SyntaxFacts.IsValidIdentifier(result) ? result : null;
     }
 
@@ -509,7 +532,7 @@ internal static class FieldNames
         var result = casing switch
         {
             FieldCasing.Pascal => Capitalize(first, several) + rest,
-            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.GetNewName(first) ?? first) + rest,
+            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.ToCamelCase(first) ?? first) + rest,
         };
 
         if (casing == FieldCasing.UnderscoreCamel)
@@ -517,7 +540,7 @@ internal static class FieldNames
             result = "_" + result;
         }
 
-        return SyntaxFacts.IsValidIdentifier(result) && SyntaxFacts.GetKeywordKind(result) == SyntaxKind.None ? result : null;
+        return CamelCaseNames.IsUsableName(result) ? result : null;
     }
 
     private static string Capitalize(string word, bool lowerRest)
@@ -560,8 +583,19 @@ internal static class FieldNames
             foreach (var reference in type.DeclaringSyntaxReferences)
             {
                 var declaration = reference.GetSyntax(cancellationToken);
-                foreach (var token in declaration.DescendantTokens())
+
+                // The tree's shared token array (TreeWalk), from the declaration's first token to its last.
+                var tokens = TreeWalk.Tokens(declaration.SyntaxTree.GetRoot(cancellationToken));
+                var (low, high) = (0, tokens.Count);
+                while (low < high)
                 {
+                    var middle = (low + high) / 2;
+                    (low, high) = tokens[middle].FullSpan.Start < declaration.FullSpan.Start ? (middle + 1, high) : (low, middle);
+                }
+
+                for (var i = low; i < tokens.Count && tokens[i].FullSpan.End <= declaration.FullSpan.End; i++)
+                {
+                    var token = tokens[i];
                     if (token.IsKind(SyntaxKind.StringLiteralToken))
                     {
                         facts.Texts.Add(token.ValueText);
@@ -572,18 +606,21 @@ internal static class FieldNames
                     }
                 }
 
-                // Code excluded by '#if', and strings in directives ('#line 1 "file"'); both need a directive. Only
-                // directives are opened: building every documentation comment's XML structure cost most of this
-                // analyzer's time.
-                foreach (var trivia in declaration.ContainsDirectives ? declaration.DescendantTrivia() : Enumerable.Empty<SyntaxTrivia>())
+                // Code excluded by '#if' (always right after a directive in the same trivia list), and strings in
+                // directives ('#line 1 "file"'). Found from the directives (Roslyn skips subtrees without any): walking
+                // all trivia cost ~40 % of this analyzer on a big file, and opening doc comments built their XML.
+                for (var directive = declaration.ContainsDirectives ? declaration.GetFirstDirective() : null;
+                    directive is not null && directive.SpanStart < declaration.FullSpan.End;
+                    directive = directive.GetNextDirective())
                 {
-                    if (trivia.IsKind(SyntaxKind.DisabledTextTrivia))
+                    facts.Texts.AddRange(directive.DescendantTokens().Where(t => t.IsKind(SyntaxKind.StringLiteralToken)).Select(t => t.ValueText));
+                    var list = directive.ParentTrivia.Token.LeadingTrivia;
+                    for (var i = list.IndexOf(directive.ParentTrivia) + 1; i < list.Count && !list[i].IsDirective; i++)
                     {
-                        facts.Texts.Add(trivia.ToString());
-                    }
-                    else if (trivia.IsDirective)
-                    {
-                        facts.Texts.AddRange(trivia.GetStructure()!.DescendantTokens().Where(t => t.IsKind(SyntaxKind.StringLiteralToken)).Select(t => t.ValueText));
+                        if (list[i].IsKind(SyntaxKind.DisabledTextTrivia))
+                        {
+                            facts.Texts.Add(list[i].ToString());
+                        }
                     }
                 }
             }

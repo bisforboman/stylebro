@@ -47,6 +47,113 @@ The owner: no, keep BRO1147 only (choice 1). IDE0370 decides all-or-nothing per 
 its fix left the `!` while the build still reported it; BRO1147 skips multi-targeted projects. The comparison is on
 [BRO1147.md](rules/BRO1147.md).
 
+## README: where the rule list goes (2026-10-06)
+
+### Question
+
+The README's rule table had grown to 124 rows, too long for a start page. Where should the list go, and should the
+contributor sections stay?
+
+### Choices
+
+1. The full table on its own page (`docs/rules/README.md`, grouped by area), a six-row summary in the README.
+2. Keep the table in the README, each area collapsed.
+3. Only a link from the README.
+
+And: move Repository layout / Developing / Roadmap to `CONTRIBUTING.md`, or keep them.
+
+### Decision
+
+The owner: choice 1, and move the contributor sections to `CONTRIBUTING.md`. The index adds a Default column (on,
+off, off in the preset); `DocExamplesTests.TheRuleIndex_ListsEveryRulePage` keeps it complete, and New-Backlog.py
+reads the titles from it.
+
+## Migrate skips submodules (2026-10-06)
+
+### Question
+
+A first run on Nerdbank.Streams: `stylebro-migrate --write` wrote a settings block into `ext/MessagePack/.editorconfig`
+and added suppressions to 68 files there, all inside a git submodule (another repository's code). And the files a
+project links from that submodule got StyleBro and SDK warnings (IDE0073, IDE0065, BRO1514, BRO1306) that
+`stylebro-migrate format` never fixes, because it formats each project's own folder only. What should the tools do
+with nested repositories, and how do users exclude vendored code?
+
+### Choices
+
+1. Skip every folder that is its own git repository (a `.git` file or folder below the root) in migrate, `init`,
+   `format` and `baseline`; document `generated_code = true` for vendored folders and linked files.
+2. Keep walking submodules and leave it to the user to revert those changes.
+3. A `--exclude` option for migrate.
+
+### Decision
+
+The owner: choice 1, "docs + migrate skips submodules". Before, `--write` in a repository with a submodule at
+`ext/MessagePack`:
+
+```
+ M .editorconfig
+ M ext/MessagePack/.editorconfig                     <- another repository's file
+ M ext/MessagePack/benchmark/.../Answer.cs           <- and 67 more
+```
+
+After: only the repository's own files change. Agent's choices: all four commands walk files through one function
+(`StyleCopSetup.EnumerateFiles`), so the skip is there; `format` and `baseline` don't walk files themselves. Found on the
+way: the linked files' warnings came from the root block turning rules on by id, which beats the
+`dotnet_analyzer_diagnostic.severity = none` that `ext/.editorconfig` set for vendored code. Migrate now reads that bulk
+key (it didn't before) and writes every replacing rule as `none` into such a folder, IDE0073 included. Verified
+with dotnet format and the build that `generated_code = true` makes StyleBro, the SDK rules and the whitespace pass
+skip a folder; getting-started.md documents it.
+
+## Migrate pins StyleCop casing (2026-10-06)
+
+### Question
+
+Nerdbank.Streams has a `dotnet_naming_rule` asking for camel case on static fields (at `suggestion`) and IDE1006 off
+("StyleCop handles these for us"). After `stylebro-migrate --write`, BRO1306 followed that naming rule and renamed 178
+fields StyleCop was happy with. Should migrate follow the repository's naming rules or StyleCop's casing?
+
+### Choices
+
+1. Pin StyleCop's casing: `--write` writes explicit `stylebro_*` keys, which win over `dotnet_naming_rule`; a new
+   project without migrate keeps following its naming rules.
+2. Follow the naming rules (what happened), and document how to opt out.
+3. Follow a naming rule only when IDE1006 is on.
+
+### Decision
+
+The owner: choice 1. Before:
+
+```csharp
+private static readonly Version ProtocolVersion = new(1, 0);   // StyleCop-clean
+private static readonly Version protocolVersion = new(1, 0);   // after migrate + dotnet format
+```
+
+After: unchanged. Agent's choices: private instance fields already had a key (`stylebro_private_field_naming`, written
+by migrate); private constants and `static readonly` fields had none, so `stylebro_private_static_field_naming`
+(`PascalCase`, `camelCase`, `_camelCase`, for both) was added, documented on [BRO1306](rules/BRO1306.md); migrate
+writes `PascalCase`. Nerdbank.Streams after the fix: 0 renames, 0 changes from `stylebro-migrate format`.
+
+## Renames to C# 14 contextual keywords (2026-10-05)
+
+### Question
+
+In C# 14 `field` inside a property accessor is the backing field: BRO1303 renaming `_field` to `field` made
+`get => field;` read other storage (CS9258), BRO1301 renaming a local `Field` in a getter didn't compile (CS9273).
+Which new names should the rename rules refuse, and should they write `@field` instead?
+
+### Choices
+
+1. **Never rename to `field`**, in any rule and any language version (StyleBro's Roslyn 4.8 can't tell C# 14), and
+   never to `value` for a local or parameter inside a property, indexer or event (the implicit setter parameter,
+   CS0136, an older bug found on the way). The name is simply not reported.
+2. Rename and write `@field`/`this.field` where an accessor uses it: correct, but a name that reads as the keyword.
+3. Refuse only when the member has a property accessor in scope: more precise, more code, same result in practice.
+
+### Answer
+
+**Choice 1** (the agent's call while fixing the bug; design rule 3, skip rather than risk). `extension`, `scoped` and
+`partial` need no guard: only the camelCase rules can produce a lower-case name, and those names are only keywords
+where a type or modifier stands.
 ## Redundant `!` and `HasValue` (newer-rules survey #5, #6) (2026-10-05)
 
 ### Question
