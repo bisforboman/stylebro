@@ -73,3 +73,9 @@ dotnet_diagnostic.BRO1148.severity = warning
 # BRO1145 (empty class body -> ;) is off by default; on for one file.
 [**/Badges.cs]
 dotnet_diagnostic.BRO1145.severity = warning
+
+# The opposite or narrower styles of BRO1104 (the SDK key), BRO1106 and BRO1135 for one file.
+[**/Tally.cs]
+csharp_prefer_simple_default_expression = true
+stylebro_empty_string_style = literal
+stylebro_upper_case_literal_suffixes = l_only
