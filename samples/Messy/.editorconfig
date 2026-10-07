@@ -74,6 +74,13 @@ dotnet_diagnostic.BRO1148.severity = warning
 [**/Badges.cs]
 dotnet_diagnostic.BRO1145.severity = warning
 
+# BRO1401 removing trailing commas (stylebro_trailing_comma = omit, default include) in one file.
+[**/Palette.cs]
+stylebro_trailing_comma = omit
+
+# BRO1508/BRO1509 leaving empty braces on one line (stylebro_allow_empty_single_line_blocks, default false) in one file.
+[**/Hooks.cs]
+stylebro_allow_empty_single_line_blocks = true
 # The opposite or narrower styles of BRO1104 (the SDK key), BRO1106 and BRO1135 for one file.
 [**/Tally.cs]
 csharp_prefer_simple_default_expression = true

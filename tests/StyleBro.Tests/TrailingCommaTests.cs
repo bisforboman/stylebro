@@ -4,6 +4,8 @@ namespace StyleBro.Tests;
 
 public class TrailingCommaTests
 {
+    private const string Omit = "stylebro_trailing_comma = omit\n";
+
     [Fact]
     public Task MultiLineLists_GetATrailingComma() => VerifyFixAsync(
         """
@@ -291,4 +293,127 @@ public class TrailingCommaTests
             };
         }
         """);
+
+    [Fact]
+    public Task Omit_RemovesTrailingCommas_AlsoOnOneLine() => VerifyFixAsync(
+        """
+        enum E
+        {
+            A,
+            B{|BRO1401:,|}
+        }
+
+        class C
+        {
+            object M(int x)
+            {
+                var array = new[] { 1, 2{|BRO1401:,|} };
+                var nested = new[]
+                {
+                    new[] { 1{|BRO1401:,|} }{|BRO1401:,|}
+                };
+                var arms = x switch
+                {
+                    1 => "a",
+                    _ => "b"{|BRO1401:,|}
+                };
+                var kept = new[]
+                {
+                    1,
+                    2
+                };
+                return (array, nested, arms, kept);
+            }
+        }
+        """,
+        """
+        enum E
+        {
+            A,
+            B
+        }
+
+        class C
+        {
+            object M(int x)
+            {
+                var array = new[] { 1, 2 };
+                var nested = new[]
+                {
+                    new[] { 1 }
+                };
+                var arms = x switch
+                {
+                    1 => "a",
+                    _ => "b"
+                };
+                var kept = new[]
+                {
+                    1,
+                    2
+                };
+                return (array, nested, arms, kept);
+            }
+        }
+        """,
+        editorConfig: Omit);
+
+    [Fact]
+    public Task Omit_KeepsTrailingComments_AndDropsSpaceBeforeTheComma() => VerifyFixAsync(
+        """
+        enum E
+        {
+            A{|BRO1401:,|} // a
+        }
+
+        enum F
+        {
+            A{|BRO1401:,|}// a
+        }
+
+        enum G
+        {
+            A /* a */ {|BRO1401:,|}
+        }
+
+        enum H
+        {
+            A {|BRO1401:,|}
+        }
+        """,
+        """
+        enum E
+        {
+            A // a
+        }
+
+        enum F
+        {
+            A // a
+        }
+
+        enum G
+        {
+            A /* a */
+        }
+
+        enum H
+        {
+            A
+        }
+        """,
+        editorConfig: Omit);
+
+    [Fact]
+    public Task Omit_ListsWithDirectives_AreLeftAlone() => VerifyNoDiagnosticsAsync(
+        """
+        enum E
+        {
+            A,
+        #if SOMETHING
+            B,
+        #endif
+        }
+        """,
+        editorConfig: Omit);
 }

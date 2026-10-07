@@ -952,6 +952,43 @@ public class FixOrderTests
         "BRO1146",
         "BRO1509");
 
+    [Fact]
+    public Task OmittedTrailingCommas_NextToEnumExpansionAndValueLines() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public enum A { X, Y, }
+
+        public enum B { X, Y }
+
+        public enum C
+        {
+            X, Y,
+        }
+
+        public class D
+        {
+            public int[] M() => new[] { 1, 2, };
+        }
+        """,
+        "stylebro_trailing_comma = omit\n",
+        "BRO1121",
+        "BRO1401",
+        "BRO1509");
+
+    [Fact]
+    public Task AllowedEmptyBlocks_InsideExpandedOnes() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class A { public A() { } public void M(bool b) { if (b) { } else { M(b); } } }
+
+        public enum E { }
+
+        public class B { }
+        """,
+        "stylebro_allow_empty_single_line_blocks = true\n",
+        "BRO1505",
+        "BRO1508",
+        "BRO1509",
+        "BRO1519");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

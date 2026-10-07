@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers.Maintainability;
 
 namespace StyleBro.Analyzers.Layout;
 
@@ -23,6 +24,9 @@ namespace StyleBro.Analyzers.Layout;
 /// </summary>
 internal static class SingleLineBlocks
 {
+    /// <summary>The .editorconfig key that lets empty braces stay on one line (default false, like StyleCop).</summary>
+    public const string AllowEmptyKey = "stylebro_allow_empty_single_line_blocks";
+
     /// <summary>The nodes BRO1508/BRO1509 look at.</summary>
     public static readonly SyntaxKind[] Kinds =
     [
@@ -135,6 +139,10 @@ internal static class SingleLineBlocks
         return true;
     }
 
+    /// <summary>Whether <c>stylebro_allow_empty_single_line_blocks = true</c>: empty braces on one line aren't reported.</summary>
+    internal static bool AllowsEmpty(AnalyzerConfigOptions options) =>
+        options.TryGetValue(AllowEmptyKey, out var value) && value.Split(':')[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>The SDK's csharp_new_line_before_open_brace for this kind of brace (default: all).</summary>
     internal static bool NewLineBeforeBrace(SyntaxNode node, AnalyzerConfigOptions options)
     {
@@ -213,6 +221,13 @@ internal static class SingleLineBlocks
         var items = GetItems(node);
         if (items.Count == 0)
         {
+            // stylebro_allow_empty_single_line_blocks: '{ }' may stay (a comment inside is never expanded, see Gap). Only the
+            // node's own braces: an enclosing block isn't empty, so the expansion of enclosing blocks never meets one.
+            if (AllowsEmpty(options))
+            {
+                return null;
+            }
+
             if (!Gap(braces.Open, braces.Close, lineBreak + baseIndent, text, changes))
             {
                 return null;
@@ -244,7 +259,9 @@ internal static class SingleLineBlocks
 
             // An expanded enum is a multi-line list, so BRO1401 wants a trailing comma: add it now, so the result doesn't
             // depend on whether 'dotnet format' runs BRO1401's fix before or after this one.
-            var comma = node is EnumDeclarationSyntax @enum && @enum.Members.SeparatorCount < @enum.Members.Count && trailingComma ? "," : string.Empty;
+            // Not with stylebro_trailing_comma = omit (BRO1401 then removes trailing commas).
+            var comma = node is EnumDeclarationSyntax @enum && @enum.Members.SeparatorCount < @enum.Members.Count && trailingComma
+                && !TrailingCommas.Omits(options) ? "," : string.Empty;
             if (!Gap(items[items.Count - 1].GetLastToken(), braces.Close, comma + lineBreak + baseIndent, text, changes))
             {
                 return null;
