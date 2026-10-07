@@ -73,3 +73,9 @@ dotnet_diagnostic.BRO1148.severity = warning
 # BRO1145 (empty class body -> ;) is off by default; on for one file.
 [**/Badges.cs]
 dotnet_diagnostic.BRO1145.severity = warning
+# BRO1110: a split list's ')' on its own line (stylebro_closing_parenthesis_placement) in one file.
+[**/Receipts.cs]
+stylebro_closing_parenthesis_placement = own_line
+# BRO1107/BRO1108: a split list's first item may stay on the '(' line (stylebro_split_list_first_item) in one file.
+[**/Coupons.cs]
+stylebro_split_list_first_item = same_line

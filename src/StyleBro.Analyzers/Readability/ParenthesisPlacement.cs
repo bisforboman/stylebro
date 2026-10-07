@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -13,6 +15,9 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class ParenthesisPlacement
 {
+    /// <summary>The .editorconfig key for where BRO1110 wants the closing token of a split list.</summary>
+    public const string CloseKey = "stylebro_closing_parenthesis_placement";
+
     /// <summary>
     /// BRO1109: the opening token when it starts a line after the name before it: 'Method' then '(int a)' on the next
     /// line. Only lists that belong to a name (declarations, calls, 'new', element access, attributes, constructor
@@ -52,12 +57,59 @@ internal static class ParenthesisPlacement
     }
 
     /// <summary>
+    /// Whether <see cref="CloseKey"/> asks for the closing token of a split list on its own line (<c>own_line</c>)
+    /// instead of at the end of the last item (<c>last_item</c>, the default, like StyleCop).
+    /// </summary>
+    public static bool IsOwnLine(AnalyzerConfigOptions options) =>
+        options.TryGetValue(CloseKey, out var value) && value.Trim().Equals("own_line", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// BRO1110: the closing token when it is misplaced, with the edit that moves it. By default (and for a list that
+    /// isn't split in <c>own_line</c> mode) it belongs at the end of the last item: see <see cref="GetMisplacedClose"/>.
+    /// With <paramref name="ownLine"/>, a split list (an item starts on a line below the opening token's line) has it on
+    /// its own line, indented like that line: '    b)' turns into '    b' / ')'. The line of the opening token is the
+    /// name's line when BRO1109 (<paramref name="openMoves"/>) moves the token up there, so both fixes agree in any order.
+    /// Skipped in <c>own_line</c> mode: a comment between the last item and the token, and directives in the list (each
+    /// target framework's copy may have another last item).
+    /// </summary>
+    public static (SyntaxToken Close, TextChange Change)? GetCloseFix(SyntaxNode list, SourceText text, bool ownLine, bool openMoves)
+    {
+        if (ownLine && GetSplitListLine(list, text, openMoves) is { } openLine)
+        {
+            var (_, items, close) = ParameterLayoutList(list);
+            var last = items[items.Count - 1].GetLastToken();
+            if (list.ContainsDirectives || Line(text, last.Span.End) != Line(text, close.SpanStart) || !IsPlainGap(last, close))
+            {
+                return null;
+            }
+
+            var indentation = new string(text.ToString(openLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray());
+            var lineBreak = text.ToString(TextSpan.FromBounds(openLine.End, openLine.EndIncludingLineBreak));
+            return (close, new TextChange(TextSpan.FromBounds(last.Span.End, close.SpanStart), (lineBreak.Length == 0 ? "\n" : lineBreak) + indentation));
+        }
+
+        return GetMisplacedClose(list, text) is { } misplaced ? (misplaced, GetCloseChange(misplaced, text)) : null;
+    }
+
+    /// <summary>The list's opening token, items and closing token, for the list kinds <see cref="ParameterLayout"/> checks.</summary>
+    public static (SyntaxToken Open, IReadOnlyList<SyntaxNode> Items, SyntaxToken Close) ParameterLayoutList(SyntaxNode list)
+    {
+        return list switch
+        {
+            BaseParameterListSyntax parameters => (parameters.GetFirstToken(), parameters.Parameters, parameters.GetLastToken()),
+            BaseArgumentListSyntax arguments => (arguments.GetFirstToken(), arguments.Arguments, arguments.GetLastToken()),
+            AttributeArgumentListSyntax attributeArguments => (attributeArguments.OpenParenToken, attributeArguments.Arguments, attributeArguments.CloseParenToken),
+            _ => (default, [], default),
+        };
+    }
+
+    /// <summary>
     /// BRO1110: the closing token when it isn't on the line where the last item ends. Null for empty lists (spacing,
     /// StyleCop's SA1009), and for gaps with anything but whitespace and one comment at the end of the last item's line
     /// (a comment there is only moved when nothing but whitespace follows the closing token on its line, since the
     /// code after it would otherwise end up behind the comment).
     /// </summary>
-    public static SyntaxToken? GetMisplacedClose(SyntaxNode list, SourceText text)
+    private static SyntaxToken? GetMisplacedClose(SyntaxNode list, SourceText text)
     {
         var (_, items, close) = ParameterLayoutList(list);
         if (items.Count == 0 || close.IsMissing)
@@ -87,23 +139,28 @@ internal static class ParenthesisPlacement
     /// The edit for BRO1110: the closing token moves right after the last item, and a comment at the end of the last
     /// item's line goes after it: 'int b // last' / ')' turns into 'int b) // last'.
     /// </summary>
-    public static TextChange GetCloseChange(SyntaxToken close, SourceText text)
+    private static TextChange GetCloseChange(SyntaxToken close, SourceText text)
     {
         var last = close.GetPreviousToken();
         var comment = GetTrailingComment(last, close, text) ?? string.Empty;
         return new TextChange(TextSpan.FromBounds(last.Span.End, close.Span.End), close.Text + comment);
     }
 
-    /// <summary>The list's opening token, items and closing token, for the list kinds <see cref="ParameterLayout"/> checks.</summary>
-    public static (SyntaxToken Open, IReadOnlyList<SyntaxNode> Items, SyntaxToken Close) ParameterLayoutList(SyntaxNode list)
+    /// <summary>
+    /// The line of the opening token (or of the name, when BRO1109 moves the token up there) when the list is split:
+    /// its last item starts on a later line. Null for empty lists, missing tokens and lists on one line.
+    /// </summary>
+    private static TextLine? GetSplitListLine(SyntaxNode list, SourceText text, bool openMoves)
     {
-        return list switch
+        var (open, items, close) = ParameterLayoutList(list);
+        if (items.Count == 0 || open.IsMissing || close.IsMissing)
         {
-            BaseParameterListSyntax parameters => (parameters.GetFirstToken(), parameters.Parameters, parameters.GetLastToken()),
-            BaseArgumentListSyntax arguments => (arguments.GetFirstToken(), arguments.Arguments, arguments.GetLastToken()),
-            AttributeArgumentListSyntax attributeArguments => (attributeArguments.OpenParenToken, attributeArguments.Arguments, attributeArguments.CloseParenToken),
-            _ => (default, [], default),
-        };
+            return null;
+        }
+
+        var start = openMoves && GetMisplacedOpen(list, text) is not null ? open.GetPreviousToken().SpanStart : open.SpanStart;
+        var openLine = text.Lines.GetLineFromPosition(start);
+        return Line(text, items[items.Count - 1].SpanStart) > openLine.LineNumber ? openLine : null;
     }
 
     private static bool BelongsToName(SyntaxNode list)

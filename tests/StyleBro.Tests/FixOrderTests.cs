@@ -202,6 +202,119 @@ public class FixOrderTests
         "BRO1520");
 
     [Fact]
+    public Task ClosingParenthesisOnOwnLine_Declarations() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int a, int b)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(int a,
+                int b) : base(a, b)
+            {
+            }
+
+            public T M<T>
+                (int a, int b) where T : class => default!;
+
+            public int N(
+                int a,
+                int b)
+                => a + b;
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1105",
+        "BRO1109",
+        "BRO1110",
+        "BRO1111",
+        "BRO1521");
+
+    [Fact]
+    public Task ClosingParenthesisOnOwnLine_Calls() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b) => a;
+
+            public int N() => 1;
+
+            public void Run()
+            {
+                M(1,
+                    2);
+                M(1, 2,
+                    M(3, 4));
+                N(
+                );
+                M(
+                    N(), M(5,
+                        6));
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1110",
+        "BRO1116");
+
+    [Fact]
+    public Task ClosingParenthesisOnOwnLine_CallChains() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public bool M(int[] items, int a, int b) =>
+                items
+                    .Where(i => Check(i, a,
+                        b)).Select(i => i
+                    ).Any() &&
+                    items.Contains(b);
+
+            private static bool Check(int i, int a, int b) => i > a + b;
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1523",
+        "BRO1108",
+        "BRO1110",
+        "BRO1520");
+
+    [Fact]
+    public Task SplitListFirstItemOnSameLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b, int c) => a;
+
+            public int N(int a,
+                         int b, int c)
+                => a;
+
+            public void Run()
+            {
+                M(1, 2,
+                    M(3,
+                      4, 5), 6);
+                M
+                    (1, 2,
+                    3);
+            }
+        }
+        """,
+        "stylebro_split_list_first_item = same_line\nstylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1109",
+        "BRO1110");
+
+    [Fact]
     public Task LiteralSuffixes_ACastOfALowerCaseSuffix() => AssertConvergesInEveryOrderAsync(
         """
         public class C

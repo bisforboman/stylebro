@@ -361,4 +361,66 @@ public class ParameterLayoutTests
             }
         }
         """);
+
+    [Fact]
+    public Task SameLine_KeepsTheFirstItem_AndCopiesTheListsIndentation() => VerifyFixAsync(
+        """
+        class C
+        {
+            public C(int a,
+                int b)
+            {
+            }
+
+            public int Sum(int a,
+                           int b, {|BRO1108:int c|}) => a;
+
+            public void Indented(int a, int b,
+                {|BRO1108:int c|})
+            {
+            }
+
+            public void NoneStartsALine(int a, int b, int c, int d)
+            {
+                NoneStartsALine(a, b, (a
+                    + b), {|BRO1108:d|});
+                Indented(
+                    a, b,
+                    {|BRO1108:c|});
+            }
+        }
+        """,
+        """
+        class C
+        {
+            public C(int a,
+                int b)
+            {
+            }
+
+            public int Sum(int a,
+                           int b,
+                           int c) => a;
+
+            public void Indented(int a,
+                int b,
+                int c)
+            {
+            }
+
+            public void NoneStartsALine(int a, int b, int c, int d)
+            {
+                NoneStartsALine(a,
+                    b,
+                    (a
+                        + b),
+                    d);
+                Indented(
+                    a,
+                    b,
+                    c);
+            }
+        }
+        """,
+        editorConfig: "stylebro_split_list_first_item = same_line");
 }

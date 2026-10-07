@@ -252,11 +252,12 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor CloseParenthesisOnLastItemLine = new(
         id: DiagnosticIds.CloseParenthesisOnLastItemLine,
         title: "Closing parenthesis or bracket should be on the line of the last item",
-        messageFormat: "Move '{0}' to the end of the last item",
+        messageFormat: "Move '{0}' {1}",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "The list ends where its last item ends, not on a line of its own. Replaces StyleCop SA1111.",
+        description: "The list ends where its last item ends, not on a line of its own; with "
+            + "stylebro_closing_parenthesis_placement = own_line, a split list ends on a line of its own. Replaces StyleCop SA1111.",
         helpLinkUri: HelpBase + DiagnosticIds.CloseParenthesisOnLastItemLine + ".md");
 
     public static readonly DiagnosticDescriptor ConstraintOnOwnLine = new(
