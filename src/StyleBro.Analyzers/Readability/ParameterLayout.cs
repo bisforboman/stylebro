@@ -31,13 +31,14 @@ internal static class ParameterLayout
     public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text)
     {
         var (open, items) = GetList(list);
-        if (items.Count < 2 || !CanRewrite(list, items))
+        if (items.Count < 2)
         {
             return null;
         }
 
+        // The layout first, then the gaps (CanRewrite looks at every item's trivia): most lists are fine.
         var openLine = Line(text, open.SpanStart);
-        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine ? items[0] : null;
+        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine && CanRewrite(list, items) ? items[0] : null;
     }
 
     /// <summary>
@@ -48,26 +49,13 @@ internal static class ParameterLayout
     public static SyntaxNode? GetFirstMisplacedItem(SyntaxNode list, SourceText text)
     {
         var (_, items) = GetList(list);
-        if (items.Count < 2 || !CanRewrite(list, items))
+        if (items.Count < 2)
         {
             return null;
         }
 
-        var firstLine = Line(text, items[0].SpanStart);
-        if (Line(text, items[1].SpanStart) == firstLine)
-        {
-            return items.Skip(2).FirstOrDefault(item => Line(text, item.SpanStart) != firstLine);
-        }
-
-        for (var i = 1; i < items.Count; i++)
-        {
-            if (Line(text, items[i].SpanStart) == Line(text, items[i - 1].Span.End))
-            {
-                return items[i];
-            }
-        }
-
-        return null;
+        var misplaced = GetMisplacedItem(items, text);
+        return misplaced is not null && CanRewrite(list, items) ? misplaced : null;
     }
 
     /// <summary>
@@ -120,6 +108,25 @@ internal static class ParameterLayout
             ArrayRankSpecifierSyntax rank => (rank.OpenBracketToken, rank.Sizes),
             _ => (default, []),
         };
+    }
+
+    private static SyntaxNode? GetMisplacedItem(IReadOnlyList<SyntaxNode> items, SourceText text)
+    {
+        var firstLine = Line(text, items[0].SpanStart);
+        if (Line(text, items[1].SpanStart) == firstLine)
+        {
+            return items.Skip(2).FirstOrDefault(item => Line(text, item.SpanStart) != firstLine);
+        }
+
+        for (var i = 1; i < items.Count; i++)
+        {
+            if (Line(text, items[i].SpanStart) == Line(text, items[i - 1].Span.End))
+            {
+                return items[i];
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

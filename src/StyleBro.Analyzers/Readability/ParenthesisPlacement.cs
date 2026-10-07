@@ -21,7 +21,10 @@ internal static class ParenthesisPlacement
     public static SyntaxToken? GetMisplacedOpen(SyntaxNode list, SourceText text)
     {
         var (open, _, _) = ParameterLayoutList(list);
-        if (open.IsMissing || !BelongsToName(list))
+
+        // The token before the list lies in the list's parent: when the parent starts on the list's line, so does that
+        // token (most calls), and finding it can be skipped.
+        if (open.IsMissing || !BelongsToName(list) || Line(text, list.Parent!.SpanStart) == Line(text, open.SpanStart))
         {
             return null;
         }

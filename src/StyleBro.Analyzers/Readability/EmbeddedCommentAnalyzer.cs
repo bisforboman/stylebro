@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Readability;
@@ -25,17 +27,40 @@ public sealed class EmbeddedCommentAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxTreeAction(
             c =>
             {
-                var text = c.Tree.GetText(c.CancellationToken);
-                foreach (var node in TreeWalk.Nodes(c.Tree.GetRoot(c.CancellationToken)))
+                // Only braces with a comment right before them can have one to move: found from the tree's comments (few)
+                // instead of asking every node's '{' for the token before it.
+                var root = c.Tree.GetRoot(c.CancellationToken);
+                var braces = new List<SyntaxToken>();
+                foreach (var trivia in TreeWalk.Trivia(root))
                 {
-                    foreach (var comment in EmbeddedComments.GetComments(EmbeddedComments.GetOpenBrace(node), text))
+                    if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
                     {
-                        c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmbeddedComment, comment.GetLocation()));
+                        var token = trivia.Token;
+                        var brace = token.LeadingTrivia.Span.Contains(trivia.Span) ? token : token.GetNextToken();
+                        if (brace.IsKind(SyntaxKind.OpenBraceToken) && (braces.Count == 0 || braces[braces.Count - 1] != brace))
+                        {
+                            braces.Add(brace);
+                        }
+                    }
+                }
+
+                var text = braces.Count > 0 ? c.Tree.GetText(c.CancellationToken) : null;
+                foreach (var brace in braces)
+                {
+                    if (EmbeddedComments.GetOpenBrace(brace.Parent!) == brace)
+                    {
+                        foreach (var comment in EmbeddedComments.GetComments(brace, text!))
+                        {
+                            c.ReportDiagnostic(Diagnostic.Create(Descriptors.EmbeddedComment, comment.GetLocation()));
+                        }
                     }
 
-                    foreach (var comment in EmbeddedComments.GetComments(EmbeddedComments.GetDeclarationOpenBrace(node), text))
+                    if (EmbeddedComments.GetDeclarationOpenBrace(brace.Parent!) == brace)
                     {
-                        c.ReportDiagnostic(Diagnostic.Create(Descriptors.DeclarationComment, comment.GetLocation()));
+                        foreach (var comment in EmbeddedComments.GetComments(brace, text!))
+                        {
+                            c.ReportDiagnostic(Diagnostic.Create(Descriptors.DeclarationComment, comment.GetLocation()));
+                        }
                     }
                 }
             });
