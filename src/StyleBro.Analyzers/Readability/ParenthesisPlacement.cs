@@ -97,6 +97,17 @@ internal static class ParenthesisPlacement
         return GetMisplacedClose(list, text) is { } misplaced ? (misplaced, GetCloseChange(misplaced, text)) : null;
     }
 
+    /// <summary>
+    /// Whether BRO1110, as configured for the file, moves the list's closing token, for fixes that join something onto
+    /// the token's line (BRO1105/BRO1111 same_line) and take the token along. In own_line mode it is never pulled up
+    /// from its own line; when it moves down, joining after it where it is gives the same text.
+    /// </summary>
+    public static bool MovesCloseToLastItem(SyntaxNode list, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    {
+        var ownLine = IsOwnLine(options);
+        return GetCloseFix(list, text, ownLine, ownLine && isOn(DiagnosticIds.OpenParenthesisOnNameLine)) is not null;
+    }
+
     /// <summary>The list's opening token, items and closing token, for the list kinds <see cref="ParameterLayout"/> checks.</summary>
     public static (SyntaxToken Open, IReadOnlyList<SyntaxNode> Items, SyntaxToken Close) ParameterLayoutList(SyntaxNode list)
     {

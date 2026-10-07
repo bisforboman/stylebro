@@ -456,6 +456,7 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (Line(text, lastItem.SpanStart) != openLine.LineNumber || GetOpening(last)'; Replace = 'if (GetOpening(last)'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'SyntaxKind.CloseParenToken when closing.Parent is ArgumentListSyntax or TupleExpressionSyntax'; Replace = 'SyntaxKind.CloseParenToken when false'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'return (false, openingLine == openLine.LineNumber ? null : openLine);'; Replace = 'return (false, openLine);'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'GetCloseFix(list, text, ownLine, ownLine && isOn'; Replace = 'GetCloseFix(list, text, false, false && isOn'; Tests = 'FixOrderTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '? (true, openLine) : (false, null);'; Replace = '? (false, openLine) : (false, null);'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacementAnalyzer.cs'; Find = 'var openMoves = ownLine && '; Replace = 'var openMoves = false && '; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = ' && !(options is not null && IsSameLine(options))'; Replace = ''; Tests = 'ParameterLayoutTests' }

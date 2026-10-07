@@ -1208,6 +1208,49 @@ public class FixOrderTests
         "BRO1509",
         "BRO1521");
 
+    // The same with BRO1110's own_line mode: a split list's ')' stays on its own line and the initializer or constraints
+    // join it there; a ')' BRO1110 pulls up to the last item (a list that isn't split) moves in the join's edit.
+    [Fact]
+    public Task SameLineJoins_WithClosingParenthesisOnItsOwnLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int x)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(
+                int a
+            )
+                : base(a) { }
+
+            public C(int a, long b,
+                long c)
+                : base(a)
+            {
+            }
+
+            public C(long a
+                )
+                : base(1)
+            {
+            }
+
+            public static void M<T>(
+                T value)
+                where T : class { }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\nstylebro_constraint_placement = same_line\nstylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1105",
+        "BRO1109",
+        "BRO1110",
+        "BRO1111",
+        "BRO1509");
+
     [Fact]
     public Task OmittedTrailingCommas_NextToEnumExpansionAndValueLines() => AssertConvergesInEveryOrderWithConfigAsync(
         """

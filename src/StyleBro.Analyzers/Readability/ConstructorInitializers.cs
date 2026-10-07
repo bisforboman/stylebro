@@ -41,7 +41,7 @@ internal static class ConstructorInitializers
 
         var start = close.Span.End;
         var closeText = string.Empty;
-        if (isOn(DiagnosticIds.CloseParenthesisOnLastItemLine) && ParenthesisPlacement.GetMisplacedClose(close.Parent!, text) is not null)
+        if (isOn(DiagnosticIds.CloseParenthesisOnLastItemLine) && ParenthesisPlacement.MovesCloseToLastItem(close.Parent!, text, options, isOn))
         {
             var last = close.GetPreviousToken();
             if (!IsPlain(last.TrailingTrivia, close.LeadingTrivia))
