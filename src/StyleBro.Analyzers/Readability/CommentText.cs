@@ -43,7 +43,7 @@ internal static class CommentText
                 var line = text.Lines[number];
                 var content = text.ToString(line.Span);
                 var slashes = content.IndexOf("///", System.StringComparison.Ordinal);
-                if (slashes < 0 || content.Substring(0, slashes).Trim().Length > 0 || content.Length > slashes + 3 && content[slashes + 3] == '/')
+                if (slashes < 0 || content.Substring(0, slashes).Trim().Length > 0 || (content.Length > slashes + 3 && content[slashes + 3] == '/'))
                 {
                     continue;
                 }

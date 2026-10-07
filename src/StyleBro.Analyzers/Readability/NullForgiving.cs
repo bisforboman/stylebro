@@ -78,14 +78,17 @@ internal static class NullForgiving
                     container = statement.ReplaceNode(node, operand);
                     model.TryGetSpeculativeSemanticModel(statement.SpanStart, (StatementSyntax)container, out speculative);
                     break;
+
                 case EqualsValueClauseSyntax clause when clause.Parent is not VariableDeclaratorSyntax { Parent.Parent: LocalDeclarationStatementSyntax }:
                     container = clause.ReplaceNode(node, operand);
                     model.TryGetSpeculativeSemanticModel(clause.SpanStart, (EqualsValueClauseSyntax)container, out speculative);
                     break;
+
                 case ArrowExpressionClauseSyntax arrow:
                     container = arrow.ReplaceNode(node, operand);
                     model.TryGetSpeculativeSemanticModel(arrow.SpanStart, (ArrowExpressionClauseSyntax)container, out speculative);
                     break;
+
                 default:
                     continue;
             }

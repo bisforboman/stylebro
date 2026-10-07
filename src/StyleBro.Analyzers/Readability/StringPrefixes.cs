@@ -17,7 +17,7 @@ internal static class StringPrefixes
     /// The edit that writes the literal in the simplest form, and that form's name ("a plain string", "a verbatim string",
     /// "a raw string"), or null when it already is. The whole simplification is one edit (<c>$@"a"</c> becomes
     /// <c>"a"</c>), so one run is enough. Empty strings are left to BRO1106 (<c>string.Empty</c>). An interpolated string
-    /// is only reported where it becomes a <c>string</c> (or <c>object</c>): as a <c>FormattableString</c>,
+    /// is only reported where it becomes a <see langword="string"/> (or <see langword="object"/>): as a <c>FormattableString</c>,
     /// <c>IFormattable</c> or an interpolated string handler, the plain string would mean something else.
     /// </summary>
     public static (TextChange Change, string Form)? GetChange(ExpressionSyntax expression, SemanticModel model, CancellationToken cancellationToken)
@@ -26,8 +26,8 @@ internal static class StringPrefixes
         {
             LiteralExpressionSyntax literal => ForLiteral(literal.Token),
             InterpolatedStringExpressionSyntax interpolated when interpolated.Contents.All(c => c is InterpolatedStringTextSyntax)
-                && model.GetTypeInfo(interpolated, cancellationToken).ConvertedType?.SpecialType is SpecialType.System_String or SpecialType.System_Object
-                => ForInterpolated(interpolated),
+                && model.GetTypeInfo(interpolated, cancellationToken).ConvertedType?.SpecialType is SpecialType.System_String or SpecialType.System_Object =>
+                ForInterpolated(interpolated),
             _ => null,
         };
         return replacement is null ? null : (new TextChange(expression.Span, replacement), Form(replacement));

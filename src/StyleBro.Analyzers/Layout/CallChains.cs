@@ -118,26 +118,32 @@ internal static class CallChains
                     expression = invocation.Expression;
                     call = true;
                     continue;
+
                 case ElementAccessExpressionSyntax access:
                     expression = access.Expression;
                     continue;
+
                 case PostfixUnaryExpressionSyntax suppression when suppression.IsKind(SyntaxKind.SuppressNullableWarningExpression):
                     expression = suppression.Operand;
                     continue;
+
                 case MemberAccessExpressionSyntax access when access.IsKind(SyntaxKind.SimpleMemberAccessExpression):
                     links.Add((access.OperatorToken, call));
                     call = false;
                     expression = access.Expression;
                     continue;
+
                 case MemberBindingExpressionSyntax binding:
                     var question = binding.OperatorToken.GetPreviousToken();
                     links.Add((question.IsKind(SyntaxKind.QuestionToken) ? question : binding.OperatorToken, call));
                     return;
+
                 case ConditionalAccessExpressionSyntax conditional:
                     Walk(conditional.WhenNotNull, links);
                     expression = conditional.Expression;
                     call = false;
                     continue;
+
                 default:
                     return;
             }

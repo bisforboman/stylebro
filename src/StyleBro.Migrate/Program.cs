@@ -174,7 +174,8 @@ internal static class Program
 
     private static (int Added, int Files) RewriteSuppressions(string root, Migration.Result result, bool write)
     {
-        int added = 0, files = 0;
+        int added = 0;
+        int files = 0;
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || StyleCopSetup.IsMSBuild(f)))
         {
             var bytes = File.ReadAllBytes(file);

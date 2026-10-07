@@ -4,22 +4,22 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using StyleBro.Analyzers;
-using StyleBro.Analyzers.Maintainability;
-using StyleBro.CodeFixes.Naming;
-using StyleBro.CodeFixes.Ordering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers;
+using StyleBro.Analyzers.Maintainability;
+using StyleBro.CodeFixes.Naming;
+using StyleBro.CodeFixes.Ordering;
 
 namespace StyleBro.CodeFixes.Maintainability;
 
 /// <summary>
-/// Fix for BRO1409: <c>public</c> -> <c>internal</c>. Left alone (the warning stays): a method whose name is a string
-/// literal or a <c>nameof</c> anywhere in the solution (reflection by name, like the naming rules' guard), and a method
+/// Fix for BRO1409: <see langword="public"/> -> <see langword="internal"/>. Left alone (the warning stays): a method whose name is a string
+/// literal or a <see langword="nameof"/> anywhere in the solution (reflection by name, like the naming rules' guard), and a method
 /// of a type that another project derives from (a friend assembly's class can implement an interface with it).
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InternalTypeMethodCodeFixProvider))]

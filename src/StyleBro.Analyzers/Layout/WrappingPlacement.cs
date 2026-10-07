@@ -44,6 +44,7 @@ internal static class WrappingPlacement
                     }
 
                     break;
+
                 case ConditionalExpressionSyntax conditional:
                     if (Find(conditional.QuestionToken, operators, text) is { } q)
                     {
@@ -65,6 +66,7 @@ internal static class WrappingPlacement
                     }
 
                     break;
+
                 case SwitchExpressionArmSyntax arm:
                     if (Find(arm.EqualsGreaterThanToken, arrows, text) is { } s)
                     {
@@ -72,6 +74,7 @@ internal static class WrappingPlacement
                     }
 
                     break;
+
                 case AssignmentExpressionSyntax assignment:
                     if (Find(assignment.OperatorToken, equals, text) is { } e)
                     {
@@ -79,6 +82,7 @@ internal static class WrappingPlacement
                     }
 
                     break;
+
                 case EqualsValueClauseSyntax clause:
                     if (Find(clause.EqualsToken, equals, text) is { } i)
                     {
@@ -92,7 +96,8 @@ internal static class WrappingPlacement
 
     /// <summary>A placement key: beginning_of_line or end_of_line ('end_of_line:warning' style values too).</summary>
     public static bool Read(AnalyzerConfigOptions options, string key, bool beginning) =>
-        !options.TryGetValue(key, out var value) ? beginning
+        !options.TryGetValue(key, out var value)
+        ? beginning
         : value.Split(':')[0].Trim().ToLowerInvariant() switch
         {
             "beginning_of_line" => true,

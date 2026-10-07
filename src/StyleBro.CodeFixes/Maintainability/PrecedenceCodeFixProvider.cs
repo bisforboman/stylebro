@@ -3,11 +3,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using StyleBro.Analyzers;
-using StyleBro.Analyzers.Maintainability;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
+using StyleBro.Analyzers;
+using StyleBro.Analyzers.Maintainability;
 
 namespace StyleBro.CodeFixes.Maintainability;
 

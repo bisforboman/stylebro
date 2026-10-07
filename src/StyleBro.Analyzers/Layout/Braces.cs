@@ -68,6 +68,7 @@ internal static class Braces
             case IfStatementSyntax { Parent: ElseClauseSyntax }:
                 // Analyzed with the chain's first 'if'.
                 yield break;
+
             case IfStatementSyntax ifStatement:
                 children = new List<StatementSyntax>();
                 for (var current = ifStatement; current is not null; current = current.Else?.Statement as IfStatementSyntax)
@@ -80,11 +81,14 @@ internal static class Braces
                 }
 
                 break;
+
             case UsingStatementSyntax { Statement: UsingStatementSyntax } when allowConsecutiveUsings:
                 yield break;
+
             case CommonForEachStatementSyntax forEach:
                 children = new List<StatementSyntax> { forEach.Statement };
                 break;
+
             default:
                 children = new List<StatementSyntax> { GetChild(node) };
                 break;

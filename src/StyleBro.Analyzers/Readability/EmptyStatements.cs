@@ -125,5 +125,4 @@ internal static class EmptyStatements
     }
 
     private static bool IsBlank(char c) => c == ' ' || c == '\t';
-
 }

@@ -23,7 +23,7 @@ internal sealed class HungarianNames
     /// <summary>StyleCop's list of words that look like a prefix but aren't one.</summary>
     private static readonly string[] Common = { "as", "at", "by", "do", "go", "if", "in", "is", "it", "no", "of", "on", "or", "to" };
 
-    private static readonly Regex Prefix = new(@"^(?<prefix>[a-z]{1,2})[A-Z]");
+    private static readonly Regex Prefix = new("^(?<prefix>[a-z]{1,2})[A-Z]");
 
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<AnalyzerConfigOptions, HungarianNames> Cache = new();
 

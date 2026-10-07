@@ -7,9 +7,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
 
-/// <summary>
-/// Shared logic for BRO1111 (StyleCop SA1127: generic type constraints on their own line).
-/// </summary>
+/// <summary>Shared logic for BRO1111 (StyleCop SA1127: generic type constraints on their own line).</summary>
 internal static class ConstraintPlacement
 {
     /// <summary>The declarations that can have 'where' clauses.</summary>

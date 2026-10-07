@@ -620,6 +620,7 @@ internal static class Descriptors
         isEnabledByDefault: true,
         description: "'get' comes before 'set' or 'init'. The fix swaps the accessors with their comments. Replaces StyleCop SA1212.",
         helpLinkUri: HelpBase + DiagnosticIds.PropertyAccessorOrder + ".md");
+
     public static readonly DiagnosticDescriptor EventAccessorOrder = new(
         id: DiagnosticIds.EventAccessorOrder,
         title: "Event accessors should follow order",
@@ -1117,6 +1118,7 @@ internal static class Descriptors
         description: "No blank line between an attribute list and the element it applies to, or the element's next attribute "
             + "list. Not a StyleCop rule: proposed in StyleCop issue #738 and never implemented there.",
         helpLinkUri: HelpBase + DiagnosticIds.BlankLineAfterAttributes + ".md");
+
     public static readonly DiagnosticDescriptor ConditionalLayout = new(
         id: DiagnosticIds.ConditionalLayout,
         title: "A split conditional expression has the condition, '?' and ':' parts on their own lines",

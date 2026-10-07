@@ -225,7 +225,7 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (before || after || Line(text, part.SpanStart) != Line(text, part.Span.End))'; Replace = 'if (before || after)'; Tests = 'ConditionalLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/ConditionalLayout.cs'; Find = 'if (before || after || '; Replace = 'if (after || '; Tests = 'ConditionalLayoutTests' }
         # BRO1603 (periods): closing punctuation, entities, excluded tags; BRO1606: a summary starting with <para>
-        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '.TrimEnd().TrimEnd(ClosingPunctuation)'; Replace = '.TrimEnd()'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '.TrimEnd(ClosingPunctuation);'; Replace = ';'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 't.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken'; Replace = 't.IsKind(SyntaxKind.XmlTextLiteralToken)'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '&& !excluded.Contains(name) && '; Replace = '&& '; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = ' || excluded.Contains(name) || IsQuotedSentence'; Replace = ' || IsQuotedSentence'; Tests = 'DocumentationTests' }
@@ -356,7 +356,9 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'field.DeclaredAccessibility != Accessibility.Private || !IsSourceField(field)'; Replace = '!IsSourceField(field)'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| !modifiersMatch(modifiers))'; Replace = ')'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '.ThenByDescending(r => r.Modifiers)'; Replace = ''; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '.OrderBy(r => r.Priority).ThenByDescending'; Replace = '.OrderBy(r => 0).ThenByDescending'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '.OrderBy(r => r.Priority)
+            .ThenByDescending'; Replace = '.OrderBy(r => 0)
+            .ThenByDescending'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '            _ => null,
         };
     }'; Replace = '            _ => FieldStyle.CamelCase,

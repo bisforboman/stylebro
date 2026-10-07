@@ -10,7 +10,7 @@ namespace StyleBro.Analyzers.Ordering;
 /// Members whose declaration order is visible at run time, so sorting them changes behavior:
 /// <list type="bullet">
 /// <item>instance fields of a struct (sequential layout is the default) or of a type with [StructLayout]: the memory
-/// layout that interop, <c>unsafe</c> code and Marshal see;</item>
+/// layout that interop, <see langword="unsafe"/> code and Marshal see;</item>
 /// <item>fields and properties of a type that a serializer writes in declaration order (Json.NET, DataContract,
 /// XmlSerializer, MessagePack, protobuf), recognized by a serializer attribute on the type or one of its members. Found
 /// on Newtonsoft.Json: sorting changed the order of properties in the JSON its tests compare.</item>

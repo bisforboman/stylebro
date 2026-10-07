@@ -14,6 +14,25 @@ internal enum FieldStyle
     UnderscoreCamelCase,
 }
 
+/// <summary>Which field naming rule applies to a field.</summary>
+internal enum FieldRule
+{
+    /// <summary>BRO1303: private field casing (SA1306, SA1309).</summary>
+    PrivateCasing,
+
+    /// <summary>BRO1306: PascalCase for constants, static readonly and non-private fields (SA1303, SA1311, SA1307, SA1304).</summary>
+    PascalCasing,
+
+    /// <summary>BRO1307: no 'm_', 's_' or 't_' prefix (SA1308).</summary>
+    Prefix,
+
+    /// <summary>BRO1308: no underscore inside the name (SA1310).</summary>
+    Underscore,
+
+    /// <summary>BRO1310: no Hungarian prefix (SA1305), off by default.</summary>
+    Hungarian,
+}
+
 /// <summary>
 /// The field styles from the configuration: private instance fields (<see cref="Private"/>), and private constants and
 /// private static readonly fields when an SDK naming rule asks for camel case for them (null: PascalCase, like StyleCop).
@@ -34,25 +53,6 @@ internal readonly struct FieldStyles
     public FieldStyle? StaticReadOnly { get; }
 
     public static implicit operator FieldStyles(FieldStyle style) => new(style, null, null);
-}
-
-/// <summary>Which field naming rule applies to a field.</summary>
-internal enum FieldRule
-{
-    /// <summary>BRO1303: private field casing (SA1306, SA1309).</summary>
-    PrivateCasing,
-
-    /// <summary>BRO1306: PascalCase for constants, static readonly and non-private fields (SA1303, SA1311, SA1307, SA1304).</summary>
-    PascalCasing,
-
-    /// <summary>BRO1307: no 'm_', 's_' or 't_' prefix (SA1308).</summary>
-    Prefix,
-
-    /// <summary>BRO1308: no underscore inside the name (SA1310).</summary>
-    Underscore,
-
-    /// <summary>BRO1310: no Hungarian prefix (SA1305), off by default.</summary>
-    Hungarian,
 }
 
 /// <summary>
@@ -394,7 +394,8 @@ internal static class FieldNames
         return GetNamingRules(options, m => m.Length == 0)
             .Select(r => (r.Priority, r.Name, Style: ToFieldStyle(options, r.Style)))
             .Where(r => r.Style is not null)
-            .OrderBy(r => r.Priority).ThenBy(r => r.Name, System.StringComparer.Ordinal)
+            .OrderBy(r => r.Priority)
+            .ThenBy(r => r.Name, System.StringComparer.Ordinal)
             .Select(r => r.Style)
             .FirstOrDefault();
     }
@@ -407,7 +408,9 @@ internal static class FieldNames
     private static FieldStyle? GetStaticStyleFromNamingRules(AnalyzerConfigOptions options, System.Func<string[], bool> modifiersMatch)
     {
         var rule = GetNamingRules(options, modifiersMatch)
-            .OrderBy(r => r.Priority).ThenByDescending(r => r.Modifiers).ThenBy(r => r.Name, System.StringComparer.Ordinal)
+            .OrderBy(r => r.Priority)
+            .ThenByDescending(r => r.Modifiers)
+            .ThenBy(r => r.Name, System.StringComparer.Ordinal)
             .FirstOrDefault();
         return rule.Style is null ? null : ToFieldStyle(options, rule.Style);
     }
@@ -432,7 +435,10 @@ internal static class FieldNames
             var symbols = Get(key);
             var style = Get($"dotnet_naming_rule.{rule}.style");
             var modifiers = (Get($"dotnet_naming_symbols.{symbols}.required_modifiers") ?? string.Empty)
-                .Split(',').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray();
+                .Split(',')
+                .Select(m => m.Trim())
+                .Where(m => m.Length > 0)
+                .ToArray();
             if (symbols is null || style is null || Get($"dotnet_naming_rule.{rule}.severity") is "none" or "silent"
                 || !Has(Get($"dotnet_naming_symbols.{symbols}.applicable_kinds"), "field")
                 || !Has(Get($"dotnet_naming_symbols.{symbols}.applicable_accessibilities"), "private")

@@ -7,9 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace StyleBro.Analyzers.Readability;
 
-/// <summary>
-/// Shared logic for BRO1104, used by both the analyzer and the code fix: what 'new T()' for a value type becomes.
-/// </summary>
+/// <summary>Shared logic for BRO1104, used by both the analyzer and the code fix: what 'new T()' for a value type becomes.</summary>
 internal static class DefaultValueConstructors
 {
     /// <summary>

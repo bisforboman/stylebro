@@ -138,9 +138,12 @@ internal static class ElementSeparation
         return node switch
         {
             CompilationUnitSyntax unit => unit.Externs.Cast<SyntaxNode>().Concat(unit.Usings).Concat(unit.AttributeLists)
-                .Concat(unit.Members.Where(m => m is not GlobalStatementSyntax)).ToList(),
+                .Concat(unit.Members.Where(m => m is not GlobalStatementSyntax))
+                .ToList(),
             FileScopedNamespaceDeclarationSyntax fileScoped => new SyntaxNode[] { fileScoped }.Concat(fileScoped.Externs)
-                .Concat(fileScoped.Usings).Concat(fileScoped.Members).ToList(),
+                .Concat(fileScoped.Usings)
+                .Concat(fileScoped.Members)
+                .ToList(),
             NamespaceDeclarationSyntax ns => ns.Externs.Cast<SyntaxNode>().Concat(ns.Usings).Concat(ns.Members).ToList(),
             TypeDeclarationSyntax type => type.Members.Cast<SyntaxNode>().ToList(),
             AccessorListSyntax accessors => accessors.Accessors.Cast<SyntaxNode>().ToList(),

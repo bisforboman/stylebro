@@ -98,6 +98,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
                 }
 
                 break;
+
             case IPropertySymbol property:
                 if (property.OverriddenProperty is { } overriddenProperty)
                 {
@@ -110,6 +111,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
                 }
 
                 break;
+
             default:
                 yield break;
         }

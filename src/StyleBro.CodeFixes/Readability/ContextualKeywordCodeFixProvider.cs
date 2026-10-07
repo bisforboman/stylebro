@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using StyleBro.Analyzers;
-using StyleBro.Analyzers.Readability;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers;
+using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 

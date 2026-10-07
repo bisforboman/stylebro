@@ -12,48 +12,6 @@ using StyleBro.Analyzers.Layout;
 
 namespace StyleBro.Analyzers.Documentation;
 
-/// <summary>The settings for BRO1615, read from .editorconfig. Null (the rule does nothing) without a company name.</summary>
-internal sealed class FileHeaderOptions
-{
-    public const string CompanyKey = "stylebro_file_header_company";
-    public const string CopyrightKey = "stylebro_file_header_copyright";
-    public const string DecorationKey = "stylebro_file_header_decoration";
-
-    /// <summary>StyleCop's default copyright text.</summary>
-    public const string DefaultCopyright = "Copyright (c) {companyName}. All rights reserved.";
-
-    private FileHeaderOptions(string company, string copyright, string decoration)
-    {
-        Company = company;
-        Copyright = copyright;
-        Decoration = decoration;
-    }
-
-    public string Company { get; }
-
-    /// <summary>Gets the copyright text with '\n' for line breaks and the variables {companyName} and {fileName}.</summary>
-    public string Copyright { get; }
-
-    /// <summary>Gets a line written above and below a new header (StyleCop's headerDecoration), or empty.</summary>
-    public string Decoration { get; }
-
-    public static FileHeaderOptions? Read(AnalyzerConfigOptions options)
-    {
-        if (!options.TryGetValue(CompanyKey, out var company) || string.IsNullOrWhiteSpace(company))
-        {
-            return null;
-        }
-
-        var copyright = options.TryGetValue(CopyrightKey, out var value) && !string.IsNullOrWhiteSpace(value) ? value : DefaultCopyright;
-        options.TryGetValue(DecorationKey, out var decoration);
-        return new FileHeaderOptions(company.Trim(), copyright, decoration?.Trim() ?? string.Empty);
-    }
-
-    /// <summary>The copyright text for a file: '\n' escapes become line breaks, the variables are filled in.</summary>
-    public string GetCopyrightText(string fileName) =>
-        Copyright.Replace("\\n", "\n").Replace("{companyName}", Company).Replace("{fileName}", fileName);
-}
-
 /// <summary>
 /// Shared logic for BRO1615 (StyleCop SA1633 with an XML header, SA1634-SA1638, SA1640, SA1641): the file starts with
 /// <c>// &lt;copyright file="Name.cs" company="Company"&gt;</c>, the copyright text and <c>// &lt;/copyright&gt;</c>.
@@ -343,4 +301,46 @@ internal static class FileHeaders
 
         public TextChange Change { get; }
     }
+}
+
+/// <summary>The settings for BRO1615, read from .editorconfig. Null (the rule does nothing) without a company name.</summary>
+internal sealed class FileHeaderOptions
+{
+    public const string CompanyKey = "stylebro_file_header_company";
+    public const string CopyrightKey = "stylebro_file_header_copyright";
+    public const string DecorationKey = "stylebro_file_header_decoration";
+
+    /// <summary>StyleCop's default copyright text.</summary>
+    public const string DefaultCopyright = "Copyright (c) {companyName}. All rights reserved.";
+
+    private FileHeaderOptions(string company, string copyright, string decoration)
+    {
+        Company = company;
+        Copyright = copyright;
+        Decoration = decoration;
+    }
+
+    public string Company { get; }
+
+    /// <summary>Gets the copyright text with '\n' for line breaks and the variables {companyName} and {fileName}.</summary>
+    public string Copyright { get; }
+
+    /// <summary>Gets a line written above and below a new header (StyleCop's headerDecoration), or empty.</summary>
+    public string Decoration { get; }
+
+    public static FileHeaderOptions? Read(AnalyzerConfigOptions options)
+    {
+        if (!options.TryGetValue(CompanyKey, out var company) || string.IsNullOrWhiteSpace(company))
+        {
+            return null;
+        }
+
+        var copyright = options.TryGetValue(CopyrightKey, out var value) && !string.IsNullOrWhiteSpace(value) ? value : DefaultCopyright;
+        options.TryGetValue(DecorationKey, out var decoration);
+        return new FileHeaderOptions(company.Trim(), copyright, decoration?.Trim() ?? string.Empty);
+    }
+
+    /// <summary>The copyright text for a file: '\n' escapes become line breaks, the variables are filled in.</summary>
+    public string GetCopyrightText(string fileName) =>
+        Copyright.Replace("\\n", "\n").Replace("{companyName}", Company).Replace("{fileName}", fileName);
 }

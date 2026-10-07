@@ -31,6 +31,7 @@ internal static class EmptyStrings
                 case ConstantPatternSyntax:
                 case EqualsValueClauseSyntax { Parent: ParameterSyntax }:
                     return true;
+
                 case VariableDeclarationSyntax declaration:
                     return declaration.Parent switch
                     {
@@ -38,6 +39,7 @@ internal static class EmptyStrings
                         LocalDeclarationStatementSyntax local => local.IsConst,
                         _ => false,
                     };
+
                 case StatementSyntax:
                 case MemberDeclarationSyntax:
                     return false;

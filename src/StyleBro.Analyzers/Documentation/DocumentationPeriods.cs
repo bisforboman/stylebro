@@ -127,17 +127,21 @@ internal static class DocumentationPeriods
 
                     // A period may be followed by closing punctuation: '(see above.)', '"done."'.
                     var ending = string.Concat(text.TextTokens.TakeWhile(t => t != last).Append(last).Select(t => t.ValueText))
-                        .TrimEnd().TrimEnd(ClosingPunctuation);
+                        .TrimEnd()
+                        .TrimEnd(ClosingPunctuation);
                     return ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':' ? null
                         : last.IsKind(SyntaxKind.XmlEntityLiteralToken) ? last.Span.End
                         : last.SpanStart + last.Text.TrimEnd().Length;
+
                 case XmlElementSyntax child:
                     var name = child.StartTag.Name.LocalName.ValueText;
                     return BlockElements.Contains(name) || excluded.Contains(name) || IsQuotedSentence(child) ? null
                         : ContainerElements.Contains(name) ? GetInsertionPoint(child, excluded)
                         : child.Span.End;
+
                 case XmlEmptyElementSyntax empty:
                     return BlockElements.Contains(empty.Name.LocalName.ValueText) ? null : empty.Span.End;
+
                 default:
                     return null;
             }

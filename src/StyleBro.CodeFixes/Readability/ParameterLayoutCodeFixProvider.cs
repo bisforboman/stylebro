@@ -3,12 +3,12 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using StyleBro.Analyzers;
-using StyleBro.Analyzers.Readability;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers;
+using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 
@@ -84,7 +84,8 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
                 var open = rounds.Aggregate(list.Open, Map);
                 if (current.FindToken(open) is var token && token.SpanStart == open && token.Parent is { } node
                     && ParameterLayout.GetList(node).Open == token
-                    && (list.All ? ParameterLayout.GetFirstMisplacedItem(node, currentText) ?? ParameterLayout.GetFirstItemToMove(node, currentText)
+                    && (list.All
+                        ? ParameterLayout.GetFirstMisplacedItem(node, currentText) ?? ParameterLayout.GetFirstItemToMove(node, currentText)
                         : ParameterLayout.GetFirstItemToMove(node, currentText)) is not null)
                 {
                     foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All))

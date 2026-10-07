@@ -12,8 +12,8 @@ internal static class RedundantBaseTypes
     /// <summary>
     /// The edit that removes the base type (with the colon when it is the only one, with the comma after it otherwise), or
     /// null when it isn't redundant or a comment or directive sits in the removed text. An enum's base is redundant when
-    /// the underlying type is <c>int</c> however it is written (<c>int</c>, <c>Int32</c>, an alias); a class's when its
-    /// first base type is named <c>object</c> or <c>Object</c> and binds to <c>System.Object</c>.
+    /// the underlying type is <see langword="int"/> however it is written (<see langword="int"/>, <c>Int32</c>, an alias); a class's when its
+    /// first base type is named <see langword="object"/> or <c>Object</c> and binds to <c>System.Object</c>.
     /// </summary>
     public static TextChange? GetChange(BaseTypeDeclarationSyntax declaration, SemanticModel model, CancellationToken cancellationToken)
     {

@@ -22,7 +22,7 @@ internal static class QualifiedUsings
         genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
 
-    /// <summary>For the directive's own (non-generic) type: <c>System.Int32</c>, not <c>int</c>.</summary>
+    /// <summary>For the directive's own (non-generic) type: <c>System.Int32</c>, not <see langword="int"/>.</summary>
     private static readonly SymbolDisplayFormat QualifiedNoKeywords = Qualified.RemoveMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
     /// <summary>
@@ -127,6 +127,7 @@ internal static class QualifiedUsings
                 builder.Append('.');
                 Append(builder, qualified.Right);
                 break;
+
             case GenericNameSyntax generic:
                 builder.Append(generic.Identifier.Text).Append('<');
                 for (var i = 0; i < generic.TypeArgumentList.Arguments.Count; i++)
@@ -137,9 +138,11 @@ internal static class QualifiedUsings
 
                 builder.Append('>');
                 break;
+
             case IdentifierNameSyntax identifier:
                 builder.Append(identifier.Identifier.Text);
                 break;
+
             default:
                 builder.Append(type.ToString());
                 break;

@@ -29,11 +29,14 @@ internal static class Suppressions
         var added = 0;
 
         foreach (var pragma in root.DescendantTrivia(descendIntoTrivia: true)
-            .Select(t => t.GetStructure()).OfType<PragmaWarningDirectiveTriviaSyntax>())
+            .Select(t => t.GetStructure())
+            .OfType<PragmaWarningDirectiveTriviaSyntax>())
         {
             var codes = pragma.ErrorCodes.Select(c => c.ToString().Trim()).ToList();
             var missing = codes.Where(replacements.ContainsKey).SelectMany(c => replacements[c])
-                .Distinct().Where(id => !codes.Contains(id)).ToList();
+                .Distinct()
+                .Where(id => !codes.Contains(id))
+                .ToList();
             if (missing.Count > 0)
             {
                 changes.Add(new TextChange(new TextSpan(pragma.ErrorCodes.Last().Span.End, 0), ", " + string.Join(", ", missing)));
@@ -71,9 +74,7 @@ internal static class Suppressions
         return changes.Count == 0 ? (text, 0) : (source.WithChanges(changes).ToString(), added);
     }
 
-    /// <summary>
-    /// The same for MSBuild files: '&lt;NoWarn&gt;$(NoWarn);SA1123;SA1600&lt;/NoWarn&gt;' gets ';BRO1113;BRO1601'.
-    /// </summary>
+    /// <summary>The same for MSBuild files: '&lt;NoWarn&gt;$(NoWarn);SA1123;SA1600&lt;/NoWarn&gt;' gets ';BRO1113;BRO1601'.</summary>
     public static (string Text, int Added) RewriteNoWarn(string text, IReadOnlyDictionary<string, SortedSet<string>> replacements)
     {
         var added = 0;
@@ -82,7 +83,9 @@ internal static class Suppressions
             var value = match.Groups[2].Value;
             var codes = value.Split(';', ',').Select(c => c.Trim()).Where(c => c.Length > 0).ToList();
             var missing = codes.Where(replacements.ContainsKey).SelectMany(c => replacements[c])
-                .Distinct().Where(id => !codes.Contains(id)).ToList();
+                .Distinct()
+                .Where(id => !codes.Contains(id))
+                .ToList();
             if (missing.Count == 0)
             {
                 return match.Value;

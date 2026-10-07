@@ -154,8 +154,10 @@ internal sealed class StyleCopSetup
         var msbuild = files.Where(IsMSBuild).Select(File.ReadAllText).ToList();
         var documentationParsed = msbuild.Any(text => DocumentationFile.IsMatch(text));
         var version = msbuild.Select(text => PackageVersion.Match(text))
-            .Where(m => m.Success).Select(m => m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value.Trim())
-            .OrderBy(v => v, StringComparer.Ordinal).FirstOrDefault();
+            .Where(m => m.Success)
+            .Select(m => m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value.Trim())
+            .OrderBy(v => v, StringComparer.Ordinal)
+            .FirstOrDefault();
         if (version is not null && (version.StartsWith("1.1.", StringComparison.Ordinal) || version.StartsWith("1.0.", StringComparison.Ordinal)))
         {
             var old = LoadIds("StyleCopRules-1.1.118.csv");

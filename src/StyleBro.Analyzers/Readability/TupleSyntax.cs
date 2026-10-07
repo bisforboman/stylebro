@@ -17,7 +17,7 @@ internal static class TupleSyntax
 {
     /// <summary>
     /// A <c>ValueTuple&lt;...&gt;</c> type with 2 to 7 elements in a type-only context, the outermost one when they're
-    /// nested (its replacement converts the inner ones too). The type of a <c>new</c> is
+    /// nested (its replacement converts the inner ones too). The type of a <see langword="new"/> is
     /// <see cref="GetCreation"/>'s: <c>new (int, string)(1, "a")</c> doesn't compile.
     /// </summary>
     public static Finding? GetType(GenericNameSyntax name, SemanticModel model, CancellationToken cancellationToken)
@@ -141,7 +141,7 @@ internal static class TupleSyntax
     private static TypeSyntax Outermost(GenericNameSyntax name)
     {
         TypeSyntax node = name;
-        while (node.Parent is QualifiedNameSyntax qualified && qualified.Right == node || node.Parent is AliasQualifiedNameSyntax alias && alias.Name == node)
+        while ((node.Parent is QualifiedNameSyntax qualified && qualified.Right == node) || (node.Parent is AliasQualifiedNameSyntax alias && alias.Name == node))
         {
             node = (TypeSyntax)node.Parent;
         }
