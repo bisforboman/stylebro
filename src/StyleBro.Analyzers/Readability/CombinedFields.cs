@@ -17,10 +17,12 @@ internal static class CombinedFields
     /// split safely (a comment or directive inside it, or other code on its first line). Every new declaration gets the
     /// attributes, modifiers and type, and the documentation comment if there is one: StyleCop's fix keeps attributes on
     /// the first field only, which takes them away from the others. Event fields, and a field that spans several lines from
-    /// the next, are separated by a blank line, which BRO1505 wants between them.
+    /// the next, are separated by a blank line, which BRO1505 wants between them; with
+    /// <paramref name="allowAdjacentSingleLine"/> (BRO1505's stylebro_allow_adjacent_single_line_members) single-line event
+    /// fields aren't.
     /// </summary>
-    public static TextChange? GetChange(BaseFieldDeclarationSyntax declaration, SourceText text) =>
-        GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text);
+    public static TextChange? GetChange(BaseFieldDeclarationSyntax declaration, SourceText text, bool allowAdjacentSingleLine = false) =>
+        GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text, allowAdjacentSingleLine);
 
     /// <summary>
     /// The same for a local declaration. Not 'using' declarations (each variable's lifetime would stay the same, but
@@ -32,7 +34,7 @@ internal static class CombinedFields
     public static TextChange? GetChange(LocalDeclarationStatementSyntax declaration, SourceText text) =>
         declaration.UsingKeyword.IsKind(SyntaxKind.None) ? GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text) : null;
 
-    private static TextChange? GetChange(SyntaxNode declaration, VariableDeclarationSyntax variableDeclaration, SyntaxToken semicolon, SourceText text)
+    private static TextChange? GetChange(SyntaxNode declaration, VariableDeclarationSyntax variableDeclaration, SyntaxToken semicolon, SourceText text, bool allowAdjacentSingleLine = false)
     {
         var variables = variableDeclaration.Variables;
         if (variables.Count < 2 || declaration.ContainsDirectives || declaration.ContainsDiagnostics
@@ -65,10 +67,17 @@ internal static class CombinedFields
         // 'const string' and then each constant on its own line) becomes a space: every new declaration is one line.
         var prefix = text.ToString(TextSpan.FromBounds(declaration.SpanStart, variables[0].SpanStart)).TrimEnd() + " ";
 
-        // BRO1505 wants a blank line between event fields, and below a field that spans several lines.
+        // BRO1505 wants a blank line between event fields (unless single-line ones may sit together; documented ones still
+        // get it, BRO1513 wants it above their documentation), and below a field that spans several lines (as SA1516
+        // measures it: below the attributes).
+        var afterAttributes = declaration is BaseFieldDeclarationSyntax { AttributeLists.Count: > 0 } withAttributes
+            ? withAttributes.AttributeLists.Last().FullSpan.End
+            : declaration.SpanStart;
+        var multiLinePrefix = text.ToString(TextSpan.FromBounds(afterAttributes, variables[0].SpanStart)).TrimEnd().IndexOf('\n') >= 0;
         var parts = variables.Select((v, i) => (i == 0 ? string.Empty
                 : sameLine ? " "
-                : (declaration is EventFieldDeclarationSyntax || (declaration is FieldDeclarationSyntax && text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0) ? lineBreak + lineBreak : lineBreak)
+                : ((declaration is EventFieldDeclarationSyntax && (!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0))
+                    || (declaration is BaseFieldDeclarationSyntax && text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0) ? lineBreak + lineBreak : lineBreak)
                     + docText + indent)
             + prefix + text.ToString(v.Span) + semicolon.Text);
         return new TextChange(declaration.Span, string.Concat(parts));

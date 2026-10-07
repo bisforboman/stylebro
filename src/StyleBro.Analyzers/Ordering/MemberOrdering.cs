@@ -103,7 +103,7 @@ internal static class MemberOrdering
     /// Returns the type with its members sorted. Blank-line layout stays with the position ("slot"),
     /// while comments, doc comments and attributes travel with the member.
     /// </summary>
-    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null, AnalyzerConfigOptions? autoAccessorLines = null)
+    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null, AnalyzerConfigOptions? autoAccessorLines = null, bool allowAdjacentSingleLine = false)
     {
         var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
         if (keys is null)
@@ -134,7 +134,8 @@ internal static class MemberOrdering
             // the blank line in exactly those cases; violations that already existed are left to those rules.
             if (slot > 0 && !layout.Any(SyntaxKind.EndOfLineTrivia))
             {
-                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines) && !NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines);
+                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines, allowAdjacentSingleLine)
+                    && !NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines, allowAdjacentSingleLine);
                 var createsComment = StartsWithLineComment(split[source].Content) && !StartsWithLineComment(split[slot].Content);
 
                 // A doc comment arriving where a member without one sat (field below field: no blank line needed before)
@@ -520,9 +521,9 @@ internal static class MemberOrdering
     }
 
     /// <summary>Whether two neighbouring members need a blank line between them (BRO1505's rule; options when BRO1527 is on).</summary>
-    private static bool NeedsSeparation(MemberDeclarationSyntax previous, MemberDeclarationSyntax current, AnalyzerConfigOptions? autoAccessorLines)
+    private static bool NeedsSeparation(MemberDeclarationSyntax previous, MemberDeclarationSyntax current, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine)
     {
-        return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines);
+        return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines, allowAdjacentSingleLine);
     }
 
     private static bool StartsWithLineComment(SyntaxTriviaList content)

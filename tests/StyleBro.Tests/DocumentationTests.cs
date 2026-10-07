@@ -763,6 +763,57 @@ public class DocumentationTests
         """,
         editorConfig: "stylebro_document_internal_elements = false");
 
+    // Both insertion paths (plain, and below code with BRO1513's blank line) write the configured form; an existing
+    // compact tag isn't rewritten.
+    [Fact]
+    public Task InheritDoc_SpacedStyle_InsertsTheSpacedTag() => VerifyFixAsync(
+        """
+        /// <summary>Something.</summary>
+        public interface IThing
+        {
+            /// <summary>Gets the name.</summary>
+            string Name { get; }
+
+            /// <summary>Gets the size.</summary>
+            int Size { get; }
+        }
+
+        /// <summary>A thing.</summary>
+        public class Thing : IThing
+        {
+            /// <inheritdoc/>
+            public int Size { get; }
+            public string {|BRO1601:Name|} => "thing";
+
+            public override string {|BRO1601:ToString|}() => Name;
+        }
+        """,
+        """
+        /// <summary>Something.</summary>
+        public interface IThing
+        {
+            /// <summary>Gets the name.</summary>
+            string Name { get; }
+
+            /// <summary>Gets the size.</summary>
+            int Size { get; }
+        }
+
+        /// <summary>A thing.</summary>
+        public class Thing : IThing
+        {
+            /// <inheritdoc/>
+            public int Size { get; }
+
+            /// <inheritdoc />
+            public string Name => "thing";
+
+            /// <inheritdoc />
+            public override string ToString() => Name;
+        }
+        """,
+        editorConfig: "stylebro_inheritdoc_style = spaced");
+
     [Fact]
     public Task ConstructorSummaries_BeginWithTheStandardText() => VerifyFixAsync(
         """

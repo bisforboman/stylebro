@@ -100,7 +100,7 @@ public class ConstraintPlacementTests
     public Task Tabs_AreRead() => VerifyFixAsync(
         "class Box<T> {|BRO1111:where T : class|}\n{\n}\n",
         "class Box<T>\n\twhere T : class\n{\n}\n",
-        editorConfig: "indent_style = tab");
+        editorConfig: "indent_style = tab\nstylebro_constraint_placement = own_line");
 
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
@@ -113,4 +113,139 @@ public class ConstraintPlacementTests
         {
         }
         """);
+
+    // stylebro_constraint_placement = same_line: every clause joins the declaration's line (one space), all or nothing,
+    // when the joined line (up to the last clause) fits max_line_length. The '=>' of an expression body stays; the ')'
+    // that BRO1110 moves to the last parameter moves in the same edit.
+    [Fact]
+    public Task SameLine_ConstraintsJoinTheDeclaration() => VerifyFixAsync(
+        """
+        using System;
+
+        public class Box<T>
+            {|BRO1111:where T : class|}
+        {
+        }
+
+        public class Pair<TKey, TValue> where TKey : class
+            {|BRO1111:where TValue : new()|}
+        {
+        }
+
+        public static class Methods
+        {
+            public static void M<T>(
+                T value)
+                {|BRO1111:where T : class|}
+            {
+            }
+
+            public static void N<T>(
+                T value
+            )
+                {|BRO1111:where T : class|}
+            {
+            }
+
+            public static void Expression<T>(T value)
+                {|BRO1111:where T : class|}
+                => Console.WriteLine(value);
+        }
+        """,
+        """
+        using System;
+
+        public class Box<T> where T : class
+        {
+        }
+
+        public class Pair<TKey, TValue> where TKey : class where TValue : new()
+        {
+        }
+
+        public static class Methods
+        {
+            public static void M<T>(
+                T value) where T : class
+            {
+            }
+
+            public static void N<T>(
+                T value) where T : class
+            {
+            }
+
+            public static void Expression<T>(T value) where T : class
+                => Console.WriteLine(value);
+        }
+        """,
+        editorConfig: "stylebro_constraint_placement = same_line\nmax_line_length = 71");
+
+    [Fact]
+    public Task SameLine_WithoutBro1110_TheParenthesisStays() => VerifyFixAsync(
+        """
+        public static class Methods
+        {
+            public static void M<T>(
+                T value
+            )
+                {|BRO1111:where T : class|}
+            {
+            }
+        }
+        """,
+        """
+        public static class Methods
+        {
+            public static void M<T>(
+                T value
+            ) where T : class
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_constraint_placement = same_line\ndotnet_diagnostic.BRO1110.severity = none");
+
+    // Too long together (73 > 71; also when the first clause is there already), a comment in a gap (also one BRO1110's
+    // ')' would carry along), a clause on several lines, already joined.
+    [Fact]
+    public Task SameLine_NotReported() => VerifyNoDiagnosticsAsync(
+        """
+        public class Box<TItem, TOther>
+            where TItem : class
+            where TOther : struct
+        {
+        }
+
+        public class Box2<TItem, TOther> where TItem : class
+            where TOther : struct
+        {
+        }
+
+        public class Commented<T> // why
+            where T : class
+        {
+        }
+
+        public static class Methods
+        {
+            public static void M<T>(
+                T value // why
+            )
+                where T : class
+            {
+            }
+        }
+
+        public class Split<T>
+            where T :
+                class
+        {
+        }
+
+        public class Joined<T> where T : class
+        {
+        }
+        """,
+        "stylebro_constraint_placement = same_line\nmax_line_length = 71");
 }

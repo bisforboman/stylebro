@@ -853,6 +853,37 @@ public class FixOrderTests
         "BRO1106",
         "BRO1138");
 
+    // The literal style: BRO1103 swaps 'string.Empty == s' (a static readonly field counts as a constant) or '"" == s'.
+    [Fact]
+    public Task Strings_TheLiteralStyle() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public string A = string.Empty;
+            public string B = @"";
+
+            public bool M(string s) => string.Empty == s;
+        }
+        """,
+        "stylebro_empty_string_style = literal\n",
+        "BRO1103",
+        "BRO1106",
+        "BRO1138");
+
+    [Fact]
+    public Task LiteralSuffixes_OnlyLInUpperCase() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public long M(long a) => a + (long)1u;
+
+            public ulong N() => (ulong)2l + 3ul;
+        }
+        """,
+        "stylebro_upper_case_literal_suffixes = l_only\n",
+        "BRO1122",
+        "BRO1135");
+
     // BRO1148 writes the form BRO1133 asks for, so BRO1133 never sees a check to rewrite; BRO1405 removes parentheses
     // around 'x.HasValue', and BRO1148 only replaces it where '!= null' binds the same.
     [Theory]
@@ -1063,6 +1094,156 @@ public class FixOrderTests
         "BRO1140",
         "BRO1146",
         "BRO1509");
+
+    // stylebro_allow_adjacent_single_line_members: BRO1001's sort and BRO1527's collapse leave single-line members
+    // without a block body together, as BRO1505 judges them.
+    [Fact]
+    public Task AdjacentSingleLineMembers_SortedAndCollapsed() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M() => P;
+            public int P { get; set; }
+            public int R
+            {
+                get;
+                set;
+            }
+            public void N() { }
+        }
+        """,
+        "stylebro_allow_adjacent_single_line_members = true\n",
+        "BRO1001",
+        "BRO1505",
+        "BRO1519",
+        "BRO1527");
+
+    // The same for BRO1114's split (a documented event field keeps BRO1513's blank line) and BRO1509's expansion.
+    [Fact]
+    public Task AdjacentSingleLineMembers_SplitAndExpanded() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public event System.EventHandler? A, B;
+            /// <summary>Docs.</summary>
+            public event System.EventHandler? D, E;
+        }
+
+        public interface I { void A(); int B(); void C() { } int D => 1; }
+        """,
+        "stylebro_allow_adjacent_single_line_members = true\n",
+        "BRO1114",
+        "BRO1505",
+        "BRO1509",
+        "BRO1513");
+
+    // stylebro_constructor_initializer_placement = same_line next to the parameter list rules: BRO1110's ')' moves in
+    // BRO1105's edit, the others don't change the ')' line's end; BRO1509 expands the body after the initializer.
+    [Fact]
+    public Task ConstructorInitializerSameLine_NextToParameterListRules() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int x)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(
+                int a
+            )
+                : base(a) { }
+
+            public C(int a, long b,
+                long c)
+                : base(a)
+            {
+            }
+
+            public C
+                (long a)
+                : base(1)
+            {
+            }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\n",
+        "BRO1105",
+        "BRO1107",
+        "BRO1108",
+        "BRO1109",
+        "BRO1110",
+        "BRO1509");
+
+    // stylebro_constraint_placement = same_line next to BRO1110 (its ')' moves in BRO1111's edit), BRO1521 (it leaves an
+    // '=>' after a constraint alone) and BRO1509 (it expands the body after the constraints).
+    [Fact]
+    public Task ConstraintSameLine_NextToParenthesesArrowsAndBodies() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            public static void M<T>(
+                T value
+            )
+                where T : class { }
+
+            public static int N<T>(T value)
+                where T : class
+                => 1;
+
+            public static int O<T>(T value)
+                where T : class =>
+                1;
+        }
+
+        public class Box<T>
+            where T : class { }
+        """,
+        "stylebro_constraint_placement = same_line\n",
+        "BRO1110",
+        "BRO1111",
+        "BRO1505",
+        "BRO1509",
+        "BRO1521");
+
+    [Fact]
+    public Task OmittedTrailingCommas_NextToEnumExpansionAndValueLines() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public enum A { X, Y, }
+
+        public enum B { X, Y }
+
+        public enum C
+        {
+            X, Y,
+        }
+
+        public class D
+        {
+            public int[] M() => new[] { 1, 2, };
+        }
+        """,
+        "stylebro_trailing_comma = omit\n",
+        "BRO1121",
+        "BRO1401",
+        "BRO1509");
+
+    [Fact]
+    public Task AllowedEmptyBlocks_InsideExpandedOnes() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class A { public A() { } public void M(bool b) { if (b) { } else { M(b); } } }
+
+        public enum E { }
+
+        public class B { }
+        """,
+        "stylebro_allow_empty_single_line_blocks = true\n",
+        "BRO1505",
+        "BRO1508",
+        "BRO1509",
+        "BRO1519");
 
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);

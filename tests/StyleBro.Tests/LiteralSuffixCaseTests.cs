@@ -54,4 +54,27 @@ public class LiteralSuffixCaseTests
             private const int F = 10;
         }
         """);
+
+    // Like Sonar S818: only 'l' must be upper case, and only the 'l' changes.
+    [Fact]
+    public Task LOnly_UpperCasesJustTheL() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            private const long A = {|BRO1135:1l|};
+            private const uint B = 2u;
+            private const ulong D = {|BRO1135:3ul|} + {|BRO1135:4Ul|} + 5uL + {|BRO1135:6lu|} + 7LU + 8UL;
+            private const ulong E = {|BRO1135:0xFFul|};
+        }
+        """,
+        """
+        public class C
+        {
+            private const long A = 1L;
+            private const uint B = 2u;
+            private const ulong D = 3uL + 4UL + 5uL + 6Lu + 7LU + 8UL;
+            private const ulong E = 0xFFuL;
+        }
+        """,
+        "stylebro_upper_case_literal_suffixes = l_only\n");
 }

@@ -99,6 +99,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                     changes.Add(DocumentationComments.GetInheritDocChange(
                         member,
                         text,
+                        document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree),
                         Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineBeforeDocumentation, cancellationToken)));
                 }
             }

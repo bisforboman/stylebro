@@ -25,6 +25,9 @@ internal static class DocumentationComments
     /// <summary>Private elements (and members of private types) need documentation: StyleCop's documentPrivateElements.</summary>
     public const string PrivateElementsKey = "stylebro_document_private_elements";
 
+    /// <summary>How BRO1601 writes the tag: 'compact' (default, '&lt;inheritdoc/&gt;') or 'spaced' ('&lt;inheritdoc /&gt;').</summary>
+    public const string InheritDocStyleKey = "stylebro_inheritdoc_style";
+
     /// <summary>
     /// The SDK property that turns on documentation generation; the package's build targets make it compiler-visible. The
     /// SDK always sets it (true when DocumentationFile is set), so it's the same in a build and under 'dotnet format',
@@ -98,8 +101,9 @@ internal static class DocumentationComments
     /// above holds code: neighbouring single-line properties may sit together (BRO1505), but a documented one may not,
     /// and without it 'dotnet format' needed a second run.
     /// </remarks>
-    public static TextChange GetInheritDocChange(SyntaxNode member, SourceText text, bool blankLineBefore = false)
+    public static TextChange GetInheritDocChange(SyntaxNode member, SourceText text, AnalyzerConfigOptions options, bool blankLineBefore = false)
     {
+        var tag = options.TryGetValue(InheritDocStyleKey, out var style) && style.Trim() == "spaced" ? "/// <inheritdoc />" : "/// <inheritdoc/>";
         var line = text.Lines.GetLineFromPosition(member.SpanStart);
         var indentation = text.ToString(TextSpan.FromBounds(line.Start, member.SpanStart));
         var lineBreak = text.ToString(TextSpan.FromBounds(line.End, line.EndIncludingLineBreak));
@@ -110,10 +114,10 @@ internal static class DocumentationComments
 
         if (blankLineBefore && indentation.Trim().Length == 0 && Layout.DocumentationBlankLines.WantsBlankLineAbove(line, text))
         {
-            return new TextChange(new TextSpan(line.Start, 0), lineBreak + indentation + "/// <inheritdoc/>" + lineBreak);
+            return new TextChange(new TextSpan(line.Start, 0), lineBreak + indentation + tag + lineBreak);
         }
 
-        return new TextChange(new TextSpan(member.SpanStart, 0), "/// <inheritdoc/>" + lineBreak + indentation);
+        return new TextChange(new TextSpan(member.SpanStart, 0), tag + lineBreak + indentation);
     }
 
     /// <summary>

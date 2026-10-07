@@ -79,7 +79,7 @@
         # BRO1142 (one local per declaration)
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'declaration.UsingKeyword.IsKind(SyntaxKind.None) ?'; Replace = 'true ?'; Tests = 'CombinedFieldsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = 'if (sameLine && declaration is not LocalDeclarationStatementSyntax)'; Replace = 'if (false)'; Tests = 'CombinedFieldsTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(declaration is FieldDeclarationSyntax && text.ToString('; Replace = '(true && text.ToString('; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(declaration is BaseFieldDeclarationSyntax && text.ToString('; Replace = '(true && text.ToString('; Tests = 'CombinedFieldsTests' }
         # BRO1144 (C# 14 contextual keywords; the C# 14 'field' type check is covered by samples/Messy, Roslyn 4.8 can't parse it)
         @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'MemberAccessExpressionSyntax access => access.Name != name,'; Replace = 'MemberAccessExpressionSyntax access => true,'; Tests = 'ContextualKeywordTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ContextualKeywords.cs'; Find = 'MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax => false,'; Replace = 'MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax => true,'; Tests = 'ContextualKeywordTests' }
@@ -140,6 +140,8 @@
 
         # BRO1135 (upper-case integer literal suffixes)
         @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = 'return suffix.Any(char.IsLower) ?'; Replace = 'return true ?'; Tests = 'LiteralSuffixCaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = 'if (lOnly)'; Replace = 'if (false)'; Tests = 'LiteralSuffixCaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = "return suffix.IndexOf('l') >= 0 ?"; Replace = 'return true ?'; Tests = 'LiteralSuffixCaseTests' }
         # BRO1133 (null check style)
         @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)'; Replace = '(LanguageVersion.CSharp7)'; Tests = 'NullCheckTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)'; Replace = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp1)'; Tests = 'NullCheckTests' }
@@ -233,6 +235,17 @@
 
         # Following StyleCop master: BRO1104 nint, BRO1604/BRO1605 init, BRO1611 primary constructors, BRO1606 blank summaries
         @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& typeText is not ("nint" or "nuint"))'; Replace = ')'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& PrefersDefaultLiteral(options)'; Replace = ''; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '>= LanguageVersion.CSharp7_1'; Replace = '>= LanguageVersion.CSharp1'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& SymbolEqualityComparer.Default.Equals(info.Type, info.ConvertedType))'; Replace = ')'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = 'group.AddRange('; Replace = 'new List<ExpressionSyntax>().AddRange('; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '.Where(e => e is DefaultExpressionSyntax'; Replace = '.Where(e => e is null'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = "&& value.Split(':')[0].Trim().Equals("; Replace = '&& value.Trim().Equals('; Tests = 'DefaultValueConstructorTests' }
+        # BRO1106 literal style
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStrings.cs'; Find = '&& !IsInNameof(access)'; Replace = ''; Tests = 'EmptyStringTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStrings.cs'; Find = '.Any(t => access.Span.Contains(t.Span)'; Replace = '.Any(t => false'; Tests = 'EmptyStringTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStrings.cs'; Find = 'is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String }'; Replace = 'is IFieldSymbol'; Tests = 'EmptyStringTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStringAnalyzer.cs'; Find = '!EmptyStrings.PrefersLiteral(c.Options.AnalyzerConfigOptionsProvider.GetOptions(literal.SyntaxTree))'; Replace = 'true'; Tests = 'EmptyStringTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '? [verb, "Gets"] : [verb]'; Replace = '? [verb] : [verb]'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = ' || old.StartsWith("Gets or initializes", StringComparison.Ordinal)'; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ParameterDocumentation.cs'; Find = 'TypeDeclarationSyntax type => type.ParameterList,'; Replace = ''; Tests = 'DocumentationTests' }
@@ -245,7 +258,7 @@
         # BRO1505: a field below a field that spans several lines; BRO1001's sort and BRO1114's split add that blank line
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '=> SpansSeveralLines(field, text),'; Replace = '=> false,'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'member.AttributeLists.Count > 0 ? member.AttributeLists.Last().FullSpan.End : member.SpanStart'; Replace = 'member.SpanStart'; Tests = 'ElementSeparationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines);'; Replace = 'return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);'; Tests = 'FixOrderTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines, allowAdjacentSingleLine);'; Replace = 'return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);'; Tests = 'FixOrderTests' }
         # Following StyleCop master (owner's decision 2026-10-04): single-line properties together, no inheritdoc on explicit implementations
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),'; Replace = ''; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),'; Replace = 'IsMultiLineProperty(property, text, autoAccessorLines),'; Tests = 'ElementSeparationTests' }
@@ -456,6 +469,14 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'previous.IsKind(SyntaxKind.CloseBraceToken)'; Replace = 'true'; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'if (AllowsEmpty(options))'; Replace = 'if (false)'; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& !TrailingCommas.Omits(options)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
+
+        # BRO1401 (trailing commas): stylebro_trailing_comma = omit
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = '|| Omits(getOptions()) != hasComma'; Replace = '|| !hasComma'; Tests = 'TrailingCommaTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = '|| HasDirectiveBetween(node, l.OpenBrace, l.CloseBrace)'; Replace = ''; Tests = 'TrailingCommaTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = 'while (start > 0 && text[start - 1] is'; Replace = 'while (false && text[start - 1] is'; Tests = 'TrailingCommaTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = "text[end] == '/' ?"; Replace = 'false ?'; Tests = 'TrailingCommaTests' }
 
         # BRO1409 (public methods of internal types): the analyzer's skips, then the fix's guards
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.OverrideKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }
@@ -524,5 +545,39 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '&& !IsNestedRepository(child)'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '(defaultSeverity > Severity.None || severity == Severity.None)'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (setup.IsOn("SA1633") && textOff.Count == 0)'; Replace = 'if (setup.IsOn("SA1633"))'; Tests = 'MigrationTests' }
+        # Options for declarations (2026-10-07): BRO1601 inheritdoc style, BRO1505 adjacent single-line members,
+        # BRO1105 / BRO1111 same_line
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'style.Trim() == "spaced"'; Replace = 'style.Trim() != "spaced"'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'out var value) && value.Trim() == "true";'; Replace = 'out var value);'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'if (allowAdjacentSingleLine && IsCompact(previous, text, autoAccessorLines) && IsCompact(current, text, autoAccessorLines))'; Replace = 'if (allowAdjacentSingleLine)'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'MethodDeclarationSyntax { ConstraintClauses.Count: > 0 } => false,'; Replace = ''; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '&& method.Body is null && !SpansSeveralLines(method, text),'; Replace = '&& !SpansSeveralLines(method, text),'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '&& method.Body is null && !SpansSeveralLines(method, text),'; Replace = '&& method.Body is null,'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'PropertyDeclarationSyntax property => !HasBlockAccessor(property) && '; Replace = 'PropertyDeclarationSyntax property => '; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'or EventDeclarationSyntax && !HasBlockAccessor(other) && '; Replace = 'or EventDeclarationSyntax && '; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'EventFieldDeclarationSyntax eventField => !SpansSeveralLines(eventField, text),'; Replace = 'EventFieldDeclarationSyntax eventField => true,'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparationAnalyzer.cs'; Find = 'var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(options);'; Replace = 'var allowAdjacent = false;'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(document'; Replace = 'false && StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(document'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options)'; Replace = 'allowAdjacentSingleLine: false'; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0)'; Replace = '(multiLinePrefix || docText.Length > 0)'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0)'; Replace = '(!allowAdjacentSingleLine || docText.Length > 0)'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0)'; Replace = '(!allowAdjacentSingleLine || multiLinePrefix)'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/CombinedFieldsCodeFixProvider.cs'; Find = 'CombinedFields.GetChange(field, text, allowAdjacent)'; Replace = 'CombinedFields.GetChange(field, text)'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'out var value) && value.Trim() == "same_line";'; Replace = 'out var value);'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = '|| Line(text, close.Span.End) == Line(text, keyword.SpanStart)'; Replace = ''; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = '|| Line(text, keyword.SpanStart) != Line(text, initializer.Span.End)'; Replace = ''; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = '|| !IsPlain(close.TrailingTrivia, '; Replace = '|| false && !IsPlain(close.TrailingTrivia, '; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'if (isOn(DiagnosticIds.CloseParenthesisOnLastItemLine) && '; Replace = 'if ('; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'if (!IsPlain(last.TrailingTrivia, close.LeadingTrivia))'; Replace = 'if (false)'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ?'; Replace = 'return length >= Indentation.GetMaxLineLength(options) ?'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ?'; Replace = 'return false ?'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'out var value) && value.Trim() == "same_line";'; Replace = 'out var value);'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = '&& isOn(DiagnosticIds.CloseParenthesisOnLastItemLine)'; Replace = ''; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'if (!IsPlainGap(previous.GetPreviousToken(), previous))'; Replace = 'if (false)'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'if (Line(text, clause.SpanStart) != Line(text, clause.Span.End) || '; Replace = 'if ('; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = '|| !IsPlainGap(before, clause.WhereKeyword))'; Replace = ')'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += clause.WhereKeyword.SpanStart - before.Span.End + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += 1 + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ? [] : joins;'; Replace = 'return length >= Indentation.GetMaxLineLength(options) ? [] : joins;'; Tests = 'ConstraintPlacementTests' }
     )
 }
