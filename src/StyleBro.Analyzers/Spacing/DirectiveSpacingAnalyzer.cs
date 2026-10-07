@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
@@ -40,9 +41,15 @@ public sealed class DirectiveSpacingAnalyzer : DiagnosticAnalyzer
             yield break;
         }
 
-        for (var directive = ((CSharpSyntaxNode)root).GetFirstDirective(); directive is not null; directive = directive.GetNextDirective())
+        // The tree's shared trivia (TreeWalk): GetNextDirective searched the tree from each directive again.
+        foreach (var trivia in TreeWalk.Trivia(root))
         {
-            var token = directive.HashToken;
+            if (!trivia.IsDirective)
+            {
+                continue;
+            }
+
+            var token = ((DirectiveTriviaSyntax)trivia.GetStructure()!).HashToken;
             if (!token.HasTrailingTrivia || token.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia))
             {
                 continue;

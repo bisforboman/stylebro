@@ -71,9 +71,6 @@ internal static class FieldNames
     /// </summary>
     public const string StaticStyleKey = "stylebro_private_static_field_naming";
 
-    /// <summary>A whole word: a run of \w characters not directly after another one or an '@'.</summary>
-    private static readonly Regex Word = new(@"(?<![\w@])\w+");
-
     private enum FieldCasing
     {
         Camel,
@@ -349,12 +346,13 @@ internal static class FieldNames
             return false;
         }
 
-        // The old name as a word in a string or in code excluded by '#if', or as an inferred member name. A field
-        // name made of other characters than \w (rare formatting characters) is checked with the exact pattern.
+        // The old name as a word in a string or in code excluded by '#if' (not directly after another word character or an
+        // '@'), or as an inferred member name. Only strings that contain the name are matched: splitting every string of
+        // the type into words cost more than the few names asked about.
         var oldName = field.Name;
-        return !(facts.InferredNames.Contains(oldName) || (Word.Match(oldName) is { Success: true } m && m.Length == oldName.Length
-            ? facts.Words.Contains(oldName)
-            : facts.Texts.Any(t => Regex.IsMatch(t, @"(?<![\w@])" + Regex.Escape(oldName) + @"(?!\w)"))));
+        var word = @"(?<![\w@])" + Regex.Escape(oldName) + @"(?!\w)";
+        return !(facts.InferredNames.Contains(oldName)
+            || facts.Texts.Any(t => t.IndexOf(oldName, System.StringComparison.Ordinal) >= 0 && Regex.IsMatch(t, word)));
     }
 
     /// <summary>
@@ -556,7 +554,7 @@ internal static class FieldNames
 
     /// <summary>
     /// What <see cref="CanRename(IFieldSymbol, string, FieldStyles, TypeFacts, HungarianNames?)"/> needs from a type's declarations, read
-    /// once: the words in its strings and in code excluded by '#if', and its inferred anonymous/tuple member names.
+    /// once: its strings and code excluded by '#if', and its inferred anonymous/tuple member names.
     /// </summary>
     internal sealed class TypeFacts
     {
@@ -569,8 +567,6 @@ internal static class FieldNames
         }
 
         public System.Collections.Generic.List<string> Texts { get; } = new();
-
-        public System.Collections.Generic.HashSet<string> Words { get; } = new(System.StringComparer.Ordinal);
 
         public System.Collections.Generic.HashSet<string> InferredNames { get; } = new(System.StringComparer.Ordinal);
 
@@ -609,27 +605,32 @@ internal static class FieldNames
                 // Code excluded by '#if' (always right after a directive in the same trivia list), and strings in
                 // directives ('#line 1 "file"'). Found from the directives (Roslyn skips subtrees without any): walking
                 // all trivia cost ~40 % of this analyzer on a big file, and opening doc comments built their XML.
-                for (var directive = declaration.ContainsDirectives ? declaration.GetFirstDirective() : null;
-                    directive is not null && directive.SpanStart < declaration.FullSpan.End;
-                    directive = directive.GetNextDirective())
+                // The directives come from the tree's shared trivia (GetNextDirective searched the tree again for each).
+                var trivia = declaration.ContainsDirectives ? TreeWalk.Trivia(declaration.SyntaxTree.GetRoot(cancellationToken)) : [];
+                (low, high) = (0, trivia.Count);
+                while (low < high)
                 {
+                    var middle = (low + high) / 2;
+                    (low, high) = trivia[middle].FullSpan.Start < declaration.FullSpan.Start ? (middle + 1, high) : (low, middle);
+                }
+
+                for (var i = low; i < trivia.Count && trivia[i].SpanStart < declaration.FullSpan.End; i++)
+                {
+                    if (!trivia[i].IsDirective)
+                    {
+                        continue;
+                    }
+
+                    var directive = (Microsoft.CodeAnalysis.CSharp.Syntax.DirectiveTriviaSyntax)trivia[i].GetStructure()!;
                     facts.Texts.AddRange(directive.DescendantTokens().Where(t => t.IsKind(SyntaxKind.StringLiteralToken)).Select(t => t.ValueText));
                     var list = directive.ParentTrivia.Token.LeadingTrivia;
-                    for (var i = list.IndexOf(directive.ParentTrivia) + 1; i < list.Count && !list[i].IsDirective; i++)
+                    for (var j = list.IndexOf(directive.ParentTrivia) + 1; j < list.Count && !list[j].IsDirective; j++)
                     {
-                        if (list[i].IsKind(SyntaxKind.DisabledTextTrivia))
+                        if (list[j].IsKind(SyntaxKind.DisabledTextTrivia))
                         {
-                            facts.Texts.Add(list[i].ToString());
+                            facts.Texts.Add(list[j].ToString());
                         }
                     }
-                }
-            }
-
-            foreach (var text in facts.Texts)
-            {
-                foreach (Match match in Word.Matches(text))
-                {
-                    facts.Words.Add(match.Value);
                 }
             }
 

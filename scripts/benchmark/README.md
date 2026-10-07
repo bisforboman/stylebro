@@ -108,6 +108,7 @@ What was slow, all with the same diagnostics before and after (reports per analy
 | StyleBro with one shared walk per tree (`TreeWalk`, same run) | 386 ms | FieldNamingAnalyzer 53 ms, DocumentationAnalyzer 37 ms, CommentSpacingAnalyzer 32 ms |
 | StyleBro, 2026-10-05, before / after the per-file fixes (compare mode, busy machine) | 600 / 571 ms | ElseIfAnalyzer 27 -> 10 ms, FieldNamingAnalyzer 82 -> 78 ms |
 | StyleCop.Analyzers 1.2.0-beta.556 (182 analyzers) vs StyleBro `main` (66 analyzers), 2026-10-05, compare mode, three runs on a busy machine | StyleCop 1,291-2,171 ms, StyleBro 411-687 ms (3.1-3.4x in each run) | SA1121 88-159 ms, SA1101 85-143 ms; FieldNamingAnalyzer 52-72 ms, DocumentationAnalyzer 36-66 ms |
+| StyleBro, 2026-10-07, before / after round 3 below (72 analyzers, compare mode, 10 runs, two runs on a busy machine) | 354-371 / 226-254 ms (-31 to -36 %) | EmbeddedCommentAnalyzer 23 -> 0.3 ms, DirectiveSpacingAnalyzer 20 -> 0.6 ms, CommentTextAnalyzer 19-25 -> 8 ms, ParameterLayoutAnalyzer 15 -> 4 ms; FieldNamingAnalyzer 43-74 ms either way (it pays the shared walk on many files) |
 
 Single runs vary by about 20% (the two 2026-10-03 runs of the same build differ by 25%). In real builds the analyzers run concurrently with each other and with the compiler,
 so the wall-clock cost is smaller: the private 30-project app built in the same time with and without StyleBro.
@@ -134,3 +135,22 @@ tree lives; reading the array costs ~2 ms. The analyzers stay separate (ids, tes
 runs first pays the walk. 595 -> 386 ms, same diagnostics.
 `STYLEBRO_BENCH_ONLY=Name1,Name2` times only those analyzers (alone they pay shared costs such as building the red tree
 or binding, so compare builds, not analyzers).
+2026-10-07 (round 3), same diagnostics on Newtonsoft.Json, Serilog, FFMpegCore and StyleBro's own `src` (reports per
+analyzer compared, with and without `--all-rules`):
+- `TreeWalk.Trivia` is a cached array of the trivia that aren't whitespace or line breaks (comments, documentation,
+  directives, disabled code). Seven analyzers walked every trivia of every token, and only want those; the array is
+  built once per tree. `TreeWalk.Tokens` and `TreeWalk.Nodes` come from one `DescendantNodesAndTokens()` walk.
+- DirectiveSpacingAnalyzer and FieldNamingAnalyzer's type facts find directives in that array; `GetNextDirective`
+  searched the tree again from each directive.
+- EmbeddedCommentAnalyzer starts from the comments (few) instead of asking every node's `{` for the token before it.
+- Cheap checks first: ParameterLayout's and ParenthesisPlacement's layout checks before the trivia of every item or
+  the token before the list, ListGaps skips lists on one line, BlankLineRuns skips the `}` without a line break in its
+  leading trivia before finding the previous token and judges the gap after a `}` by its trivia before its lines.
+- FieldNamingAnalyzer looks for a field's old name only in the strings that contain it, instead of splitting every
+  string of the type into words.
+
+Tried and dropped (no gain in alternated runs): skipping MemberOrdering's initializer/serialization guards for types
+already in order and a `ContainsDirectives` shortcut in DocumentationAnalyzer's directive check; not kept either:
+explicit equality for `FieldStyles` and a per-tree cache of the generated-file check (both run only for rename
+candidates; the profile blamed the struct's reflection-based hash). `dotnet-trace`'s sampling profile lands on safepoints (`PollGC`, `Monitor.Enter`),
+so it points at the right analyzer but overstates single methods: confirm each idea with `compare`.

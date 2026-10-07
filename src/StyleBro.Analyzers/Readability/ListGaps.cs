@@ -23,7 +23,12 @@ internal static class ListGaps
             yield break;
         }
 
+        // Every finding needs a line break inside the list, and most lists are on one line.
         var close = list.GetLastToken();
+        if (Line(text, open.SpanStart) == Line(text, close.SpanStart))
+        {
+            yield break;
+        }
 
         // BRO1116: '()' split over lines. Like StyleCop, not for attributes.
         if (items.Count == 0)

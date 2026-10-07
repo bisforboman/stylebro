@@ -1163,6 +1163,16 @@ worse than the file; now time grows with file size (8x size -> 8.4x time). Jelly
 Newtonsoft XmlNodeConverter 58 -> 24 ms. Whole project (Newtonsoft.Json, 72 analyzers, 2026-10-06): ~485 ms; StyleCop
 1.2 is 3.1-3.4x slower (docs/stylebro-vs-stylecop.md, #48).
 
+**Performance round 3** (2026-10-07, owner: "performance is an important metric for analyzers"): Newtonsoft.Json
+354-371 -> 226-254 ms (-31 to -36 %, compare mode), same reports per analyzer on four sources. `TreeWalk.Trivia` is now
+a cached array WITHOUT whitespace and line breaks (every caller wanted only comments/docs/directives); tokens and
+nodes come from one walk; directives are found in that array (not `GetNextDirective`); EmbeddedCommentAnalyzer starts
+from the comments; cheap layout checks before trivia/previous-token lookups (ParameterLayout, ListGaps,
+ParenthesisPlacement, BlankLineRuns); FieldNaming matches an old name only in strings containing it (no word split).
+Lessons: `dotnet-trace` samples land on safepoints (`PollGC`, `Monitor.Enter`), so a hot method in the profile can be
+noise (FieldStyles' reflection hash: called ~250 times); the shared walk lands on whichever analyzer runs first per
+file (FieldNamingAnalyzer swings 35-90 ms between runs), so judge by the total and by analyzers that don't pay it.
+
 **Lessons**:
 - A keep-both merge resolution can cut through a raw string when the shared lines sit outside the conflict: build
   before trusting mutation results (a compile error "kills" every mutation). After a merge, also check

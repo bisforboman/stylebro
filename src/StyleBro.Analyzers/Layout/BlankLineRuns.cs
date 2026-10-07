@@ -29,21 +29,22 @@ internal static class BlankLineRuns
             yield break;
         }
 
+        var (multipleOn, beforeOn, afterOn) = (isOn(DiagnosticIds.MultipleBlankLines), isOn(DiagnosticIds.BlankLineBeforeCloseBrace), isOn(DiagnosticIds.BlankLineAfterCloseBrace));
         foreach (var token in TreeWalk.Tokens(root))
         {
-            if (isOn(DiagnosticIds.MultipleBlankLines) && MultipleBlankLines(token, text, isOn) is { } multiple)
+            if (multipleOn && MultipleBlankLines(token, text, isOn) is { } multiple)
             {
                 yield return (DiagnosticIds.MultipleBlankLines, multiple.Location, multiple.Change);
             }
 
             if (token.IsKind(SyntaxKind.CloseBraceToken))
             {
-                if (isOn(DiagnosticIds.BlankLineBeforeCloseBrace) && BlankLinesBeforeCloseBrace(token, text, isOn) is { } before)
+                if (beforeOn && BlankLinesBeforeCloseBrace(token, text, isOn) is { } before)
                 {
                     yield return (DiagnosticIds.BlankLineBeforeCloseBrace, token.Span, before);
                 }
 
-                if (isOn(DiagnosticIds.BlankLineAfterCloseBrace) && MissingBlankLineAfterCloseBrace(token, text, isOn) is { } after)
+                if (afterOn && MissingBlankLineAfterCloseBrace(token, text, isOn) is { } after)
                 {
                     yield return (DiagnosticIds.BlankLineAfterCloseBrace, after.Location, after.Change);
                 }
@@ -122,11 +123,11 @@ internal static class BlankLineRuns
     /// </summary>
     public static bool JudgesGapAfter(SyntaxToken brace, SyntaxToken next, SourceText text, Func<string, bool> isOn, bool gapIsReplaced)
     {
-        var braceLine = text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;
-        return OpeningLine(brace, text) != braceLine
-            && brace.TrailingTrivia.LastOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)) is { RawKind: (int)SyntaxKind.EndOfLineTrivia }
+        // The cheap checks first: most '}' are followed by another '}' (WantsBlankLineAfter's first checks).
+        return brace.TrailingTrivia.LastOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)) is { RawKind: (int)SyntaxKind.EndOfLineTrivia }
             && !brace.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
-            && WantsBlankLineAfter(brace.Parent!, brace, next, isOn, gapIsReplaced);
+            && WantsBlankLineAfter(brace.Parent!, brace, next, isOn, gapIsReplaced)
+            && OpeningLine(brace, text) != text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;
     }
 
     /// <summary>SA1507: a run of two or more blank lines in a token's leading trivia; the fix keeps one.</summary>
@@ -214,6 +215,13 @@ internal static class BlankLineRuns
     /// <summary>SA1508: blank lines between '}' and what comes before it; the fix removes them.</summary>
     private static TextChange? BlankLinesBeforeCloseBrace(SyntaxToken brace, SourceText text, Func<string, bool> isOn)
     {
+        // A blank line needs a line break in the brace's leading trivia (the previous token's trailing trivia ends at its
+        // first one): most braces have none, and this skips finding the previous token.
+        if (!brace.LeadingTrivia.Any(SyntaxKind.EndOfLineTrivia))
+        {
+            return null;
+        }
+
         var previous = brace.GetPreviousToken();
         if (previous.IsKind(SyntaxKind.None))
         {

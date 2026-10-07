@@ -187,7 +187,7 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = '|| !next.LeadingTrivia.All('; Replace = '|| false && !next.LeadingTrivia.All('; Tests = 'SwitchSectionBlankLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = '|| (previous.IsKind(SyntaxKind.CloseBraceToken) && BlankLineRuns.JudgesGapAfter('; Replace = '|| (false && BlankLineRuns.JudgesGapAfter('; Tests = 'SwitchSectionBlankLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SwitchSectionBlankLines.cs'; Find = ' && node.Sections[i - 1].Statements.Last() is not BlockSyntax'; Replace = ''; Tests = 'SwitchSectionBlankLinesTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'return OpeningLine(brace, text) != braceLine'; Replace = 'return true'; Tests = 'SwitchSectionBlankLinesTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '&& OpeningLine(brace, text) != text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;'; Replace = ';'; Tests = 'SwitchSectionBlankLinesTests' }
         # BRO1143 (no 'else' after a jump)
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = 'node.Parent is not BlockSyntax block'; Replace = 'node.FirstAncestorOrSelf<BlockSyntax>() is not { } block'; Tests = 'ElseAfterJumpTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ElseAfterJump.cs'; Find = '|| node.Else is not { Statement: not IfStatementSyntax } elseClause'; Replace = '|| node.Else is not { } elseClause'; Tests = 'ElseAfterJumpTests' }
@@ -309,8 +309,8 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/HungarianNames.cs'; Find = '&& !char.IsUpper(name[0])'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '&& !HungarianNames.IsInNativeMethods(context.Node)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = ', name => HungarianNames.GetVariableName(name, hungarian))'; Replace = ')'; Tests = 'HungarianNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'declaration.ContainsDirectives ? declaration.GetFirstDirective()'; Replace = 'false ? declaration.GetFirstDirective()'; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'facts.Texts.Add(list[i].ToString());'; Replace = ''; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'declaration.ContainsDirectives ? TreeWalk.Trivia('; Replace = 'false ? TreeWalk.Trivia('; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'facts.Texts.Add(list[j].ToString());'; Replace = ''; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| HungarianNames.IsInNativeMethods(field)'; Replace = ''; Tests = 'HungarianNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'if (GetNewName(f, key.Item1, hungarian) is { } name)'; Replace = 'if (GetNewName(f, key.Item1) is { } name)'; Tests = 'HungarianNamingTests' }
 
