@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -10,6 +12,9 @@ namespace StyleBro.Analyzers.Readability;
 /// <summary>Shared logic for BRO1111 (StyleCop SA1127: generic type constraints on their own line).</summary>
 internal static class ConstraintPlacement
 {
+    /// <summary>'own_line' (default, StyleCop's SA1127) or 'same_line' (every 'where' clause on the declaration's line).</summary>
+    public const string PlacementKey = "stylebro_constraint_placement";
+
     /// <summary>The declarations that can have 'where' clauses.</summary>
     public static readonly SyntaxKind[] DeclarationKinds =
     [
@@ -22,6 +27,70 @@ internal static class ConstraintPlacement
         SyntaxKind.DelegateDeclaration,
         SyntaxKind.LocalFunctionStatement,
     ];
+
+    /// <summary>Whether <see cref="PlacementKey"/> is 'same_line'.</summary>
+    public static bool IsSameLine(AnalyzerConfigOptions options)
+    {
+        return options.TryGetValue(PlacementKey, out var value) && value.Trim() == "same_line";
+    }
+
+    /// <summary>
+    /// For 'same_line': the clauses that start a line, each with the edit that joins it onto the line before (one space).
+    /// All or nothing per declaration: empty when a clause spans several lines, anything but whitespace sits before a
+    /// clause, or the joined line (up to the last clause's end; a body or '=&gt;' after it isn't counted) would be longer
+    /// than 'max_line_length' (no limit when unset). The '=&gt;' of an expression body stays where it is. When BRO1110
+    /// is on and moves the ')' before the first clause to the last parameter's line, the ')' moves in the same edit, so
+    /// both fixes give the same text in either order.
+    /// </summary>
+    public static List<(TypeParameterConstraintClauseSyntax Clause, TextChange Change)> GetJoins(SyntaxNode declaration, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    {
+        var joins = new List<(TypeParameterConstraintClauseSyntax Clause, TextChange Change)>();
+        var clauses = GetClauses(declaration);
+        if (clauses.Count == 0 || declaration.ContainsDiagnostics)
+        {
+            return joins;
+        }
+
+        var previous = clauses[0].WhereKeyword.GetPreviousToken();
+        var start = previous.Span.End;
+        var closeText = string.Empty;
+        if (Line(text, previous.Span.End) != Line(text, clauses[0].WhereKeyword.SpanStart)
+            && isOn(DiagnosticIds.CloseParenthesisOnLastItemLine)
+            && ParenthesisPlacement.GetMisplacedClose(previous.Parent!, text) is not null)
+        {
+            if (!IsPlainGap(previous.GetPreviousToken(), previous))
+            {
+                return joins;
+            }
+
+            start = previous.GetPreviousToken().Span.End;
+            closeText = previous.Text;
+        }
+
+        var length = start - text.Lines.GetLineFromPosition(start).Start + closeText.Length;
+        foreach (var clause in clauses)
+        {
+            var before = clause.WhereKeyword.GetPreviousToken();
+            if (Line(text, clause.SpanStart) != Line(text, clause.Span.End) || !IsPlainGap(before, clause.WhereKeyword))
+            {
+                return [];
+            }
+
+            if (Line(text, before.Span.End) == Line(text, clause.WhereKeyword.SpanStart))
+            {
+                length += clause.WhereKeyword.SpanStart - before.Span.End + clause.Span.Length;
+            }
+            else
+            {
+                length += 1 + clause.Span.Length;
+                joins.Add(joins.Count == 0 && closeText.Length > 0 && clause == clauses[0]
+                    ? (clause, new TextChange(TextSpan.FromBounds(start, clause.WhereKeyword.SpanStart), closeText + " "))
+                    : (clause, new TextChange(TextSpan.FromBounds(before.Span.End, clause.WhereKeyword.SpanStart), " ")));
+            }
+        }
+
+        return length > Indentation.GetMaxLineLength(options) ? [] : joins;
+    }
 
     /// <summary>
     /// The 'where' clauses that share their line with the code before them. Skipped: a comment or directive right

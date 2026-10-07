@@ -13,7 +13,8 @@ using StyleBro.Analyzers.Readability;
 namespace StyleBro.CodeFixes.Readability;
 
 /// <summary>
-/// Fix for BRO1105: moves the initializer to its own line, indented with the .editorconfig indentation settings.
+/// Fix for BRO1105: moves the initializer to its own line, indented with the .editorconfig indentation settings (or, with
+/// stylebro_constructor_initializer_placement = same_line, onto the parameter list's last line).
 /// Each constructor has at most one initializer, so Fix All is one set of non-overlapping edits.
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ConstructorInitializerLineCodeFixProvider))]
@@ -57,12 +58,26 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var indentUnit = Indentation.GetUnit(options);
+        var sameLine = ConstructorInitializers.IsSameLine(options);
         var changes = new Dictionary<ConstructorInitializerSyntax, TextChange>();
         foreach (var diagnostic in diagnostics)
         {
             var initializer = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent as ConstructorInitializerSyntax;
-            if (initializer is not null && ConstructorInitializers.ShouldMove(initializer, text))
+            if (initializer is null)
+            {
+                continue;
+            }
+
+            if (sameLine)
+            {
+                if (ConstructorInitializers.GetJoin(initializer, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken)) is { } join)
+                {
+                    changes[initializer] = join;
+                }
+            }
+            else if (ConstructorInitializers.ShouldMove(initializer, text))
             {
                 changes[initializer] = ConstructorInitializers.GetChange(initializer, text, indentUnit);
             }

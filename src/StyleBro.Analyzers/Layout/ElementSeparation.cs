@@ -15,21 +15,33 @@ namespace StyleBro.Analyzers.Layout;
 internal static class ElementSeparation
 {
     /// <summary>
+    /// 'true': two neighbouring single-line members without a block body (methods, operators, properties, indexers,
+    /// events; bodiless or expression-bodied, no 'where' clauses) need no blank line between them (StyleCop issue #2441). Default false.
+    /// </summary>
+    public const string AllowAdjacentSingleLineMembersKey = "stylebro_allow_adjacent_single_line_members";
+
+    /// <summary>Whether <see cref="AllowAdjacentSingleLineMembersKey"/> is set to true.</summary>
+    public static bool AllowsAdjacentSingleLineMembers(AnalyzerConfigOptions options)
+    {
+        return options.TryGetValue(AllowAdjacentSingleLineMembersKey, out var value) && value.Trim() == "true";
+    }
+
+    /// <summary>
     /// Pairs of neighbouring elements (previous, current) that need a blank line and don't have one. Elements are the
     /// usings, extern aliases, assembly attributes and members of a file or namespace, the members of a type, and the
     /// accessors of a property, indexer or event. Like StyleCop, these pairs don't need one: two fields (unless the first
     /// spans several lines); two single-line properties (like StyleCop's unreleased master); two usings, two extern
     /// aliases or two attribute lists; and two accessors that are both on a single line. <paramref name="autoAccessorLines"/>:
-    /// see <see cref="NeedsBlankLine"/>.
+    /// see <see cref="NeedsBlankLine"/>; <paramref name="allowAdjacentSingleLine"/>: <see cref="AllowAdjacentSingleLineMembersKey"/>.
     /// </summary>
-    public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text, AnalyzerConfigOptions? autoAccessorLines)
+    public static IEnumerable<(SyntaxNode Previous, SyntaxNode Current)> GetViolations(SyntaxNode root, SourceText text, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine = false)
     {
         foreach (var node in root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax or TypeDeclarationSyntax or MemberDeclarationSyntax or AccessorListSyntax))
         {
             var elements = GetElements(node);
             for (var i = 1; i < elements.Count; i++)
             {
-                if (NeedsBlankLine(elements[i - 1], elements[i], text, autoAccessorLines) && !HasBlankLineBetween(elements[i - 1], elements[i], text))
+                if (NeedsBlankLine(elements[i - 1], elements[i], text, autoAccessorLines, allowAdjacentSingleLine) && !HasBlankLineBetween(elements[i - 1], elements[i], text))
                 {
                     yield return (elements[i - 1], elements[i]);
                 }
@@ -73,10 +85,17 @@ internal static class ElementSeparation
     /// Whether two neighbouring elements need a blank line between them (BRO1505; also used by BRO1509's fix and BRO1001's
     /// sort). <paramref name="autoAccessorLines"/> is the file's options when BRO1527 is on (else null): a property its fix
     /// puts on one line counts as one-line already, so the result doesn't depend on which fix 'dotnet format' runs first.
+    /// <paramref name="allowAdjacentSingleLine"/>: <see cref="AllowAdjacentSingleLineMembersKey"/> (BRO1114's split, BRO1509's
+    /// expansion and BRO1001's sort pass it too).
     /// </summary>
-    public static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text, AnalyzerConfigOptions? autoAccessorLines = null)
+    public static bool NeedsBlankLine(SyntaxNode previous, SyntaxNode current, SourceText text, AnalyzerConfigOptions? autoAccessorLines = null, bool allowAdjacentSingleLine = false)
     {
         if (previous.ContainsDiagnostics || current.ContainsDiagnostics)
+        {
+            return false;
+        }
+
+        if (allowAdjacentSingleLine && IsCompact(previous, text, autoAccessorLines) && IsCompact(current, text, autoAccessorLines))
         {
             return false;
         }
@@ -126,6 +145,31 @@ internal static class ElementSeparation
     {
         var start = member.AttributeLists.Count > 0 ? member.AttributeLists.Last().FullSpan.End : member.SpanStart;
         return text.Lines.GetLineFromPosition(start).LineNumber != text.Lines.GetLineFromPosition(member.Span.End).LineNumber;
+    }
+
+    /// <summary>
+    /// For <see cref="AllowAdjacentSingleLineMembersKey"/>: a method, operator, property, indexer or event on one line (as
+    /// SA1516 measures it, below its attributes) without a block body. A block body on one line is BRO1508/BRO1509's to
+    /// expand, after which the member spans several lines: counting it as one-line would leave BRO1505 a second run.
+    /// </summary>
+    private static bool IsCompact(SyntaxNode node, SourceText text, AnalyzerConfigOptions? autoAccessorLines)
+    {
+        return node switch
+        {
+            // 'where' clauses: BRO1111 may move them to their own line.
+            MethodDeclarationSyntax { ConstraintClauses.Count: > 0 } => false,
+            BaseMethodDeclarationSyntax method => method is MethodDeclarationSyntax or OperatorDeclarationSyntax or ConversionOperatorDeclarationSyntax
+                && method.Body is null && !SpansSeveralLines(method, text),
+            PropertyDeclarationSyntax property => !HasBlockAccessor(property) && !IsMultiLineProperty(property, text, autoAccessorLines),
+            BasePropertyDeclarationSyntax other => other is IndexerDeclarationSyntax or EventDeclarationSyntax && !HasBlockAccessor(other) && !SpansSeveralLines(other, text),
+            EventFieldDeclarationSyntax eventField => !SpansSeveralLines(eventField, text),
+            _ => false,
+        };
+    }
+
+    private static bool HasBlockAccessor(BasePropertyDeclarationSyntax property)
+    {
+        return property.AccessorList?.Accessors.Any(a => a.Body is not null) == true;
     }
 
     private static bool IsMultiLineProperty(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions? autoAccessorLines)

@@ -172,4 +172,46 @@ public class CombinedFieldsTests
             }
         }
         """);
+
+    // BRO1505's stylebro_allow_adjacent_single_line_members: single-line event fields may sit together, so the split
+    // adds no blank line between them (one whose declaration spans several lines still gets it, and so does a documented
+    // one: BRO1513 wants a blank line above its documentation).
+    [Fact]
+    public Task EventFields_AdjacentSingleLineMembersAllowed() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            {|BRO1114:public|} event EventHandler E1, E2;
+
+            {|BRO1114:public|} event
+                EventHandler E3, E4;
+
+            /// <summary>Documented.</summary>
+            {|BRO1114:public|} event EventHandler E5, E6;
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            public event EventHandler E1;
+            public event EventHandler E2;
+
+            public event
+                EventHandler E3;
+
+            public event
+                EventHandler E4;
+
+            /// <summary>Documented.</summary>
+            public event EventHandler E5;
+
+            /// <summary>Documented.</summary>
+            public event EventHandler E6;
+        }
+        """,
+        editorConfig: "stylebro_allow_adjacent_single_line_members = true");
 }

@@ -464,6 +464,26 @@ public class SingleLineBlocksTests
         """,
         editorConfig: "dotnet_diagnostic.BRO1401.severity = none\n");
 
+    // The expansion adds BRO1505's blank lines, so with stylebro_allow_adjacent_single_line_members none between
+    // single-line members without a block body.
+    [Fact]
+    public Task Expansion_AdjacentSingleLineMembersAllowed() => VerifyFixAsync(
+        """
+        public interface I {|BRO1509:{|} void A(); int B => 1; void C() {|BRO1509:{|} } }
+        """,
+        """
+        public interface I
+        {
+            void A();
+            int B => 1;
+
+            void C()
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_allow_adjacent_single_line_members = true");
+
     [Fact]
     public Task Enum_GetsNoTrailingComma_WhenTrailingCommasAreOmitted() => VerifyFixAsync(
         """

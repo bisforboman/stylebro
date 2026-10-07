@@ -53,12 +53,24 @@ public sealed class ConstraintPlacementCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var indentUnit = Indentation.GetUnit(options);
+        var sameLine = ConstraintPlacement.IsSameLine(options);
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
-            if (root.FindNode(diagnostic.Location.SourceSpan) is TypeParameterConstraintClauseSyntax { Parent: { } declaration } clause
-                && ConstraintPlacement.GetMisplacedClauses(declaration, text).Contains(clause))
+            if (root.FindNode(diagnostic.Location.SourceSpan) is not TypeParameterConstraintClauseSyntax { Parent: { } declaration } clause)
+            {
+                continue;
+            }
+
+            if (sameLine)
+            {
+                changes.AddRange(ConstraintPlacement.GetJoins(declaration, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken))
+                    .Where(j => j.Clause == clause)
+                    .Select(j => j.Change));
+            }
+            else if (ConstraintPlacement.GetMisplacedClauses(declaration, text).Contains(clause))
             {
                 changes.AddRange(ConstraintPlacement.GetChanges(clause, text, indentUnit));
             }

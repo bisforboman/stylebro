@@ -334,4 +334,76 @@ public class ElementSeparationTests
             public void Reset() { this.level = 0; }
         }
         """);
+
+    // stylebro_allow_adjacent_single_line_members: single-line members without a block body may sit together (StyleCop
+    // #2441). Still separated: a block body (BRO1509 expands it), a 'where' clause (BRO1111 may split it), a member that
+    // spans several lines, accessors with block bodies, constructors and fields next to them.
+    [Fact]
+    public Task AdjacentSingleLineMembers_WhenAllowed() => VerifyFixAsync(
+        """
+        using System;
+
+        public abstract class C
+        {
+            private int count;
+        {|BRO1505:|}    public abstract void A();
+            public int B() => 1;
+            public int this[int i] => i;
+            public event EventHandler? Changed;
+        {|BRO1505:|}    public event EventHandler? Closed { add { } remove { } }
+        {|BRO1505:|}    public event EventHandler? Opened { add => Changed += value; remove => Changed -= value; }
+            public static C operator +(C c, int i) => c;
+            [Obsolete]
+            public int P { get; set; }
+        {|BRO1505:|}    public void D() { }
+        {|BRO1505:|}    public abstract void E<T>() where T : class;
+        {|BRO1505:|}    public abstract void F();
+        {|BRO1505:|}    public int Q { get { return 1; } }
+        {|BRO1505:|}    public event EventHandler?
+                Multi;
+        {|BRO1505:|}    public abstract void H();
+        {|BRO1505:|}    public int G() =>
+                2;
+        {|BRO1505:|}    public C() { }
+        }
+        """,
+        """
+        using System;
+
+        public abstract class C
+        {
+            private int count;
+
+            public abstract void A();
+            public int B() => 1;
+            public int this[int i] => i;
+            public event EventHandler? Changed;
+
+            public event EventHandler? Closed { add { } remove { } }
+
+            public event EventHandler? Opened { add => Changed += value; remove => Changed -= value; }
+            public static C operator +(C c, int i) => c;
+            [Obsolete]
+            public int P { get; set; }
+
+            public void D() { }
+
+            public abstract void E<T>() where T : class;
+
+            public abstract void F();
+
+            public int Q { get { return 1; } }
+
+            public event EventHandler?
+                Multi;
+
+            public abstract void H();
+
+            public int G() =>
+                2;
+
+            public C() { }
+        }
+        """,
+        editorConfig: "stylebro_allow_adjacent_single_line_members = true");
 }

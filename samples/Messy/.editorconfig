@@ -74,6 +74,14 @@ dotnet_diagnostic.BRO1148.severity = warning
 [**/Badges.cs]
 dotnet_diagnostic.BRO1145.severity = warning
 
+# Declaration options (all off by default) for one file: '<inheritdoc />' (BRO1601), adjacent single-line members
+# (BRO1505), ': base(...)' and 'where' on the declaration's line (BRO1105, BRO1111).
+[**/Couriers.cs]
+stylebro_inheritdoc_style = spaced
+stylebro_allow_adjacent_single_line_members = true
+stylebro_constructor_initializer_placement = same_line
+stylebro_constraint_placement = same_line
+max_line_length = 120
 # BRO1401 removing trailing commas (stylebro_trailing_comma = omit, default include) in one file.
 [**/Palette.cs]
 stylebro_trailing_comma = omit

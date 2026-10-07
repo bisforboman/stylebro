@@ -8,6 +8,13 @@ namespace StyleBro.Analyzers;
 /// </summary>
 internal static class Indentation
 {
+    /// <summary>The standard 'max_line_length' key; <see cref="int.MaxValue"/> (no limit) when unset or not a positive number.</summary>
+    public static int GetMaxLineLength(AnalyzerConfigOptions options)
+    {
+        return options.TryGetValue("max_line_length", out var value) && int.TryParse(value.Trim(), out var length) && length > 0 ? length : int.MaxValue;
+    }
+
+    /// <summary>One level of indentation.</summary>
     public static string GetUnit(AnalyzerConfigOptions options)
     {
         if (options.TryGetValue("indent_style", out var style) && style.Trim().ToLowerInvariant() == "tab")

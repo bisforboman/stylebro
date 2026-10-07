@@ -249,7 +249,7 @@ internal static class SingleLineBlocks
                 var blankLine = node is BlockSyntax
                     ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
                         && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
-                    : node is not EnumDeclarationSyntax && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text);
+                    : node is not EnumDeclarationSyntax && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options));
                 var separator = blankLine ? lineBreak + lineBreak : lineBreak;
                 if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
                 {
