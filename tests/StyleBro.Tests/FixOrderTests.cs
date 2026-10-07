@@ -921,6 +921,119 @@ public class FixOrderTests
         "BRO1146",
         "BRO1509");
 
+    // stylebro_allow_adjacent_single_line_members: BRO1001's sort and BRO1527's collapse leave single-line members
+    // without a block body together, as BRO1505 judges them.
+    [Fact]
+    public Task AdjacentSingleLineMembers_SortedAndCollapsed() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M() => P;
+            public int P { get; set; }
+            public int R
+            {
+                get;
+                set;
+            }
+            public void N() { }
+        }
+        """,
+        "stylebro_allow_adjacent_single_line_members = true\n",
+        "BRO1001",
+        "BRO1505",
+        "BRO1519",
+        "BRO1527");
+
+    // The same for BRO1114's split (a documented event field keeps BRO1513's blank line) and BRO1509's expansion.
+    [Fact]
+    public Task AdjacentSingleLineMembers_SplitAndExpanded() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public event System.EventHandler? A, B;
+            /// <summary>Docs.</summary>
+            public event System.EventHandler? D, E;
+        }
+
+        public interface I { void A(); int B(); void C() { } int D => 1; }
+        """,
+        "stylebro_allow_adjacent_single_line_members = true\n",
+        "BRO1114",
+        "BRO1505",
+        "BRO1509",
+        "BRO1513");
+
+    // stylebro_constructor_initializer_placement = same_line next to the parameter list rules: BRO1110's ')' moves in
+    // BRO1105's edit, the others don't change the ')' line's end; BRO1509 expands the body after the initializer.
+    [Fact]
+    public Task ConstructorInitializerSameLine_NextToParameterListRules() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int x)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(
+                int a
+            )
+                : base(a) { }
+
+            public C(int a, long b,
+                long c)
+                : base(a)
+            {
+            }
+
+            public C
+                (long a)
+                : base(1)
+            {
+            }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\n",
+        "BRO1105",
+        "BRO1107",
+        "BRO1108",
+        "BRO1109",
+        "BRO1110",
+        "BRO1509");
+
+    // stylebro_constraint_placement = same_line next to BRO1110 (its ')' moves in BRO1111's edit), BRO1521 (it leaves an
+    // '=>' after a constraint alone) and BRO1509 (it expands the body after the constraints).
+    [Fact]
+    public Task ConstraintSameLine_NextToParenthesesArrowsAndBodies() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            public static void M<T>(
+                T value
+            )
+                where T : class { }
+
+            public static int N<T>(T value)
+                where T : class
+                => 1;
+
+            public static int O<T>(T value)
+                where T : class =>
+                1;
+        }
+
+        public class Box<T>
+            where T : class { }
+        """,
+        "stylebro_constraint_placement = same_line\n",
+        "BRO1110",
+        "BRO1111",
+        "BRO1505",
+        "BRO1509",
+        "BRO1521");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

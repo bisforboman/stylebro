@@ -1012,4 +1012,28 @@ public class MemberOrderingTests
         }
         """,
         editorConfig: "stylebro_member_static_first = false\n");
+
+    // The sort adds a blank line only where BRO1505 wants one: with stylebro_allow_adjacent_single_line_members, a
+    // single-line method moved below a single-line property needs none.
+    [Theory]
+    [InlineData("true", "")]
+    [InlineData("false", "\n")]
+    public Task Sort_AdjacentSingleLineMembers(string allowed, string blankLine) => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M() => P;
+            public int {|BRO1001:P|} { get; set; }
+            public int R { get; set; }
+        }
+        """,
+        $$"""
+        public class C
+        {
+            public int P { get; set; }
+            public int R { get; set; }
+        {{blankLine}}    public int M() => P;
+        }
+        """,
+        editorConfig: "stylebro_allow_adjacent_single_line_members = " + allowed);
 }

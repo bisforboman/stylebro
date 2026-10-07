@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
+using StyleBro.Analyzers.Layout;
 using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
@@ -57,11 +58,12 @@ public sealed class CombinedFieldsCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var changes = new List<TextChange>();
+        var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
         foreach (var diagnostic in diagnostics)
         {
             var declaration = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent?.AncestorsAndSelf()
                 .FirstOrDefault(n => n is BaseFieldDeclarationSyntax or LocalDeclarationStatementSyntax);
-            if ((declaration is BaseFieldDeclarationSyntax field ? CombinedFields.GetChange(field, text)
+            if ((declaration is BaseFieldDeclarationSyntax field ? CombinedFields.GetChange(field, text, allowAdjacent)
                 : declaration is LocalDeclarationStatementSyntax local ? CombinedFields.GetChange(local, text) : null) is { } change)
             {
                 changes.Add(change);

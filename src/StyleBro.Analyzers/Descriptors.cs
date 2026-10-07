@@ -31,7 +31,7 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor ConstructorInitializerLine = new(
         id: DiagnosticIds.ConstructorInitializerLine,
         title: "Constructor initializers should be on their own line",
-        messageFormat: "Put ': {0}(...)' on its own line",
+        messageFormat: "Put ': {0}(...)' {1}",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
@@ -262,7 +262,7 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor ConstraintOnOwnLine = new(
         id: DiagnosticIds.ConstraintOnOwnLine,
         title: "Generic type constraints should be on their own line",
-        messageFormat: "Move the constraint on '{0}' to its own line",
+        messageFormat: "Move the constraint on '{0}' {1}",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,

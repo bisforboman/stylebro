@@ -77,7 +77,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         }
 
         var targets = new HashSet<SyntaxNode>(partialAccess.Keys);
-        var rewriter = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken));
+        var rewriter = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree));
         return targets.Where(t => !t.Ancestors().Any(targets.Contains))
             .Select(t => new TextChange(t.Span, rewriter.Visit(t)!.ToString()))
             .ToList();
@@ -121,7 +121,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
         }
 
-        var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken)).Visit(root)!;
+        var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree)).Visit(root)!;
         return document.WithSyntaxRoot(newRoot);
     }
 
@@ -131,6 +131,10 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             ? document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(tree)
             : null;
 
+    /// <summary>BRO1505's stylebro_allow_adjacent_single_line_members: the sort adds a blank line only where BRO1505 wants one.</summary>
+    private static bool AllowsAdjacentSingleLine(Document document, SyntaxTree tree) =>
+        StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(tree));
+
     /// <summary>Sorts the targeted types bottom-up, so nested types are sorted before their parents.</summary>
     private sealed class SortingRewriter : CSharpSyntaxRewriter
     {
@@ -138,9 +142,11 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         private readonly MemberOrderOptions options;
         private readonly Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess;
         private readonly AnalyzerConfigOptions? autoAccessorLines;
+        private readonly bool allowAdjacentSingleLine;
 
-        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess, AnalyzerConfigOptions? autoAccessorLines)
+        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine)
         {
+            this.allowAdjacentSingleLine = allowAdjacentSingleLine;
             this.targets = targets;
             this.options = options;
             this.partialAccess = partialAccess;
@@ -156,7 +162,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             // 'original' is the node from the unmodified tree, so reference equality with the targets holds.
             // Sorting nested types doesn't move this container's own members, so the indexes still match.
             return targets.Contains(original) && visited is not null
-                ? MemberOrdering.Sort(visited, options, partialAccess[original], autoAccessorLines)
+                ? MemberOrdering.Sort(visited, options, partialAccess[original], autoAccessorLines, allowAdjacentSingleLine)
                 : visited;
         }
     }

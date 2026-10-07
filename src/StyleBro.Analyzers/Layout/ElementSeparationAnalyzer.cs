@@ -23,10 +23,10 @@ public sealed class ElementSeparationAnalyzer : DiagnosticAnalyzer
             start.RegisterSyntaxTreeAction(c =>
             {
                 var text = c.Tree.GetText(c.CancellationToken);
-                var autoAccessorLines = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.AutoAccessorsOnOneLine, c.CancellationToken)
-                    ? c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)
-                    : null;
-                foreach (var (previous, current) in ElementSeparation.GetViolations(c.Tree.GetRoot(c.CancellationToken), text, autoAccessorLines))
+                var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree);
+                var autoAccessorLines = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.AutoAccessorsOnOneLine, c.CancellationToken) ? options : null;
+                var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(options);
+                foreach (var (previous, current) in ElementSeparation.GetViolations(c.Tree.GetRoot(c.CancellationToken), text, autoAccessorLines, allowAdjacent))
                 {
                     if (ElementSeparation.GetChange(previous, current, text) is not null)
                     {
