@@ -30,20 +30,21 @@ internal static class ParameterLayout
 
     /// <summary>
     /// BRO1107: the first item shares its line with the opening parenthesis while the second item starts on a later
-    /// line. Like StyleCop, when the first two share a line, BRO1108 reports the list instead. Never with
-    /// <paramref name="sameLine"/> (<c>stylebro_split_list_first_item = same_line</c>): the first item may stay there.
+    /// line. Like StyleCop, when the first two share a line, BRO1108 reports the list instead. Never when
+    /// <paramref name="options"/> set <c>stylebro_split_list_first_item = same_line</c>: the first item may stay there.
     /// </summary>
-    public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text, bool sameLine = false)
+    public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text, AnalyzerConfigOptions? options)
     {
         var (open, items) = GetList(list);
-        if (sameLine || items.Count < 2)
+        if (items.Count < 2)
         {
             return null;
         }
 
-        // The layout first, then the gaps (CanRewrite looks at every item's trivia): most lists are fine.
+        // The layout first, then the setting and the gaps (CanRewrite looks at every item's trivia): most lists are fine.
         var openLine = Line(text, open.SpanStart);
-        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine && CanRewrite(list, items) ? items[0] : null;
+        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine
+            && !(options is not null && IsSameLine(options)) && CanRewrite(list, items) ? items[0] : null;
     }
 
     /// <summary>
@@ -81,6 +82,7 @@ internal static class ParameterLayout
         {
             indentation = LeadingWhitespace(text, text.Lines.GetLineFromPosition(lineStart.SpanStart));
         }
+
         var lineBreak = text.ToString(TextSpan.FromBounds(openLine.End, openLine.EndIncludingLineBreak));
         if (lineBreak.Length == 0)
         {

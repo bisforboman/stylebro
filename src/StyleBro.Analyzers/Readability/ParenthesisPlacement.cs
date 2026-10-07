@@ -66,15 +66,21 @@ internal static class ParenthesisPlacement
     /// <summary>
     /// BRO1110: the closing token when it is misplaced, with the edit that moves it. By default (and for a list that
     /// isn't split in <c>own_line</c> mode) it belongs at the end of the last item: see <see cref="GetMisplacedClose"/>.
-    /// With <paramref name="ownLine"/>, a split list (an item starts on a line below the opening token's line) has it on
+    /// With <paramref name="ownLine"/>, a split list (see <see cref="GetSplitListLine"/>) has it on
     /// its own line, indented like that line: '    b)' turns into '    b' / ')'. The line of the opening token is the
     /// name's line when BRO1109 (<paramref name="openMoves"/>) moves the token up there, so both fixes agree in any order.
-    /// Skipped in <c>own_line</c> mode: a comment between the last item and the token, and directives in the list (each
-    /// target framework's copy may have another last item).
+    /// Skipped in <c>own_line</c> mode: a comment between the last item and the token, directives in the list (each
+    /// target framework's copy may have another last item) and a last item ending in single-line braces.
     /// </summary>
     public static (SyntaxToken Close, TextChange Change)? GetCloseFix(SyntaxNode list, SourceText text, bool ownLine, bool openMoves)
     {
-        if (ownLine && GetSplitListLine(list, text, openMoves) is { } openLine)
+        var split = ownLine ? GetSplitListLine(list, text, openMoves) : default;
+        if (split.Skip)
+        {
+            return null;
+        }
+
+        if (split.Line is { } openLine)
         {
             var (_, items, close) = ParameterLayoutList(list);
             var last = items[items.Count - 1].GetLastToken();
@@ -148,19 +154,55 @@ internal static class ParenthesisPlacement
 
     /// <summary>
     /// The line of the opening token (or of the name, when BRO1109 moves the token up there) when the list is split:
-    /// its last item starts on a later line. Null for empty lists, missing tokens and lists on one line.
+    /// its last item ends on a later line, unless every item starts on that line and the last one ends with a
+    /// structure whose closing token the list's token hugs, like CSharpier: multi-line braces ('x =>' / '{' / '})'), or
+    /// an argument list, tuple or collection expression opened on that line ('x => new T(' / 'a' / '))'). Neither
+    /// changes when a fix moves the structure's closing token (an inner list's BRO1110), so the decision is stable; a
+    /// parenthesized expression doesn't count (BRO1405 removes parentheses, BRO1406 adds them). Skip is true for a
+    /// last item ending in single-line braces ('{ a(); }'), which BRO1508/BRO1509 may expand into a hugged block.
     /// </summary>
-    private static TextLine? GetSplitListLine(SyntaxNode list, SourceText text, bool openMoves)
+    private static (bool Skip, TextLine? Line) GetSplitListLine(SyntaxNode list, SourceText text, bool openMoves)
     {
         var (open, items, close) = ParameterLayoutList(list);
         if (items.Count == 0 || open.IsMissing || close.IsMissing)
         {
-            return null;
+            return (false, null);
         }
 
         var start = openMoves && GetMisplacedOpen(list, text) is not null ? open.GetPreviousToken().SpanStart : open.SpanStart;
         var openLine = text.Lines.GetLineFromPosition(start);
-        return Line(text, items[items.Count - 1].SpanStart) > openLine.LineNumber ? openLine : null;
+        var lastItem = items[items.Count - 1];
+        if (Line(text, lastItem.Span.End) == openLine.LineNumber)
+        {
+            return (false, null);
+        }
+
+        var last = lastItem.GetLastToken();
+        if (Line(text, lastItem.SpanStart) != openLine.LineNumber || GetOpening(last) is not { } opening)
+        {
+            return (false, openLine);
+        }
+
+        var openingLine = Line(text, opening.SpanStart);
+        if (!last.IsKind(SyntaxKind.CloseBraceToken))
+        {
+            return (false, openingLine == openLine.LineNumber ? null : openLine);
+        }
+
+        return openingLine == Line(text, last.SpanStart) ? (true, openLine) : (false, null);
+    }
+
+    /// <summary>The opening token of the structure a closing token ends, for the closing tokens a list hugs.</summary>
+    private static SyntaxToken? GetOpening(SyntaxToken closing)
+    {
+        var kind = closing.Kind() switch
+        {
+            SyntaxKind.CloseBraceToken => SyntaxKind.OpenBraceToken,
+            SyntaxKind.CloseParenToken when closing.Parent is ArgumentListSyntax or TupleExpressionSyntax => SyntaxKind.OpenParenToken,
+            SyntaxKind.CloseBracketToken when closing.Parent is BracketedArgumentListSyntax or CollectionExpressionSyntax => SyntaxKind.OpenBracketToken,
+            _ => SyntaxKind.None,
+        };
+        return kind == SyntaxKind.None ? null : closing.Parent!.ChildTokens().Where(t => t.IsKind(kind)).Cast<SyntaxToken?>().FirstOrDefault();
     }
 
     private static bool BelongsToName(SyntaxNode list)

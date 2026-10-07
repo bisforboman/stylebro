@@ -287,6 +287,36 @@ public class FixOrderTests
         "BRO1520");
 
     [Fact]
+    public Task ClosingParenthesisOnOwnLine_HuggedLambdas() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public bool Run(System.Func<int, bool> check) => check(1);
+
+            public void M()
+            {
+                Run(x =>
+                    (x > 1));
+                Run(x =>
+                    { if (x > 1) return true; return false; });
+                Run(x => Run(y =>
+                    y > x));
+                Run(x =>
+                {
+                    if (x > 1) return true;
+                    return false;
+                }
+                );
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1110",
+        "BRO1405",
+        "BRO1508",
+        "BRO1514");
+
+    [Fact]
     public Task SplitListFirstItemOnSameLine() => AssertConvergesInEveryOrderWithConfigAsync(
         """
         public class C

@@ -439,9 +439,13 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '|| !IsPlainGap(last, close))'; Replace = '|| false)'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'Line(text, last.Span.End) != Line(text, close.SpanStart) || '; Replace = ''; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'openMoves && GetMisplacedOpen(list, text) is not null ?'; Replace = 'false ?'; Tests = 'ParenthesisPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'Line(text, items[items.Count - 1].SpanStart) > openLine.LineNumber ?'; Replace = 'true ?'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (Line(text, lastItem.Span.End) == openLine.LineNumber)'; Replace = 'if (false)'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (Line(text, lastItem.SpanStart) != openLine.LineNumber || GetOpening(last)'; Replace = 'if (GetOpening(last)'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'SyntaxKind.CloseParenToken when closing.Parent is ArgumentListSyntax or TupleExpressionSyntax'; Replace = 'SyntaxKind.CloseParenToken when false'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'return (false, openingLine == openLine.LineNumber ? null : openLine);'; Replace = 'return (false, openLine);'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '? (true, openLine) : (false, null);'; Replace = '? (false, openLine) : (false, null);'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacementAnalyzer.cs'; Find = 'var openMoves = ownLine && '; Replace = 'var openMoves = false && '; Tests = 'ParenthesisPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'if (sameLine || items.Count < 2)'; Replace = 'if (items.Count < 2)'; Tests = 'ParameterLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = ' && !(options is not null && IsSameLine(options))'; Replace = ''; Tests = 'ParameterLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = ' && !(sameLine && previousEnd == open.Span.End))'; Replace = ')'; Tests = 'ParameterLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'if (sameLine && items.FirstOrDefault('; Replace = 'if (false && items.FirstOrDefault('; Tests = 'ParameterLayoutTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BracesAnalyzer.cs'; Find = '&& !Braces.IsLeftToExpansion('; Replace = '&& true || !Braces.IsLeftToExpansion('; Tests = 'BracesTests' }

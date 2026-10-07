@@ -285,7 +285,37 @@ public class ParenthesisPlacementTests
                 };
                 Method(
                     1, 2{|BRO1110:)|}; // two
+                Run(x =>
+                    x.Length > 1
+                    && x.Contains('a'){|BRO1110:)|};
+                Run(x =>
+                    x.StartsWith(
+                        "a"{|BRO1110:)|}{|BRO1110:)|};
+                Run(x => (x.Length
+                    + 1) > 2{|BRO1110:)|};
+                Run(x => (x.Length
+                    + 1 > 2){|BRO1110:)|};
+                Run(x =>
+                {
+                    return true;
+                });
+                Run(x =>
+                {
+                    return true;
+                }
+                {|BRO1110:)|};
+                Run(x => x.StartsWith(
+                    "a"{|BRO1110:)|});
+                Run(x => x.Length is 1
+                    or 2{|BRO1110:)|};
+                Run(
+                    x =>
+                    {
+                        return true;
+                    }{|BRO1110:)|};
             }
+
+            public bool Run(Func<string, bool> check) => check("a");
 
             public void Next
                 (int a,
@@ -354,7 +384,44 @@ public class ParenthesisPlacementTests
                 Method(
                     1, 2
                 ); // two
+                Run(x =>
+                    x.Length > 1
+                    && x.Contains('a')
+                );
+                Run(x =>
+                    x.StartsWith(
+                        "a"
+                    )
+                );
+                Run(x => (x.Length
+                    + 1) > 2
+                );
+                Run(x => (x.Length
+                    + 1 > 2)
+                );
+                Run(x =>
+                {
+                    return true;
+                });
+                Run(x =>
+                {
+                    return true;
+                });
+                Run(x => x.StartsWith(
+                    "a"
+                ));
+                Run(x => x.Length is 1
+                    or 2
+                );
+                Run(
+                    x =>
+                    {
+                        return true;
+                    }
+                );
             }
+
+            public bool Run(Func<string, bool> check) => check("a");
 
             public void Next
                 (int a,
@@ -399,6 +466,9 @@ public class ParenthesisPlacementTests
                 M(
                     1,
                     2 /* two */);
+                System.Action<System.Action> run = null;
+                run(() =>
+                    { M(1, 2); });
                 M(
                     1,
         #if DEBUG
