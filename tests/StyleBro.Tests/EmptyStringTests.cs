@@ -4,6 +4,8 @@ namespace StyleBro.Tests;
 
 public class EmptyStringTests
 {
+    private const string LiteralStyle = "stylebro_empty_string_style = literal\n";
+
     [Fact]
     public Task EmptyLiterals_BecomeStringEmpty() => VerifyFixAsync(
         """
@@ -77,4 +79,71 @@ public class EmptyStringTests
             }
         }
         """);
+
+    [Fact]
+    public Task LiteralStyle_StringEmptyBecomesTheLiteral() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            string field = {|BRO1106:string.Empty|};
+
+            bool M(string s)
+            {
+                var a = {|BRO1106:String.Empty|};
+                var b = {|BRO1106:System.String.Empty|} + {|BRO1106:global::System.String.Empty|};
+                var c = {|BRO1106:string.Empty|}.Length;
+                var d = $"{{|BRO1106:string.Empty|}}";
+                var e = "";
+                var f = @"";
+                return s == {|BRO1106:string
+                    .Empty|};
+            }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            string field = "";
+
+            bool M(string s)
+            {
+                var a = "";
+                var b = "" + "";
+                var c = "".Length;
+                var d = $"{""}";
+                var e = "";
+                var f = @"";
+                return s == "";
+            }
+        }
+        """,
+        LiteralStyle);
+
+    [Fact]
+    public Task LiteralStyle_OtherMembersNameofAndComments_NoDiagnostic() => VerifyNoDiagnosticsAsync(
+        """
+        class Other
+        {
+            public static readonly string Empty = "x";
+        }
+
+        class C
+        {
+            string Empty => "y";
+
+            void M()
+            {
+                var a = Other.Empty;
+                var b = this.Empty;
+                var c = nameof(string.Empty);
+                var d = nameof(string.Empty.Length);
+                var e = string /* why */ .Empty;
+            }
+        }
+        """,
+        LiteralStyle);
 }

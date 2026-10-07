@@ -129,6 +129,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 |---|---|---|
 | [BRO1311](rules/BRO1311.md) (SA1316) | Renames the declaration only: every use (`t.count`) and override then breaks the build | Renames every tuple type element with the name, the literals converted to them and every use, in the whole solution; a rename that wouldn't compile is skipped and the warning stays |
 | [BRO1002](rules/BRO1002.md) (SA1005) | `// ` with a trailing space for an empty comment | `//` |
+| [BRO1104](rules/BRO1104.md) (SA1129) | `default(T)` | `default(T)` too, unless the SDK's `csharp_prefer_simple_default_expression = true` is set: then the `default` literal where it binds the same (IDE0034 then has nothing left to simplify) |
 | [BRO1108](rules/BRO1108.md) (SA1117) | None that works | Each item on its own line |
 | [BRO1132](rules/BRO1132.md) (SA1108) | None | Moves the comment into the block, on its own line right after `{` |
 | [BRO1301](rules/BRO1301.md)-[BRO1309](rules/BRO1309.md) (naming) | Lowers/removes only the first letter or prefix, can't fix `_name`, under `dotnet format` applies part of the renames per run or nothing; `MAX_VALUE` -> `MAXVALUE`, `m_Upper` -> `Upper` | The complete correct name in one pass (`MaxValue`), with overrides, implementations, named arguments and docs |
@@ -227,7 +228,7 @@ in `.editorconfig` to use them.
 | [BRO1522](rules/BRO1522.md) | `=` of assignments and initializers at the end of the line (`stylebro_equals_placement_when_wrapping`) | Roslynator RCS0052 |
 | [BRO1134](rules/BRO1134.md) | A comment between a type's, namespace's, member's, accessor's or local function's header and its `{` moves into the body, like BRO1132 (SA1108) for statements | StyleCop issue [#605](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/605) (proposed, never implemented) |
 | [BRO1523](rules/BRO1523.md) | In a call chain split over several lines, every call after the first line starts its own line | Roslynator RCS0054 |
-| [BRO1135](rules/BRO1135.md) | Integer literal suffixes in upper case (`1L`, `2U`, `3UL`); real suffixes (`f`, `d`, `m`) aren't checked | Sonar S818, StyleCop issue #1563 |
+| [BRO1135](rules/BRO1135.md) | Integer literal suffixes in upper case (`1L`, `2U`, `3UL`; only `l` with `stylebro_upper_case_literal_suffixes = l_only`); real suffixes (`f`, `d`, `m`) aren't checked | Sonar S818, StyleCop issue #1563 |
 | [BRO1525](rules/BRO1525.md) | No blank line between an attribute list and its element or the element's next attribute list | StyleCop's proposed SA1521 ([#738](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/738), never implemented) |
 | [BRO1524](rules/BRO1524.md) | A split conditional expression has the condition, `? a` and `: b` on their own lines (`?`/`:` side from `dotnet_style_operator_placement_when_wrapping`); chains aren't checked | StyleCop issue [#651](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/651) (proposed, never implemented) |
 | [BRO1526](rules/BRO1526.md) | A blank line between switch sections (`stylebro_blank_line_between_switch_sections = include`, the default), none (`omit`), or none after a section that ends in a block (`omit_after_block`); after a multi-line block BRO1519 (SA1513) decides. The preset turns it on (`dotnet_diagnostic.BRO1526.severity = warning`) | Roslynator RCS0061 |

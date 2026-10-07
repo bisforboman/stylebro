@@ -57,11 +57,13 @@ public sealed class DefaultValueConstructorCodeFixProvider : CodeFixProvider
             return document;
         }
 
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var version = LinkedFileFixAllProvider.GetLowestLanguageVersion(document);
         var replacements = new Dictionary<SyntaxNode, string>();
         foreach (var diagnostic in diagnostics)
         {
             if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true) is BaseObjectCreationExpressionSyntax creation
-                && DefaultValueConstructors.GetReplacement(creation, model, cancellationToken) is { } replacement)
+                && DefaultValueConstructors.GetReplacement(creation, model, options, cancellationToken, version) is { } replacement)
             {
                 replacements[creation] = replacement;
             }

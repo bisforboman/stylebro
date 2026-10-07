@@ -140,6 +140,8 @@
 
         # BRO1135 (upper-case integer literal suffixes)
         @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = 'return suffix.Any(char.IsLower) ?'; Replace = 'return true ?'; Tests = 'LiteralSuffixCaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = 'if (lOnly)'; Replace = 'if (false)'; Tests = 'LiteralSuffixCaseTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/LiteralSuffixes.cs'; Find = "return suffix.IndexOf('l') >= 0 ?"; Replace = 'return true ?'; Tests = 'LiteralSuffixCaseTests' }
         # BRO1133 (null check style)
         @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)'; Replace = '(LanguageVersion.CSharp7)'; Tests = 'NullCheckTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NullChecks.cs'; Find = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp7)'; Replace = '(not ? LanguageVersion.CSharp9 : LanguageVersion.CSharp1)'; Tests = 'NullCheckTests' }
@@ -233,6 +235,17 @@
 
         # Following StyleCop master: BRO1104 nint, BRO1604/BRO1605 init, BRO1611 primary constructors, BRO1606 blank summaries
         @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& typeText is not ("nint" or "nuint"))'; Replace = ')'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& PrefersDefaultLiteral(options)'; Replace = ''; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '>= LanguageVersion.CSharp7_1'; Replace = '>= LanguageVersion.CSharp1'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '&& SymbolEqualityComparer.Default.Equals(info.Type, info.ConvertedType))'; Replace = ')'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = 'group.AddRange('; Replace = 'new List<ExpressionSyntax>().AddRange('; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = '.Where(e => e is DefaultExpressionSyntax'; Replace = '.Where(e => e is null'; Tests = 'DefaultValueConstructorTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/DefaultValueConstructors.cs'; Find = "&& value.Split(':')[0].Trim().Equals("; Replace = '&& value.Trim().Equals('; Tests = 'DefaultValueConstructorTests' }
+        # BRO1106 literal style
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStrings.cs'; Find = '&& !IsInNameof(access)'; Replace = ''; Tests = 'EmptyStringTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStrings.cs'; Find = '.Any(t => access.Span.Contains(t.Span)'; Replace = '.Any(t => false'; Tests = 'EmptyStringTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStrings.cs'; Find = 'is IFieldSymbol { ContainingType.SpecialType: SpecialType.System_String }'; Replace = 'is IFieldSymbol'; Tests = 'EmptyStringTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/EmptyStringAnalyzer.cs'; Find = '!EmptyStrings.PrefersLiteral(c.Options.AnalyzerConfigOptionsProvider.GetOptions(literal.SyntaxTree))'; Replace = 'true'; Tests = 'EmptyStringTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '? [verb, "Gets"] : [verb]'; Replace = '? [verb] : [verb]'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = ' || old.StartsWith("Gets or initializes", StringComparison.Ordinal)'; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ParameterDocumentation.cs'; Find = 'TypeDeclarationSyntax type => type.ParameterList,'; Replace = ''; Tests = 'DocumentationTests' }
