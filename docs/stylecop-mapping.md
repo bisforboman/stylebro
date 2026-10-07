@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **draft (2026-09-30)**. Of 197 rules: 45 SDK, 106 StyleBro (106 done), 42 drop, 0 not yet done, 4 not applicable or variants.
+Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)**. Of 197 rules: 45 SDK, 106 StyleBro (106 done), 42 drop, 0 not yet done, 4 not applicable or variants.
 
 ## How this was measured
 
