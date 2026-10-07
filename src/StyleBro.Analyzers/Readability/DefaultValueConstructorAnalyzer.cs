@@ -23,7 +23,7 @@ public sealed class DefaultValueConstructorAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var creation = (BaseObjectCreationExpressionSyntax)c.Node;
-                if (DefaultValueConstructors.GetReplacement(creation, c.SemanticModel, c.CancellationToken) is { } replacement)
+                if (DefaultValueConstructors.GetReplacement(creation, c.SemanticModel, c.Options.AnalyzerConfigOptionsProvider.GetOptions(creation.SyntaxTree), c.CancellationToken) is { } replacement)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.DefaultValueConstructor, creation.GetLocation(), replacement));
                 }

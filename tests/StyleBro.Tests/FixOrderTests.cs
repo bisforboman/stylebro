@@ -710,6 +710,37 @@ public class FixOrderTests
         "BRO1106",
         "BRO1138");
 
+    // The literal style: BRO1103 swaps 'string.Empty == s' (a static readonly field counts as a constant) or '"" == s'.
+    [Fact]
+    public Task Strings_TheLiteralStyle() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public string A = string.Empty;
+            public string B = @"";
+
+            public bool M(string s) => string.Empty == s;
+        }
+        """,
+        "stylebro_empty_string_style = literal\n",
+        "BRO1103",
+        "BRO1106",
+        "BRO1138");
+
+    [Fact]
+    public Task LiteralSuffixes_OnlyLInUpperCase() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public long M(long a) => a + (long)1u;
+
+            public ulong N() => (ulong)2l + 3ul;
+        }
+        """,
+        "stylebro_upper_case_literal_suffixes = l_only\n",
+        "BRO1122",
+        "BRO1135");
+
     // BRO1148 writes the form BRO1133 asks for, so BRO1133 never sees a check to rewrite; BRO1405 removes parentheses
     // around 'x.HasValue', and BRO1148 only replaces it where '!= null' binds the same.
     [Theory]
