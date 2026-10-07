@@ -31,7 +31,8 @@ public sealed class LiteralSuffixAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                if (LiteralSuffixes.GetUpperCaseSuffix(((LiteralExpressionSyntax)c.Node).Token) is { } newText)
+                var token = ((LiteralExpressionSyntax)c.Node).Token;
+                if (LiteralSuffixes.GetUpperCaseSuffix(token, LiteralSuffixes.UpperCasesOnlyL(c.Options.AnalyzerConfigOptionsProvider.GetOptions(token.SyntaxTree!))) is { } newText)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.LiteralSuffixCase, c.Node.GetLocation(), newText));
                 }

@@ -83,11 +83,12 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor EmptyString = new(
         id: DiagnosticIds.EmptyString,
         title: "Use string.Empty for empty strings",
-        messageFormat: "Use 'string.Empty' instead of '{0}'",
+        messageFormat: "Use '{0}' instead of '{1}'",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "'string.Empty' instead of \"\", except where C# requires a constant. Replaces StyleCop SA1122.",
+        description: "'string.Empty' instead of \"\", except where C# requires a constant; or \"\" instead of 'string.Empty' with "
+            + "stylebro_empty_string_style = literal. Replaces StyleCop SA1122.",
         helpLinkUri: HelpBase + DiagnosticIds.EmptyString + ".md");
 
     public static readonly DiagnosticDescriptor SplitParametersStartOnNewLine = new(
@@ -499,12 +500,12 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",
-        messageFormat: "Add a trailing comma",
+        messageFormat: "{0}",
         category: "Maintainability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "A trailing comma after the last item keeps diffs to one line when items are added. "
-            + "Replaces StyleCop SA1413.",
+        description: "A trailing comma after the last item keeps diffs to one line when items are added "
+            + "(stylebro_trailing_comma = omit removes trailing commas instead). Replaces StyleCop SA1413.",
         helpLinkUri: HelpBase + DiagnosticIds.TrailingComma + ".md");
 
     public static readonly DiagnosticDescriptor BlankLineBeforeOpenBrace = new(
@@ -865,7 +866,7 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "'1L' instead of '1l', which looks like '11'; 'U' and 'UL' likewise. Real suffixes ('f', 'd', 'm') aren't "
-            + "checked. Not a StyleCop rule.",
+            + "checked; stylebro_upper_case_literal_suffixes = l_only checks only 'l'. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffixCase + ".md");
 
     public static readonly DiagnosticDescriptor NullCheckStyle = new(

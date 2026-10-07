@@ -4,6 +4,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -18,9 +19,11 @@ internal static class LiteralSuffixes
     /// <summary>
     /// BRO1135: the numeric literal's text with its integer suffix ('u', 'l', 'ul', 'lu' in any case) in upper case, or
     /// null when it has none in lower case. Real literals never end in 'u' or 'l' ('f', 'd', 'm' and the exponent's 'e'
-    /// aren't checked), and in hex literals the suffix letters can't be digits.
+    /// aren't checked), and in hex literals the suffix letters can't be digits. <paramref name="lOnly"/>
+    /// (stylebro_upper_case_literal_suffixes = l_only, like Sonar S818): only an 'l' is reported and upper-cased, 'u'
+    /// stays as written.
     /// </summary>
-    public static string? GetUpperCaseSuffix(SyntaxToken literal)
+    public static string? GetUpperCaseSuffix(SyntaxToken literal, bool lOnly)
     {
         var text = literal.Text;
         var start = text.Length;
@@ -30,8 +33,17 @@ internal static class LiteralSuffixes
         }
 
         var suffix = text.Substring(start);
+        if (lOnly)
+        {
+            return suffix.IndexOf('l') >= 0 ? text.Substring(0, start) + suffix.Replace('l', 'L') : null;
+        }
+
         return suffix.Any(char.IsLower) ? text.Substring(0, start) + suffix.ToUpperInvariant() : null;
     }
+
+    /// <summary>Whether stylebro_upper_case_literal_suffixes is l_only (default: all).</summary>
+    public static bool UpperCasesOnlyL(AnalyzerConfigOptions options) =>
+        options.TryGetValue("stylebro_upper_case_literal_suffixes", out var value) && value.Trim().Equals("l_only", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The edit that replaces the cast with the suffixed literal, or null. Unlike StyleCop, the new literal must have

@@ -13,11 +13,14 @@ using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1106: replaces "" with 'string.Empty'. Literals never overlap, so Fix All is one set of edits.</summary>
+/// <summary>
+/// Fix for BRO1106: replaces "" with 'string.Empty', or 'string.Empty' with "" in the literal style. The replaced
+/// expressions never overlap, so Fix All is one set of edits.
+/// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(EmptyStringCodeFixProvider))]
 public sealed class EmptyStringCodeFixProvider : CodeFixProvider
 {
-    private const string Title = "Use string.Empty";
+    private const string Title = "Use the configured empty string";
 
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
@@ -55,12 +58,21 @@ public sealed class EmptyStringCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var literalStyle = EmptyStrings.PrefersLiteral(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var model = literalStyle ? await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) : null;
         var changes = new List<TextChange>();
         foreach (var span in diagnostics.Select(d => d.Location.SourceSpan).Distinct())
         {
-            if (root.FindNode(span, getInnermostNodeForTie: true) is LiteralExpressionSyntax literal && EmptyStrings.ShouldReplace(literal))
+            var node = root.FindNode(span, getInnermostNodeForTie: true);
+            if (!literalStyle && node is LiteralExpressionSyntax literal && EmptyStrings.ShouldReplace(literal))
             {
                 changes.Add(new TextChange(literal.Span, "string.Empty"));
+            }
+            else if (model is not null
+                && node is MemberAccessExpressionSyntax access
+                && EmptyStrings.ShouldReplaceWithLiteral(access, model, cancellationToken))
+            {
+                changes.Add(new TextChange(access.Span, "\"\""));
             }
         }
 

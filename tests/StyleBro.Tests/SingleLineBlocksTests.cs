@@ -483,4 +483,61 @@ public class SingleLineBlocksTests
         }
         """,
         editorConfig: "stylebro_allow_adjacent_single_line_members = true");
+
+    [Fact]
+    public Task Enum_GetsNoTrailingComma_WhenTrailingCommasAreOmitted() => VerifyFixAsync(
+        """
+        public enum E {|BRO1509:{|} A, B }
+        """,
+        """
+        public enum E
+        {
+            A,
+            B
+        }
+        """,
+        editorConfig: "stylebro_trailing_comma = omit\n");
+
+    [Fact]
+    public Task AllowEmpty_EmptyBracesStay_OthersAreExpanded() => VerifyFixAsync(
+        """
+        public class Empty { }
+
+        public enum None { }
+
+        public class C {|BRO1509:{|} public C() { } }
+
+        public class D
+        {
+            public void M(bool b) {|BRO1509:{|} try { } catch { } if (b) {|BRO1508:{|} X(); } }
+
+            public void X() { }
+        }
+        """,
+        """
+        public class Empty { }
+
+        public enum None { }
+
+        public class C
+        {
+            public C() { }
+        }
+
+        public class D
+        {
+            public void M(bool b)
+            {
+                try { } catch { }
+
+                if (b)
+                {
+                    X();
+                }
+            }
+
+            public void X() { }
+        }
+        """,
+        editorConfig: "stylebro_allow_empty_single_line_blocks = true\n");
 }
