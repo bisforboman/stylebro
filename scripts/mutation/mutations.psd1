@@ -442,6 +442,14 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'previous.IsKind(SyntaxKind.CloseBraceToken)'; Replace = 'true'; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'if (AllowsEmpty(options))'; Replace = 'if (false)'; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = '&& !TrailingCommas.Omits(options)'; Replace = ''; Tests = 'SingleLineBlocksTests' }
+
+        # BRO1401 (trailing commas): stylebro_trailing_comma = omit
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = '|| Omits(getOptions()) != hasComma'; Replace = '|| !hasComma'; Tests = 'TrailingCommaTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = '|| HasDirectiveBetween(node, l.OpenBrace, l.CloseBrace)'; Replace = ''; Tests = 'TrailingCommaTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = 'while (start > 0 && text[start - 1] is'; Replace = 'while (false && text[start - 1] is'; Tests = 'TrailingCommaTests' }
+        @{ File = 'src/StyleBro.Analyzers/Maintainability/TrailingCommas.cs'; Find = "text[end] == '/' ?"; Replace = 'false ?'; Tests = 'TrailingCommaTests' }
 
         # BRO1409 (public methods of internal types): the analyzer's skips, then the fix's guards
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = 'case SyntaxKind.OverrideKeyword:'; Replace = ''; Tests = 'InternalTypeMethodTests' }

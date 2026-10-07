@@ -21,10 +21,13 @@ public sealed class TrailingCommaAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                var last = TrailingCommas.GetLastItemWithoutComma(c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken));
-                if (last is not null)
+                var tree = c.Node.SyntaxTree;
+                if (TrailingCommas.GetFinding(c.Node, tree.GetText(c.CancellationToken), () => c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree)) is { } finding)
                 {
-                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.TrailingComma, last.GetLocation()));
+                    c.ReportDiagnostic(Diagnostic.Create(
+                        Descriptors.TrailingComma,
+                        finding.Location,
+                        finding.Change.Span.Length > 0 ? "Remove the trailing comma" : "Add a trailing comma"));
                 }
             },
             SyntaxKind.ArrayInitializerExpression,

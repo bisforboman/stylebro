@@ -499,12 +499,12 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor TrailingComma = new(
         id: DiagnosticIds.TrailingComma,
         title: "Use a trailing comma in multi-line initializers",
-        messageFormat: "Add a trailing comma",
+        messageFormat: "{0}",
         category: "Maintainability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "A trailing comma after the last item keeps diffs to one line when items are added. "
-            + "Replaces StyleCop SA1413.",
+        description: "A trailing comma after the last item keeps diffs to one line when items are added "
+            + "(stylebro_trailing_comma = omit removes trailing commas instead). Replaces StyleCop SA1413.",
         helpLinkUri: HelpBase + DiagnosticIds.TrailingComma + ".md");
 
     public static readonly DiagnosticDescriptor BlankLineBeforeOpenBrace = new(
