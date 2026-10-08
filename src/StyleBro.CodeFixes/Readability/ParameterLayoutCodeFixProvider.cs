@@ -60,6 +60,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        bool JoinsEmptyLists() => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.EmptyListOnOneLine, cancellationToken);
 
         // One entry per list: its span, the position of its '(' and whether every item moves (BRO1108) or only the first.
         var remaining = diagnostics
@@ -85,8 +86,8 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
                 if (current.FindToken(open) is var token && token.SpanStart == open && token.Parent is { } node
                     && ParameterLayout.GetList(node).Open == token
                     && (list.All
-                        ? ParameterLayout.GetFirstMisplacedItem(node, currentText) ?? ParameterLayout.GetFirstItemToMove(node, currentText)
-                        : ParameterLayout.GetFirstItemToMove(node, currentText)) is not null)
+                        ? ParameterLayout.GetFirstMisplacedItem(node, currentText, JoinsEmptyLists) ?? ParameterLayout.GetFirstItemToMove(node, currentText, JoinsEmptyLists)
+                        : ParameterLayout.GetFirstItemToMove(node, currentText, JoinsEmptyLists)) is not null)
                 {
                     foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All))
                     {

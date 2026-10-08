@@ -1102,6 +1102,77 @@ public class FixOrderTests
         "BRO1509",
         "BRO1519");
 
+    [Fact]
+    public Task MemberOrder_InAOneLineType() => AssertConvergesInEveryOrderAsync(
+        """
+        public interface I { void B(); void A(); }
+
+        public class C { public void B() { } private int x; public void A() { } }
+        """,
+        "BRO1001",
+        "BRO1505",
+        "BRO1509");
+
+    [Fact]
+    public Task MemberOrder_BlankLinesInOtherSlots() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void B()
+            {
+            }
+            private int y;
+
+            private int x;
+            public void A()
+            {
+            }
+        }
+
+        public class D
+        {
+            private int y;
+            public int P { get; set; }
+
+            public const int X = 1;
+        }
+        """,
+        "BRO1001",
+        "BRO1505");
+
+    [Fact]
+    public Task CombinedFields_DocumentedFieldsSplit() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            /// <summary>Docs.</summary>
+            public int A, B;
+
+            /// <summary>Docs.</summary>
+            private int c, d;
+        }
+        """,
+        "BRO1114",
+        "BRO1513");
+
+    [Fact]
+    public Task EmptyParentheses_InsideASplitList() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b) => a;
+
+            public int N() => 1;
+
+            public int P() => M(
+                N(
+                ), M(5,
+                6));
+        }
+        """,
+        "BRO1108",
+        "BRO1116");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

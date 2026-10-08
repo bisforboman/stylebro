@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -28,7 +29,8 @@ internal static class ParameterLayout
     /// BRO1107: the first item shares its line with the opening parenthesis while the second item starts on a later
     /// line. Like StyleCop, when the first two share a line, BRO1108 reports the list instead.
     /// </summary>
-    public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text)
+    /// <param name="joinsEmptyLists">Whether BRO1116 is on (see <see cref="GetLines"/>).</param>
+    public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text, Func<bool>? joinsEmptyLists = null)
     {
         var (open, items) = GetList(list);
         if (items.Count < 2)
@@ -37,8 +39,9 @@ internal static class ParameterLayout
         }
 
         // The layout first, then the gaps (CanRewrite looks at every item's trivia): most lists are fine.
-        var openLine = Line(text, open.SpanStart);
-        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine && CanRewrite(list, items) ? items[0] : null;
+        var line = GetLines(list, text, joinsEmptyLists);
+        var openLine = line(open.SpanStart);
+        return line(items[0].SpanStart) == openLine && line(items[1].SpanStart) > openLine && CanRewrite(list, items) ? items[0] : null;
     }
 
     /// <summary>
@@ -46,7 +49,7 @@ internal static class ParameterLayout
     /// intended, like StyleCop. Returns the first item that breaks it. When the first two start on the same line,
     /// every item has to start on that line; otherwise no item may start on the line where the previous one ends.
     /// </summary>
-    public static SyntaxNode? GetFirstMisplacedItem(SyntaxNode list, SourceText text)
+    public static SyntaxNode? GetFirstMisplacedItem(SyntaxNode list, SourceText text, Func<bool>? joinsEmptyLists = null)
     {
         var (_, items) = GetList(list);
         if (items.Count < 2)
@@ -54,7 +57,7 @@ internal static class ParameterLayout
             return null;
         }
 
-        var misplaced = GetMisplacedItem(items, text);
+        var misplaced = GetMisplacedItem(items, GetLines(list, text, joinsEmptyLists));
         return misplaced is not null && CanRewrite(list, items) ? misplaced : null;
     }
 
@@ -110,17 +113,17 @@ internal static class ParameterLayout
         };
     }
 
-    private static SyntaxNode? GetMisplacedItem(IReadOnlyList<SyntaxNode> items, SourceText text)
+    private static SyntaxNode? GetMisplacedItem(IReadOnlyList<SyntaxNode> items, Func<int, int> line)
     {
-        var firstLine = Line(text, items[0].SpanStart);
-        if (Line(text, items[1].SpanStart) == firstLine)
+        var firstLine = line(items[0].SpanStart);
+        if (line(items[1].SpanStart) == firstLine)
         {
-            return items.Skip(2).FirstOrDefault(item => Line(text, item.SpanStart) != firstLine);
+            return items.Skip(2).FirstOrDefault(item => line(item.SpanStart) != firstLine);
         }
 
         for (var i = 1; i < items.Count; i++)
         {
-            if (Line(text, items[i].SpanStart) == Line(text, items[i - 1].Span.End))
+            if (line(items[i].SpanStart) == line(items[i - 1].Span.End))
             {
                 return items[i];
             }
@@ -180,6 +183,47 @@ internal static class ParameterLayout
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// The line of a position in the list as it is once BRO1116 (when on) has joined every empty '()' inside it that is
+    /// split over lines: those line breaks don't count, so BRO1107/BRO1108 judge the list the same before and after that
+    /// fix, and the result doesn't depend on which fix runs first (<c>N(</c> / <c>), M(5,</c> was "each on its own line"
+    /// before the join and "all on one line" after it).
+    /// </summary>
+    private static Func<int, int> GetLines(SyntaxNode list, SourceText text, Func<bool>? joinsEmptyLists)
+    {
+        int Plain(int position) => Line(text, position);
+        if (joinsEmptyLists is null)
+        {
+            return Plain;
+        }
+
+        // Only an item that spans lines can hold one (most don't); its tokens are scanned for '(' + ')' with a line break.
+        List<(int At, int Breaks)>? joined = null;
+        foreach (var item in GetList(list).Items)
+        {
+            if (Line(text, item.SpanStart) == Line(text, item.Span.End))
+            {
+                continue;
+            }
+
+            var previous = default(SyntaxToken);
+            foreach (var token in item.DescendantTokens())
+            {
+                if (token.IsKind(SyntaxKind.CloseParenToken) && previous.IsKind(SyntaxKind.OpenParenToken)
+                    && (previous.TrailingTrivia.Any(SyntaxKind.EndOfLineTrivia) || token.LeadingTrivia.Any(SyntaxKind.EndOfLineTrivia))
+                    && token.Parent is { } empty && (empty.IsKind(SyntaxKind.ArgumentList) || empty.IsKind(SyntaxKind.ParameterList))
+                    && ListGaps.GetFindings(empty, text).Any(f => f.Id == DiagnosticIds.EmptyListOnOneLine))
+                {
+                    (joined ??= []).Add((token.SpanStart, Line(text, token.SpanStart) - Line(text, previous.SpanStart)));
+                }
+
+                previous = token;
+            }
+        }
+
+        return joined is null || !joinsEmptyLists() ? Plain : position => Plain(position) - joined.Where(j => j.At <= position).Sum(j => j.Breaks);
     }
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
