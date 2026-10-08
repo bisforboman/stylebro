@@ -12,7 +12,8 @@ using StyleBro.Analyzers.Readability;
 namespace StyleBro.CodeFixes.Readability;
 
 /// <summary>
-/// Fix for BRO1109 (moves the opening token up to the name) and BRO1110 (moves the closing token up to the last item).
+/// Fix for BRO1109 (moves the opening token up to the name) and BRO1110 (moves the closing token up to the last item,
+/// or to its own line with stylebro_closing_parenthesis_placement = own_line).
 /// Both are text edits within one list, so single fixes and Fix All agree.
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ParenthesisPlacementCodeFixProvider))]
@@ -33,7 +34,7 @@ public sealed class ParenthesisPlacementCodeFixProvider : CodeFixProvider
         {
             var title = diagnostic.Id == DiagnosticIds.OpenParenthesisOnNameLine
                 ? "Move the opening parenthesis up"
-                : "Move the closing parenthesis up";
+                : "Move the closing parenthesis";
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title,
@@ -57,6 +58,8 @@ public sealed class ParenthesisPlacementCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var ownLine = ParenthesisPlacement.IsOwnLine(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var openMoves = ownLine && Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.OpenParenthesisOnNameLine, cancellationToken);
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
@@ -74,9 +77,9 @@ public sealed class ParenthesisPlacementCodeFixProvider : CodeFixProvider
                     changes.Add(ParenthesisPlacement.GetOpenChange(open, text));
                 }
             }
-            else if (ParenthesisPlacement.GetMisplacedClose(list, text) is { } close)
+            else if (ParenthesisPlacement.GetCloseFix(list, text, ownLine, openMoves) is { } close)
             {
-                changes.Add(ParenthesisPlacement.GetCloseChange(close, text));
+                changes.Add(close.Change);
             }
         }
 

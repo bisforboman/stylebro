@@ -24,7 +24,7 @@ public sealed class ParameterLayoutAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var text = c.Node.SyntaxTree.GetText(c.CancellationToken);
-                if (ParameterLayout.GetFirstItemToMove(c.Node, text) is { } first)
+                if (ParameterLayout.GetFirstItemToMove(c.Node, text, c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree)) is { } first)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.SplitParametersStartOnNewLine, first.GetLocation()));
                 }

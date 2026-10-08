@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -13,6 +14,9 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class ParameterLayout
 {
+    /// <summary>The .editorconfig key for where the first item of a split list goes (BRO1107, and BRO1108's fix).</summary>
+    public const string FirstItemKey = "stylebro_split_list_first_item";
+
     /// <summary>The lists both rules look at: parameters, arguments, attribute arguments and array sizes.</summary>
     public static readonly SyntaxKind[] ListKinds =
     [
@@ -26,9 +30,10 @@ internal static class ParameterLayout
 
     /// <summary>
     /// BRO1107: the first item shares its line with the opening parenthesis while the second item starts on a later
-    /// line. Like StyleCop, when the first two share a line, BRO1108 reports the list instead.
+    /// line. Like StyleCop, when the first two share a line, BRO1108 reports the list instead. Never when
+    /// <paramref name="options"/> set <c>stylebro_split_list_first_item = same_line</c>: the first item may stay there.
     /// </summary>
-    public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text)
+    public static SyntaxNode? GetFirstItemToMove(SyntaxNode list, SourceText text, AnalyzerConfigOptions? options)
     {
         var (open, items) = GetList(list);
         if (items.Count < 2)
@@ -36,9 +41,10 @@ internal static class ParameterLayout
             return null;
         }
 
-        // The layout first, then the gaps (CanRewrite looks at every item's trivia): most lists are fine.
+        // The layout first, then the setting and the gaps (CanRewrite looks at every item's trivia): most lists are fine.
         var openLine = Line(text, open.SpanStart);
-        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine && CanRewrite(list, items) ? items[0] : null;
+        return Line(text, items[0].SpanStart) == openLine && Line(text, items[1].SpanStart) > openLine
+            && !(options is not null && IsSameLine(options)) && CanRewrite(list, items) ? items[0] : null;
     }
 
     /// <summary>
@@ -63,13 +69,20 @@ internal static class ParameterLayout
     /// starting on the line after the opening parenthesis, one indentation level deeper than the line with the
     /// parenthesis. A moved item's later lines (a lambda's block body) move by the same amount, unlike StyleCop's fix
     /// (StyleCop #1620, #3183). Items already at the start of a line keep their indentation; everything else in the
-    /// list stays as it is.
+    /// list stays as it is. With <paramref name="sameLine"/>, a first item on the opening parenthesis's line stays there,
+    /// and moved items are indented like the first item that already starts a line (aligned under the first item, or
+    /// one level deeper: whatever the list does), else one level deeper than the line with the parenthesis.
     /// </summary>
-    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false)
+    public static IEnumerable<TextChange> GetChanges(SyntaxNode list, SourceText text, string indentUnit, bool firstOnly = false, bool sameLine = false)
     {
         var (open, items) = GetList(list);
         var openLine = text.Lines.GetLineFromPosition(open.SpanStart);
         var indentation = new string(text.ToString(openLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray()) + indentUnit;
+        if (sameLine && items.FirstOrDefault(i => Line(text, i.SpanStart) > Line(text, i.GetFirstToken().GetPreviousToken().Span.End)) is { } lineStart)
+        {
+            indentation = LeadingWhitespace(text, text.Lines.GetLineFromPosition(lineStart.SpanStart));
+        }
+
         var lineBreak = text.ToString(TextSpan.FromBounds(openLine.End, openLine.EndIncludingLineBreak));
         if (lineBreak.Length == 0)
         {
@@ -79,7 +92,7 @@ internal static class ParameterLayout
         var previousEnd = open.Span.End;
         foreach (var item in items)
         {
-            if (Line(text, item.SpanStart) == Line(text, previousEnd))
+            if (Line(text, item.SpanStart) == Line(text, previousEnd) && !(sameLine && previousEnd == open.Span.End))
             {
                 // Replace the spaces between the previous token ('(' or ',') and the item with a line break.
                 yield return new TextChange(TextSpan.FromBounds(previousEnd, item.SpanStart), lineBreak + indentation);
@@ -97,6 +110,10 @@ internal static class ParameterLayout
             previousEnd = item.GetLastToken().GetNextToken().Span.End; // the ',' after the item
         }
     }
+
+    /// <summary>Whether <see cref="FirstItemKey"/> is <c>same_line</c> (default <c>next_line</c>, like StyleCop).</summary>
+    public static bool IsSameLine(AnalyzerConfigOptions options) =>
+        options.TryGetValue(FirstItemKey, out var value) && value.Trim().Equals("same_line", System.StringComparison.OrdinalIgnoreCase);
 
     public static (SyntaxToken Open, IReadOnlyList<SyntaxNode> Items) GetList(SyntaxNode list)
     {
