@@ -16,7 +16,7 @@
     <Description>Generates StyleBro and .NET SDK settings from a repository's StyleCop configuration, so moving from StyleCop.Analyzers to StyleBro keeps the code's style.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/bisforboman/stylebro</PackageProjectUrl>
-    <PackageTags>stylecop;migration;analyzers;code-style;dotnet-format;dotnet-tool</PackageTags>
+    <PackageTags>stylecop;sonarqube;migration;analyzers;code-style;dotnet-format;dotnet-tool</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
@@ -36,6 +36,9 @@
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\mapping.csv" LogicalName="StyleCopMapping.csv" />
     <EmbeddedResource Include="sdk-rules.editorconfig" LogicalName="SdkRules.editorconfig" />
     <EmbeddedResource Include="modernize-rules.editorconfig" LogicalName="ModernizeRules.editorconfig" />
+    <!-- Sonar's C# rules and defaults (public metadata of SonarAnalyzer.CSharp), and the rules that fix what they report. -->
+    <EmbeddedResource Include="data\sonar-rules-10.35.0.4138.tsv" LogicalName="SonarRules.tsv" />
+    <EmbeddedResource Include="data\sonar-mapping.tsv" LogicalName="SonarMapping.tsv" />
   </ItemGroup>
 
   <ItemGroup>

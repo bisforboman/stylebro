@@ -190,7 +190,7 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE rules init's template
+    /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
     /// and the stylebro blocks of the .editorconfig files at and above <paramref name="root"/> name (rules set to none
     /// aren't fixed anyway).
     /// </summary>
@@ -207,7 +207,7 @@ internal static class FormatCommand
             }
         }
 
-        foreach (Match match in Regex.Matches(string.Join("\n", text), @"dotnet_diagnostic\.(IDE\d+)\.severity", RegexOptions.IgnoreCase))
+        foreach (Match match in Regex.Matches(string.Join("\n", text), @"dotnet_diagnostic\.((?:IDE|CA)\d+)\.severity", RegexOptions.IgnoreCase))
         {
             ids.Add(match.Groups[1].Value.ToUpperInvariant());
         }

@@ -1,0 +1,458 @@
+# SonarAnalyzer.CSharp 10.35.0.4138: every C# rule, read from the package's descriptors (public metadata only).
+# Id, on by default (Sonar way), the package has a code fix, title.
+S100	off	-	Methods and properties should be named in PascalCase
+S101	on	-	Types should be named in PascalCase
+S103	off	-	Lines should not be too long
+S104	off	-	Files should not have too many lines of code
+S105	off	-	Tabulation characters should not be used
+S106	off	-	Standard outputs should not be used directly to log anything
+S107	off	-	Methods should not have too many parameters
+S108	on	-	Nested blocks of code should not be left empty
+S109	off	-	Magic numbers should not be used
+S110	off	-	Inheritance tree of classes should not be too deep
+S112	on	-	General or reserved exceptions should never be thrown
+S113	off	-	Files should end with a newline
+S121	off	-	Control structures should use curly braces
+S122	off	-	Statements should be on separate lines
+S125	on	fix	Sections of code should not be commented out
+S126	off	-	"if ... else if" constructs should end with "else" clauses
+S127	on	-	"for" loop stop conditions should be invariant
+S131	off	-	"switch/Select" statements should contain a "default/Case Else" clauses
+S134	off	-	Control flow statements "if", "switch", "for", "foreach", "while", "do"  and "try" should not be nested too deeply
+S138	off	-	Functions should not have too many lines of code
+S818	on	fix	Literal suffixes should be upper case
+S881	off	-	Increment (++) and decrement (--) operators should not be used in a method call or mixed with other operators in an expression
+S907	on	-	"goto" statement should not be used
+S927	on	-	Parameter names should match base declaration and other partial definitions
+S1006	on	fix	Method overrides should not change parameter defaults
+S1048	on	-	Finalizers should not throw exceptions
+S1066	on	-	Mergeable "if" statements should be combined
+S1067	off	-	Expressions should not be too complex
+S1075	on	-	URIs should not be hardcoded
+S1104	on	-	Fields should not have public accessibility
+S1109	off	-	A close curly brace should be located at the beginning of a line
+S1110	on	fix	Redundant pairs of parentheses should be removed
+S1116	on	fix	Empty statements should be removed
+S1117	on	-	Local variables should not shadow class fields or properties
+S1118	on	-	Utility classes should not have public constructors
+S1121	on	-	Assignments should not be made from within sub-expressions
+S1123	on	-	"Obsolete" attributes should include explanations
+S1125	on	fix	Boolean literals should not be redundant
+S1128	off	fix	Unnecessary "using" should be removed
+S1133	on	-	Deprecated code should be removed
+S1134	on	-	Track uses of "FIXME" tags
+S1135	on	-	Track uses of "TODO" tags
+S1144	on	fix	Unused private types or members should be removed
+S1147	off	-	Exit methods should not be called
+S1151	off	-	"switch case" clauses should not have too many lines of code
+S1155	on	fix	"Any()" should be used to test for emptiness
+S1163	on	-	Exceptions should not be thrown in finally blocks
+S1168	on	-	Empty arrays and collections should be returned instead of null
+S1172	on	fix	Unused method parameters should be removed
+S1185	on	fix	Overriding members should do more than simply call the same member in the base class
+S1186	on	fix	Methods should not be empty
+S1192	off	-	String literals should not be duplicated
+S1199	on	-	Nested code blocks should not be used
+S1200	off	-	Classes should not be coupled to too many other classes
+S1206	on	-	"Equals(Object)" and "GetHashCode()" should be overridden in pairs
+S1210	on	-	"Equals" and the comparison operators should be overridden when implementing "IComparable"
+S1215	on	-	"GC.Collect" should not be called
+S1226	off	-	Method parameters, caught exceptions and foreach variables' initial values should not be ignored
+S1227	off	-	break statements should not be used except for switch cases
+S1244	on	-	Floating point numbers should not be tested for equality
+S1264	off	-	A "while" loop should be used instead of a "for" loop
+S1301	off	-	"switch" statements should have at least 3 "case" clauses
+S1309	off	-	Track uses of in-source issue suppressions
+S1312	off	-	Logger fields should be "private static readonly"
+S1313	on	-	IP addresses should not be hardcoded
+S1449	off	-	Culture should be specified for "string" operations
+S1450	on	-	Private fields only used as local variables in methods should become local variables
+S1451	off	fix	Track lack of copyright and license headers
+S1479	off	-	"switch" statements with many "case" clauses should have only one statement
+S1481	on	-	Unused local variables should be removed
+S1541	off	-	Methods and properties should not be too complex
+S1607	on	-	Tests should not be ignored
+S1643	on	-	Strings should not be concatenated using '+' in a loop
+S1656	on	-	Variables should not be self-assigned
+S1659	off	fix	Multiple variables should not be declared on the same line
+S1694	on	-	An abstract class should have both abstract and concrete methods
+S1696	on	-	NullReferenceException should not be caught
+S1698	off	-	"==" should not be used when "Equals" is overridden
+S1699	on	-	Constructors should only call non-overridable methods
+S1751	on	-	Loops with at most one iteration should be refactored
+S1764	on	-	Identical expressions should not be used on both sides of operators
+S1821	off	-	"switch" statements should not be nested
+S1848	on	-	Objects should not be created to be dropped immediately without being used
+S1854	on	-	Unused assignments should be removed
+S1858	off	fix	"ToString()" calls should not be redundant
+S1862	on	-	Related "if/else if" statements should not have the same condition
+S1871	on	-	Two branches in a conditional structure should not have exactly the same implementation
+S1905	on	fix	Redundant casts should not be used
+S1939	on	fix	Inheritance list should not be redundant
+S1940	on	fix	Boolean checks should not be inverted
+S1944	on	-	Invalid casts should be avoided
+S1994	on	-	"for" loop increment clauses should modify the loops' counters
+S2068	on	-	Credentials should not be hard-coded
+S2077	on	-	SQL queries should not be dynamically formatted
+S2092	on	-	Cookies should have the "secure" flag
+S2094	on	-	Classes should not be empty
+S2114	on	-	Collections should not be passed as arguments to their own methods
+S2115	on	-	A secure password should be used when connecting to a database
+S2123	on	-	Values should not be uselessly incremented
+S2139	on	-	Exceptions should be either logged or rethrown but not both
+S2148	off	-	Underscores should be used to make large numbers readable
+S2156	off	-	"sealed" classes should not have "protected" members
+S2166	on	-	Classes named like "Exception" should extend "Exception" or a subclass
+S2178	on	fix	Short-circuit logic should be used in boolean contexts
+S2183	on	-	Integral numbers should not be shifted by zero or more than their number of bits-1
+S2184	on	-	Results of integer division should not be assigned to floating point variables
+S2187	on	-	Test classes should contain at least one test case
+S2190	on	-	Loops and recursions should not be infinite
+S2197	off	-	Modulus results should not be checked for direct equality
+S2198	on	-	Unnecessary mathematical comparisons should not be made
+S2201	on	-	Methods without side effects should not have their return values ignored
+S2219	on	fix	Runtime type checking should be simplified
+S2221	off	-	"Exception" should not be caught
+S2223	on	-	Non-constant static fields should not be visible
+S2225	on	-	"ToString()" method should not return null
+S2234	on	-	Arguments should be passed in the same order as the method parameters
+S2245	on	-	Pseudorandom number generators (PRNGs) should not be used in security contexts
+S2251	on	-	A "for" loop update clause should move the counter in the right direction
+S2252	on	-	For-loop conditions should be true at least once
+S2257	on	-	Custom cryptographic algorithms should not be used
+S2275	on	-	Composite format strings should not lead to unexpected behavior at runtime
+S2290	on	fix	Field-like events should not be virtual
+S2291	on	-	Overflow checking should not be disabled for "Enumerable.Sum"
+S2292	on	-	Trivial properties should be auto-implemented
+S2302	off	-	"nameof" should be used
+S2306	on	-	"async" and "await" should not be used as identifiers
+S2325	on	-	Methods and properties that don't access instance data should be static
+S2326	on	-	Unused type parameters should be removed
+S2327	off	-	"try" statements with identical "catch" and/or "finally" blocks should be merged
+S2328	on	fix	"GetHashCode" should not reference mutable fields
+S2330	off	-	Array covariance should not be used
+S2333	off	fix	Redundant modifiers should not be used
+S2339	off	-	Public constant members should not be used
+S2342	off	-	Enumeration types should comply with a naming convention
+S2344	on	-	Enumeration type names should not have "Flags" or "Enum" suffixes
+S2345	on	-	Flags enumerations should explicitly initialize all their members
+S2346	on	-	Flags enumerations zero-value members should be named "None"
+S2357	off	-	Fields should be private
+S2360	off	-	Optional parameters should not be used
+S2365	on	-	Properties should not make collection or array copies
+S2368	on	-	Public methods should not have multidimensional array parameters
+S2372	on	-	Exceptions should not be thrown from property getters
+S2376	on	-	Write-only properties should not be used
+S2386	on	-	Mutable fields should not be "public static"
+S2387	off	-	Child class fields should not shadow parent class fields
+S2436	off	-	Types and methods should not have too many generic parameters
+S2437	on	fix	Unnecessary bit operations should not be performed
+S2445	on	-	Blocks should be synchronized on read-only fields
+S2479	on	-	Whitespace and control characters in string literals should be explicit
+S2486	on	-	Generic exceptions should not be ignored
+S2551	on	-	Shared resources should not be used for locking
+S2612	on	-	File permissions should not be set to world-accessible values
+S2629	on	-	Logging templates should be constant
+S2674	on	-	The length returned from a stream read should be checked
+S2681	on	-	Multiline blocks should be enclosed in curly braces
+S2688	on	-	"NaN" should not be used in comparisons
+S2692	off	-	"IndexOf" checks should not be for positive numbers
+S2696	on	-	Instance members should not write to "static" fields
+S2699	on	-	Tests should include assertions
+S2701	on	-	Literal boolean values should not be used in assertions
+S2737	on	fix	"catch" clauses should do more than rethrow
+S2743	on	-	Static fields should not be used in generic types
+S2755	on	-	XML parsers should not be vulnerable to XXE attacks
+S2757	on	-	Non-existent operators like "=+" should not be used
+S2760	off	-	Sequential tests should not check the same condition
+S2761	on	fix	Doubled prefix operators "!!" and "~~" should not be used
+S2857	on	-	SQL keywords should be delimited by whitespace
+S2925	on	-	"Thread.Sleep" should not be used in tests
+S2930	on	-	"IDisposables" should be disposed
+S2931	off	-	Classes with "IDisposable" members should implement "IDisposable"
+S2933	on	fix	Fields that are only assigned in the constructor should be "readonly"
+S2934	on	fix	Property assignments should not be made for "readonly" fields not constrained to reference types
+S2952	off	-	Classes should "Dispose" of members from the classes' own "Dispose" methods
+S2953	on	-	Methods named "Dispose" should implement "IDisposable.Dispose"
+S2955	on	fix	Generic parameters not constrained to reference types should not be compared to "null"
+S2970	on	-	Assertions should be complete
+S2971	on	-	LINQ expressions should be simplified
+S2995	on	-	"Object.ReferenceEquals" should not be used for value types
+S2996	on	-	"ThreadStatic" fields should not be initialized
+S2997	on	-	"IDisposables" created in a "using" statement should not be returned
+S3005	on	fix	"ThreadStatic" should not be used on non-static fields
+S3010	on	-	Static fields should not be updated in constructors
+S3011	on	-	Reflection should not be used to increase accessibility of classes, methods, or fields
+S3052	off	fix	Members should not be initialized to default values
+S3059	off	-	Types should not have members with visibility set higher than the type's visibility
+S3060	on	-	"is" should not be used with "this"
+S3063	on	-	"StringBuilder" data should be used
+S3168	on	-	"async" methods should not return "void"
+S3169	on	fix	Multiple "OrderBy" calls should not be used
+S3172	on	-	Delegates should not be subtracted
+S3215	off	-	"interface" instances should not be cast to concrete types
+S3216	off	-	"ConfigureAwait(false)" should be used
+S3217	on	fix	"Explicit" conversions of "foreach" loops should not be used
+S3218	on	-	Inner class members should not shadow outer class "static" or type members
+S3220	on	-	Method calls should not resolve ambiguously to overloads with "params"
+S3234	off	fix	"GC.SuppressFinalize" should not be invoked for types without destructors
+S3235	off	fix	Redundant parentheses should not be used
+S3236	on	-	Caller information arguments should not be provided explicitly
+S3237	on	-	"value" contextual keyword should be used
+S3240	off	fix	The simplest possible condition syntax should be used
+S3241	on	-	Methods should not return values that are never used
+S3242	off	-	Method parameters should be declared with base types
+S3244	on	-	Anonymous delegates should not be used to unsubscribe from Events
+S3246	on	-	Generic type parameters should be co/contravariant when possible
+S3247	on	-	Duplicate casts should not be made
+S3249	off	-	Classes directly extending "object" should not call "base" in "GetHashCode" or "Equals"
+S3251	on	-	Implementations should be provided for "partial" methods
+S3253	off	fix	Constructor and destructor declarations should not be redundant
+S3254	off	fix	Default parameter values should not be passed as arguments
+S3256	off	-	"string.IsNullOrEmpty" should be used
+S3257	off	fix	Declarations and initializations should be as concise as possible
+S3260	on	-	Non-derived "private" classes and records should be "sealed"
+S3261	on	fix	Namespaces should not be empty
+S3262	on	fix	"params" should be used on overrides
+S3263	on	-	Static fields should appear in the order they must be initialized
+S3264	on	-	Events should be invoked
+S3265	on	fix	Non-flags enums should not be used in bitwise operations
+S3267	on	-	Loops should be simplified with "LINQ" expressions
+S3330	on	-	Cookies should have the "HttpOnly" flag
+S3343	on	-	Caller information parameters should come at the end of the parameter list
+S3346	on	-	Expressions used in "Debug.Assert" should not produce side effects
+S3353	off	fix	Unchanged variables should be marked as "const"
+S3358	on	-	Ternary operators should not be nested
+S3363	on	-	Date and time should not be used as a type for primary keys
+S3366	off	-	"this" should not be exposed from constructors
+S3376	on	-	Attribute, EventArgs, and Exception type names should end with the type being extended
+S3397	on	-	"base.Equals" should not be used to check for reference equality in "Equals" if "base" is not "object"
+S3398	on	-	"private" methods called only by inner classes should be moved to those classes
+S3400	on	-	Methods should not return constants
+S3415	on	-	Assertion arguments should be passed in the correct order
+S3416	off	-	Loggers should be named for their enclosing types
+S3427	on	-	Method overloads with default parameter values should not overlap
+S3431	on	-	"[ExpectedException]" should not be used
+S3433	on	-	Test method signatures should be correct
+S3440	on	fix	Variables should not be checked against the values they're about to be assigned
+S3441	off	fix	Redundant property names should be omitted in anonymous classes
+S3442	on	-	"abstract" classes should not have "public" constructors
+S3443	on	-	Type should not be examined on "System.Type" instances
+S3444	on	-	Interfaces should not simply inherit from base interfaces with colliding members
+S3445	on	fix	Exceptions should not be explicitly rethrown
+S3447	on	fix	"[Optional]" should not be used on "ref" or "out" parameters
+S3449	on	-	Right operands of shift operators should be integers
+S3450	on	fix	Parameters with "[DefaultParameterValue]" attributes should also be marked "[Optional]"
+S3451	on	fix	"[DefaultValue]" should not be used when "[DefaultParameterValue]" is meant
+S3453	on	-	Classes should not have only "private" constructors
+S3456	on	fix	"string.ToCharArray()" and "ReadOnlySpan<T>.ToArray()" should not be called redundantly
+S3457	on	-	Composite format strings should be used correctly
+S3458	on	fix	Empty "case" clauses that fall through to the "default" should be omitted
+S3459	on	-	Unassigned members should be removed
+S3464	on	-	Type inheritance should not be recursive
+S3466	on	-	Optional parameters should be passed to "base" calls
+S3532	off	fix	Empty "default" clauses should be removed
+S3597	on	-	"ServiceContract" and "OperationContract" attributes should be used together
+S3598	on	-	One-way "OperationContract" methods should have "void" return type
+S3600	on	fix	"params" should not be introduced on overrides
+S3603	on	-	Methods with "Pure" attribute should return a value
+S3604	on	fix	Member initializer values should not be redundant
+S3610	on	-	Nullable type comparison should not be redundant
+S3626	on	-	Jump statements should not be redundant
+S3717	off	-	Track use of "NotImplementedException"
+S3776	off	-	Cognitive Complexity of methods should not be too high
+S3869	on	-	"SafeHandle.DangerousGetHandle" should not be called
+S3871	on	-	Exception types should be "public"
+S3872	off	-	Parameter names should not duplicate the names of their methods
+S3874	off	-	"out" and "ref" parameters should not be used
+S3875	on	-	"operator==" should not be overloaded on reference types
+S3876	off	-	Strings or integral types should be used for indexers
+S3877	on	-	Exceptions should not be thrown from unexpected methods
+S3878	on	-	Arrays should not be created for params parameters
+S3880	off	-	Finalizers should not be empty
+S3881	on	-	"IDisposable" should be implemented correctly
+S3884	off	-	"CoSetProxyBlanket" and "CoInitializeSecurity" should not be used
+S3885	off	-	"Assembly.Load" should be used
+S3887	on	-	Mutable, non-private fields should not be "readonly"
+S3889	on	-	"Thread.Resume" and "Thread.Suspend" should not be used
+S3897	on	-	Classes that provide "Equals(<T>)" should implement "IEquatable<T>"
+S3898	off	-	Value types should implement "IEquatable<T>"
+S3902	off	-	"Assembly.GetExecutingAssembly" should not be called
+S3903	on	-	Types should be defined in named namespaces
+S3904	on	-	Assemblies should have version information
+S3906	off	-	Event Handlers should have the correct signature
+S3908	off	-	Generic event handlers should be used
+S3909	off	-	Collections should implement the generic interface
+S3923	on	-	All branches in a conditional structure should not have exactly the same implementation
+S3925	on	-	"ISerializable" should be implemented correctly
+S3926	on	-	Deserialization methods should be provided for "OptionalField" members
+S3927	on	-	Serialization event handlers should be implemented correctly
+S3928	on	-	Parameter names used into ArgumentException constructors should match an existing one
+S3937	off	-	Number patterns should be regular
+S3956	off	-	"Generic.List" instances should not be part of public APIs
+S3962	off	-	"static readonly" constants should be "const" instead
+S3963	on	-	"static" fields should be initialized inline
+S3967	off	-	Multidimensional arrays should not be used
+S3971	on	-	"GC.SuppressFinalize" should not be called
+S3972	on	-	Conditionals should start on new lines
+S3973	on	-	A conditionally executed single line should be denoted by indentation
+S3981	on	-	Collection sizes and array length comparisons should make sense
+S3984	on	-	Exceptions should not be created without being thrown
+S3990	off	-	Assemblies should be marked as CLS compliant
+S3992	off	-	Assemblies should explicitly specify COM visibility
+S3993	on	-	Custom attributes should be marked with "System.AttributeUsageAttribute"
+S3994	off	-	URI Parameters should not be strings
+S3995	off	-	URI return values should not be strings
+S3996	off	-	URI properties should not be strings
+S3997	off	-	String URI overloads should call "System.Uri" overloads
+S3998	on	-	Threads should not lock on objects with weak identity
+S4000	off	-	Pointers to unmanaged memory should not be visible
+S4002	off	-	Disposable types should declare finalizers
+S4004	off	-	Collection properties should be readonly
+S4005	off	-	"System.Uri" arguments should be used instead of strings
+S4015	on	-	Inherited member visibility should not be decreased
+S4016	off	-	Enumeration members should not be named "Reserved"
+S4017	off	-	Method signatures should not contain nested generic types
+S4018	off	-	All type parameters should be used in the parameter list to enable type inference
+S4019	on	-	Base class methods should not be hidden
+S4022	off	-	Enumerations should have "Int32" storage
+S4023	off	-	Interfaces should not be empty
+S4025	off	-	Child class fields should not differ from parent class fields only by capitalization
+S4026	off	-	Assemblies should be marked with "NeutralResourcesLanguageAttribute"
+S4027	off	-	Exceptions should provide standard constructors
+S4035	on	-	Classes implementing "IEquatable<T>" should be sealed
+S4036	on	-	OS commands should not rely on PATH resolution
+S4039	off	-	Interface methods should be callable by derived types
+S4040	off	-	Strings should be normalized to uppercase
+S4041	off	-	Type names should not match namespaces
+S4047	off	-	Generics should be used when appropriate
+S4049	off	-	Properties should be preferred
+S4050	on	-	Operators should be overloaded consistently
+S4052	on	-	Types should not extend outdated base types
+S4055	off	-	Literals should not be passed as localized parameters
+S4056	off	-	Overloads with a "CultureInfo" or an "IFormatProvider" parameter should be used
+S4057	off	-	Locales should be set for data types
+S4058	off	-	Overloads with a "StringComparison" parameter should be used
+S4059	off	-	Property names should not match get methods
+S4060	off	-	Non-abstract attributes should be sealed
+S4061	on	-	"params" should be used instead of "varargs"
+S4069	off	-	Operator overloads should have named alternatives
+S4070	on	-	Non-flags enums should not be marked with "FlagsAttribute"
+S4136	on	-	Method overloads should be grouped together
+S4143	on	-	Collection elements should not be replaced unconditionally
+S4144	on	-	Methods should not have identical implementations
+S4159	on	-	Classes should implement their "ExportAttribute" interfaces
+S4200	on	-	Native methods should be wrapped
+S4201	on	fix	Null checks should not be combined with "is" operator checks
+S4210	on	-	Windows Forms entry points should be marked with STAThread
+S4211	on	-	Members should not have conflicting transparency annotations
+S4212	off	-	Serialization constructors should be secured
+S4214	off	-	"P/Invoke" methods should not be visible
+S4220	on	-	Events should have proper arguments
+S4225	off	-	Extension methods should not extend "object"
+S4226	off	-	Extensions should be in separate namespaces
+S4260	on	-	"ConstructorArgument" parameters should exist in constructors
+S4261	off	-	Methods should be named according to their synchronicities
+S4275	on	-	Getters and setters should access the expected fields
+S4277	on	-	"Shared" parts should not be created with "new"
+S4423	on	-	Weak SSL/TLS protocols should not be used
+S4426	on	-	Cryptographic keys should be robust
+S4428	on	-	"PartCreationPolicyAttribute" should be used with "ExportAttribute"
+S4433	on	-	LDAP connections should be authenticated
+S4456	on	-	Parameter validation in yielding methods should be wrapped
+S4457	off	-	Parameter validation in "async"/"await" methods should be wrapped
+S4462	off	-	Calls to "async" methods should not be blocking
+S4487	on	-	Unread "private" fields should be removed
+S4502	on	-	CSRF protections should not be disabled
+S4507	on	-	Debugging features should not be enabled in production
+S4524	on	-	"default" clauses should be first or last
+S4545	on	-	"DebuggerDisplayAttribute" strings should reference existing members
+S4581	on	fix	"new Guid()" should not be used
+S4583	on	-	Calls to delegate's method "BeginInvoke" should be paired with calls to "EndInvoke"
+S4586	on	-	Non-async "Task/Task<T>" methods should not return null
+S4635	on	-	Start index should be used instead of calling Substring
+S4663	on	-	Comments should not be empty
+S4790	on	-	Weak hashing algorithms should not be used
+S4830	on	-	Server certificates should be verified during SSL/TLS connections
+S5034	on	-	"ValueTask" should be consumed correctly
+S5042	off	-	Expanding archive files should not be done without controlling resource consumption
+S5122	on	-	Cross-Origin Resource Sharing (CORS) policy should be restricted to trusted origins
+S5332	on	-	Clear-text protocols should not be used
+S5344	on	-	Passwords should not be stored in plaintext or with a fast hashing algorithm
+S5443	on	-	Temporary files should not be created in publicly writable directories
+S5445	on	-	Insecure temporary file creation methods should not be used
+S5542	on	-	Encryption algorithms should be used with secure mode and padding scheme
+S5547	on	-	Cipher algorithms should be robust
+S5659	on	-	JWT should be signed and verified with strong cipher algorithms
+S5693	on	-	HTTP request content length should be limited
+S5753	on	-	ASP.NET Request Validation should not be disabled
+S5766	on	-	Serializable objects should validate data during deserialization
+S5856	on	-	Regular expressions should be syntactically valid
+S6354	off	-	Use a testable date/time provider
+S6377	on	-	XML signatures should be validated securely
+S6418	on	-	Secrets should not be hard-coded
+S6419	on	-	Azure Functions should be stateless
+S6420	on	-	Client instances should not be recreated on each Azure Function invocation
+S6421	off	-	Azure Functions should use Structured Error Handling
+S6422	on	-	Calls to "async" methods should not be blocking in Azure Functions
+S6423	off	-	Azure Functions should log all failures
+S6424	on	-	Interfaces for durable entities should satisfy the restrictions
+S6444	on	-	Regular expressions should be executed with a timeout
+S6507	off	-	Blocks should not be synchronized on local variables
+S6513	off	-	"ExcludeFromCodeCoverage" attributes should include a justification
+S6561	on	-	Avoid using "DateTime.Now" for benchmarking or timing operations
+S6562	on	-	Always set the "DateTimeKind" when creating new "DateTime" instances
+S6563	off	-	Use UTC when recording DateTime instants
+S6566	off	-	Use "DateTimeOffset" instead of "DateTime"
+S6575	on	-	Use "TimeZoneInfo.FindSystemTimeZoneById" without converting the timezones with "TimezoneConverter"
+S6580	on	-	Use a format provider when parsing date and time
+S6585	off	-	Don't hardcode the format when turning dates and times to strings
+S6588	on	fix	Use the "UnixEpoch" field instead of creating "DateTime" instances that point to the beginning of the Unix epoch
+S6602	off	-	"Find" method should be used instead of the "FirstOrDefault" extension
+S6603	off	-	The collection-specific "TrueForAll" method should be used instead of the "All" extension
+S6605	off	-	Collection-specific "Exists" method should be used instead of the "Any" extension
+S6607	on	-	The collection should be filtered before sorting by using "Where" before "OrderBy"
+S6608	on	-	Prefer indexing instead of "Enumerable" methods on types implementing "IList"
+S6609	on	-	"Min/Max" properties of "Set" types should be used instead of the "Enumerable" extension methods
+S6610	on	fix	"StartsWith" and "EndsWith" overloads that take a "char" should be used instead of the ones that take a "string"
+S6612	on	-	The lambda parameter should be used instead of capturing arguments in "ConcurrentDictionary" methods
+S6613	on	fix	"First" and "Last" properties of "LinkedList" should be used instead of the "First()" and "Last()" extension methods
+S6617	on	-	"Contains" should be used instead of "Any" for simple equality checks
+S6618	on	-	"string.Create" should be used instead of "FormattableString"
+S6640	on	-	Unsafe code blocks should not be used
+S6664	off	-	The code block contains too many logging calls
+S6667	on	-	Logging in a catch clause should pass the caught exception as a parameter.
+S6668	on	-	Logging arguments should be passed to the correct parameter
+S6669	off	-	Logger field or property name should comply with a naming convention
+S6670	off	-	"Trace.Write" and "Trace.WriteLine" should not be used
+S6672	on	-	Generic logger injection should match enclosing type
+S6673	on	-	Log message template placeholders should be in the right order
+S6674	on	-	Log message template should be syntactically correct
+S6675	on	-	"Trace.WriteLineIf" should not be used with "TraceSwitch" levels
+S6677	on	-	Message template placeholders should be unique
+S6678	on	-	Use PascalCase for named placeholders
+S6797	on	-	Blazor query parameter type should be supported
+S6798	on	-	[JSInvokable] attribute should only be used on public methods
+S6800	on	-	Component parameter type should match the route parameter type constraint
+S6802	off	-	Using lambda expressions in loops should be avoided in Blazor markup section
+S6803	off	-	Parameters with SupplyParameterFromQuery attribute should be used only in routable components
+S6930	on	-	Backslash should be avoided in route templates
+S6931	on	-	ASP.NET controller actions should not have a route template starting with "/"
+S6932	on	-	Use model binding instead of reading raw request data
+S6934	on	-	A Route attribute should be added to the controller when a route template is specified at the action level
+S6960	on	-	Controllers should not have mixed responsibilities
+S6961	on	fix	API Controllers should derive from ControllerBase instead of Controller
+S6962	on	-	You should pool HTTP connections with HttpClientFactory
+S6964	on	-	Value type property used as input in a controller action should be nullable, required or annotated with the JsonRequiredAttribute to avoid under-posting.
+S6965	on	-	REST API actions should be annotated with an HTTP verb attribute
+S6966	on	-	Awaitable method should be used
+S6967	on	-	ModelState.IsValid should be called in controller actions
+S6968	on	-	Actions that return a value should be annotated with ProducesResponseTypeAttribute containing the return type
+S7039	on	-	Content Security Policies should be restrictive
+S8367	on	-	Identifiers should not conflict with the C# 14 "field" contextual keyword
+S8368	on	-	Identifiers should not conflict with the C# 14 "extension" contextual keyword
+S8380	on	-	Return types named "partial" should be escaped with "@"
+S8381	on	-	"scoped" should be escaped when used as an identifier or type name in parenthesized lambda parameter lists
+S8949	on	-	The overload accepting a 'CancellationToken' should be used
+S8969	on	fix	Null-forgiving operators should not be redundant
+S8970	on	fix	Null-forgiving operators should not be used when nullable warnings are disabled
