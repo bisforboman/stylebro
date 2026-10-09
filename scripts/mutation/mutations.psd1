@@ -21,7 +21,6 @@
         @{ File = 'src/StyleBro.Analyzers/Modernize/MultiTargetSuppressor.cs'; Find = '&& net.Major >= 5 && net >= minimum.Core'; Replace = '&& net >= minimum.Core'; Tests = 'MultiTargetSuppressorTests' }
         # BRO1008 (using placement)
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| root.Members.Count != 1 ||'; Replace = '|| root.Members.Count < 1 ||'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| target.Count > 0 ||'; Replace = '||'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '.Any(t => t.IsDirective)'; Replace = '.Any(t => false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (lines[firstLine].Start + indentation.Length != first.SpanStart'; Replace = 'if (false'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '.LineNumber == lastLine)'; Replace = '.LineNumber == -1)'; Tests = 'UsingPlacementTests' }
@@ -32,7 +31,6 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '== Key(newModel.GetSymbolInfo(n.NamespaceOrType, cancellationToken))).Contains(false))'; Replace = '== Key(newModel.GetSymbolInfo(n.NamespaceOrType, cancellationToken))).Contains(false) && false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (oldKeys.Current != newKeys.Current)'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ': symbol is IMethodSymbol { ReducedFrom: { } reducedFrom } ?'; Replace = ': symbol is IMethodSymbol { ReducedFrom: { } reducedFrom } && false ?'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| moved.Any(u => u.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword))'; Replace = ''; Tests = 'UsingPlacementTests' }
         # BRO1136 (lambda parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'if (lambda.ParameterList.Parameters.Count != 1'; Replace = 'if (lambda.ParameterList.Parameters.Count < 1'; Tests = 'LambdaParenthesesTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'is not { Type: null } parameter'; Replace = 'is not { } parameter'; Tests = 'LambdaParenthesesTests' }

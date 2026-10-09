@@ -98,8 +98,9 @@ internal static class UsingPlacement
             return null;
         }
 
-        var (moved, target) = mode == UsingPlacementMode.Outside ? (ns.Usings, root.Usings) : (root.Usings, ns.Usings);
-        if (moved.Count == 0 || target.Count > 0 || moved.Any(u => u.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword)))
+        // Usings on both levels, and global usings (which can't go inside), fail the binding check (BindsTheSame).
+        var moved = mode == UsingPlacementMode.Outside ? ns.Usings : root.Usings;
+        if (moved.Count == 0)
         {
             return null;
         }
