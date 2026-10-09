@@ -31,7 +31,15 @@
     <StyleBroTargetFrameworks Condition="'$(StyleBroTargetFrameworks)' == '' and '$(TargetFrameworks)' != ''">$(TargetFrameworks.Replace(';', ','))</StyleBroTargetFrameworks>
     <StyleBroTargetFrameworks Condition="'$(StyleBroTargetFrameworks)' == ''">$(TargetFramework)</StyleBroTargetFrameworks>
   </PropertyGroup>
+  <!--
+    The package folders for PackageFileSuppressor: StyleBro's findings in files compiled from a NuGet package (source
+    packages' contentFiles) are hidden, nobody can fix them there. '|'-separated, like StyleBroTargetFrameworks.
+  -->
+  <PropertyGroup>
+    <StyleBroPackageFolders Condition="'$(StyleBroPackageFolders)' == ''">$(NuGetPackageFolders.Replace(';', '|'))</StyleBroPackageFolders>
+  </PropertyGroup>
   <ItemGroup>
+    <CompilerVisibleProperty Include="StyleBroPackageFolders" />
     <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <!-- BRO1145 (C# 12 syntax): the SDK sets LangVersion to MaxSupportedLangVersion unless the project sets it. -->
     <CompilerVisibleProperty Include="LangVersion" />

@@ -3,6 +3,13 @@
 # survives is a guard no test covers. Add one for every new guard.
 @{
     Mutations = @(
+        # Files from NuGet packages (PackageFileSuppressor)
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = '? roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase))'; Replace = '? true'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = 'file.IndexOf("/contentFiles/", StringComparison.OrdinalIgnoreCase) >= 0'; Replace = 'false'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = 'return roots.Count > 0'; Replace = 'return false'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = 'if (isPackageFile)'; Replace = 'if (true)'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = ".Replace('\\', '/').TrimEnd('/'))"; Replace = ".Replace('\\', '/'))"; Tests = 'PackageFileSuppressorTests' }
+
         # Multi-target guard (MultiTargetSuppressor)
         @{ File = 'src/StyleBro.Analyzers/Modernize/MultiTargetSuppressor.cs'; Find = 'if (frameworks.Count < 2)'; Replace = 'if (frameworks.Count < 1)'; Tests = 'MultiTargetSuppressorTests' }
         @{ File = 'src/StyleBro.Analyzers/Modernize/MultiTargetSuppressor.cs'; Find = '!frameworks.All(f => Has(f, Minimums[diagnostic.Id]))'; Replace = '!frameworks.Any(f => Has(f, Minimums[diagnostic.Id]))'; Tests = 'MultiTargetSuppressorTests' }
