@@ -308,6 +308,62 @@ public class CallChainTests
         """);
 
     [Fact]
+    public Task RegionsInTheChain_DontMatter_OtherDirectivesDo() => VerifyFixAsync(
+        """
+        using System.Linq;
+        using System.Threading.Tasks;
+
+        public class C
+        {
+            public int[] M(int[] items)
+            {
+                var a = items
+                    .Where(i => i > 0){|BRO1523:.|}Select(i =>
+                    {
+        #region Work
+                        return i;
+        #endregion
+                    })
+                    .ToArray();
+                Task.Run(async () =>
+                    {
+        #pragma warning disable CS0168
+                        await Task.Yield();
+                    }).GetAwaiter()
+                    .GetResult();
+                return a;
+            }
+        }
+        """,
+        """
+        using System.Linq;
+        using System.Threading.Tasks;
+
+        public class C
+        {
+            public int[] M(int[] items)
+            {
+                var a = items
+                    .Where(i => i > 0)
+                    .Select(i =>
+                    {
+        #region Work
+                        return i;
+        #endregion
+                    })
+                    .ToArray();
+                Task.Run(async () =>
+                    {
+        #pragma warning disable CS0168
+                        await Task.Yield();
+                    }).GetAwaiter()
+                    .GetResult();
+                return a;
+            }
+        }
+        """);
+
+    [Fact]
     public Task SyntaxErrors_AreSkipped() => VerifyNoDiagnosticsAsync(
         """
         public class C

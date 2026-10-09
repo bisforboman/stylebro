@@ -178,7 +178,10 @@
 
         # BRO1523 (call chain layout)
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'if (!starts.Contains(true) || '; Replace = 'if ('; Tests = 'CallChainTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| chain.ContainsDirectives '; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = 'if (!directive.IsKind(SyntaxKind.RegionDirectiveTrivia) && '; Replace = 'if (false && '; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '!directive.IsKind(SyntaxKind.RegionDirectiveTrivia) && !'; Replace = '!'; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '&& !directive.IsKind(SyntaxKind.EndRegionDirectiveTrivia)'; Replace = ''; Tests = 'CallChainTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '.Where(n => !regionLines.Contains(n))'; Replace = ''; Tests = 'CallChainTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| chain.ContainsDiagnostics'; Replace = '|| false'; Tests = 'CallChainTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| chain.Ancestors().Any(a => a is InterpolationSyntax)'; Replace = ''; Tests = 'CallChainTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/CallChains.cs'; Find = '|| !links[i - 1].Call '; Replace = ''; Tests = 'CallChainTests' }
