@@ -50,7 +50,7 @@ SA1116,"StyleBro **BRO1107** (done), also checks record and primary-constructor 
 SA1117,"StyleBro **BRO1108** (done), also checks record and primary-constructor parameters; unlike StyleCop, has a fix"
 SA1118,"Drop: StyleCop has no fix. A multi-line argument (other than the first, or a lambda/anonymous object) needs extracting into a variable: a refactoring that names things. 126 findings in the private app."
 SA1119,"StyleBro **BRO1405** (done; replaces IDE0047, whose fix breaks multi-targeted projects). Skips parentheses whose removal would change how the code parses (StyleCop's fix can make a generic call)"
-SA1119_p,"Variant: Not a rule of its own: a Hidden diagnostic SA1119 reports on the `(` and `)` tokens so the IDE greys them out (StyleCop's ParenthesisDescriptor, read in its source). BRO1405 covers SA1119 itself."
+SA1119_p,"StyleBro **BRO1405** (done). Not a rule of its own: the Hidden companion of SA1119 that StyleCop reports on the same parentheses' `(` and `)` so the IDE greys them out (it only checks parenthesized expressions, never patterns). BRO1405 reports the same parentheses; the greying isn't ported"
 SA1120,"StyleBro **BRO1120** (done), same positions; the fix removes every empty comment at that end of the group in one run"
 SA1121,SDK: IDE0049 (`dotnet_style_predefined_type_* = true`)
 SA1122,"StyleBro **BRO1106** (done), same results as StyleCop"
@@ -195,4 +195,4 @@ SA1650,Drop: StyleCop never reports it. Off by default and no diagnostic on miss
 SA1651,"StyleBro **BRO1609** (done), same results and output as StyleCop"
 SX1101,SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; stylebro-migrate turns IDE0003 on when SX1101 is on
 SX1309,"StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which stylebro-migrate sets when SX1309 is on"
-SX1309S,"Variant: Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule."
+SX1309S,"StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`: the style covers private static fields that aren't readonly or const (SX1309S's fields) as well as instance fields (SX1309's). stylebro-migrate counts SX1309S as covered when it writes `_camelCase` (always with SX1309); with SX1309S alone and plain instance fields, the report lists it as not expressible"

@@ -122,11 +122,18 @@ internal static class Migration
             lines.Add($"dotnet_diagnostic.{id}.severity = {Name(severity)}");
         }
 
-        // StyleCop's SX1309 (private fields begin with '_') is BRO1303 with '_camelCase'.
-        if (result.FieldStyle == "_camelCase" && setup.IsOn("SX1309")
-            && !lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.PrivateFieldNaming}.severity = none"))
+        // StyleCop's SX1309 (private instance fields begin with '_') and SX1309S (private static fields that aren't
+        // readonly) are BRO1303 with '_camelCase', which has one style for both kinds.
+        foreach (var sx in new[] { "SX1309", "SX1309S" }.Where(setup.IsOn))
         {
-            result.Covered.Add("SX1309");
+            if (result.FieldStyle != "_camelCase")
+            {
+                result.Reasons[sx] = "BRO1303 has one style for private instance and static fields, and the instance fields here are 'camelCase'";
+            }
+            else if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.PrivateFieldNaming}.severity = none"))
+            {
+                result.Covered.Add(sx);
+            }
         }
 
         AddMemberOrder(setup, lines);

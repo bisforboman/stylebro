@@ -362,6 +362,51 @@ public class ParameterLayoutTests
         }
         """);
 
+    // BRO1116 joins 'N(' / ')': judged as joined already, the items are all on one line.
+    [Fact]
+    public Task EmptyParenthesesSplitOverLines_CountAsJoined() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            int M(int a, int b) => a;
+
+            int N() => 1;
+
+            int P() => M(
+                N(
+                ), M(5, 6));
+        }
+        """);
+
+    [Fact]
+    public Task EmptyParenthesesSplitOverLines_CountWhenBro1116IsOff() => VerifyFixAsync(
+        """
+        class C
+        {
+            int M(int a, int b) => a;
+
+            int N() => 1;
+
+            int P() => M(
+                N(
+                ), {|BRO1108:M(5, 6)|});
+        }
+        """,
+        """
+        class C
+        {
+            int M(int a, int b) => a;
+
+            int N() => 1;
+
+            int P() => M(
+                N(
+                ),
+                M(5, 6));
+        }
+        """,
+        "dotnet_diagnostic.BRO1116.severity = none");
+
     [Fact]
     public Task SameLine_KeepsTheFirstItem_AndCopiesTheListsIndentation() => VerifyFixAsync(
         """

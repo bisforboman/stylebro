@@ -557,6 +557,8 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '&& !IsNestedRepository(child)'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '(defaultSeverity > Severity.None || severity == Severity.None)'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (setup.IsOn("SA1633") && textOff.Count == 0)'; Replace = 'if (setup.IsOn("SA1633"))'; Tests = 'MigrationTests' }
+        # SX1309S counts as covered only with '_camelCase' (2026-10-09)
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (result.FieldStyle != "_camelCase")'; Replace = 'if (false)'; Tests = 'MigrationTests.StaticUnderscoreAlone' }
         # Options for declarations (2026-10-07): BRO1601 inheritdoc style, BRO1505 adjacent single-line members,
         # BRO1105 / BRO1111 same_line
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'style.Trim() == "spaced"'; Replace = 'style.Trim() != "spaced"'; Tests = 'DocumentationTests' }
@@ -571,9 +573,21 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparationAnalyzer.cs'; Find = 'var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(options);'; Replace = 'var allowAdjacent = false;'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(document'; Replace = 'false && StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(document'; Tests = 'MemberOrderingTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'; Find = 'allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options)'; Replace = 'allowAdjacentSingleLine: false'; Tests = 'SingleLineBlocksTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0)'; Replace = '(multiLinePrefix || docText.Length > 0)'; Tests = 'CombinedFieldsTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0)'; Replace = '(!allowAdjacentSingleLine || docText.Length > 0)'; Tests = 'CombinedFieldsTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0)'; Replace = '(!allowAdjacentSingleLine || multiLinePrefix)'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix))'; Replace = '(multiLinePrefix))'; Tests = 'CombinedFieldsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = '(!allowAdjacentSingleLine || multiLinePrefix))'; Replace = '(!allowAdjacentSingleLine))'; Tests = 'CombinedFieldsTests' }
+        # Fix order: BRO1114's blank line above a documented field's copies (BRO1513)
+        @{ File = 'src/StyleBro.Analyzers/Readability/CombinedFields.cs'; Find = ': (docText.Length > 0'; Replace = ': (false'; Tests = 'CombinedFieldsTests' }
+        # Fix order: BRO1001 makes BRO1509's expansion and BRO1505's blank lines before sorting; a one-line type stays on one line
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'if ((own.Count > 0 || IsOn(DiagnosticIds.SingleLineElement))'; Replace = 'if ((own.Count > 0)'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'if ((own.Count > 0 || IsOn(DiagnosticIds.SingleLineElement))'; Replace = 'if ((IsOn(DiagnosticIds.SingleLineElement))'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'var violations = IsOn(DiagnosticIds.ElementsSeparatedByBlankLine)'; Replace = 'var violations = false'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = 'var violations = IsOn(DiagnosticIds.ElementsSeparatedByBlankLine)'; Replace = 'var violations = true'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = '.Sum(c => c.NewText!.Length - c.Span.Length);'; Replace = '.Sum(c => 0);'; Tests = 'FixOrderTests.MemberOrder_BlankLinesInOtherSlots' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (slot > 0 && !oneLine && '; Replace = 'if (slot > 0 && '; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'if (slot < count - 1 && !oneLine && '; Replace = 'if (slot < count - 1 && '; Tests = 'MemberOrderingTests' }
+        # Fix order: BRO1107/BRO1108 judge a list with BRO1116's joins made
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'joined is null || !joinsEmptyLists() ? Plain'; Replace = 'joined is null ? Plain'; Tests = 'ParameterLayoutTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'Plain(position) - joined.Where(j => j.At <= position).Sum(j => j.Breaks)'; Replace = 'Plain(position)'; Tests = 'ParameterLayoutTests' }
         @{ File = 'src/StyleBro.CodeFixes/Readability/CombinedFieldsCodeFixProvider.cs'; Find = 'CombinedFields.GetChange(field, text, allowAdjacent)'; Replace = 'CombinedFields.GetChange(field, text)'; Tests = 'CombinedFieldsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'out var value) && value.Trim() == "same_line";'; Replace = 'out var value);'; Tests = 'ConstructorInitializerLineTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = '|| Line(text, close.Span.End) == Line(text, keyword.SpanStart)'; Replace = ''; Tests = 'ConstructorInitializerLineTests' }

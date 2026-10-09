@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)**. Of 197 rules: 45 SDK, 106 StyleBro (106 done), 42 drop, 0 not yet done, 4 not applicable or variants.
+Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)**. Of 197 rules: 45 SDK, 108 StyleBro (108 done), 42 drop, 0 not yet done, 2 not applicable or variants.
 
 ## How this was measured
 
@@ -125,7 +125,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
 | SA1119 | Statement should not use unnecessary parenthesis | on | yes | on / on / off | 0 / 0 / 1 | fixed | StyleBro **BRO1405** (done; replaces IDE0047, whose fix breaks multi-targeted projects). Skips parentheses whose removal would change how the code parses (StyleCop's fix can make a generic call) |
-| SA1119_p | Statement should not use unnecessary parenthesis | on | yes | on / off / on | 0 / 0 / 0 |  | Variant: Not a rule of its own: a Hidden diagnostic SA1119 reports on the `(` and `)` tokens so the IDE greys them out (StyleCop's ParenthesisDescriptor, read in its source). BRO1405 covers SA1119 itself. ([details](skipped-rules.md#sa1119_p)) |
+| SA1119_p | Statement should not use unnecessary parenthesis | on | yes | on / off / on | 0 / 0 / 0 |  | StyleBro **BRO1405** (done). Not a rule of its own: the Hidden companion of SA1119 that StyleCop reports on the same parentheses' `(` and `)` so the IDE greys them out (it only checks parenthesized expressions, never patterns). BRO1405 reports the same parentheses; the greying isn't ported |
 | SA1400 | Access modifier should be declared | on | yes | on / on / off | 0 / 0 / 10 | fixed | StyleBro **BRO1404** (done; replaces IDE0040), same positions and output as StyleCop |
 | SA1401 | Fields should be private | on | no | off / off / off | 141 / 48 / 39 |  | Drop: Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on. ([details](skipped-rules.md#sa1401)) |
 | SA1402 | File may only contain a single type | on | yes | on / off / off | 0 / 34 / 1 |  | Drop: Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it). ([details](skipped-rules.md#sa1402)) |
@@ -162,7 +162,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 | SA1314 | Type parameter names should begin with T | on | yes | on / off / off | 0 / 0 / 0 | not fixed | StyleBro **BRO1305** (done), rename with Fix All, same results as StyleCop |
 | SA1316 (1.2 beta) | Tuple element names should use correct casing | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1311** (done), the name renamed with every use and override solution-wide; `stylebro_tuple_element_name_casing` from tupleElementNameCasing |
 | SX1309 | Field names should begin with underscore | off | yes | off / off / off | 842 / 0 / 32 |  | StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which stylebro-migrate sets when SX1309 is on |
-| SX1309S | Static field names should begin with underscore | off | yes | off / off / off | 19 / 1 / 0 |  | Variant: Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule. ([details](skipped-rules.md#sx1309s)) |
+| SX1309S | Static field names should begin with underscore | off | yes | off / off / off | 19 / 1 / 0 |  | StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`: the style covers private static fields that aren't readonly or const (SX1309S's fields) as well as instance fields (SX1309's). stylebro-migrate counts SX1309S as covered when it writes `_camelCase` (always with SX1309); with SX1309S alone and plain instance fields, the report lists it as not expressible |
 
 ### Ordering
 
