@@ -19,7 +19,7 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 
 ## Summary
 
-46 rules: 0 candidate, 0 SDK not on yet, 32 drop, 10 not in StyleCop, 2 variant, 2 n/a.
+44 rules: 0 candidate, 0 SDK not on yet, 32 drop, 10 not in StyleCop, 0 variant, 2 n/a.
 
 | Rule | Title | Status | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) |
 |---|---|---|---|---|
@@ -65,8 +65,6 @@ picture, including covered rules, is in [stylecop-mapping.md](stylecop-mapping.m
 | [SA1632](#sa1632) | Documentation text should meet minimum character length | not in StyleCop | off / on / off | 0 / 0 / 0 |
 | [SA1644](#sa1644) | Documentation headers should not contain blank lines | not in StyleCop | off / on / off | 0 / 0 / 0 |
 | [SA1650](#sa1650) | Element documentation should be spelled correctly | not in StyleCop | off / on / off | 0 / 0 / 0 |
-| [SA1119_p](#sa1119_p) | Statement should not use unnecessary parenthesis | variant | on / off / on | 0 / 0 / 0 |
-| [SX1309S](#sx1309s) | Static field names should begin with underscore | variant | off / off / off | 19 / 1 / 0 |
 | [SA0001](#sa0001) | XML comment analysis disabled | n/a | on / off / off | 0 / 0 / 0 |
 | [SA0002](#sa0002) | Invalid settings file | n/a | on / on / on | 0 / 0 / 0 |
 
@@ -493,28 +491,6 @@ Documentation rule. StyleCop: off by default, no code fix; SDK check: StyleCop r
 **Why:** Off by default and no diagnostic on misspelled words (probed).
 
 **To revisit:** Nothing to port.
-
-## Variants of other rules
-
-<a id="sa1119_p"></a>
-
-### SA1119_p: Statement should not use unnecessary parenthesis
-
-Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it on (OTel / Polly / App): on / off / on. Diagnostics with every rule on (OTel / Polly / App): 0 / 0 / 0.
-
-**Why:** Not a rule of its own: a Hidden diagnostic SA1119 reports on the `(` and `)` tokens so the IDE greys them out (StyleCop's ParenthesisDescriptor, read in its source). BRO1405 covers SA1119 itself.
-
-**To revisit:** Nothing to port (an earlier note here took it for parenthesized patterns; StyleCop doesn't check those).
-
-<a id="sx1309s"></a>
-
-### SX1309S: Static field names should begin with underscore
-
-Naming rule. StyleCop: off by default, has a code fix. Teams keeping it on (OTel / Polly / App): off / off / off. Diagnostics with every rule on (OTel / Polly / App): 19 / 1 / 0.
-
-**Why:** Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306's (PascalCase), so a team using `_` for those has no StyleBro rule.
-
-**To revisit:** With SX1309; decide whether `_camelCase` should extend to private static readonly fields.
 
 ## Not applicable
 

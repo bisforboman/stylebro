@@ -112,15 +112,18 @@ public class FieldNamingTests
         """);
 
     [Fact]
-    public Task UnderscoreStyle_IsRead() => VerifyFixAsync(
+    public Task UnderscoreStyle_IsRead_ForStaticFieldsToo() => VerifyFixAsync(
         """
         class C
         {
             private int {|BRO1303:count|};
             private int {|BRO1303:Total|};
             private int _done;
+            private static int {|BRO1303:instances|};
+            private static readonly int Limit = 1;
+            private const int Max = 2;
 
-            public int Sum() => count + Total + _done;
+            public int Sum() => count + Total + _done + instances + Limit + Max;
         }
         """,
         """
@@ -129,8 +132,11 @@ public class FieldNamingTests
             private int _count;
             private int _total;
             private int _done;
+            private static int _instances;
+            private static readonly int Limit = 1;
+            private const int Max = 2;
 
-            public int Sum() => _count + _total + _done;
+            public int Sum() => _count + _total + _done + _instances + Limit + Max;
         }
         """,
         editorConfig: Underscore);

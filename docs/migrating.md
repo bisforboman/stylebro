@@ -71,7 +71,8 @@ real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md)
   StyleCop's rules that read it never run (it reports SA0001 instead), but `dotnet format` does parse it. So the
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.
 - StyleCop's alternative rules: SX1101 (no `this.`) turns on the SDK's IDE0003, SX1309 (fields begin with `_`) sets
-  BRO1303 to `_camelCase`, and SA1412 (UTF-8 with BOM) writes `charset = utf-8-bom`.
+  BRO1303 to `_camelCase`, which also covers SX1309S (private static fields begin with `_`; on its own, with instance
+  fields named `count`, the report lists it as not expressible: BRO1303 has one style for both), and SA1412 (UTF-8 with BOM) writes `charset = utf-8-bom`.
 - `stylecop.json`: `elementOrder`, `usingDirectivesPlacement`, `systemUsingDirectivesFirst`,
   `blankLinesBetweenUsingGroups`, `allowBuiltInTypeAliases`, indentation, the file header settings,
   `documentationCulture` and `excludeFromPunctuationCheck`.

@@ -554,6 +554,8 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'rulesets.Add([]);'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/InitCommand.cs'; Find = 'underscore >= UnderscoreShare * (underscore + plain)'; Replace = 'underscore > plain'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
+        # SX1309S counts as covered only with '_camelCase' (2026-10-09)
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (result.FieldStyle != "_camelCase")'; Replace = 'if (false)'; Tests = 'MigrationTests.StaticUnderscoreAlone' }
         # Options for declarations (2026-10-07): BRO1601 inheritdoc style, BRO1505 adjacent single-line members,
         # BRO1105 / BRO1111 same_line
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'style.Trim() == "spaced"'; Replace = 'style.Trim() != "spaced"'; Tests = 'DocumentationTests' }
