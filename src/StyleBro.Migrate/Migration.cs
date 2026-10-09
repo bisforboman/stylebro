@@ -112,6 +112,22 @@ internal static class Migration
                 relevant = [];
             }
 
+            // BRO1001 always sorts by kind and by access; StyleCop doesn't when elementOrder leaves either out (SixLabors:
+            // ["kind"], so members of mixed access stay where they are).
+            if (id == StyleBro.Analyzers.DiagnosticIds.MemberOrdering && severity > Severity.None
+                && setup.Setting("orderingRules", "elementOrder") is { ValueKind: JsonValueKind.Array } elementOrder
+                && elementOrder.EnumerateArray().Select(e => e.GetString()).ToList() is var order
+                && (!order.Contains("kind") || !order.Contains("accessibility")))
+            {
+                foreach (var sa in relevant.Where(setup.IsOn))
+                {
+                    result.Reasons[sa] = "stylecop.json's elementOrder leaves out kind or accessibility, which BRO1001 always sorts by";
+                }
+
+                severity = Severity.None;
+                relevant = [];
+            }
+
             if (severity > Severity.None)
             {
                 result.Covered.UnionWith(styleCop);

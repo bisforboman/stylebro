@@ -84,7 +84,8 @@ tool again replaces the block, so put your own settings outside it.
 - **StyleBro rules.** A rule is on only when StyleCop enforced every rule it replaces, with the weakest of their
   severities. [BRO1001](rules/BRO1001.md) replaces SA1201-SA1204 and SA1214 with one sort. A team that turned SA1201
   off doesn't get the full sort, so BRO1001 stays off and the report lists SA1203/SA1204 as partly covered. Rules
-  that `stylecop.json` makes moot don't count: SA1203 when `elementOrder` leaves out `constant`, and so on.
+  that `stylecop.json` makes moot don't count: SA1203 when `elementOrder` leaves out `constant`, and so on. When
+  `elementOrder` leaves out `kind` or `accessibility`, BRO1001 stays off: it always sorts by both.
 - **Private field naming.** [BRO1303](rules/BRO1303.md) uses `_camelCase` when SA1309 (no leading underscore) is off
   and most of the repository's private fields start with `_`, and `camelCase` otherwise. Private constants and
   `static readonly` fields are pinned to StyleCop's PascalCase (`stylebro_private_static_field_naming = PascalCase`,

@@ -186,14 +186,14 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE rules init's templates
+    /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE rules init's template
     /// and the stylebro blocks of the .editorconfig files at and above <paramref name="root"/> name (rules set to none
     /// aren't fixed anyway).
     /// </summary>
     public static List<string> Diagnostics(string root)
     {
         var ids = new SortedSet<string>(Migration.StyleBroRules().Select(r => r.Id), StringComparer.Ordinal);
-        var text = new List<string> { InitCommand.Template(), InitCommand.ModernizeTemplate() };
+        var text = new List<string> { InitCommand.Template() };
         for (var folder = new DirectoryInfo(root); folder is not null; folder = folder.Parent)
         {
             var path = Path.Combine(folder.FullName, ".editorconfig");

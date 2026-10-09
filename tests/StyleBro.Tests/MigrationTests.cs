@@ -945,6 +945,7 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains(Path.Combine("shared", "stylecop.json"), setup.Sources);
         Assert.Contains("dotnet_diagnostic.BRO1401.severity = none", lines);
         Assert.Contains("stylebro_member_constants_first = false", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1001.severity = none", lines);  // elementOrder without accessibility
         Assert.Contains("dotnet_diagnostic.BRO1615.severity = none", lines);
         Assert.Contains("dotnet_diagnostic.IDE0073.severity = warning", lines);
         Assert.Contains(StyleCopSetup.Evidence(root), e => e.Contains("stylecop.json", StringComparison.Ordinal));
@@ -1017,12 +1018,15 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("BRO1520", ids);
         Assert.Contains("IDE0055", ids);    // whitespace formatting's rule, from init's template
         Assert.Contains("IDE0036", ids);
-        Assert.Contains("IDE0090", ids);    // --modernize
+        Assert.DoesNotContain("IDE0090", ids);  // a modernization rule: only with init --modernize's block
         Assert.DoesNotContain(ids, id => id.StartsWith("CS", StringComparison.Ordinal) || id.StartsWith("S1", StringComparison.Ordinal) || id == "IDE1006");
 
         // An SDK rule only the migration's block turns on.
         Write(".editorconfig", "root = true\n" + Migration.Render(new[] { ("*.cs", new List<string> { "dotnet_diagnostic.IDE0009.severity = warning", "dotnet_diagnostic.IDE0003.severity = none" }) }));
         Assert.Contains("IDE0003", FormatCommand.Diagnostics(root));
+
+        File.AppendAllText(Path.Combine(root, ".editorconfig"), $"\n{InitCommand.ModernizeBegin}\n[*.cs]\ndotnet_diagnostic.IDE0090.severity = warning\n{InitCommand.ModernizeEnd}\n");
+        Assert.Contains("IDE0090", FormatCommand.Diagnostics(root));
     }
 
     [Fact]
