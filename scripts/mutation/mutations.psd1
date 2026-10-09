@@ -32,12 +32,15 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'fromContainers.Count > 0 ? !fromContainers.SetEquals(fromU) :'; Replace = 'fromContainers.Count > 0 ? false :'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ': !g.Find(name).IsSubsetOf(fromU))'; Replace = ': false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& !g.Extensions(name).Concat('; Replace = '&& false && !g.Extensions(name).Concat('; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& t.FullSpan.End <= limit);'; Replace = ');'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '(t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) &&'; Replace = 'true &&'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return HasOnlyRegionsAbove(root, checkedEnd, lines[startLine].Start) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return HasOnlyRegionsAbove(root, checkedEnd, lines[insertLine].Start) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& !IsDirective(lines[startLine - 1])'; Replace = ''; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& !IsDirective(lines[insertLine - 1])'; Replace = ''; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& !usings.IntersectsWith(t.Span))'; Replace = ')'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '(t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) && !usings'; Replace = 'true && !usings'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& Depth(usings.Start) == 0'; Replace = ''; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& Depth(insertAt) == 0;'; Replace = ';'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return RegionsOnly(root, checkedEnd, moved, next.Start) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return RegionsOnly(root, checkedEnd, moved, lines[insertLine].Start) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (below > endLine && below < lines.Count && !IsBlank(lines[below]))'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
         # BRO1136 (lambda parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'if (lambda.ParameterList.Parameters.Count != 1'; Replace = 'if (lambda.ParameterList.Parameters.Count < 1'; Tests = 'LambdaParenthesesTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'is not { Type: null } parameter'; Replace = 'is not { } parameter'; Tests = 'LambdaParenthesesTests' }

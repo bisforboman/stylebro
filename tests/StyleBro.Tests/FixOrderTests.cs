@@ -1930,6 +1930,31 @@ public class FixOrderTests
         "BRO1112",
         "BRO1505");
 
+    // Newtonsoft.Json's TestObjects/Friend.cs: the usings above the '#region License' header.
+    [Fact]
+    public Task UsingPlacement_RegionBelowTheUsings() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        namespace Newtonsoft.Json
+        {
+            public class C
+            {
+                public List<Type> Types { get; } = new List<Type>();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "BRO1008",
+        "BRO1112",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506");
+
     [Fact]
     public Task UsingPlacement_Outside_RegionAroundTheHeader() => AssertConvergesInEveryOrderWithConfigAsync(
         """

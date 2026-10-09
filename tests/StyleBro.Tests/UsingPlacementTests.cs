@@ -217,6 +217,16 @@ public class UsingPlacementTests
         """,
         Outside);
 
+    // Newtonsoft.Json's TestObjects/Friend.cs; and the comment that becomes the file header gets a blank line below it.
+    [Fact]
+    public Task Inside_UsingsAboveTheHeader() => Task.WhenAll(
+        Verify.VerifyFixAsync(
+            "{|BRO1008:using System;|}\n#region License\n// Text\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
+            "#region License\n// Text\n#endregion\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"),
+        Verify.VerifyFixAsync(
+            "{|BRO1008:using System;|}\n\n// Text\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
+            "// Text\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"));
+
     [Fact]
     public Task ARegionBelowTheHeader_StaysWhereItIs() => Task.WhenAll(
         Verify.VerifyFixAsync(
@@ -431,6 +441,8 @@ public class UsingPlacementTests
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\npublic class D\n{\n}\n"),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n#if DEBUG\n    using System;\n#endif\n\n    public class C { }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("#region Usings\nusing System;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n"),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n#region More\nusing System.Text;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } public StringBuilder? B { get; set; } }\n}\n"),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\n#region Body\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n#endregion\n"),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    #region Usings\n    using System;\n    #endregion\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System; public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{ using System;\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),

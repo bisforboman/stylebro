@@ -210,7 +210,7 @@ internal static class UsingPlacement
             }
 
             changes.Insert(0, new TextChange(new TextSpan(lines[insertLine].Start, 0), reindented + lineBreak));
-            return HasOnlyRegionsAbove(root, checkedEnd, lines[insertLine].Start) ? changes : null;
+            return RegionsOnly(root, checkedEnd, moved, lines[insertLine].Start) ? changes : null;
         }
 
         // Inside: on the line below '{', or after a blank line below 'namespace X;'; a blank line before what follows.
@@ -225,8 +225,21 @@ internal static class UsingPlacement
         var inserted = (ns is FileScopedNamespaceDeclarationSyntax ? lineBreak : string.Empty)
             + reindented
             + (IsBlank(next) || nextIsClose ? string.Empty : lineBreak);
+        // Usings taken from the top of the file make the comment below them the file header: it gets the blank line a
+        // header has, as when BRO1112 removes a '#region License' around it first (Newtonsoft.Json's Friend.cs).
+        var below = endLine;
+        while (startLine == 0 && below < lines.Count && lines[below].ToString().TrimStart().StartsWith("//", System.StringComparison.Ordinal))
+        {
+            below++;
+        }
+
+        if (below > endLine && below < lines.Count && !IsBlank(lines[below]))
+        {
+            changes.Add(new TextChange(new TextSpan(lines[below].Start, 0), lineBreak));
+        }
+
         changes.Add(new TextChange(new TextSpan(next.Start, 0), inserted));
-        return HasOnlyRegionsAbove(root, checkedEnd, lines[startLine].Start) ? changes : null;
+        return RegionsOnly(root, checkedEnd, moved, next.Start) ? changes : null;
     }
 
     /// <summary>
@@ -391,14 +404,23 @@ internal static class UsingPlacement
     private static bool IsDirective(TextLine line) => line.ToString().TrimStart().StartsWith("#", System.StringComparison.Ordinal);
 
     /// <summary>
-    /// Whether the only directives before <paramref name="end"/> are '#region'/'#endregion' lines above
-    /// <paramref name="limit"/> (where the moved lines start or go): Newtonsoft.Json's '#region License' around the
-    /// header, which BRO1112 removes in the same run. Anything else ('#if' for a target framework, '#pragma', a region
-    /// around the usings) can't be moved across.
+    /// Whether the only directives before <paramref name="end"/> are '#region'/'#endregion' lines that stay where they
+    /// are: none among the usings, and none open where the usings are taken from or where they go
+    /// (<paramref name="insertAt"/>). That allows Newtonsoft.Json's '#region License' around the header, above or below
+    /// the usings, which BRO1112 removes in the same run (waiting for it took a second run). Anything else ('#if' for a
+    /// target framework, '#pragma', a region around the usings) can't be moved across.
     /// </summary>
-    private static bool HasOnlyRegionsAbove(CompilationUnitSyntax root, int end, int limit) =>
-        root.DescendantTrivia(TextSpan.FromBounds(0, end)).All(t => !t.IsDirective
-            || (t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) && t.FullSpan.End <= limit);
+    private static bool RegionsOnly(CompilationUnitSyntax root, int end, SyntaxList<UsingDirectiveSyntax> moved, int insertAt)
+    {
+        var usings = TextSpan.FromBounds(moved.First().SpanStart, moved.Last().Span.End);
+        var directives = root.DescendantTrivia(TextSpan.FromBounds(0, end)).Where(t => t.IsDirective).ToList();
+        int Depth(int position) =>
+            directives.Count(t => t.IsKind(SyntaxKind.RegionDirectiveTrivia) && t.SpanStart < position)
+            - directives.Count(t => t.IsKind(SyntaxKind.EndRegionDirectiveTrivia) && t.SpanStart < position);
+        return directives.All(t => (t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) && !usings.IntersectsWith(t.Span))
+            && Depth(usings.Start) == 0
+            && Depth(insertAt) == 0;
+    }
 
     /// <summary>What a set of using directives brings into scope, by name.</summary>
     private sealed class Imports
