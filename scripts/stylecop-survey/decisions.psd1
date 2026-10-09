@@ -82,6 +82,8 @@
         SA1502 = 'StyleBro **BRO1509** (done), same positions as StyleCop (local functions reported once, as BRO1509)'
         SX1101 = 'SDK: IDE0003 (`dotnet_style_qualification_for_* = false`); off by default in StyleCop and not enforced by the preset; stylebro-migrate turns IDE0003 on when SX1101 is on'
         SX1309 = 'StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`, which stylebro-migrate sets when SX1309 is on'
+        SX1309S = 'StyleBro **BRO1303** (done) with `stylebro_private_field_naming = _camelCase`: the style covers private static fields that aren''t readonly or const (SX1309S''s fields) as well as instance fields (SX1309''s). stylebro-migrate counts SX1309S as covered when it writes `_camelCase` (always with SX1309); with SX1309S alone and plain instance fields, the report lists it as not expressible'
+        SA1119_p = 'StyleBro **BRO1405** (done). Not a rule of its own: the Hidden companion of SA1119 that StyleCop reports on the same parentheses'' `(` and `)` so the IDE greys them out (it only checks parenthesized expressions, never patterns). BRO1405 reports the same parentheses; the greying isn''t ported'
         SA1412 = 'SDK: `charset = utf-8-bom` (`dotnet format` writes the BOM); off by default in StyleCop and not in the preset; stylebro-migrate sets it when SA1412 is on'
         SA1005 = 'StyleBro **BRO1002** (done), same results as StyleCop 1.2 (1.1.118 also reported `//  two spaces`)'
         SA1106 = 'StyleBro **BRO1101** (done). Differs from StyleCop: embedded (`while (x) ;`) and labeled empty statements are not reported'

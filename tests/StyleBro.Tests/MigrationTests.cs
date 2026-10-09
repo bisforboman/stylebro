@@ -561,7 +561,7 @@ public sealed class MigrationTests : IDisposable
     [Fact]
     public void StyleCopsAlternativeRules_AreMapped()
     {
-        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1101.severity = none\ndotnet_diagnostic.SX1101.severity = warning\ndotnet_diagnostic.SA1309.severity = none\ndotnet_diagnostic.SX1309.severity = warning\ndotnet_diagnostic.SA1412.severity = warning\n");
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1101.severity = none\ndotnet_diagnostic.SX1101.severity = warning\ndotnet_diagnostic.SA1309.severity = none\ndotnet_diagnostic.SX1309.severity = warning\ndotnet_diagnostic.SX1309S.severity = warning\ndotnet_diagnostic.SA1412.severity = warning\n");
         Write("C.cs", "class C { private int count; private int other; }"); // the code would say camelCase; SX1309 wins
 
         var result = Migration.Generate(StyleCopSetup.Read(root), root);
@@ -572,7 +572,22 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("charset = utf-8-bom", result.Lines);
         Assert.Contains("SX1101", result.Covered);
         Assert.Contains("SX1309", result.Covered);
+        Assert.Contains("SX1309S", result.Covered);
         Assert.Contains("SA1412", result.Covered);
+    }
+
+    [Fact]
+    public void StaticUnderscoreAlone_IsNotExpressible_WhenInstanceFieldsAreCamelCase()
+    {
+        // SX1309S wants '_' on private static fields only; BRO1303 has one style for those and instance fields.
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1309.severity = none\ndotnet_diagnostic.SX1309S.severity = warning\n");
+        Write("C.cs", "class C { private int count; private int other; private static int _instances; }");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("stylebro_private_field_naming = camelCase", result.Lines);
+        Assert.DoesNotContain("SX1309S", result.Covered);
+        Assert.Contains("SX1309S", result.Reasons.Keys);
     }
 
     [Fact]
