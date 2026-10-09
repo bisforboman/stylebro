@@ -1197,20 +1197,40 @@ public class MemberOrderingTests
         """,
         "dotnet_diagnostic.BRO1509.severity = none");
 
+    // Serilog: the constructor would sort between the field and the comment below it, although neither of them moves.
+    [Fact]
+    public Task ACommentBelowAMember_KeepsTheContainerAsItIs_WhenTheyWouldBeSeparated() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            public C()
+            {
+            }
+
+            [System.ThreadStatic]
+            public static int Emitted;
+            // ReSharper restore ThreadStaticFieldHasInitializer
+
+            public void Emit()
+            {
+            }
+        }
+        """);
+
     // eShop's RedisBasketRepository: the note below the field belongs to the field; sorting would move it with the method.
     [Fact]
     public Task ACommentBelowAMember_KeepsTheContainerAsItIs() => VerifyNoDiagnosticsAsync(
         """
         class C
         {
-            private static int Key() => prefix;
+            public void M()
+            {
+            }
 
             private static int prefix = 1;
             // note on the prefix
 
-            public void M()
-            {
-            }
+            private static int Key() => prefix;
         }
         """);
 }

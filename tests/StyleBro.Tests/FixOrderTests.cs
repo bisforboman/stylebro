@@ -1611,6 +1611,40 @@ public class FixOrderTests
         "BRO1513",
         "BRO1601");
 
+    // Serilog's DummyWithLevelSwitchSink: the sort put the constructor between a field and the comment below it, and the
+    // comment then wanted other blank lines on the next run.
+    [Fact]
+    public Task CommentBelowAField_TheSortDoesntSeparateThem() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+
+        public class Sink
+        {
+            public Sink(int level)
+            {
+                Level = level;
+            }
+
+            [ThreadStatic]
+            public static int Level;
+
+            [ThreadStatic]
+            // ReSharper disable ThreadStaticFieldHasInitializer
+            public static List<int> Emitted = new List<int>();
+            // ReSharper restore ThreadStaticFieldHasInitializer
+
+            public void Emit(int value)
+            {
+                Emitted.Add(value);
+            }
+        }
+        """,
+        "BRO1001",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506");
+
     // eShop's RedisBasketRepository: a comment below a field, then a blank line, describes the field; nothing moves it to
     // the method below.
     [Fact]

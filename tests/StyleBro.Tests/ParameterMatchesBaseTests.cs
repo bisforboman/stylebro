@@ -292,7 +292,7 @@ public class ParameterMatchesBaseTests
 
         public class Derived : Store
         {
-            public override void Run(int number) => throw new ArgumentOutOfRangeException(nameof(number));
+            public override void Run(int number) => Guard.NotNull(number);
         }
 
         public static class Guard
@@ -324,7 +324,7 @@ public class ParameterMatchesBaseTests
 
         public class Derived : Store
         {
-            public override void Run(int number) => throw new ArgumentOutOfRangeException(nameof(number));
+            public override void Run(int number) => Guard.NotNull(number);
         }
 
         public static class Guard

@@ -12,7 +12,8 @@ namespace StyleBro.Analyzers.Ordering;
 /// move such a member. Judged by kinds, not blank lines: other rules add and remove blank lines between members in the
 /// same 'dotnet format' run (BRO1505, BRO1506, BRO1509), so a blank-line test would decide differently on a second run.
 /// Also a comment below the previous member (<see cref="Layout.BlankLines.IsCommentBelowCode"/>, whose blank lines
-/// no rule changes): it describes that member, and the sort would move it with the next one.
+/// no rule changes): it describes that member, so the two must stay neighbours (Serilog: the sort moved a constructor
+/// between a field and the '// ReSharper restore' comment below it).
 /// </summary>
 internal static class GroupComments
 {
@@ -42,7 +43,7 @@ internal static class GroupComments
 
         for (var i = 1; i < members.Count; i++)
         {
-            if (members[i].GetLeadingTrivia().Any(t => Layout.BlankLines.IsCommentBelowCode(t, members[i].SyntaxTree.GetText())) && Moves(position, i))
+            if (members[i].GetLeadingTrivia().Any(t => Layout.BlankLines.IsCommentBelowCode(t, members[i].SyntaxTree.GetText())) && position[i] != position[i - 1] + 1)
             {
                 return true;
             }
