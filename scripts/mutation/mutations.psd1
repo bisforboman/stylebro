@@ -290,6 +290,8 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '!char.IsLower(rest[0]) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = '(char.IsLower(remaining[0]) || '; Replace = '('; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = ' || PropertySummaries.StartsWithAnyWord(remaining, PropertySummaries.Conditions)))'; Replace = '))'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = "if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' '))))"; Replace = 'if (false)'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'if (replaceLength == 0 && StartsWithWords(remaining,'; Replace = 'if (StartsWithWords(remaining,'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'comments = comments.RemoveAll(c => previous.TrailingTrivia.Contains(c));'; Replace = ''; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'GetDeclarationOpenBrace(openBrace.Parent!) == openBrace && Line('; Replace = 'Line('; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = ' && Line(text, openBrace.SpanStart) != Line(text, previous.SpanStart))'; Replace = ')'; Tests = 'DeclarationCommentTests' }

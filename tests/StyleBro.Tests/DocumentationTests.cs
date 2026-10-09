@@ -855,7 +855,13 @@ public class DocumentationTests
             {
             }
 
-            /// {|BRO1606:<summary>|}Initializes a new instance of Words with the given name.</summary>
+            /// {|BRO1606:<summary>|}Initializes a new instance of the Words class. Initializes the cache.</summary>
+            /// <param name="c">The c.</param>
+            public Words(char c)
+            {
+            }
+
+            /// <summary>Initializes a new instance of Words with the given name.</summary>
             /// <param name="b">The b.</param>
             public Words(byte b)
             {
@@ -925,7 +931,13 @@ public class DocumentationTests
             {
             }
 
-            /// <summary>Initializes a new instance of the <see cref="Words"/> class. Initializes a new instance of Words with the given name.</summary>
+            /// <summary>Initializes a new instance of the <see cref="Words"/> class. Initializes the cache.</summary>
+            /// <param name="c">The c.</param>
+            public Words(char c)
+            {
+            }
+
+            /// <summary>Initializes a new instance of Words with the given name.</summary>
             /// <param name="b">The b.</param>
             public Words(byte b)
             {
@@ -1639,6 +1651,13 @@ public class DocumentationTests
             /// <summary>When given, the words are copied.</summary>
             /// <param name="s">The s.</param>
             public Words(string s)
+            {
+            }
+
+            // Scrutor: 'Initializes a new instance of the ... class. Initializes the attribute with ...' before.
+            /// <summary>Initializes the words with the specified value.</summary>
+            /// <param name="b">The b.</param>
+            public Words(bool b)
             {
             }
 

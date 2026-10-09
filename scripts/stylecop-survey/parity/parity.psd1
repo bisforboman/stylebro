@@ -520,11 +520,9 @@
             Expected = @(
                 # StyleBro puts a space after the standard sentence; StyleCop's fix doesn't ('class.Creates').
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class. Initializes the static members.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct. Makes a point.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class. Makes one.</summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Initializes a new instance of Words with the given name.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Creates a words object.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class.Initializes the static members.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class.Cleans up.</summary>]'
@@ -538,6 +536,12 @@
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Creates a words object from a float.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Initializes a new instance of Words with the given name.</summary>]'
+                # BRO1606: a summary that is a constructor sentence of its own ('Initializes the static members.') isn't reported:
+                # the standard sentence in front would repeat it, and replacing it would lose what it says (Scrutor). StyleCop prefixes it.
+                'only StyleCop: BRO1606 Words.cs(25,13)'
+                'only StyleCop: BRO1606 Words.cs(43,13)'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of Words with the given name.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes the static members.</summary>]'
             )
         }
         @{
