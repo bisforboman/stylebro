@@ -317,8 +317,7 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '&& TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)'; Replace = ')'; Tests = 'BlankLineRunsTests' }
 
         # BRO1120 (empty comments between blank lines)
-        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '!changes.All(c => c.Span.End > text.Lines.GetLineFromPosition(c.Span.Start).End)'; Replace = 'false'; Tests = 'CommentTextTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '|| !IsBlankLine(text, text.Lines[first.LineNumber - 1])'; Replace = ''; Tests = 'CommentTextTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '|| !IsBlankLine(text, text.Lines[first.LineNumber - 1]))'; Replace = ')'; Tests = 'CommentTextTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = 'if (blankEnd > end)'; Replace = 'if (false)'; Tests = 'CommentTextTests' }
 
         # BRO1001: comments that introduce a group (GroupComments)

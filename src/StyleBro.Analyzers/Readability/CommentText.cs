@@ -107,9 +107,8 @@ internal static class CommentText
         var changes = removed.Select(c => GetRemoval(c, text)).ToList();
         var first = text.Lines.GetLineFromPosition(changes[0].Span.Start);
         var end = changes[changes.Count - 1].Span.End;
-        if (!changes.All(c => c.Span.End > text.Lines.GetLineFromPosition(c.Span.Start).End)
-            || first.LineNumber == 0
-            || !IsBlankLine(text, text.Lines[first.LineNumber - 1]))
+        // A removal that keeps code on its line ends mid-line, so the loop below finds no blank line after it.
+        if (first.LineNumber == 0 || !IsBlankLine(text, text.Lines[first.LineNumber - 1]))
         {
             return changes;
         }
