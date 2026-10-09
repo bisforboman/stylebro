@@ -90,7 +90,8 @@ when we can do that"): don't suggest releases at all; the user says when.
   2026-10-04; `MaxRuns` in repos.psd1 for a documented exception), or tests that passed
   on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
   `scripts/mutation/Invoke-Mutations.ps1` breaks each guard in `scripts/mutation/mutations.psd1` and needs a test to
-  fail; add an entry for every new guard). All scripts run locally too (mutations in a separate worktree: they undo
+  fail; add an entry for every new guard; 4 parallel shards `mutation shard 0..3` (`-Shard i -Shards 4`, index modulo
+  4, each shard also runs the stale check over all entries), and the job `mutation` passes only if every shard did). All scripts run locally too (mutations in a separate worktree: they undo
   each mutation with `git checkout`, so commit first).
 - `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
   (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
@@ -1196,10 +1197,11 @@ file (FieldNamingAnalyzer swings 35-90 ms between runs), so judge by the total a
   FixOrderTests case with both options on.
 - **Speed round 3** (#63): `TreeWalk.Trivia` holds only comment/directive trivia; tokens and nodes in one walk; about a
   third off the total. dotnet-trace blames whatever it samples during thread suspension: confirm with `compare`.
-- **CI time:** the mutation job takes 70-90 minutes (limit 120). Give new entries a NARROW `Tests` filter (a FixOrderTests
-  case with 7 ids is 5,040 orders, ~10 minutes); splitting the job is in the backlog.
-- **Paused** (owner, 2026-10-08: token budget): no new implementation until the owner restarts it; open ideas are the
-  "Idea" rows in docs/backlog.md.
+- **CI time:** the mutation check took 70-106 minutes in one job; since 2026-10-09 (#71) it runs as 4 shards (13-18
+  minutes each measured, timeout 60) plus the summary job `mutation` (`if: always()`, fails unless `needs.shard.result` is
+  success). Give new entries a NARROW `Tests` filter (a FixOrderTests case with 7 ids is 5,040 orders, ~10 minutes).
+- **Paused briefly** (2026-10-08) and resumed the next day (owner: "let's ignore my previous hesitations"); open
+  ideas are the "Idea" rows in docs/backlog.md.
 
 ## Known open questions
 

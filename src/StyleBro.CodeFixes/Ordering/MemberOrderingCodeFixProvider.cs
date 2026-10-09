@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
+using StyleBro.Analyzers.Layout;
 using StyleBro.Analyzers.Ordering;
 
 namespace StyleBro.CodeFixes.Ordering;
@@ -121,8 +122,59 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
         }
 
+        var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var layout = LinkedFileFixAllProvider.Merge(GetLayoutChanges(document, root, text, targets, cancellationToken));
+        if (layout.Count > 0)
+        {
+            // The containers again, in the new text: each starts where it did, shifted by the edits before it.
+            document = document.WithText(text.WithChanges(layout));
+            var newTree = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+            var moved = new Dictionary<SyntaxNode, MemberAccess?[]?>();
+            foreach (var target in targets)
+            {
+                var start = target.SpanStart + layout.Where(c => c.Span.End <= target.SpanStart).Sum(c => c.NewText!.Length - c.Span.Length);
+                if (newTree?.FindToken(start).Parent?.AncestorsAndSelf().FirstOrDefault(n => n.SpanStart == start && n.RawKind == target.RawKind) is { } found)
+                {
+                    moved[found] = partialAccess[target];
+                }
+            }
+
+            (root, partialAccess, targets) = (newTree!, moved, new HashSet<SyntaxNode>(moved.Keys));
+        }
+
         var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree)).Visit(root)!;
         return document.WithSyntaxRoot(newRoot);
+    }
+
+    /// <summary>
+    /// What BRO1509 and BRO1505 do to the containers, made before the sort so it starts from the same text in every fix
+    /// order: blank lines stay with their slot, so sorting before or after those fixes gave different text. A container on
+    /// one line is expanded like BRO1509's fix does (also BRO1505's, when it reports members there); otherwise BRO1505's
+    /// missing blank lines between its members are added.
+    /// </summary>
+    private static List<TextChange> GetLayoutChanges(Document document, SyntaxNode root, SourceText text, HashSet<SyntaxNode> targets, CancellationToken cancellationToken)
+    {
+        bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var violations = IsOn(DiagnosticIds.ElementsSeparatedByBlankLine)
+            ? ElementSeparation.GetViolations(root, text, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), ElementSeparation.AllowsAdjacentSingleLineMembers(options)).ToList()
+            : [];
+        var trailingComma = SingleLineBlocks.WantsTrailingComma(document.Project.CompilationOptions, root.SyntaxTree, cancellationToken);
+        var changes = new List<TextChange>();
+        foreach (var target in targets)
+        {
+            var own = violations.Where(v => v.Current.Parent == target).ToList();
+            if ((own.Count > 0 || IsOn(DiagnosticIds.SingleLineElement)) && SingleLineBlocks.GetChanges(target, text, options, trailingComma, IsOn) is { } expansion)
+            {
+                changes.AddRange(expansion);
+            }
+            else
+            {
+                changes.AddRange(own.Select(v => ElementSeparation.GetChange(v.Previous, v.Current, text)).OfType<TextChange>());
+            }
+        }
+
+        return changes;
     }
 
     /// <summary>The file's options when BRO1527 is on: its fix puts multi-line auto-properties on one line, so the sort judges them so.</summary>

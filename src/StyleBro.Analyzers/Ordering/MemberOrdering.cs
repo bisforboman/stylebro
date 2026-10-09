@@ -120,6 +120,9 @@ internal static class MemberOrdering
         }
 
         var newLine = DetectNewLine(container);
+
+        // A type on one line (BRO1509 off; with it on the fix expands the type first) stays on one line.
+        var oneLine = !members.Any(m => m.ToFullString().IndexOf('\n') >= 0);
         var split = members.Select(m => SplitLeadingTrivia(m.GetLeadingTrivia())).ToArray();
         var result = new MemberDeclarationSyntax[count];
 
@@ -132,7 +135,7 @@ internal static class MemberOrdering
             // below a field where two fields sat before (BRO1505, SA1516), or a '//' comment below code (BRO1504,
             // SA1515). The sort must not create a violation that only a second 'dotnet format' run fixes, so it adds
             // the blank line in exactly those cases; violations that already existed are left to those rules.
-            if (slot > 0 && !layout.Any(SyntaxKind.EndOfLineTrivia))
+            if (slot > 0 && !oneLine && !layout.Any(SyntaxKind.EndOfLineTrivia))
             {
                 var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines, allowAdjacentSingleLine)
                     && !NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines, allowAdjacentSingleLine);
@@ -155,7 +158,7 @@ internal static class MemberOrdering
 
             var member = members[source].WithLeadingTrivia(layout.AddRange(split[source].Content));
 
-            if (slot < count - 1 && !EndsWithNewLine(member))
+            if (slot < count - 1 && !oneLine && !EndsWithNewLine(member))
             {
                 member = member.WithTrailingTrivia(member.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine(newLine)));
             }

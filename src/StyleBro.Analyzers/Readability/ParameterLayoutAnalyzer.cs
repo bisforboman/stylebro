@@ -24,12 +24,13 @@ public sealed class ParameterLayoutAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var text = c.Node.SyntaxTree.GetText(c.CancellationToken);
-                if (ParameterLayout.GetFirstItemToMove(c.Node, text, c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree)) is { } first)
+                bool JoinsEmptyLists() => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, DiagnosticIds.EmptyListOnOneLine, c.CancellationToken);
+                if (ParameterLayout.GetFirstItemToMove(c.Node, text, c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree), JoinsEmptyLists) is { } first)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.SplitParametersStartOnNewLine, first.GetLocation()));
                 }
 
-                if (ParameterLayout.GetFirstMisplacedItem(c.Node, text) is { } misplaced)
+                if (ParameterLayout.GetFirstMisplacedItem(c.Node, text, JoinsEmptyLists) is { } misplaced)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.ParametersOnSameOrSeparateLines, misplaced.GetLocation()));
                 }

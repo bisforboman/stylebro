@@ -50,6 +50,7 @@ public class CombinedFieldsTests
 
             /// <summary>Documented.</summary>
             private int g;
+
             /// <summary>Documented.</summary>
             private int h;
 

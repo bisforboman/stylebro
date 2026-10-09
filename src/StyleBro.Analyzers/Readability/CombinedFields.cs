@@ -67,16 +67,17 @@ internal static class CombinedFields
         // 'const string' and then each constant on its own line) becomes a space: every new declaration is one line.
         var prefix = text.ToString(TextSpan.FromBounds(declaration.SpanStart, variables[0].SpanStart)).TrimEnd() + " ";
 
-        // BRO1505 wants a blank line between event fields (unless single-line ones may sit together; documented ones still
-        // get it, BRO1513 wants it above their documentation), and below a field that spans several lines (as SA1516
-        // measures it: below the attributes).
+        // BRO1505 wants a blank line between event fields (unless single-line ones may sit together), and below a field
+        // that spans several lines (as SA1516 measures it: below the attributes). BRO1513 wants one above every copy of a
+        // documentation comment, of fields too.
         var afterAttributes = declaration is BaseFieldDeclarationSyntax { AttributeLists.Count: > 0 } withAttributes
             ? withAttributes.AttributeLists.Last().FullSpan.End
             : declaration.SpanStart;
         var multiLinePrefix = text.ToString(TextSpan.FromBounds(afterAttributes, variables[0].SpanStart)).TrimEnd().IndexOf('\n') >= 0;
         var parts = variables.Select((v, i) => (i == 0 ? string.Empty
                 : sameLine ? " "
-                : ((declaration is EventFieldDeclarationSyntax && (!allowAdjacentSingleLine || multiLinePrefix || docText.Length > 0))
+                : (docText.Length > 0
+                    || (declaration is EventFieldDeclarationSyntax && (!allowAdjacentSingleLine || multiLinePrefix))
                     || (declaration is BaseFieldDeclarationSyntax && text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0) ? lineBreak + lineBreak : lineBreak)
                     + docText + indent)
             + prefix + text.ToString(v.Span) + semicolon.Text);

@@ -812,7 +812,8 @@ public class MemberOrderingTests
             private readonly object _lock = new();
             private string Name { get; set; } = Default;
         }
-        """);
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
 
     [Fact]
     public Task StaticInitializerReadingAnotherField_IsLeftAlone() => VerifyNoDiagnosticsAsync("""
@@ -920,7 +921,8 @@ public class MemberOrderingTests
             // normal deserialization
             public string Name { get; set; }
         }
-        """);
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
 
     [Fact]
     public Task MethodMovedBelowAField_GetsABlankLine() => VerifyFixAsync(
@@ -961,7 +963,8 @@ public class MemberOrderingTests
             void M();
             void N();
         }
-        """);
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
 
     [Fact]
     public Task StaticConstructor_ComesBeforeInstanceConstructors() => VerifyFixAsync(
@@ -1035,5 +1038,78 @@ public class MemberOrderingTests
         {{blankLine}}    public int M() => P;
         }
         """,
-        editorConfig: "stylebro_allow_adjacent_single_line_members = " + allowed);
+        editorConfig: "stylebro_allow_adjacent_single_line_members = " + allowed + "\ndotnet_diagnostic.BRO1505.severity = none");
+
+    [Fact]
+    public Task OneLineType_StaysOnOneLine_WhenNotExpanded() => VerifyFixAsync(
+        """
+        public class C { public void B() { } private int {|BRO1001:x|}; private int y; }
+        """,
+        """
+        public class C { private int x; private int y; public void B() { } }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\ndotnet_diagnostic.BRO1509.severity = none");
+
+    [Fact]
+    public Task BlankLinesBro1505Wants_AreAddedBeforeTheSort() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void B()
+            {
+            }
+            private int {|BRO1001:y|};
+            public void A()
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            private int y;
+
+            public void B()
+            {
+            }
+
+            public void A()
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task OneLineType_IsExpandedBeforeTheSort_WhenBro1509IsOn() => VerifyFixAsync(
+        """
+        public class C { public void B() { } private int {|BRO1001:x|}; private int y; }
+        """,
+        """
+        public class C
+        {
+            private int x;
+
+            private int y;
+
+            public void B() { }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
+
+    [Fact]
+    public Task OneLineType_IsExpandedBeforeTheSort_WhenBro1505ReportsIt() => VerifyFixAsync(
+        """
+        public class C { public void B() { } private int {|BRO1001:x|}; private int y; }
+        """,
+        """
+        public class C
+        {
+            private int x;
+
+            private int y;
+
+            public void B() { }
+        }
+        """,
+        "dotnet_diagnostic.BRO1509.severity = none");
 }

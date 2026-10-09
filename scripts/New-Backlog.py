@@ -56,7 +56,7 @@ WORK = [
     ('Hardening', 'BRO1112 sort path vs BRO1505', "The regions fix sorts members itself (`GetSortChangesAsync`) but doesn't add BRO1505's missing blank lines first, as BRO1001's fix now does: likely order-dependent when BRO1112, BRO1505 and BRO1001 all fire. Reproduce with a FixOrderTests case first.", 'Idea'),
     ('Hardening', 'BRO1105/BRO1111 same_line at the line limit', 'Another fix in the same run can change the joined line\'s length right at `max_line_length`, so `dotnet format` may need a second run (documented). Could measure the line as the other fixes will leave it.', 'Idea'),
     ('Hardening', 'BRO1110 own_line indentation', 'In own_line mode a `)` already on its own line isn\'t checked for indentation.', 'Idea'),
-    ('CI', 'Split the mutation job', 'About 70-90 minutes for ~475 entries (limit raised to 120). Shard into parallel jobs plus a summary job named `mutation` (the required check), or skip entries whose file a PR doesn\'t touch.', 'Idea'),
+    ('CI', 'Split the mutation job', 'Was 70-106 minutes for ~475 entries in one job. Now 4 parallel shards (index modulo 4) plus a summary job named `mutation` (the required check) that fails when any shard fails or is cancelled (#71).', 'Done (2026-10-09)'),
     ('Adoption', 'Second first-run trial with the published package', 'Install 0.2.0-alpha.1 from nuget.org into 3-4 repos nobody has tried, exactly as a new user would; the first trial (local packages) found a loop and 213 build errors.', 'Idea'),
     ('Adoption', 'Readable release notes', "GitHub's generated notes list every PR title; a short summary per release (what's new, how to upgrade, known limits) for users.", 'Idea'),
     ('Adoption', 'Rider check', 'The IDE check was done in Visual Studio 2022 only.', 'Idea'),
@@ -64,6 +64,8 @@ WORK = [
     ('Parity', 'SA1119_p and SX1309S', 'The last two StyleCop variants. SA1119_p is SA1119\'s hidden IDE greying of the same parentheses, covered by BRO1405 (StyleCop never checks parentheses in patterns); SX1309S is BRO1303 with `_camelCase`, which stylebro-migrate now counts as covering it. Both in stylecop-mapping.md.', 'Done (2026-10-09)'),
     ('Beyond StyleCop', 'Unnecessary parentheses in patterns', '`x is (> 0)`, `x is (A or B)` alone: no StyleCop rule checks them (SA1119 only looks at expressions). Would sit next to BRO1405 and must leave the parentheses BRO1407 adds to `and`/`or` patterns.', 'Idea'),
     ('Performance', 'FieldNamingAnalyzer variance', 'Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost.', 'Idea'),
+    ('Adoption', '`stylebro-migrate --diff`: preview before writing', 'Show what the settings and the first `dotnet format` run would change (files, counts per rule, a sample of hunks) without touching the repository, so a team can judge a migration or `init` first. Likely: copy the repo to a temp folder, run there, print a summary and the diff.', 'Idea'),
+    ('Adoption', 'Rule docs as a website', 'Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views.', 'Idea'),
 ]
 
 # Candidates from StyleCop's issue tracker and other analyzers (docs/beyond-stylecop.md); planned as a group (WORK).
