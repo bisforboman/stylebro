@@ -188,8 +188,9 @@ internal static class BlankLineRuns
             start++;
             count--;
 
-            // Blank lines below a '//' comment are BRO1506's.
-            if (trivia[start - 2].IsKind(SyntaxKind.SingleLineCommentTrivia) && isOn(DiagnosticIds.BlankLineAfterComment))
+            // Blank lines below a '//' comment are BRO1506's, where it reports them (not above another comment).
+            if (trivia[start - 2].IsKind(SyntaxKind.SingleLineCommentTrivia) && isOn(DiagnosticIds.BlankLineAfterComment)
+                && TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)
             {
                 return null;
             }

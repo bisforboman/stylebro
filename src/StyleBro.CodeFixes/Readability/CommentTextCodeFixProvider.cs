@@ -66,7 +66,7 @@ public sealed class CommentTextCodeFixProvider : CodeFixProvider
             }
             else if (empty.FirstOrDefault(e => e.Reported.Span == span) is { Removed: { } removed })
             {
-                changes.AddRange(removed.Select(c => CommentText.GetRemoval(c, text)));
+                changes.AddRange(CommentText.GetRemovals(removed, text));
             }
         }
 

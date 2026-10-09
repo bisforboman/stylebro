@@ -88,6 +88,35 @@ public class BlankLineRunsTests
         }
         """);
 
+    // Fonts: below a comment and above another, BRO1506 doesn't report the blank lines, so they're BRO1517's.
+    [Fact]
+    public Task BlankLinesBetweenTwoComments_AreFixed() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+                // The number of glyphs.
+        {|BRO1517:
+
+        |}        // The format.
+                M();
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M()
+            {
+                // The number of glyphs.
+
+                // The format.
+                M();
+            }
+        }
+        """);
+
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;

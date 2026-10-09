@@ -752,6 +752,28 @@ public class FixOrderTests
         "BRO1112",
         "BRO1518");
 
+    // Fonts: an empty comment between two blank lines, between two comments.
+    [Fact]
+    public Task EmptyComment_BetweenBlankLinesAndComments() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+                // The number of glyphs.
+
+                //
+
+                // The format.
+                M();
+            }
+        }
+        """,
+        "BRO1120",
+        "BRO1504",
+        "BRO1506",
+        "BRO1517");
+
     // Kavita: empty regions in a row, each with several blank lines, the last one before the type's '}'.
     [Fact]
     public Task Regions_EmptyRegionsWithBlankLineRuns() => AssertConvergesInEveryOrderAsync(

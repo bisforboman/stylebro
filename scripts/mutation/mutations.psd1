@@ -312,6 +312,10 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = ' || owner is DoStatementSyntax or BlockSyntax { Parent: DoStatementSyntax }'; Replace = ''; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '(gapIsReplaced && t.IsKind(SyntaxKind.EndOfLineTrivia))'; Replace = 'false'; Tests = 'SingleLineBlocksTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'yield return found;'; Replace = '{ yield return found; yield break; }'; Tests = 'BlankLineRunsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '&& TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)'; Replace = ')'; Tests = 'BlankLineRunsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '!changes.All(c => c.Span.End > text.Lines.GetLineFromPosition(c.Span.Start).End)'; Replace = 'false'; Tests = 'CommentTextTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '|| !IsBlankLine(text, text.Lines[first.LineNumber - 1])'; Replace = ''; Tests = 'CommentTextTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = 'if (blankEnd > end)'; Replace = 'if (false)'; Tests = 'CommentTextTests' }
 
         # BRO1309: snake_case names; a property kept by a string keeps its type's other properties
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, strings!, keptTypes))'; Replace = ''; Tests = 'PascalCaseNamingTests' }
