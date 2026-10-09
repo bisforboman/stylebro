@@ -11,13 +11,13 @@ using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1150: passes the 'Where' predicate to the call after it.</summary>
+/// <summary>Fix for BRO1150 and Sonar's S2971 (same place: the 'Where' name): passes the 'Where' predicate to the call after it.</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(WhereBeforeTerminalCodeFixProvider))]
 public sealed class WhereBeforeTerminalCodeFixProvider : NodeCodeFixProvider<InvocationExpressionSyntax>
 {
     /// <summary>Initializes a new instance of the <see cref="WhereBeforeTerminalCodeFixProvider"/> class.</summary>
     public WhereBeforeTerminalCodeFixProvider()
-        : base(DiagnosticIds.WhereBeforeTerminal, "Pass the predicate instead of calling 'Where'")
+        : base(DiagnosticIds.WhereBeforeTerminal, "Pass the predicate instead of calling 'Where'", "S2971")
     {
     }
 
