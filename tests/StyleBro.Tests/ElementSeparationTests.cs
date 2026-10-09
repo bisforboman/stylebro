@@ -228,6 +228,37 @@ public class ElementSeparationTests
         }
         """);
 
+    // Ocelot: a documented property is set apart like any other member (BRO1601's '<inheritdoc/>' made the result depend
+    // on the fix order otherwise).
+    [Fact]
+    public Task DocumentedProperties_AreSetApart() => VerifyFixAsync(
+        """
+        class C
+        {
+            public int A { get; set; }
+
+            /// <summary>Gets B.</summary>
+            public int B { get; set; }
+        {|BRO1505:|}    public int C1 { get; set; }
+        {|BRO1505:|}    /// <inheritdoc/>
+            public override string ToString() => string.Empty;
+        }
+        """,
+        """
+        class C
+        {
+            public int A { get; set; }
+
+            /// <summary>Gets B.</summary>
+            public int B { get; set; }
+
+            public int C1 { get; set; }
+
+            /// <inheritdoc/>
+            public override string ToString() => string.Empty;
+        }
+        """);
+
     // An auto-property that BRO1527 puts on one line counts as one line while BRO1527 is on (so the result doesn't depend
     // on which fix runs first), and as several lines while it's off.
     [Fact]

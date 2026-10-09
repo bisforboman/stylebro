@@ -451,6 +451,7 @@ public class DocumentationTests
             public string Name { get; set; }
             public int {|BRO1601:Priority|} { get; set; }
             public string {|BRO1601:Host|} { get; set; }
+
             public string Path { get; set; }
         }
         """,
