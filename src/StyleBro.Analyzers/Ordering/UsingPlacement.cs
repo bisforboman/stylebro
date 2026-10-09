@@ -225,6 +225,7 @@ internal static class UsingPlacement
         var inserted = (ns is FileScopedNamespaceDeclarationSyntax ? lineBreak : string.Empty)
             + reindented
             + (IsBlank(next) || nextIsClose ? string.Empty : lineBreak);
+
         // Usings taken from the top of the file make the comment below them the file header: it gets the blank line a
         // header has, as when BRO1112 removes a '#region License' around it first (Newtonsoft.Json's Friend.cs).
         var below = endLine;
