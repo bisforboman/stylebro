@@ -14,9 +14,9 @@ if [ "${GITHUB_EVENT_NAME:-}" != pull_request ]; then
 fi
 
 files=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
-# Docs, markdown outside src/tests/samples, the backlog generator, and the StyleCop survey except what the parity check
-# and StyleBro.Migrate (embedded CSVs) read.
-docs='^(docs/|(?!(src|tests|samples)/).*\.md$|scripts/New-Backlog\.py$|scripts/stylecop-survey/(?!Compare-WithStyleCop\.ps1$|parity/|data/inventory-|data/mapping\.csv$))'
+# Docs, markdown outside src/tests/samples, the docs site's setup, the backlog generator, and the StyleCop survey except
+# what the parity check and StyleBro.Migrate (embedded CSVs) read.
+docs='^(docs/|(?!(src|tests|samples)/).*\.md$|mkdocs\.yml$|\.github/docs-requirements\.txt$|\.github/workflows/docs\.yml$|scripts/New-Backlog\.py$|scripts/stylecop-survey/(?!Compare-WithStyleCop\.ps1$|parity/|data/inventory-|data/mapping\.csv$))'
 perf='^(src/|scripts/benchmark/|scripts/realworld/repos\.psd1$|Directory\.|global\.json$|[^/]*\.slnx$|\.github/workflows/ci\.yml$)'
 
 code=$(grep -vP "$docs" <<< "$files" || true)

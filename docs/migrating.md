@@ -46,7 +46,7 @@ applies to every project:
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
-real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md).
+real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).
 
 ## What it reads
 

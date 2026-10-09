@@ -1,0 +1,58 @@
+name: Docs
+
+# The documentation site (mkdocs.yml, docs/): built with --strict on every pull request (a broken link, anchor or a
+# page missing from the nav fails it), deployed to GitHub Pages from main. Deploying needs Pages turned on once in the
+# repository settings (Settings > Pages > Source: GitHub Actions); until then the deploy job fails, the build doesn't.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - run: pip install -r .github/docs-requirements.txt
+
+      # MkDocs only logs links to excluded internal pages (decisions.md, backlog.md, ...) as INFO; fail on them too:
+      # they must be absolute GitHub links.
+      - name: Build
+        run: |
+          set -o pipefail
+          mkdocs build --strict 2>&1 | tee build.log
+          if grep -q 'excluded from the built site' build.log; then
+            echo '::error::A page links to an excluded internal page; use an absolute GitHub link.'
+            exit 1
+          fi
+
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name == 'push'
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: site
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

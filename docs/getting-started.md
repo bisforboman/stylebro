@@ -165,7 +165,7 @@ Still deciding? [StyleBro vs StyleCop](stylebro-vs-stylecop.md) compares the two
 
 `stylebro-migrate` reads your StyleCop setup (rulesets, global configs, `.editorconfig` files, `stylecop.json`) and
 writes StyleBro and SDK settings that enforce the same things, so code StyleCop was happy with stays as it is. A
-walk-through on a small project, with real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md).
+walk-through on a small project, with real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).
 
 ### 1. Dry run
 

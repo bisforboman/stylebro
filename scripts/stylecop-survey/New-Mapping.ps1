@@ -107,7 +107,7 @@ W "Status: **$($decisions.Status)**. Of $($rows.Count) rules: $($tally.SDK) SDK,
 W
 W '## How this was measured'
 W
-W 'Scripts and data: [scripts/stylecop-survey](../scripts/stylecop-survey).'
+W 'Scripts and data: [scripts/stylecop-survey](https://github.com/bisforboman/stylebro/tree/main/scripts/stylecop-survey).'
 W
 W '- **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118 and 1.2.0-beta.556, read from the analyzer DLLs, including whether StyleCop itself ships a code fix. 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants.'
 W "- **Teams keeping it on**: the effective setting for production code in $($repos.Count) repos that use StyleCop: $(($repos | ForEach-Object Title) -join ', '). Shown as $labels."

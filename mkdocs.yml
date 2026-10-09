@@ -1,0 +1,203 @@
+site_name: StyleBro
+site_description: Roslyn analyzers and code fixes for C#, a modern StyleCop replacement that dotnet format fixes.
+site_url: https://bisforboman.github.io/stylebro/
+repo_url: https://github.com/bisforboman/stylebro
+repo_name: bisforboman/stylebro
+edit_uri: edit/main/docs/
+docs_dir: docs
+
+# Internal pages (plans, decisions, proposals) stay on GitHub only.
+exclude_docs: |
+  backlog.md
+  beyond-stylecop.md
+  decisions.md
+  proposals/
+
+# With --strict these fail the build: a broken link or anchor, or a page missing from the nav.
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.action.edit
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+# Rule pages: grouped like docs/rules/README.md (DocExamplesTests checks that they match).
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Migrating from StyleCop: migrating.md
+  - Rules:
+      - rules/README.md
+      - Ordering, spacing and comments:
+          - rules/BRO1001.md
+          - rules/BRO1002.md
+          - rules/BRO1003.md
+          - rules/BRO1004.md
+          - rules/BRO1005.md
+          - rules/BRO1006.md
+          - rules/BRO1007.md
+      - Readability:
+          - rules/BRO1101.md
+          - rules/BRO1102.md
+          - rules/BRO1103.md
+          - rules/BRO1104.md
+          - rules/BRO1105.md
+          - rules/BRO1106.md
+          - rules/BRO1107.md
+          - rules/BRO1108.md
+          - rules/BRO1109.md
+          - rules/BRO1110.md
+          - rules/BRO1111.md
+          - rules/BRO1112.md
+          - rules/BRO1113.md
+          - rules/BRO1114.md
+          - rules/BRO1115.md
+          - rules/BRO1116.md
+          - rules/BRO1117.md
+          - rules/BRO1118.md
+          - rules/BRO1119.md
+          - rules/BRO1120.md
+          - rules/BRO1121.md
+          - rules/BRO1122.md
+          - rules/BRO1123.md
+          - rules/BRO1124.md
+          - rules/BRO1125.md
+          - rules/BRO1126.md
+          - rules/BRO1127.md
+          - rules/BRO1128.md
+          - rules/BRO1129.md
+          - rules/BRO1130.md
+          - rules/BRO1131.md
+          - rules/BRO1132.md
+          - rules/BRO1133.md
+          - rules/BRO1134.md
+          - rules/BRO1135.md
+          - rules/BRO1136.md
+          - rules/BRO1137.md
+          - rules/BRO1138.md
+          - rules/BRO1139.md
+          - rules/BRO1140.md
+          - rules/BRO1141.md
+          - rules/BRO1142.md
+          - rules/BRO1143.md
+          - rules/BRO1144.md
+          - rules/BRO1145.md
+          - rules/BRO1146.md
+          - rules/BRO1147.md
+          - rules/BRO1148.md
+      - Naming:
+          - rules/BRO1301.md
+          - rules/BRO1302.md
+          - rules/BRO1303.md
+          - rules/BRO1304.md
+          - rules/BRO1305.md
+          - rules/BRO1306.md
+          - rules/BRO1307.md
+          - rules/BRO1308.md
+          - rules/BRO1309.md
+          - rules/BRO1310.md
+          - rules/BRO1311.md
+          - rules/BRO1312.md
+          - rules/BRO1313.md
+          - rules/BRO1314.md
+      - Maintainability:
+          - rules/BRO1401.md
+          - rules/BRO1402.md
+          - rules/BRO1403.md
+          - rules/BRO1404.md
+          - rules/BRO1405.md
+          - rules/BRO1406.md
+          - rules/BRO1407.md
+          - rules/BRO1408.md
+          - rules/BRO1409.md
+          - rules/BRO1410.md
+      - Layout:
+          - rules/BRO1501.md
+          - rules/BRO1502.md
+          - rules/BRO1503.md
+          - rules/BRO1504.md
+          - rules/BRO1505.md
+          - rules/BRO1506.md
+          - rules/BRO1507.md
+          - rules/BRO1508.md
+          - rules/BRO1509.md
+          - rules/BRO1510.md
+          - rules/BRO1511.md
+          - rules/BRO1512.md
+          - rules/BRO1513.md
+          - rules/BRO1514.md
+          - rules/BRO1515.md
+          - rules/BRO1516.md
+          - rules/BRO1517.md
+          - rules/BRO1518.md
+          - rules/BRO1519.md
+          - rules/BRO1520.md
+          - rules/BRO1521.md
+          - rules/BRO1522.md
+          - rules/BRO1523.md
+          - rules/BRO1524.md
+          - rules/BRO1525.md
+          - rules/BRO1526.md
+          - rules/BRO1527.md
+      - Documentation:
+          - rules/BRO1601.md
+          - rules/BRO1602.md
+          - rules/BRO1603.md
+          - rules/BRO1604.md
+          - rules/BRO1605.md
+          - rules/BRO1606.md
+          - rules/BRO1607.md
+          - rules/BRO1608.md
+          - rules/BRO1609.md
+          - rules/BRO1610.md
+          - rules/BRO1611.md
+          - rules/BRO1612.md
+          - rules/BRO1613.md
+          - rules/BRO1614.md
+          - rules/BRO1615.md
+          - rules/BRO1616.md
+          - rules/BRO1617.md
+          - rules/BRO1618.md
+          - rules/BRO1619.md
+  - Configuration:
+      - Settings: configuration.md
+      - Baseline: baseline.md
+      - CI: ci.md
+      - Modernizing: modernizing.md
+  - StyleCop:
+      - StyleBro vs StyleCop: stylebro-vs-stylecop.md
+      - Differences from StyleCop: differences-from-stylecop.md
+      - StyleCop mapping: stylecop-mapping.md
+      - Skipped rules: skipped-rules.md

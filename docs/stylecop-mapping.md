@@ -15,7 +15,7 @@ Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reaso
 
 ## How this was measured
 
-Scripts and data: [scripts/stylecop-survey](../scripts/stylecop-survey).
+Scripts and data: [scripts/stylecop-survey](https://github.com/bisforboman/stylebro/tree/main/scripts/stylecop-survey).
 
 - **Inventory**: every diagnostic in StyleCop.Analyzers 1.1.118 and 1.2.0-beta.556, read from the analyzer DLLs, including whether StyleCop itself ships a code fix. 1.2.0-beta.556 adds SA1141, SA1142, SA1316, SA1414 and some variants.
 - **Teams keeping it on**: the effective setting for production code in 3 repos that use StyleCop: [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) (`ea1e3f3`, StyleCop 1.2.0-beta.556), [Polly](https://github.com/App-vNext/Polly) (`0275bc2`, StyleCop 1.2.0-beta.556), a private 30-project app (StyleCop 1.1.118). Shown as OTel / Polly / App.

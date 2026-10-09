@@ -40,6 +40,50 @@ public partial class DocExamplesTests
         Assert.Equal(pages.Order(StringComparer.Ordinal), listed.Order(StringComparer.Ordinal));
     }
 
+    [Fact]
+    public void HelpLinks_PointToTheRulePagesOnTheSite()
+    {
+        var descriptors = typeof(StyleBro.Analyzers.Descriptors).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(field => field.GetValue(null))
+            .OfType<DiagnosticDescriptor>()
+            .ToList();
+        Assert.NotEmpty(descriptors);
+        foreach (var descriptor in descriptors)
+        {
+            // MkDocs serves docs/rules/BROxxxx.md at rules/BROxxxx/. A fading companion (BROxxxx_p) links to its rule's page.
+            var page = descriptor.Id.EndsWith("_p", StringComparison.Ordinal) ? descriptor.Id.Substring(0, descriptor.Id.Length - 2) : descriptor.Id;
+            Assert.Equal("https://bisforboman.github.io/stylebro/rules/" + page + "/", descriptor.HelpLinkUri);
+            Assert.True(File.Exists(Path.Combine(RulesFolder, page + ".md")), $"{descriptor.Id}: no docs/rules/{page}.md");
+        }
+    }
+
+    [Fact]
+    public void TheSiteNav_GroupsTheRulesLikeTheIndex()
+    {
+        var index = File.ReadAllText(Path.Combine(RulesFolder, "README.md"));
+        var indexed = Regex.Matches(index, @"^## (.+?)\s*$|^\| \[(BRO\d{4})\]", RegexOptions.Multiline)
+            .Select(m => m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value);
+        var mkdocs = File.ReadAllText(Path.Combine(FindRepoRoot(), "mkdocs.yml"));
+        var rulesNav = mkdocs[mkdocs.IndexOf("  - Rules:", StringComparison.Ordinal)..];
+        rulesNav = rulesNav[..rulesNav.IndexOf("\n  - ", 1, StringComparison.Ordinal)];
+        var nav = Regex.Matches(rulesNav, @"^ {6}- (.+?):\s*$|^ {10}- rules/(BRO\d{4})\.md\s*$", RegexOptions.Multiline)
+            .Select(m => m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value);
+        Assert.Equal(indexed, nav);
+    }
+
+    [Fact]
+    public void TheConfigurationPage_ListsEverySetting()
+    {
+        var source = Directory.GetFiles(Path.Combine(FindRepoRoot(), "src"), "*.cs", SearchOption.AllDirectories)
+            .SelectMany(file => Regex.Matches(File.ReadAllText(file), @"""(stylebro_[a-z_]+)""").Select(m => m.Groups[1].Value))
+            .Distinct()
+            .Order(StringComparer.Ordinal);
+        var page = File.ReadAllText(Path.Combine(FindRepoRoot(), "docs", "configuration.md"));
+        var listed = Regex.Matches(page, @"^\| `(stylebro_[a-z_]+)` \|", RegexOptions.Multiline).Select(m => m.Groups[1].Value)
+            .Order(StringComparer.Ordinal);
+        Assert.Equal(source, listed);
+    }
+
     [Theory]
     [MemberData(nameof(Rules))]
     public async Task ExampleIsFixedAsDocumented(string id)
