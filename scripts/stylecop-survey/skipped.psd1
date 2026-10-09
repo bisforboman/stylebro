@@ -115,12 +115,6 @@
             Revisit = 'Would need a separate tool (stylebro-migrate could do it as a one-off, with `git mv`).' }
         SA1650 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on misspelled words (probed).'
             Revisit = 'Nothing to port.' }
-
-        # ---- Variants ----------------------------------------------------------------------------------------------
-        SA1119_p = @{ Status = 'Variant'; Why = 'Not a rule of its own: a Hidden diagnostic SA1119 reports on the `(` and `)` tokens so the IDE greys them out (StyleCop''s ParenthesisDescriptor, read in its source). BRO1405 covers SA1119 itself.'
-            Revisit = 'Nothing to port (an earlier note here took it for parenthesized patterns; StyleCop doesn''t check those).' }
-        SX1309S = @{ Status = 'Variant'; Why = 'Static fields begin with `_`. BRO1303 with `_camelCase` (which stylebro-migrate sets for SX1309) covers private static non-readonly fields; `static readonly` fields are BRO1306''s (PascalCase), so a team using `_` for those has no StyleBro rule.'
-            Revisit = 'With SX1309; decide whether `_camelCase` should extend to private static readonly fields.' }
     }
 
     Partial = @{
