@@ -9,6 +9,8 @@ trim_trailing_whitespace = true
 indent_size = 4
 # BRO1616: StyleBro's own code (and the samples) write one-sentence summaries on one line; the default is multi_line.
 stylebro_summary_layout = single_line_when_fits
+# BRO1008: usings outside the namespace, like the preset (not set: StyleCop's default, inside).
+csharp_using_directive_placement = outside_namespace
 
 [*.{csproj,props,targets,slnx,xml,json,yml}]
 indent_size = 2

@@ -139,6 +139,10 @@ dotnet_diagnostic.BRO1124.severity = warning
 # BRO1125: lambdas instead of anonymous methods (SA1130)
 dotnet_diagnostic.BRO1125.severity = warning
 
+# BRO1008: using directives where csharp_using_directive_placement says (SA1200); replaces IDE0065, whose fix can
+# change what names bind to
+dotnet_diagnostic.BRO1008.severity = warning
+
 # BRO1126: using directives inside a namespace are fully qualified (SA1135)
 dotnet_diagnostic.BRO1126.severity = warning
 

@@ -1567,6 +1567,63 @@ public class FixOrderTests
         "BRO1109",
         "BRO1110");
 
+    [Fact]
+    public Task UsingPlacement_Outside_WithQualifiedUsingsAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        namespace System.Tools
+        {
+            using IO;
+            public class C
+            {
+                public Stream? M(bool b)
+                {
+                    if (b)
+                    {
+                        return null;
+                    }
+                    return Stream.Null;
+                }
+            }
+        }
+        """,
+        "csharp_using_directive_placement = outside_namespace\n",
+        "BRO1008",
+        "BRO1126",
+        "BRO1505",
+        "BRO1519");
+
+    [Fact]
+    public Task UsingPlacement_Inside_TheFileHeaderStaysOnTop() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System;
+        namespace App
+        {
+            public class C
+            {
+                public Type? T { get; set; }
+            }
+        }
+        """,
+        "stylebro_file_header_company = Contoso\n",
+        "BRO1008",
+        "BRO1505",
+        "BRO1615");
+
+    [Fact]
+    public Task UsingPlacement_Outside_TheFileHeaderStaysOnTop() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        namespace App;
+        using System;
+        public class C
+        {
+            public Type? T { get; set; }
+        }
+        """,
+        "csharp_using_directive_placement = outside_namespace\nstylebro_file_header_company = Contoso\n",
+        "BRO1008",
+        "BRO1505",
+        "BRO1615");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

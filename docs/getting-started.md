@@ -105,7 +105,7 @@ defaults. Your own `.editorconfig` wins over the preset. To configure everything
 
 ### 2. Turn on the built-in rules
 
-StyleBro relies on some built-in .NET rules (IDE0055 formatting, IDE0036 modifier order, IDE0065 using placement, ...).
+StyleBro relies on some built-in .NET rules (IDE0055 formatting, IDE0036 modifier order, IDE0049 type aliases, ...).
 Their severities have to be in `.editorconfig`, because `dotnet format` ignores rule severities in a package's preset.
 In the repository root:
 
@@ -147,7 +147,7 @@ usual. It also runs once per target framework where needed ([Multi-targeted repo
 and never touches git submodules. The plain equivalent is `dotnet format --diagnostics` with the ids to fix:
 
 ```
-dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 IDE0065
+dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 BRO1008
 ```
 
 `stylebro-migrate format --all` applies everything, like plain `dotnet format`.

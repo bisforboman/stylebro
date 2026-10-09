@@ -68,6 +68,7 @@ nav:
           - rules/BRO1005.md
           - rules/BRO1006.md
           - rules/BRO1007.md
+          - rules/BRO1008.md
       - Readability:
           - rules/BRO1101.md
           - rules/BRO1102.md

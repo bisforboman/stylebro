@@ -100,7 +100,7 @@ tool again replaces the block, so put your own settings outside it.
   `static readonly` fields are pinned to StyleCop's PascalCase (`stylebro_private_static_field_naming = PascalCase`,
   [BRO1306](rules/BRO1306.md)): without it BRO1306 would follow a camel-case `dotnet_naming_rule` for static fields that
   StyleCop never enforced (IDE1006 off), and rename fields StyleCop was happy with.
-- **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order, IDE0065 using placement, and so
+- **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order, IDE0049 type aliases, and so
   on) get the strongest severity of the StyleCop rules they cover, with options from `stylecop.json`.
 - **Every rule by its id.** Each StyleBro rule gets its own `dotnet_diagnostic.BROxxxx.severity` line, `none` included
   (also the rules beyond StyleCop and those off by default): a bulk `dotnet_analyzer_diagnostic.severity = warning`

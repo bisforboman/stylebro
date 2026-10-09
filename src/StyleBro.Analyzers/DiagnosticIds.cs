@@ -9,6 +9,7 @@ public static class DiagnosticIds
     public const string DocumentationLineSpace = "BRO1005";
     public const string DirectiveSpacing = "BRO1006";
     public const string PartialAccessModifier = "BRO1007";
+    public const string UsingPlacement = "BRO1008";
     public const string EmptyStatement = "BRO1101";
     public const string CombinedAttributes = "BRO1102";
     public const string ConstantOnLeft = "BRO1103";
