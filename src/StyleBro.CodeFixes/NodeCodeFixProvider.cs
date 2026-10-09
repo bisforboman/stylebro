@@ -16,22 +16,27 @@ namespace StyleBro.CodeFixes;
 /// <summary>
 /// A fix that finds the reported node again (the nearest <typeparamref name="TNode"/> around the diagnostic's span) and
 /// asks the rule's shared logic for its edits, so analyzer and fix can't disagree. A node that no longer needs the fix
-/// (another rule changed it) gets none.
+/// (another rule changed it) gets none. A rule may also fix another analyzer's id reported at the same place
+/// (<c>otherId</c>, e.g. Sonar's S1066 for BRO1149): only where the shared logic gives edits for the node found there;
+/// elsewhere no action is registered and that warning stays.
 /// </summary>
 public abstract class NodeCodeFixProvider<TNode> : CodeFixProvider
     where TNode : SyntaxNode
 {
     private readonly string id;
     private readonly string title;
+    private readonly string? otherId;
 
-    private protected NodeCodeFixProvider(string id, string title)
+    private protected NodeCodeFixProvider(string id, string title, string? otherId = null)
     {
         this.id = id;
         this.title = title;
+        this.otherId = otherId;
     }
 
     /// <inheritdoc/>
-    public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(this.id);
+    public sealed override ImmutableArray<string> FixableDiagnosticIds =>
+        this.otherId is null ? ImmutableArray.Create(this.id) : ImmutableArray.Create(this.id, this.otherId);
 
     /// <summary>Gets a value indicating whether <see cref="GetChanges"/> needs the semantic model.</summary>
     private protected virtual bool NeedsSemanticModel => false;
@@ -41,10 +46,17 @@ public abstract class NodeCodeFixProvider<TNode> : CodeFixProvider
         LinkedFileFixAllProvider.Create(this.FixDocumentAsync);
 
     /// <inheritdoc/>
-    public sealed override Task RegisterCodeFixesAsync(CodeFixContext context)
+    public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
         {
+            // The other analyzer's findings include places the shared logic skips: no action there.
+            if (diagnostic.Id != this.id
+                && (await this.GetChangesAsync(context.Document, ImmutableArray.Create(diagnostic), context.CancellationToken).ConfigureAwait(false)).Count == 0)
+            {
+                continue;
+            }
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     this.title,
@@ -52,8 +64,6 @@ public abstract class NodeCodeFixProvider<TNode> : CodeFixProvider
                     equivalenceKey: this.GetType().Name),
                 diagnostic);
         }
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -64,17 +74,24 @@ public abstract class NodeCodeFixProvider<TNode> : CodeFixProvider
 
     private async Task<Document> FixDocumentAsync(Document document, ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken)
     {
+        var changes = await this.GetChangesAsync(document, diagnostics, cancellationToken).ConfigureAwait(false);
+        var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+    }
+
+    private async Task<List<TextChange>> GetChangesAsync(Document document, ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken)
+    {
+        var changes = new List<TextChange>();
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         if (root is null)
         {
-            return document;
+            return changes;
         }
 
         var model = this.NeedsSemanticModel ? await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) : null;
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
-        var changes = new List<TextChange>();
         foreach (var span in diagnostics.Select(d => d.Location.SourceSpan).Distinct())
         {
             if (span.End <= root.FullSpan.End
@@ -85,6 +102,6 @@ public abstract class NodeCodeFixProvider<TNode> : CodeFixProvider
             }
         }
 
-        return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+        return changes;
     }
 }
