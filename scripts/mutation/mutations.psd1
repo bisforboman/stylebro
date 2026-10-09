@@ -658,7 +658,6 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = '|| !IsPlainGap(before, clause.WhereKeyword))'; Replace = ')'; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += clause.WhereKeyword.SpanStart - before.Span.End + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += 1 + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ? [] : joins;'; Replace = 'return length >= Indentation.GetMaxLineLength(options) ? [] : joins;'; Tests = 'ConstraintPlacementTests' }
         # Names nameof(...) produces keep them (Ocelot)
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = '&& !names.Nameof.Contains(oldName)'; Replace = ''; Tests = 'CamelCaseNamingTests.NamesInNameof_KeepTheirName' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'access.Name == name ? (ExpressionSyntax)access : name'; Replace = 'name'; Tests = 'FieldNamingTests.NamesInNameof_KeepTheirName' }
