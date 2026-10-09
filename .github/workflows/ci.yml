@@ -114,11 +114,12 @@ jobs:
           git worktree add "$work/base-src" "origin/${{ github.base_ref }}"
           dotnet build "$work/base-src/src/StyleBro.Analyzers" -c Release -nologo -v q -o "$work/base"
 
-          # The same pinned commit as the real-world check.
+          # The same pinned commit as the real-world check. --all-rules: the off-by-default rules are measured too (a
+          # superset: the default rules run the same code, apart from a few that defer to an off-by-default one).
           $nj = (Import-PowerShellDataFile scripts/realworld/repos.psd1).Newtonsoft
           git init -q "$work/nj"
           git -C "$work/nj" fetch -q --depth 1 $nj.Url $nj.Commit
           git -C "$work/nj" checkout -q FETCH_HEAD
 
-          dotnet run -c Release --project scripts/benchmark -- compare "$work/base/StyleBro.Analyzers.dll" "$work/head/StyleBro.Analyzers.dll" "$work/nj/Src/Newtonsoft.Json" 10
+          dotnet run -c Release --project scripts/benchmark -- compare "$work/base/StyleBro.Analyzers.dll" "$work/head/StyleBro.Analyzers.dll" "$work/nj/Src/Newtonsoft.Json" 10 --all-rules
           exit $LASTEXITCODE

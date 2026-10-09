@@ -28,7 +28,11 @@ away and a real regression stays. Checked on a busy machine: a build against its
 and the build before the 2026-10-04 speed-ups against the one after failed on DocumentationAnalyzer, CommentTextAnalyzer
 and the total.
 
-`--all-rules` (any mode) also turns on the rules that are off by default (through the compilation options).
+`--all-rules` (any mode) also turns on the rules that are off by default (through the compilation options, which
+`Severities.IsOn` reads too). Checked 2026-10-09 on Newtonsoft.Json: 4,087 reports without it, 4,439 with it (BRO1143 39,
+BRO1145 9, BRO1147 18, BRO1148 17, BRO1310 1, BRO1313 6, BRO1409 263; BRO1139 23 -> 21, it leaves an `else` after a jump
+to BRO1143; BRO1312 and BRO1314 report on a probe file, nothing in Newtonsoft.Json). CI's `performance` job compares with
+`--all-rules`: a superset, so the off-by-default analyzers are measured too.
 
 The optional fourth argument sets preprocessor symbols (`HAVE_ASYNC;NET8_0`). Missing references don't matter much:
 the sources are compiled against the .NET runtime only, so code using other packages binds partly. Compare two builds

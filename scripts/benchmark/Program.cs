@@ -88,7 +88,7 @@ for (var round = 1; round < 3 && problems.Count > 0; round++)
     (problems, lines) = Evaluate();
 }
 
-var report = string.Join('\n', new[] { "## Analyzer performance (Newtonsoft.Json, base vs head, alternated, fastest run each)", "" }
+var report = string.Join('\n', new[] { $"## Analyzer performance (Newtonsoft.Json, {(allRules ? "all rules" : "default rules")}, base vs head, alternated, fastest run each)", "" }
     .Concat(lines)
     .Concat(problems.Count == 0 ? new[] { "", "No regression." } : new[] { "", "**Slower:**", "" }.Concat(problems.Select(p => "- " + p))));
 Console.WriteLine(report);
