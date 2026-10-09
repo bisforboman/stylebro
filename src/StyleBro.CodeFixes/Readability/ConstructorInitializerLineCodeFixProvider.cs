@@ -61,6 +61,7 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var indentUnit = Indentation.GetUnit(options);
         var sameLine = ConstructorInitializers.IsSameLine(options);
+        var model = sameLine ? await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) : null;
         var changes = new Dictionary<ConstructorInitializerSyntax, TextChange>();
         foreach (var diagnostic in diagnostics)
         {
@@ -72,7 +73,7 @@ public sealed class ConstructorInitializerLineCodeFixProvider : CodeFixProvider
 
             if (sameLine)
             {
-                if (ConstructorInitializers.GetJoin(initializer, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken)) is { } join)
+                if (ConstructorInitializers.GetJoin(initializer, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken), model!, cancellationToken) is { } join)
                 {
                     changes[initializer] = join;
                 }

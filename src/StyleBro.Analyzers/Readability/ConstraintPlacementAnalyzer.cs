@@ -32,7 +32,7 @@ public sealed class ConstraintPlacementAnalyzer : DiagnosticAnalyzer
                 var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree);
                 if (ConstraintPlacement.IsSameLine(options))
                 {
-                    foreach (var (clause, _) in ConstraintPlacement.GetJoins(c.Node, text, options, id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken)))
+                    foreach (var (clause, _) in ConstraintPlacement.GetJoins(c.Node, text, options, id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken), c.SemanticModel, c.CancellationToken))
                     {
                         c.ReportDiagnostic(Diagnostic.Create(Descriptors.ConstraintOnOwnLine, clause.GetLocation(), clause.Name.Identifier.ValueText, "to the declaration's line"));
                     }
