@@ -326,6 +326,10 @@ public class UsingPlacementTests
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\npublic class D\n{\n}\n"),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n#if DEBUG\n    using System;\n#endif\n\n    public class C { }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System; public class C { public Type? T { get; set; } }\n}\n", Outside),
+        Verify.VerifyNoDiagnosticsAsync("namespace App\n{ using System;\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),
+        Verify.VerifyFixAsync(
+            new[] { "using Routing;\n\nnamespace Tests\n{\n    public class C { }\n}\n", "namespace Routing { public class A { } }\nnamespace Tests.Routing { public class B { } }\n" },
+            new[] { "using Routing;\n\nnamespace Tests\n{\n    public class C { }\n}\n", "namespace Routing { public class A { } }\nnamespace Tests.Routing { public class B { } }\n" }),
         Verify.VerifyNoDiagnosticsAsync("global using System.Text;\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n"),
         Verify.VerifyNoDiagnosticsAsync("using System.Text;\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } public StringBuilder? B { get; set; } }\n}\n", Outside));
 }
