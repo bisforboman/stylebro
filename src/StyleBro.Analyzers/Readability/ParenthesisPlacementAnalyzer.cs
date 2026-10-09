@@ -32,8 +32,10 @@ public sealed class ParenthesisPlacementAnalyzer : DiagnosticAnalyzer
     // One pass per file over TreeWalk's cached nodes, so the settings are read once per file, not for every list.
     private static void AnalyzeTree(SyntaxTreeAnalysisContext context, CompilationOptions compilationOptions)
     {
-        var ownLine = ParenthesisPlacement.IsOwnLine(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree));
-        var openMoves = ownLine && Severities.IsOn(compilationOptions, context.Tree, DiagnosticIds.OpenParenthesisOnNameLine, context.CancellationToken);
+        var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
+        var ownLine = ParenthesisPlacement.IsOwnLine(options);
+        bool IsOn(string id) => Severities.IsOn(compilationOptions, context.Tree, id, context.CancellationToken);
+        var openMoves = ownLine && IsOn(DiagnosticIds.OpenParenthesisOnNameLine);
         var text = context.Tree.GetText(context.CancellationToken);
         foreach (var node in TreeWalk.Nodes(context.Tree.GetRoot(context.CancellationToken)))
         {
@@ -47,13 +49,16 @@ public sealed class ParenthesisPlacementAnalyzer : DiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.OpenParenthesisOnNameLine, open.GetLocation(), open.Text));
             }
 
-            if (ParenthesisPlacement.GetCloseFix(node, text, ownLine, openMoves) is { } close)
+            if (ParenthesisPlacement.GetCloseFix(node, text, ownLine, openMoves, options, IsOn) is { } close)
             {
+                var newText = close.Change.NewText!;
                 context.ReportDiagnostic(Diagnostic.Create(
                     Descriptors.CloseParenthesisOnLastItemLine,
                     close.Close.GetLocation(),
                     close.Close.Text,
-                    close.Change.NewText!.Trim().Length == 0 ? "to its own line" : "to the end of the last item"));
+                    newText.Trim().Length > 0 ? "to the end of the last item"
+                        : newText.IndexOf('\n') >= 0 ? "to its own line"
+                        : "to the indentation of the line with the opening token"));
             }
         }
     }

@@ -1359,6 +1359,93 @@ public class FixOrderTests
         "BRO1108",
         "BRO1116");
 
+    [Fact]
+    public Task Regions_RemovedAroundMembersMissingBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            #region Methods
+            public void B()
+            {
+            }
+            private int y;
+            #endregion
+
+            private int x;
+            public void A()
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "BRO1001",
+        "BRO1112",
+        "BRO1505");
+
+    [Fact]
+    public Task EmptyParentheses_InsideASplitListWithTheFirstItemOnTheSameLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b) => a;
+
+            public int N() => 1;
+
+            public int P() => M(N(
+                ), M(5,
+                6));
+
+            public int Q() => M(N(
+                    ),
+                M(N(
+                ), 6));
+        }
+        """,
+        "stylebro_split_list_first_item = same_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1116");
+
+    [Fact]
+    public Task ClosingParenthesisOnOwnLine_Reindented() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int a, int b)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(int a,
+                int b
+                    ) : base(
+                a, b
+                    )
+            {
+            }
+
+            public int M(int a, int b) => a;
+
+            public void Run()
+            {
+                M
+                    (1,
+                    2
+                    );
+                M(M(
+                    1, 2
+                        ), M(
+                    3, 4));
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1105",
+        "BRO1109",
+        "BRO1110");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 
