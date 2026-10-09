@@ -15,7 +15,8 @@ internal static class PropertySummaries
 {
     /// <summary>
     /// Words that can't follow other words of a sentence: a condition ('If true, the text is checked', 'True if ...').
-    /// BRO1604 doesn't put 'Gets' in front of them, nor BRO1606 its sentence.
+    /// BRO1604 doesn't put 'Gets' in front of them (written in lower case: a capitalized word isn't reported anyway), nor
+    /// BRO1606 its sentence.
     /// </summary>
     public static readonly string[] Conditions = ["If", "When", "Whenever", "Unless", "While", "Whether", "True", "False"];
 
@@ -42,7 +43,13 @@ internal static class PropertySummaries
         "Whether",
     ];
 
-    /// <summary>A summary that starts with a verb of its own: 'Gets' in front of it isn't a sentence ('Gets returns ...').</summary>
+    /// <summary>Articles: a summary without a known prefix that starts with one is a noun phrase ('The name').</summary>
+    private static readonly string[] Articles = ["The", "A", "An"];
+
+    /// <summary>
+    /// A summary that starts with a verb of its own: 'Gets' in front of it isn't a sentence ('Gets returns ...'). Only
+    /// matters in lower case ('returns ...'): a capitalized word isn't reported anyway.
+    /// </summary>
     private static readonly string[] Verbs =
     [
         "Returns", "Specifies", "Indicates", "Determines", "Contains", "Controls", "Defines", "Represents", "Provides",
@@ -55,8 +62,9 @@ internal static class PropertySummaries
     /// one counts, like in StyleCop), 'Sets' (write-only); a bool gets 'a value indicating whether' after them. An
     /// 'init' accessor counts like a setter with 'initializes', and like StyleCop master a property with 'get' and
     /// 'init' may also say just 'Gets'. Not checked: indexers, summaries that don't start with text, and summaries
-    /// without a known prefix that start with a condition or a verb ('If true, ...', 'Returns ...'): the words in front
-    /// wouldn't make a sentence.
+    /// without a known prefix that don't start like a noun phrase (an article or a lower-case word): 'This is the hash',
+    /// 'Device id of the user', 'Returns ...' have no fix that makes a sentence (owner's decision, 2026-10-09); nor
+    /// lower-case conditions or verbs ('if true, ...', 'returns ...').
     /// </summary>
     public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text)
     {
@@ -100,6 +108,11 @@ internal static class PropertySummaries
         // state'). Only a summary that already says 'whether' gets the full phrase.
         var longForm = verb + " a value indicating whether";
         if (accepted.Any(v => old == v || (isBool && old == v + " a value indicating whether")))
+        {
+            return null;
+        }
+
+        if (old.Length == 0 && !char.IsLower(rest[0]) && !StartsWithAnyWord(rest, Articles))
         {
             return null;
         }

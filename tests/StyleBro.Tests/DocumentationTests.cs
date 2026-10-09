@@ -554,8 +554,17 @@ public class DocumentationTests
             /// </summary>
             public string {|BRO1604:Url|} => "x";
 
-            /// <summary>URL of the site.</summary>
+            /// <summary>Sets URL of the site.</summary>
             public string {|BRO1604:Site|} => "x";
+
+            /// <summary>An id.</summary>
+            public int {|BRO1604:Id|} { get; set; }
+
+            /// <summary>A key.</summary>
+            public int {|BRO1604:Key|} { get; }
+
+            /// <summary>number of pages.</summary>
+            public int {|BRO1604:Pages|} { get; }
         }
         """,
         """
@@ -596,6 +605,15 @@ public class DocumentationTests
 
             /// <summary>Gets URL of the site.</summary>
             public string Site => "x";
+
+            /// <summary>Gets or sets an id.</summary>
+            public int Id { get; set; }
+
+            /// <summary>Gets a key.</summary>
+            public int Key { get; }
+
+            /// <summary>Gets number of pages.</summary>
+            public int Pages { get; }
         }
         """);
 
@@ -1572,6 +1590,32 @@ public class DocumentationTests
         }
         """);
 
+    // Kavita: 'This is the Koreader hash' would become 'Gets or sets this is the Koreader hash'. Only summaries that start
+    // like a noun phrase (an article or a lower-case word) or with a known prefix are reported (owner's decision,
+    // 2026-10-09); a capitalized word has no fix that surely makes a sentence.
+    [Fact]
+    public Task PropertySummariesThatArentNounPhrases_AreNotReported() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary>This is the Koreader hash.</summary>
+            public string Hash { get; set; }
+
+            /// <summary>Not used - For parity.</summary>
+            public string Document { get; set; }
+
+            /// <summary>Device id of the user.</summary>
+            public string DeviceId { get; set; }
+
+            /// <summary>Is it closed.</summary>
+            public bool IsClosed { get; set; }
+
+            /// <summary>Theme of the page.</summary>
+            public string Theme { get; set; }
+        }
+        """);
+
     // Dapper: 'If true, the command-text is inspected' became 'Gets or sets if true, ...', and a constructor summary
     // 'construct a dynamic parameter bag' became '... class. construct a dynamic parameter bag'. Text that can't follow
     // the standard words as a sentence is left alone.
@@ -1609,6 +1653,9 @@ public class DocumentationTests
 
             /// <summary>whenever it changes, it's saved.</summary>
             public int Count { get; set; }
+
+            /// <summary>returns the size.</summary>
+            public int Size { get; set; }
         }
         """);
 }
