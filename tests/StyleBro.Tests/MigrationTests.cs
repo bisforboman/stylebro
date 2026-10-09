@@ -1274,6 +1274,13 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\" Version=", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")));
         Assert.Contains("<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />", File.ReadAllText(Path.Combine(root, "Directory.Build.props")));
         Assert.Null(PreviewCommand.AddPackage(root)); // referenced now
+
+        // Polly: the property in Directory.Build.props, the versions in Directory.Packages.props.
+        File.Delete(Path.Combine(root, "Directory.Build.props"));
+        Write("Directory.Packages.props", "<Project><ItemGroup><PackageVersion Include=\"X\" Version=\"1.0.0\" /></ItemGroup></Project>");
+        Write("Directory.Build.props", "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup></Project>");
+        Assert.NotNull(PreviewCommand.AddPackage(root));
+        Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\" Version=", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")));
     }
 
     [Fact]

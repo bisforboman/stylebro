@@ -399,8 +399,10 @@ internal static class PreviewCommand
 
         var version = typeof(PreviewCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
         var packages = Path.Combine(root, "Directory.Packages.props");
-        var central = File.Exists(packages) && Regex.IsMatch(File.ReadAllText(packages), @"<ManagePackageVersionsCentrally>\s*true", RegexOptions.IgnoreCase);
         var props = Path.Combine(root, "Directory.Build.props");
+
+        // The property is in Directory.Packages.props or (Polly) Directory.Build.props.
+        var central = File.Exists(packages) && new[] { packages, props }.Any(f => File.Exists(f) && Regex.IsMatch(File.ReadAllText(f), @"<ManagePackageVersionsCentrally>\s*true", RegexOptions.IgnoreCase));
         if (central)
         {
             File.WriteAllText(packages, AddItem(File.ReadAllText(packages), $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
