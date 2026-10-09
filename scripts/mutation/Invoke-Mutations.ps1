@@ -3,12 +3,16 @@
 # listed tests must then fail. Fails when a mutation survives (no test covers that guard) or no longer applies (the code
 # changed: update its Find text).
 #
-#   ./scripts/mutation/Invoke-Mutations.ps1 [-Root <checkout>] [-Shard <i> -Shards <n>]
+#   ./scripts/mutation/Invoke-Mutations.ps1 [-Root <checkout>] [-Shard <i> -Shards <n>] [-OnlyFiles <paths>]
+# -OnlyFiles (pull requests: the changed files) runs only the entries whose File is listed or whose test class is a listed
+# tests/ file; an empty list runs none. Guards can also break through other files (shared helpers): the full run on main
+# catches those.
 # -Shard/-Shards run only the entries whose index modulo n is i (0-based; CI runs the shards in parallel jobs). The stale
 # check (Find must occur exactly once) is text only and always covers EVERY entry, so each shard fails on any stale one.
 # The checkout must have no uncommitted changes to the mutated files: each mutation is undone with 'git checkout'.
 # Locally, run it in a separate worktree (git worktree add ../stylebro-mut HEAD) so builds don't touch your working copy.
-param([string]$Root = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent), [int]$Shard = 0, [int]$Shards = 1)
+param([string]$Root = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent), [int]$Shard = 0, [int]$Shards = 1,
+    [AllowEmptyCollection()][string[]]$OnlyFiles)
 $ErrorActionPreference = 'Stop'
 $env:StyleBroSelf = 'none'
 $config = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'mutations.psd1')
@@ -24,11 +28,19 @@ $stale = @(foreach ($m in $all) {
     $count = Get-Count $m
     if ($count -ne 1) { [pscustomobject]@{ Result = 'STALE'; File = $m.File; Find = $m.Find; Note = "found $count times" } }
 })
-$mine = @(for ($i = $Shard; $i -lt $all.Count; $i += $Shards) { if ((Get-Count $all[$i]) -eq 1) { $all[$i] } })
-Write-Host "Shard $Shard of ${Shards}: $($mine.Count) mutations of $($all.Count) ($($stale.Count) stale in total)."
+$run = $all
+if ($PSBoundParameters.ContainsKey('OnlyFiles')) {
+    $classes = @($OnlyFiles | Where-Object { $_ -like 'tests/*.cs' } | ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_) })
+    $run = @($all | Where-Object { $_.File -in $OnlyFiles -or $_.Tests.Split('.')[0] -in $classes })
+}
 
-dotnet build $tests -nologo -v q | Out-Host
-if ($LASTEXITCODE -ne 0) { throw 'The unmutated build fails.' }
+$mine = @(for ($i = $Shard; $i -lt $run.Count; $i += $Shards) { if ((Get-Count $run[$i]) -eq 1) { $run[$i] } })
+Write-Host "Shard $Shard of ${Shards}: $($mine.Count) mutations of $($run.Count) selected, $($all.Count) in total ($($stale.Count) stale)."
+
+if ($mine.Count) {
+    dotnet build $tests -nologo -v q | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw 'The unmutated build fails.' }
+}
 
 $results = $stale + @(foreach ($m in $mine) {
     $file = Join-Path $Root $m.File
