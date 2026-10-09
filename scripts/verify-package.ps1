@@ -3,7 +3,7 @@
 # from a local feed into a project outside the repository, and checks what only the package's build targets do:
 #   1. the preset reaches the compiler (BRO1112, which the preset turns off, isn't reported; other rules are);
 #   2. <StyleBroPreset>none</StyleBroPreset> turns it off;
-#   3. after 'stylebro-migrate init --write', 'dotnet format' fixes the built-in rules too (their severities come from
+#   3. 'stylebro-migrate init --diff' previews without writing; after 'init --write', 'dotnet format' fixes the built-in rules too (their severities come from
 #      .editorconfig) and applies the preset's formatting options; a second run changes nothing;
 #   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported;
 #   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
@@ -71,7 +71,12 @@ try {
     Write-Host '== 2. <StyleBroPreset>none</StyleBroPreset> turns it off'
     Check ((Build @('-p:StyleBroPreset=none')) -contains 'BRO1112 Regions.cs') 'BRO1112 is reported without the preset'
 
-    Write-Host "== 3. init + dotnet format"
+    Write-Host "== 3. init --diff previews, then init + dotnet format"
+    $patch = Join-Path $work 'preview.patch'
+    Migrate @('init', $repo, "--diff=$patch", '--project', 'src/App/App.csproj')
+    $previewed = Get-Content $patch -Raw
+    Check ($previewed -match '\+\+\+ b/\.editorconfig' -and $previewed -match '\+internal class Style') 'init --diff wrote the settings and the format fixes (BRO1404) to the patch'
+    Check (-not (Test-Path (Join-Path $repo '.editorconfig'))) 'init --diff left the repository alone'
     Migrate @('init', $repo, '--write')
     dotnet format $project --severity warn | Out-Host
     $style = Get-Content (Join-Path $app 'Style.cs') -Raw

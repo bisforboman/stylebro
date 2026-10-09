@@ -39,6 +39,15 @@ internal static class Program
               once per target framework in multi-targeted repositories, never inside git submodules. --all also applies
               every other analyzer's and compiler fix. Other options pass through (--verify-no-changes, --severity warn).
 
+          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>]
+          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize]
+          stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [options]
+              Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
+              temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
+              rule, sample changes) and writes the full diff to stylebro-preview.patch (or <file>). Adds the
+              StyleBro.Analyzers reference in the copy when the repository has none. --keep keeps the copy; --project
+              names what format runs on when the folder has several solutions or projects.
+
           stylebro-migrate baseline [path] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
 
@@ -64,16 +73,27 @@ internal static class Program
         var (command, known) = args.FirstOrDefault() switch
         {
             "baseline" => ("baseline", new[] { "--project" }),
-            "init" => ("init", new[] { "--write", "--modernize" }),
+            "init" => ("init", new[] { "--write", "--modernize" }.Concat(PreviewCommand.Options).ToArray()),
             "format" => ("format", null),
-            _ => (null, new[] { "--write" }),
+            _ => (null, new[] { "--write" }.Concat(PreviewCommand.Options).ToArray()),
         };
         var options = args.Skip(command is null ? 0 : 1).ToArray();
-        if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a)) is { } unknown)
+        if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a.Split('=')[0])) is { } unknown)
         {
             Console.Error.WriteLine($"Unknown option: {unknown}");
             Console.Error.WriteLine(Usage);
             return 1;
+        }
+
+        if (command != "baseline" && PreviewCommand.Wants(options))
+        {
+            if (options.Contains("--write"))
+            {
+                Console.Error.WriteLine("--diff previews without writing anything: use --diff or --write, not both.");
+                return 1;
+            }
+
+            return PreviewCommand.Run(command, options);
         }
 
         switch (command)
@@ -86,8 +106,15 @@ internal static class Program
 
             case "format":
                 return FormatCommand.Run(options);
-        }
 
+            default:
+                return Migrate(options);
+        }
+    }
+
+    /// <summary>stylebro-migrate [path] [--write]: the migration from StyleCop.</summary>
+    public static int Migrate(string[] args)
+    {
         var write = args.Contains("--write");
         var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
         if (!Directory.Exists(root))

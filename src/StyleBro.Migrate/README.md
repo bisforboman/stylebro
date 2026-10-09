@@ -57,6 +57,20 @@ projects it runs once per target framework: plain `dotnet format` crashes there 
 because Roslyn can't merge the frameworks' copies of a file. Other options pass through (`--verify-no-changes`,
 `--severity warn`, ...). `stylebro-migrate --help` lists every command.
 
+## Preview
+
+```
+stylebro-migrate path/to/repo --diff[=file] [--keep]
+stylebro-migrate init [path] --diff[=file] [--keep]
+stylebro-migrate format [path] --diff[=file] [--keep]
+```
+
+Shows what the command would change without touching the repository: it runs on a temporary copy (`--write` for the
+first two, then `stylebro-migrate format` until a run changes nothing), prints the settings it wrote, the files each
+rule changed and a few sample hunks, and writes the full diff to `stylebro-preview.patch` (or `file`). A repository
+without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the copy. Example:
+[docs/getting-started.md](https://github.com/bisforboman/stylebro/blob/main/docs/getting-started.md#preview-first).
+
 ## Baseline
 
 ```
