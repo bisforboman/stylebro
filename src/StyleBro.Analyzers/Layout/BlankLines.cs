@@ -98,7 +98,8 @@ internal static class BlankLines
     /// an opening brace, '=>' or a 'case'/'default' label; and not for '///' and '////' (commented-out code). Not for a comment
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
     /// behind. Not for a comment whose text starts with one of <paramref name="exemptPrefixes"/> (tool markers such as
-    /// '// ReSharper disable once ...', from <see cref="ExemptPrefixesKey"/>).
+    /// '// ReSharper disable once ...', from <see cref="ExemptPrefixesKey"/>). Not for a comment below code
+    /// (<see cref="IsCommentBelowCode"/>).
     /// </summary>
     public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes)
     {
@@ -137,7 +138,60 @@ internal static class BlankLines
             && !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)
             && !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
-            && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule));
+            && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
+            && !IsCommentBelowCode(comment, text);
+    }
+
+    /// <summary>
+    /// Whether the '//' comment is in a run of comment lines directly below a line that ends a statement or a member
+    /// with ';' (not a using directive or a file-scoped namespace), with a blank line after the run: it describes the code above it (eShop: a field, '// note on UTF8 here:
+    /// ...', a blank line, a method). StyleCop's SA1515 and SA1512 want the blank line moved above the comment, which
+    /// attaches it to the code below; BRO1504 and BRO1506 leave it, and BRO1001 doesn't move the members on either side.
+    /// </summary>
+    public static bool IsCommentBelowCode(SyntaxTrivia comment, SourceText text)
+    {
+        if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var line = text.Lines.GetLineFromPosition(comment.SpanStart);
+        if (!IsBlank(text, TextSpan.FromBounds(line.Start, comment.SpanStart)))
+        {
+            return false;
+        }
+
+        bool IsComment(int number) => text.ToString(text.Lines[number].Span).TrimStart().StartsWith("//", StringComparison.Ordinal);
+        var first = line.LineNumber;
+        while (first > 0 && IsComment(first - 1))
+        {
+            first--;
+        }
+
+        var last = line.LineNumber;
+        while (last + 1 < text.Lines.Count && IsComment(last + 1))
+        {
+            last++;
+        }
+
+        // '#region'/'#endregion' lines below the run don't count: BRO1112/BRO1113 may remove them in the same run, and
+        // the answer mustn't change then.
+        var below = last + 1;
+        while (below < text.Lines.Count && text.ToString(text.Lines[below].Span).TrimStart() is var content
+            && (content.StartsWith("#region", StringComparison.Ordinal) || content.StartsWith("#endregion", StringComparison.Ordinal)))
+        {
+            below++;
+        }
+
+        // The ';' before the comment, on the line right above the run; and a blank line (not the end of the file) below it.
+        var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
+        return first > 0
+            && previous.IsKind(SyntaxKind.SemicolonToken)
+            && (previous.Parent is StatementSyntax || previous.Parent is MemberDeclarationSyntax and not BaseNamespaceDeclarationSyntax)
+            && text.Lines.GetLineFromPosition(previous.Span.End).LineNumber == first - 1
+            && below < text.Lines.Count
+            && text.Lines[below].End < text.Length
+            && IsBlank(text, text.Lines[below].Span);
     }
 
     /// <summary>Deletes the given lines. Duplicates are ignored, so Fix All can pass overlapping sets.</summary>

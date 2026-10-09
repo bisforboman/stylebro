@@ -432,6 +432,44 @@ public class DocumentationTests
         }
         """);
 
+    // vs-threading's Types.cs: StyleCop's SA1629 passes over elements it doesn't know, and checks the text before them.
+    [Fact]
+    public Task UnknownElements_ArePassedOver() => VerifyFixAsync(
+        """
+        /// <summary>
+        /// Identifiers used to identify types.
+        /// <devremarks>For each value here, please update the unit test</devremarks>
+        /// </summary>
+        public class Types
+        {
+            /// <summary>Gets the value{|BRO1603:|} <devremarks>internal</devremarks></summary>
+            public int A { get; }
+
+            /// <summary>Gets the value{|BRO1603:|}<para/></summary>
+            public int B { get; }
+
+            /// <summary>Returns <b>true</b>{|BRO1603:|}</summary>
+            public bool C() => true;
+        }
+        """,
+        """
+        /// <summary>
+        /// Identifiers used to identify types.
+        /// <devremarks>For each value here, please update the unit test</devremarks>
+        /// </summary>
+        public class Types
+        {
+            /// <summary>Gets the value. <devremarks>internal</devremarks></summary>
+            public int A { get; }
+
+            /// <summary>Gets the value.<para/></summary>
+            public int B { get; }
+
+            /// <summary>Returns <b>true</b>.</summary>
+            public bool C() => true;
+        }
+        """);
+
     [Fact]
     public Task QuotedSentenceInATrailingCodeElement_IsNotReported() => VerifyFixAsync(
         """

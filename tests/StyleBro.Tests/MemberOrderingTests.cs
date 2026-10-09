@@ -1196,4 +1196,21 @@ public class MemberOrderingTests
         }
         """,
         "dotnet_diagnostic.BRO1509.severity = none");
+
+    // eShop's RedisBasketRepository: the note below the field belongs to the field; sorting would move it with the method.
+    [Fact]
+    public Task ACommentBelowAMember_KeepsTheContainerAsItIs() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            private static int Key() => prefix;
+
+            private static int prefix = 1;
+            // note on the prefix
+
+            public void M()
+            {
+            }
+        }
+        """);
 }

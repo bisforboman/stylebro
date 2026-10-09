@@ -76,7 +76,9 @@ internal static class CamelCaseNames
     /// name binds to. Checked by syntax, conservatively, over the member that contains the declaration (for a primary
     /// constructor parameter, the whole type): no identifier there may already be <paramref name="newName"/> or get
     /// the same new name from another rename, the old name may not be an inferred tuple element or anonymous type
-    /// member name (the rename would change it), and the member may not contain '#if' (code that isn't compiled
+    /// member name or the name a <c>nameof(...)</c> produces (the rename would change a value: Ocelot's test read a private
+    /// field with <c>GetField(nameof(_components))</c>, where '_components' was a local), and the member may not contain
+    /// '#if' (code that isn't compiled
     /// can't be renamed reliably). Never 'value' inside a property, indexer or event: their set/init/add/remove
     /// accessors declare an implicit 'value' parameter that no identifier shows (CS0136).
     /// </summary>
@@ -97,14 +99,15 @@ internal static class CamelCaseNames
         var map = getNewName ?? GetNewName;
         return !names.Identifiers.Contains(newName)
             && !names.Inferred.Contains(oldName)
+            && !names.Nameof.Contains(oldName)
             && !names.Identifiers.Any(text => text != oldName && map(text) == newName);
     }
 
     /// <summary>
-    /// BRO1313: whether the parameter's name reaches run time from its member's code: <c>nameof(key)</c>, or an argument
-    /// a <c>[CallerArgumentExpression]</c> parameter captures (<c>ArgumentNullException.ThrowIfNull(key)</c>). Both
-    /// usually end up as an exception's ParamName, which callers and tests compare (Newtonsoft.Json's
-    /// <c>JObject.ContainsKey(null)</c> test expects "propertyName").
+    /// BRO1313: whether the parameter's name reaches run time from its member's code through an argument a
+    /// <c>[CallerArgumentExpression]</c> parameter captures (<c>ArgumentNullException.ThrowIfNull(key)</c>), which usually
+    /// ends up as an exception's ParamName, which callers and tests compare. <c>nameof(key)</c> (Newtonsoft.Json's
+    /// <c>JObject.ContainsKey(null)</c> test expects "propertyName") is <see cref="CanRename"/>'s.
     /// </summary>
     public static bool IsNameObservable(SyntaxNode member, string name, SemanticModel model, System.Threading.CancellationToken cancellationToken)
     {
@@ -115,13 +118,12 @@ internal static class CamelCaseNames
                 continue;
             }
 
-            if (argument.Parent?.Parent is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }
-                || (model.GetOperation(argument, cancellationToken) is Microsoft.CodeAnalysis.Operations.IArgumentOperation { Parameter: { } target }
-                    && target.ContainingSymbol is IMethodSymbol method
-                    && method.Parameters.Any(p => p.GetAttributes().Any(a =>
-                        a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
-                        && a.ConstructorArguments.Length == 1
-                        && a.ConstructorArguments[0].Value as string == target.Name))))
+            if (model.GetOperation(argument, cancellationToken) is Microsoft.CodeAnalysis.Operations.IArgumentOperation { Parameter: { } target }
+                && target.ContainingSymbol is IMethodSymbol method
+                && method.Parameters.Any(p => p.GetAttributes().Any(a =>
+                    a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
+                    && a.ConstructorArguments.Length == 1
+                    && a.ConstructorArguments[0].Value as string == target.Name)))
             {
                 return true;
             }
@@ -157,12 +159,37 @@ internal static class CamelCaseNames
                 || name.Parent is ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax });
     }
 
+    /// <summary>
+    /// Whether the token is the name a <c>nameof(...)</c> produces: its argument's last name ('nameof(x)',
+    /// 'nameof(this.x)', 'nameof(Type.x)'). Renaming that symbol changes the string.
+    /// </summary>
+    public static bool IsNameofName(SyntaxToken token)
+    {
+        if (token.Parent is not SimpleNameSyntax name)
+        {
+            return false;
+        }
+
+        var expression = name.Parent is MemberAccessExpressionSyntax access && access.Name == name ? (ExpressionSyntax)access : name;
+        return expression.Parent is ArgumentSyntax
+        {
+            Parent: ArgumentListSyntax
+            {
+                Arguments.Count: 1,
+                Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } },
+            },
+        };
+    }
+
     private sealed class ScopeNames
     {
         public System.Collections.Generic.HashSet<string> Identifiers { get; } = new(StringComparer.Ordinal);
 
         /// <summary>Gets the names used as inferred tuple element or anonymous type member names.</summary>
         public System.Collections.Generic.HashSet<string> Inferred { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets the names <c>nameof(...)</c> produces (<see cref="IsNameofName"/>).</summary>
+        public System.Collections.Generic.HashSet<string> Nameof { get; } = new(StringComparer.Ordinal);
 
         public static ScopeNames Collect(SyntaxNode scope)
         {
@@ -176,6 +203,10 @@ internal static class CamelCaseNames
                     if (IsInferredMemberName(token))
                     {
                         names.Inferred.Add(token.ValueText);
+                    }
+                    else if (IsNameofName(token))
+                    {
+                        names.Nameof.Add(token.ValueText);
                     }
                 }
             }

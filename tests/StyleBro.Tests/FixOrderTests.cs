@@ -1567,6 +1567,61 @@ public class FixOrderTests
         "BRO1109",
         "BRO1110");
 
+    // Ocelot's FileAggregateRoute: BRO1601 inserting '<inheritdoc/>' before BRO1001's sort left the blank lines it added
+    // with the positions, so the result depended on the order.
+    [Fact]
+    public Task InheritDoc_OnPropertiesTheSortMoves() => AssertConvergesInEveryOrderAsync(
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets or sets the priority.</summary>
+            int Priority { get; set; }
+
+            /// <summary>Gets or sets the host.</summary>
+            string Host { get; set; }
+        }
+
+        public class Route : IRoute
+        {
+            public string Aggregator { get; set; }
+            public int Priority { get; set; } = 1;
+            public string Keys { get; set; }
+            public string Host { get; set; }
+            public string Path { get; set; }
+
+            public Route()
+            {
+                Aggregator = default;
+            }
+        }
+        """,
+        "BRO1001",
+        "BRO1505",
+        "BRO1513",
+        "BRO1601");
+
+    // eShop's RedisBasketRepository: a comment below a field, then a blank line, describes the field; nothing moves it to
+    // the method below.
+    [Fact]
+    public Task CommentBelowAField_StaysWithIt() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public static int Count;
+
+            private static int prefix = 1;
+            // note on the prefix
+            // and more
+
+            public static int Key(string id) => prefix + id.Length;
+            private int x;
+        }
+        """,
+        "BRO1001",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

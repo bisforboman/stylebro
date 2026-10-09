@@ -45,6 +45,16 @@ internal static class DocumentationPeriods
     };
 
     /// <summary>
+    /// Inline elements: the sentence's last word ('Returns &lt;see langword="true"/&gt;'), so the period goes after them.
+    /// StyleCop's (c, see, paramref, typeparamref) plus HTML's inline elements. Any other element (a tool's own
+    /// '&lt;devremarks&gt;', '&lt;para/&gt;') is passed over, like StyleCop: the text before it counts.
+    /// </summary>
+    private static readonly HashSet<string> InlineElements = new()
+    {
+        "c", "see", "paramref", "typeparamref", "a", "b", "i", "u", "em", "strong", "sub", "sup", "span", "tt",
+    };
+
+    /// <summary>
     /// The positions where a period is missing: after the last text of each top-level summary, remarks, param,
     /// typeparam, returns, value and exception element. Not reported: text that ends with '.', '?', '!' or ':' (a
     /// question, an exclamation or an introduction is a finished sentence), with a block element such as a list or a
@@ -84,7 +94,7 @@ internal static class DocumentationPeriods
             end++;
         }
 
-        return new TextChange(TextSpan.FromBounds(position, end < text.Length && text[end] == '<' ? end : position), ".");
+        return new TextChange(TextSpan.FromBounds(position, end + 1 < text.Length && text[end] == '<' && text[end + 1] == '/' ? end : position), ".");
     }
 
     /// <summary>The tags <see cref="ExcludeKey"/> names (StyleCop's default when it isn't set).</summary>
@@ -135,12 +145,36 @@ internal static class DocumentationPeriods
 
                 case XmlElementSyntax child:
                     var name = child.StartTag.Name.LocalName.ValueText;
-                    return BlockElements.Contains(name) || excluded.Contains(name) || IsQuotedSentence(child) ? null
-                        : ContainerElements.Contains(name) ? GetInsertionPoint(child, excluded)
-                        : child.Span.End;
+                    if (BlockElements.Contains(name) || excluded.Contains(name) || IsQuotedSentence(child))
+                    {
+                        return null;
+                    }
+
+                    if (ContainerElements.Contains(name))
+                    {
+                        return GetInsertionPoint(child, excluded);
+                    }
+
+                    if (InlineElements.Contains(name))
+                    {
+                        return child.Span.End;
+                    }
+
+                    continue;
 
                 case XmlEmptyElementSyntax empty:
-                    return BlockElements.Contains(empty.Name.LocalName.ValueText) ? null : empty.Span.End;
+                    var emptyName = empty.Name.LocalName.ValueText;
+                    if (BlockElements.Contains(emptyName))
+                    {
+                        return null;
+                    }
+
+                    if (InlineElements.Contains(emptyName))
+                    {
+                        return empty.Span.End;
+                    }
+
+                    continue;
 
                 default:
                     return null;

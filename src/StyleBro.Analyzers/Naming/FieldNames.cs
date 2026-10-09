@@ -316,8 +316,10 @@ internal static class FieldNames
     /// Whether renaming <paramref name="field"/> to <paramref name="newName"/> is safe. Skipped: the type or a base
     /// type already has a member with the new name; another checked field gets the same new name; the field has
     /// attributes or the type is [Serializable] (serializers can depend on field names); the old name appears in a
-    /// string in the type (reflection, e.g. GetField("_count")), in code excluded by '#if', or as an inferred
-    /// anonymous type member or tuple element name. Locals and parameters with the new name are no reason to skip:
+    /// string in the type (reflection, e.g. GetField("_count")), in code excluded by '#if', as an inferred
+    /// anonymous type member or tuple element name, or as the name a <c>nameof(...)</c> in the type produces (Ocelot's
+    /// 'X_RateLimit_Limit = nameof(X_RateLimit_Limit).Replace('_', '-')' is an HTTP header name). The fix also looks for
+    /// strings and <c>nameof</c> in the rest of the solution. Locals and parameters with the new name are no reason to skip:
     /// the fix qualifies the references they would hide ('this.count').
     /// </summary>
     public static bool CanRename(IFieldSymbol field, string newName, FieldStyles style, CancellationToken cancellationToken) =>
@@ -574,6 +576,7 @@ internal static class FieldNames
 
         public System.Collections.Generic.List<string> Texts { get; } = new();
 
+        /// <summary>Gets the field names used as inferred member names or in <c>nameof(...)</c>: a rename would change a value.</summary>
         public System.Collections.Generic.HashSet<string> InferredNames { get; } = new(System.StringComparer.Ordinal);
 
         public static TypeFacts For(INamedTypeSymbol type, CancellationToken cancellationToken)
@@ -602,7 +605,8 @@ internal static class FieldNames
                     {
                         facts.Texts.Add(token.ValueText);
                     }
-                    else if (token.IsKind(SyntaxKind.IdentifierToken) && fieldNames.Contains(token.ValueText) && CamelCaseNames.IsInferredMemberName(token))
+                    else if (token.IsKind(SyntaxKind.IdentifierToken) && fieldNames.Contains(token.ValueText)
+                        && (CamelCaseNames.IsInferredMemberName(token) || CamelCaseNames.IsNameofName(token)))
                     {
                         facts.InferredNames.Add(token.ValueText);
                     }

@@ -166,6 +166,7 @@ public class RegionsTests
             {
                 {|BRO1113:#region Usage|}
                 var x = 1;
+
                 // x is 1
                 #endregion
 
@@ -179,6 +180,7 @@ public class RegionsTests
             public int M()
             {
                 var x = 1;
+
                 // x is 1
                 return x;
             }

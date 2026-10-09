@@ -53,6 +53,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             : null;
         var rename = FieldNames.GetRename(field, style, hungarian);
         if (rename is ({ } rule, { } newName)
+            && PublicApi.CanRename(field, options)
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
             && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian))
         {

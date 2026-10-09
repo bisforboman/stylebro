@@ -51,6 +51,27 @@ internal static class TupleElementNames
             && CamelCaseNamingAnalyzer.GetBaseMembers(symbol).Any(b => !b.Locations.Any(l => l.IsInSource) && HasTupleNames(b.OriginalDefinition));
     }
 
+    /// <summary>
+    /// Whether the element is in the signature of a member other assemblies see (<see cref="PublicApi.IsVisible"/>): a
+    /// method's, property's, indexer's or delegate's return or parameter types, or a field's or event's type. Such an
+    /// element is renamed only when <see cref="PublicApi.RenameKey"/> is true.
+    /// </summary>
+    public static bool IsInPublicSignature(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken)
+    {
+        if (element.FirstAncestorOrSelf<MemberDeclarationSyntax>() is not { } member)
+        {
+            return false;
+        }
+
+        SyntaxNode? declared = member switch
+        {
+            BaseFieldDeclarationSyntax field => field.Declaration.Type.Span.Contains(element.Span) ? field.Declaration.Variables.FirstOrDefault() : null,
+            DelegateDeclarationSyntax @delegate => @delegate.ReturnType.Span.Contains(element.Span) || @delegate.ParameterList.Span.Contains(element.Span) ? @delegate : null,
+            _ => IsInSignature(element, member) ? member : null,
+        };
+        return declared is not null && model.GetDeclaredSymbol(declared, cancellationToken) is { } symbol && PublicApi.IsVisible(symbol);
+    }
+
     /// <summary>Whether the node is in the member's return type, parameter types or property/event type, not its body.</summary>
     public static bool IsInSignature(SyntaxNode node, MemberDeclarationSyntax member)
     {

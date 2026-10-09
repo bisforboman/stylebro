@@ -71,7 +71,7 @@ public class FieldNamingTests
             {
                 _count = count;
                 Instances++;
-                Console.WriteLine(Name + name + nameof(_count));
+                Console.WriteLine(Name + name + _count);
             }
 
             public int Count => _count;
@@ -100,7 +100,7 @@ public class FieldNamingTests
             {
                 this.count = count;
                 instances++;
-                Console.WriteLine(this.name + name + nameof(this.count));
+                Console.WriteLine(this.name + name + this.count);
             }
 
             public int Count => count;
@@ -936,6 +936,7 @@ public class FieldNamingTests
         public GeneratorTest(string source)
         {
             TestState.Sources.Add(source);
+            TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
             FixedState.Sources.Add(source);
             NumberOfIncrementalIterations = 1;
             NumberOfFixAllIterations = 1;
@@ -956,4 +957,75 @@ public class FieldNamingTests
 
         public override ImmutableArray<ISourceGenerator> GetGenerators(string language) => ImmutableArray.Create(generator.AsSourceGenerator());
     }
+
+    [Fact]
+    public Task PublicApi_IsLeftAloneByDefault() => VerifyFixAsync(
+        """
+        public class Limits
+        {
+            public const int MAX_COUNT = 1;
+            protected int _shared;
+            internal static int {|BRO1308:Min_Count|};
+            private int {|BRO1303:_count|};
+
+            public int Get() => _count + _shared + Min_Count;
+        }
+
+        internal class Hidden
+        {
+            public const int {|BRO1308:MAX_COUNT|} = 1;
+        }
+        """,
+        """
+        public class Limits
+        {
+            public const int MAX_COUNT = 1;
+            protected int _shared;
+            internal static int MinCount;
+            private int count;
+
+            public int Get() => count + _shared + MinCount;
+        }
+
+        internal class Hidden
+        {
+            public const int MaxCount = 1;
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
+    // Ocelot: 'X_RateLimit_Limit = nameof(X_RateLimit_Limit).Replace(...)' is an HTTP header name, and a test read a field
+    // with 'GetField(nameof(_tracer))'.
+    [Fact]
+    public Task NamesInNameof_KeepTheirName() => VerifyNoDiagnosticsAsync(
+        """
+        internal static class Headers
+        {
+            public static readonly string X_RateLimit_Limit = nameof(X_RateLimit_Limit).Replace('_', '-');
+        }
+
+        class C
+        {
+            private object _tracer = new object();
+
+            object Read(C c) => typeof(C).GetField(nameof(C._tracer), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(c)!;
+        }
+        """);
+
+    [Fact]
+    public Task NameofInAnotherType_KeepsTheName() => VerifyNotFixedAsync(
+        [
+            """
+            class C
+            {
+                internal static int {|BRO1308:Max_Count|} = 1;
+            }
+            """,
+            """
+            class D
+            {
+                string Name => nameof(C.Max_Count);
+            }
+            """,
+        ]);
 }

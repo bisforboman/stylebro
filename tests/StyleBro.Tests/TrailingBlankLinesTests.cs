@@ -106,4 +106,58 @@ public class TrailingBlankLinesTests
     public Task CommentAtTheEnd_LosesItsBlankLines() => VerifyFixAsync(
         "class C\n{\n}\n{|BRO1506:// the end|}{|BRO1507:|}\n\n",
         "class C\n{\n}\n// the end\n");
+
+    // eShop's RedisBasketRepository: a note below a field, then a blank line, describes the field.
+    [Fact]
+    public Task ACommentBelowCode_KeepsTheBlankLineBelowIt() => VerifyFixAsync(
+        """
+        class C
+        {
+            private static int prefix = 1;
+            // note on the prefix
+            // and more
+
+            private static int Key() => prefix;
+
+            void M()
+            {
+                M();
+
+                {|BRO1506:// a comment above code|}
+
+                M();
+            }
+
+            void N()
+            {
+            }
+            {|BRO1506:// below a member ending in a brace|}
+
+            int O() => 2;
+        }
+        """,
+        """
+        class C
+        {
+            private static int prefix = 1;
+            // note on the prefix
+            // and more
+
+            private static int Key() => prefix;
+
+            void M()
+            {
+                M();
+
+                // a comment above code
+                M();
+            }
+
+            void N()
+            {
+            }
+            // below a member ending in a brace
+            int O() => 2;
+        }
+        """);
 }

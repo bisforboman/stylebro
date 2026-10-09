@@ -44,6 +44,7 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
         var node = (InterfaceDeclarationSyntax)context.Node;
         if (context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is { } symbol
             && PrefixNames.GetInterfaceName(symbol.Name) is { } newName
+            && PublicApi.CanRename(symbol, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))
             && !PrefixNames.IsTypeNameTaken(newName, context.SemanticModel.Compilation)
             && context.SemanticModel.LookupSymbols(node.SpanStart, name: newName).IsEmpty)
         {
@@ -57,6 +58,7 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
         if (context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is { } symbol
             && PrefixNames.GetTypeParameterName(symbol.Name) is { } newName
             && !InheritsName(symbol)
+            && PublicApi.CanRename(symbol, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))
             && symbol.DeclaringMethod is not ({ PartialDefinitionPart: not null } or { PartialImplementationPart: not null })
             && (symbol.DeclaringType is not { } owner || !NamespaceNames.HasGeneratedPart(owner))
             && !PrefixNames.IsTypeNameTaken(newName, context.SemanticModel.Compilation)
