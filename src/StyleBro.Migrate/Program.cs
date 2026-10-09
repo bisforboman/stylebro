@@ -24,23 +24,27 @@ internal static class Program
         stylebro-migrate: move a repository to StyleBro (https://github.com/bisforboman/stylebro).
 
         Usage:
-          stylebro-migrate [path] [--write]
+          stylebro-migrate [path] [--write] [--sonar-profile <file>]
               Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize]
+          stylebro-migrate init [path] [--write] [--modernize] [--sonar-profile <file>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. A repository with a StyleCop setup is told to
               use 'stylebro-migrate --write' instead.
+
+              Both follow a SonarQube setup too (SonarAnalyzer.CSharp, Sonar rule severities in rulesets and configs):
+              the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
+              takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
 
           stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. --all also applies
               every other analyzer's and compiler fix. Other options pass through (--verify-no-changes, --severity warn).
 
-          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>]
-          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize]
+          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--sonar-profile <file>]
+          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
           stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
@@ -54,6 +58,9 @@ internal static class Program
           stylebro-migrate help | --help | -h
               This text.
         """;
+
+    /// <summary>The option that names a SonarQube quality profile backup (XML) to follow.</summary>
+    internal const string SonarProfileOption = "--sonar-profile";
 
     /// <summary>How to format after init or --write: 'stylebro-migrate format', not plain 'dotnet format'.</summary>
     internal const string FormatHint = "Next: run 'stylebro-migrate format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
@@ -73,9 +80,9 @@ internal static class Program
         var (command, known) = args.FirstOrDefault() switch
         {
             "baseline" => ("baseline", new[] { "--project" }),
-            "init" => ("init", new[] { "--write", "--modernize" }.Concat(PreviewCommand.Options).ToArray()),
+            "init" => ("init", new[] { "--write", "--modernize", SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
             "format" => ("format", null),
-            _ => (null, new[] { "--write" }.Concat(PreviewCommand.Options).ToArray()),
+            _ => (null, new[] { "--write", SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
         };
         var options = args.Skip(command is null ? 0 : 1).ToArray();
         if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a.Split('=')[0])) is { } unknown)
@@ -115,16 +122,22 @@ internal static class Program
     /// <summary>stylebro-migrate [path] [--write]: the migration from StyleCop.</summary>
     public static int Migrate(string[] args)
     {
-        var write = args.Contains("--write");
-        var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
+        var (profile, rest) = TakeOption(args, SonarProfileOption);
+        var write = rest.Contains("--write");
+        var root = Path.GetFullPath(rest.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
         if (!Directory.Exists(root))
         {
             Console.Error.WriteLine($"Not a directory: {root}");
             return 1;
         }
 
+        if (!ReadSonar(root, profile, out var sonar))
+        {
+            return 1;
+        }
+
         var setup = StyleCopSetup.Read(root);
-        var result = Migration.Generate(setup, root);
+        var result = Migration.Generate(setup, root, sonar: sonar);
         var plan = Migration.Plan(setup, root, result);
 
         Console.WriteLine($"Read: {(setup.Sources.Count == 0 ? "no StyleCop settings (StyleCop's defaults)" : string.Join(", ", setup.Sources))}");
@@ -134,6 +147,11 @@ internal static class Program
         }
 
         Report(setup, result);
+        if (result.Sonar is { } applied)
+        {
+            sonar!.Report(applied).ForEach(Console.WriteLine);
+        }
+
         foreach (var note in result.Notes)
         {
             Console.WriteLine(note);
@@ -184,8 +202,53 @@ internal static class Program
         return 0;
     }
 
-    /// <summary>docs/stylecop-mapping.md's proposal for every StyleCop rule, without Markdown.</summary>
     /// <summary>
+    /// An option with a value ('--name value' or '--name=value'): the value (null when it's not there), and the other
+    /// arguments.
+    /// </summary>
+    internal static (string? Value, string[] Others) TakeOption(string[] args, string name)
+    {
+        var rest = args.ToList();
+        var at = rest.FindIndex(a => a == name || a.StartsWith(name + "=", StringComparison.Ordinal));
+        if (at < 0)
+        {
+            return (null, args);
+        }
+
+        var value = rest[at].Length > name.Length ? rest[at].Substring(name.Length + 1) : at + 1 < rest.Count ? rest[at + 1] : string.Empty;
+        rest.RemoveRange(at, rest[at].Length > name.Length || at + 1 >= rest.Count ? 1 : 2);
+        return (value, rest.ToArray());
+    }
+
+    /// <summary>
+    /// The SonarQube setup at the root (<paramref name="profile"/>: --sonar-profile's file), or null without one; false
+    /// (with the error printed) when the profile isn't a readable file.
+    /// </summary>
+    internal static bool ReadSonar(string root, string? profile, out SonarSetup? sonar)
+    {
+        sonar = null;
+        if (profile is not null && !File.Exists(profile))
+        {
+            Console.Error.WriteLine($"{SonarProfileOption}: not a file: {profile}");
+            return false;
+        }
+
+        try
+        {
+            sonar = SonarSetup.Read(root, profile is null ? null : Path.GetFullPath(profile));
+            return true;
+        }
+        catch (System.Xml.XmlException e)
+        {
+            Console.Error.WriteLine($"{SonarProfileOption}: {profile} isn't a quality profile backup ({e.Message}).");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// A dropped rule's reason as the report shows it. The mapping is written for the project's own docs and carries survey
+    /// evidence (finding counts in the surveyed repositories, which decision it was); users only need the reason.
+    /// </summary>
     /// A dropped rule's reason as the report shows it. The mapping is written for the project's own docs and carries survey
     /// evidence (finding counts in the surveyed repositories, which decision it was); users only need the reason.
     /// </summary>

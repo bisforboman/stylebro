@@ -44,6 +44,15 @@ Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()
 (StyleBro's multi-target guard) and the newer-C# rules are suggestions unless `LangVersion` is set. Works after `--write` too. Details:
 [docs/modernizing.md](https://github.com/bisforboman/stylebro/blob/main/docs/modernizing.md).
 
+## SonarQube
+
+Both the migration and `init` also read a SonarQube/SonarAnalyzer setup: a `SonarAnalyzer.CSharp` reference (its
+default rules), Sonar rule severities in rulesets (SonarLint's and the scanner's too), global configs and
+`.editorconfig`, or a quality profile exported from the server (`--sonar-profile profile.xml`). The Sonar rules that
+are on turn on the StyleBro and .NET rules that fix what they report (S2325 -> CA1822, S1659 -> BRO1142, S4136 ->
+overloads kept together, ...), and the report says which Sonar rules stay Sonar's. Sonar keeps reporting its own ids.
+Details: [docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md#coming-from-sonarqube).
+
 ## Formatting
 
 ```
