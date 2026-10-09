@@ -1340,7 +1340,7 @@ public sealed class MigrationTests : IDisposable
         Assert.Equal(Severity.Suggestion, sonar.Severities["S2325"]);  // ... the strictest of the global configs wins
         Assert.Equal(Severity.Error, sonar.Severities["S100"]);
         Assert.False(sonar.IsOn("S1116"));  // not a C# section
-        Assert.False(sonar.IsOn("S927"));   // no package: no defaults
+        Assert.False(sonar.IsOn("S927"));   // no package: no defaults, and a ruleset's StyleCop block doesn't count
         Assert.DoesNotContain(sonar.Sources, s => s.Contains("none", StringComparison.Ordinal));
 
         var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
@@ -1469,7 +1469,7 @@ public sealed class MigrationTests : IDisposable
     private static string SonarRuleset(params (string Id, string Action)[] rules) =>
         "<RuleSet Name=\"Sonar\" ToolsVersion=\"14.0\">\n  <Rules AnalyzerId=\"SonarAnalyzer.CSharp\" RuleNamespace=\"SonarAnalyzer.CSharp\">\n"
         + string.Concat(rules.Select(r => $"    <Rule Id=\"{r.Id}\" Action=\"{r.Action}\" />\n"))
-        + "  </Rules>\n  <Rules AnalyzerId=\"StyleCop.Analyzers\" RuleNamespace=\"StyleCop.Analyzers\">\n    <Rule Id=\"S2325\" Action=\"Warning\" />\n  </Rules>\n</RuleSet>\n";
+        + "  </Rules>\n  <Rules AnalyzerId=\"StyleCop.Analyzers\" RuleNamespace=\"StyleCop.Analyzers\">\n    <Rule Id=\"S927\" Action=\"Warning\" />\n  </Rules>\n</RuleSet>\n";
 
     private static Dictionary<string, string> Hashes(string folder)
     {
