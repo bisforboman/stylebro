@@ -12,9 +12,10 @@ namespace StyleBro.Migrate;
 /// on into the repository's root .editorconfig. They can't live in the preset: 'dotnet format' ignores rule severities in a
 /// package's global config (the build doesn't), so only .editorconfig makes it fix them. Written between the same markers
 /// as 'stylebro-migrate --write', which replaces the block with settings matched to a StyleCop setup. --modernize adds a
-/// second block with the SDK's modernization rules (<see cref="Modernize"/>). It looks at the repository first: a clear
-/// '_' majority among private fields is kept (<see cref="FieldStyle"/>), and a repository with a StyleCop setup is sent
-/// to 'stylebro-migrate --write' instead (owner's decision 2026-10-09, docs/decisions.md).
+/// second block with the SDK's modernization rules (<see cref="Modernize"/>). It looks at the repository first: the
+/// conventions its code clearly follows are kept (<see cref="Detect"/>), EF Core migrations are marked as generated, and a
+/// repository with a StyleCop setup is sent to 'stylebro-migrate --write' instead (owner's decisions 2026-10-09,
+/// docs/decisions.md).
 /// </summary>
 internal static class InitCommand
 {
@@ -32,8 +33,8 @@ internal static class InitCommand
     /// <summary>The end marker of the --modernize block.</summary>
     public const string ModernizeEnd = "# END stylebro-modernize";
 
-    /// <summary>The share of private fields starting with '_' from which init keeps the underscore (owner's decision 2026-10-09).</summary>
-    public const double UnderscoreShare = 0.75;
+    /// <summary>The first line of the detected conventions in the output (the preview shows that part).</summary>
+    public const string DetectedHeader = "Conventions in the code";
 
     public static int Run(string[] args)
     {
@@ -67,17 +68,44 @@ internal static class InitCommand
         }
 
         var multiTargeted = MultiTargetedProjects(root).ToList();
-        var own = Migration.OwnKeys(root);
-        var fieldStyle = migrated ? null : FieldStyle(root, own);
+        var ownSettings = Migration.OwnSettings(root);
+        var own = new HashSet<string>(ownSettings.Keys, StringComparer.OrdinalIgnoreCase);
 
         // A Sonar setup turns on what fixes its rules, like in the migration; StyleBro's own rules are on in the preset.
         var sonarLines = new List<string>();
         if (sonar is not null && !migrated)
         {
             sonar.Report(sonar.Apply(sonarLines, _ => true, own)).ForEach(Console.WriteLine);
+
+            // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
+            var (added, files) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>()), write);
+            if (added > 0)
+            {
+                Console.WriteLine($"Suppressions: {added} {(write ? "added" : "to add")} for the rules that fix Sonar's in {files} files (the Sonar ones stay).");
+            }
         }
 
-        var block = Block(fieldStyle, plainHeader: own.Contains("file_header_template"), sonarLines);
+        // The conventions the code follows: what the code already does stays (Ocelot: '=>' at the start of a line, '_field').
+        var detected = new List<string>();
+        if (!migrated)
+        {
+            var (lines, report) = Detect(root, ownSettings, sonarLines);
+            detected = lines;
+            if (report.Count > 0)
+            {
+                Console.WriteLine($"{DetectedHeader} (written when one form has {Conventions.Share * 100:0}% of at least {Conventions.MinimumSample} places):");
+                report.ForEach(Console.WriteLine);
+                Console.WriteLine();
+            }
+        }
+
+        var generated = migrated ? new List<string>() : Migration.MigrationFolders(root);
+        if (generated.Count > 0)
+        {
+            Console.WriteLine($"EF Core migrations in {string.Join(", ", generated)}: marked generated_code = true, so formatting and StyleBro leave them alone.");
+        }
+
+        var block = Block(detected, plainHeader: own.Contains("file_header_template"), sonarLines, generated);
         var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
         if (multiTargeted.Count > 0)
         {
@@ -108,7 +136,7 @@ internal static class InitCommand
         if (modernize.Block is not null)
         {
             text = Migration.Apply(text, modernize.Block, ModernizeBegin, ModernizeEnd);
-            Console.WriteLine("Wrote the modernization rules to .editorconfig (see docs/modernizing.md).");
+            Console.WriteLine("Wrote the modernization rules to .editorconfig (see https://bisforboman.github.io/stylebro/modernizing/).");
         }
 
         if (text != existing)
@@ -118,16 +146,18 @@ internal static class InitCommand
         }
 
         Console.WriteLine(Program.FormatHint);
+        Program.PrintWorkspaceHint(root);
         return 0;
     }
 
     /// <summary>
-    /// The block written into .editorconfig, between the stylebro-migrate markers. <paramref name="fieldStyle"/>: the
-    /// private field style the code shows, when it isn't the default; <paramref name="plainHeader"/>: the repository has
+    /// The block written into .editorconfig, between the stylebro-migrate markers. <paramref name="detected"/>: the settings
+    /// for the conventions the code follows (<see cref="Detect"/>); <paramref name="plainHeader"/>: the repository has
     /// IDE0073's file_header_template, so BRO1615's XML header is off (each would add its header above the other's);
-    /// <paramref name="sonar"/>: the lines a SonarQube setup adds (<see cref="SonarSetup.Apply"/>).
+    /// <paramref name="sonar"/>: the lines a SonarQube setup adds (<see cref="SonarSetup.Apply"/>); <paramref name="generated"/>:
+    /// folders marked as generated code (EF Core migrations, <see cref="Migration.MigrationFolders"/>).
     /// </summary>
-    public static string Block(string? fieldStyle = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null)
+    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null)
     {
         var template = Template().Replace("\r\n", "\n").TrimEnd('\n');
         if (sonar is { Count: > 0 })
@@ -135,9 +165,9 @@ internal static class InitCommand
             template += "\n" + string.Join("\n", sonar);
         }
 
-        if (fieldStyle is not null)
+        if (detected is { Count: > 0 })
         {
-            template += $"\n# Most private fields here start with '_': BRO1303 keeps it\n{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = {fieldStyle}";
+            template += "\n\n# Conventions this repository's code follows (stylebro-migrate init counted them)\n" + string.Join("\n", detected);
         }
 
         if (plainHeader)
@@ -145,29 +175,72 @@ internal static class InitCommand
             template += $"\n# The file header is IDE0073's (file_header_template); BRO1615's XML header would add a second one\ndotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none";
         }
 
+        foreach (var folder in generated ?? Array.Empty<string>())
+        {
+            template += $"\n\n# EF Core migrations: generated by 'dotnet ef', so formatting and StyleBro leave them alone\n[{folder}/**]\ngenerated_code = true";
+        }
+
         return Migration.BeginMarker + " (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)\n"
             + template + "\n" + Migration.EndMarker + "\n";
     }
 
     /// <summary>
-    /// '_camelCase' when at least <see cref="UnderscoreShare"/> of the repository's private fields start with '_', else
-    /// null (StyleBro's default, camelCase). Also null when the repository sets the style or an SDK naming rule itself.
+    /// The conventions the repository's code follows (<see cref="Conventions"/>): the lines to write, and the report.
+    /// Settings the root .editorconfig or the Sonar setup (<paramref name="sonarLines"/>) set win, and so does an SDK naming
+    /// rule for private fields (BRO1303 follows it).
     /// </summary>
-    public static string? FieldStyle(string root, ISet<string> ownKeys)
+    public static (List<string> Lines, List<string> Report) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines)
     {
-        if (ownKeys.Contains(StyleBro.Analyzers.Naming.FieldNames.StyleKey) || ownKeys.Any(k => k.StartsWith("dotnet_naming_rule.", StringComparison.OrdinalIgnoreCase)))
+        var decided = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var convention in Conventions.All)
         {
-            return null;
+            if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
+            {
+                decided[convention.Key] = $".editorconfig sets {key} = {own[key]}";
+            }
+            else if (sonarLines.Any(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal)))
+            {
+                decided[convention.Key] = "the Sonar setup sets " + sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
+            }
         }
 
-        var (underscore, plain) = Migration.CountPrivateFields(root);
-        var style = underscore > 0 && underscore >= UnderscoreShare * (underscore + plain) ? "_camelCase" : null;
-        if (underscore + plain > 0)
+        if (!decided.ContainsKey(StyleBro.Analyzers.Naming.FieldNames.StyleKey) && FieldNamingRule(own) is { } rule)
         {
-            Console.WriteLine($"Private fields: {underscore} named '_field', {plain} named 'field'; BRO1303 uses '{style ?? "camelCase"}'.");
+            decided[StyleBro.Analyzers.Naming.FieldNames.StyleKey] = $"the naming rule dotnet_naming_rule.{rule} decides";
         }
 
-        return style;
+        return Conventions.Decide(Conventions.Count(root), decided);
+    }
+
+    /// <summary>
+    /// The SDK naming rule BRO1303 follows (like the analyzer): one whose symbols are fields (or '*'), private (or '*') with
+    /// no required modifiers, not turned off, with a camel case style without a prefix or with '_'. Null without one: rules
+    /// for interfaces, constants or static fields don't decide the private field style.
+    /// </summary>
+    public static string? FieldNamingRule(IReadOnlyDictionary<string, string> settings)
+    {
+        string? Get(string key) => settings.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
+        static bool Has(string? list, string item) => list is null || list.Split(',').Select(p => p.Trim()).Any(p => p == "*" || p.Equals(item, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var key in settings.Keys.Where(k => k.StartsWith("dotnet_naming_rule.", StringComparison.OrdinalIgnoreCase) && k.EndsWith(".symbols", StringComparison.OrdinalIgnoreCase)).Order(StringComparer.Ordinal))
+        {
+            var rule = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
+            var symbols = Get(key);
+            var style = Get($"dotnet_naming_rule.{rule}.style");
+            if (symbols is not null && style is not null && Get($"dotnet_naming_rule.{rule}.severity") is not ("none" or "silent")
+                && Has(Get($"dotnet_naming_symbols.{symbols}.applicable_kinds"), "field")
+                && Has(Get($"dotnet_naming_symbols.{symbols}.applicable_accessibilities"), "private")
+                && string.IsNullOrWhiteSpace(Get($"dotnet_naming_symbols.{symbols}.required_modifiers"))
+                && Get($"dotnet_naming_style.{style}.capitalization") == "camel_case"
+                && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
+                && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator"))
+                && (Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty) is "" or "_")
+            {
+                return rule;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

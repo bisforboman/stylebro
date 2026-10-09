@@ -12,13 +12,40 @@ namespace StyleBro.Migrate;
 /// <summary>
 /// Carries StyleCop suppressions over to the rules that replace them, so code a team deliberately exempted stays
 /// exempt: '#pragma warning disable SA1642' gets ', BRO1606', and '[SuppressMessage("StyleCop...", "SA1202:...")]'
-/// gets a sibling attribute for BRO1001. The StyleCop ones stay (harmless once StyleCop is gone, and needed while
-/// both run). Running it again adds nothing.
+/// gets a sibling attribute for BRO1001. Sonar's suppressions the same way ('S2325' gets 'CA1822', <see cref="WithSonar"/>).
+/// The StyleCop and Sonar ones stay (harmless once StyleCop is gone, and needed while both run). Running it again adds
+/// nothing.
 /// </summary>
 internal static class Suppressions
 {
-    private static readonly Regex CheckId = new(@"^(SA\d{4})\b");
+    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|S\d{3,4})\b");
+
     private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// <paramref name="replacements"/> (StyleCop's) plus Sonar's: each Sonar rule the mapping knows, to the rules that fix
+    /// what it reports (a team that suppressed S2325 doesn't want CA1822's fix there either).
+    /// </summary>
+    public static SortedDictionary<string, SortedSet<string>> WithSonar(IReadOnlyDictionary<string, SortedSet<string>> replacements)
+    {
+        var all = new SortedDictionary<string, SortedSet<string>>(StringComparer.Ordinal);
+        foreach (var (id, ids) in replacements)
+        {
+            all[id] = new SortedSet<string>(ids, StringComparer.Ordinal);
+        }
+
+        foreach (var row in SonarSetup.Mapping)
+        {
+            if (!all.TryGetValue(row.Sonar, out var ids))
+            {
+                all[row.Sonar] = ids = new SortedSet<string>(StringComparer.Ordinal);
+            }
+
+            ids.Add(row.Rule);
+        }
+
+        return all;
+    }
 
     /// <summary>The rewritten text and the number of suppressions added (0: unchanged).</summary>
     public static (string Text, int Added) Rewrite(string text, IReadOnlyDictionary<string, SortedSet<string>> replacements)

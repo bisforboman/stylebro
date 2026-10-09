@@ -72,6 +72,13 @@ internal static class PreviewCommand
             return 1;
         }
 
+        // What format will run on, checked before anything runs: with several solutions it would fail after the settings step.
+        if (project is null && Directory.Exists(path) && BaselineCommand.FindWorkspace(path) is null)
+        {
+            Console.Error.WriteLine(BaselineCommand.NoWorkspace(path, command == "format" ? "'stylebro-migrate format <file> --diff'" : "--project <file>"));
+            return 1;
+        }
+
         var folder = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
         var source = Git(folder, "rev-parse", "--show-toplevel") is (0, var top) ? Path.GetFullPath(top.Trim()) : folder;
         var prefix = source == folder ? string.Empty : Git(folder, "rev-parse", "--show-prefix").Output.Trim();
@@ -126,7 +133,7 @@ internal static class PreviewCommand
 
             if (package is not null)
             {
-                Console.WriteLine($"  StyleBro.Analyzers wasn't referenced: added {package} for the preview, as docs/getting-started.md says (the patch includes it).");
+                Console.WriteLine($"  StyleBro.Analyzers wasn't referenced: added {package} for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).");
             }
 
             var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize")).ToList();
@@ -144,7 +151,7 @@ internal static class PreviewCommand
             for (var run = 1; run <= MaxRuns; run++)
             {
                 var code = 0;
-                Step($"Format run {run}", () => code = format(formatArgs.ToArray(), Log));
+                Step($"Format run {run}", () => code = format(formatArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
                 if (code != 0)
                 {
                     Console.Error.WriteLine($"'stylebro-migrate format' failed (exit code {code}).");
@@ -321,8 +328,9 @@ internal static class PreviewCommand
     }
 
     /// <summary>
-    /// The lines of the hunk (of a '-U0' diff) that covers <paramref name="line"/> of the old text, else the first hunk; at
-    /// most <paramref name="max"/> lines.
+    /// The lines of the hunk (of a '-U0' diff) that covers <paramref name="line"/> of the old text (an insertion after line
+    /// N covers N and N + 1), else the nearest one; at most <paramref name="max"/> lines. A byte order mark is left out
+    /// (it printed as '?' before the first line of a file).
     /// </summary>
     public static List<string> Hunk(string diff, int line, int max)
     {
@@ -334,16 +342,16 @@ internal static class PreviewCommand
             {
                 var start = int.Parse(header.Groups[1].Value);
                 var length = header.Groups[2].Success ? int.Parse(header.Groups[2].Value) : 1;
-                hunks.Add((start, start + Math.Max(length, 1) - 1, new List<string>()));
+                hunks.Add((start, length == 0 ? start + 1 : start + length - 1, new List<string>()));
             }
             else if (hunks.Count > 0 && (text.StartsWith('+') || text.StartsWith('-')))
             {
-                hunks[^1].Lines.Add(text);
+                hunks[^1].Lines.Add(text.Replace("﻿", string.Empty));
             }
         }
 
-        var hunk = hunks.FirstOrDefault(h => h.Start <= line && line <= h.End);
-        var lines = (hunk.Lines ?? hunks.FirstOrDefault().Lines ?? new List<string>()).Take(max + 1).ToList();
+        var hunk = hunks.OrderBy(h => line < h.Start ? h.Start - line : line > h.End ? line - h.End : 0).ThenBy(h => h.Start).FirstOrDefault();
+        var lines = (hunk.Lines ?? new List<string>()).Take(max + 1).ToList();
         return lines.Count > max ? lines.Take(max).Append("  ...").ToList() : lines;
     }
 
@@ -467,10 +475,15 @@ internal static class PreviewCommand
     }
 
     /// <summary>The Sonar part of the report in the command's output (from 'Sonar: read' to the next empty line), or nothing.</summary>
-    public static string SonarPart(string output)
+    public static string SonarPart(string output) => Part(output, "Sonar: read ");
+
+    /// <summary>The conventions init found in the code (from its header to the next empty line), or nothing.</summary>
+    public static string DetectedPart(string output) => Part(output, InitCommand.DetectedHeader);
+
+    private static string Part(string output, string firstLine)
     {
         var lines = output.Replace("\r\n", "\n").Split('\n');
-        var start = Array.FindIndex(lines, l => l.StartsWith("Sonar: read ", StringComparison.Ordinal));
+        var start = Array.FindIndex(lines, l => l.StartsWith(firstLine, StringComparison.Ordinal));
         return start < 0 ? string.Empty : string.Join("\n", lines.Skip(start).TakeWhile(l => l.Length > 0)) + "\n";
     }
 
@@ -504,6 +517,11 @@ internal static class PreviewCommand
         else
         {
             Console.Write(SonarPart(writer.ToString()));
+            Console.Write(DetectedPart(writer.ToString()));
+            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal)))
+            {
+                Console.WriteLine(line);
+            }
         }
 
         return code;
