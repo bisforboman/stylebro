@@ -262,7 +262,7 @@ internal static class MemberOrdering
         var order = SortedOrder(keys, segments, anchors);
         return (container is TypeDeclarationSyntax type
                 && (InitializerOrder.ReordersDependentInitializers(type, order) || ObservableOrder.ReordersObservableMembers(type, order)))
-            || GroupComments.MovesGroupComment(members, order)
+            || GroupComments.MovesGroupComment(members, keys, order)
             ? null
             : keys;
     }

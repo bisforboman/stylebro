@@ -752,6 +752,34 @@ public class FixOrderTests
         "BRO1112",
         "BRO1518");
 
+    // Scrutor: whether a comment introduces a group mustn't depend on blank lines that BRO1505/BRO1506/BRO1509 add or
+    // remove in the same run (a first version judged by blank lines and sorted these on the second run).
+    [Fact]
+    public Task Ordering_GroupCommentsAndBlankLines() => AssertConvergesInEveryOrderAsync(
+        """
+        namespace N;
+
+        public class Tests
+        {
+        }
+
+        // Test interfaces and classes
+        public interface IService { }
+        public interface IOtherService { }
+
+        public class Service : IService { }
+
+        // ReSharper disable UnusedTypeParameter
+
+        public class Query { }
+
+        public interface IQuery { }
+        """,
+        "BRO1001",
+        "BRO1505",
+        "BRO1506",
+        "BRO1509");
+
     // Fonts: an empty comment between two blank lines, between two comments.
     [Fact]
     public Task EmptyComment_BetweenBlankLinesAndComments() => AssertConvergesInEveryOrderAsync(

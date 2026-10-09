@@ -904,7 +904,6 @@ public class MemberOrderingTests
         {
             // normal deserialization
             public string Name { get; set; }
-
             public {|BRO1001:C|}()
             {
             }
@@ -915,7 +914,6 @@ public class MemberOrderingTests
         class C
         {
             public int _count;
-
             public C()
             {
             }
@@ -927,8 +925,8 @@ public class MemberOrderingTests
         "dotnet_diagnostic.BRO1505.severity = none");
 
     // Scrutor: '// Test interfaces and classes' moved with the first interface, away from the classes it describes. A
-    // comment above a member that the next member follows without a blank line, or with a blank line below it,
-    // introduces a group: the container isn't sorted when that member would move.
+    // comment above a member whose next member is of the same kind introduces a group: the container isn't sorted when
+    // that member would move.
     [Fact]
     public Task GroupComments_KeepTheContainerAsItIs() => VerifyNoDiagnosticsAsync(
         """
@@ -944,22 +942,9 @@ public class MemberOrderingTests
 
             public class Service : IService { }
         }
-
-        public class Fields
-        {
-            public void M()
-            {
-            }
-
-            // The state
-
-            private int a;
-
-            public int B;
-        }
         """);
 
-    // Not a group comment: blank lines around the member, or a group comment whose member doesn't move.
+    // Not a group comment: the next member is of another kind, or a group comment whose member doesn't move.
     [Fact]
     public Task MemberComments_MoveWithTheirMember() => VerifyFixAsync(
         """
@@ -969,9 +954,6 @@ public class MemberOrderingTests
             private int z;
             private int y;
 
-            // The first.
-            private int a;
-
             public void M()
             {
             }
@@ -979,7 +961,7 @@ public class MemberOrderingTests
             // The count.
             private int {|BRO1001:count|};
 
-            private int b;
+            public int P { get; set; }
         }
         """,
         """
@@ -989,13 +971,10 @@ public class MemberOrderingTests
             private int z;
             private int y;
 
-            // The first.
-            private int a;
-
             // The count.
             private int count;
 
-            private int b;
+            public int P { get; set; }
 
             public void M()
             {

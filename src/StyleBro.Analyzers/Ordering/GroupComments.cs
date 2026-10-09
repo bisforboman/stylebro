@@ -5,15 +5,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace StyleBro.Analyzers.Ordering;
 
 /// <summary>
-/// A '//' comment that probably introduces a group of members rather than the one below it: a blank line separates it
-/// from that member, or the next member follows that member without a blank line ('// Test interfaces and classes'
-/// above two interfaces and the classes after them, Scrutor). The sort moves a comment with its member, so it would
-/// end up above part of the group. The container is skipped when the sort would move such a member.
+/// A '//' comment that probably introduces a group of members rather than the one below it: the next member is of the
+/// same kind ('// Test interfaces and classes' above two interfaces and the classes after them, Scrutor). The sort moves a
+/// comment with its member, so it would end up above part of the group. The container is skipped when the sort would
+/// move such a member. Judged by kinds, not blank lines: other rules add and remove blank lines between members in the
+/// same 'dotnet format' run (BRO1505, BRO1506, BRO1509), so a blank-line test would decide differently on a second run.
 /// </summary>
 internal static class GroupComments
 {
     /// <summary>Whether the sort (<paramref name="order"/>: new index -> old index) moves a member led by a group comment.</summary>
-    public static bool MovesGroupComment(SyntaxList<MemberDeclarationSyntax> members, int[] order)
+    public static bool MovesGroupComment(SyntaxList<MemberDeclarationSyntax> members, MemberKey[] keys, int[] order)
     {
         var position = new int[order.Length];
         var moved = false;
@@ -28,9 +29,9 @@ internal static class GroupComments
             return false;
         }
 
-        for (var i = 0; i < members.Count; i++)
+        for (var i = 0; i + 1 < members.Count; i++)
         {
-            if (Moves(position, i) && HasGroupComment(members, i))
+            if (keys[i + 1].Kind == keys[i].Kind && Moves(position, i) && HasComment(members[i]))
             {
                 return true;
             }
@@ -53,58 +54,22 @@ internal static class GroupComments
         return false;
     }
 
-    private static bool HasGroupComment(SyntaxList<MemberDeclarationSyntax> members, int i)
+    /// <summary>Whether a '//' comment leads the member, after the last directive (what is above a region line stays in place).</summary>
+    private static bool HasComment(MemberDeclarationSyntax member)
     {
-        // The last '//' comment after the last directive: what is above a directive (a region line) stays in place.
-        var trivia = members[i].GetLeadingTrivia();
-        var comment = -1;
-        for (var k = 0; k < trivia.Count; k++)
+        var found = false;
+        foreach (var trivia in member.GetLeadingTrivia())
         {
-            if (trivia[k].IsDirective)
+            if (trivia.IsDirective)
             {
-                comment = -1;
+                found = false;
             }
-            else if (trivia[k].IsKind(SyntaxKind.SingleLineCommentTrivia))
+            else if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
             {
-                comment = k;
+                found = true;
             }
         }
 
-        if (comment < 0)
-        {
-            return false;
-        }
-
-        var lineBreaks = 0;
-        for (var k = comment + 1; k < trivia.Count; k++)
-        {
-            lineBreaks += trivia[k].IsKind(SyntaxKind.EndOfLineTrivia) ? 1 : 0;
-        }
-
-        return lineBreaks > 1 || (i + 1 < members.Count && !HasBlankLine(members[i + 1].GetLeadingTrivia()));
-    }
-
-    /// <summary>Whether the trivia holds a blank line: a line break with nothing but whitespace since the previous one or the start.</summary>
-    private static bool HasBlankLine(SyntaxTriviaList trivia)
-    {
-        var lineStart = true;
-        foreach (var t in trivia)
-        {
-            if (t.IsKind(SyntaxKind.EndOfLineTrivia))
-            {
-                if (lineStart)
-                {
-                    return true;
-                }
-
-                lineStart = true;
-            }
-            else if (!t.IsKind(SyntaxKind.WhitespaceTrivia))
-            {
-                lineStart = false;
-            }
-        }
-
-        return false;
+        return found;
     }
 }
