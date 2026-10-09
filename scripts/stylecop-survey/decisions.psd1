@@ -32,7 +32,7 @@
         SA1503 = 'StyleBro **BRO1514** (done; replaces IDE0011, whose fix breaks multi-targeted projects). Skips comments/directives where the braces go and multi-line strings'
         SA1519 = 'StyleBro **BRO1515** (done; replaces IDE0011). Same skips as BRO1514'
         SA1520 = 'StyleBro **BRO1516** (done; replaces IDE0011). Same skips as BRO1514'
-        SA1200 = 'StyleBro **BRO1008** (done; replaces IDE0065, whose fix can change what names bind to: CS0104/CS0118 in eShop and Ocelot). Moves the usings only when every name binds the same; skips files with several namespaces, directives before the namespace body, usings on both levels'
+        SA1200 = 'StyleBro **BRO1008** (done; replaces IDE0065, whose fix can change what names bind to: CS0104/CS0118 in eShop and Ocelot). Moves the usings only when no name can be looked up differently; skips files with several namespaces, directives before the namespace body, usings on both levels'
         SA1205 = 'StyleBro **BRO1007** (done; replaces IDE0040, whose fix breaks multi-targeted projects), same positions and output as StyleCop'
         SA1400 = 'StyleBro **BRO1404** (done; replaces IDE0040), same positions and output as StyleCop'
         SA1119 = 'StyleBro **BRO1405** (done; replaces IDE0047, whose fix breaks multi-targeted projects). Skips parentheses whose removal would change how the code parses (StyleCop''s fix can make a generic call)'

@@ -1,6 +1,9 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,17 +29,23 @@ internal enum UsingPlacementMode
 
 /// <summary>
 /// Shared logic for BRO1008 (StyleCop SA1200): using directives inside or outside the namespace. The usings of a file
-/// move together, and only when every name in the file binds to the same symbol afterwards: moving a using changes
-/// where lookup finds it (the SDK's IDE0065 fix made 'Order' ambiguous in eShop and turned a type into a namespace in
-/// Ocelot).
+/// move together, and only when no name in the file can be looked up differently afterwards: moving a using changes
+/// where lookup finds what it imports (the SDK's IDE0065 fix made 'Order' ambiguous in eShop and turned a type into a
+/// namespace in Ocelot).
 /// </summary>
 internal static class UsingPlacement
 {
     public const string ConfigKey = "csharp_using_directive_placement";
 
-    private static readonly SymbolDisplayFormat Format = SymbolDisplayFormat.FullyQualifiedFormat
-        .WithMemberOptions(SymbolDisplayMemberOptions.IncludeContainingType | SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeExplicitInterface)
-        .WithParameterOptions(SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeParamsRefOut);
+    private static readonly ConditionalWeakTable<Compilation, ConcurrentDictionary<INamespaceOrTypeSymbol, ILookup<string, IMethodSymbol>>> ExtensionCache = new();
+
+    // Methods the compiler looks up by name without a name in the code (foreach, await, collection initializers,
+    // deconstruction, query clauses): an extension method with one of these names counts as used.
+    private static readonly string[] ImplicitMethodNames =
+    {
+        "GetEnumerator", "GetAsyncEnumerator", "GetAwaiter", "Add", "Deconstruct", "Select", "SelectMany", "Where", "Join",
+        "GroupJoin", "OrderBy", "OrderByDescending", "ThenBy", "ThenByDescending", "GroupBy", "Cast",
+    };
 
     public static UsingPlacementMode GetMode(AnalyzerConfigOptions options)
     {
@@ -67,44 +76,47 @@ internal static class UsingPlacement
     /// <summary>
     /// The edits that move every using of the file to its place, or null when that can't be done safely: not exactly
     /// one namespace and nothing else in the file, usings on both levels, global usings or extern aliases, a directive
-    /// before the namespace's body, a using sharing its line with other code, syntax errors, or a name that would bind
-    /// differently afterwards. Comments directly above the usings move with them (not the file header).
+    /// before the namespace's body, a using sharing its line with other code, syntax errors, or a name that could be
+    /// looked up differently afterwards (<see cref="LooksUpTheSame"/>). Comments directly above the usings move with them
+    /// (not the file header).
     /// </summary>
     public static List<TextChange>? GetChanges(SemanticModel model, UsingPlacementMode mode, string indentUnit, CancellationToken cancellationToken)
     {
         var tree = model.SyntaxTree;
         var text = tree.GetText(cancellationToken);
-        if (tree.GetRoot(cancellationToken) is not CompilationUnitSyntax root
-            || GetSyntaxChanges(root, text, mode, indentUnit, model, cancellationToken) is not { } changes)
-        {
-            return null;
-        }
-
-        return BindsTheSame(model, root, text.WithChanges(changes), mode, cancellationToken) ? changes : null;
-    }
-
-    private static List<TextChange>? GetSyntaxChanges(
-        CompilationUnitSyntax root,
-        SourceText text,
-        UsingPlacementMode mode,
-        string indentUnit,
-        SemanticModel model,
-        CancellationToken cancellationToken)
-    {
-        if (mode == UsingPlacementMode.Preserve || root.ContainsDiagnostics || root.Externs.Count > 0 || root.AttributeLists.Count > 0
+        if (mode == UsingPlacementMode.Preserve || tree.GetRoot(cancellationToken) is not CompilationUnitSyntax root
+            || root.ContainsDiagnostics || root.Externs.Count > 0 || root.AttributeLists.Count > 0
             || root.Members.Count != 1 || root.Members[0] is not BaseNamespaceDeclarationSyntax ns
             || ns.Externs.Count > 0 || ns.Members.Any(m => m is BaseNamespaceDeclarationSyntax))
         {
             return null;
         }
 
-        // Usings on both levels, and global usings (which can't go inside), fail the binding check (BindsTheSame).
-        var moved = mode == UsingPlacementMode.Outside ? ns.Usings : root.Usings;
-        if (moved.Count == 0)
+        var (moved, target) = mode == UsingPlacementMode.Outside ? (ns.Usings, root.Usings) : (root.Usings, ns.Usings);
+        if (moved.Count == 0 || target.Count > 0 || moved.Any(u => u.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword)))
         {
             return null;
         }
 
+        // Relative names get their full name when they move out (BRO1126's fix, so both rules agree in any order).
+        var names = moved.Select(u => mode == UsingPlacementMode.Outside && QualifiedUsings.GetQualifiedName(u, model, cancellationToken) is { } qualified
+            ? (u.Name, (TypeSyntax)SyntaxFactory.ParseTypeName(qualified))
+            : ((NameSyntax?)null, u.NamespaceOrType)).ToList();
+        return GetSyntaxChanges(root, ns, moved, names, text, mode, indentUnit) is { } changes
+            && LooksUpTheSame(model, root, ns, moved, names.Select(n => n.Item2), cancellationToken)
+            ? changes
+            : null;
+    }
+
+    private static List<TextChange>? GetSyntaxChanges(
+        CompilationUnitSyntax root,
+        BaseNamespaceDeclarationSyntax ns,
+        SyntaxList<UsingDirectiveSyntax> moved,
+        List<(NameSyntax? Replaced, TypeSyntax Name)> names,
+        SourceText text,
+        UsingPlacementMode mode,
+        string indentUnit)
+    {
         // Where the namespace's body starts: no directive ('#if', '#pragma', ...) may sit anywhere before it.
         var bodyStart = ns is NamespaceDeclarationSyntax blockNamespace ? blockNamespace.OpenBraceToken : ((FileScopedNamespaceDeclarationSyntax)ns).SemicolonToken;
         var checkedEnd = mode == UsingPlacementMode.Outside ? moved.Last().FullSpan.End : bodyStart.FullSpan.End;
@@ -113,15 +125,15 @@ internal static class UsingPlacement
             return null;
         }
 
+        // The usings must have their lines to themselves (a trailing comment is fine).
         var lines = text.Lines;
         var first = moved.First();
         var last = moved.Last();
         var firstLine = lines.GetLineFromPosition(first.SpanStart).LineNumber;
         var lastLine = lines.GetLineFromPosition(last.Span.End).LineNumber;
         var indentation = Indentation(lines[firstLine]);
-        // Code after the last using on its line would move too. (Code before the first one, '{' or 'namespace X;', fails
-        // the re-parse or the binding check.)
-        if (lines.GetLineFromPosition(last.GetLastToken().GetNextToken().SpanStart).LineNumber == lastLine)
+        if (lines[firstLine].Start + indentation.Length != first.SpanStart
+            || lines.GetLineFromPosition(last.GetLastToken().GetNextToken().SpanStart).LineNumber == lastLine)
         {
             return null;
         }
@@ -138,22 +150,14 @@ internal static class UsingPlacement
             startLine = firstLine;
         }
 
-        // The moved lines, with relative names qualified (BRO1126's fix, so both rules agree in any order) and their
-        // indentation replaced.
+        // The moved lines, with qualified names and their indentation replaced.
         var block = text.GetSubText(TextSpan.FromBounds(lines[startLine].Start, lines[lastLine].EndIncludingLineBreak));
-        if (mode == UsingPlacementMode.Outside)
-        {
-            var qualified = moved
-                .Select(u => (Name: u.Name, Qualified: QualifiedUsings.GetQualifiedName(u, model, cancellationToken)))
-                .Where(p => p.Name is not null && p.Qualified is not null)
-                .Select(p => new TextChange(new TextSpan(p.Name!.SpanStart - lines[startLine].Start, p.Name.Span.Length), p.Qualified!));
-            block = block.WithChanges(qualified);
-        }
-
-        var newIndentation = mode == UsingPlacementMode.Outside ? string.Empty
-            : ns is NamespaceDeclarationSyntax ? Indentation(lines.GetLineFromPosition(ns.SpanStart)) + indentUnit
+        block = block.WithChanges(names.Where(n => n.Replaced is not null)
+            .Select(n => new TextChange(new TextSpan(n.Replaced!.SpanStart - lines[startLine].Start, n.Replaced.Span.Length), n.Name.ToString())));
+        var newIndentation = ns is NamespaceDeclarationSyntax && mode == UsingPlacementMode.Inside
+            ? Indentation(lines.GetLineFromPosition(ns.SpanStart)) + indentUnit
             : string.Empty;
-        var reindented = new System.Text.StringBuilder();
+        var reindented = new StringBuilder();
         foreach (var line in block.Lines)
         {
             var content = block.ToString(line.SpanIncludingLineBreak);
@@ -227,103 +231,156 @@ internal static class UsingPlacement
     }
 
     /// <summary>
-    /// Whether every name, query clause, foreach, await, collection initializer element and deconstruction of the file
-    /// binds to the same symbols with the usings moved, and the file has no more errors.
+    /// Whether every name in the file is looked up the same with the usings moved, by C#'s lookup rules (no rebinding of
+    /// the file). For namespace N (in containers C1..Cn, then the global namespace), lookup goes
+    /// inside: N's members, the moved usings (U), C1..Cn's members, the global namespace's, the global usings (G);
+    /// outside: N's members, C1..Cn's members, the global namespace's, U together with G.
+    /// So a name found in N is the same either way; a name U imports must not be found in C1..Cn/global (unless as the
+    /// same symbols), nor, when none of those has it, through G as anything U doesn't import too. Extension methods of
+    /// the same name from U and from N, its containers or G could change overload resolution: not allowed. Names are
+    /// compared by text (every identifier in the file, '-Attribute' added in attributes), arity ignored: conservative.
+    /// The usings' own names: their first identifier must be a member of the global namespace and of no namespace of N's
+    /// (inside N it would resolve there; at the top, only global members are seen).
     /// </summary>
-    private static bool BindsTheSame(SemanticModel model, CompilationUnitSyntax root, SourceText newText, UsingPlacementMode mode, CancellationToken cancellationToken)
+    private static bool LooksUpTheSame(
+        SemanticModel model,
+        CompilationUnitSyntax root,
+        BaseNamespaceDeclarationSyntax ns,
+        SyntaxList<UsingDirectiveSyntax> moved,
+        IEnumerable<TypeSyntax> movedNames,
+        CancellationToken cancellationToken)
     {
-        var newTree = model.SyntaxTree.WithChangedText(newText);
-        var newRoot = (CompilationUnitSyntax)newTree.GetRoot(cancellationToken);
-        if (newRoot.ContainsDiagnostics)
+        if (model.GetDeclaredSymbol(ns, cancellationToken) is not INamespaceSymbol declared)
         {
             return false;
         }
 
-#pragma warning disable RS1030 // The moved usings need a compilation with the changed tree; no speculative model covers using directives.
-        var newModel = model.Compilation.ReplaceSyntaxTree(model.SyntaxTree, newTree).GetSemanticModel(newTree);
-#pragma warning restore RS1030
-
-        // The usings themselves (in the same order on both sides), then everything else.
-        var oldUsings = mode == UsingPlacementMode.Outside ? ((BaseNamespaceDeclarationSyntax)root.Members[0]).Usings : root.Usings;
-        var newUsings = mode == UsingPlacementMode.Outside ? newRoot.Usings : ((BaseNamespaceDeclarationSyntax)newRoot.Members[0]).Usings;
-        if (oldUsings.Count != newUsings.Count
-            || oldUsings.Zip(newUsings, (o, n) => Key(model.GetSymbolInfo(o.NamespaceOrType, cancellationToken)) == Key(newModel.GetSymbolInfo(n.NamespaceOrType, cancellationToken))).Contains(false))
+        // The compilation's namespaces (members from every assembly), not the source module's: from the global one down.
+        var global = model.Compilation.GlobalNamespace;
+        var containers = new List<INamespaceSymbol>();
+        var inner = global;
+        foreach (var part in declared.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)).Split('.'))
         {
-            return false;
-        }
-
-        using var oldKeys = Keys(model, root, cancellationToken).GetEnumerator();
-        using var newKeys = Keys(newModel, newRoot, cancellationToken).GetEnumerator();
-        while (true)
-        {
-            var hasOld = oldKeys.MoveNext();
-            if (hasOld != newKeys.MoveNext())
+            containers.Insert(0, inner);
+            if (inner.GetNamespaceMembers().FirstOrDefault(n => n.Name == part.TrimStart('@')) is not { } next)
             {
                 return false;
             }
 
-            if (!hasOld)
+            inner = next;
+        }
+
+        var namespacesOfN = containers.Where(c => !c.IsGlobalNamespace).Prepend(inner).ToList();
+        foreach (var name in movedNames)
+        {
+            foreach (var first in FirstIdentifiers(name))
             {
-                break;
+                if (!global.GetMembers(first).Any() || namespacesOfN.Any(n => n.GetMembers(first).Any()))
+                {
+                    return false;
+                }
+            }
+        }
+
+        // What U imports, and what the global usings (every other import in scope at the top) do.
+        var movedSpans = moved.Select(u => u.Span).ToList();
+        bool IsMoved(SyntaxReference? reference) =>
+            reference is not null && reference.SyntaxTree == root.SyntaxTree && movedSpans.Any(s => s.Contains(reference.Span));
+        var scopes = model.GetImportScopes(ns.Members.Count > 0 ? ns.Members[0].SpanStart : ns.Span.End - 1, cancellationToken);
+        var imports = scopes.SelectMany(s => s.Imports).ToList();
+        var aliases = scopes.SelectMany(s => s.Aliases).ToList();
+        var compilation = model.Compilation;
+        var u = new Imports(compilation, imports.Where(i => IsMoved(i.DeclaringSyntaxReference)).Select(i => i.NamespaceOrType), aliases.Where(a => a.DeclaringSyntaxReferences.Any(IsMoved)));
+        var g = new Imports(compilation, imports.Where(i => !IsMoved(i.DeclaringSyntaxReference)).Select(i => i.NamespaceOrType), aliases.Where(a => !a.DeclaringSyntaxReferences.Any(IsMoved)));
+
+        var (identifiers, methodNames) = GetNames(root, TextSpan.FromBounds(moved.First().SpanStart, moved.Last().Span.End));
+        foreach (var name in identifiers)
+        {
+            var fromU = u.Find(name);
+            if (fromU.Count == 0 || inner.GetMembers(name).Any())
+            {
+                continue;
             }
 
-            if (oldKeys.Current != newKeys.Current)
+            var fromContainers = new HashSet<ISymbol>(containers.SelectMany(c => c.GetMembers(name)).Where(m => IsVisible(compilation, m)), SymbolEqualityComparer.Default);
+            if (fromContainers.Count > 0 ? !fromContainers.SetEquals(fromU) : !g.Find(name).IsSubsetOf(fromU))
             {
                 return false;
             }
         }
 
-        var newErrors = newModel.GetDiagnostics(cancellationToken: cancellationToken).Count(d => d.Severity == DiagnosticSeverity.Error);
-        return newErrors == 0 || newErrors <= model.GetDiagnostics(cancellationToken: cancellationToken).Count(d => d.Severity == DiagnosticSeverity.Error);
+        foreach (var name in methodNames)
+        {
+            var fromU = new HashSet<IMethodSymbol>(u.Extensions(name), SymbolEqualityComparer.Default);
+            if (fromU.Count > 0
+                && !g.Extensions(name).Concat(namespacesOfN.Append(global).SelectMany(n => ExtensionsOf(compilation, n)[name])).All(fromU.Contains))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    private static IEnumerable<string> Keys(SemanticModel model, CompilationUnitSyntax root, CancellationToken cancellationToken)
+    /// <summary>
+    /// Every identifier the file uses outside <paramref name="usings"/> (with 'XAttribute' for an attribute's 'X'), and the
+    /// names that may be extension method calls: after '.', and the ones the compiler looks up itself.
+    /// </summary>
+    private static (HashSet<string> Identifiers, HashSet<string> MethodNames) GetNames(CompilationUnitSyntax root, TextSpan usings)
     {
-        foreach (var node in root.DescendantNodes(n => n is not UsingDirectiveSyntax))
+        var identifiers = new HashSet<string>(System.StringComparer.Ordinal);
+        var methods = new HashSet<string>(ImplicitMethodNames, System.StringComparer.Ordinal);
+        foreach (var node in TreeWalk.Nodes(root))
         {
+            if (usings.Contains(node.Span))
+            {
+                continue;
+            }
+
             switch (node)
             {
-                case SimpleNameSyntax or SelectOrGroupClauseSyntax or OrderingSyntax:
-                    yield return Key(model.GetSymbolInfo(node, cancellationToken));
+                case SimpleNameSyntax simple:
+                    identifiers.Add(simple.Identifier.ValueText);
                     break;
-
-                case QueryClauseSyntax clause:
-                    var info = model.GetQueryClauseInfo(clause, cancellationToken);
-                    yield return Key(info.CastInfo) + Key(info.OperationInfo);
+                case AttributeSyntax { Name: var name }:
+                    identifiers.Add(name.GetLastToken().ValueText + "Attribute");
                     break;
-
-                case CommonForEachStatementSyntax forEach:
-                    var each = model.GetForEachStatementInfo(forEach);
-                    yield return Key(each.GetEnumeratorMethod) + Key(each.MoveNextMethod) + Key(each.CurrentProperty);
+                case MemberAccessExpressionSyntax access:
+                    methods.Add(access.Name.Identifier.ValueText);
                     break;
-
-                case AwaitExpressionSyntax awaitExpression:
-                    yield return Key(model.GetAwaitExpressionInfo(awaitExpression).GetAwaiterMethod);
-                    break;
-
-                case InitializerExpressionSyntax { RawKind: (int)SyntaxKind.CollectionInitializerExpression } initializer:
-                    foreach (var element in initializer.Expressions)
-                    {
-                        yield return Key(model.GetCollectionInitializerSymbolInfo(element, cancellationToken));
-                    }
-
-                    break;
-
-                case AssignmentExpressionSyntax { Left: TupleExpressionSyntax or DeclarationExpressionSyntax } deconstruction:
-                    yield return Key(model.GetDeconstructionInfo(deconstruction).Method);
+                case MemberBindingExpressionSyntax binding:
+                    methods.Add(binding.Name.Identifier.ValueText);
                     break;
             }
         }
+
+        return (identifiers, methods);
     }
 
-    private static string Key(SymbolInfo info) =>
-        info.Symbol is { } symbol ? Key(symbol) : "?" + info.CandidateReason + string.Join("|", info.CandidateSymbols.Select(Key));
+    /// <summary>The first identifier of each name in a using's target (the one looked up in scope), not after 'global::'.</summary>
+    private static IEnumerable<string> FirstIdentifiers(TypeSyntax type) =>
+        type.DescendantNodesAndSelf()
+            .OfType<SimpleNameSyntax>()
+            .Where(n => n.Parent is not QualifiedNameSyntax { Right: var right } || right != n)
+            .Where(n => n.Parent is not AliasQualifiedNameSyntax)
+            .Select(n => n.Identifier.ValueText);
 
-    // A reduced extension method displays as its receiver's member ('int.Twice()'): compare the static method it came from.
-    private static string Key(ISymbol? symbol) =>
-        symbol is null ? "-"
-        : symbol is IMethodSymbol { ReducedFrom: { } reducedFrom } ? "reduced " + Key(reducedFrom)
-        : symbol.Kind + ":" + symbol.ToDisplayString(Format) + "@" + symbol.ContainingAssembly?.Identity.Name;
+    /// <summary>
+    /// The extension methods a namespace's types (or a 'using static' type) declare, by name; cached per compilation, since
+    /// every file imports the same few namespaces.
+    /// </summary>
+    private static ILookup<string, IMethodSymbol> ExtensionsOf(Compilation compilation, INamespaceOrTypeSymbol target) =>
+        ExtensionCache.GetValue(compilation, _ => new ConcurrentDictionary<INamespaceOrTypeSymbol, ILookup<string, IMethodSymbol>>(SymbolEqualityComparer.Default))
+            .GetOrAdd(target, t => (t is INamespaceSymbol ns ? ns.GetTypeMembers() : t is INamedTypeSymbol type ? ImmutableArray.Create(type) : ImmutableArray<INamedTypeSymbol>.Empty)
+                .Where(type => type.MightContainExtensionMethods && IsVisible(compilation, type))
+                .SelectMany(type => type.GetMembers())
+                .OfType<IMethodSymbol>()
+                .Where(m => m.IsExtensionMethod && IsVisible(compilation, m))
+                .ToLookup(m => m.Name));
+
+    /// <summary>Only what the file's code could use: not another assembly's internal types (lookup skips them).</summary>
+    private static bool IsVisible(Compilation compilation, ISymbol symbol) =>
+        symbol is INamespaceSymbol || compilation.IsSymbolAccessibleWithin(symbol, compilation.Assembly);
 
     private static string Indentation(TextLine line)
     {
@@ -332,4 +389,37 @@ internal static class UsingPlacement
     }
 
     private static bool IsBlank(TextLine line) => string.IsNullOrWhiteSpace(line.ToString());
+
+    /// <summary>What a set of using directives brings into scope, by name.</summary>
+    private sealed class Imports
+    {
+        private readonly Compilation compilation;
+        private readonly List<INamespaceOrTypeSymbol> targets;
+        private readonly List<IAliasSymbol> aliases;
+
+        public Imports(Compilation compilation, IEnumerable<INamespaceOrTypeSymbol> targets, IEnumerable<IAliasSymbol> aliases)
+        {
+            this.compilation = compilation;
+            this.targets = targets.ToList();
+            this.aliases = aliases.ToList();
+        }
+
+        /// <summary>The types (of a namespace), static members and nested types (of a 'using static' type) and alias targets named <paramref name="name"/>.</summary>
+        public HashSet<ISymbol> Find(string name)
+        {
+            var found = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
+            foreach (var target in this.targets)
+            {
+                found.UnionWith(target is INamespaceSymbol ns
+                    ? ns.GetTypeMembers(name).Where(t => IsVisible(this.compilation, t))
+                    : target.GetMembers(name).Where(m => (m.IsStatic || m is ITypeSymbol) && IsVisible(this.compilation, m)));
+            }
+
+            found.UnionWith(this.aliases.Where(a => a.Name == name).Select(a => a.Target));
+            return found;
+        }
+
+        /// <summary>The extension methods named <paramref name="name"/> of the imported namespaces' types and the 'using static' types.</summary>
+        public IEnumerable<IMethodSymbol> Extensions(string name) => this.targets.SelectMany(t => ExtensionsOf(this.compilation, t)[name]);
+    }
 }

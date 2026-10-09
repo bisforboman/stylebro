@@ -216,6 +216,35 @@ public class UsingPlacementTests
         },
         Outside);
 
+    // Outside, the usings join the global usings (implicit usings too): a type both import would be ambiguous (CS0104).
+    [Fact]
+    public Task Outside_ANameAGlobalUsingImportsToo_NotReported() => Verify.VerifyFixAsync(
+        new[]
+        {
+            "namespace App\n{\n    using Domain;\n\n    public class Handler\n    {\n        public Order? Current { get; set; }\n    }\n}\n",
+            "global using Shared;\n\nnamespace Domain { public class Order { } }\nnamespace Shared { public class Order { } }\n",
+        },
+        new[]
+        {
+            "namespace App\n{\n    using Domain;\n\n    public class Handler\n    {\n        public Order? Current { get; set; }\n    }\n}\n",
+            "global using Shared;\n\nnamespace Domain { public class Order { } }\nnamespace Shared { public class Order { } }\n",
+        },
+        Outside);
+
+    [Fact]
+    public Task Outside_TheSameNamespaceAsAGlobalUsing_IsMoved() => Verify.VerifyFixAsync(
+        new[]
+        {
+            "namespace App\n{\n    {|BRO1008:using Shared;|}\n\n    public class Handler\n    {\n        public Order? Current { get; set; }\n    }\n}\n",
+            "global using Shared;\n\nnamespace Shared { public class Order { } }\n",
+        },
+        new[]
+        {
+            "using Shared;\n\nnamespace App\n{\n    public class Handler\n    {\n        public Order? Current { get; set; }\n    }\n}\n",
+            "global using Shared;\n\nnamespace Shared { public class Order { } }\n",
+        },
+        Outside);
+
     [Fact]
     public Task Outside_ANameThatWouldBindToANamespace_NotReported() => Verify.VerifyFixAsync(
         new[]

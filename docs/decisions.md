@@ -23,11 +23,12 @@ do about using placement?
 ### Decision
 
 3 (owner: "StyleBro rule that checks binding"): [BRO1008](rules/BRO1008.md) replaces IDE0065 and SA1200. It follows
-`csharp_using_directive_placement` (not set: StyleCop's default, inside). The analyzer builds the moved file, binds it
-in a copy of the compilation, and compares every name, query clause, `foreach`, `await`, collection initializer element,
-deconstruction and the usings' own targets with the original; a file where anything differs, or that gets more
-errors, isn't reported. `init` writes IDE0065 = none; migrate maps SA1200 to BRO1008 (off with stylecop.json's
-`preserve`).
+`csharp_using_directive_placement` (not set: StyleCop's default, inside). The check follows C#'s lookup order rather
+than compiling the moved file again (a first version did, and cost 180 ms on the Newtonsoft.Json benchmark; this one
+9 ms): every identifier the moved usings import must find the same symbols in the enclosing namespaces, or nothing
+there and nothing else through the global usings; extension methods they bring must not share a name with others in
+scope; a using's own name must start with a global namespace member no enclosing namespace has. A file that fails
+isn't reported. `init` writes IDE0065 = none; migrate maps SA1200 to BRO1008 (off with stylecop.json's `preserve`).
 
 ## Rule docs as a website (2026-10-09)
 

@@ -72,7 +72,7 @@ SA1137,SDK: IDE0055 formatting
 SA1139,"StyleBro **BRO1122** (done), only when the suffixed literal has exactly the cast's value (StyleCop's fix can change decimals)"
 SA1141,"StyleBro **BRO1123** (done), every type-only position (StyleCop: declarations only); StyleCop's fix has no Fix All"
 SA1142,"StyleBro **BRO1124** (done), same positions as StyleCop except nameof; StyleCop's fix throws under `dotnet format`"
-SA1200,"StyleBro **BRO1008** (done; replaces IDE0065, whose fix can change what names bind to: CS0104/CS0118 in eShop and Ocelot). Moves the usings only when every name binds the same; skips files with several namespaces, directives before the namespace body, usings on both levels"
+SA1200,"StyleBro **BRO1008** (done; replaces IDE0065, whose fix can change what names bind to: CS0104/CS0118 in eShop and Ocelot). Moves the usings only when no name can be looked up differently; skips files with several namespaces, directives before the namespace body, usings on both levels"
 SA1201,StyleBro **BRO1001** (done)
 SA1202,StyleBro **BRO1001** (done)
 SA1203,StyleBro **BRO1001** (done)

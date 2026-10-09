@@ -26,10 +26,14 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (startLine == 0 && mode == UsingPlacementMode.Inside)'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ' && !aboveIsOpenBrace)'; Replace = ')'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '+ (IsBlank(next) || nextIsClose ? string.Empty : lineBreak);'; Replace = ';'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return BindsTheSame(model, root, text.WithChanges(changes), mode, cancellationToken) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '== Key(newModel.GetSymbolInfo(n.NamespaceOrType, cancellationToken))).Contains(false))'; Replace = '== Key(newModel.GetSymbolInfo(n.NamespaceOrType, cancellationToken))).Contains(false) && false)'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (oldKeys.Current != newKeys.Current)'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ': symbol is IMethodSymbol { ReducedFrom: { } reducedFrom } ?'; Replace = ': symbol is IMethodSymbol { ReducedFrom: { } reducedFrom } && false ?'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| target.Count > 0 ||'; Replace = '||'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| moved.Any(u => u.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword))'; Replace = ''; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (lines[firstLine].Start + indentation.Length != first.SpanStart'; Replace = 'if (false'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (!global.GetMembers(first).Any() || namespacesOfN.Any(n => n.GetMembers(first).Any()))'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'fromContainers.Count > 0 ? !fromContainers.SetEquals(fromU) :'; Replace = 'fromContainers.Count > 0 ? false :'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ': !g.Find(name).IsSubsetOf(fromU))'; Replace = ': false)'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& !g.Extensions(name).Concat('; Replace = '&& false && !g.Extensions(name).Concat('; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| compilation.IsSymbolAccessibleWithin(symbol, compilation.Assembly);'; Replace = '|| true;'; Tests = 'UsingPlacementTests' }
         # BRO1136 (lambda parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'if (lambda.ParameterList.Parameters.Count != 1'; Replace = 'if (lambda.ParameterList.Parameters.Count < 1'; Tests = 'LambdaParenthesesTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'is not { Type: null } parameter'; Replace = 'is not { } parameter'; Tests = 'LambdaParenthesesTests' }
