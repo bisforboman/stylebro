@@ -129,6 +129,11 @@ global configs, a StyleCop.Analyzers reference), it stops without writing and te
 `stylebro-migrate --write` instead: that's [path B](#b-coming-from-stylecop), which turns StyleBro's rules on only where
 StyleCop enforced them.
 
+With SonarQube or SonarCloud (a `SonarAnalyzer.CSharp` reference, Sonar rule severities in rulesets or configs, or a
+quality profile you export and pass with `--sonar-profile profile.xml`), `init` also turns on the StyleBro and .NET rules
+that fix what your Sonar rules report (S2325 -> CA1822, S4136 -> overloads kept together, ...) and prints which:
+[Coming from SonarQube](migrating.md#coming-from-sonarqube). The same works for `stylebro-migrate --write` in path B.
+
 ### 3. Run stylebro-migrate format
 
 ```

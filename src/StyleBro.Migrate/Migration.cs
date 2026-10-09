@@ -60,10 +60,13 @@ internal static class Migration
             .ToList();
     }
 
-    /// <summary>The settings for the whole repository. <paramref name="fieldStyle"/> null: inferred from the code.</summary>
-    public static Result Generate(StyleCopSetup setup, string root, string? fieldStyle = null)
+    /// <summary>
+    /// The settings for the whole repository. <paramref name="fieldStyle"/> null: inferred from the code;
+    /// <paramref name="sonar"/>: the SonarQube setup, whose rules turn on the rules that fix what they report.
+    /// </summary>
+    public static Result Generate(StyleCopSetup setup, string root, string? fieldStyle = null, SonarSetup? sonar = null)
     {
-        var result = new Result();
+        var result = new Result { SonarSetup = sonar };
         var lines = result.Lines;
         result.FieldStyle = fieldStyle ?? InferFieldStyle(setup, root, result.Notes);
 
@@ -202,6 +205,9 @@ internal static class Migration
             result.Notes.Add($"Kept the repository's own settings for: {string.Join(", ", kept.Select(KeyOf))}.");
         }
 
+        // Sonar's rules turn on what fixes them, also rules StyleCop doesn't have: a rule on through either is on.
+        result.Sonar = sonar?.Apply(lines, id => lines.Any(l => l.StartsWith($"dotnet_diagnostic.{id}.severity = ", StringComparison.Ordinal) && !l.EndsWith("= none", StringComparison.Ordinal)), own);
+
         if (setup.EditorConfigCopiedBy is { } copier)
         {
             result.Notes.Add($"{copier} copies an .editorconfig, maybe over the root one on every build (SixLabors' shared infrastructure does): check after a build that the stylebro-migrate block is still there, else put it into the copied file.");
@@ -221,7 +227,7 @@ internal static class Migration
     /// <summary>The settings for a scope: the lines whose value differs from the repository-wide ones (<paramref name="main"/>).</summary>
     public static List<string> GenerateScope(StyleCopSetup setup, Scope scope, string root, Result main)
     {
-        var inScope = Generate(setup.For(scope), root, main.FieldStyle);
+        var inScope = Generate(setup.For(scope), root, main.FieldStyle, main.SonarSetup);
         var mainValues = main.Lines.Select(Split).Where(p => p.Key is not null).ToDictionary(p => p.Key!, p => p.Value);
         return inScope.Lines
             .Where(line => Split(line) is { Key: { } key } pair && !main.OwnKeys.Contains(key)
@@ -818,6 +824,12 @@ internal static class Migration
         public SortedDictionary<string, SortedSet<string>> Replacements { get; } = new(StringComparer.Ordinal);
 
         public string FieldStyle { get; set; } = "camelCase";
+
+        /// <summary>Gets or sets the SonarQube setup the settings follow too, or null.</summary>
+        public SonarSetup? SonarSetup { get; set; }
+
+        /// <summary>Gets or sets what the Sonar setup turned on, or null without one.</summary>
+        public SonarSetup.Applied? Sonar { get; set; }
 
         /// <summary>Gets keys left out because the repository sets them itself.</summary>
         public HashSet<string> OwnKeys { get; } = new(StringComparer.OrdinalIgnoreCase);

@@ -37,6 +37,8 @@ internal static class InitCommand
 
     public static int Run(string[] args)
     {
+        var (profile, rest) = Program.TakeOption(args, Program.SonarProfileOption);
+        args = rest;
         var write = args.Contains("--write");
         var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
         if (!Directory.Exists(root))
@@ -59,10 +61,23 @@ internal static class InitCommand
             return 1;
         }
 
+        if (!Program.ReadSonar(root, profile, out var sonar))
+        {
+            return 1;
+        }
+
         var multiTargeted = MultiTargetedProjects(root).ToList();
         var own = Migration.OwnKeys(root);
         var fieldStyle = migrated ? null : FieldStyle(root, own);
-        var block = Block(fieldStyle, plainHeader: own.Contains("file_header_template"));
+
+        // A Sonar setup turns on what fixes its rules, like in the migration; StyleBro's own rules are on in the preset.
+        var sonarLines = new List<string>();
+        if (sonar is not null && !migrated)
+        {
+            sonar.Report(sonar.Apply(sonarLines, _ => true, own)).ForEach(Console.WriteLine);
+        }
+
+        var block = Block(fieldStyle, plainHeader: own.Contains("file_header_template"), sonarLines);
         var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
         if (multiTargeted.Count > 0)
         {
@@ -109,11 +124,17 @@ internal static class InitCommand
     /// <summary>
     /// The block written into .editorconfig, between the stylebro-migrate markers. <paramref name="fieldStyle"/>: the
     /// private field style the code shows, when it isn't the default; <paramref name="plainHeader"/>: the repository has
-    /// IDE0073's file_header_template, so BRO1615's XML header is off (each would add its header above the other's).
+    /// IDE0073's file_header_template, so BRO1615's XML header is off (each would add its header above the other's);
+    /// <paramref name="sonar"/>: the lines a SonarQube setup adds (<see cref="SonarSetup.Apply"/>).
     /// </summary>
-    public static string Block(string? fieldStyle = null, bool plainHeader = false)
+    public static string Block(string? fieldStyle = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null)
     {
         var template = Template().Replace("\r\n", "\n").TrimEnd('\n');
+        if (sonar is { Count: > 0 })
+        {
+            template += "\n" + string.Join("\n", sonar);
+        }
+
         if (fieldStyle is not null)
         {
             template += $"\n# Most private fields here start with '_': BRO1303 keeps it\n{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = {fieldStyle}";

@@ -47,7 +47,8 @@ internal static class PreviewCommand
         var clock = Stopwatch.StartNew();
         var patch = Path.GetFullPath(options.FirstOrDefault(o => o.StartsWith("--diff=", StringComparison.Ordinal))?.Substring("--diff=".Length) ?? DefaultPatch);
         var keep = options.Contains("--keep");
-        var rest = options.Where(o => !Wants(new[] { o }) && o != "--keep").ToList();
+        var (profile, others) = command == "format" ? (null, options) : Program.TakeOption(options, Program.SonarProfileOption);
+        var rest = others.Where(o => !Wants(new[] { o }) && o != "--keep").ToList();
 
         // init and the migration: --project names what format runs on (relative to the path) when the folder has several.
         var projectIndex = command == "format" ? -1 : rest.IndexOf("--project");
@@ -108,7 +109,7 @@ internal static class PreviewCommand
 
             if (command != "format")
             {
-                var settings = Settings(command, target, rest.Contains("--modernize"), Log);
+                var settings = Settings(command, target, rest.Contains("--modernize"), profile, Log);
                 if (settings != 0)
                 {
                     return Fail(tail, settings);
@@ -463,8 +464,11 @@ internal static class PreviewCommand
         }
     }
 
-    /// <summary>Init's or the migration's '--write' on the copy; their output goes to the log (the dry run prints it).</summary>
-    private static int Settings(string? command, string target, bool modernize, Action<string> log)
+    /// <summary>
+    /// Init's or the migration's '--write' on the copy; their output goes to the log (the dry run prints it), except the
+    /// Sonar part of the report: which Sonar rules turned on which rules.
+    /// </summary>
+    private static int Settings(string? command, string target, bool modernize, string? profile, Action<string> log)
     {
         var original = Console.Out;
         using var writer = new StringWriter();
@@ -472,9 +476,10 @@ internal static class PreviewCommand
         int code;
         try
         {
+            var sonar = profile is null ? Array.Empty<string>() : new[] { Program.SonarProfileOption, Path.GetFullPath(profile) };
             code = command == "init"
-                ? InitCommand.Run(new[] { target, "--write" }.Concat(modernize ? new[] { "--modernize" } : Array.Empty<string>()).ToArray())
-                : Program.Migrate(new[] { target, "--write" });
+                ? InitCommand.Run(new[] { target, "--write" }.Concat(modernize ? new[] { "--modernize" } : Array.Empty<string>()).Concat(sonar).ToArray())
+                : Program.Migrate(new[] { target, "--write" }.Concat(sonar).ToArray());
         }
         finally
         {
@@ -486,8 +491,20 @@ internal static class PreviewCommand
         {
             Console.Write(writer.ToString());
         }
+        else
+        {
+            Console.Write(SonarPart(writer.ToString()));
+        }
 
         return code;
+    }
+
+    /// <summary>The Sonar part of the report in the command's output (from 'Sonar: read' to the next empty line), or nothing.</summary>
+    public static string SonarPart(string output)
+    {
+        var lines = output.Replace("\r\n", "\n").Split('\n');
+        var start = Array.FindIndex(lines, l => l.StartsWith("Sonar: read ", StringComparison.Ordinal));
+        return start < 0 ? string.Empty : string.Join("\n", lines.Skip(start).TakeWhile(l => l.Length > 0)) + "\n";
     }
 
     /// <summary>The rule titles: StyleBro's from the analyzers, the built-in rules' from the comments in init's templates.</summary>

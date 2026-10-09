@@ -550,7 +550,7 @@ internal sealed class StyleCopSetup
     /// submodules included (a shared-infrastructure submodule with the StyleCop setup): imported .props/.targets,
     /// CodeAnalysisRuleSet rulesets and stylecop.json additional files. They're only read, never written.
     /// </summary>
-    private static (List<string> MSBuild, List<string> Rulesets, List<string> StyleCopJson) FollowReferences(string root, IReadOnlyCollection<string> own)
+    internal static (List<string> MSBuild, List<string> Rulesets, List<string> StyleCopJson) FollowReferences(string root, IReadOnlyCollection<string> own)
     {
         var seen = new HashSet<string>(own, StringComparer.OrdinalIgnoreCase);
         var result = (MSBuild: new List<string>(), Rulesets: new List<string>(), StyleCopJson: new List<string>());
@@ -661,7 +661,7 @@ internal sealed class StyleCopSetup
         return File.Exists(full) && full.StartsWith(rootFolder, StringComparison.OrdinalIgnoreCase) ? full : null;
     }
 
-    private static string WithoutComments(string xml) => Regex.Replace(xml, "<!--.*?-->", string.Empty, RegexOptions.Singleline);
+    internal static string WithoutComments(string xml) => Regex.Replace(xml, "<!--.*?-->", string.Empty, RegexOptions.Singleline);
 
     /// <summary>Each rule the configs set, at the strictest of them; a config that doesn't set it counts with the target's value.</summary>
     private static void OverlayStrictest(Dictionary<string, Severity> target, IReadOnlyList<Dictionary<string, Severity>> configs)
