@@ -508,6 +508,7 @@ public sealed class MigrationTests : IDisposable
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1101.severity = warning\n");
         var ids = File.ReadAllLines(preset).Concat(InitCommand.Template().Split('\n')).Concat(InitCommand.ModernizeTemplate().Split('\n'))
             .Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
+            .Concat(SonarSetup.Mapping.Select(m => $"dotnet_diagnostic.{m.Rule}.severity"))
             .Select(l => System.Text.RegularExpressions.Regex.Match(l, @"^dotnet_diagnostic\.((?:IDE|CA)\d{4})\.severity"))
             .Where(m => m.Success)
             .Select(m => m.Groups[1].Value)
@@ -1273,6 +1274,13 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\" Version=", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")));
         Assert.Contains("<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />", File.ReadAllText(Path.Combine(root, "Directory.Build.props")));
         Assert.Null(PreviewCommand.AddPackage(root)); // referenced now
+
+        // Polly: the property in Directory.Build.props, the versions in Directory.Packages.props.
+        File.Delete(Path.Combine(root, "Directory.Build.props"));
+        Write("Directory.Packages.props", "<Project><ItemGroup><PackageVersion Include=\"X\" Version=\"1.0.0\" /></ItemGroup></Project>");
+        Write("Directory.Build.props", "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup></Project>");
+        Assert.NotNull(PreviewCommand.AddPackage(root));
+        Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\" Version=", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")));
     }
 
     [Fact]
@@ -1282,6 +1290,193 @@ public sealed class MigrationTests : IDisposable
         Assert.Equal(1, Program.Main(new[] { "init", root, "--diffs" }));
         Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
     }
+
+    [Fact]
+    public void Sonar_WithoutASetup_ChangesNothing()
+    {
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SA1101.severity = none\n");
+
+        Assert.Null(SonarSetup.Read(root));
+        var result = Migration.Generate(StyleCopSetup.Read(root), root, sonar: SonarSetup.Read(root));
+        Assert.Null(result.Sonar);
+        Assert.DoesNotContain(result.Lines, l => l.Contains("Sonar", StringComparison.Ordinal));
+        Assert.DoesNotContain("Sonar", Capture(() => Program.Main(new[] { root })), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Sonar_ThePackage_BringsItsDefaultRules()
+    {
+        // Central package management: the version in Directory.Packages.props, the reference in Directory.Build.props.
+        Write("Directory.Packages.props", """<Project><ItemGroup><PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
+        Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" /></ItemGroup></Project>""");
+
+        var sonar = SonarSetup.Read(root)!;
+        Assert.True(sonar.IsOn("S2325"));   // Sonar way
+        Assert.False(sonar.IsOn("S1659"));  // off by default
+        Assert.Contains(sonar.Sources, s => s.StartsWith("SonarAnalyzer.CSharp 10.34.0.3385", StringComparison.Ordinal));
+        Assert.Equal(SonarSetup.Rules.Count(r => r.Value.SonarWay), sonar.Severities.Count(s => s.Value == Severity.Warning));
+
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
+        Assert.Contains("dotnet_diagnostic.CA1822.severity = warning", lines);
+        Assert.Contains("dotnet_code_quality.CA1822.api_surface = private, internal", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1313.severity = warning", lines);   // S927; off after the migration otherwise
+        Assert.Contains("dotnet_diagnostic.BRO1135.severity = warning", lines);   // S818
+        Assert.Contains("stylebro_upper_case_literal_suffixes = l_only", lines);
+        Assert.Contains("stylebro_keep_overloads_together = true", lines);       // S4136: BRO1001 is on (StyleCop's defaults)
+        Assert.DoesNotContain("dotnet_diagnostic.BRO1142.severity = warning", lines);  // S1659 is off
+        Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1313.severity", StringComparison.Ordinal));
+        Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1309.severity", StringComparison.Ordinal));  // on through SA1300 already
+    }
+
+    [Fact]
+    public void Sonar_SeveritiesComeFromRulesetsConfigsAndTheEditorConfig()
+    {
+        // No package: the scanner's and SonarLint's rulesets alone are a setup (the scanner runs Sonar in CI only).
+        Write(".sonarqube/conf/Sonar-cs.ruleset", SonarRuleset(("S3052", "Warning"), ("S1659", "Warning")));
+        Write(".sonarqube/conf/Sonar-cs-none.ruleset", SonarRuleset(("S3052", "None")));
+        Write(".sonarlint/myprojectcsharp.ruleset", SonarRuleset(("S100", "Error")));
+        Write("eng/Library.globalconfig", "is_global = true\ndotnet_diagnostic.S1659.severity = none\ndotnet_diagnostic.S2325.severity = suggestion\n");
+        Write("eng/Test.globalconfig", "is_global = true\ndotnet_diagnostic.S2325.severity = none\n");
+        Write(".editorconfig", "root = true\n[*.md]\ndotnet_diagnostic.S1116.severity = warning\n[*.cs]\ndotnet_diagnostic.S3052.severity = none\n");
+
+        var sonar = SonarSetup.Read(root)!;
+
+        Assert.False(sonar.IsOn("S3052"));  // the root .editorconfig wins
+        Assert.True(sonar.IsOn("S1659"));   // the ruleset's warning; a global config can't turn it off for everything ...
+        Assert.Equal(Severity.Warning, sonar.Severities["S1659"]);
+        Assert.Equal(Severity.Suggestion, sonar.Severities["S2325"]);  // ... the strictest of the global configs wins
+        Assert.Equal(Severity.Error, sonar.Severities["S100"]);
+        Assert.False(sonar.IsOn("S1116"));  // not a C# section
+        Assert.False(sonar.IsOn("S927"));   // no package: no defaults, and a ruleset's StyleCop block doesn't count
+        Assert.DoesNotContain(sonar.Sources, s => s.Contains("none", StringComparison.Ordinal));
+
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
+        Assert.Contains("dotnet_diagnostic.BRO1309.severity = error", lines);       // S100, stronger than SA1300's warning
+        Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1309.severity", StringComparison.Ordinal));
+        Assert.Contains("dotnet_diagnostic.CA1822.severity = suggestion", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1142.severity = warning", lines);
+        Assert.DoesNotContain(lines, l => l.StartsWith("dotnet_diagnostic.CA1805", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Sonar_AQualityProfile_ReplacesTheDefaults()
+    {
+        Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
+        var profile = Path.Combine(root, "..", Path.GetFileName(root) + "-profile.xml");
+        File.WriteAllText(profile, """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <profile>
+              <name>Team way</name>
+              <language>cs</language>
+              <rules>
+                <rule><repositoryKey>csharpsquid</repositoryKey><key>S1066</key><type>CODE_SMELL</type><priority>MAJOR</priority><parameters/></rule>
+                <rule><repositoryKey>csharpsquid</repositoryKey><key>S3052</key><type>CODE_SMELL</type><priority>MINOR</priority><parameters/></rule>
+                <rule><repositoryKey>vbnet</repositoryKey><key>S2325</key><type>CODE_SMELL</type><priority>MINOR</priority><parameters/></rule>
+              </rules>
+            </profile>
+            """);
+        try
+        {
+            var sonar = SonarSetup.Read(root, profile)!;
+            Assert.Equal(new[] { "S1066", "S3052" }, sonar.Severities.Where(s => s.Value >= Severity.Suggestion).Select(s => s.Key).Order());
+
+            var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
+            Assert.Contains("dotnet_diagnostic.BRO1149.severity = warning", lines);
+            Assert.Contains("dotnet_diagnostic.CA1805.severity = warning", lines);
+            Assert.DoesNotContain(lines, l => l.StartsWith("dotnet_diagnostic.CA1822", StringComparison.Ordinal));
+
+            // On the command line; a missing file fails before anything is read.
+            var output = Capture(() => Assert.Equal(0, Program.Main(new[] { "--sonar-profile", profile, root })));
+            Assert.Contains("S1066 -> BRO1149", output, StringComparison.Ordinal);
+            Assert.Contains("quality profile", output, StringComparison.Ordinal);
+            Assert.Equal(1, Program.Main(new[] { root, "--sonar-profile=" + profile + ".missing" }));
+        }
+        finally
+        {
+            File.Delete(profile);
+        }
+    }
+
+    [Fact]
+    public void Sonar_AndStyleCop_ARuleOnThroughEitherIsOn_ConflictsAreListed()
+    {
+        // StyleCop's ordering off: BRO1001 stays off, so S4136's overloads option can't apply.
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SA1201.severity = none\ndotnet_diagnostic.SA1503.severity = none\ndotnet_diagnostic.SA1519.severity = none\ndotnet_diagnostic.SA1520.severity = none\n"
+            + "dotnet_diagnostic.S4136.severity = warning\ndotnet_diagnostic.S121.severity = warning\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root, sonar: SonarSetup.Read(root));
+
+        Assert.Contains("dotnet_diagnostic.BRO1001.severity = none", result.Lines);
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("stylebro_keep_overloads_together", StringComparison.Ordinal));
+        Assert.Contains(result.Sonar!.NotApplied, n => n.Sonar == "S4136" && n.Reason.Contains("BRO1001 is off", StringComparison.Ordinal));
+
+        // S121 turns BRO1514 on and wants braces everywhere, where StyleCop's setup didn't: Sonar's setting wins, noted.
+        Assert.Contains("dotnet_diagnostic.BRO1514.severity = warning", result.Lines);
+        Assert.Single(result.Lines, l => l.StartsWith("csharp_prefer_braces", StringComparison.Ordinal));
+        Assert.Contains("csharp_prefer_braces = true", result.Lines);
+        Assert.Contains(result.Sonar.Notes, n => n.StartsWith("csharp_prefer_braces: true for S121 instead of false", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Sonar_TheReport_SaysWhatIsFixedAndWhatStaysSonars()
+    {
+        Write("src/App/App.csproj", """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" /></ItemGroup></Project>""");
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SA1201.severity = none\n");
+
+        var output = Capture(() => Assert.Equal(0, Program.Main(new[] { root })));
+
+        Assert.Contains("Sonar: read SonarAnalyzer.CSharp 10.35.0.4138", output, StringComparison.Ordinal);
+        Assert.Contains($"Sonar rules on: {SonarSetup.Rules.Count(r => r.Value.SonarWay)}; fixed by StyleBro or the SDK from now on: ", output, StringComparison.Ordinal);
+        Assert.Contains("  S2325 -> CA1822 (dotnet_code_quality.CA1822.api_surface = private, internal; public members stay Sonar's", output, StringComparison.Ordinal);
+        Assert.Contains("    S4136: BRO1001 is off here", output, StringComparison.Ordinal);
+        Assert.Contains("Sonar keeps reporting its own ids", output, StringComparison.Ordinal);
+        Assert.Contains("# S2325: Methods and properties that don't access instance data should be static", output, StringComparison.Ordinal);
+
+        // The preview shows the same part of the report.
+        var part = PreviewCommand.SonarPart(output);
+        Assert.StartsWith("Sonar: read ", part, StringComparison.Ordinal);
+        Assert.EndsWith("Sonar keeps reporting its own ids, the ones above too.\n", part, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Sonar_Init_TurnsOnTheSameRules_WithANote()
+    {
+        Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" /></ItemGroup></Project>""");
+
+        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+
+        var config = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.Contains("Sonar rules on:", output, StringComparison.Ordinal);
+        Assert.Contains("dotnet_diagnostic.CA1822.severity = warning\n", config, StringComparison.Ordinal);
+        Assert.Contains("stylebro_keep_overloads_together = true\n", config, StringComparison.Ordinal);  // BRO1001 is on in the preset
+        Assert.Contains("dotnet_diagnostic.IDE0055.severity = warning\n", config, StringComparison.Ordinal);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(config, "# BEGIN stylebro-migrate"));
+
+        // The format command fixes the CA rules the block turns on.
+        Assert.Contains("CA1822", FormatCommand.Diagnostics(root));
+    }
+
+    [Fact]
+    public void Sonar_TheMapping_NamesKnownRules()
+    {
+        // BRO1149-BRO1151 (S1066, S2971, S3878) are being added in parallel; until they're on main they are only written.
+        var pending = new HashSet<string> { "BRO1149", "BRO1150", "BRO1151" };
+        var rules = Migration.StyleBroRules().Select(r => r.Id).ToHashSet();
+
+        Assert.NotEmpty(SonarSetup.Mapping);
+        Assert.All(SonarSetup.Mapping, m =>
+        {
+            Assert.True(SonarSetup.Rules.ContainsKey(m.Sonar), m.Sonar);
+            Assert.True(rules.Contains(m.Rule) || pending.Contains(m.Rule) || System.Text.RegularExpressions.Regex.IsMatch(m.Rule, @"^(IDE|CA)\d{4}$"), m.Rule);
+            Assert.True(!m.OptionOnly || m.Setting is not null, m.Sonar);
+        });
+        Assert.Contains(SonarSetup.Mapping, m => m.Sonar == "S4136" && m.Rule == "BRO1001" && m.OptionOnly);
+    }
+
+    private static string SonarRuleset(params (string Id, string Action)[] rules) =>
+        "<RuleSet Name=\"Sonar\" ToolsVersion=\"14.0\">\n  <Rules AnalyzerId=\"SonarAnalyzer.CSharp\" RuleNamespace=\"SonarAnalyzer.CSharp\">\n"
+        + string.Concat(rules.Select(r => $"    <Rule Id=\"{r.Id}\" Action=\"{r.Action}\" />\n"))
+        + "  </Rules>\n  <Rules AnalyzerId=\"StyleCop.Analyzers\" RuleNamespace=\"StyleCop.Analyzers\">\n    <Rule Id=\"S927\" Action=\"Warning\" />\n  </Rules>\n</RuleSet>\n";
 
     private static Dictionary<string, string> Hashes(string folder)
     {
