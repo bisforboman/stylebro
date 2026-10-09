@@ -33,7 +33,6 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'fromContainers.Count > 0 ? !fromContainers.SetEquals(fromU) :'; Replace = 'fromContainers.Count > 0 ? false :'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ': !g.Find(name).IsSubsetOf(fromU))'; Replace = ': false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '&& !g.Extensions(name).Concat('; Replace = '&& false && !g.Extensions(name).Concat('; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| compilation.IsSymbolAccessibleWithin(symbol, compilation.Assembly);'; Replace = '|| true;'; Tests = 'UsingPlacementTests' }
         # BRO1136 (lambda parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'if (lambda.ParameterList.Parameters.Count != 1'; Replace = 'if (lambda.ParameterList.Parameters.Count < 1'; Tests = 'LambdaParenthesesTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'is not { Type: null } parameter'; Replace = 'is not { } parameter'; Tests = 'LambdaParenthesesTests' }

@@ -302,7 +302,7 @@ internal static class UsingPlacement
                 continue;
             }
 
-            var fromContainers = new HashSet<ISymbol>(containers.SelectMany(c => c.GetMembers(name)).Where(m => IsVisible(compilation, m)), SymbolEqualityComparer.Default);
+            var fromContainers = new HashSet<ISymbol>(containers.SelectMany(c => c.GetMembers(name)), SymbolEqualityComparer.Default);
             if (fromContainers.Count > 0 ? !fromContainers.SetEquals(fromU) : !g.Find(name).IsSubsetOf(fromU))
             {
                 return false;
@@ -372,15 +372,11 @@ internal static class UsingPlacement
     private static ILookup<string, IMethodSymbol> ExtensionsOf(Compilation compilation, INamespaceOrTypeSymbol target) =>
         ExtensionCache.GetValue(compilation, _ => new ConcurrentDictionary<INamespaceOrTypeSymbol, ILookup<string, IMethodSymbol>>(SymbolEqualityComparer.Default))
             .GetOrAdd(target, t => (t is INamespaceSymbol ns ? ns.GetTypeMembers() : t is INamedTypeSymbol type ? ImmutableArray.Create(type) : ImmutableArray<INamedTypeSymbol>.Empty)
-                .Where(type => type.MightContainExtensionMethods && IsVisible(compilation, type))
+                .Where(type => type.MightContainExtensionMethods)
                 .SelectMany(type => type.GetMembers())
                 .OfType<IMethodSymbol>()
-                .Where(m => m.IsExtensionMethod && IsVisible(compilation, m))
+                .Where(m => m.IsExtensionMethod)
                 .ToLookup(m => m.Name));
-
-    /// <summary>Only what the file's code could use: not another assembly's internal types (lookup skips them).</summary>
-    private static bool IsVisible(Compilation compilation, ISymbol symbol) =>
-        symbol is INamespaceSymbol || compilation.IsSymbolAccessibleWithin(symbol, compilation.Assembly);
 
     private static string Indentation(TextLine line)
     {
@@ -411,8 +407,8 @@ internal static class UsingPlacement
             foreach (var target in this.targets)
             {
                 found.UnionWith(target is INamespaceSymbol ns
-                    ? ns.GetTypeMembers(name).Where(t => IsVisible(this.compilation, t))
-                    : target.GetMembers(name).Where(m => (m.IsStatic || m is ITypeSymbol) && IsVisible(this.compilation, m)));
+                    ? ns.GetTypeMembers(name)
+                    : target.GetMembers(name).Where(m => m.IsStatic || m is ITypeSymbol));
             }
 
             found.UnionWith(this.aliases.Where(a => a.Name == name).Select(a => a.Target));
