@@ -140,8 +140,10 @@ The settings: private field naming ([BRO1303](rules/BRO1303.md)), brace placemen
 `csharp_new_line_before_else`/`_catch`/`_finally`), braces on one-line bodies (`csharp_prefer_braces`), operator, `=>`
 and `=` placement when wrapping, trailing commas, `""` or `string.Empty`, null checks, one-line summaries,
 `<inheritdoc/>` spacing, `default` or `default(T)`, the closing parenthesis and first item of split lists, constructor
-initializer and `where` placement, `new T()` parentheses with an initializer, and blank lines between switch sections
-(the keys are in [Settings](configuration.md)). A key your root `.editorconfig` sets wins, so does a Sonar setup's, and
+initializer and `where` placement, `new T()` parentheses with an initializer, blank lines between switch sections, and
+where using directives go (`csharp_using_directive_placement`, [BRO1008](rules/BRO1008.md); counted in files: a file
+with a namespace and its usings on one level, inside it, file-scoped too, or outside; only `inside_namespace` is
+written, the preset already says `outside_namespace`) (the keys are in [Settings](configuration.md)). A key your root `.editorconfig` sets wins, so does a Sonar setup's, and
 a `dotnet_naming_rule` for private fields decides the field style (naming rules for interfaces or constants don't).
 
 EF Core migrations (files with `[Migration(...)]`, a `Migration` base class or a `ModelSnapshot`) are written by

@@ -15,7 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 125 |
 | Done, not released yet | 4 |
-| Planned | 0 rules, 65 work items |
+| Planned | 0 rules, 66 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 109 by StyleBro, 44 by the .NET SDK, 42 dropped by design (they
@@ -43,6 +43,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Getting started | docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines. | Done (2026-10-03) |
 | Adoption | IDE experience | Checked by the owner in Visual Studio 2022 (17.13) with the package from a local feed and `init --write`: the build reports the same 8 rules as the command line (not the preset-off BRO1112), the light bulb renames (BRO1303) with a preview, Fix All in the solution sorts (BRO1001), and squiggles appear while typing (BRO1002). Rider not checked (not installed). | Done (2026-10-05) |
 | Adoption | Migration sample | samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards. | Done (2026-10-03) |
+| Adoption | `init` detects using directive placement | Counts the repository's files with usings inside vs outside the namespace (file-scoped counts as inside; mixed, namespace-less and global-only files don't count) and writes `csharp_using_directive_placement = inside_namespace` for BRO1008 at 75 % of at least 10 files; outside is the preset's. | Done (2026-10-09) |
 | Adoption | `init --modernize` | Opt-in block of the SDK's modernization rules in three tiers ([modernizing.md](modernizing.md)): older C# everywhere; newer C# at warning unless a multi-targeted project leaves LangVersion unset; newer APIs only without multi-targeted projects (else suggestions with a note). See decisions.md. | Done (2026-10-04) |
 | Adoption | Multi-target guard for modernization rules | MultiTargetSuppressor: the package passes the project's target frameworks (StyleBroTargetFrameworks, comma-separated) and the suppressor hides a tier C rule where a framework lacks its API, so init --modernize writes tier C at warning everywhere. See modernizing.md. | Done (2026-10-05) |
 | Beyond StyleCop | Survey other analyzers | Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe. | Done (2026-10-03) |

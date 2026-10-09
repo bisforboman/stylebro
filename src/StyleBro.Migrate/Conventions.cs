@@ -49,6 +49,7 @@ internal static class Conventions
         new("stylebro_constraint_placement", "'where' constraints", "own_line", ("own_line", "on their own line"), ("same_line", "on the declaration's line")),
         new("stylebro_object_creation_parentheses", "'new T { ... }' with an initializer", "omit", ("omit", "without '()'"), ("include", "with '()'")),
         new("stylebro_blank_line_between_switch_sections", "switch sections", "include", ("include", "after a blank line"), ("omit", "without one")),
+        new("csharp_using_directive_placement", "files with using directives", "outside_namespace", ("outside_namespace", "outside the namespace"), ("inside_namespace", "inside the namespace")),
     };
 
     /// <summary>Counts every convention in the repository's own C# files: key -> count per value (in <see cref="Convention.Values"/>' order).</summary>
@@ -100,6 +101,7 @@ internal static class Conventions
         counts[StyleBro.Analyzers.Naming.FieldNames.StyleKey][1] += underscore;
 
         var root = tree.GetRoot();
+        UsingPlacement();
         foreach (var token in root.DescendantTokens())
         {
             if (token.IsKind(SyntaxKind.OpenBraceToken) && token.Parent is BlockSyntax or BaseTypeDeclarationSyntax or BaseNamespaceDeclarationSyntax or AccessorListSyntax or SwitchStatementSyntax
@@ -277,6 +279,20 @@ internal static class Conventions
                 case XmlEmptyElementSyntax { Name.LocalName.ValueText: "inheritdoc" } inheritdoc:
                     Add("stylebro_inheritdoc_style", inheritdoc.SlashGreaterThanToken.GetPreviousToken().TrailingTrivia.Any() || inheritdoc.SlashGreaterThanToken.LeadingTrivia.Any());
                     break;
+            }
+        }
+
+        // Unit = files: one with a namespace and non-global usings on one level only (file-scoped namespaces count as inside).
+        void UsingPlacement()
+        {
+            if (root is CompilationUnitSyntax unit && unit.DescendantNodes(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax).OfType<BaseNamespaceDeclarationSyntax>().ToList() is { Count: > 0 } namespaces)
+            {
+                var outside = unit.Usings.Any(u => u.GlobalKeyword.IsKind(SyntaxKind.None));
+                var inside = namespaces.Any(n => n.Usings.Count > 0);
+                if (outside != inside)
+                {
+                    Add("csharp_using_directive_placement", inside);
+                }
             }
         }
 
