@@ -8,8 +8,16 @@ and writes the matching settings.
 ```
 dotnet tool install --global StyleBro.Migrate --prerelease
 stylebro-migrate path/to/repo           # dry run: prints the report and the settings
+stylebro-migrate path/to/repo --diff    # preview: what the settings and the format run would change in the code
 stylebro-migrate path/to/repo --write   # writes them
 ```
+
+`--diff` runs `--write` and then `stylebro-migrate format` (until a run changes nothing) on a temporary copy of the
+repository, prints which files each rule changed with a few sample hunks, and writes the full diff to
+`stylebro-preview.patch` (`--diff=file` for another name, `--keep` keeps the copy). The copy also gets the
+StyleBro.Analyzers reference if the repository has none; StyleCop.Analyzers stays, but format only fixes StyleBro's
+and the built-in rules' ids, so it changes nothing. In a StyleCop-clean repository the format part should be close to
+empty. Details: [Preview first](getting-started.md#preview-first).
 
 The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.2.0-alpha.1;
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
