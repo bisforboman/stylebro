@@ -788,6 +788,42 @@ internal static class Descriptors
         description: "Parentheses around a value, or around a whole expression in a statement, argument or initializer, add nothing. Replaces StyleCop SA1119.",
         helpLinkUri: HelpBase + DiagnosticIds.UnnecessaryParentheses + ".md");
 
+    // The '(' and ')' of a BRO1405 finding, so an IDE fades them (like StyleCop's SA1119_p): hidden, not configurable,
+    // no fix of its own. Not in DiagnosticIds: no baseline, migration or documentation entry of its own.
+    public static readonly DiagnosticDescriptor UnnecessaryParenthesesFade = new(
+        id: DiagnosticIds.UnnecessaryParentheses + "_p",
+        title: "Statement should not use unnecessary parenthesis",
+        messageFormat: "Remove the unnecessary parentheses",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Hidden,
+        isEnabledByDefault: true,
+        description: FadeDescription,
+        helpLinkUri: HelpBase + DiagnosticIds.UnnecessaryParentheses + ".md",
+        customTags: new[] { WellKnownDiagnosticTags.Unnecessary, WellKnownDiagnosticTags.NotConfigurable });
+
+    public static readonly DiagnosticDescriptor UnnecessaryPatternParentheses = new(
+        id: DiagnosticIds.UnnecessaryPatternParentheses,
+        title: "Patterns should not use unnecessary parentheses",
+        messageFormat: "Remove the unnecessary parentheses",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Parentheses around a pattern that parses the same without them ('x is (> 0)', 'o is (string s)', "
+            + "'x is not (null)') add nothing. Ones that BRO1407 wants between 'and' and 'or' stay.",
+        helpLinkUri: HelpBase + DiagnosticIds.UnnecessaryPatternParentheses + ".md");
+
+    // The same for BRO1410.
+    public static readonly DiagnosticDescriptor UnnecessaryPatternParenthesesFade = new(
+        id: DiagnosticIds.UnnecessaryPatternParentheses + "_p",
+        title: "Patterns should not use unnecessary parentheses",
+        messageFormat: "Remove the unnecessary parentheses",
+        category: "Maintainability",
+        defaultSeverity: DiagnosticSeverity.Hidden,
+        isEnabledByDefault: true,
+        description: FadeDescription,
+        helpLinkUri: HelpBase + DiagnosticIds.UnnecessaryPatternParentheses + ".md",
+        customTags: new[] { WellKnownDiagnosticTags.Unnecessary, WellKnownDiagnosticTags.NotConfigurable });
+
     public static readonly DiagnosticDescriptor ArithmeticPrecedence = new(
         id: DiagnosticIds.ArithmeticPrecedence,
         title: "Arithmetic expressions should declare precedence",
@@ -1333,4 +1369,6 @@ internal static class Descriptors
         helpLinkUri: HelpBase + DiagnosticIds.AutoAccessorsOnOneLine + ".md");
 
     private const string HelpBase = "https://github.com/bisforboman/stylebro/blob/main/docs/rules/";
+
+    private const string FadeDescription = "Fades the parentheses of a finding in an IDE. Not configurable: reported only where its rule is on.";
 }

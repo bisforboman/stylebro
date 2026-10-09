@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -7,7 +8,10 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Maintainability;
 
-/// <summary>BRO1405 (SA1119): unnecessary parentheses. Which ones follow StyleCop; the fix removes the pair.</summary>
+/// <summary>
+/// BRO1405 (SA1119): unnecessary parentheses around expressions, which ones follow StyleCop. BRO1410: around patterns.
+/// The fix removes the pair.
+/// </summary>
 internal static class Parentheses
 {
     /// <summary>Whether StyleCop's SA1119 reports these parentheses and removing them keeps the code's meaning.</summary>
@@ -15,15 +19,29 @@ internal static class Parentheses
         !node.IsPartOfStructuredTrivia() && IsReportedByStyleCop(node) && ParsesTheSame(new[] { node }, text);
 
     /// <summary>
+    /// Whether removing these pattern parentheses keeps the code's meaning. <paramref name="keepPrecedence"/>: whether
+    /// BRO1407 is on and wants them where they separate 'and' from 'or' ('A or (B and C)'); asked only there.
+    /// </summary>
+    public static bool IsUnnecessary(ParenthesizedPatternSyntax pattern, SourceText text, Func<bool> keepPrecedence) =>
+        !(DeclaresPrecedence(pattern) && keepPrecedence()) && ParsesTheSame(new[] { pattern }, text);
+
+    /// <summary>The '(' and ')' of a parenthesized expression or pattern.</summary>
+    public static (SyntaxToken Open, SyntaxToken Close) GetTokens(SyntaxNode node)
+    {
+        var (open, _, close) = Parts(node);
+        return (open, close);
+    }
+
+    /// <summary>
     /// The pairs that can be removed together: each one is added only when the enclosing statement or member still parses
     /// the same with it and the ones before it removed (two removals that are fine alone can make a generic call together).
     /// </summary>
-    public static List<TextChange> GetChanges(IEnumerable<ParenthesizedExpressionSyntax> nodes, SourceText text)
+    public static List<TextChange> GetChanges(IEnumerable<SyntaxNode> nodes, SourceText text)
     {
         var changes = new List<TextChange>();
         foreach (var group in nodes.Distinct().GroupBy(Container))
         {
-            var accepted = new List<ParenthesizedExpressionSyntax>();
+            var accepted = new List<SyntaxNode>();
             foreach (var node in group.OrderBy(n => n.SpanStart))
             {
                 if (group.Key is not null && ParsesTheSame(accepted.Append(node).ToList(), text))
@@ -39,17 +57,15 @@ internal static class Parentheses
     }
 
     /// <summary>Removes '(' and ')' and the spaces inside them; a space stays where the tokens would run together.</summary>
-    private static List<TextChange>? GetChanges(ParenthesizedExpressionSyntax node, SourceText text)
+    private static List<TextChange>? GetChanges(SyntaxNode node, SourceText text)
     {
-        var open = node.OpenParenToken;
-        var close = node.CloseParenToken;
+        var (open, inner, close) = Parts(node);
         if (open.IsMissing || close.IsMissing
             || !open.TrailingTrivia.Concat(close.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia)))
         {
             return null;
         }
 
-        var inner = node.Expression;
         var before = open.GetPreviousToken();
         var after = close.GetNextToken();
         var openText = before.Span.End == open.SpanStart && Glues(before, inner.GetFirstToken()) ? " " : string.Empty;
@@ -71,7 +87,7 @@ internal static class Parentheses
     /// same tree with the parenthesized expression replaced by its content (catches 'F((a &lt; b), (c &gt; (d)))' turning
     /// into a generic call, and casts like '(T)(-x)').
     /// </summary>
-    private static bool ParsesTheSame(IReadOnlyList<ParenthesizedExpressionSyntax> nodes, SourceText text)
+    private static bool ParsesTheSame(IReadOnlyList<SyntaxNode> nodes, SourceText text)
     {
         var container = Container(nodes[0]);
         var changes = new List<TextChange>();
@@ -102,7 +118,7 @@ internal static class Parentheses
             return false;
         }
 
-        var expected = container.ReplaceNodes(nodes, (original, rewritten) => ((ParenthesizedExpressionSyntax)rewritten).Expression);
+        var expected = container.ReplaceNodes(nodes, (original, rewritten) => Parts(rewritten).Inner);
         return parsed.IsEquivalentTo(expected, topLevel: false);
     }
 
@@ -172,5 +188,27 @@ internal static class Parentheses
         ConditionalExpressionSyntax => true,
         AssignmentExpressionSyntax assignment => HasConditional(assignment.Left) || HasConditional(assignment.Right),
         _ => false,
+    };
+
+    /// <summary>
+    /// The outermost pair around an 'and' inside 'or' or the other way round, which BRO1407 would add again. Inner pairs
+    /// ('A or ((B and C))') are redundant.
+    /// </summary>
+    private static bool DeclaresPrecedence(ParenthesizedPatternSyntax node)
+    {
+        var inner = node.Pattern;
+        while (inner is ParenthesizedPatternSyntax nested)
+        {
+            inner = nested.Pattern;
+        }
+
+        return inner is BinaryPatternSyntax binary && node.Parent is BinaryPatternSyntax outer && !outer.IsKind(binary.Kind());
+    }
+
+    private static (SyntaxToken Open, SyntaxNode Inner, SyntaxToken Close) Parts(SyntaxNode node) => node switch
+    {
+        ParenthesizedExpressionSyntax e => (e.OpenParenToken, e.Expression, e.CloseParenToken),
+        ParenthesizedPatternSyntax p => (p.OpenParenToken, p.Pattern, p.CloseParenToken),
+        _ => throw new ArgumentException("Not a parenthesized expression or pattern.", nameof(node)),
     };
 }

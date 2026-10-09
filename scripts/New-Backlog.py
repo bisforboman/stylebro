@@ -5,7 +5,7 @@ import re
 
 readme = open('docs/rules/README.md', encoding='utf-8').read()
 rows = re.findall(r'^\| \[(BRO\d{4})\]\(BRO\d{4}\.md\) \| (.*?) \| (.*?) \|', readme, re.M)
-unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
+unshipped = set(re.findall(r'^(BRO\d{4})\s*\|', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
 
 PLANNED = [
 ]
@@ -65,11 +65,13 @@ WORK = [
     ('Adoption', 'Readable release notes', "GitHub's generated notes list every PR title; a short summary per release (what's new, how to upgrade, known limits) for users.", 'Idea'),
     ('Adoption', 'Rider check', 'The IDE check was done in Visual Studio 2022 only.', 'Idea'),
     ('Upstream', 'Report the SDK fixer bugs to dotnet/roslyn', 'Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`; the owner posts them.', 'Idea'),
+    ('Parity', 'SA1119_p and SX1309S', 'The two StyleCop variants StyleBro doesn\'t cover: unnecessary parentheses in patterns (`x is (> 0)`, next to BRO1405) and the `_` prefix for static fields (a BRO1303 style). See skipped-rules.md.', 'Idea'),
+    ('Beyond StyleCop', 'Unnecessary parentheses in patterns', 'BRO1410: `x is (> 0)`, `o is (string s)`, a pair around a pair; leaves the ones BRO1407 adds to `and`/`or` patterns. BRO1405_p/BRO1410_p fade the parentheses in an IDE like StyleCop\'s SA1119_p. Off after `stylebro-migrate`. See decisions.md.', 'Done (2026-10-09)'),
     ('Parity', 'SA1119_p and SX1309S', 'The last two StyleCop variants. SA1119_p is SA1119\'s hidden IDE greying of the same parentheses, covered by BRO1405 (StyleCop never checks parentheses in patterns); SX1309S is BRO1303 with `_camelCase`, which stylebro-migrate now counts as covering it. Both in stylecop-mapping.md.', 'Done (2026-10-09)'),
-    ('Beyond StyleCop', 'Unnecessary parentheses in patterns', '`x is (> 0)`, `x is (A or B)` alone: no StyleCop rule checks them (SA1119 only looks at expressions). Would sit next to BRO1405 and must leave the parentheses BRO1407 adds to `and`/`or` patterns.', 'Idea'),
     ('Performance', 'FieldNamingAnalyzer variance', 'Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost.', 'Idea'),
     ('Adoption', '`stylebro-migrate --diff`: preview before writing', '`--diff[=file]` on the migration, `init` and `format` (decisions.md 2026-10-09): runs the command and `stylebro-migrate format` on a temporary copy, prints the settings, files per rule and sample hunks, writes the full diff to `stylebro-preview.patch`. On FFMpegCore the patch matched the real commands byte for byte.', 'Done (2026-10-09)'),
     ('Adoption', 'Rule docs as a website', 'Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views.', 'Idea'),
+    ('Hardening', 'BRO1523 second run in Kavita', "After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Reproduce from the trial clone and find which fix leaves it.", 'Idea'),
 ]
 
 # Candidates from StyleCop's issue tracker and other analyzers (docs/beyond-stylecop.md); planned as a group (WORK).

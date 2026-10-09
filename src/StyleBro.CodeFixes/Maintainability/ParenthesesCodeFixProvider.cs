@@ -11,13 +11,13 @@ using StyleBro.Analyzers.Maintainability;
 
 namespace StyleBro.CodeFixes.Maintainability;
 
-/// <summary>Fix for BRO1405: removes the parentheses.</summary>
+/// <summary>Fix for BRO1405 and BRO1410: removes the parentheses.</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ParenthesesCodeFixProvider))]
 public sealed class ParenthesesCodeFixProvider : CodeFixProvider
 {
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(DiagnosticIds.UnnecessaryParentheses);
+        ImmutableArray.Create(DiagnosticIds.UnnecessaryParentheses, DiagnosticIds.UnnecessaryPatternParentheses);
 
     /// <inheritdoc/>
     public override FixAllProvider GetFixAllProvider() =>
@@ -51,11 +51,16 @@ public sealed class ParenthesesCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var nodes = new List<ParenthesizedExpressionSyntax>();
+        var tree = root.SyntaxTree;
+        bool KeepPrecedence() =>
+            Severities.IsOn(document.Project.CompilationOptions, tree, DiagnosticIds.ConditionalPrecedence, cancellationToken)
+            && Precedence.IsWanted(DiagnosticIds.ConditionalPrecedence, document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(tree));
+        var nodes = new List<SyntaxNode>();
         foreach (var diagnostic in diagnostics)
         {
-            if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true) is ParenthesizedExpressionSyntax node
-                && Parentheses.IsUnnecessary(node, text))
+            var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
+            if ((node is ParenthesizedExpressionSyntax expression && Parentheses.IsUnnecessary(expression, text))
+                || (node is ParenthesizedPatternSyntax pattern && Parentheses.IsUnnecessary(pattern, text, KeepPrecedence)))
             {
                 nodes.Add(node);
             }

@@ -2,6 +2,20 @@
 
 Design questions that came up while building StyleBro, the choices considered, and what was decided. Newest first.
 
+## Parentheses in patterns, and fading unnecessary parentheses (2026-10-09)
+
+### Question
+
+StyleCop's SA1119 (BRO1405) only looks at parenthesized expressions, so `x is (> 0)` or `o is (string s)` were never
+reported. And StyleCop also reports a hidden SA1119_p on the `(` and `)` of each finding so the IDE fades them, which
+StyleBro didn't. Should StyleBro check patterns, and should it fade the parentheses?
+
+```csharp
+// Before
+public bool IsSmall(int x) => x is ((1 or 2)) or (> 5 and < 9);
+
+// After
+public bool IsSmall(int x) => x is 1 or 2 or (> 5 and < 9);
 ## A preview before writing: which commands, and what it shows (2026-10-09)
 
 ### Question
@@ -58,6 +72,21 @@ stylebro-migrate format --all          # everything, like before
 
 ### Choices
 
+1. Patterns: extend BRO1405 (but then `stylebro-migrate`'s SA1119 -> BRO1405 mapping would turn on more than StyleCop
+   checked), a new rule beyond StyleCop next to it, or leave patterns alone.
+2. Fading: a hidden, not configurable companion like StyleCop's SA1119_p, or none (the warning alone).
+
+### Decision
+
+The owner: a new rule, [BRO1410](rules/BRO1410.md), on in the preset and off after `stylebro-migrate` (like every rule
+beyond StyleCop). It only removes parentheses whose removal parses to the same pattern, and leaves the ones
+[BRO1407](rules/BRO1407.md) (SA1408) wants between `and` and `or` while BRO1407 is on, so the two converge in one run in
+any order. And fading like StyleCop: `BRO1405_p` and `BRO1410_p` (hidden, `Unnecessary` and `NotConfigurable` tags)
+on the `(` and `)` of each finding, reported only where their rule is on, no fix of their own, and no baseline,
+migration or rule-page entry of their own.
+
+A survey of the 12 reference repositories found 32 parenthesized patterns and no finding: 24 put an `and` inside an
+`or`, 8 follow `not`.
 1. Limit `stylebro-migrate format` to StyleBro's ids and the SDK rules `init`/the migration turn on, `--all` for
    everything; the docs warn about plain `dotnet format` and show the `--diagnostics` equivalent.
 2. Only warn in the docs; keep passing everything through.

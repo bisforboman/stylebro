@@ -14,8 +14,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 124 |
-| Done, not released yet | 0 |
-| Planned | 0 rules, 58 work items |
+| Done, not released yet | 1 |
+| Planned | 0 rules, 60 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 108 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -88,11 +88,13 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Readable release notes | GitHub's generated notes list every PR title; a short summary per release (what's new, how to upgrade, known limits) for users. | Idea |
 | Adoption | Rider check | The IDE check was done in Visual Studio 2022 only. | Idea |
 | Upstream | Report the SDK fixer bugs to dotnet/roslyn | Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`; the owner posts them. | Idea |
+| Parity | SA1119_p and SX1309S | The two StyleCop variants StyleBro doesn't cover: unnecessary parentheses in patterns (`x is (> 0)`, next to BRO1405) and the `_` prefix for static fields (a BRO1303 style). See skipped-rules.md. | Idea |
+| Beyond StyleCop | Unnecessary parentheses in patterns | BRO1410: `x is (> 0)`, `o is (string s)`, a pair around a pair; leaves the ones BRO1407 adds to `and`/`or` patterns. BRO1405_p/BRO1410_p fade the parentheses in an IDE like StyleCop's SA1119_p. Off after `stylebro-migrate`. See decisions.md. | Done (2026-10-09) |
 | Parity | SA1119_p and SX1309S | The last two StyleCop variants. SA1119_p is SA1119's hidden IDE greying of the same parentheses, covered by BRO1405 (StyleCop never checks parentheses in patterns); SX1309S is BRO1303 with `_camelCase`, which stylebro-migrate now counts as covering it. Both in stylecop-mapping.md. | Done (2026-10-09) |
-| Beyond StyleCop | Unnecessary parentheses in patterns | `x is (> 0)`, `x is (A or B)` alone: no StyleCop rule checks them (SA1119 only looks at expressions). Would sit next to BRO1405 and must leave the parentheses BRO1407 adds to `and`/`or` patterns. | Idea |
 | Performance | FieldNamingAnalyzer variance | Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost. | Idea |
 | Adoption | `stylebro-migrate --diff`: preview before writing | `--diff[=file]` on the migration, `init` and `format` (decisions.md 2026-10-09): runs the command and `stylebro-migrate format` on a temporary copy, prints the settings, files per rule and sample hunks, writes the full diff to `stylebro-preview.patch`. On FFMpegCore the patch matched the real commands byte for byte. | Done (2026-10-09) |
 | Adoption | Rule docs as a website | Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views. | Idea |
+| Hardening | BRO1523 second run in Kavita | After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Reproduce from the trial clone and find which fix leaves it. | Idea |
 
 ### Read the SDK's own settings
 
@@ -221,6 +223,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Released |
 | [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Released |
 | [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | Released |
+| [BRO1410](rules/BRO1410.md) | Patterns should not use unnecessary parentheses | (none; SA1119 checks expressions only) | Done |
 
 ### BRO15xx: Layout
 

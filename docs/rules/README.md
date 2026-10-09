@@ -114,6 +114,7 @@ folder counts. Shared source linked from elsewhere in the repository is still ch
 | [BRO1407](BRO1407.md) | Conditional expressions should declare precedence | SA1408 | on |
 | [BRO1408](BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | on |
 | [BRO1409](BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | off |
+| [BRO1410](BRO1410.md) | Patterns should not use unnecessary parentheses | (none; SA1119 checks expressions only) | on |
 
 ## Layout
 
