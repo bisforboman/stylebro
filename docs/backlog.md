@@ -15,8 +15,6 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 125 |
 | Done, not released yet | 4 |
-| Planned | 0 rules, 64 work items |
-| Done, not released yet | 3 |
 | Planned | 0 rules, 65 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
