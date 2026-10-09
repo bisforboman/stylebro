@@ -11,6 +11,12 @@ Where the rules and the preset differ from StyleCop: [differences-from-stylecop.
 How every StyleCop rule maps to StyleBro or the SDK: [stylecop-mapping.md](../stylecop-mapping.md), and the ones
 StyleBro leaves out: [skipped-rules.md](../skipped-rules.md).
 
+**Files from NuGet packages** aren't checked: a source package's files (`contentFiles`, or files a package's build
+targets compile) live in the package folder, where nobody can fix them and `dotnet format` would edit the shared
+package cache. The package passes the restore's package folders (`NuGetPackageFolders`) to `PackageFileSuppressor`,
+which hides every StyleBro finding there; without them (no package build targets), a path with a `contentFiles`
+folder counts. Shared source linked from elsewhere in the repository is still checked.
+
 ## Ordering, spacing and comments
 
 | ID | Title | Replaces | Default |

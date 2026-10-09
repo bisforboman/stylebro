@@ -432,21 +432,16 @@
                 'only StyleCop: BRO1603 Periods.cs(16,43)'
                 'only StyleCop: BRO1603 Periods.cs(37,40)'
                 'only StyleCop: BRO1603 Periods.cs(52,47)'
-                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?</summary>]'
-                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:</summary>]'
-                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a question?.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a colon:.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an exclamation!.</summary>]'
                 # A period followed by closing punctuation ends the sentence ('"done."'; StyleCop accepts only '.)', #2860).
                 'only StyleCop: BRO1603 Periods.cs(46,52)'
-                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with a quoted "sentence."</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a quoted "sentence.".</summary>]'
                 # Text ending in an entity: the period goes after it; StyleCop 1.2.0-beta.556 reports the ';' and its fix
                 # replaces it (#3802, fixed after beta.556).
                 'only StyleBro: BRO1603 Periods.cs(49,55)'
                 'only StyleCop: BRO1603 Periods.cs(49,54)'
-                'StyleBro output only: Periods.cs: [        /// <summary>Gets or sets ends with an entity List&lt;T&gt;.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with an entity List&lt;T&gt.</summary>]'
                 # A bool's summary may use the plain verb ('Gets the open state'); StyleCop requires 'a value indicating
                 # whether' and puts it in front of any text ('whether gets the return value condition').
@@ -478,6 +473,45 @@
                 'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets the set thing.</summary>]'
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets the init thing.</summary>]'
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets or initializes the set thing.</summary>]'
+                # BRO1604 only prefixes noun phrases (an article or a lower-case word; owner's decision 2026-10-09): these probe
+                # summaries start with a capitalized word ('Ends with ...', 'Value doc', 'Number 42'). StyleCop prefixes them all.
+                'only StyleCop: BRO1604 Periods.cs(11,20)'
+                'only StyleCop: BRO1604 Periods.cs(14,20)'
+                'only StyleCop: BRO1604 Periods.cs(17,20)'
+                'only StyleCop: BRO1604 Periods.cs(20,20)'
+                'only StyleCop: BRO1604 Periods.cs(23,20)'
+                'only StyleCop: BRO1604 Periods.cs(38,20)'
+                'only StyleCop: BRO1604 Periods.cs(41,20)'
+                'only StyleCop: BRO1604 Periods.cs(44,20)'
+                'only StyleCop: BRO1604 Periods.cs(47,20)'
+                'only StyleCop: BRO1604 Periods.cs(50,20)'
+                'only StyleCop: BRO1604 Periods.cs(53,20)'
+                'only StyleCop: BRO1604 Periods.cs(71,20)'
+                'only StyleCop: BRO1604 Periods.cs(78,20)'
+                'only StyleCop: BRO1604 Periods.cs(81,20)'
+                'StyleBro output only: Periods.cs: [        /// Multi-line summary without a period.]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a period.</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a question?</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a see <see cref="Texts"/>.</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with code <c>x</c>.</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a colon:</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a closing paren (see above).</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a period in parens (see above.)</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a quoted "sentence."</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with an entity List&lt;T&gt;.</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with an exclamation!</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Value doc.</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Ends with a quote "done".</summary>]'
+                'StyleBro output only: Periods.cs: [        /// <summary>Number 42.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// Gets or sets multi-line summary without a period.]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a period.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a see <see cref="Texts"/>.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with code <c>x</c>.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a closing paren (see above).</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a period in parens (see above.)</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets value doc.</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a quote "done".</summary>]'
+                'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets number 42.</summary>]'
             )
         }
         @{
@@ -486,11 +520,9 @@
             Expected = @(
                 # StyleBro puts a space after the standard sentence; StyleCop's fix doesn't ('class.Creates').
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class. Initializes the static members.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct. Makes a point.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class. Makes one.</summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Initializes a new instance of Words with the given name.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Creates a words object.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class.Initializes the static members.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class.Cleans up.</summary>]'
@@ -504,6 +536,12 @@
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Creates a words object from a float.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Initializes a new instance of Words with the given name.</summary>]'
+                # BRO1606: a summary that is a constructor sentence of its own ('Initializes the static members.') isn't reported:
+                # the standard sentence in front would repeat it, and replacing it would lose what it says (Scrutor). StyleCop prefixes it.
+                'only StyleCop: BRO1606 Words.cs(25,13)'
+                'only StyleCop: BRO1606 Words.cs(43,13)'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of Words with the given name.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Initializes the static members.</summary>]'
             )
         }
         @{

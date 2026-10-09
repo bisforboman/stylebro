@@ -8,7 +8,8 @@
 #   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported;
 #   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
 #      single-target project and not in a netstandard2.0;net10.0 one, which still builds;
-#   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion.
+#   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion;
+#   7. a file compiled from the package folder (a source package's contentFiles) isn't checked.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -120,6 +121,16 @@ try {
     Check (-not ((Build @() $guardProject) -contains 'BRO1145 Marker.cs')) 'without LangVersion, netstandard2.0;net10.0 gets no BRO1145'
     Check ((Build @('-p:LangVersion=12') $guardProject) -contains 'BRO1145 Marker.cs') 'with LangVersion set, it is reported'
     Check ((Build @('-p:StyleBroTargetFrameworks=net10.0') $guardProject) -contains 'BRO1145 Marker.cs') 'with one framework, it is reported'
+
+    Write-Host '== 7. Files from the package folder (a source package) are not checked'
+    $vendored = Join-Path $repo 'src/Vendored'
+    $source = Join-Path $work 'packages/fake.sources/1.0.0/contentFiles/cs/any'
+    New-Item -ItemType Directory -Force $vendored, $source | Out-Null
+    Set-Content (Join-Path $source 'Vendored.cs') "namespace App;`n`npublic class Vendored`n{`n    public string Name = `"`";`n}`n" -NoNewline
+    $vendoredProject = Join-Path $vendored 'Vendored.csproj'
+    Set-Content $vendoredProject ((Get-Content $project -Raw).Replace('</Project>', "  <ItemGroup><Compile Include=`"$(Join-Path $source 'Vendored.cs')`" /></ItemGroup>`n</Project>"))
+    Check (-not ((Build @() $vendoredProject) -contains 'BRO1106 Vendored.cs')) 'BRO1106 is not reported in a file under the package folder'
+    Check ((Build @('-p:StyleBroPackageFolders=C:/elsewhere') $vendoredProject) -contains 'BRO1106 Vendored.cs') 'with other package folders, it is reported'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue

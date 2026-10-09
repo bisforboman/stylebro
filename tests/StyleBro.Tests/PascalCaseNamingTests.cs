@@ -241,6 +241,15 @@ public class PascalCaseNamingTests
             public bool ShouldSerializeitems() => items > 0;
         }
 
+        public class Snake
+        {
+            public string device_id { get; set; }
+
+            public void load_all()
+            {
+            }
+        }
+
         public class JsonObjectAttribute : Attribute
         {
         }
@@ -288,13 +297,72 @@ public class PascalCaseNamingTests
             """
             public class Dto
             {
-                public string {|BRO1309:access_token|} { get; set; }
+                public string {|BRO1309:token|} { get; set; }
             }
             """,
             """
             class Tests
             {
-                const string Json = "{\"access_token\": \"x\"}";
+                const string Json = "{\"token\": \"x\"}";
+            }
+            """,
+        ]);
+
+    // Kavita's Koreader DTO: 'document' is in a string and keeps its name, so 'percentage' keeps its own too (a mixed
+    // casing, and only part of the wire format renamed, before). Snake_case names aren't reported at all.
+    // Only properties BRO1309 would rename count: 'Id' in a string doesn't keep 'count'.
+    [Fact]
+    public Task AnUpperCasePropertyInAString_DoesntKeepTheOthers() => VerifyFixAsync(
+        [
+            """
+            public class Dto
+            {
+                public int Id { get; set; }
+
+                public int {|BRO1309:count|} { get; set; }
+            }
+            """,
+            """
+            class Tests
+            {
+                const string Json = "{\"Id\": 1}";
+            }
+            """,
+        ],
+        [
+            """
+            public class Dto
+            {
+                public int Id { get; set; }
+
+                public int Count { get; set; }
+            }
+            """,
+            """
+            class Tests
+            {
+                const string Json = "{\"Id\": 1}";
+            }
+            """,
+        ]);
+
+    [Fact]
+    public Task APropertyKeptByAString_KeepsTheTypesOtherProperties() => VerifyNotFixedAsync(
+        [
+            """
+            public class KoreaderBookDto
+            {
+                public string {|BRO1309:document|} { get; set; }
+
+                public string device_id { get; set; }
+
+                public float {|BRO1309:percentage|} { get; set; }
+            }
+            """,
+            """
+            class Tests
+            {
+                const string Json = "{\"document\": \"x\"}";
             }
             """,
         ]);

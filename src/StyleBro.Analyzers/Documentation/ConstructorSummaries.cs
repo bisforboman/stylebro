@@ -92,6 +92,14 @@ internal static class ConstructorSummaries
             return null;
         }
 
+        // A summary that is a constructor sentence of its own ('Initializes the attribute with the specified value.')
+        // would follow the standard one ('... class. Initializes the attribute ...'), and replacing it would lose what it
+        // says (Scrutor): left alone.
+        if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' '))))
+        {
+            return null;
+        }
+
         var separator = remaining.Length == 0 || remaining.StartsWith("</", StringComparison.Ordinal) ? string.Empty : " ";
         return new Finding(summary.StartTag.GetLocation(), member is DestructorDeclarationSyntax, new TextSpan(start, replaceLength), standard + separator);
     }

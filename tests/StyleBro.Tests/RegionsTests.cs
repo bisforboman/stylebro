@@ -44,6 +44,35 @@ public class RegionsTests
         }
         """);
 
+    // Kavita: the blank lines left below the comment are found once per removed region and span removed lines.
+    [Fact]
+    public Task EmptyRegionsBelowAComment_TheBlankLinesGoOnce() => VerifyFixAsync(
+        """
+        public class C
+        {
+            // TODO: Implement
+
+            {|BRO1112:#region First|}
+
+
+            #endregion
+
+            {|BRO1112:#region Second|}
+
+
+            #endregion
+
+            public int A;
+        }
+        """,
+        """
+        public class C
+        {
+            // TODO: Implement
+            public int A;
+        }
+        """);
+
     [Fact]
     public Task RegionsAroundDirectives_KeepTheDirectives() => VerifyFixAsync(
         """

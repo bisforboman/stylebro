@@ -752,6 +752,84 @@ public class FixOrderTests
         "BRO1112",
         "BRO1518");
 
+    // Scrutor: whether a comment introduces a group mustn't depend on blank lines that BRO1505/BRO1506/BRO1509 add or
+    // remove in the same run (a first version judged by blank lines and sorted these on the second run).
+    [Fact]
+    public Task Ordering_GroupCommentsAndBlankLines() => AssertConvergesInEveryOrderAsync(
+        """
+        namespace N;
+
+        public class Tests
+        {
+        }
+
+        // Test interfaces and classes
+        public interface IService { }
+        public interface IOtherService { }
+
+        public class Service : IService { }
+
+        // ReSharper disable UnusedTypeParameter
+
+        public class Query { }
+
+        public interface IQuery { }
+        """,
+        "BRO1001",
+        "BRO1505",
+        "BRO1506",
+        "BRO1509");
+
+    // Fonts: an empty comment between two blank lines, between two comments.
+    [Fact]
+    public Task EmptyComment_BetweenBlankLinesAndComments() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+                // The number of glyphs.
+
+                //
+
+                // The format.
+                M();
+            }
+        }
+        """,
+        "BRO1120",
+        "BRO1504",
+        "BRO1506",
+        "BRO1517");
+
+    // Kavita: empty regions in a row, each with several blank lines, the last one before the type's '}'.
+    [Fact]
+    public Task Regions_EmptyRegionsWithBlankLineRuns() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            // TODO: Implement
+
+            #region First
+
+
+
+            #endregion
+
+            #region Second
+
+
+
+            #endregion
+
+        }
+        """,
+        "BRO1112",
+        "BRO1503",
+        "BRO1506",
+        "BRO1517",
+        "BRO1518");
+
     [Fact]
     public Task RedundantReturn_InSingleLineBodiesAndBelowABlankLine() => AssertConvergesInEveryOrderAsync(
         """
