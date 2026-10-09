@@ -464,6 +464,14 @@ internal static class PreviewCommand
         }
     }
 
+    /// <summary>The Sonar part of the report in the command's output (from 'Sonar: read' to the next empty line), or nothing.</summary>
+    public static string SonarPart(string output)
+    {
+        var lines = output.Replace("\r\n", "\n").Split('\n');
+        var start = Array.FindIndex(lines, l => l.StartsWith("Sonar: read ", StringComparison.Ordinal));
+        return start < 0 ? string.Empty : string.Join("\n", lines.Skip(start).TakeWhile(l => l.Length > 0)) + "\n";
+    }
+
     /// <summary>
     /// Init's or the migration's '--write' on the copy; their output goes to the log (the dry run prints it), except the
     /// Sonar part of the report: which Sonar rules turned on which rules.
@@ -497,14 +505,6 @@ internal static class PreviewCommand
         }
 
         return code;
-    }
-
-    /// <summary>The Sonar part of the report in the command's output (from 'Sonar: read' to the next empty line), or nothing.</summary>
-    public static string SonarPart(string output)
-    {
-        var lines = output.Replace("\r\n", "\n").Split('\n');
-        var start = Array.FindIndex(lines, l => l.StartsWith("Sonar: read ", StringComparison.Ordinal));
-        return start < 0 ? string.Empty : string.Join("\n", lines.Skip(start).TakeWhile(l => l.Length > 0)) + "\n";
     }
 
     /// <summary>The rule titles: StyleBro's from the analyzers, the built-in rules' from the comments in init's templates.</summary>
