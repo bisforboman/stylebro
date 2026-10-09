@@ -944,6 +944,32 @@ public class MemberOrderingTests
         }
         """);
 
+    // A comment above a region line stays where it is, so it doesn't count as the first member's group comment.
+    [Fact]
+    public Task ACommentAboveARegion_IsNotAGroupComment() => VerifyFixAsync(
+        """
+        class C
+        {
+            // Section.
+            #region A
+            private int b;
+            private int c;
+            public const int {|BRO1001:A|} = 1;
+            #endregion
+        }
+        """,
+        """
+        class C
+        {
+            // Section.
+            #region A
+            public const int A = 1;
+            private int b;
+            private int c;
+            #endregion
+        }
+        """);
+
     // Not a group comment: the next member is of another kind, or a group comment whose member doesn't move.
     [Fact]
     public Task MemberComments_MoveWithTheirMember() => VerifyFixAsync(
