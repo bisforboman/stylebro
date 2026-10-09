@@ -1073,6 +1073,10 @@ Decisions for all of this are in `docs/decisions.md`; rule details on the rule p
   both builds in one process (order alternates, GC before each), fastest run per analyzer, up to two more rounds
   before a slowdown counts; fails at total >10 % and 25 ms, one analyzer >50 % and 15 ms, a new analyzer >60 ms.
   `STYLEBRO_BENCH_ONLY=Name,...` times only those. CI job `performance` runs it on every PR; a REQUIRED check.
+- The benchmark builds and times `TreeWalk`'s arrays before the analyzers, as their own line (2026-10-09): the first
+  analyzer to touch a tree paid for the walk, mostly FieldNamingAnalyzer (the only symbol-action analyzer; symbol actions
+  run before a file's tree/node actions), which swung 72-101 ms; now ~20 ms. `NamespaceNames.IsGenerated` is cached per
+  tree (it built the file header's text per rename candidate). Remaining swings are GC pauses (`Monitor.Enter` in traces).
 
 **StyleCop**: the open-bug sweep (54 open reports on replaced rules: 34 not shared, 8 shared and fixed or kept by
 decision, 12 n/a; table in differences-from-stylecop.md), parity with StyleCop's unreleased `master` (31 changes,

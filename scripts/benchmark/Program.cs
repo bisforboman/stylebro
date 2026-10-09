@@ -1,5 +1,7 @@
 // Times analyzers on a folder of C# sources: the compiler's own per-analyzer execution time (what ReportAnalyzer shows),
 // all analyzers together, single-threaded, median of the runs after a warm-up run. See README.md.
+// The shared TreeWalk arrays of every tree are built and timed first, as their own line (else the first analyzer to
+// touch a tree pays for them).
 //
 //   dotnet run -c Release --project scripts/benchmark -- <analyzer dll> <source folder> [runs] [preprocessor symbols]
 //   dotnet run -c Release --project scripts/benchmark -- compare <base dll> <head dll> <source folder> [runs]
@@ -115,6 +117,7 @@ async Task Measure(int first, int last)
             compilation.GetDiagnostics();
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            var shared = build.WalkTrees(compilation.SyntaxTrees);
             var options = new CompilationWithAnalyzersOptions(
                 new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty), null, concurrentAnalysis: false, logAnalyzerExecutionTime: true);
             var withAnalyzers = compilation.WithAnalyzers(build.Analyzers, options);
@@ -125,6 +128,7 @@ async Task Measure(int first, int last)
                 continue;
             }
 
+            build.AddShared(shared);
             foreach (var analyzer in build.Analyzers)
             {
                 build.Times[analyzer.GetType().Name].Add((await withAnalyzers.GetAnalyzerTelemetryInfoAsync(analyzer, CancellationToken.None)).ExecutionTime.TotalMilliseconds);
@@ -145,8 +149,8 @@ async Task PerFile(Build build)
         : fileTargets.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(Path.GetFullPath).ToArray();
     files = files.Concat(targets.Where(t => files.All(f => f.Path != t)).Select(t => (t, File.ReadAllText(t)))).ToArray();
     var trees = files.ToDictionary(f => f.Path, f => CSharpSyntaxTree.ParseText(f.Text, parse, f.Path));
-    var times = targets.ToDictionary(t => t, _ => build.Analyzers.ToDictionary(a => a.GetType().Name, _ => new List<double>()));
-    var reports = targets.ToDictionary(t => t, _ => new Dictionary<string, int>());
+    var times = targets.ToDictionary(t => t, _ => build.Times.Keys.ToDictionary(name => name, _ => new List<double>()));
+    var reports = targets.ToDictionary(t => t, _ => new Dictionary<string, int> { [Build.SharedWalk] = 0 });
     for (var run = 0; run <= runs; run++)
     {
         foreach (var target in targets)
@@ -160,6 +164,12 @@ async Task PerFile(Build build)
             model.GetDiagnostics();
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            var shared = build.WalkTrees([tree]);
+            if (run > 0 && shared is { } ms)
+            {
+                times[target][Build.SharedWalk].Add(ms);
+            }
+
             var diagnostics = (await withAnalyzers.GetAnalyzerSyntaxDiagnosticsAsync(tree, CancellationToken.None))
                 .AddRange(await withAnalyzers.GetAnalyzerSemanticDiagnosticsAsync(model, null, CancellationToken.None));
             foreach (var analyzer in build.Analyzers)
@@ -256,14 +266,51 @@ static Build Load(string dll, string name)
         .Where(a => a is not DiagnosticSuppressor)
         .Where(a => Environment.GetEnvironmentVariable("STYLEBRO_BENCH_ONLY") is not { } only || only.Split(',').Contains(a.GetType().Name))
         .ToImmutableArray();
-    return new Build(analyzers);
+    var walk = assembly.GetType("StyleBro.Analyzers.TreeWalk")?.GetMethods(BindingFlags.Public | BindingFlags.Static);
+    return new Build(analyzers, walk ?? []);
 }
 
-sealed class Build(ImmutableArray<DiagnosticAnalyzer> analyzers)
+sealed class Build(ImmutableArray<DiagnosticAnalyzer> analyzers, MethodInfo[] treeWalk)
 {
+    // The shared walk of every tree (StyleBro.Analyzers' TreeWalk: tokens, nodes, trivia), timed on its own before the
+    // analyzers run. Whichever analyzer touches a tree first used to pay for it, mostly FieldNamingAnalyzer (its symbol
+    // actions run before the tree and node actions), which made that analyzer swing 35-90 ms between runs of one build.
+    public const string SharedWalk = "TreeWalk (shared walk of every tree)";
+
     public ImmutableArray<DiagnosticAnalyzer> Analyzers { get; } = analyzers;
 
-    public Dictionary<string, List<double>> Times { get; } = analyzers.ToDictionary(a => a.GetType().Name, _ => new List<double>());
+    public Dictionary<string, List<double>> Times { get; } = analyzers.Select(a => a.GetType().Name)
+        .Concat(treeWalk.Length > 0 ? [SharedWalk] : [])
+        .ToDictionary(name => name, _ => new List<double>());
+
+    /// <summary>Builds TreeWalk's arrays for the trees; the milliseconds it took, or null for a build without TreeWalk.</summary>
+    public double? WalkTrees(IEnumerable<SyntaxTree> trees)
+    {
+        if (treeWalk.Length == 0)
+        {
+            return null;
+        }
+
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        foreach (var tree in trees)
+        {
+            var root = tree.GetRoot();
+            foreach (var method in treeWalk)
+            {
+                method.Invoke(null, [root]);
+            }
+        }
+
+        return watch.Elapsed.TotalMilliseconds;
+    }
+
+    public void AddShared(double? ms)
+    {
+        if (ms is { } value)
+        {
+            Times[SharedWalk].Add(value);
+        }
+    }
 
     public Dictionary<string, int> Counts { get; set; } = new();
 

@@ -4,7 +4,10 @@ Times analyzers the way the compiler's `ReportAnalyzer` does (each analyzer's ow
 noise of a full build: one compilation of a folder of sources, all analyzers together, single-threaded, the median of
 several runs after a warm-up run. Since 2026-10-05 every run (and every build in compare mode) gets freshly parsed
 sources, as a real build does: nothing one run built (red nodes, structured trivia, a per-tree cache) carries over to
-the next, so the analyzer that walks a tree first pays for it. Numbers from before then aren't comparable.
+the next. Since 2026-10-09 the shared walk of every tree (`TreeWalk`: tokens, nodes, trivia) is built before the
+analyzers run and timed as its own line, `TreeWalk (shared walk of every tree)`, which counts in the total and is
+compared like an analyzer; before, the analyzer that touched a tree first paid for it (see FieldNamingAnalyzer below).
+Numbers from before then aren't comparable.
 
 ```bash
 dotnet build src/StyleBro.Analyzers
@@ -35,7 +38,7 @@ of the analyzers on the same sources rather than reading the absolute numbers.
 
 Visual Studio analyzes the open document on every edit, in a new compilation: the syntax tree, syntax node and semantic
 model actions of that file, and the symbol actions of the symbols declared in it. Whole-project numbers hide an analyzer
-that is slow on one big file or grows faster than the file, so `file` times one document at a time:
+that is slow on one big file or grows faster than the file, so `file` times one document at a time (the target tree's `TreeWalk` line included):
 
 ```bash
 dotnet run -c Release --project scripts/benchmark -- file path/to/StyleBro.Analyzers.dll path/to/sources 10 7 "SYMBOL_A;SYMBOL_B" --all-rules
@@ -49,8 +52,8 @@ outside the folder (they are compiled with it). For every run each file gets a f
 `GetAnalyzerSemanticDiagnosticsAsync(model, null)`. The runs go round the files, each analyzer's fastest run counts. It
 prints each file's slowest analyzers, the slowest analyzer per file with microseconds per KB, and the reports per
 analyzer (to check that a change keeps the diagnostics). `STYLEBRO_BENCH_CSV=path` also writes every
-file/analyzer/time/reports row. Shared costs land on whichever analyzer comes first: building the tree's red nodes and
-`TreeWalk` arrays, and the driver's generated-code check (a walk of the whole tree on a file's first reported diagnostic).
+file/analyzer/time/reports row. Shared costs land on whichever analyzer comes first: building the tree's red nodes, and the
+driver's generated-code check (a walk of the whole tree on a file's first reported diagnostic).
 So an analyzer that reports little and is first can look slow; profile before blaming it (`dotnet-trace collect --format
 speedscope -- dotnet scripts/benchmark/bin/Release/net10.0/Benchmark.dll file ...` with `STYLEBRO_BENCH_ONLY`).
 
@@ -133,8 +136,8 @@ does nothing else), and about 16 analyzers each walked every token, trivia or no
 StyleBro.Analyzers) walks a tree once and keeps its tokens and nodes as arrays (trivia comes from the tokens) while the
 tree lives; reading the array costs ~2 ms. The analyzers stay separate (ids, tests and fixes unchanged); whichever
 runs first pays the walk. 595 -> 386 ms, same diagnostics.
-`STYLEBRO_BENCH_ONLY=Name1,Name2` times only those analyzers (alone they pay shared costs such as building the red tree
-or binding, so compare builds, not analyzers).
+`STYLEBRO_BENCH_ONLY=Name1,Name2` times only those analyzers (alone they still pay Roslyn's shared costs, such as the
+driver's generated-code check on the first diagnostic in a file, so compare builds, not analyzers).
 2026-10-07 (round 3), same diagnostics on Newtonsoft.Json, Serilog, FFMpegCore and StyleBro's own `src` (reports per
 analyzer compared, with and without `--all-rules`):
 - `TreeWalk.Trivia` is a cached array of the trivia that aren't whitespace or line breaks (comments, documentation,
@@ -154,3 +157,15 @@ already in order and a `ContainsDirectives` shortcut in DocumentationAnalyzer's 
 explicit equality for `FieldStyles` and a per-tree cache of the generated-file check (both run only for rename
 candidates; the profile blamed the struct's reflection-based hash). `dotnet-trace`'s sampling profile lands on safepoints (`PollGC`, `Monitor.Enter`),
 so it points at the right analyzer but overstates single methods: confirm each idea with `compare`.
+
+2026-10-09, FieldNamingAnalyzer's variance: in compare runs of one build against itself it took 72-101 ms (fastest of 10
+runs), alone 120-250 ms, while most analyzers were stable. It is StyleBro's only symbol-action analyzer, and the driver
+runs symbol actions before a file's tree and node actions, so on most files it was the first to ask for `TreeWalk`'s
+arrays: it paid for the whole walk (~65 ms, allocation-heavy, so also for the garbage collections that came with it) and
+for the driver's generated-code check on its first diagnostic in a file. Built and timed before the analyzers (above),
+the walk measures 66-91 ms on a busy machine and FieldNamingAnalyzer 17-29 ms with all analyzers. Alone it still took
+53-109 ms: `NamespaceNames.IsGenerated` built the text of the file's whole header (Newtonsoft.Json's license comment) for
+every rename candidate; it is cached per tree now: alone 30-35 ms in five of six runs (one at 86 ms, with the base build
+at 79 ms in the same run), against 53-109 ms before (same reports on Newtonsoft.Json, Serilog and StyleBro's `src`, with
+and without `--all-rules`). Alone it still pays the driver's generated-code check. A profile with `dotnet-trace` showed the rest of its variance
+as `Monitor.Enter` waits: thread suspension for garbage collections, which land on whatever runs.
