@@ -4,6 +4,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 
 > StyleCop writes you a ticket. StyleBro just fixes it. Rule IDs use the `BRO` prefix.
 
+**Documentation:** [bisforboman.github.io/stylebro](https://bisforboman.github.io/stylebro/) (the `docs/` folder as a
+searchable site).
+
 **New here?** [Getting started](https://github.com/bisforboman/stylebro/blob/main/docs/getting-started.md): from install to the first `dotnet format` run, for a new
 project or coming from StyleCop.
 

@@ -19,7 +19,7 @@ The preset follows StyleCop's defaults except here.
 | `this.` prefix (SA1101) | Required | Not required (`dotnet_style_qualification_for_field`, `_property`, `_method`, `_event` = `false`; `stylebro-migrate init` writes `dotnet_diagnostic.IDE0009.severity = none`) | Most teams turn SA1101 off (2 of the 3 surveyed); it's also the SDK's default. User decision. With these keys `false`, [BRO1131](rules/BRO1131.md) (SA1100) removes `base.` instead of writing `this.`. | Set the four `dotnet_style_qualification_for_*` keys to `true` and IDE0009 to `warning` in `.editorconfig`. |
 | Using placement (SA1200) | Inside the namespace | Outside (`csharp_using_directive_placement = outside_namespace`) | Works with file-scoped namespaces, matches the .NET templates; all three surveyed teams turn SA1200 off. User decision. | `csharp_using_directive_placement = inside_namespace`. |
 | Regions between members (SA1124, [BRO1112](rules/BRO1112.md)) | Reported | Off (`dotnet_diagnostic.BRO1112.severity = none`) | Removing every region in an existing codebase is a large one-time change, so it's opt-in. (Regions inside code, SA1123/[BRO1113](rules/BRO1113.md), stay on.) | `dotnet_diagnostic.BRO1112.severity = warning`. |
-| Namespace names (SA1300, [BRO1312](rules/BRO1312.md)) | Reported | Off (`dotnet_diagnostic.BRO1312.severity = none`) | Renaming a namespace renames every type in it: a breaking change for other code and for stored type names (`$type`, `Type.GetType`). In the surveyed repositories every lower-case namespace part was deliberate (brand names like `iText`, `iOS`; culture codes). User decision; findings in [proposals/namespace-names.md](proposals/namespace-names.md). | `dotnet_diagnostic.BRO1312.severity = warning`. |
+| Namespace names (SA1300, [BRO1312](rules/BRO1312.md)) | Reported | Off (`dotnet_diagnostic.BRO1312.severity = none`) | Renaming a namespace renames every type in it: a breaking change for other code and for stored type names (`$type`, `Type.GetType`). In the surveyed repositories every lower-case namespace part was deliberate (brand names like `iText`, `iOS`; culture codes). User decision; findings in [proposals/namespace-names.md](https://github.com/bisforboman/stylebro/blob/main/docs/proposals/namespace-names.md). | `dotnet_diagnostic.BRO1312.severity = warning`. |
 | Missing documentation (SA1600, SA1601, SA1602, SA1611, SA1615, ...) | Reported | Only overrides and interface implementations, fixed with `<inheritdoc/>` ([BRO1601](rules/BRO1601.md)) | The only automatic fix for other members is placeholder text, which satisfies the rule without documenting anything. User decision. | Not available (keep StyleCop's SA1600 for reporting only, or use the compiler's CS1591). |
 | File header (SA1633-SA1641) | Required, XML format (`// <copyright file="X.cs" company="PlaceholderCompany">`) | XML format with [BRO1615](rules/BRO1615.md) (`dotnet_diagnostic.BRO1615.severity = warning`), but it does nothing until `stylebro_file_header_company` is set; `stylebro-migrate` turns it off when `stylecop.json` names no company | A header needs the team's company name and copyright text; a placeholder header everywhere is worse than none. | `stylebro_file_header_company = YourCompany` (and `stylebro_file_header_copyright` if the text differs). For a plain header (`xmlHeader: false`): `file_header_template = ...` and `dotnet_diagnostic.IDE0073.severity = warning`. |
 
@@ -171,7 +171,7 @@ change nothing there.)
 ### Compared with StyleCop's unreleased `master`
 
 The tables above compare with the last release, 1.2.0-beta.556. StyleCop's `master` has changed some of these rules
-since (not released; see [decisions](decisions.md), 2026-10-04). Where `master` fixed a gap, StyleBro follows it:
+since (not released; see [decisions](https://github.com/bisforboman/stylebro/blob/main/docs/decisions.md), 2026-10-04). Where `master` fixed a gap, StyleBro follows it:
 
 | Rule | Follows `master` | beta.556 |
 |---|---|---|
@@ -263,13 +263,13 @@ in `.editorconfig` to use them.
 Every open StyleCop.Analyzers issue on a rule StyleBro replaces was read (2026-10-04: 430 open issues, 97 name such a
 rule and aren't feature requests), and each one that describes a behavior StyleBro could share was run against StyleBro
 with a throwaway test: 50 open issues and 4 closed as not planned. The others were already covered in
-[beyond-stylecop.md](beyond-stylecop.md) (21) or aren't about behavior StyleBro could share (23: documentation wording,
+[beyond-stylecop.md](https://github.com/bisforboman/stylebro/blob/main/docs/beyond-stylecop.md) (21) or aren't about behavior StyleBro could share (23: documentation wording,
 configuration questions, the IDE, missing-documentation rules StyleBro drops).
 
 | Result | Issues |
 |---|---|
 | StyleBro doesn't have the bug | 34 (30 open, 4 not planned) |
-| StyleBro had it too | 8: 7 fixed on 2026-10-04, 1 kept like StyleCop by the owner's decision ([decisions.md](decisions.md)) |
+| StyleBro had it too | 8: 7 fixed on 2026-10-04, 1 kept like StyleCop by the owner's decision ([decisions.md](https://github.com/bisforboman/stylebro/blob/main/docs/decisions.md)) |
 | Not applicable, or StyleBro is the same or different by design | 12 |
 
 | Issue | Rule | Bug | StyleBro |

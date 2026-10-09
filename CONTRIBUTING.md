@@ -32,6 +32,23 @@ StyleBro checks its own code with its latest published release. Run the same che
 dotnet format StyleBro.slnx --verify-no-changes --severity warn --exclude samples
 ```
 
+## Documentation site
+
+`docs/` is published as [bisforboman.github.io/stylebro](https://bisforboman.github.io/stylebro/) with MkDocs Material
+(`mkdocs.yml`; the `Docs` workflow builds it on every pull request and deploys it from `main`). Rule help links point
+there. To preview it locally (Python 3):
+
+```
+python -m venv .venv
+.venv/bin/pip install -r .github/docs-requirements.txt      # Windows: .venv\Scripts\pip
+.venv/bin/mkdocs serve                                       # http://127.0.0.1:8000, reloads on save
+.venv/bin/mkdocs build --strict                              # what CI runs: fails on broken links
+```
+
+A new page needs an entry in `nav` in `mkdocs.yml` (a new rule page under its area, in the order of
+`docs/rules/README.md`; `DocExamplesTests` checks that). Links that leave `docs/`, or point to the internal pages the
+site leaves out (`decisions.md`, `backlog.md`, `beyond-stylecop.md`, `proposals/`), are absolute GitHub links.
+
 ## What every rule needs
 
 - **A code fix, and Fix All works.** `dotnet format` applies fixes through Fix All. Use

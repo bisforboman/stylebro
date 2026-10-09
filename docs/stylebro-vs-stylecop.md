@@ -45,7 +45,7 @@ StyleCop's fixes, run under `dotnet format`, from [differences-from-stylecop.md]
 
 ## Coverage
 
-StyleCop 1.2 has 197 diagnostics ([stylecop-mapping.md](stylecop-mapping.md), [backlog.md](backlog.md#summary)):
+StyleCop 1.2 has 197 diagnostics ([stylecop-mapping.md](stylecop-mapping.md), [backlog.md](https://github.com/bisforboman/stylebro/blob/main/docs/backlog.md#summary)):
 
 | | Diagnostics | |
 |---|---:|---|
@@ -67,7 +67,7 @@ Why the 32 are dropped ([skipped-rules.md](skipped-rules.md) has every one, with
 
 ## Speed
 
-Measured 2026-10-05 with [scripts/benchmark](../scripts/benchmark/README.md) in `compare` mode on Newtonsoft.Json's main
+Measured 2026-10-05 with [scripts/benchmark](https://github.com/bisforboman/stylebro/blob/main/scripts/benchmark/README.md) in `compare` mode on Newtonsoft.Json's main
 project (`Src/Newtonsoft.Json` at `52fa3ae`, 242 files): both analyzer DLLs load into one process and take turns on
 freshly parsed sources (which goes first alternates, garbage collection before each), single-threaded, compiler
 telemetry per analyzer, each analyzer's fastest of 20-30 runs, summed. StyleCop: `StyleCop.Analyzers.dll` from the
@@ -104,7 +104,7 @@ comparable.
   ([#3656](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3656)). 8 were shared: 7 fixed, 1 kept like
   StyleCop by the owner's decision.
 - **Parity with StyleCop:** 42 parity sets run both tools on edge-case files and compare positions and fixed output;
-  every difference must be a documented deviation ([scripts/stylecop-survey](../scripts/stylecop-survey)). StyleCop's
+  every difference must be a documented deviation ([scripts/stylecop-survey](https://github.com/bisforboman/stylebro/tree/main/scripts/stylecop-survey)). StyleCop's
   unreleased `master` was compared too: where it fixed a gap, StyleBro follows it.
 - **Real-world check on every pull request:** every rule on 8 public repositories (FFMpegCore, Polly, OpenTelemetry,
   Newtonsoft.Json, Serilog, Jellyfin, FluentValidation, CsvHelper; `scripts/realworld/repos.psd1`). A pull request fails
@@ -148,7 +148,7 @@ The rules StyleCop doesn't have are turned off by the migration, so they change 
 ## Beyond StyleCop
 
 26 rules StyleCop doesn't have ([differences-from-stylecop.md](differences-from-stylecop.md#rules-beyond-stylecop),
-chosen in [beyond-stylecop.md](beyond-stylecop.md) from Roslynator, Meziantou, Sonar and StyleCop's issue tracker),
+chosen in [beyond-stylecop.md](https://github.com/bisforboman/stylebro/blob/main/docs/beyond-stylecop.md) from Roslynator, Meziantou, Sonar and StyleCop's issue tracker),
 each with a fix like every other rule. For example: null checks in one form (BRO1133), operator placement when an
 expression wraps (BRO1520), split call chains one call per line (BRO1523), no `$`/`@` a plain string doesn't need
 (BRO1138), generic crefs in braces (BRO1617), no `else` after a jump (BRO1143, off by default). The preset turns 22
@@ -177,6 +177,6 @@ XML file header only once a company is configured. `stylebro-migrate` keeps a te
 Checked and not checked:
 
 - Visual Studio 2022 (17.13): build, light bulb fixes, Fix All and live squiggles checked by the owner (2026-10-05,
-  [backlog.md](backlog.md)). **Rider: not checked.**
+  [backlog.md](https://github.com/bisforboman/stylebro/blob/main/docs/backlog.md)). **Rider: not checked.**
 - Needs Roslyn 4.8 (.NET 8 SDK, Visual Studio 17.8) or newer.
 - **Prerelease:** 0.2.0-alpha.1 on nuget.org; versions and behavior can still change between prereleases.

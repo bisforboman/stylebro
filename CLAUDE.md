@@ -56,6 +56,15 @@ when we can do that"): don't suggest releases at all; the user says when.
 - `samples/MultiTarget`: net10.0 + net8.0 with `#if NET10_0_OR_GREATER` code; verify-format checks it like Messy and
   also that the fixed sample builds. It does NOT reproduce the old linked-file bug (couldn't find a minimal repro);
   the reference for that bug is Newtonsoft.Json (8 target frameworks) with all rules in the real-world run.
+- **Docs site** (2026-10-09, docs/decisions.md): MkDocs Material, `mkdocs.yml` at the root (docs_dir docs, explicit
+  `nav`, `exclude_docs` for the internal decisions/backlog/beyond-stylecop/proposals), pinned packages in
+  `.github/docs-requirements.txt`. `.github/workflows/docs.yml`: `mkdocs build --strict` on every PR (broken links/
+  anchors, pages missing from the nav, and links to excluded pages fail), deploy to GitHub Pages on `main`
+  (https://bisforboman.github.io/stylebro/). The deploy job fails until the owner sets Settings > Pages > Source:
+  GitHub Actions; it isn't a required check. Help links (`Descriptors.HelpBase`) point to the site's
+  `rules/BROxxxx/`. A new page needs a nav entry (rule pages under their area, in index order: `DocExamplesTests`);
+  links leaving docs/ or to excluded pages are absolute GitHub URLs. `docs/configuration.md` lists every `stylebro_*`
+  key read in src/ (test). Preview: CONTRIBUTING.md.
 - `scripts/verify-format.ps1` reads the rule IDs from `AnalyzerReleases.Unshipped.md` and runs every sample.
 - `scripts/verify-package.ps1` (CI and release.yml, 2026-10-02): packs StyleBro.Analyzers as 0.0.0-verify into a temp
   feed, restores it (isolated RestorePackagesPath) into a project OUTSIDE the repo and checks what only the package's

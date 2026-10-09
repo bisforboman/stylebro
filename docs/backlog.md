@@ -92,7 +92,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Beyond StyleCop | Unnecessary parentheses in patterns | `x is (> 0)`, `x is (A or B)` alone: no StyleCop rule checks them (SA1119 only looks at expressions). Would sit next to BRO1405 and must leave the parentheses BRO1407 adds to `and`/`or` patterns. | Idea |
 | Performance | FieldNamingAnalyzer variance | Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost. | Idea |
 | Adoption | `stylebro-migrate --diff`: preview before writing | `--diff[=file]` on the migration, `init` and `format` (decisions.md 2026-10-09): runs the command and `stylebro-migrate format` on a temporary copy, prints the settings, files per rule and sample hunks, writes the full diff to `stylebro-preview.patch`. On FFMpegCore the patch matched the real commands byte for byte. | Done (2026-10-09) |
-| Adoption | Rule docs as a website | Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views. | Idea |
+| Adoption | Rule docs as a website | MkDocs Material site from docs/ (user docs only; decisions, backlog and proposals stay on GitHub), built with `--strict` on every PR and deployed to GitHub Pages from main (decisions.md 2026-10-09); rule help links point to its rule pages; `docs/configuration.md` lists every `stylebro_*` key (checked by a test). | Done (2026-10-09) |
 
 ### Read the SDK's own settings
 
