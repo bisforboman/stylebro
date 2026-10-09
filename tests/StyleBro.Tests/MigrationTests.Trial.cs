@@ -21,6 +21,21 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Migration_FieldStyle_SkipsGeneratedAndVendoredCode()
+    {
+        Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1309.severity = none\n");
+        Write("src/A.cs", "class A { private int _a, _b; private int c; }");
+        Write("src/Form.Designer.cs", "class F { private int button1, button2, button3; }");
+        Write("src/Data/Migrations/20240101_Init.cs", "class M { private int x, y, z; }");
+        Write("vendor/Lib.cs", "class L { private int p, q, r; }");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains("stylebro_private_field_naming = _camelCase", result.Lines);
+        Assert.Contains(result.Notes, n => n.Contains("2 named '_field', 1 named 'field'"));
+    }
+
+    [Fact]
     public void Init_LeavesThePrivateFieldStyle_ToANamingRuleForPrivateFields()
     {
         var settings = new Dictionary<string, string>
