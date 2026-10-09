@@ -315,9 +315,19 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '(gapIsReplaced && t.IsKind(SyntaxKind.EndOfLineTrivia))'; Replace = 'false'; Tests = 'SingleLineBlocksTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'yield return found;'; Replace = '{ yield return found; yield break; }'; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '&& TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)'; Replace = ')'; Tests = 'BlankLineRunsTests' }
+
+        # BRO1120 (empty comments between blank lines)
         @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '!changes.All(c => c.Span.End > text.Lines.GetLineFromPosition(c.Span.Start).End)'; Replace = 'false'; Tests = 'CommentTextTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '|| !IsBlankLine(text, text.Lines[first.LineNumber - 1])'; Replace = ''; Tests = 'CommentTextTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = 'if (blankEnd > end)'; Replace = 'if (false)'; Tests = 'CommentTextTests' }
+
+        # BRO1001: comments that introduce a group (GroupComments)
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = '|| GroupComments.MovesGroupComment(members, order)'; Replace = ''; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'if (Moves(position, i) && HasGroupComment(members, i))'; Replace = 'if (HasGroupComment(members, i))'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'return lineBreaks > 1 ||'; Replace = 'return'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = '(i + 1 < members.Count && !HasBlankLine(members[i + 1].GetLeadingTrivia()))'; Replace = 'false'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'if (trivia[k].IsDirective)'; Replace = 'if (false)'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'if (lineStart)'; Replace = 'if (false)'; Tests = 'MemberOrderingTests' }
 
         # BRO1309: snake_case names; a property kept by a string keeps its type's other properties
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, strings!, keptTypes))'; Replace = ''; Tests = 'PascalCaseNamingTests' }

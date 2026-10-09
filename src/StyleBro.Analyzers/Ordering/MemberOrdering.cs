@@ -258,9 +258,11 @@ internal static class MemberOrdering
         }
 
         // Sorting must not change what field initializers compute, nor an order the runtime sees (struct layout,
-        // serialized members); skip the type if it could.
-        return container is TypeDeclarationSyntax type
-            && (InitializerOrder.ReordersDependentInitializers(type, SortedOrder(keys, segments, anchors)) || ObservableOrder.ReordersObservableMembers(type, SortedOrder(keys, segments, anchors)))
+        // serialized members), nor move a comment away from the group it introduces; skip the container if it could.
+        var order = SortedOrder(keys, segments, anchors);
+        return (container is TypeDeclarationSyntax type
+                && (InitializerOrder.ReordersDependentInitializers(type, order) || ObservableOrder.ReordersObservableMembers(type, order)))
+            || GroupComments.MovesGroupComment(members, order)
             ? null
             : keys;
     }
