@@ -207,6 +207,7 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 - `dotnet_diagnostic.BRO1144.severity`
 - `dotnet_diagnostic.BRO1146.severity`
 - `dotnet_diagnostic.BRO1408.severity`
+- `dotnet_diagnostic.BRO1410.severity`
 - `dotnet_diagnostic.BRO1520.severity`
 - `dotnet_diagnostic.BRO1521.severity`
 - `dotnet_diagnostic.BRO1522.severity`
@@ -252,6 +253,7 @@ in `.editorconfig` to use them.
 | [BRO1527](rules/BRO1527.md) | Auto-accessors only (`get;`, `private set;`, `init;`) spread over several lines go on the declaration's line: `public int Simple { get; set; }` | Roslynator RCS0042 |
 | [BRO1408](rules/BRO1408.md) | No `enum E : int` or `class C : object` | Roslynator RCS1042, Sonar S1939 |
 | [BRO1409](rules/BRO1409.md) | Off by default. `internal`, not `public`, on an ordinary method of a type that can't be seen outside the assembly; properties, constructors, interface implementations, overrides, attributed methods and types, types with a base from another assembly and convention names (`Dispose`, `GetEnumerator`, ...) are left out, and a name found in a string or `nameof` isn't fixed | StyleCop issue [#2981](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2981) (proposed, never implemented) |
+| [BRO1410](rules/BRO1410.md) | Parentheses around a pattern that parses the same without them (`x is (> 0)`, `o is (string s)`); ones BRO1407 (SA1408) wants between `and` and `or` stay | StyleCop's SA1119 checks parenthesized expressions only (its SA1119_p fades the parentheses; StyleBro fades both rules' with BRO1405_p/BRO1410_p) |
 | [BRO1313](rules/BRO1313.md) | Off by default. A parameter of an override or interface implementation has the base member's parameter name (named arguments updated) | StyleCop's proposed SA1315 ([#1949](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1949), never implemented); SDK CA1725 (no fix) |
 | [BRO1314](rules/BRO1314.md) | Off by default. Methods returning `Task`, `Task<T>`, `ValueTask`, `ValueTask<T>` or `IAsyncEnumerable<T>` end in `Async`; tests, controllers, hubs, event handlers and attributed methods skipped | Roslynator RCS1046, Meziantou MA0137 |
 | [BRO1617](rules/BRO1617.md) | A cref's type arguments in braces: `cref="List{T}"`, not `cref="List&lt;T&gt;"` | StyleCop's proposed SA1653 ([#758](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/758), never implemented) |

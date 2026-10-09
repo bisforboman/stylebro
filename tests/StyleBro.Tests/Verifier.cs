@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -20,7 +22,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// </summary>
     public static Task VerifyFixAsync(string source, string fixedSource, string? editorConfig = null, string? batchFixedSource = null)
     {
-        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+        var test = new Test
         {
             TestCode = source,
             FixedCode = fixedSource,
@@ -42,7 +44,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// <summary>Like <see cref="VerifyFixAsync(string, string, string?, string?)"/>, for several files.</summary>
     public static Task VerifyFixAsync(string[] sources, string[] fixedSources, string? editorConfig = null)
     {
-        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>();
+        var test = new Test();
         if (editorConfig is not null)
         {
             test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\n" + editorConfig));
@@ -64,7 +66,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// <summary>The diagnostics in <paramref name="sources"/> are reported, but the fix deliberately leaves them.</summary>
     public static Task VerifyNotFixedAsync(string[] sources, string? editorConfig = null)
     {
-        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+        var test = new Test
         {
             NumberOfIncrementalIterations = 1,
             NumberOfFixAllIterations = 1,
@@ -87,7 +89,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// <summary>Like <see cref="VerifyNotFixedAsync(string[], string?)"/>, for files with their names ('/0/Page.g.cs').</summary>
     public static Task VerifyNotFixedAsync(params (string Name, string Text)[] sources)
     {
-        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+        var test = new Test
         {
             NumberOfIncrementalIterations = 1,
             NumberOfFixAllIterations = 1,
@@ -105,7 +107,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// <summary>No diagnostics in files with their names ('/0/Page.g.cs').</summary>
     public static Task VerifyNoDiagnosticsAsync(params (string Name, string Text)[] sources)
     {
-        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>();
+        var test = new Test();
         foreach (var source in sources)
         {
             test.TestState.Sources.Add(source);
@@ -134,5 +136,21 @@ internal static class Verifier<TAnalyzer, TCodeFix>
         }
 
         return test.RunAsync();
+    }
+
+    /// <summary>
+    /// Leaves out the hidden companions that fade a finding's parentheses (BRO1405_p): not configurable, so
+    /// DisabledDiagnostics can't; <see cref="IncludeFades"/> checks them.
+    /// </summary>
+    internal sealed class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+    {
+        public bool IncludeFades { get; init; }
+
+        protected override ImmutableArray<(Project project, Diagnostic diagnostic)> FilterDiagnostics(ImmutableArray<(Project project, Diagnostic diagnostic)> diagnostics) =>
+            base.FilterDiagnostics(diagnostics).Where(d => IncludeFades || !IsFade(d.diagnostic)).ToImmutableArray();
+
+        // Compiler errors are not configurable either.
+        private static bool IsFade(Diagnostic diagnostic) =>
+            diagnostic.Id.StartsWith("BRO", StringComparison.Ordinal) && diagnostic.Descriptor.CustomTags.Contains(WellKnownDiagnosticTags.NotConfigurable);
     }
 }
