@@ -752,6 +752,34 @@ public class FixOrderTests
         "BRO1112",
         "BRO1518");
 
+    // Kavita: empty regions in a row, each with several blank lines, the last one before the type's '}'.
+    [Fact]
+    public Task Regions_EmptyRegionsWithBlankLineRuns() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            // TODO: Implement
+
+            #region First
+
+
+
+            #endregion
+
+            #region Second
+
+
+
+            #endregion
+
+        }
+        """,
+        "BRO1112",
+        "BRO1503",
+        "BRO1506",
+        "BRO1517",
+        "BRO1518");
+
     [Fact]
     public Task RedundantReturn_InSingleLineBodiesAndBelowABlankLine() => AssertConvergesInEveryOrderAsync(
         """

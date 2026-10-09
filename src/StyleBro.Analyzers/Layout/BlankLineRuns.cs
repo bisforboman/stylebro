@@ -32,9 +32,12 @@ internal static class BlankLineRuns
         var (multipleOn, beforeOn, afterOn) = (isOn(DiagnosticIds.MultipleBlankLines), isOn(DiagnosticIds.BlankLineBeforeCloseBrace), isOn(DiagnosticIds.BlankLineAfterCloseBrace));
         foreach (var token in TreeWalk.Tokens(root))
         {
-            if (multipleOn && MultipleBlankLines(token, text, isOn) is { } multiple)
+            if (multipleOn)
             {
-                yield return (DiagnosticIds.MultipleBlankLines, multiple.Location, multiple.Change);
+                foreach (var multiple in MultipleBlankLines(token, text, isOn))
+                {
+                    yield return (DiagnosticIds.MultipleBlankLines, multiple.Location, multiple.Change);
+                }
             }
 
             if (token.IsKind(SyntaxKind.CloseBraceToken))
@@ -130,13 +133,16 @@ internal static class BlankLineRuns
             && OpeningLine(brace, text) != text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;
     }
 
-    /// <summary>SA1507: a run of two or more blank lines in a token's leading trivia; the fix keeps one.</summary>
-    private static (TextSpan Location, TextChange Change)? MultipleBlankLines(SyntaxToken token, SourceText text, Func<string, bool> isOn)
+    /// <summary>
+    /// SA1507: every run of two or more blank lines in a token's leading trivia (several when directives or comments
+    /// separate them, e.g. empty regions in a row); the fix keeps one blank line of each.
+    /// </summary>
+    private static IEnumerable<(TextSpan Location, TextChange Change)> MultipleBlankLines(SyntaxToken token, SourceText text, Func<string, bool> isOn)
     {
         if (token.IsKind(SyntaxKind.EndOfFileToken))
         {
             // Blank lines at the end are BRO1507's.
-            return null;
+            yield break;
         }
 
         var trivia = token.LeadingTrivia;
@@ -160,14 +166,12 @@ internal static class BlankLineRuns
 
             if (Run(token, trivia, start, end, count, text, isOn) is { } found)
             {
-                return found;
+                yield return found;
             }
 
             start = i + 1;
             count = 0;
         }
-
-        return null;
     }
 
     private static (TextSpan Location, TextChange Change)? Run(SyntaxToken token, SyntaxTriviaList trivia, int start, int end, int count, SourceText text, Func<string, bool> isOn)

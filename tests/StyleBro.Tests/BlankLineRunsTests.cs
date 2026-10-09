@@ -50,6 +50,45 @@ public class BlankLineRunsTests
         """);
 
     [Fact]
+    public Task SeveralRunsBeforeOneToken_AreAllFixedInOneRun() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int A;
+
+            #region First
+        {|BRO1517:
+
+
+        |}    #endregion
+
+            #region Second
+        {|BRO1517:
+
+
+        |}    #endregion
+
+            public int B;
+        }
+        """,
+        """
+        public class C
+        {
+            public int A;
+
+            #region First
+
+            #endregion
+
+            #region Second
+
+            #endregion
+
+            public int B;
+        }
+        """);
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;
 
