@@ -313,7 +313,7 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'brace.RawKind != 0 && isOn(DiagnosticIds.ElementsSeparatedByBlankLine)'; Replace = 'false'; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = ' || owner is DoStatementSyntax or BlockSyntax { Parent: DoStatementSyntax }'; Replace = ''; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '(gapIsReplaced && t.IsKind(SyntaxKind.EndOfLineTrivia))'; Replace = 'false'; Tests = 'SingleLineBlocksTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'yield return found;'; Replace = '{ yield return found; yield break; }'; Tests = 'BlankLineRunsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '(runs ??= []).Add(found);'; Replace = '{ (runs ??= []).Add(found); return runs; }'; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '&& TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)'; Replace = ')'; Tests = 'BlankLineRunsTests' }
 
         # BRO1120 (empty comments between blank lines)
