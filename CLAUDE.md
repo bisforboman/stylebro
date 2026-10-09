@@ -19,7 +19,9 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 (see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Since
 2026-10-05: 118 rules, 842 tests. Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.2.0-alpha.1 (124 rules, `init`/`format`/`init --modernize`, the preset finally reaching the compiler, the
+0.3.0-alpha.1 (125 rules incl. BRO1410, 11 options, `--diff` preview, docs site help links, both first-run trials'
+fixes; owner's call, 2026-10-09) is the latest on nuget.org once its tag runs; bump `StyleBroSelfVersion` after it's
+live. Before it: 0.2.0-alpha.1 (124 rules, `init`/`format`/`init --modernize`, the preset finally reaching the compiler, the
 first-run fixes; owner's call "a new minor version", 2026-10-06) is the latest on nuget.org with StyleBro.Migrate;
 after it's live, bump `StyleBroSelfVersion` in its own PR (the preset then applies to StyleBro's own code: run
 `dotnet format` and commit that). Earlier: alpha.8 (71 rules + baseline support + the BRO1117 crash fix, 2026-10-02), alpha.7 (71 rules), alpha.6 (54 rules,

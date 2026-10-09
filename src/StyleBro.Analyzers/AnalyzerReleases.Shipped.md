@@ -174,3 +174,13 @@ BRO1616 | Documentation | Warning  | SummaryLayoutAnalyzer
 BRO1617 | Documentation | Warning  | DocumentationStyleAnalyzer
 BRO1618 | Documentation | Warning  | DocumentationStyleAnalyzer
 BRO1619 | Documentation | Warning  | DocumentationStyleAnalyzer
+
+## Release 0.3.0.1
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+BRO1405_p | Maintainability | Hidden | ParenthesesAnalyzer
+BRO1410 | Maintainability | Warning  | ParenthesesAnalyzer
+BRO1410_p | Maintainability | Hidden | ParenthesesAnalyzer

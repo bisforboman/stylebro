@@ -19,7 +19,7 @@ StyleBro.Analyzers reference if the repository has none; StyleCop.Analyzers stay
 and the built-in rules' ids, so it changes nothing. In a StyleCop-clean repository the format part should be close to
 empty. Details: [Preview first](getting-started.md#preview-first).
 
-The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.2.0-alpha.1;
+The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.3.0-alpha.1;
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
 Then swap the package (below) and run `stylebro-migrate format`. It runs `dotnet format` with only StyleBro's rules
@@ -41,7 +41,7 @@ applies to every project:
 <GlobalPackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556" />
 
 <!-- after -->
-<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" />
+<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.3.0-alpha.1" />
 ```
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
