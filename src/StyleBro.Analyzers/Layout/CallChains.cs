@@ -47,9 +47,21 @@ internal static class CallChains
         links.Reverse();
         var starts = links.Select(l => StartsLine(l.Token, text)).ToList();
 
-        // Skipped: chains that aren't split, '#if' or syntax errors anywhere in the chain, and chains inside an
-        // interpolated string's hole (a line break there needs C# 11).
-        if (!starts.Contains(true) || chain.ContainsDirectives || chain.ContainsDiagnostics
+        // Skipped: chains that aren't split, directives other than regions or syntax errors anywhere in the chain, and
+        // chains inside an interpolated string's hole (a line break there needs C# 11). Region lines are ignored, so
+        // the chain is judged the same before and after BRO1112/BRO1113 remove them.
+        var regionLines = new HashSet<int>();
+        foreach (var directive in chain.ContainsDirectives ? chain.DescendantTrivia().Where(t => t.IsDirective) : [])
+        {
+            if (!directive.IsKind(SyntaxKind.RegionDirectiveTrivia) && !directive.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
+            {
+                yield break;
+            }
+
+            regionLines.Add(Line(text, directive.SpanStart));
+        }
+
+        if (!starts.Contains(true) || chain.ContainsDiagnostics
             || chain.Ancestors().Any(a => a is InterpolationSyntax))
         {
             yield break;
@@ -81,6 +93,7 @@ internal static class CallChains
             // indentation, so the decision doesn't depend on which links were fixed first.
             var end = i + 1 < links.Count ? links[i + 1].Token.GetPreviousToken().Span.End : chain.Span.End;
             if (Enumerable.Range(line + 1, Line(text, end) - line)
+                .Where(n => !regionLines.Contains(n))
                 .Select(n => text.ToString(text.Lines[n].Span))
                 .Any(l => l.Trim().Length > 0 && !l.StartsWith(indentation, System.StringComparison.Ordinal)))
             {

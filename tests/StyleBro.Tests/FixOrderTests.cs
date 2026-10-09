@@ -752,6 +752,29 @@ public class FixOrderTests
         "BRO1112",
         "BRO1518");
 
+    // Kavita: a chain skipped for the regions in its lambda was BRO1523's on the run after BRO1113 removed them.
+    [Fact]
+    public Task Regions_InsideACallChainsLambda() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Threading.Tasks;
+
+        public class C
+        {
+            public void M()
+            {
+                Task.Run(async () =>
+                    {
+                        #region Work
+                        await Task.Yield();
+        #endregion
+                    }).GetAwaiter()
+                    .GetResult();
+            }
+        }
+        """,
+        "BRO1113",
+        "BRO1523");
+
     // Scrutor: whether a comment introduces a group mustn't depend on blank lines that BRO1505/BRO1506/BRO1509 add or
     // remove in the same run (a first version judged by blank lines and sorted these on the second run).
     [Fact]
