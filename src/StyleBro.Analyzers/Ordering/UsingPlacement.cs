@@ -119,8 +119,9 @@ internal static class UsingPlacement
         var firstLine = lines.GetLineFromPosition(first.SpanStart).LineNumber;
         var lastLine = lines.GetLineFromPosition(last.Span.End).LineNumber;
         var indentation = Indentation(lines[firstLine]);
-        if (lines[firstLine].Start + indentation.Length != first.SpanStart
-            || lines.GetLineFromPosition(last.GetLastToken().GetNextToken().SpanStart).LineNumber == lastLine)
+        // Code after the last using on its line would move too. (Code before the first one, '{' or 'namespace X;', fails
+        // the re-parse or the binding check.)
+        if (lines.GetLineFromPosition(last.GetLastToken().GetNextToken().SpanStart).LineNumber == lastLine)
         {
             return null;
         }

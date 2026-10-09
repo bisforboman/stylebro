@@ -22,7 +22,6 @@
         # BRO1008 (using placement)
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '|| root.Members.Count != 1 ||'; Replace = '|| root.Members.Count < 1 ||'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '.Any(t => t.IsDirective)'; Replace = '.Any(t => false)'; Tests = 'UsingPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (lines[firstLine].Start + indentation.Length != first.SpanStart'; Replace = 'if (false'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = '.LineNumber == lastLine)'; Replace = '.LineNumber == -1)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (startLine == 0 && mode == UsingPlacementMode.Inside)'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = ' && !aboveIsOpenBrace)'; Replace = ')'; Tests = 'UsingPlacementTests' }
