@@ -121,10 +121,33 @@ The block sits between `# BEGIN stylebro-migrate` and `# END stylebro-migrate`; 
 Put your own settings outside it. To get these rules reported by the build too, add
 `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` to `Directory.Build.props`.
 
-`init` also looks at your code first. When at least three quarters of the private fields start with `_`, it writes
-`stylebro_private_field_naming = _camelCase`, so [BRO1303](rules/BRO1303.md) keeps your underscores instead of
-renaming every field (generated code, EF Core migrations and submodules don't count; your own `dotnet_naming_rule`
-settings win). And when it finds a StyleCop setup (`stylecop.json`, StyleCop rule ids in `.editorconfig`, rulesets or
+`init` also looks at your code first and keeps the conventions it clearly follows. For each setting below it counts
+both forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count) and, when one
+form has at least three quarters of at least 10 places and isn't StyleBro's default, writes it into the block. It
+prints every count, also for the settings it leaves alone (Ocelot):
+
+```
+Conventions in the code (written when one form has 75% of at least 10 places):
+  private fields: 32 named 'field', 1054 named '_field'; stylebro_private_field_naming = _camelCase
+  '{' of a multi-line block: 5412 on its own line, 0 at the end of the line; .editorconfig sets csharp_new_line_before_open_brace = all
+  '=>' of expression bodies and switch arms where a line wraps: 16 at the end of the line, 296 at the start of the line; stylebro_arrow_placement_when_wrapping = beginning_of_line
+  empty strings: 357 string.Empty, 20 ""; stylebro_empty_string_style = string_empty (the default)
+  one-line <summary> texts: 208 tags on lines of their own, 121 on one line; no clear majority, stylebro_summary_layout stays multi_line
+  ...
+```
+
+The settings: private field naming ([BRO1303](rules/BRO1303.md)), brace placement (`csharp_new_line_before_open_brace`,
+`csharp_new_line_before_else`/`_catch`/`_finally`), braces on one-line bodies (`csharp_prefer_braces`), operator, `=>`
+and `=` placement when wrapping, trailing commas, `""` or `string.Empty`, null checks, one-line summaries,
+`<inheritdoc/>` spacing, `default` or `default(T)`, the closing parenthesis and first item of split lists, constructor
+initializer and `where` placement, `new T()` parentheses with an initializer, and blank lines between switch sections
+(the keys are in [Settings](configuration.md)). A key your root `.editorconfig` sets wins, so does a Sonar setup's, and
+a `dotnet_naming_rule` for private fields decides the field style (naming rules for interfaces or constants don't).
+
+EF Core migrations (files with `[Migration(...)]`, a `Migration` base class or a `ModelSnapshot`) are written by
+`dotnet ef`, so `init` marks their folders `generated_code = true`: formatting and StyleBro leave them alone.
+
+When it finds a StyleCop setup (`stylecop.json`, StyleCop rule ids in `.editorconfig`, rulesets or
 global configs, a StyleCop.Analyzers reference), it stops without writing and tells you to run
 `stylebro-migrate --write` instead: that's [path B](#b-coming-from-stylecop), which turns StyleBro's rules on only where
 StyleCop enforced them.
@@ -140,7 +163,10 @@ that fix what your Sonar rules report (S2325 -> CA1822, S4136 -> overloads kept 
 stylebro-migrate format
 ```
 
-This fixes whitespace, the built-in rules and every StyleBro rule in one go. A second run should change nothing.
+This fixes whitespace, the built-in rules and every StyleBro rule. One fix can make work for another rule, so the
+command runs `dotnet format` again until a run changes no file (at most three runs) and prints what each run changed
+(`Run 1: 293 files changed.`, `Run 2: 0 files changed, clean.`); `--once` runs it once. A folder with several solutions
+or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 Review the diff and commit it. In a large codebase you may not want one big change: see
 [Large codebases](#large-codebases).
 
