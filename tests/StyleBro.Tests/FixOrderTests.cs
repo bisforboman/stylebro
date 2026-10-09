@@ -1905,6 +1905,54 @@ public class FixOrderTests
         "BRO1505",
         "BRO1519");
 
+    // Newtonsoft.Json: '#region License' around the header. BRO1112 removes it; BRO1008 must not wait for that (a second
+    // run), so region lines above the usings don't stop it.
+    [Fact]
+    public Task UsingPlacement_RegionAroundTheHeader() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        using System;
+        using System.Collections.Generic;
+
+        namespace Newtonsoft.Json
+        {
+            public class C
+            {
+                public List<Type> Types { get; } = new List<Type>();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "BRO1008",
+        "BRO1112",
+        "BRO1505");
+
+    [Fact]
+    public Task UsingPlacement_Outside_RegionAroundTheHeader() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        namespace Newtonsoft.Json
+        {
+            using System;
+            using System.Collections.Generic;
+
+            public class C
+            {
+                public List<Type> Types { get; } = new List<Type>();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\ncsharp_using_directive_placement = outside_namespace\n",
+        "BRO1008",
+        "BRO1112",
+        "BRO1505");
+
     [Fact]
     public Task UsingPlacement_Inside_TheFileHeaderStaysOnTop() => AssertConvergesInEveryOrderWithConfigAsync(
         """

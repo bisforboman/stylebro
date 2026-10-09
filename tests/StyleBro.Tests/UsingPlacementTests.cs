@@ -151,6 +151,82 @@ public class UsingPlacementTests
         }
         """);
 
+    // Newtonsoft.Json's '#region License' around the header: region lines above the usings don't stop the move.
+    [Fact]
+    public Task Inside_ARegionAroundTheHeader_StaysOnTop() => Verify.VerifyFixAsync(
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        {|BRO1008:using System;|}
+
+        namespace App
+        {
+            public class C
+            {
+                public Type? T { get; set; }
+            }
+        }
+        """,
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        namespace App
+        {
+            using System;
+
+            public class C
+            {
+                public Type? T { get; set; }
+            }
+        }
+        """);
+
+    [Fact]
+    public Task Outside_ARegionAroundTheHeader_StaysOnTop() => Verify.VerifyFixAsync(
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+        namespace App
+        {
+            {|BRO1008:using System;|}
+
+            public class C
+            {
+                public Type? T { get; set; }
+            }
+        }
+        """,
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+        using System;
+
+        namespace App
+        {
+            public class C
+            {
+                public Type? T { get; set; }
+            }
+        }
+        """,
+        Outside);
+
+    [Fact]
+    public Task ARegionBelowTheHeader_StaysWhereItIs() => Task.WhenAll(
+        Verify.VerifyFixAsync(
+            "// Header\n\n#region License\n// Text\n#endregion\n{|BRO1008:using System;|}\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
+            "// Header\n\n#region License\n// Text\n#endregion\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"),
+        Verify.VerifyFixAsync(
+            "// Header\n\n#region License\n#endregion\nnamespace App\n{\n    {|BRO1008:using System;|}\n\n    public class C { public Type? T { get; set; } }\n}\n",
+            "// Header\n\n#region License\n#endregion\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
+            Outside));
+
     [Fact]
     public Task Inside_FileScopedNamespace() => Verify.VerifyFixAsync(
         """
@@ -354,6 +430,8 @@ public class UsingPlacementTests
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\nnamespace Other\n{\n}\n"),
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\npublic class D\n{\n}\n"),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n#if DEBUG\n    using System;\n#endif\n\n    public class C { }\n}\n", Outside),
+        Verify.VerifyNoDiagnosticsAsync("#region Usings\nusing System;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n"),
+        Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    #region Usings\n    using System;\n    #endregion\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System; public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{ using System;\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App; using System;\n\npublic class C { public Type? T { get; set; } }\n", Outside),

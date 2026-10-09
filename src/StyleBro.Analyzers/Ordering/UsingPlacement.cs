@@ -119,13 +119,10 @@ internal static class UsingPlacement
         UsingPlacementMode mode,
         string indentUnit)
     {
-        // Where the namespace's body starts: no directive ('#if', '#pragma', ...) may sit anywhere before it.
+        // Where the namespace's body starts: no directive ('#if', '#pragma', ...) may sit anywhere before it (checked
+        // below, once it's known where the moved lines start and where they go).
         var bodyStart = ns is NamespaceDeclarationSyntax blockNamespace ? blockNamespace.OpenBraceToken : ((FileScopedNamespaceDeclarationSyntax)ns).SemicolonToken;
         var checkedEnd = mode == UsingPlacementMode.Outside ? moved.Last().FullSpan.End : bodyStart.FullSpan.End;
-        if (root.DescendantTrivia(TextSpan.FromBounds(0, checkedEnd)).Any(t => t.IsDirective))
-        {
-            return null;
-        }
 
         // The usings must have their lines to themselves (a trailing comment is fine).
         var lines = text.Lines;
@@ -142,7 +139,7 @@ internal static class UsingPlacement
 
         // Comment lines directly above the first using move along, unless they start the file (its header).
         var startLine = firstLine;
-        while (startLine > 0 && !IsBlank(lines[startLine - 1]) && lines[startLine - 1].Start >= first.FullSpan.Start)
+        while (startLine > 0 && !IsBlank(lines[startLine - 1]) && !IsDirective(lines[startLine - 1]) && lines[startLine - 1].Start >= first.FullSpan.Start)
         {
             startLine--;
         }
@@ -202,7 +199,7 @@ internal static class UsingPlacement
         {
             // Above the namespace and the comments directly above it, below the file header.
             var insertLine = lines.GetLineFromPosition(ns.SpanStart).LineNumber;
-            while (insertLine > 0 && !IsBlank(lines[insertLine - 1]))
+            while (insertLine > 0 && !IsBlank(lines[insertLine - 1]) && !IsDirective(lines[insertLine - 1]))
             {
                 insertLine--;
             }
@@ -213,7 +210,7 @@ internal static class UsingPlacement
             }
 
             changes.Insert(0, new TextChange(new TextSpan(lines[insertLine].Start, 0), reindented + lineBreak));
-            return changes;
+            return HasOnlyRegionsAbove(root, checkedEnd, lines[insertLine].Start) ? changes : null;
         }
 
         // Inside: on the line below '{', or after a blank line below 'namespace X;'; a blank line before what follows.
@@ -229,7 +226,7 @@ internal static class UsingPlacement
             + reindented
             + (IsBlank(next) || nextIsClose ? string.Empty : lineBreak);
         changes.Add(new TextChange(new TextSpan(next.Start, 0), inserted));
-        return changes;
+        return HasOnlyRegionsAbove(root, checkedEnd, lines[startLine].Start) ? changes : null;
     }
 
     /// <summary>
@@ -390,6 +387,18 @@ internal static class UsingPlacement
     }
 
     private static bool IsBlank(TextLine line) => string.IsNullOrWhiteSpace(line.ToString());
+
+    private static bool IsDirective(TextLine line) => line.ToString().TrimStart().StartsWith("#", System.StringComparison.Ordinal);
+
+    /// <summary>
+    /// Whether the only directives before <paramref name="end"/> are '#region'/'#endregion' lines above
+    /// <paramref name="limit"/> (where the moved lines start or go): Newtonsoft.Json's '#region License' around the
+    /// header, which BRO1112 removes in the same run. Anything else ('#if' for a target framework, '#pragma', a region
+    /// around the usings) can't be moved across.
+    /// </summary>
+    private static bool HasOnlyRegionsAbove(CompilationUnitSyntax root, int end, int limit) =>
+        root.DescendantTrivia(TextSpan.FromBounds(0, end)).All(t => !t.IsDirective
+            || (t.IsKind(SyntaxKind.RegionDirectiveTrivia) || t.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) && t.FullSpan.End <= limit);
 
     /// <summary>What a set of using directives brings into scope, by name.</summary>
     private sealed class Imports
