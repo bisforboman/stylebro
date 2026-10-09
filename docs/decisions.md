@@ -11,8 +11,8 @@ a website? With what, which pages, and where do the help links go?
 
 ### Choices
 
-1. Generator: MkDocs Material (Markdown as it is, search, dark mode); DocFX (.NET's own, API docs we don't need);
-   GitHub's rendering only (no site).
+1. Generator: MkDocs Material (Markdown as it is, search, dark mode); GitHub's built-in Jekyll (no build setup,
+   plain look, no real search); DocFX (.NET's own, aimed at API docs we don't need).
 2. Pages: user docs only (rules, getting started, migrating, configuration, baseline, CI, StyleCop comparison); or
    everything in `docs/`, the decision log, backlog and proposals included.
 3. Help links: to the site's rule pages; or keep the GitHub file views.
