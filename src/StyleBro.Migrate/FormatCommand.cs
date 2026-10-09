@@ -5,13 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// stylebro-migrate format [folder, solution or project] [dotnet format options]: 'dotnet format' that is
-/// safe in multi-targeted repositories. There 'dotnet format' loads one copy of every file per target framework, the
-/// SDK's IDE0055 fix edits each copy on its own (each sees other '#if' code), and Roslyn's linked-file merge crashes on
+/// stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]: 'dotnet format' that fixes
+/// only StyleBro's rules and the built-in ones init/migrate turn on (<see cref="Diagnostics"/>; --all: everything), never
+/// inside git submodules, and is safe in multi-targeted repositories. There 'dotnet format' loads one copy of every
+/// file per target framework, the SDK's IDE0055 fix edits each copy on its own (each sees other '#if' code), and
+/// Roslyn's linked-file merge crashes on
 /// the result: nothing is written. Its whitespace pass only formats the first framework's code. Loading the projects
 /// for one framework at a time leaves nothing to merge, so this runs 'dotnet format' once per target framework, each
 /// time on the projects that target it (a temporary solution filter). A repository without multi-targeted projects
@@ -60,6 +63,32 @@ internal static class FormatCommand
         {
             Console.Error.WriteLine($"No single solution or project in {root}; name one.");
             return 1;
+        }
+
+        // By default only StyleBro's rules and the built-in ones init/migrate turn on: plain 'dotnet format' also applies
+        // every other analyzer's fixes and compiler fixes (CS8618's 'required', a Sonar fix removing 'init;': build
+        // errors in Kavita). Whitespace formatting still runs. --all keeps them.
+        if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
+        {
+            var ids = Diagnostics(root);
+            Console.WriteLine($"Fixing StyleBro's rules and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
+            passThrough.Add("--diagnostics");
+            passThrough.AddRange(ids);
+        }
+
+        // Submodules are someone else's code, even when a project compiles files from them.
+        if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
+        {
+            var exclude = passThrough.IndexOf("--exclude");
+            if (exclude < 0)
+            {
+                passThrough.Add("--exclude");
+                passThrough.AddRange(submodules);
+            }
+            else
+            {
+                passThrough.InsertRange(exclude + 1, submodules);
+            }
         }
 
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
@@ -154,6 +183,32 @@ internal static class FormatCommand
         }
 
         return exit;
+    }
+
+    /// <summary>
+    /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE rules init's template
+    /// and the stylebro blocks of the .editorconfig files at and above <paramref name="root"/> name (rules set to none
+    /// aren't fixed anyway).
+    /// </summary>
+    public static List<string> Diagnostics(string root)
+    {
+        var ids = new SortedSet<string>(Migration.StyleBroRules().Select(r => r.Id), StringComparer.Ordinal);
+        var text = new List<string> { InitCommand.Template() };
+        for (var folder = new DirectoryInfo(root); folder is not null; folder = folder.Parent)
+        {
+            var path = Path.Combine(folder.FullName, ".editorconfig");
+            if (File.Exists(path))
+            {
+                text.AddRange(Regex.Matches(File.ReadAllText(path), "# BEGIN stylebro-.*?# END stylebro-", RegexOptions.Singleline).Select(m => m.Value));
+            }
+        }
+
+        foreach (Match match in Regex.Matches(string.Join("\n", text), @"dotnet_diagnostic\.(IDE\d+)\.severity", RegexOptions.IgnoreCase))
+        {
+            ids.Add(match.Groups[1].Value.ToUpperInvariant());
+        }
+
+        return ids.ToList();
     }
 
     /// <summary>

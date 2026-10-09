@@ -18,7 +18,7 @@ With `--write` it:
 - adds the replacing rule ids to existing StyleCop suppressions (`#pragma warning disable`, `[SuppressMessage]`,
   `<NoWarn>`).
 
-Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `dotnet format`.
+Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `stylebro-migrate format` (below).
 
 The report lists the StyleCop rules that nothing enforces after the switch, and why. Details:
 [docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md).
@@ -31,7 +31,9 @@ stylebro-migrate init [path] [--write]
 
 Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order,
 IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
-a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too.
+a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. When at least
+three quarters of the private fields start with `_`, it keeps them (`stylebro_private_field_naming = _camelCase`). In a
+repository with a StyleCop setup it stops and points to `--write` instead.
 
 ```
 stylebro-migrate init [path] --modernize [--write]
@@ -42,17 +44,18 @@ Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()
 (StyleBro's multi-target guard) and the newer-C# rules are suggestions unless `LangVersion` is set. Works after `--write` too. Details:
 [docs/modernizing.md](https://github.com/bisforboman/stylebro/blob/main/docs/modernizing.md).
 
-## Formatting multi-targeted projects
+## Formatting
 
 ```
-stylebro-migrate format [folder, solution or project] [dotnet format options]
+stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]
 ```
 
-`dotnet format`, once per target framework. In a repository with multi-targeted projects, plain `dotnet format`
-crashes on the SDK's formatting fix (IDE0055): Roslyn can't merge the frameworks' copies of a file. This loads the
-projects for one framework at a time, so there's nothing to merge, and code behind `#if` gets formatted too. Without
-multi-targeted projects it's one plain `dotnet format` run. Options pass through (`--verify-no-changes`,
-`--severity warn`, ...).
+`dotnet format` with only StyleBro's rules and the built-in rules `init` or `--write` turn on (`--diagnostics ...`),
+plus whitespace formatting. Plain `dotnet format` also applies every other analyzer's and the compiler's fixes, which
+can break the build; `--all` does that too. Git submodules are never formatted. In a repository with multi-targeted
+projects it runs once per target framework: plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055),
+because Roslyn can't merge the frameworks' copies of a file. Other options pass through (`--verify-no-changes`,
+`--severity warn`, ...). `stylebro-migrate --help` lists every command.
 
 ## Baseline
 
