@@ -1699,6 +1699,187 @@ public class FixOrderTests
         "BRO1109",
         "BRO1111");
 
+    // BRO1149: a merge moves the inner body into the outer 'if' (and its else chain), which changes which brace rule
+    // reports it; the merge adds the braces they want itself.
+    [Fact]
+    public Task NestedIfs_WithTheBraceRules() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b, bool c)
+            {
+                if (a)
+                {
+                    if (b)
+                        M(a, b, c);
+                }
+
+                if (a)
+                    if (b)
+                    {
+                        M(a, b, c);
+                    }
+
+                if (c)
+                    M(a, b, c);
+                else if (a)
+                    if (b)
+                        M(b, a, c);
+
+                if (c)
+                {
+                    M(a, b, c);
+                }
+                else if (a)
+                {
+                    if (b)
+                        M(b, a, c);
+                }
+
+                if (a)
+                    if (b)
+                        if (c)
+                            M(c, b,
+                                a);
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1514",
+        "BRO1515",
+        "BRO1516");
+
+    [Fact]
+    public Task NestedIfs_InSingleLineBlocks() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b) { if (a) { if (b) { M(b, a); } } }
+
+            public void N(bool a, bool b)
+            {
+                if (a) { if (b) { M(b, a); } }
+                if (b) { if (a) M(b, a); }
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1519");
+
+    [Fact]
+    public Task NestedIfs_InElseClauses() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool a, bool b, bool c)
+            {
+                if (c)
+                {
+                    return 1;
+                }
+                else
+                {
+                    if (a)
+                    {
+                        if (b)
+                        {
+                            M(a, b, c);
+                        }
+                    }
+                }
+
+                if (a)
+                {
+                    M(a, b, c);
+                }
+                else
+                {
+                    if (b)
+                    {
+                        if (c)
+                        {
+                            M(a, b, c);
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1139",
+        "BRO1143",
+        "BRO1149");
+
+    [Fact]
+    public Task NestedIfs_WithParenthesesRules() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b, bool c, bool d)
+            {
+                if (a || b && c)
+                {
+                    if (d || c && a)
+                    {
+                        M(a, b, c, d);
+                    }
+                }
+
+                if ((a))
+                {
+                    if ((b || c))
+                    {
+                        M(a, b, c, d);
+                    }
+                }
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1405",
+        "BRO1407");
+
+    [Fact]
+    public Task WhereBeforeTerminal_InSplitChains() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public int M(int[] items) => items.Select(i => i * 2)
+                .Where(i => i > 0).Count();
+
+            public bool N(int[] items) =>
+                items
+                    .Where(i => i > 0)
+                    .Any();
+        }
+        """,
+        "BRO1150",
+        "BRO1523");
+
+    [Fact]
+    public Task ParamsArrays_WithArgumentLayout() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public static int Sum(int first, params int[] rest) => first + rest.Length;
+
+            public int M() => Sum(1,
+                new[] { 2, 3 }) + Sum(1, 2,
+                new[] { 3, 4 }) + Sum(
+                1, new[] { 2 }) + Sum(1, new[] { 2, 3 });
+        }
+        """,
+        "BRO1107",
+        "BRO1108",
+        "BRO1151");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

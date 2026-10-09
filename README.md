@@ -21,15 +21,15 @@ correctness and migration, with measured numbers.
 
 ## Rules
 
-124 rules, each with a code fix. The full list, with what each one replaces and whether it's on by
+128 rules, each with a code fix. The full list, with what each one replaces and whether it's on by
 default: **[docs/rules](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md)**.
 
 | Area | Rules | For example |
 |------|------:|-------------|
 | [Ordering, spacing and comments](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#ordering-spacing-and-comments) | 7 | member order, accessor order, comment and directive spacing |
-| [Readability](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#readability) | 48 | `string.Empty`, `else if`, list and query layout, lambdas, tuples, null checks |
+| [Readability](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#readability) | 51 | `string.Empty`, `else if`, list and query layout, lambdas, tuples, null checks |
 | [Naming](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#naming) | 14 | casing of fields, parameters and types, `I`/`T` prefixes, `Async` suffix |
-| [Maintainability](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#maintainability) | 9 | access modifiers, parentheses, trailing commas |
+| [Maintainability](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#maintainability) | 10 | access modifiers, parentheses, trailing commas |
 | [Layout](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#layout) | 27 | blank lines, braces, single-line blocks, line breaks when wrapping |
 | [Documentation](https://github.com/bisforboman/stylebro/blob/main/docs/rules/README.md#documentation) | 19 | `<inheritdoc/>`, periods, summary wording, file headers |
 

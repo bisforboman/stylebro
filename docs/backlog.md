@@ -14,8 +14,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 125 |
-| Done, not released yet | 0 |
-| Planned | 0 rules, 62 work items |
+| Done, not released yet | 3 |
+| Planned | 0 rules, 64 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 108 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -97,6 +97,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Rule docs as a website | MkDocs Material site from docs/ (user docs only; decisions, backlog and proposals stay on GitHub), built with `--strict` on every PR and deployed to GitHub Pages from main (decisions.md 2026-10-09); rule help links point to its rule pages; `docs/configuration.md` lists every `stylebro_*` key (checked by a test). | Done (2026-10-09) |
 | Adoption | Rule docs as a website | Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views. | Idea |
 | Hardening | BRO1523 second run in Kavita | After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Cause: BRO1523 skipped chains with any directive in them, so a lambda's `#region`s hid the chain until BRO1113 removed them. Region lines no longer count (other directives still skip the chain). | Done (2026-10-09) |
+| Beyond StyleCop | Sonar mirrors (Sonar survey 2026-10-09) | BRO1149 merges nested `if`s (S1066), BRO1150 `Where(p).Count()` -> `Count(p)` (S2971), BRO1151 the elements instead of an array for `params` (S3878); written from the public rule descriptions, with fixes Sonar lacks. On in the preset, off after `stylebro-migrate`. Fixers for the Sonar ids reuse their fix logic in a later PR (decisions.md 2026-10-09). | Done (2026-10-09) |
 | Adoption | `stylebro-migrate` follows a SonarQube setup | Owner's decision 2026-10-09: the migration and `init` read Sonar rule severities (rulesets incl. SonarLint's and the scanner's, global configs, `.editorconfig`), the `SonarAnalyzer.CSharp` defaults (Sonar way, embedded rule list) or a quality profile backup (`--sonar-profile`), and turn on the StyleBro/SDK rules that fix 22 Sonar rules (S2325 -> CA1822, S4136 -> overloads together, S1066 -> BRO1149, ...); a rule on through StyleCop or Sonar is on. The report and `--diff` show the Sonar part. See migrating.md. | Done (2026-10-09) |
 
 ### Read the SDK's own settings
@@ -193,6 +194,9 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Released |
 | [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | Released |
 | [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | Released |
+| [BRO1149](rules/BRO1149.md) | Merge an 'if' into the enclosing 'if' | (none; Sonar S1066) | Done |
+| [BRO1150](rules/BRO1150.md) | Pass the predicate to the LINQ call instead of calling Where first | (none; Sonar S2971) | Done |
+| [BRO1151](rules/BRO1151.md) | Pass the elements, not an array, to a params parameter | (none; Sonar S3878) | Done |
 
 ### BRO13xx: Naming
 
