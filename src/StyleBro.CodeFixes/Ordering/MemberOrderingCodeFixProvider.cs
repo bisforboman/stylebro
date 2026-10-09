@@ -77,10 +77,13 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             }
         }
 
-        var targets = new HashSet<SyntaxNode>(partialAccess.Keys);
-        var rewriter = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree));
-        return targets.Where(t => !t.Ancestors().Any(targets.Contains))
-            .Select(t => new TextChange(t.Span, rewriter.Visit(t)!.ToString()))
+        // The layout pre-step's edits are inside the containers, so each outermost one still replaces its original span.
+        var outermost = partialAccess.Keys.Where(t => !t.Ancestors().Any(partialAccess.ContainsKey)).ToList();
+        var (laidOut, newRoot, moved) = await ApplyLayoutAsync(document, root, new HashSet<SyntaxNode>(partialAccess.Keys), cancellationToken).ConfigureAwait(false);
+        var movedAccess = moved.ToDictionary(p => p.Value, p => partialAccess[p.Key]);
+        var rewriter = new SortingRewriter(new HashSet<SyntaxNode>(movedAccess.Keys), options, movedAccess, GetAutoAccessorLines(laidOut, newRoot.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(laidOut, newRoot.SyntaxTree));
+        return outermost.Where(moved.ContainsKey)
+            .Select(t => new TextChange(t.Span, rewriter.Visit(moved[t])!.ToString()))
             .ToList();
     }
 
@@ -122,28 +125,43 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
         }
 
-        var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var layout = LinkedFileFixAllProvider.Merge(GetLayoutChanges(document, root, text, targets, cancellationToken));
-        if (layout.Count > 0)
-        {
-            // The containers again, in the new text: each starts where it did, shifted by the edits before it.
-            document = document.WithText(text.WithChanges(layout));
-            var newTree = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-            var moved = new Dictionary<SyntaxNode, MemberAccess?[]?>();
-            foreach (var target in targets)
-            {
-                var start = target.SpanStart + layout.Where(c => c.Span.End <= target.SpanStart).Sum(c => c.NewText!.Length - c.Span.Length);
-                if (newTree?.FindToken(start).Parent?.AncestorsAndSelf().FirstOrDefault(n => n.SpanStart == start && n.RawKind == target.RawKind) is { } found)
-                {
-                    moved[found] = partialAccess[target];
-                }
-            }
-
-            (root, partialAccess, targets) = (newTree!, moved, new HashSet<SyntaxNode>(moved.Keys));
-        }
+        var (laidOut, laidOutRoot, moved) = await ApplyLayoutAsync(document, root, targets, cancellationToken).ConfigureAwait(false);
+        (document, root) = (laidOut, laidOutRoot);
+        partialAccess = moved.ToDictionary(p => p.Value, p => partialAccess[p.Key]);
+        targets = new HashSet<SyntaxNode>(moved.Values);
 
         var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree)).Visit(root)!;
         return document.WithSyntaxRoot(newRoot);
+    }
+
+    /// <summary>
+    /// Applies <see cref="GetLayoutChanges"/>: the new document and root, and where each container is in it (a container
+    /// that can't be found again is left out).
+    /// </summary>
+    private static async Task<(Document Document, SyntaxNode Root, Dictionary<SyntaxNode, SyntaxNode> Moved)> ApplyLayoutAsync(Document document, SyntaxNode root, HashSet<SyntaxNode> targets, CancellationToken cancellationToken)
+    {
+        var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var layout = LinkedFileFixAllProvider.Merge(GetLayoutChanges(document, root, text, targets, cancellationToken));
+        var moved = targets.ToDictionary(t => t, t => t);
+        if (layout.Count == 0)
+        {
+            return (document, root, moved);
+        }
+
+        // The containers again, in the new text: each starts where it did, shifted by the edits before it.
+        document = document.WithText(text.WithChanges(layout));
+        var newRoot = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))!;
+        moved.Clear();
+        foreach (var target in targets)
+        {
+            var start = target.SpanStart + layout.Where(c => c.Span.End <= target.SpanStart).Sum(c => c.NewText!.Length - c.Span.Length);
+            if (newRoot.FindToken(start).Parent?.AncestorsAndSelf().FirstOrDefault(n => n.SpanStart == start && n.RawKind == target.RawKind) is { } found)
+            {
+                moved[target] = found;
+            }
+        }
+
+        return (document, newRoot, moved);
     }
 
     /// <summary>

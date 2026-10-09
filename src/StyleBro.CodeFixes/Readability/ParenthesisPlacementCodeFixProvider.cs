@@ -58,8 +58,10 @@ public sealed class ParenthesisPlacementCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var ownLine = ParenthesisPlacement.IsOwnLine(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
-        var openMoves = ownLine && Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.OpenParenthesisOnNameLine, cancellationToken);
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var ownLine = ParenthesisPlacement.IsOwnLine(options);
+        bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken);
+        var openMoves = ownLine && IsOn(DiagnosticIds.OpenParenthesisOnNameLine);
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
@@ -77,7 +79,7 @@ public sealed class ParenthesisPlacementCodeFixProvider : CodeFixProvider
                     changes.Add(ParenthesisPlacement.GetOpenChange(open, text));
                 }
             }
-            else if (ParenthesisPlacement.GetCloseFix(list, text, ownLine, openMoves) is { } close)
+            else if (ParenthesisPlacement.GetCloseFix(list, text, ownLine, openMoves, options, IsOn) is { } close)
             {
                 changes.Add(close.Change);
             }

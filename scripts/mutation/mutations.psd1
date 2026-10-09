@@ -490,9 +490,22 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ParameterLayout.cs'; Find = 'foreach (var change in Reindent(item, text, indentation))'; Replace = 'foreach (var change in Reindent(item, text, indentation).Take(0))'; Tests = 'ParameterLayoutTests' }
         @{ File = 'src/StyleBro.CodeFixes/Readability/ParameterLayoutCodeFixProvider.cs'; Find = '!remaining.Any(o => o != l && o.Span.Contains(l.Span))'; Replace = 'true'; Tests = 'ParameterLayoutTests' }
         # Options: stylebro_closing_parenthesis_placement (BRO1110), stylebro_split_list_first_item (BRO1107/BRO1108)
-        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'list.ContainsDirectives || '; Replace = ''; Tests = 'ParenthesisPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '|| !IsPlainGap(last, close))'; Replace = '|| false)'; Tests = 'ParenthesisPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'Line(text, last.Span.End) != Line(text, close.SpanStart) || '; Replace = ''; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (list.ContainsDirectives)'; Replace = 'if (false)'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (!IsPlainGap(last, close))'; Replace = 'if (false)'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (Line(text, last.Span.End) != Line(text, close.SpanStart))'; Replace = 'if (false)'; Tests = 'ParenthesisPlacementTests' }
+        # Hardening: BRO1110 own_line reindents a ')' on its own line, like the line with '(' after the other fixes
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'return before == indentation || '; Replace = 'return '; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = ' || !string.IsNullOrWhiteSpace(before)'; Replace = ''; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '&& isOn(DiagnosticIds.ConstructorInitializerLine) && '; Replace = '&& false && '; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '!ConstructorInitializers.IsSameLine(options) && '; Replace = ''; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'return newText.Substring(lineBreak + 1);'; Replace = 'break;'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'return newText; // reindented where it is'; Replace = 'break;'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (startsLine)'; Replace = 'if (false)'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'else if (startsLine && openMoves'; Replace = 'else if (false && openMoves'; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '&& open == current && current.GetNextToken() == close && '; Replace = '&& open == current && '; Tests = 'ParenthesisPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = '&& fix.Change.Span.Start == fix.Close.GetPreviousToken().Span.End;'; Replace = ';'; Tests = 'ConstructorInitializerLineTests' }
+        # Hardening: BRO1112's sort (BRO1001) adds BRO1505's blank lines first, like BRO1001's own fix
+        @{ File = 'src/StyleBro.CodeFixes/Ordering/MemberOrderingCodeFixProvider.cs'; Find = '= await ApplyLayoutAsync(document, root, new HashSet<SyntaxNode>(partialAccess.Keys), cancellationToken).ConfigureAwait(false);'; Replace = '= (document, root, partialAccess.Keys.ToDictionary(k => k, k => k));'; Tests = 'FixOrderTests.Regions_RemovedAroundMembersMissingBlankLines' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'openMoves && GetMisplacedOpen(list, text) is not null ?'; Replace = 'false ?'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (Line(text, lastItem.Span.End) == openLine.LineNumber)'; Replace = 'if (false)'; Tests = 'ParenthesisPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ParenthesisPlacement.cs'; Find = 'if (Line(text, lastItem.SpanStart) != openLine.LineNumber || GetOpening(last)'; Replace = 'if (GetOpening(last)'; Tests = 'ParenthesisPlacementTests' }

@@ -212,6 +212,32 @@ public class ConstructorInitializerLineTests
         """ + BaseClass,
         editorConfig: "stylebro_constructor_initializer_placement = same_line\ndotnet_diagnostic.BRO1110.severity = none");
 
+    // BRO1110's own_line mode only reindents a ')' already on its own line, so the initializer joins it there.
+    [Fact]
+    public Task SameLine_WithAClosingParenthesisBro1110Reindents() => VerifyFixAsync(
+        """
+        class C : B
+        {
+            public C(
+                byte a
+                    )
+                {|BRO1105::|} base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        """
+        class C : B
+        {
+            public C(
+                byte a
+                    ) : base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        editorConfig: "stylebro_constructor_initializer_placement = same_line\nstylebro_closing_parenthesis_placement = own_line");
+
     // Too long (55 > 45), a comment in the gap (also one BRO1110 would carry along), arguments on several lines, already
     // joined.
     [Fact]

@@ -69,10 +69,13 @@ internal static class ParenthesisPlacement
     /// With <paramref name="ownLine"/>, a split list (see <see cref="GetSplitListLine"/>) has it on
     /// its own line, indented like that line: '    b)' turns into '    b' / ')'. The line of the opening token is the
     /// name's line when BRO1109 (<paramref name="openMoves"/>) moves the token up there, so both fixes agree in any order.
+    /// A token already on its own line gets that indentation too. The indentation is the one that line has once the fixes
+    /// that move tokens across lines are done (see <see cref="GetIndentation"/>), so nested lists agree in one run.
     /// Skipped in <c>own_line</c> mode: a comment between the last item and the token, directives in the list (each
     /// target framework's copy may have another last item) and a last item ending in single-line braces.
     /// </summary>
-    public static (SyntaxToken Close, TextChange Change)? GetCloseFix(SyntaxNode list, SourceText text, bool ownLine, bool openMoves)
+    /// <param name="options">The file's options, with <paramref name="isOn"/>: for BRO1105, which moves ': base('.</param>
+    public static (SyntaxToken Close, TextChange Change)? GetCloseFix(SyntaxNode list, SourceText text, bool ownLine, bool openMoves, AnalyzerConfigOptions? options = null, Func<string, bool>? isOn = null)
     {
         var split = ownLine ? GetSplitListLine(list, text, openMoves) : default;
         if (split.Skip)
@@ -84,12 +87,27 @@ internal static class ParenthesisPlacement
         {
             var (_, items, close) = ParameterLayoutList(list);
             var last = items[items.Count - 1].GetLastToken();
-            if (list.ContainsDirectives || Line(text, last.Span.End) != Line(text, close.SpanStart) || !IsPlainGap(last, close))
+            if (list.ContainsDirectives)
             {
                 return null;
             }
 
-            var indentation = new string(text.ToString(openLine.Span).TakeWhile(c => c is ' ' or '\t').ToArray());
+            var indentation = GetIndentation(list, openLine, text, openMoves, options, isOn);
+            if (Line(text, last.Span.End) != Line(text, close.SpanStart))
+            {
+                // Already on its own line: only its indentation is checked, the same the fix gives a ')' it moves down.
+                var closeLine = text.Lines.GetLineFromPosition(close.SpanStart);
+                var before = text.ToString(TextSpan.FromBounds(closeLine.Start, close.SpanStart));
+                return before == indentation || !string.IsNullOrWhiteSpace(before)
+                    ? null
+                    : (close, new TextChange(TextSpan.FromBounds(closeLine.Start, close.SpanStart), indentation));
+            }
+
+            if (!IsPlainGap(last, close))
+            {
+                return null;
+            }
+
             var lineBreak = text.ToString(TextSpan.FromBounds(openLine.End, openLine.EndIncludingLineBreak));
             return (close, new TextChange(TextSpan.FromBounds(last.Span.End, close.SpanStart), (lineBreak.Length == 0 ? "\n" : lineBreak) + indentation));
         }
@@ -105,7 +123,10 @@ internal static class ParenthesisPlacement
     public static bool MovesCloseToLastItem(SyntaxNode list, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
         var ownLine = IsOwnLine(options);
-        return GetCloseFix(list, text, ownLine, ownLine && isOn(DiagnosticIds.OpenParenthesisOnNameLine)) is not null;
+
+        // A ')' on its own line is only reindented where it is (that edit starts at its line, not after the last item).
+        return GetCloseFix(list, text, ownLine, ownLine && isOn(DiagnosticIds.OpenParenthesisOnNameLine), options, isOn) is { } fix
+            && fix.Change.Span.Start == fix.Close.GetPreviousToken().Span.End;
     }
 
     /// <summary>The list's opening token, items and closing token, for the list kinds <see cref="ParameterLayout"/> checks.</summary>
@@ -201,6 +222,68 @@ internal static class ParenthesisPlacement
         }
 
         return openingLine == Line(text, last.SpanStart) ? (true, openLine) : (false, null);
+    }
+
+    /// <summary>
+    /// The indentation of the line with the opening token (or the name, when BRO1109 moves the token up there) once the
+    /// other fixes that move tokens across lines are done: BRO1105 puts ': base(' on a line of its own, and see
+    /// <see cref="GetLineIndentation"/>.
+    /// </summary>
+    private static string GetIndentation(SyntaxNode list, TextLine openLine, SourceText text, bool openMoves, AnalyzerConfigOptions? options, Func<string, bool>? isOn)
+    {
+        // BRO1105's same_line mode never joins a split initializer, so only its own_line move counts.
+        if (list.Parent is ConstructorInitializerSyntax initializer && options is not null && isOn is not null
+            && isOn(DiagnosticIds.ConstructorInitializerLine) && !ConstructorInitializers.IsSameLine(options) && ConstructorInitializers.ShouldMove(initializer, text))
+        {
+            // Its new line: a line break, the indentation and ': '.
+            var moved = ConstructorInitializers.GetChange(initializer, text, Indentation.GetUnit(options)).NewText!;
+            return moved.Substring(moved.LastIndexOf('\n') + 1, moved.Length - moved.LastIndexOf('\n') - 3);
+        }
+
+        // The opening token, or the name when it moves up there (GetSplitListLine's line).
+        var (open, _, _) = ParameterLayoutList(list);
+        return GetLineIndentation(Line(text, open.SpanStart) == openLine.LineNumber ? open : open.GetPreviousToken(), text, openMoves, options, isOn);
+    }
+
+    /// <summary>
+    /// The indentation of the token's line once BRO1110 and BRO1109 are done: a ')' before the token that BRO1110 puts on a
+    /// line of its own starts the line, with the indentation the fix gives it; a ')' starting the line that moves up to
+    /// the line before (BRO1110's last_item placement for a list that isn't split), or an empty '()' that BRO1109 joins
+    /// to the name, takes the line along (BRO1109 keeps the rest of a non-empty list's line where it is).
+    /// </summary>
+    private static string GetLineIndentation(SyntaxToken token, SourceText text, bool openMoves, AnalyzerConfigOptions? options, Func<string, bool>? isOn)
+    {
+        var line = text.Lines.GetLineFromPosition(token.SpanStart);
+        for (var current = token; current.SpanStart >= line.Start && !current.IsKind(SyntaxKind.None); current = current.GetPreviousToken())
+        {
+            var startsLine = string.IsNullOrWhiteSpace(text.ToString(TextSpan.FromBounds(line.Start, current.SpanStart)));
+            if (current.Parent is { } parent && (current.IsKind(SyntaxKind.CloseParenToken) || current.IsKind(SyntaxKind.CloseBracketToken))
+                && ParameterLayoutList(parent).Close == current && GetCloseFix(parent, text, true, openMoves, options, isOn) is { } fix)
+            {
+                var newText = fix.Change.NewText!;
+                if (newText.IndexOf('\n') is var lineBreak and >= 0)
+                {
+                    return newText.Substring(lineBreak + 1);
+                }
+
+                if (fix.Change.Span.Start >= line.Start)
+                {
+                    return newText; // reindented where it is
+                }
+
+                if (startsLine)
+                {
+                    return GetLineIndentation(current.GetPreviousToken(), text, openMoves, options, isOn);
+                }
+            }
+            else if (startsLine && openMoves && current.Parent is { } list && ParameterLayoutList(list) is var (open, _, close)
+                && open == current && current.GetNextToken() == close && GetMisplacedOpen(list, text) is not null)
+            {
+                return GetLineIndentation(current.GetPreviousToken(), text, openMoves, options, isOn);
+            }
+        }
+
+        return new string(text.ToString(line.Span).TakeWhile(c => c is ' ' or '\t').ToArray());
     }
 
     /// <summary>The opening token of the structure a closing token ends, for the closing tokens a list hugs.</summary>
