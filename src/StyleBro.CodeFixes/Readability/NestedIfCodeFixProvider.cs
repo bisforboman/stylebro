@@ -11,13 +11,13 @@ using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1149: merges the inner 'if' into the enclosing one.</summary>
+/// <summary>Fix for BRO1149 and Sonar's S1066 (same place: the inner 'if' keyword): merges the inner 'if' into the enclosing one.</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(NestedIfCodeFixProvider))]
 public sealed class NestedIfCodeFixProvider : NodeCodeFixProvider<IfStatementSyntax>
 {
     /// <summary>Initializes a new instance of the <see cref="NestedIfCodeFixProvider"/> class.</summary>
     public NestedIfCodeFixProvider()
-        : base(DiagnosticIds.NestedIf, "Merge the 'if' statements")
+        : base(DiagnosticIds.NestedIf, "Merge the 'if' statements", "S1066")
     {
     }
 
