@@ -319,7 +319,7 @@ internal static class FieldNames
     /// string in the type (reflection, e.g. GetField("_count")), in code excluded by '#if', as an inferred
     /// anonymous type member or tuple element name, or as the name a <c>nameof(...)</c> in the type produces (Ocelot's
     /// 'X_RateLimit_Limit = nameof(X_RateLimit_Limit).Replace('_', '-')' is an HTTP header name). The fix also looks for
-    /// strings and <c>nameof</c> in the rest of the solution. Locals and parameters with the new name are no reason to skip:
+    /// strings and <see langword="nameof"/> in the rest of the solution. Locals and parameters with the new name are no reason to skip:
     /// the fix qualifies the references they would hide ('this.count').
     /// </summary>
     public static bool CanRename(IFieldSymbol field, string newName, FieldStyles style, CancellationToken cancellationToken) =>

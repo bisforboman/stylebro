@@ -336,21 +336,6 @@ public class NamespaceNamingTests
         state.AdditionalProjects["App"].AdditionalProjectReferences.Add("TestProject");
     });
 
-    /// <summary>The diagnostics are reported, but the rename is skipped: the same sources before and after.</summary>
-    private static Task RunNotFixedAsync(Action<SolutionState> fill)
-    {
-        var test = new CSharpCodeFixTest<NamespaceNamingAnalyzer, CamelCaseNamingCodeFixProvider, DefaultVerifier>
-        {
-            NumberOfIncrementalIterations = 1,
-            NumberOfFixAllIterations = 1,
-            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
-        };
-        fill(test.TestState);
-        fill(test.FixedState);
-        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
-        return test.RunAsync();
-    }
-
     [Fact]
     public Task NamespacesOfPublicTypes_AreLeftAloneByDefault() => VerifyFixAsync(
         """
@@ -384,4 +369,19 @@ public class NamespaceNamingTests
         }
         """,
         On + "\nstylebro_rename_public_api = false");
+
+    /// <summary>The diagnostics are reported, but the rename is skipped: the same sources before and after.</summary>
+    private static Task RunNotFixedAsync(Action<SolutionState> fill)
+    {
+        var test = new CSharpCodeFixTest<NamespaceNamingAnalyzer, CamelCaseNamingCodeFixProvider, DefaultVerifier>
+        {
+            NumberOfIncrementalIterations = 1,
+            NumberOfFixAllIterations = 1,
+            CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
+        };
+        fill(test.TestState);
+        fill(test.FixedState);
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
+        return test.RunAsync();
+    }
 }

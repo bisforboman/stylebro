@@ -141,6 +141,24 @@ internal static class ElementSeparation
     }
 
     /// <summary>
+    /// BRO1601's fix: where a blank line goes below a property it documents, when another property sits right below it
+    /// (a documented property needs one, <see cref="NeedsBlankLine"/>); null when none is needed or BRO1505 adds it anyway.
+    /// </summary>
+    public static TextChange? GetBlankLineBelowOnceDocumented(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine)
+    {
+        if (property.Parent is not TypeDeclarationSyntax type
+            || (type.Members.IndexOf(property) + 1 is var index && (index >= type.Members.Count || type.Members[index] is not PropertyDeclarationSyntax next))
+            || (allowAdjacentSingleLine && IsCompact(property, text, autoAccessorLines) && IsCompact(next, text, autoAccessorLines))
+            || NeedsBlankLine(property, next, text, autoAccessorLines, allowAdjacentSingleLine)
+            || HasBlankLineBetween(property, next, text))
+        {
+            return null;
+        }
+
+        return new TextChange(new TextSpan(text.Lines.GetLineFromPosition(GetFirstLineStart(next, text)).Start, 0), GetLineBreak(text, text.Lines.GetLineFromPosition(property.Span.End)));
+    }
+
+    /// <summary>
     /// Whether a field or property spans several lines, like StyleCop's SA1516: from the line where the last attribute
     /// list's trivia ends (attributes on their own lines don't count) or the member's first line, to its last line.
     /// </summary>
@@ -168,24 +186,6 @@ internal static class ElementSeparation
             EventFieldDeclarationSyntax eventField => !SpansSeveralLines(eventField, text),
             _ => false,
         };
-    }
-
-    /// <summary>
-    /// BRO1601's fix: where a blank line goes below a property it documents, when another property sits right below it
-    /// (a documented property needs one, <see cref="NeedsBlankLine"/>); null when none is needed or BRO1505 adds it anyway.
-    /// </summary>
-    public static TextChange? GetBlankLineBelowOnceDocumented(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine)
-    {
-        if (property.Parent is not TypeDeclarationSyntax type
-            || type.Members.IndexOf(property) + 1 is var index && (index >= type.Members.Count || type.Members[index] is not PropertyDeclarationSyntax next)
-            || (allowAdjacentSingleLine && IsCompact(property, text, autoAccessorLines) && IsCompact(next, text, autoAccessorLines))
-            || NeedsBlankLine(property, next, text, autoAccessorLines, allowAdjacentSingleLine)
-            || HasBlankLineBetween(property, next, text))
-        {
-            return null;
-        }
-
-        return new TextChange(new TextSpan(text.Lines.GetLineFromPosition(GetFirstLineStart(next, text)).Start, 0), GetLineBreak(text, text.Lines.GetLineFromPosition(property.Span.End)));
     }
 
     /// <summary>A '///' or '/** */' comment above the member (parsed as documentation or not: that depends on the project).</summary>
