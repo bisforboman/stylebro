@@ -21,7 +21,10 @@ internal static class Program
 {
     /// <summary>What 'stylebro-migrate --help' prints.</summary>
     public const string Usage = """
-        stylebro-migrate: move a repository to StyleBro (https://github.com/bisforboman/stylebro).
+        stylebro-migrate: move a repository to StyleBro (https://bisforboman.github.io/stylebro/).
+          Getting started: https://bisforboman.github.io/stylebro/getting-started/
+          From StyleCop:   https://bisforboman.github.io/stylebro/migrating/
+          Settings:        https://bisforboman.github.io/stylebro/configuration/
 
         Usage:
           stylebro-migrate [path] [--write] [--sonar-profile <file>]
@@ -38,10 +41,12 @@ internal static class Program
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
               takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
 
-          stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]
+          stylebro-migrate format [folder, solution or project] [--all] [--once] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
-              once per target framework in multi-targeted repositories, never inside git submodules. --all also applies
-              every other analyzer's and compiler fix. Other options pass through (--verify-no-changes, --severity warn).
+              once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
+              run changes nothing (at most 3 runs) and prints the files each run changed; --once runs once. --all also
+              applies every other analyzer's and compiler fix. Other options pass through (--verify-no-changes, --severity
+              warn). A folder with several solutions or projects needs one named.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--sonar-profile <file>]
           stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
@@ -157,10 +162,15 @@ internal static class Program
             Console.WriteLine(note);
         }
 
-        var suppressions = RewriteSuppressions(root, result, write);
+        if (Migration.MigrationFolders(root) is { Count: > 0 } migrations)
+        {
+            Console.WriteLine($"EF Core migrations in {string.Join(", ", migrations)}: marked generated_code = true, so formatting and StyleBro leave them alone.");
+        }
+
+        var suppressions = RewriteSuppressions(root, Suppressions.WithSonar(result.Replacements), write);
         Console.WriteLine(suppressions.Added == 0
-            ? "Suppressions: no StyleCop suppressions in the code to carry over."
-            : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the StyleCop ones stay).");
+            ? "Suppressions: none in the code to carry over."
+            : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
 
         Console.WriteLine();
         foreach (var (file, sections) in plan)
@@ -199,7 +209,17 @@ internal static class Program
         Console.WriteLine(write
             ? NextStep
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
+        PrintWorkspaceHint(root);
         return 0;
+    }
+
+    /// <summary>When the folder has several solutions or projects, which ones, and that format needs one named.</summary>
+    internal static void PrintWorkspaceHint(string root)
+    {
+        if (BaselineCommand.WorkspaceCandidates(root) is { Count: > 1 } several)
+        {
+            Console.WriteLine($"This folder has several solutions or projects ({string.Join(", ", several)}): name the one to format, e.g. 'stylebro-migrate format {several[0]}'.");
+        }
     }
 
     /// <summary>
@@ -249,9 +269,6 @@ internal static class Program
     /// A dropped rule's reason as the report shows it. The mapping is written for the project's own docs and carries survey
     /// evidence (finding counts in the surveyed repositories, which decision it was); users only need the reason.
     /// </summary>
-    /// A dropped rule's reason as the report shows it. The mapping is written for the project's own docs and carries survey
-    /// evidence (finding counts in the surveyed repositories, which decision it was); users only need the reason.
-    /// </summary>
     internal static string UserFacingReason(string proposal)
     {
         var reason = Regex.Replace(proposal, @"^(Drop|Not applicable)[:.]\s*", string.Empty);
@@ -277,12 +294,51 @@ internal static class Program
         return mapping;
     }
 
+    /// <summary>
+    /// Carries the suppressions in the code over (<see cref="Suppressions"/>): StyleCop's and Sonar's ids, to the rules that
+    /// replace them. Returns how many were (or would be) added, in how many files.
+    /// </summary>
+    internal static (int Added, int Files) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write)
+    {
+        int added = 0;
+        int files = 0;
+        var mentions = new Regex(@"\bS[AX]?\d{3,4}\b");
+        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || StyleCopSetup.IsMSBuild(f)))
+        {
+            var bytes = File.ReadAllBytes(file);
+            var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+            var text = Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
+            if (!mentions.IsMatch(text))
+            {
+                continue;
+            }
+
+            var (rewritten, count) = StyleCopSetup.IsMSBuild(file)
+                ? Suppressions.RewriteNoWarn(text, replacements)
+                : Suppressions.Rewrite(text, replacements);
+            if (count == 0)
+            {
+                continue;
+            }
+
+            added += count;
+            files++;
+            if (write)
+            {
+                File.WriteAllText(file, rewritten, new UTF8Encoding(bom));
+            }
+        }
+
+        return (added, files);
+    }
+
     /// <summary>Which StyleCop rules are on, and why the ones StyleBro and the SDK don't cover aren't.</summary>
     private static void Report(StyleCopSetup setup, Migration.Result result)
     {
         // SA0001 says that XML documentation isn't parsed: with a GenerateDocumentationFile project it can't fire, so it
         // isn't a rule the repository loses.
-        var on = StyleCopSetup.Rules.Where(r => setup.IsOn(r.Id) && !(r.Id == "SA0001" && setup.DocumentationParsed)).Select(r => r.Id).ToList();
+        var cannotFire = Migration.CannotFire(setup);
+        var on = StyleCopSetup.Rules.Where(r => setup.IsOn(r.Id) && !(r.Id == "SA0001" && setup.DocumentationParsed) && !cannotFire.Contains(r.Id)).Select(r => r.Id).ToList();
         var uncovered = on.Where(id => !result.Covered.Contains(id)).ToList();
         Console.WriteLine($"StyleCop rules on: {on.Count}; enforced by StyleBro or the SDK after migrating: {on.Count - uncovered.Count}");
         if (uncovered.Count == 0)
@@ -308,38 +364,5 @@ internal static class Program
                 Console.WriteLine($"    {id}{(reason.Length == 0 ? string.Empty : ": " + reason)}");
             }
         }
-    }
-
-    private static (int Added, int Files) RewriteSuppressions(string root, Migration.Result result, bool write)
-    {
-        int added = 0;
-        int files = 0;
-        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || StyleCopSetup.IsMSBuild(f)))
-        {
-            var bytes = File.ReadAllBytes(file);
-            var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
-            var text = Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
-            if (!text.Contains("SA1") && !text.Contains("SA0"))
-            {
-                continue;
-            }
-
-            var (rewritten, count) = StyleCopSetup.IsMSBuild(file)
-                ? Suppressions.RewriteNoWarn(text, result.Replacements)
-                : Suppressions.Rewrite(text, result.Replacements);
-            if (count == 0)
-            {
-                continue;
-            }
-
-            added += count;
-            files++;
-            if (write)
-            {
-                File.WriteAllText(file, rewritten, new UTF8Encoding(bom));
-            }
-        }
-
-        return (added, files);
     }
 }

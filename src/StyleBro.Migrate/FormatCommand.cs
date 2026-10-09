@@ -45,149 +45,67 @@ internal static class FormatCommand
         </Project>
         """;
 
-    /// <summary>Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the console.</summary>
+    /// <summary>The most runs 'stylebro-migrate format' makes until a run changes nothing.</summary>
+    public const int MaxRuns = 3;
+
+    /// <summary>The option for a single run (the preview counts its own runs).</summary>
+    public const string OnceOption = "--once";
+
+    /// <summary>
+    /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
+    /// console. It runs again until a run changes no file (at most <see cref="MaxRuns"/>), printing the files each run
+    /// changed: one 'dotnet format' run doesn't always finish (a fix can make work for another rule). One run only with
+    /// --once, --verify-no-changes or --report.
+    /// </summary>
     public static int Run(string[] args, Action<string>? output = null)
     {
         Action<string> log = output ?? Console.WriteLine;
-        Action<string> error = output ?? Console.Error.WriteLine;
+        if (args.Contains(OnceOption) || args.Contains("--verify-no-changes") || args.Contains("--report"))
+        {
+            return RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
+        }
 
-        // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
-        var hasPath = args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal);
-        var path = Path.GetFullPath(hasPath ? args[0] : ".");
-        var passThrough = args.Skip(hasPath ? 1 : 0).ToList();
+        var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
         var root = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
-        if (!Directory.Exists(root))
+        for (var run = 1; ; run++)
         {
-            error($"Not found: {path}");
-            return 1;
-        }
-
-        var workspace = File.Exists(path) ? Path.GetFileName(path) : BaselineCommand.FindWorkspace(root);
-        if (workspace is null)
-        {
-            error($"No single solution or project in {root}; name one.");
-            return 1;
-        }
-
-        // By default only StyleBro's rules and the built-in ones init/migrate turn on: plain 'dotnet format' also applies
-        // every other analyzer's fixes and compiler fixes (CS8618's 'required', a Sonar fix removing 'init;': build
-        // errors in Kavita). Whitespace formatting still runs. --all keeps them.
-        if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
-        {
-            var ids = Diagnostics(root);
-            log($"Fixing StyleBro's rules and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
-            passThrough.Add("--diagnostics");
-            passThrough.AddRange(ids);
-        }
-
-        // Submodules are someone else's code, even when a project compiles files from them.
-        if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
-        {
-            var exclude = passThrough.IndexOf("--exclude");
-            if (exclude < 0)
+            var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, (long, DateTime)>();
+            var code = RunOnce(args, output);
+            if (code != 0)
             {
-                passThrough.Add("--exclude");
-                passThrough.AddRange(submodules);
+                return code;
             }
-            else
+
+            var changed = ChangedFiles(before, Snapshot(root));
+            log($"Run {run}: {changed} file{(changed == 1 ? string.Empty : "s")} changed{(changed == 0 ? ", clean." : ".")}");
+            if (changed == 0)
             {
-                passThrough.InsertRange(exclude + 1, submodules);
+                return 0;
+            }
+
+            if (run == MaxRuns)
+            {
+                log($"Still changing after {MaxRuns} runs: run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
+                return 0;
             }
         }
-
-        var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
-        var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
-        var projects = ReadProjects(workspacePath);
-        var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
-        if (plan.Count <= 1)
-        {
-            return Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough), output);
-        }
-
-        log($"Multi-targeted: one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
-
-        // The restore's own output (its "Build succeeded" block) only matters when it fails.
-        var restoreOutput = new List<string>();
-        var restore = Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
-        if (restore != 0)
-        {
-            restoreOutput.ForEach(log);
-            return restore;
-        }
-
-        // Every run would write its own format-report.json over the last one: each gets a folder, merged at the end.
-        var reportIndex = passThrough.IndexOf("--report");
-        var report = reportIndex >= 0 && reportIndex + 1 < passThrough.Count ? passThrough[reportIndex + 1] : null;
-        var reportFolders = new List<string>();
-
-        // The runs print the same diagnostics and workspace warnings once per framework: each line is shown once.
-        var shown = new HashSet<string>(StringComparer.Ordinal);
-        void Show(string line)
-        {
-            if (IsNewLine(shown, line))
-            {
-                log(line);
-            }
-        }
-
-        var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
-        var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
-        File.WriteAllText(select, SelectFrameworkTargets);
-        var exit = 0;
-        try
-        {
-            foreach (var (framework, selected) in plan)
-            {
-                log($"== {framework} ({selected.Count} project(s))");
-                var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
-                try
-                {
-                    if (filter is not null)
-                    {
-                        File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
-                    }
-
-                    var options = passThrough.ToList();
-                    if (report is not null)
-                    {
-                        var folder = Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}");
-                        reportFolders.Add(folder);
-                        options[reportIndex + 1] = folder;
-                    }
-
-                    var arguments = new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(options);
-                    if (!passThrough.Contains("--include"))
-                    {
-                        arguments = arguments.Append("--include").Concat(Include(root, solutionDirectory, selected));
-                    }
-
-                    var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
-                    var code = Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), arguments, Show);
-                    if (exit == 0)
-                    {
-                        exit = code;
-                    }
-                }
-                finally
-                {
-                    if (filter is not null)
-                    {
-                        File.Delete(filter);
-                    }
-                }
-            }
-        }
-        finally
-        {
-            File.Delete(select);
-            if (report is not null)
-            {
-                WriteMergedReport(Path.GetFullPath(report), reportFolders);
-            }
-        }
-
-        return exit;
     }
+
+    /// <summary>The C# files under the root (not bin/obj, not submodules) with their size and time, to tell which a run changed.</summary>
+    public static Dictionary<string, (long Length, DateTime Written)> Snapshot(string root) =>
+        StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(
+                f => f,
+                f =>
+                {
+                    var info = new FileInfo(f);
+                    return (info.Length, info.LastWriteTimeUtc);
+                },
+                StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The number of files that differ between two snapshots (added, removed or written).</summary>
+    public static int ChangedFiles(IReadOnlyDictionary<string, (long Length, DateTime Written)> before, IReadOnlyDictionary<string, (long Length, DateTime Written)> after) =>
+        after.Count(a => !before.TryGetValue(a.Key, out var b) || b != a.Value) + before.Keys.Count(k => !after.ContainsKey(k));
 
     /// <summary>
     /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
@@ -343,6 +261,149 @@ internal static class FormatCommand
             ? refs.EnumerateArray().Select(r => r.GetProperty("FullPath").GetString()!).ToArray()
             : Array.Empty<string>();
         return (frameworks, references);
+    }
+
+    private static int RunOnce(string[] args, Action<string>? output)
+    {
+        Action<string> log = output ?? Console.WriteLine;
+        Action<string> error = output ?? Console.Error.WriteLine;
+
+        // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
+        var hasPath = args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal);
+        var path = Path.GetFullPath(hasPath ? args[0] : ".");
+        var passThrough = args.Skip(hasPath ? 1 : 0).ToList();
+        var root = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
+        if (!Directory.Exists(root))
+        {
+            error($"Not found: {path}");
+            return 1;
+        }
+
+        var workspace = File.Exists(path) ? Path.GetFileName(path) : BaselineCommand.FindWorkspace(root);
+        if (workspace is null)
+        {
+            error(BaselineCommand.NoWorkspace(root, "'stylebro-migrate format <file>'"));
+            return 1;
+        }
+
+        // By default only StyleBro's rules and the built-in ones init/migrate turn on: plain 'dotnet format' also applies
+        // every other analyzer's fixes and compiler fixes (CS8618's 'required', a Sonar fix removing 'init;': build
+        // errors in Kavita). Whitespace formatting still runs. --all keeps them.
+        if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
+        {
+            var ids = Diagnostics(root);
+            log($"Fixing StyleBro's rules and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
+            passThrough.Add("--diagnostics");
+            passThrough.AddRange(ids);
+        }
+
+        // Submodules are someone else's code, even when a project compiles files from them.
+        if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
+        {
+            var exclude = passThrough.IndexOf("--exclude");
+            if (exclude < 0)
+            {
+                passThrough.Add("--exclude");
+                passThrough.AddRange(submodules);
+            }
+            else
+            {
+                passThrough.InsertRange(exclude + 1, submodules);
+            }
+        }
+
+        var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
+        var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
+        var projects = ReadProjects(workspacePath);
+        var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
+        if (plan.Count <= 1)
+        {
+            return Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough), output);
+        }
+
+        log($"Multi-targeted: one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
+
+        // The restore's own output (its "Build succeeded" block) only matters when it fails.
+        var restoreOutput = new List<string>();
+        var restore = Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
+        if (restore != 0)
+        {
+            restoreOutput.ForEach(log);
+            return restore;
+        }
+
+        // Every run would write its own format-report.json over the last one: each gets a folder, merged at the end.
+        var reportIndex = passThrough.IndexOf("--report");
+        var report = reportIndex >= 0 && reportIndex + 1 < passThrough.Count ? passThrough[reportIndex + 1] : null;
+        var reportFolders = new List<string>();
+
+        // The runs print the same diagnostics and workspace warnings once per framework: each line is shown once.
+        var shown = new HashSet<string>(StringComparer.Ordinal);
+        void Show(string line)
+        {
+            if (IsNewLine(shown, line))
+            {
+                log(line);
+            }
+        }
+
+        var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+        var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
+        File.WriteAllText(select, SelectFrameworkTargets);
+        var exit = 0;
+        try
+        {
+            foreach (var (framework, selected) in plan)
+            {
+                log($"== {framework} ({selected.Count} project(s))");
+                var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
+                try
+                {
+                    if (filter is not null)
+                    {
+                        File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
+                    }
+
+                    var options = passThrough.ToList();
+                    if (report is not null)
+                    {
+                        var folder = Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}");
+                        reportFolders.Add(folder);
+                        options[reportIndex + 1] = folder;
+                    }
+
+                    var arguments = new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(options);
+                    if (!passThrough.Contains("--include"))
+                    {
+                        arguments = arguments.Append("--include").Concat(Include(root, solutionDirectory, selected));
+                    }
+
+                    var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
+                    var code = Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), arguments, Show);
+                    if (exit == 0)
+                    {
+                        exit = code;
+                    }
+                }
+                finally
+                {
+                    if (filter is not null)
+                    {
+                        File.Delete(filter);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            File.Delete(select);
+            if (report is not null)
+            {
+                WriteMergedReport(Path.GetFullPath(report), reportFolders);
+            }
+        }
+
+        return exit;
     }
 
     /// <summary>
