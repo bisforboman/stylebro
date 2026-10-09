@@ -457,6 +457,189 @@ public class ParenthesisPlacementTests
         editorConfig: "stylebro_closing_parenthesis_placement = own_line");
 
     [Fact]
+    public Task OwnLine_ReindentsAClosingTokenOnItsOwnLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            public int M(int a, int b) => a;
+
+            public void Method
+                {|BRO1109:(|}int a,
+                int b
+                {|BRO1110:)|}
+            {
+                M(
+                    1,
+                    2
+                        {|BRO1110:)|};
+                M(
+                    1,
+                    2 // two
+        {|BRO1110:)|};
+                M(
+                    1,
+                    2
+                );
+            }
+        }
+        """,
+        """
+        class C
+        {
+            public int M(int a, int b) => a;
+
+            public void Method(
+                int a,
+                int b
+            )
+            {
+                M(
+                    1,
+                    2
+                );
+                M(
+                    1,
+                    2 // two
+                );
+                M(
+                    1,
+                    2
+                );
+            }
+        }
+        """,
+        editorConfig: "stylebro_closing_parenthesis_placement = own_line");
+
+    // The indentation of the opening token's line as the other fixes leave it: BRO1105 moves ': base(' down, an inner list's
+    // ')' moved down or reindented starts the line, one moved up (not split) or an empty '()' joined to its name by
+    // BRO1109 takes the line up.
+    [Fact]
+    public Task OwnLine_IndentsLikeTheOpeningLineAfterTheOtherFixes() => VerifyFixAsync(
+        """
+        class B
+        {
+            public B(int a)
+            {
+            }
+        }
+
+        class C : B
+        {
+            public C(int a) : base(
+                a
+            {|BRO1110:)|}
+            {
+            }
+
+            public int M(int a, int b) => a;
+
+            public C Get() => this;
+
+            public void Run()
+            {
+                M(M(
+                    1, 2{|BRO1110:)|}, M(
+                    3, 4
+                        {|BRO1110:)|}{|BRO1110:)|};
+                M(M(
+                    1, 2
+                        {|BRO1110:)|}, M(
+                    3, 4
+                        {|BRO1110:)|}{|BRO1110:)|};
+                var x = M(1, 2
+                    {|BRO1110:)|} + M(
+                    3,
+                    4
+                        {|BRO1110:)|};
+                var y = Get
+                    {|BRO1109:(|}).M(
+                    1,
+                    2
+                    {|BRO1110:)|};
+                var z = M
+                    {|BRO1109:(|}1, M(
+                        2,
+                        3
+                    ){|BRO1110:)|};
+            }
+        }
+        """,
+        """
+        class B
+        {
+            public B(int a)
+            {
+            }
+        }
+
+        class C : B
+        {
+            public C(int a) : base(
+                a
+                )
+            {
+            }
+
+            public int M(int a, int b) => a;
+
+            public C Get() => this;
+
+            public void Run()
+            {
+                M(M(
+                    1, 2
+                ), M(
+                    3, 4
+                )
+                );
+                M(M(
+                    1, 2
+                ), M(
+                    3, 4
+                )
+                );
+                var x = M(1, 2) + M(
+                    3,
+                    4
+                );
+                var y = Get().M(
+                    1,
+                    2
+                );
+                var z = M(
+                    1, M(
+                        2,
+                        3
+                    )
+                );
+            }
+        }
+        """,
+        editorConfig: "stylebro_closing_parenthesis_placement = own_line");
+
+    // BRO1105's same_line mode leaves ': base(' on the constructor's line.
+    [Fact]
+    public Task OwnLine_ConstructorInitializerOnTheConstructorsLine() => VerifyNoDiagnosticsAsync(
+        """
+        class B
+        {
+            public B(int a)
+            {
+            }
+        }
+
+        class C : B
+        {
+            public C(int a) : base(
+                a
+            )
+            {
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\nstylebro_constructor_initializer_placement = same_line");
+
+    [Fact]
     public Task OwnLine_SkipsCommentsAndDirectives() => VerifyNoDiagnosticsAsync(
         """
         class C
@@ -480,6 +663,10 @@ public class ParenthesisPlacementTests
                     1,
                     2 // two
                 );
+                M(
+                    1,
+                    2
+                        /* two */ );
             }
         }
         """,
