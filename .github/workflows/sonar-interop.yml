@@ -1,0 +1,22 @@
+name: Sonar interop
+
+# StyleBro's fixes for Sonar's S1066/S2971/S3878 against the real, pinned SonarAnalyzer.CSharp package
+# (scripts/sonar-interop.ps1). Weekly and on demand: the unit tests use a stub, so a PR doesn't need the package.
+on:
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+jobs:
+  sonar-interop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Sonar's ids under dotnet format
+        shell: pwsh
+        run: ./scripts/sonar-interop.ps1

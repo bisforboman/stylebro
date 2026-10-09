@@ -11,13 +11,13 @@ using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1151: passes the array's elements to the params parameter.</summary>
+/// <summary>Fix for BRO1151 and Sonar's S3878 (same place: the array): passes the array's elements to the params parameter.</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ParamsArrayCodeFixProvider))]
 public sealed class ParamsArrayCodeFixProvider : NodeCodeFixProvider<ExpressionSyntax>
 {
     /// <summary>Initializes a new instance of the <see cref="ParamsArrayCodeFixProvider"/> class.</summary>
     public ParamsArrayCodeFixProvider()
-        : base(DiagnosticIds.ParamsArray, "Pass the elements")
+        : base(DiagnosticIds.ParamsArray, "Pass the elements", "S3878")
     {
     }
 

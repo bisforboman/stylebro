@@ -56,6 +56,12 @@ works on the reported syntax alone (`NestedIfs.GetChange`, `WhereCalls.GetChange
 later PR can register the same fixes for S1066, S2971 and S3878 (never for an id Sonar fixes itself: `dotnet format`
 would pick either fixer). The migration reading Sonar setups comes in its own PR.
 
+Choice 4 as built: BRO1149-BRO1151's fix providers list S1066, S2971 and S3878 too (Sonar 10.35.0.4138 reports them on
+the inner `if` keyword, the `Where` name and the array: the places the StyleBro rules use) and register an action only
+where the shared logic gives edits, so Sonar's warning stays wherever StyleBro skips the code. Tests use a stub analyzer
+that reports the ids where Sonar does (no Sonar package in the solution, so it can never become a dependency of
+StyleBro's packages); `scripts/sonar-interop.ps1` (weekly workflow) checks the real, pinned package end to end.
+
 ## Rule docs as a website (2026-10-09)
 
 ### Question

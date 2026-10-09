@@ -74,6 +74,8 @@
         # BRO1146 (record class)
         @{ File = 'src/StyleBro.Analyzers/Readability/RecordClassKeywords.cs'; Find = 'return Trivia.IsBlank(record, span) ?'; Replace = 'return true ?'; Tests = 'RecordClassKeywordTests' }
         # BRO1149 (nested ifs)
+        # Sonar ids (NodeCodeFixProvider): no action where the shared logic skips
+        @{ File = 'src/StyleBro.CodeFixes/NodeCodeFixProvider.cs'; Find = '.ConfigureAwait(false)).Count == 0)'; Replace = '.ConfigureAwait(false)).Count < 0)'; Tests = 'SonarIdsTests.S1066_NoActionWhereBro1149Skips' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'outer.Else is not null'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'inner.Else is not null'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
         @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'outer.ContainsDirectives'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }

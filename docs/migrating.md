@@ -208,6 +208,13 @@ The Sonar rules that are on turn on these rules, at the strongest severity of th
 | S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = true`, only when BRO1001 is on |
 | S8969 (redundant `!`) | [BRO1147](rules/BRO1147.md) |
 
+**Sonar's own warnings for S1066, S2971 and S3878** are fixed too when the project references SonarAnalyzer.CSharp:
+BRO1149-BRO1151's fixes are registered for those ids, so `dotnet format` (or a light bulb) applies them to Sonar's
+diagnostics, at the places the StyleBro rule would fix; where it skips the code (a comment in the merged text, an array of a
+derived type, Sonar's other S2971 cases, ...) the Sonar warning stays. This needs the package in the build: findings only
+the scanner reports in CI aren't seen by `dotnet format`. Checked against SonarAnalyzer.CSharp 10.35.0.4138
+(`scripts/sonar-interop.ps1`).
+
 The data lives in the tool: `src/StyleBro.Migrate/data/sonar-mapping.tsv` (the mapping) and
 `sonar-rules-10.35.0.4138.tsv` (Sonar's rule list and defaults, public metadata only).
 
