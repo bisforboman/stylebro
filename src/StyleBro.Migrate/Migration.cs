@@ -49,7 +49,10 @@ internal static class Migration
         var analyzers = typeof(StyleBro.Analyzers.DiagnosticIds).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t))
             .Select(t => (DiagnosticAnalyzer)Activator.CreateInstance(t)!);
+
+        // Not the hidden companions that fade a finding's parentheses (BRO1405_p): they follow their rule.
         return analyzers.SelectMany(a => a.SupportedDiagnostics)
+            .Where(d => !d.CustomTags.Contains(WellKnownDiagnosticTags.NotConfigurable))
             .GroupBy(d => d.Id)
             .Select(g => g.First())
             .OrderBy(d => d.Id, StringComparer.Ordinal)

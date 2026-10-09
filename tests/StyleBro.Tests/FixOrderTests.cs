@@ -1288,6 +1288,26 @@ public class FixOrderTests
         "BRO1509",
         "BRO1519");
 
+    // BRO1410 leaves the parentheses BRO1407 adds between 'and' and 'or' (and removes only extra pairs around them);
+    // BRO1405 leaves those of BRO1406 by StyleCop's own logic.
+    [Fact]
+    public Task PatternParentheses_NextToPrecedence() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public bool M(int x, int a, int b) =>
+                x is (1 or 2 and 3)
+                || x is 1 or ((> 5 and < 9))
+                || x is (> 0 and < 5) or 10
+                || x is 4 or 5 and 6
+                || (a + b * a) > 0;
+        }
+        """,
+        "BRO1405",
+        "BRO1406",
+        "BRO1407",
+        "BRO1410");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

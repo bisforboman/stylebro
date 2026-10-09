@@ -14,8 +14,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 124 |
-| Done, not released yet | 0 |
-| Planned | 0 rules, 51 work items |
+| Done, not released yet | 1 |
+| Planned | 0 rules, 52 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -85,6 +85,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Rider check | The IDE check was done in Visual Studio 2022 only. | Idea |
 | Upstream | Report the SDK fixer bugs to dotnet/roslyn | Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`; the owner posts them. | Idea |
 | Parity | SA1119_p and SX1309S | The two StyleCop variants StyleBro doesn't cover: unnecessary parentheses in patterns (`x is (> 0)`, next to BRO1405) and the `_` prefix for static fields (a BRO1303 style). See skipped-rules.md. | Idea |
+| Beyond StyleCop | Unnecessary parentheses in patterns | BRO1410: `x is (> 0)`, `o is (string s)`, a pair around a pair; leaves the ones BRO1407 adds to `and`/`or` patterns. BRO1405_p/BRO1410_p fade the parentheses in an IDE like StyleCop's SA1119_p. Off after `stylebro-migrate`. See decisions.md. | Done (2026-10-09) |
 | Performance | FieldNamingAnalyzer variance | Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost. | Idea |
 
 ### Read the SDK's own settings
@@ -214,6 +215,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Released |
 | [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Released |
 | [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | Released |
+| [BRO1410](rules/BRO1410.md) | Patterns should not use unnecessary parentheses | (none; SA1119 checks expressions only) | Done |
 
 ### BRO15xx: Layout
 

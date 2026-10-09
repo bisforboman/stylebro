@@ -5,7 +5,7 @@ import re
 
 readme = open('docs/rules/README.md', encoding='utf-8').read()
 rows = re.findall(r'^\| \[(BRO\d{4})\]\(BRO\d{4}\.md\) \| (.*?) \| (.*?) \|', readme, re.M)
-unshipped = set(re.findall(r'^(BRO\d{4})', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
+unshipped = set(re.findall(r'^(BRO\d{4})\s*\|', open('src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md').read(), re.M))
 
 PLANNED = [
 ]
@@ -62,6 +62,7 @@ WORK = [
     ('Adoption', 'Rider check', 'The IDE check was done in Visual Studio 2022 only.', 'Idea'),
     ('Upstream', 'Report the SDK fixer bugs to dotnet/roslyn', 'Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`; the owner posts them.', 'Idea'),
     ('Parity', 'SA1119_p and SX1309S', 'The two StyleCop variants StyleBro doesn\'t cover: unnecessary parentheses in patterns (`x is (> 0)`, next to BRO1405) and the `_` prefix for static fields (a BRO1303 style). See skipped-rules.md.', 'Idea'),
+    ('Beyond StyleCop', 'Unnecessary parentheses in patterns', 'BRO1410: `x is (> 0)`, `o is (string s)`, a pair around a pair; leaves the ones BRO1407 adds to `and`/`or` patterns. BRO1405_p/BRO1410_p fade the parentheses in an IDE like StyleCop\'s SA1119_p. Off after `stylebro-migrate`. See decisions.md.', 'Done (2026-10-09)'),
     ('Performance', 'FieldNamingAnalyzer variance', 'Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost.', 'Idea'),
 ]
 
