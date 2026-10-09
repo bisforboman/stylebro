@@ -13,9 +13,9 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 
 | | Rules |
 |---|---|
-| Released | 124 |
-| Done, not released yet | 1 |
-| Planned | 0 rules, 60 work items |
+| Released | 125 |
+| Done, not released yet | 0 |
+| Planned | 0 rules, 61 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 108 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -224,7 +224,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1407](rules/BRO1407.md) | Conditional expressions should declare precedence | SA1408 | Released |
 | [BRO1408](rules/BRO1408.md) | Remove a redundant base type | (none; Roslynator RCS1042) | Released |
 | [BRO1409](rules/BRO1409.md) | Methods of internal types should be internal, not public | (none; StyleCop issue #2981, never implemented) | Released |
-| [BRO1410](rules/BRO1410.md) | Patterns should not use unnecessary parentheses | (none; SA1119 checks expressions only) | Done |
+| [BRO1410](rules/BRO1410.md) | Patterns should not use unnecessary parentheses | (none; SA1119 checks expressions only) | Released |
 
 ### BRO15xx: Layout
 

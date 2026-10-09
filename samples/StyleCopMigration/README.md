@@ -138,7 +138,7 @@ In `Orders.csproj`, replace StyleCop.Analyzers with StyleBro.Analyzers (use the 
 
 ```diff
 -    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
-+    <PackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" PrivateAssets="all" />
++    <PackageReference Include="StyleBro.Analyzers" Version="0.3.0-alpha.1" PrivateAssets="all" />
 ```
 
 `stylecop.json` can stay until StyleCop is gone everywhere; StyleBro doesn't read it.

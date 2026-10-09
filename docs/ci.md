@@ -22,7 +22,7 @@ Fixing a failure is the same everywhere: run `stylebro-migrate format` (or `dotn
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.2.0-alpha.1" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.3.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
