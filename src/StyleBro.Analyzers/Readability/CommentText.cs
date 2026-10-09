@@ -97,6 +97,43 @@ internal static class CommentText
         }
     }
 
+    /// <summary>
+    /// The edits that remove a run of empty comments on consecutive lines (<see cref="GetEmptyComments"/>). When whole
+    /// lines go from between two blank lines, the blank lines below them go too, so the blank lines don't double up
+    /// (BRO1517; Fonts: '// text', blank, '//', blank, '// text').
+    /// </summary>
+    public static List<TextChange> GetRemovals(IReadOnlyList<SyntaxTrivia> removed, SourceText text)
+    {
+        var changes = removed.Select(c => GetRemoval(c, text)).ToList();
+        var first = text.Lines.GetLineFromPosition(changes[0].Span.Start);
+        var end = changes[changes.Count - 1].Span.End;
+
+        // A removal that keeps code on its line ends mid-line, so the loop below finds no blank line after it.
+        if (first.LineNumber == 0 || !IsBlankLine(text, text.Lines[first.LineNumber - 1]))
+        {
+            return changes;
+        }
+
+        var blankEnd = end;
+        while (blankEnd < text.Length)
+        {
+            var line = text.Lines.GetLineFromPosition(blankEnd);
+            if (!IsBlankLine(text, line))
+            {
+                break;
+            }
+
+            blankEnd = line.EndIncludingLineBreak;
+        }
+
+        if (blankEnd > end)
+        {
+            changes.Add(new TextChange(TextSpan.FromBounds(end, blankEnd), string.Empty));
+        }
+
+        return changes;
+    }
+
     /// <summary>The edit that removes one comment: its whole line when it's alone there, or the comment and the space before it.</summary>
     public static TextChange GetRemoval(SyntaxTrivia comment, SourceText text)
     {
@@ -148,6 +185,8 @@ internal static class CommentText
             ? text.Length >= 2 && text.Substring(2).Trim().Length == 0
             : text.Length >= 4 && text.Substring(2, text.Length - 4).Trim().Length == 0;
     }
+
+    private static bool IsBlankLine(SourceText text, TextLine line) => text.ToString(line.Span).Trim().Length == 0;
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
 }

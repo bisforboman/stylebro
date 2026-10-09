@@ -75,13 +75,17 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
         }
     }
 
+    /// <summary>Every StyleBro rule id: the constants in <see cref="DiagnosticIds"/>.</summary>
+    internal static IEnumerable<string> BroIds() =>
+        typeof(DiagnosticIds).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.IsLiteral && f.FieldType == typeof(string))
+            .Select(f => (string)f.GetRawConstantValue()!)
+            .Distinct(StringComparer.Ordinal);
+
     private static ImmutableDictionary<string, SuppressionDescriptor> CreateDescriptors()
     {
-        // Every StyleBro rule id (the constants in DiagnosticIds), plus the SDK rules.
-        var bro = typeof(DiagnosticIds).GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(f => f.IsLiteral && f.FieldType == typeof(string))
-            .Select(f => (string)f.GetRawConstantValue()!);
-        return bro.Concat(SdkIds).Distinct(StringComparer.Ordinal)
+        // Every StyleBro rule id, plus the SDK rules.
+        return BroIds().Concat(SdkIds).Distinct(StringComparer.Ordinal)
             .ToImmutableDictionary(id => id, id => new SuppressionDescriptor("BASELINE_" + id, id, "In stylebro.baseline"));
     }
 }

@@ -32,6 +32,7 @@ internal static class CamelCaseRenamer
         HashSet<string>? strings = null;
         var done = new HashSet<(string File, int Start)>();
         var namespaces = new List<(string, string)>();
+        var keptTypes = new Dictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
         foreach (var (document, diagnostic) in items)
         {
             if (diagnostic.Id == DiagnosticIds.NamespacePascalCase)
@@ -77,6 +78,7 @@ internal static class CamelCaseRenamer
 
                 if ((IsReachableByName(symbol)
                         && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
+                    || (symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, strings!, keptTypes))
                     || await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
                     safe = false;
@@ -201,6 +203,22 @@ internal static class CamelCaseRenamer
 
         var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
         return strings.Any(s => pattern.IsMatch(s));
+    }
+
+    /// <summary>
+    /// Whether a property of the type that BRO1309 would rename keeps its name because it's in a string (test JSON, a wire
+    /// format). Then the type's other properties keep theirs too: renaming only some mixes casings and changes only part
+    /// of what a serializer reads and writes (Kavita's Koreader DTO: 'percentage' renamed, 'document' and 'progress' kept).
+    /// </summary>
+    private static bool HasKeptProperty(INamedTypeSymbol type, HashSet<string> strings, Dictionary<ISymbol, bool> cache)
+    {
+        if (!cache.TryGetValue(type, out var kept))
+        {
+            cache[type] = kept = type.GetMembers().OfType<IPropertySymbol>()
+                .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && IsInStrings(p, strings));
+        }
+
+        return kept;
     }
 
     /// <summary>Symbols whose conflicts are checked by syntax over their member (<see cref="CamelCaseNames.CanRename"/>).</summary>

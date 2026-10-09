@@ -3,6 +3,13 @@
 # survives is a guard no test covers. Add one for every new guard.
 @{
     Mutations = @(
+        # Files from NuGet packages (PackageFileSuppressor)
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = '? roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase))'; Replace = '? true'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = 'file.IndexOf("/contentFiles/", StringComparison.OrdinalIgnoreCase) >= 0'; Replace = 'false'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = 'return roots.Count > 0'; Replace = 'return false'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = 'if (isPackageFile)'; Replace = 'if (true)'; Tests = 'PackageFileSuppressorTests' }
+        @{ File = 'src/StyleBro.Analyzers/PackageFileSuppressor.cs'; Find = ".Replace('\\', '/').TrimEnd('/'))"; Replace = ".Replace('\\', '/'))"; Tests = 'PackageFileSuppressorTests' }
+
         # Multi-target guard (MultiTargetSuppressor)
         @{ File = 'src/StyleBro.Analyzers/Modernize/MultiTargetSuppressor.cs'; Find = 'if (frameworks.Count < 2)'; Replace = 'if (frameworks.Count < 1)'; Tests = 'MultiTargetSuppressorTests' }
         @{ File = 'src/StyleBro.Analyzers/Modernize/MultiTargetSuppressor.cs'; Find = '!frameworks.All(f => Has(f, Minimums[diagnostic.Id]))'; Replace = '!frameworks.Any(f => Has(f, Minimums[diagnostic.Id]))'; Tests = 'MultiTargetSuppressorTests' }
@@ -134,6 +141,8 @@
         # Removing regions also does what BRO1001 and BRO1506 then want, only when they're on
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (!IsOn(DiagnosticIds.MemberOrdering))'; Replace = 'if (false)'; Tests = 'RegionsTests' }
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineAfterComment))'; Replace = 'if (true)'; Tests = 'RegionsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'union[union.Count - 1].Span.End >= span.Start'; Replace = 'false'; Tests = 'RegionsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'while (line.LineNumber > 0 && string.IsNullOrWhiteSpace(line.ToString()))'; Replace = 'while (false)'; Tests = 'RegionsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/Regions.cs'; Find = 'RegionDirectiveTriviaSyntax { IsActive: true } region'; Replace = 'RegionDirectiveTriviaSyntax region'; Tests = 'RegionsTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/Regions.cs'; Find = 'if (beforeText.Length == 0 && after + 1 < text.Lines.Count'; Replace = 'if (false && after + 1 < text.Lines.Count'; Tests = 'FixOrderTests' }
         @{ File = 'src/StyleBro.CodeFixes/Readability/RegionsCodeFixProvider.cs'; Find = 'if (IsOn(DiagnosticIds.BlankLineBeforeComment))'; Replace = 'if (false)'; Tests = 'FixOrderTests' }
@@ -276,8 +285,13 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = "end < text.Length && text[end] == '<' ? end : position"; Replace = 'position'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = 'if (old.Length == 0 && (StartsWithAnyWord(rest, Conditions) || StartsWithAnyWord(rest, Verbs)))'; Replace = 'if (false)'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = ' || StartsWithAnyWord(rest, Verbs)))'; Replace = '))'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = 'if (old.Length == 0 && !char.IsLower(rest[0]) && !StartsWithAnyWord(rest, Articles))'; Replace = 'if (false)'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '&& !StartsWithAnyWord(rest, Articles))'; Replace = ')'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '!char.IsLower(rest[0]) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = '(char.IsLower(remaining[0]) || '; Replace = '('; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = ' || PropertySummaries.StartsWithAnyWord(remaining, PropertySummaries.Conditions)))'; Replace = '))'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = "if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' '))))"; Replace = 'if (false)'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'if (replaceLength == 0 && StartsWithWords(remaining,'; Replace = 'if (StartsWithWords(remaining,'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'comments = comments.RemoveAll(c => previous.TrailingTrivia.Contains(c));'; Replace = ''; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = 'GetDeclarationOpenBrace(openBrace.Parent!) == openBrace && Line('; Replace = 'Line('; Tests = 'DeclarationCommentTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/EmbeddedComments.cs'; Find = ' && Line(text, openBrace.SpanStart) != Line(text, previous.SpanStart))'; Replace = ')'; Tests = 'DeclarationCommentTests' }
@@ -299,6 +313,23 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = 'brace.RawKind != 0 && isOn(DiagnosticIds.ElementsSeparatedByBlankLine)'; Replace = 'false'; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = ' || owner is DoStatementSyntax or BlockSyntax { Parent: DoStatementSyntax }'; Replace = ''; Tests = 'BlankLineRunsTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '(gapIsReplaced && t.IsKind(SyntaxKind.EndOfLineTrivia))'; Replace = 'false'; Tests = 'SingleLineBlocksTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '(runs ??= []).Add(found);'; Replace = '{ (runs ??= []).Add(found); return runs; }'; Tests = 'BlankLineRunsTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLineRuns.cs'; Find = '&& TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)'; Replace = ')'; Tests = 'BlankLineRunsTests' }
+
+        # BRO1120 (empty comments between blank lines)
+        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = '|| !IsBlankLine(text, text.Lines[first.LineNumber - 1]))'; Replace = ')'; Tests = 'CommentTextTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/CommentText.cs'; Find = 'if (blankEnd > end)'; Replace = 'if (false)'; Tests = 'CommentTextTests' }
+
+        # BRO1001: comments that introduce a group (GroupComments)
+        @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = '|| GroupComments.MovesGroupComment(members, keys, order)'; Replace = ''; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'if (keys[i + 1].Kind == keys[i].Kind && '; Replace = 'if ('; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = '&& Moves(position, i) && HasComment'; Replace = '&& HasComment'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'if (trivia.IsDirective)'; Replace = 'if (false)'; Tests = 'MemberOrderingTests' }
+
+        # BRO1309: snake_case names; a property kept by a string keeps its type's other properties
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, strings!, keptTypes))'; Replace = ''; Tests = 'PascalCaseNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '.Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && IsInStrings(p, strings))'; Replace = '.Any(p => IsInStrings(p, strings))'; Tests = 'PascalCaseNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = "symbol.Name.TrimStart('_').IndexOf('_') < 0 ? GetNewName(symbol.Name) : null;"; Replace = 'GetNewName(symbol.Name);'; Tests = 'PascalCaseNamingTests' }
 
         # BRO1303/BRO1306/BRO1307 (fields)
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'var newName = isProtected && field.IsReadOnly ?'; Replace = 'var newName = false ?'; Tests = 'FieldNamingTests' }

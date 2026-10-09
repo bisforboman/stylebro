@@ -924,6 +924,90 @@ public class MemberOrderingTests
         """,
         "dotnet_diagnostic.BRO1505.severity = none");
 
+    // Scrutor: '// Test interfaces and classes' moved with the first interface, away from the classes it describes. A
+    // comment above a member whose next member is of the same kind introduces a group: the container isn't sorted when
+    // that member would move.
+    [Fact]
+    public Task GroupComments_KeepTheContainerAsItIs() => VerifyNoDiagnosticsAsync(
+        """
+        namespace N
+        {
+            public class Tests
+            {
+            }
+
+            // Test interfaces and classes
+            public interface IService { }
+            public interface IOtherService { }
+
+            public class Service : IService { }
+        }
+        """);
+
+    // A comment above a region line stays where it is, so it doesn't count as the first member's group comment.
+    [Fact]
+    public Task ACommentAboveARegion_IsNotAGroupComment() => VerifyFixAsync(
+        """
+        class C
+        {
+            // Section.
+            #region A
+            private int b;
+            private int c;
+            public const int {|BRO1001:A|} = 1;
+            #endregion
+        }
+        """,
+        """
+        class C
+        {
+            // Section.
+            #region A
+            public const int A = 1;
+            private int b;
+            private int c;
+            #endregion
+        }
+        """);
+
+    // Not a group comment: the next member is of another kind, or a group comment whose member doesn't move.
+    [Fact]
+    public Task MemberComments_MoveWithTheirMember() => VerifyFixAsync(
+        """
+        public class C
+        {
+            // The state.
+            private int z;
+            private int y;
+
+            public void M()
+            {
+            }
+
+            // The count.
+            private int {|BRO1001:count|};
+
+            public int P { get; set; }
+        }
+        """,
+        """
+        public class C
+        {
+            // The state.
+            private int z;
+            private int y;
+
+            // The count.
+            private int count;
+
+            public int P { get; set; }
+
+            public void M()
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task MethodMovedBelowAField_GetsABlankLine() => VerifyFixAsync(
         """
