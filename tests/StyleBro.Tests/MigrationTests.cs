@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-public sealed class MigrationTests : IDisposable
+public sealed partial class MigrationTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("stylebro-migrate-").FullName;
 
@@ -1061,7 +1061,7 @@ public sealed class MigrationTests : IDisposable
     [Fact]
     public void Init_KeepsALeadingUnderscore_WhenMostPrivateFieldsHaveIt()
     {
-        Write("src/A.cs", "class A { private int _a; private int _b; private readonly string _c; private int d; }");
+        Write("src/A.cs", "class A { private int _a; private int _b; private readonly string _c; private int d; private int _e, _f, _g, _h, _i, _j; }");
         Write("src/Migrations/20240101_Init.cs", "class M { private int x; private int y; private int z; private int w; }");
         Write("src/Form.Designer.cs", "class F { private int button1; private int button2; }");
 
@@ -1069,7 +1069,7 @@ public sealed class MigrationTests : IDisposable
         Assert.Contains("stylebro_private_field_naming = _camelCase", File.ReadAllText(Path.Combine(root, ".editorconfig")));
 
         // Below three quarters: StyleBro's default (camelCase), nothing written.
-        Write("src/B.cs", "class B { private int e; }");
+        Write("src/B.cs", "class B { private int e, f, g; }");
         File.Delete(Path.Combine(root, ".editorconfig"));
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         Assert.DoesNotContain("stylebro_private_field_naming", File.ReadAllText(Path.Combine(root, ".editorconfig")));
@@ -1273,7 +1273,7 @@ public sealed class MigrationTests : IDisposable
 
         Assert.Equal(new[] { "-a", "+b" }, PreviewCommand.Hunk(diff, 2, 12));
         Assert.Equal(new[] { "-if (x) return;", "-y", "+if (x)", "  ..." }, PreviewCommand.Hunk(diff, 11, 3));
-        Assert.Equal(new[] { "-a", "+b" }, PreviewCommand.Hunk(diff, 99, 12)); // not found: the first hunk
+        Assert.Equal(new[] { "-if (x) return;", "-y", "+if (x)", "  ..." }, PreviewCommand.Hunk(diff, 99, 3)); // not covered: the nearest hunk
     }
 
     [Fact]

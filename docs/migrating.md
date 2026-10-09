@@ -148,7 +148,11 @@ stays exempt:
 ```
 
 The StyleCop suppressions stay: they're harmless once StyleCop is gone, and needed while both run. Running the tool
-again adds nothing.
+again adds nothing. Sonar's suppressions get the same treatment ([Coming from SonarQube](#coming-from-sonarqube)).
+
+EF Core migrations are `dotnet ef`'s output: when the repository has them, the block marks their folders
+`generated_code = true` (a section per folder, e.g. `[src/Ordering.Infrastructure/Migrations/**]`), so formatting
+and StyleBro leave them alone.
 
 ## The report
 
@@ -230,8 +234,10 @@ private members, cognitive complexity, ...). The generated block has the Sonar-d
 `# From the SonarQube setup`, each with the Sonar rule's title. `--diff` prints the same part of the report before its
 summary. `init` does the same in a repository without StyleCop, and prints it.
 
-Limits: sub-directory `.editorconfig` files and `#pragma`/`[SuppressMessage]` suppressions of Sonar ids aren't carried
-over (code where a team suppressed S2325 gets CA1822's fix); Sonar's rule parameters (`SonarLint.xml`) aren't read.
+Suppressions of Sonar ids are carried over like StyleCop's ([Suppressions](#suppressions)): `#pragma warning disable
+S2325` gets `CA1822`, `[SuppressMessage("...", "S1481:...")]` a sibling for `IDE0059`, `<NoWarn>` the replacing ids, so
+code where a team suppressed a Sonar rule doesn't get the fix (`init --write` does this too when it finds a Sonar
+setup). Limits: sub-directory `.editorconfig` files aren't read; Sonar's rule parameters (`SonarLint.xml`) aren't read.
 
 ## Modernizing afterwards
 

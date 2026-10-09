@@ -36,7 +36,9 @@ reported by the build or the IDE, and `dotnet format` leaves it alone.
 **Not covered: whitespace formatting.** `dotnet format` (and `dotnet format whitespace`) formats whitespace directly,
 without diagnostics, so nothing can hide it. Either run `dotnet format whitespace` once (whitespace-only changes are
 easy to review), or check only `dotnet format style` and `dotnet format analyzers` in CI. `stylebro-migrate baseline`
-says how many whitespace changes it found.
+says how many such formatting changes it found (whitespace, line endings, charset, final newline, using order:
+`dotnet format` reports them as WHITESPACE, ENDOFLINE, CHARSET, FINALNEWLINE and IMPORTS). Files under `obj/` and `bin/`
+(generated AssemblyInfo and global usings) don't count.
 
 ## How entries match
 

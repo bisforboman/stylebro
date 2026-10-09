@@ -21,7 +21,7 @@ With `--write` it:
 Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `stylebro-migrate format` (below).
 
 The report lists the StyleCop rules that nothing enforces after the switch, and why. Details:
-[docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md).
+[docs/migrating.md](https://bisforboman.github.io/stylebro/migrating/).
 
 ## Starting without StyleCop
 
@@ -33,6 +33,10 @@ Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 forma
 IDE0049 type aliases, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
 a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. When at least
 three quarters of the private fields start with `_`, it keeps them (`stylebro_private_field_naming = _camelCase`). In a
+IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
+a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. For the
+conventions your code clearly follows (three quarters of at least 10 places: `_field` names, `=>` at the start of a
+wrapped line, `== null`, ...), it keeps them and prints what it counted; EF Core migrations are marked as generated. In a
 repository with a StyleCop setup it stops and points to `--write` instead.
 
 ```
@@ -42,7 +46,7 @@ stylebro-migrate init [path] --modernize [--write]
 Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()`, collection expressions,
 `ThrowIfNull`, ...), in their own block; in multi-targeted projects the newer-API rules are hidden where a target framework lacks the API
 (StyleBro's multi-target guard) and the newer-C# rules are suggestions unless `LangVersion` is set. Works after `--write` too. Details:
-[docs/modernizing.md](https://github.com/bisforboman/stylebro/blob/main/docs/modernizing.md).
+[docs/modernizing.md](https://bisforboman.github.io/stylebro/modernizing/).
 
 ## SonarQube
 
@@ -51,7 +55,7 @@ default rules), Sonar rule severities in rulesets (SonarLint's and the scanner's
 `.editorconfig`, or a quality profile exported from the server (`--sonar-profile profile.xml`). The Sonar rules that
 are on turn on the StyleBro and .NET rules that fix what they report (S2325 -> CA1822, S1659 -> BRO1142, S4136 ->
 overloads kept together, ...), and the report says which Sonar rules stay Sonar's. Sonar keeps reporting its own ids.
-Details: [docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md#coming-from-sonarqube).
+Details: [docs/migrating.md](https://bisforboman.github.io/stylebro/migrating/#coming-from-sonarqube).
 
 ## Formatting
 
@@ -78,7 +82,7 @@ Shows what the command would change without touching the repository: it runs on 
 first two, then `stylebro-migrate format` until a run changes nothing), prints the settings it wrote, the files each
 rule changed and a few sample hunks, and writes the full diff to `stylebro-preview.patch` (or `file`). A repository
 without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the copy. Example:
-[docs/getting-started.md](https://github.com/bisforboman/stylebro/blob/main/docs/getting-started.md#preview-first).
+[docs/getting-started.md](https://bisforboman.github.io/stylebro/getting-started/#preview-first).
 
 ## Baseline
 
@@ -89,4 +93,4 @@ stylebro-migrate baseline [path] [--project MySolution.sln]
 Writes `stylebro.baseline` with every violation `dotnet format` would fix today. The StyleBro.Analyzers package then
 hides those in the build, the IDE and `dotnet format`, so only new code has to follow the rules; a violation counts as
 new once its line is edited. Whitespace formatting can't be baselined. Details:
-[docs/baseline.md](https://github.com/bisforboman/stylebro/blob/main/docs/baseline.md).
+[docs/baseline.md](https://bisforboman.github.io/stylebro/baseline/).

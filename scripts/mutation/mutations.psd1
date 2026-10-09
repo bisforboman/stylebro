@@ -659,7 +659,8 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '!config.Bulk.Contains(p.Key) || !specific.Contains(p.Key)'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = ' || !order.Contains("accessibility")'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'rulesets.Add([]);'; Replace = ''; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/InitCommand.cs'; Find = 'underscore >= UnderscoreShare * (underscore + plain)'; Replace = 'underscore > plain'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'var winner = count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;'; Replace = 'var winner = count[1] > count[0] ? 1 : 0;'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
         # stylebro-migrate follows a SonarQube setup (2026-10-09)
         @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '.Where(f => !Path.GetFileName(f).Contains("none", StringComparison.OrdinalIgnoreCase))'; Replace = ''; Tests = 'MigrationTests.Sonar_' }

@@ -17,6 +17,12 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal static class BaselineCommand
 {
+    /// <summary>
+    /// What 'dotnet format' reports for its formatting passes, not as diagnostics: whitespace, line endings, the charset
+    /// (BOM), the final newline, using order. Nothing can suppress them, so they can't be baselined.
+    /// </summary>
+    private static readonly HashSet<string> FormattingIds = new(StringComparer.Ordinal) { "WHITESPACE", "ENDOFLINE", "CHARSET", "FINALNEWLINE", "IMPORTS" };
+
     public static int Run(string[] args)
     {
         var projectIndex = Array.IndexOf(args, "--project");
@@ -31,7 +37,7 @@ internal static class BaselineCommand
         project ??= FindWorkspace(root);
         if (project is null)
         {
-            Console.Error.WriteLine($"No single solution or project in {root}; name one with --project.");
+            Console.Error.WriteLine(NoWorkspace(root, "--project <file>"));
             return 1;
         }
 
@@ -93,6 +99,13 @@ internal static class BaselineCommand
         foreach (var document in report.RootElement.EnumerateArray())
         {
             var file = document.GetProperty("FilePath").GetString() ?? string.Empty;
+
+            // Build output (obj/: generated AssemblyInfo, global usings) isn't the repository's code.
+            if (Path.GetRelativePath(root, file).Replace('\\', '/').Split('/').Any(f => f.Equals("obj", StringComparison.OrdinalIgnoreCase) || f.Equals("bin", StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
             foreach (var change in document.GetProperty("FileChanges").EnumerateArray())
             {
                 var id = change.GetProperty("DiagnosticId").GetString() ?? string.Empty;
@@ -102,7 +115,7 @@ internal static class BaselineCommand
                     continue;
                 }
 
-                if (id == "WHITESPACE")
+                if (FormattingIds.Contains(id))
                 {
                     whitespace++;
                     continue;
@@ -128,23 +141,32 @@ internal static class BaselineCommand
         return new Result(new Baseline(counts), perRule, whitespace, notCovered);
     }
 
-    public static string? FindWorkspace(string root)
+    /// <summary>The solution or project the commands run on when none is named: the only candidate in the folder, else null.</summary>
+    public static string? FindWorkspace(string root) => WorkspaceCandidates(root) is [var only] ? only : null;
+
+    /// <summary>
+    /// What the commands could run on in a folder (file names): its solutions (.slnx, .sln, .slnf; a .sln next to the .slnx
+    /// of the same name is that solution, not another), else its projects. Several are never picked from silently: eShop's
+    /// eShop.slnx next to eShop.Web.slnf (the slnx needs MAUI workloads), Ocelot's two .slnx files.
+    /// </summary>
+    public static List<string> WorkspaceCandidates(string root)
     {
-        foreach (var pattern in new[] { "*.slnx", "*.sln", "*.csproj" })
-        {
-            var found = Directory.GetFiles(root, pattern);
-            if (found.Length == 1)
-            {
-                return Path.GetFileName(found[0]);
-            }
+        // Not Directory.GetFiles(root, "*.sln"): on Windows a three-letter extension pattern also matches .slnx and .slnf.
+        var files = Directory.EnumerateFiles(root).Select(Path.GetFileName).OfType<string>().ToList();
+        bool Is(string file, string extension) => string.Equals(Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase);
+        var solutions = files.Where(f => Is(f, ".slnx") || Is(f, ".slnf") || (Is(f, ".sln") && !files.Contains(Path.ChangeExtension(f, ".slnx"), StringComparer.OrdinalIgnoreCase)))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        return solutions.Count > 0 ? solutions : files.Where(f => Is(f, ".csproj")).Order(StringComparer.OrdinalIgnoreCase).ToList();
+    }
 
-            if (found.Length > 1)
-            {
-                return null;
-            }
-        }
-
-        return null;
+    /// <summary>Why no solution or project was picked in <paramref name="root"/>, and how to name one (<paramref name="how"/>, e.g. "--project &lt;file&gt;").</summary>
+    public static string NoWorkspace(string root, string how)
+    {
+        var candidates = WorkspaceCandidates(root);
+        return candidates.Count == 0
+            ? $"No solution or project in {root}; name one with {how}."
+            : $"Several solutions or projects in {root}: {string.Join(", ", candidates)}. Name the one to use with {how.Replace("<file>", candidates[0])}.";
     }
 
     private static void Report(Result result)
@@ -158,8 +180,9 @@ internal static class BaselineCommand
 
         if (result.Whitespace > 0)
         {
-            Console.WriteLine($"Not in the baseline: {result.Whitespace} whitespace changes ('dotnet format whitespace' formats without diagnostics, "
-                + "so nothing can hide them). Run 'dotnet format whitespace' once, or check only 'dotnet format style' and 'dotnet format analyzers' in CI.");
+            Console.WriteLine($"Not in the baseline: {result.Whitespace} formatting changes (whitespace, line endings, charset, final newline or using order: "
+                + "'dotnet format' makes them without diagnostics, so nothing can hide them). Run 'stylebro-migrate format' once, or check only "
+                + "'dotnet format style' and 'dotnet format analyzers' in CI.");
         }
 
         foreach (var (id, count) in result.NotCovered.OrderBy(r => r.Key, StringComparer.Ordinal))
