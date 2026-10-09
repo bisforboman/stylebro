@@ -197,7 +197,11 @@
         @{
             Name     = 'comment-and-file-endings'
             Map      = @('SA1512=BRO1506', 'SA1518=BRO1507')
-            Expected = @()
+            Expected = @(
+                # A comment right below code with a blank line after it describes that code (eShop): the blank line stays.
+                'only StyleCop: BRO1506 More.cs(13,13)'
+                'StyleBro output only: More.cs: []'
+            )
         }
         @{
             Name     = 'comparisons-default-values'
