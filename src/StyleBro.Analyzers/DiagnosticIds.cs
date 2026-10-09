@@ -90,6 +90,9 @@ public static class DiagnosticIds
     public const string ContextualKeyword = "BRO1144";
     public const string EmptyTypeBody = "BRO1145";
     public const string RecordClassKeyword = "BRO1146";
+    public const string NestedIf = "BRO1149";
+    public const string WhereBeforeTerminal = "BRO1150";
+    public const string ParamsArray = "BRO1151";
     public const string TrailingComma = "BRO1401";
     public const string EmptyAttributeParentheses = "BRO1402";
     public const string EmptyDelegateParentheses = "BRO1403";
