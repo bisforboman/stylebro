@@ -94,7 +94,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Performance | FieldNamingAnalyzer variance | Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost. | Idea |
 | Adoption | `stylebro-migrate --diff`: preview before writing | `--diff[=file]` on the migration, `init` and `format` (decisions.md 2026-10-09): runs the command and `stylebro-migrate format` on a temporary copy, prints the settings, files per rule and sample hunks, writes the full diff to `stylebro-preview.patch`. On FFMpegCore the patch matched the real commands byte for byte. | Done (2026-10-09) |
 | Adoption | Rule docs as a website | Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views. | Idea |
-| Hardening | BRO1523 second run in Kavita | After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Cause: BRO1523 skipped chains with any directive in them, so a lambda's `#region`s hid the chain until BRO1113 removed them. Region lines no longer count (other directives still skip the chain). | Done |
+| Hardening | BRO1523 second run in Kavita | After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Cause: BRO1523 skipped chains with any directive in them, so a lambda's `#region`s hid the chain until BRO1113 removed them. Region lines no longer count (other directives still skip the chain). | Done (2026-10-09) |
 
 ### Read the SDK's own settings
 
