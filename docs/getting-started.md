@@ -2,6 +2,7 @@
 
 From install to the first `dotnet format` run. Pick the path that fits:
 
+- [Preview first](#preview-first): what either path would change, without changing anything
 - [A. A new project, or no StyleCop](#a-a-new-project-or-no-stylecop)
 - [B. Coming from StyleCop](#b-coming-from-stylecop)
 
@@ -23,6 +24,52 @@ dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --versi
 
 Then add the folder as a package source in your repository's `nuget.config`
 (`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.2.0-dev.1` wherever this page says `0.2.0-alpha.1`.
+
+## Preview first
+
+Before changing anything, `--diff` shows what a path would do to your code. It works on all three commands:
+
+```
+stylebro-migrate init --diff          # path A: init's settings, then format
+stylebro-migrate path/to/repo --diff  # path B: the migration's settings (--write), then format
+stylebro-migrate format --diff        # only the format run
+```
+
+The preview copies the repository to a temporary folder (git's tracked and untracked files, not the ignored ones; the
+working trees of submodules too), runs the command there, then `stylebro-migrate format` until a run changes nothing,
+and deletes the copy. Your repository isn't touched. If it doesn't reference StyleBro.Analyzers yet, the copy gets the
+reference from [step 1](#1-add-the-package) (the tool's own version) and the output says so. It prints a summary and
+writes the full diff to `stylebro-preview.patch` in the current folder (`--diff=other.patch` names another file).
+`--keep` keeps the copy and prints where it is; `--all` passes on to format; with several solutions or projects in the
+folder, `--project MySolution.sln` names the one to format. FFMpegCore, `stylebro-migrate init --diff`:
+
+```text
+Previewing 'stylebro-migrate init --write' and 'stylebro-migrate format' on a copy; nothing in C:\src\FFMpegCore changes.
+Copying the repository to C:\Users\me\AppData\Local\Temp\stylebro-preview-fmsw0dps.3qa\FFMpegCore... 0s
+Settings: 31 lines in .editorconfig; 3 lines in Directory.Build.props (StyleBro.Analyzers)
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.2.0-alpha.1 to Directory.Build.props for the preview, as docs/getting-started.md says (the patch includes it).
+Finding what format fixes ('dotnet format --verify-no-changes')... 16s
+Format run 1... 29s
+Format run 2... 14s
+Format: 124 files, 579 reported changes, clean after 1 run
+  BRO1603  Documentation text should end with a ...    65 files
+  BRO1001  Members should be ordered                   33 files
+  BRO1401  Use a trailing comma in multi-line in...    33 files
+  ...
+  ... and 24 more rules
+Sample (BRO1603, FFMpegCore.Extensions.Downloader/Exceptions/FFMpegDownloaderException.cs):
+  -///     Custom exception for FFMpegDownloader
+  +///     Custom exception for FFMpegDownloader.
+Sample (BRO1401, FFMpegCore.Examples/Program.cs):
+  -            FrameRate = 30 //set source frame rate
+  +            FrameRate = 30, // set source frame rate
+Full diff: stylebro-preview.patch (5,966 lines)
+Done in 1m 2s.
+```
+
+Files are counted under every rule `dotnet format --verify-no-changes` reported in them before the fixes; a file with
+only whitespace changes counts as IDE0055, one with nothing reported (another fix's side effect) as `other`. The patch
+is what the real commands write (byte for byte on FFMpegCore); `git apply stylebro-preview.patch` applies it.
 
 ## A. A new project, or no StyleCop
 
@@ -66,6 +113,9 @@ In the repository root:
 stylebro-migrate init            # shows the block
 stylebro-migrate init --write    # adds it to .editorconfig (created if missing)
 ```
+
+`stylebro-migrate init --diff` shows what the block and the format run in step 3 would change, without writing
+anything ([Preview first](#preview-first)).
 
 The block sits between `# BEGIN stylebro-migrate` and `# END stylebro-migrate`; running the command again replaces it.
 Put your own settings outside it. To get these rules reported by the build too, add
@@ -124,7 +174,8 @@ stylebro-migrate path/to/repo
 ```
 
 It prints what it read, the settings it would write, and the StyleCop rules nothing enforces after the switch (dropped
-by design, partly covered, or not covered yet). Nothing is changed.
+by design, partly covered, or not covered yet). Nothing is changed. To also see what the settings and the format run
+would do to the code: `stylebro-migrate path/to/repo --diff` ([Preview first](#preview-first)).
 
 ### 2. Write the settings
 

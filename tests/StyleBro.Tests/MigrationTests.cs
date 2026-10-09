@@ -8,7 +8,7 @@ public sealed class MigrationTests : IDisposable
     private readonly string root = Directory.CreateTempSubdirectory("stylebro-migrate-").FullName;
 
     /// <inheritdoc/>
-    public void Dispose() => Directory.Delete(root, recursive: true);
+    public void Dispose() => DeleteFolder(root);
 
     [Fact]
     public void Defaults_FollowStyleCop()
@@ -1140,6 +1140,164 @@ public sealed class MigrationTests : IDisposable
             var text = File.ReadAllText(Path.Combine(RepositoryRoot(), readme));
             Assert.DoesNotMatch(@"\]\((?!https?://)[^)]*\)|^\s*\[[^\]]+\]:\s*(?!https?://)|(?:href|src)=""(?!https?://)", text);
         }
+    }
+
+    [Fact]
+    public void PreviewCopy_TakesTrackedAndUntrackedFiles_NotIgnoredOnes()
+    {
+        Write(".gitignore", "ignored.txt\nbin/\n");
+        Write("src/Tracked.cs", "class A { }\n");
+        Write("src/bin/Debug/App.dll", "binary");
+        PreviewCommand.MakeRepository(root);
+        Write("src/Untracked.cs", "class B { }\n");
+        Write("ignored.txt", "secret");
+        Write("ext/Lib/Code.cs", "class C { }\n");
+        PreviewCommand.MakeRepository(Path.Combine(root, "ext", "Lib")); // a repository inside: its working tree comes along
+        var before = Hashes(root);
+        var target = Directory.CreateTempSubdirectory("stylebro-preview-test-").FullName;
+        try
+        {
+            PreviewCommand.Copy(root, target);
+
+            var copied = Directory.EnumerateFiles(target, "*", SearchOption.AllDirectories)
+                .Select(f => Path.GetRelativePath(target, f).Replace('\\', '/'))
+                .Where(f => !f.Contains(".git/", StringComparison.Ordinal))
+                .Order(StringComparer.Ordinal);
+            Assert.Equal(new[] { ".gitignore", "ext/Lib/Code.cs", "src/Tracked.cs", "src/Untracked.cs" }, copied);
+            Assert.True(Directory.Exists(Path.Combine(target, "ext", "Lib", ".git"))); // still a repository of its own: format skips it
+            Assert.Equal(before, Hashes(root));
+        }
+        finally
+        {
+            DeleteFolder(target);
+        }
+    }
+
+    [Fact]
+    public void Preview_AppliesInitAndFormatToACopy_WritesThePatch_AndLeavesTheRepositoryAlone()
+    {
+        Write("App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("C.cs", "class C { int b; int a; }\n");
+        Write("D.cs", "class D {  }\n");
+        PreviewCommand.MakeRepository(root);
+        var before = Hashes(root);
+        var patch = Path.Combine(Directory.CreateTempSubdirectory("stylebro-preview-test-").FullName, "out.patch");
+        var runs = 0;
+        int Format(string[] args, Action<string> log)
+        {
+            var folder = args[0];
+            Assert.True(File.Exists(Path.Combine(folder, ".editorconfig"))); // init ran first, in the copy
+            var report = Array.IndexOf(args, "--report");
+            if (report >= 0)
+            {
+                Directory.CreateDirectory(args[report + 1]);
+                var c = Path.Combine(folder, "C.cs").Replace("\\", "\\\\");
+                var d = Path.Combine(folder, "D.cs").Replace("\\", "\\\\");
+                File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), $$"""
+                    [ { "FilePath": "{{c}}", "FileChanges": [ { "LineNumber": 1, "CharNumber": 11, "DiagnosticId": "BRO1001" } ] },
+                      { "FilePath": "{{d}}", "FileChanges": [ { "LineNumber": 1, "CharNumber": 10, "DiagnosticId": "WHITESPACE" } ] } ]
+                    """);
+                return 2;
+            }
+
+            runs++;
+            File.WriteAllText(Path.Combine(folder, "C.cs"), "class C { int a; int b; }\n");
+            File.WriteAllText(Path.Combine(folder, "D.cs"), "class D { }\n");
+            return 0;
+        }
+
+        var output = Capture(() => Assert.Equal(0, PreviewCommand.Run("init", new[] { root, "--diff=" + patch, "--keep" }, Format)));
+
+        Assert.Equal(2, runs); // the second run changed nothing
+        Assert.Equal(before, Hashes(root));
+        Assert.Contains("Format: 2 files, 2 reported changes, clean after 1 run", output);
+        Assert.Matches("BRO1001 .* 1 file", output);
+        Assert.Matches("IDE0055 .* 1 file", output);
+        Assert.Contains("+class C { int a; int b; }", output); // the sample
+        var text = File.ReadAllText(patch);
+        Assert.Contains("+++ b/.editorconfig", text);
+        Assert.Contains("+++ b/Directory.Build.props", text);
+        Assert.Contains("Include=\"StyleBro.Analyzers\"", text);
+        Assert.Contains("+class C { int a; int b; }", text);
+        var kept = System.Text.RegularExpressions.Regex.Match(output, @"The copy is kept: (.*) \(log").Groups[1].Value;
+        Assert.True(Directory.Exists(kept));
+        DeleteFolder(Path.GetDirectoryName(kept)!);
+        DeleteFolder(Path.GetDirectoryName(patch)!);
+    }
+
+    [Fact]
+    public void PreviewAttribution_CountsFilesPerReportedRule_WhitespaceAndOther()
+    {
+        var report = """
+            [ { "FilePath": "C:/Temp/stylebro-preview-x/repo/src/A.cs", "FileChanges": [
+                  { "LineNumber": 9, "CharNumber": 1, "DiagnosticId": "BRO1001" }, { "LineNumber": 3, "CharNumber": 1, "DiagnosticId": "BRO1001" },
+                  { "LineNumber": 3, "CharNumber": 1, "DiagnosticId": "BRO1001" }, { "LineNumber": 4, "CharNumber": 2, "DiagnosticId": "WHITESPACE" } ] },
+              { "FilePath": "/tmp/stylebro-preview-x/repo/src/B.cs", "FileChanges": [ { "LineNumber": 5, "CharNumber": 1, "DiagnosticId": "BRO1514" } ] },
+              { "FilePath": "/tmp/stylebro-preview-x/repo/src/Unchanged.cs", "FileChanges": [ { "LineNumber": 1, "CharNumber": 1, "DiagnosticId": "BRO1303" } ] } ]
+            """;
+        var changed = new[] { "src/A.cs", "src/B.cs", "src/Spaces.cs", "src/Moved.cs" };
+
+        var (rules, changes) = PreviewCommand.Attribute(report, "stylebro-preview-x/repo", changed, f => f == "src/Spaces.cs");
+
+        Assert.Equal(4, changes); // a diagnostic reported twice (two frameworks) counts once; Unchanged.cs isn't counted
+        Assert.Equal(new[] { "BRO1001", "BRO1514", "IDE0055", "other" }, rules.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal(3, rules["BRO1001"]["src/A.cs"]); // the first reported line, for the sample
+        Assert.Equal(new[] { "src/A.cs", "src/Spaces.cs" }, rules["IDE0055"].Keys);
+        Assert.Equal(new[] { "src/Moved.cs" }, rules["other"].Keys);
+        Assert.Equal(new[] { ("IDE0055", "src/A.cs", 4), ("BRO1001", "src/A.cs", 3), ("BRO1514", "src/B.cs", 5) }, PreviewCommand.Samples(rules, 3));
+
+        var summary = PreviewCommand.FormatSummary(4, changes, rules, new[] { true, false });
+        Assert.StartsWith("Format: 4 files, 4 reported changes, clean after 1 run", summary);
+        Assert.EndsWith("1 file", summary.Split('\n').Last()); // 'other' comes last
+        Assert.Contains("other", summary.Split('\n').Last());
+    }
+
+    [Fact]
+    public void PreviewHunk_IsTheOneCoveringTheLine()
+    {
+        var diff = "diff --git a/A.cs b/A.cs\n@@ -2 +2 @@\n-a\n+b\n@@ -10,2 +10,5 @@\n-if (x) return;\n-y\n+if (x)\n+{\n+    return;\n+}\n+y\n";
+
+        Assert.Equal(new[] { "-a", "+b" }, PreviewCommand.Hunk(diff, 2, 12));
+        Assert.Equal(new[] { "-if (x) return;", "-y", "+if (x)", "  ..." }, PreviewCommand.Hunk(diff, 11, 3));
+        Assert.Equal(new[] { "-a", "+b" }, PreviewCommand.Hunk(diff, 99, 12)); // not found: the first hunk
+    }
+
+    [Fact]
+    public void PreviewPackage_FollowsCentralPackageManagement()
+    {
+        Assert.Equal("<Project>\n  <ItemGroup>\n    <X />\n  </ItemGroup>\n</Project>\n", PreviewCommand.AddItem(null, "<X />"));
+        Assert.Equal("<Project>\n  <A />\n  <ItemGroup>\n    <X />\n  </ItemGroup>\n</Project>", PreviewCommand.AddItem("<Project>\n  <A />\n</Project>", "<X />"));
+
+        Write("Directory.Packages.props", "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup></Project>");
+        Assert.NotNull(PreviewCommand.AddPackage(root));
+        Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\" Version=", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")));
+        Assert.Contains("<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />", File.ReadAllText(Path.Combine(root, "Directory.Build.props")));
+        Assert.Null(PreviewCommand.AddPackage(root)); // referenced now
+    }
+
+    [Fact]
+    public void Preview_DiffAndWrite_DontGoTogether()
+    {
+        Assert.Equal(1, Program.Main(new[] { root, "--write", "--diff" }));
+        Assert.Equal(1, Program.Main(new[] { "init", root, "--diffs" }));
+        Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
+    }
+
+    private static Dictionary<string, string> Hashes(string folder)
+    {
+        return Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories)
+            .Where(f => !f.Contains(Path.DirectorySeparatorChar + ".git" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .ToDictionary(f => f, f => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(f))));
+    }
+
+    private static void DeleteFolder(string folder)
+    {
+        foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+        {
+            File.SetAttributes(file, FileAttributes.Normal); // git's object files are read-only
+        }
+
+        Directory.Delete(folder, recursive: true);
     }
 
     private static string Capture(Action action)

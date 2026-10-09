@@ -45,8 +45,12 @@ internal static class FormatCommand
         </Project>
         """;
 
-    public static int Run(string[] args)
+    /// <summary>Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the console.</summary>
+    public static int Run(string[] args, Action<string>? output = null)
     {
+        Action<string> log = output ?? Console.WriteLine;
+        Action<string> error = output ?? Console.Error.WriteLine;
+
         // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
         var hasPath = args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal);
         var path = Path.GetFullPath(hasPath ? args[0] : ".");
@@ -54,14 +58,14 @@ internal static class FormatCommand
         var root = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
         if (!Directory.Exists(root))
         {
-            Console.Error.WriteLine($"Not found: {path}");
+            error($"Not found: {path}");
             return 1;
         }
 
         var workspace = File.Exists(path) ? Path.GetFileName(path) : BaselineCommand.FindWorkspace(root);
         if (workspace is null)
         {
-            Console.Error.WriteLine($"No single solution or project in {root}; name one.");
+            error($"No single solution or project in {root}; name one.");
             return 1;
         }
 
@@ -71,7 +75,7 @@ internal static class FormatCommand
         if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
         {
             var ids = Diagnostics(root);
-            Console.WriteLine($"Fixing StyleBro's rules and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
+            log($"Fixing StyleBro's rules and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
             passThrough.Add("--diagnostics");
             passThrough.AddRange(ids);
         }
@@ -97,17 +101,17 @@ internal static class FormatCommand
         var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
         if (plan.Count <= 1)
         {
-            return Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough));
+            return Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough), output);
         }
 
-        Console.WriteLine($"Multi-targeted: one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
+        log($"Multi-targeted: one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
 
         // The restore's own output (its "Build succeeded" block) only matters when it fails.
         var restoreOutput = new List<string>();
         var restore = Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
         if (restore != 0)
         {
-            restoreOutput.ForEach(Console.WriteLine);
+            restoreOutput.ForEach(log);
             return restore;
         }
 
@@ -122,7 +126,7 @@ internal static class FormatCommand
         {
             if (IsNewLine(shown, line))
             {
-                Console.WriteLine(line);
+                log(line);
             }
         }
 
@@ -134,7 +138,7 @@ internal static class FormatCommand
         {
             foreach (var (framework, selected) in plan)
             {
-                Console.WriteLine($"== {framework} ({selected.Count} project(s))");
+                log($"== {framework} ({selected.Count} project(s))");
                 var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
                 try
                 {
