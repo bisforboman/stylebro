@@ -1084,6 +1084,8 @@ Decisions for all of this are in `docs/decisions.md`; rule details on the rule p
   both builds in one process (order alternates, GC before each), fastest run per analyzer, up to two more rounds
   before a slowdown counts; fails at total >10 % and 25 ms, one analyzer >50 % and 15 ms, a new analyzer >60 ms.
   `STYLEBRO_BENCH_ONLY=Name,...` times only those. CI job `performance` runs it on every PR; a REQUIRED check.
+  Since 2026-10-09 CI compares with `--all-rules` (off-by-default rules measured too). The flag works (checked: 4,087
+  -> 4,439 reports on Newtonsoft.Json); an earlier "totals match" was a misreading.
 - The benchmark builds and times `TreeWalk`'s arrays before the analyzers, as their own line (2026-10-09): the first
   analyzer to touch a tree paid for the walk, mostly FieldNamingAnalyzer (the only symbol-action analyzer; symbol actions
   run before a file's tree/node actions), which swung 72-101 ms; now ~20 ms. `NamespaceNames.IsGenerated` is cached per
