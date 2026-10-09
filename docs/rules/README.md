@@ -81,6 +81,9 @@ folder counts. Shared source linked from elsewhere in the repository is still ch
 | [BRO1146](BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | on |
 | [BRO1147](BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | off |
 | [BRO1148](BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | off |
+| [BRO1149](BRO1149.md) | Merge an 'if' into the enclosing 'if' | (none; Sonar S1066) | on |
+| [BRO1150](BRO1150.md) | Pass the predicate to the LINQ call instead of calling Where first | (none; Sonar S2971) | on |
+| [BRO1151](BRO1151.md) | Pass the elements, not an array, to a params parameter | (none; Sonar S3878) | on |
 
 ## Naming
 

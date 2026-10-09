@@ -59,6 +59,33 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = ' && !string.Equals(langVersion!.Trim(), defaultVersion?.Trim(), StringComparison.OrdinalIgnoreCase)'; Replace = ''; Tests = 'EmptyTypeBodyTests' }
         # BRO1146 (record class)
         @{ File = 'src/StyleBro.Analyzers/Readability/RecordClassKeywords.cs'; Find = 'return Trivia.IsBlank(record, span) ?'; Replace = 'return true ?'; Tests = 'RecordClassKeywordTests' }
+        # BRO1149 (nested ifs)
+        # Sonar ids (NodeCodeFixProvider): no action where the shared logic skips
+        @{ File = 'src/StyleBro.CodeFixes/NodeCodeFixProvider.cs'; Find = '.ConfigureAwait(false)).Count == 0)'; Replace = '.ConfigureAwait(false)).Count < 0)'; Tests = 'SonarIdsTests.S1066_NoActionWhereBro1149Skips' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'outer.Else is not null'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'inner.Else is not null'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'outer.ContainsDirectives'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| !Trivia.IsBlank(outer, TextSpan.FromBounds(outer.Condition.Span.End, inner.Condition.SpanStart))'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| !Trivia.IsBlank(outer, TextSpan.FromBounds(inner.Span.End, outer.Span.End))'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| !Trivia.IsBlank(deepest, TextSpan.FromBounds(deepest.Condition.Span.End, deepest.CloseParenToken.SpanStart))'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| condition.IsKind(SyntaxKind.LogicalOrExpression)'; Replace = ''; Tests = 'NestedIfTests.LooserOperands_GetParentheses' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'if (node.DescendantTokens().Any(t => text.Lines'; Replace = 'if (false && node.DescendantTokens().Any(t => text.Lines'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'if (children.Count == 0)'; Replace = 'if (true)'; Tests = 'NestedIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'IndentOf(text, current.SpanStart) - topIndent'; Replace = '0'; Tests = 'NestedIfTests.MultiLineInnerCondition_MovesLeft' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'return scope is not null'; Replace = 'return false && scope is not null'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| outer.GetLastToken().GetNextToken().LeadingTrivia.Any(t => t.IsDirective)'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        # BRO1150 (Where before Count/Any/...)
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = 'if (GetLinqMethod(model.GetSymbolInfo(where, cancellationToken).Symbol) is null'; Replace = 'if (false'; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| NullChecks.IsInExpressionTree(terminal, model, cancellationToken)'; Replace = ''; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = 'if (GetLinqMethod(Speculation.SymbolAfterReplacing(model, terminal, call, cancellationToken)) is null)'; Replace = 'if (false)'; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| !Trivia.IsBlank(terminal, TextSpan.FromBounds(argument.Span.End, terminal.Span.End))'; Replace = ''; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        # BRO1151 (params arrays)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'list.Arguments.Count != method.Parameters.Length'; Replace = 'false'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = '|| (elements.Count == 1 && model.ClassifyConversion(elements[0], parameter.Type).IsImplicit)'; Replace = ''; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'array is CollectionExpressionSyntax ? info.ConvertedType : info.Type'; Replace = 'info.ConvertedType'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = '|| (elements.Count > 1 && line != text.Lines.GetLineFromPosition(list.Arguments[0].SpanStart).LineNumber)'; Replace = ''; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'return SymbolEqualityComparer.Default.Equals(Speculation.SymbolAfterReplacing(model, call, expanded, cancellationToken), method) ? changes : null;'; Replace = 'return changes;'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'if (removed.Any(span => !Trivia.IsBlank(call, span))'; Replace = 'if (false'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
         # BRO1527 (auto-accessors on one line)
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '|| list.Accessors.Count == 0 '; Replace = ''; Tests = 'AutoAccessorLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (Line(text, before.Span.End) == Line(text, close.SpanStart)'; Replace = 'if (false'; Tests = 'AutoAccessorLinesTests' }

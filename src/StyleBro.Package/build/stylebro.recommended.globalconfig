@@ -247,6 +247,12 @@ dotnet_diagnostic.BRO1144.severity = warning
 dotnet_diagnostic.BRO1408.severity = warning
 # BRO1146: 'record R' instead of 'record class R' (Meziantou MA0174; stylebro-migrate turns it off)
 dotnet_diagnostic.BRO1146.severity = warning
+# BRO1149: 'if (a && b)' instead of an 'if' nested alone in another (Sonar S1066; stylebro-migrate turns it off)
+dotnet_diagnostic.BRO1149.severity = warning
+# BRO1150: 'source.Count(p)' instead of 'source.Where(p).Count()' (Sonar S2971; stylebro-migrate turns it off)
+dotnet_diagnostic.BRO1150.severity = warning
+# BRO1151: the elements, not an array, for a params parameter (Sonar S3878; stylebro-migrate turns it off)
+dotnet_diagnostic.BRO1151.severity = warning
 
 # BRO1145: 'class Marker;' instead of 'class Marker { }' (C# 12; Meziantou MA0206). Off: a matter of taste, and it needs
 # C# 12 in every target framework; set to warning to opt in.
