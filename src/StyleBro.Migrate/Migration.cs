@@ -712,6 +712,7 @@ internal static class Migration
 
         // Using directives.
         var placement = setup.Setting("orderingRules", "usingDirectivesPlacement")?.GetString() ?? "insideNamespace";
+
         // StyleBro's BRO1008 replaces IDE0065, whose fix can change what names bind to.
         Rule("IDE0065");
         lines.Add($"csharp_using_directive_placement = {(placement == "outsideNamespace" ? "outside_namespace" : "inside_namespace")}");

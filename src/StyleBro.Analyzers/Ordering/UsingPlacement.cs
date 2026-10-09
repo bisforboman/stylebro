@@ -67,7 +67,9 @@ internal static class UsingPlacement
         mode switch
         {
             UsingPlacementMode.Outside => root.DescendantNodes(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax)
-                .OfType<BaseNamespaceDeclarationSyntax>().SelectMany(n => n.Usings).ToImmutableArray(),
+                .OfType<BaseNamespaceDeclarationSyntax>()
+                .SelectMany(n => n.Usings)
+                .ToImmutableArray(),
             UsingPlacementMode.Inside when root.Members.Any(m => m is BaseNamespaceDeclarationSyntax) =>
                 root.Usings.Where(u => !u.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword)).ToImmutableArray(),
             _ => ImmutableArray<UsingDirectiveSyntax>.Empty,
@@ -342,12 +344,15 @@ internal static class UsingPlacement
                 case SimpleNameSyntax simple:
                     identifiers.Add(simple.Identifier.ValueText);
                     break;
+
                 case AttributeSyntax { Name: var name }:
                     identifiers.Add(name.GetLastToken().ValueText + "Attribute");
                     break;
+
                 case MemberAccessExpressionSyntax access:
                     methods.Add(access.Name.Identifier.ValueText);
                     break;
+
                 case MemberBindingExpressionSyntax binding:
                     methods.Add(binding.Name.Identifier.ValueText);
                     break;
