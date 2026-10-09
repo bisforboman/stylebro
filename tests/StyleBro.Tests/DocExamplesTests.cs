@@ -50,9 +50,10 @@ public partial class DocExamplesTests
         Assert.NotEmpty(descriptors);
         foreach (var descriptor in descriptors)
         {
-            // MkDocs serves docs/rules/BROxxxx.md at rules/BROxxxx/.
-            Assert.Equal("https://bisforboman.github.io/stylebro/rules/" + descriptor.Id + "/", descriptor.HelpLinkUri);
-            Assert.True(File.Exists(Path.Combine(RulesFolder, descriptor.Id + ".md")), $"{descriptor.Id}: no docs/rules/{descriptor.Id}.md");
+            // MkDocs serves docs/rules/BROxxxx.md at rules/BROxxxx/. A fading companion (BROxxxx_p) links to its rule's page.
+            var page = descriptor.Id.EndsWith("_p", StringComparison.Ordinal) ? descriptor.Id.Substring(0, descriptor.Id.Length - 2) : descriptor.Id;
+            Assert.Equal("https://bisforboman.github.io/stylebro/rules/" + page + "/", descriptor.HelpLinkUri);
+            Assert.True(File.Exists(Path.Combine(RulesFolder, page + ".md")), $"{descriptor.Id}: no docs/rules/{page}.md");
         }
     }
 
