@@ -219,3 +219,4 @@ stylebro-migrate baseline --project MySolution.sln   # or name it
 
 This writes `stylebro.baseline`; commit it. The build, the IDE and `dotnet format` then ignore those violations, and
 only new code has to follow the rules. A baseline can't hide whitespace formatting. Details: [baseline.md](baseline.md).
+
