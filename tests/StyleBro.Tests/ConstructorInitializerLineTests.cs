@@ -274,4 +274,142 @@ public class ConstructorInitializerLineTests
         }
         """ + BaseClass,
         "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 45");
+
+    // The line is measured as the other fixes leave it: BRO1108 splits the parameters ('        long d) : base(a)', 25),
+    // BRO1109 moves '(' up ('        long a) : base(1)', 25). As the text stands, each joined line would be too long (33,
+    // 26 > 25). The last one fits either way: BRO1109 and BRO1108 both rewrite the gap after its '('.
+    [Fact]
+    public Task SameLine_MeasuredAsTheOtherFixesLeaveTheLine() => VerifyFixAsync(
+        """
+        class C : B
+        {
+            public C(int a, long b,
+                long c, long d)
+                {|BRO1105::|} base(a)
+            {
+            }
+
+            public C
+                (long a)
+                {|BRO1105::|} base(1)
+            {
+            }
+
+            public C
+                ( int a, int b,
+                long c)
+                {|BRO1105::|} base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        """
+        class C : B
+        {
+            public C(int a, long b,
+                long c, long d) : base(a)
+            {
+            }
+
+            public C
+                (long a) : base(1)
+            {
+            }
+
+            public C
+                ( int a, int b,
+                long c) : base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        editorConfig: "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 25");
+
+    // BRO1110's own_line mode moves ')' down, also when the join takes it along: '    ) : base(a)' (15) fits, as the text
+    // stands '        int a, int b) : base(a)' (31) wouldn't. The space before ')' keeps BRO1110's edit after the join's.
+    [Fact]
+    public Task SameLine_MeasuredAfterBro1110MovesTheParenthesisDown() => VerifyFixAsync(
+        """
+        class C : B
+        {
+            public C(
+                int a, int b )
+                {|BRO1105::|} base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        """
+        class C : B
+        {
+            public C(
+                int a, int b) : base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        editorConfig: "stylebro_constructor_initializer_placement = same_line\nstylebro_closing_parenthesis_placement = own_line\nmax_line_length = 15");
+
+    // The same lines with BRO1108, BRO1109 and BRO1110 off: their edits aren't counted, so none fits.
+    [Fact]
+    public Task SameLine_NotReported_WhenTheRulesThatShortenTheLineAreOff() => VerifyNoDiagnosticsAsync(
+        """
+        class C : B
+        {
+            public C(int a, long b,
+                long c, long d)
+                : base(a)
+            {
+            }
+
+            public C
+                (long a)
+                : base(1)
+            {
+            }
+
+            public C(
+                int a, int b)
+                : base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        "stylebro_constructor_initializer_placement = same_line\nstylebro_closing_parenthesis_placement = own_line\nmax_line_length = 25\n"
+            + "dotnet_diagnostic.BRO1108.severity = none\ndotnet_diagnostic.BRO1109.severity = none\ndotnet_diagnostic.BRO1110.severity = none");
+
+    // BRO1404 adds 'private ' ('    private C(int a) : base(a)', 30 > 25); with BRO1404 off, '    C(int a) : base(a)' fits.
+    [Fact]
+    public Task SameLine_NotReported_WhenAnAddedModifierMakesItTooLong() => VerifyNoDiagnosticsAsync(
+        """
+        class C : B
+        {
+            C(int a)
+                : base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 25");
+
+    [Fact]
+    public Task SameLine_WithoutBro1404_TheModifierIsNotCounted() => VerifyFixAsync(
+        """
+        class C : B
+        {
+            C(int a)
+                {|BRO1105::|} base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        """
+        class C : B
+        {
+            C(int a) : base(a)
+            {
+            }
+        }
+        """ + BaseClass,
+        editorConfig: "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 25\ndotnet_diagnostic.BRO1404.severity = none");
 }

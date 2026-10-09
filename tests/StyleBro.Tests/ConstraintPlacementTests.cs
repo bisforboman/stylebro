@@ -248,4 +248,97 @@ public class ConstraintPlacementTests
         }
         """,
         "stylebro_constraint_placement = same_line\nmax_line_length = 71");
+
+    // The line is measured as the other fixes leave it: BRO1108 splits the parameters ('        T dd) where T : class',
+    // 29), BRO1109 moves '(' up ('        T abcdefg) where T : class', 34). As the text stands, each joined line would be
+    // too long (35 > 34).
+    [Fact]
+    public Task SameLine_MeasuredAsTheOtherFixesLeaveTheLine() => VerifyFixAsync(
+        """
+        public static class C
+        {
+            public static void M<T>(int a, int b,
+                T cc, T dd)
+                {|BRO1111:where T : class|}
+            {
+            }
+
+            public static void N<T>
+                (T abcdefg)
+                {|BRO1111:where T : class|}
+            {
+            }
+        }
+        """,
+        """
+        public static class C
+        {
+            public static void M<T>(int a, int b,
+                T cc, T dd) where T : class
+            {
+            }
+
+            public static void N<T>
+                (T abcdefg) where T : class
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_constraint_placement = same_line\nmax_line_length = 34");
+
+    // BRO1404 adds 'internal ' (37 > 36) and 'private ' (42 > 36), BRO1007 another part's 'public ' (41 > 36).
+    [Fact]
+    public Task SameLine_NotReported_WhenAnAddedModifierMakesItTooLong() => VerifyNoDiagnosticsAsync(
+        """
+        class Box<T>
+            where T : class
+        {
+            void M<U>(U v)
+                where U : class
+            {
+            }
+        }
+
+        partial class P<T>
+            where T : class
+        {
+        }
+
+        public partial class P<T>
+        {
+        }
+        """,
+        "stylebro_constraint_placement = same_line\nmax_line_length = 36");
+
+    [Fact]
+    public Task SameLine_WithoutBro1404AndBro1007_TheModifiersAreNotCounted() => VerifyFixAsync(
+        """
+        class Box<T>
+            {|BRO1111:where T : class|}
+        {
+        }
+
+        partial class P<T>
+            {|BRO1111:where T : class|}
+        {
+        }
+
+        public partial class P<T>
+        {
+        }
+        """,
+        """
+        class Box<T> where T : class
+        {
+        }
+
+        partial class P<T> where T : class
+        {
+        }
+
+        public partial class P<T>
+        {
+        }
+        """,
+        editorConfig: "stylebro_constraint_placement = same_line\nmax_line_length = 36\ndotnet_diagnostic.BRO1404.severity = none\ndotnet_diagnostic.BRO1007.severity = none");
 }

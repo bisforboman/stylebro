@@ -56,6 +56,7 @@ public sealed class ConstraintPlacementCodeFixProvider : CodeFixProvider
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var indentUnit = Indentation.GetUnit(options);
         var sameLine = ConstraintPlacement.IsSameLine(options);
+        var model = sameLine ? await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) : null;
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
@@ -66,7 +67,7 @@ public sealed class ConstraintPlacementCodeFixProvider : CodeFixProvider
 
             if (sameLine)
             {
-                changes.AddRange(ConstraintPlacement.GetJoins(declaration, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken))
+                changes.AddRange(ConstraintPlacement.GetJoins(declaration, text, options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken), model!, cancellationToken)
                     .Where(j => j.Clause == clause)
                     .Select(j => j.Change));
             }
