@@ -444,6 +444,9 @@ public class DocumentationTests
 
             /// <summary>Gets the host.</summary>
             string Host { get; }
+
+            /// <summary>Gets the port.</summary>
+            int Port { get; }
         }
 
         public class Route : IRoute
@@ -452,6 +455,7 @@ public class DocumentationTests
             public int {|BRO1601:Priority|} { get; set; }
             public string Keys { get; set; }
             public string {|BRO1601:Host|} { get; set; }
+            public int {|BRO1601:Port|} { get; set; }
 
             public string Path { get; set; }
         }
@@ -464,6 +468,9 @@ public class DocumentationTests
 
             /// <summary>Gets the host.</summary>
             string Host { get; }
+
+            /// <summary>Gets the port.</summary>
+            int Port { get; }
         }
 
         public class Route : IRoute
@@ -477,6 +484,9 @@ public class DocumentationTests
 
             /// <inheritdoc/>
             public string Host { get; set; }
+
+            /// <inheritdoc/>
+            public int Port { get; set; }
 
             public string Path { get; set; }
         }
