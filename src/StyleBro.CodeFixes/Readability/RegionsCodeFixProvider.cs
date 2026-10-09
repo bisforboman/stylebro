@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -91,7 +92,13 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
                     continue;
                 }
 
+                // Up over blank lines left by an earlier removal (empty regions in a row, fixed one at a time).
                 var line = removedText.Lines.GetLineFromPosition(position - 1);
+                while (line.LineNumber > 0 && string.IsNullOrWhiteSpace(line.ToString()))
+                {
+                    line = removedText.Lines[line.LineNumber - 1];
+                }
+
                 var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
                 foreach (var blank in TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText))
                 {
@@ -101,7 +108,23 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
 
             if (blanks.Count > 0)
             {
-                changes.AddRange(blanks);
+                // All deletions: one blank-line run can be found from several removed regions (empty regions in a row
+                // below one comment) and span removed lines, so overlapping deletions become one.
+                var union = new List<TextChange>();
+                foreach (var span in changes.Concat(blanks).Select(c => c.Span).OrderBy(s => s.Start))
+                {
+                    if (union.Count > 0 && union[union.Count - 1].Span.End >= span.Start)
+                    {
+                        var last = union[union.Count - 1].Span;
+                        union[union.Count - 1] = new TextChange(TextSpan.FromBounds(last.Start, Math.Max(last.End, span.End)), string.Empty);
+                    }
+                    else
+                    {
+                        union.Add(new TextChange(span, string.Empty));
+                    }
+                }
+
+                changes = union;
                 removed = document.WithText(text.WithChanges(changes));
             }
         }

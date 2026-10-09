@@ -169,7 +169,9 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
     private static void Analyze(SyntaxNodeAnalysisContext context, SyntaxNode declaration, SyntaxToken identifier, ISymbol symbol)
     {
         // BRO1314 adds the suffix in the same rename as BRO1309's casing ('getData' -> 'GetDataAsync'), so one run converges.
-        var newName = GetNewName(symbol.Name);
+        // A snake_case name ('device_id') isn't BRO1309's: it's usually a wire name (JSON, a protocol), and 'Device_id'
+        // wouldn't be PascalCase either.
+        var newName = symbol.Name.TrimStart('_').IndexOf('_') < 0 ? GetNewName(symbol.Name) : null;
         var descriptor = Descriptors.ElementPascalCase;
         var options = context.Compilation.Options;
         if (symbol is IMethodSymbol method

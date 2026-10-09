@@ -6,6 +6,22 @@ on:
   pull_request:
 
 jobs:
+  # What the pull request changes (.github/changes.sh). A docs-only change skips the work of parity, performance (also
+  # skipped unless analyzer code changed), the real-world and the mutation jobs; they still report their checks.
+  # `!cancelled()` on the jobs below: if this job fails, its outputs are empty and everything runs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+      perf: ${{ steps.changes.outputs.perf }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: changes
+        run: bash .github/changes.sh
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -43,15 +59,24 @@ jobs:
   # StyleBro and StyleCop 1.2 run on the same edge-case files (scripts/stylecop-survey/parity); every difference in
   # positions or fixed output must be listed as a documented deviation in parity.psd1.
   parity:
+    needs: changes
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Skipped (docs-only change)
+        if: needs.changes.outputs.relevant == 'false'
+        run: echo "Nothing that affects results changed."
+
       - uses: actions/checkout@v7
+        if: needs.changes.outputs.relevant != 'false'
 
       - uses: actions/setup-dotnet@v6
+        if: needs.changes.outputs.relevant != 'false'
         with:
           dotnet-version: 10.0.x
 
       - name: Compare with StyleCop
+        if: needs.changes.outputs.relevant != 'false'
         shell: pwsh
         run: |
           $env:StyleBroSelf = 'none'
@@ -61,18 +86,26 @@ jobs:
   # The PR's analyzers against the base branch's, alternated in one process on Newtonsoft.Json's main project
   # (scripts/benchmark, compare mode): fails when an analyzer or the total is clearly slower. Results in the job summary.
   performance:
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: ${{ github.event_name == 'pull_request' && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Skipped (analyzer code unchanged)
+        if: needs.changes.outputs.perf == 'false'
+        run: echo "Nothing that affects analyzer speed changed."
+
       - uses: actions/checkout@v7
+        if: needs.changes.outputs.perf != 'false'
         with:
           fetch-depth: 0
 
       - uses: actions/setup-dotnet@v6
+        if: needs.changes.outputs.perf != 'false'
         with:
           dotnet-version: 10.0.x
 
       - name: Compare analyzer speed with the base branch
+        if: needs.changes.outputs.perf != 'false'
         shell: pwsh
         run: |
           $env:StyleBroSelf = 'none'

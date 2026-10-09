@@ -39,6 +39,51 @@ public class CommentTextTests
         }
         """);
 
+    // Fonts: removing the empty comment between two blank lines left two blank lines in a row (BRO1517).
+    [Fact]
+    public Task EmptyCommentsBetweenBlankLines_TakeTheBlankLinesBelowAlong() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M()
+            {
+                // The number of glyphs.
+
+                {|BRO1120://|}
+                //
+
+                // The format.
+                int a = 1;
+
+                {|BRO1120://|}
+                int b = a;
+                {|BRO1120://|}
+
+                int c = b; {|BRO1120://|}
+
+                return c;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M()
+            {
+                // The number of glyphs.
+
+                // The format.
+                int a = 1;
+
+                int b = a;
+
+                int c = b;
+
+                return c;
+            }
+        }
+        """);
+
     [Fact]
     public Task EmptyComments_AtTheEndsOfAGroup_AreRemoved() => VerifyFixAsync(
         """
