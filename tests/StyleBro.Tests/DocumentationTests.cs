@@ -432,6 +432,52 @@ public class DocumentationTests
         }
         """);
 
+    // Ocelot's FileAggregateRoute: a documented property is set apart from the property below it too (BRO1505), so the
+    // result doesn't depend on whether BRO1601 runs before BRO1001's sort.
+    [Fact]
+    public Task InheritDoc_OnAdjacentProperties_SeparatesThem() => VerifyFixAsync(
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets the priority.</summary>
+            int Priority { get; }
+
+            /// <summary>Gets the host.</summary>
+            string Host { get; }
+        }
+
+        public class Route : IRoute
+        {
+            public string Name { get; set; }
+            public int {|BRO1601:Priority|} { get; set; }
+            public string {|BRO1601:Host|} { get; set; }
+            public string Path { get; set; }
+        }
+        """,
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets the priority.</summary>
+            int Priority { get; }
+
+            /// <summary>Gets the host.</summary>
+            string Host { get; }
+        }
+
+        public class Route : IRoute
+        {
+            public string Name { get; set; }
+
+            /// <inheritdoc/>
+            public int Priority { get; set; }
+
+            /// <inheritdoc/>
+            public string Host { get; set; }
+
+            public string Path { get; set; }
+        }
+        """);
+
     // vs-threading's Types.cs: StyleCop's SA1629 passes over elements it doesn't know, and checks the text before them.
     [Fact]
     public Task UnknownElements_ArePassedOver() => VerifyFixAsync(

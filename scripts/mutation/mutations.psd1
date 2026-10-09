@@ -272,8 +272,8 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'member.AttributeLists.Count > 0 ? member.AttributeLists.Last().FullSpan.End : member.SpanStart'; Replace = 'member.SpanStart'; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'; Find = 'return Layout.ElementSeparation.NeedsBlankLine(previous, current, previous.SyntaxTree.GetText(), autoAccessorLines, allowAdjacentSingleLine);'; Replace = 'return !(previous is FieldDeclarationSyntax && current is FieldDeclarationSyntax);'; Tests = 'FixOrderTests' }
         # Following StyleCop master (owner's decision 2026-10-04): single-line properties together, no inheritdoc on explicit implementations
-        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),'; Replace = ''; Tests = 'ElementSeparationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = 'IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines),'; Replace = 'IsMultiLineProperty(property, text, autoAccessorLines),'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => IsMultiLineProperty(property, text, autoAccessorLines) || IsMultiLineProperty(next, text, autoAccessorLines)'; Replace = '(PropertyDeclarationSyntax property, PropertyDeclarationSyntax next) => true'; Tests = 'ElementSeparationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '|| IsMultiLineProperty(next, text, autoAccessorLines)'; Replace = ''; Tests = 'ElementSeparationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '!IsExplicitImplementation(s) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = 'if (blankLineBefore && indentation.Trim().Length == 0'; Replace = 'if (false && indentation.Trim().Length == 0'; Tests = 'DocumentationTests' }
 
@@ -285,7 +285,7 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '? string.Equals(value.Trim(), "true", System.StringComparison.OrdinalIgnoreCase)'; Replace = '? true'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = ': tree.Options.DocumentationMode >= DocumentationMode.Parse;'; Replace = ': true;'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationComments.cs'; Find = '&& value.Trim().Length > 0'; Replace = ''; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = "end < text.Length && text[end] == '<' ? end : position"; Replace = 'position'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = "end + 1 < text.Length && text[end] == '<' && text[end + 1] == '/' ? end : position"; Replace = 'position'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = 'if (old.Length == 0 && (StartsWithAnyWord(rest, Conditions) || StartsWithAnyWord(rest, Verbs)))'; Replace = 'if (false)'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = ' || StartsWithAnyWord(rest, Verbs)))'; Replace = '))'; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = 'if (old.Length == 0 && !char.IsLower(rest[0]) && !StartsWithAnyWord(rest, Articles))'; Replace = 'if (false)'; Tests = 'DocumentationTests' }
@@ -659,40 +659,48 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += 1 + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ? [] : joins;'; Replace = 'return length >= Indentation.GetMaxLineLength(options) ? [] : joins;'; Tests = 'ConstraintPlacementTests' }
         # Names nameof(...) produces keep them (Ocelot)
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = '&& !names.Nameof.Contains(oldName)'; Replace = ''; Tests = 'CamelCaseNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'access.Name == name ? (ExpressionSyntax)access : name'; Replace = 'name'; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| CamelCaseNames.IsNameofName(token)'; Replace = ''; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'GetStringLiteralsAsync(solution, cancellationToken, withNameof: true)'; Replace = 'GetStringLiteralsAsync(solution, cancellationToken)'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = '&& !names.Nameof.Contains(oldName)'; Replace = ''; Tests = 'CamelCaseNamingTests.NamesInNameof_KeepTheirName' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'access.Name == name ? (ExpressionSyntax)access : name'; Replace = 'name'; Tests = 'FieldNamingTests.NamesInNameof_KeepTheirName' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| CamelCaseNames.IsNameofName(token)'; Replace = ''; Tests = 'FieldNamingTests.NamesInNameof_KeepTheirName' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'GetStringLiteralsAsync(solution, cancellationToken, withNameof: true)'; Replace = 'GetStringLiteralsAsync(solution, cancellationToken)'; Tests = 'FieldNamingTests.NameofInAnotherType_KeepsTheName' }
         # Public API is renamed only with stylebro_rename_public_api = true
-        @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = 'value.Trim().Equals("true", StringComparison.OrdinalIgnoreCase)'; Replace = 'true'; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = '|| ns.GetNamespaceMembers().Any(IsVisible)'; Replace = ''; Tests = 'NamespaceNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = 'Accessibility.Public or Accessibility.Protected or'; Replace = 'Accessibility.Public or'; Tests = 'CamelCaseNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'; Find = '&& PublicApi.CanRename(field, options)'; Replace = ''; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| !PublicApi.CanRename(symbol, '; Replace = '|| false && !PublicApi.CanRename(symbol, '; Tests = 'PascalCaseNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = 'value.Trim().Equals("true", StringComparison.OrdinalIgnoreCase)'; Replace = 'true'; Tests = 'FieldNamingTests.PublicApi_IsLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = '|| ns.GetNamespaceMembers().Any(IsVisible)'; Replace = ''; Tests = 'NamespaceNamingTests.NamespacesOfPublicTypes_AreLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = 'Accessibility.Public or Accessibility.Protected or'; Replace = 'Accessibility.Public or'; Tests = 'CamelCaseNamingTests.PublicApiParameters_AreLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'; Find = '&& PublicApi.CanRename(field, options)'; Replace = ''; Tests = 'FieldNamingTests.PublicApi_IsLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| !PublicApi.CanRename(symbol, '; Replace = '|| false && !PublicApi.CanRename(symbol, '; Tests = 'PascalCaseNamingTests.PublicApi_IsLeftAloneByDefault' }
         @{ File = 'src/StyleBro.Analyzers/Naming/PrefixNamingAnalyzer.cs'; Find = '&& PrefixNames.GetInterfaceName(symbol.Name) is { } newName
             && PublicApi.CanRename(symbol, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))'; Replace = '&& PrefixNames.GetInterfaceName(symbol.Name) is { } newName
-            && true'; Tests = 'PrefixNamingTests' }
+            && true'; Tests = 'PrefixNamingTests.PublicApi_IsLeftAloneByDefault' }
         @{ File = 'src/StyleBro.Analyzers/Naming/PrefixNamingAnalyzer.cs'; Find = '&& !InheritsName(symbol)
             && PublicApi.CanRename(symbol, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))'; Replace = '&& !InheritsName(symbol)
-            && true'; Tests = 'PrefixNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| !PublicApi.CanRename(ns, options)'; Replace = ''; Tests = 'NamespaceNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !PublicApi.CanRename(parameter, '; Replace = '|| false && !PublicApi.CanRename(parameter, '; Tests = 'CamelCaseNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if ((!renamePublicApi && PublicApi.IsVisible(parameter))'; Replace = 'if (false'; Tests = 'ParameterMatchesBaseTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '(renamePublicApi || !PublicApi.IsVisible(baseParameter))'; Replace = 'true'; Tests = 'ParameterMatchesBaseTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/TupleElementNamingAnalyzer.cs'; Find = '|| (!PublicApi.IsRenameAllowed(options) && TupleElementNames.IsInPublicSignature('; Replace = '|| (false && TupleElementNames.IsInPublicSignature('; Tests = 'TupleElementNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'; Find = '|| !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))'; Replace = '|| true))'; Tests = 'TupleElementNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if ((!renamePublicApi && symbols.Any(PublicApi.IsVisible))'; Replace = 'if (false'; Tests = 'PascalCaseNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (!renamePublicApi && PublicApi.IsVisible(current))'; Replace = ''; Tests = 'CamelCaseNamingTests' }
+            && true'; Tests = 'PrefixNamingTests.PublicApi_IsLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| !PublicApi.CanRename(ns, options)'; Replace = ''; Tests = 'NamespaceNamingTests.NamespacesOfPublicTypes_AreLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '|| !PublicApi.CanRename(parameter, '; Replace = '|| false && !PublicApi.CanRename(parameter, '; Tests = 'CamelCaseNamingTests.PublicApiParameters_AreLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = 'if ((!renamePublicApi && PublicApi.IsVisible(parameter))'; Replace = 'if (false'; Tests = 'ParameterMatchesBaseTests.PublicApi_IsLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'; Find = '(renamePublicApi || !PublicApi.IsVisible(baseParameter))'; Replace = 'true'; Tests = 'ParameterMatchesBaseTests.PublicApi_IsLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/TupleElementNamingAnalyzer.cs'; Find = '|| (!PublicApi.IsRenameAllowed(options) && TupleElementNames.IsInPublicSignature('; Replace = '|| (false && TupleElementNames.IsInPublicSignature('; Tests = 'TupleElementNamingTests.PublicSignatures_AreLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'; Find = '|| !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))'; Replace = '|| true))'; Tests = 'TupleElementNamingTests.PublicSignatures_AreLeftAloneByDefault' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if ((!renamePublicApi && symbols.Any(PublicApi.IsVisible))'; Replace = 'if (false'; Tests = 'PascalCaseNamingTests.APublicImplementation_KeepsTheName' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (!renamePublicApi && PublicApi.IsVisible(current))'; Replace = ''; Tests = 'CamelCaseNamingTests.PublicApiParameters_AreLeftAloneByDefault' }
         # BRO1603: elements StyleCop doesn't know are passed over
-        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 'if (InlineElements.Contains(name))'; Replace = 'if (true)'; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 'if (InlineElements.Contains(emptyName))'; Replace = 'if (true)'; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = "&& text[end] == '<' && text[end + 1] == '/'"; Replace = "&& text[end] == '<'"; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 'if (InlineElements.Contains(name))'; Replace = 'if (true)'; Tests = 'DocumentationTests.UnknownElements_ArePassedOver' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = 'if (InlineElements.Contains(emptyName))'; Replace = 'if (true)'; Tests = 'DocumentationTests.UnknownElements_ArePassedOver' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = "&& text[end] == '<' && text[end + 1] == '/'"; Replace = "&& text[end] == '<'"; Tests = 'DocumentationTests.UnknownElements_ArePassedOver' }
+        # A documented property is set apart (BRO1505), BRO1601 adds the blank line below (Ocelot)
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '|| HasDocumentation(property) || HasDocumentation(next),'; Replace = ','; Tests = 'FixOrderTests.InheritDoc_OnPropertiesTheSortMoves' }
+        @{ File = 'src/StyleBro.CodeFixes/Documentation/DocumentationCodeFixProvider.cs'; Find = 'if (separate && member is PropertyDeclarationSyntax property'; Replace = 'if (false && member is PropertyDeclarationSyntax property'; Tests = 'DocumentationTests.InheritDoc_OnAdjacentProperties_SeparatesThem' }
+        @{ File = 'src/StyleBro.CodeFixes/Documentation/DocumentationCodeFixProvider.cs'; Find = '&& !(blankLineBefore && property.Parent is TypeDeclarationSyntax type && documented.Contains('; Replace = '&& !(false && property.Parent is TypeDeclarationSyntax type && documented.Contains('; Tests = 'DocumentationTests.InheritDoc_OnAdjacentProperties_SeparatesThem' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/ElementSeparation.cs'; Find = '|| HasBlankLineBetween(property, next, text))'; Replace = ')'; Tests = 'DocumentationTests.InheritDoc_OnAdjacentProperties_SeparatesThem' }
         # A comment below code (BRO1504, BRO1506, BRO1001; eShop)
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !IsCommentBelowCode(comment, text);'; Replace = ';'; Tests = 'BlankLineAfterTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/TrailingBlankLines.cs'; Find = '|| BlankLines.IsCommentBelowCode(comment, text))'; Replace = ')'; Tests = 'TrailingBlankLinesTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& previous.IsKind(SyntaxKind.SemicolonToken)'; Replace = ''; Tests = 'TrailingBlankLinesTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& IsBlank(text, text.Lines[below].Span);'; Replace = ';'; Tests = 'BlankLineAfterTests' }
-        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = 'while (last + 1 < text.Lines.Count && IsComment(last + 1))'; Replace = 'while (false)'; Tests = 'BlankLineAfterTests' }
-        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'members[i].GetLeadingTrivia().Any(t => Layout.BlankLines.IsCommentBelowCode(t, members[i].SyntaxTree.GetText())) && Moves(position, i)'; Replace = 'false'; Tests = 'MemberOrderingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !IsCommentBelowCode(comment, text);'; Replace = ';'; Tests = 'BlankLineAfterTests.ACommentBelowCode_FollowedByABlankLine_IsNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/TrailingBlankLines.cs'; Find = '|| BlankLines.IsCommentBelowCode(comment, text))'; Replace = ')'; Tests = 'TrailingBlankLinesTests.ACommentBelowCode_KeepsTheBlankLineBelowIt' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& previous.IsKind(SyntaxKind.SemicolonToken)'; Replace = ''; Tests = 'TrailingBlankLinesTests.ACommentBelowCode_KeepsTheBlankLineBelowIt' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !comment.Token.IsKind(SyntaxKind.CloseBraceToken);'; Replace = ';'; Tests = 'TrailingBlankLinesTests.ACommentBelowCode_KeepsTheBlankLineBelowIt' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& (previous.Parent is StatementSyntax || previous.Parent is MemberDeclarationSyntax and not BaseNamespaceDeclarationSyntax)'; Replace = ''; Tests = 'TrailingBlankLinesTests.BlankLinesAfterComments_AreRemoved' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '(content.StartsWith("#region", StringComparison.Ordinal) || content.StartsWith("#endregion", StringComparison.Ordinal))'; Replace = 'false'; Tests = 'FixOrderTests.Regions_ACommentAfterCodeAboveTheRemovedLines' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& IsBlank(text, text.Lines[below].Span)'; Replace = ''; Tests = 'BlankLineAfterTests.ACommentBelowCode_FollowedByABlankLine_IsNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = 'while (last + 1 < text.Lines.Count && IsComment(last + 1))'; Replace = 'while (false)'; Tests = 'BlankLineAfterTests.ACommentBelowCode_FollowedByABlankLine_IsNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/GroupComments.cs'; Find = 'members[i].GetLeadingTrivia().Any(t => Layout.BlankLines.IsCommentBelowCode(t, members[i].SyntaxTree.GetText())) && Moves(position, i)'; Replace = 'false'; Tests = 'MemberOrderingTests.ACommentBelowAMember_KeepsTheContainerAsItIs' }
     )
 }

@@ -1615,12 +1615,20 @@ public class FixOrderTests
 
             public static int Key(string id) => prefix + id.Length;
             private int x;
+
+            public void M()
+            {
+                x++;
+                // last in the block
+
+            }
         }
         """,
         "BRO1001",
         "BRO1504",
         "BRO1505",
-        "BRO1506");
+        "BRO1506",
+        "BRO1518");
 
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);

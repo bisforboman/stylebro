@@ -188,10 +188,12 @@ public class BlankLineRunsTests
                 }
                 // BRO1504 asks for the blank line above this comment.
                 a = true;
+
                 // BRO1506: no blank line below a comment.
 
 
                 a = false;
+
                 // BRO1506 also covers the blank line before '}' below a comment.
 
             }

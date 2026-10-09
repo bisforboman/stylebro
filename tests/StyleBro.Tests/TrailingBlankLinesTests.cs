@@ -128,6 +128,13 @@ public class TrailingBlankLinesTests
                 M();
             }
 
+            void P()
+            {
+                P();
+                {|BRO1506:// last in the block: BRO1518 would remove the blank line anyway|}
+
+            }
+
             void N()
             {
             }
@@ -151,6 +158,12 @@ public class TrailingBlankLinesTests
 
                 // a comment above code
                 M();
+            }
+
+            void P()
+            {
+                P();
+                // last in the block: BRO1518 would remove the blank line anyway
             }
 
             void N()

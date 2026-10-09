@@ -183,7 +183,8 @@ internal static class BlankLines
             below++;
         }
 
-        // The ';' before the comment, on the line right above the run; and a blank line (not the end of the file) below it.
+        // The ';' before the comment, on the line right above the run; and a blank line (not the end of the file) below it,
+        // which isn't one before a '}' (BRO1518 removes those, and the comment would then want BRO1504's line above it).
         var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
         return first > 0
             && previous.IsKind(SyntaxKind.SemicolonToken)
@@ -191,7 +192,8 @@ internal static class BlankLines
             && text.Lines.GetLineFromPosition(previous.Span.End).LineNumber == first - 1
             && below < text.Lines.Count
             && text.Lines[below].End < text.Length
-            && IsBlank(text, text.Lines[below].Span);
+            && IsBlank(text, text.Lines[below].Span)
+            && !comment.Token.IsKind(SyntaxKind.CloseBraceToken);
     }
 
     /// <summary>Deletes the given lines. Duplicates are ignored, so Fix All can pass overlapping sets.</summary>
