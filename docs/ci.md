@@ -8,7 +8,8 @@ Two checks keep a repository clean. They overlap on purpose: the build catches w
 2. **`dotnet format --verify-no-changes`** fails (exit code 2) when running `dotnet format` would change any file. It
    also covers whitespace formatting, which isn't a build warning.
 
-Fixing a failure is the same everywhere: run `dotnet format` locally and commit the result.
+Fixing a failure is the same everywhere: run `stylebro-migrate format` (or `dotnet format`, see
+[the notes](#notes) on other analyzers) locally and commit the result.
 
 ## Setup
 
@@ -87,6 +88,13 @@ steps:
 - **`--no-restore`** after a build saves a second restore; `dotnet format` needs a restored solution either way.
 - **`--report`** writes `format-report.json`: every file and line `dotnet format` would change and why (rule id or
   `WHITESPACE`). Uploading it on failure shows what to fix without rerunning anything.
+- **Other analyzers and compiler fixes.** Plain `dotnet format --verify-no-changes` also fails on every other analyzer
+  package's fixable warnings and on compiler fixes (CS8618's `required`), and locally plain `dotnet format` applies
+  them, which can change behavior or break the build. To check and fix only StyleBro's rules and the built-in rules
+  `stylebro-migrate init` turns on, name them: `dotnet format --diagnostics BRO1001 BRO1505 ... IDE0055 IDE0036
+  --verify-no-changes`. `stylebro-migrate format` (the .NET tool StyleBro.Migrate) builds that list for you and is what
+  [getting-started.md](getting-started.md#3-run-stylebro-migrate-format) recommends locally; in CI it needs
+  `dotnet tool install --global StyleBro.Migrate --prerelease` first.
 - **Only some checks?** `dotnet format whitespace`, `dotnet format style` (built-in .NET rules) and
   `dotnet format analyzers` (StyleBro and other analyzer packages) check one part each, with the same options.
 - **A large existing codebase:** commit a [baseline](baseline.md) so CI fails only on new violations. A baseline can't

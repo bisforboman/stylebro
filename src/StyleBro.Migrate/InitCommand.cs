@@ -12,7 +12,9 @@ namespace StyleBro.Migrate;
 /// on into the repository's root .editorconfig. They can't live in the preset: 'dotnet format' ignores rule severities in a
 /// package's global config (the build doesn't), so only .editorconfig makes it fix them. Written between the same markers
 /// as 'stylebro-migrate --write', which replaces the block with settings matched to a StyleCop setup. --modernize adds a
-/// second block with the SDK's modernization rules (<see cref="Modernize"/>).
+/// second block with the SDK's modernization rules (<see cref="Modernize"/>). It looks at the repository first: a clear
+/// '_' majority among private fields is kept (<see cref="FieldStyle"/>), and a repository with a StyleCop setup is sent
+/// to 'stylebro-migrate --write' instead (owner's decision 2026-10-09, docs/decisions.md).
 /// </summary>
 internal static class InitCommand
 {
@@ -30,6 +32,9 @@ internal static class InitCommand
     /// <summary>The end marker of the --modernize block.</summary>
     public const string ModernizeEnd = "# END stylebro-modernize";
 
+    /// <summary>The share of private fields starting with '_' from which init keeps the underscore (owner's decision 2026-10-09).</summary>
+    public const double UnderscoreShare = 0.75;
+
     public static int Run(string[] args)
     {
         var write = args.Contains("--write");
@@ -40,10 +45,25 @@ internal static class InitCommand
             return 1;
         }
 
-        var multiTargeted = MultiTargetedProjects(root).ToList();
-        var block = Block();
-        var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
         var path = Path.Combine(root, ".editorconfig");
+        var existing = File.Exists(path) ? File.ReadAllText(path) : null;
+        var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
+
+        // A StyleCop repository gets StyleBro's rules only where StyleCop enforced them: that's the migration, not init.
+        if (!migrated && StyleCopSetup.Evidence(root) is { Count: > 0 } evidence)
+        {
+            Console.WriteLine("This repository has a StyleCop setup:");
+            evidence.ForEach(e => Console.WriteLine("  " + e));
+            Console.WriteLine("Run 'stylebro-migrate --write' instead (a dry run without --write first): it turns StyleBro's rules on only where StyleCop");
+            Console.WriteLine("enforced them, so code StyleCop was happy with stays as it is. 'init' would apply StyleBro's preset to all of it.");
+            return 1;
+        }
+
+        var multiTargeted = MultiTargetedProjects(root).ToList();
+        var own = Migration.OwnKeys(root);
+        var fieldStyle = migrated ? null : FieldStyle(root, own);
+        var block = Block(fieldStyle, plainHeader: own.Contains("file_header_template"));
+        var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
         if (multiTargeted.Count > 0)
         {
             Console.WriteLine($"{multiTargeted.Count} project(s) target several frameworks ({List(multiTargeted)}).");
@@ -59,9 +79,8 @@ internal static class InitCommand
             return 0;
         }
 
-        var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         var text = existing ?? "root = true\n";
-        if (existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init"))
+        if (migrated)
         {
             Console.WriteLine(".editorconfig already has settings from 'stylebro-migrate --write'; they include the built-in rules.");
         }
@@ -83,22 +102,51 @@ internal static class InitCommand
             Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
         }
 
-        Console.WriteLine($"Next: run '{FormatCommandName(multiTargeted.Count > 0)}'.");
+        Console.WriteLine(Program.FormatHint);
         return 0;
     }
 
-    /// <summary>The command that formats the repository: 'stylebro-migrate format' when it has multi-targeted projects.</summary>
-    public static string FormatCommandName(string root) => FormatCommandName(MultiTargetedProjects(root).Any());
-
-    /// <summary>The command that formats a repository with or without multi-targeted projects.</summary>
-    public static string FormatCommandName(bool multiTargeted) => multiTargeted ? "stylebro-migrate format" : "dotnet format";
-
-    /// <summary>The block written into .editorconfig, between the stylebro-migrate markers.</summary>
-    public static string Block()
+    /// <summary>
+    /// The block written into .editorconfig, between the stylebro-migrate markers. <paramref name="fieldStyle"/>: the
+    /// private field style the code shows, when it isn't the default; <paramref name="plainHeader"/>: the repository has
+    /// IDE0073's file_header_template, so BRO1615's XML header is off (each would add its header above the other's).
+    /// </summary>
+    public static string Block(string? fieldStyle = null, bool plainHeader = false)
     {
         var template = Template().Replace("\r\n", "\n").TrimEnd('\n');
+        if (fieldStyle is not null)
+        {
+            template += $"\n# Most private fields here start with '_': BRO1303 keeps it\n{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = {fieldStyle}";
+        }
+
+        if (plainHeader)
+        {
+            template += $"\n# The file header is IDE0073's (file_header_template); BRO1615's XML header would add a second one\ndotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none";
+        }
+
         return Migration.BeginMarker + " (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)\n"
             + template + "\n" + Migration.EndMarker + "\n";
+    }
+
+    /// <summary>
+    /// '_camelCase' when at least <see cref="UnderscoreShare"/> of the repository's private fields start with '_', else
+    /// null (StyleBro's default, camelCase). Also null when the repository sets the style or an SDK naming rule itself.
+    /// </summary>
+    public static string? FieldStyle(string root, ISet<string> ownKeys)
+    {
+        if (ownKeys.Contains(StyleBro.Analyzers.Naming.FieldNames.StyleKey) || ownKeys.Any(k => k.StartsWith("dotnet_naming_rule.", StringComparison.OrdinalIgnoreCase)))
+        {
+            return null;
+        }
+
+        var (underscore, plain) = Migration.CountPrivateFields(root);
+        var style = underscore > 0 && underscore >= UnderscoreShare * (underscore + plain) ? "_camelCase" : null;
+        if (underscore + plain > 0)
+        {
+            Console.WriteLine($"Private fields: {underscore} named '_field', {plain} named 'field'; BRO1303 uses '{style ?? "camelCase"}'.");
+        }
+
+        return style;
     }
 
     /// <summary>

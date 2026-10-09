@@ -862,15 +862,11 @@ public sealed class MigrationTests : IDisposable
     }
 
     [Fact]
-    public void NextStep_NamesStyleBroFormat_WhenMultiTargeted()
+    public void NextStep_NamesStyleBroFormat()
     {
-        Assert.Contains("run 'dotnet format'", Program.NextStep(root));
-        Assert.Equal("dotnet format", InitCommand.FormatCommandName(root));
-
-        Write("src/Lib/Lib.csproj", "<Project><PropertyGroup><TargetFrameworks>net8.0;net48</TargetFrameworks></PropertyGroup></Project>");
-
-        Assert.Contains("run 'stylebro-migrate format'", Program.NextStep(root));
-        Assert.Equal("stylebro-migrate format", InitCommand.FormatCommandName(root));
+        // Single- or multi-targeted: plain 'dotnet format' also applies other analyzers' fixes (owner's decision 2026-10-09).
+        Assert.Contains("run 'stylebro-migrate format'", Program.NextStep);
+        Assert.Contains(Program.FormatHint, Capture(() => InitCommand.Run(new[] { root, "--write" })));
     }
 
     [Fact]
@@ -901,6 +897,247 @@ public sealed class MigrationTests : IDisposable
         var lines = new[] { "Warnings were encountered while loading the workspace.", "A.cs(1,1): warning BRO1001", string.Empty, "Warnings were encountered while loading the workspace.", "A.cs(1,1): warning BRO1001", string.Empty };
 
         Assert.Equal(new[] { lines[0], lines[1], string.Empty, string.Empty }, lines.Where(l => FormatCommand.IsNewLine(shown, l)));
+    }
+
+    [Fact]
+    public void SettingsInASubmodule_AreRead_WhenTheRepositoryPointsThere()
+    {
+        // SixLabors.Fonts: the StyleCop setup lives in a shared-infrastructure submodule that the repository imports.
+        Write("shared/.git", "gitdir: ../.git/modules/shared\n");
+        Write("shared/base.ruleset", """
+            <RuleSet Name="base" ToolsVersion="17.0">
+              <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+                <Rule Id="SA1413" Action="None" />
+                <Rule Id="SA1101" Action="Warning" />
+              </Rules>
+            </RuleSet>
+            """);
+        Write("shared/stylecop.json", """{ "settings": { "orderingRules": { "elementOrder": ["kind"] }, "documentationRules": { "xmlHeader": false } } }""");
+        Write("shared/props/Global.props", """
+            <Project>
+              <PropertyGroup><GenerateDocumentationFile>true</GenerateDocumentationFile></PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
+                <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" />
+              </ItemGroup>
+            </Project>
+            """);
+        Write("Directory.Build.props", """<Project><Import Project="$(MSBuildThisFileDirectory)shared\props\Global.props" /></Project>""");
+        Write("src/App.ruleset", """
+            <RuleSet Name="app" ToolsVersion="17.0">
+              <Include Path="..\shared\base.ruleset" Action="Default" />
+              <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+                <Rule Id="SA1101" Action="None" />
+              </Rules>
+            </RuleSet>
+            """);
+
+        // A bulk severity doesn't override a ruleset's own entry for a rule (the compiler doesn't either).
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_analyzer_diagnostic.severity = warning\n");
+
+        var setup = StyleCopSetup.Read(root);
+        var lines = Migration.Generate(setup, root).Lines;
+
+        Assert.False(setup.IsOn("SA1413"));  // from the included ruleset
+        Assert.False(setup.IsOn("SA1101"));  // the including ruleset's own entry wins
+        Assert.True(setup.DocumentationParsed);
+        Assert.Equal("1.2.0-beta.556", setup.Version);
+        Assert.Contains(Path.Combine("shared", "stylecop.json"), setup.Sources);
+        Assert.Contains("dotnet_diagnostic.BRO1401.severity = none", lines);
+        Assert.Contains("stylebro_member_constants_first = false", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.IDE0073.severity = warning", lines);
+        Assert.Contains(StyleCopSetup.Evidence(root), e => e.Contains("stylecop.json", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ARulesetAFoldersPropsSelects_IsAScope()
+    {
+        // Tests with ordering off: production code keeps BRO1001, the tests folder gets it off.
+        Write("tests/tests.ruleset", """
+            <RuleSet Name="t" ToolsVersion="17.0">
+              <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+                <Rule Id="SA1201" Action="None" />
+              </Rules>
+            </RuleSet>
+            """);
+        Write("tests/Directory.Build.props", """<Project><PropertyGroup><CodeAnalysisRuleSet Condition="'$(CodeAnalysisRuleSet)' == ''">$(MSBuildThisFileDirectory)tests.ruleset</CodeAnalysisRuleSet></PropertyGroup></Project>""");
+        Write("tests/App.Tests/App.Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+
+        var setup = StyleCopSetup.Read(root);
+        var plan = Migration.Plan(setup, root, Migration.Generate(setup, root));
+
+        Assert.True(setup.IsOn("SA1201"));
+        Assert.Contains("dotnet_diagnostic.BRO1001.severity = warning", plan[".editorconfig"][0].Lines);
+        var (section, lines) = Assert.Single(plan[Path.Combine("tests", ".editorconfig")]);
+        Assert.Equal("*.cs", section);
+        Assert.Equal(["dotnet_diagnostic.BRO1001.severity = none"], lines);
+    }
+
+    [Fact]
+    public void XmlHeader_WithoutACompanyName_LeavesBro1615Off_AndIde0073IsNeverOnWithIt()
+    {
+        // StyleCop's default company is 'PlaceholderCompany': a header nobody wants, so BRO1615 isn't turned on for it.
+        var noCompany = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = none", noCompany.Lines);
+        Assert.DoesNotContain(noCompany.Lines, l => l.Contains("PlaceholderCompany", StringComparison.Ordinal));
+        Assert.Contains("dotnet_diagnostic.IDE0073.severity = none", noCompany.Lines);
+        Assert.Contains(noCompany.Reasons.Values, r => r.Contains("companyName", StringComparison.Ordinal));
+
+        Write("stylecop.json", """{ "settings": { "documentationRules": { "companyName": "Contoso" } } }""");
+        var withCompany = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = warning", withCompany);
+        Assert.Contains("dotnet_diagnostic.IDE0073.severity = none", withCompany);
+    }
+
+    [Fact]
+    public void Init_WithTheRepositorysOwnPlainHeader_TurnsBro1615Off()
+    {
+        Write(".editorconfig", "root = true\n[*.cs]\nfile_header_template = Copyright (c) Contoso.\n");
+
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+
+        Assert.Contains("dotnet_diagnostic.BRO1615.severity = none", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+        Assert.DoesNotContain("BRO1615", InitCommand.Block());
+    }
+
+    [Fact]
+    public void Format_ExcludesSubmodules_AndFixesOnlyStyleBroAndTheBuiltInRulesByDefault()
+    {
+        Write("ext/Lib/.git", "gitdir: ../../.git/modules/ext/Lib\n");
+        Write("ext/Lib/Code.cs", "class C { }\n");
+        Write("tools/Vendored/.git/HEAD", "ref: refs/heads/main\n");
+        Write("src/App/App.cs", "class D { }\n");
+
+        Assert.Equal(new[] { "ext/Lib/", "tools/Vendored/" }, StyleCopSetup.NestedRepositories(root));
+
+        var ids = FormatCommand.Diagnostics(root);
+        Assert.Contains("BRO1001", ids);
+        Assert.Contains("BRO1520", ids);
+        Assert.Contains("IDE0055", ids);    // whitespace formatting's rule, from init's template
+        Assert.Contains("IDE0036", ids);
+        Assert.Contains("IDE0090", ids);    // --modernize
+        Assert.DoesNotContain(ids, id => id.StartsWith("CS", StringComparison.Ordinal) || id.StartsWith("S1", StringComparison.Ordinal) || id == "IDE1006");
+
+        // An SDK rule only the migration's block turns on.
+        Write(".editorconfig", "root = true\n" + Migration.Render(new[] { ("*.cs", new List<string> { "dotnet_diagnostic.IDE0009.severity = warning", "dotnet_diagnostic.IDE0003.severity = none" }) }));
+        Assert.Contains("IDE0003", FormatCommand.Diagnostics(root));
+    }
+
+    [Fact]
+    public void Init_KeepsALeadingUnderscore_WhenMostPrivateFieldsHaveIt()
+    {
+        Write("src/A.cs", "class A { private int _a; private int _b; private readonly string _c; private int d; }");
+        Write("src/Migrations/20240101_Init.cs", "class M { private int x; private int y; private int z; private int w; }");
+        Write("src/Form.Designer.cs", "class F { private int button1; private int button2; }");
+
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        Assert.Contains("stylebro_private_field_naming = _camelCase", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+
+        // Below three quarters: StyleBro's default (camelCase), nothing written.
+        Write("src/B.cs", "class B { private int e; }");
+        File.Delete(Path.Combine(root, ".editorconfig"));
+        Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
+        Assert.DoesNotContain("stylebro_private_field_naming", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+    }
+
+    [Fact]
+    public void Init_StopsInAStyleCopRepository_AndPointsToTheMigration()
+    {
+        // Spectre.Console: no stylecop.json, but StyleCop rules turned off in .editorconfig.
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SA1309.severity = none\n# SA1101 is fine\n");
+        var before = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+
+        var output = Capture(() => Assert.Equal(1, InitCommand.Run(new[] { root, "--write" })));
+
+        Assert.Equal(before, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+        Assert.Contains(".editorconfig (StyleCop rule severities)", output, StringComparison.Ordinal);
+        Assert.Contains("stylebro-migrate --write", output, StringComparison.Ordinal);
+
+        File.Delete(Path.Combine(root, ".editorconfig"));
+        Write("Directory.Packages.props", "<Project><ItemGroup><PackageVersion Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" /></ItemGroup></Project>");
+        Assert.Equal(new[] { "Directory.Packages.props (StyleCop.Analyzers package)" }, StyleCopSetup.Evidence(root));
+
+        File.Delete(Path.Combine(root, "Directory.Packages.props"));
+        Write("Code.cs", "// SA1101\n");
+        Assert.Empty(StyleCopSetup.Evidence(root));
+    }
+
+    [Fact]
+    public void EveryRuleTheMigrationTurnsOff_IsWrittenOffByItsId()
+    {
+        // 'dotnet_analyzer_diagnostic.severity = warning' (SixLabors) turns on every rule without its own entry, also
+        // StyleBro's off-by-default ones: the block names each rule, so a bulk severity can't reach them.
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_analyzer_diagnostic.severity = warning\n");
+
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+
+        Assert.All(Migration.StyleBroRules(), r => Assert.Single(lines, l => l.StartsWith($"dotnet_diagnostic.{r.Id}.severity = ", StringComparison.Ordinal)));
+        Assert.Contains("dotnet_diagnostic.BRO1310.severity = none", lines);  // off by default (SA1305 too)
+        Assert.Contains("dotnet_diagnostic.BRO1520.severity = none", lines);  // beyond StyleCop
+        Assert.Contains("dotnet_diagnostic.BRO1135.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1525.severity = none", lines);
+    }
+
+    [Fact]
+    public void ABuildThatCopiesAnEditorConfig_GetsANote()
+    {
+        Write("Directory.Build.targets", """<Project><ItemGroup><ConfigFilesToCopy Include="$(MSBuildThisFileDirectory)shared\.editorconfig" /></ItemGroup></Project>""");
+
+        Assert.Contains(Migration.Generate(StyleCopSetup.Read(root), root).Notes, n => n.StartsWith("Directory.Build.targets copies an .editorconfig", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("--help")]
+    [InlineData("-h")]
+    [InlineData("help")]
+    public void Help_PrintsTheUsageOfEveryCommand_AndChangesNothing(string option)
+    {
+        Write("stylecop.json", "{}");
+
+        var output = Capture(() => Assert.Equal(0, Program.Main(new[] { option })));
+        Assert.Equal(0, Program.Main(new[] { "init", root, "--help" }));
+
+        Assert.All(new[] { "stylebro-migrate [path] [--write]", "stylebro-migrate init", "stylebro-migrate format", "stylebro-migrate baseline" }, u => Assert.Contains(u, output, StringComparison.Ordinal));
+        Assert.Equal(new[] { "stylecop.json" }, Directory.EnumerateFileSystemEntries(root).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public void UnknownOptions_FailWithTheUsage()
+    {
+        Assert.Equal(1, Program.Main(new[] { root, "--wirte" }));
+        Assert.Equal(1, Program.Main(new[] { "init", root, "--modernise" }));
+        Assert.Equal(1, Program.Main(new[] { "baseline", root, "--projct", "x.sln" }));
+        Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
+    }
+
+    [Fact]
+    public void ThePackageReadmes_HaveOnlyAbsoluteLinks()
+    {
+        // nuget.org renders a relative link as href="": the packed READMEs link to GitHub.
+        foreach (var readme in new[] { "README.md", Path.Combine("src", "StyleBro.Migrate", "README.md") })
+        {
+            var text = File.ReadAllText(Path.Combine(RepositoryRoot(), readme));
+            Assert.DoesNotMatch(@"\]\((?!https?://)[^)]*\)|^\s*\[[^\]]+\]:\s*(?!https?://)|(?:href|src)=""(?!https?://)", text);
+        }
+    }
+
+    private static string Capture(Action action)
+    {
+        var original = Console.Out;
+        using var writer = new StringWriter();
+        Console.SetOut(writer);
+        try
+        {
+            action();
+        }
+        finally
+        {
+            Console.SetOut(original);
+        }
+
+        return writer.ToString();
     }
 
     private static Dictionary<string, string> KeyValues(IEnumerable<string> lines)

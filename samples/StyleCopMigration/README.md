@@ -57,7 +57,7 @@ stylebro-migrate samples/StyleCopMigration --write
 ```text
 Wrote the settings to .editorconfig.
 Turned the preset off in Directory.Build.props (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.
-Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'dotnet format'.
+Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.
 ```
 
 The block added to `.editorconfig` (the team's own lines above it stay). The team's changes show up as settings:
@@ -159,8 +159,9 @@ That's the point of migrating: a StyleCop-clean repository stays as it is.
 
 ## Without the migration tool
 
-For comparison: the same project with StyleBro's preset instead (`stylebro-migrate init --write`, then `dotnet
-format`) changes 3 of the 4 files, because the preset follows StyleCop's defaults, not this team's changes:
+For comparison: `stylebro-migrate init --write` refuses here (it finds `stylecop.json` and points to the migration).
+With StyleBro's preset anyway (the package without the migration's settings, then `dotnet format`), 3 of the 4 files
+change, because the preset follows StyleCop's defaults, not this team's changes:
 
 ```diff
 -    private readonly List<string> _items = new List<string>();

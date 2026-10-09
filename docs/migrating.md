@@ -14,8 +14,12 @@ stylebro-migrate path/to/repo --write   # writes them
 The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.2.0-alpha.1;
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
-Then swap the package (below) and run `dotnet format`, or `stylebro-migrate format` if any project sets several
-`<TargetFrameworks>` (`--write` ends with the one your repository needs).
+Then swap the package (below) and run `stylebro-migrate format`. It runs `dotnet format` with only StyleBro's rules
+and the built-in rules the block turns on (plus whitespace formatting), once per target framework where projects
+target several, and never inside git submodules. Plain `dotnet format` also applies every other analyzer's fixes and
+the compiler's: in one trial repository it added `required` (CS8618) and a Sonar fix removed `init;` accessors, nine
+build errors. The plain equivalent is `dotnet format --diagnostics <ids>` with every id to fix (`--diagnostics BRO1001
+BRO1505 IDE0055 IDE0036 ...`); `stylebro-migrate format --all` keeps everything.
 
 ## Swap the package
 
@@ -42,14 +46,24 @@ real output: [samples/StyleCopMigration](../samples/StyleCopMigration/README.md)
 - `*.ruleset` files, then `*.globalconfig` files, then the root `.editorconfig`'s sections for all C# files. Later
   sources win, like in the compiler: `dotnet_diagnostic.SAxxxx.severity` and
   `dotnet_analyzer_diagnostic.category-StyleCop.CSharp.*.severity` keys, and ruleset `<Rule Id="SAxxxx">` actions.
-  When several rulesets or global configs disagree (one per project type), the strictest wins, so production code
-  keeps everything StyleCop enforced there.
+  Also like in the compiler, a bulk setting (a category, or `dotnet_analyzer_diagnostic.severity` for every rule)
+  doesn't override a rule's own entry in a ruleset or another config. A ruleset's `<Include>`d rulesets count, under
+  its own entries. When several rulesets or global configs disagree (one per project type), the strictest wins, a file
+  that doesn't mention a rule counting with StyleCop's default, so production code keeps everything StyleCop enforced
+  there.
+- A ruleset that a folder's `Directory.Build.props` selects (`<CodeAnalysisRuleSet>`, itself or through what it
+  imports) applies to that folder: a `tests` folder whose ruleset turns ordering off gets BRO1001 off in
+  `tests/.editorconfig`, while the rest keeps it.
+- Settings the repository's MSBuild files point to are read wherever they are, also inside a git submodule (a shared
+  infrastructure repository): imported `.props`/`.targets` (for `GenerateDocumentationFile` and the StyleCop version),
+  the rulesets they select, and a `stylecop.json` added as `<AdditionalFiles>`. They're only read.
 - Sub-directory `.editorconfig` files and path-specific sections (like `[tests/**.cs]`) are translated in place: they
   get the settings that differ from the repository-wide ones, in the same file and section. A folder that turns every
   analyzer off (`dotnet_analyzer_diagnostic.severity = none`, common for vendored code) gets every replacing rule as
   `none`: a rule the root turns on by its id would win over the folder's bulk setting.
-- Git submodules and other nested repositories (folders with their own `.git` file or folder) are skipped: their
-  settings, code and project files belong to another repository, and nothing in them is changed. Files a project
+- Git submodules and other nested repositories (folders with their own `.git` file or folder) are otherwise skipped:
+  their settings, code and project files belong to another repository, and nothing in them is changed
+  (`stylebro-migrate format` excludes them too). Files a project
   links from a submodule are another matter: see [excluding vendored code](getting-started.md#excluding-vendored-code).
 - The StyleCop.Analyzers version in the project files: with 1.1.x, the rules added in 1.2 (SA1141, SA1142, SA1316,
   SA1414) count as off.
@@ -78,6 +92,16 @@ tool again replaces the block, so put your own settings outside it.
   StyleCop never enforced (IDE1006 off), and rename fields StyleCop was happy with.
 - **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order, IDE0065 using placement, and so
   on) get the strongest severity of the StyleCop rules they cover, with options from `stylecop.json`.
+- **Every rule by its id.** Each StyleBro rule gets its own `dotnet_diagnostic.BROxxxx.severity` line, `none` included
+  (also the rules beyond StyleCop and those off by default): a bulk `dotnet_analyzer_diagnostic.severity = warning`
+  in your `.editorconfig` would otherwise turn them on.
+- **File header.** With StyleCop's XML header and a `companyName`, [BRO1615](rules/BRO1615.md) is on and IDE0073 off;
+  with `xmlHeader: false`, IDE0073 (with `file_header_template`) and BRO1615 off. Never both: each would add its
+  header above the other's on every run. Without a `companyName` BRO1615 stays off (StyleCop's default company,
+  `PlaceholderCompany`, is nobody's real header).
+- **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every
+  build (SixLabors' shared infrastructure does). The report notes such a file: the block would be lost on the next
+  build, so put it into the copied file (or stop the copy).
 
 - **Documentation scope.** `documentExposedElements`, `documentInternalElements` and `documentPrivateElements`
   become [BRO1601](rules/BRO1601.md)'s `stylebro_document_*` settings.

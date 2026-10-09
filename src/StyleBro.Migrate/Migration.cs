@@ -96,9 +96,18 @@ internal static class Migration
                 relevant = [];
             }
 
-            // The XML header rule only stands in for StyleCop's XML header; a plain header is IDE0073's (below).
-            if (id == StyleBro.Analyzers.DiagnosticIds.FileHeader && !XmlHeader(setup))
+            // The XML header rule only stands in for StyleCop's XML header; a plain header is IDE0073's (below). Without a
+            // companyName StyleCop wanted 'PlaceholderCompany' in every header: nobody's real header, so BRO1615 stays off.
+            if (id == StyleBro.Analyzers.DiagnosticIds.FileHeader && (!XmlHeader(setup) || CompanyName(setup) is null))
             {
+                if (XmlHeader(setup))
+                {
+                    foreach (var sa in relevant.Where(setup.IsOn))
+                    {
+                        result.Reasons[sa] = "stylecop.json sets no companyName, so StyleCop wanted 'PlaceholderCompany' in every header; BRO1615 needs the real one (stylebro_file_header_company)";
+                    }
+                }
+
                 severity = Severity.None;
                 relevant = [];
             }
@@ -165,6 +174,11 @@ internal static class Migration
             lines.RemoveAll(kept.Contains);
             result.OwnKeys.UnionWith(kept.Select(KeyOf)!);
             result.Notes.Add($"Kept the repository's own settings for: {string.Join(", ", kept.Select(KeyOf))}.");
+        }
+
+        if (setup.EditorConfigCopiedBy is { } copier)
+        {
+            result.Notes.Add($"{copier} copies an .editorconfig, maybe over the root one on every build (SixLabors' shared infrastructure does): check after a build that the stylebro-migrate block is still there, else put it into the copied file.");
         }
 
         // IDE0055 on in a multi-targeted repository: plain 'dotnet format' crashes there, 'stylebro-migrate format' doesn't.
@@ -381,8 +395,10 @@ internal static class Migration
     private static bool XmlHeader(StyleCopSetup setup) =>
         setup.Setting("documentationRules", "xmlHeader") is not { ValueKind: JsonValueKind.False };
 
-    private static string Company(StyleCopSetup setup) =>
-        setup.Setting("documentationRules", "companyName")?.GetString() ?? "PlaceholderCompany";
+    private static string Company(StyleCopSetup setup) => CompanyName(setup) ?? "PlaceholderCompany";
+
+    private static string? CompanyName(StyleCopSetup setup) =>
+        setup.Setting("documentationRules", "companyName")?.GetString() is { Length: > 0 } name ? name : null;
 
     /// <summary>
     /// stylecop.json's copyrightText as an .editorconfig value: line breaks as '\n', its custom variables filled in.
@@ -626,7 +642,8 @@ internal static class Migration
             lines.Add($"dotnet_style_qualification_for_{kind} = {Bool(setup.IsOn("SA1101"))}");
         }
 
-        // File header: a plain header is IDE0073's file_header_template; the XML header is BRO1615's (above).
+        // File header: a plain header is IDE0073's file_header_template; the XML header is BRO1615's (above). Never both:
+        // each would write its header above the other's on every run. With the XML header IDE0073 is off.
         // With a plain header StyleCop's SA1633 only wants one; the text is SA1636's (checked only while SA1635 is on too,
         // line by line, trimmed). IDE0073 compares the text, so it's on only when StyleCop compared it as well. Off is
         // written too: a folder whose StyleCop rules are off must override the repository-wide 'warning'.
@@ -646,6 +663,10 @@ internal static class Migration
                     result.Reasons["SA1633"] = $"IDE0073 also checks the header's text, which StyleCop didn't here ({string.Join(", ", textOff)} off)";
                 }
             }
+        }
+        else
+        {
+            Rule("IDE0073");
         }
     }
 
@@ -692,14 +713,24 @@ internal static class Migration
         return ids;
     }
 
-    /// <summary>Private instance and static fields (not constants, not static readonly), by whether they start with '_'.</summary>
-    private static (int Underscore, int Plain) CountPrivateFields(string root)
+    /// <summary>
+    /// Private instance and static fields (not constants, not static readonly), by whether they start with '_'. Generated
+    /// code (an '&lt;auto-generated' header, *.g.cs, *.Designer.cs, EF Core's Migrations) and vendored folders don't count;
+    /// submodules are skipped anyway.
+    /// </summary>
+    internal static (int Underscore, int Plain) CountPrivateFields(string root)
     {
         int underscore = 0;
         int plain = 0;
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
         {
-            var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(file));
+            var text = File.ReadAllText(file);
+            if (IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
+            {
+                continue;
+            }
+
+            var tree = CSharpSyntaxTree.ParseText(text);
             foreach (var field in tree.GetRoot().DescendantNodes().OfType<FieldDeclarationSyntax>())
             {
                 var modifiers = field.Modifiers;
@@ -725,6 +756,19 @@ internal static class Migration
         }
 
         return (underscore, plain);
+    }
+
+    /// <summary>Whether a C# file (path relative to the root) is generated or someone else's code.</summary>
+    internal static bool IsGeneratedOrVendored(string relativePath, string text)
+    {
+        var name = Path.GetFileName(relativePath);
+        var folders = relativePath.Split('/', '\\').SkipLast(1);
+        return name.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".g.i.cs", StringComparison.OrdinalIgnoreCase)
+            || name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".generated.cs", StringComparison.OrdinalIgnoreCase)
+            || folders.Any(f => f.Equals("Migrations", StringComparison.OrdinalIgnoreCase) || f.Equals("vendor", StringComparison.OrdinalIgnoreCase)
+                || f.Equals("vendored", StringComparison.OrdinalIgnoreCase) || f.Equals("third_party", StringComparison.OrdinalIgnoreCase)
+                || f.Equals("thirdparty", StringComparison.OrdinalIgnoreCase) || f.Equals("external", StringComparison.OrdinalIgnoreCase))
+            || text.AsSpan(0, Math.Min(text.Length, 500)).Contains("<auto-generated", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string Name(Severity severity) => severity.ToString().ToLowerInvariant();

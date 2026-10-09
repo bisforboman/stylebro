@@ -19,21 +19,65 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal static class Program
 {
+    /// <summary>What 'stylebro-migrate --help' prints.</summary>
+    public const string Usage = """
+        stylebro-migrate: move a repository to StyleBro (https://github.com/bisforboman/stylebro).
+
+        Usage:
+          stylebro-migrate [path] [--write]
+              Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
+              StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
+              turns StyleBro's preset off and carries StyleCop suppressions over.
+
+          stylebro-migrate init [path] [--write] [--modernize]
+              Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
+              --modernize adds the SDK's rules for newer C# and APIs. A repository with a StyleCop setup is told to
+              use 'stylebro-migrate --write' instead.
+
+          stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]
+              'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
+              once per target framework in multi-targeted repositories, never inside git submodules. --all also applies
+              every other analyzer's and compiler fix. Other options pass through (--verify-no-changes, --severity warn).
+
+          stylebro-migrate baseline [path] [--project <solution or project>]
+              Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
+
+          stylebro-migrate help | --help | -h
+              This text.
+        """;
+
     public static int Main(string[] args)
     {
-        if (args.FirstOrDefault() == "baseline")
+        if (args.FirstOrDefault() == "help" || args.Any(a => a is "--help" or "-h" or "-?"))
         {
-            return BaselineCommand.Run(args.Skip(1).ToArray());
+            Console.WriteLine(Usage);
+            return 0;
         }
 
-        if (args.FirstOrDefault() == "init")
+        // 'format' passes unknown options on to 'dotnet format'.
+        var (command, known) = args.FirstOrDefault() switch
         {
-            return InitCommand.Run(args.Skip(1).ToArray());
+            "baseline" => ("baseline", new[] { "--project" }),
+            "init" => ("init", new[] { "--write", "--modernize" }),
+            "format" => ("format", null),
+            _ => (null, new[] { "--write" }),
+        };
+        var options = args.Skip(command is null ? 0 : 1).ToArray();
+        if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a)) is { } unknown)
+        {
+            Console.Error.WriteLine($"Unknown option: {unknown}");
+            Console.Error.WriteLine(Usage);
+            return 1;
         }
 
-        if (args.FirstOrDefault() == "format")
+        switch (command)
         {
-            return FormatCommand.Run(args.Skip(1).ToArray());
+            case "baseline":
+                return BaselineCommand.Run(options);
+            case "init":
+                return InitCommand.Run(options);
+            case "format":
+                return FormatCommand.Run(options);
         }
 
         var write = args.Contains("--write");
@@ -100,14 +144,16 @@ internal static class Program
         }
 
         Console.WriteLine(write
-            ? NextStep(root)
+            ? NextStep
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
         return 0;
     }
 
-    /// <summary>What to do after --write: swap the packages and format (with 'stylebro-migrate format' when multi-targeted).</summary>
-    internal static string NextStep(string root) =>
-        $"Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run '{InitCommand.FormatCommandName(root)}'.";
+    /// <summary>How to format after init or --write: 'stylebro-migrate format', not plain 'dotnet format'.</summary>
+    internal const string FormatHint = "Next: run 'stylebro-migrate format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
+
+    /// <summary>What to do after --write: swap the packages and format.</summary>
+    internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
 
     /// <summary>docs/stylecop-mapping.md's proposal for every StyleCop rule, without Markdown.</summary>
     /// <summary>

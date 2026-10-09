@@ -2,6 +2,71 @@
 
 Design questions that came up while building StyleBro, the choices considered, and what was decided. Newest first.
 
+## What `stylebro-migrate format` fixes (2026-10-09)
+
+### Question
+
+A trial of 0.2.0-alpha.1 on Kavita ran plain `dotnet format` as the docs said. Besides StyleBro's fixes it applied
+every other analyzer's and the compiler's: CS8618's fix added `required`, a Sonar fix (S1144) removed `init;`
+accessors, and the repository no longer built (9 errors). Should StyleBro's tooling limit what gets fixed?
+
+```
+# Before: the docs said 'dotnet format'; 'stylebro-migrate format' passed everything through
+dotnet format                          # StyleBro + SDK + Sonar + compiler fixes
+
+# After
+stylebro-migrate format                # dotnet format --diagnostics BRO1001 ... IDE0055 IDE0036 ... (+ whitespace)
+stylebro-migrate format --all          # everything, like before
+```
+
+### Choices
+
+1. Limit `stylebro-migrate format` to StyleBro's ids and the SDK rules `init`/the migration turn on, `--all` for
+   everything; the docs warn about plain `dotnet format` and show the `--diagnostics` equivalent.
+2. Only warn in the docs; keep passing everything through.
+3. Leave it to the user.
+
+### Decision
+
+The owner: "Limit format, warn in docs" (choice 1). Whitespace formatting still runs (it isn't filtered by
+`--diagnostics`), and the docs now recommend `stylebro-migrate format` for every repository, not only multi-targeted
+ones. In the same change `format` excludes git submodules (`--exclude`), since a project can compile files from one.
+
+## What `stylebro-migrate init` does in an existing codebase (2026-10-09)
+
+### Question
+
+`init` applied the preset as is. On Kavita (309 of 309 private fields named `_x`) BRO1303 renamed 337 fields to
+`x`; on Spectre.Console, whose `.editorconfig` turns SA1309, SA1201 and SA1202 off, it applied the full BRO1001 sort
+and BRO1306. Should `init` look at the repository first?
+
+```csharp
+// Kavita before init
+private readonly ILogger<SeriesService> _logger;
+
+// After init until now (BRO1303, camelCase)
+private readonly ILogger<SeriesService> logger;
+
+// After: init wrote stylebro_private_field_naming = _camelCase, nothing renamed
+private readonly ILogger<SeriesService> _logger;
+```
+
+### Choices
+
+1. Detect and adapt: keep a clear `_` majority, and stop in a repository with a StyleCop setup, pointing to
+   `stylebro-migrate --write`.
+2. Only document both cases.
+3. Ask interactively.
+
+### Decision
+
+The owner: "Detect and adapt" (choice 1). The threshold is three quarters of the private fields (instance and
+non-readonly static; generated code, EF Core migrations, vendored folders and submodules don't count), and the
+repository's own `stylebro_private_field_naming` or `dotnet_naming_rule.*` settings win. StyleCop setup means
+`stylecop.json`, StyleCop rule ids in `.editorconfig`/rulesets/global configs, or a StyleCop.Analyzers reference, also
+in files the MSBuild files import; `init` prints what it found and exits with 1 without writing. After
+`stylebro-migrate --write` (its block present) `init` runs as before, e.g. for `--modernize`.
+
 ## More options where preferences differ (2026-10-07)
 
 ### Question
