@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
 
-/// <summary>Shared logic for BRO1136: <c>x =&gt; x</c> instead of <c>(x) =&gt; x</c>.</summary>
+/// <summary>Shared logic for BRO1136: <c>x =&gt; x</c> instead of <c>(x) =&gt; x</c> (scratch).</summary>
 internal static class LambdaParentheses
 {
     /// <summary>
