@@ -56,7 +56,7 @@ internal static class ConstraintPlacement
         var closeText = string.Empty;
         if (Line(text, previous.Span.End) != Line(text, clauses[0].WhereKeyword.SpanStart)
             && isOn(DiagnosticIds.CloseParenthesisOnLastItemLine)
-            && ParenthesisPlacement.GetMisplacedClose(previous.Parent!, text) is not null)
+            && ParenthesisPlacement.MovesCloseToLastItem(previous.Parent!, text, options, isOn))
         {
             if (!IsPlainGap(previous.GetPreviousToken(), previous))
             {

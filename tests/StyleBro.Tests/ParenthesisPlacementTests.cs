@@ -230,4 +230,258 @@ public class ParenthesisPlacementTests
             }
         }
         """);
+
+    [Fact]
+    public Task OwnLine_MovesTheClosingTokenOfASplitList() => VerifyFixAsync(
+        """
+        using System;
+
+        class Mark : Attribute
+        {
+            public Mark(int a = 0, int b = 0)
+            {
+            }
+        }
+
+        class C
+        {
+            [Mark(
+                1,
+                2{|BRO1110:)|}]
+            public int Method(
+                int a,
+                int b{|BRO1110:)|} => a;
+
+            public int One(int a) => a;
+
+            public int this[
+                int i,
+                int j{|BRO1110:]|} => i;
+
+            public void Calls(int[,] grid)
+            {
+                Method(1, 2);
+                Method(1,
+                    2{|BRO1110:)|};
+                Method(
+                    Method(
+                        1,
+                        2{|BRO1110:)|},
+                    3{|BRO1110:)|};
+                One(Method(
+                    1,
+                    2{|BRO1110:)|});
+                var x = grid[
+                    0,
+                    1{|BRO1110:]|};
+                Method(
+                    1,
+                    2
+                );
+                Method(1, 2
+                    {|BRO1110:)|};
+                Action a = () =>
+                {
+                };
+                Method(
+                    1, 2{|BRO1110:)|}; // two
+                Run(x =>
+                    x.Length > 1
+                    && x.Contains('a'){|BRO1110:)|};
+                Run(x =>
+                    x.StartsWith(
+                        "a"{|BRO1110:)|}{|BRO1110:)|};
+                Run(x => (x.Length
+                    + 1) > 2{|BRO1110:)|};
+                Run(x => (x.Length
+                    + 1 > 2){|BRO1110:)|};
+                Run(x =>
+                {
+                    return true;
+                });
+                Run(x =>
+                {
+                    return true;
+                }
+                {|BRO1110:)|};
+                Run(x => x.StartsWith(
+                    "a"{|BRO1110:)|});
+                Run(x => x.Length is 1
+                    or 2{|BRO1110:)|};
+                Run(
+                    x =>
+                    {
+                        return true;
+                    }{|BRO1110:)|};
+            }
+
+            public bool Run(Func<string, bool> check) => check("a");
+
+            public void Next
+                (int a,
+                int b{|BRO1110:)|}
+            {
+            }
+        }
+        """,
+        """
+        using System;
+
+        class Mark : Attribute
+        {
+            public Mark(int a = 0, int b = 0)
+            {
+            }
+        }
+
+        class C
+        {
+            [Mark(
+                1,
+                2
+            )]
+            public int Method(
+                int a,
+                int b
+            ) => a;
+
+            public int One(int a) => a;
+
+            public int this[
+                int i,
+                int j
+            ] => i;
+
+            public void Calls(int[,] grid)
+            {
+                Method(1, 2);
+                Method(1,
+                    2
+                );
+                Method(
+                    Method(
+                        1,
+                        2
+                    ),
+                    3
+                );
+                One(Method(
+                    1,
+                    2
+                ));
+                var x = grid[
+                    0,
+                    1
+                ];
+                Method(
+                    1,
+                    2
+                );
+                Method(1, 2);
+                Action a = () =>
+                {
+                };
+                Method(
+                    1, 2
+                ); // two
+                Run(x =>
+                    x.Length > 1
+                    && x.Contains('a')
+                );
+                Run(x =>
+                    x.StartsWith(
+                        "a"
+                    )
+                );
+                Run(x => (x.Length
+                    + 1) > 2
+                );
+                Run(x => (x.Length
+                    + 1 > 2)
+                );
+                Run(x =>
+                {
+                    return true;
+                });
+                Run(x =>
+                {
+                    return true;
+                });
+                Run(x => x.StartsWith(
+                    "a"
+                ));
+                Run(x => x.Length is 1
+                    or 2
+                );
+                Run(
+                    x =>
+                    {
+                        return true;
+                    }
+                );
+            }
+
+            public bool Run(Func<string, bool> check) => check("a");
+
+            public void Next
+                (int a,
+                int b
+                )
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_closing_parenthesis_placement = own_line\ndotnet_diagnostic.BRO1109.severity = none");
+
+    [Fact]
+    public Task OwnLine_WithBro1109_IndentsLikeTheNameLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            public void Method
+                {|BRO1109:(|}int a, int b{|BRO1110:)|}
+            {
+            }
+        }
+        """,
+        """
+        class C
+        {
+            public void Method(
+                int a, int b
+            )
+            {
+            }
+        }
+        """,
+        editorConfig: "stylebro_closing_parenthesis_placement = own_line");
+
+    [Fact]
+    public Task OwnLine_SkipsCommentsAndDirectives() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            void M(int a, int b)
+            {
+                M(
+                    1,
+                    2 /* two */);
+                System.Action<System.Action> run = null;
+                run(() =>
+                    { M(1, 2); });
+                M(
+                    1,
+        #if DEBUG
+                    2);
+        #else
+                    3);
+        #endif
+                M(
+                    1,
+                    2 // two
+                );
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line");
 }

@@ -202,6 +202,149 @@ public class FixOrderTests
         "BRO1520");
 
     [Fact]
+    public Task ClosingParenthesisOnOwnLine_Declarations() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int a, int b)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(int a,
+                int b) : base(a, b)
+            {
+            }
+
+            public T M<T>
+                (int a, int b) where T : class => default!;
+
+            public int N(
+                int a,
+                int b)
+                => a + b;
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1105",
+        "BRO1109",
+        "BRO1110",
+        "BRO1111",
+        "BRO1521");
+
+    [Fact]
+    public Task ClosingParenthesisOnOwnLine_Calls() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b) => a;
+
+            public int N() => 1;
+
+            public void Run()
+            {
+                M(1,
+                    2);
+                M(1, 2,
+                    M(3, 4));
+                N(
+                );
+                M(
+                    N(), M(5,
+                        6));
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1110",
+        "BRO1116");
+
+    [Fact]
+    public Task ClosingParenthesisOnOwnLine_CallChains() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public bool M(int[] items, int a, int b) =>
+                items
+                    .Where(i => Check(i, a,
+                        b)).Select(i => i
+                    ).Any() &&
+                    items.Contains(b);
+
+            private static bool Check(int i, int a, int b) => i > a + b;
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1523",
+        "BRO1108",
+        "BRO1110",
+        "BRO1520");
+
+    [Fact]
+    public Task ClosingParenthesisOnOwnLine_HuggedLambdas() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public bool Run(System.Func<int, bool> check) => check(1);
+
+            public void M()
+            {
+                Run(x =>
+                    (x > 1));
+                Run(x =>
+                    { if (x > 1) return true; return false; });
+                Run(x => Run(y =>
+                    y > x));
+                Run(x =>
+                {
+                    if (x > 1) return true;
+                    return false;
+                }
+                );
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1110",
+        "BRO1405",
+        "BRO1508",
+        "BRO1514");
+
+    [Fact]
+    public Task SplitListFirstItemOnSameLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b, int c) => a;
+
+            public int N(int a,
+                         int b, int c)
+                => a;
+
+            public void Run()
+            {
+                M(1, 2,
+                    M(3,
+                      4, 5), 6);
+                M
+                    (1, 2,
+                    3);
+            }
+        }
+        """,
+        "stylebro_split_list_first_item = same_line\nstylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1109",
+        "BRO1110");
+
+    [Fact]
     public Task LiteralSuffixes_ACastOfALowerCaseSuffix() => AssertConvergesInEveryOrderAsync(
         """
         public class C
@@ -1064,6 +1207,49 @@ public class FixOrderTests
         "BRO1505",
         "BRO1509",
         "BRO1521");
+
+    // The same with BRO1110's own_line mode: a split list's ')' stays on its own line and the initializer or constraints
+    // join it there; a ')' BRO1110 pulls up to the last item (a list that isn't split) moves in the join's edit.
+    [Fact]
+    public Task SameLineJoins_WithClosingParenthesisOnItsOwnLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class B
+        {
+            public B(int x)
+            {
+            }
+        }
+
+        public class C : B
+        {
+            public C(
+                int a
+            )
+                : base(a) { }
+
+            public C(int a, long b,
+                long c)
+                : base(a)
+            {
+            }
+
+            public C(long a
+                )
+                : base(1)
+            {
+            }
+
+            public static void M<T>(
+                T value)
+                where T : class { }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\nstylebro_constraint_placement = same_line\nstylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1105",
+        "BRO1109",
+        "BRO1110",
+        "BRO1111",
+        "BRO1509");
 
     [Fact]
     public Task OmittedTrailingCommas_NextToEnumExpansionAndValueLines() => AssertConvergesInEveryOrderWithConfigAsync(

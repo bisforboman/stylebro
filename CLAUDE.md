@@ -1179,6 +1179,28 @@ file (FieldNamingAnalyzer swings 35-90 ms between runs), so judge by the total a
   that every mutation entry's Find text still exists (a refactor leaves stale entries).
 - Check that a "two runs" note is really fix order: the `field` case was a guard keeping the rename back.
 
+## Added 2026-10-06/08 (release, first-run fixes, options, speed)
+
+- **0.2.0-alpha.1 released** (2026-10-06, owner's call): 124 rules shipped (AnalyzerReleases.Shipped "Release 0.2.0.1"),
+  self-check moved to it (#62; the preset now applies to StyleBro's own code: usings sorted). Released versions:
+  update the "Status" section above when the next one ships.
+- **First-run trial** (local packages, 4 new repos, docs/backlog.md): BRO1601 skips members with `#if` above them and
+  projects without doc generation (`build_property.GenerateDocumentationFile`, compiler-visible via the package
+  targets); migrate pins StyleCop's casing (`stylebro_private_static_field_naming`), skips git submodules, merges
+  `format` reports. README's rule table moved to `docs/rules/README.md` (index, Default column; a test keeps it
+  complete; New-Backlog.py reads it); contributor docs in CONTRIBUTING.md.
+- **Options** (decisions.md 2026-10-07: .editorconfig only, never a stylebro.json; defaults = StyleCop's behavior, the
+  preset sets none): eleven keys, listed in that entry and on the rule pages. Lesson from merging them: options of
+  different rules interact (#67's same_line joins asked BRO1110's default rule; with #68's own_line that pulled a `)`
+  off its own line). Ask the other rule's CONFIGURED decision (`ParenthesisPlacement.MovesCloseToLastItem`), and add a
+  FixOrderTests case with both options on.
+- **Speed round 3** (#63): `TreeWalk.Trivia` holds only comment/directive trivia; tokens and nodes in one walk; about a
+  third off the total. dotnet-trace blames whatever it samples during thread suspension: confirm with `compare`.
+- **CI time:** the mutation job takes 70-90 minutes (limit 120). Give new entries a NARROW `Tests` filter (a FixOrderTests
+  case with 7 ids is 5,040 orders, ~10 minutes); splitting the job is in the backlog.
+- **Paused** (owner, 2026-10-08: token budget): no new implementation until the owner restarts it; open ideas are the
+  "Idea" rows in docs/backlog.md.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
