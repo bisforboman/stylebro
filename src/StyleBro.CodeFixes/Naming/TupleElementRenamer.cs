@@ -19,7 +19,7 @@ namespace StyleBro.CodeFixes.Naming;
 /// <list type="number">
 /// <item>every tuple type element with the old name, except in a member that overrides or implements a library member
 /// whose own declaration has tuple names (they have to match; 'IComparer&lt;(int a, int b)&gt;.Compare' takes them from
-/// the type argument, which is renamed too);</item>
+/// the type argument, which is renamed too), and in a public signature unless stylebro_rename_public_api is true;</item>
 /// <item>every explicit name in a tuple literal ('(count: 1, ...)') converted to a renamed element (else the compiler
 /// warns that the name is ignored, CS8123); a literal that keeps its natural type isn't a tuple type the rule checks, and
 /// keeps its names;</item>
@@ -79,7 +79,9 @@ internal static class TupleElementRenamer
         {
             foreach (var element in root.DescendantNodes().OfType<TupleElementSyntax>().Where(e => e.Identifier.ValueText == oldName))
             {
-                if (!TupleElementNames.InheritsNames(element, model, cancellationToken))
+                if (!TupleElementNames.InheritsNames(element, model, cancellationToken)
+                    && (PublicApi.IsRenameAllowed(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree))
+                        || !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))
                 {
                     renamed.Add(Key(element.Identifier.GetLocation()));
                     Rename(document, element.Identifier);

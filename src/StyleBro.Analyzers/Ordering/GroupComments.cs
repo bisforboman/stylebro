@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,6 +11,9 @@ namespace StyleBro.Analyzers.Ordering;
 /// comment with its member, so it would end up above part of the group. The container is skipped when the sort would
 /// move such a member. Judged by kinds, not blank lines: other rules add and remove blank lines between members in the
 /// same 'dotnet format' run (BRO1505, BRO1506, BRO1509), so a blank-line test would decide differently on a second run.
+/// Also a comment below the previous member (<see cref="Layout.BlankLines.IsCommentBelowCode"/>, whose blank lines
+/// no rule changes): it describes that member, so the two must stay neighbours (Serilog: the sort moved a constructor
+/// between a field and the '// ReSharper restore' comment below it).
 /// </summary>
 internal static class GroupComments
 {
@@ -32,6 +36,14 @@ internal static class GroupComments
         for (var i = 0; i + 1 < members.Count; i++)
         {
             if (keys[i + 1].Kind == keys[i].Kind && Moves(position, i) && HasComment(members[i]))
+            {
+                return true;
+            }
+        }
+
+        for (var i = 1; i < members.Count; i++)
+        {
+            if (members[i].GetLeadingTrivia().Any(t => Layout.BlankLines.IsCommentBelowCode(t, members[i].SyntaxTree.GetText())) && position[i] != position[i - 1] + 1)
             {
                 return true;
             }

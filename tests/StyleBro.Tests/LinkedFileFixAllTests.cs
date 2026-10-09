@@ -140,7 +140,7 @@ public class LinkedFileFixAllTests
         // Polly: an abstract member of a multi-targeted library was renamed in the copies where it was safe, while the
         // test project (referencing one target framework) kept its override: CS0115. A rename is all or nothing.
         var path = Path.Combine(Path.GetTempPath(), "Base.cs");
-        var text = "public abstract class Base\n{\n    public abstract void run();\n}\n";
+        var text = "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"tests\")]\n\ninternal abstract class Base\n{\n    public abstract void run();\n}\n";
         var corlib = Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         var workspace = new Microsoft.CodeAnalysis.AdhocWorkspace();
         var solution = workspace.CurrentSolution;
@@ -167,7 +167,7 @@ public class LinkedFileFixAllTests
             .AddMetadataReference(tests, corlib)
             .AddProjectReference(tests, new Microsoft.CodeAnalysis.ProjectReference(projects[0]))
             .AddDocument(Microsoft.CodeAnalysis.DocumentId.CreateNewId(tests), "Derived.cs", SourceText.From(
-                "public class Derived : Base\n{\n    public override void run()\n    {\n    }\n\n    public void Run()\n    {\n    }\n}\n"));
+                "internal class Derived : Base\n{\n    public override void run()\n    {\n    }\n\n    public void Run()\n    {\n    }\n}\n"));
 
         var analyzer = new StyleBro.Analyzers.Naming.PascalCaseNamingAnalyzer();
         var fixer = new StyleBro.CodeFixes.Naming.CamelCaseNamingCodeFixProvider();

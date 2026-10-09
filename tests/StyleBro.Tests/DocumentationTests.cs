@@ -432,6 +432,104 @@ public class DocumentationTests
         }
         """);
 
+    // Ocelot's FileAggregateRoute: a documented property is set apart from the property below it too (BRO1505), so the
+    // result doesn't depend on whether BRO1601 runs before BRO1001's sort.
+    [Fact]
+    public Task InheritDoc_OnAdjacentProperties_SeparatesThem() => VerifyFixAsync(
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets the priority.</summary>
+            int Priority { get; }
+
+            /// <summary>Gets the host.</summary>
+            string Host { get; }
+
+            /// <summary>Gets the port.</summary>
+            int Port { get; }
+        }
+
+        public class Route : IRoute
+        {
+            public string Name { get; set; }
+            public int {|BRO1601:Priority|} { get; set; }
+            public string Keys { get; set; }
+            public string {|BRO1601:Host|} { get; set; }
+            public int {|BRO1601:Port|} { get; set; }
+
+            public string Path { get; set; }
+        }
+        """,
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets the priority.</summary>
+            int Priority { get; }
+
+            /// <summary>Gets the host.</summary>
+            string Host { get; }
+
+            /// <summary>Gets the port.</summary>
+            int Port { get; }
+        }
+
+        public class Route : IRoute
+        {
+            public string Name { get; set; }
+
+            /// <inheritdoc/>
+            public int Priority { get; set; }
+
+            public string Keys { get; set; }
+
+            /// <inheritdoc/>
+            public string Host { get; set; }
+
+            /// <inheritdoc/>
+            public int Port { get; set; }
+
+            public string Path { get; set; }
+        }
+        """);
+
+    // vs-threading's Types.cs: StyleCop's SA1629 passes over elements it doesn't know, and checks the text before them.
+    [Fact]
+    public Task UnknownElements_ArePassedOver() => VerifyFixAsync(
+        """
+        /// <summary>
+        /// Identifiers used to identify types.
+        /// <devremarks>For each value here, please update the unit test</devremarks>
+        /// </summary>
+        public class Types
+        {
+            /// <summary>Gets the value{|BRO1603:|} <devremarks>internal</devremarks></summary>
+            public int A { get; }
+
+            /// <summary>Gets the value{|BRO1603:|}<para/></summary>
+            public int B { get; }
+
+            /// <summary>Returns <b>true</b>{|BRO1603:|}</summary>
+            public bool C() => true;
+        }
+        """,
+        """
+        /// <summary>
+        /// Identifiers used to identify types.
+        /// <devremarks>For each value here, please update the unit test</devremarks>
+        /// </summary>
+        public class Types
+        {
+            /// <summary>Gets the value. <devremarks>internal</devremarks></summary>
+            public int A { get; }
+
+            /// <summary>Gets the value.<para/></summary>
+            public int B { get; }
+
+            /// <summary>Returns <b>true</b>.</summary>
+            public bool C() => true;
+        }
+        """);
+
     [Fact]
     public Task QuotedSentenceInATrailingCodeElement_IsNotReported() => VerifyFixAsync(
         """

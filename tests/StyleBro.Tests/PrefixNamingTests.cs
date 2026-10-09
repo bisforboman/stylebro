@@ -298,4 +298,40 @@ public class PrefixNamingTests
                 public item Value { get; set; }
             }
             """));
+
+    [Fact]
+    public Task PublicApi_IsLeftAloneByDefault() => VerifyFixAsync(
+        """
+        public interface Shape
+        {
+        }
+
+        public class Box<Item>
+        {
+            internal void Put<{|BRO1305:Value|}>(Value value)
+            {
+            }
+        }
+
+        internal interface {|BRO1304:Area|}
+        {
+        }
+        """,
+        """
+        public interface Shape
+        {
+        }
+
+        public class Box<Item>
+        {
+            internal void Put<TValue>(TValue value)
+            {
+            }
+        }
+
+        internal interface IArea
+        {
+        }
+        """,
+        "stylebro_rename_public_api = false");
 }

@@ -285,4 +285,46 @@ public class BlankLineAfterTests
         }
         """,
         "stylebro_comment_blank_line_exempt_prefixes = ReSharper, @formatter,\n");
+
+    // eShop's RedisBasketRepository: a note below a field, then a blank line, describes the field.
+    [Fact]
+    public Task ACommentBelowCode_FollowedByABlankLine_IsNotReported() => VerifyFixAsync(
+        """
+        class C
+        {
+            private static int prefix = 1;
+            // note on the prefix
+            // and more
+
+            private static int Key() => prefix;
+
+            void M()
+            {
+                var x = 1;
+                {|BRO1504:// no blank line after this one|}
+                x++;
+                {|BRO1504:// nor after this one, at the end|}
+            }
+        }
+        """,
+        """
+        class C
+        {
+            private static int prefix = 1;
+            // note on the prefix
+            // and more
+
+            private static int Key() => prefix;
+
+            void M()
+            {
+                var x = 1;
+
+                // no blank line after this one
+                x++;
+
+                // nor after this one, at the end
+            }
+        }
+        """);
 }

@@ -31,6 +31,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_private_static_field_naming` | `PascalCase`, `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `PascalCase` | [BRO1306](rules/BRO1306.md) |
 | `stylebro_allowed_hungarian_prefixes` | prefixes, comma-separated | none | [BRO1310](rules/BRO1310.md) |
 | `stylebro_allow_common_hungarian_prefixes` | `true`, `false` | `true` | [BRO1310](rules/BRO1310.md) |
+| `stylebro_rename_public_api` | `true`, `false` | `false` | [BRO1302](rules/BRO1302.md)-[BRO1314](rules/BRO1314.md): names other assemblies see |
 | `stylebro_tuple_element_name_casing` | `PascalCase`, `camelCase` | `PascalCase` | [BRO1311](rules/BRO1311.md) |
 | `stylebro_allowed_namespace_components` | names, comma-separated | none | [BRO1312](rules/BRO1312.md) |
 | `stylebro_trailing_comma` | `include`, `omit` | `include` | [BRO1401](rules/BRO1401.md), [BRO1509](rules/BRO1509.md) |

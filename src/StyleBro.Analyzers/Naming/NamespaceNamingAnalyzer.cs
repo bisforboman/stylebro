@@ -52,6 +52,7 @@ public sealed class NamespaceNamingAnalyzer : DiagnosticAnalyzer
             if (parent.GetMembers(newName).Any()
                 || !NamespaceNames.IsOnlyFrom(ns, a => SymbolEqualityComparer.Default.Equals(a, context.Compilation.Assembly))
                 || IsInRootNamespace(fullName, rootNamespace)
+                || !PublicApi.CanRename(ns, options)
                 || declared.Locations.Any(l => l.SourceTree is { } tree && NamespaceNames.IsGenerated(tree)))
             {
                 continue;

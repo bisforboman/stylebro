@@ -77,9 +77,9 @@ internal static class CamelCaseRenamer
                 }
 
                 if ((IsReachableByName(symbol)
-                        && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken).ConfigureAwait(false)))
+                        && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken, withNameof: true).ConfigureAwait(false)))
                     || (symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, strings!, keptTypes))
-                    || await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
+                    || await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, PublicApi.IsRenameAllowed(copy.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
                 {
                     safe = false;
                     break;
@@ -146,7 +146,8 @@ internal static class CamelCaseRenamer
     /// field by name through reflection, also from other projects the analyzer can't see (Polly's tests read
     /// '_blockedUntil' with GetField), and renaming it would still compile but break at run time. Its diagnostic stays
     /// for a manual rename. With <paramref name="withNameof"/>, also the names in <c>nameof(...)</c> (BRO1409:
-    /// <c>GetMethod(nameof(Run))</c> finds public methods only).
+    /// <c>GetMethod(nameof(Run))</c> finds public methods only; the naming rules: the rename would change the string, as
+    /// with Ocelot's <c>X_RateLimit_Limit = nameof(X_RateLimit_Limit).Replace('_', '-')</c>, an HTTP header name).
     /// </summary>
     internal static async Task<HashSet<string>> GetStringLiteralsAsync(Solution solution, CancellationToken cancellationToken, bool withNameof = false)
     {
@@ -239,13 +240,16 @@ internal static class CamelCaseRenamer
 
     /// <summary>
     /// The edits that rename <paramref name="symbol"/> (and, for a parameter, the same-named parameters of its
-    /// overrides and implementations), or null when one of them isn't safe to rename.
+    /// overrides and implementations), or null when one of them isn't safe to rename. Without
+    /// <paramref name="renamePublicApi"/>, a related member other assemblies see (a public class's implementation of an
+    /// internal interface's method) makes the rename unsafe, and a related parameter they see keeps its name.
     /// </summary>
     private static async Task<List<(string File, TextChange Change)>?> GetChangesAsync(
         Solution solution,
         ISymbol symbol,
         string newName,
         bool keepObservableNames,
+        bool renamePublicApi,
         CancellationToken cancellationToken)
     {
         var oldName = symbol.Name;
@@ -266,7 +270,8 @@ internal static class CamelCaseRenamer
             // 'Run', a library's) would stop doing so. Compared by name, not symbol: another project's view of a
             // multi-targeted library is a different (retargeted) symbol for the same member.
             var renamed = new HashSet<string>(symbols.Select(s => s.OriginalDefinition.ToDisplayString()));
-            if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString())))
+            if ((!renamePublicApi && symbols.Any(PublicApi.IsVisible))
+                || symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString())))
                 || await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
             {
                 return null;
@@ -288,6 +293,7 @@ internal static class CamelCaseRenamer
             if (!SymbolEqualityComparer.Default.Equals(current, symbol)
                 && IsMemberScoped(current)
                 && (!await CanRenameAsync(current).ConfigureAwait(false)
+                    || (!renamePublicApi && PublicApi.IsVisible(current))
                     || (keepObservableNames && current is IParameterSymbol && await IsObservableAsync(current).ConfigureAwait(false))))
             {
                 continue;
