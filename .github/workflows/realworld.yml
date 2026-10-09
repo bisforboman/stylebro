@@ -14,18 +14,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: changes
+        run: bash .github/changes.sh
+
+  # A docs-only pull request (.github/changes.sh) still reports every `Real world (<repo>)` check (required by branch
+  # protection; an `if:` on this matrix job would skip it without the names), on ubuntu and without doing the work.
+  # `!cancelled()`: if `changes` fails, its outputs are empty and everything runs.
   realworld:
     name: Real world (${{ matrix.repo }})
-    runs-on: windows-latest
+    needs: changes
+    if: ${{ !cancelled() }}
+    runs-on: ${{ needs.changes.outputs.relevant == 'false' && 'ubuntu-latest' || 'windows-latest' }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
         repo: [FFMpegCore, Polly, OpenTelemetry, Newtonsoft, Serilog, Jellyfin, FluentValidation, CsvHelper, eShopOnWeb, MediatR, LibGit2Sharp, Mapperly]
     steps:
+      - name: Skipped (docs-only change)
+        if: needs.changes.outputs.relevant == 'false'
+        run: echo "Nothing that affects results changed."
+
       - uses: actions/checkout@v7
+        if: needs.changes.outputs.relevant != 'false'
 
       - uses: actions/setup-dotnet@v6
+        if: needs.changes.outputs.relevant != 'false'
         with:
           # The repositories build with older SDKs' target frameworks too.
           dotnet-version: |
@@ -34,5 +57,6 @@ jobs:
             10.0.x
 
       - name: Run StyleBro on ${{ matrix.repo }}
+        if: needs.changes.outputs.relevant != 'false'
         shell: pwsh
         run: ./scripts/realworld/Invoke-RealWorld.ps1 -Repo ${{ matrix.repo }} -Tests -Work "${{ runner.temp }}/realworld"

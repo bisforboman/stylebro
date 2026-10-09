@@ -15,7 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 124 |
 | Done, not released yet | 0 |
-| Planned | 0 rules, 53 work items |
+| Planned | 0 rules, 54 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -80,6 +80,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | BRO1105/BRO1111 same_line at the line limit | Another fix in the same run can change the joined line's length right at `max_line_length`, so `dotnet format` may need a second run (documented). Could measure the line as the other fixes will leave it. | Idea |
 | Hardening | BRO1110 own_line indentation | In own_line mode a `)` already on its own line isn't checked for indentation. | Idea |
 | CI | Split the mutation job | Was 70-106 minutes for ~475 entries in one job. Now 4 parallel shards (index modulo 4) plus a summary job named `mutation` (the required check) that fails when any shard fails or is cancelled (#71). | Done (2026-10-09) |
+| CI | Faster PRs | A docs-only PR skips the work of the real-world, mutation, parity and performance jobs (each still reports its required check); performance runs only when analyzer code changes; mutation on a PR runs only the entries for the files it changes, the full set runs on main (`.github/changes.sh`, `-OnlyFiles`). | Done (2026-10-09) |
 | Adoption | Second first-run trial with the published package | Install 0.2.0-alpha.1 from nuget.org into 3-4 repos nobody has tried, exactly as a new user would; the first trial (local packages) found a loop and 213 build errors. | Idea |
 | Adoption | Readable release notes | GitHub's generated notes list every PR title; a short summary per release (what's new, how to upgrade, known limits) for users. | Idea |
 | Adoption | Rider check | The IDE check was done in Visual Studio 2022 only. | Idea |
