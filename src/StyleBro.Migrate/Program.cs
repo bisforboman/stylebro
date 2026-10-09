@@ -46,6 +46,12 @@ internal static class Program
               This text.
         """;
 
+    /// <summary>How to format after init or --write: 'stylebro-migrate format', not plain 'dotnet format'.</summary>
+    internal const string FormatHint = "Next: run 'stylebro-migrate format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
+
+    /// <summary>What to do after --write: swap the packages and format.</summary>
+    internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
+
     public static int Main(string[] args)
     {
         if (args.FirstOrDefault() == "help" || args.Any(a => a is "--help" or "-h" or "-?"))
@@ -74,8 +80,10 @@ internal static class Program
         {
             case "baseline":
                 return BaselineCommand.Run(options);
+
             case "init":
                 return InitCommand.Run(options);
+
             case "format":
                 return FormatCommand.Run(options);
         }
@@ -148,12 +156,6 @@ internal static class Program
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
         return 0;
     }
-
-    /// <summary>How to format after init or --write: 'stylebro-migrate format', not plain 'dotnet format'.</summary>
-    internal const string FormatHint = "Next: run 'stylebro-migrate format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
-
-    /// <summary>What to do after --write: swap the packages and format.</summary>
-    internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
 
     /// <summary>docs/stylecop-mapping.md's proposal for every StyleCop rule, without Markdown.</summary>
     /// <summary>

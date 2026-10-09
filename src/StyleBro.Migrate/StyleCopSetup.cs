@@ -169,8 +169,10 @@ internal sealed class StyleCopSetup
         // rulesets' result), so a test ruleset turning a rule off doesn't turn it off for production code. A bulk entry
         // (category, every rule) doesn't override a rule's own entry anywhere, like in the compiler (SixLabors: rulesets
         // turn SA1413 off, the .editorconfig sets 'dotnet_analyzer_diagnostic.severity = warning').
-        var specific = new HashSet<string>(read.SelectMany(r => r.Rules.Keys)
-            .Concat(globalConfigs.Concat(rootSections).SelectMany(c => c.Severities.Keys.Where(id => !c.Bulk.Contains(id)))), StringComparer.Ordinal);
+        var specific = new HashSet<string>(
+            read.SelectMany(r => r.Rules.Keys)
+                .Concat(globalConfigs.Concat(rootSections).SelectMany(c => c.Severities.Keys.Where(id => !c.Bulk.Contains(id)))),
+            StringComparer.Ordinal);
         Dictionary<string, Severity> WithoutBulkOverrides((Dictionary<string, Severity> Severities, HashSet<string> Bulk) config) =>
             config.Severities.Where(p => !config.Bulk.Contains(p.Key) || !specific.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value);
         var globalInEffect = globalConfigs.Select(WithoutBulkOverrides).ToList();

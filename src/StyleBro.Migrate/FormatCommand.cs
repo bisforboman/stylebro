@@ -199,7 +199,7 @@ internal static class FormatCommand
             var path = Path.Combine(folder.FullName, ".editorconfig");
             if (File.Exists(path))
             {
-                text.AddRange(Regex.Matches(File.ReadAllText(path), @"# BEGIN stylebro-.*?# END stylebro-", RegexOptions.Singleline).Select(m => m.Value));
+                text.AddRange(Regex.Matches(File.ReadAllText(path), "# BEGIN stylebro-.*?# END stylebro-", RegexOptions.Singleline).Select(m => m.Value));
             }
         }
 
