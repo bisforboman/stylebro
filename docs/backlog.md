@@ -15,7 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 124 |
 | Done, not released yet | 0 |
-| Planned | 0 rules, 51 work items |
+| Planned | 0 rules, 53 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 106 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
@@ -86,6 +86,8 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Upstream | Report the SDK fixer bugs to dotnet/roslyn | Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`; the owner posts them. | Idea |
 | Parity | SA1119_p and SX1309S | The two StyleCop variants StyleBro doesn't cover: unnecessary parentheses in patterns (`x is (> 0)`, next to BRO1405) and the `_` prefix for static fields (a BRO1303 style). See skipped-rules.md. | Idea |
 | Performance | FieldNamingAnalyzer variance | Swings 35-90 ms between runs in both builds (it often runs first on a file and pays for the shared walk); find a stable measure or split its cost. | Idea |
+| Adoption | `stylebro-migrate --diff`: preview before writing | Show what the settings and the first `dotnet format` run would change (files, counts per rule, a sample of hunks) without touching the repository, so a team can judge a migration or `init` first. Likely: copy the repo to a temp folder, run there, print a summary and the diff. | Idea |
+| Adoption | Rule docs as a website | Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views. | Idea |
 
 ### Read the SDK's own settings
 

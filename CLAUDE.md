@@ -1197,11 +1197,11 @@ file (FieldNamingAnalyzer swings 35-90 ms between runs), so judge by the total a
   FixOrderTests case with both options on.
 - **Speed round 3** (#63): `TreeWalk.Trivia` holds only comment/directive trivia; tokens and nodes in one walk; about a
   third off the total. dotnet-trace blames whatever it samples during thread suspension: confirm with `compare`.
-- **CI time:** the mutation check took 70-106 minutes in one job; since 2026-10-09 (#71) it runs as 4 shards (~25
-  minutes each, timeout 60) plus the summary job `mutation` (`if: always()`, fails unless `needs.shard.result` is
+- **CI time:** the mutation check took 70-106 minutes in one job; since 2026-10-09 (#71) it runs as 4 shards (13-18
+  minutes each measured, timeout 60) plus the summary job `mutation` (`if: always()`, fails unless `needs.shard.result` is
   success). Give new entries a NARROW `Tests` filter (a FixOrderTests case with 7 ids is 5,040 orders, ~10 minutes).
-- **Paused** (owner, 2026-10-08: token budget): no new implementation until the owner restarts it; open ideas are the
-  "Idea" rows in docs/backlog.md.
+- **Paused briefly** (2026-10-08) and resumed the next day (owner: "let's ignore my previous hesitations"); open
+  ideas are the "Idea" rows in docs/backlog.md.
 
 ## Known open questions
 
