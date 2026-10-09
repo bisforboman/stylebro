@@ -398,6 +398,48 @@ internal sealed class StyleCopSetup
                 : null;
     }
 
+    /// <summary>
+    /// The files the repository's own MSBuild files point to, followed through imports into any folder under the root,
+    /// submodules included (a shared-infrastructure submodule with the StyleCop setup): imported .props/.targets,
+    /// CodeAnalysisRuleSet rulesets and stylecop.json additional files. They're only read, never written.
+    /// </summary>
+    internal static (List<string> MSBuild, List<string> Rulesets, List<string> StyleCopJson) FollowReferences(string root, IReadOnlyCollection<string> own)
+    {
+        var seen = new HashSet<string>(own, StringComparer.OrdinalIgnoreCase);
+        var result = (MSBuild: new List<string>(), Rulesets: new List<string>(), StyleCopJson: new List<string>());
+        var pending = new Queue<string>(own.Where(IsMSBuild));
+        while (pending.Count > 0)
+        {
+            var file = pending.Dequeue();
+            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(file))))
+            {
+                var group = new[] { "import", "ruleset", "additional" }.First(g => match.Groups[g].Success);
+                if (Resolve(match.Groups[group].Value, file, root) is not { } target)
+                {
+                    continue;
+                }
+
+                if (group == "import" && IsMSBuild(target) && seen.Add(target))
+                {
+                    result.MSBuild.Add(target);
+                    pending.Enqueue(target);
+                }
+                else if (group == "ruleset")
+                {
+                    result.Rulesets.Add(target);
+                }
+                else if (group == "additional" && Path.GetFileName(target).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.StyleCopJson.Add(target);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    internal static string WithoutComments(string xml) => Regex.Replace(xml, "<!--.*?-->", string.Empty, RegexOptions.Singleline);
+
     /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]').</summary>
     private static bool MayApplyToCSharp(string section)
     {
@@ -546,46 +588,6 @@ internal sealed class StyleCopSetup
     }
 
     /// <summary>
-    /// The files the repository's own MSBuild files point to, followed through imports into any folder under the root,
-    /// submodules included (a shared-infrastructure submodule with the StyleCop setup): imported .props/.targets,
-    /// CodeAnalysisRuleSet rulesets and stylecop.json additional files. They're only read, never written.
-    /// </summary>
-    private static (List<string> MSBuild, List<string> Rulesets, List<string> StyleCopJson) FollowReferences(string root, IReadOnlyCollection<string> own)
-    {
-        var seen = new HashSet<string>(own, StringComparer.OrdinalIgnoreCase);
-        var result = (MSBuild: new List<string>(), Rulesets: new List<string>(), StyleCopJson: new List<string>());
-        var pending = new Queue<string>(own.Where(IsMSBuild));
-        while (pending.Count > 0)
-        {
-            var file = pending.Dequeue();
-            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(file))))
-            {
-                var group = new[] { "import", "ruleset", "additional" }.First(g => match.Groups[g].Success);
-                if (Resolve(match.Groups[group].Value, file, root) is not { } target)
-                {
-                    continue;
-                }
-
-                if (group == "import" && IsMSBuild(target) && seen.Add(target))
-                {
-                    result.MSBuild.Add(target);
-                    pending.Enqueue(target);
-                }
-                else if (group == "ruleset")
-                {
-                    result.Rulesets.Add(target);
-                }
-                else if (group == "additional" && Path.GetFileName(target).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
-                {
-                    result.StyleCopJson.Add(target);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /// <summary>
     /// The ruleset each folder with its own Directory.Build.props (the root's too) gives its projects: the last
     /// CodeAnalysisRuleSet the props and its imports set, in order ("'$(CodeAnalysisRuleSet)' == ''" conditions respected).
     /// A value relative to the project is resolved from the folder's projects.
@@ -660,8 +662,6 @@ internal sealed class StyleCopSetup
         var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
         return File.Exists(full) && full.StartsWith(rootFolder, StringComparison.OrdinalIgnoreCase) ? full : null;
     }
-
-    private static string WithoutComments(string xml) => Regex.Replace(xml, "<!--.*?-->", string.Empty, RegexOptions.Singleline);
 
     /// <summary>Each rule the configs set, at the strictest of them; a config that doesn't set it counts with the target's value.</summary>
     private static void OverlayStrictest(Dictionary<string, Severity> target, IReadOnlyList<Dictionary<string, Severity>> configs)

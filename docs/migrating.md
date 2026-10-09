@@ -161,6 +161,71 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
   a changed public API).
 - **Not covered yet:** candidates for future StyleBro rules. See [stylecop-mapping.md](stylecop-mapping.md).
 
+## Coming from SonarQube
+
+Many teams run SonarQube or SonarCloud next to (or instead of) StyleCop. `stylebro-migrate` and `stylebro-migrate init`
+read that setup too and turn on the StyleBro and .NET rules that fix what the team's Sonar rules report, so
+`stylebro-migrate format` cleans up findings Sonar can only list. Sonar stays: StyleBro doesn't turn any Sonar rule off,
+and Sonar keeps reporting its own ids.
+
+What it reads, in this order (later wins, like for StyleCop):
+
+- **The base.** A quality profile exported from the server, when you pass one: `--sonar-profile profile.xml` (the XML from
+  the server's `api/qualityprofiles/backup?language=cs&qualityProfile=<name>`, or Quality Profiles > Back up in the UI;
+  its `csharpsquid` rules are on). Without it, when a project references `SonarAnalyzer.CSharp` (`PackageReference`,
+  `GlobalPackageReference` or central package versions), the package's own defaults ("Sonar way", from SonarAnalyzer.CSharp
+  10.35's rule list).
+- **Rulesets** with Sonar rules (`<Rules AnalyzerId="SonarAnalyzer.CSharp">`): your own, SonarLint's
+  `.sonarlint/*csharp.ruleset`, and the scanner's `.sonarqube/conf/Sonar-cs.ruleset` when it's there (rulesets named
+  `*none*` are skipped).
+- **Global configs** (`dotnet_diagnostic.Sxxxx.severity`); with several (one per project type) the strictest wins.
+- **The root `.editorconfig`'s** sections for all C# files.
+
+Without a Sonar package, a profile or Sonar rule ids in those files, nothing Sonar-related happens.
+
+The Sonar rules that are on turn on these rules, at the strongest severity of the Sonar rules behind each:
+
+| Sonar | Fixed by |
+|---|---|
+| S100, S101 (PascalCase names) | [BRO1309](rules/BRO1309.md) |
+| S121 (braces) | [BRO1514](rules/BRO1514.md) with `csharp_prefer_braces = true` |
+| S818 (upper-case literal suffixes) | [BRO1135](rules/BRO1135.md) with `stylebro_upper_case_literal_suffixes = l_only` |
+| S927 (parameter names match the base) | [BRO1313](rules/BRO1313.md) |
+| S1066 (mergeable `if`s) | BRO1149 |
+| S1116 (empty statements) | [BRO1101](rules/BRO1101.md) |
+| S1118 (utility classes) | CA1052, non-public classes only (`dotnet_code_quality.CA1052.api_surface = private, internal`) |
+| S1125 (redundant boolean literals) | IDE0075, IDE0100 |
+| S1481, S1854 (unused locals and assignments) | IDE0059 |
+| S1659 (one variable per declaration) | [BRO1142](rules/BRO1142.md) |
+| S1905 (redundant casts) | IDE0004 |
+| S1939 (redundant base types) | [BRO1408](rules/BRO1408.md) |
+| S2325 (members that could be static) | CA1822, non-public members only (`dotnet_code_quality.CA1822.api_surface = private, internal`) |
+| S2971 (LINQ predicate into `Count`/`Any`/...) | BRO1150 |
+| S3052 (initialized to the default value) | CA1805 |
+| S3260 (seal private classes) | CA1852 |
+| S3442 (public constructors of abstract classes) | CA1012 |
+| S3878 (arrays for `params`) | BRO1151 |
+| S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = true`, only when BRO1001 is on |
+| S8969 (redundant `!`) | [BRO1147](rules/BRO1147.md) |
+
+The data lives in the tool: `src/StyleBro.Migrate/data/sonar-mapping.tsv` (the mapping) and
+`sonar-rules-10.35.0.4138.tsv` (Sonar's rule list and defaults, public metadata only).
+
+**With StyleCop too**, a rule is on when either setup turns it on, at the stronger severity: the migration normally turns
+the rules beyond StyleCop off (BRO1135, BRO1142, BRO1313, ...), but not when the matching Sonar rule is on. A setting
+Sonar's rule needs replaces the one from the StyleCop setup, and the report lists each such conflict (S121's
+`csharp_prefer_braces = true` where StyleCop's braces rules were off). An option of a rule StyleCop's setup leaves off
+isn't applied: S4136 only sets an option of BRO1001, so with SA1201 or SA1202 off it stays Sonar's alone.
+
+The report has a Sonar part: what was read, how many Sonar rules are on, which of them StyleBro or the SDK now fixes (and
+with which rule), which mapped ones aren't applied and why, and that the rest stay Sonar's (no safe automatic fix: unused
+private members, cognitive complexity, ...). The generated block has the Sonar-driven lines last, under
+`# From the SonarQube setup`, each with the Sonar rule's title. `--diff` prints the same part of the report before its
+summary. `init` does the same in a repository without StyleCop, and prints it.
+
+Limits: sub-directory `.editorconfig` files and `#pragma`/`[SuppressMessage]` suppressions of Sonar ids aren't carried
+over (code where a team suppressed S2325 gets CA1822's fix); Sonar's rule parameters (`SonarLint.xml`) aren't read.
+
 ## Modernizing afterwards
 
 StyleCop has no rules for newer C# or APIs, so the migration turns none on. To add the SDK's modernization rules

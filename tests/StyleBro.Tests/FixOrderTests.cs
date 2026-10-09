@@ -9,6 +9,17 @@ namespace StyleBro.Tests;
 /// </summary>
 public class FixOrderTests
 {
+    // The base class of the same_line cases at max_line_length.
+    private const string BaseClass = """
+        public class B
+        {
+            public B(int x)
+            {
+            }
+        }
+
+        """;
+
     [Fact]
     public Task Braces_AnElseChainThatBecomesInconsistent() => AssertConvergesInEveryOrderAsync(
         """
@@ -1566,6 +1577,308 @@ public class FixOrderTests
         "BRO1105",
         "BRO1109",
         "BRO1110");
+
+    // same_line joins at max_line_length: the length is judged on the line as the other fixes leave it. Each case sits
+    // right at the limit: the join fits before the other fix and not after it, or the other way round.
+    // BRO1404 adds 'private ': '    private C(int a) : base(a)' (30) is too long, '    C(int a) : base(a)' (22) wasn't.
+    [Fact]
+    public Task ConstructorInitializerSameLine_AtTheLimit_WithAnAddedModifier() => AssertConvergesInEveryOrderWithConfigAsync(
+        BaseClass + """
+        public class C : B
+        {
+            C(int a)
+                : base(a)
+            {
+            }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 25\n",
+        "BRO1105",
+        "BRO1404");
+
+    // BRO1108 splits the parameters: '        long d) : base(a)' (25) fits, '        long c, long d) : base(a)' (33) didn't.
+    [Fact]
+    public Task ConstructorInitializerSameLine_AtTheLimit_WithSplitParameters() => AssertConvergesInEveryOrderWithConfigAsync(
+        BaseClass + """
+        public class C : B
+        {
+            public C(int a, long b,
+                long c, long d)
+                : base(a)
+            {
+            }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 28\n",
+        "BRO1105",
+        "BRO1107",
+        "BRO1108");
+
+    // BRO1109 moves '(' up: '        long a) : base(1)' (25) fits, '        (long a) : base(1)' (26) didn't.
+    [Fact]
+    public Task ConstructorInitializerSameLine_AtTheLimit_WithAMovedOpeningParenthesis() => AssertConvergesInEveryOrderWithConfigAsync(
+        BaseClass + """
+        public class C : B
+        {
+            public C
+                (long a)
+                : base(1)
+            {
+            }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\nmax_line_length = 25\n",
+        "BRO1105",
+        "BRO1109");
+
+    // BRO1110's own_line mode moves ')' down: '    ) : base(a)' (15) fits, '        int a, int b) : base(a)' (31) didn't.
+    [Fact]
+    public Task ConstructorInitializerSameLine_AtTheLimit_WithAClosingParenthesisMovedDown() => AssertConvergesInEveryOrderWithConfigAsync(
+        BaseClass + """
+        public class C : B
+        {
+            public C(
+                int a, int b)
+                : base(a)
+            {
+            }
+        }
+        """,
+        "stylebro_constructor_initializer_placement = same_line\nstylebro_closing_parenthesis_placement = own_line\nmax_line_length = 15\n",
+        "BRO1105",
+        "BRO1110");
+
+    // BRO1404/BRO1007 add 'internal '/'private '/'public ' (another part's): each joined line fits only without it.
+    [Fact]
+    public Task ConstraintSameLine_AtTheLimit_WithAddedModifiers() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        class Box<T>
+            where T : class
+        {
+            void M<U>(U v)
+                where U : class
+            {
+            }
+        }
+
+        partial class P<T>
+            where T : class
+        {
+        }
+
+        public partial class P<T>
+        {
+        }
+        """,
+        "stylebro_constraint_placement = same_line\nmax_line_length = 36\n",
+        "BRO1007",
+        "BRO1111",
+        "BRO1404");
+
+    // BRO1108 splits the parameters, BRO1109 moves '(' up: both joined lines fit only afterwards.
+    [Fact]
+    public Task ConstraintSameLine_AtTheLimit_WithSplitParametersAndAMovedOpeningParenthesis() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            public static void M<T>(int a, int b,
+                T cc, T dd)
+                where T : class
+            {
+            }
+
+            public static void N<T>
+                (T abcdefg)
+                where T : class
+            {
+            }
+        }
+        """,
+        "stylebro_constraint_placement = same_line\nmax_line_length = 34\n",
+        "BRO1108",
+        "BRO1109",
+        "BRO1111");
+
+    // BRO1149: a merge moves the inner body into the outer 'if' (and its else chain), which changes which brace rule
+    // reports it; the merge adds the braces they want itself.
+    [Fact]
+    public Task NestedIfs_WithTheBraceRules() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b, bool c)
+            {
+                if (a)
+                {
+                    if (b)
+                        M(a, b, c);
+                }
+
+                if (a)
+                    if (b)
+                    {
+                        M(a, b, c);
+                    }
+
+                if (c)
+                    M(a, b, c);
+                else if (a)
+                    if (b)
+                        M(b, a, c);
+
+                if (c)
+                {
+                    M(a, b, c);
+                }
+                else if (a)
+                {
+                    if (b)
+                        M(b, a, c);
+                }
+
+                if (a)
+                    if (b)
+                        if (c)
+                            M(c, b,
+                                a);
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1514",
+        "BRO1515",
+        "BRO1516");
+
+    [Fact]
+    public Task NestedIfs_InSingleLineBlocks() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b) { if (a) { if (b) { M(b, a); } } }
+
+            public void N(bool a, bool b)
+            {
+                if (a) { if (b) { M(b, a); } }
+                if (b) { if (a) M(b, a); }
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1519");
+
+    [Fact]
+    public Task NestedIfs_InElseClauses() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(bool a, bool b, bool c)
+            {
+                if (c)
+                {
+                    return 1;
+                }
+                else
+                {
+                    if (a)
+                    {
+                        if (b)
+                        {
+                            M(a, b, c);
+                        }
+                    }
+                }
+
+                if (a)
+                {
+                    M(a, b, c);
+                }
+                else
+                {
+                    if (b)
+                    {
+                        if (c)
+                        {
+                            M(a, b, c);
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1143.severity = warning\n",
+        "BRO1139",
+        "BRO1143",
+        "BRO1149");
+
+    [Fact]
+    public Task NestedIfs_WithParenthesesRules() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b, bool c, bool d)
+            {
+                if (a || b && c)
+                {
+                    if (d || c && a)
+                    {
+                        M(a, b, c, d);
+                    }
+                }
+
+                if ((a))
+                {
+                    if ((b || c))
+                    {
+                        M(a, b, c, d);
+                    }
+                }
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1405",
+        "BRO1407");
+
+    [Fact]
+    public Task WhereBeforeTerminal_InSplitChains() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public int M(int[] items) => items.Select(i => i * 2)
+                .Where(i => i > 0).Count();
+
+            public bool N(int[] items) =>
+                items
+                    .Where(i => i > 0)
+                    .Any();
+        }
+        """,
+        "BRO1150",
+        "BRO1523");
+
+    [Fact]
+    public Task ParamsArrays_WithArgumentLayout() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public static int Sum(int first, params int[] rest) => first + rest.Length;
+
+            public int M() => Sum(1,
+                new[] { 2, 3 }) + Sum(1, 2,
+                new[] { 3, 4 }) + Sum(
+                1, new[] { 2 }) + Sum(1, new[] { 2, 3 });
+        }
+        """,
+        "BRO1107",
+        "BRO1108",
+        "BRO1151");
 
     [Fact]
     public Task UsingPlacement_Outside_WithQualifiedUsingsAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(

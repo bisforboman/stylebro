@@ -29,6 +29,9 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
         "IDE0240", "IDE0241", "IDE0250", "IDE0270", "IDE0300", "IDE0301", "IDE0302", "IDE0303", "IDE0304", "IDE0306", "IDE0330",
         "IDE0340", "IDE0350", "IDE0360", "CA1510", "CA1511", "CA1512", "CA1513", "CA1825", "CA1829", "CA1834", "CA1847", "CA1850", "CA1864",
         "CA1865", "CA1872", "CA2249", "CA2263",
+
+        // turned on by a SonarQube setup (stylebro-migrate's Sonar mapping)
+        "IDE0004", "IDE0059", "IDE0075", "IDE0100", "CA1012", "CA1052", "CA1805", "CA1822", "CA1852",
     };
 
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = CreateDescriptors();

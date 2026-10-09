@@ -15,7 +15,8 @@ param([string]$Root = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent), [
     [AllowEmptyCollection()][string[]]$OnlyFiles)
 $ErrorActionPreference = 'Stop'
 $env:StyleBroSelf = 'none'
-$config = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'mutations.psd1')
+# -SkipLimitCheck: without it, a data file with more than about 550 entries fails to load ('dynamic expressions').
+$config = Import-PowerShellDataFile -SkipLimitCheck (Join-Path $PSScriptRoot 'mutations.psd1')
 $tests = Join-Path $Root 'tests/StyleBro.Tests'
 if ($Shards -lt 1 -or $Shard -lt 0 -or $Shard -ge $Shards) { throw "Invalid shard $Shard of $Shards." }
 

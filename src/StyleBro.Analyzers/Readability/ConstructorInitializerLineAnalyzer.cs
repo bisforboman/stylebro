@@ -31,7 +31,7 @@ public sealed class ConstructorInitializerLineAnalyzer : DiagnosticAnalyzer
                 var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree);
                 var sameLine = ConstructorInitializers.IsSameLine(options);
                 if (sameLine
-                    ? ConstructorInitializers.GetJoin(initializer, text, options, id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken)) is not null
+                    ? ConstructorInitializers.GetJoin(initializer, text, options, id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken), c.SemanticModel, c.CancellationToken) is not null
                     : ConstructorInitializers.ShouldMove(initializer, text))
                 {
                     c.ReportDiagnostic(Diagnostic.Create(

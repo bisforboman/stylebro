@@ -14,8 +14,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 125 |
-| Done, not released yet | 1 |
-| Planned | 0 rules, 62 work items |
+| Done, not released yet | 4 |
+| Planned | 0 rules, 64 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 109 by StyleBro, 44 by the .NET SDK, 42 dropped by design (they
@@ -78,7 +78,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | Four fix-order bugs | BRO1001 on one-line types and blank lines in other slots, BRO1114 on documented fields, BRO1116 vs BRO1108 (#69). | Done (2026-10-08) |
 | Hardening | BRO1112 sort path vs BRO1505 | Reproduced (FixOrderTests: one order lost a blank line between two fields): the regions fix's sort (`GetSortChangesAsync`) now runs BRO1001's layout pre-step (BRO1505's blank lines, BRO1509's expansion) first, shared with BRO1001's own fix. | Done (2026-10-09) |
 | Hardening | BRO1107 same_line with BRO1116 | FixOrderTests case for `stylebro_split_list_first_item = same_line` with BRO1116 joining a split empty `()` inside the list: identical text in every order, no change needed. | Done (2026-10-09) |
-| Hardening | BRO1105/BRO1111 same_line at the line limit | Another fix in the same run can change the joined line's length right at `max_line_length`, so `dotnet format` may need a second run (documented). Could measure the line as the other fixes will leave it. | Idea |
+| Hardening | BRO1105/BRO1111 same_line at the line limit | The joined line is measured as the other fixes leave it (BRO1404/BRO1007 modifier, BRO1109 `(`, BRO1108 split, BRO1110 `)`), so one run converges in any order. Renames and rewrites inside the line aren't counted (documented on both rule pages). | Done (2026-10-09) |
 | Hardening | BRO1110 own_line indentation | In own_line mode a `)` already on its own line isn't checked for indentation. | Idea |
 | CI | Split the mutation job | Was 70-106 minutes for ~475 entries in one job. Now 4 parallel shards (index modulo 4) plus a summary job named `mutation` (the required check) that fails when any shard fails or is cancelled (#71). | Done (2026-10-09) |
 | Hardening | BRO1110 own_line indentation | In own_line mode a `)` already on its own line is reindented like the line with `(` (IDE0055 leaves it at any indentation, probed), that line taken as BRO1105, BRO1109 and BRO1110 itself leave it, so nested lists align in one run. | Done (2026-10-09) |
@@ -97,6 +97,8 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Adoption | Rule docs as a website | MkDocs Material site from docs/ (user docs only; decisions, backlog and proposals stay on GitHub), built with `--strict` on every PR and deployed to GitHub Pages from main (decisions.md 2026-10-09); rule help links point to its rule pages; `docs/configuration.md` lists every `stylebro_*` key (checked by a test). | Done (2026-10-09) |
 | Adoption | Rule docs as a website | Publish docs/ (rule pages, getting started, migrating, decisions) as a searchable site, e.g. GitHub Pages built in CI; rule help links (`helpLinkUri`) could point there instead of GitHub file views. | Idea |
 | Hardening | BRO1523 second run in Kavita | After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Cause: BRO1523 skipped chains with any directive in them, so a lambda's `#region`s hid the chain until BRO1113 removed them. Region lines no longer count (other directives still skip the chain). | Done (2026-10-09) |
+| Beyond StyleCop | Sonar mirrors (Sonar survey 2026-10-09) | BRO1149 merges nested `if`s (S1066), BRO1150 `Where(p).Count()` -> `Count(p)` (S2971), BRO1151 the elements instead of an array for `params` (S3878); written from the public rule descriptions, with fixes Sonar lacks. On in the preset, off after `stylebro-migrate`. Fixers for the Sonar ids reuse their fix logic in a later PR (decisions.md 2026-10-09). | Done (2026-10-09) |
+| Adoption | `stylebro-migrate` follows a SonarQube setup | Owner's decision 2026-10-09: the migration and `init` read Sonar rule severities (rulesets incl. SonarLint's and the scanner's, global configs, `.editorconfig`), the `SonarAnalyzer.CSharp` defaults (Sonar way, embedded rule list) or a quality profile backup (`--sonar-profile`), and turn on the StyleBro/SDK rules that fix 22 Sonar rules (S2325 -> CA1822, S4136 -> overloads together, S1066 -> BRO1149, ...); a rule on through StyleCop or Sonar is on. The report and `--diff` show the Sonar part. See migrating.md. | Done (2026-10-09) |
 
 ### Read the SDK's own settings
 
@@ -193,6 +195,9 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Released |
 | [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | Released |
 | [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | Released |
+| [BRO1149](rules/BRO1149.md) | Merge an 'if' into the enclosing 'if' | (none; Sonar S1066) | Done |
+| [BRO1150](rules/BRO1150.md) | Pass the predicate to the LINQ call instead of calling Where first | (none; Sonar S2971) | Done |
+| [BRO1151](rules/BRO1151.md) | Pass the elements, not an array, to a params parameter | (none; Sonar S3878) | Done |
 
 ### BRO13xx: Naming
 

@@ -1346,6 +1346,40 @@ internal static class Descriptors
             + "MA0171).",
         helpLinkUri: HelpBase + DiagnosticIds.HasValueNullCheck + "/");
 
+    public static readonly DiagnosticDescriptor NestedIf = new(
+        id: DiagnosticIds.NestedIf,
+        title: "Merge an 'if' into the enclosing 'if'",
+        messageFormat: "Merge this 'if' into the enclosing one",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "An 'if' that is the only statement of an enclosing 'if', neither with an 'else', joins it: "
+            + "'if (a && b)'. Not a StyleCop rule (Sonar S1066).",
+        helpLinkUri: HelpBase + DiagnosticIds.NestedIf + "/");
+
+    public static readonly DiagnosticDescriptor WhereBeforeTerminal = new(
+        id: DiagnosticIds.WhereBeforeTerminal,
+        title: "Pass the predicate to the LINQ call instead of calling Where first",
+        messageFormat: "Use '{0}' with the predicate instead of 'Where(...).{0}()'",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'source.Where(p).Count()' becomes 'source.Count(p)'; also Any, LongCount, First, FirstOrDefault, Last, "
+            + "LastOrDefault, Single and SingleOrDefault, for System.Linq's Enumerable and Queryable. Not a StyleCop rule "
+            + "(Sonar S2971).",
+        helpLinkUri: HelpBase + DiagnosticIds.WhereBeforeTerminal + "/");
+
+    public static readonly DiagnosticDescriptor ParamsArray = new(
+        id: DiagnosticIds.ParamsArray,
+        title: "Pass the elements, not an array, to a params parameter",
+        messageFormat: "Pass the elements instead of creating an array for the params parameter",
+        category: "Readability",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "'M(x, new[] { a, b })' becomes 'M(x, a, b)' where the call still binds to the same method. Not a "
+            + "StyleCop rule (Sonar S3878).",
+        helpLinkUri: HelpBase + DiagnosticIds.ParamsArray + "/");
+
     public static readonly DiagnosticDescriptor EmptyTypeBody = new(
         id: DiagnosticIds.EmptyTypeBody,
         title: "A class, struct or interface with an empty body should end with ';'",

@@ -73,6 +73,31 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/EmptyRecordBodies.cs'; Find = ' && !string.Equals(langVersion!.Trim(), defaultVersion?.Trim(), StringComparison.OrdinalIgnoreCase)'; Replace = ''; Tests = 'EmptyTypeBodyTests' }
         # BRO1146 (record class)
         @{ File = 'src/StyleBro.Analyzers/Readability/RecordClassKeywords.cs'; Find = 'return Trivia.IsBlank(record, span) ?'; Replace = 'return true ?'; Tests = 'RecordClassKeywordTests' }
+        # BRO1149 (nested ifs)
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'outer.Else is not null'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'inner.Else is not null'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'outer.ContainsDirectives'; Replace = 'false'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| !Trivia.IsBlank(outer, TextSpan.FromBounds(outer.Condition.Span.End, inner.Condition.SpanStart))'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| !Trivia.IsBlank(outer, TextSpan.FromBounds(inner.Span.End, outer.Span.End))'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| !Trivia.IsBlank(deepest, TextSpan.FromBounds(deepest.Condition.Span.End, deepest.CloseParenToken.SpanStart))'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| condition.IsKind(SyntaxKind.LogicalOrExpression)'; Replace = ''; Tests = 'NestedIfTests.LooserOperands_GetParentheses' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'if (node.DescendantTokens().Any(t => text.Lines'; Replace = 'if (false && node.DescendantTokens().Any(t => text.Lines'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'if (children.Count == 0)'; Replace = 'if (true)'; Tests = 'NestedIfTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'IndentOf(text, current.SpanStart) - topIndent'; Replace = '0'; Tests = 'NestedIfTests.MultiLineInnerCondition_MovesLeft' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = 'return scope is not null'; Replace = 'return false && scope is not null'; Tests = 'NestedIfTests.Skipped' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'; Find = '|| outer.GetLastToken().GetNextToken().LeadingTrivia.Any(t => t.IsDirective)'; Replace = ''; Tests = 'NestedIfTests.Skipped' }
+        # BRO1150 (Where before Count/Any/...)
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = 'if (GetLinqMethod(model.GetSymbolInfo(where, cancellationToken).Symbol) is null'; Replace = 'if (false'; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| NullChecks.IsInExpressionTree(terminal, model, cancellationToken)'; Replace = ''; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = 'if (GetLinqMethod(Speculation.SymbolAfterReplacing(model, terminal, call, cancellationToken)) is null)'; Replace = 'if (false)'; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| !Trivia.IsBlank(terminal, TextSpan.FromBounds(argument.Span.End, terminal.Span.End))'; Replace = ''; Tests = 'WhereBeforeTerminalTests.OtherCalls_AreNotReported' }
+        # BRO1151 (params arrays)
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'list.Arguments.Count != method.Parameters.Length'; Replace = 'false'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = '|| (elements.Count == 1 && model.ClassifyConversion(elements[0], parameter.Type).IsImplicit)'; Replace = ''; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'array is CollectionExpressionSyntax ? info.ConvertedType : info.Type'; Replace = 'info.ConvertedType'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = '|| (elements.Count > 1 && line != text.Lines.GetLineFromPosition(list.Arguments[0].SpanStart).LineNumber)'; Replace = ''; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'return SymbolEqualityComparer.Default.Equals(Speculation.SymbolAfterReplacing(model, call, expanded, cancellationToken), method) ? changes : null;'; Replace = 'return changes;'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'; Find = 'if (removed.Any(span => !Trivia.IsBlank(call, span))'; Replace = 'if (false'; Tests = 'ParamsArrayTests.OtherArrays_AreNotReported' }
         # BRO1527 (auto-accessors on one line)
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = '|| list.Accessors.Count == 0 '; Replace = ''; Tests = 'AutoAccessorLinesTests' }
         @{ File = 'src/StyleBro.Analyzers/Layout/AutoAccessorLines.cs'; Find = 'if (Line(text, before.Span.End) == Line(text, close.SpanStart)'; Replace = 'if (false'; Tests = 'AutoAccessorLinesTests' }
@@ -626,6 +651,13 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'rulesets.Add([]);'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/InitCommand.cs'; Find = 'underscore >= UnderscoreShare * (underscore + plain)'; Replace = 'underscore > plain'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
+        # stylebro-migrate follows a SonarQube setup (2026-10-09)
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '.Where(f => !Path.GetFileName(f).Contains("none", StringComparison.OrdinalIgnoreCase))'; Replace = ''; Tests = 'MigrationTests.Sonar_' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = 'severities[id] = kind.Max('; Replace = 'severities[id] = kind.Min('; Tests = 'MigrationTests.Sonar_' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '(string?)r.Attribute("AnalyzerId") == "SonarAnalyzer.CSharp"'; Replace = 'true'; Tests = 'MigrationTests.Sonar_' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '(string?)r.Element("repositoryKey") == "csharpsquid"'; Replace = 'true'; Tests = 'MigrationTests.Sonar_' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = 'optionOnly && !ruleOn(rule)'; Replace = 'false'; Tests = 'MigrationTests.Sonar_' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '(StyleCopSetup.ParseSeverity(ValueOf(lines[existing])) ?? Severity.None) < severity'; Replace = 'false'; Tests = 'MigrationTests.Sonar_' }
         # SX1309S counts as covered only with '_camelCase' (2026-10-09)
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (result.FieldStyle != "_camelCase")'; Replace = 'if (false)'; Tests = 'MigrationTests.StaticUnderscoreAlone' }
         # Options for declarations (2026-10-07): BRO1601 inheritdoc style, BRO1505 adjacent single-line members,
@@ -664,8 +696,9 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = '|| !IsPlain(close.TrailingTrivia, '; Replace = '|| false && !IsPlain(close.TrailingTrivia, '; Tests = 'ConstructorInitializerLineTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'if (isOn(DiagnosticIds.CloseParenthesisOnLastItemLine) && '; Replace = 'if ('; Tests = 'ConstructorInitializerLineTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'if (!IsPlain(last.TrailingTrivia, close.LeadingTrivia))'; Replace = 'if (false)'; Tests = 'ConstructorInitializerLineTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ?'; Replace = 'return length >= Indentation.GetMaxLineLength(options) ?'; Tests = 'ConstructorInitializerLineTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ?'; Replace = 'return false ?'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = '(initializer.Span.End - keyword.SpanStart) > maxLength'; Replace = '(initializer.Span.End - keyword.SpanStart) >= maxLength'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'return maxLength != int.MaxValue'; Replace = 'return false'; Tests = 'ConstructorInitializerLineTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstructorInitializers.cs'; Find = 'start, closeText.Length > 0, text'; Replace = 'start, false, text'; Tests = 'ConstructorInitializerLineTests.SameLine_MeasuredAfterBro1110' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'out var value) && value.Trim() == "same_line";'; Replace = 'out var value);'; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = '&& isOn(DiagnosticIds.CloseParenthesisOnLastItemLine)'; Replace = ''; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'if (!IsPlainGap(previous.GetPreviousToken(), previous))'; Replace = 'if (false)'; Tests = 'ConstraintPlacementTests' }
@@ -673,6 +706,16 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = '|| !IsPlainGap(before, clause.WhereKeyword))'; Replace = ')'; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += clause.WhereKeyword.SpanStart - before.Span.End + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'length += 1 + clause.Span.Length;'; Replace = 'length += 0;'; Tests = 'ConstraintPlacementTests' }
-        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'return length > Indentation.GetMaxLineLength(options) ? [] : joins;'; Replace = 'return length >= Indentation.GetMaxLineLength(options) ? [] : joins;'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = '+ length > maxLength ? [] : joins;'; Replace = '+ length >= maxLength ? [] : joins;'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/ConstraintPlacement.cs'; Find = 'return joins.Count > 0 && maxLength != int.MaxValue'; Replace = 'return joins.Count > 0 && false'; Tests = 'ConstraintPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = '&& isOn(finding.Id))'; Replace = ')'; Tests = 'ConstraintPlacementTests.SameLine_WithoutBro1404AndBro1007' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'finding.Modifier + " "'; Replace = 'string.Empty'; Tests = 'ConstraintPlacementTests.SameLine_NotReported_WhenAnAddedModifier' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'if (isOn(DiagnosticIds.OpenParenthesisOnNameLine) && ParenthesisPlacement'; Replace = 'if (ParenthesisPlacement'; Tests = 'ConstructorInitializerLineTests.SameLine_NotReported_WhenTheRulesThatShortenTheLineAreOff' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'changes.Add(ParenthesisPlacement.GetOpenChange(open, text));'; Replace = ''; Tests = 'ConstructorInitializerLineTests.SameLine_MeasuredAsTheOtherFixesLeaveTheLine' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'if (isOn(DiagnosticIds.ParametersOnSameOrSeparateLines)'; Replace = 'if (true'; Tests = 'ConstructorInitializerLineTests.SameLine_NotReported_WhenTheRulesThatShortenTheLineAreOff' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'return isOn(DiagnosticIds.CloseParenthesisOnLastItemLine)'; Replace = 'return true'; Tests = 'ConstructorInitializerLineTests.SameLine_NotReported_WhenTheRulesThatShortenTheLineAreOff' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'if (closeMoves && close?.NewText'; Replace = 'if (false && close?.NewText'; Tests = 'ConstructorInitializerLineTests.SameLine_MeasuredAfterBro1110' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = '|| applied[applied.Count - 1].Span.End <= change.Span.Start)'; Replace = '|| true)'; Tests = 'ConstructorInitializerLineTests.SameLine_MeasuredAsTheOtherFixesLeaveTheLine' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = '.Where(c => c.Span.End <= position)'; Replace = '.Where(c => false)'; Tests = 'ConstraintPlacementTests.SameLine_NotReported_WhenAnAddedModifier' }
     )
 }

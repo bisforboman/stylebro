@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,9 +26,10 @@ internal static class ConstructorInitializers
     /// there already or can't be joined: the initializer spans several lines, anything but whitespace sits between ')'
     /// and 'base'/'this', or the joined line (up to the initializer's end; a body after it isn't counted, BRO1509 may move
     /// it) would be longer than 'max_line_length' (no limit when unset). When BRO1110 is on and moves the ')' to the last
-    /// parameter's line, the ')' moves in the same edit, so both fixes give the same text in either order.
+    /// parameter's line, the ')' moves in the same edit, so both fixes give the same text in either order. The line is
+    /// measured as the other fixes leave it (<see cref="SameLineJoins.GetColumn"/>).
     /// </summary>
-    public static TextChange? GetJoin(ConstructorInitializerSyntax initializer, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    public static TextChange? GetJoin(ConstructorInitializerSyntax initializer, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model, CancellationToken cancellationToken)
     {
         var keyword = initializer.ThisOrBaseKeyword;
         if (initializer.ColonToken.IsMissing || initializer.ContainsDiagnostics
@@ -54,8 +56,11 @@ internal static class ConstructorInitializers
         }
 
         var newText = closeText + " : ";
-        var length = (start - text.Lines.GetLineFromPosition(start).Start) + newText.Length + (initializer.Span.End - keyword.SpanStart);
-        return length > Indentation.GetMaxLineLength(options) ? null : new TextChange(TextSpan.FromBounds(start, keyword.SpanStart), newText);
+        var maxLength = Indentation.GetMaxLineLength(options);
+        return maxLength != int.MaxValue
+            && SameLineJoins.GetColumn(initializer.Parent!, start, closeText.Length > 0, text, options, isOn, model, cancellationToken) + newText.Length + (initializer.Span.End - keyword.SpanStart) > maxLength
+            ? null
+            : new TextChange(TextSpan.FromBounds(start, keyword.SpanStart), newText);
     }
 
     /// <summary>

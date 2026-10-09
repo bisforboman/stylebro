@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -40,9 +41,10 @@ internal static class ConstraintPlacement
     /// clause, or the joined line (up to the last clause's end; a body or '=&gt;' after it isn't counted) would be longer
     /// than 'max_line_length' (no limit when unset). The '=&gt;' of an expression body stays where it is. When BRO1110
     /// is on and moves the ')' before the first clause to the last parameter's line, the ')' moves in the same edit, so
-    /// both fixes give the same text in either order.
+    /// both fixes give the same text in either order. The line is measured as the other fixes leave it
+    /// (<see cref="SameLineJoins.GetColumn"/>).
     /// </summary>
-    public static List<(TypeParameterConstraintClauseSyntax Clause, TextChange Change)> GetJoins(SyntaxNode declaration, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    public static List<(TypeParameterConstraintClauseSyntax Clause, TextChange Change)> GetJoins(SyntaxNode declaration, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model, CancellationToken cancellationToken)
     {
         var joins = new List<(TypeParameterConstraintClauseSyntax Clause, TextChange Change)>();
         var clauses = GetClauses(declaration);
@@ -67,7 +69,7 @@ internal static class ConstraintPlacement
             closeText = previous.Text;
         }
 
-        var length = start - text.Lines.GetLineFromPosition(start).Start + closeText.Length;
+        var length = closeText.Length;
         foreach (var clause in clauses)
         {
             var before = clause.WhereKeyword.GetPreviousToken();
@@ -89,7 +91,9 @@ internal static class ConstraintPlacement
             }
         }
 
-        return length > Indentation.GetMaxLineLength(options) ? [] : joins;
+        var maxLength = Indentation.GetMaxLineLength(options);
+        return joins.Count > 0 && maxLength != int.MaxValue
+            && SameLineJoins.GetColumn(declaration, start, closeText.Length > 0, text, options, isOn, model, cancellationToken) + length > maxLength ? [] : joins;
     }
 
     /// <summary>

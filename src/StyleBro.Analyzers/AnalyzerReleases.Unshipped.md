@@ -6,3 +6,6 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 BRO1008 | Ordering | Warning  | UsingPlacementAnalyzer
+BRO1149 | Readability | Warning  | NestedIfAnalyzer
+BRO1150 | Readability | Warning  | WhereBeforeTerminalAnalyzer
+BRO1151 | Readability | Warning  | ParamsArrayAnalyzer
