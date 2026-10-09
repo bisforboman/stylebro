@@ -1,6 +1,8 @@
 name: Mutation testing
 
-# Breaks each guard listed in scripts/mutation/mutations.psd1 and checks that a test fails.
+# Breaks each guard listed in scripts/mutation/mutations.psd1 and checks that a test fails. The entries are split over
+# parallel shards (index modulo the shard count); the job named `mutation` (the required check) passes only when every
+# shard passed.
 on:
   push:
     branches: [main]
@@ -12,9 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  mutation:
+  shard:
+    name: mutation shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v7
 
@@ -24,4 +31,15 @@ jobs:
 
       - name: Mutate the guards
         shell: pwsh
-        run: ./scripts/mutation/Invoke-Mutations.ps1
+        run: ./scripts/mutation/Invoke-Mutations.ps1 -Shard ${{ matrix.shard }} -Shards 4
+
+  # The required check. `always()` so a failed or cancelled shard fails it instead of skipping it.
+  mutation:
+    needs: shard
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the shards
+        run: |
+          echo "Shards: ${{ needs.shard.result }}"
+          test "${{ needs.shard.result }}" = success
