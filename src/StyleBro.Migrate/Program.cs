@@ -27,21 +27,24 @@ internal static class Program
           Settings:        https://bisforboman.github.io/stylebro/configuration/
 
         Usage:
-          stylebro-migrate [path] [--write] [--sonar-profile <file>]
+          stylebro-migrate [path] [--write] [--no-agents-md] [--sonar-profile <file>]
               Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize] [--sonar-profile <file>]
+          stylebro-migrate init [path] [--write] [--modernize] [--no-agents-md] [--sonar-profile <file>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. A repository with a StyleCop setup is told to
               use 'stylebro-migrate --write' instead.
+
+              Both also write a StyleBro section into AGENTS.md (instructions for AI agents, between markers, updated on
+              every run); --no-agents-md leaves AGENTS.md alone.
 
               Both follow a SonarQube setup too (SonarAnalyzer.CSharp, Sonar rule severities in rulesets and configs):
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
               takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
 
-          stylebro-migrate format [folder, solution or project] [--all] [--once] [dotnet format options]
+          stylebro-migrate format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
               run changes nothing (at most 3 runs) and prints the files each run changed (the first 10); --once runs once. --all also
@@ -53,6 +56,8 @@ internal static class Program
               don't fail it (plain 'dotnet format --verify-no-changes' fails on them). For CI and agents.
               Exit codes: 0 clean (only kept findings left, if any); 2 a run still changed files after 3 runs, or with
               --verify-no-changes, formatting would change a file; other: 'dotnet format' failed.
+              --files formats only those files (paths relative to the current folder or the repository root), loading
+              just the project each belongs to: seconds after a small edit. With --verify-no-changes too.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--sonar-profile <file>]
           stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
@@ -65,6 +70,9 @@ internal static class Program
 
           stylebro-migrate baseline [path] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
+
+          --json (any command): one JSON object on stdout (settings, conventions, runs, changes per rule, kept
+              findings, clean, exit code; https://bisforboman.github.io/stylebro/agents/); the text goes to stderr.
 
           stylebro-migrate help | --help | -h
               This text.
@@ -87,47 +95,30 @@ internal static class Program
             return 0;
         }
 
-        // 'format' passes unknown options on to 'dotnet format'.
-        var (command, known) = args.FirstOrDefault() switch
+        if (!args.Contains(JsonReport.Option))
         {
-            "baseline" => ("baseline", new[] { "--project" }),
-            "init" => ("init", new[] { "--write", "--modernize", SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
-            "format" => ("format", null),
-            _ => (null, new[] { "--write", SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
-        };
-        var options = args.Skip(command is null ? 0 : 1).ToArray();
-        if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a.Split('=')[0])) is { } unknown)
-        {
-            Console.Error.WriteLine($"Unknown option: {unknown}");
-            Console.Error.WriteLine(Usage);
-            return 1;
+            return Dispatch(args);
         }
 
-        if (command != "baseline" && PreviewCommand.Wants(options))
+        // --json: the human text goes to stderr, the report to stdout.
+        args = args.Where(a => a != JsonReport.Option).ToArray();
+        var command = args.FirstOrDefault() is "baseline" or "init" or "format" ? args[0] : "migrate";
+        var preview = command != "baseline" && PreviewCommand.Wants(args);
+        JsonReport.Begin(preview ? "preview" : command, preview ? command : null);
+        var stdout = Console.Out;
+        Console.SetOut(Console.Error);
+        int code;
+        try
         {
-            if (options.Contains("--write"))
-            {
-                Console.Error.WriteLine("--diff previews without writing anything: use --diff or --write, not both.");
-                return 1;
-            }
-
-            return PreviewCommand.Run(command, options);
+            code = Dispatch(args);
+        }
+        finally
+        {
+            Console.SetOut(stdout);
         }
 
-        switch (command)
-        {
-            case "baseline":
-                return BaselineCommand.Run(options);
-
-            case "init":
-                return InitCommand.Run(options);
-
-            case "format":
-                return FormatCommand.Run(options);
-
-            default:
-                return Migrate(options);
-        }
+        stdout.WriteLine(JsonReport.End(code));
+        return code;
     }
 
     /// <summary>stylebro-migrate [path] [--write]: the migration from StyleCop.</summary>
@@ -142,6 +133,8 @@ internal static class Program
             return 1;
         }
 
+        JsonReport.Set("path", root);
+        JsonReport.Set("write", write);
         if (!ReadSonar(root, profile, out var sonar))
         {
             return 1;
@@ -188,6 +181,7 @@ internal static class Program
         {
             var path = Path.Combine(root, file);
             var block = Migration.Render(sections);
+            JsonReport.AddSettings(file, block);
             if (write)
             {
                 var existing = File.Exists(path) ? File.ReadAllText(path) : null;
@@ -223,6 +217,7 @@ internal static class Program
             }
         }
 
+        AgentsFile.Update(root, write, rest.Contains(AgentsFile.OptOut)).ForEach(Console.WriteLine);
         Console.WriteLine(write
             ? NextStep
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
@@ -347,6 +342,53 @@ internal static class Program
         }
 
         return (added, files);
+    }
+
+    /// <summary>Runs the command the arguments name.</summary>
+    private static int Dispatch(string[] args)
+    {
+        // 'format' passes unknown options on to 'dotnet format'.
+        var (command, known) = args.FirstOrDefault() switch
+        {
+            "baseline" => ("baseline", new[] { "--project" }),
+            "init" => ("init", new[] { "--write", "--modernize", AgentsFile.OptOut, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+            "format" => ("format", null),
+            _ => (null, new[] { "--write", AgentsFile.OptOut, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+        };
+        var options = args.Skip(command is null ? 0 : 1).ToArray();
+        if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a.Split('=')[0])) is { } unknown)
+        {
+            Console.Error.WriteLine($"Unknown option: {unknown}");
+            Console.Error.WriteLine(Usage);
+            return 1;
+        }
+
+        if (command != "baseline" && PreviewCommand.Wants(options))
+        {
+            if (options.Contains("--write"))
+            {
+                Console.Error.WriteLine("--diff previews without writing anything: use --diff or --write, not both.");
+                return 1;
+            }
+
+            return PreviewCommand.Run(command, options);
+        }
+
+        switch (command)
+        {
+            case "baseline":
+                return BaselineCommand.Run(options);
+
+            case "init":
+                return InitCommand.Run(options);
+
+            case "format":
+                // With --json, 'dotnet format''s own output goes through the log too (else it inherits stdout).
+                return FormatCommand.Run(options, JsonReport.Current is null ? null : Console.Error.WriteLine);
+
+            default:
+                return Migrate(options);
+        }
     }
 
     /// <summary>Which StyleCop rules are on, and why the ones StyleBro and the SDK don't cover aren't.</summary>

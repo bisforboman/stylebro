@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -194,6 +195,14 @@ internal sealed class SonarSetup
     /// <summary>The report's Sonar part, ending with an empty line (the preview prints it as one block).</summary>
     public List<string> Report(Applied applied)
     {
+        JsonReport.Set("sonar", new JsonObject
+        {
+            ["sources"] = new JsonArray(Sources.Select(s => (JsonNode?)s).ToArray()),
+            ["rulesOn"] = applied.On,
+            ["fixed"] = new JsonArray(applied.Enforced.Select(e => (JsonNode?)new JsonObject { ["sonar"] = e.Sonar, ["by"] = e.Target }).ToArray()),
+            ["notApplied"] = new JsonArray(applied.NotApplied.Select(n => (JsonNode?)new JsonObject { ["sonar"] = n.Sonar, ["reason"] = n.Reason }).ToArray()),
+            ["notes"] = new JsonArray(applied.Notes.Select(n => (JsonNode?)n).ToArray()),
+        });
         var report = new List<string>
         {
             $"Sonar: read {string.Join(", ", Sources)}",

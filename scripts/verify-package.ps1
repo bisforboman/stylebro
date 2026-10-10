@@ -11,7 +11,8 @@
 #   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion;
 #   7. a file compiled from the package folder (a source package's contentFiles) isn't checked;
 #   8. a rename the fix keeps on purpose (the name read by reflection in another file): 'stylebro-migrate format' lists it
-#      with its reason, and its --verify-no-changes exits 2 while something is left to fix, then 0 with only it left.
+#      with its reason, and its --verify-no-changes exits 2 while something is left to fix, then 0 with only it left;
+#      with --files and --json, the JSON on stdout has it with its reason.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -158,6 +159,8 @@ try {
     $verified = dotnet @migrate --verify-no-changes 2>&1 | Out-String
     $verified | Out-Host
     Check ($LASTEXITCODE -eq 0 -and $verified -match '1 finding kept on purpose') 'format --verify-no-changes exits 0 with only the kept finding left'
+    $json = dotnet @migrate --verify-no-changes --files (Join-Path $keptRepo 'Counter.cs') --json 2>$null | Out-String | ConvertFrom-Json
+    Check ($LASTEXITCODE -eq 0 -and $json.clean -and $json.keptFindings[0].rule -eq 'BRO1303' -and $json.keptFindings[0].reason -eq 'NameInString') 'format --files --json reports the kept finding with its reason'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue

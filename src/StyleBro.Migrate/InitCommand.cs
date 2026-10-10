@@ -48,6 +48,9 @@ internal static class InitCommand
             return 1;
         }
 
+        JsonReport.Set("path", root);
+        JsonReport.Set("write", write);
+
         var path = Path.Combine(root, ".editorconfig");
         var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
@@ -121,11 +124,23 @@ internal static class InitCommand
         }
 
         modernize.Notes.ForEach(Console.WriteLine);
+        if (!migrated)
+        {
+            JsonReport.AddSettings(".editorconfig", block);
+        }
+
+        if (modernize.Block is not null)
+        {
+            JsonReport.AddSettings(".editorconfig", modernize.Block);
+        }
+
+        var noAgents = args.Contains(AgentsFile.OptOut);
         if (!write)
         {
             Console.WriteLine("== .editorconfig (run with --write to add it)");
             Console.Write(block);
             Console.Write(modernize.Block);
+            AgentsFile.Update(root, write: false, noAgents).ForEach(Console.WriteLine);
             return 0;
         }
 
@@ -155,6 +170,7 @@ internal static class InitCommand
             }
         }
 
+        AgentsFile.Update(root, write: true, noAgents).ForEach(Console.WriteLine);
         Console.WriteLine(Program.FormatHint);
         Program.PrintWorkspaceHint(root);
         return 0;
