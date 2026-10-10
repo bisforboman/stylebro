@@ -1253,6 +1253,13 @@ job per workflow lets docs-only PRs pass the heavy jobs in seconds (skips are on
 appear); on PRs only the mutation entries for changed files (and their test files) run, the full set on main. The
 performance check compares with `--all-rules`. Real-world jobs are the queue bottleneck (12 Windows jobs per PR, ~20
 concurrent jobs on the free plan): avoid many parallel PRs that touch src/.
+Since 2026-10-10 (owner's decision): real-world and mutation don't run on push to main, only on PRs and NIGHTLY on main
+(02:00/03:00 UTC + `workflow_dispatch`); a failed nightly opens or comments on the issue "Nightly real-world run failed"
+/ "Nightly mutation run failed" (`.github/nightly-issue.sh`). ci.yml (build, parity, performance) still runs on push.
+Real-world jobs cache the clone's `.git` (`realworld-clone-<repo>-<commit>`) and `NUGET_PACKAGES`
+(`realworld-nuget-<os>-<repo>-<commit>-sdk<ver>`); saved only outside PRs (main's caches reach every PR; PR caches
+would evict them from the 10 GB limit), so a new pin is cached by the next nightly. The script skips the fetch when the
+commit is already in the clone; StyleBro's DLLs are never in a cached path.
 
 **Sonar** (#89, #90, #94): `stylebro-migrate` reads Sonar setups (`SonarSetup.cs`: exported profile via
 `--sonar-profile`, the package's default "Sonar way" list from `data/`, rulesets incl. the scanner's, globalconfigs,
