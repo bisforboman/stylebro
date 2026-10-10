@@ -40,11 +40,11 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '.OrderBy(r => r.Priority)
             .ThenByDescending'; Replace = '.OrderBy(r => 0)
             .ThenByDescending'; Tests = 'FieldNamingTests' }
-        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '            _ => null,
-        };
-    }'; Replace = '            _ => FieldStyle.CamelCase,
-        };
-    }'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '"camelCase" => FieldStyle.CamelCase,
+            "_camelCase" => FieldStyle.UnderscoreCamelCase,
+            _ => null,'; Replace = '"camelCase" => FieldStyle.CamelCase,
+            "_camelCase" => FieldStyle.UnderscoreCamelCase,
+            _ => FieldStyle.CamelCase,'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'm => m.Contains("const") && m.All(x => x is "const" or "static")'; Replace = 'm => m.Length > 0'; Tests = 'FieldNamingTests' }
 
         # BRO1313 (parameter names like the base)
