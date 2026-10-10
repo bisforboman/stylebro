@@ -938,8 +938,8 @@ public class FieldNamingTests
             TestState.Sources.Add(source);
             TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
             FixedState.Sources.Add(source);
-            NumberOfIncrementalIterations = 1;
-            NumberOfFixAllIterations = 1;
+            NumberOfIncrementalIterations = 0;
+            NumberOfFixAllIterations = 0;
             CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck;
             SolutionTransforms.Add((solution, projectId) => solution.AddAnalyzerReference(projectId, new GeneratorReference(new TGenerator())));
         }

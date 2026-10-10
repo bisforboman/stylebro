@@ -4,6 +4,11 @@ namespace StyleBro.Analyzers;
 
 internal static class Descriptors
 {
+    /// <summary>For the rules whose fix can leave a finding on purpose (a rename that would break code it can't see).</summary>
+    private const string KeptNote = " If 'dotnet format' doesn't fix a finding, StyleBro kept it on purpose (for example, the name is read by "
+        + "reflection): 'stylebro-migrate format' lists each one with the reason. Change it by hand only after checking those uses, "
+        + "or suppress or baseline it.";
+
     public static readonly DiagnosticDescriptor MemberOrdering = new(
         id: DiagnosticIds.MemberOrdering,
         title: "Members should be ordered",
@@ -120,7 +125,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Local variables and query range variables are camelCase: 'total', not 'Total' or '_total'. "
-            + "Replaces StyleCop SA1312.",
+            + "Replaces StyleCop SA1312."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.VariableCasing + "/");
 
     public static readonly DiagnosticDescriptor ParameterCasing = new(
@@ -131,7 +137,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Parameters are camelCase: 'count', not 'Count' or '_count'. The fix also renames named arguments "
-            + "and the parameters of overrides and implementations. Replaces StyleCop SA1313.",
+            + "and the parameters of overrides and implementations. Replaces StyleCop SA1313."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.ParameterCasing + "/");
 
     public static readonly DiagnosticDescriptor PrivateFieldNaming = new(
@@ -142,7 +149,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Private fields are 'count', or '_count' with stylebro_private_field_naming = _camelCase. "
-            + "Replaces StyleCop SA1306 and SA1309 for private fields.",
+            + "Replaces StyleCop SA1306 and SA1309 for private fields."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.PrivateFieldNaming + "/");
 
     public static readonly DiagnosticDescriptor InterfacePrefix = new(
@@ -152,7 +160,8 @@ internal static class Descriptors
         category: "Naming",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Interfaces are named 'IShape', not 'Shape'. Replaces StyleCop SA1302.",
+        description: "Interfaces are named 'IShape', not 'Shape'. Replaces StyleCop SA1302."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.InterfacePrefix + "/");
 
     public static readonly DiagnosticDescriptor TypeParameterPrefix = new(
@@ -162,7 +171,8 @@ internal static class Descriptors
         category: "Naming",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Type parameters are named 'T' or 'TItem', not 'Item'. Replaces StyleCop SA1314.",
+        description: "Type parameters are named 'T' or 'TItem', not 'Item'. Replaces StyleCop SA1314."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.TypeParameterPrefix + "/");
 
     public static readonly DiagnosticDescriptor FieldPascalCase = new(
@@ -173,7 +183,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Constants, static readonly fields and public or internal fields are 'MaxCount', not 'maxCount' or "
-            + "'_maxCount'. Replaces StyleCop SA1303, SA1311, SA1307 and SA1304.",
+            + "'_maxCount'. Replaces StyleCop SA1303, SA1311, SA1307 and SA1304."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.FieldPascalCase + "/");
 
     public static readonly DiagnosticDescriptor FieldPrefix = new(
@@ -183,7 +194,8 @@ internal static class Descriptors
         category: "Naming",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Fields aren't named 'm_count', 's_count' or 't_count'. Replaces StyleCop SA1308.",
+        description: "Fields aren't named 'm_count', 's_count' or 't_count'. Replaces StyleCop SA1308."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.FieldPrefix + "/");
 
     public static readonly DiagnosticDescriptor FieldUnderscore = new(
@@ -193,7 +205,8 @@ internal static class Descriptors
         category: "Naming",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Fields are 'maxValue' or 'MaxValue', not 'max_value' or 'MAX_VALUE'. Replaces StyleCop SA1310.",
+        description: "Fields are 'maxValue' or 'MaxValue', not 'max_value' or 'MAX_VALUE'. Replaces StyleCop SA1310."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.FieldUnderscore + "/");
 
     public static readonly DiagnosticDescriptor ElementPascalCase = new(
@@ -204,7 +217,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Types, methods, properties, events, enum members and local functions are PascalCase. "
-            + "Replaces StyleCop SA1300 (except for namespaces).",
+            + "Replaces StyleCop SA1300 (except for namespaces)."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.ElementPascalCase + "/");
 
     public static readonly DiagnosticDescriptor NamespacePascalCase = new(
@@ -215,7 +229,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: false,
         description: "Every part of a namespace name is PascalCase. Off by default: renaming a namespace renames every type in it. "
-            + "Replaces StyleCop SA1300 (namespaces).",
+            + "Replaces StyleCop SA1300 (namespaces)."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.NamespacePascalCase + "/");
 
     public static readonly DiagnosticDescriptor ParameterMatchesBase = new(
@@ -226,7 +241,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: false,
         description: "A parameter of an override or interface implementation has the name of the base member's parameter "
-            + "(proposed for StyleCop in issue #1949; the SDK's CA1725 reports it without a fix). Off by default.",
+            + "(proposed for StyleCop in issue #1949; the SDK's CA1725 reports it without a fix). Off by default."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.ParameterMatchesBase + "/");
 
     public static readonly DiagnosticDescriptor AsyncSuffix = new(
@@ -237,7 +253,8 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: false,
         description: "A method that returns Task, Task<T>, ValueTask, ValueTask<T> or IAsyncEnumerable<T> ends in 'Async' "
-            + "(Roslynator RCS1046, Meziantou MA0137). Off by default.",
+            + "(Roslynator RCS1046, Meziantou MA0137). Off by default."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.AsyncSuffix + "/");
 
     public static readonly DiagnosticDescriptor OpenParenthesisOnNameLine = new(
@@ -863,7 +880,8 @@ internal static class Descriptors
         category: "Naming",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: false,
-        description: "Variable, parameter and field names don't start with a type prefix ('iCount' -> 'count'). Off by default, like StyleCop's. Replaces StyleCop SA1305.",
+        description: "Variable, parameter and field names don't start with a type prefix ('iCount' -> 'count'). Off by default, like StyleCop's. Replaces StyleCop SA1305."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.HungarianNotation + "/");
 
     public static readonly DiagnosticDescriptor TupleElementCasing = new(
@@ -873,7 +891,8 @@ internal static class Descriptors
         category: "Naming",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Element names in tuple types are PascalCase ('(int Count, string Name)'), or camelCase with stylebro_tuple_element_name_casing. Replaces StyleCop SA1316.",
+        description: "Element names in tuple types are PascalCase ('(int Count, string Name)'), or camelCase with stylebro_tuple_element_name_casing. Replaces StyleCop SA1316."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.TupleElementCasing + "/");
 
     public static readonly DiagnosticDescriptor BaseCall = new(
@@ -1319,7 +1338,8 @@ internal static class Descriptors
         description: "An ordinary method declared public in a type that is internal (or private, or nested in one) is internal "
             + "in effect; 'internal' says so. Off by default. Only methods: properties, constructors and anything an interface, "
             + "a base type, an attribute or a convention needs stay public, because reflection and serializers see public "
-            + "members only (StyleCop issue #2981, never implemented).",
+            + "members only (StyleCop issue #2981, never implemented)."
+            + KeptNote,
         helpLinkUri: HelpBase + DiagnosticIds.InternalTypePublicMethod + "/");
 
     public static readonly DiagnosticDescriptor RedundantNullForgiving = new(

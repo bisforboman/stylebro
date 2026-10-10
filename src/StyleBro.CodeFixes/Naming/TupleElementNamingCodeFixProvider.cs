@@ -22,22 +22,22 @@ public sealed class TupleElementNamingCodeFixProvider : CodeFixProvider
     public override FixAllProvider GetFixAllProvider() => RenameAllProvider.Instance;
 
     /// <inheritdoc/>
-    public override Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
         {
-            if (Rename(diagnostic) is { } rename)
+            // A rename the fix keeps on purpose offers no action: applying it would change nothing.
+            if (Rename(diagnostic) is { } rename
+                && await TupleElementRenamer.GetKeptReasonAsync(context.Document.Project.Solution, rename.OldName, rename.NewName, context.CancellationToken).ConfigureAwait(false) is null)
             {
                 context.RegisterCodeFix(
                     CodeAction.Create(
                         $"Rename to '{rename.NewName}'",
-                        ct => TupleElementRenamer.RenameAsync(context.Document.Project.Solution, new[] { rename }, ct),
+                        ct => TupleElementRenamer.RenameAsync(context.Document.Project.Solution, new[] { (rename.OldName, rename.NewName, diagnostic) }, ct),
                         equivalenceKey: nameof(TupleElementNamingCodeFixProvider)),
                     diagnostic);
             }
         }
-
-        return Task.CompletedTask;
     }
 
     private static (string OldName, string NewName)? Rename(Diagnostic diagnostic) =>
@@ -69,14 +69,14 @@ public sealed class TupleElementNamingCodeFixProvider : CodeFixProvider
                 _ => context.Document is null ? Enumerable.Empty<Document>() : new[] { context.Document },
             };
 
-            var renames = new List<(string, string)>();
+            var renames = new List<(string, string, Diagnostic)>();
             foreach (var document in documents)
             {
                 foreach (var diagnostic in await context.GetDocumentDiagnosticsAsync(document).ConfigureAwait(false))
                 {
                     if (Rename(diagnostic) is { } rename)
                     {
-                        renames.Add(rename);
+                        renames.Add((rename.OldName, rename.NewName, diagnostic));
                     }
                 }
             }

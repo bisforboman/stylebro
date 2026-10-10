@@ -45,8 +45,14 @@ internal static class Program
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
               run changes nothing (at most 3 runs) and prints the files each run changed; --once runs once. --all also
-              applies every other analyzer's and compiler fix. Other options pass through (--verify-no-changes, --severity
-              warn). A folder with several solutions or projects needs one named.
+              applies every other analyzer's and compiler fix. Other options pass through (--severity warn, --report). A
+              folder with several solutions or projects needs one named.
+              Then it lists the findings StyleBro's fixes keep on purpose, with the reason (a name read by reflection,
+              used in generated code, ...): don't change those by hand without checking; suppress or baseline them.
+              --verify-no-changes changes nothing and checks whether formatting would change a file; kept findings
+              don't fail it (plain 'dotnet format --verify-no-changes' fails on them). For CI and agents.
+              Exit codes: 0 clean (only kept findings left, if any); 2 a run still changed files after 3 runs, or with
+              --verify-no-changes, formatting would change a file; other: 'dotnet format' failed.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--sonar-profile <file>]
           stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize] [--sonar-profile <file>]

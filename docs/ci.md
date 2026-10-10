@@ -5,8 +5,16 @@ Two checks keep a repository clean. They overlap on purpose: the build catches w
 
 1. **The build** reports StyleBro's rules as warnings (and the built-in .NET rules too, with
    `EnforceCodeStyleInBuild`). With warnings as errors, a violation fails the build.
-2. **`dotnet format --verify-no-changes`** fails (exit code 2) when running `dotnet format` would change any file. It
-   also covers whitespace formatting, which isn't a build warning.
+2. **`stylebro-migrate format --verify-no-changes`** fails (exit code 2) when formatting would change any file. It
+   also covers whitespace formatting, which isn't a build warning. Unlike plain `dotnet format --verify-no-changes`, it
+   doesn't fail on [findings kept on purpose](getting-started.md#findings-kept-on-purpose): renames StyleBro's fixes
+   leave because they'd break code only the fix can see (a name read by reflection, say). Those stay as build warnings,
+   so suppress or [baseline](baseline.md) them where warnings are errors.
+
+Exit codes of `stylebro-migrate format --verify-no-changes`: **0** clean (nothing to change; kept findings are listed
+with their reasons), **2** formatting would change a file (the output says which findings), anything else: `dotnet
+format` itself failed. A script or an AI agent can loop "run `stylebro-migrate format`, then check" and stop on 0; with
+plain `dotnet format --verify-no-changes` such a loop never ends while kept findings exist.
 
 Fixing a failure is the same everywhere: run `stylebro-migrate format` (or `dotnet format`, see
 [the notes](#notes) on other analyzers) locally and commit the result.
@@ -52,8 +60,10 @@ jobs:
 
       - run: dotnet build MySolution.sln
 
+      - run: dotnet tool install --global StyleBro.Migrate --prerelease
+
       - name: Code style
-        run: dotnet format MySolution.sln --verify-no-changes --severity warn --no-restore --report format-report
+        run: stylebro-migrate format MySolution.sln --verify-no-changes --severity warn --no-restore --report format-report
 
       - name: Upload what dotnet format would change
         if: failure()
@@ -74,7 +84,10 @@ steps:
   - script: dotnet build MySolution.sln
     displayName: Build
 
-  - script: dotnet format MySolution.sln --verify-no-changes --severity warn --no-restore --report $(Build.ArtifactStagingDirectory)/format-report
+  - script: dotnet tool install --global StyleBro.Migrate --prerelease
+    displayName: Install stylebro-migrate
+
+  - script: stylebro-migrate format MySolution.sln --verify-no-changes --severity warn --no-restore --report $(Build.ArtifactStagingDirectory)/format-report
     displayName: Code style
 
   - publish: $(Build.ArtifactStagingDirectory)/format-report
@@ -87,14 +100,19 @@ steps:
 - **`--severity warn`** makes `dotnet format` apply and check everything at warning level, StyleBro's default.
 - **`--no-restore`** after a build saves a second restore; `dotnet format` needs a restored solution either way.
 - **`--report`** writes `format-report.json`: every file and line `dotnet format` would change and why (rule id or
-  `WHITESPACE`). Uploading it on failure shows what to fix without rerunning anything.
+  `WHITESPACE`), kept findings included. Uploading it on failure shows what to fix without rerunning anything.
+- **How `--verify-no-changes` tells kept findings apart:** when `dotnet format --verify-no-changes` reports findings,
+  `stylebro-migrate format` formats a temporary copy of the repository (the fixes only run when they may write) and
+  checks whether any file changed; the fixes write down which findings they kept and why. The copy is deleted, the
+  repository isn't touched. That costs a second format run, only when there are findings.
+- **Without the tool:** plain `dotnet format --verify-no-changes --severity warn` works too, but it fails on kept
+  findings. Suppress or baseline them first.
 - **Other analyzers and compiler fixes.** Plain `dotnet format --verify-no-changes` also fails on every other analyzer
   package's fixable warnings and on compiler fixes (CS8618's `required`), and locally plain `dotnet format` applies
   them, which can change behavior or break the build. To check and fix only StyleBro's rules and the built-in rules
   `stylebro-migrate init` turns on, name them: `dotnet format --diagnostics BRO1001 BRO1505 ... IDE0055 IDE0036
-  --verify-no-changes`. `stylebro-migrate format` (the .NET tool StyleBro.Migrate) builds that list for you and is what
-  [getting-started.md](getting-started.md#3-run-stylebro-migrate-format) recommends locally; in CI it needs
-  `dotnet tool install --global StyleBro.Migrate --prerelease` first.
+  --verify-no-changes`. `stylebro-migrate format` (the .NET tool StyleBro.Migrate, installed in the examples above)
+  builds that list for you, locally and in CI.
 - **Only some checks?** `dotnet format whitespace`, `dotnet format style` (built-in .NET rules) and
   `dotnet format analyzers` (StyleBro and other analyzer packages) check one part each, with the same options.
 - **A large existing codebase:** commit a [baseline](baseline.md) so CI fails only on new violations. A baseline can't

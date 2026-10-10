@@ -15,7 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 129 |
 | Done, not released yet | 0 |
-| Planned | 0 rules, 66 work items |
+| Planned | 0 rules, 71 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 109 by StyleBro, 44 by the .NET SDK, 42 dropped by design (they
@@ -100,6 +100,11 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | BRO1523 second run in Kavita | After the trial-2 fixes, Kavita still needed a second run for one BRO1523 call-chain split (`}).GetAwaiter()` in `Kavita.Server/Startup.cs`). Cause: BRO1523 skipped chains with any directive in them, so a lambda's `#region`s hid the chain until BRO1113 removed them. Region lines no longer count (other directives still skip the chain). | Done (2026-10-09) |
 | Beyond StyleCop | Sonar mirrors (Sonar survey 2026-10-09) | BRO1149 merges nested `if`s (S1066), BRO1150 `Where(p).Count()` -> `Count(p)` (S2971), BRO1151 the elements instead of an array for `params` (S3878); written from the public rule descriptions, with fixes Sonar lacks. On in the preset, off after `stylebro-migrate`. Fixers for the Sonar ids reuse their fix logic in a later PR (decisions.md 2026-10-09). | Done (2026-10-09) |
 | Beyond StyleCop | Fixes for Sonar's own S1066, S2971, S3878 | Owner's decision 2026-10-09: BRO1149-BRO1151's fixes are registered for Sonar's ids too, so `dotnet format` fixes SonarAnalyzer.CSharp's warnings at the places the StyleBro rule would fix (no action elsewhere: the warning stays). Unit tests with a stub reporting where Sonar does; `scripts/sonar-interop.ps1` (weekly workflow) against the real package. | Done (2026-10-09) |
+| Agents | Findings kept on purpose | Owner's request 2026-10-10: a fix that leaves a finding on purpose (a rename that would break reflection, `nameof`, generated code or a hiding member) offers no code action, and `stylebro-migrate format` lists each with its reason; `--verify-no-changes` exits 0 when only kept findings are left. See decisions.md and getting-started.md. | Done (2026-10-10) |
+| Agents | `--json` output | Machine-readable output for `init`, `--diff`, `format` and the migration report: settings written, changes per rule, kept findings with reasons, runs and exit status, so an agent doesn't parse prose. | Idea |
+| Agents | Fast per-file format | `stylebro-migrate format --files a.cs b.cs` (or documented `dotnet format --include`) for the files an agent just edited: seconds instead of minutes on a large solution. | Idea |
+| Agents | StyleBro section in AGENTS.md / CLAUDE.md | `init` writes a short section into the repository's agent instructions: run `stylebro-migrate format` after edits, don't hand-fix BRO warnings, kept findings are intentional, settings live in `.editorconfig`. | Idea |
+| Agents | llms.txt for the docs site | An index of the rule pages and settings (llms.txt) on the docs site, so agents find the right page without crawling. | Idea |
 | Adoption | `stylebro-migrate` follows a SonarQube setup | Owner's decision 2026-10-09: the migration and `init` read Sonar rule severities (rulesets incl. SonarLint's and the scanner's, global configs, `.editorconfig`), the `SonarAnalyzer.CSharp` defaults (Sonar way, embedded rule list) or a quality profile backup (`--sonar-profile`), and turn on the StyleBro/SDK rules that fix 22 Sonar rules (S2325 -> CA1822, S4136 -> overloads together, S1066 -> BRO1149, ...); a rule on through StyleCop or Sonar is on. The report and `--diff` show the Sonar part. See migrating.md. | Done (2026-10-09) |
 
 ### Read the SDK's own settings
