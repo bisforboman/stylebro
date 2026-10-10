@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers;
 using StyleBro.Analyzers.Naming;
 
 namespace StyleBro.CodeFixes.Naming;
@@ -31,18 +32,36 @@ namespace StyleBro.CodeFixes.Naming;
 /// </summary>
 internal static class TupleElementRenamer
 {
-    public static async Task<Solution> RenameAsync(Solution solution, IEnumerable<(string OldName, string NewName)> renames, CancellationToken cancellationToken)
+    public static async Task<Solution> RenameAsync(Solution solution, IEnumerable<(string OldName, string NewName, Diagnostic Diagnostic)> renames, CancellationToken cancellationToken)
     {
-        foreach (var (oldName, newName) in renames.Distinct())
+        foreach (var rename in renames.GroupBy(r => (r.OldName, r.NewName)))
         {
-            var renamed = await RenameOneAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
-            if (renamed is not null && !await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false))
+            var (renamed, reason) = await TryRenameAsync(solution, rename.Key.OldName, rename.Key.NewName, cancellationToken).ConfigureAwait(false);
+            if (renamed is not null)
             {
                 solution = renamed;
+                continue;
+            }
+
+            foreach (var item in rename)
+            {
+                KeptFindings.Record(item.Diagnostic, reason ?? KeptReason.NothingToRename);
             }
         }
 
         return solution;
+    }
+
+    /// <summary>Why the fix leaves a rename on purpose, or null when it makes it (the same checks as <see cref="RenameAsync"/>).</summary>
+    public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken) =>
+        (await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false)).Reason;
+
+    private static async Task<(Solution? Renamed, KeptReason? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    {
+        var renamed = await RenameOneAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
+        return renamed is null ? (null, KeptReason.NothingToRename)
+            : await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, KeptReason.AddsErrors)
+            : (renamed, null);
     }
 
     private static async Task<Solution?> RenameOneAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)

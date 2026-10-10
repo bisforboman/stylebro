@@ -29,5 +29,10 @@
 
         # SX1309S counts as covered only with '_camelCase' (2026-10-09)
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (result.FieldStyle != "_camelCase")'; Replace = 'if (false)'; Tests = 'MigrationTests.StaticUnderscoreAlone' }
+
+        # stylebro-migrate format: kept findings don't fail it, files left to change do (2026-10-10)
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (copyCode != 0 || changed > 0)'; Replace = 'if (copyCode != 0)'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'return NotCleanExitCode;'; Replace = 'return 0;'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Where(l => !IsKeptLine(l, keys))'; Replace = 'lines'; Tests = 'KeptFindingsTests' }
     )
 }

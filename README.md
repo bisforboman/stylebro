@@ -15,7 +15,7 @@ correctness and migration, with measured numbers.
 
 ## Principles
 
-- **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run.
+- **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run. One exception, on purpose: a rename that would break code only the fix can see (a name read by reflection, used in generated code) is left with its warning, and `stylebro-migrate format` lists each with its reason ([Findings kept on purpose](https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose)).
 - **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, StyleBro uses that rule instead of shipping a copy: the preset sets its options and `stylebro-migrate init` turns it on in `.editorconfig`.
 - **Configurable through `.editorconfig`**, with a recommended preset shipped as a low-priority global config.
 

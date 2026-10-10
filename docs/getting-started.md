@@ -167,7 +167,9 @@ stylebro-migrate format
 
 This fixes whitespace, the built-in rules and every StyleBro rule. One fix can make work for another rule, so the
 command runs `dotnet format` again until a run changes no file (at most three runs) and prints what each run changed
-(`Run 1: 293 files changed.`, `Run 2: 0 files changed, clean.`); `--once` runs it once. A folder with several solutions
+(`Run 1: 293 files changed.`, `Run 2: 0 files changed, clean.`); `--once` runs it once. It ends with the findings
+StyleBro's fixes leave on purpose, each with its reason ([Findings kept on purpose](#findings-kept-on-purpose)), and
+exits with 0 when clean, 2 when a run still changed files. A folder with several solutions
 or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 Review the diff and commit it. In a large codebase you may not want one big change: see
 [Large codebases](#large-codebases).
@@ -189,8 +191,10 @@ dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 BRO1008
 
 ### 4. Check it in CI
 
-Run `dotnet format --verify-no-changes --severity warn` after the build: it fails when `dotnet format` would change a
-file. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md).
+Run `stylebro-migrate format --verify-no-changes --severity warn` after the build: it changes nothing and fails (exit
+code 2) when formatting would change a file. Findings kept on purpose don't fail it; plain
+`dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
+there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md).
 
 ## B. Coming from StyleCop
 
@@ -268,8 +272,46 @@ API, and the newer-C# rules are suggestions unless the project sets `LangVersion
   left in a [baseline](baseline.md).
 - **Some renames are left to you.** The naming rules don't rename a member whose name also appears in a string
   (reflection, serialized names, `DebuggerDisplay`): the rename would compile but break at run time. Those warnings
-  stay after `dotnet format`. Rename them by hand, suppress them (`#pragma warning disable BRO1303` with a reason), or
-  record them in the [baseline](baseline.md).
+  stay after `dotnet format`: see [Findings kept on purpose](#findings-kept-on-purpose).
+
+## Findings kept on purpose
+
+Every StyleBro finding has a fix, but a fix can see more than the analyzer: the whole solution, other projects
+included. When a change would break something only the fix can see, it leaves the finding, the warning stays, and the
+fix offers no code action for it. That's the one exception to "`dotnet format` fixes everything StyleBro reports",
+and it's on purpose. The reasons, per finding:
+
+- the name is in a string anywhere in the solution (reflection like `GetField("_count")`, serialized names, test JSON):
+  the rename would compile but break at run time;
+- the name is in a `nameof(...)` elsewhere, whose text would change with it (an HTTP header name, a log key);
+- another member would hide the new name, or the new name already means something else where the name is used;
+- a use is in generated code (a source generator, a Razor page, a designer file), which a tool writes again;
+- a related override or implementation is public API, or also implements a member that isn't renamed;
+- the rename would add compile errors (tuple element names), or the namespace is also defined outside the solution.
+
+`stylebro-migrate format` lists them after its last run:
+
+```
+Run 2: 0 files changed, clean.
+Clean: 1 finding kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them (...).
+  src/Counter.cs(5,17): BRO1303 Rename '_count' to 'count'. Kept: the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time.
+```
+
+What to do with one: **don't rename by hand to silence it** (that's what breaks the reflection or the generated code).
+Check the uses the reason names; if they can change too, rename both by hand. Otherwise suppress it with a reason
+(`#pragma warning disable BRO1303 // read by reflection in Tests`), or record it in the [baseline](baseline.md).
+
+Exit codes of `stylebro-migrate format`, for CI and agents:
+
+| Exit code | Plain run | `--verify-no-changes` |
+|---|---|---|
+| 0 | clean: the last run changed nothing (kept findings don't count) | formatting would change nothing; only kept findings are left |
+| 2 | still changing after three runs | formatting would change a file |
+| other | `dotnet format` failed (load or build errors) | the same |
+
+`--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats a temporary
+copy of the repository to see whether any file would change and which findings the fixes keep, then deletes the copy.
+Plain `dotnet format --verify-no-changes` can't tell the two apart and fails on kept findings.
 
 ## Excluding vendored code
 

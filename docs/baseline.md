@@ -40,6 +40,12 @@ says how many such formatting changes it found (whitespace, line endings, charse
 `dotnet format` reports them as WHITESPACE, ENDOFLINE, CHARSET, FINALNEWLINE and IMPORTS). Files under `obj/` and `bin/`
 (generated AssemblyInfo and global usings) don't count.
 
+**Findings kept on purpose are covered too.** A rename StyleBro's fix leaves because it would break code only the fix
+can see (the name read by reflection, used in generated code: see
+[Findings kept on purpose](getting-started.md#findings-kept-on-purpose)) stays a warning after every `dotnet format`
+run. The baseline records it like any other violation, so warnings as errors don't fail the build over it.
+`stylebro-migrate format` lists these with their reasons; check them before you rename one by hand.
+
 ## How entries match
 
 Each line of the file is a rule, a file (relative to the baseline), a fingerprint of the reported line's text, and how
