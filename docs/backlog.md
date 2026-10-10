@@ -13,8 +13,8 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 
 | | Rules |
 |---|---|
-| Released | 125 |
-| Done, not released yet | 4 |
+| Released | 129 |
+| Done, not released yet | 0 |
 | Planned | 0 rules, 66 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
@@ -143,7 +143,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1005](rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Released |
 | [BRO1006](rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Released |
 | [BRO1007](rules/BRO1007.md) | Partial elements should declare an access modifier | SA1205 | Released |
-| [BRO1008](rules/BRO1008.md) | Using directives should be placed correctly | SA1200 | Done |
+| [BRO1008](rules/BRO1008.md) | Using directives should be placed correctly | SA1200 | Released |
 
 ### BRO11xx: Readability
 
@@ -197,9 +197,9 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1146](rules/BRO1146.md) | Write 'record' without 'class' | (none; Meziantou MA0174) | Released |
 | [BRO1147](rules/BRO1147.md) | No redundant null-forgiving `!` | (none; Sonar S8969, IDE0370) | Released |
 | [BRO1148](rules/BRO1148.md) | `x is not null` instead of `x.HasValue` | (none; Meziantou MA0171) | Released |
-| [BRO1149](rules/BRO1149.md) | Merge an 'if' into the enclosing 'if' | (none; Sonar S1066) | Done |
-| [BRO1150](rules/BRO1150.md) | Pass the predicate to the LINQ call instead of calling Where first | (none; Sonar S2971) | Done |
-| [BRO1151](rules/BRO1151.md) | Pass the elements, not an array, to a params parameter | (none; Sonar S3878) | Done |
+| [BRO1149](rules/BRO1149.md) | Merge an 'if' into the enclosing 'if' | (none; Sonar S1066) | Released |
+| [BRO1150](rules/BRO1150.md) | Pass the predicate to the LINQ call instead of calling Where first | (none; Sonar S2971) | Released |
+| [BRO1151](rules/BRO1151.md) | Pass the elements, not an array, to a params parameter | (none; Sonar S3878) | Released |
 
 ### BRO13xx: Naming
 

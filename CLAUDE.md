@@ -19,7 +19,9 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 (see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Since
 2026-10-05: 118 rules, 842 tests. Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.3.0-alpha.1 (125 rules incl. BRO1410, 11 options, `--diff` preview, docs site help links, both first-run trials'
+0.4.0-alpha.1 (129 rules: BRO1008 replaces IDE0065, BRO1149-BRO1151 mirror Sonar; Sonar setups in migrate,
+init adapts to the repo's conventions, public API not renamed by default; owner's call, 2026-10-10) is the latest on
+nuget.org once its tag runs; bump `StyleBroSelfVersion` after it's live. Before it: 0.3.0-alpha.1 (125 rules incl. BRO1410, 11 options, `--diff` preview, docs site help links, both first-run trials'
 fixes; owner's call, 2026-10-09) is the latest on nuget.org once its tag runs; bump `StyleBroSelfVersion` after it's
 live. Before it: 0.2.0-alpha.1 (124 rules, `init`/`format`/`init --modernize`, the preset finally reaching the compiler, the
 first-run fixes; owner's call "a new minor version", 2026-10-06) is the latest on nuget.org with StyleBro.Migrate;

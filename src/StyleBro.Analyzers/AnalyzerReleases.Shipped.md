@@ -184,3 +184,14 @@ Rule ID | Category | Severity | Notes
 BRO1405_p | Maintainability | Hidden | ParenthesesAnalyzer
 BRO1410 | Maintainability | Warning  | ParenthesesAnalyzer
 BRO1410_p | Maintainability | Hidden | ParenthesesAnalyzer
+
+## Release 0.4.0.1
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+BRO1008 | Ordering | Warning  | UsingPlacementAnalyzer
+BRO1149 | Readability | Warning  | NestedIfAnalyzer
+BRO1150 | Readability | Warning  | WhereBeforeTerminalAnalyzer
+BRO1151 | Readability | Warning  | ParamsArrayAnalyzer
