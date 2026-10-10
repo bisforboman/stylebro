@@ -217,7 +217,9 @@ BRO1149-BRO1151's fixes are registered for those ids, so `dotnet format` (or a l
 diagnostics, at the places the StyleBro rule would fix; where it skips the code (a comment in the merged text, an array of a
 derived type, Sonar's other S2971 cases, ...) the Sonar warning stays. This needs the package in the build: findings only
 the scanner reports in CI aren't seen by `dotnet format`. Checked against SonarAnalyzer.CSharp 10.35.0.4138
-(`scripts/sonar-interop.ps1`).
+(`scripts/sonar-interop.ps1`). Sonar reports more than the StyleBro rules fix in places: S3878 on an array spread over several lines
+(BRO1151 leaves those, see its page), S8969 on a `!` that hides a nested nullability mismatch or in a multi-targeted
+project (BRO1147 leaves those); those warnings stay.
 
 The data lives in the tool: `src/StyleBro.Migrate/data/sonar-mapping.tsv` (the mapping) and
 `sonar-rules-10.35.0.4138.tsv` (Sonar's rule list and defaults, public metadata only).
