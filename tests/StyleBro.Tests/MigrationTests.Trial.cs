@@ -152,8 +152,8 @@ public sealed partial class MigrationTests
         Assert.Contains(Key + " = inside_namespace", lines);
         Assert.Contains("  files with using directives: 4 outside the namespace, 120 inside the namespace; csharp_using_directive_placement = inside_namespace", report);
         Assert.Empty(Lines(new[] { 120, 4 })); // outside is the preset's
-        Assert.Empty(Lines(new[] { 4, 9 })); // mixed: 69 %
-        Assert.Empty(Lines(new[] { 0, 9 })); // 9 files: too few
+        Assert.Equal(new[] { "dotnet_diagnostic.BRO1008.severity = none" }, Lines(new[] { 4, 9 }).Where(l => !l.StartsWith('#'))); // mixed: 69 %, BRO1008 off
+        Assert.Contains(Key + " = inside_namespace", Lines(new[] { 0, 9 })); // 9 files, all inside
         Assert.Empty(Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 0, 30 } }, new Dictionary<string, string> { [Key] = ".editorconfig sets it" }).Lines);
 
         IEnumerable<string> Lines(int[] count) => Conventions.Decide(new Dictionary<string, int[]> { [Key] = count }, none).Lines;
@@ -163,11 +163,15 @@ public sealed partial class MigrationTests
     public void Conventions_AreWrittenOnlyWithEnoughPlacesAndAClearMajority()
     {
         const string Key = "stylebro_arrow_placement_when_wrapping";
+        const string Off = "dotnet_diagnostic.BRO1521.severity = none";
         var none = new Dictionary<string, string>();
         Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 1, 9 }));
-        Assert.Empty(Lines(new[] { 1, 8 }));    // 9 places: too few
+        Assert.Equal(new[] { Off }, Lines(new[] { 1, 8 })); // 9 places that disagree: too few
+        Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 0, 2 })); // 2 places that agree
+        Assert.Empty(Lines(new[] { 2, 0 })); // ... on the default
         Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 3, 9 })); // 75 %
-        Assert.Empty(Lines(new[] { 4, 9 }));    // 69 %: no clear majority
+        Assert.Equal(new[] { Off }, Lines(new[] { 4, 9 })); // 69 %: no clear majority, BRO1521 off
+        Assert.Empty(Lines(new[] { 0, 0 })); // nothing to judge: the default stays
         Assert.Empty(Lines(new[] { 20, 0 }));   // the default is never written
 
         var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 0, 30 } }, new Dictionary<string, string> { [Key] = ".editorconfig sets it" });
@@ -269,8 +273,9 @@ public sealed partial class MigrationTests
         var before = new Dictionary<string, (long, DateTime)> { ["a.cs"] = (1, DateTime.MinValue), ["b.cs"] = (2, DateTime.MinValue), ["gone.cs"] = (1, DateTime.MinValue) };
         var after = new Dictionary<string, (long, DateTime)> { ["a.cs"] = (1, DateTime.MinValue), ["b.cs"] = (3, DateTime.MinValue), ["new.cs"] = (1, DateTime.MinValue) };
 
-        Assert.Equal(3, FormatCommand.ChangedFiles(before, after));
-        Assert.Equal(0, FormatCommand.ChangedFiles(after, after));
+        Assert.Equal(new[] { "b.cs", "gone.cs", "new.cs" }, FormatCommand.ChangedFiles(before, after));
+        Assert.Empty(FormatCommand.ChangedFiles(after, after));
+        Assert.Equal(new[] { "  b.cs", "  gone.cs", "  ... and 1 more" }, FormatCommand.ListFiles(".", FormatCommand.ChangedFiles(before, after), 2));
     }
 
     [Fact]

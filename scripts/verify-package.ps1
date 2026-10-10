@@ -63,7 +63,9 @@ try {
 "@
     $app = Join-Path $repo 'src/App'
     Set-Content (Join-Path $app 'Regions.cs') "namespace App;`n`npublic class Regions`n{`n    #region Values`n`n    public int Value;`n`n    #endregion`n}`n" -NoNewline
-    Set-Content (Join-Path $app 'Style.cs') "namespace App;`n`nclass Style`n{`n    static public int Count;`n`n    public string Name = `"`";`n`n    public void M()`n    {`n        int a = 1; int b = 2;`n    }`n}`n" -NoNewline
+    # init follows the code's conventions (a lone "" would make it write 'literal'): most empty strings are string.Empty.
+    Set-Content (Join-Path $app 'Empties.cs') ("namespace App;`n`ninternal class Empties`n{`n" + (-join (0..9 | ForEach-Object { "    public string A$_ = string.Empty;`n" })) + "}`n") -NoNewline
+    Set-Content (Join-Path $app 'Style.cs')"namespace App;`n`nclass Style`n{`n    static public int Count;`n`n    public string Name = `"`";`n`n    public void M()`n    {`n        int a = 1; int b = 2;`n    }`n}`n" -NoNewline
 
     Write-Host '== 1. The preset reaches the compiler'
     $warnings = Build

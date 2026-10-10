@@ -44,7 +44,7 @@ internal static class Program
           stylebro-migrate format [folder, solution or project] [--all] [--once] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
-              run changes nothing (at most 3 runs) and prints the files each run changed; --once runs once. --all also
+              run changes nothing (at most 3 runs) and prints the files each run changed (the first 10); --once runs once. --all also
               applies every other analyzer's and compiler fix. Other options pass through (--severity warn, --report). A
               folder with several solutions or projects needs one named.
               Then it lists the findings StyleBro's fixes keep on purpose, with the reason (a name read by reflection,
@@ -173,6 +173,11 @@ internal static class Program
             Console.WriteLine($"EF Core migrations in {string.Join(", ", migrations)}: marked generated_code = true, so formatting and StyleBro leave them alone.");
         }
 
+        if (Migration.VendoredFolders(root) is { Count: > 0 } vendored)
+        {
+            Console.WriteLine($"Vendored code in {string.Join(", ", vendored)}: marked generated_code = true, so formatting and StyleBro leave it alone.");
+        }
+
         var suppressions = RewriteSuppressions(root, Suppressions.WithSonar(result.Replacements), write);
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
@@ -197,18 +202,24 @@ internal static class Program
             }
         }
 
-        var props = Path.Combine(root, "Directory.Build.props");
-        var disabled = Migration.DisablePreset(File.Exists(props) ? File.ReadAllText(props) : null);
-        if (disabled is not null)
+        // Every Directory.Build.props a project imports: a nested one shadows the root's.
+        foreach (var props in Migration.PropsFiles(root))
         {
+            var disabled = Migration.DisablePreset(File.Exists(props) ? File.ReadAllText(props) : null);
+            var name = Path.GetRelativePath(root, props).Replace('\\', '/');
+            if (disabled is null)
+            {
+                continue;
+            }
+
             if (write)
             {
                 File.WriteAllText(props, disabled);
-                Console.WriteLine("Turned the preset off in Directory.Build.props (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.");
+                Console.WriteLine($"Turned the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.");
             }
             else
             {
-                Console.WriteLine("--write also turns the preset off in Directory.Build.props (<StyleBroPreset>none</StyleBroPreset>): the settings replace it.");
+                Console.WriteLine($"--write also turns the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings replace it.");
             }
         }
 
