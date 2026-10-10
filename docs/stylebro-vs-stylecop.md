@@ -15,7 +15,7 @@ For a team deciding whether to switch. Measured numbers only; each one says wher
 | Moving a StyleCop-clean repo | (the starting point) | Files changed after `stylebro-migrate --write` + `dotnet format`: Polly 1, OpenTelemetry 1, a private app 7; only 1 of those 9 is a StyleBro fix ([Migration](#migration)) |
 | Baseline (fail only on new violations) | No | Yes (`stylebro-migrate baseline`) |
 | Multi-targeted projects | Not measured | Fix All merges each target framework's copy itself (no conflict markers in Newtonsoft.Json, 8 frameworks); `stylebro-migrate format` works around the SDK's IDE0055 crash |
-| Release status | 1.2.0-beta.556 (beta for years; last stable 1.1.118) | 0.4.0-alpha.1 on nuget.org (129 rules), a prerelease |
+| Release status | 1.2.0-beta.556 (beta for years; last stable 1.1.118) | 0.5.0-alpha.1 on nuget.org (129 rules), a prerelease |
 
 ## What it is
 
@@ -179,4 +179,4 @@ Checked and not checked:
 - Visual Studio 2022 (17.13): build, light bulb fixes, Fix All and live squiggles checked by the owner (2026-10-05,
   [backlog.md](https://github.com/bisforboman/stylebro/blob/main/docs/backlog.md)). **Rider: not checked.**
 - Needs Roslyn 4.8 (.NET 8 SDK, Visual Studio 17.8) or newer.
-- **Prerelease:** 0.4.0-alpha.1 on nuget.org; versions and behavior can still change between prereleases.
+- **Prerelease:** 0.5.0-alpha.1 on nuget.org; versions and behavior can still change between prereleases.
