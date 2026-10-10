@@ -150,6 +150,11 @@ internal static class Program
             Console.WriteLine($"StyleCop.Analyzers version: {version}{(version.StartsWith("1.2", StringComparison.Ordinal) ? string.Empty : " (rules added in 1.2 count as off)")}");
         }
 
+        foreach (var line in ScopeReport(setup))
+        {
+            Console.WriteLine(line);
+        }
+
         Report(setup, result);
         if (result.Sonar is { } applied)
         {
@@ -221,8 +226,41 @@ internal static class Program
         Console.WriteLine(write
             ? NextStep
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
+        PackageHints(setup).ForEach(Console.WriteLine);
         PrintWorkspaceHint(root);
         return 0;
+    }
+
+    /// <summary>Where StyleCop runs, when only some projects reference it: the settings apply only there.</summary>
+    internal static List<string> ScopeReport(StyleCopSetup setup)
+    {
+        static string Names(IReadOnlyList<string> folders) =>
+            string.Join(", ", folders.Take(5)) + (folders.Count > 5 ? $" and {folders.Count - 5} more" : string.Empty);
+
+        return setup.Folders is { } folders
+            ? new List<string>
+            {
+                $"StyleCop runs only in {Names(folders)}: the settings apply there, with the rules StyleCop has on there.",
+                $"No StyleCop in {Names(setup.FoldersWithout)}: no rule changes there. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
+            }
+            : new List<string>();
+    }
+
+    /// <summary>Where the package swap goes: the files that reference StyleCop.Analyzers, and the ones that remove it.</summary>
+    internal static List<string> PackageHints(StyleCopSetup setup)
+    {
+        var lines = new List<string>();
+        if (setup.ReferencedIn.Count > 0)
+        {
+            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there (with central package management, its version goes into Directory.Packages.props).");
+        }
+
+        if (setup.RemovedIn.Count > 0)
+        {
+            lines.Add($"{string.Join(", ", setup.RemovedIn)} remove{(setup.RemovedIn.Count == 1 ? "s" : string.Empty)} the StyleCop.Analyzers reference (<PackageReference Remove=\"StyleCop.Analyzers\" />): add <PackageReference Remove=\"StyleBro.Analyzers\" /> next to it, else that project gets StyleBro (and a restore error, NU1015, when it doesn't use central package management).");
+        }
+
+        return lines;
     }
 
     /// <summary>When the folder has several solutions or projects, which ones, and that format needs one named.</summary>

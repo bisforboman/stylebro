@@ -494,35 +494,75 @@ internal static class PreviewCommand
 
     /// <summary>
     /// Adds the StyleBro.Analyzers reference (the tool's own version) when no project file mentions it, the way
-    /// docs/getting-started.md says: to the Directory.Build.props every project imports (<see cref="Migration.PropsFiles"/>:
-    /// a nested one shadows the root's); with central package management the version goes into Directory.Packages.props.
-    /// Returns the file(s) edited, or null.
+    /// docs/getting-started.md says: next to the StyleCop.Analyzers references (a project that removes StyleCop's gets a
+    /// Remove item for StyleBro's too), else to the Directory.Build.props every project imports
+    /// (<see cref="Migration.PropsFiles"/>: a nested one shadows the root's). Where central package management is on for a
+    /// file (<see cref="CentralPackages"/>), the version goes into that Directory.Packages.props. Returns what it edited, or null.
     /// </summary>
     public static string? AddPackage(string root)
     {
-        if (StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase)))
+        var files = StyleCopSetup.EnumerateFiles(root).ToList();
+        if (files.Where(StyleCopSetup.IsMSBuild).Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase)))
         {
             return null;
         }
 
         var version = typeof(PreviewCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
-        var packages = Path.Combine(root, "Directory.Packages.props");
-        var props = Migration.PropsFiles(root);
-
-        // The property is in Directory.Packages.props or (Polly) Directory.Build.props.
-        var central = File.Exists(packages) && props.Prepend(packages).Any(f => File.Exists(f) && Regex.IsMatch(File.ReadAllText(f), @"<ManagePackageVersionsCentrally>\s*true", RegexOptions.IgnoreCase));
-        if (central)
+        var (_, styleCop, removes) = StyleCopSetup.Projects(root, files);
+        var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);
+        var versions = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in targets)
         {
-            File.WriteAllText(packages, AddItem(File.ReadAllText(packages), $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+            var packages = CentralPackages(file, root);
+            if (packages is not null && versions.Add(packages))
+            {
+                File.WriteAllText(packages, AddItem(File.ReadAllText(packages), $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+            }
+
+            File.WriteAllText(file, AddItem(File.Exists(file) ? File.ReadAllText(file) : null, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
         }
 
-        foreach (var file in props)
+        // LiteBus' analyzer project removes the StyleCop reference its Directory.Build.props adds, and turns central package
+        // management off: StyleBro's version-less reference failed its restore (NU1015).
+        foreach (var file in removes)
         {
-            File.WriteAllText(file, AddItem(File.Exists(file) ? File.ReadAllText(file) : null, $"<PackageReference Include=\"StyleBro.Analyzers\"{(central ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
+            File.WriteAllText(file, AddItem(File.ReadAllText(file), "<PackageReference Remove=\"StyleBro.Analyzers\" />"));
         }
 
-        var names = string.Join(", ", props.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
-        return $"StyleBro.Analyzers {version} to {names}{(central ? " and Directory.Packages.props" : string.Empty)}";
+        string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
+        return $"StyleBro.Analyzers {version} to {Names(targets)}"
+            + (versions.Count > 0 ? $" (version in {Names(versions)})" : string.Empty)
+            + (removes.Count > 0 ? $", removed again in {Names(removes)} (they remove StyleCop.Analyzers)" : string.Empty);
+    }
+
+    /// <summary>
+    /// The Directory.Packages.props that holds the versions for an MSBuild file's package references, or null when central
+    /// package management is off there: the nearest one above the file, when it, the file or a Directory.Build.props above
+    /// the file sets ManagePackageVersionsCentrally to true (and the file itself doesn't set it to false).
+    /// </summary>
+    public static string? CentralPackages(string file, string root)
+    {
+        // ponytail: text-level; a property set by a Condition or another import isn't seen.
+        static bool Sets(string path, string value) => File.Exists(path)
+            && Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase);
+        if (Sets(file, "false"))
+        {
+            return null;
+        }
+
+        var rootFolder = Path.GetFullPath(root).TrimEnd('\\', '/');
+        string? packages = null;
+        var props = new List<string>();
+        for (var folder = Path.GetDirectoryName(Path.GetFullPath(file)); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
+        {
+            props.Add(Path.Combine(folder, "Directory.Build.props"));
+            if (packages is null && File.Exists(Path.Combine(folder, "Directory.Packages.props")))
+            {
+                packages = Path.Combine(folder, "Directory.Packages.props");
+            }
+        }
+
+        return packages is not null && props.Prepend(file).Prepend(packages).Any(f => Sets(f, "true")) ? packages : null;
     }
 
     /// <summary>

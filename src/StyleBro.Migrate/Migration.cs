@@ -296,9 +296,17 @@ internal static class Migration
     /// <summary>The blocks to write, per .editorconfig (relative path): the repository-wide settings and every scope's.</summary>
     public static SortedDictionary<string, List<(string Section, List<string> Lines)>> Plan(StyleCopSetup setup, string root, Result main)
     {
+        // 'dotnet format' sorts usings wherever a sort key is set, whatever its value, and a scope can't unset the main
+        // block's: with a scope that doesn't sort them, the keys go only into the scopes that do.
+        var sortKeys = new[] { "dotnet_sort_system_directives_first", "dotnet_separate_import_directive_groups" };
+        if (setup.Scopes.Any(scope => setup.For(scope) is var inScope && !inScope.IsOn("SA1208") && !inScope.IsOn("SA1210")))
+        {
+            main.Lines.RemoveAll(line => sortKeys.Contains(KeyOf(line)));
+        }
+
         var plan = new SortedDictionary<string, List<(string, List<string>)>>(StringComparer.OrdinalIgnoreCase)
         {
-            [".editorconfig"] = [(MainSection, main.Lines)],
+            [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders) : MainSection, main.Lines)],
         };
         foreach (var folder in MigrationFolders(root))
         {
@@ -452,14 +460,20 @@ internal static class Migration
     /// code (an '&lt;auto-generated' header, *.g.cs, *.Designer.cs, EF Core's Migrations) and vendored folders don't count;
     /// submodules are skipped anyway.
     /// </summary>
-    internal static (int Underscore, int Plain) CountPrivateFields(string root)
+    internal static (int Underscore, int Plain) CountPrivateFields(string root, IReadOnlyList<string>? folders = null)
     {
         int underscore = 0;
         int plain = 0;
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
         {
+            var relative = Path.GetRelativePath(root, file).Replace('\\', '/');
+            if (folders is not null && !folders.Any(f => relative.StartsWith(f + "/", StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
             var text = File.ReadAllText(file);
-            if (IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
+            if (IsGeneratedOrVendored(relative, text))
             {
                 continue;
             }
@@ -563,7 +577,7 @@ internal static class Migration
     }
 
     /// <summary>The distinct folders, sorted, without those inside another one.</summary>
-    private static List<string> Topmost(IEnumerable<string> folders)
+    internal static List<string> Topmost(IEnumerable<string> folders)
     {
         var list = folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
         return list.Where(f => !list.Any(p => f.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))).ToList();
@@ -745,9 +759,10 @@ internal static class Migration
             return "_camelCase";
         }
 
-        var (underscore, plain) = CountPrivateFields(root);
+        var (underscore, plain) = CountPrivateFields(root, setup.Folders);
         var style = !setup.IsOn("SA1309") && underscore > plain ? "_camelCase" : "camelCase";
-        notes.Add($"Private fields: {underscore} named '_field', {plain} named 'field'; SA1309 is {(setup.IsOn("SA1309") ? "on" : "off")}, so BRO1303 uses '{style}'.");
+        var where = setup.Folders is null ? string.Empty : " where StyleCop runs";
+        notes.Add($"Private fields{where}: {underscore} named '_field', {plain} named 'field'; SA1309 is {(setup.IsOn("SA1309") ? "on" : "off")}{where}, so BRO1303 uses '{style}'.");
         return style;
     }
 

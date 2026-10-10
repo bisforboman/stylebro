@@ -48,6 +48,12 @@ internal sealed class StyleCopSetup
         @"<Import\b[^>]*?\bProject\s*=\s*""(?<import>[^""]+)""|<CodeAnalysisRuleSet\b(?:[^>]*?\bCondition\s*=\s*""(?<condition>[^""]*)"")?[^>]*>(?<ruleset>[^<]+)</CodeAnalysisRuleSet>|<AdditionalFiles\b[^>]*?\bInclude\s*=\s*""(?<additional>[^""]+)""",
         RegexOptions.IgnoreCase);
 
+    /// <summary>A reference that runs StyleCop in a project: a (global) package reference or an analyzer DLL.</summary>
+    private static readonly Regex StyleCopReference = new(@"<(?:Global)?PackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*StyleCop\.Analyzers", RegexOptions.IgnoreCase);
+
+    /// <summary>A project that opts out of the StyleCop reference it inherits ('&lt;PackageReference Remove="StyleCop.Analyzers" /&gt;').</summary>
+    private static readonly Regex StyleCopRemove = new(@"<PackageReference\b[^>]*?\bRemove\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
+
     /// <summary>An item or Copy task taking an .editorconfig (not one the compiler reads as a config file).</summary>
     private static readonly Regex CopiesEditorConfig = new(@"<(?!EditorConfigFiles\b|GlobalAnalyzerConfigFiles\b)[\w.]+\s[^>]*\b(?:Include|SourceFiles)\s*=\s*""[^""]*\.editorconfig""", RegexOptions.IgnoreCase);
 
@@ -90,6 +96,21 @@ internal sealed class StyleCopSetup
     /// (SixLabors' shared infrastructure does): the generated block would be lost. Null when none does.
     /// </summary>
     public string? EditorConfigCopiedBy { get; init; }
+
+    /// <summary>
+    /// Gets the folders (relative, '/'-separated) StyleCop runs in, when some projects reference it and others don't: the
+    /// settings apply only there. Null when every project runs it, or none does (the settings then apply everywhere).
+    /// </summary>
+    public IReadOnlyList<string>? Folders { get; init; }
+
+    /// <summary>Gets the folders with projects that don't run StyleCop (only when <see cref="Folders"/> isn't null).</summary>
+    public IReadOnlyList<string> FoldersWithout { get; init; } = [];
+
+    /// <summary>Gets the MSBuild files (relative) that reference StyleCop.Analyzers.</summary>
+    public IReadOnlyList<string> ReferencedIn { get; init; } = [];
+
+    /// <summary>Gets the MSBuild files (relative) that remove the StyleCop.Analyzers reference they inherit.</summary>
+    public IReadOnlyList<string> RemovedIn { get; init; } = [];
 
     public static StyleCopSetup Read(string root)
     {
@@ -236,10 +257,28 @@ internal sealed class StyleCopSetup
             sources.Add(Path.GetRelativePath(root, json));
         }
 
+        // Only where StyleCop ran (owner's decision 2026-10-10): the settings there, with the scopes that cover all of it.
+        var allScopes = new List<Scope>([.. folderScopes, .. scopes]);
+        var projects = Projects(root, files);
+        var folders = Cover(projects.Uses, true, root);
+        if (folders is not null)
+        {
+            allScopes = InStyleCopFolders(allScopes, folders, severities);
+            foreach (var id in old is null ? [] : severities.Keys.Where(id => !old.Contains(id)).ToList())
+            {
+                severities[id] = Severity.None;
+            }
+        }
+
         var copier = msbuild.FirstOrDefault(m => CopiesEditorConfig.IsMatch(WithoutComments(m.Text))).File;
-        return new StyleCopSetup(severities, settings, sources, [.. folderScopes, .. scopes], version, documentationParsed)
+        string Relative(string file) => Path.GetRelativePath(root, file).Replace('\\', '/');
+        return new StyleCopSetup(severities, settings, sources, allScopes, version, documentationParsed)
         {
             EditorConfigCopiedBy = copier is null ? null : Path.GetRelativePath(root, copier),
+            Folders = folders,
+            FoldersWithout = folders is null ? [] : Cover(projects.Uses, false, root) ?? [],
+            ReferencedIn = projects.ReferencedIn.Select(Relative).ToList(),
+            RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
         };
     }
 
@@ -288,6 +327,100 @@ internal sealed class StyleCopSetup
             "error" => Severity.Error,
             _ => null,
         };
+    }
+
+    /// <summary>The .editorconfig section (in the root one) for the C# files under the folders (relative, '/'-separated).</summary>
+    public static string SectionFor(IReadOnlyList<string> folders)
+    {
+        // The folders' common parent goes in front: 'src/{A,B}/**.cs'.
+        var parts = folders.Select(f => f.Split('/')).ToList();
+        var common = parts.Count == 1 ? 0 : Enumerable.Range(0, parts.Min(p => p.Length) - 1).TakeWhile(i => parts.All(p => p[i].Equals(parts[0][i], StringComparison.Ordinal))).Count();
+        string Escape(IEnumerable<string> segments) => Regex.Replace(string.Join("/", segments), @"[\[\]{}*?,\\]", @"\$0");
+        var prefix = common == 0 ? string.Empty : Escape(parts[0].Take(common)) + "/";
+        var rest = parts.Select(p => Escape(p.Skip(common))).ToList();
+        return prefix + (rest.Count == 1 ? rest[0] : "{" + string.Join(",", rest) + "}") + "/**.cs";
+    }
+
+    /// <summary>
+    /// Each project (full path) under the root and whether StyleCop runs in it: a StyleCop.Analyzers reference in the project,
+    /// the Directory.Build.props/.targets or Directory.Packages.props it gets, or what those import, and no Remove item for it.
+    /// Also the repository's own files that reference it and that remove it.
+    /// </summary>
+    internal static (Dictionary<string, bool> Uses, List<string> ReferencedIn, List<string> RemovedIn) Projects(string root, IReadOnlyCollection<string> files)
+    {
+        // ponytail: text-level, like FolderRulesets: Conditions are ignored, a Remove anywhere in the chain wins.
+        var own = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
+        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var uses = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        var referenced = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        var removed = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var project in files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
+        {
+            var chain = new List<string> { project };
+            foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
+            {
+                for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
+                {
+                    if (File.Exists(Path.Combine(folder, name)))
+                    {
+                        chain.Add(Path.Combine(folder, name));
+                        break;
+                    }
+                }
+            }
+
+            for (var i = 0; i < chain.Count && i < 64; i++)
+            {
+                foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
+                {
+                    if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
+                        && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
+                    {
+                        chain.Add(imported);
+                    }
+                }
+            }
+
+            var references = chain.Where(f => StyleCopReference.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
+            var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
+            uses[project] = references.Count > 0 && removes.Count == 0;
+            referenced.UnionWith(references.Where(own.Contains));
+            removed.UnionWith(removes.Where(own.Contains));
+        }
+
+        return (uses, referenced.ToList(), removed.ToList());
+    }
+
+    /// <summary>
+    /// The topmost folders (relative, '/'-separated) whose projects all have <paramref name="value"/>, from each such
+    /// project's folder up while no project with the other value is below. Null when not some projects have each value
+    /// (or, for StyleCop's folders, one is the root itself).
+    /// </summary>
+    internal static List<string>? Cover(IReadOnlyDictionary<string, bool> uses, bool value, string root)
+    {
+        if (!uses.Values.Contains(true) || !uses.Values.Contains(false))
+        {
+            return null;
+        }
+
+        var rootFolder = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var others = uses.Where(p => p.Value != value).Select(p => Path.GetDirectoryName(p.Key)!).ToList();
+        bool HasOther(string folder) => others.Any(o => o.Equals(folder, StringComparison.OrdinalIgnoreCase) || o.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        var result = new List<string>();
+        foreach (var project in uses.Where(p => p.Value == value).Select(p => p.Key))
+        {
+            // ponytail: a project sharing its folder with one of the other kind gets that folder anyway; per-file sections if that matters.
+            var folder = Path.GetDirectoryName(project)!;
+            while (Path.GetDirectoryName(folder) is { } parent && parent.Length > rootFolder.Length && !HasOther(parent))
+            {
+                folder = parent;
+            }
+
+            result.Add(Path.GetRelativePath(rootFolder, folder).Replace('\\', '/'));
+        }
+
+        result = Migration.Topmost(result);
+        return value && result.Contains(".") ? null : result;
     }
 
     /// <summary>Whether an .editorconfig section applies to every C# file ('[*]', '[*.cs]', '[*.{cs,vb}]').</summary>
@@ -661,6 +794,48 @@ internal sealed class StyleCopSetup
         var full = Path.GetFullPath(Path.Combine(directory, value.Replace('\\', Path.DirectorySeparatorChar)));
         var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
         return File.Exists(full) && full.StartsWith(rootFolder, StringComparison.OrdinalIgnoreCase) ? full : null;
+    }
+
+    /// <summary>
+    /// The scopes, where StyleCop runs only in <paramref name="folders"/>: a scope inside one of them stays; one for all C#
+    /// files that covers every one of them is folded into <paramref name="severities"/> (their base); one that covers some is
+    /// moved to a root section for those; one that covers none is dropped (no StyleCop there, so no settings either). A
+    /// file-pattern section above several folders stays as it is.
+    /// </summary>
+    private static List<Scope> InStyleCopFolders(IEnumerable<Scope> scopes, IReadOnlyList<string> folders, Dictionary<string, Severity> severities)
+    {
+        static bool IsUnder(string folder, string parent) =>
+            parent.Length == 0 || folder.Equals(parent, StringComparison.OrdinalIgnoreCase) || folder.StartsWith(parent + "/", StringComparison.OrdinalIgnoreCase);
+
+        var result = new List<Scope>();
+        var located = scopes.Select(scope =>
+        {
+            // A path section ('tests/**.cs') narrows the folder by its literal leading segments.
+            var folder = (Path.GetDirectoryName(scope.File) ?? string.Empty).Replace('\\', '/');
+            var segments = scope.Section.TrimStart('/').Split('/');
+            var literal = segments.Length > 1 ? segments.Take(segments.Length - 1).TakeWhile(p => p.IndexOfAny(['*', '?', '[', '{']) < 0).ToList() : [];
+            var area = string.Join("/", new[] { folder }.Concat(literal).Where(p => p.Length > 0));
+            var rest = string.Join("/", segments.Skip(literal.Count));
+            return (Scope: scope, Area: area, AllCSharp: AppliesToCSharp(rest));
+        });
+        foreach (var (scope, area, allCSharp) in located.OrderBy(l => l.Area.Count(c => c == '/') + (l.Area.Length > 0 ? 1 : 0)))
+        {
+            var covered = folders.Where(f => IsUnder(f, area)).ToList();
+            if (folders.Any(f => IsUnder(area, f)) || (covered.Count > 0 && !allCSharp))
+            {
+                result.Add(scope);
+            }
+            else if (covered.Count == folders.Count)
+            {
+                Overlay(severities, scope.Severities);
+            }
+            else if (covered.Count > 0)
+            {
+                result.Add(new Scope(".editorconfig", SectionFor(covered), scope.Severities));
+            }
+        }
+
+        return result;
     }
 
     /// <summary>Each rule the configs set, at the strictest of them; a config that doesn't set it counts with the target's value.</summary>

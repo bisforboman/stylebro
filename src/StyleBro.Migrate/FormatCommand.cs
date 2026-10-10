@@ -70,6 +70,15 @@ internal static class FormatCommand
     /// <summary>The start of the line that lists the target frameworks (printed for the first run only).</summary>
     private const string MultiTargetedHeader = "Multi-targeted: ";
 
+    /// <summary>The start of the line that says the whitespace pass doesn't run (printed for the first run only).</summary>
+    private const string NoWhitespaceHeader = "No whitespace pass:";
+
+    /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
+    private const string OldMacHeader = "Not formatted:";
+
+    /// <summary>What to say when the restore 'dotnet format' needs fails (it prints only a stack trace).</summary>
+    internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why (for example NuGet audit warnings with TreatWarningsAsErrors). Once the packages are restored, '--no-restore' skips it.";
+
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
     /// console. It runs again until a run changes no file (at most <see cref="MaxRuns"/>), printing the files each run
@@ -205,7 +214,7 @@ internal static class FormatCommand
             .Select(KeptFinding.Parse)
             .OfType<KeptFinding>()
             .Select(k => k.Path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                ? new KeptFinding(Path.Combine(to, k.Path.Substring(prefix.Length)), k.Line, k.Column, k.Id, k.Reason, k.Message)
+                ? new KeptFinding(Path.Combine(to, k.Path.Substring(prefix.Length)), k.Line, k.Column, k.Id, k.Reason, k.Message, k.Where is { } w && w.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? Path.Combine(to, w.Substring(prefix.Length)) : k.Where)
                 : k)
             .GroupBy(k => (k.Path.ToUpperInvariant(), k.Line, k.Column, k.Id))
             .Select(g => g.First())
@@ -228,19 +237,22 @@ internal static class FormatCommand
         foreach (var finding in kept)
         {
             var path = Path.GetRelativePath(root, finding.Path).Replace(Path.DirectorySeparatorChar, '/');
-            lines.Add($"  {path}({finding.Line},{finding.Column}): {finding.Id} {finding.Message}. Kept: {KeptFinding.Describe(finding.Reason)}.");
+            var where = finding.Where is { } w ? $" (first: {Relative(root, w)})" : string.Empty;
+            lines.Add($"  {path}({finding.Line},{finding.Column}): {finding.Id} {finding.Message}. Kept: {KeptFinding.Describe(finding.Reason)}{where}.");
         }
 
         return lines;
     }
 
     /// <summary>Whether a 'dotnet format' output line reports one of the kept findings ('path(line,column): warning ID: ...').</summary>
-    public static bool IsKeptLine(string line, ISet<(string Path, int Line, string Id)> kept)
-    {
-        var match = Regex.Match(line, @"^\s*(?<path>.+?)\((?<line>\d+),\d+\): \w+ (?<id>\w+):");
-        return match.Success
-            && kept.Contains((match.Groups["path"].Value.ToUpperInvariant(), int.Parse(match.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture), match.Groups["id"].Value));
-    }
+    public static bool IsKeptLine(string line, ISet<(string Path, int Line, string Id)> kept) => KeptLine(line, kept) is not null;
+
+    /// <summary>
+    /// A 'dotnet format' output line, with a kept finding's severity replaced by 'kept' ('path(1,2): kept BRO1303: ...'), so
+    /// it doesn't read (or count in CI) as one to fix.
+    /// </summary>
+    public static string MarkKept(string line, ISet<(string Path, int Line, string Id)> kept) =>
+        KeptLine(line, kept) is { } severity ? line.Remove(severity.Index, severity.Length).Insert(severity.Index, "kept") : line;
 
     /// <summary>The C# files under the root (not bin/obj, not submodules) with their size and time, to tell which a run changed.</summary>
     public static Dictionary<string, (long Length, DateTime Written)> Snapshot(string root) =>
@@ -322,6 +334,55 @@ internal static class FormatCommand
         }
 
         return ids.ToList();
+    }
+
+    /// <summary>Whether a 'dotnet format' output line says its restore failed (it prints a stack trace, nothing about why).</summary>
+    public static bool IsRestoreFailure(string line) => line.Contains("Restore operation failed", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Whether the stylebro blocks of the .editorconfig files above, at and below the root set IDE0055 and only to 'none'
+    /// (a migration from a StyleCop setup with its spacing rules off). Without a block saying so, whitespace formatting runs.
+    /// </summary>
+    public static bool WhitespaceOff(string root)
+    {
+        var files = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetFileName(f) == ".editorconfig").ToList();
+        for (var folder = new DirectoryInfo(root).Parent; folder is not null; folder = folder.Parent)
+        {
+            files.Add(Path.Combine(folder.FullName, ".editorconfig"));
+        }
+
+        var values = files.Where(File.Exists)
+            .SelectMany(f => Regex.Matches(File.ReadAllText(f), "# BEGIN stylebro-.*?# END stylebro-", RegexOptions.Singleline))
+            .SelectMany(block => Regex.Matches(block.Value, @"^\s*dotnet_diagnostic\.IDE0055\.severity\s*=\s*(\w+)", RegexOptions.Multiline | RegexOptions.IgnoreCase))
+            .Select(m => m.Groups[1].Value.ToLowerInvariant())
+            .ToList();
+        return values.Count > 0 && values.All(v => v == "none");
+    }
+
+    /// <summary>
+    /// The C# files under the root (relative, '/'-separated) with old Mac line endings: a CR without an LF after it. The
+    /// SDK's formatter adds a line break to them on every run.
+    /// </summary>
+    public static List<string> OldMacLineEndings(string root)
+    {
+        static bool HasLoneCr(byte[] bytes)
+        {
+            for (var at = Array.IndexOf(bytes, (byte)'\r'); at >= 0; at = Array.IndexOf(bytes, (byte)'\r', at + 1))
+            {
+                if (at + 1 == bytes.Length || bytes[at + 1] != '\n')
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return StyleCopSetup.EnumerateFiles(root)
+            .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && HasLoneCr(File.ReadAllBytes(f)))
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .Order(StringComparer.Ordinal)
+            .ToList();
     }
 
     /// <summary>
@@ -508,7 +569,7 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run.
             var code = runOnce(runArgs, run == 1 ? output : line =>
             {
-                if (!line.StartsWith(FixingHeader, StringComparison.Ordinal) && !line.StartsWith(MultiTargetedHeader, StringComparison.Ordinal))
+                if (!new[] { FixingHeader, MultiTargetedHeader, NoWhitespaceHeader, OldMacHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
                 {
                     log(line);
                 }
@@ -561,6 +622,14 @@ internal static class FormatCommand
             return 0;
         }
 
+        // 'dotnet format --verify-no-changes' says "would change" with 2; anything else is an error of its own (an
+        // unknown option, a failed restore), which formatting a copy would only repeat.
+        if (code != NotCleanExitCode)
+        {
+            lines.ForEach(log);
+            return code;
+        }
+
         // The whole repository: settings above the folder (.editorconfig, Directory.Build.props, nuget.config) count.
         var source = RepositoryRoot(root) ?? root;
         var copy = Path.Combine(Path.GetTempPath(), $"stylebro-verify-{Guid.NewGuid():N}");
@@ -596,9 +665,16 @@ internal static class FormatCommand
             var changedFiles = ChangedFiles(before, Snapshot(copy));
             var changed = changedFiles.Count;
             JsonReport.AddRun(1, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))), null);
+            var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
             if (copyCode != 0 || changed > 0)
             {
-                lines.ForEach(log);
+                // The kept findings among them are marked: they aren't what makes it fail.
+                lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);
+                if (lines.Count(l => IsKeptLine(l, keys)) is var marked and > 0)
+                {
+                    log($"{marked} of these {(marked == 1 ? "is" : "are")} kept on purpose (marked 'kept'): StyleBro's fixes leave them, they don't make this fail ({KeptFindingsHelp}).");
+                }
+
                 log(changed > 0
                     ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'stylebro-migrate format'."
                     : "Not clean: formatting a copy of the repository failed (see above).");
@@ -606,7 +682,6 @@ internal static class FormatCommand
             }
 
             JsonReport.AddKept(kept);
-            var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
             lines.Where(l => !IsKeptLine(l, keys)).ToList().ForEach(log);
             KeptSummary(kept, root).ForEach(log);
             if (kept.Count == 0)
@@ -621,6 +696,23 @@ internal static class FormatCommand
             PreviewCommand.Delete(copy);
             File.Delete(keptFile);
         }
+    }
+
+    /// <summary>The severity word of a line that reports a kept finding (its position in the line), or null.</summary>
+    private static Group? KeptLine(string line, ISet<(string Path, int Line, string Id)> kept)
+    {
+        var match = Regex.Match(line, @"^\s*(?<path>.+?)\((?<line>\d+),\d+\): (?<severity>\w+) (?<id>\w+):");
+        return match.Success
+            && kept.Contains((match.Groups["path"].Value.ToUpperInvariant(), int.Parse(match.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture), match.Groups["id"].Value))
+                ? match.Groups["severity"]
+                : null;
+    }
+
+    /// <summary>A 'path(line)' relative to the root when it's under it.</summary>
+    private static string Relative(string root, string where)
+    {
+        var relative = Path.IsPathRooted(where) ? Path.GetRelativePath(root, where) : where;
+        return (relative.StartsWith("..", StringComparison.Ordinal) ? where : relative).Replace('\\', '/');
     }
 
     /// <summary>The git repository that holds the folder (the nearest folder above with a .git), or null.</summary>
@@ -644,8 +736,10 @@ internal static class FormatCommand
         Action<string> error = output ?? Console.Error.WriteLine;
         var skipped = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
         var current = string.Empty;
+        var restoreFailed = false;
         void Record(string line)
         {
+            restoreFailed |= IsRestoreFailure(line);
             if (SkippedProject(line) is { } project)
             {
                 (skipped.TryGetValue(project, out var set) ? set : skipped[project] = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)).Add(current);
@@ -687,20 +781,84 @@ internal static class FormatCommand
             passThrough.AddRange(ids);
         }
 
-        // Submodules are someone else's code, even when a project compiles files from them.
-        if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
+        void Exclude(IReadOnlyCollection<string> paths)
         {
             var exclude = passThrough.IndexOf("--exclude");
             if (exclude < 0)
             {
                 passThrough.Add("--exclude");
-                passThrough.AddRange(submodules);
+                passThrough.AddRange(paths);
             }
             else
             {
-                passThrough.InsertRange(exclude + 1, submodules);
+                passThrough.InsertRange(exclude + 1, paths);
             }
         }
+
+        // Submodules are someone else's code, even when a project compiles files from them.
+        if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
+        {
+            Exclude(submodules);
+        }
+
+        // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles.
+        if (OldMacLineEndings(root) is { Count: > 0 } oldMac)
+        {
+            log($"{OldMacHeader} {string.Join(", ", oldMac)}: old Mac line endings (a CR alone). 'dotnet format' (a .NET SDK bug) adds a line break to such a file on every run, so it never settles. Convert them to LF or CRLF, then run again.");
+            Exclude(oldMac);
+        }
+
+        // 'dotnet format' runs its whitespace pass whatever IDE0055's severity says: where the settings turn IDE0055 off,
+        // only the style and analyzer passes run (LiteBus: aligned switch arms flattened, '(T)x' became '(T) x').
+        var passes = WhitespaceOff(root) ? new[] { "style", "analyzers" } : new[] { string.Empty };
+        if (passes.Length > 1)
+        {
+            log($"{NoWhitespaceHeader} IDE0055 is off in the stylebro settings, so no whitespace formatting: style and analyzer fixes only.");
+        }
+
+        int Format(string target, List<string> options, Func<IEnumerable<string>, int> run)
+        {
+            // Each pass would write its own format-report.json over the last one: each gets a folder, merged after.
+            var at = options.IndexOf("--report");
+            var report = passes.Length > 1 && at >= 0 && at + 1 < options.Count ? options[at + 1] : null;
+            var folders = new List<string>();
+            var exit = 0;
+            foreach (var pass in passes)
+            {
+                var passOptions = options.ToList();
+                if (report is not null)
+                {
+                    folders.Add(Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}"));
+                    passOptions[at + 1] = folders[^1];
+                }
+
+                var code = run(new[] { "format", pass }.Where(a => a.Length > 0).Append(target).Concat(passOptions));
+                exit = exit == 0 ? code : exit;
+                if (code != 0 && code != NotCleanExitCode)
+                {
+                    break; // an error (a failed restore): the next pass would only repeat it
+                }
+            }
+
+            if (report is not null)
+            {
+                WriteMergedReport(Path.GetFullPath(report), folders);
+            }
+
+            return exit;
+        }
+
+        int Done(int code)
+        {
+            if (restoreFailed)
+            {
+                log(RestoreHint);
+            }
+
+            return code;
+        }
+
+        var noRestore = passThrough.Remove("--no-restore");
 
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
         var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
@@ -708,20 +866,21 @@ internal static class FormatCommand
         var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
         if (plan.Count <= 1)
         {
-            var single = Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough), Watch);
+            var single = Format(workspacePath, passThrough.Concat(noRestore ? new[] { "--no-restore" } : Array.Empty<string>()).ToList(), a => Dotnet(root, null, a, Watch));
             Incomplete(skipped, new Dictionary<string, List<string>>()).ForEach(log);
-            return single;
+            return Done(single);
         }
 
         log($"{MultiTargetedHeader}one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
 
         // The restore's own output (its "Build succeeded" block) only matters when it fails.
         var restoreOutput = new List<string>();
-        var restore = Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
+        var restore = noRestore ? 0 : Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
         if (restore != 0)
         {
             restoreOutput.ForEach(log);
-            return restore;
+            restoreFailed = true;
+            return Done(restore);
         }
 
         // Every run would write its own format-report.json over the last one: each gets a folder, merged at the end.
@@ -766,14 +925,15 @@ internal static class FormatCommand
                         options[reportIndex + 1] = folder;
                     }
 
-                    var arguments = new[] { "format", filter ?? workspacePath, "--no-restore" }.Concat(options);
+                    options.Insert(0, "--no-restore");
                     if (!passThrough.Contains("--include"))
                     {
-                        arguments = arguments.Append("--include").Concat(Include(root, solutionDirectory, selected));
+                        options.Add("--include");
+                        options.AddRange(Include(root, solutionDirectory, selected));
                     }
 
                     var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
-                    var code = Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), arguments, Show);
+                    var code = Format(filter ?? workspacePath, options, a => Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), a, Show));
                     if (exit == 0)
                     {
                         exit = code;
@@ -801,7 +961,7 @@ internal static class FormatCommand
             .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.Select(x => x.Framework).ToList(), StringComparer.OrdinalIgnoreCase);
         Incomplete(skipped, runFor).ForEach(log);
-        return exit;
+        return Done(exit);
     }
 
     /// <summary>

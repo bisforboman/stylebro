@@ -37,12 +37,12 @@ internal static class NamespaceRenamer
     {
         foreach (var rename in namespaces.GroupBy(n => (n.OldName, n.NewName)))
         {
-            var (edits, reason) = await GetChangesAsync(solution, rename.Key.OldName, rename.Key.NewName, cancellationToken).ConfigureAwait(false);
+            var (edits, reason, where) = await GetChangesAsync(solution, rename.Key.OldName, rename.Key.NewName, cancellationToken).ConfigureAwait(false);
             if (reason is { } kept)
             {
                 foreach (var item in rename)
                 {
-                    KeptFindings.Record(item.Diagnostic, kept);
+                    KeptFindings.Record(item.Diagnostic, kept, where);
                 }
 
                 continue;
@@ -61,7 +61,7 @@ internal static class NamespaceRenamer
     }
 
     /// <summary>The edits that rename the namespace part, or why it's kept.</summary>
-    internal static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason)> GetChangesAsync(
+    internal static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason, string? Where)> GetChangesAsync(
         Solution solution,
         string oldFullName,
         string newPart,
@@ -79,9 +79,9 @@ internal static class NamespaceRenamer
         {
             foreach (var additional in project.AdditionalDocuments)
             {
-                if (await additional.GetTextAsync(cancellationToken).ConfigureAwait(false) is { } text && fullNameInText.IsMatch(text.ToString()))
+                if (await additional.GetTextAsync(cancellationToken).ConfigureAwait(false) is { } text && fullNameInText.Match(text.ToString()) is { Success: true } match)
                 {
-                    return (result, KeptReason.NameInString);
+                    return (result, KeptReason.NameInString, $"{additional.FilePath ?? additional.Name}({text.Lines.GetLineFromPosition(match.Index).LineNumber + 1})");
                 }
             }
 
@@ -93,12 +93,12 @@ internal static class NamespaceRenamer
             var global = compilation.GlobalNamespace;
             if (NamespaceNames.Find(global, oldFullName) is { } ns && !NamespaceNames.IsOnlyFrom(ns, a => assemblies.Contains(a.Name)))
             {
-                return (result, KeptReason.NamespaceFromOutside);
+                return (result, KeptReason.NamespaceFromOutside, null);
             }
 
             if ((parentName.Length == 0 ? global : NamespaceNames.Find(global, parentName))?.GetMembers(newPart).Any() == true)
             {
-                return (result, KeptReason.NewNameTaken);
+                return (result, KeptReason.NewNameTaken, null);
             }
 
             // Source generators' trees too: a reference there can't be edited.
@@ -111,16 +111,16 @@ internal static class NamespaceRenamer
                 // Strings in generated code are left out: the SDK's AssemblyInfo names the assembly ('AssemblyTitle("myCompany.data")'),
                 // which usually is the root namespace. Generated code that uses the namespace is caught as a reference below.
                 var generated = document is null or SourceGeneratedDocument || NamespaceNames.IsGenerated(tree);
-                if (!generated && root.DescendantTokens().Any(t => (t.IsKind(SyntaxKind.StringLiteralToken) || t.IsKind(SyntaxKind.InterpolatedStringTextToken)
+                if (!generated && root.DescendantTokens().FirstOrDefault(t => (t.IsKind(SyntaxKind.StringLiteralToken) || t.IsKind(SyntaxKind.InterpolatedStringTextToken)
                         || t.IsKind(SyntaxKind.SingleLineRawStringLiteralToken) || t.IsKind(SyntaxKind.MultiLineRawStringLiteralToken))
-                        && fullNameInText.IsMatch(t.ValueText)))
+                        && fullNameInText.IsMatch(t.ValueText)) is { RawKind: not 0 } inString)
                 {
-                    return (result, KeptReason.NameInString);
+                    return (result, KeptReason.NameInString, $"{tree.FilePath}({inString.GetLocation().GetLineSpan().StartLinePosition.Line + 1})");
                 }
 
                 if (root.DescendantTrivia().Any(t => t.IsKind(SyntaxKind.DisabledTextTrivia) && partInText.IsMatch(t.ToString())))
                 {
-                    return (result, KeptReason.DisabledCode);
+                    return (result, KeptReason.DisabledCode, null);
                 }
 
                 foreach (var name in root.DescendantNodes(descendIntoTrivia: true).OfType<IdentifierNameSyntax>())
@@ -130,12 +130,12 @@ internal static class NamespaceRenamer
                     {
                         if (document is null || generated)
                         {
-                            return (result, KeptReason.GeneratedReference);
+                            return (result, KeptReason.GeneratedReference, null);
                         }
 
                         if (IsLookedUp(name) && !model.LookupSymbols(name.SpanStart, name: newPart).IsEmpty)
                         {
-                            return (result, KeptReason.NewNameMeansSomethingElse);
+                            return (result, KeptReason.NewNameMeansSomethingElse, null);
                         }
 
                         result.Add((CamelCaseRenamer.GetFileKey(document), new TextChange(name.Identifier.Span, newPart)));
@@ -145,13 +145,13 @@ internal static class NamespaceRenamer
                     {
                         // 'Data' meaning a type from a using directive (or anything found outside the type): inside
                         // the containing namespace, the renamed namespace would be found first.
-                        return (result, KeptReason.NewNameMeansSomethingElse);
+                        return (result, KeptReason.NewNameMeansSomethingElse, null);
                     }
                 }
             }
         }
 
-        return (result, null);
+        return (result, null, null);
     }
 
     /// <summary>A name that is looked up in scope, as opposed to 'x.Name', 'A.Name', a declared namespace's name, 'Name = '.</summary>
