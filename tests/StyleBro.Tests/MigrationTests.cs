@@ -1062,7 +1062,7 @@ public sealed partial class MigrationTests : IDisposable
     public void Init_KeepsALeadingUnderscore_WhenMostPrivateFieldsHaveIt()
     {
         Write("src/A.cs", "class A { private int _a; private int _b; private readonly string _c; private int d; private int _e, _f, _g, _h, _i, _j; }");
-        Write("src/Migrations/20240101_Init.cs", "class M { private int x; private int y; private int z; private int w; }");
+        Write("src/Migrations/20240101_Init.cs", "using Microsoft.EntityFrameworkCore.Migrations;\n[Migration(\"20240101_Init\")]\nclass M { private int x; private int y; private int z; private int w; }");
         Write("src/Form.Designer.cs", "class F { private int button1; private int button2; }");
 
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
