@@ -17,7 +17,7 @@ public sealed partial class MigrationTests
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
 
         Assert.Contains("stylebro_private_field_naming = _camelCase", File.ReadAllText(Path.Combine(root, ".editorconfig")));
-        Assert.Contains("private fields: 0 named 'field', 10 named '_field'; stylebro_private_field_naming = _camelCase", output);
+        Assert.Contains("  kept     private fields: 10 of 10 named '_field' -> stylebro_private_field_naming = _camelCase", output);
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public sealed partial class MigrationTests
         var none = new Dictionary<string, string>();
         var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 4, 120 } }, none);
         Assert.Contains(Key + " = inside_namespace", lines);
-        Assert.Contains("  files with using directives: 4 outside the namespace, 120 inside the namespace; csharp_using_directive_placement = inside_namespace", report);
+        Assert.Contains("  kept     files' using directives: 120 of 124 inside the namespace -> csharp_using_directive_placement = inside_namespace", report);
         Assert.Empty(Lines(new[] { 120, 4 })); // outside is the preset's
         Assert.Equal(new[] { "dotnet_diagnostic.BRO1008.severity = none" }, Lines(new[] { 4, 9 }).Where(l => !l.StartsWith('#'))); // mixed: 69 %, BRO1008 off
         Assert.Contains(Key + " = inside_namespace", Lines(new[] { 0, 9 })); // 9 files, all inside
@@ -167,8 +167,10 @@ public sealed partial class MigrationTests
         var none = new Dictionary<string, string>();
         Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 1, 9 }));
         Assert.Equal(new[] { Off }, Lines(new[] { 1, 8 })); // 9 places that disagree: too few
-        Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 0, 2 })); // 2 places that agree
-        Assert.Empty(Lines(new[] { 2, 0 })); // ... on the default
+        Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 0, 3 })); // 3 places that agree
+        Assert.Empty(Lines(new[] { 3, 0 })); // ... on the default
+        Assert.Empty(Lines(new[] { 0, 2 })); // 2 places: too few to tell, the default stays
+        Assert.Empty(Lines(new[] { 1, 1 })); // ... also when they disagree
         Assert.Equal(new[] { Key + " = beginning_of_line" }, Lines(new[] { 3, 9 })); // 75 %
         Assert.Equal(new[] { Off }, Lines(new[] { 4, 9 })); // 69 %: no clear majority, BRO1521 off
         Assert.Empty(Lines(new[] { 0, 0 })); // nothing to judge: the default stays

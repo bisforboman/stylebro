@@ -1072,7 +1072,7 @@ public sealed partial class MigrationTests : IDisposable
         Write("src/B.cs", "class B { private int e, f, g; }");
         File.Delete(Path.Combine(root, ".editorconfig"));
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
-        Assert.DoesNotContain("stylebro_private_field_naming", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+        Assert.DoesNotContain("\nstylebro_private_field_naming =", File.ReadAllText(Path.Combine(root, ".editorconfig")));
     }
 
     [Fact]

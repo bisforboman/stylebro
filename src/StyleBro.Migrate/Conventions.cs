@@ -14,7 +14,8 @@ namespace StyleBro.Migrate;
 /// The conventions a repository's code already follows, for the settings StyleBro has (owner's decision 2026-10-09,
 /// docs/decisions.md: "Detect the main ones"). 'stylebro-migrate init' counts both forms of each in the repository's own
 /// C# (syntax only; generated, vendored and EF Core migration files and submodules don't count) and writes the form most
-/// of the code uses when it is clear: at least <see cref="Share"/> of at least <see cref="MinimumSample"/> places. Ocelot
+/// of the code uses when it is clear: at least <see cref="Share"/> of at least <see cref="MinimumSample"/> places, or all of
+/// at least <see cref="MinimumAgreeing"/>. Ocelot
 /// writes '=>' at the start of a wrapped line; StyleBro's default (end) moved it in 115 files.
 /// </summary>
 internal static class Conventions
@@ -23,10 +24,16 @@ internal static class Conventions
     public const double Share = 0.75;
 
     /// <summary>
-    /// The fewest places a majority is judged on. Fewer places are followed only when they all agree (RealWorld: its only 2
-    /// private fields are '_field'); mixed ones turn the rule off like a missing majority. None at all: the default stays.
+    /// The fewest places a majority is judged on. Fewer places (but at least <see cref="MinimumAgreeing"/>) are followed only
+    /// when they all agree; mixed ones turn the rule off like a missing majority.
     /// </summary>
     public const int MinimumSample = 10;
+
+    /// <summary>
+    /// The fewest places init judges at all (owner's decision 2026-10-10, docs/decisions.md): with fewer, the default stays and
+    /// nothing is written. The package check's test project had one '""', and init switched BRO1106 to literals for it.
+    /// </summary>
+    public const int MinimumAgreeing = 3;
 
     /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
@@ -37,26 +44,26 @@ internal static class Conventions
     public static readonly IReadOnlyList<Convention> All = new Convention[]
     {
         new(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "private fields", "camelCase", ("camelCase", "named 'field'"), ("_camelCase", "named '_field'"), Off(DiagnosticIds.PrivateFieldNaming)),
-        new("csharp_new_line_before_open_brace", "'{' of a multi-line block", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
+        new("csharp_new_line_before_open_brace", "'{' of multi-line blocks", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
         new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), null, "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
-        new("csharp_prefer_braces", "one-line bodies of if/else/for/foreach/while/using/lock", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline"),
-        new("dotnet_style_operator_placement_when_wrapping", "binary and ?: operators where a line wraps", "beginning_of_line", ("beginning_of_line", "at the start of the line"), ("end_of_line", "at the end of the line"), Off(DiagnosticIds.OperatorPlacement)),
-        new(StyleBro.Analyzers.Layout.WrappingPlacement.ArrowKey, "'=>' of expression bodies and switch arms where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.ArrowPlacement)),
+        new("csharp_prefer_braces", "one-line if/else/for/while/using/lock bodies", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline"),
+        new("dotnet_style_operator_placement_when_wrapping", "operators where a line wraps", "beginning_of_line", ("beginning_of_line", "at the start of the line"), ("end_of_line", "at the end of the line"), Off(DiagnosticIds.OperatorPlacement)),
+        new(StyleBro.Analyzers.Layout.WrappingPlacement.ArrowKey, "'=>' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.ArrowPlacement)),
         new(StyleBro.Analyzers.Layout.WrappingPlacement.EqualsKey, "'=' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.EqualsPlacement)),
-        new("stylebro_trailing_comma", "multi-line initializers, enums and switch expressions", "include", ("include", "with a trailing comma"), ("omit", "without"), Off(DiagnosticIds.TrailingComma)),
+        new("stylebro_trailing_comma", "multi-line initializers", "include", ("include", "with a trailing comma"), ("omit", "without a trailing comma"), Off(DiagnosticIds.TrailingComma)),
         new("stylebro_empty_string_style", "empty strings", "string_empty", ("string_empty", "string.Empty"), ("literal", "\"\""), Off(DiagnosticIds.EmptyString)),
         new("stylebro_null_check_style", "null checks", "pattern_matching", ("pattern_matching", "'is null'"), ("equality_operator", "'== null'"), Off(DiagnosticIds.NullCheckStyle)),
         new("stylebro_summary_layout", "one-line <summary> texts", "multi_line", ("multi_line", "tags on lines of their own"), ("single_line_when_fits", "on one line"), Off(DiagnosticIds.SummaryLayout)),
         new("stylebro_inheritdoc_style", "<inheritdoc/> tags", "compact", ("compact", "'<inheritdoc/>'"), ("spaced", "'<inheritdoc />'"), null),
         new("csharp_prefer_simple_default_expression", "default values", "false", ("false", "'default(T)'"), ("true", "'default'"), null),
-        new("stylebro_closing_parenthesis_placement", "')' of split argument and parameter lists", "last_item", ("last_item", "after the last item"), ("own_line", "on its own line"), Off(DiagnosticIds.CloseParenthesisOnLastItemLine)),
-        new("stylebro_split_list_first_item", "split argument and parameter lists", "next_line", ("next_line", "first item on the next line"), ("same_line", "first item after '('"), Off(DiagnosticIds.SplitParametersStartOnNewLine)),
+        new("stylebro_closing_parenthesis_placement", "')' of split lists", "last_item", ("last_item", "after the last item"), ("own_line", "on its own line"), Off(DiagnosticIds.CloseParenthesisOnLastItemLine)),
+        new("stylebro_split_list_first_item", "split lists", "next_line", ("next_line", "first item on the next line"), ("same_line", "first item after '('"), Off(DiagnosticIds.SplitParametersStartOnNewLine)),
         new("stylebro_constructor_initializer_placement", "': base(...)'/': this(...)'", "own_line", ("own_line", "on its own line"), ("same_line", "on the constructor's line"), Off(DiagnosticIds.ConstructorInitializerLine)),
         new("stylebro_constraint_placement", "'where' constraints", "own_line", ("own_line", "on their own line"), ("same_line", "on the declaration's line"), Off(DiagnosticIds.ConstraintOnOwnLine)),
         new("stylebro_object_creation_parentheses", "'new T { ... }' with an initializer", "omit", ("omit", "without '()'"), ("include", "with '()'"), Off(DiagnosticIds.ObjectCreationParentheses)),
-        new("stylebro_blank_line_between_switch_sections", "switch sections", "include", ("include", "after a blank line"), ("omit", "without one"), Off(DiagnosticIds.BlankLineBetweenSwitchSections)),
-        new("csharp_using_directive_placement", "files with using directives", "outside_namespace", ("outside_namespace", "outside the namespace"), ("inside_namespace", "inside the namespace"), Off(DiagnosticIds.UsingPlacement)),
-        new(ArithmeticKey, "operations of another kind inside arithmetic ('a + b * c')", "always_for_clarity", ("always_for_clarity", "with parentheses"), ("never_if_unnecessary", "without"), Off(DiagnosticIds.ArithmeticPrecedence)),
+        new("stylebro_blank_line_between_switch_sections", "switch sections", "include", ("include", "after a blank line"), ("omit", "without a blank line"), Off(DiagnosticIds.BlankLineBetweenSwitchSections)),
+        new("csharp_using_directive_placement", "files' using directives", "outside_namespace", ("outside_namespace", "outside the namespace"), ("inside_namespace", "inside the namespace"), Off(DiagnosticIds.UsingPlacement)),
+        new(ArithmeticKey, "mixed arithmetic ('a + b * c')", "always_for_clarity", ("always_for_clarity", "with parentheses"), ("never_if_unnecessary", "without parentheses"), Off(DiagnosticIds.ArithmeticPrecedence)),
     };
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
@@ -345,16 +352,20 @@ internal static class Conventions
 
     /// <summary>
     /// What to write: for each convention with a clear majority (<see cref="Share"/> of at least <see cref="MinimumSample"/>
-    /// places, or fewer places that all agree) that isn't the default, its lines; without one, the line that turns its rule
-    /// off (<see cref="Convention.Off"/>; owner's decision 2026-10-10: Bogus had 24 operators at the start of a line and 50 at
-    /// the end, and BRO1520 moved 52); and one report line per convention found in the code. <paramref name="decided"/>: keys
-    /// set elsewhere (the repository's own .editorconfig, the Sonar setup, an SDK naming rule), with why; they're reported, not
-    /// written. <paramref name="isSet"/>: whether the repository or the Sonar setup sets an Off line's key itself (then it stays).
+    /// places, or at least <see cref="MinimumAgreeing"/> places that all agree) that isn't the default, its lines; without one,
+    /// the line that turns its rule off (<see cref="Convention.Off"/>; owner's decision 2026-10-10: Bogus had 24 operators at
+    /// the start of a line and 50 at the end, and BRO1520 moved 52); and the report: one line per convention found in the code
+    /// (the verdict first) and a summary of what was kept and turned off. <paramref name="decided"/>: keys set elsewhere (the
+    /// repository's own .editorconfig, the Sonar setup, an SDK naming rule), with why; they're reported, not written.
+    /// <paramref name="isSet"/>: whether the repository or the Sonar setup sets an Off line's key itself (then it stays).
     /// </summary>
     public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null)
     {
         var lines = new List<string>();
         var report = new List<string>();
+        var kept = new List<string>();
+        var turnedOff = new List<string>();
+        var tooFew = 0;
         foreach (var convention in All)
         {
             var count = counts.TryGetValue(convention.Key, out var c) ? c : new int[2];
@@ -364,41 +375,80 @@ internal static class Conventions
                 continue;
             }
 
-            var found = $"{convention.What}: {count[0]} {convention.Values[0].Label}, {count[1]} {convention.Values[1].Label}";
+            var mixed = string.Join(", ", Enumerable.Range(0, 2).Where(i => count[i] > 0).Select(i => $"{count[i]} {convention.Values[i].Label}"));
             var winner = total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)
                 : count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;
-            var why = total < MinimumSample ? "too few places that disagree" : "no clear majority";
+            var found = winner < 0 ? mixed : $"{count[winner]} of {total} {convention.Values[winner].Label}";
+            string tag;
             string verdict;
             if (decided.TryGetValue(convention.Key, out var reason))
             {
-                verdict = reason;
+                (tag, verdict) = ("set", reason);
+            }
+            else if (total < MinimumAgreeing)
+            {
+                (tag, verdict) = ("too few", $"too few places to tell, {convention.Key} stays {convention.Default}");
+                found = mixed;
+                tooFew++;
             }
             else if (winner < 0 && convention.Off is { } off && !(isSet?.Invoke(off.Substring(0, off.IndexOf('=')).Trim()) ?? false))
             {
-                verdict = $"{why}, so StyleBro doesn't enforce either form: {off}";
-                lines.Add($"# {found}: {why}");
+                var rule = off.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal) ? off.Split('.')[1] : null;
+                (tag, verdict) = ("off", rule is null ? $"both forms allowed: {off}" : $"{rule} is off");
+                turnedOff.Add($"{rule ?? off} ({convention.What})");
+                lines.Add(rule is null
+                    ? $"# init: {convention.What}: your code mixes both forms ({mixed}), so both are allowed. To choose {convention.Values[0].Label}: change the next line to {convention.Key} = {convention.Values[0].Value}."
+                    : $"# init: {convention.What}: your code mixes both forms ({mixed}), so {rule} is off. To choose one: set {convention.Key} and remove the next line.");
                 lines.Add(off);
             }
             else if (winner < 0)
             {
-                verdict = $"{why}, {convention.Key} stays {convention.Default}";
+                (tag, verdict) = ("mixed", $"{convention.Key} stays {convention.Default}");
             }
             else if (convention.Values[winner].Value == convention.Default)
             {
-                verdict = $"{convention.Key} = {convention.Default} (the default){(total < MinimumSample ? $", all {total} agree" : string.Empty)}";
+                (tag, verdict) = ("default", $"{convention.Key} = {convention.Default}");
             }
             else
             {
                 var value = convention.Values[winner].Value;
-                verdict = $"{convention.Key} = {value}{(total < MinimumSample ? $" (few places, all {total} agree)" : string.Empty)}";
-                lines.Add($"# {found}");
+                (tag, verdict) = ("kept", $"{convention.Key} = {value}");
+                kept.Add(convention.Key);
+                lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {total} places in your code");
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
 
-            report.Add($"  {found}; {verdict}");
+            report.Add($"  {tag,-8} {convention.What}: {found} -> {verdict}");
         }
 
+        report.AddRange(Summary(kept, turnedOff, tooFew));
         return (lines, report);
+    }
+
+    /// <summary>The end of init's convention report: which settings follow the code, which rules are off and how to choose later.</summary>
+    public static IEnumerable<string> Summary(IReadOnlyList<string> kept, IReadOnlyList<string> turnedOff, int tooFew)
+    {
+        if (kept.Count + turnedOff.Count + tooFew == 0)
+        {
+            yield break;
+        }
+
+        yield return "Summary:";
+        if (kept.Count > 0)
+        {
+            yield return $"  Kept your style for {kept.Count} setting(s): {string.Join(", ", kept)}.";
+        }
+
+        if (turnedOff.Count > 0)
+        {
+            yield return $"  Turned {turnedOff.Count} rule(s) off because your code mixes both forms: {string.Join(", ", turnedOff)}.";
+            yield return "  To choose a style later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.";
+        }
+
+        if (tooFew > 0)
+        {
+            yield return $"  {tooFew} setting(s) had fewer than {MinimumAgreeing} places to tell: StyleBro's defaults stay.";
+        }
     }
 
     /// <summary>The line that turns a rule off.</summary>

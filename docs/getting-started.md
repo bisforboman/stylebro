@@ -128,34 +128,81 @@ Put your own settings outside it. To get these rules reported by the build too, 
 `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` to `Directory.Build.props` (`init` says so when no project
 file sets it yet).
 
-`init` also looks at your code first and keeps the conventions it clearly follows. For each setting below it counts
-both forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count) and, when one
-form has at least three quarters of at least 10 places (or fewer places that all agree) and isn't StyleBro's default,
-writes it into the block. Without a clear majority it turns off the StyleBro rule that enforces the setting, so the code
-stays as it is (`dotnet_diagnostic.BRO1520.severity = none`; for braces on one-line bodies `csharp_prefer_braces =
-when_multiline`); with no places at all the default stays. It prints every count and decision (Ocelot):
+#### init also looks at your code
+
+`init` looks at your code first and keeps the conventions it clearly follows. For each setting below it counts both
+forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count):
+
+- **fewer than 3 places** (or none): too few to tell, StyleBro's default stays and nothing is written;
+- **3 to 9 places**: followed when they all agree;
+- **10 places or more**: followed when one form has at least 75 %;
+- **mixed** (no form gets there): the StyleBro rule that enforces the setting is turned off, so the code stays as it is
+  (`dotnet_diagnostic.BRO1520.severity = none`; for braces on one-line bodies `csharp_prefer_braces = when_multiline`,
+  which allows both).
+
+A followed form that is StyleBro's default needs no line; any other is written into the block. A key your root
+`.editorconfig` sets wins, so does a Sonar setup's, and a `dotnet_naming_rule` for private fields decides the field style
+(naming rules for interfaces or constants don't).
+
+| Setting | What's counted | Rule | Key |
+|---|---|---|---|
+| Private field names | `field` or `_field` | [BRO1303](rules/BRO1303.md) | `stylebro_private_field_naming` |
+| `{` placement | `{` of a multi-line block on its own line or at the end of the line | SDK formatter (IDE0055) | `csharp_new_line_before_open_brace` |
+| `else`/`catch`/`finally` | after `}` on a new line or the same line | SDK formatter (IDE0055) | `csharp_new_line_before_else`, `_catch`, `_finally` |
+| Braces | one-line `if`/`else`/`for`/`foreach`/`while`/`using`/`lock` bodies with or without braces | [BRO1514](rules/BRO1514.md)-[BRO1516](rules/BRO1516.md) | `csharp_prefer_braces` |
+| Operator placement | binary and `?:` operators at the start or end of a wrapped line | [BRO1520](rules/BRO1520.md) | `dotnet_style_operator_placement_when_wrapping` |
+| `=>` placement | `=>` of expression bodies and switch arms where a line wraps | [BRO1521](rules/BRO1521.md) | `stylebro_arrow_placement_when_wrapping` |
+| `=` placement | `=` where a line wraps | [BRO1522](rules/BRO1522.md) | `stylebro_equals_placement_when_wrapping` |
+| Trailing commas | multi-line initializers, enums and switch expressions | [BRO1401](rules/BRO1401.md) | `stylebro_trailing_comma` |
+| Empty strings | `string.Empty` or `""` (outside constant contexts) | [BRO1106](rules/BRO1106.md) | `stylebro_empty_string_style` |
+| Null checks | `is null` or `== null` | [BRO1133](rules/BRO1133.md) | `stylebro_null_check_style` |
+| Summaries | one-line `<summary>` texts with the tags on their own lines or on one line | [BRO1616](rules/BRO1616.md) | `stylebro_summary_layout` |
+| `<inheritdoc/>` | `<inheritdoc/>` or `<inheritdoc />` | [BRO1601](rules/BRO1601.md) | `stylebro_inheritdoc_style` |
+| Default values | `default(T)` or `default` | IDE0034 | `csharp_prefer_simple_default_expression` |
+| `)` of split lists | after the last item or on its own line | [BRO1110](rules/BRO1110.md) | `stylebro_closing_parenthesis_placement` |
+| First item of split lists | on the next line or after `(` | [BRO1107](rules/BRO1107.md) | `stylebro_split_list_first_item` |
+| Constructor initializers | `: base(...)`/`: this(...)` on its own line or the constructor's | [BRO1105](rules/BRO1105.md) | `stylebro_constructor_initializer_placement` |
+| Constraints | `where` on its own line or the declaration's | [BRO1111](rules/BRO1111.md) | `stylebro_constraint_placement` |
+| `new T { ... }` | with or without `()` before an initializer | [BRO1141](rules/BRO1141.md) | `stylebro_object_creation_parentheses` |
+| Switch sections | after a blank line or without one | [BRO1526](rules/BRO1526.md) | `stylebro_blank_line_between_switch_sections` |
+| Using directives | files with a namespace and their usings on one level: inside it (file-scoped too) or outside; only `inside_namespace` is written, the preset already says `outside_namespace` | [BRO1008](rules/BRO1008.md) | `csharp_using_directive_placement` |
+| Arithmetic parentheses | `a + (b * c)` or `a + b * c` | [BRO1406](rules/BRO1406.md) | `dotnet_style_parentheses_in_arithmetic_binary_operators` |
+
+The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `mixed`,
+`too few`, or `set` when your configuration decides), then a summary (RealWorld):
 
 ```
-Conventions in the code (a form is written when it has 75% of at least 10 places, or all of fewer;
-  without a clear majority, the rule that enforces the setting is turned off):
-  private fields: 32 named 'field', 1054 named '_field'; stylebro_private_field_naming = _camelCase
-  '{' of a multi-line block: 5412 on its own line, 0 at the end of the line; .editorconfig sets csharp_new_line_before_open_brace = all
-  '=>' of expression bodies and switch arms where a line wraps: 16 at the end of the line, 296 at the start of the line; stylebro_arrow_placement_when_wrapping = beginning_of_line
-  empty strings: 357 string.Empty, 20 ""; stylebro_empty_string_style = string_empty (the default)
-  one-line <summary> texts: 208 tags on lines of their own, 121 on one line; no clear majority, so StyleBro doesn't enforce either form: dotnet_diagnostic.BRO1616.severity = none
+Conventions in the code (judged from 3 places: all must agree below 10, 75% from 10 on;
+  mixed: the rule that enforces the setting is turned off):
+  too few  private fields: 2 named '_field' -> too few places to tell, stylebro_private_field_naming stays camelCase
+  set      '{' of multi-line blocks: 196 of 196 on its own line -> .editorconfig sets csharp_new_line_before_open_brace = all
+  kept     multi-line initializers: 18 of 18 without a trailing comma -> stylebro_trailing_comma = omit
+  default  empty strings: 3 of 3 string.Empty -> stylebro_empty_string_style = string_empty
+  off      null checks: 7 'is null', 10 '== null' -> BRO1133 is off
+  off      split lists: 13 first item on the next line, 17 first item after '(' -> BRO1107 is off
   ...
+Summary:
+  Kept your style for 1 setting(s): stylebro_trailing_comma.
+  Turned 2 rule(s) off because your code mixes both forms: BRO1133 (null checks), BRO1107 (split lists).
+  To choose a style later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.
+  4 setting(s) had fewer than 3 places to tell: StyleBro's defaults stay.
 ```
 
-The settings: private field naming ([BRO1303](rules/BRO1303.md)), brace placement (`csharp_new_line_before_open_brace`,
-`csharp_new_line_before_else`/`_catch`/`_finally`), braces on one-line bodies (`csharp_prefer_braces`), operator, `=>`
-and `=` placement when wrapping, trailing commas, `""` or `string.Empty`, null checks, one-line summaries, parentheses
-inside arithmetic (`a + (b * c)`, [BRO1406](rules/BRO1406.md)),
-`<inheritdoc/>` spacing, `default` or `default(T)`, the closing parenthesis and first item of split lists, constructor
-initializer and `where` placement, `new T()` parentheses with an initializer, blank lines between switch sections, and
-where using directives go (`csharp_using_directive_placement`, [BRO1008](rules/BRO1008.md); counted in files: a file
-with a namespace and its usings on one level, inside it, file-scoped too, or outside; only `inside_namespace` is
-written, the preset already says `outside_namespace`) (the keys are in [Settings](configuration.md)). A key your root `.editorconfig` sets wins, so does a Sonar setup's, and
-a `dotnet_naming_rule` for private fields decides the field style (naming rules for interfaces or constants don't).
+Each written line gets a comment in the block saying why:
+
+```ini
+# init: multi-line initializers: without a trailing comma in 18 of 18 places in your code
+stylebro_trailing_comma = omit
+# init: null checks: your code mixes both forms (7 'is null', 10 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.
+dotnet_diagnostic.BRO1133.severity = none
+```
+
+#### Changing a detected setting later
+
+Set the key in your own part of `.editorconfig`, outside the block (for example `stylebro_null_check_style =
+equality_operator`), remove the rule's `severity = none` line from the block, and run `stylebro-migrate format` to bring
+the code in line. The block is rewritten each time `init` runs, but a key you set yourself wins over what it counts: it
+then writes neither the setting nor the `severity = none` line.
 
 EF Core migrations (files with `[Migration(...)]`, a `Migration` base class or a `ModelSnapshot`) are written by
 `dotnet ef`, so `init` marks their folders `generated_code = true`: formatting and StyleBro leave them alone. Vendored
