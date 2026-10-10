@@ -89,7 +89,10 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
 
             if (await GetKeptReasonAsync(document, method, model, cancellationToken).ConfigureAwait(false) is { } kept)
             {
-                KeptFindings.Record(diagnostic, kept);
+                var where = kept == KeptReason.NameInString
+                    ? (await CamelCaseRenamer.GetNamesInCodeAsync(document.Project.Solution).ConfigureAwait(false)).WhereIs(method.Identifier.ValueText)
+                    : null;
+                KeptFindings.Record(diagnostic, kept, where);
                 continue;
             }
 

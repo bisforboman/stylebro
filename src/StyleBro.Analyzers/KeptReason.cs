@@ -55,7 +55,7 @@ public enum KeptReason
 
 /// <summary>
 /// One finding a fix kept, as a line of the file named by <see cref="Variable"/> (tab-separated: path, line, column,
-/// rule, reason, message). The fixes append to it when the variable is set; 'stylebro-migrate format' sets it and reads it.
+/// rule, reason, message, and where the reason was found when the fix knows it). The fixes append to it when the variable is set; 'stylebro-migrate format' sets it and reads it.
 /// </summary>
 public sealed class KeptFinding
 {
@@ -63,8 +63,9 @@ public sealed class KeptFinding
     public const string Variable = "STYLEBRO_KEPT_FINDINGS";
 
     /// <summary>Initializes a new instance of the <see cref="KeptFinding"/> class.</summary>
-    public KeptFinding(string path, int line, int column, string id, KeptReason reason, string message)
+    public KeptFinding(string path, int line, int column, string id, KeptReason reason, string message, string? where = null)
     {
+        Where = where;
         Path = path;
         Line = line;
         Column = column;
@@ -91,6 +92,9 @@ public sealed class KeptFinding
     /// <summary>Gets the diagnostic's message.</summary>
     public string Message { get; }
 
+    /// <summary>Gets where the reason was found ('path(line)' of the first string with the name), or null.</summary>
+    public string? Where { get; }
+
     /// <summary>What a reason means, for people.</summary>
     public static string Describe(KeptReason reason) => reason switch
     {
@@ -115,15 +119,16 @@ public sealed class KeptFinding
     public static KeptFinding? Parse(string line)
     {
         var parts = line.Split('\t');
-        return parts.Length == 6
+        return parts.Length is 6 or 7
             && int.TryParse(parts[1], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var number)
             && int.TryParse(parts[2], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var column)
             && System.Enum.TryParse<KeptReason>(parts[4], out var reason)
-            ? new KeptFinding(parts[0], number, column, parts[3], reason, parts[5])
+            ? new KeptFinding(parts[0], number, column, parts[3], reason, parts[5], parts.Length == 7 ? parts[6] : null)
             : null;
     }
 
     /// <summary>The line written to the file.</summary>
     public override string ToString() =>
-        string.Join("\t", Path, Line.ToString(System.Globalization.CultureInfo.InvariantCulture), Column.ToString(System.Globalization.CultureInfo.InvariantCulture), Id, Reason.ToString(), Message.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' '));
+        string.Join("\t", Path, Line.ToString(System.Globalization.CultureInfo.InvariantCulture), Column.ToString(System.Globalization.CultureInfo.InvariantCulture), Id, Reason.ToString(), Message.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' '))
+            + (Where is null ? string.Empty : "\t" + Where.Replace('\t', ' '));
 }

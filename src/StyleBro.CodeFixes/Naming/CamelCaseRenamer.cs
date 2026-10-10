@@ -53,10 +53,10 @@ internal static class CamelCaseRenamer
                 continue;
             }
 
-            var (itemChanges, reason) = await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false);
+            var (itemChanges, reason, where) = await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false);
             if (reason is { } kept)
             {
-                KeptFindings.Record(diagnostic, kept);
+                KeptFindings.Record(diagnostic, kept, where);
                 continue;
             }
 
@@ -142,7 +142,7 @@ internal static class CamelCaseRenamer
             : null;
 
     /// <summary>The edits for one diagnostic, in every copy of its file, or why it's kept.</summary>
-    private static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason)> GetItemChangesAsync(
+    private static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason, string? Where)> GetItemChangesAsync(
         Solution solution,
         Document document,
         Diagnostic diagnostic,
@@ -152,7 +152,7 @@ internal static class CamelCaseRenamer
         var itemChanges = new List<(string File, TextChange Change)>();
         if (!diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName) || newName is null)
         {
-            return (itemChanges, null);
+            return (itemChanges, null, null);
         }
 
         // Every copy of the file: '#if' code can hold references that only one target framework sees. All or nothing:
@@ -177,7 +177,7 @@ internal static class CamelCaseRenamer
                 continue;
             }
 
-            var reason = IsReachableByName(symbol) ? FindInCode(symbol, await GetNamesInCodeAsync(solution).ConfigureAwait(false)) : null;
+            var (reason, where) = IsReachableByName(symbol) ? FindInCode(symbol, await GetNamesInCodeAsync(solution).ConfigureAwait(false)) : (null, null);
             if (reason is null && symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, await GetNamesInCodeAsync(solution).ConfigureAwait(false), keptTypes))
             {
                 reason = KeptReason.OtherPropertyKept;
@@ -185,19 +185,19 @@ internal static class CamelCaseRenamer
 
             if (reason is not null)
             {
-                return (itemChanges, reason);
+                return (itemChanges, reason, where);
             }
 
             var (symbolChanges, kept) = await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, PublicApi.IsRenameAllowed(copy.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), cancellationToken).ConfigureAwait(false);
             if (kept is not null)
             {
-                return (itemChanges, kept);
+                return (itemChanges, kept, null);
             }
 
             itemChanges.AddRange(symbolChanges);
         }
 
-        return (itemChanges, null);
+        return (itemChanges, null, null);
     }
 
     /// <summary>
@@ -211,6 +211,7 @@ internal static class CamelCaseRenamer
     private static async Task<NamesInCode> CollectNamesAsync(Solution solution, CancellationToken cancellationToken)
     {
         var strings = new HashSet<string>();
+        var where = new Dictionary<string, string>();
         var nameofs = new HashSet<string>();
         var documents = new List<Document>();
         foreach (var project in solution.Projects)
@@ -228,7 +229,10 @@ internal static class CamelCaseRenamer
                 {
                     if (token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
                     {
-                        strings.Add(token.ValueText);
+                        if (strings.Add(token.ValueText))
+                        {
+                            where[token.ValueText] = $"{document.FilePath ?? document.Name}({token.GetLocation().GetLineSpan().StartLinePosition.Line + 1})";
+                        }
                     }
                     else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"
                         && token.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 1 } invocation)
@@ -239,20 +243,20 @@ internal static class CamelCaseRenamer
             }
         }
 
-        return new NamesInCode(strings, nameofs);
+        return new NamesInCode(strings, nameofs, where);
     }
 
     /// <summary>Whether code can refer to the symbol by a string or a nameof, and which.</summary>
-    private static KeptReason? FindInCode(ISymbol symbol, NamesInCode names) =>
-        IsInStrings(symbol, names.Strings) ? KeptReason.NameInString
-        : IsInStrings(symbol, names.Nameofs) ? KeptReason.NameInNameof
-        : null;
+    private static (KeptReason? Reason, string? Where) FindInCode(ISymbol symbol, NamesInCode names) =>
+        MatchInStrings(symbol, names.Strings) is { } match ? (KeptReason.NameInString, names.WhereIs(match))
+        : MatchInStrings(symbol, names.Nameofs) is not null ? (KeptReason.NameInNameof, null)
+        : (null, null);
 
     /// <summary>
-    /// Whether code can refer to the symbol by a string: a field by its name (GetField("_count")), a type by its name
+    /// The first string code can refer to the symbol by, or null: a field by its name (GetField("_count")), a type by its name
     /// or its qualified name (Type.GetType("App.Shape"), "App.Shape, App").
     /// </summary>
-    private static bool IsInStrings(ISymbol symbol, HashSet<string> strings)
+    private static string? MatchInStrings(ISymbol symbol, HashSet<string> strings)
     {
         // Names that are also data (serializers write public instance fields, properties and enum members by name)
         // are looked for inside strings too, like test JSON.
@@ -265,11 +269,11 @@ internal static class CamelCaseRenamer
         if (symbol is not INamedTypeSymbol)
         {
             var word = new System.Text.RegularExpressions.Regex(@"(?<![\w@])" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"(?!\w)");
-            return strings.Contains(symbol.Name) || (isData && strings.Any(s => word.IsMatch(s)));
+            return strings.Contains(symbol.Name) ? symbol.Name : isData ? strings.FirstOrDefault(s => word.IsMatch(s)) : null;
         }
 
         var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
-        return strings.Any(s => pattern.IsMatch(s));
+        return strings.FirstOrDefault(s => pattern.IsMatch(s));
     }
 
     /// <summary>
@@ -282,7 +286,7 @@ internal static class CamelCaseRenamer
         if (!cache.TryGetValue(type, out var kept))
         {
             cache[type] = kept = type.GetMembers().OfType<IPropertySymbol>()
-                .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names) is not null);
+                .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null);
         }
 
         return kept;
@@ -640,10 +644,13 @@ internal static class CamelCaseRenamer
     /// <summary>The string literals (and interpolated text) and the names in <c>nameof(...)</c> of a solution.</summary>
     internal sealed class NamesInCode
     {
-        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs)
+        private readonly Dictionary<string, string> where;
+
+        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where)
         {
             Strings = strings;
             Nameofs = nameofs;
+            this.where = where;
         }
 
         public HashSet<string> Strings { get; }
@@ -651,5 +658,8 @@ internal static class CamelCaseRenamer
         public HashSet<string> Nameofs { get; }
 
         public bool Contains(string name) => Strings.Contains(name) || Nameofs.Contains(name);
+
+        /// <summary>Where the string first appears ('path(line)'), or null.</summary>
+        public string? WhereIs(string text) => where.TryGetValue(text, out var at) ? at : null;
     }
 }

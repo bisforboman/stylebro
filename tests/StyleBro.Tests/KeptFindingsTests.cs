@@ -88,6 +88,9 @@ public class KeptFindingsTests
             var kept = File.ReadAllLines(file).Select(KeptFinding.Parse).OfType<KeptFinding>().Single(k => k.Path.EndsWith("C.cs", StringComparison.Ordinal));
             Assert.Equal((3, 17, "BRO1303", KeptReason.NameInString), (kept.Line, kept.Column, kept.Id, kept.Reason));
             Assert.Equal("Rename '_blockedUntil' to 'blockedUntil'", kept.Message);
+
+            // Where the string is, so a person can check it (the trial: "the name is in a string", but not which).
+            Assert.EndsWith("Tests.cs(3)", kept.Where);
         }
         finally
         {
@@ -105,6 +108,46 @@ public class KeptFindingsTests
 
         Assert.Equal((finding.Path, 12, 5, "BRO1303", KeptReason.NameInNameof, "Rename '_a' to 'a'"), (parsed.Path, parsed.Line, parsed.Column, parsed.Id, parsed.Reason, parsed.Message));
         Assert.Null(KeptFinding.Parse("not a finding"));
+
+        var withWhere = KeptFinding.Parse(new KeptFinding("C.cs", 1, 1, "BRO1303", KeptReason.NameInString, "m", Path.Combine("tests", "T.cs") + "(9)").ToString())!;
+        Assert.Equal(Path.Combine("tests", "T.cs") + "(9)", withWhere.Where);
+    }
+
+    [Fact]
+    public void KeptSummary_SaysWhereTheString_Is()
+    {
+        var root = NewFolder();
+        var finding = new KeptFinding(Path.Combine(root, "C.cs"), 3, 17, "BRO1303", KeptReason.NameInString, "Rename '_count' to 'count'", Path.Combine(root, "tests", "T.cs") + "(12)");
+
+        Assert.Contains("  C.cs(3,17): BRO1303 Rename '_count' to 'count'. Kept: " + KeptFinding.Describe(KeptReason.NameInString) + " (first: tests/T.cs(12)).", FormatCommand.KeptSummary(new[] { finding }, root));
+    }
+
+    [Fact]
+    public void Verify_SomethingFixableLeft_MarksTheKeptFindings()
+    {
+        var root = NewFolder();
+        var kept = $"{Path.Combine(root, "C.cs")}(3,17): warning BRO1303: Rename '_count' to 'count' [{Path.Combine(root, "App.csproj")}]";
+        var lines = new List<string>();
+
+        var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (args, output) =>
+        {
+            if (args.Contains("--verify-no-changes"))
+            {
+                output?.Invoke(kept);
+                output?.Invoke("C.cs(1,1): warning BRO1505: Add a blank line");
+                return 2;
+            }
+
+            WriteKept(Path.Combine(args[0], "C.cs"));
+            File.WriteAllText(Path.Combine(args[0], "C.cs"), "class C\n{\n}\n");
+            return 0;
+        });
+
+        Assert.Equal(2, code);
+        Assert.Contains(kept.Replace("warning BRO1303", "kept BRO1303", StringComparison.Ordinal), lines);
+        Assert.DoesNotContain(kept, lines);
+        Assert.Contains("C.cs(1,1): warning BRO1505: Add a blank line", lines);
+        Assert.Contains(lines, l => l.StartsWith("1 of these is kept on purpose (marked 'kept')", StringComparison.Ordinal));
     }
 
     [Fact]

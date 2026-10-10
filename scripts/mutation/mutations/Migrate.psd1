@@ -17,7 +17,7 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'rulesets.Add([]);'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;'; Replace = ': count[1] > count[0] ? 1 : 0;'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (true)'; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(relative, text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
 
         # stylebro-migrate follows a SonarQube setup (2026-10-09)
         @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '.Where(f => !Path.GetFileName(f).Contains("none", StringComparison.OrdinalIgnoreCase))'; Replace = ''; Tests = 'MigrationTests.Sonar_' }
@@ -72,5 +72,21 @@
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'offLine == $"{convention.Key} = {convention.Values[winner].Value}")'; Replace = 'false)'; Tests = 'MigrationTests.Conventions_TurnBro1601Off' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'bool Skip(int position) => only is not null && !only.Any(s => s.Contains(position));'; Replace = 'bool Skip(int position) => false;'; Tests = 'MigrationTests.Conventions_CountCodeInactive' }
         @{ File = 'src/StyleBro.Migrate/Suppressions.cs'; Find = 'SonarSetup.Mapping.Where(m => sonar?.IsOn(m.Sonar) ?? true)'; Replace = 'SonarSetup.Mapping'; Tests = 'MigrationTests.Init_AddsNoSuppressionsForASonarRuleThatIsOff' }
+
+        # Trial of 0.5.0-alpha.1 (2026-10-10): settings only where StyleCop runs, sort keys, the package next to StyleCop's,
+        # no whitespace pass with IDE0055 off, old Mac line endings, verify's own errors, kept findings marked as kept
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'uses[project] = references.Count > 0 && removes.Count == 0;'; Replace = 'uses[project] = references.Count > 0;'; Tests = 'MigrationTests.Settings_' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'parent.Length > rootFolder.Length && !HasOther(parent)'; Replace = 'parent.Length > rootFolder.Length'; Tests = 'MigrationTests.Settings_' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'else if (covered.Count == folders.Count)'; Replace = 'else if (false)'; Tests = 'MigrationTests.Settings_' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'else if (covered.Count > 0)'; Replace = 'else if (false)'; Tests = 'MigrationTests.AScopeAbove' }
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (setup.Scopes.Any(scope => setup.For(scope) is var inScope'; Replace = 'if (false && setup.Scopes.Any(scope => setup.For(scope) is var inScope'; Tests = 'MigrationTests.ScopesThatDontSortUsings' }
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (folders is not null && !folders.Any('; Replace = 'if (false && !folders!.Any('; Tests = 'MigrationTests.Settings_' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);'; Replace = 'var targets = Migration.PropsFiles(root);'; Tests = 'MigrationTests.ThePackage_' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'if (Sets(file, "false"))'; Replace = 'if (false)'; Tests = 'MigrationTests.ThePackage_' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'foreach (var file in removes)'; Replace = 'foreach (var file in Array.Empty<string>())'; Tests = 'MigrationTests.ThePackage_' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'return values.Count > 0 && values.All(v => v == "none");'; Replace = 'return values.All(v => v == "none");'; Tests = 'MigrationTests.Format_SkipsTheWhitespacePass' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (at + 1 == bytes.Length || bytes[at + 1] != ''\n'')'; Replace = 'if (at + 1 == bytes.Length)'; Tests = 'MigrationTests.Format_NamesFilesWithOldMacLineEndings' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (code != NotCleanExitCode)'; Replace = 'if (false)'; Tests = 'MigrationTests.Verify_AnUnknownOption' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);'; Replace = 'lines.ForEach(log);'; Tests = 'KeptFindingsTests' }
     )
 }

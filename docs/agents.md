@@ -1,5 +1,8 @@
 # Using StyleBro from scripts and AI agents
 
+*Next release:* `--json`, `format --files` and `--agents-md` aren't in 0.5.0-alpha.1, the latest release; they come
+with the next one. To use them now, [build `main`](getting-started.md#which-version).
+
 `stylebro-migrate` has three things for scripts and AI coding agents: a JSON result for every command (`--json`), a
 fast format of just the files an edit touched (`format --files`), and, on request (`--agents-md`), a section in the
 repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site also has an index for agents:
@@ -27,6 +30,8 @@ anything else is `dotnet format`'s.
 
 ## `format --files`
 
+*Next release:* not in 0.5.0-alpha.1; [build `main`](getting-started.md#which-version) to use it now.
+
 ```
 stylebro-migrate format --files <file> [<file> ...] [--verify-no-changes] [dotnet format options]
 stylebro-migrate format <folder, solution or project> --files <file> [<file> ...]
@@ -47,6 +52,8 @@ Measured (2026-10-10) right after setting StyleBro up, each run until clean (two
 Most of the time is loading projects: a file of a project with many target frameworks costs one load per framework.
 
 ## `--json`
+
+*Next release:* not in 0.5.0-alpha.1; [build `main`](getting-started.md#which-version) to use it now.
 
 Every command takes `--json`: `init`, the StyleCop migration (`stylebro-migrate [path]`, dry run and `--write`), the
 `--diff` previews and `format` (with `--verify-no-changes` and `--files` too). The result is one JSON object on stdout;
@@ -115,6 +122,8 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 (what each means: `reasonText`).
 
 ## AGENTS.md
+
+*Next release:* not in 0.5.0-alpha.1; [build `main`](getting-started.md#which-version) to use it now.
 
 It's opt-in: with `--agents-md`, `stylebro-migrate init --write` and `stylebro-migrate --write` put a short StyleBro
 section into the repository's `AGENTS.md` (created when there's none), between `<!-- BEGIN stylebro` and

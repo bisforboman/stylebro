@@ -3,7 +3,7 @@
     Mutations = @(
         # BRO1309: snake_case names; a property kept by a string keeps its type's other properties
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if (reason is null && symbol is IPropertySymbol'; Replace = 'if (false && symbol is IPropertySymbol'; Tests = 'PascalCaseNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '.Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names) is not null)'; Replace = '.Any(p => FindInCode(p, names) is not null)'; Tests = 'PascalCaseNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '.Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null)'; Replace = '.Any(p => FindInCode(p, names).Reason is not null)'; Tests = 'PascalCaseNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = "symbol.Name.TrimStart('_').IndexOf('_') < 0 ? GetNewName(symbol.Name) : null;"; Replace = 'GetNewName(symbol.Name);'; Tests = 'PascalCaseNamingTests' }
 
         # BRO1303/BRO1306/BRO1307 (fields)
@@ -79,7 +79,7 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '? type.Arity <= 1 && ns.ToDisplayString() == "System.Threading.Tasks"'; Replace = '? true'; Tests = 'AsyncSuffixTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = 'newName = (casingOn ? newName ?? symbol.Name : symbol.Name) + "Async";'; Replace = 'newName = (newName ?? symbol.Name) + "Async";'; Tests = 'AsyncSuffixTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString()))))'; Replace = 'if (false)'; Tests = 'AsyncSuffixTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'return (itemChanges, kept);'; Replace = 'continue;'; Tests = 'LinkedFileFixAllTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'return (itemChanges, kept, null);'; Replace = 'continue;'; Tests = 'LinkedFileFixAllTests' }
 
         # BRO1312 (namespace names): the analyzer's skips, then the rename's
         @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| allowed.Contains(oldName)'; Replace = ''; Tests = 'NamespaceNamingTests' }
@@ -87,7 +87,7 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| !NamespaceNames.IsOnlyFrom(ns, a => SymbolEqualityComparer.Default.Equals(a, context.Compilation.Assembly))'; Replace = ''; Tests = 'NamespaceNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| IsInRootNamespace(fullName, rootNamespace)'; Replace = ''; Tests = 'NamespaceNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/NamespaceNamingAnalyzer.cs'; Find = '|| declared.Locations.Any(l => l.SourceTree is { } tree && NamespaceNames.IsGenerated(tree)))'; Replace = ')'; Tests = 'NamespaceNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = 'is { } text && fullNameInText.IsMatch(text.ToString()))'; Replace = 'is { } text && false)'; Tests = 'NamespaceNamingTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = 'is { } text && fullNameInText.Match(text.ToString()) is { Success: true } match)'; Replace = 'is { } text && fullNameInText.Match(text.ToString()) is { Success: false } match)'; Tests = 'NamespaceNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = 'if (NamespaceNames.Find(global, oldFullName) is { } ns && !NamespaceNames.IsOnlyFrom(ns, a => assemblies.Contains(a.Name)))'; Replace = 'if (false)'; Tests = 'NamespaceNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = 'if ((parentName.Length == 0 ? global : NamespaceNames.Find(global, parentName))?.GetMembers(newPart).Any() == true)'; Replace = 'if (false)'; Tests = 'NamespaceNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = '&& fullNameInText.IsMatch(t.ValueText))'; Replace = '&& false)'; Tests = 'NamespaceNamingTests' }
@@ -155,6 +155,9 @@
         # Kept findings (2026-10-10): a rename the fix keeps on purpose offers no code action
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseNamingCodeFixProvider.cs'; Find = '|| await CamelCaseRenamer.GetKeptReasonAsync(context.Document.Project.Solution, context.Document, diagnostic, context.CancellationToken).ConfigureAwait(false) is not null)'; Replace = ')'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementNamingCodeFixProvider.cs'; Find = '&& await TupleElementRenamer.GetKeptReasonAsync(context.Document.Project.Solution, rename.OldName, rename.NewName, context.CancellationToken).ConfigureAwait(false) is null)'; Replace = ')'; Tests = 'TupleElementNamingTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'IsInStrings(symbol, names.Strings) ? KeptReason.NameInString'; Replace = 'false ? KeptReason.NameInString'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'MatchInStrings(symbol, names.Strings) is { } match ? (KeptReason.NameInString'; Replace = 'MatchInStrings(symbol, names.Strings) is { } match && false ? (KeptReason.NameInString'; Tests = 'KeptFindingsTests' }
+
+        # Kept findings say where the string is (trial of 0.5.0-alpha.1, 2026-10-10)
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'KeptFindings.Record(diagnostic, kept, where);'; Replace = 'KeptFindings.Record(diagnostic, kept);'; Tests = 'KeptFindingsTests' }
     )
 }
