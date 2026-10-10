@@ -292,7 +292,7 @@ public class ParameterMatchesBaseTests
 
         public class Derived : Store
         {
-            public override void Run(int number) => throw new ArgumentOutOfRangeException(nameof(number));
+            public override void Run(int number) => Guard.NotNull(number);
         }
 
         public static class Guard
@@ -324,7 +324,7 @@ public class ParameterMatchesBaseTests
 
         public class Derived : Store
         {
-            public override void Run(int number) => throw new ArgumentOutOfRangeException(nameof(number));
+            public override void Run(int number) => Guard.NotNull(number);
         }
 
         public static class Guard
@@ -348,4 +348,40 @@ public class ParameterMatchesBaseTests
         }
         """,
         On);
+
+    [Fact]
+    public Task PublicApi_IsLeftAloneByDefault() => VerifyFixAsync(
+        """
+        public interface IStore
+        {
+            void Save(int Id);
+        }
+
+        public class Store : IStore
+        {
+            public void Save(int key) => System.Console.WriteLine(key);
+        }
+
+        internal class Hidden : IStore
+        {
+            void IStore.Save(int {|BRO1313:number|}) => System.Console.WriteLine(number);
+        }
+        """,
+        """
+        public interface IStore
+        {
+            void Save(int Id);
+        }
+
+        public class Store : IStore
+        {
+            public void Save(int key) => System.Console.WriteLine(key);
+        }
+
+        internal class Hidden : IStore
+        {
+            void IStore.Save(int Id) => System.Console.WriteLine(Id);
+        }
+        """,
+        On + "\nstylebro_rename_public_api = false");
 }

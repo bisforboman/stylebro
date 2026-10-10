@@ -30,9 +30,10 @@ public sealed class TupleElementNamingAnalyzer : DiagnosticAnalyzer
         }
 
         var name = element.Identifier.ValueText;
-        var camelCase = TupleElementNames.IsCamelCase(context.Options.AnalyzerConfigOptionsProvider.GetOptions(element.SyntaxTree));
-        if (TupleElementNames.GetNewName(name, camelCase) is not { } newName
-            || TupleElementNames.InheritsNames(element, context.SemanticModel, context.CancellationToken))
+        var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(element.SyntaxTree);
+        if (TupleElementNames.GetNewName(name, TupleElementNames.IsCamelCase(options)) is not { } newName
+            || TupleElementNames.InheritsNames(element, context.SemanticModel, context.CancellationToken)
+            || (!PublicApi.IsRenameAllowed(options) && TupleElementNames.IsInPublicSignature(element, context.SemanticModel, context.CancellationToken)))
         {
             return;
         }

@@ -295,6 +295,31 @@ public class TupleElementNamingTests
                 """,
         };
         test.TestState.AdditionalReferences.Add(MetadataReference.CreateFromImage(image.ToArray()));
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         await test.RunAsync();
     }
+
+    [Fact]
+    public Task PublicSignatures_AreLeftAloneByDefault() => VerifyFixAsync(
+        """
+        public class Scores
+        {
+            public (int count, int total) Get() => (1, 2);
+
+            private (int {|BRO1311:count|}, int {|BRO1311:total|}) Sum() => (1, 2);
+
+            public int Total() => Get().count + Sum().count;
+        }
+        """,
+        """
+        public class Scores
+        {
+            public (int count, int total) Get() => (1, 2);
+
+            private (int Count, int Total) Sum() => (1, 2);
+
+            public int Total() => Get().count + Sum().Count;
+        }
+        """,
+        "stylebro_rename_public_api = false");
 }

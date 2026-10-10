@@ -58,7 +58,7 @@ public class PascalCaseNamingTests
 
             public kind Current => kind.round;
 
-            public string Name => nameof(area);
+            public string Name => area().ToString();
         }
         """,
         """
@@ -103,7 +103,7 @@ public class PascalCaseNamingTests
 
             public Kind Current => Kind.Round;
 
-            public string Name => nameof(Area);
+            public string Name => Area().ToString();
         }
         """.Replace("public enum Kind", "public enum Kind").Replace("public Kind Current => Kind.Round;", "public Kind Current => Kind.Round;"));
 
@@ -383,4 +383,62 @@ public class PascalCaseNamingTests
                 public void Render() => reload();
             }
             """));
+
+    [Fact]
+    public Task PublicApi_IsLeftAloneByDefault() => VerifyFixAsync(
+        """
+        public class Runner
+        {
+            public void run()
+            {
+            }
+
+            internal void {|BRO1309:stop|}()
+            {
+            }
+        }
+
+        internal class {|BRO1309:helper|}
+        {
+            public int {|BRO1309:count|} { get; set; }
+        }
+        """,
+        """
+        public class Runner
+        {
+            public void run()
+            {
+            }
+
+            internal void Stop()
+            {
+            }
+        }
+
+        internal class Helper
+        {
+            public int Count { get; set; }
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
+    // An internal interface's member renamed with a public class's implementation would change the public API.
+    [Fact]
+    public Task APublicImplementation_KeepsTheName() => VerifyNotFixedAsync(
+        [
+            """
+            interface IRunner
+            {
+                void {|BRO1309:run|}();
+            }
+
+            public class Runner : IRunner
+            {
+                public void run()
+                {
+                }
+            }
+            """,
+        ],
+        "stylebro_rename_public_api = false");
 }

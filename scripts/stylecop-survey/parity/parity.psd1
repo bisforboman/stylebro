@@ -197,7 +197,11 @@
         @{
             Name     = 'comment-and-file-endings'
             Map      = @('SA1512=BRO1506', 'SA1518=BRO1507')
-            Expected = @()
+            Expected = @(
+                # A comment right below code with a blank line after it describes that code (eShop): the blank line stays.
+                'only StyleCop: BRO1506 More.cs(13,13)'
+                'StyleBro output only: More.cs: []'
+            )
         }
         @{
             Name     = 'comparisons-default-values'
@@ -261,6 +265,8 @@
         @{
             Name     = 'naming-variables-parameters'
             Map      = @('SA1312=BRO1301', 'SA1313=BRO1302')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # StyleCop's rename fix applies only part of the renames per 'dotnet format' run (a different part each
             # time), so only positions are compared; StyleBro's output must still be clean.
             CompareOutput = $false
@@ -274,6 +280,8 @@
         @{
             Name     = 'naming-fields'
             Map      = @('SA1306=BRO1303', 'SA1309=BRO1303')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # Output isn't compared: StyleCop's fix also renames the fields BRO1303 leaves out (below), which only
             # repeats those differences line by line. StyleBro's output must still be clean.
             CompareOutput = $false
@@ -289,6 +297,8 @@
         @{
             Name     = 'naming-prefixes'
             Map      = @('SA1302=BRO1304', 'SA1314=BRO1305')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # StyleCop's fixes for SA1302/SA1314 change nothing under 'dotnet format'; positions only.
             CompareOutput = $false
             Expected = @(
@@ -297,6 +307,8 @@
         @{
             Name     = 'naming-pascal-fields'
             Map      = @('SA1303=BRO1306', 'SA1311=BRO1306', 'SA1307=BRO1306', 'SA1304=BRO1306')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             Expected = @(
                 # StyleCop reports two rules on some fields (SA1307 with SA1311 or SA1304); BRO1306 reports them once,
                 # and the comparison counts StyleCop's reports at one position once.
@@ -312,6 +324,8 @@
         @{
             Name     = 'naming-prefix-underscore'
             Map      = @('SA1308=BRO1307', 'SA1310=BRO1308')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # The new names differ by design, so only positions are compared: StyleCop's fix deletes the prefix or the
             # underscore and nothing else ('MAX_VALUE' -> 'MAXVALUE', 'm_Upper' -> 'Upper', 's_static' -> '@static'), and
             # needs a second run for 'm_with_more'. StyleBro's output must still be clean.
@@ -327,6 +341,8 @@
         @{
             Name     = 'naming-elements'
             Map      = @('SA1300=BRO1309')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # StyleCop's SA1300 fix changes nothing under 'dotnet format'; positions only.
             CompareOutput = $false
             Expected = @(
@@ -338,6 +354,8 @@
         @{
             Name     = 'tuple-element-casing'
             Map      = @('SA1316=BRO1311')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # StyleCop's fix renames only the declaration (the uses then don't compile); positions only.
             CompareOutput = $false
             Expected = @(
@@ -346,6 +364,8 @@
         @{
             Name     = 'naming-namespaces'
             Map      = @('SA1300=BRO1312')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             Expected = @(
                 # 'taken' -> 'Taken' would merge it into the existing namespace 'Taken': not reported (StyleCop merges).
                 'only StyleCop: BRO1312 Taken.cs(5,11)'
@@ -361,6 +381,8 @@
         @{
             Name     = 'naming-hungarian'
             Map      = @('SA1305=BRO1310')
+            # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
+            EditorConfig = "stylebro_rename_public_api = true`n"
             # StyleCop has no fix for SA1305; positions only.
             CompareOutput = $false
             Expected = @(

@@ -137,6 +137,7 @@ public class NamespaceNamingTests
         var test = new CSharpCodeFixTest<NamespaceNamingAnalyzer, CamelCaseNamingCodeFixProvider, DefaultVerifier>();
         test.TestState.Sources.Add(("/0/Test0.cs", "namespace gen.Models\n{\n    public class A\n    {\n    }\n}\n"));
         test.TestState.Sources.Add(("/0/Strings.Designer.cs", "namespace gen.Models\n{\n    public class B\n    {\n    }\n}\n"));
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         await test.RunAsync();
     }
 
@@ -255,6 +256,7 @@ public class NamespaceNamingTests
         test.TestState.AdditionalProjects["App"].AdditionalProjectReferences.Add("TestProject");
         test.FixedState.AdditionalProjects["App"].Sources.Add(App.Replace("shared.", "Shared.", StringComparison.Ordinal));
         test.FixedState.AdditionalProjects["App"].AdditionalProjectReferences.Add("TestProject");
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         await test.RunAsync();
     }
 
@@ -274,6 +276,7 @@ public class NamespaceNamingTests
             TestCode = "namespace vendor.Mine\n{\n}\n",
         };
         test.TestState.AdditionalReferences.Add(MetadataReference.CreateFromImage(image.ToArray()));
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         await test.RunAsync();
     }
 
@@ -294,6 +297,7 @@ public class NamespaceNamingTests
         test.TestState.Sources.Add(("/0/App.AssemblyInfo.cs", AssemblyInfo));
         test.FixedState.Sources.Add(("/0/Test0.cs", "namespace MyApp.Models\n{\n}\n"));
         test.FixedState.Sources.Add(("/0/App.AssemblyInfo.cs", AssemblyInfo));
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         await test.RunAsync();
     }
 
@@ -332,6 +336,40 @@ public class NamespaceNamingTests
         state.AdditionalProjects["App"].AdditionalProjectReferences.Add("TestProject");
     });
 
+    [Fact]
+    public Task NamespacesOfPublicTypes_AreLeftAloneByDefault() => VerifyFixAsync(
+        """
+        namespace myApp.Models
+        {
+            public class A
+            {
+            }
+        }
+
+        namespace {|BRO1312:tools|}.Lib
+        {
+            internal class B
+            {
+            }
+        }
+        """,
+        """
+        namespace myApp.Models
+        {
+            public class A
+            {
+            }
+        }
+
+        namespace Tools.Lib
+        {
+            internal class B
+            {
+            }
+        }
+        """,
+        On + "\nstylebro_rename_public_api = false");
+
     /// <summary>The diagnostics are reported, but the rename is skipped: the same sources before and after.</summary>
     private static Task RunNotFixedAsync(Action<SolutionState> fill)
     {
@@ -343,6 +381,7 @@ public class NamespaceNamingTests
         };
         fill(test.TestState);
         fill(test.FixedState);
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         return test.RunAsync();
     }
 }

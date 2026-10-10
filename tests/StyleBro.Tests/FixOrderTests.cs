@@ -1578,6 +1578,103 @@ public class FixOrderTests
         "BRO1109",
         "BRO1110");
 
+    // Ocelot's FileAggregateRoute: BRO1601 inserting '<inheritdoc/>' before BRO1001's sort left the blank lines it added
+    // with the positions, so the result depended on the order.
+    [Fact]
+    public Task InheritDoc_OnPropertiesTheSortMoves() => AssertConvergesInEveryOrderAsync(
+        """
+        public interface IRoute
+        {
+            /// <summary>Gets or sets the priority.</summary>
+            int Priority { get; set; }
+
+            /// <summary>Gets or sets the host.</summary>
+            string Host { get; set; }
+        }
+
+        public class Route : IRoute
+        {
+            public string Aggregator { get; set; }
+            public int Priority { get; set; } = 1;
+            public string Keys { get; set; }
+            public string Host { get; set; }
+            public string Path { get; set; }
+
+            public Route()
+            {
+                Aggregator = default;
+            }
+        }
+        """,
+        "BRO1001",
+        "BRO1505",
+        "BRO1513",
+        "BRO1601");
+
+    // Serilog's DummyWithLevelSwitchSink: the sort put the constructor between a field and the comment below it, and the
+    // comment then wanted other blank lines on the next run.
+    [Fact]
+    public Task CommentBelowAField_TheSortDoesntSeparateThem() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+
+        public class Sink
+        {
+            public Sink(int level)
+            {
+                Level = level;
+            }
+
+            [ThreadStatic]
+            public static int Level;
+
+            [ThreadStatic]
+            // ReSharper disable ThreadStaticFieldHasInitializer
+            public static List<int> Emitted = new List<int>();
+            // ReSharper restore ThreadStaticFieldHasInitializer
+
+            public void Emit(int value)
+            {
+                Emitted.Add(value);
+            }
+        }
+        """,
+        "BRO1001",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506");
+
+    // eShop's RedisBasketRepository: a comment below a field, then a blank line, describes the field; nothing moves it to
+    // the method below.
+    [Fact]
+    public Task CommentBelowAField_StaysWithIt() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public static int Count;
+
+            private static int prefix = 1;
+            // note on the prefix
+            // and more
+
+            public static int Key(string id) => prefix + id.Length;
+            private int x;
+
+            public void M()
+            {
+                x++;
+                // last in the block
+
+            }
+        }
+        """,
+        "BRO1001",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506",
+        "BRO1518");
+
     // same_line joins at max_line_length: the length is judged on the line as the other fixes leave it. Each case sits
     // right at the limit: the join fits before the other fix and not after it, or the other way round.
     // BRO1404 adds 'private ': '    private C(int a) : base(a)' (30) is too long, '    C(int a) : base(a)' (22) wasn't.

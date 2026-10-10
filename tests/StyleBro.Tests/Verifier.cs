@@ -7,6 +7,16 @@ using Microsoft.CodeAnalysis.Testing;
 
 namespace StyleBro.Tests;
 
+/// <summary>
+/// The naming rules leave public API alone by default (stylebro_rename_public_api). Most naming tests are about the rename
+/// itself and use public types, so the tests rename everything; a test of the default sets the key to false in its
+/// .editorconfig, which wins over this global config.
+/// </summary>
+internal static class PublicApi
+{
+    public static readonly (string, string) RenameEverything = ("/.globalconfig", "is_global = true\n\nstylebro_rename_public_api = true\n");
+}
+
 internal static class Verifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
@@ -122,6 +132,7 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     /// </summary>
     private static Task RunAsync(CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier> test, string? editorConfig)
     {
+        test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         var off = new TAnalyzer().SupportedDiagnostics.Where(d => !d.IsEnabledByDefault).Select(d => d.Id)
             .Where(id => editorConfig?.Contains($"dotnet_diagnostic.{id}.severity", StringComparison.Ordinal) != true)
             .ToList();

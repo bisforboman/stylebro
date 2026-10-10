@@ -14,14 +14,16 @@ internal static class TrailingBlankLines
 {
     /// <summary>
     /// The blank lines directly below a '//' comment that starts its line, like SA1512. Not for the file header (the
-    /// comments before the file's first code), '///' and '////' comments, or when the next non-blank line is another
-    /// comment. The blank lines are whitespace inside trivia, never string contents.
+    /// comments before the file's first code), '///' and '////' comments, when the next non-blank line is another
+    /// comment, or for a comment below code (<see cref="BlankLines.IsCommentBelowCode"/>). The blank lines are whitespace
+    /// inside trivia, never string contents.
     /// </summary>
     public static IReadOnlyList<TextLine> GetBlankLinesAfterComment(SyntaxTrivia comment, SourceText text)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia)
             || comment.ToString().StartsWith("///", StringComparison.Ordinal)
-            || IsFileHeader(comment))
+            || IsFileHeader(comment)
+            || BlankLines.IsCommentBelowCode(comment, text))
         {
             return [];
         }

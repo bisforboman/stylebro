@@ -62,7 +62,7 @@ public class CamelCaseNamingTests
                 }
 
                 const int ConstLocal = 1;
-                return Total + _count + A + b + ConstLocal + nameof(Total).Length;
+                return Total + _count + A + b + ConstLocal + Total.ToString().Length;
             }
         }
         """,
@@ -102,7 +102,7 @@ public class CamelCaseNamingTests
                 }
 
                 const int ConstLocal = 1;
-                return total + count + a + b + ConstLocal + nameof(total).Length;
+                return total + count + a + b + ConstLocal + total.ToString().Length;
             }
         }
         """);
@@ -128,7 +128,7 @@ public class CamelCaseNamingTests
             {
                 if (Value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Value));
+                    throw new ArgumentOutOfRangeException(Value.ToString());
                 }
 
                 Func<int, int> f = {|BRO1302:Arg|} => Arg;
@@ -164,7 +164,7 @@ public class CamelCaseNamingTests
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(value.ToString());
                 }
 
                 Func<int, int> f = arg => arg;
@@ -488,4 +488,71 @@ public class CamelCaseNamingTests
             }
         }
         """);
+
+    // Ocelot: a test read a private field with 'GetField(nameof(_components))', where '_components' was a local.
+    [Fact]
+    public Task NamesInNameof_KeepTheirName() => VerifyNoDiagnosticsAsync(
+        """
+        using System.Reflection;
+
+        class C
+        {
+            object M(object builder)
+            {
+                object _components;
+                _components = builder.GetType().GetField(nameof(_components), BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(builder)!;
+                return _components;
+            }
+
+            void N(string Value) => System.Console.WriteLine(nameof(Value));
+        }
+        """);
+
+    [Fact]
+    public Task PublicApiParameters_AreLeftAloneByDefault() => VerifyFixAsync(
+        """
+        interface IRun
+        {
+            void Run(int {|BRO1302:Count|});
+        }
+
+        public class Runner : IRun
+        {
+            public void Run(int Count) => System.Console.WriteLine(Count);
+        }
+
+        public class C
+        {
+            public void M(int Value) => System.Console.WriteLine(Value);
+
+            protected void N(int Value) => System.Console.WriteLine(Value);
+
+            internal void O(int {|BRO1302:Value|}) => System.Console.WriteLine(Value);
+
+            private void P(int {|BRO1302:Value|}) => System.Console.WriteLine(Value);
+        }
+        """,
+        """
+        interface IRun
+        {
+            void Run(int count);
+        }
+
+        public class Runner : IRun
+        {
+            public void Run(int Count) => System.Console.WriteLine(Count);
+        }
+
+        public class C
+        {
+            public void M(int Value) => System.Console.WriteLine(Value);
+
+            protected void N(int Value) => System.Console.WriteLine(Value);
+
+            internal void O(int value) => System.Console.WriteLine(value);
+
+            private void P(int value) => System.Console.WriteLine(value);
+        }
+        """,
+        "stylebro_rename_public_api = false");
 }

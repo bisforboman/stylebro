@@ -132,9 +132,10 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// BRO1313: the name <paramref name="parameter"/> gets from the members its member overrides or implements, or null
     /// when it has none or they disagree. A base parameter in source counts with the name it will have after its own
-    /// rename (its base's, or its BRO1302/BRO1310 name), so a chain of overrides converges in one run.
+    /// rename (its base's, or its BRO1302/BRO1310 name), so a chain of overrides converges in one run. A base parameter
+    /// other assemblies see keeps its name unless <paramref name="renamePublicApi"/>.
     /// </summary>
-    internal static string? GetBaseName(IParameterSymbol parameter, Func<string, string?> getNewName, int depth = 0)
+    internal static string? GetBaseName(IParameterSymbol parameter, Func<string, string?> getNewName, bool renamePublicApi, int depth = 0)
     {
         string? result = null;
         foreach (var member in GetBaseMembers(parameter.ContainingSymbol))
@@ -148,8 +149,9 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             var name = baseParameter.Name;
             if (depth < 8 && baseParameter.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is { } declaration)
             {
-                name = GetBaseName(baseParameter, getNewName, depth + 1)
-                    ?? (getNewName(name) is { } renamed && CamelCaseNames.CanRename(declaration, name, renamed, getNewName) ? renamed : name);
+                name = GetBaseName(baseParameter, getNewName, renamePublicApi, depth + 1)
+                    ?? (getNewName(name) is { } renamed && (renamePublicApi || !PublicApi.IsVisible(baseParameter))
+                        && CamelCaseNames.CanRename(declaration, name, renamed, getNewName) ? renamed : name);
             }
 
             if (result is not null && result != name)
@@ -192,6 +194,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { } parameter
             || InheritsName(parameter)
             || NamesAMember(parameter)
+            || !PublicApi.CanRename(parameter, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))
             || parameter.ContainingSymbol is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null })
         {
             return;
@@ -222,7 +225,9 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         Func<string, string?> getNewName = name => HungarianNames.GetVariableName(name, hungarian);
         var casingOn = Severities.IsOn(context.Compilation.Options, node.SyntaxTree, DiagnosticIds.ParameterCasing, context.CancellationToken);
         var oldName = parameter.Name;
-        if (GetBaseName(parameter, casingOn ? getNewName : _ => null) is not { } newName
+        var renamePublicApi = PublicApi.IsRenameAllowed(context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree));
+        if ((!renamePublicApi && PublicApi.IsVisible(parameter))
+            || GetBaseName(parameter, casingOn ? getNewName : _ => null, renamePublicApi) is not { } newName
             || newName == oldName
             || !CamelCaseNames.IsUsableName(newName)
             || !CamelCaseNames.CanRename(node, oldName, newName, getNewName)
