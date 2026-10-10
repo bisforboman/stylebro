@@ -28,6 +28,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_upper_case_literal_suffixes` | `all`, `l_only` | `all` | [BRO1135](rules/BRO1135.md) |
 | `stylebro_object_creation_parentheses` | `omit`, `include` | `omit` | [BRO1141](rules/BRO1141.md) |
 | `stylebro_private_field_naming` | `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `camelCase` | [BRO1303](rules/BRO1303.md), [BRO1307](rules/BRO1307.md), [BRO1310](rules/BRO1310.md) |
+| `stylebro_private_mutable_static_field_naming` | `camelCase`, `_camelCase` | not set: a naming rule requiring just `static` decides, else `stylebro_private_field_naming`'s style | [BRO1303](rules/BRO1303.md) |
 | `stylebro_private_static_field_naming` | `PascalCase`, `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `PascalCase` | [BRO1306](rules/BRO1306.md) |
 | `stylebro_allowed_hungarian_prefixes` | prefixes, comma-separated | none | [BRO1310](rules/BRO1310.md) |
 | `stylebro_allow_common_hungarian_prefixes` | `true`, `false` | `true` | [BRO1310](rules/BRO1310.md) |

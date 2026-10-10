@@ -167,12 +167,13 @@ internal static class Migration
         }
 
         // StyleCop's SX1309 (private instance fields begin with '_') and SX1309S (private static fields that aren't
-        // readonly) are BRO1303 with '_camelCase', which has one style for both kinds.
+        // readonly) are BRO1303 with '_camelCase'. SX1309S alone can't be: StyleCop's SA1309 (no '_') checks every field,
+        // so it is off there, and BRO1303's 'camelCase' would remove the '_' of instance fields StyleCop accepts.
         foreach (var sx in new[] { "SX1309", "SX1309S" }.Where(setup.IsOn))
         {
             if (result.FieldStyle != "_camelCase")
             {
-                result.Reasons[sx] = "BRO1303 has one style for private instance and static fields, and the instance fields here are 'camelCase'";
+                result.Reasons[sx] = "the private instance fields here are 'camelCase', and BRO1303 would remove the '_' StyleCop accepts on them";
             }
             else if (!lines.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.PrivateFieldNaming}.severity = none"))
             {
@@ -182,6 +183,9 @@ internal static class Migration
 
         AddMemberOrder(setup, lines);
         lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = {result.FieldStyle}");
+
+        // Pinned like the static style below: a naming rule for static fields StyleCop never enforced doesn't apply.
+        lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey} = {result.FieldStyle}");
 
         // StyleCop wants private constants and static readonly fields in PascalCase (SA1303, SA1311), whatever the SDK's
         // naming rules say: pinned, so BRO1306 doesn't follow a naming rule StyleCop never enforced.

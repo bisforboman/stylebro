@@ -159,5 +159,10 @@
 
         # Kept findings say where the string is (trial of 0.5.0-alpha.1, 2026-10-10)
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'KeptFindings.Record(diagnostic, kept, where);'; Replace = 'KeptFindings.Record(diagnostic, kept);'; Tests = 'KeptFindingsTests' }
+
+        # Private static fields that aren't readonly get their own style (SX1309S, 2026-10-10)
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'field.IsStatic && style.MutableStatic is { } mutableStatic ? mutableStatic : style.Private'; Replace = 'style.Private'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'm => m.Length == 1 && m[0] == "static"'; Replace = 'm => false'; Tests = 'FieldNamingTests' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'field.IsStatic && style.MutableStatic'; Replace = 'style.MutableStatic'; Tests = 'FieldNamingTests' }
     )
 }

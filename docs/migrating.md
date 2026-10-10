@@ -106,7 +106,8 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.
 - StyleCop's alternative rules: SX1101 (no `this.`) turns on the SDK's IDE0003, SX1309 (fields begin with `_`) sets
   BRO1303 to `_camelCase`, which also covers SX1309S (private static fields begin with `_`; on its own, with instance
-  fields named `count`, the report lists it as not expressible: BRO1303 has one style for both), and SA1412 (UTF-8 with BOM) writes `charset = utf-8-bom`.
+  fields named `count`, the report lists it as not expressible: SA1309 is off then, so StyleCop accepts instance fields
+  with and without `_`, which BRO1303 would unify), and SA1412 (UTF-8 with BOM) writes `charset = utf-8-bom`.
 - `stylecop.json`: `elementOrder`, `usingDirectivesPlacement`, `systemUsingDirectivesFirst`,
   `blankLinesBetweenUsingGroups`, `allowBuiltInTypeAliases`, indentation, the file header settings,
   `documentationCulture` and `excludeFromPunctuationCheck`.
@@ -124,8 +125,10 @@ tool again replaces the block, so put your own settings outside it.
 - **Private field naming.** [BRO1303](rules/BRO1303.md) uses `_camelCase` when SA1309 (no leading underscore) is off
   and most of the repository's private fields start with `_`, and `camelCase` otherwise. Private constants and
   `static readonly` fields are pinned to StyleCop's PascalCase (`stylebro_private_static_field_naming = PascalCase`,
-  [BRO1306](rules/BRO1306.md)): without it BRO1306 would follow a camel-case `dotnet_naming_rule` for static fields that
-  StyleCop never enforced (IDE1006 off), and rename fields StyleCop was happy with.
+  [BRO1306](rules/BRO1306.md)), and private static fields that aren't readonly to BRO1303's style
+  (`stylebro_private_mutable_static_field_naming`): without these keys BRO1303 and BRO1306 would follow a camel-case
+  `dotnet_naming_rule` for static fields that StyleCop never enforced (IDE1006 off), and rename fields StyleCop was
+  happy with.
 - **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order, IDE0049 type aliases, and so
   on) get the strongest severity of the StyleCop rules they cover, with options from `stylecop.json`.
 - **Every rule by its id.** Each StyleBro rule gets its own `dotnet_diagnostic.BROxxxx.severity` line, `none` included
