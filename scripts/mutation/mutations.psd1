@@ -41,6 +41,7 @@
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return RegionsOnly(root, checkedEnd, moved, next.Start) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return RegionsOnly(root, checkedEnd, moved, lines[insertLine].Start) ? changes : null;'; Replace = 'return changes;'; Tests = 'UsingPlacementTests' }
         @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'if (below > endLine && below < lines.Count && !IsBlank(lines[below]))'; Replace = 'if (false)'; Tests = 'UsingPlacementTests' }
+        @{ File = 'src/StyleBro.Analyzers/Ordering/UsingPlacement.cs'; Find = 'return UsingPlacementMode.Preserve;'; Replace = 'return UsingPlacementMode.Inside;'; Tests = 'UsingPlacementTests' }
         # BRO1136 (lambda parentheses)
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'if (lambda.ParameterList.Parameters.Count != 1'; Replace = 'if (lambda.ParameterList.Parameters.Count < 1'; Tests = 'LambdaParenthesesTests' }
         @{ File = 'src/StyleBro.Analyzers/Readability/LambdaParentheses.cs'; Find = 'is not { Type: null } parameter'; Replace = 'is not { } parameter'; Tests = 'LambdaParenthesesTests' }

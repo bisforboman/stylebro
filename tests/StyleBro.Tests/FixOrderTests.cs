@@ -2022,7 +2022,7 @@ public class FixOrderTests
             }
         }
         """,
-        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "dotnet_diagnostic.BRO1112.severity = warning\ncsharp_using_directive_placement = inside_namespace\n",
         "BRO1008",
         "BRO1112",
         "BRO1505");
@@ -2045,7 +2045,7 @@ public class FixOrderTests
             }
         }
         """,
-        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "dotnet_diagnostic.BRO1112.severity = warning\ncsharp_using_directive_placement = inside_namespace\n",
         "BRO1008",
         "BRO1112",
         "BRO1504",
@@ -2087,7 +2087,7 @@ public class FixOrderTests
             }
         }
         """,
-        "stylebro_file_header_company = Contoso\n",
+        "csharp_using_directive_placement = inside_namespace\nstylebro_file_header_company = Contoso\n",
         "BRO1008",
         "BRO1505",
         "BRO1615");

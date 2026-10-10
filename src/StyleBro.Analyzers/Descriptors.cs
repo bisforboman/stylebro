@@ -785,8 +785,8 @@ internal static class Descriptors
         category: "Ordering",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Using directives go inside or outside the namespace, as csharp_using_directive_placement says (inside when "
-            + "it isn't set). The fix moves them only when every name in the file still means the same afterwards. "
+        description: "Using directives go inside or outside the namespace, as csharp_using_directive_placement says (nothing is "
+            + "reported when it isn't set). The fix moves them only when every name in the file still means the same afterwards. "
             + "Replaces StyleCop SA1200.",
         helpLinkUri: HelpBase + DiagnosticIds.UsingPlacement + "/");
 

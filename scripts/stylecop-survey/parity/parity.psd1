@@ -785,8 +785,10 @@
             )
         }
         @{
-            Name     = 'using-placement'
-            Map      = @('SA1200=BRO1008')
+            Name         = 'using-placement'
+            Map          = @('SA1200=BRO1008')
+            # StyleCop's default is inside; StyleBro needs the setting (migrate writes it).
+            EditorConfig = "csharp_using_directive_placement = inside_namespace`n"
             Expected = @(
                 # Moved inside 'namespace Parity.Routing', 'Routing.Finder' would mean 'Parity.Routing.Finder': not reported
                 # (StyleCop's fix doesn't compile).

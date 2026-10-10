@@ -5,6 +5,7 @@ namespace StyleBro.Tests;
 public class UsingPlacementTests
 {
     private const string Outside = "csharp_using_directive_placement = outside_namespace\n";
+    private const string Inside = "csharp_using_directive_placement = inside_namespace\n";
 
     [Fact]
     public Task Outside_BlockNamespace_UsingsMoveAboveIt_BelowTheHeader() => Verify.VerifyFixAsync(
@@ -122,7 +123,7 @@ public class UsingPlacementTests
         Outside);
 
     [Fact]
-    public Task Inside_IsTheDefault_UsingsMoveBelowTheBrace() => Verify.VerifyFixAsync(
+    public Task Inside_UsingsMoveBelowTheBrace() => Verify.VerifyFixAsync(
         """
         // Copyright (c) Contoso.
         {|BRO1008:using System;|}
@@ -149,7 +150,8 @@ public class UsingPlacementTests
                 public List<Type> Types { get; } = new();
             }
         }
-        """);
+        """,
+        Inside);
 
     // Newtonsoft.Json's '#region License' around the header: region lines above the usings don't stop the move.
     [Fact]
@@ -183,7 +185,8 @@ public class UsingPlacementTests
                 public Type? T { get; set; }
             }
         }
-        """);
+        """,
+        Inside);
 
     [Fact]
     public Task Outside_ARegionAroundTheHeader_StaysOnTop() => Verify.VerifyFixAsync(
@@ -222,16 +225,19 @@ public class UsingPlacementTests
     public Task Inside_UsingsAboveTheHeader() => Task.WhenAll(
         Verify.VerifyFixAsync(
             "{|BRO1008:using System;|}\n#region License\n// Text\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
-            "#region License\n// Text\n#endregion\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"),
+            "#region License\n// Text\n#endregion\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n",
+            Inside),
         Verify.VerifyFixAsync(
             "{|BRO1008:using System;|}\n\n// Text\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
-            "// Text\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"));
+            "// Text\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n",
+            Inside));
 
     [Fact]
     public Task ARegionBelowTheHeader_StaysWhereItIs() => Task.WhenAll(
         Verify.VerifyFixAsync(
             "// Header\n\n#region License\n// Text\n#endregion\n{|BRO1008:using System;|}\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
-            "// Header\n\n#region License\n// Text\n#endregion\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"),
+            "// Header\n\n#region License\n// Text\n#endregion\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n",
+            Inside),
         Verify.VerifyFixAsync(
             "// Header\n\n#region License\n#endregion\nnamespace App\n{\n    {|BRO1008:using System;|}\n\n    public class C { public Type? T { get; set; } }\n}\n",
             "// Header\n\n#region License\n#endregion\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n",
@@ -262,10 +268,12 @@ public class UsingPlacementTests
         "csharp_using_directive_placement = inside_namespace:warning\n");
 
     [Fact]
-    public Task CorrectlyPlaced_OrPreserve_NotReported() => Task.WhenAll(
+    public Task CorrectlyPlaced_Preserve_OrNotSet_NotReported() => Task.WhenAll(
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n", Outside),
-        Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n"),
-        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n", "csharp_using_directive_placement = preserve\n"));
+        Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n", Inside),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n", "csharp_using_directive_placement = preserve\n"),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n"),
+        Verify.VerifyNoDiagnosticsAsync("namespace App;\n\nusing System;\n\npublic class C { public Type? T { get; set; } }\n"));
 
     // eShop's CS0104 and Ocelot's CS0118 under IDE0065: a name that binds to something else, or to nothing, afterwards.
     [Fact]
@@ -396,7 +404,8 @@ public class UsingPlacementTests
             }
             """,
             "namespace Routing.Finder { public class DownstreamRouteFinder { } }\n",
-        });
+        },
+        Inside);
 
     [Fact]
     public Task Outside_AnExtensionMethodThatWouldChange_NotReported() => Verify.VerifyFixAsync(
@@ -436,13 +445,13 @@ public class UsingPlacementTests
 
     [Fact]
     public Task Skipped_Directives_SeveralNamespaces_TypesOutside_SharedLines() => Task.WhenAll(
-        Verify.VerifyNoDiagnosticsAsync("#nullable enable\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n"),
-        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\nnamespace Other\n{\n}\n"),
-        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\npublic class D\n{\n}\n"),
+        Verify.VerifyNoDiagnosticsAsync("#nullable enable\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n", Inside),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\nnamespace Other\n{\n}\n", Inside),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n\npublic class D\n{\n}\n", Inside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n#if DEBUG\n    using System;\n#endif\n\n    public class C { }\n}\n", Outside),
-        Verify.VerifyNoDiagnosticsAsync("#region Usings\nusing System;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n"),
-        Verify.VerifyNoDiagnosticsAsync("using System;\n#region More\nusing System.Text;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } public StringBuilder? B { get; set; } }\n}\n"),
-        Verify.VerifyNoDiagnosticsAsync("using System;\n\n#region Body\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n#endregion\n"),
+        Verify.VerifyNoDiagnosticsAsync("#region Usings\nusing System;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n", Inside),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n#region More\nusing System.Text;\n#endregion\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } public StringBuilder? B { get; set; } }\n}\n", Inside),
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\n#region Body\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n#endregion\n", Inside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    #region Usings\n    using System;\n    #endregion\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System; public class C { public Type? T { get; set; } }\n}\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{ using System;\n\n    public class C { public Type? T { get; set; } }\n}\n", Outside),
@@ -450,7 +459,8 @@ public class UsingPlacementTests
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System; public class C { }\n}\n", Outside),
         Verify.VerifyFixAsync(
             new[] { "using Routing;\n\nnamespace Tests\n{\n    public class C { }\n}\n", "namespace Routing { public class A { } }\nnamespace Tests.Routing { public class B { } }\n" },
-            new[] { "using Routing;\n\nnamespace Tests\n{\n    public class C { }\n}\n", "namespace Routing { public class A { } }\nnamespace Tests.Routing { public class B { } }\n" }),
-        Verify.VerifyNoDiagnosticsAsync("global using System.Text;\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n"),
+            new[] { "using Routing;\n\nnamespace Tests\n{\n    public class C { }\n}\n", "namespace Routing { public class A { } }\nnamespace Tests.Routing { public class B { } }\n" },
+            Inside),
+        Verify.VerifyNoDiagnosticsAsync("global using System.Text;\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n", Inside),
         Verify.VerifyNoDiagnosticsAsync("using System.Text;\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } public StringBuilder? B { get; set; } }\n}\n", Outside));
 }

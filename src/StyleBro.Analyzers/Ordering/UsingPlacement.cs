@@ -17,13 +17,13 @@ namespace StyleBro.Analyzers.Ordering;
 /// <summary>Where using directives go: the SDK's csharp_using_directive_placement.</summary>
 internal enum UsingPlacementMode
 {
-    /// <summary>'inside_namespace', or not set (StyleCop's default).</summary>
+    /// <summary>'inside_namespace' (StyleCop's default; migrate writes it for a StyleCop setup).</summary>
     Inside,
 
     /// <summary>'outside_namespace'.</summary>
     Outside,
 
-    /// <summary>Any other value: nothing is checked.</summary>
+    /// <summary>Not set, or any other value: nothing is checked (owner's decision: the rule needs a setting).</summary>
     Preserve,
 }
 
@@ -51,7 +51,7 @@ internal static class UsingPlacement
     {
         if (!options.TryGetValue(ConfigKey, out var value))
         {
-            return UsingPlacementMode.Inside;
+            return UsingPlacementMode.Preserve;
         }
 
         return value.Split(':')[0].Trim().ToLowerInvariant() switch
