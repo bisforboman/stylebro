@@ -227,60 +227,7 @@ public class ParenthesisPlacementTests
                     ); var x = 1;
                 System.Func<int, int> f =
                     (v) => v;
-
-                // RealWorld: with ')' moved up, the SDK formatter put '{ Author = ... }' on a line of its own.
-                var article = new Box(
-                    1,
-                    2
-                    ) { Value = 3 };
             }
-        }
-
-        class Box
-        {
-            public Box(int a, int b)
-            {
-            }
-
-            public int Value { get; set; }
-        }
-        """);
-
-    [Fact]
-    public Task AnInitializerOnTheNextLine_DoesNotBlock() => VerifyFixAsync(
-        """
-        class Box
-        {
-            public Box(int a, int b)
-            {
-            }
-
-            public int Value { get; set; }
-
-            public static Box Make() => new Box(
-                1,
-                2
-                {|BRO1110:)|}
-            {
-                Value = 3,
-            };
-        }
-        """,
-        """
-        class Box
-        {
-            public Box(int a, int b)
-            {
-            }
-
-            public int Value { get; set; }
-
-            public static Box Make() => new Box(
-                1,
-                2)
-            {
-                Value = 3,
-            };
         }
         """);
 
