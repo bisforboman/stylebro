@@ -102,7 +102,7 @@ when we can do that"): don't suggest releases at all; the user says when.
   fails on analyzer crashes, new compile errors, conflict markers, a second run that still changes files (since
   2026-10-04; `MaxRuns` in repos.psd1 for a documented exception), or tests that passed
   on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
-  `scripts/mutation/Invoke-Mutations.ps1` breaks each guard in `scripts/mutation/mutations.psd1` and needs a test to
+  `scripts/mutation/Invoke-Mutations.ps1` breaks each guard listed in `scripts/mutation/mutations/<Area>.psd1` (one file per source folder) and needs a test to
   fail; add an entry for every new guard; 4 parallel shards `mutation shard 0..3` (`-Shard i -Shards 4`, index modulo
   4, each shard also runs the stale check over all entries), and the job `mutation` passes only if every shard did).
   **Scoped PR runs (2026-10-09, owner's decision)**: each workflow's `changes` job (`.github/changes.sh`, git diff
