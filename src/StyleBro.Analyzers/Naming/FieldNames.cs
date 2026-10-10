@@ -71,7 +71,7 @@ internal static class FieldNames
     /// </summary>
     public const string StaticStyleKey = "stylebro_private_static_field_naming";
 
-    private enum FieldCasing
+    internal enum FieldCasing
     {
         Camel,
         UnderscoreCamel,
@@ -386,6 +386,46 @@ internal static class FieldNames
     }
 
     /// <summary>
+    /// The words of <paramref name="core"/> (split at underscores) joined in <paramref name="casing"/>: 'with_underscore'
+    /// -> 'withUnderscore', 'MAX_VALUE' -> 'MaxValue' (Pascal) or 'maxValue' (camel). An all-capitals word of more than
+    /// one letter counts as a word, not an acronym, when there are several words.
+    /// </summary>
+    internal static string? GetJoinedName(string core, FieldCasing casing)
+    {
+        var words = core.Split(new[] { '_' }, System.StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length == 0 || !char.IsLetter(words[0][0]))
+        {
+            return null;
+        }
+
+        // 'Int32_0': an underscore between two digits separates numbers; joining them ('Int320') would change the name's
+        // meaning, so such names are left alone.
+        for (var i = 1; i < words.Length; i++)
+        {
+            if (char.IsDigit(words[i - 1][words[i - 1].Length - 1]) && char.IsDigit(words[i][0]))
+            {
+                return null;
+            }
+        }
+
+        var several = words.Length > 1;
+        var first = words[0];
+        var rest = string.Concat(words.Skip(1).Select(w => Capitalize(w, several)));
+        var result = casing switch
+        {
+            FieldCasing.Pascal => Capitalize(first, several) + rest,
+            _ => (char.IsLower(first[0]) ? first : several && IsAllUpper(first) ? first.ToLowerInvariant() : CamelCaseNames.ToCamelCase(first) ?? first) + rest,
+        };
+
+        if (casing == FieldCasing.UnderscoreCamel)
+        {
+            result = "_" + result;
+        }
+
+        return CamelCaseNames.IsUsableName(result) ? result : null;
+    }
+
+    /// <summary>
     /// The style of the SDK naming rule (dotnet_naming_rule.*) that covers private instance fields: its symbols apply to
     /// fields (or '*') and private (or '*') with no required modifiers ('static' or 'readonly' rules are for other fields),
     /// it isn't turned off, and its style is camel case without a prefix or with '_' (anything else: null). The lowest
@@ -507,46 +547,6 @@ internal static class FieldNames
 
         var result = name.Substring(0, index) + CamelCaseNames.ToCamelCase(name.Substring(index));
         return SyntaxFacts.IsValidIdentifier(result) ? result : null;
-    }
-
-    /// <summary>
-    /// The words of <paramref name="core"/> (split at underscores) joined in <paramref name="casing"/>: 'with_underscore'
-    /// -> 'withUnderscore', 'MAX_VALUE' -> 'MaxValue' (Pascal) or 'maxValue' (camel). An all-capitals word of more than
-    /// one letter counts as a word, not an acronym, when there are several words.
-    /// </summary>
-    private static string? GetJoinedName(string core, FieldCasing casing)
-    {
-        var words = core.Split(new[] { '_' }, System.StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length == 0 || !char.IsLetter(words[0][0]))
-        {
-            return null;
-        }
-
-        // 'Int32_0': an underscore between two digits separates numbers; joining them ('Int320') would change the name's
-        // meaning, so such names are left alone.
-        for (var i = 1; i < words.Length; i++)
-        {
-            if (char.IsDigit(words[i - 1][words[i - 1].Length - 1]) && char.IsDigit(words[i][0]))
-            {
-                return null;
-            }
-        }
-
-        var several = words.Length > 1;
-        var first = words[0];
-        var rest = string.Concat(words.Skip(1).Select(w => Capitalize(w, several)));
-        var result = casing switch
-        {
-            FieldCasing.Pascal => Capitalize(first, several) + rest,
-            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.ToCamelCase(first) ?? first) + rest,
-        };
-
-        if (casing == FieldCasing.UnderscoreCamel)
-        {
-            result = "_" + result;
-        }
-
-        return CamelCaseNames.IsUsableName(result) ? result : null;
     }
 
     private static string Capitalize(string word, bool lowerRest)

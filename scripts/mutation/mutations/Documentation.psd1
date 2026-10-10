@@ -65,8 +65,8 @@
         @{ File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'; Find = '!char.IsLower(rest[0]) && '; Replace = ''; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = '(char.IsLower(remaining[0]) || '; Replace = '('; Tests = 'DocumentationTests' }
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = ' || PropertySummaries.StartsWithAnyWord(remaining, PropertySummaries.Conditions)))'; Replace = '))'; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = "if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' '))))"; Replace = 'if (false)'; Tests = 'DocumentationTests' }
-        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'if (replaceLength == 0 && StartsWithWords(remaining,'; Replace = 'if (StartsWithWords(remaining,'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = "&& (StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' ')))"; Replace = '&& (false'; Tests = 'DocumentationTests' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = 'if (replaceLength == 0'; Replace = 'if (true'; Tests = 'DocumentationTests' }
 
         # StyleCop's open bugs (2026-10-04)
         @{ File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'; Find = '|| IsQuotedSentence(child)'; Replace = ''; Tests = 'DocumentationTests' }
@@ -84,5 +84,8 @@
         # A documented property is set apart (BRO1505), BRO1601 adds the blank line below (Ocelot)
         @{ File = 'src/StyleBro.CodeFixes/Documentation/DocumentationCodeFixProvider.cs'; Find = 'if (separate && member is PropertyDeclarationSyntax property'; Replace = 'if (false && member is PropertyDeclarationSyntax property'; Tests = 'DocumentationTests.InheritDoc_OnAdjacentProperties_SeparatesThem' }
         @{ File = 'src/StyleBro.CodeFixes/Documentation/DocumentationCodeFixProvider.cs'; Find = '&& !(blankLineBefore && property.Parent is TypeDeclarationSyntax type && documented.Contains('; Replace = '&& !(false && property.Parent is TypeDeclarationSyntax type && documented.Contains('; Tests = 'DocumentationTests.InheritDoc_OnAdjacentProperties_SeparatesThem' }
+
+        # BRO1606: constructor sentences of their own (Instantiates, Constructs, Creates a new)
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = '|| (member is ConstructorDeclarationSyntax && ConstructorVerbs.Any(v => StartsWithWords(remaining, v)))))'; Replace = '))'; Tests = 'DocumentationTests.SummariesThatCantFollowTheStandardWords_AreNotReported' }
     )
 }

@@ -26,5 +26,5 @@ public sealed class WhereBeforeTerminalCodeFixProvider : NodeCodeFixProvider<Inv
 
     /// <inheritdoc/>
     private protected override IEnumerable<TextChange>? GetChanges(InvocationExpressionSyntax node, SourceText text, SemanticModel? model, AnalyzerConfigOptions options, Func<string, bool> isOn, CancellationToken cancellationToken) =>
-        WhereCalls.GetChanges(node, model!, cancellationToken)?.Changes;
+        WhereCalls.GetChanges(node, model!, options, cancellationToken)?.Changes;
 }

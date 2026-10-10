@@ -298,5 +298,10 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = 'if (closeMoves && close?.NewText'; Replace = 'if (false && close?.NewText'; Tests = 'ConstructorInitializerLineTests.SameLine_MeasuredAfterBro1110' }
         @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = '|| applied[applied.Count - 1].Span.End <= change.Span.Start)'; Replace = '|| true)'; Tests = 'ConstructorInitializerLineTests.SameLine_MeasuredAsTheOtherFixesLeaveTheLine' }
         @{ File = 'src/StyleBro.Analyzers/Readability/SameLineJoins.cs'; Find = '.Where(c => c.Span.End <= position)'; Replace = '.Where(c => false)'; Tests = 'ConstraintPlacementTests.SameLine_NotReported_WhenAnAddedModifier' }
+
+        # BRO1150: List/array Exists and Find where Sonar S6605/S6602 are on
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| !SonarRules.IsOn(model, options, name == "Any" ? "S6605" : "S6602", cancellationToken))'; Replace = ')'; Tests = 'WhereBeforeTerminalTests.SonarCollectionRules' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| !(isArray ? symbol.ContainingType.SpecialType == SpecialType.System_Array : IsList(symbol.ContainingType)))'; Replace = ')'; Tests = 'WhereBeforeTerminalTests.CollectionMethodsThatWouldNotBind' }
+        @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = 'return Trivia.IsBlank(terminal, TextSpan.FromBounds(receiver.Span.End, access.Name.SpanStart))'; Replace = 'return true'; Tests = 'WhereBeforeTerminalTests.CollectionMethodsThatWouldNotBind' }
     )
 }

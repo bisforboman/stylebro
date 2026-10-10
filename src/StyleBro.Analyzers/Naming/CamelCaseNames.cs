@@ -22,10 +22,19 @@ internal static class CamelCaseNames
     /// The camelCase name for <paramref name="name"/>, or null when the name already begins with a lower-case letter
     /// or has no safe replacement. Leading underscores go; a leading run of capitals is lowered as a whole, except the
     /// capital that starts the next word: 'Value' -> 'value', '_value' -> 'value', 'URL' -> 'url',
-    /// 'HTMLParser' -> 'htmlParser'. Null for names that are only underscores, would start with a digit, or would
-    /// become a keyword ('Class' -> 'class') or 'field' (see <see cref="IsUsableName"/>).
+    /// 'HTMLParser' -> 'htmlParser'. Words separated by underscores are joined like BRO1308 joins a field's
+    /// ('RANGE_REP_REG' -> 'rangeRepReg', 'Max_Value' -> 'maxValue'; 'Int32_0' keeps its underscore). Null for names
+    /// that are only underscores, would start with a digit, or would become a keyword ('Class' -> 'class') or 'field'
+    /// (see <see cref="IsUsableName"/>).
     /// </summary>
-    public static string? GetNewName(string name) => ToCamelCase(name) is { } result && IsUsableName(result) ? result : null;
+    public static string? GetNewName(string name)
+    {
+        var core = name.TrimStart('_');
+        var result = core.IndexOf('_') > 0 && name.Length > 0 && !char.IsLower(name[0])
+            ? FieldNames.GetJoinedName(core, FieldNames.FieldCasing.Camel) ?? ToCamelCase(name)
+            : ToCamelCase(name);
+        return result is not null && result != name && IsUsableName(result) ? result : null;
+    }
 
     /// <summary>Like <see cref="GetNewName"/>, but 'Field' -> 'field' too: for names that get a prefix ('_field') or more words.</summary>
     public static string? ToCamelCase(string name)

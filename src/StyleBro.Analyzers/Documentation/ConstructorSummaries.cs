@@ -17,6 +17,13 @@ internal static class ConstructorSummaries
     /// <summary>The members BRO1606 and BRO1607 check.</summary>
     public static readonly SyntaxKind[] MemberKinds = [SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration];
 
+    // How a constructor summary of its own starts, besides the standard sentence's 'Initializes' ('Creates a words object'
+    // isn't one: it gets the standard sentence in front).
+    private static readonly string[] ConstructorVerbs =
+    [
+        "Initialize", "Initialises", "Initialise", "Instantiates", "Instantiate", "Constructs", "Construct", "Creates a new", "Create a new",
+    ];
+
     /// <summary>
     /// The finding for a constructor or destructor whose summary doesn't begin with the standard text, or null. Not
     /// reported: members without a summary (missing documentation isn't reported; '&lt;inheritdoc/&gt;' has none), records.
@@ -92,10 +99,12 @@ internal static class ConstructorSummaries
             return null;
         }
 
-        // A summary that is a constructor sentence of its own ('Initializes the attribute with the specified value.')
-        // would follow the standard one ('... class. Initializes the attribute ...'), and replacing it would lose what it
-        // says (Scrutor): left alone.
-        if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' '))))
+        // A summary that is a constructor sentence of its own ('Initializes the attribute with the specified value.',
+        // 'Instantiates a new Hashids encoder ...') would follow the standard one ('... class. Instantiates ...'), and
+        // replacing it would lose what it says (Scrutor, Hashids): left alone.
+        if (replaceLength == 0
+            && (StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' ')))
+                || (member is ConstructorDeclarationSyntax && ConstructorVerbs.Any(v => StartsWithWords(remaining, v)))))
         {
             return null;
         }

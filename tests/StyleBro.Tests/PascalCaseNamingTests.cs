@@ -441,4 +441,24 @@ public class PascalCaseNamingTests
             """,
         ],
         "stylebro_rename_public_api = false");
+
+    // A name in code excluded by '#if' isn't bound, so a rename can't follow it (another target framework's build breaks).
+    [Fact]
+    public Task NamesInDisabledCode_AreSkipped() => VerifyNoDiagnosticsAsync(
+        ("/0/A.cs", """
+            internal class Store
+            {
+                internal int load() => 1;
+
+                internal int count { get; set; }
+            }
+            """),
+        ("/0/B.cs", """
+            internal class Uses
+            {
+            #if NEVER
+                int M(Store s) => s.load() + s.count;
+            #endif
+            }
+            """));
 }

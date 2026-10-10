@@ -246,6 +246,94 @@ public class PrefixNamingTests
         }
         """);
 
+    // Bogus: 'V' -> 'TV' renamed the declaration and the active branch, the '#if STANDARD' branch kept 'V' (CS0246 in
+    // the target frameworks that compile it). Disabled code isn't bound, so no rename can follow it.
+    [Fact]
+    public Task NamesInDisabledCode_AreSkipped() => VerifyNoDiagnosticsAsync(
+        ("/0/A.cs", """
+            using System;
+            using System.Reflection;
+
+            internal static class Setters
+            {
+                private static Action<T, object> Create<T, V>(MethodInfo setter)
+                {
+                    var typed =
+            #if STANDARD
+                        (Action<T, V>)setter.CreateDelegate(typeof(Action<T, V>))
+            #else
+                        (Action<T, V>)Delegate.CreateDelegate(typeof(Action<T, V>), setter)
+            #endif
+                    ;
+                    return (t, value) => typed(t, (V)value);
+                }
+            }
+
+            internal class Box<item>
+            {
+                internal object Get()
+                {
+            #if NEVER
+                    return default(item);
+            #endif
+                    return null;
+                }
+            }
+
+            internal interface Shape
+            {
+            }
+            """),
+        ("/0/B.cs", """
+            internal class Uses
+            {
+            #if NEVER
+                Shape shape;
+            #endif
+            }
+            """));
+
+    [Fact]
+    public Task DisabledCodeWithoutTheName_DoesNotBlock() => VerifyFixAsync(
+        """
+        internal class Box<{|BRO1305:item|}>
+        {
+            internal item Get()
+            {
+        #if NEVER
+                var items = 1;
+        #endif
+                return default(item);
+            }
+        }
+
+        internal class Other
+        {
+        #if NEVER
+            item Elsewhere;
+        #endif
+        }
+        """,
+        """
+        internal class Box<TItem>
+        {
+            internal TItem Get()
+            {
+        #if NEVER
+                var items = 1;
+        #endif
+                return default(TItem);
+            }
+        }
+
+        internal class Other
+        {
+        #if NEVER
+            item Elsewhere;
+        #endif
+        }
+        """);
+
     [Fact]
     public Task ConflictsInOtherFiles_KeepTheName() => VerifyNotFixedAsync(
         [
