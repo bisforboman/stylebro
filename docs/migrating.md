@@ -121,12 +121,12 @@ tool again replaces the block, so put your own settings outside it.
   differs from StyleCop's default (`["seealso"]`), becomes [BRO1603](rules/BRO1603.md)'s
   `stylebro_exclude_from_punctuation_check`.
 
-Every key the preset sets is written, and `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>` in the
-root `Directory.Build.props`, created if needed): the block replaces it. That matters because an `.editorconfig`
+Every key the preset sets is written, and `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>` in
+every `Directory.Build.props` the projects import: the root one, created if needed, and a nested one that doesn't import
+the root's): the block replaces it. That matters because an `.editorconfig`
 can't take a key back from the preset: `dotnet format` sorts `using` directives whenever
 `dotnet_sort_system_directives_first` is set, even to `false`, so the block sets it only when StyleCop sorted usings
-(SA1208 or SA1210 on). If a sub-directory has its own `Directory.Build.props` that doesn't import the root one, add
-the property there too. SDK settings your root
+(SA1208 or SA1210 on). SDK settings your root
 `.editorconfig` already sets for C# files are left out: your code is already formatted with them.
 
 ## Suppressions

@@ -87,10 +87,16 @@ internal static class PreviewCommand
         var target = Path.GetFullPath(Path.Combine(copy, prefix, File.Exists(path) ? Path.GetFileName(path) : string.Empty));
         using var log = new StreamWriter(Path.Combine(temp, "preview.log")) { AutoFlush = true };
         var tail = new Queue<string>();
+        string? incomplete = null;
         void Log(string line)
         {
             lock (log)
             {
+                if (line.StartsWith(FormatCommand.IncompleteMarker, StringComparison.Ordinal))
+                {
+                    incomplete ??= line;
+                }
+
                 log.WriteLine(line);
                 tail.Enqueue(line);
                 if (tail.Count > 30)
@@ -146,6 +152,20 @@ internal static class PreviewCommand
                 return Fail(tail, 1);
             }
 
+            // A project that didn't load would show up as missing changes (a broken package cache: 58 files of side effects).
+            if (incomplete is not null)
+            {
+                Console.Error.WriteLine($"The preview stopped. {incomplete}");
+                Console.Error.WriteLine("  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
+                return Fail(tail, 1);
+            }
+
+            var notLoaded = NotLoadedWarning(File.ReadAllText(reportFile));
+            if (notLoaded is not null)
+            {
+                Console.WriteLine(notLoaded);
+            }
+
             var changed = new List<bool>();
             var tree = Tree(copy);
             for (var run = 1; run <= MaxRuns; run++)
@@ -182,6 +202,11 @@ internal static class PreviewCommand
             Git(copy, "diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
+            if (notLoaded is not null)
+            {
+                Console.WriteLine(notLoaded);
+            }
+
             ok = true;
             return 0;
         }
@@ -290,6 +315,21 @@ internal static class PreviewCommand
         return (result, changes);
     }
 
+    /// <summary>
+    /// The warning when the report before the fixes has no StyleBro rule at all, else null. With 150 rules that almost always
+    /// means the analyzers didn't load (Bogus: the reference went into a Directory.Build.props its projects never imported,
+    /// and the preview showed only the SDK's formatting).
+    /// </summary>
+    public static string? NotLoadedWarning(string reportJson)
+    {
+        using var report = JsonDocument.Parse(reportJson);
+        var any = report.RootElement.EnumerateArray().SelectMany(d => d.GetProperty("FileChanges").EnumerateArray())
+            .Any(c => c.GetProperty("DiagnosticId").GetString()?.StartsWith("BRO", StringComparison.Ordinal) == true);
+        return any ? null : "WARNING: StyleBro reported nothing, so its analyzers probably didn't load (or the code already follows every rule).\n"
+            + "  Check that every project gets the StyleBro.Analyzers reference: a nested Directory.Build.props shadows the root's unless it\n"
+            + "  imports it, a reference in a conditional ItemGroup (one TargetFramework) misses the others, and RunAnalyzers=false turns analyzers off.";
+    }
+
     /// <summary>The format part of the summary: files, reported changes, runs, and the rules by the number of files they changed.</summary>
     public static string FormatSummary(int files, int changes, Dictionary<string, SortedDictionary<string, int>> attribution, IReadOnlyList<bool> changedRuns)
     {
@@ -330,7 +370,8 @@ internal static class PreviewCommand
     /// <summary>
     /// The lines of the hunk (of a '-U0' diff) that covers <paramref name="line"/> of the old text (an insertion after line
     /// N covers N and N + 1), else the nearest one; at most <paramref name="max"/> lines. A byte order mark is left out
-    /// (it printed as '?' before the first line of a file).
+    /// (it printed as '?' before the first line of a file). A change nobody could see in the lines ('-}' / '+}' for a final
+    /// newline, a byte order mark, blank lines) is described instead (<see cref="Invisible"/>).
     /// </summary>
     public static List<string> Hunk(string diff, int line, int max)
     {
@@ -344,15 +385,62 @@ internal static class PreviewCommand
                 var length = header.Groups[2].Success ? int.Parse(header.Groups[2].Value) : 1;
                 hunks.Add((start, length == 0 ? start + 1 : start + length - 1, new List<string>()));
             }
-            else if (hunks.Count > 0 && (text.StartsWith('+') || text.StartsWith('-')))
+            else if (hunks.Count > 0 && (text.StartsWith('+') || text.StartsWith('-') || text.StartsWith('\\')))
             {
-                hunks[^1].Lines.Add(text.Replace("﻿", string.Empty));
+                hunks[^1].Lines.Add(text);
             }
         }
 
         var hunk = hunks.OrderBy(h => line < h.Start ? h.Start - line : line > h.End ? line - h.End : 0).ThenBy(h => h.Start).FirstOrDefault();
-        var lines = (hunk.Lines ?? new List<string>()).Take(max + 1).ToList();
+        if (hunk.Lines is not null && Invisible(hunk.Lines) is { } described)
+        {
+            return new List<string> { described };
+        }
+
+        var lines = (hunk.Lines ?? new List<string>()).Where(l => !l.StartsWith('\\')).Select(l => l.Replace("﻿", string.Empty)).Take(max + 1).ToList();
         return lines.Count > max ? lines.Take(max).Append("  ...").ToList() : lines;
+    }
+
+    /// <summary>
+    /// What a hunk changes when its lines look the same ('\ No newline at end of file' marks the line without one), or only
+    /// blank lines come or go; null for a visible change.
+    /// </summary>
+    public static string? Invisible(IReadOnlyList<string> hunk)
+    {
+        static string Visible(string line) => line.Replace("﻿", string.Empty).TrimEnd();
+        var removed = hunk.Where(l => l.StartsWith('-')).Select(l => l.Substring(1)).ToList();
+        var added = hunk.Where(l => l.StartsWith('+')).Select(l => l.Substring(1)).ToList();
+        bool NoNewlineAfter(char kind) => Enumerable.Range(1, Math.Max(0, hunk.Count - 1)).Any(i => hunk[i].StartsWith('\\') && hunk[i - 1].StartsWith(kind));
+        if (removed.Select(Visible).SequenceEqual(added.Select(Visible)))
+        {
+            var what = new List<string>();
+            var bomBefore = removed.Any(l => l.Contains('﻿'));
+            var bomAfter = added.Any(l => l.Contains('﻿'));
+            if (bomBefore != bomAfter)
+            {
+                what.Add(bomAfter ? "adds a byte order mark" : "removes the byte order mark");
+            }
+
+            if (NoNewlineAfter('-') != NoNewlineAfter('+'))
+            {
+                what.Add(NoNewlineAfter('-') ? "adds the final newline" : "removes the final newline");
+            }
+
+            if (!removed.Select(l => l.Replace("﻿", string.Empty)).SequenceEqual(added.Select(l => l.Replace("﻿", string.Empty))))
+            {
+                what.Add("removes trailing whitespace");
+            }
+
+            return "(" + (what.Count == 0 ? "changes only line endings or whitespace" : string.Join(", ", what)) + ")";
+        }
+
+        if (removed.Concat(added).All(string.IsNullOrWhiteSpace) && (removed.Count == 0) != (added.Count == 0))
+        {
+            var count = removed.Count + added.Count;
+            return $"({(removed.Count > 0 ? "removes" : "adds")} {(count == 1 ? "a blank line" : $"{count} blank lines")})";
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -394,9 +482,10 @@ internal static class PreviewCommand
     }
 
     /// <summary>
-    /// Adds the StyleBro.Analyzers reference (the tool's own version) to the folder's Directory.Build.props when no project
-    /// file mentions it, the way docs/getting-started.md says; with central package management the version goes into
-    /// Directory.Packages.props. Returns the file(s) edited, or null.
+    /// Adds the StyleBro.Analyzers reference (the tool's own version) when no project file mentions it, the way
+    /// docs/getting-started.md says: to the Directory.Build.props every project imports (<see cref="Migration.PropsFiles"/>:
+    /// a nested one shadows the root's); with central package management the version goes into Directory.Packages.props.
+    /// Returns the file(s) edited, or null.
     /// </summary>
     public static string? AddPackage(string root)
     {
@@ -407,19 +496,22 @@ internal static class PreviewCommand
 
         var version = typeof(PreviewCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
         var packages = Path.Combine(root, "Directory.Packages.props");
-        var props = Path.Combine(root, "Directory.Build.props");
+        var props = Migration.PropsFiles(root);
 
         // The property is in Directory.Packages.props or (Polly) Directory.Build.props.
-        var central = File.Exists(packages) && new[] { packages, props }.Any(f => File.Exists(f) && Regex.IsMatch(File.ReadAllText(f), @"<ManagePackageVersionsCentrally>\s*true", RegexOptions.IgnoreCase));
+        var central = File.Exists(packages) && props.Prepend(packages).Any(f => File.Exists(f) && Regex.IsMatch(File.ReadAllText(f), @"<ManagePackageVersionsCentrally>\s*true", RegexOptions.IgnoreCase));
         if (central)
         {
             File.WriteAllText(packages, AddItem(File.ReadAllText(packages), $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
-            File.WriteAllText(props, AddItem(File.Exists(props) ? File.ReadAllText(props) : null, "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" />"));
-            return $"StyleBro.Analyzers {version} to Directory.Build.props and Directory.Packages.props";
         }
 
-        File.WriteAllText(props, AddItem(File.Exists(props) ? File.ReadAllText(props) : null, $"<PackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" PrivateAssets=\"all\" />"));
-        return $"StyleBro.Analyzers {version} to Directory.Build.props";
+        foreach (var file in props)
+        {
+            File.WriteAllText(file, AddItem(File.Exists(file) ? File.ReadAllText(file) : null, $"<PackageReference Include=\"StyleBro.Analyzers\"{(central ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
+        }
+
+        var names = string.Join(", ", props.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
+        return $"StyleBro.Analyzers {version} to {names}{(central ? " and Directory.Packages.props" : string.Empty)}";
     }
 
     /// <summary>
@@ -536,7 +628,7 @@ internal static class PreviewCommand
         {
             Console.Write(SonarPart(writer.ToString()));
             Console.Write(DetectedPart(writer.ToString()));
-            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal)))
+            foreach (var line in writer.ToString().Replace("\r\n", "\n").Split('\n').Where(l => l.StartsWith("EF Core migrations", StringComparison.Ordinal) || l.StartsWith("Vendored code", StringComparison.Ordinal)))
             {
                 Console.WriteLine(line);
             }

@@ -58,6 +58,15 @@ internal static class FormatCommand
     /// <summary>Where people and agents read what a kept finding means.</summary>
     public const string KeptFindingsHelp = "https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose";
 
+    /// <summary>The start of the line that says a project wasn't formatted at all (<see cref="Incomplete"/>).</summary>
+    public const string IncompleteMarker = "Incomplete:";
+
+    /// <summary>The start of the line that says which rules a run fixes (printed for the first run only).</summary>
+    private const string FixingHeader = "Fixing StyleBro's rules";
+
+    /// <summary>The start of the line that lists the target frameworks (printed for the first run only).</summary>
+    private const string MultiTargetedHeader = "Multi-targeted: ";
+
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
     /// console. It runs again until a run changes no file (at most <see cref="MaxRuns"/>), printing the files each run
@@ -89,15 +98,24 @@ internal static class FormatCommand
         {
             File.Delete(keptFile);
             var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, (long, DateTime)>();
-            var code = runOnce(args, output);
+
+            // What it fixes and the framework list are said once, not every run.
+            var code = runOnce(args, run == 1 ? output : line =>
+            {
+                if (!line.StartsWith(FixingHeader, StringComparison.Ordinal) && !line.StartsWith(MultiTargetedHeader, StringComparison.Ordinal))
+                {
+                    log(line);
+                }
+            });
             if (code != 0)
             {
                 return code;
             }
 
             var changed = ChangedFiles(before, Snapshot(root));
-            log($"Run {run}: {changed} file{(changed == 1 ? string.Empty : "s")} changed{(changed == 0 ? ", clean." : ".")}");
-            if (changed == 0)
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count == 0 ? ", clean." : ":")}");
+            ListFiles(root, changed, 10).ForEach(log);
+            if (changed.Count == 0)
             {
                 KeptSummary(ReadKept(keptFile, root, root), root).ForEach(log);
                 return 0;
@@ -176,9 +194,49 @@ internal static class FormatCommand
                 },
                 StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>The number of files that differ between two snapshots (added, removed or written).</summary>
-    public static int ChangedFiles(IReadOnlyDictionary<string, (long Length, DateTime Written)> before, IReadOnlyDictionary<string, (long Length, DateTime Written)> after) =>
-        after.Count(a => !before.TryGetValue(a.Key, out var b) || b != a.Value) + before.Keys.Count(k => !after.ContainsKey(k));
+    /// <summary>The files that differ between two snapshots (added, removed or written), sorted.</summary>
+    public static List<string> ChangedFiles(IReadOnlyDictionary<string, (long Length, DateTime Written)> before, IReadOnlyDictionary<string, (long Length, DateTime Written)> after) =>
+        after.Where(a => !before.TryGetValue(a.Key, out var b) || b != a.Value).Select(a => a.Key)
+            .Concat(before.Keys.Where(k => !after.ContainsKey(k)))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    /// <summary>The changed files to print (relative to the root, indented), at most <paramref name="max"/> and a count of the rest.</summary>
+    public static List<string> ListFiles(string root, IReadOnlyList<string> files, int max) =>
+        files.Take(max).Select(f => "  " + Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .Concat(files.Count > max ? new[] { $"  ... and {files.Count - max} more" } : Array.Empty<string>())
+            .ToList();
+
+    /// <summary>
+    /// The project 'dotnet format' skipped, from its warning that the project's references didn't load (a broken restore,
+    /// a corrupt package cache), else null. Its files weren't formatted, and it says nothing else about them.
+    /// </summary>
+    public static string? SkippedProject(string line) =>
+        Regex.Match(line, "Required references did not load for (.+?) or referenced project") is { Success: true } match ? match.Groups[1].Value : null;
+
+    /// <summary>
+    /// What to say when 'dotnet format' skipped projects (<see cref="SkippedProject"/>): project name -> the frameworks whose
+    /// runs skipped it ("" for a plain run). <paramref name="frameworks"/>: project name -> the frameworks it was run for. A
+    /// project skipped in every run wasn't formatted at all (<see cref="IncompleteMarker"/>; the preview stops then); one
+    /// skipped for some frameworks only (Bogus: netstandard1.3) only misses the code just those compile.
+    /// </summary>
+    public static List<string> Incomplete(IReadOnlyDictionary<string, SortedSet<string>> skipped, IReadOnlyDictionary<string, List<string>> frameworks)
+    {
+        var lines = new List<string>();
+        var whole = skipped.Where(s => !frameworks.TryGetValue(s.Key, out var all) || all.All(s.Value.Contains)).Select(s => s.Key).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        if (whole.Count > 0)
+        {
+            lines.Add($"{IncompleteMarker} 'dotnet format' skipped {string.Join(", ", whole)} (references didn't load), so those files weren't formatted.");
+            lines.Add("  Run 'dotnet restore' (or 'dotnet build') and fix what it reports, e.g. a missing SDK or package or a corrupt package cache, then run again.");
+        }
+
+        foreach (var (project, skippedFor) in skipped.Where(s => !whole.Contains(s.Key)).OrderBy(s => s.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            lines.Add($"Partly incomplete: 'dotnet format' skipped {project} for {string.Join(", ", skippedFor)} (references didn't load): code only that framework compiles (inside #if) wasn't formatted.");
+        }
+
+        return lines;
+    }
 
     /// <summary>
     /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
@@ -386,7 +444,7 @@ internal static class FormatCommand
                 kept = ReadKept(keptFile, copy, source);
             }
 
-            var changed = ChangedFiles(before, Snapshot(copy));
+            var changed = ChangedFiles(before, Snapshot(copy)).Count;
             if (copyCode != 0 || changed > 0)
             {
                 lines.ForEach(log);
@@ -427,10 +485,26 @@ internal static class FormatCommand
         return null;
     }
 
+    /// <summary>One run; afterwards, the projects 'dotnet format' skipped (<see cref="Incomplete"/>).</summary>
     private static int RunOnce(string[] args, Action<string>? output)
     {
         Action<string> log = output ?? Console.WriteLine;
         Action<string> error = output ?? Console.Error.WriteLine;
+        var skipped = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
+        var current = string.Empty;
+        void Record(string line)
+        {
+            if (SkippedProject(line) is { } project)
+            {
+                (skipped.TryGetValue(project, out var set) ? set : skipped[project] = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)).Add(current);
+            }
+        }
+
+        void Watch(string line)
+        {
+            Record(line);
+            log(line);
+        }
 
         // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
         var hasPath = args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal);
@@ -456,7 +530,7 @@ internal static class FormatCommand
         if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
         {
             var ids = Diagnostics(root);
-            log($"Fixing StyleBro's rules and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
+            log($"{FixingHeader} and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
             passThrough.Add("--diagnostics");
             passThrough.AddRange(ids);
         }
@@ -482,10 +556,12 @@ internal static class FormatCommand
         var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
         if (plan.Count <= 1)
         {
-            return Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough), output);
+            var single = Dotnet(root, null, new[] { "format", workspacePath }.Concat(passThrough), Watch);
+            Incomplete(skipped, new Dictionary<string, List<string>>()).ForEach(log);
+            return single;
         }
 
-        log($"Multi-targeted: one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
+        log($"{MultiTargetedHeader}one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
 
         // The restore's own output (its "Build succeeded" block) only matters when it fails.
         var restoreOutput = new List<string>();
@@ -505,6 +581,7 @@ internal static class FormatCommand
         var shown = new HashSet<string>(StringComparer.Ordinal);
         void Show(string line)
         {
+            Record(line);
             if (IsNewLine(shown, line))
             {
                 log(line);
@@ -520,6 +597,7 @@ internal static class FormatCommand
             foreach (var (framework, selected) in plan)
             {
                 log($"== {framework} ({selected.Count} project(s))");
+                current = framework;
                 var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
                 try
                 {
@@ -567,6 +645,10 @@ internal static class FormatCommand
             }
         }
 
+        var runFor = plan.SelectMany(p => p.Projects.Select(project => (Name: Path.GetFileNameWithoutExtension(project), p.Framework)))
+            .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Framework).ToList(), StringComparer.OrdinalIgnoreCase);
+        Incomplete(skipped, runFor).ForEach(log);
         return exit;
     }
 

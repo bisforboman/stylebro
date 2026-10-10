@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using StyleBro.Analyzers;
 
 namespace StyleBro.Migrate;
 
@@ -21,36 +22,45 @@ internal static class Conventions
     /// <summary>The share of places one form needs before init writes it.</summary>
     public const double Share = 0.75;
 
-    /// <summary>The fewest places a convention is judged on: below that, StyleBro's default stays.</summary>
+    /// <summary>
+    /// The fewest places a majority is judged on. Fewer places are followed only when they all agree (RealWorld: its only 2
+    /// private fields are '_field'); mixed ones turn the rule off like a missing majority. None at all: the default stays.
+    /// </summary>
     public const int MinimumSample = 10;
 
     /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
-    /// with what each looks like. <c>AlsoKeys</c> get the same value (else, catch and finally go together).
+    /// with what each looks like, and the line that stops StyleBro enforcing either form when the code has no clear majority
+    /// (owner's decision 2026-10-10, docs/decisions.md; null: no StyleBro rule of its own enforces it, e.g. the SDK formatter's
+    /// brace placement, so the default stays). <c>AlsoKeys</c> get the same value (else, catch and finally go together).
     /// </summary>
     public static readonly IReadOnlyList<Convention> All = new Convention[]
     {
-        new(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "private fields", "camelCase", ("camelCase", "named 'field'"), ("_camelCase", "named '_field'")),
-        new("csharp_new_line_before_open_brace", "'{' of a multi-line block", "all", ("all", "on its own line"), ("none", "at the end of the line")),
-        new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
-        new("csharp_prefer_braces", "one-line bodies of if/else/for/foreach/while/using/lock", "true", ("true", "with braces"), ("when_multiline", "without braces")),
-        new("dotnet_style_operator_placement_when_wrapping", "binary and ?: operators where a line wraps", "beginning_of_line", ("beginning_of_line", "at the start of the line"), ("end_of_line", "at the end of the line")),
-        new(StyleBro.Analyzers.Layout.WrappingPlacement.ArrowKey, "'=>' of expression bodies and switch arms where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line")),
-        new(StyleBro.Analyzers.Layout.WrappingPlacement.EqualsKey, "'=' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line")),
-        new("stylebro_trailing_comma", "multi-line initializers, enums and switch expressions", "include", ("include", "with a trailing comma"), ("omit", "without")),
-        new("stylebro_empty_string_style", "empty strings", "string_empty", ("string_empty", "string.Empty"), ("literal", "\"\"")),
-        new("stylebro_null_check_style", "null checks", "pattern_matching", ("pattern_matching", "'is null'"), ("equality_operator", "'== null'")),
-        new("stylebro_summary_layout", "one-line <summary> texts", "multi_line", ("multi_line", "tags on lines of their own"), ("single_line_when_fits", "on one line")),
-        new("stylebro_inheritdoc_style", "<inheritdoc/> tags", "compact", ("compact", "'<inheritdoc/>'"), ("spaced", "'<inheritdoc />'")),
-        new("csharp_prefer_simple_default_expression", "default values", "false", ("false", "'default(T)'"), ("true", "'default'")),
-        new("stylebro_closing_parenthesis_placement", "')' of split argument and parameter lists", "last_item", ("last_item", "after the last item"), ("own_line", "on its own line")),
-        new("stylebro_split_list_first_item", "split argument and parameter lists", "next_line", ("next_line", "first item on the next line"), ("same_line", "first item after '('")),
-        new("stylebro_constructor_initializer_placement", "': base(...)'/': this(...)'", "own_line", ("own_line", "on its own line"), ("same_line", "on the constructor's line")),
-        new("stylebro_constraint_placement", "'where' constraints", "own_line", ("own_line", "on their own line"), ("same_line", "on the declaration's line")),
-        new("stylebro_object_creation_parentheses", "'new T { ... }' with an initializer", "omit", ("omit", "without '()'"), ("include", "with '()'")),
-        new("stylebro_blank_line_between_switch_sections", "switch sections", "include", ("include", "after a blank line"), ("omit", "without one")),
-        new("csharp_using_directive_placement", "files with using directives", "outside_namespace", ("outside_namespace", "outside the namespace"), ("inside_namespace", "inside the namespace")),
+        new(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "private fields", "camelCase", ("camelCase", "named 'field'"), ("_camelCase", "named '_field'"), Off(DiagnosticIds.PrivateFieldNaming)),
+        new("csharp_new_line_before_open_brace", "'{' of a multi-line block", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
+        new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), null, "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
+        new("csharp_prefer_braces", "one-line bodies of if/else/for/foreach/while/using/lock", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline"),
+        new("dotnet_style_operator_placement_when_wrapping", "binary and ?: operators where a line wraps", "beginning_of_line", ("beginning_of_line", "at the start of the line"), ("end_of_line", "at the end of the line"), Off(DiagnosticIds.OperatorPlacement)),
+        new(StyleBro.Analyzers.Layout.WrappingPlacement.ArrowKey, "'=>' of expression bodies and switch arms where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.ArrowPlacement)),
+        new(StyleBro.Analyzers.Layout.WrappingPlacement.EqualsKey, "'=' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.EqualsPlacement)),
+        new("stylebro_trailing_comma", "multi-line initializers, enums and switch expressions", "include", ("include", "with a trailing comma"), ("omit", "without"), Off(DiagnosticIds.TrailingComma)),
+        new("stylebro_empty_string_style", "empty strings", "string_empty", ("string_empty", "string.Empty"), ("literal", "\"\""), Off(DiagnosticIds.EmptyString)),
+        new("stylebro_null_check_style", "null checks", "pattern_matching", ("pattern_matching", "'is null'"), ("equality_operator", "'== null'"), Off(DiagnosticIds.NullCheckStyle)),
+        new("stylebro_summary_layout", "one-line <summary> texts", "multi_line", ("multi_line", "tags on lines of their own"), ("single_line_when_fits", "on one line"), Off(DiagnosticIds.SummaryLayout)),
+        new("stylebro_inheritdoc_style", "<inheritdoc/> tags", "compact", ("compact", "'<inheritdoc/>'"), ("spaced", "'<inheritdoc />'"), null),
+        new("csharp_prefer_simple_default_expression", "default values", "false", ("false", "'default(T)'"), ("true", "'default'"), null),
+        new("stylebro_closing_parenthesis_placement", "')' of split argument and parameter lists", "last_item", ("last_item", "after the last item"), ("own_line", "on its own line"), Off(DiagnosticIds.CloseParenthesisOnLastItemLine)),
+        new("stylebro_split_list_first_item", "split argument and parameter lists", "next_line", ("next_line", "first item on the next line"), ("same_line", "first item after '('"), Off(DiagnosticIds.SplitParametersStartOnNewLine)),
+        new("stylebro_constructor_initializer_placement", "': base(...)'/': this(...)'", "own_line", ("own_line", "on its own line"), ("same_line", "on the constructor's line"), Off(DiagnosticIds.ConstructorInitializerLine)),
+        new("stylebro_constraint_placement", "'where' constraints", "own_line", ("own_line", "on their own line"), ("same_line", "on the declaration's line"), Off(DiagnosticIds.ConstraintOnOwnLine)),
+        new("stylebro_object_creation_parentheses", "'new T { ... }' with an initializer", "omit", ("omit", "without '()'"), ("include", "with '()'"), Off(DiagnosticIds.ObjectCreationParentheses)),
+        new("stylebro_blank_line_between_switch_sections", "switch sections", "include", ("include", "after a blank line"), ("omit", "without one"), Off(DiagnosticIds.BlankLineBetweenSwitchSections)),
+        new("csharp_using_directive_placement", "files with using directives", "outside_namespace", ("outside_namespace", "outside the namespace"), ("inside_namespace", "inside the namespace"), Off(DiagnosticIds.UsingPlacement)),
+        new(ArithmeticKey, "operations of another kind inside arithmetic ('a + b * c')", "always_for_clarity", ("always_for_clarity", "with parentheses"), ("never_if_unnecessary", "without"), Off(DiagnosticIds.ArithmeticPrecedence)),
     };
+
+    /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
+    private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
 
     /// <summary>Counts every convention in the repository's own C# files: key -> count per value (in <see cref="Convention.Values"/>' order).</summary>
     public static Dictionary<string, int[]> Count(string root)
@@ -149,6 +159,7 @@ internal static class Conventions
                         Add("stylebro_null_check_style", true);
                     }
 
+                    Arithmetic(binary);
                     break;
 
                 case ConditionalExpressionSyntax conditional:
@@ -296,6 +307,33 @@ internal static class Conventions
             }
         }
 
+        // BRO1406's places: an operation of another kind inside arithmetic. Without parentheses it is the rule's finding; with
+        // them only where they change nothing ('a + (b * c)', not '(a + b) * c').
+        void Arithmetic(BinaryExpressionSyntax binary)
+        {
+            var outer = Level(binary.Kind());
+            foreach (var operand in outer == 0 ? Array.Empty<ExpressionSyntax>() : new[] { binary.Left, binary.Right })
+            {
+                var parenthesized = operand is ParenthesizedExpressionSyntax;
+                if ((operand is ParenthesizedExpressionSyntax p ? p.Expression : operand) is BinaryExpressionSyntax inner && Level(inner.Kind()) is var level and > 0
+                    && Family(inner.Kind()) != Family(binary.Kind()) && (!parenthesized || level > outer || (level == outer && operand == binary.Left)))
+                {
+                    Add(ArithmeticKey, !parenthesized);
+                }
+            }
+        }
+
+        static int Level(SyntaxKind kind) => kind switch
+        {
+            SyntaxKind.MultiplyExpression or SyntaxKind.DivideExpression or SyntaxKind.ModuloExpression => 3,
+            SyntaxKind.AddExpression or SyntaxKind.SubtractExpression => 2,
+            SyntaxKind.LeftShiftExpression or SyntaxKind.RightShiftExpression => 1,
+            _ => 0,
+        };
+
+        // StyleCop's families: '%' is one of its own.
+        static int Family(SyntaxKind kind) => kind == SyntaxKind.ModuloExpression ? 4 : Level(kind);
+
         void TrailingComma(SyntaxToken open, SyntaxToken close, int items, int separators)
         {
             if (items > 0 && Line(open.SpanStart) != Line(close.SpanStart))
@@ -306,11 +344,14 @@ internal static class Conventions
     }
 
     /// <summary>
-    /// What to write: for each convention with enough places and a clear majority that isn't the default, its lines, and one
-    /// report line per convention found in the code. <paramref name="decided"/>: keys set elsewhere (the repository's own
-    /// .editorconfig, the Sonar setup, an SDK naming rule), with why; they're reported, not written.
+    /// What to write: for each convention with a clear majority (<see cref="Share"/> of at least <see cref="MinimumSample"/>
+    /// places, or fewer places that all agree) that isn't the default, its lines; without one, the line that turns its rule
+    /// off (<see cref="Convention.Off"/>; owner's decision 2026-10-10: Bogus had 24 operators at the start of a line and 50 at
+    /// the end, and BRO1520 moved 52); and one report line per convention found in the code. <paramref name="decided"/>: keys
+    /// set elsewhere (the repository's own .editorconfig, the Sonar setup, an SDK naming rule), with why; they're reported, not
+    /// written. <paramref name="isSet"/>: whether the repository or the Sonar setup sets an Off line's key itself (then it stays).
     /// </summary>
-    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided)
+    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null)
     {
         var lines = new List<string>();
         var report = new List<string>();
@@ -324,28 +365,32 @@ internal static class Conventions
             }
 
             var found = $"{convention.What}: {count[0]} {convention.Values[0].Label}, {count[1]} {convention.Values[1].Label}";
-            var winner = count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;
+            var winner = total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)
+                : count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;
+            var why = total < MinimumSample ? "too few places that disagree" : "no clear majority";
             string verdict;
-            if (decided.TryGetValue(convention.Key, out var why))
+            if (decided.TryGetValue(convention.Key, out var reason))
             {
-                verdict = why;
+                verdict = reason;
             }
-            else if (total < MinimumSample)
+            else if (winner < 0 && convention.Off is { } off && !(isSet?.Invoke(off.Substring(0, off.IndexOf('=')).Trim()) ?? false))
             {
-                verdict = $"too few to tell, {convention.Key} stays {convention.Default}";
+                verdict = $"{why}, so StyleBro doesn't enforce either form: {off}";
+                lines.Add($"# {found}: {why}");
+                lines.Add(off);
             }
             else if (winner < 0)
             {
-                verdict = $"no clear majority, {convention.Key} stays {convention.Default}";
+                verdict = $"{why}, {convention.Key} stays {convention.Default}";
             }
             else if (convention.Values[winner].Value == convention.Default)
             {
-                verdict = $"{convention.Key} = {convention.Default} (the default)";
+                verdict = $"{convention.Key} = {convention.Default} (the default){(total < MinimumSample ? $", all {total} agree" : string.Empty)}";
             }
             else
             {
                 var value = convention.Values[winner].Value;
-                verdict = $"{convention.Key} = {value}";
+                verdict = $"{convention.Key} = {value}{(total < MinimumSample ? $" (few places, all {total} agree)" : string.Empty)}";
                 lines.Add($"# {found}");
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
@@ -355,6 +400,9 @@ internal static class Conventions
 
         return (lines, report);
     }
+
+    /// <summary>The line that turns a rule off.</summary>
+    private static string Off(string id) => $"dotnet_diagnostic.{id}.severity = none";
 
     /// <summary>Whether an empty string literal has to stay a literal (BRO1106 leaves constant contexts alone).</summary>
     private static bool InConstantContext(SyntaxNode literal)
@@ -367,12 +415,13 @@ internal static class Conventions
     /// <summary>A convention init detects (see <see cref="All"/>).</summary>
     internal sealed class Convention
     {
-        public Convention(string key, string what, string defaultValue, (string Value, string Label) first, (string Value, string Label) second, params string[] alsoKeys)
+        public Convention(string key, string what, string defaultValue, (string Value, string Label) first, (string Value, string Label) second, string? off, params string[] alsoKeys)
         {
             Key = key;
             What = what;
             Default = defaultValue;
             Values = new[] { first, second };
+            Off = off;
             AlsoKeys = alsoKeys;
         }
 
@@ -383,6 +432,9 @@ internal static class Conventions
         public string Default { get; }
 
         public (string Value, string Label)[] Values { get; }
+
+        /// <summary>Gets the line written when the code has no clear majority (see <see cref="Conventions.All"/>), or null.</summary>
+        public string? Off { get; }
 
         public string[] AlsoKeys { get; }
     }

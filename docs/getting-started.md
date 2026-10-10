@@ -99,6 +99,12 @@ With central package management, the version goes in `Directory.Packages.props` 
 </ItemGroup>
 ```
 
+MSBuild imports only the nearest `Directory.Build.props` above a project: if a folder (say `src/`) has its own and
+it doesn't import the root one, put the reference there (or in each such file). A reference inside a conditional
+`ItemGroup` (`Condition="'$(TargetFramework)' == 'net8.0'"`) reaches only that target framework, and
+`<RunAnalyzers>false</RunAnalyzers>` turns all analyzers off where it applies. `--diff` adds the reference to every
+`Directory.Build.props` the projects use and warns when StyleBro reported nothing at all.
+
 The package brings StyleBro's rules and its preset: rule severities and formatting options, close to StyleCop's
 defaults. Your own `.editorconfig` wins over the preset. To configure everything yourself instead:
 `<StyleBroPreset>none</StyleBroPreset>`.
@@ -119,26 +125,31 @@ anything ([Preview first](#preview-first)).
 
 The block sits between `# BEGIN stylebro-migrate` and `# END stylebro-migrate`; running the command again replaces it.
 Put your own settings outside it. To get these rules reported by the build too, add
-`<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` to `Directory.Build.props`.
+`<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` to `Directory.Build.props` (`init` says so when no project
+file sets it yet).
 
 `init` also looks at your code first and keeps the conventions it clearly follows. For each setting below it counts
 both forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count) and, when one
-form has at least three quarters of at least 10 places and isn't StyleBro's default, writes it into the block. It
-prints every count, also for the settings it leaves alone (Ocelot):
+form has at least three quarters of at least 10 places (or fewer places that all agree) and isn't StyleBro's default,
+writes it into the block. Without a clear majority it turns off the StyleBro rule that enforces the setting, so the code
+stays as it is (`dotnet_diagnostic.BRO1520.severity = none`; for braces on one-line bodies `csharp_prefer_braces =
+when_multiline`); with no places at all the default stays. It prints every count and decision (Ocelot):
 
 ```
-Conventions in the code (written when one form has 75% of at least 10 places):
+Conventions in the code (a form is written when it has 75% of at least 10 places, or all of fewer;
+  without a clear majority, the rule that enforces the setting is turned off):
   private fields: 32 named 'field', 1054 named '_field'; stylebro_private_field_naming = _camelCase
   '{' of a multi-line block: 5412 on its own line, 0 at the end of the line; .editorconfig sets csharp_new_line_before_open_brace = all
   '=>' of expression bodies and switch arms where a line wraps: 16 at the end of the line, 296 at the start of the line; stylebro_arrow_placement_when_wrapping = beginning_of_line
   empty strings: 357 string.Empty, 20 ""; stylebro_empty_string_style = string_empty (the default)
-  one-line <summary> texts: 208 tags on lines of their own, 121 on one line; no clear majority, stylebro_summary_layout stays multi_line
+  one-line <summary> texts: 208 tags on lines of their own, 121 on one line; no clear majority, so StyleBro doesn't enforce either form: dotnet_diagnostic.BRO1616.severity = none
   ...
 ```
 
 The settings: private field naming ([BRO1303](rules/BRO1303.md)), brace placement (`csharp_new_line_before_open_brace`,
 `csharp_new_line_before_else`/`_catch`/`_finally`), braces on one-line bodies (`csharp_prefer_braces`), operator, `=>`
-and `=` placement when wrapping, trailing commas, `""` or `string.Empty`, null checks, one-line summaries,
+and `=` placement when wrapping, trailing commas, `""` or `string.Empty`, null checks, one-line summaries, parentheses
+inside arithmetic (`a + (b * c)`, [BRO1406](rules/BRO1406.md)),
 `<inheritdoc/>` spacing, `default` or `default(T)`, the closing parenthesis and first item of split lists, constructor
 initializer and `where` placement, `new T()` parentheses with an initializer, blank lines between switch sections, and
 where using directives go (`csharp_using_directive_placement`, [BRO1008](rules/BRO1008.md); counted in files: a file
@@ -147,7 +158,8 @@ written, the preset already says `outside_namespace`) (the keys are in [Settings
 a `dotnet_naming_rule` for private fields decides the field style (naming rules for interfaces or constants don't).
 
 EF Core migrations (files with `[Migration(...)]`, a `Migration` base class or a `ModelSnapshot`) are written by
-`dotnet ef`, so `init` marks their folders `generated_code = true`: formatting and StyleBro leave them alone.
+`dotnet ef`, so `init` marks their folders `generated_code = true`: formatting and StyleBro leave them alone. Vendored
+folders (`vendor`, `vendored`, `third_party`, `thirdparty`, `external`) get the same section.
 
 When it finds a StyleCop setup (`stylecop.json`, StyleCop rule ids in `.editorconfig`, rulesets or
 global configs, a StyleCop.Analyzers reference), it stops without writing and tells you to run
@@ -167,9 +179,12 @@ stylebro-migrate format
 
 This fixes whitespace, the built-in rules and every StyleBro rule. One fix can make work for another rule, so the
 command runs `dotnet format` again until a run changes no file (at most three runs) and prints what each run changed
-(`Run 1: 293 files changed.`, `Run 2: 0 files changed, clean.`); `--once` runs it once. It ends with the findings
-StyleBro's fixes leave on purpose, each with its reason ([Findings kept on purpose](#findings-kept-on-purpose)), and
-exits with 0 when clean, 2 when a run still changed files. A folder with several solutions
+(`Run 1: 293 files changed:` and the first 10 of them, `Run 2: 0 files changed, clean.`); `--once` runs it once. It ends
+with the findings StyleBro's fixes leave on purpose, each with its reason ([Findings kept on purpose](#findings-kept-on-purpose)),
+and exits with 0 when clean, 2 when a run still changed files. When `dotnet format` skips a project because its
+references didn't load (a broken restore or package cache), the command names it and says the run is incomplete (for
+one target framework only: the code only that framework compiles); `--diff` stops then instead of showing a partial
+preview. A folder with several solutions
 or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 Review the diff and commit it. In a large codebase you may not want one big change: see
 [Large codebases](#large-codebases).
