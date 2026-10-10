@@ -109,7 +109,7 @@ Files and folders are not renamed.
 
 - Unit tests: 15 in `NamespaceNamingTests` (single fix and Fix All, multi-file, two projects, metadata, generated
   code, additional files, each guard), plus a migration test. `dotnet test StyleBro.slnx`: 517 passed.
-- Mutation testing: 14 entries in `scripts/mutation/mutations.psd1`, all killed.
+- Mutation testing: 14 entries in `scripts/mutation/mutations/Naming.psd1`, all killed.
 - Parity set `naming-namespaces`: StyleCop 7 / StyleBro 6 positions; the one difference is `taken` next to `Taken`.
   StyleCop's fixed output doesn't compile (the `using` in the other file stays lower-case); StyleBro's does.
 - `scripts/verify-format.ps1` with a Messy case (`Catalog.cs`, BRO1312 on for that file): passes, second run clean.

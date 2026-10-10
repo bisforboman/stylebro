@@ -113,7 +113,7 @@ comparable.
   renames that broke reflection and serialization, member sorting that changed serialized JSON order. Those cases are
   now skipped; one known failure is left (Newtonsoft.Json's `MemberSearchFlags` serializes an attribute-less class's
   private fields by reflection, in declaration order).
-- **Mutation testing:** 320 guards (`scripts/mutation/mutations.psd1`) are each broken on purpose; a test must fail for
+- **Mutation testing:** 320 guards (`scripts/mutation/mutations/`) are each broken on purpose; a test must fail for
   every one.
 - **Unit tests:** 842, including every example on every rule page (before compiles and is reported, one Fix All pass
   gives exactly the after, the after is clean).
