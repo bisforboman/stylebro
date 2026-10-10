@@ -99,8 +99,12 @@ when we can do that"): don't suggest releases at all; the user says when.
   runs every StyleCop parity set (`Compare-WithStyleCop.ps1`).
 - **PR pipeline (2026-10-03, user's request: "verify new changes before merging to main")**: `main` is protected; changes
   land through pull requests whose checks pass. Work on a branch, push it, open a PR (`gh pr create`), let the checks
-  run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: windows-latest, one
-  job per public repo in `scripts/realworld/repos.psd1`, `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
+  run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: one
+  job per public repo in `scripts/realworld/repos.psd1`, on the runner its `Os` names (windows-latest by default: .NET
+  Framework targets and CRLF checkouts; Jellyfin, FluentValidation, eShopOnWeb, Mapperly on ubuntu-latest since
+  2026-10-10, same results as on Windows; Serilog/MediatR lose their net462 findings on Linux), prints each phase's
+  duration; the untouched code's failing tests are cached (key: repo, commit, SDK, OS, `FailedTests.ps1`, the repo's
+  Tests/TestFilter; saved outside PRs after a successful run), so a hit skips that Release build and test run; `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
   fails on analyzer crashes, new compile errors, conflict markers, a second run that still changes files (since
   2026-10-04; `MaxRuns` in repos.psd1 for a documented exception), or tests that passed
   on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
