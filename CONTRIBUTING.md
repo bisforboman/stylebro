@@ -79,6 +79,10 @@ site leaves out (`decisions.md`, `backlog.md`, `beyond-stylecop.md`, `proposals/
 - one `Real world` job per repository in `scripts/realworld/repos.psd1`. Each runs every rule, then checks for crashes,
   new compile errors, conflict markers, a second run that still changes files, and new test failures.
 
+A merge to `main` doesn't run the real-world jobs or the full mutation set again: they run nightly on `main` (and on
+demand from the Actions tab), and a failed nightly run opens or comments on an issue named "Nightly real-world run
+failed" or "Nightly mutation run failed".
+
 Every script also runs locally.
 
 ## Plans and decisions

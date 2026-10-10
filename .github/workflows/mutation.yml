@@ -3,11 +3,12 @@ name: Mutation testing
 # Breaks each guard listed in scripts/mutation/mutations/*.psd1 and checks that a test fails. The entries are split over
 # parallel shards (index modulo the shard count); the job named `mutation` (the required check) passes only when every
 # shard passed. On a pull request only the entries for the files it changes run (.github/changes.sh, -OnlyFiles; the
-# stale check still covers every entry); a push to main runs them all.
+# stale check still covers every entry); the nightly run on main runs them all (instead of a run after every merge; a
+# failure opens or updates the issue "Nightly mutation run failed").
 on:
-  push:
-    branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -65,3 +66,19 @@ jobs:
           echo "Changes: ${{ needs.changes.result }}, shards: ${{ needs.shard.result }}"
           test "${{ needs.changes.result }}" = success
           test "${{ needs.shard.result }}" = success
+
+  # A failed nightly run opens the issue "Nightly mutation run failed", or comments on it while it is open.
+  nightly-issue:
+    needs: mutation
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: bash .github/nightly-issue.sh "Nightly mutation run failed"
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -15,7 +15,7 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 |---|---|
 | Released | 129 |
 | Done, not released yet | 0 |
-| Planned | 0 rules, 71 work items |
+| Planned | 0 rules, 72 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
 StyleCop coverage (197 diagnostics in StyleCop 1.2): 109 by StyleBro, 44 by the .NET SDK, 42 dropped by design (they
@@ -85,6 +85,7 @@ StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([
 | Hardening | BRO1110 own_line indentation | In own_line mode a `)` already on its own line is reindented like the line with `(` (IDE0055 leaves it at any indentation, probed), that line taken as BRO1105, BRO1109 and BRO1110 itself leave it, so nested lists align in one run. | Done (2026-10-09) |
 | CI | Split the mutation job | About 70-90 minutes for ~475 entries (limit raised to 120). Shard into parallel jobs plus a summary job named `mutation` (the required check), or skip entries whose file a PR doesn't touch. | Idea |
 | CI | Faster PRs | A docs-only PR skips the work of the real-world, mutation, parity and performance jobs (each still reports its required check); performance runs only when analyzer code changes; mutation on a PR runs only the entries for the files it changes, the full set runs on main (`.github/changes.sh`, `-OnlyFiles`). | Done (2026-10-09) |
+| CI | Faster real-world runs, nightly on main | The real-world jobs cache each clone's `.git` and its NuGet packages (keyed by repo + pinned commit, + OS and SDK for the packages; saved by the nightly run on main, restored by every PR). Real world and the full mutation set no longer run after every merge, but nightly on main (02:00/03:00 UTC, also `workflow_dispatch`); a failed nightly run opens or comments on the issue "Nightly real-world run failed" / "Nightly mutation run failed" (`.github/nightly-issue.sh`). | Done (2026-10-10) |
 | Adoption | Second first-run trial with the published package | Install 0.2.0-alpha.1 from nuget.org into 3-4 repos nobody has tried, exactly as a new user would; the first trial (local packages) found a loop and 213 build errors. | Idea |
 | Adoption | Readable release notes | GitHub's generated notes list every PR title; a short summary per release (what's new, how to upgrade, known limits) for users. | Idea |
 | Adoption | Rider check | The IDE check was done in Visual Studio 2022 only. | Idea |

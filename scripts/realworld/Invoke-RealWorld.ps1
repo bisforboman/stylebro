@@ -82,8 +82,12 @@ if (-not (Test-Path (Join-Path $path '.git'))) {
     git init -q $path
     git -C $path remote add origin $r.Url
 }
-git -C $path fetch -q --depth 1 origin $r.Commit
-git -C $path checkout -q --force FETCH_HEAD
+# CI caches the .git folder (realworld.yml): a clone that already has the pinned commit skips the fetch. Either way the
+# working tree is reset to exactly that commit, with nothing left from a previous run.
+git -C $path cat-file -e "$($r.Commit)^{commit}" 2>$null
+if ($LASTEXITCODE -ne 0) { git -C $path fetch -q --depth 1 origin $r.Commit }
+git -C $path checkout -q --force $r.Commit
+if ($LASTEXITCODE -ne 0) { throw "Checking out $($r.Commit) failed in $path." }
 git -C $path clean -fdxq
 $sln = Join-Path $path $r.Solution
 

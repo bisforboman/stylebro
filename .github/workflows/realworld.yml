@@ -3,10 +3,12 @@ name: Real world
 # Every StyleBro rule on public repositories at pinned commits (scripts/realworld/repos.psd1): no analyzer crashes, no
 # new compile errors, no merge-conflict markers, the fixes converge, and no test that passed before fails afterwards.
 # Windows, because Polly and Serilog also target .NET Framework.
+# Pull requests run it before merging; main runs it NIGHTLY instead of after every merge (a bad combination of two
+# merged PRs shows up the next morning: the run fails and opens or updates the issue "Nightly real-world run failed").
 on:
-  push:
-    branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -48,6 +50,7 @@ jobs:
         if: needs.changes.outputs.relevant != 'false'
 
       - uses: actions/setup-dotnet@v6
+        id: dotnet
         if: needs.changes.outputs.relevant != 'false'
         with:
           # The repositories build with older SDKs' target frameworks too.
@@ -56,7 +59,69 @@ jobs:
             9.0.x
             10.0.x
 
+      # The pinned commit (cache keys) and the folders. The restores go to a cached NuGet folder; StyleBro's analyzers
+      # never do (the hook copies them from this run's build into $WORK/stylebro-bin, outside every cached path).
+      - name: Pinned commit
+        id: pin
+        if: needs.changes.outputs.relevant != 'false'
+        shell: pwsh
+        run: |
+          "commit=$((Import-PowerShellDataFile scripts/realworld/repos.psd1).${{ matrix.repo }}.Commit)" >> $env:GITHUB_OUTPUT
+          "WORK=${{ runner.temp }}/realworld" >> $env:GITHUB_ENV
+          "NUGET_PACKAGES=${{ runner.temp }}/realworld-nuget" >> $env:GITHUB_ENV
+
+      # The clone's .git (the pinned commit: no fetch on a hit) and the NuGet packages its restore downloads. Restored on
+      # every run, saved only outside pull requests: caches saved on main (the nightly run) reach every PR, a PR's own
+      # would only reach that PR and push main's out of the 10 GB limit. A changed pin or SDK starts a new cache.
+      - name: Restore the clone
+        id: clone
+        if: needs.changes.outputs.relevant != 'false'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.WORK }}/${{ matrix.repo }}/.git
+          key: realworld-clone-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}
+
+      - name: Restore the NuGet packages
+        id: nuget
+        if: needs.changes.outputs.relevant != 'false'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.dotnet.outputs.dotnet-version }}
+          restore-keys: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-
+
       - name: Run StyleBro on ${{ matrix.repo }}
         if: needs.changes.outputs.relevant != 'false'
         shell: pwsh
-        run: ./scripts/realworld/Invoke-RealWorld.ps1 -Repo ${{ matrix.repo }} -Tests -Work "${{ runner.temp }}/realworld"
+        run: ./scripts/realworld/Invoke-RealWorld.ps1 -Repo ${{ matrix.repo }} -Tests -Work $env:WORK
+
+      # Saved even when the run found problems: the clone and the packages don't depend on the result.
+      - name: Save the clone
+        if: ${{ !cancelled() && github.event_name != 'pull_request' && needs.changes.outputs.relevant != 'false' && steps.clone.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.WORK }}/${{ matrix.repo }}/.git
+          key: ${{ steps.clone.outputs.cache-primary-key }}
+
+      - name: Save the NuGet packages
+        if: ${{ !cancelled() && github.event_name != 'pull_request' && needs.changes.outputs.relevant != 'false' && steps.nuget.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ steps.nuget.outputs.cache-primary-key }}
+
+  # A failed nightly run opens the issue "Nightly real-world run failed", or comments on it while it is open.
+  nightly-issue:
+    needs: realworld
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: bash .github/nightly-issue.sh "Nightly real-world run failed"
+        env:
+          GH_TOKEN: ${{ github.token }}

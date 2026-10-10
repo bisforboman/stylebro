@@ -4,7 +4,7 @@
 #             their checks without doing the work. Any file not listed as documentation below counts as relevant.
 #   perf      true when analyzer speed can change (the performance job).
 #   files     the changed files, one per line (mutation testing runs only the entries for these).
-# Anything but a pull request (a push to main) changes everything.
+# Anything but a pull request (the nightly run on main, a manual run) changes everything.
 set -euo pipefail
 export LC_ALL=C.UTF-8 # grep -P
 out=${GITHUB_OUTPUT:-/dev/stdout}
