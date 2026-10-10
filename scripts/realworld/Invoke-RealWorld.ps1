@@ -58,7 +58,16 @@ Set-Content $hook @"
     <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == '' and '`$(TargetFrameworks)' != ''">`$(TargetFrameworks.Replace(';', ','))</StyleBroTargetFrameworks>
     <StyleBroTargetFrameworks Condition="'`$(StyleBroTargetFrameworks)' == ''">`$(TargetFramework)</StyleBroTargetFrameworks>
   </PropertyGroup>
+  <Target Name="_StyleBroFindSonar" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun">
+    <ItemGroup>
+      <_StyleBroSonarAnalyzer Include="@(Analyzer)" Condition="'%(Filename)' == 'SonarAnalyzer.CSharp'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <StyleBroSonar Condition="'`$(StyleBroSonar)' == ''">@(_StyleBroSonarAnalyzer->'%(FullPath)', '|')</StyleBroSonar>
+    </PropertyGroup>
+  </Target>
   <ItemGroup>
+    <CompilerVisibleProperty Include="StyleBroSonar" />
     <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <CompilerVisibleProperty Include="LangVersion" />
     <CompilerVisibleProperty Include="MaxSupportedLangVersion" />

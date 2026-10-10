@@ -1360,13 +1360,13 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor WhereBeforeTerminal = new(
         id: DiagnosticIds.WhereBeforeTerminal,
         title: "Pass the predicate to the LINQ call instead of calling Where first",
-        messageFormat: "Use '{0}' with the predicate instead of 'Where(...).{0}()'",
+        messageFormat: "Use '{0}' with the predicate instead of 'Where(...).{1}()'",
         category: "Readability",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "'source.Where(p).Count()' becomes 'source.Count(p)'; also Any, LongCount, First, FirstOrDefault, Last, "
-            + "LastOrDefault, Single and SingleOrDefault, for System.Linq's Enumerable and Queryable. Not a StyleCop rule "
-            + "(Sonar S2971).",
+            + "LastOrDefault, Single and SingleOrDefault, for System.Linq's Enumerable and Queryable; on a List or an array, "
+            + "Exists/Find where Sonar's S6605/S6602 are on. Not a StyleCop rule (Sonar S2971).",
         helpLinkUri: HelpBase + DiagnosticIds.WhereBeforeTerminal + "/");
 
     public static readonly DiagnosticDescriptor ParamsArray = new(

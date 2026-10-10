@@ -117,4 +117,103 @@ public class WhereBeforeTerminalTests
             }
         }
         """);
-}
+
+    // Owner's decision (2026-10-10): where Sonar's S6605/S6602 are on, a List's or an array's own method, not the LINQ
+    // call Sonar would report next (SonarAnalyzer.CSharp 9.19 on RealWorld: S6605 on 'Any(p)', S6602 on 'FirstOrDefault(p)').
+    private const string Collections = """
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public class C
+        {
+            public void M(List<int> items, int[] numbers, Func<int, bool> test)
+            {
+                var any = items.{|BRO1150:Where|}(i => i > 0).Any();
+                var first = items.{|BRO1150:Where|}(i => i > 0).FirstOrDefault();
+                var count = items.{|BRO1150:Where|}(i => i > 0).Count();
+                var anyArray = numbers.{|BRO1150:Where|}(i => i > 0).Any();
+                var firstArray = numbers
+                    .{|BRO1150:Where|}(i => i > 0)
+                    .FirstOrDefault();
+                var func = items.{|BRO1150:Where|}(test).Any();
+            }
+        }
+        """;
+
+    private const string Linq = """
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public class C
+        {
+            public void M(List<int> items, int[] numbers, Func<int, bool> test)
+            {
+                var any = items.Any(i => i > 0);
+                var first = items.FirstOrDefault(i => i > 0);
+                var count = items.Count(i => i > 0);
+                var anyArray = numbers.Any(i => i > 0);
+                var firstArray = numbers
+                    .FirstOrDefault(i => i > 0);
+                var func = items.Any(test);
+            }
+        }
+        """;
+
+    private const string Own = """
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public class C
+        {
+            public void M(List<int> items, int[] numbers, Func<int, bool> test)
+            {
+                var any = items.Exists(i => i > 0);
+                var first = items.Find(i => i > 0);
+                var count = items.Count(i => i > 0);
+                var anyArray = Array.Exists(numbers, i => i > 0);
+                var firstArray = Array.Find(numbers, i => i > 0);
+                var func = items.Any(test);
+            }
+        }
+        """;
+
+    [Theory]
+    [InlineData("dotnet_diagnostic.S6605.severity = warning\ndotnet_diagnostic.S6602.severity = warning", true)]
+    [InlineData("build_property.StyleBroSonar = C:/nuget/sonaranalyzer.csharp/9.19.0.84025/analyzers/SonarAnalyzer.CSharp.dll", true)]
+    [InlineData("build_property.StyleBroSonar = /home/x/.nuget/packages/sonaranalyzer.csharp/10.35.0.4138/analyzers/SonarAnalyzer.CSharp.dll", false)]
+    [InlineData("build_property.StyleBroSonar = C:/nuget/sonaranalyzer.csharp/9.19.0.84025/analyzers/SonarAnalyzer.CSharp.dll\ndotnet_diagnostic.S6605.severity = none\ndotnet_diagnostic.S6602.severity = none", false)]
+    [InlineData("build_property.StyleBroSonar = ", false)]
+    public Task SonarCollectionRules_PickTheCollectionsOwnMethods(string editorConfig, bool own) =>
+        Verify.VerifyFixAsync(Collections, own ? Own : Linq, editorConfig);
+
+    [Fact]
+    public Task ArraysWithoutUsingSystem_KeepTheLinqCall() => Verify.VerifyFixAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public bool M(int[] numbers) => numbers.{|BRO1150:Where|}(i => i > 0).Any();
+        }
+        """,
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public bool M(int[] numbers) => numbers.Any(i => i > 0);
+        }
+        """,
+        "dotnet_diagnostic.S6605.severity = warning");
+
+    [Theory]
+    [InlineData("C:/n/sonaranalyzer.csharp/9.19.0.84025/analyzers/SonarAnalyzer.CSharp.dll", 9)]
+    [InlineData(@"C:\n\SonarAnalyzer.CSharp\10.3.0.106239\analyzers\SonarAnalyzer.CSharp.dll", 10)]
+    [InlineData("C:/tools/SonarAnalyzer.CSharp.dll", null)]
+    [InlineData("C:/a/other.dll|C:/n/sonaranalyzer.csharp/8.30.0.37606/analyzers/SonarAnalyzer.CSharp.dll", 8)]
+    [InlineData("", null)]
+    public void SonarVersion_IsReadFromThePackagePath(string paths, int? major) =>
+        Assert.Equal(major, StyleBro.Analyzers.SonarRules.GetMajorVersion(paths));}

@@ -25,9 +25,9 @@ public sealed class WhereBeforeTerminalAnalyzer : DiagnosticAnalyzer
                 var where = (InvocationExpressionSyntax)c.Node;
                 if (where.Expression is MemberAccessExpressionSyntax { Name: { Identifier.ValueText: "Where" } name }
                     && where.Parent is MemberAccessExpressionSyntax
-                    && WhereCalls.GetChanges(where, c.SemanticModel, c.CancellationToken) is { } change)
+                    && WhereCalls.GetChanges(where, c.SemanticModel, c.Options.AnalyzerConfigOptionsProvider.GetOptions(where.SyntaxTree), c.CancellationToken) is { } change)
                 {
-                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.WhereBeforeTerminal, name.GetLocation(), change.Name));
+                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.WhereBeforeTerminal, name.GetLocation(), change.Name, change.Terminal));
                 }
             },
             SyntaxKind.InvocationExpression);

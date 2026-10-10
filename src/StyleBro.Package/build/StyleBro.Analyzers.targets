@@ -38,9 +38,23 @@
   <PropertyGroup>
     <StyleBroPackageFolders Condition="'$(StyleBroPackageFolders)' == ''">$(NuGetPackageFolders.Replace(';', '|'))</StyleBroPackageFolders>
   </PropertyGroup>
+  <!--
+    BRO1150 writes List<T>.Exists/Find and Array.Exists/Find where Sonar's S6605/S6602 are on: with no severity configured
+    for them, that depends on the SonarAnalyzer.CSharp package's version (on in its defaults before 10.0). Its analyzer
+    paths ('|'-separated; the version is in the package folder's path) are passed after the packages' analyzers are
+    resolved, so this is a target.
+  -->
+  <Target Name="_StyleBroFindSonar" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun">
+    <ItemGroup>
+      <_StyleBroSonarAnalyzer Include="@(Analyzer)" Condition="'%(Filename)' == 'SonarAnalyzer.CSharp'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <StyleBroSonar Condition="'$(StyleBroSonar)' == ''">@(_StyleBroSonarAnalyzer->'%(FullPath)', '|')</StyleBroSonar>
+    </PropertyGroup>
+  </Target>
   <ItemGroup>
-    <CompilerVisibleProperty Include="StyleBroPackageFolders" />
-    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
+    <CompilerVisibleProperty Include="StyleBroSonar" />
+    <CompilerVisibleProperty Include="StyleBroPackageFolders" />    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <!-- BRO1145 (C# 12 syntax): the SDK sets LangVersion to MaxSupportedLangVersion unless the project sets it. -->
     <CompilerVisibleProperty Include="LangVersion" />
     <CompilerVisibleProperty Include="MaxSupportedLangVersion" />
