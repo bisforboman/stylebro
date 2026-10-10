@@ -1229,6 +1229,65 @@ file (FieldNamingAnalyzer swings 35-90 ms between runs), so judge by the total a
 - **Paused briefly** (2026-10-08) and resumed the next day (owner: "let's ignore my previous hesitations"); open
   ideas are the "Idea" rows in docs/backlog.md.
 
+## Added 2026-10-09/10 (0.3.0 and 0.4.0 releases, Sonar, trials 2 and 3, docs site, CI speed)
+
+Decisions in `docs/decisions.md`; details on the rule pages and in PRs #71-#97.
+
+**Releases**: 0.3.0-alpha.1 (2026-10-09) and 0.4.0-alpha.1 (2026-10-10), both by the owner's call. Release notes are
+written by hand (`gh release edit --notes-file`) instead of GitHub's PR list; release prep = Unshipped -> Shipped
+("Release 0.x.0.1"), versions in both csproj and the docs/samples, then tag the prep PR's MERGE commit (check its
+`<Version>` first), then bump `StyleBroSelfVersion` in its own PR.
+
+**Docs site** (#82): MkDocs Material, `mkdocs.yml` + `.github/docs-requirements.txt`, deployed to GitHub Pages
+(https://bisforboman.github.io/stylebro/) from main by `.github/workflows/docs.yml`; PRs build `--strict`. Every rule's
+help link is `https://bisforboman.github.io/stylebro/rules/BROxxxx/` (`Descriptors.HelpBase`; fading companions like
+`BRO1405_p` link to their rule's page). A new rule page needs a row in `docs/rules/README.md` AND an entry in the
+`mkdocs.yml` nav (DocExamplesTests checks both); new `stylebro_*` keys need a row in `docs/configuration.md` (a test
+checks). Internal docs (decisions, backlog, surveys, proposals) are excluded from the site; link to them with absolute
+GitHub URLs.
+
+**CI** (#71, #77, #87): mutation runs in 4 shards + a summary job named `mutation` (the required check); a `changes`
+job per workflow lets docs-only PRs pass the heavy jobs in seconds (skips are on STEPS, so matrix check names still
+appear); on PRs only the mutation entries for changed files (and their test files) run, the full set on main. The
+performance check compares with `--all-rules`. Real-world jobs are the queue bottleneck (12 Windows jobs per PR, ~20
+concurrent jobs on the free plan): avoid many parallel PRs that touch src/.
+
+**Sonar** (#89, #90, #94): `stylebro-migrate` reads Sonar setups (`SonarSetup.cs`: exported profile via
+`--sonar-profile`, the package's default "Sonar way" list from `data/`, rulesets incl. the scanner's, globalconfigs,
+root .editorconfig) and maps Sonar ids to StyleBro/SDK rules (`data/sonar-mapping.tsv`; public code excluded where a
+fix would change an API); Sonar suppressions carry over like StyleCop's. BRO1149 (nested ifs, S1066), BRO1150
+(`Where(p).Count()`, S2971), BRO1151 (params array, S3878) are our own rules written from Sonar's public rule
+descriptions (never read or port Sonar's source: its license has a "competing" clause); their fix providers also list
+S1066/S2971/S3878 in FixableDiagnosticIds, so `dotnet format` fixes Sonar's own warnings where our logic accepts the
+node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's locations; `scripts/sonar-interop.ps1`
+(weekly workflow) runs the real pinned package. Sonar is never a dependency of StyleBro's packages.
+
+**Rules and guards added after the trials** (trial 2 #76/#80, trial 3 #91-#93):
+- BRO1008 replaces IDE0065 (SA1200): moves usings only when C#'s lookup order shows every name binds the same (no
+  rebinding: 180 ms -> 5-9 ms); `#region` lines don't block it; UNSET `csharp_using_directive_placement` = nothing
+  reported (owner); the preset says outside, migrate writes StyleCop's choice, init detects the repo's majority.
+- BRO1410 parentheses in patterns + hidden `_p` fading companions (NotConfigurable, not in DiagnosticIds; tests
+  filter them unless `IncludeFades`).
+- Naming: `nameof(x)` used as a value blocks renaming x (solution-wide for members); `stylebro_rename_public_api`
+  (default false: names visible outside the assembly aren't renamed; parity sets turn it on); snake_case names aren't
+  BRO1309's; a DTO's properties are renamed all or none.
+- Comments: a `//` run right below a statement, followed by a blank line, belongs to the code above (BRO1504/BRO1506
+  leave it, BRO1001 skips types whose sort would separate them); group comments keep their group.
+- BRO1604 only prefixes noun phrases; BRO1601 skips projects without doc generation and members with `#if` above;
+  findings in NuGet package folders (contentFiles) are suppressed (`PackageFileSuppressor`).
+- `init` (Conventions.cs) detects 20 conventions (incl. `_` fields and using placement) and writes the majority at
+  >= 75 % of >= 10 places; stops for StyleCop repos (use `--write`); `format` limits fixes to BRO + init's IDE/CA ids
+  (`--all` for everything) and repeats until clean; `--diff` previews init / migrate / format on a temp copy.
+
+**Lessons**:
+- Every trial on unseen repos found real bugs (loops, build breaks, behaviour changes): keep doing them after
+  releases; run the repos' TESTS, not just builds (Ocelot's header value changed through `nameof`).
+- Options of different rules interact: ask the other rule's CONFIGURED decision, and add a FixOrderTests case with both.
+- After merging main into a PR, re-run the tests AND check mutation entries still match: refactors leave stale or
+  surviving entries (#91, #92); test edits can stop exercising a guard.
+- A "conflict" right after a push is often GitHub recomputing: watchers should require DIRTY several times.
+- Agents squashing onto a moved main can revert other PRs' changes: check a PR's file list before trusting it.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
