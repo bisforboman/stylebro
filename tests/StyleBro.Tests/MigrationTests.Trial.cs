@@ -125,6 +125,40 @@ public sealed partial class MigrationTests
         Assert.Equal(new[] { 0, 1 }, counts["stylebro_split_list_first_item"]);
     }
 
+    [Theory]
+    [InlineData("using System;\nnamespace N\n{\n    class C { }\n}\n", 1, 0)]
+    [InlineData("namespace N\n{\n    using System;\n    class C { }\n}\n", 0, 1)]
+    [InlineData("namespace N;\nusing System;\nclass C { }\n", 0, 1)]
+    [InlineData("using System;\nnamespace N;\nclass C { }\n", 1, 0)]
+    [InlineData("namespace A\n{\n    namespace B\n    {\n        using System;\n    }\n}\n", 0, 1)]
+    [InlineData("global using System;\nnamespace N\n{\n    using System.IO;\n}\n", 0, 1)]
+    [InlineData("using System;\nnamespace N\n{\n    using System.IO;\n}\n", 0, 0)] // both levels
+    [InlineData("using System;\nclass C { }\n", 0, 0)] // no namespace
+    [InlineData("global using System;\nnamespace N { }\n", 0, 0)] // global usings only
+    [InlineData("namespace N { class C { } }\n", 0, 0)] // no usings
+    public void Conventions_CountUsingPlacementPerFile(string source, int outside, int inside)
+    {
+        var counts = Conventions.NewCounts();
+        Conventions.Count(CSharpSyntaxTree.ParseText(source), counts);
+        Assert.Equal(new[] { outside, inside }, counts["csharp_using_directive_placement"]);
+    }
+
+    [Fact]
+    public void Conventions_WriteInsideNamespaceOnlyWhenMostFilesDoIt()
+    {
+        const string Key = "csharp_using_directive_placement";
+        var none = new Dictionary<string, string>();
+        var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 4, 120 } }, none);
+        Assert.Contains(Key + " = inside_namespace", lines);
+        Assert.Contains("  files with using directives: 4 outside the namespace, 120 inside the namespace; csharp_using_directive_placement = inside_namespace", report);
+        Assert.Empty(Lines(new[] { 120, 4 })); // outside is the preset's
+        Assert.Empty(Lines(new[] { 4, 9 })); // mixed: 69 %
+        Assert.Empty(Lines(new[] { 0, 9 })); // 9 files: too few
+        Assert.Empty(Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 0, 30 } }, new Dictionary<string, string> { [Key] = ".editorconfig sets it" }).Lines);
+
+        IEnumerable<string> Lines(int[] count) => Conventions.Decide(new Dictionary<string, int[]> { [Key] = count }, none).Lines;
+    }
+
     [Fact]
     public void Conventions_AreWrittenOnlyWithEnoughPlacesAndAClearMajority()
     {
