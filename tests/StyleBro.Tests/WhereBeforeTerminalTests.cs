@@ -217,6 +217,7 @@ public class WhereBeforeTerminalTests
     [InlineData("", null)]
     public void SonarVersion_IsReadFromThePackagePath(string paths, int? major) =>
         Assert.Equal(major, StyleBro.Analyzers.SonarRules.GetMajorVersion(paths));
+
     [Fact]
     public Task CollectionMethodsThatWouldNotBind_KeepTheLinqCall() => Verify.VerifyFixAsync(
         """
