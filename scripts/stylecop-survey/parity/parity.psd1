@@ -784,5 +784,37 @@
                 'only StyleCop: BRO1128 Queries.cs(42,13)'
             )
         }
+        @{
+            Name         = 'using-placement'
+            Map          = @('SA1200=BRO1008')
+            # StyleCop's default is inside; StyleBro needs the setting (migrate writes it).
+            EditorConfig = "csharp_using_directive_placement = inside_namespace`n"
+            Expected = @(
+                # Moved inside 'namespace Parity.Routing', 'Routing.Finder' would mean 'Parity.Routing.Finder': not reported
+                # (StyleCop's fix doesn't compile).
+                'only StyleCop: BRO1008 Binding.cs(1,1)'
+                'StyleBro output only: Binding.cs: [using Routing.Finder;]'
+                'StyleCop output only: Binding.cs: [    using Routing.Finder;]'
+                'StyleCop fix doesn''t compile: Binding.cs(3,19) CS0234'
+                'StyleCop fix doesn''t compile: Binding.cs(7,16) CS0246'
+                # Two namespaces: no single place to move the usings to.
+                'only StyleCop: BRO1008 TwoNamespaces.cs(1,1)'
+            )
+        }
+        @{
+            Name         = 'using-placement-outside'
+            Map          = @('SA1200=BRO1008')
+            StyleCopJson = '{ "settings": { "orderingRules": { "usingDirectivesPlacement": "outsideNamespace" } } }'
+            EditorConfig = "csharp_using_directive_placement = outside_namespace`n"
+            Expected     = @(
+                # Outside the namespace, 'Order' would be App.Order instead of Domain.Order: not reported (StyleCop's fix
+                # compiles but changes the type; eShop's case under IDE0065 was an ambiguity, CS0104).
+                'only StyleCop: BRO1008 Ambiguous.cs(3,5)'
+                'StyleBro output only: Ambiguous.cs: [    using Domain;]'
+                'StyleCop output only: Ambiguous.cs: [using Domain;]'
+                # StyleCop's fix drops the blank line after 'namespace X;' (BRO1505 wants it).
+                'StyleBro output only: FileScoped.cs: []'
+            )
+        }
     )
 }

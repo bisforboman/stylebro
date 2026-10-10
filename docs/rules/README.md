@@ -28,6 +28,7 @@ folder counts. Shared source linked from elsewhere in the repository is still ch
 | [BRO1005](BRO1005.md) | Documentation lines should begin with single space | SA1004 | on |
 | [BRO1006](BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | on |
 | [BRO1007](BRO1007.md) | Partial elements should declare an access modifier | SA1205 | on |
+| [BRO1008](BRO1008.md) | Using directives should be placed correctly | SA1200 | on |
 
 ## Readability
 

@@ -134,6 +134,17 @@ internal static class Migration
                 relevant = [];
             }
 
+            if (id == StyleBro.Analyzers.DiagnosticIds.UsingPlacement && setup.Setting("orderingRules", "usingDirectivesPlacement")?.GetString() == "preserve")
+            {
+                foreach (var sa in relevant.Where(setup.IsOn))
+                {
+                    result.Reasons[sa] = "stylecop.json's usingDirectivesPlacement is preserve: StyleCop checks nothing";
+                }
+
+                severity = Severity.None;
+                relevant = [];
+            }
+
             if (severity > Severity.None)
             {
                 result.Covered.UnionWith(styleCop);
@@ -759,7 +770,9 @@ internal static class Migration
 
         // Using directives.
         var placement = setup.Setting("orderingRules", "usingDirectivesPlacement")?.GetString() ?? "insideNamespace";
-        Rule("IDE0065", placement == "preserve" ? [] : ["SA1200"]);
+
+        // StyleBro's BRO1008 replaces IDE0065, whose fix can change what names bind to.
+        Rule("IDE0065");
         lines.Add($"csharp_using_directive_placement = {(placement == "outsideNamespace" ? "outside_namespace" : "inside_namespace")}");
 
         // 'dotnet format' sorts usings (SA1210, SA1211, and aliases/static usings: SA1209, SA1216, SA1217) whenever either key is set, whatever its value

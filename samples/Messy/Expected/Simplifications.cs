@@ -1,9 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Messy.Simplifications
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
     public enum Level
     {
         Low,

@@ -3,7 +3,7 @@
 Every `stylebro_*` setting, in `.editorconfig` under `[*.cs]`. Each rule's page explains its settings with examples;
 this page lists them all in one place. Severities work like any analyzer's
 (`dotnet_diagnostic.BRO1001.severity = none`), and the package's preset sets the defaults listed here unless your
-`.editorconfig` says otherwise. Some rules also follow the SDK's own settings (`csharp_prefer_braces`,
+`.editorconfig` says otherwise. Some rules also follow the SDK's own settings (`csharp_prefer_braces`, `csharp_using_directive_placement`,
 `dotnet_style_qualification_for_*`, `dotnet_naming_rule.*`, `max_line_length`, ...): see their rule pages.
 
 ```ini

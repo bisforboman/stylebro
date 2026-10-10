@@ -11,7 +11,7 @@ What happens to each StyleCop.Analyzers rule when a project moves to StyleBro. E
 
 Every rule StyleBro doesn't cover is explained, with what it would take to revisit it, in [skipped-rules.md](skipped-rules.md).
 
-Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)**. Of 197 rules: 45 SDK, 108 StyleBro (108 done), 42 drop, 0 not yet done, 2 not applicable or variants.
+Status: **complete: every StyleCop rule is StyleBro, SDK or dropped with a reason (2026-10-07)**. Of 197 rules: 44 SDK, 109 StyleBro (109 done), 42 drop, 0 not yet done, 2 not applicable or variants.
 
 ## How this was measured
 
@@ -168,7 +168,7 @@ The documentation rules (SA16xx) are mostly not tested yet. The ones where Style
 
 | Rule | Title | Default | StyleCop fix | Teams keeping it on (OTel / Polly / App) | Diagnostics (OTel / Polly / App) | SDK check | Proposal |
 |---|---|---|---|---|---|---|---|
-| SA1200 | Using directives should be placed correctly | on | yes | off / off / off | 0 / 0 / 14,192 | fixed | SDK: IDE0065 (`csharp_using_directive_placement = inside_namespace`) |
+| SA1200 | Using directives should be placed correctly | on | yes | off / off / off | 0 / 0 / 14,192 | fixed | StyleBro **BRO1008** (done; replaces IDE0065, whose fix can change what names bind to: CS0104/CS0118 in eShop and Ocelot). Moves the usings only when no name can be looked up differently; skips files with several namespaces, directives before the namespace body, usings on both levels |
 | SA1201 | Elements should appear in the correct order | on | yes | on / off / off | 0 / 89 / 839 |  | StyleBro **BRO1001** (done) |
 | SA1202 | Elements should be ordered by access | on | yes | on / off / off | 0 / 71 / 185 |  | StyleBro **BRO1001** (done) |
 | SA1203 | Constants should appear before fields | on | yes | on / on / on | 0 / 0 / 0 |  | StyleBro **BRO1001** (done) |

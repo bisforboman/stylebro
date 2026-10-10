@@ -778,6 +778,18 @@ internal static class Descriptors
         description: "Every part of a partial type says its accessibility, so no part has to be found to know it. Replaces StyleCop SA1205.",
         helpLinkUri: HelpBase + DiagnosticIds.PartialAccessModifier + "/");
 
+    public static readonly DiagnosticDescriptor UsingPlacement = new(
+        id: DiagnosticIds.UsingPlacement,
+        title: "Using directives should be placed correctly",
+        messageFormat: "Move the using directive {0} the namespace",
+        category: "Ordering",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Using directives go inside or outside the namespace, as csharp_using_directive_placement says (nothing is "
+            + "reported when it isn't set). The fix moves them only when every name in the file still means the same afterwards. "
+            + "Replaces StyleCop SA1200.",
+        helpLinkUri: HelpBase + DiagnosticIds.UsingPlacement + "/");
+
     public static readonly DiagnosticDescriptor UnnecessaryParentheses = new(
         id: DiagnosticIds.UnnecessaryParentheses,
         title: "Statement should not use unnecessary parenthesis",

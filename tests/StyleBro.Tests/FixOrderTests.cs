@@ -1977,6 +1977,136 @@ public class FixOrderTests
         "BRO1108",
         "BRO1151");
 
+    [Fact]
+    public Task UsingPlacement_Outside_WithQualifiedUsingsAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        namespace System.Tools
+        {
+            using IO;
+            public class C
+            {
+                public Stream? M(bool b)
+                {
+                    if (b)
+                    {
+                        return null;
+                    }
+                    return Stream.Null;
+                }
+            }
+        }
+        """,
+        "csharp_using_directive_placement = outside_namespace\n",
+        "BRO1008",
+        "BRO1126",
+        "BRO1505",
+        "BRO1519");
+
+    // Newtonsoft.Json: '#region License' around the header. BRO1112 removes it; BRO1008 must not wait for that (a second
+    // run), so region lines above the usings don't stop it.
+    [Fact]
+    public Task UsingPlacement_RegionAroundTheHeader() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        using System;
+        using System.Collections.Generic;
+
+        namespace Newtonsoft.Json
+        {
+            public class C
+            {
+                public List<Type> Types { get; } = new List<Type>();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\ncsharp_using_directive_placement = inside_namespace\n",
+        "BRO1008",
+        "BRO1112",
+        "BRO1505");
+
+    // Newtonsoft.Json's TestObjects/Friend.cs: the usings above the '#region License' header.
+    [Fact]
+    public Task UsingPlacement_RegionBelowTheUsings() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        namespace Newtonsoft.Json
+        {
+            public class C
+            {
+                public List<Type> Types { get; } = new List<Type>();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\ncsharp_using_directive_placement = inside_namespace\n",
+        "BRO1008",
+        "BRO1112",
+        "BRO1504",
+        "BRO1505",
+        "BRO1506");
+
+    [Fact]
+    public Task UsingPlacement_Outside_RegionAroundTheHeader() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        #region License
+        // Copyright (c) 2007 James Newton-King
+        #endregion
+
+        namespace Newtonsoft.Json
+        {
+            using System;
+            using System.Collections.Generic;
+
+            public class C
+            {
+                public List<Type> Types { get; } = new List<Type>();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\ncsharp_using_directive_placement = outside_namespace\n",
+        "BRO1008",
+        "BRO1112",
+        "BRO1505");
+
+    [Fact]
+    public Task UsingPlacement_Inside_TheFileHeaderStaysOnTop() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System;
+        namespace App
+        {
+            public class C
+            {
+                public Type? T { get; set; }
+            }
+        }
+        """,
+        "csharp_using_directive_placement = inside_namespace\nstylebro_file_header_company = Contoso\n",
+        "BRO1008",
+        "BRO1505",
+        "BRO1615");
+
+    [Fact]
+    public Task UsingPlacement_Outside_TheFileHeaderStaysOnTop() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        namespace App;
+        using System;
+        public class C
+        {
+            public Type? T { get; set; }
+        }
+        """,
+        "csharp_using_directive_placement = outside_namespace\nstylebro_file_header_company = Contoso\n",
+        "BRO1008",
+        "BRO1505",
+        "BRO1615");
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 

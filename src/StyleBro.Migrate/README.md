@@ -30,6 +30,9 @@ stylebro-migrate init [path] [--write]
 ```
 
 Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order,
+IDE0049 type aliases, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
+a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. When at least
+three quarters of the private fields start with `_`, it keeps them (`stylebro_private_field_naming = _camelCase`). In a
 IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
 a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. For the
 conventions your code clearly follows (three quarters of at least 10 places: `_field` names, `=>` at the start of a

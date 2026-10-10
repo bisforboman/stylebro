@@ -1,6 +1,6 @@
-namespace Messy;
-
 using System;
+
+namespace Messy;
 
 [Serializable]
 public class Sensor

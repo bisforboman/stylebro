@@ -17,8 +17,8 @@ dotnet_diagnostic.IDE0049.severity = warning
 dotnet_diagnostic.IDE0047.severity = none
 # Parentheses that show precedence (SA1407, SA1408) are StyleBro's BRO1406/BRO1407: IDE0048's fix breaks multi-targeted projects
 dotnet_diagnostic.IDE0048.severity = none
-# Using directives outside the namespace (SA1200, the preset's choice)
-dotnet_diagnostic.IDE0065.severity = warning
+# Using placement (SA1200) is StyleBro's BRO1008: IDE0065's fix can change what names bind to (CS0104, CS0118)
+dotnet_diagnostic.IDE0065.severity = none
 # Blank lines (SA1507, SA1508, SA1513) are StyleBro's BRO1517-BRO1519: the SDK's fixes break multi-targeted projects
 dotnet_diagnostic.IDE2000.severity = none
 dotnet_diagnostic.IDE2002.severity = none

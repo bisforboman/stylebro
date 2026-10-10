@@ -348,6 +348,19 @@ public sealed partial class MigrationTests : IDisposable
     }
 
     [Fact]
+    public void UsingPlacement_IsBro1008_AndOffWithPreserve()
+    {
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+        Assert.Contains("dotnet_diagnostic.BRO1008.severity = warning", lines);
+        Assert.Contains("dotnet_diagnostic.IDE0065.severity = none", lines);
+        Assert.Contains("csharp_using_directive_placement = inside_namespace", lines);
+
+        Write("stylecop.json", """{ "settings": { "orderingRules": { "usingDirectivesPlacement": "preserve" } } }""");
+        lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+        Assert.Contains("dotnet_diagnostic.BRO1008.severity = none", lines);
+    }
+
+    [Fact]
     public void OffRules_TurnTheirSdkSettingsOff()
     {
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1101.severity = none\ndotnet_diagnostic.SA1200.severity = none\ndotnet_diagnostic.SA1507.severity = none\n");
@@ -860,7 +873,7 @@ public sealed partial class MigrationTests : IDisposable
         var lines = Migration.GenerateScope(setup, scope, root, result);
 
         Assert.Contains("dotnet_diagnostic.BRO1306.severity = none", lines);
-        Assert.Contains("dotnet_diagnostic.IDE0065.severity = none", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1008.severity = none", lines);
         Assert.Contains("dotnet_diagnostic.IDE0055.severity = none", lines);
         Assert.Contains("dotnet_diagnostic.BRO1514.severity = none", lines);
         Assert.Contains("dotnet_diagnostic.IDE0073.severity = none", lines);

@@ -14,11 +14,11 @@ Status: **Released** (on nuget.org), **Done** (on `main`, in the next release), 
 | | Rules |
 |---|---|
 | Released | 125 |
-| Done, not released yet | 3 |
+| Done, not released yet | 4 |
 | Planned | 0 rules, 65 work items |
 | Maybe | 0 candidates from the StyleCop tracker and other analyzers |
 
-StyleCop coverage (197 diagnostics in StyleCop 1.2): 108 by StyleBro, 45 by the .NET SDK, 42 dropped by design (they
+StyleCop coverage (197 diagnostics in StyleCop 1.2): 109 by StyleBro, 44 by the .NET SDK, 42 dropped by design (they
 can't be fixed without inventing text or moving code between files), the rest variants or not applicable. Details in
 [stylecop-mapping.md](stylecop-mapping.md).
 
@@ -142,6 +142,7 @@ The other dropped StyleCop rules (missing documentation, one type per file, ...)
 | [BRO1005](rules/BRO1005.md) | Documentation lines should begin with single space | SA1004 | Released |
 | [BRO1006](rules/BRO1006.md) | Preprocessor keywords should not be preceded by a space | SA1006 | Released |
 | [BRO1007](rules/BRO1007.md) | Partial elements should declare an access modifier | SA1205 | Released |
+| [BRO1008](rules/BRO1008.md) | Using directives should be placed correctly | SA1200 | Done |
 
 ### BRO11xx: Readability
 
