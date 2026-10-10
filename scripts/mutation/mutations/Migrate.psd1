@@ -74,7 +74,7 @@
         @{ File = 'src/StyleBro.Migrate/Suppressions.cs'; Find = 'SonarSetup.Mapping.Where(m => sonar?.IsOn(m.Sonar) ?? true)'; Replace = 'SonarSetup.Mapping'; Tests = 'MigrationTests.Init_AddsNoSuppressionsForASonarRuleThatIsOff' }
 
         # Trial of 0.5.0-alpha.1 (2026-10-10): settings only where StyleCop runs, sort keys, the package next to StyleCop's,
-        # no whitespace pass with IDE0055 off, old Mac line endings, verify's own errors, kept findings marked
+        # no whitespace pass with IDE0055 off, old Mac line endings, verify's own errors, kept findings marked as kept
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'uses[project] = references.Count > 0 && removes.Count == 0;'; Replace = 'uses[project] = references.Count > 0;'; Tests = 'MigrationTests.Settings_' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'parent.Length > rootFolder.Length && !HasOther(parent)'; Replace = 'parent.Length > rootFolder.Length'; Tests = 'MigrationTests.Settings_' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'else if (covered.Count == folders.Count)'; Replace = 'else if (false)'; Tests = 'MigrationTests.Settings_' }
@@ -88,6 +88,5 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (at + 1 == bytes.Length || bytes[at + 1] != ''\n'')'; Replace = 'if (at + 1 == bytes.Length)'; Tests = 'MigrationTests.Format_NamesFilesWithOldMacLineEndings' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (code != NotCleanExitCode)'; Replace = 'if (false)'; Tests = 'MigrationTests.Verify_AnUnknownOption' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);'; Replace = 'lines.ForEach(log);'; Tests = 'KeptFindingsTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'KeptFindings.Record(diagnostic, kept, where);'; Replace = 'KeptFindings.Record(diagnostic, kept);'; Tests = 'KeptFindingsTests' }
     )
 }

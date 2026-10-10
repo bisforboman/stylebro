@@ -15,7 +15,8 @@ stylebro-migrate path/to/repo --write   # writes them
 `--diff` runs `--write` and then `stylebro-migrate format` (until a run changes nothing) on a temporary copy of the
 repository, prints which files each rule changed with a few sample hunks, and writes the full diff to
 `stylebro-preview.patch` (`--diff=file` for another name, `--keep` keeps the copy). The copy also gets the
-StyleBro.Analyzers reference if the repository has none; StyleCop.Analyzers stays, but format only fixes StyleBro's
+StyleBro.Analyzers reference if the repository has none, next to StyleCop's (see [Swap the package](#swap-the-package));
+StyleCop.Analyzers stays, but format only fixes StyleBro's
 and the built-in rules' ids, so it changes nothing. In a StyleCop-clean repository the format part should be close to
 empty. Details: [Preview first](getting-started.md#preview-first).
 
@@ -23,7 +24,8 @@ The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under t
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
 Then swap the package (below) and run `stylebro-migrate format`. It runs `dotnet format` with only StyleBro's rules
-and the built-in rules the block turns on (plus whitespace formatting), once per target framework where projects
+and the built-in rules the block turns on (plus whitespace formatting, unless the block turns IDE0055 off: `dotnet
+format`'s whitespace pass ignores that severity, so then only its style and analyzer passes run), once per target framework where projects
 target several, and never inside git submodules. Plain `dotnet format` also applies every other analyzer's fixes and
 the compiler's: in one trial repository it added `required` (CS8618) and a Sonar fix removed `init;` accessors, nine
 build errors. The plain equivalent is `dotnet format --diagnostics <ids>` with every id to fix (`--diagnostics BRO1001
@@ -44,12 +46,36 @@ applies to every project:
 <GlobalPackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" />
 ```
 
+With central package management the version goes into the `Directory.Packages.props` that holds StyleCop's version,
+which may be a folder's (`src/Directory.Packages.props`) rather than the root's; a reference with a `Version` there fails
+the restore (NU1008).
+
+A project that opts out of the StyleCop reference it inherits (`<PackageReference Remove="StyleCop.Analyzers" />`, often
+an analyzer or source generator project) needs the same for StyleBro, else it gets StyleBro, and when it turns central
+package management off itself, the version-less reference fails its restore (NU1015):
+
+```xml
+<PackageReference Remove="StyleCop.Analyzers" />
+<PackageReference Remove="StyleBro.Analyzers" />
+```
+
+The migration's report names the files that reference StyleCop and the ones that remove it, and `--diff` makes both
+changes in its copy.
+
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
 real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).
 
 ## What it reads
 
+- **Only where StyleCop runs.** When some projects reference StyleCop.Analyzers (in the project, the
+  `Directory.Build.props`/`.targets` or `Directory.Packages.props` it gets, or what those import) and others don't (tests,
+  samples, benchmarks, a project with a `Remove` item), the settings apply only to the folders of the projects that run
+  it, with the rules it had on there: the block's section names those folders (`[src/{App,App.Core}/**.cs]`), a
+  sub-directory `.editorconfig` that covers all of them counts as the base (a `src/.editorconfig` that turns everything
+  but documentation off), and folders without StyleCop get no settings at all; the report lists them. Once StyleCop
+  is gone, `stylebro-migrate init` can set those up. When every project or none references StyleCop, the settings apply
+  to the whole repository.
 - StyleCop's own defaults (from the StyleCop 1.2 DLL's rule list).
 - `*.ruleset` files, then `*.globalconfig` files, then the root `.editorconfig`'s sections for all C# files. Later
   sources win, like in the compiler: `dotnet_diagnostic.SAxxxx.severity` and
@@ -126,7 +152,8 @@ every `Directory.Build.props` the projects import: the root one, created if need
 the root's): the block replaces it. That matters because an `.editorconfig`
 can't take a key back from the preset: `dotnet format` sorts `using` directives whenever
 `dotnet_sort_system_directives_first` is set, even to `false`, so the block sets it only when StyleCop sorted usings
-(SA1208 or SA1210 on). SDK settings your root
+(SA1208 or SA1210 on), and where a sub-directory or path section has both off, the keys go only into the sections that
+sort (a scope can't unset the main block's keys). SDK settings your root
 `.editorconfig` already sets for C# files are left out: your code is already formatted with them.
 
 ## Suppressions

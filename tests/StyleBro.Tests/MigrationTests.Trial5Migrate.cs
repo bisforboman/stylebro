@@ -139,7 +139,7 @@ public sealed partial class MigrationTests
         Assert.True(setup.IsOn("SA1101")); // the base: lib's scope doesn't cover app/C
         Assert.Equal(
             new[] { (Path.Combine("lib", "A", ".editorconfig"), "*.cs"), (".editorconfig", "lib/{A,B}/**.cs") },
-            setup.Scopes.Select(s => (s.File, s.Section)).OrderBy(s => s.Item2, StringComparer.Ordinal));
+            setup.Scopes.Select(s => (s.File, s.Section)).OrderBy(s => s.Section, StringComparer.Ordinal));
         Assert.Equal(@"{a\[1\],b\,c}/**.cs", StyleCopSetup.SectionFor(new[] { "a[1]", "b,c" }));
     }
 

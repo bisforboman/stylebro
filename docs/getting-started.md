@@ -12,7 +12,8 @@ Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your pro
 ### Which version
 
 The latest release on nuget.org is **0.5.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
-that exact version. Everything on this page is in it. To try the code on `main` before the next release, build both
+that exact version. Everything on this page is in it, except what's marked *Next release*. To try the code on `main`
+before the next release, build both
 packages from a clone into a local folder (any version string works; `0.5.0-dev.1` here):
 
 ```
@@ -279,8 +280,8 @@ code 2) when formatting would change a file. Findings kept on purpose don't fail
 `dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
 there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md).
 
-With `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding agents (opt-in).
-For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
+*Next release:* with `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
+agents (opt-in). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
 [Scripts and AI agents](agents.md).
 
 ## B. Coming from StyleCop

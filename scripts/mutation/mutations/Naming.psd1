@@ -156,5 +156,8 @@
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseNamingCodeFixProvider.cs'; Find = '|| await CamelCaseRenamer.GetKeptReasonAsync(context.Document.Project.Solution, context.Document, diagnostic, context.CancellationToken).ConfigureAwait(false) is not null)'; Replace = ')'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementNamingCodeFixProvider.cs'; Find = '&& await TupleElementRenamer.GetKeptReasonAsync(context.Document.Project.Solution, rename.OldName, rename.NewName, context.CancellationToken).ConfigureAwait(false) is null)'; Replace = ')'; Tests = 'TupleElementNamingTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'MatchInStrings(symbol, names.Strings) is { } match ? (KeptReason.NameInString'; Replace = 'MatchInStrings(symbol, names.Strings) is { } match && false ? (KeptReason.NameInString'; Tests = 'KeptFindingsTests' }
+
+        # Kept findings say where the string is (trial of 0.5.0-alpha.1, 2026-10-10)
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'KeptFindings.Record(diagnostic, kept, where);'; Replace = 'KeptFindings.Record(diagnostic, kept);'; Tests = 'KeptFindingsTests' }
     )
 }

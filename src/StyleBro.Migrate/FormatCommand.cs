@@ -64,6 +64,9 @@ internal static class FormatCommand
     /// <summary>The option that formats only the files named after it (for agents: seconds on a small change).</summary>
     public const string FilesOption = "--files";
 
+    /// <summary>What to say when the restore 'dotnet format' needs fails (it prints only a stack trace).</summary>
+    internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why (for example NuGet audit warnings with TreatWarningsAsErrors). Once the packages are restored, '--no-restore' skips it.";
+
     /// <summary>The start of the line that says which rules a run fixes (printed for the first run only).</summary>
     private const string FixingHeader = "Fixing StyleBro's rules";
 
@@ -75,9 +78,6 @@ internal static class FormatCommand
 
     /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
     private const string OldMacHeader = "Not formatted:";
-
-    /// <summary>What to say when the restore 'dotnet format' needs fails (it prints only a stack trace).</summary>
-    internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why (for example NuGet audit warnings with TreatWarningsAsErrors). Once the packages are restored, '--no-restore' skips it.";
 
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the

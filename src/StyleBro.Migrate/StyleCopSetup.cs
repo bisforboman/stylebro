@@ -341,88 +341,6 @@ internal sealed class StyleCopSetup
         return prefix + (rest.Count == 1 ? rest[0] : "{" + string.Join(",", rest) + "}") + "/**.cs";
     }
 
-    /// <summary>
-    /// Each project (full path) under the root and whether StyleCop runs in it: a StyleCop.Analyzers reference in the project,
-    /// the Directory.Build.props/.targets or Directory.Packages.props it gets, or what those import, and no Remove item for it.
-    /// Also the repository's own files that reference it and that remove it.
-    /// </summary>
-    internal static (Dictionary<string, bool> Uses, List<string> ReferencedIn, List<string> RemovedIn) Projects(string root, IReadOnlyCollection<string> files)
-    {
-        // ponytail: text-level, like FolderRulesets: Conditions are ignored, a Remove anywhere in the chain wins.
-        var own = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
-        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var uses = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-        var referenced = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-        var removed = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var project in files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
-        {
-            var chain = new List<string> { project };
-            foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
-            {
-                for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
-                {
-                    if (File.Exists(Path.Combine(folder, name)))
-                    {
-                        chain.Add(Path.Combine(folder, name));
-                        break;
-                    }
-                }
-            }
-
-            for (var i = 0; i < chain.Count && i < 64; i++)
-            {
-                foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
-                {
-                    if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
-                        && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
-                    {
-                        chain.Add(imported);
-                    }
-                }
-            }
-
-            var references = chain.Where(f => StyleCopReference.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
-            var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
-            uses[project] = references.Count > 0 && removes.Count == 0;
-            referenced.UnionWith(references.Where(own.Contains));
-            removed.UnionWith(removes.Where(own.Contains));
-        }
-
-        return (uses, referenced.ToList(), removed.ToList());
-    }
-
-    /// <summary>
-    /// The topmost folders (relative, '/'-separated) whose projects all have <paramref name="value"/>, from each such
-    /// project's folder up while no project with the other value is below. Null when not some projects have each value
-    /// (or, for StyleCop's folders, one is the root itself).
-    /// </summary>
-    internal static List<string>? Cover(IReadOnlyDictionary<string, bool> uses, bool value, string root)
-    {
-        if (!uses.Values.Contains(true) || !uses.Values.Contains(false))
-        {
-            return null;
-        }
-
-        var rootFolder = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var others = uses.Where(p => p.Value != value).Select(p => Path.GetDirectoryName(p.Key)!).ToList();
-        bool HasOther(string folder) => others.Any(o => o.Equals(folder, StringComparison.OrdinalIgnoreCase) || o.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
-        var result = new List<string>();
-        foreach (var project in uses.Where(p => p.Value == value).Select(p => p.Key))
-        {
-            // ponytail: a project sharing its folder with one of the other kind gets that folder anyway; per-file sections if that matters.
-            var folder = Path.GetDirectoryName(project)!;
-            while (Path.GetDirectoryName(folder) is { } parent && parent.Length > rootFolder.Length && !HasOther(parent))
-            {
-                folder = parent;
-            }
-
-            result.Add(Path.GetRelativePath(rootFolder, folder).Replace('\\', '/'));
-        }
-
-        result = Migration.Topmost(result);
-        return value && result.Contains(".") ? null : result;
-    }
-
     /// <summary>Whether an .editorconfig section applies to every C# file ('[*]', '[*.cs]', '[*.{cs,vb}]').</summary>
     public static bool AppliesToCSharp(string section)
     {
@@ -529,6 +447,88 @@ internal sealed class StyleCopSetup
             && sectionElement.TryGetProperty(name, out var value)
                 ? value
                 : null;
+    }
+
+    /// <summary>
+    /// Each project (full path) under the root and whether StyleCop runs in it: a StyleCop.Analyzers reference in the project,
+    /// the Directory.Build.props/.targets or Directory.Packages.props it gets, or what those import, and no Remove item for it.
+    /// Also the repository's own files that reference it and that remove it.
+    /// </summary>
+    internal static (Dictionary<string, bool> Uses, List<string> ReferencedIn, List<string> RemovedIn) Projects(string root, IReadOnlyCollection<string> files)
+    {
+        // ponytail: text-level, like FolderRulesets: Conditions are ignored, a Remove anywhere in the chain wins.
+        var own = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
+        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var uses = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        var referenced = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        var removed = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var project in files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
+        {
+            var chain = new List<string> { project };
+            foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
+            {
+                for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
+                {
+                    if (File.Exists(Path.Combine(folder, name)))
+                    {
+                        chain.Add(Path.Combine(folder, name));
+                        break;
+                    }
+                }
+            }
+
+            for (var i = 0; i < chain.Count && i < 64; i++)
+            {
+                foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
+                {
+                    if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
+                        && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
+                    {
+                        chain.Add(imported);
+                    }
+                }
+            }
+
+            var references = chain.Where(f => StyleCopReference.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
+            var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
+            uses[project] = references.Count > 0 && removes.Count == 0;
+            referenced.UnionWith(references.Where(own.Contains));
+            removed.UnionWith(removes.Where(own.Contains));
+        }
+
+        return (uses, referenced.ToList(), removed.ToList());
+    }
+
+    /// <summary>
+    /// The topmost folders (relative, '/'-separated) whose projects all have <paramref name="value"/>, from each such
+    /// project's folder up while no project with the other value is below. Null when not some projects have each value
+    /// (or, for StyleCop's folders, one is the root itself).
+    /// </summary>
+    internal static List<string>? Cover(IReadOnlyDictionary<string, bool> uses, bool value, string root)
+    {
+        if (!uses.Values.Contains(true) || !uses.Values.Contains(false))
+        {
+            return null;
+        }
+
+        var rootFolder = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var others = uses.Where(p => p.Value != value).Select(p => Path.GetDirectoryName(p.Key)!).ToList();
+        bool HasOther(string folder) => others.Any(o => o.Equals(folder, StringComparison.OrdinalIgnoreCase) || o.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        var result = new List<string>();
+        foreach (var project in uses.Where(p => p.Value == value).Select(p => p.Key))
+        {
+            // ponytail: a project sharing its folder with one of the other kind gets that folder anyway; per-file sections if that matters.
+            var folder = Path.GetDirectoryName(project)!;
+            while (Path.GetDirectoryName(folder) is { } parent && parent.Length > rootFolder.Length && !HasOther(parent))
+            {
+                folder = parent;
+            }
+
+            result.Add(Path.GetRelativePath(rootFolder, folder).Replace('\\', '/'));
+        }
+
+        result = Migration.Topmost(result);
+        return value && result.Contains(".") ? null : result;
     }
 
     /// <summary>
