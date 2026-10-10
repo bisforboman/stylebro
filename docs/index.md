@@ -16,7 +16,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 ## Install
 
 ```xml
-<PackageReference Include="StyleBro.Analyzers" Version="0.4.0-alpha.1" PrivateAssets="all" />
+<PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" />
 ```
 
 ```
