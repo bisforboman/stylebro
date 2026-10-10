@@ -81,7 +81,7 @@ internal static class InitCommand
             sonar.Report(sonar.Apply(sonarLines, _ => true, own)).ForEach(Console.WriteLine);
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
-            var (added, files) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>()), write);
+            var (added, files) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
             if (added > 0)
             {
                 Console.WriteLine($"Suppressions: {added} {(write ? "added" : "to add")} for the rules that fix Sonar's in {files} files (the Sonar ones stay).");
@@ -96,8 +96,9 @@ internal static class InitCommand
             detected = lines;
             if (report.Count > 0)
             {
-                Console.WriteLine($"{DetectedHeader} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on;");
-                Console.WriteLine("  mixed: the rule that enforces the setting is turned off):");
+                Console.WriteLine($"{DetectedHeader} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
+                Console.WriteLine("  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;");
+                Console.WriteLine("  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):");
                 report.ForEach(Console.WriteLine);
                 Console.WriteLine();
             }
@@ -242,7 +243,7 @@ internal static class InitCommand
             decided[StyleBro.Analyzers.Naming.FieldNames.StyleKey] = $"the naming rule dotnet_naming_rule.{rule} decides";
         }
 
-        return Conventions.Decide(Conventions.Count(root), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)));
+        return Conventions.Decide(Conventions.Count(root, own), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)), own);
     }
 
     /// <summary>

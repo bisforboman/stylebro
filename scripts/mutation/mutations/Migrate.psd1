@@ -36,10 +36,10 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Where(l => !IsKeptLine(l, keys))'; Replace = 'lines'; Tests = 'KeptFindingsTests' }
 
         # Trial of 0.4.0-alpha.1 (2026-10-10): rules off without a majority, few places, nested Directory.Build.props, vendored code
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'var winner = total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)'; Replace = 'var winner = total < MinimumSample ? -1'; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '!(isSet?.Invoke(off.Substring(0, off.IndexOf(''='')).Trim()) ?? false)'; Replace = 'true'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)'; Replace = ': total < MinimumSample ? -1'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'convention.Off is { } off && !IsSet(off)'; Replace = 'convention.Off is { } off'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (total < MinimumAgreeing)'; Replace = 'else if (false)'; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (written.Count + matched + turnedOff.Count + tooFew.Count == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (written.Count + matched + lists.TurnedOff.Count + lists.Unfollowed.Count + lists.BothAllowed.Count + lists.TooFew.Count == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         # init's report: short verdicts, plurals, the defaults the code follows, wrapped summary (2026-10-10)
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'found = winner < 0 ? Plural(total, "place") : found;'; Replace = 'found = found;'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'yield return matched == 0 ?'; Replace = 'yield return true ?'; Tests = 'MigrationTests' }
@@ -60,5 +60,17 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative)'; Replace = 'false'; Tests = 'MigrationTests.Files_' }
         @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (!requested)'; Replace = 'if (false)'; Tests = 'MigrationTests.AgentsMd_' }
         @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (changed)'; Replace = 'if (true)'; Tests = 'MigrationTests.AgentsMd_' }
+
+        # Trial of 0.5.0-alpha.1 (2026-10-10): keys the code contradicts, one-line statements, BRO1601, '#if' code, Sonar NoWarn
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'Contradicted(convention, convention.Values[winner].Value, repository) is { } value && !IsSet(Off(convention.Enforcer!))'; Replace = 'Contradicted(convention, convention.Values[winner].Value, repository) is { } value'; Tests = 'MigrationTests.Conventions_AKeyTheCodeContradicts' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (total >= MinimumAgreeing && winner >= 0 && Contradicted('; Replace = 'if (winner >= 0 && Contradicted('; Tests = 'MigrationTests.Conventions_AKeyTheCodeContradicts' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'return value != code && convention.Values.Any(v => v.Value == value) && (convention.EnforcedValues?.Contains(value) ?? true) ? value : null;'; Replace = 'return value != code ? value : null;'; Tests = 'MigrationTests.Conventions_AKeyTheCodeContradicts' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'var winner = convention.KeepAny && count[1] >= MinimumAgreeing ? 1'; Replace = 'var winner = false ? 1'; Tests = 'MigrationTests.Conventions_KeepStatements' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (body is not (BlockSyntax or IfStatementSyntax or UsingStatementSyntax))'; Replace = 'if (true)'; Tests = 'MigrationTests.Conventions_CountStatements' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'trees.Where(t => only?.Contains(t) ?? true)'; Replace = 'trees'; Tests = 'MigrationTests.Conventions_CountTheMembersBro1601Checks' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (!projectFound && Directory.GetFiles(current, "*.csproj")'; Replace = 'if (Directory.GetFiles(current, "*.csproj")'; Tests = 'MigrationTests.Init_CountsBro1601OnlyWhereDocumentationIsGenerated' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (convention.Off is { } offLine && offLine == $"{convention.Key} = {convention.Values[winner].Value}")'; Replace = 'else if (false)'; Tests = 'MigrationTests.Conventions_TurnBro1601Off' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'bool Skip(int position) => only is not null && !only.Any(s => s.Contains(position));'; Replace = 'bool Skip(int position) => false;'; Tests = 'MigrationTests.Conventions_CountCodeInactive' }
+        @{ File = 'src/StyleBro.Migrate/Suppressions.cs'; Find = 'SonarSetup.Mapping.Where(m => sonar?.IsOn(m.Sonar) ?? true)'; Replace = 'SonarSetup.Mapping'; Tests = 'MigrationTests.Init_AddsNoSuppressionsForASonarRuleThatIsOff' }
     )
 }

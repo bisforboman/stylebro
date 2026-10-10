@@ -131,18 +131,33 @@ file sets it yet).
 #### init also looks at your code
 
 `init` looks at your code first and keeps the conventions it clearly follows. For each setting below it counts both
-forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count):
+forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count; code inside `#if`
+counts too, as `format` sees it in the target framework that defines the symbol):
 
 - **fewer than 3 places** (or none): too few to tell, StyleBro's default stays and nothing is written;
 - **3 to 9 places**: followed when they all agree;
 - **10 places or more**: followed when one form has at least 75 %;
 - **mixed** (no form gets there): the StyleBro rule that enforces the setting is turned off, so the code stays as it is
-  (`dotnet_diagnostic.BRO1520.severity = none`; for braces on one-line bodies `csharp_prefer_braces = when_multiline`,
-  which allows both).
+  (`off`: `dotnet_diagnostic.BRO1520.severity = none`; `both`: for braces on one-line bodies `csharp_prefer_braces =
+  when_multiline`, which allows both). Where no StyleBro rule enforces the setting (`{` placement, `<inheritdoc/>`
+  spacing, `default(T)`), the verdict is `mixed`: the default stays and nothing is turned off.
 
 A followed form that is StyleBro's default needs no line; any other is written into the block. A key your root
 `.editorconfig` sets wins, so does a Sonar setup's, and a `dotnet_naming_rule` for private fields decides the field style
-(naming rules for interfaces or constants don't).
+(naming rules for interfaces or constants don't). One exception: when your `.editorconfig` sets an SDK key that only a
+StyleBro rule enforces (operator placement, braces = `true`, using placement, arithmetic parentheses =
+`always_for_clarity`) and your code clearly does the other thing, nothing ever enforced that key. Then `init` leaves the
+key alone and turns that rule off (`your .editorconfig says end_of_line, ... so BRO1520 is off`), instead of letting it
+rewrite the code.
+
+Two settings work a little differently:
+
+- **One-line statements** (`if (a) return;`, `case 1: a(); break;`): the preset sets
+  `csharp_preserve_single_line_statements = false`, which moves each to a line of its own. From 3 such statements on,
+  `init` writes `true`, majority or not, unless your `.editorconfig` sets the key.
+- **`<inheritdoc/>` on overrides and implementations** ([BRO1601](rules/BRO1601.md)): in projects that generate
+  documentation, `init` counts the overrides and interface implementations BRO1601 checks, with and without a doc
+  comment. Mostly documented: the rule stays on; mostly undocumented or mixed: it's turned off.
 
 | Setting | What's counted | Rule | Key |
 |---|---|---|---|
@@ -167,14 +182,17 @@ A followed form that is StyleBro's default needs no line; any other is written i
 | Switch sections | after a blank line or without one | [BRO1526](rules/BRO1526.md) | `stylebro_blank_line_between_switch_sections` |
 | Using directives | files with a namespace and their usings on one level: inside it (file-scoped too) or outside; only `inside_namespace` is written, the preset already says `outside_namespace` | [BRO1008](rules/BRO1008.md) | `csharp_using_directive_placement` |
 | Arithmetic parentheses | `a + (b * c)` or `a + b * c` | [BRO1406](rules/BRO1406.md) | `dotnet_style_parentheses_in_arithmetic_binary_operators` |
+| One-line statements | a braceless `if`/`else`/loop body or a `case` label's statements on their owner's line or below it | SDK formatter (IDE0055) | `csharp_preserve_single_line_statements` |
+| Documented overrides | overrides and interface implementations with or without a doc comment | [BRO1601](rules/BRO1601.md) | `dotnet_diagnostic.BRO1601.severity` |
 
-The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `mixed`,
-`too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys
+The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `both`,
+`mixed`, `too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys
 (RealWorld):
 
 ```
-Conventions in the code (judged from 3 places: all must agree below 10, 75% from 10 on;
-  mixed: the rule that enforces the setting is turned off):
+Conventions in the code (judged from 3 places: all must agree below 10, 75% from 10 on).
+  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
+  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
   too few  private fields: 2 places -> default stays (camelCase)
   set      '{' of multi-line blocks: 196 of 196 on its own line -> set in .editorconfig (all)
   too few  operators where a line wraps: 1 place -> default stays (beginning_of_line)
@@ -186,7 +204,7 @@ Conventions in the code (judged from 3 places: all must agree below 10, 75% from
 Summary:
   Kept your style for 5 settings (1 written, 4 already StyleBro's default): stylebro_trailing_comma.
   Turned 2 rules off because your code mixes both forms: BRO1133 (null checks), BRO1107 (split lists).
-  To choose later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.
+  To choose later: set the key in .editorconfig, remove its init line, run 'stylebro-migrate format'.
   4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
     dotnet_style_operator_placement_when_wrapping, stylebro_equals_placement_when_wrapping, stylebro_summary_layout.
 ```
