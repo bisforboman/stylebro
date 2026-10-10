@@ -436,8 +436,8 @@ internal static class Conventions
     /// <paramref name="matched"/>: how many where the code already follows StyleBro's default), which rules are off and how
     /// to choose later, and the keys judged on too few places. Lines longer than <see cref="Width"/> wrap after a list's comma.
     /// </summary>
-    public static IEnumerable<string> Summary(IReadOnlyList<string> written, int matched, IReadOnlyList<string> turnedOff, IReadOnlyList<string> tooFew)
-        => SummaryLines(written, matched, turnedOff, tooFew).SelectMany(Wrap);
+    public static IEnumerable<string> Summary(IReadOnlyList<string> written, int matched, IReadOnlyList<string> turnedOff, IReadOnlyList<string> tooFew) =>
+        SummaryLines(written, matched, turnedOff, tooFew).SelectMany(Wrap);
 
     /// <summary>A count with its noun: '1 place', '2 places'.</summary>
     public static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? string.Empty : "s")}";

@@ -81,6 +81,7 @@ public sealed partial class MigrationTests
         Assert.Equal(
             new[] { "# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (5 with braces, 5 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.", "csharp_prefer_braces = when_multiline" },
             lines);
+
         // Wrapped at the report's width.
         Assert.Contains("  Turned 1 rule off because your code mixes both forms: csharp_prefer_braces = when_multiline (one-line\n    if/else/loop/using/lock bodies).", string.Join("\n", report));
     }
