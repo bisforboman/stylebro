@@ -93,8 +93,8 @@ internal static class InitCommand
             detected = lines;
             if (report.Count > 0)
             {
-                Console.WriteLine($"{DetectedHeader} (a form is written when it has {Conventions.Share * 100:0}% of at least {Conventions.MinimumSample} places, or all of fewer;");
-                Console.WriteLine("  without a clear majority, the rule that enforces the setting is turned off):");
+                Console.WriteLine($"{DetectedHeader} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on;");
+                Console.WriteLine("  mixed: the rule that enforces the setting is turned off):");
                 report.ForEach(Console.WriteLine);
                 Console.WriteLine();
             }
@@ -178,7 +178,7 @@ internal static class InitCommand
 
         if (detected is { Count: > 0 })
         {
-            template += "\n\n# Conventions this repository's code follows (stylebro-migrate init counted them)\n" + string.Join("\n", detected);
+            template += "\n\n# Conventions in this repository's code (stylebro-migrate init counted them)\n" + string.Join("\n", detected);
         }
 
         if (plainHeader)

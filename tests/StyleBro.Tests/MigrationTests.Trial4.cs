@@ -17,7 +17,9 @@ public sealed partial class MigrationTests
         var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("dotnet_diagnostic.BRO1133.severity = none", editorConfig);
         Assert.DoesNotContain("stylebro_null_check_style =", editorConfig);
-        Assert.Contains("null checks: 6 'is null', 6 '== null'; no clear majority, so StyleBro doesn't enforce either form: dotnet_diagnostic.BRO1133.severity = none", output);
+        Assert.Contains("  off      null checks: 6 'is null', 6 '== null' -> BRO1133 is off", output);
+        Assert.Contains("# init: null checks: your code mixes both forms (6 'is null', 6 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.\ndotnet_diagnostic.BRO1133.severity = none", editorConfig);
+        Assert.Contains("Summary:\n  Turned 1 rule(s) off because your code mixes both forms: BRO1133 (null checks).\n  To choose a style later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.", output.Replace("\r\n", "\n"));
 
         // The repository's own severity stays.
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.BRO1133.severity = warning\n");
@@ -26,20 +28,60 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
-    public void Init_FollowsFewPlacesThatAllAgree_LikeRealWorld()
+    public void Init_NeedsThreePlaces_LikeRealWorld()
     {
-        // RealWorld: its only 2 private fields are '_logger' and '_mediator'; both were renamed.
+        // RealWorld: its only 2 private fields are '_logger' and '_mediator'. Too few to tell (owner's decision 2026-10-10).
         Write("A.cs", "class A { private int _logger; private int _mediator; }");
 
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
 
-        Assert.Contains("stylebro_private_field_naming = _camelCase", File.ReadAllText(Path.Combine(root, ".editorconfig")));
-        Assert.Contains("stylebro_private_field_naming = _camelCase (few places, all 2 agree)", output);
+        var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.DoesNotContain("stylebro_private_field_naming", editorConfig);
+        Assert.DoesNotContain("BRO1303", editorConfig);
+        Assert.Contains("  too few  private fields: 2 named '_field' -> too few places to tell, stylebro_private_field_naming stays camelCase", output);
+        Assert.Contains("1 setting(s) had fewer than 3 places to tell", output);
 
-        // Few places that disagree: the rule is off.
-        Write("A.cs", "class A { private int _logger; private int mediator; }");
+        // Three that agree are followed, with a comment saying why.
+        Write("A.cs", "class A { private int _logger; private int _mediator; private int _clock; }");
+        output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.Contains("# init: private fields: named '_field' in 3 of 3 places in your code\nstylebro_private_field_naming = _camelCase", editorConfig);
+        Assert.Contains("  kept     private fields: 3 of 3 named '_field' -> stylebro_private_field_naming = _camelCase", output);
+        Assert.Contains("Kept your style for 1 setting(s): stylebro_private_field_naming.", output);
+
+        // Three that disagree: the rule is off.
+        Write("A.cs", "class A { private int _logger; private int _mediator; private int clock; }");
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
         Assert.Contains("dotnet_diagnostic.BRO1303.severity = none", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+    }
+
+    [Theory]
+    [InlineData(0, 1, false)] // 1 place
+    [InlineData(1, 1, false)] // 2 places
+    [InlineData(0, 3, true)]  // 3 that agree: followed
+    [InlineData(1, 2, false)] // 3 mixed: the rule is off
+    public void Conventions_AreJudgedFromThreePlaces(int stringEmpty, int literal, bool followed)
+    {
+        const string Key = "stylebro_empty_string_style";
+        var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { stringEmpty, literal } }, new Dictionary<string, string>());
+
+        Assert.Equal(followed, lines.Contains(Key + " = literal"));
+        Assert.Equal(stringEmpty > 0 && literal > 0 && stringEmpty + literal >= 3, lines.Contains("dotnet_diagnostic.BRO1106.severity = none"));
+        Assert.Equal(stringEmpty + literal < 3, report.Any(r => r.StartsWith("  too few  empty strings: ", StringComparison.Ordinal) && r.EndsWith($"-> too few places to tell, {Key} stays string_empty", StringComparison.Ordinal)));
+
+        // Decided elsewhere: reported as before, also with few places.
+        Assert.Contains(Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 0, 1 } }, new Dictionary<string, string> { [Key] = ".editorconfig sets it" }).Report, r => r.EndsWith("-> .editorconfig sets it", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Init_ExplainsBracesItAllowsBothWays()
+    {
+        var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { ["csharp_prefer_braces"] = new[] { 5, 5 } }, new Dictionary<string, string>());
+
+        Assert.Equal(
+            new[] { "# init: one-line if/else/for/while/using/lock bodies: your code mixes both forms (5 with braces, 5 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.", "csharp_prefer_braces = when_multiline" },
+            lines);
+        Assert.Contains("  Turned 1 rule(s) off because your code mixes both forms: csharp_prefer_braces = when_multiline (one-line if/else/for/while/using/lock bodies).", report);
     }
 
     [Fact]

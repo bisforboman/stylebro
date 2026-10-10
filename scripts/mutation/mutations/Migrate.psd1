@@ -38,6 +38,8 @@
         # Trial of 0.4.0-alpha.1 (2026-10-10): rules off without a majority, few places, nested Directory.Build.props, vendored code
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'var winner = total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)'; Replace = 'var winner = total < MinimumSample ? -1'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '!(isSet?.Invoke(off.Substring(0, off.IndexOf(''='')).Trim()) ?? false)'; Replace = 'true'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (total < MinimumAgreeing)'; Replace = 'else if (false)'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (kept.Count + turnedOff.Count + tooFew == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '(!parenthesized || level > outer || (level == outer && operand == binary.Left))'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'Regex.Replace(File.ReadAllText(candidate), "<!--.*?-->", string.Empty, RegexOptions.Singleline)'; Replace = 'File.ReadAllText(candidate)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = '? Nearest(Path.GetDirectoryName(directory)) : candidate;'; Replace = '? candidate : candidate;'; Tests = 'MigrationTests' }
