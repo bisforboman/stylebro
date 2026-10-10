@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -15,11 +14,21 @@ namespace StyleBro.Analyzers.Naming;
 /// </summary>
 internal static class DisabledCode
 {
-    private static readonly ConditionalWeakTable<Compilation, HashSet<string>> Words = new();
-    private static readonly Regex Word = new(@"[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}]*", RegexOptions.CultureInvariant);
+    private static readonly ConditionalWeakTable<Compilation, List<string>> Texts = new();
 
     /// <summary>Whether <paramref name="name"/> is a word in disabled code anywhere in the compilation (for members and types other files can use).</summary>
-    public static bool Mentions(Compilation compilation, string name) => Words.GetValue(compilation, Collect).Contains(name);
+    public static bool Mentions(Compilation compilation, string name)
+    {
+        foreach (var text in Texts.GetValue(compilation, Collect))
+        {
+            if (IsWordIn(text, name))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>Whether <paramref name="name"/> is a word in disabled code inside one of the symbol's declarations (a type's, a method's).</summary>
     public static bool Mentions(ISymbol owner, string name, System.Threading.CancellationToken cancellationToken)
@@ -46,16 +55,13 @@ internal static class DisabledCode
         return false;
     }
 
+    /// <summary>Whether <paramref name="name"/> occurs in <paramref name="text"/> with no identifier character on either side.</summary>
     private static bool IsWordIn(string text, string name)
     {
-        if (text.IndexOf(name, System.StringComparison.Ordinal) < 0)
+        for (var i = text.IndexOf(name, System.StringComparison.Ordinal); i >= 0; i = text.IndexOf(name, i + 1, System.StringComparison.Ordinal))
         {
-            return false;
-        }
-
-        foreach (Match match in Word.Matches(text))
-        {
-            if (match.Value == name)
+            var end = i + name.Length;
+            if ((i == 0 || !IsIdentifierChar(text[i - 1])) && (end == text.Length || !IsIdentifierChar(text[end])))
             {
                 return true;
             }
@@ -64,9 +70,13 @@ internal static class DisabledCode
         return false;
     }
 
-    private static HashSet<string> Collect(Compilation compilation)
+    private static bool IsIdentifierChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+
+    // The disabled code of every tree with directives, read once per compilation; names are looked up in it only for the
+    // few symbols that are about to be reported (a word set of Newtonsoft.Json's disabled code cost ~30 ms).
+    private static List<string> Collect(Compilation compilation)
     {
-        var words = new HashSet<string>(System.StringComparer.Ordinal);
+        var texts = new List<string>();
         foreach (var tree in compilation.SyntaxTrees)
         {
             var root = tree.GetRoot();
@@ -79,14 +89,11 @@ internal static class DisabledCode
             {
                 if (trivia.IsKind(SyntaxKind.DisabledTextTrivia))
                 {
-                    foreach (Match match in Word.Matches(trivia.ToString()))
-                    {
-                        words.Add(match.Value);
-                    }
+                    texts.Add(trivia.ToString());
                 }
             }
         }
 
-        return words;
+        return texts;
     }
 }
