@@ -303,6 +303,5 @@
         @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| !SonarRules.IsOn(model, options, name == "Any" ? "S6605" : "S6602", cancellationToken))'; Replace = ')'; Tests = 'WhereBeforeTerminalTests.SonarCollectionRules' }
         @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = '|| !(isArray ? symbol.ContainingType.SpecialType == SpecialType.System_Array : IsList(symbol.ContainingType)))'; Replace = ')'; Tests = 'WhereBeforeTerminalTests.CollectionMethodsThatWouldNotBind' }
         @{ File = 'src/StyleBro.Analyzers/Readability/WhereCalls.cs'; Find = 'return Trivia.IsBlank(terminal, TextSpan.FromBounds(receiver.Span.End, access.Name.SpanStart))'; Replace = 'return true'; Tests = 'WhereBeforeTerminalTests.CollectionMethodsThatWouldNotBind' }
-        @{ File = 'src/StyleBro.Analyzers/SonarRules.cs'; Find = '&& GetMajorVersion(paths) is < 10;'; Replace = ';'; Tests = 'WhereBeforeTerminalTests.SonarCollectionRules' }
     )
 }

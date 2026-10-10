@@ -13,5 +13,8 @@
 
         # Generated code and C# versions (real-world: eShopOnWeb's Razor pages, Mapperly's generated accessors, LibGit2Sharp's net472)
         @{ File = 'src/StyleBro.CodeFixes/LinkedFileFixAllProvider.cs'; Find = '.Min();'; Replace = '.Max();'; Tests = 'NullCheckTests' }
+
+        # Sonar rule defaults by package version (BRO1150)
+        @{ File = 'src/StyleBro.Analyzers/SonarRules.cs'; Find = '&& GetMajorVersion(paths) is < 10;'; Replace = ';'; Tests = 'WhereBeforeTerminalTests.SonarCollectionRules' }
     )
 }
