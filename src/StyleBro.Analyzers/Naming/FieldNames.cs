@@ -71,7 +71,7 @@ internal static class FieldNames
     /// </summary>
     public const string StaticStyleKey = "stylebro_private_static_field_naming";
 
-    private enum FieldCasing
+    internal enum FieldCasing
     {
         Camel,
         UnderscoreCamel,
@@ -514,7 +514,7 @@ internal static class FieldNames
     /// -> 'withUnderscore', 'MAX_VALUE' -> 'MaxValue' (Pascal) or 'maxValue' (camel). An all-capitals word of more than
     /// one letter counts as a word, not an acronym, when there are several words.
     /// </summary>
-    private static string? GetJoinedName(string core, FieldCasing casing)
+    internal static string? GetJoinedName(string core, FieldCasing casing)
     {
         var words = core.Split(new[] { '_' }, System.StringSplitOptions.RemoveEmptyEntries);
         if (words.Length == 0 || !char.IsLetter(words[0][0]))
@@ -538,7 +538,7 @@ internal static class FieldNames
         var result = casing switch
         {
             FieldCasing.Pascal => Capitalize(first, several) + rest,
-            _ => (char.IsLower(first[0]) ? first : CamelCaseNames.ToCamelCase(first) ?? first) + rest,
+            _ => (char.IsLower(first[0]) ? first : several && IsAllUpper(first) ? first.ToLowerInvariant() : CamelCaseNames.ToCamelCase(first) ?? first) + rest,
         };
 
         if (casing == FieldCasing.UnderscoreCamel)

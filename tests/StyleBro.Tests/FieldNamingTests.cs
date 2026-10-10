@@ -1028,4 +1028,23 @@ public class FieldNamingTests
             }
             """,
         ]);
+
+    // Non-private fields can be used from other files' '#if' code, which no rename sees; private ones only from their
+    // type (TypeFacts).
+    [Fact]
+    public Task NonPrivateFieldsInDisabledCode_AreSkipped() => VerifyNoDiagnosticsAsync(
+        ("/0/A.cs", """
+            internal class Store
+            {
+                internal int total;
+            }
+            """),
+        ("/0/B.cs", """
+            internal class Uses
+            {
+            #if NEVER
+                int M(Store s) => s.total;
+            #endif
+            }
+            """));
 }

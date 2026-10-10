@@ -1759,6 +1759,25 @@ public class DocumentationTests
             {
             }
 
+            // Hashids: 'Initializes a new instance of the ... class. Instantiates a new Hashids ...' before.
+            /// <summary>Instantiates a new words encoder with the given salt.</summary>
+            /// <param name="l">The l.</param>
+            public Words(long l)
+            {
+            }
+
+            /// <summary>Creates a new words list from nothing.</summary>
+            /// <param name="c">The c.</param>
+            public Words(char c)
+            {
+            }
+
+            /// <summary>Constructs the words.</summary>
+            /// <param name="d">The d.</param>
+            public Words(double d)
+            {
+            }
+
             /// <summary>If true, the command-text is inspected.</summary>
             public bool Inspect { get; set; }
 

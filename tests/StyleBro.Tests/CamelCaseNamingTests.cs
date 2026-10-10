@@ -22,6 +22,13 @@ public class CamelCaseNamingTests
     [InlineData("Class", null)]
     [InlineData("Field", null)]
     [InlineData("_field", null)]
+    [InlineData("RANGE_REP_REG", "rangeRepReg")]
+    [InlineData("REP_REG", "repReg")]
+    [InlineData("Max_Value", "maxValue")]
+    [InlineData("_Foo_bar", "fooBar")]
+    [InlineData("Int32_0", "int32_0")]
+    [InlineData("CLASS_NAME", "className")]
+    [InlineData("value_x", null)]
     public void NewName(string name, string? expected) => Assert.Equal(expected, CamelCaseNames.GetNewName(name));
 
     [Fact]
@@ -555,4 +562,30 @@ public class CamelCaseNamingTests
         }
         """,
         "stylebro_rename_public_api = false");
+
+    // Bogus's Finance.cs: 'RANGE_REP_REG' became 'rangE_REP_REG' (only the leading capital run was lowered).
+    [Fact]
+    public Task UnderscoreSeparatedNames_AreJoinedWordByWord() => VerifyFixAsync(
+        """
+        internal class C
+        {
+            internal int M(int {|BRO1302:MAX_COUNT|})
+            {
+                var {|BRO1301:RANGE_REP_REG|} = "[0-9]";
+                var {|BRO1301:REP_REG|} = RANGE_REP_REG + "+";
+                return REP_REG.Length + MAX_COUNT;
+            }
+        }
+        """,
+        """
+        internal class C
+        {
+            internal int M(int maxCount)
+            {
+                var rangeRepReg = "[0-9]";
+                var repReg = rangeRepReg + "+";
+                return repReg.Length + maxCount;
+            }
+        }
+        """);
 }
