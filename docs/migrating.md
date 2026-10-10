@@ -71,7 +71,9 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
 - **Only where StyleCop runs.** When some projects reference StyleCop.Analyzers (in the project, the
   `Directory.Build.props`/`.targets` or `Directory.Packages.props` it gets, or what those import) and others don't (tests,
   samples, benchmarks, a project with a `Remove` item), the settings apply only to the folders of the projects that run
-  it, with the rules it had on there: the block's section names those folders (`[src/{App,App.Core}/**.cs]`), a
+  it, with the rules it had on there: the block's section names those folders (`[src/{App,App.Core}/**.cs]`; the
+  topmost folders with no project without StyleCop below, and sibling folders sharing a name start no such project has
+  as one wildcard, `src/{LiteBus,LiteBus.Inbox*}`), a
   sub-directory `.editorconfig` that covers all of them counts as the base (a `src/.editorconfig` that turns everything
   but documentation off), and folders without StyleCop get no settings at all; the report lists them. Once StyleCop
   is gone, `stylebro-migrate init` can set those up. When every project or none references StyleCop, the settings apply

@@ -261,9 +261,10 @@ internal sealed class StyleCopSetup
         var allScopes = new List<Scope>([.. folderScopes, .. scopes]);
         var projects = Projects(root, files);
         var folders = Cover(projects.Uses, true, root);
+        var without = folders is null ? [] : Cover(projects.Uses, false, root) ?? [];
         if (folders is not null)
         {
-            allScopes = InStyleCopFolders(allScopes, folders, severities);
+            allScopes = InStyleCopFolders(allScopes, folders, without, severities);
             foreach (var id in old is null ? [] : severities.Keys.Where(id => !old.Contains(id)).ToList())
             {
                 severities[id] = Severity.None;
@@ -276,7 +277,7 @@ internal sealed class StyleCopSetup
         {
             EditorConfigCopiedBy = copier is null ? null : Path.GetRelativePath(root, copier),
             Folders = folders,
-            FoldersWithout = folders is null ? [] : Cover(projects.Uses, false, root) ?? [],
+            FoldersWithout = without,
             ReferencedIn = projects.ReferencedIn.Select(Relative).ToList(),
             RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
         };
@@ -329,16 +330,37 @@ internal sealed class StyleCopSetup
         };
     }
 
-    /// <summary>The .editorconfig section (in the root one) for the C# files under the folders (relative, '/'-separated).</summary>
-    public static string SectionFor(IReadOnlyList<string> folders)
+    /// <summary>
+    /// The .editorconfig section (in the root one) for the C# files under the folders (relative, '/'-separated). Sibling
+    /// folders that share a dotted name start no folder of <paramref name="without"/> has become one wildcard
+    /// ('src/LiteBus.Inbox*' for LiteBus.Inbox, LiteBus.Inbox.Abstractions, ...), so the section still covers exactly the
+    /// projects of <paramref name="folders"/>. It may also cover folders without a project: their files aren't compiled.
+    /// </summary>
+    public static string SectionFor(IReadOnlyList<string> folders, IReadOnlyList<string>? without = null)
     {
+        var others = (without ?? []).Select(f => f.Split('/')).ToList();
+        var entries = new List<(string[] Parts, bool Wildcard)>();
+        foreach (var group in folders.Select(f => f.Split('/')).GroupBy(parts => (Parent: string.Join("/", parts.SkipLast(1)), Start: WildcardStart(parts, others))))
+        {
+            entries.AddRange(group.Key.Start is { } start && group.Count() > 1 ? [([.. group.First().SkipLast(1), start], true)] : group.Select(p => (p, false)));
+        }
+
         // The folders' common parent goes in front: 'src/{A,B}/**.cs'.
-        var parts = folders.Select(f => f.Split('/')).ToList();
-        var common = parts.Count == 1 ? 0 : Enumerable.Range(0, parts.Min(p => p.Length) - 1).TakeWhile(i => parts.All(p => p[i].Equals(parts[0][i], StringComparison.Ordinal))).Count();
-        string Escape(IEnumerable<string> segments) => Regex.Replace(string.Join("/", segments), @"[\[\]{}*?,\\]", @"\$0");
-        var prefix = common == 0 ? string.Empty : Escape(parts[0].Take(common)) + "/";
-        var rest = parts.Select(p => Escape(p.Skip(common))).ToList();
+        var common = entries.Count == 1 ? 0 : Enumerable.Range(0, entries.Min(e => e.Parts.Length) - 1).TakeWhile(i => entries.All(e => e.Parts[i].Equals(entries[0].Parts[i], StringComparison.Ordinal))).Count();
+        static string Escape(IEnumerable<string> segments) => Regex.Replace(string.Join("/", segments), @"[\[\]{}*?,\\]", @"\$0");
+        var prefix = common == 0 ? string.Empty : Escape(entries[0].Parts.Take(common)) + "/";
+        var rest = entries.Select(e => Escape(e.Parts.Skip(common)) + (e.Wildcard ? "*" : string.Empty)).ToList();
         return prefix + (rest.Count == 1 ? rest[0] : "{" + string.Join(",", rest) + "}") + "/**.cs";
+
+        // The shortest dotted start of the folder's name (or the whole name) that no sibling folder of 'others' begins with.
+        static string? WildcardStart(string[] parts, List<string[]> others)
+        {
+            var depth = parts.Length - 1;
+            var name = parts[depth];
+            var siblings = others.Where(o => o.Length > depth && o.Take(depth).SequenceEqual(parts.Take(depth), StringComparer.OrdinalIgnoreCase)).Select(o => o[depth]).ToList();
+            return Enumerable.Range(1, name.Length).Where(i => i == name.Length || name[i] == '.').Select(i => name[..i])
+                .FirstOrDefault(start => !siblings.Any(s => s.StartsWith(start, StringComparison.OrdinalIgnoreCase)));
+        }
     }
 
     /// <summary>Whether an .editorconfig section applies to every C# file ('[*]', '[*.cs]', '[*.{cs,vb}]').</summary>
@@ -802,7 +824,7 @@ internal sealed class StyleCopSetup
     /// moved to a root section for those; one that covers none is dropped (no StyleCop there, so no settings either). A
     /// file-pattern section above several folders stays as it is.
     /// </summary>
-    private static List<Scope> InStyleCopFolders(IEnumerable<Scope> scopes, IReadOnlyList<string> folders, Dictionary<string, Severity> severities)
+    private static List<Scope> InStyleCopFolders(IEnumerable<Scope> scopes, IReadOnlyList<string> folders, IReadOnlyList<string> without, Dictionary<string, Severity> severities)
     {
         static bool IsUnder(string folder, string parent) =>
             parent.Length == 0 || folder.Equals(parent, StringComparison.OrdinalIgnoreCase) || folder.StartsWith(parent + "/", StringComparison.OrdinalIgnoreCase);
@@ -831,7 +853,7 @@ internal sealed class StyleCopSetup
             }
             else if (covered.Count > 0)
             {
-                result.Add(new Scope(".editorconfig", SectionFor(covered), scope.Severities));
+                result.Add(new Scope(".editorconfig", SectionFor(covered, [.. without, .. folders.Except(covered)]), scope.Severities));
             }
         }
 
