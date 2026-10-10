@@ -2,6 +2,24 @@
 
 Design questions that came up while building StyleBro, the choices considered, and what was decided. Newest first.
 
+## The AGENTS.md section is opt-in (2026-10-10)
+
+### Question
+
+#106 made `init --write` and `--write` write a StyleBro section into AGENTS.md by default (`--no-agents-md` to opt out).
+Should a style tool add instructions to a repository's agent file without being asked?
+
+### Choices
+
+1. Opt-in: `--agents-md` writes it; without it the commands print one tip line.
+2. Keep it on by default with `--no-agents-md`.
+
+### Decision
+
+1 (owner). Without `--agents-md` nothing is written (also next to a CLAUDE.md), dry runs and `--diff` show the section
+only with it, and `--json`'s `agentsMd` is null. `--no-agents-md` is removed: no release had it (0.5.0-alpha.1 was
+cut before #106).
+
 ## StyleBro for scripts and AI agents: --json, format --files, AGENTS.md, llms.txt (2026-10-10)
 
 ### Question
@@ -25,7 +43,7 @@ the agent section when a repository has a CLAUDE.md, which projects `--files` lo
 1a: scripts redirect stdout and still see progress and errors; the object has a `schemaVersion` (1) and every field is
 always there (docs/agents.md documents them). 2a (the owner prefers AGENTS.md as the cross-tool standard): between
 `<!-- BEGIN stylebro` / `<!-- END stylebro -->` markers like the .editorconfig block, written by `init --write` and
-`--write`, shown by dry runs and `--diff`, `--no-agents-md` opts out. 3a: loading one project instead of the solution is
+`--write`, shown by dry runs and `--diff` (made opt-in the same day, see the entry above). 3a: loading one project instead of the solution is
 where the time goes; multi-targeted projects still get one run per target framework, and the repeat-until-clean and
 kept-findings list work as for a whole format. 4a: `scripts/mkdocs_llms.py` writes llms.txt (every page and rule page
 with its first sentence) and llms-full.txt; the build fails when a rule page is missing from llms.txt.

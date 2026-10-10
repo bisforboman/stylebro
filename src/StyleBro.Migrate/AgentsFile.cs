@@ -9,15 +9,19 @@ namespace StyleBro.Migrate;
 /// The StyleBro section init and '--write' put into the repository's AGENTS.md (owner's request 2026-10-10,
 /// docs/decisions.md): what an AI agent editing the code should run, and that the findings the format leaves are kept on
 /// purpose. Between markers like the .editorconfig block, so a second run replaces it. AGENTS.md is the cross-tool file;
-/// a repository with only a CLAUDE.md gets an AGENTS.md too, and a hint to import it from CLAUDE.md.
+/// a repository with only a CLAUDE.md gets an AGENTS.md too, and a hint to import it from CLAUDE.md. Opt-in with
+/// <see cref="Option"/> (owner's decision 2026-10-10): without it, the commands print <see cref="Tip"/>.
 /// </summary>
 internal static class AgentsFile
 {
     /// <summary>The file.</summary>
     public const string FileName = "AGENTS.md";
 
-    /// <summary>The option that leaves AGENTS.md alone.</summary>
-    public const string OptOut = "--no-agents-md";
+    /// <summary>The option that writes the section.</summary>
+    public const string Option = "--agents-md";
+
+    /// <summary>What the commands print without <see cref="Option"/>.</summary>
+    public const string Tip = "Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.";
 
     /// <summary>The start marker.</summary>
     public const string Begin = "<!-- BEGIN stylebro";
@@ -47,14 +51,15 @@ internal static class AgentsFile
     public static string Apply(string? existing) => Migration.Apply(existing, Section, Begin, End);
 
     /// <summary>
-    /// Writes the section into the root's AGENTS.md (<paramref name="write"/>), or says it would; nothing with
-    /// <paramref name="optOut"/>. Returns the lines to print.
+    /// Writes the section into the root's AGENTS.md (<paramref name="write"/>), or says it would; only when
+    /// <paramref name="requested"/>, else just <see cref="Tip"/>. Returns the lines to print.
     /// </summary>
-    public static List<string> Update(string root, bool write, bool optOut)
+    public static List<string> Update(string root, bool write, bool requested)
     {
         var lines = new List<string>();
-        if (optOut)
+        if (!requested)
         {
+            lines.Add(Tip);
             return lines;
         }
 
@@ -65,7 +70,7 @@ internal static class AgentsFile
         JsonReport.Set("agentsMd", new JsonObject { ["file"] = FileName, ["created"] = existing is null, ["changed"] = changed, ["written"] = write && changed });
         if (!write)
         {
-            lines.Add($"== {FileName} ({(existing is null ? "created" : "section added or updated")} with --write; {OptOut} leaves it alone)");
+            lines.Add($"== {FileName} ({(existing is null ? "created" : "section added or updated")} with --write)");
             lines.Add(Section.TrimEnd('\n'));
             return lines;
         }
@@ -73,7 +78,7 @@ internal static class AgentsFile
         if (changed)
         {
             File.WriteAllText(path, text);
-            lines.Add($"{(existing is null ? "Wrote" : "Updated")} the StyleBro section in {FileName} (instructions for AI agents; {OptOut} leaves it alone).");
+            lines.Add($"{(existing is null ? "Wrote" : "Updated")} the StyleBro section in {FileName} (instructions for AI agents).");
         }
 
         if (existing is null && File.Exists(Path.Combine(root, "CLAUDE.md")))

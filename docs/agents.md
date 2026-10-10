@@ -1,8 +1,8 @@
 # Using StyleBro from scripts and AI agents
 
 `stylebro-migrate` has three things for scripts and AI coding agents: a JSON result for every command (`--json`), a
-fast format of just the files an edit touched (`format --files`), and a section in the repository's `AGENTS.md` that
-tells an agent how to work with StyleBro. The site also has an index for agents:
+fast format of just the files an edit touched (`format --files`), and, on request (`--agents-md`), a section in the
+repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site also has an index for agents:
 [llms.txt](https://bisforboman.github.io/stylebro/llms.txt) (every page and rule with one line each) and
 [llms-full.txt](https://bisforboman.github.io/stylebro/llms-full.txt) (all pages in one file).
 
@@ -100,7 +100,7 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 | `settings` | array | `init`/`migrate`/`preview`: every setting of the blocks written (or that `--write` would write): `file` (relative), `section` (`*.cs`, a folder's glob, ...), `key`, `value`, `why` (the comment above it, or `null`). |
 | `conventions` | array | `init`: each convention found in the code: `key`, `what`, `counts` (value -> places), `verdict` (`kept`, `default`, `mixed`, `off`, `set`, `tooFew`), `result` (the text after the verdict in the report: the value, the rule turned off, or why the default stays). |
 | `sonar` | object or null | With a SonarQube setup: `sources`, `rulesOn`, `fixed` (`sonar`, `by`), `notApplied` (`sonar`, `reason`), `notes`. |
-| `agentsMd` | object or null | `init`/`migrate`: `file`, `created`, `changed`, `written` (null with `--no-agents-md`). |
+| `agentsMd` | object or null | `init`/`migrate`: `file`, `created`, `changed`, `written` (null without `--agents-md`). |
 | `runs` | array | `format`/`preview`: each `dotnet format` run: `run` (1-based), `filesChanged`, `changesPerRule` (`format` only; `{}` in a preview). With `--verify-no-changes`: at most one entry, the files formatting would change. |
 | `changesPerRule` | object | Rule id -> changes, all runs together (`format`: from `dotnet format`'s report; `preview`: what the check before the fixes found). Whitespace counts as `IDE0055`. |
 | `filesPerRule` | object or null | `preview`: rule id -> the files it changed (`IDE0055` for whitespace-only files, `other` when nothing was reported). |
@@ -116,13 +116,18 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 
 ## AGENTS.md
 
-`stylebro-migrate init --write` and `stylebro-migrate --write` put a short StyleBro section into the repository's
-`AGENTS.md` (created when there's none), between `<!-- BEGIN stylebro` and `<!-- END stylebro -->`; running the command
-again replaces it, and leaves the rest of the file alone. `--no-agents-md` leaves `AGENTS.md` alone; without `--write`
-the commands print the section, and `--diff` includes it in the patch.
+It's opt-in: with `--agents-md`, `stylebro-migrate init --write` and `stylebro-migrate --write` put a short StyleBro
+section into the repository's `AGENTS.md` (created when there's none), between `<!-- BEGIN stylebro` and
+`<!-- END stylebro -->`; running the command again with `--agents-md` replaces it, and leaves the rest of the file
+alone. Without `--write` the commands print the section, and `--diff --agents-md` includes it in the patch. Without
+`--agents-md` nothing is written; the commands print one tip line:
 
-`AGENTS.md` is the file most coding agents read. A repository with only a `CLAUDE.md` gets an `AGENTS.md` too, and the
-command says to add a line `@AGENTS.md` to `CLAUDE.md` (Claude Code reads `CLAUDE.md` and imports what it names).
+```
+Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
+```
+
+`AGENTS.md` is the file most coding agents read. With `--agents-md`, a repository with only a `CLAUDE.md` gets an
+`AGENTS.md` too, and the command says to add a line `@AGENTS.md` to `CLAUDE.md` (Claude Code reads `CLAUDE.md` and imports what it names).
 
 The section:
 

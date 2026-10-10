@@ -27,18 +27,18 @@ internal static class Program
           Settings:        https://bisforboman.github.io/stylebro/configuration/
 
         Usage:
-          stylebro-migrate [path] [--write] [--no-agents-md] [--sonar-profile <file>]
+          stylebro-migrate [path] [--write] [--agents-md] [--sonar-profile <file>]
               Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize] [--no-agents-md] [--sonar-profile <file>]
+          stylebro-migrate init [path] [--write] [--modernize] [--agents-md] [--sonar-profile <file>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. A repository with a StyleCop setup is told to
               use 'stylebro-migrate --write' instead.
 
-              Both also write a StyleBro section into AGENTS.md (instructions for AI agents, between markers, updated on
-              every run); --no-agents-md leaves AGENTS.md alone.
+              --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
+              markers, updated on every run). Opt-in.
 
               Both follow a SonarQube setup too (SonarAnalyzer.CSharp, Sonar rule severities in rulesets and configs):
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
@@ -217,7 +217,7 @@ internal static class Program
             }
         }
 
-        AgentsFile.Update(root, write, rest.Contains(AgentsFile.OptOut)).ForEach(Console.WriteLine);
+        AgentsFile.Update(root, write, rest.Contains(AgentsFile.Option)).ForEach(Console.WriteLine);
         Console.WriteLine(write
             ? NextStep
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
@@ -351,9 +351,9 @@ internal static class Program
         var (command, known) = args.FirstOrDefault() switch
         {
             "baseline" => ("baseline", new[] { "--project" }),
-            "init" => ("init", new[] { "--write", "--modernize", AgentsFile.OptOut, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+            "init" => ("init", new[] { "--write", "--modernize", AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
             "format" => ("format", null),
-            _ => (null, new[] { "--write", AgentsFile.OptOut, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+            _ => (null, new[] { "--write", AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
         };
         var options = args.Skip(command is null ? 0 : 1).ToArray();
         if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a.Split('=')[0])) is { } unknown)
