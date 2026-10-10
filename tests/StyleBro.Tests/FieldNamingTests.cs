@@ -666,6 +666,93 @@ public class FieldNamingTests
         CamelConstants);
 
     [Fact]
+    public Task MutableStaticKey_Underscore_OnlyForStaticFields() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int {|BRO1303:_count|};
+            private int done;
+            private static int {|BRO1303:instances|};
+            private static int {|BRO1307:m_old|};
+            private static int _fine;
+            private static readonly int Limit = 1;
+
+            public int Sum() => _count + done + instances + m_old + _fine + Limit;
+        }
+        """,
+        """
+        class C
+        {
+            private int count;
+            private int done;
+            private static int _instances;
+            private static int _old;
+            private static int _fine;
+            private static readonly int Limit = 1;
+
+            public int Sum() => count + done + _instances + _old + _fine + Limit;
+        }
+        """,
+        "stylebro_private_mutable_static_field_naming = _camelCase");
+
+    [Fact]
+    public Task MutableStaticKey_CamelCase_WithUnderscoreInstanceFields() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int {|BRO1303:count|};
+            private static int {|BRO1303:_instances|};
+            private static int fine;
+
+            public int Sum() => count + _instances + fine;
+        }
+        """,
+        """
+        class C
+        {
+            private int _count;
+            private static int instances;
+            private static int fine;
+
+            public int Sum() => _count + instances + fine;
+        }
+        """,
+        Underscore + "\nstylebro_private_mutable_static_field_naming = camelCase");
+
+    [Fact]
+    public Task NamingRuleRequiringOnlyStatic_SetsTheMutableStaticStyle() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int {|BRO1303:count|};
+            private static int {|BRO1303:_instances|};
+            private static readonly int {|BRO1306:Limit|} = 1;
+
+            public int Sum() => count + _instances + Limit;
+        }
+        """,
+        """
+        class C
+        {
+            private int _count;
+            private static int instances;
+            private static readonly int limit = 1;
+
+            public int Sum() => _count + instances + limit;
+        }
+        """,
+        Underscore + """
+
+        dotnet_naming_rule.statics.symbols = statics
+        dotnet_naming_rule.statics.style = camel
+        dotnet_naming_rule.statics.severity = warning
+        dotnet_naming_symbols.statics.applicable_kinds = field
+        dotnet_naming_symbols.statics.applicable_accessibilities = private
+        dotnet_naming_symbols.statics.required_modifiers = static
+        dotnet_naming_style.camel.capitalization = camel_case
+        """);
+
+    [Fact]
     public Task StaticStyleKey_PascalCase_WinsOverTheNamingRules() => VerifyNoDiagnosticsAsync(
         """
         public class C

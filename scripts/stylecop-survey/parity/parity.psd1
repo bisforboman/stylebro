@@ -295,6 +295,30 @@
             )
         }
         @{
+            Name     = 'naming-static-underscore'
+            Map      = @('SX1309S=BRO1303')
+            # SX1309S alone: '_' on private static fields that aren't readonly or const, instance fields camelCase.
+            EditorConfig = "stylebro_private_mutable_static_field_naming = _camelCase`n"
+            Expected = @(
+                # BRO1303 is SA1306 and SX1309S in one rename: '__twice' and 'Upper' get the whole style ('_twice',
+                # '_upper'); SX1309S only checks the first character, its fix writes '_Upper' and leaves '__twice'.
+                'only StyleBro: BRO1303 StaticFields.cs(10,28)'
+                'StyleBro output only: StaticFields.cs: [        private static int _upper;]'
+                'StyleBro output only: StaticFields.cs: [        private static int _twice;]'
+                'StyleBro output only: StaticFields.cs: [        public int Sum() => count + other + _instances + _created + _upper + _twice + Limit + Max + shared + inherited;]'
+                'StyleCop output only: StaticFields.cs: [        private static int _Upper;]'
+                'StyleCop output only: StaticFields.cs: [        private static int __twice;]'
+                'StyleCop output only: StaticFields.cs: [        public int Sum() => count + other + _instances + _created + _Upper + __twice + Limit + Max + shared + inherited;]'
+                # StyleCop's naming rules skip classes named '*NativeMethods'; BRO1303 doesn't (an existing difference,
+                # SA1306 skips them too).
+                'only StyleBro: BRO1303 StaticFields.cs(21,28)'
+                'StyleBro output only: StaticFields.cs: [        private static int _handle;]'
+                'StyleBro output only: StaticFields.cs: [        public static int Get() => _handle;]'
+                'StyleCop output only: StaticFields.cs: [        private static int handle;]'
+                'StyleCop output only: StaticFields.cs: [        public static int Get() => handle;]'
+            )
+        }
+        @{
             Name     = 'naming-prefixes'
             Map      = @('SA1302=BRO1304', 'SA1314=BRO1305')
             # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.

@@ -34,19 +34,23 @@ internal enum FieldRule
 }
 
 /// <summary>
-/// The field styles from the configuration: private instance fields (<see cref="Private"/>), and private constants and
-/// private static readonly fields when an SDK naming rule asks for camel case for them (null: PascalCase, like StyleCop).
+/// The field styles from the configuration: private instance fields (<see cref="Private"/>), private static fields that
+/// aren't readonly (<see cref="MutableStatic"/>, null: <see cref="Private"/>), and private constants and private static
+/// readonly fields when an SDK naming rule asks for camel case for them (null: PascalCase, like StyleCop).
 /// </summary>
 internal readonly struct FieldStyles
 {
-    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly)
+    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null)
     {
         Private = @private;
         Constant = constant;
         StaticReadOnly = staticReadOnly;
+        MutableStatic = mutableStatic;
     }
 
     public FieldStyle Private { get; }
+
+    public FieldStyle? MutableStatic { get; }
 
     public FieldStyle? Constant { get; }
 
@@ -70,6 +74,12 @@ internal static class FieldNames
     /// When unset, an SDK naming rule that singles them out decides (else PascalCase).
     /// </summary>
     public const string StaticStyleKey = "stylebro_private_static_field_naming";
+
+    /// <summary>
+    /// The style of private static fields that aren't readonly or const (StyleCop's SX1309S): camelCase or _camelCase.
+    /// When unset, an SDK naming rule for private fields requiring just 'static' decides (else <see cref="StyleKey"/>'s).
+    /// </summary>
+    public const string MutableStaticStyleKey = "stylebro_private_mutable_static_field_naming";
 
     internal enum FieldCasing
     {
@@ -103,21 +113,27 @@ internal static class FieldNames
     /// </remarks>
     public static FieldStyles GetStyles(AnalyzerConfigOptions options)
     {
+        var mutableStatic = options.TryGetValue(MutableStaticStyleKey, out var mutableValue)
+            ? ToCamelStyle(mutableValue)
+            : GetStaticStyleFromNamingRules(options, m => m.Length == 1 && m[0] == "static");
         if (options.TryGetValue(StaticStyleKey, out var value))
         {
-            FieldStyle? style = value.Split(':')[0].Trim() switch
-            {
-                "camelCase" => FieldStyle.CamelCase,
-                "_camelCase" => FieldStyle.UnderscoreCamelCase,
-                _ => null,
-            };
-            return new(GetStyle(options), style, style);
+            var style = ToCamelStyle(value);
+            return new(GetStyle(options), style, style, mutableStatic);
         }
 
         return new(
             GetStyle(options),
             GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
-            GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")));
+            GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")),
+            mutableStatic);
+
+        static FieldStyle? ToCamelStyle(string value) => value.Split(':')[0].Trim() switch
+        {
+            "camelCase" => FieldStyle.CamelCase,
+            "_camelCase" => FieldStyle.UnderscoreCamelCase,
+            _ => null,
+        };
     }
 
     /// <summary>
@@ -172,7 +188,8 @@ internal static class FieldNames
 
         var underscore = GetCamelStaticStyle(field, style) is { } camelStatic
             ? camelStatic == FieldStyle.UnderscoreCamelCase
-            : style.Private == FieldStyle.UnderscoreCamelCase && (IsChecked(field) || field.Name.StartsWith("_", System.StringComparison.Ordinal));
+            : IsChecked(field) ? GetPrivateStyle(field, style) == FieldStyle.UnderscoreCamelCase
+            : style.Private == FieldStyle.UnderscoreCamelCase && field.Name.StartsWith("_", System.StringComparison.Ordinal);
         return (FieldRule.Hungarian, underscore ? "_" + stripped : stripped);
     }
 
@@ -200,7 +217,7 @@ internal static class FieldNames
         if (hasPrefix || core.TrimStart('_').Contains('_'))
         {
             var casing = pascal ? FieldCasing.Pascal
-                : (camelStatic ?? (IsChecked(field) ? style.Private : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
+                : (camelStatic ?? (IsChecked(field) ? GetPrivateStyle(field, style) : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
                 : FieldCasing.Camel;
             return GetJoinedName(core, casing) is { } joined && joined != name
                 ? (hasPrefix ? FieldRule.Prefix : FieldRule.Underscore, joined)
@@ -212,7 +229,7 @@ internal static class FieldNames
             : isProtected ? (camelStyle ? CamelCaseNames.GetNewName(name) : LowerAfterUnderscores(name))
             : pascal ? GetPascalName(name)
             : camelStatic is { } staticStyle ? GetNewName(name, staticStyle)
-            : IsChecked(field) ? GetNewName(name, style.Private)
+            : IsChecked(field) ? GetNewName(name, GetPrivateStyle(field, style))
             : null;
         return newName is null ? null : (pascal || camelStatic is not null ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
     }
@@ -512,6 +529,10 @@ internal static class FieldNames
             _ => null,
         };
     }
+
+    /// <summary>The style of a field <see cref="IsChecked"/> checks: its own for static fields when one is configured.</summary>
+    private static FieldStyle GetPrivateStyle(IFieldSymbol field, FieldStyles style) =>
+        field.IsStatic && style.MutableStatic is { } mutableStatic ? mutableStatic : style.Private;
 
     /// <summary>The camel style a naming rule asks for when <paramref name="field"/> is a private constant or static readonly field.</summary>
     private static FieldStyle? GetCamelStaticStyle(IFieldSymbol field, FieldStyles style) =>

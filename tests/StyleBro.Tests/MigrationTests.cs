@@ -593,7 +593,8 @@ public sealed partial class MigrationTests : IDisposable
     [Fact]
     public void StaticUnderscoreAlone_IsNotExpressible_WhenInstanceFieldsAreCamelCase()
     {
-        // SX1309S wants '_' on private static fields only; BRO1303 has one style for those and instance fields.
+        // SX1309S wants '_' on private static fields; SA1309 (off) would forbid it on every field, so StyleCop accepts
+        // instance fields with and without '_', which BRO1303 can't leave alone.
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1309.severity = none\ndotnet_diagnostic.SX1309S.severity = warning\n");
         Write("C.cs", "class C { private int count; private int other; private static int _instances; }");
 
@@ -602,6 +603,16 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Contains("stylebro_private_field_naming = camelCase", result.Lines);
         Assert.DoesNotContain("SX1309S", result.Covered);
         Assert.Contains("SX1309S", result.Reasons.Keys);
+    }
+
+    [Fact]
+    public void MutableStaticStyle_IsPinnedToTheFieldStyle_WithoutSX1309S()
+    {
+        Write("C.cs", "class C { private int _count; private int _other; }");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+
+        Assert.Contains($"stylebro_private_mutable_static_field_naming = {result.FieldStyle}", result.Lines);
     }
 
     [Fact]

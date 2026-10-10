@@ -25,8 +25,8 @@ The preset follows StyleCop's defaults except here.
 | File header (SA1633-SA1641) | Required, XML format (`// <copyright file="X.cs" company="PlaceholderCompany">`) | XML format with [BRO1615](rules/BRO1615.md) (`dotnet_diagnostic.BRO1615.severity = warning`), but it does nothing until `stylebro_file_header_company` is set; `stylebro-migrate` turns it off when `stylecop.json` names no company | A header needs the team's company name and copyright text; a placeholder header everywhere is worse than none. | `stylebro_file_header_company = YourCompany` (and `stylebro_file_header_copyright` if the text differs). For a plain header (`xmlHeader: false`): `file_header_template = ...` and `dotnet_diagnostic.IDE0073.severity = warning`. |
 
 Settings that look different but match StyleCop: `stylebro_private_field_naming = camelCase` (SA1306/SA1309: no
-leading underscore; `_camelCase` is StyleCop's opt-in SX1309 and SX1309S together, one style for private instance and
-static fields), `stylebro_document_*` (stylecop.json's documentationRules defaults), `stylebro_member_*`
+leading underscore; `_camelCase` is StyleCop's opt-in SX1309 and SX1309S together;
+`stylebro_private_mutable_static_field_naming = _camelCase` gives static fields alone the `_`), `stylebro_document_*` (stylecop.json's documentationRules defaults), `stylebro_member_*`
 (SA1201-SA1204/SA1214 order, checked pairwise), and the SDK settings for spacing, braces, modifiers, type aliases,
 parentheses, using order and blank lines. `dotnet_style_require_accessibility_modifiers = for_non_interface_members`
 matches SA1400, which doesn't ask for modifiers on interface members (`always` would).
