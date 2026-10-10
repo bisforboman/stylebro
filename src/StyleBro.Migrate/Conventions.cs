@@ -99,19 +99,41 @@ internal static class Conventions
         var trees = new List<SyntaxTree>();
         var documented = new HashSet<SyntaxTree>();
         var generates = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
-        {
-            var text = File.ReadAllText(file);
-            if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
+
+        // Parsing and counting is per file: in parallel, each file with its own counts, added up in file order.
+        var parsed = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .AsParallel()
+            .AsOrdered()
+            .Select(file =>
             {
-                var tree = CSharpSyntaxTree.ParseText(text);
-                Count(tree, counts);
-                CountConditional(tree, counts);
-                trees.Add(tree);
-                if (GeneratesDocumentation(root, Path.GetDirectoryName(file)!, generates))
+                var text = File.ReadAllText(file);
+                if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
                 {
-                    documented.Add(tree);
+                    return default;
                 }
+
+                var tree = CSharpSyntaxTree.ParseText(text);
+                var own = NewCounts();
+                Count(tree, own);
+                CountConditional(tree, own);
+                return (File: file, Tree: tree, Counts: own);
+            })
+            .Where(p => p.Tree is not null)
+            .ToList();
+        foreach (var (file, tree, own) in parsed)
+        {
+            foreach (var (key, values) in own)
+            {
+                for (var i = 0; i < values.Length; i++)
+                {
+                    counts[key][i] += values[i];
+                }
+            }
+
+            trees.Add(tree);
+            if (GeneratesDocumentation(root, Path.GetDirectoryName(file)!, generates))
+            {
+                documented.Add(tree);
             }
         }
 

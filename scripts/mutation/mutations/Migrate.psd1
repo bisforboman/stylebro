@@ -16,7 +16,7 @@
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = ' || !order.Contains("accessibility")'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'rulesets.Add([]);'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;'; Replace = ': count[1] > count[0] ? 1 : 0;'; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (true)'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(relative, text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
 
         # a hand-written Migrations folder counts; only EF Core's files are skipped, like the generated_code sections (2026-10-10)
@@ -91,5 +91,13 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (at + 1 == bytes.Length || bytes[at + 1] != ''\n'')'; Replace = 'if (at + 1 == bytes.Length)'; Tests = 'MigrationTests.Format_NamesFilesWithOldMacLineEndings' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (code != NotCleanExitCode)'; Replace = 'if (false)'; Tests = 'MigrationTests.Verify_AnUnknownOption' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);'; Replace = 'lines.ForEach(log);'; Tests = 'KeptFindingsTests' }
+
+        # a faster first run: only the first run restores, later runs check all frameworks at once, the preview's first run reports (2026-10-10)
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'r.Code == 0 && '; Replace = ''; Tests = 'MigrationTests.Format_CleanCheck' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'SkippedProject(l) is not null || '; Replace = ''; Tests = 'MigrationTests.Format_CleanCheck' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'next.Contains(CheckFirstOption) ? next : '; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'args.Contains("--no-restore") ? args : '; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '            args = NextRun(args);'; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = ': FormatCommand.NextRun(formatArgs.ToArray());'; Replace = ': formatArgs;'; Tests = 'MigrationTests.Preview_AppliesInitAndFormatToACopy' }
     )
 }

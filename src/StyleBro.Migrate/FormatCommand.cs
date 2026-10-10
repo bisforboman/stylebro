@@ -52,6 +52,12 @@ internal static class FormatCommand
     /// <summary>The option for a single run (the preview counts its own runs).</summary>
     public const string OnceOption = "--once";
 
+    /// <summary>
+    /// The option for a run that likely changes nothing (the one after a run that changed files): a multi-targeted
+    /// repository checks all frameworks at once first (<see cref="IsCleanCheck"/>).
+    /// </summary>
+    public const string CheckFirstOption = "--check-first";
+
     /// <summary>The exit code when files are left to change: a run still changed files, or --verify-no-changes found some ('dotnet format''s code).</summary>
     public const int NotCleanExitCode = 2;
 
@@ -78,6 +84,9 @@ internal static class FormatCommand
 
     /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
     private const string OldMacHeader = "Not formatted:";
+
+    /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
+    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
@@ -334,6 +343,26 @@ internal static class FormatCommand
         }
 
         return ids.ToList();
+    }
+
+    /// <summary>
+    /// Whether the frameworks' '--verify-no-changes' runs (exit code, output) show that nothing is left: each exited 0, and
+    /// none skipped a project (a project that didn't load reports nothing, which proves nothing).
+    /// </summary>
+    public static bool IsCleanCheck(IEnumerable<(int Code, IReadOnlyList<string> Lines)> runs) =>
+        runs.All(r => r.Code == 0 && !r.Lines.Any(l => SkippedProject(l) is not null || IsRestoreFailure(l)));
+
+    /// <summary>The arguments with '--no-restore' (once).</summary>
+    public static string[] NoRestore(string[] args) => args.Contains("--no-restore") ? args : args.Append("--no-restore").ToArray();
+
+    /// <summary>
+    /// The arguments for the run after one that changed files: no restore (the first run restored, and the runs only edit
+    /// C# files), and <see cref="CheckFirstOption"/> (it likely changes nothing).
+    /// </summary>
+    public static string[] NextRun(string[] args)
+    {
+        var next = NoRestore(args);
+        return next.Contains(CheckFirstOption) ? next : next.Append(CheckFirstOption).ToArray();
     }
 
     /// <summary>Whether a 'dotnet format' output line says its restore failed (it prints a stack trace, nothing about why).</summary>
@@ -601,6 +630,8 @@ internal static class FormatCommand
                 log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
+
+            args = NextRun(args);
         }
     }
 
@@ -834,6 +865,9 @@ internal static class FormatCommand
 
                 var code = run(new[] { "format", pass }.Where(a => a.Length > 0).Append(target).Concat(passOptions));
                 exit = exit == 0 ? code : exit;
+
+                // The first pass restored: the second one needn't.
+                options = NoRestore(options.ToArray()).ToList();
                 if (code != 0 && code != NotCleanExitCode)
                 {
                     break; // an error (a failed restore): the next pass would only repeat it
@@ -859,6 +893,7 @@ internal static class FormatCommand
         }
 
         var noRestore = passThrough.Remove("--no-restore");
+        var checkFirst = passThrough.Remove(CheckFirstOption);
 
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
         var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
@@ -902,50 +937,80 @@ internal static class FormatCommand
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
         var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
         File.WriteAllText(select, SelectFrameworkTargets);
+
+        // Each run's own report folder, in the plan's order (the runs may run at once).
+        reportFolders.AddRange(plan.Select(_ => Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}")).Where(_ => report is not null));
+        int RunFramework(int index, bool verify, Action<string> output)
+        {
+            var (framework, selected) = plan[index];
+            var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
+            try
+            {
+                if (filter is not null)
+                {
+                    File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
+                }
+
+                var options = passThrough.ToList();
+                if (report is not null)
+                {
+                    options[reportIndex + 1] = reportFolders[index];
+                }
+
+                options.Insert(0, "--no-restore");
+                if (verify && !options.Contains("--verify-no-changes"))
+                {
+                    options.Add("--verify-no-changes");
+                }
+
+                if (!passThrough.Contains("--include"))
+                {
+                    options.Add("--include");
+                    options.AddRange(Include(root, solutionDirectory, selected));
+                }
+
+                var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
+                return Format(filter ?? workspacePath, options, a => Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), a, output));
+            }
+            finally
+            {
+                if (filter is not null)
+                {
+                    File.Delete(filter);
+                }
+            }
+        }
+
         var exit = 0;
+        void RunOrReplay(int index, (int Code, List<string> Lines)? ran)
+        {
+            log($"== {plan[index].Framework} ({plan[index].Projects.Count} project(s))");
+            current = plan[index].Framework;
+            ran?.Lines.ForEach(Show);
+            var code = ran?.Code ?? RunFramework(index, verify: false, Show);
+            exit = exit == 0 ? code : exit;
+        }
+
         try
         {
-            foreach (var (framework, selected) in plan)
+            // Runs that write nothing can run at once (one 'dotnet format' per framework), their output shown afterwards in
+            // the plan's order: '--verify-no-changes', and the check before a run that likely changes nothing (after a run
+            // that changed files). When every framework's check is clean (which '--verify-no-changes' isn't for findings a
+            // fix keeps either), that is what the runs one after another would find; otherwise they run as usual.
+            var verifying = passThrough.Contains("--verify-no-changes");
+            var atOnce = verifying || (checkFirst && report is null)
+                ? Enumerable.Range(0, plan.Count).AsParallel().AsOrdered().WithDegreeOfParallelism(plan.Count)
+                    .Select(i =>
+                    {
+                        var lines = new List<string>();
+                        return (Code: RunFramework(i, verify: true, lines.Add), Lines: lines);
+                    })
+                    .ToList()
+                : null;
+            var replay = atOnce is not null && (verifying || IsCleanCheck(atOnce.Select(c => (c.Code, (IReadOnlyList<string>)c.Lines))));
+            for (var i = 0; i < plan.Count; i++)
             {
-                log($"== {framework} ({selected.Count} project(s))");
-                current = framework;
-                var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
-                try
-                {
-                    if (filter is not null)
-                    {
-                        File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
-                    }
-
-                    var options = passThrough.ToList();
-                    if (report is not null)
-                    {
-                        var folder = Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}");
-                        reportFolders.Add(folder);
-                        options[reportIndex + 1] = folder;
-                    }
-
-                    options.Insert(0, "--no-restore");
-                    if (!passThrough.Contains("--include"))
-                    {
-                        options.Add("--include");
-                        options.AddRange(Include(root, solutionDirectory, selected));
-                    }
-
-                    var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
-                    var code = Format(filter ?? workspacePath, options, a => Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), a, Show));
-                    if (exit == 0)
-                    {
-                        exit = code;
-                    }
-                }
-                finally
-                {
-                    if (filter is not null)
-                    {
-                        File.Delete(filter);
-                    }
-                }
+                RunOrReplay(i, replay ? atOnce![i] : null);
             }
         }
         finally
@@ -990,9 +1055,22 @@ internal static class FormatCommand
         File.WriteAllText(path, MergeReports(reports));
     }
 
-    /// <summary>Each C# project of the solution (keyed by its path as the solution lists it) or the project itself.</summary>
+    /// <summary>
+    /// Each C# project of the solution (keyed by its path as the solution lists it) or the project itself. The projects are
+    /// evaluated in parallel (one 'dotnet msbuild' each, ~1 s: LiteBus has 99) and once per process: the runs until clean
+    /// and the preview's runs only edit C# files.
+    /// </summary>
     private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References)> ReadProjects(string workspacePath)
     {
+        // ponytail: keyed by the workspace only; a project file changed between two runs of one process isn't seen.
+        lock (ProjectCache)
+        {
+            if (ProjectCache.TryGetValue(workspacePath, out var known))
+            {
+                return known;
+            }
+        }
+
         var directory = Path.GetDirectoryName(workspacePath)!;
         var projects = workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             ? new[] { Path.GetFileName(workspacePath) }
@@ -1000,14 +1078,20 @@ internal static class FormatCommand
                 .Select(l => l.Trim())
                 .Where(l => l.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
-        return projects.ToDictionary(
-            p => p,
-            p =>
+        var read = projects.AsParallel().AsOrdered()
+            .Select(p =>
             {
                 var fullPath = Path.GetFullPath(Path.Combine(directory, p));
                 var (frameworks, references) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-nologo"));
-                return (fullPath, frameworks, references);
-            });
+                return (Key: p, Value: (fullPath, frameworks, references));
+            })
+            .ToDictionary(p => p.Key, p => p.Value);
+        lock (ProjectCache)
+        {
+            ProjectCache[workspacePath] = read;
+        }
+
+        return read;
     }
 
     private static string Capture(string directory, params string[] arguments)
