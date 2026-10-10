@@ -26,7 +26,7 @@ public sealed partial class MigrationTests
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SA1309.severity = none\n");
         Write("src/A.cs", "class A { private int _a, _b; private int c; }");
         Write("src/Form.Designer.cs", "class F { private int button1, button2, button3; }");
-        Write("src/Data/Migrations/20240101_Init.cs", "class M { private int x, y, z; }");
+        Write("src/Data/Migrations/20240101_Init.cs", "using Microsoft.EntityFrameworkCore.Migrations;\nclass M : Migration { private int x, y, z; }");
         Write("vendor/Lib.cs", "class L { private int p, q, r; }");
 
         var result = Migration.Generate(StyleCopSetup.Read(root), root);
@@ -225,6 +225,12 @@ public sealed partial class MigrationTests
         Write("src/Other/Migrations/Notes.cs", "class Migration { }\n"); // not EF Core
 
         Assert.Equal(new[] { "src/Ordering/Migrations" }, Migration.MigrationFolders(root));
+
+        // The convention count decides the same way: EF Core's files are skipped, a hand-written Migrations folder counts.
+        foreach (var (file, generated) in new[] { ("src/Ordering/Migrations/20240101_Init.cs", true), ("src/Ordering/Migrations/OrderingContextModelSnapshot.cs", true), ("src/Other/Migrations/Notes.cs", false) })
+        {
+            Assert.Equal(generated, Migration.IsGeneratedOrVendored(file, File.ReadAllText(Path.Combine(root, file))));
+        }
 
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
         Assert.Contains("[src/Ordering/Migrations/**]\ngenerated_code = true", File.ReadAllText(Path.Combine(root, ".editorconfig")));

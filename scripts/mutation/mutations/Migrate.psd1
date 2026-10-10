@@ -19,6 +19,9 @@
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(relative, text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
 
+        # a hand-written Migrations folder counts; only EF Core's files are skipped, like the generated_code sections (2026-10-10)
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = '            || IsEfMigration(text)'; Replace = ''; Tests = 'MigrationTests' }
+
         # stylebro-migrate follows a SonarQube setup (2026-10-09)
         @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = '.Where(f => !Path.GetFileName(f).Contains("none", StringComparison.OrdinalIgnoreCase))'; Replace = ''; Tests = 'MigrationTests.Sonar_' }
         @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = 'severities[id] = kind.Max('; Replace = 'severities[id] = kind.Min('; Tests = 'MigrationTests.Sonar_' }
