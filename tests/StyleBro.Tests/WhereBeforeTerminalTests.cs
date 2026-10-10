@@ -216,4 +216,40 @@ public class WhereBeforeTerminalTests
     [InlineData("C:/a/other.dll|C:/n/sonaranalyzer.csharp/8.30.0.37606/analyzers/SonarAnalyzer.CSharp.dll", 8)]
     [InlineData("", null)]
     public void SonarVersion_IsReadFromThePackagePath(string paths, int? major) =>
-        Assert.Equal(major, StyleBro.Analyzers.SonarRules.GetMajorVersion(paths));}
+        Assert.Equal(major, StyleBro.Analyzers.SonarRules.GetMajorVersion(paths));
+    [Fact]
+    public Task CollectionMethodsThatWouldNotBind_KeepTheLinqCall() => Verify.VerifyFixAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public static class Lists
+        {
+            public static bool Exists(this List<int> list, Func<int, bool> test) => true;
+        }
+
+        public class C
+        {
+            public bool M(List<int> items, int[] numbers, Func<int, bool> test) =>
+                items.{|BRO1150:Where|}(test).Any() || numbers /* all */ .{|BRO1150:Where|}(i => i > 0).Any();
+        }
+        """,
+        """
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public static class Lists
+        {
+            public static bool Exists(this List<int> list, Func<int, bool> test) => true;
+        }
+
+        public class C
+        {
+            public bool M(List<int> items, int[] numbers, Func<int, bool> test) =>
+                items.Any(test) || numbers /* all */ .Any(i => i > 0);
+        }
+        """,
+        "dotnet_diagnostic.S6605.severity = warning");
+}

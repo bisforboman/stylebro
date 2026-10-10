@@ -105,8 +105,7 @@ internal static class WhereCalls
         var call = isArray
             ? "Array." + method + "(" + text.ToString(receiver.Span) + ", " + predicate + ")"
             : text.ToString(TextSpan.FromBounds(terminal.SpanStart, access.Name.SpanStart)) + method + "(" + predicate + ")";
-        if (Speculation.SymbolAfterReplacing(model, terminal, SyntaxFactory.ParseExpression(call), cancellationToken) is not IMethodSymbol { Name: var bound } symbol
-            || bound != method
+        if (Speculation.SymbolAfterReplacing(model, terminal, SyntaxFactory.ParseExpression(call), cancellationToken) is not IMethodSymbol symbol
             || !(isArray ? symbol.ContainingType.SpecialType == SpecialType.System_Array : IsList(symbol.ContainingType)))
         {
             return null;

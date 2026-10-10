@@ -322,4 +322,18 @@ public class TupleElementNamingTests
         }
         """,
         "stylebro_rename_public_api = false");
+
+    // A use in code excluded by '#if' isn't bound, so the rename can't follow it.
+    [Fact]
+    public Task NamesInDisabledCode_AreSkipped() => VerifyNoDiagnosticsAsync(
+        """
+        internal class Scores
+        {
+            private (int count, int Total) Sum() => (1, 2);
+
+        #if NEVER
+            private int Total() => Sum().count;
+        #endif
+        }
+        """);
 }

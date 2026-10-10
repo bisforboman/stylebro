@@ -301,10 +301,17 @@ public class PrefixNamingTests
             internal item Get()
             {
         #if NEVER
-                return null;
+                var items = 1;
         #endif
                 return default(item);
             }
+        }
+
+        internal class Other
+        {
+        #if NEVER
+            item Elsewhere;
+        #endif
         }
         """,
         """
@@ -313,10 +320,17 @@ public class PrefixNamingTests
             internal TItem Get()
             {
         #if NEVER
-                return null;
+                var items = 1;
         #endif
                 return default(TItem);
             }
+        }
+
+        internal class Other
+        {
+        #if NEVER
+            item Elsewhere;
+        #endif
         }
         """);
 

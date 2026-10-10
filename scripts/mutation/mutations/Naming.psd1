@@ -142,5 +142,16 @@
         @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'; Find = '|| !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))'; Replace = '|| true))'; Tests = 'TupleElementNamingTests.PublicSignatures_AreLeftAloneByDefault' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if ((!renamePublicApi && symbols.Any(PublicApi.IsVisible))'; Replace = 'if (false'; Tests = 'PascalCaseNamingTests.APublicImplementation_KeepsTheName' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = '|| (!renamePublicApi && PublicApi.IsVisible(current))'; Replace = ''; Tests = 'CamelCaseNamingTests.PublicApiParameters_AreLeftAloneByDefault' }
+
+        # Names in disabled #if code (DisabledCode), SCREAMING_CASE locals joined word by word
+        @{ File = 'src/StyleBro.Analyzers/Naming/PrefixNamingAnalyzer.cs'; Find = '&& !DisabledCode.Mentions(context.Compilation, symbol.Name))'; Replace = ')'; Tests = 'PrefixNamingTests.NamesInDisabledCode_AreSkipped' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PrefixNamingAnalyzer.cs'; Find = '&& !DisabledCode.Mentions(symbol.ContainingSymbol, symbol.Name, context.CancellationToken))'; Replace = ')'; Tests = 'PrefixNamingTests.NamesInDisabledCode_AreSkipped' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/DisabledCode.cs'; Find = '&& declaration.FullSpan.Contains(trivia.Span)'; Replace = ''; Tests = 'PrefixNamingTests.DisabledCodeWithoutTheName_DoesNotBlock' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/DisabledCode.cs'; Find = 'if (match.Value == name)'; Replace = 'if (true)'; Tests = 'PrefixNamingTests.DisabledCodeWithoutTheName_DoesNotBlock' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/PascalCaseNamingAnalyzer.cs'; Find = '|| (symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } && DisabledCode.Mentions(context.Compilation, symbol.Name)))'; Replace = ')'; Tests = 'PascalCaseNamingTests.NamesInDisabledCode_AreSkipped' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNamingAnalyzer.cs'; Find = '&& (field.DeclaredAccessibility == Accessibility.Private || !DisabledCode.Mentions(context.Compilation, field.Name))'; Replace = ''; Tests = 'FieldNamingTests.NonPrivateFieldsInDisabledCode_AreSkipped' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/TupleElementNamingAnalyzer.cs'; Find = '|| DisabledCode.Mentions(context.Compilation, name)'; Replace = ''; Tests = 'TupleElementNamingTests.NamesInDisabledCode_AreSkipped' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = '? FieldNames.GetJoinedName(core, FieldNames.FieldCasing.Camel) ?? ToCamelCase(name)'; Replace = '? ToCamelCase(name)'; Tests = 'CamelCaseNamingTests.NewName' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'several && IsAllUpper(first) ? first.ToLowerInvariant() : '; Replace = ''; Tests = 'CamelCaseNamingTests.NewName' }
     )
 }
