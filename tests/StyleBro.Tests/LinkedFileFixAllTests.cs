@@ -175,8 +175,11 @@ public class LinkedFileFixAllTests
         var diagnostics = await GetDiagnosticsAsync(first, analyzer);
         Microsoft.CodeAnalysis.CodeActions.CodeAction? action = null;
         await fixer.RegisterCodeFixesAsync(new Microsoft.CodeAnalysis.CodeFixes.CodeFixContext(first, diagnostics.Single(), (a, _) => action ??= a, CancellationToken.None));
+
+        // Kept on purpose: no action. 'dotnet format' then runs Fix All without an equivalence key, as here.
+        Assert.Null(action);
         var context = new Microsoft.CodeAnalysis.CodeFixes.FixAllContext(
-            first, fixer, Microsoft.CodeAnalysis.CodeFixes.FixAllScope.Solution, action!.EquivalenceKey, new[] { "BRO1309" }, new Provider(analyzer), CancellationToken.None);
+            first, fixer, Microsoft.CodeAnalysis.CodeFixes.FixAllScope.Solution, action?.EquivalenceKey!, new[] { "BRO1309" }, new Provider(analyzer), CancellationToken.None);
         var operations = await (await fixer.GetFixAllProvider()!.GetFixAsync(context))!.GetOperationsAsync(CancellationToken.None);
         var fixedSolution = operations.OfType<Microsoft.CodeAnalysis.CodeActions.ApplyChangesOperation>().Single().ChangedSolution;
 

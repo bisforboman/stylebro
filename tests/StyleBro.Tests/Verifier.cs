@@ -73,13 +73,13 @@ internal static class Verifier<TAnalyzer, TCodeFix>
         return RunAsync(test, editorConfig);
     }
 
-    /// <summary>The diagnostics in <paramref name="sources"/> are reported, but the fix deliberately leaves them.</summary>
+    /// <summary>The diagnostics in <paramref name="sources"/> are reported, but the fix deliberately leaves them and offers no action.</summary>
     public static Task VerifyNotFixedAsync(string[] sources, string? editorConfig = null)
     {
         var test = new Test
         {
-            NumberOfIncrementalIterations = 1,
-            NumberOfFixAllIterations = 1,
+            NumberOfIncrementalIterations = 0,
+            NumberOfFixAllIterations = 0,
             CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
         };
         foreach (var source in sources)
@@ -101,8 +101,8 @@ internal static class Verifier<TAnalyzer, TCodeFix>
     {
         var test = new Test
         {
-            NumberOfIncrementalIterations = 1,
-            NumberOfFixAllIterations = 1,
+            NumberOfIncrementalIterations = 0,
+            NumberOfFixAllIterations = 0,
             CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
         };
         foreach (var source in sources)

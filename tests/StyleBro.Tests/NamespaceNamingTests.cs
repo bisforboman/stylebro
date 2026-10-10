@@ -375,8 +375,8 @@ public class NamespaceNamingTests
     {
         var test = new CSharpCodeFixTest<NamespaceNamingAnalyzer, CamelCaseNamingCodeFixProvider, DefaultVerifier>
         {
-            NumberOfIncrementalIterations = 1,
-            NumberOfFixAllIterations = 1,
+            NumberOfIncrementalIterations = 0,
+            NumberOfFixAllIterations = 0,
             CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
         };
         fill(test.TestState);

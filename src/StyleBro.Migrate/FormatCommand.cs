@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using StyleBro.Analyzers;
 
 namespace StyleBro.Migrate;
 
@@ -51,26 +52,44 @@ internal static class FormatCommand
     /// <summary>The option for a single run (the preview counts its own runs).</summary>
     public const string OnceOption = "--once";
 
+    /// <summary>The exit code when files are left to change: a run still changed files, or --verify-no-changes found some ('dotnet format''s code).</summary>
+    public const int NotCleanExitCode = 2;
+
+    /// <summary>Where people and agents read what a kept finding means.</summary>
+    public const string KeptFindingsHelp = "https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose";
+
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
     /// console. It runs again until a run changes no file (at most <see cref="MaxRuns"/>), printing the files each run
-    /// changed: one 'dotnet format' run doesn't always finish (a fix can make work for another rule). One run only with
-    /// --once, --verify-no-changes or --report.
+    /// changed: one 'dotnet format' run doesn't always finish (a fix can make work for another rule). Then it lists the
+    /// findings StyleBro's fixes keep on purpose, with the reason (<see cref="KeptFinding"/>). Exit code 0 when clean
+    /// (kept findings don't count), <see cref="NotCleanExitCode"/> when a run still changed files. With
+    /// --verify-no-changes it changes nothing and exits 0 when only kept findings are left (<see cref="Verify"/>). One plain
+    /// run with --once or --report. <paramref name="runOnce"/> stands in for one 'dotnet format' run in tests.
     /// </summary>
-    public static int Run(string[] args, Action<string>? output = null)
+    public static int Run(string[] args, Action<string>? output = null, Func<string[], Action<string>?, int>? runOnce = null)
     {
         Action<string> log = output ?? Console.WriteLine;
-        if (args.Contains(OnceOption) || args.Contains("--verify-no-changes") || args.Contains("--report"))
+        runOnce ??= RunOnce;
+        if (args.Contains(OnceOption) || (args.Contains("--report") && !args.Contains("--verify-no-changes")))
         {
-            return RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
+            return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
         }
 
         var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
         var root = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
+        if (args.Contains("--verify-no-changes"))
+        {
+            return Verify(args, root, log, runOnce);
+        }
+
+        var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
+        using var kept = new KeptVariable(keptFile);
         for (var run = 1; ; run++)
         {
+            File.Delete(keptFile);
             var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, (long, DateTime)>();
-            var code = RunOnce(args, output);
+            var code = runOnce(args, output);
             if (code != 0)
             {
                 return code;
@@ -80,15 +99,69 @@ internal static class FormatCommand
             log($"Run {run}: {changed} file{(changed == 1 ? string.Empty : "s")} changed{(changed == 0 ? ", clean." : ".")}");
             if (changed == 0)
             {
+                KeptSummary(ReadKept(keptFile, root, root), root).ForEach(log);
                 return 0;
             }
 
             if (run == MaxRuns)
             {
-                log($"Still changing after {MaxRuns} runs: run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
-                return 0;
+                log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
+                return NotCleanExitCode;
             }
         }
+    }
+
+    /// <summary>
+    /// The kept findings the fixes wrote, once each (every target framework's run writes its own), paths moved from
+    /// <paramref name="from"/> (a copy) to <paramref name="to"/>, in file and line order.
+    /// </summary>
+    public static List<KeptFinding> ReadKept(string file, string from, string to)
+    {
+        if (!File.Exists(file))
+        {
+            return new List<KeptFinding>();
+        }
+
+        var prefix = Path.GetFullPath(from).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        return File.ReadAllLines(file)
+            .Select(KeptFinding.Parse)
+            .OfType<KeptFinding>()
+            .Select(k => k.Path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                ? new KeptFinding(Path.Combine(to, k.Path.Substring(prefix.Length)), k.Line, k.Column, k.Id, k.Reason, k.Message)
+                : k)
+            .GroupBy(k => (k.Path.ToUpperInvariant(), k.Line, k.Column, k.Id))
+            .Select(g => g.First())
+            .OrderBy(k => k.Path, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(k => k.Line)
+            .ThenBy(k => k.Column)
+            .ToList();
+    }
+
+    /// <summary>The lines that list the kept findings (none when there are none).</summary>
+    public static List<string> KeptSummary(IReadOnlyCollection<KeptFinding> kept, string root)
+    {
+        var lines = new List<string>();
+        if (kept.Count == 0)
+        {
+            return lines;
+        }
+
+        lines.Add($"Clean: {kept.Count} finding{(kept.Count == 1 ? string.Empty : "s")} kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them ({KeptFindingsHelp}).");
+        foreach (var finding in kept)
+        {
+            var path = Path.GetRelativePath(root, finding.Path).Replace(Path.DirectorySeparatorChar, '/');
+            lines.Add($"  {path}({finding.Line},{finding.Column}): {finding.Id} {finding.Message}. Kept: {KeptFinding.Describe(finding.Reason)}.");
+        }
+
+        return lines;
+    }
+
+    /// <summary>Whether a 'dotnet format' output line reports one of the kept findings ('path(line,column): warning ID: ...').</summary>
+    public static bool IsKeptLine(string line, ISet<(string Path, int Line, string Id)> kept)
+    {
+        var match = Regex.Match(line, @"^\s*(?<path>.+?)\((?<line>\d+),\d+\): \w+ (?<id>\w+):");
+        return match.Success
+            && kept.Contains((match.Groups["path"].Value.ToUpperInvariant(), int.Parse(match.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture), match.Groups["id"].Value));
     }
 
     /// <summary>The C# files under the root (not bin/obj, not submodules) with their size and time, to tell which a run changed.</summary>
@@ -261,6 +334,97 @@ internal static class FormatCommand
             ? refs.EnumerateArray().Select(r => r.GetProperty("FullPath").GetString()!).ToArray()
             : Array.Empty<string>();
         return (frameworks, references);
+    }
+
+    /// <summary>
+    /// --verify-no-changes: 'dotnet format --verify-no-changes' fails on every finding it would hand to a fix, also those a
+    /// StyleBro fix leaves on purpose, so a loop "until clean" never ends. When it fails, this formats a temporary copy of
+    /// the repository (the fixes only run when files are written) and decides by the copy: no file changed means only
+    /// findings no fix changes are left, listed with the reasons the fixes recorded; exit 0. A changed file means work is
+    /// left: 'dotnet format''s output and exit code. The repository itself is never touched.
+    /// </summary>
+    private static int Verify(string[] args, string root, Action<string> log, Func<string[], Action<string>?, int> runOnce)
+    {
+        var lines = new List<string>();
+        var code = runOnce(args, lines.Add);
+        if (code == 0)
+        {
+            lines.ForEach(log);
+            log("Clean.");
+            return 0;
+        }
+
+        // The whole repository: settings above the folder (.editorconfig, Directory.Build.props, nuget.config) count.
+        var source = RepositoryRoot(root) ?? root;
+        var copy = Path.Combine(Path.GetTempPath(), $"stylebro-verify-{Guid.NewGuid():N}");
+        var keptFile = copy + ".kept.tsv";
+        try
+        {
+            PreviewCommand.Copy(source, copy);
+            var copyArgs = args.Where(a => a != "--verify-no-changes").ToList();
+            var report = copyArgs.IndexOf("--report");
+            if (report >= 0)
+            {
+                copyArgs.RemoveRange(report, Math.Min(2, copyArgs.Count - report));
+            }
+
+            if (copyArgs.Count > 0 && !copyArgs[0].StartsWith("-", StringComparison.Ordinal))
+            {
+                copyArgs[0] = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, Path.GetFullPath(copyArgs[0]))));
+            }
+            else
+            {
+                copyArgs.Insert(0, Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, root))));
+            }
+
+            var before = Snapshot(copy);
+            int copyCode;
+            List<KeptFinding> kept;
+            using (new KeptVariable(keptFile))
+            {
+                copyCode = runOnce(copyArgs.ToArray(), _ => { });
+                kept = ReadKept(keptFile, copy, source);
+            }
+
+            var changed = ChangedFiles(before, Snapshot(copy));
+            if (copyCode != 0 || changed > 0)
+            {
+                lines.ForEach(log);
+                log(changed > 0
+                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'stylebro-migrate format'."
+                    : "Not clean: formatting a copy of the repository failed (see above).");
+                return code;
+            }
+
+            var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
+            lines.Where(l => !IsKeptLine(l, keys)).ToList().ForEach(log);
+            KeptSummary(kept, root).ForEach(log);
+            if (kept.Count == 0)
+            {
+                log("Clean: formatting would change nothing.");
+            }
+
+            return 0;
+        }
+        finally
+        {
+            PreviewCommand.Delete(copy);
+            File.Delete(keptFile);
+        }
+    }
+
+    /// <summary>The git repository that holds the folder (the nearest folder above with a .git), or null.</summary>
+    private static string? RepositoryRoot(string folder)
+    {
+        for (var current = new DirectoryInfo(folder); current is not null; current = current.Parent)
+        {
+            if (Directory.Exists(Path.Combine(current.FullName, ".git")) || File.Exists(Path.Combine(current.FullName, ".git")))
+            {
+                return current.FullName;
+            }
+        }
+
+        return null;
     }
 
     private static int RunOnce(string[] args, Action<string>? output)
@@ -512,5 +676,24 @@ internal static class FormatCommand
 
         process.WaitForExit();
         return process.ExitCode;
+    }
+
+    /// <summary>Sets <see cref="KeptFinding.Variable"/> for the 'dotnet format' runs this process starts, and restores it.</summary>
+    private sealed class KeptVariable : IDisposable
+    {
+        private readonly string? previous = Environment.GetEnvironmentVariable(KeptFinding.Variable);
+        private readonly string file;
+
+        public KeptVariable(string file)
+        {
+            this.file = file;
+            Environment.SetEnvironmentVariable(KeptFinding.Variable, file);
+        }
+
+        public void Dispose()
+        {
+            Environment.SetEnvironmentVariable(KeptFinding.Variable, previous);
+            File.Delete(file);
+        }
     }
 }

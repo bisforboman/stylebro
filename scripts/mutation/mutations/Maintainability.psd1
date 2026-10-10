@@ -57,12 +57,16 @@
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '? derived.Prepend(type)'; Replace = '? new[] { type }'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                        pending.Push(child);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.Analyzers/Maintainability/InternalTypeMethods.cs'; Find = '                    pending.Push(type);'; Replace = ''; Tests = 'InternalTypeMethodTests' }
-        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '|| strings.Contains(method.Identifier.ValueText)'; Replace = ''; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = ': names.Nameofs.Contains(name) ? KeptReason.NameInNameof'; Replace = ': false ? KeptReason.NameInNameof'; Tests = 'InternalTypeMethodTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'return names.Strings.Contains(name) ? KeptReason.NameInString'; Replace = 'return false ? KeptReason.NameInString'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'if (!Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.MemberOrdering, cancellationToken))'; Replace = 'if (true)'; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '.Where(s => changes.Any(c => s.Span.Contains(c.Span)))'; Replace = ''; Tests = 'InternalTypeMethodTests' }
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = 'return derived.Any(d => d.Locations.Any(l => l.IsInSource && project.GetDocument(l.SourceTree) is null));'; Replace = 'return false;'; Tests = 'InternalTypeMethodTests' }
 
         # Generated code and C# versions (real-world: eShopOnWeb's Razor pages, Mapperly's generated accessors, LibGit2Sharp's net472)
         @{ File = 'src/StyleBro.CodeFixes/Maintainability/AccessModifiersCodeFixProvider.cs'; Find = 'preference, version)'; Replace = 'preference)'; Tests = 'AccessModifiersTests' }
+
+        # Kept findings (2026-10-10): a method the fix keeps public on purpose offers no code action
+        @{ File = 'src/StyleBro.CodeFixes/Maintainability/InternalTypeMethodCodeFixProvider.cs'; Find = '&& await GetKeptReasonAsync(context.Document, method, model, context.CancellationToken).ConfigureAwait(false) is not null)'; Replace = '&& false)'; Tests = 'InternalTypeMethodTests' }
     )
 }

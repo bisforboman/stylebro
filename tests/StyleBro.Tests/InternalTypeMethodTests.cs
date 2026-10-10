@@ -656,8 +656,8 @@ public class InternalTypeMethodTests
         {
             TestCode = Library,
             FixedCode = Library,
-            NumberOfIncrementalIterations = 1,
-            NumberOfFixAllIterations = 1,
+            NumberOfIncrementalIterations = 0,
+            NumberOfFixAllIterations = 0,
             CodeFixTestBehaviors = CodeFixTestBehaviors.SkipFixAllInDocumentCheck,
         };
         foreach (var state in new[] { test.TestState, test.FixedState })

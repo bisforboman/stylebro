@@ -37,11 +37,14 @@ public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
     public override FixAllProvider GetFixAllProvider() => RenameFixAllProvider.Instance;
 
     /// <inheritdoc/>
-    public override Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
         {
-            if (!diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName))
+            // A rename the fix keeps on purpose (CamelCaseRenamer.GetKeptReasonAsync) offers no action: applying it would
+            // change nothing, and a hand-made rename breaks what the check protects.
+            if (!diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName)
+                || await CamelCaseRenamer.GetKeptReasonAsync(context.Document.Project.Solution, context.Document, diagnostic, context.CancellationToken).ConfigureAwait(false) is not null)
             {
                 continue;
             }
@@ -53,8 +56,6 @@ public sealed class CamelCaseNamingCodeFixProvider : CodeFixProvider
                     equivalenceKey: nameof(CamelCaseNamingCodeFixProvider) + diagnostic.Id),
                 diagnostic);
         }
-
-        return Task.CompletedTask;
     }
 
     /// <summary>Collects every diagnostic in the scope and renames them all in one pass.</summary>

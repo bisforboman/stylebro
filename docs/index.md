@@ -6,7 +6,9 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 > StyleCop writes you a ticket. StyleBro just fixes it. Rule IDs use the `BRO` prefix.
 
 - **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent,
-  and they converge in a single pass.
+  and they converge in a single pass. One exception, on purpose: a rename that would break code only the fix can see
+  (a name read by reflection, used in generated code) keeps its warning, and `stylebro-migrate format` lists it with
+  the reason ([Findings kept on purpose](getting-started.md#findings-kept-on-purpose)).
 - **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, StyleBro uses that rule instead
   of shipping a copy: the preset sets its options and `stylebro-migrate init` turns it on in `.editorconfig`.
 - **Configurable through `.editorconfig`**, with a recommended preset shipped in the package.

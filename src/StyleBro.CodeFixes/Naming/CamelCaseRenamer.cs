@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -23,72 +24,43 @@ namespace StyleBro.CodeFixes.Naming;
 /// </summary>
 internal static class CamelCaseRenamer
 {
+    private static readonly ConditionalWeakTable<Solution, Task<NamesInCode>> NamesCache = new();
+
     public static async Task<Solution> RenameAsync(
         Solution solution,
         IEnumerable<(Document Document, Diagnostic Diagnostic)> items,
         CancellationToken cancellationToken)
     {
         var changes = new Dictionary<string, List<TextChange>>();
-        HashSet<string>? strings = null;
         var done = new HashSet<(string File, int Start)>();
-        var namespaces = new List<(string, string)>();
+        var namespaces = new List<(string, string, Diagnostic)>();
         var keptTypes = new Dictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
         foreach (var (document, diagnostic) in items)
         {
             if (diagnostic.Id == DiagnosticIds.NamespacePascalCase)
             {
-                if (diagnostic.Properties.TryGetValue(NamespaceNames.NamespaceKey, out var oldNamespace) && oldNamespace is not null
-                    && diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newPart) && newPart is not null)
+                if (GetNamespaceRename(diagnostic) is { } rename)
                 {
-                    namespaces.Add((oldNamespace, newPart));
+                    namespaces.Add((rename.OldName, rename.NewName, diagnostic));
                 }
 
                 continue;
             }
 
-            if (!diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName) || newName is null
+            if (!diagnostic.Properties.ContainsKey(CamelCaseNamingAnalyzer.NewNameKey)
                 || !done.Add((GetFileKey(document), diagnostic.Location.SourceSpan.Start)))
             {
                 continue;
             }
 
-            // Every copy of the file: '#if' code can hold references that only one target framework sees. All or nothing:
-            // when one copy's rename isn't safe (another project sees an override or a clash there), the other copies'
-            // edits would rename the shared file without it (Polly: an abstract member renamed, the test project's
-            // override left behind).
-            var itemChanges = new List<(string File, TextChange Change)>();
-            var safe = true;
-            foreach (var id in document.GetLinkedDocumentIds().Add(document.Id))
+            var (itemChanges, reason) = await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false);
+            if (reason is { } kept)
             {
-                var copy = solution.GetDocument(id);
-                if (copy is null
-                    || await copy.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
-                    || await copy.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model)
-                {
-                    continue;
-                }
-
-                var token = root.FindToken(diagnostic.Location.SourceSpan.Start);
-                if (token.Span != diagnostic.Location.SourceSpan
-                    || token.Parent is not { } declaration
-                    || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol)
-                {
-                    continue;
-                }
-
-                if ((IsReachableByName(symbol)
-                        && IsInStrings(symbol, strings ??= await GetStringLiteralsAsync(solution, cancellationToken, withNameof: true).ConfigureAwait(false)))
-                    || (symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, strings!, keptTypes))
-                    || await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, PublicApi.IsRenameAllowed(copy.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), cancellationToken).ConfigureAwait(false) is not { } symbolChanges)
-                {
-                    safe = false;
-                    break;
-                }
-
-                itemChanges.AddRange(symbolChanges);
+                KeptFindings.Record(diagnostic, kept);
+                continue;
             }
 
-            foreach (var (file, change) in safe ? itemChanges : new List<(string File, TextChange Change)>())
+            foreach (var (file, change) in itemChanges)
             {
                 if (!changes.TryGetValue(file, out var list))
                 {
@@ -131,6 +103,28 @@ internal static class CamelCaseRenamer
     }
 
     /// <summary>
+    /// Why the fix leaves the diagnostic on purpose, or null when it renames it: the same checks as
+    /// <see cref="RenameAsync"/>. The analyzer doesn't report what it can see is unsafe; these are the reasons it can't
+    /// see (strings, nameof and overrides in other projects, generated code).
+    /// </summary>
+    public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, Document document, Diagnostic diagnostic, CancellationToken cancellationToken)
+    {
+        if (diagnostic.Id == DiagnosticIds.NamespacePascalCase)
+        {
+            return GetNamespaceRename(diagnostic) is { } rename
+                ? (await NamespaceRenamer.GetChangesAsync(solution, rename.OldName, rename.NewName, cancellationToken).ConfigureAwait(false)).Reason
+                : null;
+        }
+
+        var keptTypes = new Dictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
+        return (await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false)).Reason;
+    }
+
+    /// <summary>The string literals and nameof names in the solution, collected once per solution.</summary>
+    internal static Task<NamesInCode> GetNamesInCodeAsync(Solution solution) =>
+        NamesCache.GetValue(solution, s => CollectNamesAsync(s, CancellationToken.None));
+
+    /// <summary>
     /// A physical file and its text: the copies of a multi-targeted file share edits only while their text is the same
     /// ('dotnet format' runs its whitespace and code style fixes first and can leave the copies different; edits found in
     /// one copy don't fit the other's text). See <see cref="LinkedFileFixAllProvider"/>.
@@ -141,17 +135,83 @@ internal static class CamelCaseRenamer
         return (document.FilePath ?? document.Id.Id.ToString()) + "|" + Convert.ToBase64String(text.GetChecksum().ToArray());
     }
 
+    private static (string OldName, string NewName)? GetNamespaceRename(Diagnostic diagnostic) =>
+        diagnostic.Properties.TryGetValue(NamespaceNames.NamespaceKey, out var oldNamespace) && oldNamespace is not null
+        && diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newPart) && newPart is not null
+            ? (oldNamespace, newPart)
+            : null;
+
+    /// <summary>The edits for one diagnostic, in every copy of its file, or why it's kept.</summary>
+    private static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason)> GetItemChangesAsync(
+        Solution solution,
+        Document document,
+        Diagnostic diagnostic,
+        Dictionary<ISymbol, bool> keptTypes,
+        CancellationToken cancellationToken)
+    {
+        var itemChanges = new List<(string File, TextChange Change)>();
+        if (!diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newName) || newName is null)
+        {
+            return (itemChanges, null);
+        }
+
+        // Every copy of the file: '#if' code can hold references that only one target framework sees. All or nothing:
+        // when one copy's rename isn't safe (another project sees an override or a clash there), the other copies'
+        // edits would rename the shared file without it (Polly: an abstract member renamed, the test project's
+        // override left behind).
+        foreach (var id in document.GetLinkedDocumentIds().Add(document.Id))
+        {
+            var copy = solution.GetDocument(id);
+            if (copy is null
+                || await copy.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
+                || await copy.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model)
+            {
+                continue;
+            }
+
+            var token = root.FindToken(diagnostic.Location.SourceSpan.Start);
+            if (token.Span != diagnostic.Location.SourceSpan
+                || token.Parent is not { } declaration
+                || model.GetDeclaredSymbol(declaration, cancellationToken) is not { } symbol)
+            {
+                continue;
+            }
+
+            var reason = IsReachableByName(symbol) ? FindInCode(symbol, await GetNamesInCodeAsync(solution).ConfigureAwait(false)) : null;
+            if (reason is null && symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, await GetNamesInCodeAsync(solution).ConfigureAwait(false), keptTypes))
+            {
+                reason = KeptReason.OtherPropertyKept;
+            }
+
+            if (reason is not null)
+            {
+                return (itemChanges, reason);
+            }
+
+            var (symbolChanges, kept) = await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, PublicApi.IsRenameAllowed(copy.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), cancellationToken).ConfigureAwait(false);
+            if (kept is not null)
+            {
+                return (itemChanges, kept);
+            }
+
+            itemChanges.AddRange(symbolChanges);
+        }
+
+        return (itemChanges, null);
+    }
+
     /// <summary>
     /// Every string literal in the solution. A field whose name is one of them is left alone: code can reach a private
     /// field by name through reflection, also from other projects the analyzer can't see (Polly's tests read
     /// '_blockedUntil' with GetField), and renaming it would still compile but break at run time. Its diagnostic stays
-    /// for a manual rename. With <paramref name="withNameof"/>, also the names in <c>nameof(...)</c> (BRO1409:
+    /// for a manual rename. Separately, the names in <c>nameof(...)</c> (BRO1409:
     /// <c>GetMethod(nameof(Run))</c> finds public methods only; the naming rules: the rename would change the string, as
     /// with Ocelot's <c>X_RateLimit_Limit = nameof(X_RateLimit_Limit).Replace('_', '-')</c>, an HTTP header name).
     /// </summary>
-    internal static async Task<HashSet<string>> GetStringLiteralsAsync(Solution solution, CancellationToken cancellationToken, bool withNameof = false)
+    private static async Task<NamesInCode> CollectNamesAsync(Solution solution, CancellationToken cancellationToken)
     {
         var strings = new HashSet<string>();
+        var nameofs = new HashSet<string>();
         var documents = new List<Document>();
         foreach (var project in solution.Projects)
         {
@@ -170,17 +230,23 @@ internal static class CamelCaseRenamer
                     {
                         strings.Add(token.ValueText);
                     }
-                    else if (withNameof && token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"
+                    else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"
                         && token.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 1 } invocation)
                     {
-                        strings.Add(invocation.ArgumentList.Arguments[0].Expression.GetLastToken().ValueText);
+                        nameofs.Add(invocation.ArgumentList.Arguments[0].Expression.GetLastToken().ValueText);
                     }
                 }
             }
         }
 
-        return strings;
+        return new NamesInCode(strings, nameofs);
     }
+
+    /// <summary>Whether code can refer to the symbol by a string or a nameof, and which.</summary>
+    private static KeptReason? FindInCode(ISymbol symbol, NamesInCode names) =>
+        IsInStrings(symbol, names.Strings) ? KeptReason.NameInString
+        : IsInStrings(symbol, names.Nameofs) ? KeptReason.NameInNameof
+        : null;
 
     /// <summary>
     /// Whether code can refer to the symbol by a string: a field by its name (GetField("_count")), a type by its name
@@ -211,12 +277,12 @@ internal static class CamelCaseRenamer
     /// format). Then the type's other properties keep theirs too: renaming only some mixes casings and changes only part
     /// of what a serializer reads and writes (Kavita's Koreader DTO: 'percentage' renamed, 'document' and 'progress' kept).
     /// </summary>
-    private static bool HasKeptProperty(INamedTypeSymbol type, HashSet<string> strings, Dictionary<ISymbol, bool> cache)
+    private static bool HasKeptProperty(INamedTypeSymbol type, NamesInCode names, Dictionary<ISymbol, bool> cache)
     {
         if (!cache.TryGetValue(type, out var kept))
         {
             cache[type] = kept = type.GetMembers().OfType<IPropertySymbol>()
-                .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && IsInStrings(p, strings));
+                .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names) is not null);
         }
 
         return kept;
@@ -240,11 +306,11 @@ internal static class CamelCaseRenamer
 
     /// <summary>
     /// The edits that rename <paramref name="symbol"/> (and, for a parameter, the same-named parameters of its
-    /// overrides and implementations), or null when one of them isn't safe to rename. Without
+    /// overrides and implementations), or why not when one of them isn't safe to rename. Without
     /// <paramref name="renamePublicApi"/>, a related member other assemblies see (a public class's implementation of an
     /// internal interface's method) makes the rename unsafe, and a related parameter they see keeps its name.
     /// </summary>
-    private static async Task<List<(string File, TextChange Change)>?> GetChangesAsync(
+    private static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason)> GetChangesAsync(
         Solution solution,
         ISymbol symbol,
         string newName,
@@ -253,6 +319,7 @@ internal static class CamelCaseRenamer
         CancellationToken cancellationToken)
     {
         var oldName = symbol.Name;
+        var result = new List<(string File, TextChange Change)>();
         var symbols = new List<ISymbol> { symbol };
         if (symbol is IParameterSymbol parameter)
         {
@@ -270,11 +337,19 @@ internal static class CamelCaseRenamer
             // 'Run', a library's) would stop doing so. Compared by name, not symbol: another project's view of a
             // multi-targeted library is a different (retargeted) symbol for the same member.
             var renamed = new HashSet<string>(symbols.Select(s => s.OriginalDefinition.ToDisplayString()));
-            if ((!renamePublicApi && symbols.Any(PublicApi.IsVisible))
-                || symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString())))
-                || await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
+            if (!renamePublicApi && symbols.Any(PublicApi.IsVisible))
             {
-                return null;
+                return (result, KeptReason.PublicApi);
+            }
+
+            if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString()))))
+            {
+                return (result, KeptReason.ImplementsAnotherMember);
+            }
+
+            if (await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
+            {
+                return (result, KeptReason.DerivedMemberHasNewName);
             }
         }
         else if (symbol is INamedTypeSymbol type)
@@ -285,7 +360,6 @@ internal static class CamelCaseRenamer
                 .Where(m => !m.IsImplicitlyDeclared));
         }
 
-        var result = new List<(string, TextChange)>();
         foreach (var current in symbols)
         {
             // A related parameter that can't be renamed safely keeps its name (it's then no longer reported either,
@@ -306,11 +380,14 @@ internal static class CamelCaseRenamer
                 var declaration = root.FindToken(location.SourceSpan.Start).Parent;
 
                 // Fields, types and type parameters were checked by their analyzers; references are checked below.
-                if (declaration is null
-                    || (IsMemberScoped(current) && !CamelCaseNames.CanRename(declaration, oldName, newName))
-                    || !await TryAddAsync(solution.GetDocument(tree), location.SourceSpan, newName).ConfigureAwait(false))
+                if (declaration is null || (IsMemberScoped(current) && !CamelCaseNames.CanRename(declaration, oldName, newName)))
                 {
-                    return null;
+                    return (result, KeptReason.NewNameTaken);
+                }
+
+                if (await TryAddAsync(solution.GetDocument(tree), location.SourceSpan, newName).ConfigureAwait(false) is { } declarationKept)
+                {
+                    return (result, declarationKept);
                 }
             }
 
@@ -333,15 +410,20 @@ internal static class CamelCaseRenamer
                     }
 
                     var replacement = await GetReplacementAsync(current, reference.Document, reference.Location.SourceSpan, newName, cancellationToken).ConfigureAwait(false);
-                    if (replacement is null || !await TryAddAsync(reference.Document, reference.Location.SourceSpan, replacement).ConfigureAwait(false))
+                    if (replacement is null)
                     {
-                        return null;
+                        return (result, KeptReason.NewNameMeansSomethingElse);
+                    }
+
+                    if (await TryAddAsync(reference.Document, reference.Location.SourceSpan, replacement).ConfigureAwait(false) is { } referenceKept)
+                    {
+                        return (result, referenceKept);
                     }
                 }
             }
         }
 
-        return result;
+        return (result, null);
 
         async Task<bool> CanRenameAsync(ISymbol related)
         {
@@ -375,7 +457,8 @@ internal static class CamelCaseRenamer
             return false;
         }
 
-        async Task<bool> TryAddAsync(Document? document, TextSpan span, string replacement)
+        // Null when the edit is added, else why it can't be.
+        async Task<KeptReason?> TryAddAsync(Document? document, TextSpan span, string replacement)
         {
             // Generated code can't be renamed with the rest (a tool writes it again): a Razor page's or a source generator's
             // reference would be left behind.
@@ -383,18 +466,18 @@ internal static class CamelCaseRenamer
                 || await document.GetSyntaxTreeAsync(cancellationToken).ConfigureAwait(false) is not { } tree
                 || NamespaceNames.IsGenerated(tree))
             {
-                return false;
+                return KeptReason.GeneratedReference;
             }
 
             // Only ever replace the old name itself ('@Name' included).
             var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
             if (text.ToString(span).TrimStart('@') != oldName)
             {
-                return false;
+                return KeptReason.ReferenceNotByName;
             }
 
             result.Add((GetFileKey(document), new TextChange(span, replacement)));
-            return true;
+            return null;
         }
     }
 
@@ -553,4 +636,20 @@ internal static class CamelCaseRenamer
 
     private static ImmutableArray<ISymbol> GetTypeParameters(ISymbol member) =>
         member is IMethodSymbol method ? method.TypeParameters.CastArray<ISymbol>() : ImmutableArray<ISymbol>.Empty;
+
+    /// <summary>The string literals (and interpolated text) and the names in <c>nameof(...)</c> of a solution.</summary>
+    internal sealed class NamesInCode
+    {
+        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs)
+        {
+            Strings = strings;
+            Nameofs = nameofs;
+        }
+
+        public HashSet<string> Strings { get; }
+
+        public HashSet<string> Nameofs { get; }
+
+        public bool Contains(string name) => Strings.Contains(name) || Nameofs.Contains(name);
+    }
 }

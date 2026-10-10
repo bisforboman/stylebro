@@ -43,7 +43,7 @@ internal static class PreviewCommand
     /// </summary>
     public static int Run(string? command, string[] options, Func<string[], Action<string>, int>? format = null)
     {
-        format ??= FormatCommand.Run;
+        format ??= (a, o) => FormatCommand.Run(a, o);
         var clock = Stopwatch.StartNew();
         var patch = Path.GetFullPath(options.FirstOrDefault(o => o.StartsWith("--diff=", StringComparison.Ordinal))?.Substring("--diff=".Length) ?? DefaultPatch);
         var keep = options.Contains("--keep");
@@ -138,7 +138,7 @@ internal static class PreviewCommand
 
             var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize")).ToList();
             var reportFolder = Path.Combine(temp, "report");
-            Step("Finding what format fixes ('dotnet format --verify-no-changes')", () => format(formatArgs.Concat(new[] { "--verify-no-changes", "--report", reportFolder }).ToArray(), Log));
+            Step("Finding what format fixes ('dotnet format --verify-no-changes')", () => format(formatArgs.Concat(new[] { "--verify-no-changes", "--report", reportFolder, FormatCommand.OnceOption }).ToArray(), Log));
             var reportFile = Path.Combine(reportFolder, "format-report.json");
             if (!File.Exists(reportFile))
             {
@@ -480,6 +480,24 @@ internal static class PreviewCommand
     /// <summary>The conventions init found in the code (from its header to the next empty line), or nothing.</summary>
     public static string DetectedPart(string output) => Part(output, InitCommand.DetectedHeader);
 
+    internal static void Delete(string folder)
+    {
+        try
+        {
+            // git makes its object files read-only.
+            foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+            }
+
+            Directory.Delete(folder, recursive: true);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Console.WriteLine($"Couldn't delete the copy ({e.Message}): {folder}");
+        }
+    }
+
     private static string Part(string output, string firstLine)
     {
         var lines = output.Replace("\r\n", "\n").Split('\n');
@@ -624,23 +642,5 @@ internal static class PreviewCommand
         }
 
         return code == 0 ? 1 : code;
-    }
-
-    private static void Delete(string folder)
-    {
-        try
-        {
-            // git makes its object files read-only.
-            foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-            }
-
-            Directory.Delete(folder, recursive: true);
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            Console.WriteLine($"Couldn't delete the copy ({e.Message}): {folder}");
-        }
     }
 }

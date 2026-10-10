@@ -9,7 +9,9 @@
 #   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
 #      single-target project and not in a netstandard2.0;net10.0 one, which still builds;
 #   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion;
-#   7. a file compiled from the package folder (a source package's contentFiles) isn't checked.
+#   7. a file compiled from the package folder (a source package's contentFiles) isn't checked;
+#   8. a rename the fix keeps on purpose (the name read by reflection in another file): 'stylebro-migrate format' lists it
+#      with its reason, and its --verify-no-changes exits 2 while something is left to fix, then 0 with only it left.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -136,6 +138,24 @@ try {
     Set-Content $vendoredProject ((Get-Content $project -Raw).Replace('</Project>', "  <ItemGroup><Compile Include=`"$(Join-Path $source 'Vendored.cs')`" /></ItemGroup>`n</Project>"))
     Check (-not ((Build @() $vendoredProject) -contains 'BRO1106 Vendored.cs')) 'BRO1106 is not reported in a file under the package folder'
     Check ((Build @('-p:StyleBroPackageFolders=C:/elsewhere') $vendoredProject) -contains 'BRO1106 Vendored.cs') 'with other package folders, it is reported'
+
+    Write-Host '== 8. Findings kept on purpose'
+    $keptRepo = Join-Path $work 'kept'
+    New-Item -ItemType Directory -Force $keptRepo | Out-Null
+    Copy-Item (Join-Path $repo 'nuget.config'), (Join-Path $repo '.editorconfig') $keptRepo
+    Set-Content (Join-Path $keptRepo 'Kept.csproj') (Get-Content $project -Raw)
+    Set-Content (Join-Path $keptRepo 'Counter.cs') "namespace App;`n`ninternal class Counter`n{`n    private int _count;`n    private int _total;`n`n    public int Next() => ++_count + _total++;`n}`n" -NoNewline
+    Set-Content (Join-Path $keptRepo 'Reader.cs') "namespace App;`n`ninternal static class Reader`n{`n    public static object? Read(Counter counter) => typeof(Counter).GetField(`"_count`", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(counter);`n}`n" -NoNewline
+    $migrate = @('run', '--project', (Join-Path $root 'src/StyleBro.Migrate'), '--no-build', '--', 'format', $keptRepo, '--severity', 'warn')
+    dotnet @migrate --verify-no-changes | Out-Host
+    Check ($LASTEXITCODE -eq 2) 'format --verify-no-changes exits 2 while _total can be renamed'
+    $formatted = dotnet @migrate 2>&1 | Out-String
+    $formatted | Out-Host
+    Check ($LASTEXITCODE -eq 0 -and $formatted -match "Counter\.cs\(5,17\): BRO1303 Rename '_count' to 'count'\. Kept: the name is in a string") 'format lists _count as kept on purpose, with the reason'
+    Check ((Get-Content (Join-Path $keptRepo 'Counter.cs') -Raw) -match 'private int _count;\s+private int total;') 'format renamed _total and kept _count'
+    $verified = dotnet @migrate --verify-no-changes 2>&1 | Out-String
+    $verified | Out-Host
+    Check ($LASTEXITCODE -eq 0 -and $verified -match '1 finding kept on purpose') 'format --verify-no-changes exits 0 with only the kept finding left'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue

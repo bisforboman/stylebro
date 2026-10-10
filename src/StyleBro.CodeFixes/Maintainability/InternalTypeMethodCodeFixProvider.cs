@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -25,8 +24,6 @@ namespace StyleBro.CodeFixes.Maintainability;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InternalTypeMethodCodeFixProvider))]
 public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
 {
-    private static readonly ConditionalWeakTable<Solution, Task<HashSet<string>>> Strings = new();
-
     /// <inheritdoc/>
     public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(DiagnosticIds.InternalTypePublicMethod);
 
@@ -34,10 +31,19 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
     public override FixAllProvider GetFixAllProvider() => LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
     /// <inheritdoc/>
-    public override Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
+        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+        var model = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
         foreach (var diagnostic in context.Diagnostics)
         {
+            // A method the fix keeps public on purpose offers no action.
+            if (root?.FindToken(diagnostic.Location.SourceSpan.Start).Parent is MethodDeclarationSyntax method && model is not null
+                && await GetKeptReasonAsync(context.Document, method, model, context.CancellationToken).ConfigureAwait(false) is not null)
+            {
+                continue;
+            }
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     "Declare it internal",
@@ -45,8 +51,20 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
                     equivalenceKey: nameof(InternalTypeMethodCodeFixProvider)),
                 diagnostic);
         }
+    }
 
-        return Task.CompletedTask;
+    /// <summary>
+    /// Why the fix leaves the method public on purpose, or null: its name is in a string or a nameof anywhere in the
+    /// solution, or another project derives from its type.
+    /// </summary>
+    internal static async Task<KeptReason?> GetKeptReasonAsync(Document document, MethodDeclarationSyntax method, SemanticModel model, CancellationToken cancellationToken)
+    {
+        var names = await CamelCaseRenamer.GetNamesInCodeAsync(document.Project.Solution).ConfigureAwait(false);
+        var name = method.Identifier.ValueText;
+        return names.Strings.Contains(name) ? KeptReason.NameInString
+            : names.Nameofs.Contains(name) ? KeptReason.NameInNameof
+            : await HasDerivedTypesElsewhereAsync(model.GetDeclaredSymbol(method, cancellationToken)?.ContainingType, document.Project, cancellationToken).ConfigureAwait(false) ? KeptReason.DerivedTypeInAnotherProject
+            : null;
     }
 
     private static async Task<Document> FixDocumentAsync(Document document, ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken)
@@ -57,18 +75,21 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var solution = document.Project.Solution;
-        var strings = await Strings.GetValue(solution, s => CamelCaseRenamer.GetStringLiteralsAsync(s, CancellationToken.None, withNameof: true)).ConfigureAwait(false);
         var changes = new List<TextChange>();
-        foreach (var span in diagnostics.Select(d => d.Location.SourceSpan).Distinct())
+        foreach (var diagnostic in diagnostics.GroupBy(d => d.Location.SourceSpan).Select(g => g.First()))
         {
+            var span = diagnostic.Location.SourceSpan;
             if (span.End > root.FullSpan.End
                 || root.FindToken(span.Start).Parent is not MethodDeclarationSyntax method
                 || InternalTypeMethods.GetPublicKeyword(method, model, cancellationToken) is not { } keyword
-                || keyword.Span != span
-                || strings.Contains(method.Identifier.ValueText)
-                || await HasDerivedTypesElsewhereAsync(model.GetDeclaredSymbol(method, cancellationToken)?.ContainingType, document.Project, cancellationToken).ConfigureAwait(false))
+                || keyword.Span != span)
             {
+                continue;
+            }
+
+            if (await GetKeptReasonAsync(document, method, model, cancellationToken).ConfigureAwait(false) is { } kept)
+            {
+                KeptFindings.Record(diagnostic, kept);
                 continue;
             }
 
