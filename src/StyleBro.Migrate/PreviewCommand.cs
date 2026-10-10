@@ -148,39 +148,47 @@ internal static class PreviewCommand
             }
 
             var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.Option)).ToList();
+
+            // The first run's report says what format fixes (a '--verify-no-changes' run first reported the same, at the
+            // cost of a whole run). Later runs are FormatCommand.NextRun's.
             var reportFolder = Path.Combine(temp, "report");
-            Step("Finding what format fixes ('dotnet format --verify-no-changes')", () => format(formatArgs.Concat(new[] { "--verify-no-changes", "--report", reportFolder, FormatCommand.OnceOption }).ToArray(), Log));
             var reportFile = Path.Combine(reportFolder, "format-report.json");
-            if (!File.Exists(reportFile))
-            {
-                Console.Error.WriteLine("'dotnet format' wrote no report.");
-                return Fail(tail, 1);
-            }
-
-            // A project that didn't load would show up as missing changes (a broken package cache: 58 files of side effects).
-            if (incomplete is not null)
-            {
-                Console.Error.WriteLine($"The preview stopped. {incomplete}");
-                Console.Error.WriteLine("  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
-                return Fail(tail, 1);
-            }
-
-            var notLoaded = NotLoadedWarning(File.ReadAllText(reportFile));
-            if (notLoaded is not null)
-            {
-                Console.WriteLine(notLoaded);
-            }
-
+            string? notLoaded = null;
             var changed = new List<bool>();
             var tree = Tree(copy);
             for (var run = 1; run <= MaxRuns; run++)
             {
                 var code = 0;
-                Step($"Format run {run}", () => code = format(formatArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
+                var runArgs = run == 1 ? formatArgs.Concat(new[] { "--report", reportFolder }) : FormatCommand.NextRun(formatArgs.ToArray());
+                Step($"Format run {run}", () => code = format(runArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
+
+                // A project that didn't load would show up as missing changes (a broken package cache: 58 files of side effects).
+                if (incomplete is not null)
+                {
+                    Console.Error.WriteLine($"The preview stopped. {incomplete}");
+                    Console.Error.WriteLine("  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
+                    return Fail(tail, 1);
+                }
+
                 if (code != 0)
                 {
                     Console.Error.WriteLine($"'stylebro-migrate format' failed (exit code {code}).");
                     return Fail(tail, code);
+                }
+
+                if (run == 1)
+                {
+                    if (!File.Exists(reportFile))
+                    {
+                        Console.Error.WriteLine("'dotnet format' wrote no report.");
+                        return Fail(tail, 1);
+                    }
+
+                    notLoaded = NotLoadedWarning(File.ReadAllText(reportFile));
+                    if (notLoaded is not null)
+                    {
+                        Console.WriteLine(notLoaded);
+                    }
                 }
 
                 var next = Tree(copy);

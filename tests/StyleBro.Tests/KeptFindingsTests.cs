@@ -174,15 +174,18 @@ public class KeptFindingsTests
         var root = NewFolder();
         var lines = new List<string>();
         var run = 0;
+        var restores = new List<int>();
 
         var code = FormatCommand.Run(new[] { root }, lines.Add, (args, _) =>
         {
+            restores.Add(args.Count(a => a == "--no-restore") + (10 * args.Count(a => a == FormatCommand.CheckFirstOption)));
             File.WriteAllText(Path.Combine(root, "C.cs"), new string('x', ++run));
             return 0;
         });
 
         Assert.Equal(FormatCommand.NotCleanExitCode, code);
         Assert.Equal(FormatCommand.MaxRuns, run);
+        Assert.Equal(new[] { 0, 11, 11 }, restores); // only the first run restores; the later ones check first, once
         Assert.Contains(lines, l => l.StartsWith("Not clean: still changing", StringComparison.Ordinal));
     }
 

@@ -1222,10 +1222,11 @@ public sealed partial class MigrationTests : IDisposable
                     [ { "FilePath": "{{c}}", "FileChanges": [ { "LineNumber": 1, "CharNumber": 11, "DiagnosticId": "BRO1001" } ] },
                       { "FilePath": "{{d}}", "FileChanges": [ { "LineNumber": 1, "CharNumber": 10, "DiagnosticId": "WHITESPACE" } ] } ]
                     """);
-                return 2;
             }
 
-            runs++;
+            // The first run reports what it fixes; the next ones skip the restore the first did.
+            Assert.Equal(++runs == 1, report >= 0);
+            Assert.Equal(runs > 1, args.Contains("--no-restore") && args.Contains(FormatCommand.CheckFirstOption));
             File.WriteAllText(Path.Combine(folder, "C.cs"), "class C { int a; int b; }\n");
             File.WriteAllText(Path.Combine(folder, "D.cs"), "class D { }\n");
             return 0;
@@ -1248,6 +1249,17 @@ public sealed partial class MigrationTests : IDisposable
         Assert.True(Directory.Exists(kept));
         DeleteFolder(Path.GetDirectoryName(kept)!);
         DeleteFolder(Path.GetDirectoryName(patch)!);
+    }
+
+    [Fact]
+    public void Format_CleanCheck_NeedsEveryFrameworkCleanAndLoaded()
+    {
+        IReadOnlyList<string> quiet = new[] { "Warnings were encountered while loading the workspace." };
+        IReadOnlyList<string> skipped = new[] { "  Required references did not load for Lib or referenced project. Run `dotnet restore` prior to formatting." };
+
+        Assert.True(FormatCommand.IsCleanCheck(new[] { (0, quiet), (0, (IReadOnlyList<string>)Array.Empty<string>()) }));
+        Assert.False(FormatCommand.IsCleanCheck(new[] { (0, quiet), (FormatCommand.NotCleanExitCode, quiet) })); // one would change files
+        Assert.False(FormatCommand.IsCleanCheck(new[] { (0, quiet), (0, skipped) })); // a project that didn't load proves nothing
     }
 
     [Fact]
