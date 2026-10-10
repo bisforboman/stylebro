@@ -52,5 +52,13 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '|| all.All(s.Value.Contains)'; Replace = '|| true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/InitCommand.cs'; Find = 'if (!EnforcesCodeStyleInBuild(root))'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'if (NoNewlineAfter(''-'') != NoNewlineAfter(''+''))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
+
+        # For agents (2026-10-10): --json, format --files, the AGENTS.md section
+        @{ File = 'src/StyleBro.Migrate/Program.cs'; Find = 'Console.SetOut(Console.Error);'; Replace = ''; Tests = 'MigrationTests.Json_Main' }
+        @{ File = 'src/StyleBro.Migrate/JsonReport.cs'; Find = 'if (afterSetting)'; Replace = 'if (false)'; Tests = 'MigrationTests.Json_Init' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'var runArgs = report is null ? args : args.Concat(new[] { "--report", report }).ToArray();'; Replace = 'var runArgs = args;'; Tests = 'MigrationTests.Json_Format' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative)'; Replace = 'false'; Tests = 'MigrationTests.Files_' }
+        @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (optOut)'; Replace = 'if (false)'; Tests = 'MigrationTests.AgentsMd_' }
+        @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (changed)'; Replace = 'if (true)'; Tests = 'MigrationTests.AgentsMd_' }
     )
 }

@@ -261,6 +261,10 @@ code 2) when formatting would change a file. Findings kept on purpose don't fail
 `dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
 there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md).
 
+`init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding agents (`--no-agents-md` leaves it
+alone). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
+[Scripts and AI agents](agents.md).
+
 ## B. Coming from StyleCop
 
 Still deciding? [StyleBro vs StyleCop](stylebro-vs-stylecop.md) compares the two with measured numbers.

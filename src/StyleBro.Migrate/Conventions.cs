@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -425,6 +426,14 @@ internal static class Conventions
             }
 
             report.Add($"  {tag,-8} {convention.What}: {found} -> {verdict}");
+            JsonReport.Add("conventions", new JsonObject
+            {
+                ["key"] = convention.Key,
+                ["what"] = convention.What,
+                ["counts"] = new JsonObject { [convention.Values[0].Value] = count[0], [convention.Values[1].Value] = count[1] },
+                ["verdict"] = tag == "too few" ? "tooFew" : tag,
+                ["result"] = verdict,
+            });
         }
 
         report.AddRange(Summary(kept, matched, turnedOff, tooFew));

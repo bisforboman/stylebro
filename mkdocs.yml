@@ -44,6 +44,10 @@ theme:
 plugins:
   - search
 
+# llms.txt and llms-full.txt for agents (fails the build when a rule page is missing from llms.txt).
+hooks:
+  - scripts/mkdocs_llms.py
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -199,6 +203,7 @@ nav:
       - Settings: configuration.md
       - Baseline: baseline.md
       - CI: ci.md
+      - Scripts and AI agents: agents.md
       - Modernizing: modernizing.md
   - StyleCop:
       - StyleBro vs StyleCop: stylebro-vs-stylecop.md

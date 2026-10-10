@@ -75,6 +75,14 @@ in generated code, ...): don't change those by hand without checking the uses; s
 `--verify-no-changes` changes nothing and exits 0 when only such findings are left, 2 when formatting would change a
 file: the check for CI and AI agents (plain `dotnet format --verify-no-changes` fails on kept findings too).
 
+## Scripts and AI agents
+
+`format --files a.cs b.cs` formats only those files, loading just the project each belongs to (seconds after a small
+edit). Every command takes `--json`: one JSON object on stdout (settings, conventions, runs, changes per rule, kept
+findings with reasons, clean, exit code), the text on stderr. `init --write` and `--write` also put a StyleBro section
+into `AGENTS.md` (`--no-agents-md` leaves it alone). Details and the JSON fields:
+[Scripts and AI agents](https://bisforboman.github.io/stylebro/agents/).
+
 ## Preview
 
 ```

@@ -61,6 +61,9 @@ internal static class FormatCommand
     /// <summary>The start of the line that says a project wasn't formatted at all (<see cref="Incomplete"/>).</summary>
     public const string IncompleteMarker = "Incomplete:";
 
+    /// <summary>The option that formats only the files named after it (for agents: seconds on a small change).</summary>
+    public const string FilesOption = "--files";
+
     /// <summary>The start of the line that says which rules a run fixes (printed for the first run only).</summary>
     private const string FixingHeader = "Fixing StyleBro's rules";
 
@@ -85,48 +88,105 @@ internal static class FormatCommand
             return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
         }
 
+        var (files, rest) = TakeFiles(args);
+        if (files is not null)
+        {
+            return RunFiles(files, rest, log, output, runOnce);
+        }
+
         var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
         var root = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
-        if (args.Contains("--verify-no-changes"))
+        if (JsonReport.Current is { } json && json["path"] is null)
         {
-            return Verify(args, root, log, runOnce);
+            json["path"] = root;
         }
 
-        var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
-        using var kept = new KeptVariable(keptFile);
-        for (var run = 1; ; run++)
+        var exit = args.Contains("--verify-no-changes") ? Verify(args, root, log, runOnce) : Repeat(args, root, log, output, runOnce);
+        JsonReport.Set("clean", exit == 0);
+        return exit;
+    }
+
+    /// <summary>The files after '--files' (up to the next option), and the other arguments; null when there's no '--files'.</summary>
+    public static (List<string>? Files, string[] Others) TakeFiles(string[] args)
+    {
+        var at = Array.IndexOf(args, FilesOption);
+        if (at < 0)
         {
-            File.Delete(keptFile);
-            var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, (long, DateTime)>();
+            return (null, args);
+        }
 
-            // What it fixes and the framework list are said once, not every run.
-            var code = runOnce(args, run == 1 ? output : line =>
+        var files = args.Skip(at + 1).TakeWhile(a => !a.StartsWith("-", StringComparison.Ordinal)).ToList();
+        return (files, args.Take(at).Concat(args.Skip(at + 1 + files.Count)).ToArray());
+    }
+
+    /// <summary>
+    /// '--files': which workspace each file is formatted in, with the files relative to its folder (for '--include').
+    /// <paramref name="workspace"/>: the folder, solution or project named on the command line; without one, each file's
+    /// nearest project file above it. A file path is relative to <paramref name="currentDirectory"/>, or else to the git
+    /// repository's root. Null (with the error said) when a file isn't found, has no project, or is outside the workspace.
+    /// </summary>
+    public static List<(string Workspace, List<string> Include)>? GroupFiles(IEnumerable<string> files, string? workspace, string currentDirectory, Action<string> error)
+    {
+        var repository = RepositoryRoot(currentDirectory) ?? currentDirectory;
+        var groups = new List<(string Workspace, List<string> Include)>();
+        foreach (var file in files)
+        {
+            var full = new[] { currentDirectory, repository }.Select(b => Path.GetFullPath(file, b)).FirstOrDefault(File.Exists);
+            if (full is null)
             {
-                if (!line.StartsWith(FixingHeader, StringComparison.Ordinal) && !line.StartsWith(MultiTargetedHeader, StringComparison.Ordinal))
-                {
-                    log(line);
-                }
-            });
-            if (code != 0)
-            {
-                return code;
+                error($"--files: not found: {file}");
+                return null;
             }
 
-            var changed = ChangedFiles(before, Snapshot(root));
-            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count == 0 ? ", clean." : ":")}");
-            ListFiles(root, changed, 10).ForEach(log);
-            if (changed.Count == 0)
+            var target = workspace is null ? NearestProject(Path.GetDirectoryName(full)!, repository) : Path.GetFullPath(workspace, currentDirectory);
+            if (target is null)
             {
-                KeptSummary(ReadKept(keptFile, root, root), root).ForEach(log);
-                return 0;
+                error($"--files: no project file above {file}.");
+                return null;
             }
 
-            if (run == MaxRuns)
+            var folder = Directory.Exists(target) ? target : Path.GetDirectoryName(target)!;
+            var relative = Path.GetRelativePath(folder, full);
+            if (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative))
             {
-                log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
-                return NotCleanExitCode;
+                error($"--files: {file} isn't under {folder}.");
+                return null;
+            }
+
+            var group = groups.FindIndex(g => g.Workspace.Equals(target, StringComparison.OrdinalIgnoreCase));
+            if (group < 0)
+            {
+                groups.Add((target, new List<string>()));
+                group = groups.Count - 1;
+            }
+
+            groups[group].Include.Add(relative.Replace('\\', '/'));
+        }
+
+        return groups;
+    }
+
+    /// <summary>
+    /// The nearest project file at or above the folder, up to <paramref name="top"/> (the first by name when a folder has
+    /// several), or null.
+    /// </summary>
+    public static string? NearestProject(string folder, string top)
+    {
+        // ponytail: a file a project includes from elsewhere ('<Compile Include="../x.cs"/>') is looked up by folder only.
+        for (var current = new DirectoryInfo(folder); current is not null; current = current.Parent)
+        {
+            if (current.GetFiles("*.csproj").OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault() is { } project)
+            {
+                return project.FullName;
+            }
+
+            if (Path.TrimEndingDirectorySeparator(current.FullName).Equals(Path.TrimEndingDirectorySeparator(Path.GetFullPath(top)), StringComparison.OrdinalIgnoreCase))
+            {
+                break;
             }
         }
+
+        return null;
     }
 
     /// <summary>
@@ -395,6 +455,95 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
+    /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.
+    /// </summary>
+    private static int RunFiles(List<string> files, string[] rest, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce)
+    {
+        var hasPath = rest.Length > 0 && !rest[0].StartsWith("-", StringComparison.Ordinal);
+        if (files.Count == 0)
+        {
+            log($"{FilesOption}: name the files to format.");
+            return 1;
+        }
+
+        var groups = GroupFiles(files, hasPath ? rest[0] : null, Environment.CurrentDirectory, log);
+        if (groups is null)
+        {
+            return 1;
+        }
+
+        if (JsonReport.Current is { } json && json["path"] is null)
+        {
+            json["path"] = RepositoryRoot(Environment.CurrentDirectory) ?? Environment.CurrentDirectory;
+        }
+
+        var exit = 0;
+        foreach (var (workspace, include) in groups)
+        {
+            var arguments = new[] { workspace }.Concat(rest.Skip(hasPath ? 1 : 0)).Append("--include").Concat(include).ToArray();
+            var root = Directory.Exists(workspace) ? workspace : Path.GetDirectoryName(workspace)!;
+            var code = arguments.Contains("--verify-no-changes") ? Verify(arguments, root, log, runOnce) : Repeat(arguments, root, log, output, runOnce);
+            exit = exit == 0 ? code : exit;
+        }
+
+        JsonReport.Set("clean", exit == 0);
+        return exit;
+    }
+
+    /// <summary>Runs 'dotnet format' until a run changes no file (at most <see cref="MaxRuns"/>), then lists the kept findings.</summary>
+    private static int Repeat(string[] args, string root, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce)
+    {
+        var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
+        using var kept = new KeptVariable(keptFile);
+        for (var run = 1; ; run++)
+        {
+            File.Delete(keptFile);
+            var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, (long, DateTime)>();
+
+            // --json: each run's changes per rule come from its own report.
+            var report = JsonReport.Current is null ? null : Path.Combine(Path.GetTempPath(), $"stylebro-format-json-{Guid.NewGuid():N}");
+            var runArgs = report is null ? args : args.Concat(new[] { "--report", report }).ToArray();
+
+            // What it fixes and the framework list are said once, not every run.
+            var code = runOnce(runArgs, run == 1 ? output : line =>
+            {
+                if (!line.StartsWith(FixingHeader, StringComparison.Ordinal) && !line.StartsWith(MultiTargetedHeader, StringComparison.Ordinal))
+                {
+                    log(line);
+                }
+            });
+            var changed = ChangedFiles(before, Snapshot(root));
+            if (report is not null)
+            {
+                JsonReport.AddRun(run, changed, Path.Combine(report, "format-report.json"));
+                PreviewCommand.Delete(report);
+            }
+
+            if (code != 0)
+            {
+                return code;
+            }
+
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count == 0 ? ", clean." : ":")}");
+            ListFiles(root, changed, 10).ForEach(log);
+            if (changed.Count == 0)
+            {
+                var keptFindings = ReadKept(keptFile, root, root);
+                JsonReport.AddKept(keptFindings);
+                KeptSummary(keptFindings, root).ForEach(log);
+                return 0;
+            }
+
+            if (run == MaxRuns)
+            {
+                log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
+                return NotCleanExitCode;
+            }
+        }
+    }
+
+    /// <summary>
     /// --verify-no-changes: 'dotnet format --verify-no-changes' fails on every finding it would hand to a fix, also those a
     /// StyleBro fix leaves on purpose, so a loop "until clean" never ends. When it fails, this formats a temporary copy of
     /// the repository (the fixes only run when files are written) and decides by the copy: no file changed means only
@@ -444,7 +593,9 @@ internal static class FormatCommand
                 kept = ReadKept(keptFile, copy, source);
             }
 
-            var changed = ChangedFiles(before, Snapshot(copy)).Count;
+            var changedFiles = ChangedFiles(before, Snapshot(copy));
+            var changed = changedFiles.Count;
+            JsonReport.AddRun(1, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))), null);
             if (copyCode != 0 || changed > 0)
             {
                 lines.ForEach(log);
@@ -454,6 +605,7 @@ internal static class FormatCommand
                 return code;
             }
 
+            JsonReport.AddKept(kept);
             var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
             lines.Where(l => !IsKeptLine(l, keys)).ToList().ForEach(log);
             KeptSummary(kept, root).ForEach(log);

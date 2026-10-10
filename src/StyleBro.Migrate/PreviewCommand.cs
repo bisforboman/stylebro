@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace StyleBro.Migrate;
@@ -122,12 +123,16 @@ internal static class PreviewCommand
 
             if (command != "format")
             {
-                var settings = Settings(command, target, rest.Contains("--modernize"), profile, Log);
+                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.OptOut), profile, Log);
                 if (settings != 0)
                 {
                     return Fail(tail, settings);
                 }
             }
+
+            // The settings step wrote to the copy: the report describes the repository, which isn't written.
+            JsonReport.Set("path", source);
+            JsonReport.Set("write", false);
 
             var package = AddPackage(File.Exists(target) ? Path.GetDirectoryName(target)! : target);
             Commit(copy, "settings");
@@ -142,7 +147,7 @@ internal static class PreviewCommand
                 Console.WriteLine($"  StyleBro.Analyzers wasn't referenced: added {package} for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).");
             }
 
-            var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize")).ToList();
+            var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.OptOut)).ToList();
             var reportFolder = Path.Combine(temp, "report");
             Step("Finding what format fixes ('dotnet format --verify-no-changes')", () => format(formatArgs.Concat(new[] { "--verify-no-changes", "--report", reportFolder, FormatCommand.OnceOption }).ToArray(), Log));
             var reportFile = Path.Combine(reportFolder, "format-report.json");
@@ -180,6 +185,7 @@ internal static class PreviewCommand
 
                 var next = Tree(copy);
                 changed.Add(next != tree);
+                JsonReport.AddRun(run, Git(copy, "diff", "--name-only", tree, next).Output.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.Combine(source, f.Trim())), null);
                 tree = next;
                 if (!changed[^1])
                 {
@@ -189,6 +195,9 @@ internal static class PreviewCommand
 
             var files = Changed(copy, configured);
             var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetFileName(temp) + "/" + Path.GetFileName(copy), files.Keys, f => WhitespaceOnly(copy, configured, f));
+            JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
+            JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
+            JsonReport.Set("clean", !changed[^1]);
             Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed));
             foreach (var (id, file, line) in Samples(attribution, 3))
             {
@@ -200,6 +209,7 @@ internal static class PreviewCommand
             }
 
             Git(copy, "diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline);
+            JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
             if (notLoaded is not null)
@@ -454,6 +464,7 @@ internal static class PreviewCommand
         foreach (var (added, file) in NumStat(Git(copy, "diff", "--numstat", from, to).Output))
         {
             if (file.EndsWith(".editorconfig", StringComparison.OrdinalIgnoreCase) || Path.GetFileName(file).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase)
+                || file.Equals(AgentsFile.FileName, StringComparison.Ordinal)
                 || Path.GetFileName(file).Equals("Directory.Packages.props", StringComparison.OrdinalIgnoreCase))
             {
                 var addedText = Git(copy, "diff", "-U0", from, to, "--", file).Output;
@@ -601,7 +612,7 @@ internal static class PreviewCommand
     /// Init's or the migration's '--write' on the copy; their output goes to the log (the dry run prints it), except the
     /// Sonar part of the report: which Sonar rules turned on which rules.
     /// </summary>
-    private static int Settings(string? command, string target, bool modernize, string? profile, Action<string> log)
+    private static int Settings(string? command, string target, bool modernize, bool noAgentsMd, string? profile, Action<string> log)
     {
         var original = Console.Out;
         using var writer = new StringWriter();
@@ -609,7 +620,9 @@ internal static class PreviewCommand
         int code;
         try
         {
-            var sonar = profile is null ? Array.Empty<string>() : new[] { Program.SonarProfileOption, Path.GetFullPath(profile) };
+            var sonar = (profile is null ? Array.Empty<string>() : new[] { Program.SonarProfileOption, Path.GetFullPath(profile) })
+                .Concat(noAgentsMd ? new[] { AgentsFile.OptOut } : Array.Empty<string>())
+                .ToArray();
             code = command == "init"
                 ? InitCommand.Run(new[] { target, "--write" }.Concat(modernize ? new[] { "--modernize" } : Array.Empty<string>()).Concat(sonar).ToArray())
                 : Program.Migrate(new[] { target, "--write" }.Concat(sonar).ToArray());
