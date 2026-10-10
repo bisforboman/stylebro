@@ -24,9 +24,11 @@ internal static class Suppressions
 
     /// <summary>
     /// <paramref name="replacements"/> (StyleCop's) plus Sonar's: each Sonar rule the mapping knows, to the rules that fix
-    /// what it reports (a team that suppressed S2325 doesn't want CA1822's fix there either).
+    /// what it reports (a team that suppressed S2325 doesn't want CA1822's fix there either). With <paramref name="sonar"/>,
+    /// only the Sonar rules that are on: an off one turns nothing on, so its suppressions need no replacing id (linkdotnet/Blog
+    /// had S8969 off and in NoWarn, and BRO1147 was added next to it).
     /// </summary>
-    public static SortedDictionary<string, SortedSet<string>> WithSonar(IReadOnlyDictionary<string, SortedSet<string>> replacements)
+    public static SortedDictionary<string, SortedSet<string>> WithSonar(IReadOnlyDictionary<string, SortedSet<string>> replacements, SonarSetup? sonar = null)
     {
         var all = new SortedDictionary<string, SortedSet<string>>(StringComparer.Ordinal);
         foreach (var (id, ids) in replacements)
@@ -34,7 +36,7 @@ internal static class Suppressions
             all[id] = new SortedSet<string>(ids, StringComparer.Ordinal);
         }
 
-        foreach (var row in SonarSetup.Mapping)
+        foreach (var row in SonarSetup.Mapping.Where(m => sonar?.IsOn(m.Sonar) ?? true))
         {
             if (!all.TryGetValue(row.Sonar, out var ids))
             {

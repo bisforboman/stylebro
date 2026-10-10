@@ -171,7 +171,7 @@ internal static class Program
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored)}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var suppressions = RewriteSuppressions(root, Suppressions.WithSonar(result.Replacements), write);
+        var suppressions = RewriteSuppressions(root, Suppressions.WithSonar(result.Replacements, sonar), write);
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
