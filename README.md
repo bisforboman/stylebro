@@ -41,7 +41,7 @@ Where the preset and the rules differ from StyleCop's defaults, and how to get S
 ## Usage
 
 ```xml
-<PackageReference Include="StyleBro.Analyzers" Version="0.3.0-alpha.1" PrivateAssets="all" />
+<PackageReference Include="StyleBro.Analyzers" Version="0.4.0-alpha.1" PrivateAssets="all" />
 ```
 
 Then, once per repository, turn on the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036

@@ -11,19 +11,19 @@ Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your pro
 
 ### Which version
 
-The latest release on nuget.org is **0.3.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
+The latest release on nuget.org is **0.4.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
 that exact version. Everything on this page is in it. To try the code on `main` before the next release, build both
-packages from a clone into a local folder (any version string works; `0.3.0-dev.1` here):
+packages from a clone into a local folder (any version string works; `0.4.0-dev.1` here):
 
 ```
 git clone https://github.com/bisforboman/stylebro
-dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.3.0-dev.1
-dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.3.0-dev.1
-dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.3.0-dev.1
+dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.4.0-dev.1
+dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.4.0-dev.1
+dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.4.0-dev.1
 ```
 
 Then add the folder as a package source in your repository's `nuget.config`
-(`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.3.0-dev.1` wherever this page says `0.3.0-alpha.1`.
+(`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.4.0-dev.1` wherever this page says `0.4.0-alpha.1`.
 
 ## Preview first
 
@@ -47,7 +47,7 @@ folder, `--project MySolution.sln` names the one to format. FFMpegCore, `stylebr
 Previewing 'stylebro-migrate init --write' and 'stylebro-migrate format' on a copy; nothing in C:\src\FFMpegCore changes.
 Copying the repository to C:\Users\me\AppData\Local\Temp\stylebro-preview-fmsw0dps.3qa\FFMpegCore... 0s
 Settings: 31 lines in .editorconfig; 3 lines in Directory.Build.props (StyleBro.Analyzers)
-  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.3.0-alpha.1 to Directory.Build.props for the preview, as docs/getting-started.md says (the patch includes it).
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.4.0-alpha.1 to Directory.Build.props for the preview, as docs/getting-started.md says (the patch includes it).
 Finding what format fixes ('dotnet format --verify-no-changes')... 16s
 Format run 1... 29s
 Format run 2... 14s
@@ -80,7 +80,7 @@ Add it to every project, for example in `Directory.Build.props` at the repositor
 ```xml
 <Project>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.3.0-alpha.1" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.4.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
@@ -90,7 +90,7 @@ With central package management, the version goes in `Directory.Packages.props` 
 ```xml
 <!-- Directory.Packages.props -->
 <ItemGroup>
-  <PackageVersion Include="StyleBro.Analyzers" Version="0.3.0-alpha.1" />
+  <PackageVersion Include="StyleBro.Analyzers" Version="0.4.0-alpha.1" />
 </ItemGroup>
 
 <!-- Directory.Build.props -->
