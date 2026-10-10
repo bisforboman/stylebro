@@ -35,6 +35,9 @@ internal static class Conventions
     /// </summary>
     public const int MinimumAgreeing = 3;
 
+    /// <summary>The longest report line (the verdicts fit; the summary's lists wrap).</summary>
+    public const int Width = 120;
+
     /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
     /// with what each looks like, and the line that stops StyleBro enforcing either form when the code has no clear majority
@@ -46,14 +49,14 @@ internal static class Conventions
         new(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "private fields", "camelCase", ("camelCase", "named 'field'"), ("_camelCase", "named '_field'"), Off(DiagnosticIds.PrivateFieldNaming)),
         new("csharp_new_line_before_open_brace", "'{' of multi-line blocks", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
         new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), null, "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
-        new("csharp_prefer_braces", "one-line if/else/for/while/using/lock bodies", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline"),
+        new("csharp_prefer_braces", "one-line if/else/loop/using/lock bodies", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline"),
         new("dotnet_style_operator_placement_when_wrapping", "operators where a line wraps", "beginning_of_line", ("beginning_of_line", "at the start of the line"), ("end_of_line", "at the end of the line"), Off(DiagnosticIds.OperatorPlacement)),
         new(StyleBro.Analyzers.Layout.WrappingPlacement.ArrowKey, "'=>' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.ArrowPlacement)),
         new(StyleBro.Analyzers.Layout.WrappingPlacement.EqualsKey, "'=' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.EqualsPlacement)),
         new("stylebro_trailing_comma", "multi-line initializers", "include", ("include", "with a trailing comma"), ("omit", "without a trailing comma"), Off(DiagnosticIds.TrailingComma)),
         new("stylebro_empty_string_style", "empty strings", "string_empty", ("string_empty", "string.Empty"), ("literal", "\"\""), Off(DiagnosticIds.EmptyString)),
         new("stylebro_null_check_style", "null checks", "pattern_matching", ("pattern_matching", "'is null'"), ("equality_operator", "'== null'"), Off(DiagnosticIds.NullCheckStyle)),
-        new("stylebro_summary_layout", "one-line <summary> texts", "multi_line", ("multi_line", "tags on lines of their own"), ("single_line_when_fits", "on one line"), Off(DiagnosticIds.SummaryLayout)),
+        new("stylebro_summary_layout", "one-line <summary> texts", "multi_line", ("multi_line", "on three lines"), ("single_line_when_fits", "on one line"), Off(DiagnosticIds.SummaryLayout)),
         new("stylebro_inheritdoc_style", "<inheritdoc/> tags", "compact", ("compact", "'<inheritdoc/>'"), ("spaced", "'<inheritdoc />'"), null),
         new("csharp_prefer_simple_default_expression", "default values", "false", ("false", "'default(T)'"), ("true", "'default'"), null),
         new("stylebro_closing_parenthesis_placement", "')' of split lists", "last_item", ("last_item", "after the last item"), ("own_line", "on its own line"), Off(DiagnosticIds.CloseParenthesisOnLastItemLine)),
@@ -364,8 +367,9 @@ internal static class Conventions
         var lines = new List<string>();
         var report = new List<string>();
         var kept = new List<string>();
+        var matched = 0;
         var turnedOff = new List<string>();
-        var tooFew = 0;
+        var tooFew = new List<string>();
         foreach (var convention in All)
         {
             var count = counts.TryGetValue(convention.Key, out var c) ? c : new int[2];
@@ -384,17 +388,18 @@ internal static class Conventions
             if (decided.TryGetValue(convention.Key, out var reason))
             {
                 (tag, verdict) = ("set", reason);
+                found = winner < 0 ? Plural(total, "place") : found;
             }
             else if (total < MinimumAgreeing)
             {
-                (tag, verdict) = ("too few", $"too few places to tell, {convention.Key} stays {convention.Default}");
-                found = mixed;
-                tooFew++;
+                (tag, verdict) = ("too few", $"default stays ({convention.Default})");
+                found = Plural(total, "place");
+                tooFew.Add(convention.Key);
             }
             else if (winner < 0 && convention.Off is { } off && !(isSet?.Invoke(off.Substring(0, off.IndexOf('=')).Trim()) ?? false))
             {
                 var rule = off.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal) ? off.Split('.')[1] : null;
-                (tag, verdict) = ("off", rule is null ? $"both forms allowed: {off}" : $"{rule} is off");
+                (tag, verdict) = ("off", rule is null ? "both allowed" : $"{rule} is off");
                 turnedOff.Add($"{rule ?? off} ({convention.What})");
                 lines.Add(rule is null
                     ? $"# init: {convention.What}: your code mixes both forms ({mixed}), so both are allowed. To choose {convention.Values[0].Label}: change the next line to {convention.Key} = {convention.Values[0].Value}."
@@ -403,16 +408,17 @@ internal static class Conventions
             }
             else if (winner < 0)
             {
-                (tag, verdict) = ("mixed", $"{convention.Key} stays {convention.Default}");
+                (tag, verdict) = ("mixed", $"default stays ({convention.Default})");
             }
             else if (convention.Values[winner].Value == convention.Default)
             {
-                (tag, verdict) = ("default", $"{convention.Key} = {convention.Default}");
+                (tag, verdict) = ("default", convention.Default);
+                matched++;
             }
             else
             {
                 var value = convention.Values[winner].Value;
-                (tag, verdict) = ("kept", $"{convention.Key} = {value}");
+                (tag, verdict) = ("kept", value);
                 kept.Add(convention.Key);
                 lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {total} places in your code");
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
@@ -421,33 +427,65 @@ internal static class Conventions
             report.Add($"  {tag,-8} {convention.What}: {found} -> {verdict}");
         }
 
-        report.AddRange(Summary(kept, turnedOff, tooFew));
+        report.AddRange(Summary(kept, matched, turnedOff, tooFew));
         return (lines, report);
     }
 
-    /// <summary>The end of init's convention report: which settings follow the code, which rules are off and how to choose later.</summary>
-    public static IEnumerable<string> Summary(IReadOnlyList<string> kept, IReadOnlyList<string> turnedOff, int tooFew)
+    /// <summary>
+    /// The end of init's convention report: which settings follow the code (<paramref name="written"/>: the keys written,
+    /// <paramref name="matched"/>: how many where the code already follows StyleBro's default), which rules are off and how
+    /// to choose later, and the keys judged on too few places. Lines longer than <see cref="Width"/> wrap after a list's comma.
+    /// </summary>
+    public static IEnumerable<string> Summary(IReadOnlyList<string> written, int matched, IReadOnlyList<string> turnedOff, IReadOnlyList<string> tooFew)
+        => SummaryLines(written, matched, turnedOff, tooFew).SelectMany(Wrap);
+
+    /// <summary>A count with its noun: '1 place', '2 places'.</summary>
+    public static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? string.Empty : "s")}";
+
+    /// <summary>Splits a line longer than <see cref="Width"/> after the last ', ' that fits (else a space); later parts are indented.</summary>
+    private static IEnumerable<string> Wrap(string line)
     {
-        if (kept.Count + turnedOff.Count + tooFew == 0)
+        while (line.Length > Width)
+        {
+            var comma = line.LastIndexOf(", ", Width - 1, StringComparison.Ordinal);
+            var at = comma > 4 ? comma + 1 : line.LastIndexOf(' ', Width);
+            if (at <= 4)
+            {
+                break;
+            }
+
+            yield return line.Substring(0, at);
+            line = "    " + line.Substring(at + 1);
+        }
+
+        yield return line;
+    }
+
+    private static IEnumerable<string> SummaryLines(IReadOnlyList<string> written, int matched, IReadOnlyList<string> turnedOff, IReadOnlyList<string> tooFew)
+    {
+        if (written.Count + matched + turnedOff.Count + tooFew.Count == 0)
         {
             yield break;
         }
 
         yield return "Summary:";
-        if (kept.Count > 0)
+        if (written.Count + matched > 0)
         {
-            yield return $"  Kept your style for {kept.Count} setting(s): {string.Join(", ", kept)}.";
+            var kept = $"  Kept your style for {Plural(written.Count + matched, "setting")}";
+            yield return matched == 0 ? $"{kept}: {string.Join(", ", written)}."
+                : written.Count == 0 ? $"{kept}, all already StyleBro's default."
+                : $"{kept} ({written.Count} written, {matched} already StyleBro's default): {string.Join(", ", written)}.";
         }
 
         if (turnedOff.Count > 0)
         {
-            yield return $"  Turned {turnedOff.Count} rule(s) off because your code mixes both forms: {string.Join(", ", turnedOff)}.";
-            yield return "  To choose a style later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.";
+            yield return $"  Turned {Plural(turnedOff.Count, "rule")} off because your code mixes both forms: {string.Join(", ", turnedOff)}.";
+            yield return "  To choose later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.";
         }
 
-        if (tooFew > 0)
+        if (tooFew.Count > 0)
         {
-            yield return $"  {tooFew} setting(s) had fewer than {MinimumAgreeing} places to tell: StyleBro's defaults stay.";
+            yield return $"  {Plural(tooFew.Count, "setting")} had fewer than {MinimumAgreeing} places to tell, StyleBro's defaults stay: {string.Join(", ", tooFew)}.";
         }
     }
 

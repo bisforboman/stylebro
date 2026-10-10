@@ -39,7 +39,13 @@
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'var winner = total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)'; Replace = 'var winner = total < MinimumSample ? -1'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '!(isSet?.Invoke(off.Substring(0, off.IndexOf(''='')).Trim()) ?? false)'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (total < MinimumAgreeing)'; Replace = 'else if (false)'; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (kept.Count + turnedOff.Count + tooFew == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (written.Count + matched + turnedOff.Count + tooFew.Count == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
+        # init's report: short verdicts, plurals, the defaults the code follows, wrapped summary (2026-10-10)
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'found = winner < 0 ? Plural(total, "place") : found;'; Replace = 'found = found;'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'yield return matched == 0 ?'; Replace = 'yield return true ?'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': written.Count == 0 ? $"{kept}, all already'; Replace = ': false ? $"{kept}, all already'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'while (line.Length > Width)'; Replace = 'while (false)'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '(count == 1 ? string.Empty : "s")'; Replace = '"s"'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '(!parenthesized || level > outer || (level == outer && operand == binary.Left))'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'Regex.Replace(File.ReadAllText(candidate), "<!--.*?-->", string.Empty, RegexOptions.Singleline)'; Replace = 'File.ReadAllText(candidate)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = '? Nearest(Path.GetDirectoryName(directory)) : candidate;'; Replace = '? candidate : candidate;'; Tests = 'MigrationTests' }

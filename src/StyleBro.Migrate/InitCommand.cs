@@ -116,7 +116,7 @@ internal static class InitCommand
         var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
         if (multiTargeted.Count > 0)
         {
-            Console.WriteLine($"{multiTargeted.Count} project(s) target several frameworks ({List(multiTargeted)}).");
+            Console.WriteLine($"{Conventions.Plural(multiTargeted.Count, "project")} {(multiTargeted.Count == 1 ? "targets" : "target")} several frameworks ({List(multiTargeted)}).");
             Console.WriteLine(MultiTargetedHint);
         }
 
@@ -212,11 +212,12 @@ internal static class InitCommand
         {
             if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
             {
-                decided[convention.Key] = $".editorconfig sets {key} = {own[key]}";
+                decided[convention.Key] = $"set in .editorconfig ({own[key]})";
             }
             else if (sonarLines.Any(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal)))
             {
-                decided[convention.Key] = "the Sonar setup sets " + sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
+                var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
+                decided[convention.Key] = $"set by the Sonar setup ({line.Substring(line.IndexOf('=') + 1).Trim()})";
             }
         }
 
@@ -273,7 +274,7 @@ internal static class InitCommand
         var notes = new List<string>();
         if (withoutLangVersion.Count > 0)
         {
-            notes.Add($"Modernize: the newer-C# rules (tier B) are suggestions: {withoutLangVersion.Count} multi-targeted project(s) don't set LangVersion ({List(withoutLangVersion)}).\n"
+            notes.Add($"Modernize: the newer-C# rules (tier B) are suggestions: {Conventions.Plural(withoutLangVersion.Count, "multi-targeted project")} {(withoutLangVersion.Count == 1 ? "doesn't" : "don't")} set LangVersion ({List(withoutLangVersion)}).\n"
                 + "  Each target framework then gets its own C# version (7.3 for .NET Framework and netstandard2.0); fixes made for the newer one break the older one.\n"
                 + "  To turn them on: set <LangVersion>latest</LangVersion> (or a fixed version) in those projects or Directory.Build.props, then run 'stylebro-migrate init --modernize --write' again.");
         }

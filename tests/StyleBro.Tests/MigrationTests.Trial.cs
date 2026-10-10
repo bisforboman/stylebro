@@ -17,7 +17,7 @@ public sealed partial class MigrationTests
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
 
         Assert.Contains("stylebro_private_field_naming = _camelCase", File.ReadAllText(Path.Combine(root, ".editorconfig")));
-        Assert.Contains("  kept     private fields: 10 of 10 named '_field' -> stylebro_private_field_naming = _camelCase", output);
+        Assert.Contains("  kept     private fields: 10 of 10 named '_field' -> _camelCase", output);
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public sealed partial class MigrationTests
         var none = new Dictionary<string, string>();
         var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 4, 120 } }, none);
         Assert.Contains(Key + " = inside_namespace", lines);
-        Assert.Contains("  kept     files' using directives: 120 of 124 inside the namespace -> csharp_using_directive_placement = inside_namespace", report);
+        Assert.Contains("  kept     files' using directives: 120 of 124 inside the namespace -> inside_namespace", report);
         Assert.Empty(Lines(new[] { 120, 4 })); // outside is the preset's
         Assert.Equal(new[] { "dotnet_diagnostic.BRO1008.severity = none" }, Lines(new[] { 4, 9 }).Where(l => !l.StartsWith('#'))); // mixed: 69 %, BRO1008 off
         Assert.Contains(Key + " = inside_namespace", Lines(new[] { 0, 9 })); // 9 files, all inside
@@ -203,7 +203,7 @@ public sealed partial class MigrationTests
         Write(".editorconfig", "root = true\n[*.cs]\nstylebro_arrow_placement_when_wrapping = end_of_line\n");
         output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
         Assert.DoesNotContain("= beginning_of_line", File.ReadAllText(Path.Combine(root, ".editorconfig")));
-        Assert.Contains(".editorconfig sets stylebro_arrow_placement_when_wrapping = end_of_line", output);
+        Assert.Contains("12 at the start of the line -> set in .editorconfig (end_of_line)", output);
     }
 
     [Fact]
