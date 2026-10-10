@@ -7,14 +7,19 @@
 #     with a documented exception sets MaxRuns in repos.psd1
 #   - with -Tests: no test that passed on the untouched code fails after the fixes
 #
-#   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>] [-Enable BRO1313,BRO1314]
+#   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>] [-Enable BRO1313,BRO1314] [-TestCache <file>]
 # -Enable turns on rules that are off by default (they don't run otherwise).
+# -TestCache: a JSON file with the tests that fail on the untouched code. Read when it exists (that build and test run is
+# skipped), written otherwise. Those results depend only on the pinned commit, the SDK and FailedTests.ps1, not on
+# StyleBro; CI keys the file on exactly those (realworld.yml).
+# Every phase prints its duration, and the report lists them.
 param(
     [Parameter(Mandatory)][string]$Repo,
     [string]$Work = (Join-Path ([IO.Path]::GetTempPath()) 'stylebro-realworld'),
     [switch]$Tests,
     [string[]]$Enable = @(),
-    [string]$Configuration = 'Release'
+    [string]$Configuration = 'Release',
+    [string]$TestCache
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -120,25 +125,17 @@ function Invoke-Format([switch]$Verify) {
     finally { Remove-Item Env:\CustomAfterMicrosoftCommonTargets -ErrorAction SilentlyContinue }
 }
 
-function Get-FailedTests {
-    # Names of the failing tests. Not StyleBro's analyzers here: the tests run on the code as it is.
-    $failed = [Collections.Generic.HashSet[string]]::new()
-    if ($r.Tests -eq 'mtp') {
-        dotnet build $sln -c Release -nologo -v q -p:TreatWarningsAsErrors=false 2>&1 | Out-Null
-        $exes = Get-ChildItem (Join-Path $path 'artifacts/bin') -Recurse -Include '*Tests.exe', '*Specs.exe', '*Tests', '*Specs' -File |
-            Where-Object { $_.BaseName -match '(Tests|Specs)$' -and $_.Directory.FullName -match '[\\/]release' -and ($_.Extension -in '.exe', '') }
-        foreach ($exe in $exes) {
-            & $exe.FullName 2>&1 | Select-String '^\s*failed (\S+)' | ForEach-Object { [void]$failed.Add("$($exe.Directory.Name)/$($_.Matches[0].Groups[1].Value)") }
-        }
+. (Join-Path $PSScriptRoot 'FailedTests.ps1')
+
+# Runs a phase and records how long it took; its output is the block's output.
+$timings = [Collections.Generic.List[string]]::new()
+function Measure-Phase([string]$name, [scriptblock]$block) {
+    $watch = [Diagnostics.Stopwatch]::StartNew()
+    try { & $block }
+    finally {
+        $timings.Add("$name $($watch.Elapsed.ToString('mm\:ss'))")
+        Write-Host "[$($watch.Elapsed.ToString('mm\:ss'))] $name"
     }
-    else {
-        # TestFilter (repos.psd1): leaves out tests that depend on something other than the code, e.g. the network.
-        $filter = if ($r.TestFilter) { @('--filter', $r.TestFilter) } else { @() }
-        dotnet test $sln -nologo -p:TreatWarningsAsErrors=false @filter 2>&1 | Select-String '^\s+Failed (\S+)' |
-            ForEach-Object { [void]$failed.Add($_.Matches[0].Groups[1].Value) }
-    }
-    # The comma keeps an empty set a set (PowerShell would unroll it to $null).
-    return , $failed
 }
 
 $problems = [Collections.Generic.List[string]]::new()
@@ -147,12 +144,19 @@ $report.Add("### $Repo")
 
 $failedBefore = $null
 if ($Tests -and $r.Tests) {
-    $failedBefore = Get-FailedTests
-    $report.Add("- tests failing on the untouched code: $($failedBefore.Count)")
-    git -C $path clean -fdxq
+    if ($TestCache -and (Test-Path $TestCache)) {
+        $failedBefore = [Collections.Generic.HashSet[string]]::new([string[]]@((Get-Content $TestCache -Raw | ConvertFrom-Json).Failed))
+        $report.Add("- tests failing on the untouched code: $($failedBefore.Count) (cached)")
+    }
+    else {
+        $failedBefore = Measure-Phase 'untouched code: Release build + tests' { Get-FailedTests }
+        $report.Add("- tests failing on the untouched code: $($failedBefore.Count)")
+        if ($TestCache) { @{ Repo = $Repo; Commit = $r.Commit; Failed = @($failedBefore | Sort-Object) } | ConvertTo-Json | Set-Content $TestCache }
+        git -C $path clean -fdxq
+    }
 }
 
-$before = Invoke-Build
+$before = Measure-Phase 'untouched code: build with analyzers' { Invoke-Build }
 $report.Add("- findings: $($before.Findings); compile errors before: $($before.Errors.Count)")
 $before.Crashes | ForEach-Object { $problems.Add("analyzer crash: $_") }
 
@@ -161,7 +165,7 @@ $converged = $false
 $state = (Get-Diff | Out-String)
 while ($runs -lt 3) {
     $runs++
-    [void](Invoke-Format)
+    [void](Measure-Phase "dotnet format run $runs" { Invoke-Format })
     $next = (Get-Diff | Out-String)
     if ($next -eq $state) { $converged = $true; break }
     $state = $next
@@ -175,14 +179,14 @@ elseif ($runs -gt $allowed) { $problems.Add("$runs runs until no changes, allowe
 $markers = @(Get-Diff | Select-String '^\+(<<<<<<<|>>>>>>>) ')
 if ($markers.Count) { $problems.Add("conflict markers written: $($markers.Count) lines") }
 
-$after = Invoke-Build
+$after = Measure-Phase 'build after the fixes' { Invoke-Build }
 $newErrors = @($after.Errors | Where-Object { $_ -notin $before.Errors })
 $newErrors | ForEach-Object { $problems.Add("new compile error: $_") }
 $after.Crashes | Where-Object { $_ -notin $before.Crashes } | ForEach-Object { $problems.Add("analyzer crash after fixing: $_") }
 $report.Add("- warnings left (kept by guards): $($after.Findings); new compile errors: $($newErrors.Count)")
 
 if ($null -ne $failedBefore) {
-    $failedAfter = Get-FailedTests
+    $failedAfter = Measure-Phase 'tests after the fixes' { Get-FailedTests }
     # Known failures: documented limits (repos.psd1), e.g. a class a test serializes by reflection without attributes.
     $known = @($r.KnownFailures)
     $newFailures = @($failedAfter | Where-Object { -not $failedBefore.Contains($_) -and $_ -notin $known })
@@ -190,6 +194,7 @@ if ($null -ne $failedBefore) {
     $newFailures | ForEach-Object { $problems.Add("test fails after the fixes: $_") }
 }
 
+$report.Add("- timings: $($timings -join '; ')")
 $problems | ForEach-Object { $report.Add("- **PROBLEM**: $_") }
 $report | Out-Host
 if ($env:GITHUB_STEP_SUMMARY) { $report | Add-Content $env:GITHUB_STEP_SUMMARY }

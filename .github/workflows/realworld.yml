@@ -2,7 +2,9 @@ name: Real world
 
 # Every StyleBro rule on public repositories at pinned commits (scripts/realworld/repos.psd1): no analyzer crashes, no
 # new compile errors, no merge-conflict markers, the fixes converge, and no test that passed before fails afterwards.
-# Windows, because Polly and Serilog also target .NET Framework.
+# Each repo runs on the runner its `Os` in repos.psd1 names: windows-latest by default (the .NET Framework targets, and
+# CRLF checkouts: git on the Windows runners converts line endings), ubuntu-latest where a Linux run gives the same
+# results.
 # Pull requests run it before merging; main runs it NIGHTLY instead of after every merge (a bad combination of two
 # merged PRs shows up the next morning: the run fails and opens or updates the issue "Nightly real-world run failed").
 on:
@@ -20,27 +22,35 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       relevant: ${{ steps.changes.outputs.relevant }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      # One job per repo in repos.psd1, on its runner.
+      - id: matrix
+        shell: pwsh
+        run: |
+          $repos = Import-PowerShellDataFile scripts/realworld/repos.psd1
+          $include = @($repos.Keys | Sort-Object | ForEach-Object { @{ repo = $_; os = if ($repos[$_].Os) { $repos[$_].Os } else { 'windows-latest' } } })
+          "matrix=$(ConvertTo-Json -Compress -Depth 5 @{ include = $include })" >> $env:GITHUB_OUTPUT
 
       - id: changes
         run: bash .github/changes.sh
 
   # A docs-only pull request (.github/changes.sh) still reports every `Real world (<repo>)` check (required by branch
   # protection; an `if:` on this matrix job would skip it without the names), on ubuntu and without doing the work.
-  # `!cancelled()`: if `changes` fails, its outputs are empty and everything runs.
+  # `!cancelled()`: if only changes.sh fails, `relevant` is empty and everything runs.
   realworld:
     name: Real world (${{ matrix.repo }})
     needs: changes
     if: ${{ !cancelled() }}
-    runs-on: ${{ needs.changes.outputs.relevant == 'false' && 'ubuntu-latest' || 'windows-latest' }}
+    runs-on: ${{ needs.changes.outputs.relevant == 'false' && 'ubuntu-latest' || matrix.os }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      matrix:
-        repo: [FFMpegCore, Polly, OpenTelemetry, Newtonsoft, Serilog, Jellyfin, FluentValidation, CsvHelper, eShopOnWeb, MediatR, LibGit2Sharp, Mapperly]
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
     steps:
       - name: Skipped (docs-only change)
         if: needs.changes.outputs.relevant == 'false'
@@ -66,7 +76,10 @@ jobs:
         if: needs.changes.outputs.relevant != 'false'
         shell: pwsh
         run: |
-          "commit=$((Import-PowerShellDataFile scripts/realworld/repos.psd1).${{ matrix.repo }}.Commit)" >> $env:GITHUB_OUTPUT
+          $entry = (Import-PowerShellDataFile scripts/realworld/repos.psd1).${{ matrix.repo }}
+          "commit=$($entry.Commit)" >> $env:GITHUB_OUTPUT
+          $settings = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes("$($entry.Tests)|$($entry.TestFilter)"))
+          "testsettings=$([Convert]::ToHexString($settings).Substring(0, 16))" >> $env:GITHUB_OUTPUT
           "WORK=${{ runner.temp }}/realworld" >> $env:GITHUB_ENV
           "NUGET_PACKAGES=${{ runner.temp }}/realworld-nuget" >> $env:GITHUB_ENV
 
@@ -90,10 +103,22 @@ jobs:
           key: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.dotnet.outputs.dotnet-version }}
           restore-keys: realworld-nuget-${{ runner.os }}-${{ matrix.repo }}-
 
+      # The tests that fail on the untouched code. They depend on the pinned commit, the SDK, the OS and the test logic
+      # (FailedTests.ps1, the repo's Tests and TestFilter), not on StyleBro, so a hit skips that Release build and test
+      # run. Saved like the caches above, and only after a successful run (a broken baseline would otherwise be kept).
+      - name: Restore the untouched code's test results
+        id: tests
+        if: needs.changes.outputs.relevant != 'false'
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/realworld-tests.json
+          key: realworld-tests-${{ runner.os }}-${{ matrix.repo }}-${{ steps.pin.outputs.commit }}-sdk${{ steps.dotnet.outputs.dotnet-version }}-${{ steps.pin.outputs.testsettings }}-${{ hashFiles('scripts/realworld/FailedTests.ps1') }}
+
       - name: Run StyleBro on ${{ matrix.repo }}
+        id: run
         if: needs.changes.outputs.relevant != 'false'
         shell: pwsh
-        run: ./scripts/realworld/Invoke-RealWorld.ps1 -Repo ${{ matrix.repo }} -Tests -Work $env:WORK
+        run: ./scripts/realworld/Invoke-RealWorld.ps1 -Repo ${{ matrix.repo }} -Tests -Work $env:WORK -TestCache '${{ runner.temp }}/realworld-tests.json'
 
       # Saved even when the run found problems: the clone and the packages don't depend on the result.
       - name: Save the clone
@@ -109,6 +134,13 @@ jobs:
         with:
           path: ${{ env.NUGET_PACKAGES }}
           key: ${{ steps.nuget.outputs.cache-primary-key }}
+
+      - name: Save the untouched code's test results
+        if: ${{ !cancelled() && github.event_name != 'pull_request' && steps.run.outcome == 'success' && steps.tests.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/realworld-tests.json
+          key: ${{ steps.tests.outputs.cache-primary-key }}
 
   # A failed nightly run opens the issue "Nightly real-world run failed", or comments on it while it is open.
   nightly-issue:
