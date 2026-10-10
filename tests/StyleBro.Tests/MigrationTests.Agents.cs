@@ -28,6 +28,7 @@ public sealed partial class MigrationTests
         Assert.False(json["write"]!.GetValue<bool>());
         Assert.Equal(0, json["exitCode"]!.GetValue<int>());
         Assert.Null(json["clean"]);
+        Assert.Null(json["agentsMd"]);
         Assert.Contains("== .editorconfig", stderr, StringComparison.Ordinal);
     }
 
@@ -37,7 +38,7 @@ public sealed partial class MigrationTests
         Write("A.cs", "class A { private int _a, _b, _c; }\n");
         JsonReport.Begin("init");
 
-        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", AgentsFile.Option })));
         var json = JsonNode.Parse(JsonReport.End(0))!;
 
         var ide0055 = json["settings"]!.AsArray().Single(s => s!["key"]!.GetValue<string>() == "dotnet_diagnostic.IDE0055.severity")!;
@@ -132,35 +133,54 @@ public sealed partial class MigrationTests
     {
         var path = Path.Combine(root, AgentsFile.FileName);
 
-        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", AgentsFile.Option })));
         Assert.Equal(AgentsFile.Section, File.ReadAllText(path));
 
         // Someone's own text around an old version of the section: the section is replaced, the rest stays.
         File.WriteAllText(path, "# Agents\n\nBuild with make.\n\n" + AgentsFile.Begin + " old -->\nold text\n" + AgentsFile.End + "\n\nMore.\n");
-        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", AgentsFile.Option })));
         var updated = File.ReadAllText(path);
         Assert.Equal("# Agents\n\nBuild with make.\n\n" + AgentsFile.Section + "\nMore.\n", updated);
 
         var written = File.GetLastWriteTimeUtc(path);
         File.SetLastWriteTimeUtc(path, written.AddHours(-1));
-        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", AgentsFile.Option })));
         Assert.Equal(updated, File.ReadAllText(path));
         Assert.Equal(written.AddHours(-1), File.GetLastWriteTimeUtc(path));
         Assert.DoesNotContain(AgentsFile.FileName, output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void AgentsMd_OptOut_DryRun_AndTheMigration()
+    public void AgentsMd_IsOptIn_WithoutTheOptionOnlyATip()
+    {
+        // Owner's decision 2026-10-10: nothing is written by default, also next to a CLAUDE.md.
+        var path = Path.Combine(root, AgentsFile.FileName);
+        Write("CLAUDE.md", "Use tabs.\n");
+
+        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Assert.False(File.Exists(path));
+        Assert.Contains(AgentsFile.Tip, output, StringComparison.Ordinal);
+        Assert.DoesNotContain("@AGENTS.md", output, StringComparison.Ordinal);
+
+        output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root })));
+        Assert.DoesNotContain("== AGENTS.md", output, StringComparison.Ordinal);
+        Assert.Contains(AgentsFile.Tip, output, StringComparison.Ordinal);
+
+        Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write" })));
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public void AgentsMd_WithTheOption_DryRunShowsIt_AndTheMigrationWritesIt()
     {
         var path = Path.Combine(root, AgentsFile.FileName);
 
-        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", AgentsFile.OptOut })));
+        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, AgentsFile.Option })));
+        Assert.Contains("== AGENTS.md", output, StringComparison.Ordinal);
+        Assert.DoesNotContain(AgentsFile.Tip, output, StringComparison.Ordinal);
         Assert.False(File.Exists(path));
 
-        Assert.Contains("== AGENTS.md", Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root }))), StringComparison.Ordinal);
-        Assert.False(File.Exists(path));
-
-        Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write" })));
+        Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write", AgentsFile.Option })));
         Assert.Equal(AgentsFile.Section, File.ReadAllText(path));
     }
 
@@ -179,7 +199,7 @@ public sealed partial class MigrationTests
     {
         Write("CLAUDE.md", "Use tabs.\n");
 
-        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", AgentsFile.Option })));
 
         Assert.True(File.Exists(Path.Combine(root, AgentsFile.FileName)));
         Assert.Equal("Use tabs.\n", File.ReadAllText(Path.Combine(root, "CLAUDE.md")));

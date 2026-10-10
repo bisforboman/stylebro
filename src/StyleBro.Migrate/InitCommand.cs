@@ -134,13 +134,13 @@ internal static class InitCommand
             JsonReport.AddSettings(".editorconfig", modernize.Block);
         }
 
-        var noAgents = args.Contains(AgentsFile.OptOut);
+        var agentsMd = args.Contains(AgentsFile.Option);
         if (!write)
         {
             Console.WriteLine("== .editorconfig (run with --write to add it)");
             Console.Write(block);
             Console.Write(modernize.Block);
-            AgentsFile.Update(root, write: false, noAgents).ForEach(Console.WriteLine);
+            AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
         }
 
@@ -170,7 +170,7 @@ internal static class InitCommand
             }
         }
 
-        AgentsFile.Update(root, write: true, noAgents).ForEach(Console.WriteLine);
+        AgentsFile.Update(root, write: true, agentsMd).ForEach(Console.WriteLine);
         Console.WriteLine(Program.FormatHint);
         Program.PrintWorkspaceHint(root);
         return 0;

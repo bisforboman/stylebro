@@ -58,7 +58,7 @@
         @{ File = 'src/StyleBro.Migrate/JsonReport.cs'; Find = 'if (afterSetting)'; Replace = 'if (false)'; Tests = 'MigrationTests.Json_Init' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'var runArgs = report is null ? args : args.Concat(new[] { "--report", report }).ToArray();'; Replace = 'var runArgs = args;'; Tests = 'MigrationTests.Json_Format' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative)'; Replace = 'false'; Tests = 'MigrationTests.Files_' }
-        @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (optOut)'; Replace = 'if (false)'; Tests = 'MigrationTests.AgentsMd_' }
+        @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (!requested)'; Replace = 'if (false)'; Tests = 'MigrationTests.AgentsMd_' }
         @{ File = 'src/StyleBro.Migrate/AgentsFile.cs'; Find = 'if (changed)'; Replace = 'if (true)'; Tests = 'MigrationTests.AgentsMd_' }
     )
 }
