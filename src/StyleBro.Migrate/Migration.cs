@@ -312,7 +312,7 @@ internal static class Migration
 
         var plan = new SortedDictionary<string, List<(string, List<string>)>>(StringComparer.OrdinalIgnoreCase)
         {
-            [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders) : MainSection, main.Lines)],
+            [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, main.Lines)],
         };
         foreach (var folder in MigrationFolders(root))
         {

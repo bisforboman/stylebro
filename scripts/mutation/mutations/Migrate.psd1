@@ -83,6 +83,8 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'parent.Length > rootFolder.Length && !HasOther(parent)'; Replace = 'parent.Length > rootFolder.Length'; Tests = 'MigrationTests.Settings_' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'else if (covered.Count == folders.Count)'; Replace = 'else if (false)'; Tests = 'MigrationTests.Settings_' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'else if (covered.Count > 0)'; Replace = 'else if (false)'; Tests = 'MigrationTests.AScopeAbove' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '.FirstOrDefault(start => !siblings.Any(s => s.StartsWith(start, StringComparison.OrdinalIgnoreCase)));'; Replace = '.FirstOrDefault();'; Tests = 'MigrationTests.TheSection_' }
+        @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'group.Key.Start is { } start && group.Count() > 1'; Replace = 'group.Key.Start is { } start'; Tests = 'MigrationTests.TheSection_' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (setup.Scopes.Any(scope => setup.For(scope) is var inScope'; Replace = 'if (false && setup.Scopes.Any(scope => setup.For(scope) is var inScope'; Tests = 'MigrationTests.ScopesThatDontSortUsings' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (folders is not null && !folders.Any('; Replace = 'if (false && !folders!.Any('; Tests = 'MigrationTests.Settings_' }
         @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);'; Replace = 'var targets = Migration.PropsFiles(root);'; Tests = 'MigrationTests.ThePackage_' }

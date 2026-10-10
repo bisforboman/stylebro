@@ -144,6 +144,56 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void TheSection_UsesTheTopmostFoldersWithOnlyStyleCopProjects()
+    {
+        // Full collapse: every project under src runs StyleCop, nested ones too (src/Group/A, src/Core/Tool inside src/Core).
+        foreach (var project in new[] { "src/Core/Core.csproj", "src/Core/Tool/Tool.csproj", "src/Group/A/A.csproj", "src/Group/B/B.csproj" })
+        {
+            Write(project, """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" /></ItemGroup></Project>""");
+        }
+
+        Write("tests/Tests/Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        var setup = StyleCopSetup.Read(root);
+        Assert.Equal(new[] { "src" }, setup.Folders);
+        Assert.Equal("src/**.cs", StyleCopSetup.SectionFor(setup.Folders!, setup.FoldersWithout));
+
+        // Partial collapse: src/Group/C without StyleCop keeps src/Group expanded, src/Core still collapses.
+        Write("src/Group/C/C.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        setup = StyleCopSetup.Read(root);
+        Assert.Equal(new[] { "src/Core", "src/Group/A", "src/Group/B" }, setup.Folders);
+        var section = StyleCopSetup.SectionFor(setup.Folders!, setup.FoldersWithout);
+        Assert.Equal("src/{Core,Group/A,Group/B}/**.cs", section);
+        var block = Migration.Render(new[] { (section, new List<string> { "dotnet_diagnostic.IDE0055.severity = none" }) });
+        Assert.True(Applies(block, "src/Core/Tool/Deep/T.cs"));
+        Assert.True(Applies(block, "src/Group/B/B.cs"));
+        Assert.False(Applies(block, "src/Group/C/C.cs"));
+        Assert.False(Applies(block, "tests/Tests/T.cs"));
+    }
+
+    [Fact]
+    public void TheSection_GroupsSiblingsByTheirNameStart_WhereNoFolderWithoutStyleCopHasIt()
+    {
+        // LiteBus: ~80 project folders in src, only src/LiteBus.Analyzers without StyleCop, so src itself can't be used.
+        var folders = new[] { "src/LiteBus", "src/LiteBus.Inbox", "src/LiteBus.Inbox.Abstractions", "src/LiteBus.Inbox.Dispatch.Kafka", "src/LiteBus.Outbox", "src/LiteBus.Outbox.Kafka", "src/LiteBus.Saga" };
+        var without = new[] { "samples", "src/LiteBus.Analyzers", "tests" };
+
+        var section = StyleCopSetup.SectionFor(folders, without);
+
+        Assert.Equal("src/{LiteBus,LiteBus.Inbox*,LiteBus.Outbox*,LiteBus.Saga}/**.cs", section);
+        var block = Migration.Render(new[] { (section, new List<string> { "dotnet_diagnostic.IDE0055.severity = none" }) });
+        foreach (var folder in folders)
+        {
+            Assert.True(Applies(block, folder + "/Deep/X.cs"), folder);
+        }
+
+        Assert.False(Applies(block, "src/LiteBus.Analyzers/X.cs"));
+        Assert.False(Applies(block, "tests/LiteBus.Tests/X.cs"));
+
+        // A folder without StyleCop that starts like a group splits it further.
+        Assert.Equal("src/{LiteBus.Inbox,LiteBus.Inbox.Abstractions}/**.cs", StyleCopSetup.SectionFor(new[] { "src/LiteBus.Inbox", "src/LiteBus.Inbox.Abstractions" }, new[] { "src/LiteBus.InboxTool" }));
+    }
+
+    [Fact]
     public void ScopesThatDontSortUsings_DontGetTheSortKeysFromTheMainBlock()
     {
         // 'dotnet format' sorts usings wherever a sort key is set, whatever its value: tests sorted although SA1208/SA1210 were off there.
