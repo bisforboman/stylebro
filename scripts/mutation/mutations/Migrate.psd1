@@ -69,7 +69,7 @@
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (body is not (BlockSyntax or IfStatementSyntax or UsingStatementSyntax))'; Replace = 'if (true)'; Tests = 'MigrationTests.Conventions_CountStatements' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'trees.Where(t => only?.Contains(t) ?? true)'; Replace = 'trees'; Tests = 'MigrationTests.Conventions_CountTheMembersBro1601Checks' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (!projectFound && Directory.GetFiles(current, "*.csproj")'; Replace = 'if (Directory.GetFiles(current, "*.csproj")'; Tests = 'MigrationTests.Init_CountsBro1601OnlyWhereDocumentationIsGenerated' }
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (convention.Off is { } offLine && offLine == $"{convention.Key} = {convention.Values[winner].Value}")'; Replace = 'else if (false)'; Tests = 'MigrationTests.Conventions_TurnBro1601Off' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'offLine == $"{convention.Key} = {convention.Values[winner].Value}")'; Replace = 'false)'; Tests = 'MigrationTests.Conventions_TurnBro1601Off' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'bool Skip(int position) => only is not null && !only.Any(s => s.Contains(position));'; Replace = 'bool Skip(int position) => false;'; Tests = 'MigrationTests.Conventions_CountCodeInactive' }
         @{ File = 'src/StyleBro.Migrate/Suppressions.cs'; Find = 'SonarSetup.Mapping.Where(m => sonar?.IsOn(m.Sonar) ?? true)'; Replace = 'SonarSetup.Mapping'; Tests = 'MigrationTests.Init_AddsNoSuppressionsForASonarRuleThatIsOff' }
     )
