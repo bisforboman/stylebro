@@ -169,23 +169,26 @@ A followed form that is StyleBro's default needs no line; any other is written i
 | Arithmetic parentheses | `a + (b * c)` or `a + b * c` | [BRO1406](rules/BRO1406.md) | `dotnet_style_parentheses_in_arithmetic_binary_operators` |
 
 The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `mixed`,
-`too few`, or `set` when your configuration decides), then a summary (RealWorld):
+`too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys
+(RealWorld):
 
 ```
 Conventions in the code (judged from 3 places: all must agree below 10, 75% from 10 on;
   mixed: the rule that enforces the setting is turned off):
-  too few  private fields: 2 named '_field' -> too few places to tell, stylebro_private_field_naming stays camelCase
-  set      '{' of multi-line blocks: 196 of 196 on its own line -> .editorconfig sets csharp_new_line_before_open_brace = all
-  kept     multi-line initializers: 18 of 18 without a trailing comma -> stylebro_trailing_comma = omit
-  default  empty strings: 3 of 3 string.Empty -> stylebro_empty_string_style = string_empty
+  too few  private fields: 2 places -> default stays (camelCase)
+  set      '{' of multi-line blocks: 196 of 196 on its own line -> set in .editorconfig (all)
+  too few  operators where a line wraps: 1 place -> default stays (beginning_of_line)
+  kept     multi-line initializers: 18 of 18 without a trailing comma -> omit
+  default  empty strings: 3 of 3 string.Empty -> string_empty
   off      null checks: 7 'is null', 10 '== null' -> BRO1133 is off
   off      split lists: 13 first item on the next line, 17 first item after '(' -> BRO1107 is off
   ...
 Summary:
-  Kept your style for 1 setting(s): stylebro_trailing_comma.
-  Turned 2 rule(s) off because your code mixes both forms: BRO1133 (null checks), BRO1107 (split lists).
-  To choose a style later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.
-  4 setting(s) had fewer than 3 places to tell: StyleBro's defaults stay.
+  Kept your style for 5 settings (1 written, 4 already StyleBro's default): stylebro_trailing_comma.
+  Turned 2 rules off because your code mixes both forms: BRO1133 (null checks), BRO1107 (split lists).
+  To choose later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.
+  4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
+    dotnet_style_operator_placement_when_wrapping, stylebro_equals_placement_when_wrapping, stylebro_summary_layout.
 ```
 
 Each written line gets a comment in the block saying why:

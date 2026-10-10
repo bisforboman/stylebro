@@ -19,7 +19,7 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain("stylebro_null_check_style =", editorConfig);
         Assert.Contains("  off      null checks: 6 'is null', 6 '== null' -> BRO1133 is off", output);
         Assert.Contains("# init: null checks: your code mixes both forms (6 'is null', 6 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.\ndotnet_diagnostic.BRO1133.severity = none", editorConfig);
-        Assert.Contains("Summary:\n  Turned 1 rule(s) off because your code mixes both forms: BRO1133 (null checks).\n  To choose a style later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.", output.Replace("\r\n", "\n"));
+        Assert.Contains("Summary:\n  Turned 1 rule off because your code mixes both forms: BRO1133 (null checks).\n  To choose later: set the key in .editorconfig, remove its 'severity = none' line, run 'stylebro-migrate format'.", output.Replace("\r\n", "\n"));
 
         // The repository's own severity stays.
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.BRO1133.severity = warning\n");
@@ -38,16 +38,16 @@ public sealed partial class MigrationTests
         var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.DoesNotContain("stylebro_private_field_naming", editorConfig);
         Assert.DoesNotContain("BRO1303", editorConfig);
-        Assert.Contains("  too few  private fields: 2 named '_field' -> too few places to tell, stylebro_private_field_naming stays camelCase", output);
-        Assert.Contains("1 setting(s) had fewer than 3 places to tell", output);
+        Assert.Contains("  too few  private fields: 2 places -> default stays (camelCase)", output);
+        Assert.Contains("  1 setting had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming.", output);
 
         // Three that agree are followed, with a comment saying why.
         Write("A.cs", "class A { private int _logger; private int _mediator; private int _clock; }");
         output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
         editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("# init: private fields: named '_field' in 3 of 3 places in your code\nstylebro_private_field_naming = _camelCase", editorConfig);
-        Assert.Contains("  kept     private fields: 3 of 3 named '_field' -> stylebro_private_field_naming = _camelCase", output);
-        Assert.Contains("Kept your style for 1 setting(s): stylebro_private_field_naming.", output);
+        Assert.Contains("  kept     private fields: 3 of 3 named '_field' -> _camelCase", output);
+        Assert.Contains("Kept your style for 1 setting: stylebro_private_field_naming.", output);
 
         // Three that disagree: the rule is off.
         Write("A.cs", "class A { private int _logger; private int _mediator; private int clock; }");
@@ -67,7 +67,7 @@ public sealed partial class MigrationTests
 
         Assert.Equal(followed, lines.Contains(Key + " = literal"));
         Assert.Equal(stringEmpty > 0 && literal > 0 && stringEmpty + literal >= 3, lines.Contains("dotnet_diagnostic.BRO1106.severity = none"));
-        Assert.Equal(stringEmpty + literal < 3, report.Any(r => r.StartsWith("  too few  empty strings: ", StringComparison.Ordinal) && r.EndsWith($"-> too few places to tell, {Key} stays string_empty", StringComparison.Ordinal)));
+        Assert.Equal(stringEmpty + literal < 3, report.Any(r => r == $"  too few  empty strings: {(stringEmpty + literal == 1 ? "1 place" : "2 places")} -> default stays (string_empty)"));
 
         // Decided elsewhere: reported as before, also with few places.
         Assert.Contains(Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { 0, 1 } }, new Dictionary<string, string> { [Key] = ".editorconfig sets it" }).Report, r => r.EndsWith("-> .editorconfig sets it", StringComparison.Ordinal));
@@ -79,9 +79,47 @@ public sealed partial class MigrationTests
         var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { ["csharp_prefer_braces"] = new[] { 5, 5 } }, new Dictionary<string, string>());
 
         Assert.Equal(
-            new[] { "# init: one-line if/else/for/while/using/lock bodies: your code mixes both forms (5 with braces, 5 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.", "csharp_prefer_braces = when_multiline" },
+            new[] { "# init: one-line if/else/loop/using/lock bodies: your code mixes both forms (5 with braces, 5 without braces), so both are allowed. To choose with braces: change the next line to csharp_prefer_braces = true.", "csharp_prefer_braces = when_multiline" },
             lines);
-        Assert.Contains("  Turned 1 rule(s) off because your code mixes both forms: csharp_prefer_braces = when_multiline (one-line if/else/for/while/using/lock bodies).", report);
+
+        // Wrapped at the report's width.
+        Assert.Contains("  Turned 1 rule off because your code mixes both forms: csharp_prefer_braces = when_multiline (one-line\n    if/else/loop/using/lock bodies).", string.Join("\n", report));
+    }
+
+    [Fact]
+    public void Conventions_SummaryCountsTheDefaultsTheCodeAlreadyFollows()
+    {
+        // RealWorld-shaped: one setting written, two where the code follows the default, one mixed, one with too few places.
+        var counts = new Dictionary<string, int[]>
+        {
+            ["stylebro_trailing_comma"] = new[] { 0, 18 },
+            ["stylebro_empty_string_style"] = new[] { 3, 0 },
+            ["csharp_using_directive_placement"] = new[] { 40, 0 },
+            ["stylebro_null_check_style"] = new[] { 7, 10 },
+            ["dotnet_style_operator_placement_when_wrapping"] = new[] { 1, 0 },
+        };
+
+        var report = Conventions.Decide(counts, new Dictionary<string, string>()).Report;
+
+        Assert.Contains("  Kept your style for 3 settings (1 written, 2 already StyleBro's default): stylebro_trailing_comma.", report);
+        Assert.Contains("  Turned 1 rule off because your code mixes both forms: BRO1133 (null checks).", report);
+        Assert.Contains("  too few  operators where a line wraps: 1 place -> default stays (beginning_of_line)", report);
+        Assert.Contains("  1 setting had fewer than 3 places to tell, StyleBro's defaults stay: dotnet_style_operator_placement_when_wrapping.", report);
+        Assert.Contains("  Kept your style for 2 settings, all already StyleBro's default.", Conventions.Decide(new Dictionary<string, int[]> { ["stylebro_empty_string_style"] = new[] { 3, 0 }, ["stylebro_trailing_comma"] = new[] { 9, 0 } }, new Dictionary<string, string>()).Report);
+    }
+
+    [Theory]
+    [InlineData(1, 1)]       // too few
+    [InlineData(999, 0)]     // the default
+    [InlineData(0, 999)]     // kept
+    [InlineData(999, 999)]   // off or mixed (Bogus: 24 and 50)
+    public void Conventions_ReportLinesFitIn120Characters(int first, int second)
+    {
+        var counts = Conventions.All.ToDictionary(c => c.Key, _ => new[] { first, second });
+        var verdicts = Conventions.Decide(counts, new Dictionary<string, string>()).Report;
+        var set = Conventions.Decide(counts, Conventions.All.ToDictionary(c => c.Key, c => $"set in .editorconfig ({c.Values[1].Value})")).Report;
+
+        Assert.All(verdicts.Concat(set), l => Assert.True(l.Length <= Conventions.Width, $"{l.Length}: {l}"));
     }
 
     [Fact]
