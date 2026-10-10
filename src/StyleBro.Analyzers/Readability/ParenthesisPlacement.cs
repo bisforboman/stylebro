@@ -161,6 +161,14 @@ internal static class ParenthesisPlacement
             return null;
         }
 
+        // 'new Article(' ... ') { Author = user };': with ')' moved up, the SDK formatter (IDE0055, csharp_new_line_before_open_brace
+        // = all, its default) puts the initializer's '{' on a line of its own below the call (RealWorld). Left alone.
+        if (list.Parent is BaseObjectCreationExpressionSyntax { Initializer.OpenBraceToken: var brace }
+            && Line(text, brace.SpanStart) == Line(text, close.SpanStart))
+        {
+            return null;
+        }
+
         if (comment.Length > 0)
         {
             var closeLine = text.Lines.GetLineFromPosition(close.SpanStart);
