@@ -1043,6 +1043,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   multi-targeted repos. Limit: per-framework indentation conflicts (Newtonsoft.Json's `else` inside `#if`).
 - Scratch scripts: `scratchpad/ide0055-*.ps1`, `try-format*.ps1`. Gotcha: an incremental build re-reports no warnings
   (use `--no-incremental` when counting).
+- Trial 6 (2026-10-11): a per-framework run loads only the projects that target it, so the renamer's solution-wide
+  guards missed the others (Scrutor: a field the tests read with GetField renamed in the library's netstandard2.0 run).
+  `format` now writes every C# file's strings, nameof names and identifiers (`RepositoryNames`, env
+  `STYLEBRO_REPOSITORY_NAMES`) for those runs; the renamers check them (strings like their own, and a non-private
+  name used in a file the run doesn't load: `KeptReason.UsedInProjectNotLoaded`). Framework spellings share a run
+  (`NormalizeFramework`, NuGet's short names: `net6` = `net6.0`, `net10` is .NET Framework 1.0); the run's
+  TargetFramework is the majority spelling, and the hook sets a kept project's own spelling (`StyleBroFormatAliases`).
 
 - **Convergence: one run everywhere** (2026-10-04). `dotnet format` fixes one id at a time (one Fix All each, fresh
   diagnostics) in an order that changes between processes, so the same repo converged in one run or two. Causes found:
