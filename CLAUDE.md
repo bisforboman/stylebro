@@ -798,7 +798,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   the others' untouched text, and `#if`-only fixes come on the next run. Renamer: one text variant per path (file key
   = path|checksum, first key per path wins). Test `CopiesWithDifferentText_OnlyTheFirstIsFixed`.
 - Then still nothing written: the SDK's own fixers break multi-targeted repos under `dotnet format` once `init`'s
-  severities are on, WITHOUT StyleBro too (plain `dotnet format` alone fine). Serilog: IDE0011 crashes Roslyn's
+  severities are on, WITHOUT StyleBro too (reported upstream: https://github.com/dotnet/roslyn/issues/86000) (plain `dotnet format` alone fine). Serilog: IDE0011 crashes Roslyn's
   `LinkedFileDiffMergingSession` (unhandled exception, nothing written), IDE0040 writes conflict markers;
   Newtonsoft.Json: plain dotnet format + init severities = 172 conflict-marker lines (79 files, 0 markers without).
   Bisect script `scratchpad/bisect-ide.ps1` (one rule at a time): IDE0011 crash, IDE0040/IDE0047 markers, IDE0055 at
@@ -1035,7 +1035,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 ## `stylebro-migrate format` (2026-10-03, IDE0055 investigation)
 
 - Plain `dotnet format` with IDE0055 at warning crashes on multi-targeted repos (Roslyn's linked-file merge, no
-  StyleBro needed; the style pass alone too). The whitespace pass formats only the first framework's code. With
+  StyleBro needed; the style pass alone too; reported upstream: https://github.com/dotnet/roslyn/issues/86000). The whitespace pass formats only the first framework's code. With
   `TargetFramework=<tfm>` as an ENVIRONMENT variable MSBuild loads each project as an inner build: no linked copies.
   The env var also reaches referenced projects that don't target that framework (Newtonsoft.Json's net46 tests -> the
   library without net46: load failure, tests silently skipped, exit 0); a hook (`BeforeMicrosoftNETSdkTargets`, right
