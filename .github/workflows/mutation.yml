@@ -1,7 +1,7 @@
 name: Mutation testing
 
-# Breaks each guard listed in scripts/mutation/mutations/*.psd1 and checks that a test fails. The entries are split over
-# parallel shards (index modulo the shard count); the job named `mutation` (the required check) passes only when every
+# Breaks each guard listed in scripts/mutation/entries/ (one file per entry) and checks that a test fails. The entries are split over
+# parallel shards (sorted by path, index modulo the shard count); the job named `mutation` (the required check) passes only when every
 # shard passed. On a pull request only the entries for the files it changes run (.github/changes.sh, -OnlyFiles; the
 # stale check still covers every entry); the nightly run on main runs them all (instead of a run after every merge; a
 # failure opens or updates the issue "Nightly mutation run failed").
