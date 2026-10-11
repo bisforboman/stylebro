@@ -17,6 +17,22 @@ public class LinkedFileFixAllTests
     private static readonly int AfterLastItem = Original.IndexOf("2\n", StringComparison.Ordinal) + 1;
 
     [Fact]
+    public async Task ParallelWork_GivesTheResultsInTheItemsOrder()
+    {
+        // The documents of a Fix All are fixed in parallel; the merge must still see their changes in document order.
+        var items = Enumerable.Range(0, 40).ToList();
+        var results = await LinkedFileFixAllProvider.ForEachAsync(
+            items,
+            async i =>
+            {
+                await Task.Delay((40 - i) % 7);
+                return i * 2;
+            },
+            CancellationToken.None);
+        Assert.Equal(items.Select(i => i * 2), results);
+    }
+
+    [Fact]
     public void IdenticalEditsFromSeveralCopies_AreAppliedOnce()
     {
         var comma = new TextChange(new TextSpan(AfterLastItem, 0), ",");

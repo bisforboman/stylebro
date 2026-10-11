@@ -16,5 +16,9 @@
 
         # Sonar rule defaults by package version (BRO1150)
         @{ File = 'src/StyleBro.Analyzers/SonarRules.cs'; Find = '&& GetMajorVersion(paths) is < 10;'; Replace = ';'; Tests = 'WhereBeforeTerminalTests.SonarCollectionRules' }
+
+        # Syntax node actions from a tree action (NodeActions): the root is visited too, and the semantic model answers
+        @{ File = 'src/StyleBro.Analyzers/TreeWalk.cs'; Find = 'new Dictionary<SyntaxKind, List<SyntaxNode>> { [root.Kind()] = new() { root } };'; Replace = 'new Dictionary<SyntaxKind, List<SyntaxNode>>();'; Tests = 'NodeActionsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/LinkedFileFixAllProvider.cs'; Find = 'results[i] = await run(items[i])'; Replace = 'results[items.Count - 1 - i] = await run(items[i])'; Tests = 'LinkedFileFixAllTests' }
     )
 }
