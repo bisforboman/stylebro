@@ -600,6 +600,37 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The TargetFramework a run sets (the spelling most of its projects use, <see cref="NormalizeFramework"/>), and the kept
+    /// projects that spell it another way, as '|PATH=spelling|' (upper-case paths) for <see cref="SelectFrameworkTargets"/>:
+    /// a project whose TargetFramework isn't one of its own spellings has no restore output for it (SmartEnum's EFCore
+    /// tests, 'net6.0', in the run for the library's 'net6': the workspace didn't load).
+    /// </summary>
+    public static (string Alias, string Aliases) Aliases(IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> projects, IEnumerable<string> keep, string framework)
+    {
+        var own = keep.Where(projects.ContainsKey)
+            .Select(p => (Path: p, Alias: projects[p].Frameworks.FirstOrDefault(f => NormalizeFramework(f) == framework)))
+            .Where(p => p.Alias is not null)
+            .ToList();
+        var alias = own.GroupBy(p => p.Alias!, StringComparer.Ordinal).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).Select(g => g.Key).FirstOrDefault() ?? framework;
+        var others = own.Where(p => p.Alias != alias).Select(p => $"{p.Path.ToUpperInvariant()}={p.Alias}|").ToList();
+        return (alias, others.Count == 0 ? string.Empty : "|" + string.Concat(others));
+    }
+
+    /// <summary>
+    /// Writes the names the renaming fixes check outside the projects a run loads (<see cref="RepositoryNames"/>), for every
+    /// C# file under the root.
+    /// </summary>
+    public static void WriteRepositoryNames(string root, string file)
+    {
+        // ponytail: parsed without preprocessor symbols, so names only inside '#if' code aren't seen.
+        var lines = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .AsParallel()
+            .AsOrdered()
+            .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList());
+        File.WriteAllLines(file, lines);
+    }
+
+    /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
     /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.
     /// </summary>
@@ -1228,37 +1259,6 @@ internal static class FormatCommand
 
         process.WaitForExit();
         return process.ExitCode;
-    }
-
-    /// <summary>
-    /// The TargetFramework a run sets (the spelling most of its projects use, <see cref="NormalizeFramework"/>), and the kept
-    /// projects that spell it another way, as '|PATH=spelling|' (upper-case paths) for <see cref="SelectFrameworkTargets"/>:
-    /// a project whose TargetFramework isn't one of its own spellings has no restore output for it (SmartEnum's EFCore
-    /// tests, 'net6.0', in the run for the library's 'net6': the workspace didn't load).
-    /// </summary>
-    public static (string Alias, string Aliases) Aliases(IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> projects, IEnumerable<string> keep, string framework)
-    {
-        var own = keep.Where(projects.ContainsKey)
-            .Select(p => (Path: p, Alias: projects[p].Frameworks.FirstOrDefault(f => NormalizeFramework(f) == framework)))
-            .Where(p => p.Alias is not null)
-            .ToList();
-        var alias = own.GroupBy(p => p.Alias!, StringComparer.Ordinal).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).Select(g => g.Key).FirstOrDefault() ?? framework;
-        var others = own.Where(p => p.Alias != alias).Select(p => $"{p.Path.ToUpperInvariant()}={p.Alias}|").ToList();
-        return (alias, others.Count == 0 ? string.Empty : "|" + string.Concat(others));
-    }
-
-    /// <summary>
-    /// Writes the names the renaming fixes check outside the projects a run loads (<see cref="RepositoryNames"/>), for every
-    /// C# file under the root.
-    /// </summary>
-    public static void WriteRepositoryNames(string root, string file)
-    {
-        // ponytail: parsed without preprocessor symbols, so names only inside '#if' code aren't seen.
-        var lines = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            .AsParallel()
-            .AsOrdered()
-            .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList());
-        File.WriteAllLines(file, lines);
     }
 
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>

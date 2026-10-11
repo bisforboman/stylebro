@@ -32,11 +32,11 @@ internal static class PreviewCommand
     /// <summary>The options the preview adds to init and the migration ('--diff=file' counts as '--diff').</summary>
     public static readonly string[] Options = { "--diff", "--keep", "--all", "--project", "--no-restore" };
 
-    /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
-    private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
-
     /// <summary>The label of files nothing was reported in.</summary>
     private const string Other = "other";
+
+    /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
+    private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
 
     /// <summary>Whether the options ask for a preview.</summary>
     public static bool Wants(IEnumerable<string> options) => options.Any(o => o == "--diff" || o.StartsWith("--diff=", StringComparison.Ordinal));

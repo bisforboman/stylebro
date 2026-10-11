@@ -139,6 +139,41 @@ internal static class CamelCaseRenamer
         return (document.FilePath ?? document.Id.Id.ToString()) + "|" + Convert.ToBase64String(text.GetChecksum().ToArray());
     }
 
+    /// <summary>
+    /// The entries of the file <see cref="RepositoryNames.Variable"/> names (read once per file), or none when it isn't set:
+    /// only 'stylebro-migrate format' sets it.
+    /// </summary>
+    internal static List<RepositoryNames.Entry> ReadRepositoryNames()
+    {
+#pragma warning disable RS1035 // Only 'stylebro-migrate format' sets the variable; the IDE and the build never read a file.
+        var file = Environment.GetEnvironmentVariable(RepositoryNames.Variable);
+        if (string.IsNullOrEmpty(file))
+        {
+            return new List<RepositoryNames.Entry>();
+        }
+
+        lock (RepositoryNamesGate)
+        {
+            if (repositoryNames.File != file)
+            {
+                List<RepositoryNames.Entry> entries;
+                try
+                {
+                    entries = System.IO.File.ReadLines(file).Select(RepositoryNames.Parse).OfType<RepositoryNames.Entry>().ToList();
+                }
+                catch (System.IO.IOException)
+                {
+                    entries = new List<RepositoryNames.Entry>();
+                }
+
+                repositoryNames = (file, entries);
+            }
+
+            return repositoryNames.Entries;
+        }
+#pragma warning restore RS1035
+    }
+
     private static (string OldName, string NewName)? GetNamespaceRename(Diagnostic diagnostic) =>
         diagnostic.Properties.TryGetValue(NamespaceNames.NamespaceKey, out var oldNamespace) && oldNamespace is not null
         && diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newPart) && newPart is not null
@@ -279,41 +314,6 @@ internal static class CamelCaseRenamer
         }
 
         return new NamesInCode(strings, nameofs, where, outside);
-    }
-
-    /// <summary>
-    /// The entries of the file <see cref="RepositoryNames.Variable"/> names (read once per file), or none when it isn't set:
-    /// only 'stylebro-migrate format' sets it.
-    /// </summary>
-    internal static List<RepositoryNames.Entry> ReadRepositoryNames()
-    {
-#pragma warning disable RS1035 // Only 'stylebro-migrate format' sets the variable; the IDE and the build never read a file.
-        var file = Environment.GetEnvironmentVariable(RepositoryNames.Variable);
-        if (string.IsNullOrEmpty(file))
-        {
-            return new List<RepositoryNames.Entry>();
-        }
-
-        lock (RepositoryNamesGate)
-        {
-            if (repositoryNames.File != file)
-            {
-                List<RepositoryNames.Entry> entries;
-                try
-                {
-                    entries = System.IO.File.ReadLines(file).Select(RepositoryNames.Parse).OfType<RepositoryNames.Entry>().ToList();
-                }
-                catch (System.IO.IOException)
-                {
-                    entries = new List<RepositoryNames.Entry>();
-                }
-
-                repositoryNames = (file, entries);
-            }
-
-            return repositoryNames.Entries;
-        }
-#pragma warning restore RS1035
     }
 
     /// <summary>Whether code can refer to the symbol by a string or a nameof, and which.</summary>

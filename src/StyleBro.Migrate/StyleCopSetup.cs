@@ -595,6 +595,14 @@ internal sealed class StyleCopSetup
 
     internal static string WithoutComments(string xml) => Regex.Replace(xml, "<!--.*?-->", string.Empty, RegexOptions.Singleline);
 
+    /// <summary>The MSBuild files an MSBuild file imports that can be found (<see cref="Resolve"/>).</summary>
+    internal static IEnumerable<string> Imports(string file, string root) =>
+        Reference.Matches(WithoutComments(File.ReadAllText(file)))
+            .Where(m => m.Groups["import"].Success)
+            .Select(m => Resolve(m.Groups["import"].Value, file, root))
+            .OfType<string>()
+            .Where(IsMSBuild);
+
     /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]').</summary>
     private static bool MayApplyToCSharp(string section)
     {
@@ -784,14 +792,6 @@ internal sealed class StyleCopSetup
 
         return result;
     }
-
-    /// <summary>The MSBuild files an MSBuild file imports that can be found (<see cref="Resolve"/>).</summary>
-    internal static IEnumerable<string> Imports(string file, string root) =>
-        Reference.Matches(WithoutComments(File.ReadAllText(file)))
-            .Where(m => m.Groups["import"].Success)
-            .Select(m => Resolve(m.Groups["import"].Value, file, root))
-            .OfType<string>()
-            .Where(IsMSBuild);
 
     /// <summary>
     /// An MSBuild path as an existing file under the root, or null: $(MSBuildThisFileDirectory) and GetPathOfFileAbove are

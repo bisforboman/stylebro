@@ -409,9 +409,6 @@ internal static class Migration
             .ToList();
     }
 
-    private static bool IsUnder(string path, string folder) =>
-        folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
-
     /// <summary>The block that goes into an .editorconfig.</summary>
     public static string Render(IEnumerable<(string Section, List<string> Lines)> sections)
     {
@@ -592,6 +589,9 @@ internal static class Migration
         var list = folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
         return list.Where(f => !list.Any(p => f.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))).ToList();
     }
+
+    private static bool IsUnder(string path, string folder) =>
+        folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsVendorFolder(string name) => name.ToLowerInvariant() is "vendor" or "vendored" or "third_party" or "thirdparty" or "external";
 
