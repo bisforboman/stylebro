@@ -52,7 +52,12 @@ public sealed partial class MigrationTests
             + "i/crlf  w/crlf  attr/                   \td e.cs\0"
             + "i/-text w/-text attr/                   \tf.bin\0";
 
-        Assert.Equal(new[] { "a.cs" }, Conventions.Converted(output));
+        // a.cs: the .gitattributes 'text' attribute converts it (the note names that, not core.autocrlf).
+        Assert.Equal(new[] { ("a.cs", true) }, Conventions.Converted(output));
+        Assert.Equal(new[] { ("g.cs", false) }, Conventions.Converted("i/lf    w/crlf  attr/                   \tg.cs\0"));
+        Assert.Equal("1 file that git converts on checkout (.gitattributes 'text') don't count", Conventions.ConvertedNote([0, 1]));
+        Assert.Equal("3 files that git converts on checkout (core.autocrlf, .gitattributes 'text') don't count", Conventions.ConvertedNote([2, 1]));
+        Assert.Null(Conventions.ConvertedNote([0, 0]));
     }
 
     [Fact]

@@ -95,10 +95,10 @@ public sealed partial class MigrationTests
             new[]
             {
                 "StyleCop runs only in src/LiteBus.Core, src/LiteBus.Events: the settings apply there, with the rules StyleCop has on there.",
-                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no rule changes there. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
+                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no rule changes there, and 'stylebro-migrate format' leaves them alone. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
             },
             Program.ScopeReport(setup));
-        var hints = Program.PackageHints(setup);
+        var hints = Program.PackageHints(setup, root);
         Assert.StartsWith("StyleCop.Analyzers is referenced in src/Directory.Build.props: ", hints[0]);
         Assert.StartsWith("src/LiteBus.Analyzers/LiteBus.Analyzers.csproj removes the StyleCop.Analyzers reference", hints[1]);
 
@@ -106,7 +106,10 @@ public sealed partial class MigrationTests
         Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write" })));
         Assert.DoesNotContain(Migration.BeginMarker, File.ReadAllText(Path.Combine(root, "tests/.editorconfig")));
         Assert.DoesNotContain(Migration.BeginMarker, File.ReadAllText(Path.Combine(root, "src/.editorconfig")));
-        Assert.Contains("[src/{LiteBus.Core,LiteBus.Events}/**.cs]\n# StyleBro rules", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+        Assert.Contains("[src/{LiteBus.Core,LiteBus.Events}/**.cs]\n" + Migration.UnformattedLine(["samples", "src/LiteBus.Analyzers", "tests"]) + "\n# StyleBro rules", File.ReadAllText(Path.Combine(root, ".editorconfig")));
+
+        // ... and so does 'format' (its whitespace pass ignores rule severities: Soulseek.NET's examples were reformatted).
+        Assert.Equal(["samples/", "src/LiteBus.Analyzers/", "tests/"], Migration.UnformattedFolders(root));
     }
 
     [Fact]

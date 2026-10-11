@@ -49,8 +49,9 @@ public sealed partial class MigrationTests
         Assert.Contains("  kept     private fields: 3 of 3 named '_field' -> _camelCase", output);
         Assert.Contains("Kept your style for 1 setting: stylebro_private_field_naming.", output);
 
-        // Three that disagree: the rule is off.
+        // Three that disagree: the rule is off (a fresh init: a second one keeps what the first wrote).
         Write("A.cs", "class A { private int _logger; private int _mediator; private int clock; }");
+        File.Delete(Path.Combine(root, ".editorconfig"));
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
         Assert.Contains("dotnet_diagnostic.BRO1303.severity = none", File.ReadAllText(Path.Combine(root, ".editorconfig")));
     }

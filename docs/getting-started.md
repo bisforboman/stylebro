@@ -181,8 +181,16 @@ A few settings work a little differently:
   comment. Mostly documented: the rule stays on; mostly undocumented or mixed: it's turned off.
 - **Line endings** count files. Without `end_of_line`, `format` writes your OS's line ending into the lines it rewrites
   (on Windows CRLF into LF files), so `init` writes the files' ending when it's clear and nothing when it's mixed. Files
-  git converts on checkout (`core.autocrlf`: LF in the repository, CRLF in a Windows checkout) don't count: there the
-  OS's ending is what the checkout has, and a fixed one would make `format` rewrite every file on the other OS.
+  git converts on checkout (`core.autocrlf`, or a `.gitattributes` `text` attribute without `eol`: LF in the repository,
+  CRLF in a Windows checkout) don't count, and the report names which of the two converts them: there the OS's ending is
+  what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. `stylebro-migrate
+  --write` writes `end_of_line` the same way.
+- **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
+  repository's code`, with their `# init:` comments), and the report says `kept from the last init`. They describe your
+  code as it was before StyleBro formatted it: counted again after a `format` run, StyleBro's own output would decide
+  (a rule that added blank lines in some places would make your code look mixed, and the setting would flip). To have a
+  convention counted again, delete its line from the block and run `init` again; to count everything again, delete the
+  block. Conventions the first run left at StyleBro's default (no line) are counted again each time.
 - **Using order** counts files with 2 or more usings: sorted with System first, sorted without, or not sorted. `dotnet
   format` sorts usings whenever `dotnet_sort_system_directives_first` is set (to any value), so the preset doesn't set
   it: `init` writes it when your usings are sorted (or there are too few files to tell), and only a comment when they
