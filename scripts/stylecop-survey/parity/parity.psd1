@@ -18,6 +18,8 @@
             Map      = @('SA1201=BRO1001', 'SA1202=BRO1001', 'SA1203=BRO1001', 'SA1204=BRO1001', 'SA1214=BRO1001')
             # StyleCop's fix moves members across regions; positions only.
             CompareOutput = $false
+            # With BRO1112 on (its default), BRO1001 leaves a type with regions to BRO1112's fix, which sorts across them.
+            EditorConfig = "dotnet_diagnostic.BRO1112.severity = none`n"
             Expected = @(
                 # BRO1001 reports once per type (the first out-of-place member); the fix sorts every region.
                 'only StyleCop: BRO1001 Regions.cs(14,17)'

@@ -105,6 +105,12 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         var partialAccess = new Dictionary<SyntaxNode, MemberAccess?[]?>();
         foreach (var container in root.DescendantNodesAndSelf(n => MemberOrdering.GetMembers(n) is not null).Where(n => MemberOrdering.GetMembers(n) is not null))
         {
+            if (MemberOrdering.HasRemovableRegions(container)
+                && Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.NoRegions, cancellationToken))
+            {
+                continue;
+            }
+
             var access = MemberOrdering.GetPartialAccess(container, model, cancellationToken);
             if (MemberOrdering.FindFirstViolation(container, options, access) is not null
                 && await GetReadByPositionAsync(document, container, access, cancellationToken).ConfigureAwait(false) is null)

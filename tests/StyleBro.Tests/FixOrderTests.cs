@@ -768,6 +768,55 @@ public class FixOrderTests
         "BRO1001",
         "BRO1112");
 
+    // Polly's Context.Dictionary.cs: sorting within the region first put the commented property next to another property,
+    // which made its comment a group comment (GroupComments) and blocked the sort across the removed regions.
+    [Fact]
+    public Task Ordering_ACommentedMemberOfRegionsThatAreRemoved() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            // The values.
+            private int P { get; set; }
+
+            public C()
+            {
+            }
+
+            #region Public
+
+            public int Q { get; set; }
+
+            #endregion
+        }
+        """,
+        "BRO1001",
+        "BRO1112");
+
+    // Newtonsoft.Json's JsonSerializerTest.cs: moving the lambda first (BRO1107) indented the line where the string starts
+    // deeper than the string's continuation lines, so BRO1108 then moved the string without them.
+    [Fact]
+    public Task ParameterLayout_AnItemOnTheLineWhereAMovedLambdaEnds() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(System.Action a, string s)
+            {
+            }
+
+            public void N()
+            {
+                M(() =>
+                {
+                    N();
+                }, "a" +
+                   "b");
+            }
+        }
+        """,
+        "BRO1107",
+        "BRO1108",
+        "BRO1520");
+
     [Fact]
     public Task Regions_ACommentAboveTheRemovedLines() => AssertConvergesInEveryOrderAsync(
         """
