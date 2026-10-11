@@ -2,7 +2,7 @@
 # no whitespace pass with IDE0055 off, old Mac line endings, verify's own errors, kept findings marked as kept
 @{
     File = 'src/StyleBro.Migrate/PreviewCommand.cs'
-    Find = 'var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);'
-    Replace = 'var targets = Migration.PropsFiles(root);'
+    Find = 'var targets = (styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root))'
+    Replace = 'var targets = (Migration.PropsFiles(root))'
     Tests = 'MigrationTests.ThePackage_'
 }

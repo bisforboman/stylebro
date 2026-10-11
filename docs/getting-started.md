@@ -585,12 +585,36 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   `Microsoft.NETFramework.ReferenceAssemblies.net462` NuGet package (the version your projects target) and point
   MSBuild at it with an environment variable, which reaches both `msbuild` and `dotnet format`:
   `set TargetFrameworkRootPath=%NUGET_PACKAGES%\microsoft.netframework.referenceassemblies.net462\1.0.3\build`.
-- **How to reference StyleBro.Analyzers.** A `PackageReference` (in the project or a `Directory.Build.props`) makes
-  NuGet restore the project the PackageReference way, and its `packages.config` packages are no longer restored: a
-  fresh clone then fails to build, while a machine with an old `packages` folder still builds. Migrate the project to
-  `PackageReference` first (Visual Studio: right-click `packages.config`, "Migrate packages.config to
-  PackageReference"), or add StyleBro through `packages.config` (Visual Studio's package manager, which also adds the
-  analyzer items).
+- **Install StyleBro.Analyzers the packages.config way**, like StyleCop was: Visual Studio's package manager
+  (or `Install-Package StyleBro.Analyzers` in its console) writes all three parts, or add them by hand. In
+  `packages.config`:
+
+  ```xml
+  <package id="StyleBro.Analyzers" version="0.5.0-alpha.1" targetFramework="net462" developmentDependency="true" />
+  ```
+
+  In the project (paths relative to it; the `packages` folder is next to the solution):
+
+  ```xml
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleBro.Analyzers.0.5.0-alpha.1\analyzers\dotnet\cs\StyleBro.Analyzers.dll" />
+    <Analyzer Include="..\packages\StyleBro.Analyzers.0.5.0-alpha.1\analyzers\dotnet\cs\StyleBro.CodeFixes.dll" />
+  </ItemGroup>
+  <!-- at the end, after the Microsoft.CSharp.targets import: the preset and the baseline -->
+  <Import Project="..\packages\StyleBro.Analyzers.0.5.0-alpha.1\build\StyleBro.Analyzers.targets" Condition="Exists('..\packages\StyleBro.Analyzers.0.5.0-alpha.1\build\StyleBro.Analyzers.targets')" />
+  ```
+
+  plus an `<Error Condition="!Exists('...StyleBro.Analyzers.targets')" ... />` line in the project's
+  `EnsureNuGetPackageBuildImports` target, as NuGet adds for every package with build targets. Don't use a
+  `PackageReference` there: it makes NuGet restore the project the PackageReference way, its `packages.config` packages
+  are no longer restored, and a fresh clone doesn't build. A `PackageReference` in a `Directory.Build.props` that also
+  serves SDK-style projects needs a condition that keeps it away from them:
+
+  ```xml
+  <PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" Condition="!Exists('$(MSBuildProjectDirectory)\packages.config')" />
+  ```
+
+  `stylebro-migrate` names the packages.config projects and says this in its report.
 - **`--diff` doesn't work** for them: the copy it formats has no git-ignored `packages` folder, and `dotnet restore`
   can't restore `packages.config`. It says so and stops. Instead, on a clean working tree: run the command without
   `--diff`, restore with MSBuild as above, run `stylebro-migrate format`, and review `git diff` (`git checkout .`

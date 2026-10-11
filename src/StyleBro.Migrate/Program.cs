@@ -282,6 +282,13 @@ internal static class Program
             lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
         }
 
+        // Old-style projects install packages through packages.config: a PackageReference would switch their restore.
+        if (PackagesConfig.Projects(StyleCopSetup.EnumerateFiles(root)) is { Count: > 0 } packagesConfig)
+        {
+            var names = packagesConfig.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')).ToList();
+            lines.Add($"{string.Join(", ", names.Take(3))}{(names.Count > 3 ? $" and {names.Count - 3} more" : string.Empty)} use packages.config: install StyleBro.Analyzers there the packages.config way (Visual Studio's package manager writes the packages.config entry, the <Analyzer> items and the build targets import), and give a PackageReference in Directory.Build.props Condition=\"{PackagesConfig.NotPackagesConfig}\" (https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects).");
+        }
+
         if (setup.RemovedIn.Count > 0)
         {
             lines.Add($"{string.Join(", ", setup.RemovedIn)} remove{(setup.RemovedIn.Count == 1 ? "s" : string.Empty)} the StyleCop.Analyzers reference (<PackageReference Remove=\"StyleCop.Analyzers\" />): add <PackageReference Remove=\"StyleBro.Analyzers\" /> next to it, else that project gets StyleBro (and a restore error, NU1015, when it doesn't use central package management).");
