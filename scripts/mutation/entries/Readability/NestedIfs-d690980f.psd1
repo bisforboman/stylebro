@@ -2,7 +2,7 @@
 # Sonar ids (NodeCodeFixProvider): no action where the shared logic skips
 @{
     File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'
-    Find = 'IndentOf(text, current.SpanStart) - topIndent'
+    Find = 'IndentOf(text, current.SpanStart) - (ownLine ? topColumn : topIndent)'
     Replace = '0'
     Tests = 'NestedIfTests.MultiLineInnerCondition_MovesLeft'
 }

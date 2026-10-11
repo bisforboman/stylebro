@@ -756,6 +756,12 @@ internal static class FormatCommand
             json["path"] = RepositoryRoot(Environment.CurrentDirectory) ?? Environment.CurrentDirectory;
         }
 
+        // Only the files' projects load: a string or name elsewhere in the repository (a test project reading a field with
+        // GetField) counts as in a per-framework run. Without it, --files renamed fields the whole-repository run kept.
+        var names = Path.Combine(Path.GetTempPath(), $"stylebro-names-{Guid.NewGuid():N}.tsv");
+        var first = Path.GetDirectoryName(Path.GetFullPath(groups[0].Workspace))!;
+        WriteRepositoryNames(RepositoryRoot(first) ?? first, names);
+        using var namesVariable = new KeptVariable(names, RepositoryNames.Variable);
         var exit = 0;
         foreach (var (workspace, root, include) in groups)
         {
@@ -892,6 +898,16 @@ internal static class FormatCommand
             var before = Snapshot(copy);
             int copyCode;
             List<KeptFinding> kept;
+
+            // --files: the repository's names, written again for the copy's paths (the files a run loads are told apart by path).
+            var namesFile = copy + ".names.tsv";
+            var namesInCopy = string.IsNullOrEmpty(Environment.GetEnvironmentVariable(RepositoryNames.Variable)) ? null : new KeptVariable(namesFile, RepositoryNames.Variable);
+            if (namesInCopy is not null)
+            {
+                WriteRepositoryNames(copy, namesFile);
+            }
+
+            using (namesInCopy)
             using (new KeptVariable(keptFile))
             {
                 copyCode = runOnce(copyArgs.ToArray(), _ => { });
@@ -1178,8 +1194,13 @@ internal static class FormatCommand
         File.WriteAllText(select, SelectFrameworkTargets);
 
         // A run loads only the projects that target its framework: the renaming fixes check the names of all the C# files.
-        var names = Path.Combine(Path.GetTempPath(), $"stylebro-names-{Guid.NewGuid():N}.tsv");
-        WriteRepositoryNames(root, names);
+        // --files names the whole repository's already (the root here is the files' project).
+        var givenNames = Environment.GetEnvironmentVariable(RepositoryNames.Variable);
+        var names = string.IsNullOrEmpty(givenNames) ? Path.Combine(Path.GetTempPath(), $"stylebro-names-{Guid.NewGuid():N}.tsv") : givenNames!;
+        if (string.IsNullOrEmpty(givenNames))
+        {
+            WriteRepositoryNames(root, names);
+        }
 
         // Each run's own report folder, in the plan's order (the runs may run at once).
         reportFolders.AddRange(plan.Select(_ => Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}")).Where(_ => report is not null));
@@ -1262,7 +1283,11 @@ internal static class FormatCommand
         finally
         {
             File.Delete(select);
-            File.Delete(names);
+            if (string.IsNullOrEmpty(givenNames))
+            {
+                File.Delete(names);
+            }
+
             if (report is not null)
             {
                 WriteMergedReport(Path.GetFullPath(report), reportFolders);
@@ -1408,21 +1433,27 @@ internal static class FormatCommand
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>
     private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Aliases, string Names);
 
-    /// <summary>Sets <see cref="KeptFinding.Variable"/> for the 'dotnet format' runs this process starts, and restores it.</summary>
+    /// <summary>
+    /// Sets <see cref="KeptFinding.Variable"/> (or another variable that names a file) for the 'dotnet format' runs this
+    /// process starts, and restores it.
+    /// </summary>
     private sealed class KeptVariable : IDisposable
     {
-        private readonly string? previous = Environment.GetEnvironmentVariable(KeptFinding.Variable);
+        private readonly string variable;
+        private readonly string? previous;
         private readonly string file;
 
-        public KeptVariable(string file)
+        public KeptVariable(string file, string variable = KeptFinding.Variable)
         {
             this.file = file;
-            Environment.SetEnvironmentVariable(KeptFinding.Variable, file);
+            this.variable = variable;
+            previous = Environment.GetEnvironmentVariable(variable);
+            Environment.SetEnvironmentVariable(variable, file);
         }
 
         public void Dispose()
         {
-            Environment.SetEnvironmentVariable(KeptFinding.Variable, previous);
+            Environment.SetEnvironmentVariable(variable, previous);
             File.Delete(file);
         }
     }

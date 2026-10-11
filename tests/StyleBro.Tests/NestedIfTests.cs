@@ -40,6 +40,128 @@ public class NestedIfTests
         }
         """);
 
+    // Flow.Launcher's ShellContextMenu: the inner condition's arguments were left behind ('...DRAWITEM) && x.HandleMenuMsg(' and
+    // a line indented by the old dedent). An inner condition over several lines gets a line of its own, '&&' first.
+    [Fact]
+    public Task AnInnerConditionOverSeveralLines_StartsALine() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null
+                    && (msg == 1
+                        || msg == 2))
+                {
+                    {|BRO1149:if|} (Handle(
+                            msg, msg) == 0)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            private int Handle(int a, int b) => a + b;
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null
+                    && (msg == 1
+                        || msg == 2)
+                    && Handle(
+                            msg, msg) == 0)
+                {
+                    return;
+                }
+            }
+
+            private int Handle(int a, int b) => a + b;
+        }
+        """);
+
+    [Fact]
+    public Task AnInnerConditionOverSeveralLines_EndOfLineOperators() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null &&
+                    msg > 0)
+                {
+                    {|BRO1149:if|} (msg == 1 ||
+                        msg == 2)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null &&
+                    msg > 0 &&
+                    (msg == 1 ||
+                        msg == 2))
+                {
+                    return;
+                }
+            }
+        }
+        """,
+        editorConfig: "dotnet_style_operator_placement_when_wrapping = end_of_line\n");
+
+    // An '#endregion' right after the 'if' kept it until BRO1113 removed the region, so the merge came on a second run.
+    [Fact]
+    public Task RegionLinesAroundTheIf_AreMerged() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b)
+            {
+                #region Menu
+
+                if (a)
+                {
+                    {|BRO1149:if|} (b)
+                    {
+                        #region Inner
+                        M(b, a);
+                        #endregion
+                    }
+                }
+
+                #endregion
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool a, bool b)
+            {
+                #region Menu
+
+                if (a && b)
+                {
+                    #region Inner
+                    M(b, a);
+                    #endregion
+                }
+
+                #endregion
+            }
+        }
+        """);
+
     [Fact]
     public Task LooserOperands_GetParentheses() => Verify.VerifyFixAsync(
         """

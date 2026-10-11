@@ -470,8 +470,9 @@ included. When a change would break something only the fix can see, it leaves th
 fix offers no code action for it. That's the one exception to "`dotnet format` fixes everything StyleBro reports",
 and it's on purpose. The reasons, per finding:
 
-- the name is in a string anywhere in the solution (reflection like `GetField("_count")`, serialized names, test JSON):
-  the rename would compile but break at run time;
+- the name is in a string elsewhere in the solution (serialized names and test JSON for properties and public fields;
+  for other fields only where code reaches a member by name: `GetField("_count")`, `GetProperty(...)`, `Type.GetType(...)`,
+  `[MemberData("...")]`, an attribute's `Name = "..."`): the rename would compile but break at run time;
 - the name is in a `nameof(...)` elsewhere, whose text would change with it (an HTTP header name, a log key);
 - another member would hide the new name, or the new name already means something else where the name is used;
 - a use is in generated code (a source generator, a Razor page, a designer file), which a tool writes again;

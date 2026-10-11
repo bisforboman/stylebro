@@ -2,8 +2,8 @@ namespace Messy;
 
 public class Throttle
 {
-    public const int MAX_REQUESTS = 100;
+    public const int Max_Requests = 100;
     private int m_count;
 
-    public bool TryEnter() => m_count++ < MAX_REQUESTS;
+    public bool TryEnter() => m_count++ < Max_Requests;
 }

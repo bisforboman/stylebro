@@ -58,6 +58,33 @@ public class AutoAccessorLinesTests
         }
         """);
 
+    // StabilityMatrix (CSharpier): the SDK's formatter wants the '{' on its own line below a split header, BRO1527 joined it
+    // back, every run (FixOrderTests runs both).
+    [Fact]
+    public Task SplitHeader_NotReported() => Verify.VerifyNoDiagnosticsAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public Func<
+                int,
+                IReadOnlyDictionary<string, string>
+            >? Factory
+            { get; set; }
+
+            public Func<
+                int,
+                string
+            > Other
+            {
+                get;
+                set;
+            }
+        }
+        """);
+
     [Fact]
     public Task Skipped_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
         """
