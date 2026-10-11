@@ -36,7 +36,6 @@ public sealed class TrailingCommaAnalyzer : DiagnosticAnalyzer
             SyntaxKind.WithInitializerExpression,
             SyntaxKind.AnonymousObjectCreationExpression,
             SyntaxKind.EnumDeclaration,
-            SyntaxKind.SwitchExpression,
-            SyntaxKind.PropertyPatternClause);
+            SyntaxKind.SwitchExpression);
     }
 }

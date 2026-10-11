@@ -94,6 +94,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1501](rules/BRO1501.md) (SA1509) | The brace of an entry in an initializer (`{ "ssh", 22 }` after a blank line in a dictionary initializer) | The blank line groups the entries; StyleCop's fix removes it (StyleCop bug [#2832](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2832), open; user decision 2026-10-04). |
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment right after `=>` (switch expression arm, lambda, expression body) | It starts what comes after the arrow; StyleCop's fix puts a blank line between them (StyleCop bug [#3392](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3392), open; user decision 2026-10-04). |
 | [BRO1504](rules/BRO1504.md) (SA1515) | A comment whose text starts with a prefix in `stylebro_comment_blank_line_exempt_prefixes` (default none; e.g. `ReSharper, @formatter`) | Tool markers belong to the line below them (StyleCop issues [#3546](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3546), [#1490](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1490)); with the default, the same as StyleCop. |
+| [BRO1504](rules/BRO1504.md) (SA1515) | A comment between the links of a call chain (the next token is the `.` or `?.` of a member access: `AddHealthChecks()`, `// liveness`, `.AddCheck(...)`) | The comment describes the next link; a blank line would split the chain (found in davidfowl/TodoApi; owner's decision 2026-10-11). |
 | [BRO1505](rules/BRO1505.md) (SA1516) | With `stylebro_allow_adjacent_single_line_members = true` (default `false`): two neighbouring single-line members without a block body (`void A();` above `int B() => 1;`) | Some teams keep short members together, like fields (StyleCop issue [#2441](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2441)). |
 | [BRO1105](rules/BRO1105.md), [BRO1111](rules/BRO1111.md) (SA1128, SA1127) | With `stylebro_constructor_initializer_placement` / `stylebro_constraint_placement = same_line` (default `own_line`): an initializer or `where` clause on the declaration's line; instead, one on a line of its own is joined when the line fits `max_line_length` | Teams that prefer that layout turn SA1128/SA1127 off in StyleCop; StyleBro can enforce it. |
 | [BRO1310](rules/BRO1310.md) (SA1305) | Parameters of `extern`, `[DllImport]` and `[LibraryImport]` methods | They keep the native API's names, like BRO1309 leaves the methods alone (StyleCop bug [#2859](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2859), open). |
@@ -187,7 +188,6 @@ since (not released; see [decisions](https://github.com/bisforboman/stylebro/blo
 | [BRO1104](rules/BRO1104.md) (SA1129) | `new nint()` -> `default(nint)` (also on .NET 7+: the fix must agree across a multi-targeted project's frameworks) | Always `nint.Zero` (CS0117 on older runtimes); `master`: `nint.Zero` on C# 11 + .NET 7+ |
 | [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md) (SA1623, SA1624) | `init` accessors: `Gets or initializes` or `Gets`, `Initializes`; `Gets or initializes` is a wrong prefix elsewhere | Ignores `init`; its fix writes `Gets or sets or initializes` |
 | [BRO1611](rules/BRO1611.md) (SA1612) | `<param>` tags of primary constructors (classes, structs, records) | Not checked |
-| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line property patterns | Not checked |
 | [BRO1505](rules/BRO1505.md) (SA1516) | No blank line needed between two single-line properties, unless one is documented (`///`) | Wants none even next to a documented one |
 | [BRO1601](rules/BRO1601.md) (SA1600) | Explicit interface implementations not reported | Reported |
 
@@ -196,6 +196,7 @@ Where `master` changed behavior StyleBro keeps (the owner's decision):
 | Rule | `master` | StyleBro (like beta.556) |
 |---|---|---|
 | [BRO1505](rules/BRO1505.md) (SA1516) | Two fields need a blank line when the second spans several lines | Only when the first does |
+| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line property patterns get a trailing comma, nested ones too (94671b70) | Not checked (owner's decision 2026-10-11: follow the release) |
 | [BRO1606](rules/BRO1606.md) (SA1642) | Any summary that starts with `<para>` is accepted, text not checked | Checks the paragraph's text |
 | [BRO1311](rules/BRO1311.md) (SA1316) | Names in an override's or implementation's signature not reported | Reported, renamed together with the base |
 

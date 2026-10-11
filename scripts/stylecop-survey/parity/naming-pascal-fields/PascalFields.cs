@@ -26,4 +26,20 @@ namespace Probe
             + privateLowerStaticReadonly + publicLowerReadonly + protectedLowerReadonly + protectedInternalLowerReadonly
             + internalLowerReadonly + publicLower + internalLower + protectedLower + PublicUpper + UpperConst;
     }
+
+    // StyleCop's rules skip '*NativeMethods' classes, except SA1311 (static readonly).
+    internal static class UnsafeNativeMethods
+    {
+        internal const int max_path = 260;
+        internal static int dwFlags;
+        internal static readonly int invalidHandle = -1;
+        internal static readonly int readonlyLower = 0;
+
+        internal struct POINT
+        {
+            public int x;
+        }
+
+        internal static int Use(POINT p) => max_path + dwFlags + invalidHandle + readonlyLower + p.x;
+    }
 }
