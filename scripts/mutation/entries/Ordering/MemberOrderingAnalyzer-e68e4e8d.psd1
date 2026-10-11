@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Ordering/MemberOrderingAnalyzer.cs'
     Find = 'if (MemberOrdering.HasRemovableRegions(container)'
     Replace = 'if (false && MemberOrdering.HasRemovableRegions(container)'
-    Tests = 'FullyQualifiedName~MemberOrderingTests.Regions_ThatBRO1112Removes|FullyQualifiedName~FixOrderTests.Ordering_ACommentedMember'
+    Tests = 'FixOrderTests.Ordering_ACommentedMemberOfRegionsThatAreRemoved'
 }

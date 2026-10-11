@@ -3,5 +3,5 @@
     File = 'src/StyleBro.CodeFixes/Readability/ParameterLayoutCodeFixProvider.cs'
     Find = 'All: allForFirst ||'
     Replace = 'All: false ||'
-    Tests = 'FullyQualifiedName~FixOrderTests.ParameterLayout_AnItemOnTheLineWhereAMovedLambdaEnds'
+    Tests = 'FixOrderTests.ParameterLayout_AnItemOnTheLineWhereAMovedLambdaEnds'
 }
