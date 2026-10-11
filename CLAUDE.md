@@ -15,8 +15,8 @@ already covers them (IDE rules, `.editorconfig`); the preset enables those built
 **Stable 1.0 (owner's decisions, 2026-10-11, docs/decisions/):** 1.0 ships after two clean trials in a row (backlog
 item "Two clean trials before 1.0" keeps the tally); after 1.0, new rules stay off until a preset version opts in
 (planned, backlog "Preset versions"). What patch/minor/major may change: `docs/versioning.md`; releases themselves still
-follow the release policy below (the owner says when). CHANGELOG.md points to GitHub Releases, SECURITY.md to private
-vulnerability reporting.
+follow the release policy below (the owner says when). CHANGELOG.md is the full release history (each version's
+section is its GitHub release notes), SECURITY.md points to private vulnerability reporting.
 
 Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29): `dotnet build StyleBro.slnx`
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
@@ -126,17 +126,32 @@ when we can do that"): don't suggest releases at all; the user says when.
   changed (`-OnlyFiles`); a guard broken through another file (shared helper) is caught by the full run on main. `build`
   always runs (docs are tested). All scripts run locally too (mutations in a separate worktree: they undo
   each mutation with `git checkout`, so commit first).
-- `.github/workflows/release.yml`: on a `v*` tag, runs the same checks, packs with the version from the tag
-  (`v0.1.0-alpha.1` -> `0.1.0-alpha.1`; overrides `<Version>` in the csproj), pushes to nuget.org via Trusted
-  Publishing (`NuGet/login@v1`, no stored API key) and creates a GitHub release (prerelease if the version has a `-`).
+- **Changelog** (2026-10-11, owner's decision, ShotDetector's style): a PR with a change users notice adds
+  `changes/<branch>.md` (changes/README.md: `### Breaking changes` / `### New` / `### Changed` / `### Fixed` /
+  `### Upgrading` and bullets), never CHANGELOG.md itself, so parallel PRs don't conflict there. CI's build job runs
+  `python scripts/changelog.py --test` and `--check` (every fragment parses). Write for the release notes' reader:
+  short, concrete, no internal jargon, never private-app details.
+- `.github/workflows/release.yml` (release on merge since 2026-10-11, ShotDetector's design): on every push to main the
+  `version` job reads the newest `## X.Y.Z – date` (or `X.Y.Z-alpha.N`) in CHANGELOG.md; if `v<version>` isn't tagged
+  yet, the `release` job runs the same checks, packs with that version (`-p:Version`, overrides `<Version>` in the
+  csproj), pushes to nuget.org via Trusted Publishing (`NuGet/login@v1`, no stored API key) and creates the GitHub
+  release and its tag on that commit, with the version's CHANGELOG section as the notes (prerelease if the version has
+  a `-`). A hand-pushed `v*` tag still releases that tag (notes from CHANGELOG if it has the section, else GitHub's PR
+  list). Most pushes: the version is tagged, nothing else runs.
+  **Release PR**: once every PR going into the release has merged, one PR runs
+  `python scripts/changelog.py X.Y.Z-alpha.N "129 rules, each fixed by \`dotnet format\`. Docs: <site>"` (folds and
+  deletes the fragments, adds "Upgrading from <previous>" with the tool update line), moves Unshipped -> Shipped
+  ("Release 0.x.0.1"), bumps the versions in both csproj and the docs/samples, and drops the docs' *Next release*
+  markers; merging it releases. Then bump `StyleBroSelfVersion` in its own PR.
   Set up: nuget.org Trusted Publishing policy (repo owner bisforboman, repo stylebro, workflow `release.yml`,
   environment `release`, packages `StyleBro.*`, new packages allowed), repo *variable* `NUGET_USER` = `bisforboman`
   (nuget.org profile name; a variable, not a secret, so logs aren't masked), and the `release` environment
-  requires the owner's approval. Since 2026-10-01 (user's decision: "prereleases auto"): tags with a `-` use the
-  `prerelease` environment instead, which has no reviewers and only accepts tags matching `v*-*` (deployment tag
-  policy), so alphas publish as soon as the tag is pushed and stable tags still wait for approval. It needs its own
-  nuget.org Trusted Publishing policy (same repo/workflow, environment `prerelease`), added by the owner on nuget.org. The first failure (HTTP 401
-  "No matching trust policy") was simply a missing policy.
+  requires the owner's approval. Since 2026-10-01 (user's decision: "prereleases auto"): versions with a `-` use the
+  `prerelease` environment instead, which has no reviewers; its deployment policy accepts tags matching `v*-*`, and
+  must also allow the branch `main` for a release on merge (the owner adds it; until then a prerelease merge fails at
+  the environment and publishes nothing, and pushing the `vX.Y.Z-alpha.N` tag on the release commit releases it). It
+  needs its own nuget.org Trusted Publishing policy (same repo/workflow, environment `prerelease`). The first failure
+  (HTTP 401 "No matching trust policy") was simply a missing policy.
 
 ## Decision log
 
@@ -1278,9 +1293,8 @@ file (FieldNamingAnalyzer swings 35-90 ms between runs), so judge by the total a
 Decisions in `docs/decisions.md`; details on the rule pages and in PRs #71-#97.
 
 **Releases**: 0.3.0-alpha.1 (2026-10-09) and 0.4.0-alpha.1 (2026-10-10), both by the owner's call. Release notes are
-written by hand (`gh release edit --notes-file`) instead of GitHub's PR list; release prep = Unshipped -> Shipped
-("Release 0.x.0.1"), versions in both csproj and the docs/samples, then tag the prep PR's MERGE commit (check its
-`<Version>` first), then bump `StyleBroSelfVersion` in its own PR.
+written by hand (`gh release edit --notes-file`) instead of GitHub's PR list. Since 2026-10-11 they come from
+changes/ fragments folded into CHANGELOG.md by the release PR, and merging it releases (see release.yml above).
 
 **Docs site** (#82): MkDocs Material, `mkdocs.yml` + `.github/docs-requirements.txt`, deployed to GitHub Pages
 (https://bisforboman.github.io/stylebro/) from main by `.github/workflows/docs.yml`; PRs build `--strict`. Every rule's
