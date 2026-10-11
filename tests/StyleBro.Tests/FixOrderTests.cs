@@ -523,6 +523,26 @@ public class FixOrderTests
         "BRO1110",
         "BRO1117");
 
+    // The same list with BRO1107 on: the first item moves too, and every order gives the same text.
+    [Fact]
+    public Task ListsWithBro1107On_MoveTheFirstItem() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int UpdateBySlug(string slug,
+                int request, int cancellationToken
+                ) => M(slug.Length
+                    , request, cancellationToken);
+
+            private static int M(int a, int b, int c) => a + b + c;
+        }
+        """,
+        null,
+        "BRO1107",
+        "BRO1108",
+        "BRO1110",
+        "BRO1117");
+
     [Fact]
     public Task ElseAfterJump_BracesAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
         """
