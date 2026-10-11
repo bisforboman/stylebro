@@ -111,5 +111,124 @@ public sealed partial class MigrationTests
         Assert.Contains("<PackageVersion Include=\"StyleBro.Analyzers\"", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Format_IncludesTheFilesProjectsLinkFromElsewhere()
+    {
+        // Orleans: <Compile Include="..\Orleans.CodeGenerator.Shared\X.cs" Link=.../> and src/AdoNet/Shared/** were never
+        // formatted in the per-framework runs: '--include' listed the projects' folders only.
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/Shared/S.cs", "class S { }\n");
+        Write("src/B/B.csproj", "<Project />");
+        Write("src/B/X.cs", "class X { }\n");
+        var json = $$"""{ "Properties": { "TargetFramework": "net8.0" }, "Items": { "Compile": [ { "FullPath": {{System.Text.Json.JsonSerializer.Serialize(Path.Combine(root, "src", "A", "A.cs"))}} }, { "FullPath": {{System.Text.Json.JsonSerializer.Serialize(Path.Combine(root, "src", "Shared", "S.cs"))}} }, { "FullPath": {{System.Text.Json.JsonSerializer.Serialize(Path.Combine(root, "src", "B", "X.cs"))}} } ] } }""";
+
+        var linked = FormatCommand.ParseProject(json, Path.Combine(root, "src", "A")).Linked;
+
+        Assert.Equal(new[] { Path.Combine(root, "src", "Shared", "S.cs"), Path.Combine(root, "src", "B", "X.cs") }, linked);
+        Assert.Empty(FormatCommand.ParseProject(json).Linked);
+
+        // A folder without a project as a folder; a file in another project's folder alone (else that project's own files
+        // would be formatted in this run too); a file outside the root not at all.
+        Assert.Equal(
+            new[] { "src/A/", "src/Shared/", "src/B/X.cs" },
+            FormatCommand.Include(root, root, new[] { Path.Combine("src", "A", "A.csproj") }, linked.Append(Path.Combine(Path.GetTempPath(), "elsewhere", "Y.cs"))));
+    }
+
+    [Fact]
+    public void Files_ALinkedFile_IsFormattedInTheProjectThatCompilesIt()
+    {
+        // Orleans: '--files src/Orleans.CodeGenerator.Shared/X.cs' said "no project file above".
+        Write("App/App.csproj", "<Project>\n  <ItemGroup>\n    <Compile Include=\"..\\Shared\\S.cs\" Link=\"S.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write("App/A.cs", "class A { }\n");
+        Write("Shared/S.cs", "class S { }\n");
+        Git("init", "-q");
+        var calls = new List<string[]>();
+
+        var code = FormatCommand.Run(new[] { "--files", Path.Combine(root, "Shared/S.cs"), Path.Combine(root, "App/A.cs"), "--once" }, _ => { }, (args, _) =>
+        {
+            calls.Add(args);
+            return 0;
+        });
+
+        Assert.Equal(0, code);
+        Assert.Equal(
+            new[]
+            {
+                $"{Path.Combine(root, "App", "App.csproj")} {FormatCommand.WorkingFolderOption} {root} --include Shared/S.cs",
+                $"{Path.Combine(root, "App", "App.csproj")} --include A.cs",
+            },
+            calls.Select(c => string.Join(" ", c)));
+    }
+
+    [Fact]
+    public void Format_TakesItsDocumentedOptions_InEveryMode()
+    {
+        // 'format --files a.cs --once' passed --once to 'dotnet format', 'format --diff --project X.sln' passed --project:
+        // both printed 'dotnet format''s usage text.
+        Assert.Equal(new[] { "X.sln", "--severity", "warn" }, FormatCommand.ProjectAsPath(new[] { "--project", "X.sln", "--severity", "warn" }));
+        Assert.Equal(new[] { Path.Combine("repo", "X.sln"), "--once" }, FormatCommand.ProjectAsPath(new[] { "repo", "--project", "X.sln", "--once" }));
+        Assert.Equal(new[] { "repo" }, FormatCommand.ProjectAsPath(new[] { "repo" }));
+
+        Write("A/A.csproj", "<Project />");
+        Write("A/A.cs", "class A { }\n");
+        var calls = new List<string[]>();
+        FormatCommand.Run(new[] { "--files", Path.Combine(root, "A/A.cs"), "--once" }, _ => { }, (args, _) =>
+        {
+            calls.Add(args);
+            return 0;
+        });
+        Assert.DoesNotContain(calls.SelectMany(c => c), a => a == FormatCommand.OnceOption);
+    }
+
+    [Fact]
+    public void Format_CountsAFileWrittenBackUnchanged_AsUnchanged()
+    {
+        Write("A.cs", "class A { }\n");
+        var before = FormatCommand.Snapshot(root);
+
+        File.WriteAllText(Path.Combine(root, "A.cs"), "class A { }\n");
+        File.SetLastWriteTimeUtc(Path.Combine(root, "A.cs"), DateTime.UtcNow.AddMinutes(1));
+        Assert.Empty(FormatCommand.ChangedFiles(before, FormatCommand.Snapshot(root)));
+
+        File.WriteAllText(Path.Combine(root, "A.cs"), "class B { }\n");
+        Assert.Single(FormatCommand.ChangedFiles(before, FormatCommand.Snapshot(root)));
+    }
+
+    [Fact]
+    public void Format_SaysOnceWhyProjectsWereSkipped()
+    {
+        // Orleans: 27 "Partly incomplete" lines, one per test project, all because of an F# project reference.
+        Assert.Equal("TestFSharp.fsproj", FormatCommand.UnsupportedProject(@"Could not format 'C:\trial8\orleans\test\Grains\TestFSharp\TestFSharp.fsproj'. Format currently supports only C# and Visual Basic projects."));
+        Assert.Null(FormatCommand.UnsupportedProject("Warnings were encountered while loading the workspace."));
+
+        var names = new[] { "T1", "T2", "T3", "T4", "T5", "T6", "T7" };
+        var skipped = names.ToDictionary(n => n, _ => new SortedSet<string> { "net10.0" });
+        var frameworks = names.ToDictionary(n => n, _ => new List<string> { "net8.0", "net10.0" });
+
+        var lines = FormatCommand.Incomplete(skipped, frameworks, new[] { "TestFSharp.fsproj" });
+
+        Assert.Equal(2, lines.Count);
+        Assert.Equal("Partly incomplete: 'dotnet format' skipped T1, T2, T3, T4, T5 and 2 more for net10.0 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.", lines[0]);
+        Assert.StartsWith("  Likely cause: they reference TestFSharp.fsproj, which 'dotnet format' can't load", lines[1], StringComparison.Ordinal);
+        Assert.Single(FormatCommand.Incomplete(skipped, frameworks));
+    }
+
+    [Fact]
+    public void OldStyleProjects_AreNotRestored_AndThePreviewSaysWhyItCant()
+    {
+        // xbox: format's 'dotnet restore' rewrote project.assets.json and the next Visual Studio build failed ("doesn't list
+        // 'win' as a RuntimeIdentifier"); --diff can't restore packages.config at all.
+        Write("Old/Old.csproj", "<?xml version=\"1.0\"?>\n<Project ToolsVersion=\"15.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n  <Import Project=\"$(MSBuildToolsPath)\\Microsoft.CSharp.targets\" />\n</Project>\n");
+        Write("New/New.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("Imported/Imported.csproj", "<Project>\n  <Import Project=\"Sdk.props\" Sdk=\"Microsoft.NET.Sdk\" />\n</Project>\n");
+        Write("App.sln", string.Empty);
+
+        Assert.Equal(new[] { "Old/Old.csproj" }, FormatCommand.OldStyleProjects(root));
+
+        Assert.Equal(1, PreviewCommand.Run("format", new[] { root, "--diff" }, (_, _) => throw new InvalidOperationException("no format")));
+        Assert.Contains("--diff doesn't work with old-style (non-SDK) projects (Old/Old.csproj)", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, "format"), StringComparison.Ordinal);
+        Assert.Contains("msbuild -t:restore -p:RestorePackagesConfig=true", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, null), StringComparison.Ordinal);
+    }
+
     private void Git(params string[] arguments) => Assert.Equal(0, PreviewCommand.Git(root, arguments).Code);
 }

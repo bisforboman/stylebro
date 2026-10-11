@@ -125,7 +125,7 @@ public sealed partial class MigrationTests
         Assert.Null(FormatCommand.GroupFiles(new[] { "missing.cs" }, null, root, errors.Add));
         Assert.Null(FormatCommand.GroupFiles(new[] { "other/X.cs" }, Path.Combine(root, "src/A/A.csproj"), root, errors.Add));
         Assert.Null(FormatCommand.GroupFiles(new[] { "other/X.cs" }, null, root, errors.Add));
-        Assert.Equal(new[] { "--files: not found: missing.cs", $"--files: other/X.cs isn't under {Path.Combine(root, "src", "A")}.", "--files: no project file above other/X.cs." }, errors);
+        Assert.Equal(new[] { "--files: not found: missing.cs", $"--files: other/X.cs isn't under {Path.Combine(root, "src", "A")}.", "--files: no project file above other/X.cs, and no project compiles it." }, errors);
     }
 
     [Fact]

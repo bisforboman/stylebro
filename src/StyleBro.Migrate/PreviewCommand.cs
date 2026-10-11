@@ -41,6 +41,17 @@ internal static class PreviewCommand
     /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
     private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
 
+    /// <summary>Why '--diff' doesn't run on old-style (non-SDK) projects, and what to do instead.</summary>
+    public static string OldStyleUnsupported(IReadOnlyList<string> projects, string? command)
+    {
+        var write = command switch { "init" => "'stylebro-migrate init --write'", "format" => null, _ => "'stylebro-migrate --write'" };
+        return $"--diff doesn't work with old-style (non-SDK) projects ({string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)}): "
+            + "the copy has no git-ignored packages folder, and 'dotnet restore' can't restore packages.config.\n"
+            + "Instead, on a clean working tree: " + (write is null ? string.Empty : $"run {write}, ")
+            + "restore with Visual Studio's MSBuild (msbuild -t:restore -p:RestorePackagesConfig=true), run 'stylebro-migrate format' and review 'git diff' ('git checkout .' undoes it). "
+            + "See https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects.";
+    }
+
     /// <summary>Whether the options ask for a preview.</summary>
     public static bool Wants(IEnumerable<string> options) => options.Any(o => o == "--diff" || o.StartsWith("--diff=", StringComparison.Ordinal));
 
@@ -57,8 +68,9 @@ internal static class PreviewCommand
         var (profile, others) = command == "format" ? (null, options) : Program.TakeOption(options, Program.SonarProfileOption);
         var rest = others.Where(o => !Wants(new[] { o }) && o != "--keep").ToList();
 
-        // init and the migration: --project names what format runs on (relative to the path) when the folder has several.
-        var projectIndex = command == "format" ? -1 : rest.IndexOf("--project");
+        // --project names what format runs on (relative to the path) when the folder has several; format takes it too
+        // (passed on, 'dotnet format' printed its usage text).
+        var projectIndex = rest.IndexOf("--project");
         var project = projectIndex >= 0 && projectIndex + 1 < rest.Count ? rest[projectIndex + 1] : null;
         if (project is not null)
         {
@@ -76,6 +88,14 @@ internal static class PreviewCommand
         if (!File.Exists(path) && !Directory.Exists(path))
         {
             Console.Error.WriteLine($"Not found: {path}");
+            return 1;
+        }
+
+        // Old-style projects need Visual Studio's restore: the copy has no git-ignored packages folder, and 'dotnet restore'
+        // can't restore packages.config (xbox-live-developer-tools: every project skipped, "Run 'dotnet restore'").
+        if (FormatCommand.OldStyleProjects(File.Exists(path) ? Path.GetDirectoryName(path)! : path) is { Count: > 0 } oldStyle)
+        {
+            Console.Error.WriteLine(OldStyleUnsupported(oldStyle, command));
             return 1;
         }
 
@@ -192,12 +212,6 @@ internal static class PreviewCommand
                 var runArgs = run == 1 ? formatArgs.Concat(new[] { "--report", reportFolder }) : FormatCommand.NextRun(formatArgs.ToArray());
                 Step($"Format run {run}", () => code = format(runArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
 
-                // A project that didn't load would show up as missing changes (a broken package cache: 58 files of side effects).
-                if (incomplete is not null)
-                {
-                    return Fail(tail, 1, $"{incomplete}\n  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
-                }
-
                 if (code != 0)
                 {
                     return Fail(tail, code, $"'stylebro-migrate format' failed (exit code {code}).");
@@ -246,6 +260,14 @@ internal static class PreviewCommand
             if (notLoaded is not null)
             {
                 Console.WriteLine(notLoaded);
+            }
+
+            // A project that didn't load is left out, as 'stylebro-migrate format' does (StabilityMatrix: a legacy project the
+            // solution doesn't build, already failing with NU1008, stopped the whole preview), and named at the end.
+            if (incomplete is not null)
+            {
+                Console.WriteLine($"WARNING: {incomplete}");
+                Console.WriteLine("  The preview has no changes for them. To include them: run 'dotnet restore' (or 'dotnet build') in the repository, fix what it reports, then preview again.");
             }
 
             ok = true;
