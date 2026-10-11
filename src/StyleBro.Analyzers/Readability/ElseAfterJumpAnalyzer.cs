@@ -21,7 +21,7 @@ public sealed class ElseAfterJumpAnalyzer : DiagnosticAnalyzer
         context.RegisterCompilationStartAction(start =>
         {
             var compilationOptions = start.Compilation.Options;
-            start.RegisterSyntaxNodeAction(
+            start.RegisterNodeAction(
                 c =>
                 {
                     var node = (IfStatementSyntax)c.Node;

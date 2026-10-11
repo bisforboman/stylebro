@@ -19,7 +19,7 @@ public sealed class QualifiedUsingsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 if (QualifiedUsings.GetQualifiedName((UsingDirectiveSyntax)c.Node, c.SemanticModel, c.CancellationToken) is { } name)

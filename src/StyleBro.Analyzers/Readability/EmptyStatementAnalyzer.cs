@@ -23,7 +23,7 @@ public sealed class EmptyStatementAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
 
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var statement = (EmptyStatementSyntax)c.Node;
@@ -34,7 +34,7 @@ public sealed class EmptyStatementAnalyzer : DiagnosticAnalyzer
             },
             SyntaxKind.EmptyStatement);
 
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var semicolon = EmptyStatements.GetRemovableTrailingSemicolon(c.Node);

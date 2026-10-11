@@ -19,7 +19,7 @@ public sealed class NullableShorthandAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 if (NullableShorthand.GetFinding((GenericNameSyntax)c.Node, c.SemanticModel, c.CancellationToken) is { } finding)

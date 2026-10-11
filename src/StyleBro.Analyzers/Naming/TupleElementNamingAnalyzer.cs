@@ -18,7 +18,7 @@ public sealed class TupleElementNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.TupleElement);
+        context.RegisterNodeAction(Analyze, SyntaxKind.TupleElement);
     }
 
     private static void Analyze(SyntaxNodeAnalysisContext context)

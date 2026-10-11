@@ -22,7 +22,7 @@ public sealed class CombinedFieldsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var declaration = (BaseFieldDeclarationSyntax)c.Node;
@@ -36,7 +36,7 @@ public sealed class CombinedFieldsAnalyzer : DiagnosticAnalyzer
             },
             SyntaxKind.FieldDeclaration,
             SyntaxKind.EventFieldDeclaration);
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var declaration = (LocalDeclarationStatementSyntax)c.Node;

@@ -19,7 +19,7 @@ public sealed class LambdaParenthesesAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var lambda = (ParenthesizedLambdaExpressionSyntax)c.Node;

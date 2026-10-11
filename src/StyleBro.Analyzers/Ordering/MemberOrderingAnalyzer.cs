@@ -23,7 +23,7 @@ public sealed class MemberOrderingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             AnalyzeType,
             SyntaxKind.ClassDeclaration,
             SyntaxKind.StructDeclaration,

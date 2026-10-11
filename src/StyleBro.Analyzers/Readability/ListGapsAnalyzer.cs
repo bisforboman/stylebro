@@ -21,7 +21,7 @@ public sealed class ListGapsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 foreach (var finding in ListGaps.GetFindings(c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)))

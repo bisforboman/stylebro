@@ -18,7 +18,7 @@ public sealed class AccessModifiersAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 if (AccessModifiers.GetFinding((MemberDeclarationSyntax)c.Node, c.SemanticModel, c.CancellationToken, AccessModifiers.GetPreference(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree))) is { } finding)

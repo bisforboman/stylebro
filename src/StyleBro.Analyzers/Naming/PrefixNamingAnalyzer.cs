@@ -35,8 +35,8 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeInterface, SyntaxKind.InterfaceDeclaration);
-        context.RegisterSyntaxNodeAction(AnalyzeTypeParameter, SyntaxKind.TypeParameter);
+        context.RegisterNodeAction(AnalyzeInterface, SyntaxKind.InterfaceDeclaration);
+        context.RegisterNodeAction(AnalyzeTypeParameter, SyntaxKind.TypeParameter);
     }
 
     private static void AnalyzeInterface(SyntaxNodeAnalysisContext context)
