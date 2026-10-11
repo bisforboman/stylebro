@@ -43,6 +43,15 @@ internal static class FormatCommand
           <PropertyGroup Condition="'$(StyleBroFormatKeep)' != '' and '$(TargetFrameworks)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))">
             <TargetFramework></TargetFramework>
           </PropertyGroup>
+          <!-- A project that writes the run's framework another way ('net6' for 'net6.0') gets its own spelling. -->
+          <PropertyGroup Condition="'$(StyleBroFormatAliases)' != '' and '$(TargetFramework)' != ''">
+            <_StyleBroAliasKey>|$(MSBuildProjectFullPath.ToUpperInvariant())=</_StyleBroAliasKey>
+            <_StyleBroAliasAt>$(StyleBroFormatAliases.IndexOf('$(_StyleBroAliasKey)'))</_StyleBroAliasAt>
+          </PropertyGroup>
+          <PropertyGroup Condition="'$(_StyleBroAliasAt)' != '' and '$(_StyleBroAliasAt)' != '-1'">
+            <_StyleBroAliasFrom>$([MSBuild]::Add($(_StyleBroAliasAt), $(_StyleBroAliasKey.Length)))</_StyleBroAliasFrom>
+            <TargetFramework>$(StyleBroFormatAliases.Substring($(_StyleBroAliasFrom), $([MSBuild]::Subtract($(StyleBroFormatAliases.IndexOf('|', $(_StyleBroAliasFrom))), $(_StyleBroAliasFrom)))))</TargetFramework>
+          </PropertyGroup>
         </Project>
         """;
 
@@ -76,6 +85,9 @@ internal static class FormatCommand
     /// <summary>The start of the line that says which rules a run fixes (printed for the first run only).</summary>
     private const string FixingHeader = "Fixing StyleBro's rules";
 
+    /// <summary>The same line for --verify-no-changes.</summary>
+    private const string CheckingHeader = "Checking StyleBro's rules";
+
     /// <summary>The start of the line that lists the target frameworks (printed for the first run only).</summary>
     private const string MultiTargetedHeader = "Multi-targeted: ";
 
@@ -95,13 +107,15 @@ internal static class FormatCommand
     /// findings StyleBro's fixes keep on purpose, with the reason (<see cref="KeptFinding"/>). Exit code 0 when clean
     /// (kept findings don't count), <see cref="NotCleanExitCode"/> when a run still changed files. With
     /// --verify-no-changes it changes nothing and exits 0 when only kept findings are left (<see cref="Verify"/>). One plain
-    /// run with --once or --report. <paramref name="runOnce"/> stands in for one 'dotnet format' run in tests.
+    /// run with --report; --once makes one run, reported like the others. <paramref name="runOnce"/> stands in for one 'dotnet format' run in tests.
     /// </summary>
     public static int Run(string[] args, Action<string>? output = null, Func<string[], Action<string>?, int>? runOnce = null)
     {
         Action<string> log = output ?? Console.WriteLine;
         runOnce ??= RunOnce;
-        if (args.Contains(OnceOption) || (args.Contains("--report") && !args.Contains("--verify-no-changes")))
+
+        // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
+        if (args.Contains("--report") && !args.Contains("--verify-no-changes"))
         {
             return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
         }
@@ -119,10 +133,20 @@ internal static class FormatCommand
             json["path"] = root;
         }
 
-        var exit = args.Contains("--verify-no-changes") ? Verify(args, root, log, runOnce) : Repeat(args, root, log, output, runOnce);
+        var once = args.Contains(OnceOption);
+        args = args.Where(a => a != OnceOption).ToArray();
+        var exit = args.Contains("--verify-no-changes") ? Verify(args, root, log, runOnce) : Repeat(args, root, log, output, runOnce, once ? 1 : MaxRuns);
         JsonReport.Set("clean", exit == 0);
         return exit;
     }
+
+    /// <summary>The line that says which rules a run fixes, or (<paramref name="verify"/>) checks without changing anything.</summary>
+    public static string RulesLine(bool verify, int ids) => verify
+        ? $"{CheckingHeader} and the built-in rules stylebro-migrate turns on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
+        : $"{FixingHeader} and the built-in rules stylebro-migrate turns on ({ids} ids); --all applies every analyzer's and compiler fix.";
+
+    /// <summary>One plain 'dotnet format' run (the preview's: it counts the runs and reads the reports itself).</summary>
+    public static int RunPlain(string[] args, Action<string>? output) => RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
 
     /// <summary>The files after '--files' (up to the next option), and the other arguments; null when there's no '--files'.</summary>
     public static (List<string>? Files, string[] Others) TakeFiles(string[] args)
@@ -226,7 +250,7 @@ internal static class FormatCommand
                 ? new KeptFinding(Path.Combine(to, k.Path.Substring(prefix.Length)), k.Line, k.Column, k.Id, k.Reason, k.Message, k.Where is { } w && w.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? Path.Combine(to, w.Substring(prefix.Length)) : k.Where)
                 : k)
             .GroupBy(k => (k.Path.ToUpperInvariant(), k.Line, k.Column, k.Id))
-            .Select(g => g.First())
+            .Select(g => g.OrderBy(k => k.Reason == KeptReason.UsedInProjectNotLoaded).First()) // a run that loads every use knows better
             .OrderBy(k => k.Path, StringComparer.OrdinalIgnoreCase)
             .ThenBy(k => k.Line)
             .ThenBy(k => k.Column)
@@ -234,7 +258,7 @@ internal static class FormatCommand
     }
 
     /// <summary>The lines that list the kept findings (none when there are none).</summary>
-    public static List<string> KeptSummary(IReadOnlyCollection<KeptFinding> kept, string root)
+    public static List<string> KeptSummary(IReadOnlyCollection<KeptFinding> kept, string root, bool clean = true)
     {
         var lines = new List<string>();
         if (kept.Count == 0)
@@ -242,7 +266,7 @@ internal static class FormatCommand
             return lines;
         }
 
-        lines.Add($"Clean: {kept.Count} finding{(kept.Count == 1 ? string.Empty : "s")} kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them ({KeptFindingsHelp}).");
+        lines.Add($"{(clean ? "Clean: " : string.Empty)}{kept.Count} finding{(kept.Count == 1 ? string.Empty : "s")} kept on purpose (listed below). StyleBro's fixes leave these: renaming by hand breaks what the check protects. Check those uses first, or suppress or baseline them ({KeptFindingsHelp}).");
         foreach (var finding in kept)
         {
             var path = Path.GetRelativePath(root, finding.Path).Replace(Path.DirectorySeparatorChar, '/');
@@ -365,6 +389,18 @@ internal static class FormatCommand
         return next.Contains(CheckFirstOption) ? next : next.Append(CheckFirstOption).ToArray();
     }
 
+    /// <summary>
+    /// What to say when the restore failed: the first NuGet error in the output when there is one (NU1008: a version on a
+    /// PackageReference under central package management), else <see cref="RestoreHint"/>.
+    /// </summary>
+    public static string RestoreHintFor(IEnumerable<string> output)
+    {
+        var error = output.Select(l => Regex.Match(l, @"\berror (?<code>NU\d{4}): (?<message>.*?)(?: For more information|\s*\[[^\]]*\]\s*$|$)")).FirstOrDefault(m => m.Success);
+        return error is null
+            ? RestoreHint
+            : $"The restore failed with {error.Groups["code"].Value}: {error.Groups["message"].Value.Trim().TrimEnd('.')}. Fix that (https://learn.microsoft.com/nuget/reference/errors-and-warnings/{error.Groups["code"].Value.ToLowerInvariant()}), then run again. Once the packages are restored, '--no-restore' skips the restore.";
+    }
+
     /// <summary>Whether a 'dotnet format' output line says its restore failed (it prints a stack trace, nothing about why).</summary>
     public static bool IsRestoreFailure(string line) => line.Contains("Restore operation failed", StringComparison.Ordinal);
 
@@ -473,11 +509,30 @@ internal static class FormatCommand
         }
 
         return frameworks
-            .SelectMany(p => p.Value.Select(f => (Framework: f, Project: p.Key)))
+            .SelectMany(p => p.Value.Select(f => (Framework: NormalizeFramework(f), Project: p.Key)))
+            .Distinct()
             .GroupBy(x => x.Framework, StringComparer.OrdinalIgnoreCase)
             .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
             .Select(g => (g.Key, g.Select(x => x.Project).OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList()))
             .ToList();
+    }
+
+    /// <summary>
+    /// A target framework in its usual spelling, so the spellings of one framework share a run: NuGet reads the digits of a
+    /// short name without dots as one version part each ('net6' and 'net60' are 'net6.0', 'netcoreapp31' is
+    /// 'netcoreapp3.1'), and a 'net' version from 5 on is .NET, written with a dot ('net48' stays .NET Framework 4.8).
+    /// </summary>
+    public static string NormalizeFramework(string framework)
+    {
+        var match = Regex.Match(framework.Trim().ToLowerInvariant(), @"^(?<name>net|netcoreapp|netstandard)(?<digits>\d+)(?<platform>-.*)?$");
+        if (!match.Success || (match.Groups["name"].Value == "net" && match.Groups["digits"].Value[0] < '5'))
+        {
+            return framework.Trim().ToLowerInvariant();
+        }
+
+        var digits = match.Groups["digits"].Value;
+        var version = digits.Length == 1 ? digits + ".0" : string.Join(".", digits.Select(d => d.ToString()));
+        return match.Groups["name"].Value + version + match.Groups["platform"].Value;
     }
 
     /// <summary>
@@ -487,7 +542,7 @@ internal static class FormatCommand
     public static HashSet<string> Keep(IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> projects, string framework)
     {
         var keep = new HashSet<string>(
-            projects.Where(p => p.Value.Frameworks.Contains(framework, StringComparer.OrdinalIgnoreCase)).Select(p => p.Key),
+            projects.Where(p => p.Value.Frameworks.Any(f => NormalizeFramework(f) == NormalizeFramework(framework))).Select(p => p.Key),
             StringComparer.OrdinalIgnoreCase);
         for (var added = true; added;)
         {
@@ -545,6 +600,37 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The TargetFramework a run sets (the spelling most of its projects use, <see cref="NormalizeFramework"/>), and the kept
+    /// projects that spell it another way, as '|PATH=spelling|' (upper-case paths) for <see cref="SelectFrameworkTargets"/>:
+    /// a project whose TargetFramework isn't one of its own spellings has no restore output for it (SmartEnum's EFCore
+    /// tests, 'net6.0', in the run for the library's 'net6': the workspace didn't load).
+    /// </summary>
+    public static (string Alias, string Aliases) Aliases(IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> projects, IEnumerable<string> keep, string framework)
+    {
+        var own = keep.Where(projects.ContainsKey)
+            .Select(p => (Path: p, Alias: projects[p].Frameworks.FirstOrDefault(f => NormalizeFramework(f) == framework)))
+            .Where(p => p.Alias is not null)
+            .ToList();
+        var alias = own.GroupBy(p => p.Alias!, StringComparer.Ordinal).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).Select(g => g.Key).FirstOrDefault() ?? framework;
+        var others = own.Where(p => p.Alias != alias).Select(p => $"{p.Path.ToUpperInvariant()}={p.Alias}|").ToList();
+        return (alias, others.Count == 0 ? string.Empty : "|" + string.Concat(others));
+    }
+
+    /// <summary>
+    /// Writes the names the renaming fixes check outside the projects a run loads (<see cref="RepositoryNames"/>), for every
+    /// C# file under the root.
+    /// </summary>
+    public static void WriteRepositoryNames(string root, string file)
+    {
+        // ponytail: parsed without preprocessor symbols, so names only inside '#if' code aren't seen.
+        var lines = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .AsParallel()
+            .AsOrdered()
+            .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList());
+        File.WriteAllLines(file, lines);
+    }
+
+    /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
     /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.
     /// </summary>
@@ -581,8 +667,11 @@ internal static class FormatCommand
         return exit;
     }
 
-    /// <summary>Runs 'dotnet format' until a run changes no file (at most <see cref="MaxRuns"/>), then lists the kept findings.</summary>
-    private static int Repeat(string[] args, string root, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce)
+    /// <summary>
+    /// Runs 'dotnet format' until a run changes no file (at most <paramref name="maxRuns"/>), then lists the kept findings.
+    /// One run (--once) lists them after it, whether it changed files or not, and exits 0 when it succeeded.
+    /// </summary>
+    private static int Repeat(string[] args, string root, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce, int maxRuns = MaxRuns)
     {
         var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
         using var kept = new KeptVariable(keptFile);
@@ -617,15 +706,15 @@ internal static class FormatCommand
 
             log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count == 0 ? ", clean." : ":")}");
             ListFiles(root, changed, 10).ForEach(log);
-            if (changed.Count == 0)
+            if (changed.Count == 0 || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, root).ForEach(log);
+                KeptSummary(keptFindings, root, clean: changed.Count == 0).ForEach(log);
                 return 0;
             }
 
-            if (run == MaxRuns)
+            if (run == maxRuns)
             {
                 log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
@@ -768,9 +857,15 @@ internal static class FormatCommand
         var skipped = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
         var current = string.Empty;
         var restoreFailed = false;
+        var nuGetErrors = new List<string>();
         void Record(string line)
         {
             restoreFailed |= IsRestoreFailure(line);
+            if (line.Contains("error NU", StringComparison.Ordinal))
+            {
+                nuGetErrors.Add(line);
+            }
+
             if (SkippedProject(line) is { } project)
             {
                 (skipped.TryGetValue(project, out var set) ? set : skipped[project] = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)).Add(current);
@@ -807,7 +902,7 @@ internal static class FormatCommand
         if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
         {
             var ids = Diagnostics(root);
-            log($"{FixingHeader} and the built-in rules stylebro-migrate turns on ({ids.Count} ids); --all applies every analyzer's and compiler fix.");
+            log(RulesLine(passThrough.Contains("--verify-no-changes"), ids.Count));
             passThrough.Add("--diagnostics");
             passThrough.AddRange(ids);
         }
@@ -886,7 +981,7 @@ internal static class FormatCommand
         {
             if (restoreFailed)
             {
-                log(RestoreHint);
+                log(RestoreHintFor(nuGetErrors));
             }
 
             return code;
@@ -913,7 +1008,7 @@ internal static class FormatCommand
         var restore = noRestore ? 0 : Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
         if (restore != 0)
         {
-            restoreOutput.ForEach(log);
+            restoreOutput.ForEach(Watch);
             restoreFailed = true;
             return Done(restore);
         }
@@ -937,6 +1032,10 @@ internal static class FormatCommand
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
         var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
         File.WriteAllText(select, SelectFrameworkTargets);
+
+        // A run loads only the projects that target its framework: the renaming fixes check the names of all the C# files.
+        var names = Path.Combine(Path.GetTempPath(), $"stylebro-names-{Guid.NewGuid():N}.tsv");
+        WriteRepositoryNames(root, names);
 
         // Each run's own report folder, in the plan's order (the runs may run at once).
         reportFolders.AddRange(plan.Select(_ => Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}")).Where(_ => report is not null));
@@ -969,8 +1068,11 @@ internal static class FormatCommand
                     options.AddRange(Include(root, solutionDirectory, selected));
                 }
 
-                var keep = Keep(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), framework);
-                return Format(filter ?? workspacePath, options, a => Dotnet(root, (framework, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|"), a, output));
+                var byPath = projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase);
+                var keep = Keep(byPath, framework);
+                var (alias, aliases) = Aliases(byPath, keep, framework);
+                var environment = new RunEnvironment(alias, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|", aliases, names);
+                return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output));
             }
             finally
             {
@@ -1016,6 +1118,7 @@ internal static class FormatCommand
         finally
         {
             File.Delete(select);
+            File.Delete(names);
             if (report is not null)
             {
                 WriteMergedReport(Path.GetFullPath(report), reportFolders);
@@ -1110,7 +1213,7 @@ internal static class FormatCommand
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
-    private static int Dotnet(string directory, (string Name, string SelectTargets, string Keep)? framework, IEnumerable<string> arguments, Action<string>? output = null)
+    private static int Dotnet(string directory, RunEnvironment? framework, IEnumerable<string> arguments, Action<string>? output = null)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = output is not null, RedirectStandardError = output is not null };
         foreach (var argument in arguments)
@@ -1124,6 +1227,8 @@ internal static class FormatCommand
             start.Environment["TargetFramework"] = f.Name;
             start.Environment["StyleBroFormatKeep"] = f.Keep;
             start.Environment["BeforeMicrosoftNETSdkTargets"] = f.SelectTargets;
+            start.Environment["StyleBroFormatAliases"] = f.Aliases;
+            start.Environment[RepositoryNames.Variable] = f.Names;
         }
 
         using var process = new Process { StartInfo = start };
@@ -1155,6 +1260,9 @@ internal static class FormatCommand
         process.WaitForExit();
         return process.ExitCode;
     }
+
+    /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>
+    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Aliases, string Names);
 
     /// <summary>Sets <see cref="KeptFinding.Variable"/> for the 'dotnet format' runs this process starts, and restores it.</summary>
     private sealed class KeptVariable : IDisposable

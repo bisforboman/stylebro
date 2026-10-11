@@ -906,6 +906,8 @@ public sealed partial class MigrationTests : IDisposable
     {
         // Single- or multi-targeted: plain 'dotnet format' also applies other analyzers' fixes (owner's decision 2026-10-09).
         Assert.Contains("run 'stylebro-migrate format'", Program.NextStep);
+        Assert.Contains(Program.AddPackageHint, Capture(() => InitCommand.Run(new[] { root, "--write" }))); // no project references StyleBro yet
+        Write("Directory.Build.props", "<Project><ItemGroup><PackageReference Include=\"StyleBro.Analyzers\" Version=\"1.0.0\" /></ItemGroup></Project>");
         Assert.Contains(Program.FormatHint, Capture(() => InitCommand.Run(new[] { root, "--write" })));
     }
 

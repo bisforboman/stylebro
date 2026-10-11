@@ -120,7 +120,7 @@ internal static class InitCommand
         var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
         if (multiTargeted.Count > 0)
         {
-            Console.WriteLine($"{Conventions.Plural(multiTargeted.Count, "project")} {(multiTargeted.Count == 1 ? "targets" : "target")} several frameworks ({List(multiTargeted)}).");
+            Console.WriteLine(MultiTargetedLine(multiTargeted));
             Console.WriteLine(MultiTargetedHint);
         }
 
@@ -172,7 +172,7 @@ internal static class InitCommand
         }
 
         AgentsFile.Update(root, write: true, agentsMd).ForEach(Console.WriteLine);
-        Console.WriteLine(Program.FormatHint);
+        Console.WriteLine(Program.NextHint(root));
         Program.PrintWorkspaceHint(root);
         return 0;
     }
@@ -329,6 +329,28 @@ internal static class InitCommand
                 yield return Path.GetRelativePath(root, file);
             }
         }
+    }
+
+    /// <summary>
+    /// Which files set several target frameworks: project files as projects, props files as props files (they aren't
+    /// projects: "3 projects target several frameworks (Directory.Build.props, ...)" read wrong).
+    /// </summary>
+    public static string MultiTargetedLine(IReadOnlyList<string> files)
+    {
+        var projects = files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).ToList();
+        var props = files.Except(projects).ToList();
+        var parts = new List<string>();
+        if (projects.Count > 0)
+        {
+            parts.Add($"{Conventions.Plural(projects.Count, "project")} {(projects.Count == 1 ? "targets" : "target")} several frameworks ({List(projects)})");
+        }
+
+        if (props.Count > 0)
+        {
+            parts.Add($"{Conventions.Plural(props.Count, "props file")} {(props.Count == 1 ? "sets" : "set")} several for {(projects.Count > 0 ? "other" : "the")} projects ({List(props)})");
+        }
+
+        return string.Join("; ", parts) + ".";
     }
 
     /// <summary>

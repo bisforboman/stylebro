@@ -59,14 +59,15 @@ internal static class Program
               --files formats only those files (paths relative to the current folder or the repository root), loading
               just the project each belongs to: seconds after a small edit. With --verify-no-changes too.
 
-          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--sonar-profile <file>]
-          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
+          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
+          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
           stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
               rule, sample changes) and writes the full diff to stylebro-preview.patch (or <file>). Adds the
               StyleBro.Analyzers reference in the copy when the repository has none. --keep keeps the copy; --project
-              names what format runs on when the folder has several solutions or projects.
+              names what format runs on when the folder has several solutions or projects; --no-restore uses the
+              repository's own restore (run 'dotnet restore' first).
 
           stylebro-migrate baseline [path] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
@@ -83,6 +84,9 @@ internal static class Program
 
     /// <summary>How to format after init or --write: 'stylebro-migrate format', not plain 'dotnet format'.</summary>
     internal const string FormatHint = "Next: run 'stylebro-migrate format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
+
+    /// <summary>The next step after init when no project references StyleBro.Analyzers yet.</summary>
+    internal const string AddPackageHint = "Next: add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), then run 'stylebro-migrate format'.";
 
     /// <summary>What to do after --write: swap the packages and format.</summary>
     internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
@@ -201,8 +205,9 @@ internal static class Program
             }
         }
 
-        // Every Directory.Build.props a project imports: a nested one shadows the root's.
-        foreach (var props in Migration.PropsFiles(root))
+        // Every Directory.Build.props a project imports where StyleCop runs (a nested one shadows the root's): elsewhere no
+        // settings are written, so the preset stays (vs-validation's tests).
+        foreach (var props in Migration.PropsFiles(root, setup.Folders))
         {
             var disabled = Migration.DisablePreset(File.Exists(props) ? File.ReadAllText(props) : null);
             var name = Path.GetRelativePath(root, props).Replace('\\', '/');
@@ -231,6 +236,9 @@ internal static class Program
         return 0;
     }
 
+    /// <summary>The next step after init: format, or first add the package when no MSBuild file references it.</summary>
+    internal static string NextHint(string root) => PreviewCommand.ReferencesStyleBro(root) ? FormatHint : AddPackageHint;
+
     /// <summary>Where StyleCop runs, when only some projects reference it: the settings apply only there.</summary>
     internal static List<string> ScopeReport(StyleCopSetup setup)
     {
@@ -252,7 +260,7 @@ internal static class Program
         var lines = new List<string>();
         if (setup.ReferencedIn.Count > 0)
         {
-            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there (with central package management, its version goes into Directory.Packages.props).");
+            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there (a GlobalPackageReference for StyleCop's GlobalPackageReference; otherwise, with central package management, its version goes into Directory.Packages.props).");
         }
 
         if (setup.RemovedIn.Count > 0)

@@ -47,8 +47,11 @@ applies to every project:
 ```
 
 With central package management the version goes into the `Directory.Packages.props` that holds StyleCop's version,
-which may be a folder's (`src/Directory.Packages.props`) rather than the root's; a reference with a `Version` there fails
-the restore (NU1008).
+which may be a folder's (`src/Directory.Packages.props`) rather than the root's; a `PackageReference` with a `Version`
+there fails the restore (NU1008). `--diff` edits the same file: a `GlobalPackageReference` next to StyleCop's
+`GlobalPackageReference` (in a folder's `Directory.Packages.props` too), a version-less `PackageReference` and a
+`PackageVersion` otherwise. `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>`) only in the
+`Directory.Build.props` files of projects StyleCop runs in: elsewhere no settings are written, so the preset applies.
 
 A project that opts out of the StyleCop reference it inherits (`<PackageReference Remove="StyleCop.Analyzers" />`, often
 an analyzer or source generator project) needs the same for StyleBro, else it gets StyleBro, and when it turns central
