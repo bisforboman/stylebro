@@ -30,7 +30,10 @@ internal static class PreviewCommand
     public const int MaxRuns = 3;
 
     /// <summary>The options the preview adds to init and the migration ('--diff=file' counts as '--diff').</summary>
-    public static readonly string[] Options = { "--diff", "--keep", "--all", "--project" };
+    public static readonly string[] Options = { "--diff", "--keep", "--all", "--project", "--no-restore" };
+
+    /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
+    private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
 
     /// <summary>The label of files nothing was reported in.</summary>
     private const string Other = "other";
@@ -44,7 +47,7 @@ internal static class PreviewCommand
     /// </summary>
     public static int Run(string? command, string[] options, Func<string[], Action<string>, int>? format = null)
     {
-        format ??= (a, o) => FormatCommand.Run(a, o);
+        format ??= FormatCommand.RunPlain;
         var clock = Stopwatch.StartNew();
         var patch = Path.GetFullPath(options.FirstOrDefault(o => o.StartsWith("--diff=", StringComparison.Ordinal))?.Substring("--diff=".Length) ?? DefaultPatch);
         var keep = options.Contains("--keep");
@@ -89,6 +92,14 @@ internal static class PreviewCommand
         using var log = new StreamWriter(Path.Combine(temp, "preview.log")) { AutoFlush = true };
         var tail = new Queue<string>();
         string? incomplete = null;
+        void LogFile(string line)
+        {
+            lock (log)
+            {
+                log.WriteLine(line);
+            }
+        }
+
         void Log(string line)
         {
             lock (log)
@@ -118,15 +129,23 @@ internal static class PreviewCommand
         try
         {
             Step($"Copying the repository to {copy}", () => Copy(source, copy));
+            var noRestore = rest.Contains("--no-restore");
+            if (noRestore)
+            {
+                CopyRestoreOutput(source, copy);
+            }
+
             MakeRepository(copy);
             var baseline = Head(copy);
 
             if (command != "format")
             {
-                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), profile, Log);
+                // Its output goes to the log file only: on a failure Settings prints it, and the end of the log shown then is
+                // format's (the init report came twice before).
+                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), profile, LogFile);
                 if (settings != 0)
                 {
-                    return Fail(tail, settings);
+                    return Fail(tail, settings, $"{(command == "init" ? "'stylebro-migrate init --write'" : "'stylebro-migrate --write'")} failed (exit code {settings}, see above).");
                 }
             }
 
@@ -145,6 +164,11 @@ internal static class PreviewCommand
             if (package is not null)
             {
                 Console.WriteLine($"  StyleBro.Analyzers wasn't referenced: added {package} for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).");
+                if (noRestore)
+                {
+                    rest.Remove("--no-restore");
+                    Console.WriteLine("  --no-restore: ignored, the copy needs a restore for that reference.");
+                }
             }
 
             var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.Option)).ToList();
@@ -165,23 +189,19 @@ internal static class PreviewCommand
                 // A project that didn't load would show up as missing changes (a broken package cache: 58 files of side effects).
                 if (incomplete is not null)
                 {
-                    Console.Error.WriteLine($"The preview stopped. {incomplete}");
-                    Console.Error.WriteLine("  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
-                    return Fail(tail, 1);
+                    return Fail(tail, 1, $"{incomplete}\n  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
                 }
 
                 if (code != 0)
                 {
-                    Console.Error.WriteLine($"'stylebro-migrate format' failed (exit code {code}).");
-                    return Fail(tail, code);
+                    return Fail(tail, code, $"'stylebro-migrate format' failed (exit code {code}).");
                 }
 
                 if (run == 1)
                 {
                     if (!File.Exists(reportFile))
                     {
-                        Console.Error.WriteLine("'dotnet format' wrote no report.");
-                        return Fail(tail, 1);
+                        return Fail(tail, 1, "'dotnet format' wrote no report.");
                     }
 
                     notLoaded = NotLoadedWarning(File.ReadAllText(reportFile));
@@ -510,7 +530,7 @@ internal static class PreviewCommand
     public static string? AddPackage(string root)
     {
         var files = StyleCopSetup.EnumerateFiles(root).ToList();
-        if (files.Where(StyleCopSetup.IsMSBuild).Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase)))
+        if (ReferencesStyleBro(files))
         {
             return null;
         }
@@ -521,6 +541,14 @@ internal static class PreviewCommand
         var versions = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in targets)
         {
+            // A GlobalPackageReference (central package management) gets one of its own: a PackageReference with a version
+            // there fails the restore (NU1008), and one without adds the package a second time.
+            if (File.Exists(file) && GlobalStyleCop.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(file))))
+            {
+                File.WriteAllText(file, AddItem(File.ReadAllText(file), $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                continue;
+            }
+
             var packages = CentralPackages(file, root);
             if (packages is not null && versions.Add(packages))
             {
@@ -543,6 +571,9 @@ internal static class PreviewCommand
             + (removes.Count > 0 ? $", removed again in {Names(removes)} (they remove StyleCop.Analyzers)" : string.Empty);
     }
 
+    /// <summary>Whether an MSBuild file under the root mentions StyleBro.Analyzers (a reference to it).</summary>
+    public static bool ReferencesStyleBro(string root) => ReferencesStyleBro(StyleCopSetup.EnumerateFiles(root));
+
     /// <summary>
     /// The Directory.Packages.props that holds the versions for an MSBuild file's package references, or null when central
     /// package management is off there: the nearest one above the file, when it, the file or a Directory.Build.props above
@@ -550,9 +581,11 @@ internal static class PreviewCommand
     /// </summary>
     public static string? CentralPackages(string file, string root)
     {
-        // ponytail: text-level; a property set by a Condition or another import isn't seen.
-        static bool Sets(string path, string value) => File.Exists(path)
-            && Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase);
+        // ponytail: text-level; a property set by a Condition isn't seen. Imports are followed (a nested
+        // Directory.Packages.props that imports the root's, which turns it on).
+        bool Sets(string path, string value, int depth = 0) => File.Exists(path)
+            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
+                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => Sets(i, value, depth + 1))));
         if (Sets(file, "false"))
         {
             return null;
@@ -784,16 +817,41 @@ internal static class PreviewCommand
         Console.WriteLine(Elapsed(clock.Elapsed));
     }
 
+    private static bool ReferencesStyleBro(IEnumerable<string> files) =>
+        files.Where(StyleCopSetup.IsMSBuild).Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase));
+
     private static string Elapsed(TimeSpan time) => time.TotalMinutes >= 1 ? $"{(int)time.TotalMinutes}m {time.Seconds}s" : $"{time.TotalSeconds:0}s";
 
-    private static int Fail(IEnumerable<string> tail, int code)
+    /// <summary>Says why the preview failed, then the end of its log (format's output; the settings step prints its own).</summary>
+    private static int Fail(IReadOnlyCollection<string> tail, int code, string reason)
     {
-        Console.Error.WriteLine("The preview failed. The end of its log:");
-        foreach (var line in tail)
+        Console.Error.WriteLine($"The preview failed: {reason}");
+        if (tail.Count > 0)
         {
-            Console.Error.WriteLine("  " + line);
+            Console.Error.WriteLine("The end of its log:");
+            foreach (var line in tail)
+            {
+                Console.Error.WriteLine("  " + line);
+            }
         }
 
         return code == 0 ? 1 : code;
+    }
+
+    /// <summary>
+    /// For '--no-restore': the restore's output (project.assets.json and the files next to it) copied into the copy, so
+    /// 'dotnet format --no-restore' finds the packages restored in the repository.
+    /// </summary>
+    private static void CopyRestoreOutput(string source, string copy)
+    {
+        foreach (var assets in Directory.EnumerateFiles(source, "project.assets.json", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true }))
+        {
+            var folder = Path.GetDirectoryName(assets)!;
+            foreach (var file in Directory.EnumerateFiles(folder).Where(f => Path.GetFileName(f) is "project.assets.json" or "project.nuget.cache" || f.EndsWith(".nuget.g.props", StringComparison.OrdinalIgnoreCase)
+                || f.EndsWith(".nuget.g.targets", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nuget.dgspec.json", StringComparison.OrdinalIgnoreCase)))
+            {
+                CopyFile(file, Path.Combine(copy, Path.GetRelativePath(source, file)));
+            }
+        }
     }
 }

@@ -58,6 +58,12 @@ internal static class TupleElementRenamer
 
     private static async Task<(Solution? Renamed, KeptReason? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
     {
+        // A project this 'stylebro-migrate format' run doesn't load may use the element (RepositoryNames).
+        if ((await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).Outside.ContainsKey(oldName))
+        {
+            return (null, KeptReason.UsedInProjectNotLoaded);
+        }
+
         var renamed = await RenameOneAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
         return renamed is null ? (null, KeptReason.NothingToRename)
             : await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, KeptReason.AddsErrors)

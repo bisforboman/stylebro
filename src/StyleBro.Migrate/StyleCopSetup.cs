@@ -785,6 +785,14 @@ internal sealed class StyleCopSetup
         return result;
     }
 
+    /// <summary>The MSBuild files an MSBuild file imports that can be found (<see cref="Resolve"/>).</summary>
+    internal static IEnumerable<string> Imports(string file, string root) =>
+        Reference.Matches(WithoutComments(File.ReadAllText(file)))
+            .Where(m => m.Groups["import"].Success)
+            .Select(m => Resolve(m.Groups["import"].Value, file, root))
+            .OfType<string>()
+            .Where(IsMSBuild);
+
     /// <summary>
     /// An MSBuild path as an existing file under the root, or null: $(MSBuildThisFileDirectory) and GetPathOfFileAbove are
     /// filled in, a relative path is taken from the file's folder, anything with other properties or wildcards is unknown.

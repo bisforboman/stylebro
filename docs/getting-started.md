@@ -23,8 +23,23 @@ dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.5.0-dev.
 dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.5.0-dev.1
 ```
 
-Then add the folder as a package source in your repository's `nuget.config`
-(`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.5.0-dev.1` wherever this page says `0.5.0-alpha.1`.
+Then add the folder as a package source in your repository's `nuget.config` and use `0.5.0-dev.1` wherever this page
+says `0.5.0-alpha.1`. When the `nuget.config` has a `<packageSourceMapping>`, the new source needs a mapping too: NuGet
+only looks for a package in the sources mapped to it, so the source alone gives NU1102 (package not found):
+
+```xml
+<configuration>
+  <packageSources>
+    <add key="stylebro" value="path/to/stylebro-feed" />
+  </packageSources>
+  <packageSourceMapping>
+    <!-- the mappings already there stay -->
+    <packageSource key="stylebro">
+      <package pattern="StyleBro.*" />
+    </packageSource>
+  </packageSourceMapping>
+</configuration>
+```
 
 ## Preview first
 
@@ -42,7 +57,12 @@ and deletes the copy. Your repository isn't touched. If it doesn't reference Sty
 reference from [step 1](#1-add-the-package) (the tool's own version) and the output says so. It prints a summary and
 writes the full diff to `stylebro-preview.patch` in the current folder (`--diff=other.patch` names another file).
 `--keep` keeps the copy and prints where it is; `--all` passes on to format; with several solutions or projects in the
-folder, `--project MySolution.sln` names the one to format. FFMpegCore, `stylebro-migrate init --diff`:
+folder, `--project MySolution.sln` names the one to format. `--no-restore` skips the restore in the copy: it takes the
+repository's own restore output, so run `dotnet restore` first (it's ignored when the preview adds the package, which
+needs a restore). Where the preview adds the reference under central package management: next to StyleCop's (a
+`GlobalPackageReference` gets a `GlobalPackageReference`, in the same `Directory.Packages.props`), else a version-less
+`PackageReference` with the version in the `Directory.Packages.props` that applies (also one that a folder's
+`Directory.Packages.props` imports). FFMpegCore, `stylebro-migrate init --diff`:
 
 ```text
 Previewing 'stylebro-migrate init --write' and 'stylebro-migrate format' on a copy; nothing in C:\src\FFMpegCore changes.
@@ -248,7 +268,7 @@ stylebro-migrate format
 
 This fixes whitespace, the built-in rules and every StyleBro rule. One fix can make work for another rule, so the
 command runs `dotnet format` again until a run changes no file (at most three runs) and prints what each run changed
-(`Run 1: 293 files changed:` and the first 10 of them, `Run 2: 0 files changed, clean.`); `--once` runs it once. It ends
+(`Run 1: 293 files changed:` and the first 10 of them, `Run 2: 0 files changed, clean.`); `--once` runs it once, with the same report and the findings kept in that run. It ends
 with the findings StyleBro's fixes leave on purpose, each with its reason ([Findings kept on purpose](#findings-kept-on-purpose)),
 and exits with 0 when clean, 2 when a run still changed files. When `dotnet format` skips a project because its
 references didn't load (a broken restore or package cache), the command names it and says the run is incomplete (for
@@ -445,7 +465,11 @@ stylebro-migrate format MySolution.sln --verify-no-changes --severity warn
 
 Plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055) without writing anything. The command runs
 `dotnet format` once per target framework instead; without multi-targeted projects it's one run. A diagnostic
-every framework sees is printed once, and `--report` writes one `format-report.json` covering all runs. Why:
+every framework sees is printed once, and `--report` writes one `format-report.json` covering all runs. Spellings of
+one framework share a run (`net6` and `net6.0`, NuGet's short names). A run loads only the projects that target its
+framework, so the renaming fixes also check the names in every other C# file of the repository: a field the tests
+read with `GetField("count")` keeps its name in the library's run too, and a name a project outside the run uses
+(`UsedInProjectNotLoaded`) is left to a run that loads both, or kept. Why:
 [ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
 
 ## Large codebases

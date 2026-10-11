@@ -239,6 +239,100 @@ public class KeptFindingsTests
         Assert.Equal("class C { }\n", File.ReadAllText(Path.Combine(root, "C.cs")));
     }
 
+    [Fact]
+    public async Task AFieldReadByReflectionInAProjectThisRunDoesntLoad_IsKept_LikeScrutor()
+    {
+        // Scrutor: the netstandard2.0 run loads only the library; its tests read the field with GetField.
+        var files = new[] { ("Counter.cs", "class Counter\n{\n    private int _zqxCount;\n\n    public int Get() => _zqxCount;\n}\n") };
+        var tests = "class ZqxCounterTests\n{\n    string zqxName => \"_zqxCount\";\n}\n"; // as in GetField(name); only zqx names: other tests run alongside
+
+        Assert.Null(await GetReasonAsync(DiagnosticIds.PrivateFieldNaming, files));
+        Assert.Equal(KeptReason.NameInString, await WithRepositoryNamesAsync(("Tests/CounterTests.cs", tests), () => GetReasonAsync(DiagnosticIds.PrivateFieldNaming, files)));
+    }
+
+    [Fact]
+    public async Task AFieldAProjectThisRunDoesntLoadUses_IsKept_UsedInProjectNotLoaded()
+    {
+        var files = new[] { ("Dto.cs", "internal class ZqxDto\n{\n    internal int zqxTotal;\n}\n") };
+        var tests = "class ZqxDtoTests\n{\n    int zqxRead(ZqxDto zqxD) => zqxD.zqxTotal;\n}\n";
+
+        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(("Tests/DtoTests.cs", tests), () => GetReasonAsync(DiagnosticIds.FieldPascalCase, files)));
+
+        // Its own files count as loaded; a private field can't be used elsewhere (only reached by a string).
+        Assert.Null(await WithRepositoryNamesAsync(("Dto.cs", tests), () => GetReasonAsync(DiagnosticIds.FieldPascalCase, files)));
+        var privateField = new[] { ("C.cs", "class C\n{\n    private int _zqxOther;\n\n    public int Get() => _zqxOther;\n}\n") };
+        Assert.Null(await WithRepositoryNamesAsync(("Tests/T.cs", "class ZqxT { int _zqxOther; }\n"), () => GetReasonAsync(DiagnosticIds.PrivateFieldNaming, privateField)));
+    }
+
+    [Fact]
+    public async Task ANamespaceOrTupleElementAProjectThisRunDoesntLoadUses_IsKept()
+    {
+        var (solution, _, _) = await FindAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "namespace ZqxApp.zqxData\n{\n    class C\n    {\n        private int _zqxN;\n\n        public (int zqxFirst, int zqxSecond) Get() => (1, 0);\n\n        public int GetN() => _zqxN;\n    }\n}\n"));
+        var tests = ("Tests/T.cs", "namespace ZqxTests\n{\n    using ZqxApp.zqxData;\n\n    class ZqxT\n    {\n        int zqxRead(C zqxC) => zqxC.Get().zqxFirst;\n    }\n}\n");
+
+        Assert.Null((await NamespaceRenamer.GetChangesAsync(solution, "ZqxApp.zqxData", "ZqxData", CancellationToken.None)).Reason);
+        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, async () => (await NamespaceRenamer.GetChangesAsync(solution, "ZqxApp.zqxData", "ZqxData", CancellationToken.None)).Reason));
+        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
+    }
+
+    [Fact]
+    public void ReadKept_PrefersTheReasonOfARunThatLoadsEveryUse()
+    {
+        var root = NewFolder();
+        var file = Path.Combine(root, "kept.tsv");
+        var path = Path.Combine(root, "C.cs");
+        File.WriteAllLines(file, new[]
+        {
+            new KeptFinding(path, 3, 17, "BRO1303", KeptReason.UsedInProjectNotLoaded, "Rename").ToString(),
+            new KeptFinding(path, 3, 17, "BRO1303", KeptReason.NameInString, "Rename").ToString(),
+        });
+
+        Assert.Equal(KeptReason.NameInString, Assert.Single(FormatCommand.ReadKept(file, root, root)).Reason);
+    }
+
+    [Fact]
+    public void Format_Once_PrintsTheRunAndTheKeptFindings()
+    {
+        var root = NewFolder();
+        var lines = new List<string>();
+        var runs = 0;
+
+        var code = FormatCommand.Run(new[] { root, FormatCommand.OnceOption }, lines.Add, (args, _) =>
+        {
+            runs++;
+            Assert.DoesNotContain(FormatCommand.OnceOption, args);
+            File.WriteAllText(Path.Combine(root, "C.cs"), "class Changed { }");
+            WriteKept(Path.Combine(root, "C.cs"));
+            return 0;
+        });
+
+        Assert.Equal(0, code);
+        Assert.Equal(1, runs); // one run, though it changed a file
+        Assert.Contains("Run 1: 1 file changed:", lines);
+        Assert.Contains(lines, l => l.StartsWith("1 finding kept on purpose", StringComparison.Ordinal)); // not "Clean:": the run changed files
+        Assert.Contains("  C.cs(3,17): BRO1303 Rename '_count' to 'count'. Kept: " + KeptFinding.Describe(KeptReason.NameInString) + ".", lines);
+    }
+
+    /// <summary>Runs <paramref name="action"/> with a repository-names file of one more file, as 'stylebro-migrate format' writes it.</summary>
+    private static async Task<T> WithRepositoryNamesAsync<T>((string Path, string Text) other, Func<Task<T>> action)
+    {
+        var file = Path.Combine(Path.GetTempPath(), $"stylebro-names-test-{Guid.NewGuid():N}.tsv");
+        var tree = CSharpSyntaxTree.ParseText(other.Text);
+        File.WriteAllLines(file, RepositoryNames.Lines(tree.GetRoot(), Path.Combine(Path.GetTempPath(), other.Path)));
+        Environment.SetEnvironmentVariable(RepositoryNames.Variable, file);
+        try
+        {
+            return await action();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(RepositoryNames.Variable, null);
+            File.Delete(file);
+        }
+    }
+
     private static string NewFolder()
     {
         var root = Path.Combine(Path.GetTempPath(), "stylebro-kept-" + Guid.NewGuid().ToString("N"));

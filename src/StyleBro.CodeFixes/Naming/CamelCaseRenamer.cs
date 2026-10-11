@@ -26,6 +26,10 @@ internal static class CamelCaseRenamer
 {
     private static readonly ConditionalWeakTable<Solution, Task<NamesInCode>> NamesCache = new();
 
+    private static readonly object RepositoryNamesGate = new();
+
+    private static (string? File, List<RepositoryNames.Entry> Entries) repositoryNames = (null, new List<RepositoryNames.Entry>());
+
     public static async Task<Solution> RenameAsync(
         Solution solution,
         IEnumerable<(Document Document, Diagnostic Diagnostic)> items,
@@ -183,6 +187,11 @@ internal static class CamelCaseRenamer
                 reason = KeptReason.OtherPropertyKept;
             }
 
+            if (reason is null && IsVisibleToOtherProjects(symbol) && (await GetNamesInCodeAsync(solution).ConfigureAwait(false)).Outside.TryGetValue(symbol.Name, out var outside))
+            {
+                (reason, where) = (KeptReason.UsedInProjectNotLoaded, outside);
+            }
+
             if (reason is not null)
             {
                 return (itemChanges, reason, where);
@@ -221,29 +230,90 @@ internal static class CamelCaseRenamer
             documents.AddRange(await project.GetSourceGeneratedDocumentsAsync(cancellationToken).ConfigureAwait(false));
         }
 
+        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var document in documents)
         {
+            if (document.FilePath is { } path)
+            {
+                paths.Add(path);
+            }
+
             if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is { } root)
             {
-                foreach (var token in TreeWalk.Tokens(root))
+                foreach (var (kind, text, line) in RepositoryNames.Collect(root))
                 {
-                    if (token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
+                    if (kind == RepositoryNames.NameofKind)
                     {
-                        if (strings.Add(token.ValueText))
-                        {
-                            where[token.ValueText] = $"{document.FilePath ?? document.Name}({token.GetLocation().GetLineSpan().StartLinePosition.Line + 1})";
-                        }
+                        nameofs.Add(text);
                     }
-                    else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"
-                        && token.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 1 } invocation)
+                    else if (strings.Add(text))
                     {
-                        nameofs.Add(invocation.ArgumentList.Arguments[0].Expression.GetLastToken().ValueText);
+                        where[text] = $"{document.FilePath ?? document.Name}({line + 1})";
                     }
                 }
             }
         }
 
-        return new NamesInCode(strings, nameofs, where);
+        // 'stylebro-migrate format' runs one target framework at a time: the files of projects this run doesn't load.
+        var outside = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var entry in ReadRepositoryNames())
+        {
+            if (entry.Kind == RepositoryNames.NameofKind)
+            {
+                nameofs.Add(entry.Text);
+            }
+            else if (entry.Kind == RepositoryNames.StringKind && strings.Add(entry.Text))
+            {
+                where[entry.Text] = entry.Where;
+            }
+            else if (entry.Kind == RepositoryNames.IdentifierKind && !paths.Contains(entry.Where))
+            {
+                foreach (var name in entry.Text.Split(' '))
+                {
+                    if (!outside.ContainsKey(name))
+                    {
+                        outside[name] = entry.Where;
+                    }
+                }
+            }
+        }
+
+        return new NamesInCode(strings, nameofs, where, outside);
+    }
+
+    /// <summary>
+    /// The entries of the file <see cref="RepositoryNames.Variable"/> names (read once per file), or none when it isn't set:
+    /// only 'stylebro-migrate format' sets it.
+    /// </summary>
+    internal static List<RepositoryNames.Entry> ReadRepositoryNames()
+    {
+#pragma warning disable RS1035 // Only 'stylebro-migrate format' sets the variable; the IDE and the build never read a file.
+        var file = Environment.GetEnvironmentVariable(RepositoryNames.Variable);
+        if (string.IsNullOrEmpty(file))
+        {
+            return new List<RepositoryNames.Entry>();
+        }
+
+        lock (RepositoryNamesGate)
+        {
+            if (repositoryNames.File != file)
+            {
+                List<RepositoryNames.Entry> entries;
+                try
+                {
+                    entries = System.IO.File.ReadLines(file).Select(RepositoryNames.Parse).OfType<RepositoryNames.Entry>().ToList();
+                }
+                catch (System.IO.IOException)
+                {
+                    entries = new List<RepositoryNames.Entry>();
+                }
+
+                repositoryNames = (file, entries);
+            }
+
+            return repositoryNames.Entries;
+        }
+#pragma warning restore RS1035
     }
 
     /// <summary>Whether code can refer to the symbol by a string or a nameof, and which.</summary>
@@ -290,6 +360,24 @@ internal static class CamelCaseRenamer
         }
 
         return kept;
+    }
+
+    /// <summary>
+    /// Whether code in another project can use the symbol by name: not private (internal counts, InternalsVisibleTo), nor
+    /// in a private type; a parameter by its member (named arguments). Locals and local functions can't.
+    /// </summary>
+    private static bool IsVisibleToOtherProjects(ISymbol symbol)
+    {
+        var current = symbol is IParameterSymbol or ITypeParameterSymbol ? symbol.ContainingSymbol : symbol;
+        for (; current is not null and not INamespaceSymbol; current = current.ContainingSymbol)
+        {
+            if (current.DeclaredAccessibility is Accessibility.Private or Accessibility.NotApplicable)
+            {
+                return false;
+            }
+        }
+
+        return current is not null;
     }
 
     /// <summary>Symbols whose conflicts are checked by syntax over their member (<see cref="CamelCaseNames.CanRename"/>).</summary>
@@ -646,16 +734,20 @@ internal static class CamelCaseRenamer
     {
         private readonly Dictionary<string, string> where;
 
-        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where)
+        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where, Dictionary<string, string>? outside = null)
         {
             Strings = strings;
             Nameofs = nameofs;
             this.where = where;
+            Outside = outside ?? new Dictionary<string, string>(StringComparer.Ordinal);
         }
 
         public HashSet<string> Strings { get; }
 
         public HashSet<string> Nameofs { get; }
+
+        /// <summary>Identifiers in files of projects this run didn't load, with the first such file (<see cref="RepositoryNames"/>).</summary>
+        public Dictionary<string, string> Outside { get; }
 
         public bool Contains(string name) => Strings.Contains(name) || Nameofs.Contains(name);
 

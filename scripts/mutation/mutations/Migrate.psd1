@@ -102,5 +102,17 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'args.Contains("--no-restore") ? args : '; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '            args = NextRun(args);'; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
         @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = ': FormatCommand.NextRun(formatArgs.ToArray());'; Replace = ': formatArgs;'; Tests = 'MigrationTests.Preview_AppliesInitAndFormatToACopy' }
+
+        # trial 6 (2026-10-11): framework spellings, kept reasons, the package under central package management, the preset opt-out, init's next step
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '|| (match.Groups["name"].Value == "net" && match.Groups["digits"].Value[0] < ''5'')'; Replace = ''; Tests = 'MigrationTests.Format_NormalizesFrameworkSpellings' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '.SelectMany(p => p.Value.Select(f => (Framework: NormalizeFramework(f), Project: p.Key)))'; Replace = '.SelectMany(p => p.Value.Select(f => (Framework: f, Project: p.Key)))'; Tests = 'MigrationTests.Format_SpellingsOfOneFramework' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '.Where(p => p.Alias != alias)'; Replace = '.Where(p => false)'; Tests = 'MigrationTests.Format_AProjectThatSpellsTheFrameworkAnotherWay' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '.Select(g => g.OrderBy(k => k.Reason == KeptReason.UsedInProjectNotLoaded).First())'; Replace = '.Select(g => g.First())'; Tests = 'KeptFindingsTests.ReadKept_PrefersTheReasonOfARunThatLoadsEveryUse' }
+        @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'if (changed.Count == 0 || maxRuns == 1)'; Replace = 'if (changed.Count == 0)'; Tests = 'KeptFindingsTests.Format_Once' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'if (File.Exists(file) && GlobalStyleCop.IsMatch('; Replace = 'if (false && GlobalStyleCop.IsMatch('; Tests = 'MigrationTests.Preview_AGlobalPackageReference' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = '|| (depth < 8 && StyleCopSetup.Imports(path, root)'; Replace = '|| (false && StyleCopSetup.Imports(path, root)'; Tests = 'MigrationTests.Preview_CentralPackageManagement_IsFoundThroughImports' }
+        @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = 'rest.Remove("--no-restore");'; Replace = ''; Tests = 'MigrationTests.Preview_AFailedFormat' }
+        @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = '.Where(f => folders is null || folders.Any('; Replace = '.Where(f => true || folders.Any('; Tests = 'MigrationTests.Write_TurnsThePresetOff' }
+        @{ File = 'src/StyleBro.Migrate/Program.cs'; Find = 'PreviewCommand.ReferencesStyleBro(root) ? FormatHint : AddPackageHint'; Replace = 'FormatHint'; Tests = 'MigrationTests.NextStep_NamesStyleBroFormat' }
     )
 }

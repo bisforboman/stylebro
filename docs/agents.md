@@ -118,7 +118,8 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 
 `reason` is one of: `NameInString`, `NameInNameof`, `OtherPropertyKept`, `PublicApi`, `ImplementsAnotherMember`,
 `DerivedMemberHasNewName`, `NewNameTaken`, `NewNameMeansSomethingElse`, `GeneratedReference`, `ReferenceNotByName`,
-`AddsErrors`, `DisabledCode`, `NamespaceFromOutside`, `DerivedTypeInAnotherProject`, `NothingToRename`
+`AddsErrors`, `DisabledCode`, `NamespaceFromOutside`, `DerivedTypeInAnotherProject`,
+`UsedInProjectNotLoaded`, `NothingToRename`
 (what each means: `reasonText`).
 
 ## AGENTS.md

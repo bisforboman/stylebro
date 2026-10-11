@@ -164,5 +164,13 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'field.IsStatic && style.MutableStatic is { } mutableStatic ? mutableStatic : style.Private'; Replace = 'style.Private'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'm => m.Length == 1 && m[0] == "static"'; Replace = 'm => false'; Tests = 'FieldNamingTests' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = 'field.IsStatic && style.MutableStatic'; Replace = 'style.MutableStatic'; Tests = 'FieldNamingTests' }
+
+        # format's runs load some projects: the names of the others' files (RepositoryNames, 2026-10-11)
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if (reason is null && IsVisibleToOtherProjects(symbol) &&'; Replace = 'if (false &&'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'else if (entry.Kind == RepositoryNames.IdentifierKind && !paths.Contains(entry.Where))'; Replace = 'else if (entry.Kind == RepositoryNames.IdentifierKind)'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'if (current.DeclaredAccessibility is Accessibility.Private or Accessibility.NotApplicable)'; Replace = 'if (false)'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'else if (entry.Kind == RepositoryNames.StringKind && strings.Add(entry.Text))'; Replace = 'else if (false)'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = '&& entry.Text.Split('' '').Contains(oldPart))'; Replace = '&& false)'; Tests = 'KeptFindingsTests' }
+        @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'; Find = '.Outside.ContainsKey(oldName))'; Replace = '.Outside.ContainsKey(oldName) && false)'; Tests = 'KeptFindingsTests' }
     )
 }
