@@ -171,6 +171,13 @@ StyleBro rule enforces (operator placement, braces = `true`, using placement, ar
 key alone and turns that rule off (`your .editorconfig says end_of_line, ... so BRO1520 is off`), instead of letting it
 rewrite the code.
 
+A key your `.editorconfig` sets at severity `silent` or `none` (`csharp_prefer_braces = true:silent`, or
+`dotnet_diagnostic.IDE0011.severity = silent` next to it) isn't enforced by anything: it's what the IDE wrote, not what the
+team checks. `init` treats it like a key that isn't set and follows the code; where the code's form differs from the key,
+it writes the code's form into the block, which comes later in the file and wins (also when that form is StyleBro's
+default). This applies to every convention whose key takes a severity: braces (IDE0011), using placement (IDE0065),
+arithmetic parentheses (IDE0048), default values (IDE0034) and operator placement.
+
 A few settings work a little differently:
 
 - **One-line statements** (`if (a) return;`, `case 1: a(); break;`): the preset sets
@@ -185,6 +192,40 @@ A few settings work a little differently:
   CRLF in a Windows checkout) don't count, and the report names which of the two converts them: there the OS's ending is
   what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. `stylebro-migrate
   --write` writes `end_of_line` the same way.
+- **Member order** ([BRO1001](rules/BRO1001.md)) counts types whose members BRO1001 would sort apart (two or more
+  members with different sort keys), with your own order settings: already in its order or not. A type that is in order
+  once overloads stay together counts as sorted (whether they do is the overloads convention's call). Mostly sorted: the
+  rule stays on; mostly unsorted or mixed: it's turned off, so `format` doesn't reorder code that was never sorted
+  (StabilityMatrix: 370 sorted, 414 not). Only type members count: BRO1001 also sorts the types of a namespace, but most
+  files hold one type, so they would say little.
+- **Unsigned literal suffixes** ([BRO1135](rules/BRO1135.md)) count `u`/`ul` suffixes in upper or lower case (`0U` or
+  `0u`); `L` alone doesn't count, since nobody writes `1l`. Mostly upper case: the rule stays on; mostly lower case or
+  mixed: it's turned off (Orleans: 423 upper, 185 lower).
+- **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,
+  `.csharpierrc.yaml` or `.csharpierrc.yml` at the root, a `csharpier` tool in `.config/dotnet-tools.json` or
+  `dotnet-tools.json`, or a `CSharpier.MsBuild` package reference), the two formatters would undo each other's layout
+  (StabilityMatrix's pre-commit check rejected 161 files StyleBro had formatted). `init` then turns off IDE0055 (so
+  `stylebro-migrate format` skips the whitespace pass) and every StyleBro rule for something CSharpier decides, and the
+  layout conventions in the table are reported as `set` (`CSharpier formats it`). Off:
+  - line breaks in lists: [BRO1107](rules/BRO1107.md)-[BRO1110](rules/BRO1110.md),
+    [BRO1116](rules/BRO1116.md)-[BRO1119](rules/BRO1119.md); constraints [BRO1111](rules/BRO1111.md), constructor
+    initializers [BRO1105](rules/BRO1105.md), enum values [BRO1121](rules/BRO1121.md), query clauses
+    [BRO1127](rules/BRO1127.md)-[BRO1130](rules/BRO1130.md);
+  - wrapping: [BRO1520](rules/BRO1520.md)-[BRO1524](rules/BRO1524.md) (operators, `=>`, `=`, call chains, `?:`);
+  - single-line blocks and members, accessors: [BRO1508](rules/BRO1508.md)-[BRO1510](rules/BRO1510.md),
+    [BRO1527](rules/BRO1527.md);
+  - the blank lines CSharpier normalizes itself: before `{` and `else`/`catch`/`finally` ([BRO1501](rules/BRO1501.md),
+    [BRO1502](rules/BRO1502.md)), after `{` ([BRO1503](rules/BRO1503.md)), before `}` ([BRO1518](rules/BRO1518.md)),
+    before a do-while's `while` ([BRO1512](rules/BRO1512.md)), runs of them ([BRO1517](rules/BRO1517.md)), and the
+    ones CSharpier removes where StyleBro would add them: before a comment ([BRO1504](rules/BRO1504.md): CSharpier
+    removes it inside initializers and above `else`) and between elements ([BRO1505](rules/BRO1505.md): CSharpier
+    removes it between accessors).
+
+  Everything else stays: naming, member order, documentation, braces on one-line bodies, readability rules, and the
+  blank lines CSharpier keeps as you wrote them (after `}`, after attributes, around doc comments, between switch
+  sections). Run CSharpier after `format`: fixes that rewrite code (an `if` merged into the enclosing one, attributes
+  split) leave lines in StyleBro's layout, which CSharpier then lays out its way, and StyleBro leaves that alone. To have
+  StyleBro format instead, remove CSharpier and run `init` again.
 - **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
   repository's code`, with their `# init:` comments), and the report says `kept from the last init`. They describe your
   code as it was before StyleBro formatted it: counted again after a `format` run, StyleBro's own output would decide
@@ -221,7 +262,9 @@ A few settings work a little differently:
 | Arithmetic parentheses | `a + (b * c)` or `a + b * c` | [BRO1406](rules/BRO1406.md) | `dotnet_style_parentheses_in_arithmetic_binary_operators` |
 | One-line statements | a braceless `if`/`else`/loop body or a `case` label's statements on their owner's line or below it | SDK formatter (IDE0055) | `csharp_preserve_single_line_statements` |
 | Documented overrides | overrides and interface implementations with or without a doc comment | [BRO1601](rules/BRO1601.md) | `dotnet_diagnostic.BRO1601.severity` |
+| Member order | types whose members BRO1001 sorts apart: already in its order or not | [BRO1001](rules/BRO1001.md) | `dotnet_diagnostic.BRO1001.severity` |
 | Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
+| Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 

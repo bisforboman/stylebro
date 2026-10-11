@@ -633,6 +633,10 @@ internal static class FormatCommand
         File.WriteAllLines(file, lines);
     }
 
+    /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
+    public static IEnumerable<(string FullPath, string[] Frameworks)> EvaluatedProjects(string workspacePath) =>
+        ReadProjects(workspacePath).Values.Select(p => (p.FullPath, p.Frameworks));
+
     /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
     /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.

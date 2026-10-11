@@ -79,8 +79,58 @@ internal static class Conventions
         new(ArithmeticKey, "mixed arithmetic ('a + b * c')", "always_for_clarity", ("always_for_clarity", "with parentheses"), ("never_if_unnecessary", "without parentheses"), Off(DiagnosticIds.ArithmeticPrecedence)) { Enforcer = DiagnosticIds.ArithmeticPrecedence, EnforcedValues = new[] { "always_for_clarity" } },
         new(SingleLineStatementsKey, "statements on their 'if'/loop/'case' line", "false", ("false", "on a line of their own"), ("true", "on their owner's line"), null) { KeepAny = true },
         new(InheritDocKey, "overrides/interface implementations", "warning", ("warning", "with a doc comment"), ("none", "without a doc comment"), Off(DiagnosticIds.InheritDocumentation)),
+        new(MemberOrderKey, "types' members", "warning", ("warning", "in BRO1001's order"), ("none", "in another order"), Off(DiagnosticIds.MemberOrdering)) { Unit = "type" },
         new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
+        new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
+    };
+
+    /// <summary>
+    /// The rules that decide what CSharpier decides too (owner's decision 2026-10-11: "Detect it, turn layout rules off";
+    /// StabilityMatrix's pre-commit hook rejected 161 files StyleBro had formatted): whitespace and indentation (IDE0055),
+    /// where lines break (lists, constraints, constructor initializers, query clauses, wrapped operators, call chains,
+    /// conditionals), single-line blocks, accessors and enums, and the blank lines CSharpier normalizes itself (after '{',
+    /// before '}', before '{'/else/while, runs of them, and the ones BRO1504/BRO1505 add where CSharpier removes them:
+    /// before a comment in an initializer or above 'else', between accessors; checked on StabilityMatrix). Blank lines
+    /// CSharpier keeps as written (after '}', after attributes, around doc comments, between switch sections) and everything
+    /// that isn't layout (naming, ordering, documentation, braces, readability) stay StyleBro's. The list is documented in
+    /// docs/getting-started.md.
+    /// </summary>
+    public static readonly string[] CSharpierRules =
+    {
+        "IDE0055",
+        DiagnosticIds.ConstructorInitializerLine,
+        DiagnosticIds.SplitParametersStartOnNewLine,
+        DiagnosticIds.ParametersOnSameOrSeparateLines,
+        DiagnosticIds.OpenParenthesisOnNameLine,
+        DiagnosticIds.CloseParenthesisOnLastItemLine,
+        DiagnosticIds.ConstraintOnOwnLine,
+        DiagnosticIds.EmptyListOnOneLine,
+        DiagnosticIds.CommaOnItemLine,
+        DiagnosticIds.FirstItemFollowsOpening,
+        DiagnosticIds.ItemFollowsComma,
+        DiagnosticIds.EnumValueOnOwnLine,
+        DiagnosticIds.QueryClauseBlankLine,
+        DiagnosticIds.QueryClausesOnSeparateLines,
+        DiagnosticIds.QueryClauseAfterMultiLineClause,
+        DiagnosticIds.MultiLineQueryClause,
+        DiagnosticIds.BlankLineBeforeOpenBrace,
+        DiagnosticIds.BlankLineBeforeChainedBlock,
+        DiagnosticIds.BlankLineAfterOpenBrace,
+        DiagnosticIds.BlankLineBeforeComment,
+        DiagnosticIds.ElementsSeparatedByBlankLine,
+        DiagnosticIds.SingleLineStatementBlock,
+        DiagnosticIds.SingleLineElement,
+        DiagnosticIds.AccessorsConsistentLayout,
+        DiagnosticIds.BlankLineBeforeWhile,
+        DiagnosticIds.MultipleBlankLines,
+        DiagnosticIds.BlankLineBeforeCloseBrace,
+        DiagnosticIds.OperatorPlacement,
+        DiagnosticIds.ArrowPlacement,
+        DiagnosticIds.EqualsPlacement,
+        DiagnosticIds.CallChainLayout,
+        DiagnosticIds.ConditionalLayout,
+        DiagnosticIds.AutoAccessorsOnOneLine,
     };
 
     /// <summary>
@@ -89,6 +139,16 @@ internal static class Conventions
     /// "Detect"; Scrutor's public and private 'CanDecorate' overloads were split).
     /// </summary>
     private const string OverloadsKey = StyleBro.Analyzers.Ordering.MemberOrderOptions.KeepOverloadsTogetherKey;
+
+    /// <summary>
+    /// BRO1001's severity: types (with members that sort apart) already in its order, or not (owner's decision 2026-10-11:
+    /// "Detect, like other conventions"; it reordered 407 files of StabilityMatrix and 167 of Flow.Launcher, which never
+    /// sorted). Type members only: namespaces mostly hold one type per file, and BRO1001 reports per type.
+    /// </summary>
+    private const string MemberOrderKey = "dotnet_diagnostic." + DiagnosticIds.MemberOrdering + ".severity";
+
+    /// <summary>BRO1135's severity: unsigned literal suffixes ('u', 'ul') in upper case or not (Orleans: 114 '0u' became '0U').</summary>
+    private const string SuffixCaseKey = "dotnet_diagnostic." + DiagnosticIds.LiteralSuffixCase + ".severity";
 
     /// <summary>
     /// The files' line endings (unit: files). Without the key, 'dotnet format' writes the OS's line ending into the lines it
@@ -126,6 +186,47 @@ internal static class Conventions
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
 
+    /// <summary>The SDK formatter's options (IDE0055's): with CSharpier they don't apply.</summary>
+    private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey };
+
+    /// <summary>
+    /// What shows that CSharpier formats the repository (a file, relative to the root), or null: a .csharpierrc(.json/.yaml/.yml),
+    /// a 'csharpier' tool in [.config/]dotnet-tools.json, or a CSharpier.MsBuild package reference in an MSBuild file.
+    /// </summary>
+    public static string? CSharpier(string root)
+    {
+        if (new[] { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" }.FirstOrDefault(f => File.Exists(Path.Combine(root, f))) is { } config)
+        {
+            return config;
+        }
+
+        if (new[] { Path.Combine(".config", "dotnet-tools.json"), "dotnet-tools.json" }
+            .FirstOrDefault(f => File.Exists(Path.Combine(root, f)) && System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(Path.Combine(root, f)), @"""csharpier""", System.Text.RegularExpressions.RegexOptions.IgnoreCase)) is { } tools)
+        {
+            return tools.Replace('\\', '/');
+        }
+
+        return StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild)
+            .FirstOrDefault(f => File.ReadAllText(f).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase)) is { } project
+            ? Path.GetRelativePath(root, project).Replace('\\', '/')
+            : null;
+    }
+
+    /// <summary>
+    /// The lines that turn <see cref="CSharpierRules"/> off (with the '# init:' comment saying why) and the report line, for a
+    /// repository CSharpier formats (<paramref name="evidence"/>: <see cref="CSharpier"/>).
+    /// </summary>
+    public static (List<string> Lines, string Report) CSharpierLines(string evidence)
+    {
+        var lines = new List<string> { $"# init: CSharpier formats this repository ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
+        lines.AddRange(CSharpierRules.Select(Off));
+        return (lines, $"  {"off",-8} CSharpier ({evidence}) -> IDE0055 and {CSharpierRules.Length - 1} layout rules are off: {string.Join(", ", CSharpierRules.Skip(1))}");
+    }
+
+    /// <summary>Whether CSharpier decides a convention (<see cref="CSharpierRules"/>): its rule is one of them, or it is an SDK formatter option.</summary>
+    public static bool IsCSharpiers(Convention convention) =>
+        FormatterKeys.Contains(convention.Key) || CSharpierRules.Contains(convention.Enforcer ?? (convention.Off is { } off ? RuleOf(off) : null));
+
     /// <summary>
     /// Counts every convention in the repository's own C# files: key -> count per value (in <see cref="Convention.Values"/>'
     /// order). <paramref name="settings"/>: the root .editorconfig's settings (which members BRO1601 checks).
@@ -152,7 +253,7 @@ internal static class Conventions
 
                 var tree = CSharpSyntaxTree.ParseText(text);
                 var own = NewCounts();
-                Count(tree, own);
+                Count(tree, own, settings: settings);
                 CountConditional(tree, own);
                 if (LineEnding(text) is var ending and >= 0)
                 {
@@ -362,7 +463,7 @@ internal static class Conventions
     }
 
     /// <summary>Adds one file's places to <paramref name="counts"/> (with <paramref name="only"/>: those starting in these spans).</summary>
-    public static void Count(SyntaxTree tree, Dictionary<string, int[]> counts, IReadOnlyList<TextSpan>? only = null)
+    public static void Count(SyntaxTree tree, Dictionary<string, int[]> counts, IReadOnlyList<TextSpan>? only = null, IReadOnlyDictionary<string, string>? settings = null)
     {
         bool Skip(int position) => only is not null && !only.Any(s => s.Contains(position));
         var text = tree.GetText();
@@ -396,6 +497,7 @@ internal static class Conventions
             UsingPlacement();
             UsingOrder();
             Overloads();
+            MemberOrder();
         }
 
         foreach (var token in root.DescendantTokens())
@@ -411,6 +513,12 @@ internal static class Conventions
                 && !before.IsKind(SyntaxKind.SemicolonToken) && !before.IsKind(SyntaxKind.ColonToken))
             {
                 Add("csharp_new_line_before_open_brace", Line(before.SpanStart) == Line(token.SpanStart));
+            }
+            else if (token.IsKind(SyntaxKind.NumericLiteralToken) && token.Text.TrimEnd('l', 'L') is [_, .., 'u' or 'U'])
+            {
+                // An unsigned suffix ('0u', '1UL'; real literals never end in 'u' or 'l'): lower case anywhere in it is BRO1135's.
+                // 'L' alone doesn't count: nobody writes '1l' (it reads as 11), so it would only outvote the 'u's.
+                Add(SuffixCaseKey, StyleBro.Analyzers.Readability.LiteralSuffixes.GetUpperCaseSuffix(token, lOnly: false) is not null);
             }
             else if ((token.IsKind(SyntaxKind.ElseKeyword) || token.IsKind(SyntaxKind.CatchKeyword) || token.IsKind(SyntaxKind.FinallyKeyword))
                 && token.GetPreviousToken().IsKind(SyntaxKind.CloseBraceToken))
@@ -654,6 +762,24 @@ internal static class Conventions
             }
         }
 
+        // Unit = types whose members BRO1001 sorts apart, with the repository's order settings: in its order or not. A type
+        // that is in order with overloads kept together counts as sorted: whether they stay together is the overloads
+        // convention's call (ponytail: so with keep_overloads_together = false such a type is still sorted on format).
+        void MemberOrder()
+        {
+            var options = StyleBro.Analyzers.Ordering.MemberOrderOptions.Read(new Options(settings));
+            var together = options.KeepOverloadsTogether
+                ? null
+                : StyleBro.Analyzers.Ordering.MemberOrderOptions.Read(new Options(new Dictionary<string, string>(settings ?? new Dictionary<string, string>()) { [OverloadsKey] = "true" }));
+            foreach (var type in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+            {
+                if (StyleBro.Analyzers.Ordering.MemberOrdering.IsSorted(type, options) is { } sorted)
+                {
+                    Add(MemberOrderKey, !sorted && (together is null || StyleBro.Analyzers.Ordering.MemberOrdering.IsSorted(type, together) != true));
+                }
+            }
+        }
+
         // BRO1406's places: an operation of another kind inside arithmetic. Without parentheses it is the rule's finding; with
         // them only where they change nothing ('a + (b * c)', not '(a + b) * c').
         void Arithmetic(BinaryExpressionSyntax binary)
@@ -700,9 +826,12 @@ internal static class Conventions
     /// the code clearly contradicts a key in <paramref name="repository"/> (the root .editorconfig's settings) that only a
     /// StyleBro rule enforces (<see cref="Convention.Enforcer"/>): then that rule goes off and the key stays.
     /// <paramref name="isSet"/>: whether the repository or the Sonar setup sets an Off line's key itself (then it stays).
+    /// <paramref name="unenforced"/>: keys the repository sets at severity silent (<see cref="InitCommand.Unenforced"/>), with
+    /// their values: the code decides, and a default the key contradicts is written too (the block comes later and wins).
     /// </summary>
-    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null, IReadOnlyDictionary<string, string>? repository = null)
+    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null, IReadOnlyDictionary<string, string>? repository = null, IReadOnlyDictionary<string, string>? unenforced = null)
     {
+        static string Value(string setting) => setting.Split(':')[0].Trim().ToLowerInvariant();
         var lines = new List<string>();
         var report = new List<string>();
         var summary = new SummaryLists();
@@ -765,7 +894,7 @@ internal static class Conventions
             {
                 (tag, verdict) = ("mixed", $"default stays ({convention.Default})");
             }
-            else if (convention.Values[winner].Value == convention.Default)
+            else if (convention.Values[winner].Value == convention.Default && (unenforced is null || !unenforced.TryGetValue(convention.Key, out var silent) || Value(silent) == convention.Default))
             {
                 (tag, verdict) = ("default", convention.Default);
                 summary.Matched++;
@@ -785,6 +914,7 @@ internal static class Conventions
                 (tag, verdict) = ("kept", value);
                 summary.Written.Add(convention.Key);
                 lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code"
+                    + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced)" : string.Empty)
                     + (convention.KeepAny ? $" ({MinimumAgreeing} are enough to keep them: {convention.Key} = {convention.Default} would move each to a line of its own)" : string.Empty));
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
