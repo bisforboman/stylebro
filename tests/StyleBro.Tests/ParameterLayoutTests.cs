@@ -204,33 +204,6 @@ public class ParameterLayoutTests
         """);
 
     [Fact]
-    public Task MovedItem_WithAMultiLineString_KeepsItsLines() => VerifyFixAsync(
-        """"
-        class C
-        {
-            void M(string a, int b)
-            {
-                M({|BRO1107:"""
-                    text
-                    """|}, {|BRO1108:1|});
-            }
-        }
-        """",
-        """"
-        class C
-        {
-            void M(string a, int b)
-            {
-                M(
-                    """
-                    text
-                    """,
-                    1);
-            }
-        }
-        """");
-
-    [Fact]
     public Task FixAll_FixesNestedLists() => VerifyFixAsync(
         """
         class C
@@ -468,4 +441,56 @@ public class ParameterLayoutTests
         }
         """,
         editorConfig: "stylebro_split_list_first_item = same_line");
+
+    // realworlddotnet: init turned BRO1107 off (the code mixes both forms), and BRO1108 still moved the first item.
+    [Fact]
+    public Task WithBro1107Off_TheFirstItemStaysOnTheParenthesisLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            public int UpdateBySlugAsync(string slug,
+                int request, {|BRO1108:int cancellationToken|}) => 0;
+
+            public int Aligned(string slug, int request,
+                               {|BRO1108:int cancellationToken|}) => 0;
+        }
+        """,
+        """
+        class C
+        {
+            public int UpdateBySlugAsync(string slug,
+                int request,
+                int cancellationToken) => 0;
+
+            public int Aligned(string slug,
+                               int request,
+                               int cancellationToken) => 0;
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1107.severity = none");
+
+    // spreadcheetah: 'Assert.Equal(@"Address line 2 (verbatim' + 'string: "", \)", name.Name)' was split around the literal.
+    [Fact]
+    public Task ListsWithAMultiLineString_AreLeftAlone() => VerifyNoDiagnosticsAsync(
+        """"
+        class C
+        {
+            public static void Equal(string expected, string actual)
+            {
+            }
+
+            public void M(string name)
+            {
+                Equal(@"Address line 2 (verbatim
+        string: "", \)", name);
+                Equal("""
+                    Age (
+                        raw
+                    )
+                    """, name);
+                Equal($@"Line {name}
+        next", name);
+            }
+        }
+        """");
 }

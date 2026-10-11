@@ -432,6 +432,54 @@ public class DocumentationTests
         }
         """);
 
+    // Stateless ('the prefix text would be digraph {') and spreadcheetah ('Example: A1:B10') got a period after code.
+    [Fact]
+    public Task TextEndingInCode_GetsNoPeriod_ProseInParenthesesDoes() => VerifyFixAsync("""
+        /// <summary>
+        /// For DOT files the prefix text would be
+        /// digraph {
+        /// </summary>
+        public class Texts
+        {
+            /// <summary>Example: A1:B10</summary>
+            public void A()
+            {
+            }
+
+            /// <summary>Call it as Run(x)</summary>
+            /// <remarks>See https://example.com/docs</remarks>
+            public void B()
+            {
+            }
+
+            /// <summary>Gets the delay (in ms){|BRO1603:|}</summary>
+            /// <returns>The value, never null{|BRO1603:|}</returns>
+            public int C() => 0;
+        }
+        """, """
+        /// <summary>
+        /// For DOT files the prefix text would be
+        /// digraph {
+        /// </summary>
+        public class Texts
+        {
+            /// <summary>Example: A1:B10</summary>
+            public void A()
+            {
+            }
+
+            /// <summary>Call it as Run(x)</summary>
+            /// <remarks>See https://example.com/docs</remarks>
+            public void B()
+            {
+            }
+
+            /// <summary>Gets the delay (in ms).</summary>
+            /// <returns>The value, never null.</returns>
+            public int C() => 0;
+        }
+        """);
+
     // Ocelot's FileAggregateRoute: a documented property is set apart from the property below it too (BRO1505), so the
     // result doesn't depend on whether BRO1601 runs before BRO1001's sort.
     [Fact]
@@ -567,7 +615,7 @@ public class DocumentationTests
         /// <summary>Gets the List&lt;T&gt;{|BRO1603:|}</summary>
         public class Texts
         {
-            /// <summary>Gets a closing parenthesis ({|BRO1603:|}</summary>
+            /// <summary>Gets an opening parenthesis, which is code: (</summary>
             /// <remarks>Gets the word &quot;done&quot;{|BRO1603:|}</remarks>
             public void A()
             {
@@ -578,7 +626,7 @@ public class DocumentationTests
         /// <summary>Gets the List&lt;T&gt;.</summary>
         public class Texts
         {
-            /// <summary>Gets a closing parenthesis (.</summary>
+            /// <summary>Gets an opening parenthesis, which is code: (</summary>
             /// <remarks>Gets the word &quot;done&quot;.</remarks>
             public void A()
             {

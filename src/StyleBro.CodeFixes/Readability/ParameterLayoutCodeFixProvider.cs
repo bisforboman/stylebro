@@ -61,7 +61,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var indentUnit = Indentation.GetUnit(options);
-        var sameLine = ParameterLayout.IsSameLine(options);
+        var sameLine = ParameterLayout.KeepsFirstItem(options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken));
         bool JoinsEmptyLists() => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.EmptyListOnOneLine, cancellationToken);
 
         // One entry per list: its span, the position of its '(' and whether every item moves (BRO1108) or only the first.

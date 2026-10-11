@@ -215,4 +215,88 @@ public class CombinedFieldsTests
         }
         """,
         editorConfig: "stylebro_allow_adjacent_single_line_members = true");
+
+    // spreadcheetah: 'bool rowRelative = true, columnRelative = true;' was split into explicit 'bool' declarations, and the
+    // repository's 'csharp_style_var_for_built_in_types = true:warning' then reported IDE0007 on each.
+    [Fact]
+    public Task Locals_FollowTheVarPreference() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public void M(object o)
+            {
+                {|BRO1142:bool|} rowRelative = true, columnRelative = true;
+                {|BRO1142:List|}<int> a = new List<int>(), b = new List<int>();
+                {|BRO1142:string|} s = (string)o, t = o as string;
+                {|BRO1142:const|} int D = 1, E = 2;
+            }
+        }
+        """,
+        """
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public void M(object o)
+            {
+                var rowRelative = true;
+                var columnRelative = true;
+                var a = new List<int>();
+                var b = new List<int>();
+                var s = (string)o;
+                var t = o as string;
+                const int D = 1;
+                const int E = 2;
+            }
+        }
+        """,
+        editorConfig: "csharp_style_var_for_built_in_types = true:warning\ncsharp_style_var_when_type_is_apparent = true:warning\n");
+
+    [Fact]
+    public Task Locals_KeepTheirType_WhenVarIsPreferredOnlySilently_OrForOtherKinds() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public void M()
+            {
+                {|BRO1142:bool|} a = true, b = false;
+                {|BRO1142:List|}<int> c = new List<int>(), d = new List<int>();
+            }
+        }
+        """,
+        """
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public void M()
+            {
+                bool a = true;
+                bool b = false;
+                List<int> c = new List<int>();
+                List<int> d = new List<int>();
+            }
+        }
+        """,
+        editorConfig: "csharp_style_var_for_built_in_types = true:silent\ncsharp_style_var_elsewhere = true:warning\n");
+
+    [Fact]
+    public Task Locals_WhereVarWouldChangeTheMeaningOrNotCompile_AreNotSplit() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+                long a = 1, b = 2;
+                string c = null, d = "x";
+                int e, f = 1;
+                object g = new(), h = new();
+            }
+        }
+        """,
+        "csharp_style_var_for_built_in_types = true:warning\ncsharp_style_var_elsewhere = true:warning\n");
 }

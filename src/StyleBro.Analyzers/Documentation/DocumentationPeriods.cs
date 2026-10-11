@@ -24,6 +24,8 @@ internal static class DocumentationPeriods
     /// <summary>Closing punctuation that may follow a sentence's period: '(see above.)', '"done."'.</summary>
     private static readonly char[] ClosingPunctuation = [')', ']', '"', '\''];
 
+    private static readonly char[] CodeCharacters = ['{', '}', '[', ']', '(', ')', '=', ';', ':', '/', '\\', '|', '$', '#', '_', '`'];
+
     private static readonly HashSet<string> TextElements = new()
     {
         "summary", "remarks", "param", "typeparam", "returns", "value", "exception",
@@ -119,6 +121,24 @@ internal static class DocumentationPeriods
         return text.Length > 1 && text[text.Length - 1] is '"' or '\'' && text.TrimEnd(ClosingPunctuation).EndsWith(".", StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Whether the text ends in code rather than a sentence: its last word has a bracket, brace, '=', ';', ':', a slash,
+    /// '|', '$', '#', '_' or a backtick in it (Stateless: 'the prefix text would be digraph {', spreadcheetah: 'Example:
+    /// A1:B10'). A period there reads as part of the code. A closing ')' or ']' whose opener isn't in the word ends a
+    /// parenthetical ('(in ms)') and doesn't count, nor do a closing quote or a trailing ',' or ';'. StyleCop's SA1629 has no such exception: a deviation.
+    /// </summary>
+    private static bool EndsInCode(string text)
+    {
+        var word = text.Substring(text.LastIndexOfAny([' ', '\t', '\n', '\r']) + 1);
+        while (word.Length > 0 && ((word[word.Length - 1] == ')' && word.IndexOf('(') < 0) || (word[word.Length - 1] == ']' && word.IndexOf('[') < 0)
+            || word[word.Length - 1] is '"' or '\'' or ',' or ';'))
+        {
+            word = word.Substring(0, word.Length - 1);
+        }
+
+        return word.IndexOfAny(CodeCharacters) >= 0;
+    }
+
     private static int? GetInsertionPoint(XmlElementSyntax element, HashSet<string> excluded)
     {
         // The last piece of content that isn't whitespace or a line's '///'.
@@ -136,10 +156,9 @@ internal static class DocumentationPeriods
                     }
 
                     // A period may be followed by closing punctuation: '(see above.)', '"done."'.
-                    var ending = string.Concat(text.TextTokens.TakeWhile(t => t != last).Append(last).Select(t => t.ValueText))
-                        .TrimEnd()
-                        .TrimEnd(ClosingPunctuation);
-                    return ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':' ? null
+                    var untrimmed = string.Concat(text.TextTokens.TakeWhile(t => t != last).Append(last).Select(t => t.ValueText)).TrimEnd();
+                    var ending = untrimmed.TrimEnd(ClosingPunctuation);
+                    return (ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':') || EndsInCode(untrimmed) ? null
                         : last.IsKind(SyntaxKind.XmlEntityLiteralToken) ? last.Span.End
                         : last.SpanStart + last.Text.TrimEnd().Length;
 
