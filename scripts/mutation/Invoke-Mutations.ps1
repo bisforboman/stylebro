@@ -1,11 +1,13 @@
 #!/usr/bin/env pwsh
 # Mutation testing for StyleBro's guards: each mutation breaks one guard, and the listed tests must then fail. Fails when a
 # mutation survives (no test covers that guard) or no longer applies (the code changed: update its Find text).
-# The entries live in scripts/mutation/mutations/<Area>.psd1, one file per source folder: src/StyleBro.Analyzers/<Area>/
-# and src/StyleBro.CodeFixes/<Area>/ -> <Area>.psd1, src/StyleBro.Migrate -> Migrate.psd1, anything else -> Common.psd1.
-# Each entry: @{ File = '<path>'; Find = '<text>'; Replace = '<text>'; Tests = '<test filter>' }. Find must occur exactly
-# once in File; Replace takes its place, and at least one test matching Tests (a test class, optionally .Method) must then
-# fail. A mutation that survives is a guard no test covers. Add one for every new guard.
+# One file per entry, scripts/mutation/entries/<Area>/<file>-<hash>.psd1 (write it with New-Mutation.ps1, which picks the
+# folder and a name no other pull request picks by accident). <Area> is the source folder: src/StyleBro.Analyzers/<Area>/
+# and src/StyleBro.CodeFixes/<Area>/ -> <Area>, src/StyleBro.Migrate -> Migrate, anything else -> Common.
+# Each file holds one entry: @{ File = '<path>'; Find = '<text>'; Replace = '<text>'; Tests = '<test filter>' }. Find must
+# occur exactly once in File; Replace takes its place, and at least one test matching Tests (a test class, optionally
+# .Method) must then fail. A mutation that survives is a guard no test covers. Add one for every new guard. An optional
+# comment above the entry says what the guard is for. Entries are independent: their order doesn't matter.
 #
 #   ./scripts/mutation/Invoke-Mutations.ps1 [-Root <checkout>] [-Shard <i> -Shards <n>] [-OnlyFiles <paths>]
 # -OnlyFiles (pull requests: the changed files; an array or a comma-separated list) runs only the entries whose File is
@@ -19,21 +21,23 @@ param([string]$Root = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent), [
     [AllowEmptyCollection()][string[]]$OnlyFiles)
 $ErrorActionPreference = 'Stop'
 $env:StyleBroSelf = 'none'
-# Sorted by name, so the entries' order, and with it each shard's share, is the same on every machine.
-# Keep each file well under a few hundred entries: Import-PowerShellDataFile rejects large files ('dynamic expressions').
-$files = @(Get-ChildItem (Join-Path $PSScriptRoot 'mutations') -Filter *.psd1 | Sort-Object Name -Culture ([cultureinfo]::InvariantCulture))
-if (-not $files.Count) { throw "No mutation files in $(Join-Path $PSScriptRoot 'mutations')." }
+. (Join-Path $PSScriptRoot 'Mutations.Common.ps1')
+# Sorted by relative path (invariant culture, case-sensitive), so the entries' order, and with it each shard's share, is the same on every machine.
+$dir = Join-Path $PSScriptRoot 'entries'
+$files = @(Get-ChildItem $dir -Filter *.psd1 -Recurse | ForEach-Object {
+    [pscustomobject]@{ Path = $_.FullName; Name = [IO.Path]::GetRelativePath($dir, $_.FullName).Replace('\', '/') }
+} | Sort-Object { $_.Name } -Culture ([cultureinfo]::InvariantCulture) -CaseSensitive)
+if (-not $files.Count) { throw "No mutation files in $dir." }
+if (Test-Path (Join-Path $PSScriptRoot 'mutations')) {
+    throw 'scripts/mutation/mutations/ holds entries in the old per-area lists: move each entry to its own file with New-Mutation.ps1.'
+}
 $all = @(foreach ($f in $files) {
-    try { $entries = (Import-PowerShellDataFile $f.FullName).Mutations }
+    try { $m = Import-PowerShellDataFile $f.Path }
     catch { throw "Cannot load $($f.Name): $($_.Exception.Message)" }
-    foreach ($m in $entries) { $m.Source = $f.BaseName; $m }
+    if (-not ($m.File -and $m.Find -and $null -ne $m.Replace -and $m.Tests)) { throw "$($f.Name) needs File, Find, Replace and Tests." }
+    $m.Source = $f.Name; $m
 })
 
-function Get-Area($path) {
-    if ($path -match '^src/StyleBro\.(Analyzers|CodeFixes)/([^/]+)/') { return $Matches[2] }
-    if ($path -like 'src/StyleBro.Migrate/*') { return 'Migrate' }
-    'Common'
-}
 $tests = Join-Path $Root 'tests/StyleBro.Tests'
 if ($Shards -lt 1 -or $Shard -lt 0 -or $Shard -ge $Shards) { throw "Invalid shard $Shard of $Shards." }
 
@@ -44,8 +48,8 @@ function Get-Count($m) {
 $stale = @(foreach ($m in $all) {
     $count = Get-Count $m
     if ($count -ne 1) { [pscustomobject]@{ Result = 'STALE'; File = $m.File; Find = $m.Find; Note = "found $count times" } }
-    elseif ($m.Source -ne ($area = Get-Area $m.File)) {
-        [pscustomobject]@{ Result = 'STALE'; File = $m.File; Find = $m.Find; Note = "in $($m.Source).psd1, belongs in $area.psd1" }
+    elseif (-not $m.Source.StartsWith(($area = Get-MutationArea $m.File) + '/')) {
+        [pscustomobject]@{ Result = 'STALE'; File = $m.File; Find = $m.Find; Note = "in $($m.Source), belongs in $area/" }
     }
 })
 $run = $all
