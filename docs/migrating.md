@@ -111,8 +111,10 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   their settings, code and project files belong to another repository, and nothing in them is changed
   (`stylebro-migrate format` excludes them too). Files a project
   links from a submodule are another matter: see [excluding vendored code](getting-started.md#excluding-vendored-code).
-- The StyleCop.Analyzers version in the project files: with 1.1.x, the rules added in 1.2 (SA1141, SA1142, SA1316,
-  SA1414) count as off.
+- The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
+  `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
+  off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
+  SA1139, SA1314 and SA1413.
 - Whether any project sets `GenerateDocumentationFile`. Without it the build doesn't parse XML documentation and
   StyleCop's rules that read it never run (it reports SA0001 instead), but `dotnet format` does parse it. So the
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.

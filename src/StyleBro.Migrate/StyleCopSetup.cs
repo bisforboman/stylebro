@@ -43,7 +43,11 @@ internal sealed class StyleCopSetup
     private const string AllRules = "*";
 
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*)\.severity$", RegexOptions.IgnoreCase);
-    private static readonly Regex PackageVersion = new(@"Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?Version=""([^""]+)""|Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*>\s*<Version>([^<]+)</Version>", RegexOptions.IgnoreCase);
+    /// <summary>
+    /// StyleCop's version: a PackageReference/PackageVersion (attribute or element), a packages.config entry, or an analyzer's
+    /// hint path into a packages.config 'packages' folder ('..\packages\StyleCop.Analyzers.1.0.2\analyzers\...': xbox-live-developer-tools).
+    /// </summary>
+    private static readonly Regex PackageVersion = new(@"Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?Version=""(?<v>[^""]+)""|Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*>\s*<Version>(?<v>[^<]+)</Version>|<package\b[^>]*?\bid=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?\bversion=""(?<v>[^""]+)""|StyleCop\.Analyzers(?:\.Unstable)?\.(?<v>\d+(?:\.\d+){2,3}(?:-[\w.]+)?)[\\/]", RegexOptions.IgnoreCase);
     private static readonly Regex DocumentationFile = new(@"<GenerateDocumentationFile>\s*true\s*<|<DocumentationFile>", RegexOptions.IgnoreCase);
     private static readonly Regex CategoryKey = new(@"^dotnet_analyzer_diagnostic\.category-StyleCop\.CSharp\.(\w+)\.severity$", RegexOptions.IgnoreCase);
 
@@ -129,14 +133,13 @@ internal sealed class StyleCopSetup
         // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x: off, whatever the configs say.
         var msbuild = files.Where(IsMSBuild).Concat(references.MSBuild).Select(f => (File: f, Text: File.ReadAllText(f))).ToList();
         var documentationParsed = msbuild.Any(m => DocumentationFile.IsMatch(m.Text));
-        var version = msbuild.Select(m => PackageVersion.Match(m.Text))
-            .Where(m => m.Success)
-            .Select(m => m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value.Trim())
+        var version = msbuild.Select(m => m.Text)
+            .Concat(files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)).Select(File.ReadAllText))
+            .SelectMany(text => PackageVersion.Matches(text))
+            .Select(m => m.Groups["v"].Value.Trim())
             .OrderBy(v => v, StringComparer.Ordinal)
             .FirstOrDefault();
-        var old = version is not null && (version.StartsWith("1.1.", StringComparison.Ordinal) || version.StartsWith("1.0.", StringComparison.Ordinal))
-            ? LoadIds("StyleCopRules-1.1.118.csv")
-            : null;
+        var old = OldRules(version);
 
         // Each project that runs StyleCop, with the ruleset and stylecop.json it gets (its own file, its Directory.Build.props
         // and .targets, and what they import). Only those projects count: a sample project without StyleCop has no ruleset
@@ -873,6 +876,24 @@ internal sealed class StyleCopSetup
     {
         var directory = Path.GetDirectoryName(file)! + Path.DirectorySeparatorChar;
         value = value.Trim().Replace("$(MSBuildThisFileDirectory)", directory, StringComparison.OrdinalIgnoreCase);
+
+        // The usual ways a nested Directory.Build.props imports its parent's: a property the same file defines, the SDK's
+        // name for the file, Path.Combine (Orleans: $(_ParentDirectoryBuildPropsPath) = Combine('..', '$(_DirectoryBuildPropsFile)');
+        // read as a path it never resolved, and the preview added the StyleBro reference to src/, test/ and the root: NU1504).
+        // ponytail: one file's unconditional definitions, not MSBuild's evaluation.
+        if (value.Contains("$(", StringComparison.Ordinal))
+        {
+            var text = WithoutComments(File.ReadAllText(file));
+            for (var i = 0; i < 4 && Regex.IsMatch(value, @"\$\(\w+\)"); i++)
+            {
+                value = Regex.Replace(value, @"\$\((\w+)\)", m => m.Groups[1].Value.Equals("_DirectoryBuildPropsFile", StringComparison.OrdinalIgnoreCase) ? "Directory.Build.props"
+                    : Regex.Match(text, $@"<{m.Groups[1].Value}\b[^>]*>([^<]*)</{m.Groups[1].Value}\s*>") is { Success: true } defined ? defined.Groups[1].Value.Trim()
+                    : m.Value);
+            }
+
+            value = Regex.Replace(value, @"^\$\(\[System\.IO\.Path\]::Combine\(\s*'([^']*)'\s*,\s*'([^']*)'\s*\)\)$", m => Path.Combine(m.Groups[1].Value, m.Groups[2].Value), RegexOptions.IgnoreCase);
+        }
+
         var above = Regex.Match(value, @"^\$\(\[MSBuild\]::GetPathOfFileAbove\(\s*'([^']+)'\s*(?:,\s*'([^']*)')?\s*\)\)$", RegexOptions.IgnoreCase);
         if (above.Success)
         {
@@ -966,6 +987,16 @@ internal sealed class StyleCopSetup
             : name.EndsWith(".ruleset", StringComparison.OrdinalIgnoreCase) ? "ruleset"
             : null;
     }
+
+    /// <summary>
+    /// The rules a StyleCop version before 1.2 has (its DLL's inventory), or null for 1.2 and later: 1.0.x lacks SA1135,
+    /// SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in StyleCop-clean code).
+    /// </summary>
+    internal static HashSet<string>? OldRules(string? version) =>
+        version is null ? null
+        : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
+        : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
+        : null;
 
     private static HashSet<string> LoadIds(string resource)
     {

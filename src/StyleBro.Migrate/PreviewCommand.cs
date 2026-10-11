@@ -548,6 +548,7 @@ internal static class PreviewCommand
         var (_, styleCop, removes) = StyleCopSetup.Projects(root, files);
         var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);
         var versions = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        var optedOut = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in targets)
         {
             // A GlobalPackageReference (central package management) gets one of its own: a PackageReference with a version
@@ -564,6 +565,20 @@ internal static class PreviewCommand
                 EditFile(packages, text => AddPackageVersion(text!, $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
             }
 
+            // StabilityMatrix: its analyzer projects turn central package management off, and the version-less reference from
+            // Directory.Build.props failed their restore (NU1015). Such projects get a reference with a version instead (those
+            // that remove StyleCop's reference remove StyleBro's too, below).
+            var optOuts = packages is null ? [] : OptOuts(file, files, root).Where(p => !removes.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
+            if (optOuts.Count > 0)
+            {
+                optedOut.UnionWith(optOuts);
+                EditFile(file, text => AddItem(
+                    text,
+                    "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" Condition=\"'$(ManagePackageVersionsCentrally)' == 'true'\" />",
+                    $"<PackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" PrivateAssets=\"all\" Condition=\"'$(ManagePackageVersionsCentrally)' != 'true'\" />"));
+                continue;
+            }
+
             EditFile(file, text => AddItem(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
         }
 
@@ -577,6 +592,7 @@ internal static class PreviewCommand
         string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
         return $"StyleBro.Analyzers {version} to {Names(targets)}"
             + (versions.Count > 0 ? $" (version in {Names(versions)})" : string.Empty)
+            + (optedOut.Count > 0 ? $", with a version for {Names(optedOut)} (central package management off there)" : string.Empty)
             + (removes.Count > 0 ? $", removed again in {Names(removes)} (they remove StyleCop.Analyzers)" : string.Empty);
     }
 
@@ -590,11 +606,7 @@ internal static class PreviewCommand
     /// </summary>
     public static string? CentralPackages(string file, string root)
     {
-        // ponytail: text-level; a property set by a Condition isn't seen. Imports are followed (a nested
-        // Directory.Packages.props that imports the root's, which turns it on).
-        bool Sets(string path, string value, int depth = 0) => File.Exists(path)
-            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
-                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => Sets(i, value, depth + 1))));
+        bool Sets(string path, string value) => SetsCentral(path, value, root);
         if (Sets(file, "false"))
         {
             return null;
@@ -616,13 +628,28 @@ internal static class PreviewCommand
     }
 
     /// <summary>
-    /// An MSBuild file with an ItemGroup holding <paramref name="item"/> before its last '&lt;/Project&gt;' (a new file
+    /// The projects that get <paramref name="props"/> (a Directory.Build.props: those under its folder) and turn central
+    /// package management off themselves.
+    /// </summary>
+    public static List<string> OptOuts(string props, IEnumerable<string> files, string root)
+    {
+        if (!Path.GetFileName(props).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase))
+        {
+            return [];
+        }
+
+        var folder = Path.GetDirectoryName(Path.GetFullPath(props))! + Path.DirectorySeparatorChar;
+        return files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase) && SetsCentral(f, "false", root)).ToList();
+    }
+
+    /// <summary>
+    /// An MSBuild file with an ItemGroup holding <paramref name="items"/> before its last '&lt;/Project&gt;' (a new file
     /// without one), in the file's line endings.
     /// </summary>
-    public static string AddItem(string? project, string item)
+    public static string AddItem(string? project, params string[] items)
     {
         var newLine = project?.Contains("\r\n", StringComparison.Ordinal) == true ? "\r\n" : "\n";
-        var group = $"  <ItemGroup>{newLine}    {item}{newLine}  </ItemGroup>{newLine}";
+        var group = $"  <ItemGroup>{newLine}{string.Concat(items.Select(item => $"    {item}{newLine}"))}  </ItemGroup>{newLine}";
         var end = project?.LastIndexOf("</Project>", StringComparison.OrdinalIgnoreCase) ?? -1;
         return end < 0 ? $"<Project>{newLine}{group}</Project>{newLine}" : project!.Substring(0, end) + group + project.Substring(end);
     }
@@ -649,6 +676,18 @@ internal static class PreviewCommand
         return next is not null
             ? packages.Insert(anchor.Index, item + newLine + indentation)
             : packages.Insert(anchor.Index + anchor.Length, newLine + indentation + item);
+    }
+
+    /// <summary>
+    /// Whether an MSBuild file sets ManagePackageVersionsCentrally to <paramref name="value"/>, itself or in what it imports
+    /// (a nested Directory.Packages.props that imports the root's, which turns it on).
+    /// </summary>
+    private static bool SetsCentral(string path, string value, string root, int depth = 0)
+    {
+        // ponytail: text-level; a property set by a Condition isn't seen.
+        return File.Exists(path)
+            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
+                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => SetsCentral(i, value, root, depth + 1))));
     }
 
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
