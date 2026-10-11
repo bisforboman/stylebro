@@ -201,6 +201,21 @@ internal static class MemberOrdering
         };
     }
 
+    /// <summary>
+    /// Whether the container is already in BRO1001's order (init's member order count), or null when it says nothing: BRO1001
+    /// leaves it alone, or all its members sort alike.
+    /// </summary>
+    public static bool? IsSorted(SyntaxNode container, MemberOrderOptions options)
+    {
+        var keys = GetKeys(container, options, null, out var segments, out var anchors);
+        if (keys is null || keys.All(k => k.CompareTo(keys[0]) == 0))
+        {
+            return null;
+        }
+
+        return SortedOrder(keys, segments, anchors).Select((source, slot) => source == slot).All(unchanged => unchanged);
+    }
+
     /// <summary>A type member's sort key with the default options (null for an unknown member): init's overload count.</summary>
     public static MemberKey? GetDefaultKey(MemberDeclarationSyntax member, bool inInterface) =>
         GetKey(member, GetAccess(member, inInterface, inNamespace: false), MemberOrderOptions.Default);

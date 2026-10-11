@@ -33,6 +33,7 @@
     <!-- StyleCop's rules with their default severities, read from the StyleCop DLLs by Get-Inventory.ps1. -->
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.2.0-beta.556.csv" LogicalName="StyleCopRules.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.1.118.csv" LogicalName="StyleCopRules-1.1.118.csv" />
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.0.2.csv" LogicalName="StyleCopRules-1.0.2.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\mapping.csv" LogicalName="StyleCopMapping.csv" />
     <EmbeddedResource Include="sdk-rules.editorconfig" LogicalName="SdkRules.editorconfig" />
     <EmbeddedResource Include="modernize-rules.editorconfig" LogicalName="ModernizeRules.editorconfig" />

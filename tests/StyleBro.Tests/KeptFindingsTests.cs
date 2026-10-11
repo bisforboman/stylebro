@@ -273,6 +273,7 @@ public class KeptFindingsTests
         {
             restores.Add(args.Count(a => a == "--no-restore") + (10 * args.Count(a => a == FormatCommand.CheckFirstOption)));
             File.WriteAllText(Path.Combine(root, "C.cs"), new string('x', ++run));
+            WriteKept(Path.Combine(root, "C.cs"));
             return 0;
         });
 
@@ -280,6 +281,9 @@ public class KeptFindingsTests
         Assert.Equal(FormatCommand.MaxRuns, run);
         Assert.Equal(new[] { 0, 11, 11 }, restores); // only the first run restores; the later ones check first, once
         Assert.Contains(lines, l => l.StartsWith("Not clean: still changing", StringComparison.Ordinal));
+
+        // The kept findings are listed too (trial 8: with TreatWarningsAsErrors they fail the build either way).
+        Assert.Contains("  C.cs(3,17): BRO1303 Rename '_count' to 'count'. Kept: " + KeptFinding.Describe(KeptReason.NameInString) + ".", lines);
     }
 
     [Fact]

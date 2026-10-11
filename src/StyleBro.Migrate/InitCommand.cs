@@ -39,6 +39,15 @@ internal static class InitCommand
     /// <summary>The first line of the detected conventions in the output (the preview shows that part).</summary>
     public const string DetectedHeader = "Conventions in the code";
 
+    /// <summary>The IDE rule that enforces a convention's SDK key (its severity tells whether the key is enforced).</summary>
+    private static readonly Dictionary<string, string> IdeRules = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["csharp_prefer_braces"] = "IDE0011",
+        ["csharp_using_directive_placement"] = "IDE0065",
+        ["dotnet_style_parentheses_in_arithmetic_binary_operators"] = "IDE0048",
+        ["csharp_prefer_simple_default_expression"] = "IDE0034",
+    };
+
     public static int Run(string[] args)
     {
         var (profile, rest) = Program.TakeOption(args, Program.SonarProfileOption);
@@ -190,7 +199,26 @@ internal static class InitCommand
     /// </summary>
     public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null)
     {
-        var template = Template().Replace("\r\n", "\n").TrimEnd('\n');
+        // A detected line replaces the template's line for the same key (CSharpier: IDE0055 = none).
+        var keys = new HashSet<string>((detected ?? Array.Empty<string>()).Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+        var kept = new List<string>();
+        foreach (var line in Template().Replace("\r\n", "\n").TrimEnd('\n').Split('\n'))
+        {
+            if (KeyOf(line) is { } key && keys.Contains(key))
+            {
+                // Its comment goes with it.
+                if (kept.Count > 0 && kept[^1].StartsWith('#'))
+                {
+                    kept.RemoveAt(kept.Count - 1);
+                }
+            }
+            else
+            {
+                kept.Add(line);
+            }
+        }
+
+        var template = string.Join("\n", kept);
         if (sonar is { Count: > 0 })
         {
             template += "\n" + string.Join("\n", sonar);
@@ -230,6 +258,10 @@ internal static class InitCommand
     /// </summary>
     public static (List<string> Lines, List<string> Report) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
     {
+        var settings = own;
+        var unenforced = Unenforced(own);
+        own = own.Where(p => !unenforced.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase);
+        var csharpier = Conventions.CSharpier(root) is { } evidence ? Conventions.CSharpierLines(evidence) : default;
         var decided = new Dictionary<string, string>(StringComparer.Ordinal);
         var kept = new List<string>();
         foreach (var convention in Conventions.All)
@@ -237,6 +269,10 @@ internal static class InitCommand
             if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
             {
                 decided[convention.Key] = $"set in .editorconfig ({own[key]})";
+            }
+            else if (csharpier.Lines is not null && Conventions.IsCSharpiers(convention))
+            {
+                decided[convention.Key] = "CSharpier formats it";
             }
             else if (sonarLines.Any(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal)))
             {
@@ -259,8 +295,38 @@ internal static class InitCommand
         // The using order is decided apart from the list (two keys): kept the same way.
         var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
         kept.AddRange(usings);
-        var (detected, report) = Conventions.Decide(Conventions.Count(root, own), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own);
-        return ([.. kept, .. detected], report);
+        var (detected, report) = Conventions.Decide(Conventions.Count(root, settings), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));
+        report.InsertRange(0, unenforced.Select(k => $"  {"note",-8} {k} = {settings[k]} in .editorconfig isn't enforced (its severity is silent or none), so your code decides"));
+        if (csharpier.Lines is not null)
+        {
+            report.Insert(0, csharpier.Report);
+        }
+
+        return ([.. csharpier.Lines ?? [], .. kept, .. detected], report);
+    }
+
+    /// <summary>
+    /// The convention keys the root .editorconfig sets without enforcing them (owner's decision 2026-10-11): severity 'silent'
+    /// or 'none' after the value ('csharp_prefer_braces = true:silent', Flow.Launcher: BRO1514 then added braces in 140
+    /// files), or on the IDE rule that enforces the key. Such a key is the IDE's default, not the team's choice: the code
+    /// decides, like for a key it isn't set.
+    /// </summary>
+    public static HashSet<string> Unenforced(IReadOnlyDictionary<string, string> own)
+    {
+        static bool Silent(string? severity) => severity?.Trim().ToLowerInvariant() is "silent" or "none";
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in Conventions.All.SelectMany(c => new[] { c.Key }.Concat(c.AlsoKeys)).Where(own.ContainsKey))
+        {
+            var value = own[key];
+            var colon = value.IndexOf(':');
+            if ((colon >= 0 && Silent(value.Substring(colon + 1)))
+                || (IdeRules.TryGetValue(key, out var ide) && own.TryGetValue($"dotnet_diagnostic.{ide}.severity", out var severity) && Silent(severity)))
+            {
+                result.Add(key);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -349,8 +415,35 @@ internal static class InitCommand
     /// <summary>The modernization template (modernize-rules.editorconfig, embedded), with {lang}/{api} severities.</summary>
     public static string ModernizeTemplate() => Read("ModernizeRules.editorconfig");
 
-    /// <summary>Project files under the root that set several target frameworks (relative paths).</summary>
+    /// <summary>
+    /// The projects under the root that target several frameworks (relative paths): evaluated by MSBuild when the root has
+    /// one solution or project (<see cref="FormatCommand.EvaluatedProjects"/>, the same evaluation format runs; Orleans sets them
+    /// through '$(DefaultTargetFrameworks)': 9 found in the text, ~130 evaluated), else the project and props files whose text
+    /// sets several (<see cref="MultiTargetedFiles"/>).
+    /// </summary>
     public static IEnumerable<string> MultiTargetedProjects(string root)
+    {
+        if (BaselineCommand.FindWorkspace(root) is { } workspace)
+        {
+            try
+            {
+                var projects = FormatCommand.EvaluatedProjects(Path.Combine(root, workspace)).ToList();
+                if (projects.Count > 0)
+                {
+                    return projects.Where(p => p.Frameworks.Length > 1).Select(p => Path.GetRelativePath(root, p.FullPath)).Order(StringComparer.OrdinalIgnoreCase).ToList();
+                }
+            }
+            catch (Exception e) when (e is AggregateException or System.Text.Json.JsonException or KeyNotFoundException)
+            {
+                // A project MSBuild couldn't evaluate (no JSON): the text search instead.
+            }
+        }
+
+        return MultiTargetedFiles(root);
+    }
+
+    /// <summary>Project and props files under the root whose text sets several target frameworks (relative paths).</summary>
+    public static IEnumerable<string> MultiTargetedFiles(string root)
     {
         var several = new Regex("<TargetFrameworks>[^<]*;[^<]*</TargetFrameworks>", RegexOptions.IgnoreCase);
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)

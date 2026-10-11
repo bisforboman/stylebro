@@ -58,6 +58,12 @@ internal static class FormatCommand
     /// <summary>The most runs 'stylebro-migrate format' makes until a run changes nothing.</summary>
     public const int MaxRuns = 3;
 
+    /// <summary>
+    /// The folder 'dotnet format' runs in when it isn't the workspace's (its '--include' paths are relative to it): '--files'
+    /// for a file a project links from outside its folder. Internal: <see cref="RunFiles"/> adds it.
+    /// </summary>
+    public const string WorkingFolderOption = "--working-folder";
+
     /// <summary>The option for a single run (the preview counts its own runs).</summary>
     public const string OnceOption = "--once";
 
@@ -79,6 +85,9 @@ internal static class FormatCommand
     /// <summary>The option that formats only the files named after it (for agents: seconds on a small change).</summary>
     public const string FilesOption = "--files";
 
+    /// <summary>How to restore old-style (non-SDK) projects before 'format' (docs/getting-started.md, "Old-style (non-SDK) projects").</summary>
+    public const string OldStyleRestore = "Restore them with Visual Studio's MSBuild first: msbuild -t:restore -p:RestorePackagesConfig=true (https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects).";
+
     /// <summary>What to say when the restore 'dotnet format' needs fails (it prints only a stack trace).</summary>
     internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why (for example NuGet audit warnings with TreatWarningsAsErrors). Once the packages are restored, '--no-restore' skips it.";
 
@@ -97,11 +106,14 @@ internal static class FormatCommand
     /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
     private const string OldMacHeader = "Not formatted:";
 
+    /// <summary>The start of the line that says old-style projects aren't restored (printed for the first run only).</summary>
+    private const string OldStyleHeader = "Old-style projects:";
+
     /// <summary>The start of the line that names the folders without StyleCop format leaves alone (printed for the first run only).</summary>
     private const string UnformattedHeader = "Leaving alone:";
 
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
-    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
@@ -123,10 +135,13 @@ internal static class FormatCommand
             return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
         }
 
+        // Every mode takes the documented options ('--files a.cs --once' passed --once on to 'dotnet format').
+        var once = args.Contains(OnceOption);
+        args = ProjectAsPath(args.Where(a => a != OnceOption).ToArray());
         var (files, rest) = TakeFiles(args);
         if (files is not null)
         {
-            return RunFiles(files, rest, log, output, runOnce);
+            return RunFiles(files, rest, log, output, runOnce, once ? 1 : MaxRuns);
         }
 
         var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
@@ -136,8 +151,6 @@ internal static class FormatCommand
             json["path"] = root;
         }
 
-        var once = args.Contains(OnceOption);
-        args = args.Where(a => a != OnceOption).ToArray();
         var exit = args.Contains("--verify-no-changes") ? Verify(args, root, log, runOnce) : Repeat(args, root, log, output, runOnce, once ? 1 : MaxRuns);
         JsonReport.Set("clean", exit == 0);
         return exit;
@@ -150,6 +163,23 @@ internal static class FormatCommand
 
     /// <summary>One plain 'dotnet format' run (the preview's: it counts the runs and reads the reports itself).</summary>
     public static int RunPlain(string[] args, Action<string>? output) => RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
+
+    /// <summary>
+    /// The arguments with '--project &lt;solution or project&gt;' (the preview's and baseline's option) as the path 'format'
+    /// takes first: passed on, 'dotnet format' printed its usage text.
+    /// </summary>
+    public static string[] ProjectAsPath(string[] args)
+    {
+        var at = Array.IndexOf(args, "--project");
+        if (at < 0 || at + 1 >= args.Length)
+        {
+            return args;
+        }
+
+        var hasPath = args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal);
+        var project = hasPath ? Path.Combine(args[0], args[at + 1]) : args[at + 1];
+        return new[] { project }.Concat(args.Where((_, i) => i != at && i != at + 1 && !(hasPath && i == 0))).ToArray();
+    }
 
     /// <summary>The files after '--files' (up to the next option), and the other arguments; null when there's no '--files'.</summary>
     public static (List<string>? Files, string[] Others) TakeFiles(string[] args)
@@ -165,15 +195,17 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// '--files': which workspace each file is formatted in, with the files relative to its folder (for '--include').
-    /// <paramref name="workspace"/>: the folder, solution or project named on the command line; without one, each file's
-    /// nearest project file above it. A file path is relative to <paramref name="currentDirectory"/>, or else to the git
-    /// repository's root. Null (with the error said) when a file isn't found, has no project, or is outside the workspace.
+    /// '--files': which workspace each file is formatted in, the folder 'dotnet format' runs in (the workspace's), and the
+    /// files relative to it (for '--include'). <paramref name="workspace"/>: the folder, solution or project named on the
+    /// command line; without one, each file's nearest project file above it, else a project that compiles it from outside its
+    /// own folder (run from the repository's root: '--include' matches nothing above the folder it runs in). A file path is
+    /// relative to <paramref name="currentDirectory"/>, or else to the git repository's root. Null (with the error said) when
+    /// a file isn't found, has no project, or is outside the workspace.
     /// </summary>
-    public static List<(string Workspace, List<string> Include)>? GroupFiles(IEnumerable<string> files, string? workspace, string currentDirectory, Action<string> error)
+    public static List<(string Workspace, string Folder, List<string> Include)>? GroupFiles(IEnumerable<string> files, string? workspace, string currentDirectory, Action<string> error)
     {
         var repository = RepositoryRoot(currentDirectory) ?? currentDirectory;
-        var groups = new List<(string Workspace, List<string> Include)>();
+        var groups = new List<(string Workspace, string Folder, List<string> Include)>();
         foreach (var file in files)
         {
             var full = new[] { currentDirectory, repository }.Select(b => Path.GetFullPath(file, b)).FirstOrDefault(File.Exists);
@@ -184,13 +216,20 @@ internal static class FormatCommand
             }
 
             var target = workspace is null ? NearestProject(Path.GetDirectoryName(full)!, repository) : Path.GetFullPath(workspace, currentDirectory);
-            if (target is null)
+            var folder = target is null ? null : Directory.Exists(target) ? target : Path.GetDirectoryName(target)!;
+
+            // Orleans links src/Orleans.CodeGenerator.Shared/*.cs into its projects: no project above those files.
+            if (target is null && LinkingProject(full, RepositoryRoot(Path.GetDirectoryName(full)!) ?? repository) is { } linking)
             {
-                error($"--files: no project file above {file}.");
+                (target, folder) = (linking, RepositoryRoot(Path.GetDirectoryName(full)!) ?? repository);
+            }
+
+            if (target is null || folder is null)
+            {
+                error($"--files: no project file above {file}, and no project compiles it.");
                 return null;
             }
 
-            var folder = Directory.Exists(target) ? target : Path.GetDirectoryName(target)!;
             var relative = Path.GetRelativePath(folder, full);
             if (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative))
             {
@@ -198,10 +237,10 @@ internal static class FormatCommand
                 return null;
             }
 
-            var group = groups.FindIndex(g => g.Workspace.Equals(target, StringComparison.OrdinalIgnoreCase));
+            var group = groups.FindIndex(g => g.Workspace.Equals(target, StringComparison.OrdinalIgnoreCase) && g.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
             if (group < 0)
             {
-                groups.Add((target, new List<string>()));
+                groups.Add((target, folder, new List<string>()));
                 group = groups.Count - 1;
             }
 
@@ -212,12 +251,25 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// A project under <paramref name="repository"/> that compiles <paramref name="file"/> from outside its own folder, or
+    /// null. Only projects whose file names a Compile item going up a folder are evaluated ('dotnet msbuild -getItem').
+    /// </summary>
+    public static string? LinkingProject(string file, string repository)
+    {
+        return StyleCopSetup.EnumerateFiles(repository)
+            .Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+                && Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(f)), @"<Compile\b[^>]*\bInclude\s*=\s*""[^""]*\.\.", RegexOptions.IgnoreCase))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(p => ParseProject(Capture(Path.GetDirectoryName(p)!, "msbuild", p, "-getItem:Compile", "-nologo"), Path.GetDirectoryName(p)).Linked
+                .Contains(Path.GetFullPath(file), StringComparer.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
     /// The nearest project file at or above the folder, up to <paramref name="top"/> (the first by name when a folder has
     /// several), or null.
     /// </summary>
     public static string? NearestProject(string folder, string top)
     {
-        // ponytail: a file a project includes from elsewhere ('<Compile Include="../x.cs"/>') is looked up by folder only.
         for (var current = new DirectoryInfo(folder); current is not null; current = current.Parent)
         {
             if (current.GetFiles("*.csproj").OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault() is { } project)
@@ -290,20 +342,17 @@ internal static class FormatCommand
     public static string MarkKept(string line, ISet<(string Path, int Line, string Id)> kept) =>
         KeptLine(line, kept) is { } severity ? line.Remove(severity.Index, severity.Length).Insert(severity.Index, "kept") : line;
 
-    /// <summary>The C# files under the root (not bin/obj, not submodules) with their size and time, to tell which a run changed.</summary>
-    public static Dictionary<string, (long Length, DateTime Written)> Snapshot(string root) =>
+    /// <summary>
+    /// The C# files under the root (not bin/obj, not submodules) with a hash of their content, to tell which a run changed: by
+    /// size and time, a file 'dotnet format' wrote back unchanged counted as changed.
+    /// </summary>
+    public static Dictionary<string, string> Snapshot(string root) =>
         StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            .ToDictionary(
-                f => f,
-                f =>
-                {
-                    var info = new FileInfo(f);
-                    return (info.Length, info.LastWriteTimeUtc);
-                },
-                StringComparer.OrdinalIgnoreCase);
+            .AsParallel()
+            .ToDictionary(f => f, f => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(f))), StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>The files that differ between two snapshots (added, removed or written), sorted.</summary>
-    public static List<string> ChangedFiles(IReadOnlyDictionary<string, (long Length, DateTime Written)> before, IReadOnlyDictionary<string, (long Length, DateTime Written)> after) =>
+    /// <summary>The files that differ between two snapshots (added, removed or with other content), sorted.</summary>
+    public static List<string> ChangedFiles(IReadOnlyDictionary<string, string> before, IReadOnlyDictionary<string, string> after) =>
         after.Where(a => !before.TryGetValue(a.Key, out var b) || b != a.Value).Select(a => a.Key)
             .Concat(before.Keys.Where(k => !after.ContainsKey(k)))
             .Order(StringComparer.OrdinalIgnoreCase)
@@ -322,13 +371,18 @@ internal static class FormatCommand
     public static string? SkippedProject(string line) =>
         Regex.Match(line, "Required references did not load for (.+?) or referenced project") is { Success: true } match ? match.Groups[1].Value : null;
 
+    /// <summary>The file name of a project 'dotnet format' can't load (F#: "Could not format '...fsproj'. Format currently supports only C# ..."), else null.</summary>
+    public static string? UnsupportedProject(string line) =>
+        Regex.Match(line, @"Could not format '(?:[^']*[\\/])?(?<name>[^'\\/]+)'\. Format currently supports only") is { Success: true } match ? match.Groups["name"].Value : null;
+
     /// <summary>
     /// What to say when 'dotnet format' skipped projects (<see cref="SkippedProject"/>): project name -> the frameworks whose
     /// runs skipped it ("" for a plain run). <paramref name="frameworks"/>: project name -> the frameworks it was run for. A
     /// project skipped in every run wasn't formatted at all (<see cref="IncompleteMarker"/>; the preview stops then); one
-    /// skipped for some frameworks only (Bogus: netstandard1.3) only misses the code just those compile.
+    /// skipped for some frameworks only (Bogus: netstandard1.3) only misses the code just those compile. <paramref name="unsupported"/>:
+    /// the projects 'dotnet format' said it can't load (F#), named once as the likely cause.
     /// </summary>
-    public static List<string> Incomplete(IReadOnlyDictionary<string, SortedSet<string>> skipped, IReadOnlyDictionary<string, List<string>> frameworks)
+    public static List<string> Incomplete(IReadOnlyDictionary<string, SortedSet<string>> skipped, IReadOnlyDictionary<string, List<string>> frameworks, IReadOnlyCollection<string>? unsupported = null)
     {
         var lines = new List<string>();
         var whole = skipped.Where(s => !frameworks.TryGetValue(s.Key, out var all) || all.All(s.Value.Contains)).Select(s => s.Key).Order(StringComparer.OrdinalIgnoreCase).ToList();
@@ -338,9 +392,18 @@ internal static class FormatCommand
             lines.Add("  Run 'dotnet restore' (or 'dotnet build') and fix what it reports, e.g. a missing SDK or package or a corrupt package cache, then run again.");
         }
 
-        foreach (var (project, skippedFor) in skipped.Where(s => !whole.Contains(s.Key)).OrderBy(s => s.Key, StringComparer.OrdinalIgnoreCase))
+        // One line per set of frameworks (Orleans: 27 test projects for net10.0, one line each before).
+        foreach (var group in skipped.Where(s => !whole.Contains(s.Key)).GroupBy(s => string.Join(", ", s.Value)).OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase))
         {
-            lines.Add($"Partly incomplete: 'dotnet format' skipped {project} for {string.Join(", ", skippedFor)} (references didn't load): code only that framework compiles (inside #if) wasn't formatted.");
+            var names = group.Select(s => s.Key).Order(StringComparer.OrdinalIgnoreCase).ToList();
+            var shown = names.Count > 5 ? $"{string.Join(", ", names.Take(5))} and {names.Count - 5} more" : string.Join(", ", names);
+            lines.Add($"Partly incomplete: 'dotnet format' skipped {shown} for {group.Key} (references didn't load): code only that framework compiles (inside #if) wasn't formatted.");
+        }
+
+        // Orleans: the test projects reference F# projects, which 'dotnet format' can't load; a restore doesn't help.
+        if (lines.Count > 0 && unsupported is { Count: > 0 })
+        {
+            lines.Add($"  Likely cause: they reference {string.Join(", ", unsupported.Order(StringComparer.OrdinalIgnoreCase))}, which 'dotnet format' can't load (C# and Visual Basic only), so a restore won't help. Nothing is broken; that code just isn't formatted.");
         }
 
         return lines;
@@ -450,6 +513,21 @@ internal static class FormatCommand
             .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && HasLoneCr(File.ReadAllBytes(f)))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Order(StringComparer.Ordinal)
+            .ToList();
+    }
+
+    /// <summary>
+    /// The old-style (non-SDK) projects under the root (relative, '/'-separated): no 'Sdk' on the Project element, no Sdk
+    /// import or element. 'dotnet restore' can't restore their packages.config and rewrites their PackageReference restore
+    /// output in a way Visual Studio's MSBuild then rejects.
+    /// </summary>
+    public static List<string> OldStyleProjects(string root)
+    {
+        return StyleCopSetup.EnumerateFiles(root)
+            .Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+                && !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(f)), @"<Project\b[^>]*\bSdk\s*=|<Import\b[^>]*\bSdk\s*=|<Sdk\b", RegexOptions.IgnoreCase))
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 
@@ -568,13 +646,24 @@ internal static class FormatCommand
     /// again (Newtonsoft.Json: conflict markers in the library during the tests' net6.0 run). Only the run's own projects
     /// are edited; the others get their own runs.
     /// </summary>
-    public static IEnumerable<string> Include(string root, string solutionDirectory, IEnumerable<string> projects)
+    public static IEnumerable<string> Include(string root, string solutionDirectory, IEnumerable<string> projects, IEnumerable<string>? linked = null)
     {
         // A folder needs the trailing '/': 'src/Lib' matches nothing (silently), 'src/Lib/' its files.
-        return projects
+        var folders = projects
             .Select(p => Path.GetRelativePath(root, Path.GetDirectoryName(Path.GetFullPath(Path.Combine(solutionDirectory, p)))!))
-            .Select(folder => folder == "." ? "**/*.cs" : folder.Replace(Path.DirectorySeparatorChar, '/') + "/")
-            .Distinct(StringComparer.OrdinalIgnoreCase);
+            .Select(folder => folder == "." ? "**/*.cs" : folder.Replace(Path.DirectorySeparatorChar, '/') + "/");
+
+        // Files the projects compile from elsewhere (Orleans: src/AdoNet/Shared/, src/Orleans.CodeGenerator.Shared/) weren't
+        // formatted at all. Their folder when no project lives there, else just the file (that project's own files would be
+        // formatted in this run too, merging its frameworks' copies). Paths are relative to the working folder, the root:
+        // 'dotnet format --include' matches nothing above it (checked: '../Shared/S.cs' and absolute paths match nothing).
+        var outside = (linked ?? [])
+            .Select(f => (File: f, Relative: Path.GetRelativePath(root, f)))
+            .Where(f => !f.Relative.StartsWith("..", StringComparison.Ordinal) && !Path.IsPathRooted(f.Relative))
+            .Select(f => Path.GetDirectoryName(f.Relative) is { Length: > 0 } folder && Directory.Exists(Path.GetDirectoryName(f.File)) && !Directory.EnumerateFiles(Path.GetDirectoryName(f.File)!, "*.csproj").Any()
+                ? folder.Replace(Path.DirectorySeparatorChar, '/') + "/"
+                : f.Relative.Replace(Path.DirectorySeparatorChar, '/'));
+        return folders.Concat(outside).Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>A solution filter (.slnf) next to the solution, with the given projects (paths as the solution lists them).</summary>
@@ -585,21 +674,27 @@ internal static class FormatCommand
             new JsonSerializerOptions { WriteIndented = true });
     }
 
-    /// <summary>A project's target frameworks ('TargetFrameworks' split, else 'TargetFramework') and project references (full paths).</summary>
-    public static (string[] Frameworks, string[] References) ParseProject(string msbuildJson)
+    /// <summary>
+    /// A project's target frameworks ('TargetFrameworks' split, else 'TargetFramework'), project references (full paths) and,
+    /// with <paramref name="projectDirectory"/>, the C# files it compiles from outside its folder (full paths): Orleans links
+    /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects.
+    /// </summary>
+    public static (string[] Frameworks, string[] References, string[] Linked) ParseProject(string msbuildJson, string? projectDirectory = null)
     {
         using var json = JsonDocument.Parse(msbuildJson);
-        var properties = json.RootElement.GetProperty("Properties");
-        var several = properties.TryGetProperty("TargetFrameworks", out var s) ? s.GetString() : null;
-        var one = properties.TryGetProperty("TargetFramework", out var o) ? o.GetString() : null;
+        var hasProperties = json.RootElement.TryGetProperty("Properties", out var properties);
+        var several = hasProperties && properties.TryGetProperty("TargetFrameworks", out var s) ? s.GetString() : null;
+        var one = hasProperties && properties.TryGetProperty("TargetFramework", out var o) ? o.GetString() : null;
         var frameworks = (string.IsNullOrWhiteSpace(several) ? one ?? string.Empty : several)
             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        var references = json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("ProjectReference", out var refs)
-            ? refs.EnumerateArray().Select(r => r.GetProperty("FullPath").GetString()!).ToArray()
+        string[] FullPaths(string item) => json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty(item, out var found)
+            ? found.EnumerateArray().Select(r => r.GetProperty("FullPath").GetString()!).ToArray()
             : Array.Empty<string>();
-        return (frameworks, references);
+        var folder = projectDirectory is null ? null : Path.TrimEndingDirectorySeparator(Path.GetFullPath(projectDirectory)) + Path.DirectorySeparatorChar;
+        var linked = folder is null ? Array.Empty<string>() : FullPaths("Compile").Where(f => !Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase)).ToArray();
+        return (frameworks, FullPaths("ProjectReference"), linked);
     }
 
     /// <summary>
@@ -633,11 +728,15 @@ internal static class FormatCommand
         File.WriteAllLines(file, lines);
     }
 
+    /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
+    public static IEnumerable<(string FullPath, string[] Frameworks)> EvaluatedProjects(string workspacePath) =>
+        ReadProjects(workspacePath).Values.Select(p => (p.FullPath, p.Frameworks));
+
     /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
     /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.
     /// </summary>
-    private static int RunFiles(List<string> files, string[] rest, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce)
+    private static int RunFiles(List<string> files, string[] rest, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce, int maxRuns)
     {
         var hasPath = rest.Length > 0 && !rest[0].StartsWith("-", StringComparison.Ordinal);
         if (files.Count == 0)
@@ -664,11 +763,15 @@ internal static class FormatCommand
         WriteRepositoryNames(RepositoryRoot(first) ?? first, names);
         using var namesVariable = new KeptVariable(names, RepositoryNames.Variable);
         var exit = 0;
-        foreach (var (workspace, include) in groups)
+        foreach (var (workspace, root, include) in groups)
         {
-            var arguments = new[] { workspace }.Concat(rest.Skip(hasPath ? 1 : 0)).Append("--include").Concat(include).ToArray();
-            var root = Directory.Exists(workspace) ? workspace : Path.GetDirectoryName(workspace)!;
-            var code = arguments.Contains("--verify-no-changes") ? Verify(arguments, root, log, runOnce) : Repeat(arguments, root, log, output, runOnce);
+            var own = Directory.Exists(workspace) ? workspace : Path.GetDirectoryName(workspace)!;
+            var arguments = new[] { workspace }.Concat(rest.Skip(hasPath ? 1 : 0))
+                .Concat(own.Equals(root, StringComparison.OrdinalIgnoreCase) ? Array.Empty<string>() : new[] { WorkingFolderOption, root })
+                .Append("--include")
+                .Concat(include)
+                .ToArray();
+            var code = arguments.Contains("--verify-no-changes") ? Verify(arguments, root, log, runOnce) : Repeat(arguments, root, log, output, runOnce, maxRuns);
             exit = exit == 0 ? code : exit;
         }
 
@@ -687,7 +790,7 @@ internal static class FormatCommand
         for (var run = 1; ; run++)
         {
             File.Delete(keptFile);
-            var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, (long, DateTime)>();
+            var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, string>();
 
             // --json: each run's changes per rule come from its own report.
             var report = JsonReport.Current is null ? null : Path.Combine(Path.GetTempPath(), $"stylebro-format-json-{Guid.NewGuid():N}");
@@ -696,7 +799,7 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run.
             var code = runOnce(runArgs, run == 1 ? output : line =>
             {
-                if (!new[] { FixingHeader, MultiTargetedHeader, NoWhitespaceHeader, OldMacHeader, UnformattedHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+                if (!new[] { FixingHeader, MultiTargetedHeader, NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
                 {
                     log(line);
                 }
@@ -725,6 +828,10 @@ internal static class FormatCommand
 
             if (run == maxRuns)
             {
+                // The kept findings too: with TreatWarningsAsErrors they fail the build whether or not the rest settles.
+                var keptFindings = ReadKept(keptFile, root, root);
+                JsonReport.AddKept(keptFindings);
+                KeptSummary(keptFindings, root, clean: false).ForEach(log);
                 log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
@@ -771,6 +878,12 @@ internal static class FormatCommand
             if (report >= 0)
             {
                 copyArgs.RemoveRange(report, Math.Min(2, copyArgs.Count - report));
+            }
+
+            var working = copyArgs.IndexOf(WorkingFolderOption);
+            if (working >= 0 && working + 1 < copyArgs.Count)
+            {
+                copyArgs[working + 1] = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, Path.GetFullPath(copyArgs[working + 1]))));
             }
 
             if (copyArgs.Count > 0 && !copyArgs[0].StartsWith("-", StringComparison.Ordinal))
@@ -874,6 +987,7 @@ internal static class FormatCommand
         Action<string> log = output ?? Console.WriteLine;
         Action<string> error = output ?? Console.Error.WriteLine;
         var skipped = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
+        var unsupported = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var current = string.Empty;
         var restoreFailed = false;
         var nuGetErrors = new List<string>();
@@ -888,6 +1002,11 @@ internal static class FormatCommand
             if (SkippedProject(line) is { } project)
             {
                 (skipped.TryGetValue(project, out var set) ? set : skipped[project] = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)).Add(current);
+            }
+
+            if (UnsupportedProject(line) is { } other)
+            {
+                unsupported.Add(other);
             }
         }
 
@@ -913,6 +1032,14 @@ internal static class FormatCommand
         {
             error(BaselineCommand.NoWorkspace(root, "'stylebro-migrate format <file>'"));
             return 1;
+        }
+
+        var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
+        var workingAt = passThrough.IndexOf(WorkingFolderOption);
+        if (workingAt >= 0 && workingAt + 1 < passThrough.Count)
+        {
+            root = Path.GetFullPath(passThrough[workingAt + 1]);
+            passThrough.RemoveRange(workingAt, 2);
         }
 
         // By default only StyleBro's rules and the built-in ones init/migrate turn on: plain 'dotnet format' also applies
@@ -1016,14 +1143,21 @@ internal static class FormatCommand
         var noRestore = passThrough.Remove("--no-restore");
         var checkFirst = passThrough.Remove(CheckFirstOption);
 
-        var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
+        // 'dotnet restore' rewrote old-style projects' restore output (xbox-live-developer-tools: the next Visual Studio
+        // build failed, "doesn't list 'win' as a RuntimeIdentifier"), and it can't restore packages.config at all.
+        if (!noRestore && OldStyleProjects(root) is { Count: > 0 } oldStyle)
+        {
+            log($"{OldStyleHeader} {string.Join(", ", oldStyle.Take(3))}{(oldStyle.Count > 3 ? $" and {oldStyle.Count - 3} more" : string.Empty)} (not SDK-style): no restore ('dotnet restore' breaks Visual Studio's). {OldStyleRestore}");
+            noRestore = true;
+        }
+
         var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
         var projects = ReadProjects(workspacePath);
         var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
         if (plan.Count <= 1)
         {
             var single = Format(workspacePath, passThrough.Concat(noRestore ? new[] { "--no-restore" } : Array.Empty<string>()).ToList(), a => Dotnet(root, null, a, Watch));
-            Incomplete(skipped, new Dictionary<string, List<string>>()).ForEach(log);
+            Incomplete(skipped, new Dictionary<string, List<string>>(), unsupported).ForEach(log);
             return Done(single);
         }
 
@@ -1096,7 +1230,7 @@ internal static class FormatCommand
                 if (!passThrough.Contains("--include"))
                 {
                     options.Add("--include");
-                    options.AddRange(Include(root, solutionDirectory, selected));
+                    options.AddRange(Include(root, solutionDirectory, selected, selected.SelectMany(p => projects[p].Linked)));
                 }
 
                 var byPath = projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase);
@@ -1163,7 +1297,7 @@ internal static class FormatCommand
         var runFor = plan.SelectMany(p => p.Projects.Select(project => (Name: Path.GetFileNameWithoutExtension(project), p.Framework)))
             .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.Select(x => x.Framework).ToList(), StringComparer.OrdinalIgnoreCase);
-        Incomplete(skipped, runFor).ForEach(log);
+        Incomplete(skipped, runFor, unsupported).ForEach(log);
         return Done(exit);
     }
 
@@ -1198,7 +1332,7 @@ internal static class FormatCommand
     /// evaluated in parallel (one 'dotnet msbuild' each, ~1 s: LiteBus has 99) and once per process: the runs until clean
     /// and the preview's runs only edit C# files.
     /// </summary>
-    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References)> ReadProjects(string workspacePath)
+    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked)> ReadProjects(string workspacePath)
     {
         // ponytail: keyed by the workspace only; a project file changed between two runs of one process isn't seen.
         lock (ProjectCache)
@@ -1220,8 +1354,8 @@ internal static class FormatCommand
             .Select(p =>
             {
                 var fullPath = Path.GetFullPath(Path.Combine(directory, p));
-                var (frameworks, references) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-nologo"));
-                return (Key: p, Value: (fullPath, frameworks, references));
+                var (frameworks, references, linked) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
+                return (Key: p, Value: (fullPath, frameworks, references, linked));
             })
             .ToDictionary(p => p.Key, p => p.Value);
         lock (ProjectCache)
