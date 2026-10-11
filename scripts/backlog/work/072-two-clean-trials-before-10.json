@@ -1,0 +1,6 @@
+{
+  "area": "Stable",
+  "item": "Two clean trials before 1.0",
+  "notes": "Owner's decision 2026-10-11 (docs/decisions/2026-10-11-when-stylebro-goes-stable.md): 1.0 ships after two clean trials in a row, first-run trials on new kinds of repository with no high-severity bugs; external users aren't required. Tally: trial 8 in progress, 0 clean in a row so far.",
+  "status": "Planned"
+}

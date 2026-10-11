@@ -1,0 +1,35 @@
+name: False positive or unwanted fix
+description: A rule reports or changes code it shouldn't.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please keep the sample minimal and leave out anything private.
+  - type: input
+    id: rule
+    attributes:
+      label: Rule id
+      placeholder: BRO1001
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: StyleBro version
+      placeholder: 0.5.0-alpha.1
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Code the rule reports or changes
+      render: csharp
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it shouldn't
+      description: What the rule or its fix gets wrong here.
+    validations:
+      required: true

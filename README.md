@@ -83,6 +83,10 @@ build, the IDE and `dotnet format` then ignore those (every StyleBro rule and th
 turns on), so only new code has to follow the rules; a violation counts as new once its line is edited. See
 [docs/baseline.md](https://github.com/bisforboman/stylebro/blob/main/docs/baseline.md).
 
+## Versions and security
+
+What the version numbers mean and when 1.0 ships: [docs/versioning.md](https://github.com/bisforboman/stylebro/blob/main/docs/versioning.md). What changed: [CHANGELOG.md](https://github.com/bisforboman/stylebro/blob/main/CHANGELOG.md) (GitHub Releases). Report vulnerabilities privately: [SECURITY.md](https://github.com/bisforboman/stylebro/blob/main/SECURITY.md).
+
 ## Contributing
 
 Repository layout, build and test commands, and the design rules every rule follows: [CONTRIBUTING.md](https://github.com/bisforboman/stylebro/blob/main/CONTRIBUTING.md).

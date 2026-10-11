@@ -1,0 +1,16 @@
+name: Feature or rule request
+description: A new rule, setting or tool feature.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you'd like
+      description: For a rule, the code before and after its fix. Name the StyleCop or other analyzer rule it matches, if any.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem it solves, or how common the pattern is in your code.

@@ -1,0 +1,35 @@
+name: Migration problem
+description: stylebro-migrate (init, --write, format, baseline) did something wrong or unexpected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please leave out anything private (company names, internal paths) from the output you paste.
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      placeholder: stylebro-migrate init --write
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: StyleBro.Migrate and .NET SDK version
+      placeholder: StyleBro.Migrate 0.5.0-alpha.1, SDK 10.0.401
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The `--json` output if the command supports it, otherwise the console output.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What went wrong and what you expected
+    validations:
+      required: true

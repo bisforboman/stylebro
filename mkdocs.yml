@@ -206,6 +206,7 @@ nav:
       - CI: ci.md
       - Scripts and AI agents: agents.md
       - Modernizing: modernizing.md
+      - Versioning: versioning.md
   - StyleCop:
       - StyleBro vs StyleCop: stylebro-vs-stylecop.md
       - Differences from StyleCop: differences-from-stylecop.md
