@@ -64,12 +64,17 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
         var sameLine = ParameterLayout.IsSameLine(options);
         bool JoinsEmptyLists() => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.EmptyListOnOneLine, cancellationToken);
 
+        // Once BRO1107 has moved the first item, BRO1108 wants every item on its own line: with it on, BRO1107 does that
+        // too, in the same pass. Moving the first item alone could indent the line where it ends (a lambda's '}') deeper
+        // than the next item's continuation lines, which BRO1108's move then left behind (Newtonsoft.Json).
+        var allForFirst = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.ParametersOnSameOrSeparateLines, cancellationToken);
+
         // One entry per list: its span, the position of its '(' and whether every item moves (BRO1108) or only the first.
         var remaining = diagnostics
             .Select(d => (Diagnostic: d, List: root.FindNode(d.Location.SourceSpan).Parent))
             .Where(f => f.List is not null)
             .GroupBy(f => f.List!)
-            .Select(g => (Span: g.Key.Span, Open: ParameterLayout.GetList(g.Key).Open.SpanStart, All: g.Any(f => f.Diagnostic.Id != DiagnosticIds.SplitParametersStartOnNewLine)))
+            .Select(g => (Span: g.Key.Span, Open: ParameterLayout.GetList(g.Key).Open.SpanStart, All: allForFirst || g.Any(f => f.Diagnostic.Id != DiagnosticIds.SplitParametersStartOnNewLine)))
             .ToList();
 
         // A list inside a moved item moves with it, so nested lists are fixed in rounds, outer lists first, each round

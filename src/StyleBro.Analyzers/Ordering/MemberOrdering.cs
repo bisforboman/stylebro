@@ -61,6 +61,18 @@ internal static class MemberOrdering
         return result;
     }
 
+    /// <summary>
+    /// Whether a '#region' or '#endregion' line that BRO1112 removes sits between the members. With BRO1112 on, its fix
+    /// removes them and sorts across them, so BRO1001 leaves the container to it: sorting within the regions first can end
+    /// elsewhere (a commented member moved next to one of its kind makes the comment a group comment, which then blocks
+    /// the sort across them; Polly's Context.Dictionary.cs came out two ways).
+    /// </summary>
+    public static bool HasRemovableRegions(SyntaxNode container) =>
+        GetMembers(container) is { } members
+        && members.Any(m => m.GetLeadingTrivia().Any(t => t.GetStructure() is DirectiveTriviaSyntax { IsActive: true } directive
+            && directive.Kind() is SyntaxKind.RegionDirectiveTrivia or SyntaxKind.EndRegionDirectiveTrivia
+            && directive.GetRelatedDirectives().Count > 1));
+
     public static OrderingViolation? FindFirstViolation(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
     {
         var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);

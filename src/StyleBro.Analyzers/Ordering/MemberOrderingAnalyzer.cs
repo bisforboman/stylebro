@@ -56,6 +56,12 @@ public sealed class MemberOrderingAnalyzer : DiagnosticAnalyzer
 
     private static void Analyze(SyntaxNodeAnalysisContext context, SyntaxNode container, MemberOrderOptions options)
     {
+        if (MemberOrdering.HasRemovableRegions(container)
+            && Severities.IsOn(context.SemanticModel.Compilation.Options, container.SyntaxTree, DiagnosticIds.NoRegions, context.CancellationToken))
+        {
+            return;
+        }
+
         var violation = MemberOrdering.FindFirstViolation(container, options, MemberOrdering.GetPartialAccess(container, context.SemanticModel, context.CancellationToken));
         if (violation is null)
         {
