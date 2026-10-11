@@ -105,6 +105,7 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
         // One group per physical file: a document and its linked copies in other projects.
         var groups = new Dictionary<DocumentId, FileGroup>();
         var groupOf = new Dictionary<DocumentId, FileGroup>();
+        var work = new List<(Document Document, ImmutableArray<Diagnostic> Diagnostics, FileGroup Group)>();
         foreach (var document in documents)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -135,13 +136,16 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
                 continue;
             }
 
-            // Exact changes for fixes that edit text (SourceText.WithChanges); a single whole-text change for fixes
-            // that rewrite the syntax tree. Never a computed diff: two copies' diffs of the same result can be chunked
-            // differently, and merging those duplicated members in a multi-targeted repo.
-            var fixedDocument = await fixDocument(document, diagnostics, cancellationToken).ConfigureAwait(false);
-            var originalText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-            var fixedText = await fixedDocument.GetTextAsync(cancellationToken).ConfigureAwait(false);
-            group.Changes.AddRange(fixedText.GetTextChanges(originalText));
+            work.Add((document, diagnostics, group));
+        }
+
+        // The documents are fixed in parallel (each fix only reads the solution; 'dotnet format' fixes one id at a time,
+        // and a rule with findings in every file was one core's work), and their changes are added in document order,
+        // so the merge is the same as fixing them one after the other.
+        var results = await ForEachAsync(work, item => FixAsync(item.Document, item.Diagnostics), cancellationToken).ConfigureAwait(false);
+        for (var i = 0; i < work.Count; i++)
+        {
+            work[i].Group.Changes.AddRange(results[i]);
         }
 
         var solution = context.Solution;
@@ -155,6 +159,43 @@ internal sealed class LinkedFileFixAllProvider : FixAllProvider
         }
 
         return solution;
+
+        // Exact changes for fixes that edit text (SourceText.WithChanges); a single whole-text change for fixes
+        // that rewrite the syntax tree. Never a computed diff: two copies' diffs of the same result can be chunked
+        // differently, and merging those duplicated members in a multi-targeted repo.
+        async Task<IReadOnlyList<TextChange>> FixAsync(Document document, ImmutableArray<Diagnostic> diagnostics)
+        {
+            var fixedDocument = await fixDocument(document, diagnostics, cancellationToken).ConfigureAwait(false);
+            var originalText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
+            var fixedText = await fixedDocument.GetTextAsync(cancellationToken).ConfigureAwait(false);
+            return fixedText.GetTextChanges(originalText);
+        }
+    }
+
+    /// <summary>
+    /// Runs <paramref name="run"/> for every item on the thread pool, at most one per processor at a time, and returns the
+    /// results in the items' order. For work that only reads an immutable solution: the order of the results, not the
+    /// order the work finishes in, decides what happens next.
+    /// </summary>
+    internal static async Task<TResult[]> ForEachAsync<TItem, TResult>(IReadOnlyList<TItem> items, Func<TItem, Task<TResult>> run, CancellationToken cancellationToken)
+    {
+        var results = new TResult[items.Count];
+        var next = -1;
+#pragma warning disable RS1035 // The processor count, not a setting.
+        var processors = Environment.ProcessorCount;
+#pragma warning restore RS1035
+        var workers = Enumerable.Range(0, Math.Min(processors, items.Count)).Select(_ => Task.Run(
+            async () =>
+            {
+                for (var i = Interlocked.Increment(ref next); i < items.Count; i = Interlocked.Increment(ref next))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    results[i] = await run(items[i]).ConfigureAwait(false);
+                }
+            },
+            cancellationToken));
+        await Task.WhenAll(workers).ConfigureAwait(false);
+        return results;
     }
 
     private sealed class FileGroup
