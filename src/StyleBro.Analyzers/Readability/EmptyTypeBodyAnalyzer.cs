@@ -27,7 +27,7 @@ public sealed class EmptyTypeBodyAnalyzer : DiagnosticAnalyzer
                 return;
             }
 
-            start.RegisterSyntaxNodeAction(
+            start.RegisterNodeAction(
                 c =>
                 {
                     var type = (TypeDeclarationSyntax)c.Node;

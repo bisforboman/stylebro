@@ -19,7 +19,7 @@ public sealed class ObjectCreationParenthesesAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var creation = (ObjectCreationExpressionSyntax)c.Node;

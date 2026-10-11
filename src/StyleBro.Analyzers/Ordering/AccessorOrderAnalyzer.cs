@@ -19,7 +19,7 @@ public sealed class AccessorOrderAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 if (AccessorOrder.GetFinding((AccessorListSyntax)c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)) is { } finding)

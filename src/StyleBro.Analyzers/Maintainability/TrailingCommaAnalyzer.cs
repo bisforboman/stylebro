@@ -18,7 +18,7 @@ public sealed class TrailingCommaAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var tree = c.Node.SyntaxTree;

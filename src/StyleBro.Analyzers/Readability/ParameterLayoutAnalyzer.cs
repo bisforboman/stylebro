@@ -20,7 +20,7 @@ public sealed class ParameterLayoutAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var text = c.Node.SyntaxTree.GetText(c.CancellationToken);

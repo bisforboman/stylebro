@@ -297,7 +297,9 @@ sealed class Build(ImmutableArray<DiagnosticAnalyzer> analyzers, MethodInfo[] tr
             var root = tree.GetRoot();
             foreach (var method in treeWalk)
             {
-                method.Invoke(null, [root]);
+                // NodesOfKind(root, kind) builds the per-kind index of the same walk: any kind does.
+                var parameters = method.GetParameters();
+                method.Invoke(null, parameters.Length == 1 ? [root] : [root, Activator.CreateInstance(parameters[1].ParameterType)]);
             }
         }
 

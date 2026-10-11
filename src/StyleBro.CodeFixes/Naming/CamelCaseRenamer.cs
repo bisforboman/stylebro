@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -38,7 +39,7 @@ internal static class CamelCaseRenamer
         var changes = new Dictionary<string, List<TextChange>>();
         var done = new HashSet<(string File, int Start)>();
         var namespaces = new List<(string, string, Diagnostic)>();
-        var keptTypes = new Dictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
+        var renames = new List<(Document Document, Diagnostic Diagnostic)>();
         foreach (var (document, diagnostic) in items)
         {
             if (diagnostic.Id == DiagnosticIds.NamespacePascalCase)
@@ -51,16 +52,23 @@ internal static class CamelCaseRenamer
                 continue;
             }
 
-            if (!diagnostic.Properties.ContainsKey(CamelCaseNamingAnalyzer.NewNameKey)
-                || !done.Add((GetFileKey(document), diagnostic.Location.SourceSpan.Start)))
+            if (diagnostic.Properties.ContainsKey(CamelCaseNamingAnalyzer.NewNameKey)
+                && done.Add((GetFileKey(document), diagnostic.Location.SourceSpan.Start)))
             {
-                continue;
+                renames.Add((document, diagnostic));
             }
+        }
 
-            var (itemChanges, reason, where) = await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false);
+        // Every rename is computed on the original solution, so they run in parallel (FindReferencesAsync in every copy of
+        // a multi-targeted file was most of BRO1303's Fix All); the results are used in the diagnostics' order.
+        var keptTypes = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
+        var results = await LinkedFileFixAllProvider.ForEachAsync(renames, item => GetItemChangesAsync(solution, item.Document, item.Diagnostic, keptTypes, cancellationToken), cancellationToken).ConfigureAwait(false);
+        for (var i = 0; i < renames.Count; i++)
+        {
+            var (itemChanges, reason, where) = results[i];
             if (reason is { } kept)
             {
-                KeptFindings.Record(diagnostic, kept, where);
+                KeptFindings.Record(renames[i].Diagnostic, kept, where);
                 continue;
             }
 
@@ -120,13 +128,19 @@ internal static class CamelCaseRenamer
                 : null;
         }
 
-        var keptTypes = new Dictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
+        var keptTypes = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
         return (await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false)).Reason;
     }
 
     /// <summary>The string literals and nameof names in the solution, collected once per solution.</summary>
-    internal static Task<NamesInCode> GetNamesInCodeAsync(Solution solution) =>
-        NamesCache.GetValue(solution, s => CollectNamesAsync(s, CancellationToken.None));
+    internal static Task<NamesInCode> GetNamesInCodeAsync(Solution solution)
+    {
+        // Locked: the table may run the factory once per thread that asks at the same time (parallel renames).
+        lock (NamesCache)
+        {
+            return NamesCache.GetValue(solution, s => CollectNamesAsync(s, CancellationToken.None));
+        }
+    }
 
     /// <summary>
     /// A physical file and its text: the copies of a multi-targeted file share edits only while their text is the same
@@ -185,7 +199,7 @@ internal static class CamelCaseRenamer
         Solution solution,
         Document document,
         Diagnostic diagnostic,
-        Dictionary<ISymbol, bool> keptTypes,
+        ConcurrentDictionary<ISymbol, bool> keptTypes,
         CancellationToken cancellationToken)
     {
         var itemChanges = new List<(string File, TextChange Change)>();
@@ -351,16 +365,9 @@ internal static class CamelCaseRenamer
     /// format). Then the type's other properties keep theirs too: renaming only some mixes casings and changes only part
     /// of what a serializer reads and writes (Kavita's Koreader DTO: 'percentage' renamed, 'document' and 'progress' kept).
     /// </summary>
-    private static bool HasKeptProperty(INamedTypeSymbol type, NamesInCode names, Dictionary<ISymbol, bool> cache)
-    {
-        if (!cache.TryGetValue(type, out var kept))
-        {
-            cache[type] = kept = type.GetMembers().OfType<IPropertySymbol>()
-                .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null);
-        }
-
-        return kept;
-    }
+    private static bool HasKeptProperty(INamedTypeSymbol type, NamesInCode names, ConcurrentDictionary<ISymbol, bool> cache) =>
+        cache.GetOrAdd(type, _ => type.GetMembers().OfType<IPropertySymbol>()
+            .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null));
 
     /// <summary>
     /// Whether code in another project can use the symbol by name: not private (internal counts, InternalsVisibleTo), nor

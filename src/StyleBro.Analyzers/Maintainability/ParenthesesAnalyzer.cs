@@ -25,7 +25,7 @@ public sealed class ParenthesesAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var node = (ParenthesizedExpressionSyntax)c.Node;
@@ -35,7 +35,7 @@ public sealed class ParenthesesAnalyzer : DiagnosticAnalyzer
                 }
             },
             SyntaxKind.ParenthesizedExpression);
-        context.RegisterSyntaxNodeAction(
+        context.RegisterNodeAction(
             c =>
             {
                 var node = (ParenthesizedPatternSyntax)c.Node;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
@@ -29,6 +30,10 @@ internal static class TreeWalk
     /// <summary>The node's descendant nodes, like <c>DescendantNodes()</c>.</summary>
     public static IReadOnlyList<SyntaxNode> Nodes(SyntaxNode root) => WalkCache.GetValue(root, r => new Walk(r)).Nodes;
 
+    /// <summary>The nodes of one kind, the root included, in document order (what <see cref="NodeActions"/> visits).</summary>
+    public static IReadOnlyList<SyntaxNode> NodesOfKind(SyntaxNode root, SyntaxKind kind) =>
+        WalkCache.GetValue(root, r => new Walk(r)).ByKind(kind);
+
     private static SyntaxTrivia[] GetTrivia(SyntaxNode root)
     {
         var result = new List<SyntaxTrivia>();
@@ -55,6 +60,8 @@ internal static class TreeWalk
     /// <summary>Tokens and nodes from one walk: every tree that needs one also needs the other, and a walk is the cost.</summary>
     private sealed class Walk
     {
+        private readonly Lazy<Dictionary<SyntaxKind, List<SyntaxNode>>> byKind;
+
         public Walk(SyntaxNode root)
         {
             var tokens = new List<SyntaxToken>();
@@ -73,10 +80,29 @@ internal static class TreeWalk
 
             Tokens = tokens.ToArray();
             Nodes = nodes.ToArray();
+            byKind = new Lazy<Dictionary<SyntaxKind, List<SyntaxNode>>>(() =>
+            {
+                var index = new Dictionary<SyntaxKind, List<SyntaxNode>> { [root.Kind()] = new() { root } };
+                foreach (var node in Nodes)
+                {
+                    var kind = node.Kind();
+                    if (!index.TryGetValue(kind, out var list))
+                    {
+                        index[kind] = list = new List<SyntaxNode>();
+                    }
+
+                    list.Add(node);
+                }
+
+                return index;
+            });
         }
 
         public SyntaxToken[] Tokens { get; }
 
         public SyntaxNode[] Nodes { get; }
+
+        public IReadOnlyList<SyntaxNode> ByKind(SyntaxKind kind) =>
+            byKind.Value.TryGetValue(kind, out var list) ? list : Array.Empty<SyntaxNode>();
     }
 }

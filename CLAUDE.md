@@ -1103,6 +1103,13 @@ Decisions for all of this are in `docs/decisions.md`; rule details on the rule p
   ConditionalWeakTable (trivia from the tokens, in document order). A bare walk of Newtonsoft.Json costs ~35-40 ms,
   reading the array ~2 ms; ~16 analyzers used to walk every file themselves. Use `TreeWalk.Tokens/Trivia/Nodes(root)`
   for every whole-tree walk. 595 -> 386 ms total, same diagnostics.
+- **Syntax-only analyzers use `context.RegisterNodeAction`, not `RegisterSyntaxNodeAction` (2026-10-11, NodeActions.cs):
+  same action and nodes, run from a tree action. Node and symbol actions make the driver compile every method body
+  first, and `dotnet format` runs the analyzers once per fixed id on every project: that binding was most of a
+  real-world run (Newtonsoft.Json ~4 s per compilation and id against <1 s). Analyzers that query the semantic model
+  keep `RegisterSyntaxNodeAction`/symbol actions: from a tree action their queries re-bound in builds (2-4x slower).
+  Fix All providers compute documents/renames in parallel (`LinkedFileFixAllProvider.ForEachAsync`, results used in
+  order): fixes must only read the solution and keep shared caches thread-safe.
 - Cheap syntax checks before semantic work everywhere (CamelCaseNaming checks the name before the symbol, BaseCalls
   rules out virtual calls before the speculative bind, NullCheck only builds the operation tree inside lambdas/queries).
   FieldNamingAnalyzer's TypeFacts no longer descend into trivia (that built every doc comment's XML; profiled with
