@@ -700,18 +700,6 @@ internal static class PreviewCommand
             : packages.Insert(anchor.Index + anchor.Length, newLine + indentation + item);
     }
 
-    /// <summary>
-    /// Whether an MSBuild file sets ManagePackageVersionsCentrally to <paramref name="value"/>, itself or in what it imports
-    /// (a nested Directory.Packages.props that imports the root's, which turns it on).
-    /// </summary>
-    private static bool SetsCentral(string path, string value, string root, int depth = 0)
-    {
-        // ponytail: text-level; a property set by a Condition isn't seen.
-        return File.Exists(path)
-            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
-                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => SetsCentral(i, value, root, depth + 1))));
-    }
-
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
     public static void MakeRepository(string folder)
     {
@@ -807,6 +795,18 @@ internal static class PreviewCommand
         }
 
         return count;
+    }
+
+    /// <summary>
+    /// Whether an MSBuild file sets ManagePackageVersionsCentrally to <paramref name="value"/>, itself or in what it imports
+    /// (a nested Directory.Packages.props that imports the root's, which turns it on).
+    /// </summary>
+    private static bool SetsCentral(string path, string value, string root, int depth = 0)
+    {
+        // ponytail: text-level; a property set by a Condition isn't seen.
+        return File.Exists(path)
+            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
+                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => SetsCentral(i, value, root, depth + 1))));
     }
 
     private static string Part(string output, string firstLine)

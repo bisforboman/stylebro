@@ -758,7 +758,9 @@ internal static class FormatCommand
             var own = Directory.Exists(workspace) ? workspace : Path.GetDirectoryName(workspace)!;
             var arguments = new[] { workspace }.Concat(rest.Skip(hasPath ? 1 : 0))
                 .Concat(own.Equals(root, StringComparison.OrdinalIgnoreCase) ? Array.Empty<string>() : new[] { WorkingFolderOption, root })
-                .Append("--include").Concat(include).ToArray();
+                .Append("--include")
+                .Concat(include)
+                .ToArray();
             var code = arguments.Contains("--verify-no-changes") ? Verify(arguments, root, log, runOnce) : Repeat(arguments, root, log, output, runOnce, maxRuns);
             exit = exit == 0 ? code : exit;
         }

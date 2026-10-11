@@ -828,6 +828,7 @@ internal static class Conventions
         }
 
         DecideUsings(counts, isSet, lines, report, summary);
+
         // The 'git' verdict above already says it (only when some files have a fixed ending: else there was no line).
         var saidAbove = ConvertedOutnumber(counts) && counts.TryGetValue(EndOfLineKey, out var fixedEndings) && fixedEndings.Sum() > 0;
         if (!saidAbove && counts.TryGetValue(ConvertedKey, out var converted) && ConvertedNote(converted) is { } note)

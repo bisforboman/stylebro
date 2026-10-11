@@ -43,6 +43,7 @@ internal sealed class StyleCopSetup
     private const string AllRules = "*";
 
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*)\.severity$", RegexOptions.IgnoreCase);
+
     /// <summary>
     /// StyleCop's version: a PackageReference/PackageVersion (attribute or element), a packages.config entry, or an analyzer's
     /// hint path into a packages.config 'packages' folder ('..\packages\StyleCop.Analyzers.1.0.2\analyzers\...': xbox-live-developer-tools).
@@ -710,6 +711,16 @@ internal sealed class StyleCopSetup
         }
     }
 
+    /// <summary>
+    /// The rules a StyleCop version before 1.2 has (its DLL's inventory), or null for 1.2 and later: 1.0.x lacks SA1135,
+    /// SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in StyleCop-clean code).
+    /// </summary>
+    internal static HashSet<string>? OldRules(string? version) =>
+        version is null ? null
+        : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
+        : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
+        : null;
+
     /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]').</summary>
     private static bool MayApplyToCSharp(string section)
     {
@@ -987,16 +998,6 @@ internal sealed class StyleCopSetup
             : name.EndsWith(".ruleset", StringComparison.OrdinalIgnoreCase) ? "ruleset"
             : null;
     }
-
-    /// <summary>
-    /// The rules a StyleCop version before 1.2 has (its DLL's inventory), or null for 1.2 and later: 1.0.x lacks SA1135,
-    /// SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in StyleCop-clean code).
-    /// </summary>
-    internal static HashSet<string>? OldRules(string? version) =>
-        version is null ? null
-        : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
-        : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
-        : null;
 
     private static HashSet<string> LoadIds(string resource)
     {
