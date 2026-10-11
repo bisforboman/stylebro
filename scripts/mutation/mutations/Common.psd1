@@ -16,5 +16,8 @@
 
         # Sonar rule defaults by package version (BRO1150)
         @{ File = 'src/StyleBro.Analyzers/SonarRules.cs'; Find = '&& GetMajorVersion(paths) is < 10;'; Replace = ';'; Tests = 'WhereBeforeTerminalTests.SonarCollectionRules' }
+
+        # the names the renamers check (RepositoryNames, shared with format's per-framework runs)
+        @{ File = 'src/StyleBro.Analyzers/RepositoryNames.cs'; Find = 'else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"'; Replace = 'else if (false'; Tests = 'FieldNamingTests.NameofInAnotherType_KeepsTheName' }
     )
 }

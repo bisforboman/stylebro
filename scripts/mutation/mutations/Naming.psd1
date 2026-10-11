@@ -118,7 +118,6 @@
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = '&& !names.Nameof.Contains(oldName)'; Replace = ''; Tests = 'CamelCaseNamingTests.NamesInNameof_KeepTheirName' }
         @{ File = 'src/StyleBro.Analyzers/Naming/CamelCaseNames.cs'; Find = 'access.Name == name ? (ExpressionSyntax)access : name'; Replace = 'name'; Tests = 'FieldNamingTests.NamesInNameof_KeepTheirName' }
         @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '|| CamelCaseNames.IsNameofName(token)'; Replace = ''; Tests = 'FieldNamingTests.NamesInNameof_KeepTheirName' }
-        @{ File = 'src/StyleBro.Analyzers/RepositoryNames.cs'; Find = 'else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"'; Replace = 'else if (false'; Tests = 'FieldNamingTests.NameofInAnotherType_KeepsTheName' }
 
         # Public API is renamed only with stylebro_rename_public_api = true
         @{ File = 'src/StyleBro.Analyzers/Naming/PublicApi.cs'; Find = 'value.Trim().Equals("true", StringComparison.OrdinalIgnoreCase)'; Replace = 'true'; Tests = 'FieldNamingTests.PublicApi_IsLeftAloneByDefault' }
