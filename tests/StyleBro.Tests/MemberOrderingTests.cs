@@ -356,7 +356,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task Regions_KeepTheirMembers_OrderAcrossThemIsNotChecked() => VerifyNoDiagnosticsAsync("""
+    public Task Regions_KeepTheirMembers_OrderAcrossThemIsNotChecked() => VerifyNoDiagnosticsAsync(
+        """
         class C
         {
             #region Methods
@@ -540,7 +541,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task ConditionalDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync("""
+    public Task ConditionalDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync(
+        """
         class C
         {
         #if true
