@@ -61,7 +61,7 @@ internal static class Program
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
           stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
-          stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [options]
+          stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
               rule, sample changes) and writes the full diff to stylebro-preview.patch (or <file>). Adds the
@@ -151,7 +151,7 @@ internal static class Program
         Console.WriteLine($"Read: {(setup.Sources.Count == 0 ? "no StyleCop settings (StyleCop's defaults)" : string.Join(", ", setup.Sources))}");
         if (setup.Version is { } version)
         {
-            Console.WriteLine($"StyleCop.Analyzers version: {version}{(version.StartsWith("1.2", StringComparison.Ordinal) ? string.Empty : " (rules added in 1.2 count as off)")}");
+            Console.WriteLine($"StyleCop.Analyzers version: {version}{(version.StartsWith("1.2", StringComparison.Ordinal) ? string.Empty : " (rules added in later versions count as off)")}");
         }
 
         foreach (var line in ScopeReport(setup))
