@@ -63,7 +63,14 @@ package management off itself, the version-less reference fails its restore (NU1
 ```
 
 The migration's report names the files that reference StyleCop and the ones that remove it, and `--diff` makes both
-changes in its copy.
+changes in its copy. A project that turns central package management off but keeps the inherited reference gets a
+second, versioned reference instead ([getting-started.md](getting-started.md#1-add-the-package) shows the pair);
+`--diff` writes that pair too.
+
+**Old-style projects** (`packages.config`, StyleCop as `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`):
+removing StyleCop means removing its `packages.config` entry and the `<Analyzer>` items. Adding StyleBro and running
+`format` there takes extra steps, and `--diff` doesn't work:
+[getting-started.md](getting-started.md#old-style-non-sdk-projects).
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
@@ -157,8 +164,8 @@ tool again replaces the block, so put your own settings outside it.
   the rest of the license off). IDE0073's `file_header_template` has no escapes: a plain header with a `;` or `#` leaves
   IDE0073 off, and the report says why.
 - **Line endings.** `end_of_line` when your C# files clearly use one ending (judged like `init` does; files git
-  converts on checkout don't count) and your `.editorconfig` doesn't set it: without it `format` writes the OS's ending
-  into the lines it changes.
+  converts on checkout don't count, and when they're the majority nothing is written) and your `.editorconfig`
+  doesn't set it: without it `format` writes the OS's ending into the lines it changes.
 - **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every
   build (SixLabors' shared infrastructure does). The report notes such a file: the block would be lost on the next
   build, so put it into the copied file (or stop the copy).
