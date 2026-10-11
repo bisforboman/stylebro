@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Sonar mirrors (Sonar survey 2026-10-09)",
+  "notes": "BRO1149 merges nested `if`s (S1066), BRO1150 `Where(p).Count()` -> `Count(p)` (S2971), BRO1151 the elements instead of an array for `params` (S3878); written from the public rule descriptions, with fixes Sonar lacks. On in the preset, off after `stylebro-migrate`. Fixers for the Sonar ids reuse their fix logic in a later PR (decisions.md 2026-10-09).",
+  "status": "Done (2026-10-09)"
+}

@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "One token pass for the layout analyzers",
+  "notes": "Done as a shared per-tree cache (`TreeWalk`) instead of a merged analyzer: ~16 analyzers read one cached walk; 595 -> 386 ms on Newtonsoft.Json, same diagnostics.",
+  "status": "Done (2026-10-05)"
+}

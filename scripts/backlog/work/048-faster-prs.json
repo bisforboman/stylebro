@@ -1,0 +1,6 @@
+{
+  "area": "CI",
+  "item": "Faster PRs",
+  "notes": "A docs-only PR skips the work of the real-world, mutation, parity and performance jobs (each still reports its required check); performance runs only when analyzer code changes; mutation on a PR runs only the entries for the files it changes, the full set runs on main (`.github/changes.sh`, `-OnlyFiles`).",
+  "status": "Done (2026-10-09)"
+}

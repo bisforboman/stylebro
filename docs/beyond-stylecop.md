@@ -2,7 +2,7 @@
 
 StyleCop parity is (almost) done. This page lists style rules from other popular C# analyzer packages that could
 become StyleBro rules: rules with a fix that `dotnet format` could apply, that the .NET SDK doesn't already cover.
-It is a survey (2026-10-03), not a plan. The top five are in the "Maybe" section of [backlog.md](backlog.md).
+It is a survey (2026-10-03), not a plan. The top five are in the "Maybe" section of [backlog.md](https://github.com/bisforboman/stylebro/blob/generated/docs/backlog.md).
 
 ## Method
 
@@ -292,7 +292,7 @@ Done (2026-10-05): RCS0042 as [BRO1527](rules/BRO1527.md), MA0174 (`record class
 
 A second survey (2026-10-04): proposals, requested fixes and options, and known bugs in the
 [StyleCop.Analyzers issue tracker](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues), checked against
-StyleBro. Not a plan either; the top five are in the "Maybe" section of [backlog.md](backlog.md).
+StyleBro. Not a plan either; the top five are in the "Maybe" section of [backlog.md](https://github.com/bisforboman/stylebro/blob/generated/docs/backlog.md).
 
 ### Method
 

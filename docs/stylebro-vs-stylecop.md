@@ -45,7 +45,7 @@ StyleCop's fixes, run under `dotnet format`, from [differences-from-stylecop.md]
 
 ## Coverage
 
-StyleCop 1.2 has 197 diagnostics ([stylecop-mapping.md](stylecop-mapping.md), [backlog.md](https://github.com/bisforboman/stylebro/blob/main/docs/backlog.md#summary)):
+StyleCop 1.2 has 197 diagnostics ([stylecop-mapping.md](stylecop-mapping.md), [backlog.md](https://github.com/bisforboman/stylebro/blob/generated/docs/backlog.md#summary)):
 
 | | Diagnostics | |
 |---|---:|---|
@@ -177,6 +177,6 @@ XML file header only once a company is configured. `stylebro-migrate` keeps a te
 Checked and not checked:
 
 - Visual Studio 2022 (17.13): build, light bulb fixes, Fix All and live squiggles checked by the owner (2026-10-05,
-  [backlog.md](https://github.com/bisforboman/stylebro/blob/main/docs/backlog.md)). **Rider: not checked.**
+  [backlog.md](https://github.com/bisforboman/stylebro/blob/generated/docs/backlog.md)). **Rider: not checked.**
 - Needs Roslyn 4.8 (.NET 8 SDK, Visual Studio 17.8) or newer.
 - **Prerelease:** 0.5.0-alpha.1 on nuget.org; versions and behavior can still change between prereleases.

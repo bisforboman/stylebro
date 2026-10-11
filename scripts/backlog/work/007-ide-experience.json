@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "IDE experience",
+  "notes": "Checked by the owner in Visual Studio 2022 (17.13) with the package from a local feed and `init --write`: the build reports the same 8 rules as the command line (not the preset-off BRO1112), the light bulb renames (BRO1303) with a preview, Fix All in the solution sorts (BRO1001), and squiggles appear while typing (BRO1002). Rider not checked (not installed).",
+  "status": "Done (2026-10-05)"
+}

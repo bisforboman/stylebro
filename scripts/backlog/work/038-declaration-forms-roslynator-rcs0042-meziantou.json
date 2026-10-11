@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Declaration forms (Roslynator RCS0042, Meziantou MA0206, MA0174)",
+  "notes": "BRO1527 auto-accessors on one line (blank lines BRO1505/BRO1519 want added in the same fix), BRO1146 `record` instead of `record class` (on in the preset, off after `stylebro-migrate`); BRO1145 `class Marker;` for empty bodies (C# 12; off by default, skipped in multi-targeted projects unless every framework gets C# 12). See decisions.md.",
+  "status": "Done (2026-10-05)"
+}

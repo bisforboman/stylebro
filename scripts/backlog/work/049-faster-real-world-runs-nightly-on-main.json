@@ -1,0 +1,6 @@
+{
+  "area": "CI",
+  "item": "Faster real-world runs, nightly on main",
+  "notes": "The real-world jobs cache each clone's `.git` and its NuGet packages (keyed by repo + pinned commit, + OS and SDK for the packages; saved by the nightly run on main, restored by every PR). Real world and the full mutation set no longer run after every merge, but nightly on main (02:00/03:00 UTC, also `workflow_dispatch`); a failed nightly run opens or comments on the issue \"Nightly real-world run failed\" / \"Nightly mutation run failed\" (`.github/nightly-issue.sh`).",
+  "status": "Done (2026-10-10)"
+}

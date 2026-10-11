@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "BRO1107 same_line with BRO1116",
+  "notes": "FixOrderTests case for `stylebro_split_list_first_item = same_line` with BRO1116 joining a split empty `()` inside the list: identical text in every order, no change needed.",
+  "status": "Done (2026-10-09)"
+}

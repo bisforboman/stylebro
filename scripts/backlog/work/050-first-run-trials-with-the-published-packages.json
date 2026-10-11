@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "First-run trials with the published packages",
+  "notes": "Trials 2-5 installed each release from nuget.org into repos nobody had tried, like a new user, and fixed what they found: trial 2 with 0.2.0 (#76, #80), trial 3 with 0.3.0 (#91, #92), trial 4 with 0.4.0 (#101, #102), trial 5 with 0.5.0 (LiteBus, #111).",
+  "status": "Done (2026-10-10)"
+}

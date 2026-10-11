@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "Migration sample",
+  "notes": "samples/StyleCopMigration: a StyleCop-clean project with changed defaults, migrated step by step with real output; `dotnet format` changes no code afterwards.",
+  "status": "Done (2026-10-03)"
+}

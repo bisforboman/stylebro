@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "FieldNamingAnalyzer",
+  "notes": "Profiled with dotnet-trace: its per-type scan built every documentation comment's XML to find strings in directives; now opens only directives (~25-30 % faster, same diagnostics).",
+  "status": "Done (2026-10-04)"
+}

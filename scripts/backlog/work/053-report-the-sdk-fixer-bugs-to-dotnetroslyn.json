@@ -1,0 +1,6 @@
+{
+  "area": "Upstream",
+  "item": "Report the SDK fixer bugs to dotnet/roslyn",
+  "notes": "Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`: drafts written, a comment for dotnet/format#1634 and new dotnet/roslyn and dotnet/format issues; the owner posts them.",
+  "status": "Done (drafts; owner posts)"
+}

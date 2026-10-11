@@ -1,0 +1,6 @@
+{
+  "area": "Superseding StyleCop",
+  "item": "Parity with StyleCop's `master`",
+  "notes": "The unreleased commits since 1.2.0-beta.556 that change a replaced rule: BRO1104 `new nint()`, BRO1604/BRO1605 `init`, BRO1611 primary constructors, BRO1505 single-line properties and BRO1601 explicit implementations follow `master`, BRO1606/BRO1607 report blank summaries; BRO1606 `<para>`, BRO1311 and (since 2026-10-11) BRO1401 property patterns keep beta.556's behavior (decisions.md). `Compare-WithStyleCop.ps1 -StyleCopFeed` runs the parity sets against a local `master` build.",
+  "status": "Done (2026-10-04)"
+}

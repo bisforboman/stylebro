@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "More real-world repos in the PR pipeline",
+  "notes": "Jellyfin (an application using StyleCop), FluentValidation and CsvHelper (seven target frameworks) added; they found a BRO1302 rename that broke CsvHelper at run time and a BRO1001 blank line that needed a second run.",
+  "status": "Done (2026-10-03)"
+}

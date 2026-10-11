@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "`--json` output",
+  "notes": "Owner's request 2026-10-10: every command takes `--json`: one JSON object on stdout (schema version 1: settings written with why, conventions, Sonar, runs, changes per rule, kept findings with reasons, clean, exit code), the text on stderr. See docs/agents.md.",
+  "status": "Done (2026-10-10)"
+}

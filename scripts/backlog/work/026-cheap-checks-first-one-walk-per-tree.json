@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "Cheap checks first, one walk per tree",
+  "notes": "DocumentationAnalyzer, CommentTextAnalyzer, NullCheckAnalyzer, WrappingPlacementAnalyzer, CamelCaseNamingAnalyzer, BaseCallsAnalyzer, CallChainAnalyzer, EmbeddedCommentAnalyzer: same diagnostics, all 55 analyzers ~830 -> ~700 ms on Newtonsoft.Json (scripts/benchmark/README.md).",
+  "status": "Done (2026-10-04)"
+}

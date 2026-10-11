@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "`stylebro-migrate --diff`: preview before writing",
+  "notes": "`--diff[=file]` on the migration, `init` and `format` (decisions.md 2026-10-09): runs the command and `stylebro-migrate format` on a temporary copy, prints the settings, files per rule and sample hunks, writes the full diff to `stylebro-preview.patch`. On FFMpegCore the patch matched the real commands byte for byte.",
+  "status": "Done (2026-10-09)"
+}

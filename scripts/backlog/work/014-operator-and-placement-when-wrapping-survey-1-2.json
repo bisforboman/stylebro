@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Operator, `=>` and `=` placement when wrapping (survey #1, #2)",
+  "notes": "BRO1520 (operators, follows `dotnet_style_operator_placement_when_wrapping`), BRO1521 (`=>`), BRO1522 (`=`); defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`.",
+  "status": "Done (2026-10-04)"
+}

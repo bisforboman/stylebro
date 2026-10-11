@@ -71,6 +71,22 @@ public partial class DocExamplesTests
         Assert.Equal(indexed, nav);
     }
 
+    // In id order, two pull requests adding rules of different areas edit different places (fewer merge conflicts).
+    [Fact]
+    public void TheRuleListsAreInIdOrder()
+    {
+        var index = File.ReadAllText(Path.Combine(RulesFolder, "README.md"));
+        foreach (var area in Regex.Split(index, "^## ", RegexOptions.Multiline).Skip(1))
+        {
+            var ids = Regex.Matches(area, @"^\| \[(BRO\d{4})\]", RegexOptions.Multiline).Select(m => m.Groups[1].Value).ToList();
+            Assert.Equal(ids.Order(StringComparer.Ordinal), ids);
+        }
+
+        var unshipped = File.ReadAllText(Path.Combine(FindRepoRoot(), "src", "StyleBro.Analyzers", "AnalyzerReleases.Unshipped.md"));
+        var rows = Regex.Matches(unshipped, @"^(BRO\d{4})\b", RegexOptions.Multiline).Select(m => m.Groups[1].Value).ToList();
+        Assert.Equal(rows.Order(StringComparer.Ordinal), rows);
+    }
+
     [Fact]
     public void TheConfigurationPage_ListsEverySetting()
     {

@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Unnecessary parentheses in patterns",
+  "notes": "BRO1410: `x is (> 0)`, `o is (string s)`, a pair around a pair; leaves the ones BRO1407 adds to `and`/`or` patterns. BRO1405_p/BRO1410_p fade the parentheses in an IDE like StyleCop's SA1119_p. Off after `stylebro-migrate`. See decisions.md.",
+  "status": "Done (2026-10-09)"
+}

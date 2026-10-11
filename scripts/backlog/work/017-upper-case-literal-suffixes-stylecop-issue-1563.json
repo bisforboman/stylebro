@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Upper-case literal suffixes (StyleCop issue #1563, Sonar S818)",
+  "notes": "BRO1135: integer suffixes (`1l` -> `1L`, `1ul` -> `1UL`); real suffixes (`f`, `d`, `m`) left alone, lower case is the norm there. Off after `stylebro-migrate`.",
+  "status": "Done (2026-10-04)"
+}

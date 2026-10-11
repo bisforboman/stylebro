@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "`init --modernize`",
+  "notes": "Opt-in block of the SDK's modernization rules in three tiers ([modernizing.md](modernizing.md)): older C# everywhere; newer C# at warning unless a multi-targeted project leaves LangVersion unset; newer APIs only without multi-targeted projects (else suggestions with a note). See decisions.md.",
+  "status": "Done (2026-10-04)"
+}

@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "llms.txt for the docs site",
+  "notes": "Owner's request 2026-10-10: an MkDocs hook (scripts/mkdocs_llms.py) writes llms.txt (every page and rule with one line) and llms-full.txt; the build fails when a rule page is missing.",
+  "status": "Done (2026-10-10)"
+}

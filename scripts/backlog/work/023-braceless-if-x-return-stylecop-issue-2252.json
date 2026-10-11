@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Braceless `if (x) return;` (StyleCop issue #2252)",
+  "notes": "`stylebro_allow_single_line_jump_statements` for BRO1514, off by default: a jump statement on its `if` line needs no braces (decisions.md).",
+  "status": "Done (2026-10-04)"
+}

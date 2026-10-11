@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "BRO1110 own_line indentation",
+  "notes": "In own_line mode a `)` already on its own line is reindented like the line with `(` (IDE0055 leaves it at any indentation, probed), that line taken as BRO1105, BRO1109 and BRO1110 itself leave it, so nested lists align in one run.",
+  "status": "Done (2026-10-09)"
+}

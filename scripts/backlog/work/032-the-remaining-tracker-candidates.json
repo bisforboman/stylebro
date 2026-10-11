@@ -1,0 +1,6 @@
+{
+  "area": "Superseding StyleCop",
+  "item": "The remaining tracker candidates",
+  "notes": "beyond-stylecop.md #6-#10 and #12: BRO1617, BRO1504's exempt prefixes, BRO1136, BRO1137, BRO1306's naming-rule option, BRO1313; #11 as the narrow BRO1409 (off by default).",
+  "status": "Done (2026-10-05)"
+}

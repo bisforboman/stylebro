@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "CI regression check",
+  "notes": "`scripts/benchmark` compare mode: the PR build and main's alternated in one process on Newtonsoft.Json, freshly parsed sources per run; fails when an analyzer or the total is clearly slower. A required check since 2026-10-05.",
+  "status": "Done (2026-10-05)"
+}

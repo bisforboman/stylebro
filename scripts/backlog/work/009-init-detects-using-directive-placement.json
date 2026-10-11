@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "`init` detects using directive placement",
+  "notes": "Counts the repository's files with usings inside vs outside the namespace (file-scoped counts as inside; mixed, namespace-less and global-only files don't count) and writes `csharp_using_directive_placement = inside_namespace` for BRO1008 at 75 % of at least 10 files; outside is the preset's.",
+  "status": "Done (2026-10-09)"
+}
