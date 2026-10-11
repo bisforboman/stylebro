@@ -89,6 +89,15 @@ failed" or "Nightly mutation run failed".
 
 Every script also runs locally.
 
+## Changelog
+
+A pull request with a change users notice (a rule, a setting, a fix, `stylebro-migrate` behaviour) adds
+`changes/<branch>.md` with `### New` / `### Changed` / `### Fixed` (or `### Breaking changes`, `### Upgrading`) and
+short bullets written for the release notes' reader; [changes/README.md](changes/README.md) has the details. Never edit
+CHANGELOG.md itself: the release pull request folds the fragments into it (`python scripts/changelog.py X.Y.Z "..."`),
+and merging that pull request publishes the release with that section as its notes. CI checks every fragment. Changes
+nobody using the packages would notice (CI, tests, internal docs) need none.
+
 ## Plans and decisions
 
 - [Backlog](https://github.com/bisforboman/stylebro/blob/generated/docs/backlog.md): every rule StyleBro has or plans, and

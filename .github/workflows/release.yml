@@ -1,28 +1,75 @@
 name: Release
 
-# Push a tag like v0.1.0-alpha.1 to publish that version to nuget.org.
-# Prerelease tags (with a 
+# Merging a release PR releases: on every push to main this reads the newest version in CHANGELOG.md
+# ("## X.Y.Z – date" or "## X.Y.Z-alpha.N – date"), and if v<version> isn't tagged yet, runs the checks, publishes
+# StyleBro.Analyzers and StyleBro.Migrate to nuget.org and creates the GitHub release (and the tag) with that
+# CHANGELOG section as the notes. Most pushes to main: the version is already tagged and nothing else runs.
+# Pushing a v* tag by hand still releases that tag.
+# Prereleases (a '-' in the version) use the 'prerelease' environment (no reviewers; its deployment policy must allow
+# the branch main for a release on merge, and allows v*-* tags), stable versions 'release' (owner's approval).
 
 on:
   push:
+    branches: [main]
     tags: ['v*']
 
+# One release at a time, never cancelled half way.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  release:
+  version:
     runs-on: ubuntu-latest
-    environment: ${{ contains(github.ref_name, '-') && 'prerelease' || 'release' }}
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: version
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            v="${GITHUB_REF_NAME#v}"
+          else
+            v=$(grep -m1 -oE '^## [0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)? ' CHANGELOG.md | cut -c4- | tr -d ' ' || true)
+          fi
+          if [ -z "$v" ]; then
+            echo "::error::No version: CHANGELOG.md has no '## X.Y.Z – date' heading"
+            exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          # ls-remote --exit-code: 0 = tagged, 2 = no such tag; anything else (network) fails the job instead of releasing.
+          tagged=0
+          if [ "$GITHUB_REF_TYPE" != tag ]; then git ls-remote --exit-code --tags origin "refs/tags/v$v" > /dev/null || tagged=$?; fi
+          if [ "$tagged" -ne 0 ] && [ "$tagged" -ne 2 ]; then
+            echo "::error::git ls-remote failed ($tagged)"
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = tag ] || [ "$tagged" -eq 2 ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "Releasing $v" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "v$v is already released" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  release:
+    needs: version
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ contains(needs.version.outputs.version, '-') && 'prerelease' || 'release' }}
     permissions:
-      contents: write   # create the GitHub release
+      contents: write   # create the GitHub release (and its tag)
       id-token: write   # request the OIDC token that NuGet/login exchanges for a temporary API key
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
-
-      - name: Version from tag
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
 
       - name: Test
         run: dotnet test StyleBro.slnx
@@ -35,6 +82,7 @@ jobs:
         shell: pwsh
         run: ./scripts/verify-package.ps1
 
+      # The version overrides <Version> in the csproj files.
       - name: Pack
         run: |
           dotnet pack src/StyleBro.Package --configuration Release -p:Version=$VERSION --output artifacts
@@ -60,4 +108,8 @@ jobs:
         run: |
           prerelease=""
           if [[ "$VERSION" == *-* ]]; then prerelease="--prerelease"; fi
-          gh release create "$GITHUB_REF_NAME" artifacts/*.nupkg --title "StyleBro $VERSION" --generate-notes $prerelease
+          # The version's CHANGELOG.md section ("## 0.6.0-alpha.1 – date" up to the next "## "), else GitHub's PR list.
+          awk -v v="## $VERSION " 'index($0, v) == 1 { on = 1; next } on && /^## / { exit } on' CHANGELOG.md > notes.md
+          if [ -s notes.md ]; then notes=(--notes-file notes.md); else notes=(--generate-notes); fi
+          # Creates the tag v$VERSION on this commit, unless it was pushed by hand.
+          gh release create "v$VERSION" artifacts/*.nupkg --target "$GITHUB_SHA" --title "StyleBro $VERSION" "${notes[@]}" $prerelease
