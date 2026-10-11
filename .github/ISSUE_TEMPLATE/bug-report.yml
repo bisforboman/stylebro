@@ -1,0 +1,51 @@
+name: Bug report
+description: A rule's fix breaks code, crashes, or dotnet format does something else than expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please keep the sample minimal and leave out anything private (company names, internal code, paths).
+  - type: input
+    id: rule
+    attributes:
+      label: Rule id
+      placeholder: BRO1001
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: StyleBro and .NET SDK version
+      description: The StyleBro.Analyzers package version and the output of `dotnet --version`.
+      placeholder: StyleBro 0.5.0-alpha.1, SDK 10.0.401
+    validations:
+      required: true
+  - type: dropdown
+    id: multitarget
+    attributes:
+      label: Multi-targeted project?
+      description: Does the project set `<TargetFrameworks>` with more than one framework?
+      options: ["No", "Yes", "Don't know"]
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Minimal code sample
+      description: The smallest code (and `.editorconfig` lines, if any) that shows the problem.
+      render: csharp
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What dotnet format did
+      description: The changed code, the error, or the crash (AD0001) message.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true

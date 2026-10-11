@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://bisforboman.github.io/stylebro/
+    about: Rules, settings, getting started and migrating from StyleCop.
+  - name: Report a security vulnerability
+    url: https://github.com/bisforboman/stylebro/security/advisories/new
+    about: Please report vulnerabilities privately, not as an issue.

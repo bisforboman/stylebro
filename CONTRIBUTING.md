@@ -98,6 +98,12 @@ Every script also runs locally.
 - [docs/decisions/](docs/decisions/): design questions, the choices and what was decided, one file per decision named
   `<yyyy-mm-dd>-<slug>.md`. `pwsh scripts/New-Decision.ps1 -Title "<the question in a few words>"` writes one.
 
+## Issues, versions and security
+
+Issues use the forms in `.github/ISSUE_TEMPLATE/` (bug, false positive, migration problem, feature request).
+[docs/versioning.md](docs/versioning.md) says what a patch, minor and major release may change (a patch never makes a
+rule report more; settings and rule ids are kept). Vulnerabilities: [SECURITY.md](SECURITY.md).
+
 ## Avoiding merge conflicts
 
 Lists that every pull request adds to are one file per entry (decisions, backlog items, mutation entries), so parallel

@@ -12,6 +12,12 @@ already covers them (IDE rules, `.editorconfig`); the preset enables those built
 
 ## Status
 
+**Stable 1.0 (owner's decisions, 2026-10-11, docs/decisions/):** 1.0 ships after two clean trials in a row (backlog
+item "Two clean trials before 1.0" keeps the tally); after 1.0, new rules stay off until a preset version opts in
+(planned, backlog "Preset versions"). What patch/minor/major may change: `docs/versioning.md`; releases themselves still
+follow the release policy below (the owner says when). CHANGELOG.md points to GitHub Releases, SECURITY.md to private
+vulnerability reporting.
+
 Re-verified after the rename to StyleBro (clean tree, SDK 10.0.401, 2026-09-29): `dotnet build StyleBro.slnx`
 (0 warnings), `dotnet test StyleBro.slnx` (11/11 passed), `scripts/verify-format.ps1` (both passes OK, output
 matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers.0.1.0-alpha.1.nupkg` with both
