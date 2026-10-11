@@ -1203,6 +1203,40 @@ public class FixOrderTests
         "BRO1303",
         "BRO1306");
 
+    // StabilityMatrix (CSharpier's layout): IDE0055 put '{ get; init; }' on its own line below a split generic type, BRO1527
+    // joined it back, on every run.
+    [Fact]
+    public Task AutoAccessors_BelowASplitGenericType_WithTheSdkFormatter() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+
+        public class C
+        {
+            public Func<
+                int,
+                IReadOnlyDictionary<string, string>
+            >? Factory { get; init; }
+
+            public Func<
+                int,
+                string
+            > Other
+            {
+                get;
+                set;
+            }
+
+            public int Plain
+            {
+                get;
+                set;
+            }
+        }
+        """,
+        "BRO1527",
+        SdkFormatter);
+
     [Fact]
     public Task AutoAccessors_NextToTheBlankLineRules() => AssertConvergesInEveryOrderAsync(
         """
@@ -1949,6 +1983,33 @@ public class FixOrderTests
 
     // BRO1149: a merge moves the inner body into the outer 'if' (and its else chain), which changes which brace rule
     // reports it; the merge adds the braces they want itself.
+    // Flow.Launcher's ShellContextMenu: the '#endregion' after the outer 'if' kept BRO1149 quiet until BRO1113 removed it.
+    [Fact]
+    public Task NestedIfs_InRegions() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b)
+            {
+                #region Menu
+
+                if (a)
+                {
+                    if (b)
+                    {
+                        #region Inner
+                        M(b, a);
+                        #endregion
+                    }
+                }
+
+                #endregion
+            }
+        }
+        """,
+        "BRO1113",
+        "BRO1149");
+
     [Fact]
     public Task NestedIfs_WithTheBraceRules() => AssertConvergesInEveryOrderAsync(
         """
@@ -2128,6 +2189,45 @@ public class FixOrderTests
         "BRO1108",
         "BRO1151");
 
+    // xbox's AuthClient: 'using DevTools.Common;' became 'using Microsoft.Xbox.Services.DevTools.Common;' out of order, and
+    // the next run's sort moved it.
+    [Fact]
+    public Task QualifiedUsings_WhereUsingsAreSorted() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        namespace Microsoft.Xbox.Services.DevTools.Common
+        {
+            public class Helper
+            {
+            }
+        }
+
+        namespace Microsoft.Xbox.Services.DevTools.Authentication
+        {
+            using System;
+            using DevTools.Common;
+            using Microsoft.Win32;
+
+            internal class AuthClient
+            {
+                public Helper? H { get; set; }
+
+                public Type? T { get; set; }
+
+                public RegistryKey? K { get; set; }
+            }
+        }
+
+        namespace Microsoft.Win32
+        {
+            public class RegistryKey
+            {
+            }
+        }
+        """,
+        "dotnet_sort_system_directives_first = true\n",
+        "BRO1126",
+        SdkUsingSort);
+
     [Fact]
     public Task UsingPlacement_Outside_WithQualifiedUsingsAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
         """
@@ -2258,6 +2358,15 @@ public class FixOrderTests
         "BRO1505",
         "BRO1615");
 
+    /// <summary>
+    /// Stands for the SDK's formatter (IDE0055, the whitespace pass of 'dotnet format') among a case's ids: a fix whose
+    /// result the formatter changes back makes every run change the file.
+    /// </summary>
+    private const string SdkFormatter = "IDE0055";
+
+    /// <summary>Stands for 'dotnet format' sorting usings (its style pass, when a sort key is set).</summary>
+    private const string SdkUsingSort = "SortUsings";
+
     private static Task AssertConvergesInEveryOrderAsync(string source, params string[] ids) =>
         AssertConvergesInEveryOrderWithConfigAsync(source, null, ids);
 
@@ -2272,6 +2381,12 @@ public class FixOrderTests
             var document = CreateDocument(source, editorConfig is null ? null : "root = true\n\n[*.cs]\n" + editorConfig);
             foreach (var id in order)
             {
+                if (id is SdkFormatter or SdkUsingSort)
+                {
+                    document = await RunSdkAsync(document, id);
+                    continue;
+                }
+
                 var analyzers = FindAnalyzer(id);
                 var diagnostics = await GetDiagnosticsAsync(document, analyzers, id);
                 if (diagnostics.Length > 0)
@@ -2282,6 +2397,13 @@ public class FixOrderTests
 
             foreach (var id in ids)
             {
+                if (id is SdkFormatter or SdkUsingSort)
+                {
+                    var formatted = (await (await RunSdkAsync(document, id)).GetTextAsync()).ToString();
+                    Assert.True(formatted == (await document.GetTextAsync()).ToString(), $"Order {string.Join(", ", order)} leaves formatting:\n{await document.GetTextAsync()}\nformatted:\n{formatted}");
+                    continue;
+                }
+
                 var left = await GetDiagnosticsAsync(document, FindAnalyzer(id), id);
                 Assert.True(left.Length == 0, $"Order {string.Join(", ", order)} leaves {id}:\n{await document.GetTextAsync()}");
             }
@@ -2292,6 +2414,10 @@ public class FixOrderTests
             Assert.True(!sameText || first == final, $"Order {string.Join(", ", order)} gives other text:\n{final}\nthan the first order:\n{first}");
         }
     }
+
+    private static Task<Microsoft.CodeAnalysis.Document> RunSdkAsync(Microsoft.CodeAnalysis.Document document, string id) => id == SdkFormatter
+        ? Microsoft.CodeAnalysis.Formatting.Formatter.FormatAsync(document)
+        : Microsoft.CodeAnalysis.Formatting.Formatter.OrganizeImportsAsync(document, CancellationToken.None);
 
     private static IEnumerable<string[]> Orders(string[] ids) => ids.Length <= 1
         ? new[] { ids }

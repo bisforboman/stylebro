@@ -269,6 +269,7 @@ internal static class CamelCaseRenamer
     private static async Task<NamesInCode> CollectNamesAsync(Solution solution, CancellationToken cancellationToken)
     {
         var strings = new HashSet<string>();
+        var reflection = new HashSet<string>();
         var where = new Dictionary<string, string>();
         var nameofs = new HashSet<string>();
         var positional = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -300,6 +301,10 @@ internal static class CamelCaseRenamer
                     {
                         AddPositional(text, $"{document.FilePath ?? document.Name}({line + 1})");
                     }
+                    else if (kind == RepositoryNames.ReflectionKind)
+                    {
+                        AddReflection(text, $"{document.FilePath ?? document.Name}({line + 1})");
+                    }
                     else if (strings.Add(text))
                     {
                         where[text] = $"{document.FilePath ?? document.Name}({line + 1})";
@@ -320,6 +325,10 @@ internal static class CamelCaseRenamer
             {
                 AddPositional(entry.Text, entry.Where);
             }
+            else if (entry.Kind == RepositoryNames.ReflectionKind)
+            {
+                AddReflection(entry.Text, entry.Where);
+            }
             else if (entry.Kind == RepositoryNames.StringKind && strings.Add(entry.Text))
             {
                 where[entry.Text] = entry.Where;
@@ -336,7 +345,16 @@ internal static class CamelCaseRenamer
             }
         }
 
-        return new NamesInCode(strings, nameofs, where, outside, positional);
+        return new NamesInCode(strings, nameofs, where, outside, positional, reflection);
+
+        // The reflection read is where the finding points: a field is kept for it, not for the first string with its name.
+        void AddReflection(string text, string at)
+        {
+            if (reflection.Add(text))
+            {
+                where[text] = at;
+            }
+        }
 
         void AddPositional(string text, string at)
         {
@@ -354,14 +372,16 @@ internal static class CamelCaseRenamer
     /// spreadcheetah's 'length').
     /// </summary>
     private static (KeptReason? Reason, string? Where) FindInCode(ISymbol symbol, NamesInCode names) =>
-        MatchInStrings(symbol, names.Strings) is { } match ? (KeptReason.NameInString, names.WhereIs(match)) : (null, null);
+        MatchInStrings(symbol, names) is { } match ? (KeptReason.NameInString, names.WhereIs(match)) : (null, null);
 
     /// <summary>
     /// The first string code can refer to the symbol by, or null: a field by its name (GetField("_count")), a type by its name
     /// or its qualified name (Type.GetType("App.Shape"), "App.Shape, App").
     /// </summary>
-    private static string? MatchInStrings(ISymbol symbol, HashSet<string> strings)
+    private static string? MatchInStrings(ISymbol symbol, NamesInCode names)
     {
+        var strings = names.Strings;
+
         // Names that are also data (serializers write public instance fields, properties and enum members by name)
         // are looked for inside strings too, like test JSON.
         // Names that serializers write (public instance fields, properties, events, enum members) are looked for inside
@@ -370,6 +390,16 @@ internal static class CamelCaseRenamer
         // (Inside the field's own type, the analyzer also matches it inside strings: 'DebuggerDisplay("{_count}")'.)
         var isData = symbol is IPropertySymbol or IEventSymbol
             || (symbol is IFieldSymbol field && (FieldNames.IsDataMember(field) || field.ContainingType.TypeKind == TypeKind.Enum));
+
+        // Other fields (private ones, mostly) only by a string where code names a member to reach it ('GetField("_count")',
+        // RepositoryNames.IsReflectionShaped; owner's decision, docs/decisions.md): any string at all kept 692 of Orleans'
+        // renames for words like "options" in 'Assert.Equal("options", e.ParamName)', and Flow.Launcher's 'type' for a JSON
+        // key in another plugin.
+        if (symbol is IFieldSymbol && !isData)
+        {
+            return names.Reflection.Contains(symbol.Name) ? symbol.Name : null;
+        }
+
         if (symbol is not INamedTypeSymbol)
         {
             var word = new System.Text.RegularExpressions.Regex(@"(?<![\w@])" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"(?!\w)");
@@ -769,8 +799,9 @@ internal static class CamelCaseRenamer
     {
         private readonly Dictionary<string, string> where;
 
-        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where, Dictionary<string, string>? outside = null, Dictionary<string, string>? positional = null)
+        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where, Dictionary<string, string>? outside = null, Dictionary<string, string>? positional = null, HashSet<string>? reflection = null)
         {
+            Reflection = reflection ?? new HashSet<string>();
             Positional = positional ?? new Dictionary<string, string>(StringComparer.Ordinal);
             Strings = strings;
             Nameofs = nameofs;
@@ -781,6 +812,9 @@ internal static class CamelCaseRenamer
         public HashSet<string> Strings { get; }
 
         public HashSet<string> Nameofs { get; }
+
+        /// <summary>Gets the strings where code names a member to reach it (<see cref="RepositoryNames.IsReflectionShaped"/>).</summary>
+        public HashSet<string> Reflection { get; }
 
         /// <summary>
         /// Types whose members code reads by position ('Name GetFields', <see cref="StyleBro.Analyzers.Ordering.ReflectionByPosition"/>),

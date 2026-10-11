@@ -81,6 +81,11 @@ internal static class FieldNames
     /// </summary>
     public const string MutableStaticStyleKey = "stylebro_private_mutable_static_field_naming";
 
+    private static readonly string[] GuidPrefixes = { "IID_", "CLSID_", "LIBID_", "DIID_", "CATID_", "GUID_" };
+
+    // Per type once: every field of a large type asks (and TypeFacts asks for each sibling's new name).
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<INamedTypeSymbol, System.Runtime.CompilerServices.StrongBox<bool>> InteropTypes = new();
+
     internal enum FieldCasing
     {
         Camel,
@@ -181,6 +186,7 @@ internal static class FieldNames
         var rename = GetRename(field, style);
         if (hungarian is null || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum
             || HungarianNames.IsInNativeMethods(field)
+            || IsInteropName(field)
             || hungarian.GetNewName((rename?.NewName ?? field.Name).TrimStart('_')) is not { } stripped)
         {
             return rename;
@@ -197,7 +203,7 @@ internal static class FieldNames
     public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyles style)
     {
         var name = field.Name;
-        if (!IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum || IsNativeMethodsName(field, name))
+        if (!IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum || IsNativeMethodsName(field, name) || IsInteropName(field))
         {
             return null;
         }
@@ -404,6 +410,38 @@ internal static class FieldNames
     }
 
     /// <summary>
+    /// Whether the field's name comes from native code, so every field naming rule leaves it (owner's decision,
+    /// docs/decisions.md: "leave interop names alone"; Flow.Launcher got 'S_OK' -> 'SOk', 'IID_IContextMenu' ->
+    /// '_iidIContextMenu', 'cbSize' -> 'CbSize'): a SCREAMING_CASE constant or static readonly field ('S_OK', 'MAX_PATH'),
+    /// a COM GUID field ('IID_IUnknown', 'CLSID_ShellLink'), or any field of a type that looks like interop, inside it or
+    /// nested in it (<see cref="IsInteropType"/>), like the '*NativeMethods' exemption but by shape.
+    /// </summary>
+    public static bool IsInteropName(IFieldSymbol field)
+    {
+        var name = field.Name;
+        if ((field.IsConst || (field.IsStatic && field.IsReadOnly))
+            && name.IndexOf('_') >= 0 && name.Any(char.IsLetter) && !name.Any(char.IsLower))
+        {
+            return true;
+        }
+
+        if (GuidPrefixes.Any(p => name.StartsWith(p, System.StringComparison.Ordinal)))
+        {
+            return true;
+        }
+
+        for (var type = field.ContainingType; type is not null; type = type.ContainingType)
+        {
+            if (InteropTypes.GetValue(type, t => new System.Runtime.CompilerServices.StrongBox<bool>(IsInteropType(t))).Value)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// The words of <paramref name="core"/> (split at underscores) joined in <paramref name="casing"/>: 'with_underscore'
     /// -> 'withUnderscore', 'MAX_VALUE' -> 'MaxValue' (Pascal) or 'maxValue' (camel). An all-capitals word of more than
     /// one letter counts as a word, not an acronym, when there are several words.
@@ -442,6 +480,15 @@ internal static class FieldNames
 
         return CamelCaseNames.IsUsableName(result) ? result : null;
     }
+
+    /// <summary>
+    /// A type with [StructLayout], [ComImport] or [UnmanagedFunctionPointer], or one that declares [DllImport],
+    /// [LibraryImport] or extern methods: its fields mirror native structures and constants ('cbSize', 'hSubMenu').
+    /// </summary>
+    private static bool IsInteropType(INamedTypeSymbol type) =>
+        type.GetAttributes().Any(a => a.AttributeClass?.Name is "StructLayoutAttribute" or "ComImportAttribute" or "UnmanagedFunctionPointerAttribute")
+        || type.GetMembers().Any(m => m is IMethodSymbol method
+            && (method.IsExtern || method.GetAttributes().Any(a => a.AttributeClass?.Name is "DllImportAttribute" or "LibraryImportAttribute")));
 
     /// <summary>
     /// Whether a field inside a '*NativeMethods' class keeps its name: StyleCop's field naming rules (SA1303, SA1304,

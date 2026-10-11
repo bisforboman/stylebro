@@ -96,6 +96,99 @@ public class FieldNamingTests
         }
         """);
 
+    // Owner's decision (docs/decisions.md): interop names stay. Flow.Launcher got 'S_OK' -> 'SOk', 'IID_IContextMenu' ->
+    // '_iidIContextMenu' and 'cbSize' -> 'CbSize'.
+    [Fact]
+    public Task InteropNames_AreLeftAlone() => VerifyFixAsync(
+        """
+        using System;
+        using System.Runtime.InteropServices;
+
+        public class Menu
+        {
+            private const int S_OK = 0;
+            internal const int MAX_PATH = 260;
+            private static readonly Guid IID_IContextMenu = Guid.Empty;
+            private static readonly int WINDOW_CLASS_2 = 2;
+            private const int {|BRO1308:Max_Count|} = 3;
+            private static int {|BRO1308:LOCAL_STATE|};
+
+            public int Sum() => S_OK + MAX_PATH + IID_IContextMenu.GetHashCode() + WINDOW_CLASS_2 + Max_Count + LOCAL_STATE;
+        }
+
+        public class Shell
+        {
+            private int _handle;
+
+            public int Handle => _handle;
+
+            [DllImport("user32.dll")]
+            private static extern int GetSubMenu(IntPtr menu, int position);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct MENUITEMINFO
+        {
+            public int cbSize;
+            public IntPtr hSubMenu;
+        }
+
+        internal class Outer
+        {
+            [DllImport("user32.dll")]
+            private static extern int GetMenu();
+
+            internal struct POINT
+            {
+                public int x;
+            }
+        }
+        """,
+        """
+        using System;
+        using System.Runtime.InteropServices;
+
+        public class Menu
+        {
+            private const int S_OK = 0;
+            internal const int MAX_PATH = 260;
+            private static readonly Guid IID_IContextMenu = Guid.Empty;
+            private static readonly int WINDOW_CLASS_2 = 2;
+            private const int MaxCount = 3;
+            private static int localState;
+
+            public int Sum() => S_OK + MAX_PATH + IID_IContextMenu.GetHashCode() + WINDOW_CLASS_2 + MaxCount + localState;
+        }
+
+        public class Shell
+        {
+            private int _handle;
+
+            public int Handle => _handle;
+
+            [DllImport("user32.dll")]
+            private static extern int GetSubMenu(IntPtr menu, int position);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct MENUITEMINFO
+        {
+            public int cbSize;
+            public IntPtr hSubMenu;
+        }
+
+        internal class Outer
+        {
+            [DllImport("user32.dll")]
+            private static extern int GetMenu();
+
+            internal struct POINT
+            {
+                public int x;
+            }
+        }
+        """);
+
     [Fact]
     public Task CamelCase_RenamesAndQualifiesHiddenReferences() => VerifyFixAsync(
         """
@@ -608,7 +701,7 @@ public class FieldNamingTests
             private int {|BRO1308:RETRY_COUNT|};
             private int {|BRO1308:trailing_|};
             private int {|BRO1308:two__underscores|};
-            private const int {|BRO1308:MAX_VALUE|} = 1;
+            private const int {|BRO1308:Max_Value|} = 1;
             private static readonly int {|BRO1308:Default_Value|} = 1;
             public int {|BRO1308:Public_Field|};
             protected int {|BRO1308:protected_field|};
@@ -617,7 +710,7 @@ public class FieldNamingTests
             private static readonly object Int32_0 = 0;
 
             public int Use() => m_member + s_count + t_depth + m_with_more + m_Upper + with_underscore + x_other
-                + RETRY_COUNT + trailing_ + two__underscores + MAX_VALUE + Default_Value + Public_Field + protected_field + m_
+                + RETRY_COUNT + trailing_ + two__underscores + Max_Value + Default_Value + Public_Field + protected_field + m_
                 + s_static;
         }
         """,
@@ -658,9 +751,9 @@ public class FieldNamingTests
         {
             private int {|BRO1307:m_member|};
             private int {|BRO1308:with_underscore|};
-            private const int {|BRO1308:MAX_VALUE|} = 1;
+            private const int {|BRO1308:Max_Value|} = 1;
 
-            public int Use() => m_member + with_underscore + MAX_VALUE;
+            public int Use() => m_member + with_underscore + Max_Value;
         }
         """,
         """
@@ -682,7 +775,7 @@ public class FieldNamingTests
         {
             public const int MaxCount = 3;
             private const int {|BRO1306:Limit|} = 2;
-            private const int {|BRO1308:MIN_SIZE|} = 1;
+            private const int {|BRO1308:Min_Size|} = 1;
             private const int fine = 4;
             internal static readonly string Shared = "";
             private static readonly string {|BRO1306:Cache|} = "";
@@ -690,7 +783,7 @@ public class FieldNamingTests
             private static readonly string _ready = "";
             private int count;
 
-            public int Sum() => MaxCount + Limit + MIN_SIZE + fine + Shared.Length + Cache.Length + empty.Length + _ready.Length + count;
+            public int Sum() => MaxCount + Limit + Min_Size + fine + Shared.Length + Cache.Length + empty.Length + _ready.Length + count;
         }
         """,
         """
@@ -1042,7 +1135,15 @@ public class FieldNamingTests
             context.RegisterPostInitializationOutput(c => c.AddSource("Accessor.cs", """
                 static class Accessor
                 {
-                    public const string Name = "_intValue";
+                    [UnsafeAccessor(Name = "_intValue")]
+                    public static void IntValue(Dto dto)
+                    {
+                    }
+                }
+
+                class UnsafeAccessorAttribute : System.Attribute
+                {
+                    public string Name { get; set; } = string.Empty;
                 }
                 """));
     }
@@ -1106,7 +1207,7 @@ public class FieldNamingTests
 
         internal class Hidden
         {
-            public const int {|BRO1308:MAX_COUNT|} = 1;
+            public const int {|BRO1308:Max_Count|} = 1;
         }
         """,
         """

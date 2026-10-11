@@ -17,7 +17,8 @@ internal static class AutoAccessorLines
 {
     /// <summary>
     /// The edits that put the list on one line, or null when it already is or is skipped: an accessor with a body,
-    /// attributes or a line break inside it, a comment or directive anywhere from the declaration's name to the '}', an
+    /// attributes or a line break inside it, a header (modifiers, type, name) over several lines, a comment or directive
+    /// anywhere from the declaration's name to the '}', an
     /// initializer that doesn't start on the '}' line, or <c>csharp_preserve_single_line_blocks = false</c> (the SDK's
     /// formatter would expand the list again). <paramref name="isOn"/> adds the blank line that BRO1519 wants after
     /// the multi-line declaration, so the result doesn't depend on which fix 'dotnet format' runs first.
@@ -32,7 +33,12 @@ internal static class AutoAccessorLines
         var open = list.OpenBraceToken;
         var close = list.CloseBraceToken;
         var before = open.GetPreviousToken();
+
+        // A header over several lines (CSharpier's 'Func<' / 'int,' / '>? Factory'): the SDK's formatter (IDE0055) puts the
+        // '{' on a line of its own then, and the two fixes undid each other on every run (StabilityMatrix).
+        var start = declaration.Modifiers.Count > 0 ? declaration.Modifiers[0] : declaration.Type.GetFirstToken();
         if (Line(text, before.Span.End) == Line(text, close.SpanStart)
+            || Line(text, start.SpanStart) != Line(text, before.Span.End)
             || (options.TryGetValue("csharp_preserve_single_line_blocks", out var preserve) && preserve.Trim().Equals("false", StringComparison.OrdinalIgnoreCase))
             || list.Accessors.Any(a => a.Body is not null || a.ExpressionBody is not null || a.AttributeLists.Count > 0 || Line(text, a.SpanStart) != Line(text, a.Span.End))
             || (declaration is PropertyDeclarationSyntax { Initializer: { } initializer } && Line(text, initializer.SpanStart) != Line(text, close.SpanStart)))

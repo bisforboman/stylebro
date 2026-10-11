@@ -29,6 +29,97 @@ public class KeptFindingsTests
         Assert.Equal(KeptReason.NameInString, reason);
     }
 
+    [Theory]
+    [InlineData("typeof(C).GetField(\"_blockedUntil\", 0)")]
+    [InlineData("c.GetType().GetRuntimeField(\"_blockedUntil\")")]
+    [InlineData("Expression.Field(null, typeof(C), \"_blockedUntil\")")]
+    [InlineData("AccessTools.FieldRefAccess<C, int>(\"_blockedUntil\")")]
+    public async Task AFieldNamedInAReflectionCall_IsKept(string read)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "class C\n{\n    private int _blockedUntil;\n\n    public int Get() => _blockedUntil;\n}\n"),
+            ("Tests.cs", $"class Tests\n{{\n    object Read(C c) => {read};\n}}\n"));
+
+        Assert.Equal(KeptReason.NameInString, reason);
+    }
+
+    [Theory]
+    [InlineData("Assert.Equal(\"_blockedUntil\", c)")] // Orleans: words in messages ('options') kept 692 renames
+    [InlineData("new System.ArgumentNullException(\"_blockedUntil\")")]
+    [InlineData("Settings[\"_blockedUntil\"]")] // Flow.Launcher: 'type', a JSON key in another plugin
+    [InlineData("System.Text.Json.JsonDocument.Parse(\"{}\").RootElement.GetProperty(\"_blockedUntil\")")] // Orleans: JSON, not a Type
+    [InlineData("DeleteMembershipEntries(\"_blockedUntil\")")] // 'Member' inside 'Membership' isn't a word
+    public async Task AFieldWhoseNameIsAnOrdinaryStringElsewhere_IsRenamed(string use)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "class C\n{\n    private int _blockedUntil;\n\n    public int Get() => _blockedUntil;\n}\n"),
+            ("Tests.cs", $"class Tests\n{{\n    object Use(C c) => {use};\n}}\n"));
+
+        Assert.Null(reason);
+    }
+
+    [Fact]
+    public void RepositoryNames_ListReflectionShapedStrings()
+    {
+        var root = CSharpSyntaxTree.ParseText("""
+            class T
+            {
+                [MemberData("Cases")]
+                [InlineData("inline")]
+                [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "count")]
+                void M(object o)
+                {
+                    o.GetType().GetProperty("Total");
+                    typeof(T)?.GetMethod("Run");
+                    Type.GetType("App.Shape");
+                    Assert.Equal("options", o);
+                    GetPrivateField(o, "_secret");
+                }
+            }
+            """).GetRoot();
+
+        var lines = RepositoryNames.Lines(root, "T.cs").Where(l => l.StartsWith("R", StringComparison.Ordinal)).ToList();
+
+        Assert.Equal(new[] { "R\tT.cs(3)\tCases", "R\tT.cs(5)\tcount", "R\tT.cs(8)\tTotal", "R\tT.cs(9)\tRun", "R\tT.cs(10)\tApp.Shape", "R\tT.cs(12)\t_secret" }, lines);
+    }
+
+    [Fact]
+    public void RepositoryNames_WriteAndReadALoneSurrogate()
+    {
+        // Orleans: '"jobs/\uD800"' in a test; File.WriteAllLines threw EncoderFallbackException before any formatting.
+        var root = CSharpSyntaxTree.ParseText("class T { string S => \"jobs/\\uD800\"; string P => \"\\uD83D\\uDE00\\\\u0041\"; }").GetRoot();
+        var file = Path.Combine(Path.GetTempPath(), $"stylebro-names-test-{Guid.NewGuid():N}.tsv");
+        try
+        {
+            File.WriteAllLines(file, RepositoryNames.Lines(root, "T.cs"));
+            var texts = File.ReadAllLines(file).Select(RepositoryNames.Parse).Where(e => e!.Kind == RepositoryNames.StringKind).Select(e => e!.Text).ToList();
+
+            Assert.Equal(new[] { "jobs/\uD800", "😀\\u0041" }, texts);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public void KeptFinding_WritesALoneSurrogateAsAReplacementCharacter()
+    {
+        var file = Path.Combine(Path.GetTempPath(), $"stylebro-kept-test-{Guid.NewGuid():N}.tsv");
+        try
+        {
+            File.AppendAllText(file, new KeptFinding("C.cs", 1, 1, "BRO1106", KeptReason.NameInString, "Use 'jobs/\uD800'", "T.cs(1)") + "\n");
+
+            Assert.Equal("Use 'jobs/�'", KeptFinding.Parse(File.ReadAllLines(file).Single())!.Message);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
     [Fact]
     public async Task AFieldInNameofElsewhere_IsKept_TheNameIsInANameof()
     {
@@ -78,7 +169,7 @@ public class KeptFindingsTests
         var (solution, document, diagnostic) = await FindAsync(
             DiagnosticIds.PrivateFieldNaming,
             ("C.cs", "class C\n{\n    private int _blockedUntil;\n\n    public int Get() => _blockedUntil;\n}\n"),
-            ("Tests.cs", "class Tests\n{\n    string Name => \"_blockedUntil\";\n}\n"));
+            ("Tests.cs", "class Tests\n{\n    object Field => typeof(C).GetField(\"_blockedUntil\");\n}\n"));
         var file = Path.Combine(Path.GetTempPath(), $"stylebro-kept-test-{Guid.NewGuid():N}.tsv");
         Environment.SetEnvironmentVariable(KeptFinding.Variable, file);
         try
@@ -245,7 +336,7 @@ public class KeptFindingsTests
     {
         // Scrutor: the netstandard2.0 run loads only the library; its tests read the field with GetField.
         var files = new[] { ("Counter.cs", "class Counter\n{\n    private int _zqxCount;\n\n    public int Get() => _zqxCount;\n}\n") };
-        var tests = "class ZqxCounterTests\n{\n    string zqxName => \"_zqxCount\";\n}\n"; // as in GetField(name); only zqx names: other tests run alongside
+        var tests = "class ZqxCounterTests\n{\n    object zqxField => typeof(Counter).GetField(\"_zqxCount\");\n}\n"; // only zqx names: other tests run alongside
 
         Assert.Null(await GetReasonAsync(DiagnosticIds.PrivateFieldNaming, files));
         Assert.Equal(KeptReason.NameInString, await WithRepositoryNamesAsync(("Tests/CounterTests.cs", tests), () => GetReasonAsync(DiagnosticIds.PrivateFieldNaming, files)));

@@ -140,6 +140,25 @@ public sealed class KeptFinding
 
     /// <summary>The line written to the file.</summary>
     public override string ToString() =>
-        string.Join("\t", Path, Line.ToString(System.Globalization.CultureInfo.InvariantCulture), Column.ToString(System.Globalization.CultureInfo.InvariantCulture), Id, Reason.ToString(), Message.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' '))
-            + (Where is null ? string.Empty : "\t" + Where.Replace('\t', ' '));
+        string.Join("\t", Path, Line.ToString(System.Globalization.CultureInfo.InvariantCulture), Column.ToString(System.Globalization.CultureInfo.InvariantCulture), Id, Reason.ToString(), Printable(Message.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ')))
+            + (Where is null ? string.Empty : "\t" + Printable(Where.Replace('\t', ' ')));
+
+    /// <summary>The text with each lone surrogate as U+FFFD: the line is appended as UTF-8, which can't hold one.</summary>
+    private static string Printable(string text)
+    {
+        var chars = text.ToCharArray();
+        for (var i = 0; i < chars.Length; i++)
+        {
+            if (char.IsHighSurrogate(chars[i]) && i + 1 < chars.Length && char.IsLowSurrogate(chars[i + 1]))
+            {
+                i++;
+            }
+            else if (char.IsSurrogate(chars[i]))
+            {
+                chars[i] = '�';
+            }
+        }
+
+        return new string(chars);
+    }
 }

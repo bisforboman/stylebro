@@ -39,13 +39,15 @@ internal static class NestedIfs
             _ => null,
         };
 
-        // Directives anywhere in the outer 'if' (also in the body), or right after it (an 'else' only some target frameworks'
-        // copies see): each copy could see other code.
+        // Conditional directives anywhere in the outer 'if' (also in the body), or right after it (an 'else' only some target
+        // frameworks' copies see): each copy could see other code. Not '#region' or '#pragma' lines: BRO1112/BRO1113 remove
+        // regions, and when an '#endregion' right after the 'if' kept it, the merge came on the next run (Flow.Launcher's
+        // ShellContextMenu). In the text the merge removes they still count (the gap checks below).
         return inner is null
             || outer.Else is not null
             || inner.Else is not null
-            || outer.ContainsDirectives
-            || outer.GetLastToken().GetNextToken().LeadingTrivia.Any(t => t.IsDirective)
+            || (outer.ContainsDirectives && HasConditionalDirective(outer.DescendantTrivia()))
+            || HasConditionalDirective(outer.GetLastToken().GetNextToken().LeadingTrivia)
             || outer.ContainsDiagnostics
             || !Trivia.IsBlank(outer, TextSpan.FromBounds(outer.Condition.Span.End, inner.Condition.SpanStart))
             || !Trivia.IsBlank(outer, TextSpan.FromBounds(inner.Span.End, outer.Span.End))
@@ -80,9 +82,13 @@ internal static class NestedIfs
         return null;
     }
 
+    private static bool HasConditionalDirective(IEnumerable<SyntaxTrivia> trivia) =>
+        trivia.Any(t => t.IsKind(SyntaxKind.IfDirectiveTrivia) || t.IsKind(SyntaxKind.ElifDirectiveTrivia) || t.IsKind(SyntaxKind.ElseDirectiveTrivia)
+            || t.IsKind(SyntaxKind.EndIfDirectiveTrivia) || t.IsKind(SyntaxKind.DisabledTextTrivia));
+
     private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
-        if (Render(top, text) is not { } rendered || !rendered.Merged.Contains(inner))
+        if (Render(top, text, WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true)) is not { } rendered || !rendered.Merged.Contains(inner))
         {
             return null;
         }
@@ -142,9 +148,13 @@ internal static class NestedIfs
 
     /// <summary>
     /// The merged chain starting at <paramref name="top"/>: one edit from its condition to its end, with the chains in the
-    /// deepest body merged too. The body moves left by as much as its 'if' is indented deeper than the top one's line.
+    /// deepest body merged too. The body moves left by as much as its 'if' is indented deeper than the top one's line. Once
+    /// the condition so far spans lines, the next one starts a line of its own, aligned with the top condition, with
+    /// '&amp;&amp;' where <paramref name="beginning"/> says (dotnet_style_operator_placement_when_wrapping), and its other
+    /// lines keep their indentation relative to it (Flow.Launcher's 'HandleMenuMsg(' went to the end of the wrapped
+    /// condition's last line, its arguments below at the old place).
     /// </summary>
-    private static Rendered? Render(IfStatementSyntax top, SourceText text)
+    private static Rendered? Render(IfStatementSyntax top, SourceText text, bool beginning)
     {
         var ifs = new List<IfStatementSyntax> { top };
         while (GetInner(ifs[ifs.Count - 1]) is { } next)
@@ -163,15 +173,21 @@ internal static class NestedIfs
         }
 
         var builder = new StringBuilder();
+        var topColumn = top.Condition.SpanStart - text.Lines.GetLineFromPosition(top.Condition.SpanStart).Start;
+        var topLine = text.Lines.GetLineFromPosition(top.SpanStart);
+        var lineBreak = SingleLineBlocks.LineBreak(text, top.SpanStart) + text.ToString(new TextSpan(topLine.Start, topIndent)) + new string(' ', System.Math.Max(0, topColumn - topIndent));
         foreach (var current in ifs)
         {
-            var condition = Dedent(current.Condition, text, current == top ? 0 : IndentOf(text, current.SpanStart) - topIndent);
+            var parenthesized = NeedsParentheses(current.Condition);
+            var ownLine = current != top && builder.ToString().IndexOf('\n') >= 0;
+            var condition = Dedent(current.Condition, text, current == top ? 0 : IndentOf(text, current.SpanStart) - (ownLine ? topColumn : topIndent));
             if (condition is null)
             {
                 return null;
             }
 
-            builder.Append(current == top ? string.Empty : " && ").Append(NeedsParentheses(current.Condition) ? "(" + condition + ")" : condition);
+            builder.Append(current == top ? string.Empty : !ownLine ? " && " : beginning ? lineBreak + "&& " : " &&" + lineBreak)
+                .Append(parenthesized ? "(" + condition + ")" : condition);
         }
 
         builder.Append(')');
@@ -195,7 +211,7 @@ internal static class NestedIfs
         var nested = new List<TextChange>();
         void Collect(SyntaxNode node)
         {
-            if (node is IfStatementSyntax candidate && GetOuter(candidate) is null && GetInner(candidate) is not null && Render(candidate, text) is { } inside)
+            if (node is IfStatementSyntax candidate && GetOuter(candidate) is null && GetInner(candidate) is not null && Render(candidate, text, beginning) is { } inside)
             {
                 nested.Add(new TextChange(new TextSpan(inside.Change.Span.Start - body.SpanStart, inside.Change.Span.Length), inside.Change.NewText!));
                 merged.AddRange(inside.Merged);
@@ -269,7 +285,8 @@ internal static class NestedIfs
 
     /// <summary>
     /// <paramref name="value"/> (the text of <paramref name="node"/>, maybe changed) with every line after the first moved left by
-    /// <paramref name="shift"/>; null when a line isn't indented that far or a token of the node spans lines (a string would change).
+    /// <paramref name="shift"/> (right for a negative one); null when a line isn't indented that far or a token of the node spans
+    /// lines (a string would change).
     /// </summary>
     private static string? Dedent(SyntaxNode node, string value, SourceText text, int shift)
     {
@@ -291,7 +308,13 @@ internal static class NestedIfs
                 continue;
             }
 
-            if (lines[i].Length < shift || lines[i].Take(shift).Any(c => c is not (' ' or '\t')))
+            if (shift < 0 && lines[i][0] != '\t')
+            {
+                lines[i] = new string(' ', -shift) + lines[i];
+                continue;
+            }
+
+            if (shift < 0 || lines[i].Length < shift || lines[i].Take(shift).Any(c => c is not (' ' or '\t')))
             {
                 return null;
             }

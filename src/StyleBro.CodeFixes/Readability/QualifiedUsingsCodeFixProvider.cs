@@ -12,7 +12,7 @@ using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
 
-/// <summary>Fix for BRO1126: writes the fully qualified name.</summary>
+/// <summary>Fix for BRO1126: writes the fully qualified name (and sorts the usings when 'dotnet format' would).</summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(QualifiedUsingsCodeFixProvider))]
 public sealed class QualifiedUsingsCodeFixProvider : CodeFixProvider
 {
@@ -63,6 +63,14 @@ public sealed class QualifiedUsingsCodeFixProvider : CodeFixProvider
             }
         }
 
-        return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+        var fixedDocument = document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+
+        // 'dotnet format' sorts usings (its style pass, before the analyzers) whenever a sort key is set: the qualified
+        // name usually sorts elsewhere ('DevTools.Common' -> 'Microsoft.Xbox.Services.DevTools.Common' in xbox's AuthClient),
+        // and the next run moved it. The same organizer, here, so one run converges.
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        return changes.Count > 0 && (options.TryGetValue("dotnet_sort_system_directives_first", out _) || options.TryGetValue("dotnet_separate_import_directive_groups", out _))
+            ? await Microsoft.CodeAnalysis.Formatting.Formatter.OrganizeImportsAsync(fixedDocument, cancellationToken).ConfigureAwait(false)
+            : fixedDocument;
     }
 }
