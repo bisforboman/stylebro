@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       relevant: ${{ steps.changes.outputs.relevant }}
       files: ${{ steps.changes.outputs.files }}
@@ -32,7 +32,7 @@ jobs:
   shard:
     name: mutation shard ${{ matrix.shard }}
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -59,7 +59,7 @@ jobs:
   mutation:
     needs: [changes, shard]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Check the shards
         run: |
@@ -71,7 +71,7 @@ jobs:
   nightly-issue:
     needs: mutation
     if: ${{ failure() && github.event_name == 'schedule' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       issues: write

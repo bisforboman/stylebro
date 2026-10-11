@@ -10,7 +10,7 @@ jobs:
   # skipped unless analyzer code changed), the real-world and the mutation jobs; they still report their checks.
   # `!cancelled()` on the jobs below: if this job fails, its outputs are empty and everything runs.
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       relevant: ${{ steps.changes.outputs.relevant }}
       perf: ${{ steps.changes.outputs.perf }}
@@ -23,7 +23,7 @@ jobs:
         run: bash .github/changes.sh
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
 
@@ -68,7 +68,7 @@ jobs:
   parity:
     needs: changes
     if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Skipped (docs-only change)
         if: needs.changes.outputs.relevant == 'false'
@@ -95,7 +95,7 @@ jobs:
   performance:
     needs: changes
     if: ${{ github.event_name == 'pull_request' && !cancelled() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Skipped (analyzer code unchanged)
         if: needs.changes.outputs.perf == 'false'
