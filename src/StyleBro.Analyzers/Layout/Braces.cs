@@ -251,7 +251,7 @@ internal static class Braces
                 SyntaxKind.ElseKeyword => eol + NewIndent(outer.OwnerLine),
 
                 // The new '}' followed by a statement: BRO1519's blank line now, so one run converges.
-                _ when isOn is not null && BlankLineRuns.WantsBlankLineAfter(outer.Statement.Parent!, default, outer.Statement.GetLastToken().GetNextToken(), isOn) => eol,
+                _ when isOn is not null && BlankLineRuns.WantsBlankLineAfter(outer.Statement.Parent!, default, outer.Statement.GetLastToken().GetNextToken(), isOn, switchSections: SwitchSectionBlankLines.ReadMode(options)) => eol,
                 _ => string.Empty,
             };
             changes.Add(new TextChange(outer.Close, closing + suffix));

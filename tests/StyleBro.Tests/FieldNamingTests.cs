@@ -1162,6 +1162,48 @@ public class FieldNamingTests
             """,
         ]);
 
+    // Stateless: 'nameof(args)' of a parameter in another file kept the test class's private field 'args' (matched by name).
+    [Fact]
+    public Task NameofOfAnotherSymbolWithTheName_DoesNotKeepTheField() => VerifyFixAsync(
+        [
+            """
+            class C
+            {
+                private readonly object[] {|BRO1303:_args|} = { 5 };
+
+                public int Count => _args.Length;
+            }
+            """,
+            """
+            class D
+            {
+                public static void Unpack(object[] _args)
+                {
+                    if (_args == null) throw new System.ArgumentNullException(nameof(_args));
+                }
+            }
+            """,
+        ],
+        [
+            """
+            class C
+            {
+                private readonly object[] args = { 5 };
+
+                public int Count => args.Length;
+            }
+            """,
+            """
+            class D
+            {
+                public static void Unpack(object[] _args)
+                {
+                    if (_args == null) throw new System.ArgumentNullException(nameof(_args));
+                }
+            }
+            """,
+        ]);
+
     // Non-private fields can be used from other files' '#if' code, which no rename sees; private ones only from their
     // type (TypeFacts).
     [Fact]

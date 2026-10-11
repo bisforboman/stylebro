@@ -99,6 +99,13 @@ internal static class MemberOrdering
         return null;
     }
 
+    /// <summary>The members' indexes in sorted order (slot by slot), or null when the container is left alone.</summary>
+    public static int[]? GetSortedOrder(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
+    {
+        var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
+        return keys is null ? null : SortedOrder(keys, segments, anchors);
+    }
+
     /// <summary>
     /// Returns the type with its members sorted. Blank-line layout stays with the position ("slot"),
     /// while comments, doc comments and attributes travel with the member.

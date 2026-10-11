@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Naming;
 using StyleBro.CodeFixes.Naming;
+using StyleBro.CodeFixes.Ordering;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
@@ -262,6 +263,54 @@ public class KeptFindingsTests
         Assert.Null(await WithRepositoryNamesAsync(("Dto.cs", tests), () => GetReasonAsync(DiagnosticIds.FieldPascalCase, files)));
         var privateField = new[] { ("C.cs", "class C\n{\n    private int _zqxOther;\n\n    public int Get() => _zqxOther;\n}\n") };
         Assert.Null(await WithRepositoryNamesAsync(("Tests/T.cs", "class ZqxT { int _zqxOther; }\n"), () => GetReasonAsync(DiagnosticIds.PrivateFieldNaming, privateField)));
+    }
+
+    [Fact]
+    public async Task ATypeAProjectThisRunDoesntLoadReadsByPosition_KeepsItsOrder()
+    {
+        // A new solution for each call: the names are collected once per solution.
+        static async Task<string?> ReadAsync()
+        {
+            var project = ProjectId.CreateNewId();
+            var documentId = DocumentId.CreateNewId(project);
+            var solution = new AdhocWorkspace().CurrentSolution
+                .AddProject(project, "App", "App", LanguageNames.CSharp)
+                .AddMetadataReference(project, MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                .AddDocument(documentId, "ZqxEvent.cs", SourceText.From("class ZqxEvent\n{\n    private int zqxA;\n    public int ZqxB;\n}\n"), filePath: Path.Combine(Path.GetTempPath(), "ZqxEvent.cs"));
+            var document = solution.GetDocument(documentId)!;
+            var type = (await document.GetSyntaxRootAsync())!.DescendantNodes().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.TypeDeclarationSyntax>().Single();
+            return await MemberOrderingCodeFixProvider.GetReadByPositionAsync(document, type, null, CancellationToken.None);
+        }
+
+        var tests = ("Tests/ZqxEventTests.cs", "class ZqxEventTests\n{\n    object zqxRead(ZqxEvent e) => e.GetType().GetFields()[0];\n}\n");
+
+        Assert.Null(await ReadAsync());
+        Assert.EndsWith("ZqxEventTests.cs(3)", await WithRepositoryNamesAsync(tests, ReadAsync));
+    }
+
+    [Fact]
+    public void RepositoryNames_ListTheTypesReadByPosition()
+    {
+        var root = CSharpSyntaxTree.ParseText("""
+            class T
+            {
+                Event subject;
+
+                void M()
+                {
+                    var fields = subject.GetType().GetFields();
+                    var a = fields[0];
+                    var b = typeof(Other).GetProperties().ElementAt(1);
+                    var c = new Third().GetType().GetMembers().First();
+                    var d = typeof(NotByPosition).GetFields().Length;
+                    var e = this.GetType().GetEvents()[0];
+                }
+            }
+            """).GetRoot();
+
+        var lines = RepositoryNames.Lines(root, "T.cs").Where(l => l.StartsWith("P", StringComparison.Ordinal)).ToList();
+
+        Assert.Equal(new[] { "P\tT.cs(7)\tEvent GetFields", "P\tT.cs(9)\tOther GetProperties", "P\tT.cs(10)\tThird GetMembers", "P\tT.cs(12)\tT GetEvents" }, lines);
     }
 
     [Fact]

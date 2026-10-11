@@ -466,6 +466,44 @@ public class FixOrderTests
         "BRO1519",
         "BRO1526");
 
+    // Stateless (StateMachine.Async.cs): with 'omit', BRO1519 added a blank line after a section's '}' and BRO1504 one above
+    // a comment that starts the next section.
+    [Fact]
+    public Task SwitchSections_Omit_Bro1519AndBro1504LeaveTheGaps() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(object x, bool b)
+            {
+                switch (x)
+                {
+                    case int:
+                        return 0;
+                    // A comment that starts the section.
+                    case string s:
+                    {
+                        if (b) return 1;
+                        return 2;
+                    }
+
+                    case long:
+                        if (b)
+                            return 3;
+                        break;
+                    default:
+                        break;
+                }
+
+                return 4;
+            }
+        }
+        """,
+        "stylebro_blank_line_between_switch_sections = omit\n",
+        "BRO1504",
+        "BRO1514",
+        "BRO1519",
+        "BRO1526");
+
     [Fact]
     public Task ElseAfterJump_BracesAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
         """

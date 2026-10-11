@@ -12,8 +12,9 @@ namespace StyleBro.Analyzers.Layout;
 /// <summary>
 /// BRO1526 (Roslynator RCS0061): a blank line between the sections of a switch statement, or none
 /// (<c>stylebro_blank_line_between_switch_sections = include | omit | omit_after_block</c>). A gap after a section whose
-/// '}' BRO1519 judges (a multi-line block or if/else at the end of the section) is BRO1519's when that rule is on: it
-/// wants a blank line there (StyleCop's SA1513), so the two fixes never undo each other.
+/// '}' BRO1519 judges (a multi-line block or if/else at the end of the section) is BRO1519's when that rule is on and the
+/// setting wants a blank line there too; where the setting wants none, BRO1519 and BRO1504 leave the gap alone
+/// (<see cref="OmitsBlankLineBefore"/>), so the fixes never undo each other.
 /// </summary>
 internal static class SwitchSectionBlankLines
 {
@@ -37,6 +38,19 @@ internal static class SwitchSectionBlankLines
         };
 
     /// <summary>
+    /// Whether <paramref name="next"/> starts a switch section (not the first) whose gap above the setting wants without a
+    /// blank line: then BRO1519 (after a '}') and BRO1504 (above a comment there) don't ask for one (Stateless: 'omit',
+    /// and the two rules added blank lines between 11 sections).
+    /// </summary>
+    public static bool OmitsBlankLineBefore(SyntaxToken next, Mode mode) =>
+        mode != Mode.Include
+        && next.Parent is SwitchLabelSyntax { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } section } label
+        && section.Labels[0] == label
+        && label.GetFirstToken() == next
+        && switchStatement.Sections.IndexOf(section) is > 0 and var index
+        && (mode == Mode.Omit || switchStatement.Sections[index - 1].Statements.LastOrDefault() is BlockSyntax);
+
+    /// <summary>
     /// Each gap between two sections that breaks the setting: the next section's first token, and the edit (a line break
     /// inserted, or the blank lines removed). Gaps with a comment or directive, sections on one line, and switch
     /// statements with syntax errors are skipped. Several blank lines where one is wanted are BRO1517's.
@@ -54,7 +68,7 @@ internal static class SwitchSectionBlankLines
             var next = node.Sections[i].GetFirstToken();
             if (!previous.TrailingTrivia.LastOrDefault().IsKind(SyntaxKind.EndOfLineTrivia)
                 || !next.LeadingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
-                || (previous.IsKind(SyntaxKind.CloseBraceToken) && BlankLineRuns.JudgesGapAfter(previous, next, text, isOn, gapIsReplaced: true)))
+                || (previous.IsKind(SyntaxKind.CloseBraceToken) && BlankLineRuns.JudgesGapAfter(previous, next, text, isOn, gapIsReplaced: true, mode)))
             {
                 continue;
             }

@@ -29,7 +29,16 @@ public static class RepositoryNames
     /// <summary>A file's identifiers, space-separated (<see cref="Entry.Where"/>: the path).</summary>
     public const char IdentifierKind = 'I';
 
-    /// <summary>The string literals and <see langword="nameof"/> names in a tree (the text, and the 0-based line).</summary>
+    /// <summary>
+    /// A type whose members code reads by position (<see cref="Ordering.ReflectionByPosition"/>): the type's simple name and
+    /// the method, space-separated (<see cref="Entry.Where"/>: 'path(line)').
+    /// </summary>
+    public const char PositionKind = 'P';
+
+    /// <summary>
+    /// The string literals, <see langword="nameof"/> names and types whose members are read by position in a tree (the text,
+    /// and the 0-based line).
+    /// </summary>
     public static IEnumerable<(char Kind, string Text, int Line)> Collect(SyntaxNode root)
     {
         foreach (var token in TreeWalk.Tokens(root))
@@ -43,6 +52,10 @@ public static class RepositoryNames
             {
                 yield return (NameofKind, invocation.ArgumentList.Arguments[0].Expression.GetLastToken().ValueText, 0);
             }
+            else if (token.IsKind(SyntaxKind.IdentifierToken) && Ordering.ReflectionByPosition.GetReadType(token) is { } type)
+            {
+                yield return (PositionKind, type + " " + token.ValueText, token.GetLocation().GetLineSpan().StartLinePosition.Line);
+            }
         }
     }
 
@@ -51,7 +64,7 @@ public static class RepositoryNames
     {
         foreach (var (kind, text, line) in Collect(root))
         {
-            yield return kind == StringKind ? Line(kind, $"{path}({line + 1})", text) : Line(kind, string.Empty, text);
+            yield return kind is StringKind or PositionKind ? Line(kind, $"{path}({line + 1})", text) : Line(kind, string.Empty, text);
         }
 
         var identifiers = new SortedSet<string>(TreeWalk.Tokens(root).Where(t => t.IsKind(SyntaxKind.IdentifierToken)).Select(t => t.ValueText), System.StringComparer.Ordinal);
@@ -105,10 +118,10 @@ public static class RepositoryNames
             Text = text;
         }
 
-        /// <summary>Gets the kind (<see cref="StringKind"/>, <see cref="NameofKind"/> or <see cref="IdentifierKind"/>).</summary>
+        /// <summary>Gets the kind (<see cref="StringKind"/>, <see cref="NameofKind"/>, <see cref="IdentifierKind"/> or <see cref="PositionKind"/>).</summary>
         public char Kind { get; }
 
-        /// <summary>Gets where it is: 'path(line)' for a string, the path for identifiers.</summary>
+        /// <summary>Gets where it is: 'path(line)' for a string or a read by position, the path for identifiers.</summary>
         public string Where { get; }
 
         /// <summary>Gets the string's text, the name, or the identifiers.</summary>

@@ -100,9 +100,10 @@ internal static class BlankLines
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
     /// behind. Not for a comment whose text starts with one of <paramref name="exemptPrefixes"/> (tool markers such as
     /// '// ReSharper disable once ...', from <see cref="ExemptPrefixesKey"/>). Not for a comment below code
-    /// (<see cref="IsCommentBelowCode"/>).
+    /// (<see cref="IsCommentBelowCode"/>). Not for a comment above a switch section when
+    /// <paramref name="switchSections"/> (BRO1526's setting) wants no blank line there.
     /// </summary>
-    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes)
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
         {
@@ -139,6 +140,7 @@ internal static class BlankLines
             && !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)
             && !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
+            && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenChainLinks(comment)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
             && !IsCommentBelowCode(comment, text);

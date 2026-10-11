@@ -288,7 +288,7 @@ internal static class SingleLineBlocks
         var next = braces.Close.GetNextToken();
         if (isOn is not null && next.RawKind != 0 && Line(text, next.SpanStart) > Line(text, braces.Close.SpanStart)
             && braces.Close.TrailingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
-            && BlankLineRuns.WantsBlankLineAfter(braces.Close.Parent!, braces.Close, next, isOn))
+            && BlankLineRuns.WantsBlankLineAfter(braces.Close.Parent!, braces.Close, next, isOn, switchSections: SwitchSectionBlankLines.ReadMode(options)))
         {
             changes.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), lineBreak));
         }

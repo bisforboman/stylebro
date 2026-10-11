@@ -35,10 +35,18 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         LinkedFileFixAllProvider.Create(FixDocumentAsync);
 
     /// <inheritdoc/>
-    public override Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
+        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         foreach (var diagnostic in context.Diagnostics)
         {
+            // A type the fix keeps unsorted on purpose offers no action.
+            if (root is not null && GetContainer(root, diagnostic) is { } container
+                && await GetReadByPositionAsync(context.Document, container, null, context.CancellationToken).ConfigureAwait(false) is not null)
+            {
+                continue;
+            }
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     Title,
@@ -46,9 +54,40 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
                     equivalenceKey: nameof(MemberOrderingCodeFixProvider)),
                 diagnostic);
         }
-
-        return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Where code reads the container's members by position through reflection ('path(line)'), when sorting would change
+    /// what it reads; else null. Looked for in the whole solution and, under 'stylebro-migrate format', in the repository's
+    /// other projects (<see cref="RepositoryNames"/>): Stateless's tests read 'GetFields(...)[0]' of a library type.
+    /// </summary>
+    internal static async Task<string?> GetReadByPositionAsync(Document document, SyntaxNode container, MemberAccess?[]? partialAccess, CancellationToken cancellationToken)
+    {
+        if (container is not TypeDeclarationSyntax type
+            || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root)
+        {
+            return null;
+        }
+
+        var names = await StyleBro.CodeFixes.Naming.CamelCaseRenamer.GetNamesInCodeAsync(document.Project.Solution).ConfigureAwait(false);
+        var reads = names.Positional.Where(p => p.Key.Substring(0, p.Key.IndexOf(' ')) == type.Identifier.ValueText).ToList();
+        if (reads.Count == 0)
+        {
+            return null;
+        }
+
+        var options = MemberOrderOptions.Read(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        if (MemberOrdering.GetSortedOrder(type, options, partialAccess) is not { } order)
+        {
+            return null;
+        }
+
+        return reads.FirstOrDefault(r => ObservableOrder.ReordersReflectedMembers(type, order, ReflectionByPosition.ReadsEveryMember(r.Key.Substring(r.Key.IndexOf(' ') + 1)))).Value;
+    }
+
+    private static SyntaxNode? GetContainer(SyntaxNode root, Diagnostic diagnostic) =>
+        root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true)
+            .FirstAncestorOrSelf<MemberDeclarationSyntax>(m => m.Parent is { } parent && MemberOrdering.GetMembers(parent) is not null)?.Parent;
 
     /// <summary>
     /// The edits that sort every container of the document that BRO1001 reports: one per outermost container, replacing
@@ -71,7 +110,8 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         foreach (var container in root.DescendantNodesAndSelf(n => MemberOrdering.GetMembers(n) is not null).Where(n => MemberOrdering.GetMembers(n) is not null))
         {
             var access = MemberOrdering.GetPartialAccess(container, model, cancellationToken);
-            if (MemberOrdering.FindFirstViolation(container, options, access) is not null)
+            if (MemberOrdering.FindFirstViolation(container, options, access) is not null
+                && await GetReadByPositionAsync(document, container, access, cancellationToken).ConfigureAwait(false) is null)
             {
                 partialAccess[container] = access;
             }
@@ -101,28 +141,31 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         var options = MemberOrderOptions.Read(
             document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
 
+        // Partial types' accessibility comes from the semantic model, which knows the original nodes only: read it now.
+        var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
         var targets = new HashSet<SyntaxNode>();
+        var partialAccess = new Dictionary<SyntaxNode, MemberAccess?[]?>();
         foreach (var diagnostic in diagnostics)
         {
-            var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
-            var member = node.FirstAncestorOrSelf<MemberDeclarationSyntax>(m => m.Parent is { } parent && MemberOrdering.GetMembers(parent) is not null);
-            if (member?.Parent is { } container)
+            if (GetContainer(root, diagnostic) is not { } container || partialAccess.ContainsKey(container))
             {
-                targets.Add(container);
+                continue;
             }
+
+            var access = model is null ? null : MemberOrdering.GetPartialAccess(container, model, cancellationToken);
+            partialAccess[container] = access;
+            if (await GetReadByPositionAsync(document, container, access, cancellationToken).ConfigureAwait(false) is { } where)
+            {
+                KeptFindings.Record(diagnostic, KeptReason.MembersReadByPosition, where);
+                continue;
+            }
+
+            targets.Add(container);
         }
 
         if (targets.Count == 0)
         {
             return document;
-        }
-
-        // Partial types' accessibility comes from the semantic model, which knows the original nodes only: read it now.
-        var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-        var partialAccess = new Dictionary<SyntaxNode, MemberAccess?[]?>();
-        foreach (var target in targets)
-        {
-            partialAccess[target] = model is null ? null : MemberOrdering.GetPartialAccess(target, model, cancellationToken);
         }
 
         var (laidOut, laidOutRoot, moved) = await ApplyLayoutAsync(document, root, targets, cancellationToken).ConfigureAwait(false);

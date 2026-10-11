@@ -137,7 +137,8 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
             var removedText = await regionsRemoved.GetTextAsync(cancellationToken).ConfigureAwait(false);
             var removedRoot = await regionsRemoved.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var insertions = new List<TextChange>();
-            var exempt = BlankLines.GetExemptPrefixes(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+            var configOptions = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+            var exempt = BlankLines.GetExemptPrefixes(configOptions);
             foreach (var change in regionChanges)
             {
                 var position = change.Span.Start - regionChanges.Where(c => c.Span.Start < change.Span.Start).Sum(c => c.Span.Length);
@@ -148,7 +149,7 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
 
                 var line = removedText.Lines.GetLineFromPosition(position);
                 var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
-                if (BlankLines.NeedsBlankLineAbove(comment, removedText, IsOn, exempt))
+                if (BlankLines.NeedsBlankLineAbove(comment, removedText, IsOn, exempt, SwitchSectionBlankLines.ReadMode(configOptions)))
                 {
                     var above = removedText.Lines[line.LineNumber - 1];
                     var lineBreak = removedText.ToString(TextSpan.FromBounds(above.End, above.EndIncludingLineBreak));

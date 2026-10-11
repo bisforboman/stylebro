@@ -66,6 +66,87 @@ public class MemberOrderingTests
         }
         """);
 
+    // Stateless: its tests read OnTransitionedEvent's fields as 'GetFields(...)[0]' and '[1]'; the sort swapped them.
+    [Fact]
+    public Task FieldsReadByPositionElsewhere_AreNotSorted() => VerifyNotFixedAsync(
+        [
+            """
+            using System;
+            using System.Collections.Generic;
+
+            internal class OnTransitionedEvent
+            {
+                event Action<int> onTransitioned;
+                readonly List<int> {|BRO1001:onTransitionedAsync|} = new List<int>();
+
+                public void Invoke(int x) => onTransitioned?.Invoke(x + onTransitionedAsync.Count);
+            }
+            """,
+            """
+            using System.Reflection;
+
+            internal class OnTransitionedEventTests
+            {
+                private readonly OnTransitionedEvent subject = new OnTransitionedEvent();
+
+                public object Read()
+                {
+                    FieldInfo[] fields = subject.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+                    return fields[1].GetValue(subject);
+                }
+            }
+            """,
+        ]);
+
+    [Fact]
+    public Task MembersOtherThanTheOnesReadByPosition_AreStillSorted() => VerifyFixAsync(
+        [
+            """
+            internal class Point
+            {
+                public int X;
+                public int Y;
+
+                public override string ToString() => X + "," + Y;
+
+                public {|BRO1001:Point|}()
+                {
+                }
+            }
+            """,
+            """
+            using System.Linq;
+
+            internal static class Reader
+            {
+                public static object Read(Point p) => typeof(Point).GetFields().First().GetValue(p);
+            }
+            """,
+        ],
+        [
+            """
+            internal class Point
+            {
+                public int X;
+                public int Y;
+
+                public Point()
+                {
+                }
+
+                public override string ToString() => X + "," + Y;
+            }
+            """,
+            """
+            using System.Linq;
+
+            internal static class Reader
+            {
+                public static object Read(Point p) => typeof(Point).GetFields().First().GetValue(p);
+            }
+            """,
+        ]);
+
     [Fact]
     public Task StructMembersOtherThanFields_AreStillOrdered() => VerifyFixAsync(
         """

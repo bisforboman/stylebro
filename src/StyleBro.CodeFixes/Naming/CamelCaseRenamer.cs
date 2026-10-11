@@ -132,7 +132,7 @@ internal static class CamelCaseRenamer
         return (await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false)).Reason;
     }
 
-    /// <summary>The string literals and nameof names in the solution, collected once per solution.</summary>
+    /// <summary>The string literals, nameof names and reads by position in the solution, collected once per solution.</summary>
     internal static Task<NamesInCode> GetNamesInCodeAsync(Solution solution)
     {
         // Locked: the table may run the factory once per thread that asks at the same time (parallel renames).
@@ -271,6 +271,7 @@ internal static class CamelCaseRenamer
         var strings = new HashSet<string>();
         var where = new Dictionary<string, string>();
         var nameofs = new HashSet<string>();
+        var positional = new Dictionary<string, string>(StringComparer.Ordinal);
         var documents = new List<Document>();
         foreach (var project in solution.Projects)
         {
@@ -295,6 +296,10 @@ internal static class CamelCaseRenamer
                     {
                         nameofs.Add(text);
                     }
+                    else if (kind == RepositoryNames.PositionKind)
+                    {
+                        AddPositional(text, $"{document.FilePath ?? document.Name}({line + 1})");
+                    }
                     else if (strings.Add(text))
                     {
                         where[text] = $"{document.FilePath ?? document.Name}({line + 1})";
@@ -310,6 +315,10 @@ internal static class CamelCaseRenamer
             if (entry.Kind == RepositoryNames.NameofKind)
             {
                 nameofs.Add(entry.Text);
+            }
+            else if (entry.Kind == RepositoryNames.PositionKind)
+            {
+                AddPositional(entry.Text, entry.Where);
             }
             else if (entry.Kind == RepositoryNames.StringKind && strings.Add(entry.Text))
             {
@@ -327,14 +336,25 @@ internal static class CamelCaseRenamer
             }
         }
 
-        return new NamesInCode(strings, nameofs, where, outside);
+        return new NamesInCode(strings, nameofs, where, outside, positional);
+
+        void AddPositional(string text, string at)
+        {
+            if (!positional.ContainsKey(text))
+            {
+                positional[text] = at;
+            }
+        }
     }
 
-    /// <summary>Whether code can refer to the symbol by a string or a nameof, and which.</summary>
+    /// <summary>
+    /// Whether code can refer to the symbol by a string, and which. A <c>nameof(...)</c> counts only when it refers to the
+    /// symbol itself (or a related member renamed with it), which <see cref="GetChangesAsync"/> sees in the references:
+    /// matched by name, any <c>nameof(args)</c> of a parameter kept every private field called 'args' (Stateless,
+    /// spreadcheetah's 'length').
+    /// </summary>
     private static (KeptReason? Reason, string? Where) FindInCode(ISymbol symbol, NamesInCode names) =>
-        MatchInStrings(symbol, names.Strings) is { } match ? (KeptReason.NameInString, names.WhereIs(match))
-        : MatchInStrings(symbol, names.Nameofs) is not null ? (KeptReason.NameInNameof, null)
-        : (null, null);
+        MatchInStrings(symbol, names.Strings) is { } match ? (KeptReason.NameInString, names.WhereIs(match)) : (null, null);
 
     /// <summary>
     /// The first string code can refer to the symbol by, or null: a field by its name (GetField("_count")), a type by its name
@@ -506,6 +526,14 @@ internal static class CamelCaseRenamer
                             && (await reference.Document.GetTextAsync(cancellationToken).ConfigureAwait(false)).ToString(reference.Location.SourceSpan).TrimStart('@') != oldName))
                     {
                         continue;
+                    }
+
+                    // nameof turns the name into a run-time string (an HTTP header name, 'GetField(nameof(_tracer))').
+                    if (IsReachableByName(symbol)
+                        && (await reference.Document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))?.FindToken(reference.Location.SourceSpan.Start) is { } token
+                        && CamelCaseNames.IsNameofName(token))
+                    {
+                        return (result, KeptReason.NameInNameof);
                     }
 
                     var replacement = await GetReplacementAsync(current, reference.Document, reference.Location.SourceSpan, newName, cancellationToken).ConfigureAwait(false);
@@ -741,8 +769,9 @@ internal static class CamelCaseRenamer
     {
         private readonly Dictionary<string, string> where;
 
-        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where, Dictionary<string, string>? outside = null)
+        public NamesInCode(HashSet<string> strings, HashSet<string> nameofs, Dictionary<string, string> where, Dictionary<string, string>? outside = null, Dictionary<string, string>? positional = null)
         {
+            Positional = positional ?? new Dictionary<string, string>(StringComparer.Ordinal);
             Strings = strings;
             Nameofs = nameofs;
             this.where = where;
@@ -752,6 +781,12 @@ internal static class CamelCaseRenamer
         public HashSet<string> Strings { get; }
 
         public HashSet<string> Nameofs { get; }
+
+        /// <summary>
+        /// Types whose members code reads by position ('Name GetFields', <see cref="StyleBro.Analyzers.Ordering.ReflectionByPosition"/>),
+        /// with where the first such read is ('path(line)').
+        /// </summary>
+        public Dictionary<string, string> Positional { get; }
 
         /// <summary>Identifiers in files of projects this run didn't load, with the first such file (<see cref="RepositoryNames"/>).</summary>
         public Dictionary<string, string> Outside { get; }
