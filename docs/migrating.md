@@ -68,8 +68,9 @@ second, versioned reference instead ([getting-started.md](getting-started.md#1-a
 `--diff` writes that pair too.
 
 **Old-style projects** (`packages.config`, StyleCop as `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`):
-removing StyleCop means removing its `packages.config` entry and the `<Analyzer>` items. Adding StyleBro and running
-`format` there takes extra steps, and `--diff` doesn't work:
+removing StyleCop means removing its `packages.config` entry and the `<Analyzer>` items. StyleBro goes in the same way:
+a `packages.config` entry, its `<Analyzer>` items and the import of its build targets, not a `PackageReference`.
+Running `format` there takes extra steps, and `--diff` doesn't work:
 [getting-started.md](getting-started.md#old-style-non-sdk-projects).
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:

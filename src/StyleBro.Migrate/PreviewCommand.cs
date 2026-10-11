@@ -568,11 +568,32 @@ internal static class PreviewCommand
 
         var version = typeof(PreviewCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
         var (_, styleCop, removes) = StyleCopSetup.Projects(root, files);
-        var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);
+
+        // packages.config projects get it the packages.config way, like StyleCop came in there (PackagesConfig).
+        var packagesConfig = PackagesConfig.Projects(files);
+        foreach (var project in packagesConfig)
+        {
+            PackagesConfig.Install(project, version);
+        }
+
+        var targets = (styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root)).Except(packagesConfig, StringComparer.OrdinalIgnoreCase).ToList();
         var versions = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var optedOut = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in targets)
         {
+            // A Directory.Build.props that packages.config projects import keeps its reference away from them.
+            var folder = Path.GetDirectoryName(Path.GetFullPath(file))! + Path.DirectorySeparatorChar;
+            var guard = file.EndsWith(".props", StringComparison.OrdinalIgnoreCase) && packagesConfig.Any(p => Path.GetFullPath(p).StartsWith(folder, StringComparison.OrdinalIgnoreCase))
+                ? PackagesConfig.NotPackagesConfig
+                : null;
+            string Condition(string? central) => (central, guard) switch
+            {
+                (null, null) => string.Empty,
+                (null, _) => $" Condition=\"{guard}\"",
+                (_, null) => $" Condition=\"{central}\"",
+                _ => $" Condition=\"{central} and {guard}\"",
+            };
+
             // A GlobalPackageReference (central package management) gets one of its own: a PackageReference with a version
             // there fails the restore (NU1008), and one without adds the package a second time.
             if (File.Exists(file) && GlobalStyleCop.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(file))))
@@ -596,12 +617,12 @@ internal static class PreviewCommand
                 optedOut.UnionWith(optOuts);
                 EditFile(file, text => AddItem(
                     text,
-                    "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" Condition=\"'$(ManagePackageVersionsCentrally)' == 'true'\" />",
-                    $"<PackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" PrivateAssets=\"all\" Condition=\"'$(ManagePackageVersionsCentrally)' != 'true'\" />"));
+                    $"<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\"{Condition("'$(ManagePackageVersionsCentrally)' == 'true'")} />",
+                    $"<PackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" PrivateAssets=\"all\"{Condition("'$(ManagePackageVersionsCentrally)' != 'true'")} />"));
                 continue;
             }
 
-            EditFile(file, text => AddItem(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
+            EditFile(file, text => AddItem(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\"{Condition(null)} />"));
         }
 
         // LiteBus' analyzer project removes the StyleCop reference its Directory.Build.props adds, and turns central package
@@ -612,7 +633,8 @@ internal static class PreviewCommand
         }
 
         string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
-        return $"StyleBro.Analyzers {version} to {Names(targets)}"
+        var where = new[] { targets.Count > 0 ? $"to {Names(targets)}" : null, packagesConfig.Count > 0 ? $"the packages.config way to {Names(packagesConfig)}" : null };
+        return $"StyleBro.Analyzers {version} {string.Join(", ", where.OfType<string>())}"
             + (versions.Count > 0 ? $" (version in {Names(versions)})" : string.Empty)
             + (optedOut.Count > 0 ? $", with a version for {Names(optedOut)} (central package management off there)" : string.Empty)
             + (removes.Count > 0 ? $", removed again in {Names(removes)} (they remove StyleCop.Analyzers)" : string.Empty);
