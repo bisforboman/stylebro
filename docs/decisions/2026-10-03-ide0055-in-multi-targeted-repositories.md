@@ -5,9 +5,9 @@
 With IDE0055 (the SDK's formatting rule) at warning, `dotnet format` crashes on multi-targeted repositories and writes
 nothing (Serilog, Newtonsoft.Json; no StyleBro involved). `init` wrote it as a suggestion there, so formatting wasn't
 enforced. Investigated: the crash is Roslyn's linked-file merge (`LinkedFileMergeConflictCommentAdditionService`:
-"Changes must be within bounds of SourceText"); IDE0055's fix edits each framework's copy of a file, each copy sees
+"Changes must be within bounds of SourceText"; [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)); IDE0055's fix edits each framework's copy of a file, each copy sees
 other `#if` code, the results can't be merged. The whitespace pass doesn't crash but only formats the first framework's
-code (Serilog: 280 warnings left, all inside `#if FEATURE_...` blocks net471 doesn't compile). Loading the projects
+code ([dotnet/sdk#56585](https://github.com/dotnet/sdk/issues/56585); Serilog: 280 warnings left, all inside `#if FEATURE_...` blocks net471 doesn't compile). Loading the projects
 for one framework at a time (`TargetFramework` as an environment variable) leaves nothing to merge: once per framework,
 Serilog went from 505 IDE0055 warnings to 0, no crash, no conflict markers, builds. How should StyleBro offer that?
 

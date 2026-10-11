@@ -141,7 +141,7 @@ The rules StyleCop doesn't have are turned off by the migration, so they change 
   759 lines baselined, then 0 StyleBro errors in the build and `dotnet format --verify-no-changes` clean (2026-10-02).
   Whitespace formatting can't be baselined.
 - **Multi-targeted projects:** StyleBro's Fix All merges each target framework's copy of a file itself, so its fixes
-  write no conflict markers (Newtonsoft.Json, 8 frameworks). The SDK's IDE0055 fix crashes plain `dotnet format` there;
+  write no conflict markers (Newtonsoft.Json, 8 frameworks). The SDK's IDE0055 fix crashes plain `dotnet format` there (reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000) and [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001));
   `stylebro-migrate format` runs `dotnet format` once per target framework (Serilog: 505 IDE0055 findings -> 0 in one
   run, 2026-10-03; [ci.md](ci.md#notes)).
 

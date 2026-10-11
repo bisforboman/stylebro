@@ -126,13 +126,13 @@ steps:
 
   `dotnet format` loads one copy of every file per target framework, and the SDK's formatting fix (IDE0055) edits
   each copy on its own: each sees other `#if` code, Roslyn can't merge the results, and `dotnet format` crashes
-  without writing anything (Serilog, Newtonsoft.Json). Its whitespace pass only formats the first framework's code,
+  without writing anything (Serilog, Newtonsoft.Json; reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000) and [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)). Its whitespace pass only formats the first framework's code ([dotnet/sdk#56585](https://github.com/dotnet/sdk/issues/56585)),
   so code behind `#if` stays unformatted while the other frameworks' builds report it. `stylebro-migrate format` runs
   `dotnet format` once per target framework, each time on the projects that target it, loaded for that framework
   alone: nothing to merge, and every framework's `#if` code gets fixed (Serilog: 505 IDE0055 warnings to 0; with all
   StyleBro rules, the second run changes nothing). A repository without multi-targeted projects gets one plain
   `dotnet format` run. The SDK fixes that wrote conflict markers there (IDE0011, IDE0040, IDE0047/IDE0048,
-  IDE2000/IDE2002/IDE2003) are replaced by StyleBro rules and off.
+  IDE2000/IDE2002/IDE2003; reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000)) are replaced by StyleBro rules and off.
 
   One limit: code that has to be indented differently for different frameworks, like an `else` inside `#if` followed
   by a block after `#endif`, can't satisfy IDE0055 for all of them; the last framework's run wins and the build

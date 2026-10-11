@@ -474,7 +474,7 @@ stylebro-migrate format
 stylebro-migrate format MySolution.sln --verify-no-changes --severity warn
 ```
 
-Plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055) without writing anything. The command runs
+Plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055) without writing anything (reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000) and [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)). The command runs
 `dotnet format` once per target framework instead; without multi-targeted projects it's one run. A diagnostic
 every framework sees is printed once, and `--report` writes one `format-report.json` covering all runs. Spellings of
 one framework share a run (`net6` and `net6.0`, NuGet's short names). A run loads only the projects that target its
