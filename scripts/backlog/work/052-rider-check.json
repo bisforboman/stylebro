@@ -1,6 +1,6 @@
 {
   "area": "Adoption",
   "item": "Rider check",
-  "notes": "The IDE check was done in Visual Studio 2022 only.",
-  "status": "Idea"
+  "notes": "The IDE check was done in Visual Studio 2022 only. Postponed (2026-10-11): the owner has no Rider; pick up when someone with Rider can try it.",
+  "status": "Postponed"
 }
