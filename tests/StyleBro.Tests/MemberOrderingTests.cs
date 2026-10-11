@@ -365,7 +365,8 @@ public class MemberOrderingTests
 
             private int _x;
         }
-        """);
+        """,
+        KeepRegions);
 
     [Fact]
     public Task Regions_ThatBRO1112Removes_AreLeftToItsFix() => VerifyNoDiagnosticsAsync("""
@@ -560,7 +561,8 @@ public class MemberOrderingTests
             public const int Max = 1;
             #endregion
         }
-        """);
+        """,
+        KeepRegions);
 
     [Fact]
     public Task CustomKindOrder_FromEditorConfig() => VerifyFixAsync(
