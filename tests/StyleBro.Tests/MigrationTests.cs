@@ -1012,10 +1012,63 @@ public sealed partial class MigrationTests : IDisposable
         var plan = Migration.Plan(setup, root, Migration.Generate(setup, root));
 
         Assert.True(setup.IsOn("SA1201"));
+        Assert.Equal(".editorconfig", Assert.Single(plan.Keys));
         Assert.Contains("dotnet_diagnostic.BRO1001.severity = warning", plan[".editorconfig"][0].Lines);
-        var (section, lines) = Assert.Single(plan[Path.Combine("tests", ".editorconfig")]);
-        Assert.Equal("*.cs", section);
+        var (section, lines) = plan[".editorconfig"][1];
+        Assert.Equal("tests/**.cs", section);
         Assert.Equal(["dotnet_diagnostic.BRO1001.severity = none"], lines);
+    }
+
+    [Fact]
+    public void EachProjectsOwnRulesetAndStyleCopJson_GetASection_ProjectsWithoutStyleCopDontCount()
+    {
+        // Soulseek.NET: src and tests each link their own ruleset and stylecop.json (other license texts); the examples don't
+        // run StyleCop and have no ruleset, which used to bring StyleCop's defaults back (SA1101: 191 files got 'this.').
+        static string Ruleset(params string[] off) => "<RuleSet Name=\"r\" ToolsVersion=\"17.0\"><Rules AnalyzerId=\"StyleCop.Analyzers\" RuleNamespace=\"StyleCop.Analyzers\">"
+            + string.Concat(off.Select(id => $"<Rule Id=\"{id}\" Action=\"None\" />")) + "</Rules></RuleSet>";
+        static string Project(string ruleset, string json) => $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup><CodeAnalysisRuleSet>{ruleset}</CodeAnalysisRuleSet></PropertyGroup>
+              <ItemGroup>
+                <AdditionalFiles Include="{json}" Link="Properties\stylecop.json" />
+                <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
+              </ItemGroup>
+            </Project>
+            """;
+        Write("src/.CodeAnalysis/CodeAnalysis.ruleset", Ruleset("SA1101", "SA1116"));
+        Write("tests/.CodeAnalysis/CodeAnalysis.ruleset", Ruleset("SA1101", "SA1201"));
+        Write("src/.CodeAnalysis/stylecop.json", """{ "settings": { "documentationRules": { "companyName": "JP", "copyrightText": "    Copyright (c) {companyName}.\n\n    Only version 3; no later one." } } }""");
+        Write("tests/.CodeAnalysis/stylecop.json", """{ "settings": { "documentationRules": { "companyName": "JP", "copyrightText": "    Copyright (c) {companyName}. All rights reserved." } } }""");
+        Write("src/Soulseek.csproj", Project(@".\.CodeAnalysis\CodeAnalysis.ruleset", @".\.CodeAnalysis\stylecop.json"));
+        Write("tests/Unit/Unit.csproj", Project(@"..\.CodeAnalysis\CodeAnalysis.ruleset", @"..\.CodeAnalysis\stylecop.json"));
+        Write("tests/Integration/Integration.csproj", Project(@"..\.CodeAnalysis\CodeAnalysis.ruleset", @"..\.CodeAnalysis\stylecop.json"));
+        Write("examples/Console/Console.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+
+        // A ruleset only a project without StyleCop selects doesn't count either.
+        Write("examples/Web/Web.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><CodeAnalysisRuleSet>web.ruleset</CodeAnalysisRuleSet></PropertyGroup></Project>");
+        Write("examples/Web/web.ruleset", "<RuleSet Name=\"w\" ToolsVersion=\"17.0\"><Rules AnalyzerId=\"StyleCop.Analyzers\" RuleNamespace=\"StyleCop.Analyzers\"><Rule Id=\"SA1101\" Action=\"Error\" /></Rules></RuleSet>");
+
+        var setup = StyleCopSetup.Read(root);
+        var main = Migration.Generate(setup, root);
+        var plan = Migration.Plan(setup, root, main);
+
+        Assert.False(setup.IsOn("SA1101"));  // off in every ruleset of a StyleCop project
+        Assert.Contains("dotnet_diagnostic.IDE0009.severity = none", main.Lines);
+        var sections = plan[".editorconfig"].ToDictionary(s => s.Section, s => s.Lines);
+        Assert.Equal(["{src,tests}/**.cs", "src/**.cs", "tests/**.cs"], sections.Keys);
+        Assert.Contains("dotnet_diagnostic.BRO1107.severity = none", sections["src/**.cs"]);    // SA1116 off in src only
+        Assert.Contains("dotnet_diagnostic.BRO1001.severity = none", sections["tests/**.cs"]);  // SA1201 off in tests only
+
+        // The header text of the most used stylecop.json (tests: two projects) is the main one; src gets its own. Both keep
+        // their ';' and leading spaces, encoded.
+        Assert.Contains(@"stylebro_file_header_copyright = \u0020\u0020\u0020\u0020Copyright (c) {companyName}. All rights reserved.", sections["{src,tests}/**.cs"]);
+        Assert.Contains(@"stylebro_file_header_copyright = \u0020\u0020\u0020\u0020Copyright (c) {companyName}.\n\n    Only version 3\u003B no later one.", sections["src/**.cs"]);
+        Assert.Contains(Migration.UnformattedPrefix + "examples", sections["{src,tests}/**.cs"][0]);
+        Assert.Empty(setup.Warnings);
+
+        // Two projects in one folder with different settings: warned about, not picked silently.
+        Write("tests/Unit/Other.csproj", Project(@"..\.CodeAnalysis\CodeAnalysis.ruleset", @"..\..\src\.CodeAnalysis\stylecop.json"));
+        Assert.Contains(StyleCopSetup.Read(root).Warnings, w => w.Contains("tests/Unit (Other.csproj, Unit.csproj)", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -1283,7 +1336,12 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Equal(3, rules["BRO1001"]["src/A.cs"]); // the first reported line, for the sample
         Assert.Equal(new[] { "src/A.cs", "src/Spaces.cs" }, rules["IDE0055"].Keys);
         Assert.Equal(new[] { "src/Moved.cs" }, rules["other"].Keys);
-        Assert.Equal(new[] { ("IDE0055", "src/A.cs", 4), ("BRO1001", "src/A.cs", 3), ("BRO1514", "src/B.cs", 5) }, PreviewCommand.Samples(rules, 3));
+
+        // A file only that rule changed comes first: in A.cs the hunk near a reported line may be the other rule's change.
+        var samples = PreviewCommand.Samples(rules, 3).ToList();
+        Assert.Equal(new[] { ("IDE0055", "src/Spaces.cs", 0), ("BRO1001", "src/A.cs", 3), ("BRO1514", "src/B.cs", 5) }, samples.Select(s => (s.Id, s.File, s.Line)));
+        Assert.Equal(new[] { "IDE0055" }, samples[1].Also);
+        Assert.Empty(samples[0].Also);
 
         var summary = PreviewCommand.FormatSummary(4, changes, rules, new[] { true, false });
         Assert.StartsWith("Format: 4 files, 4 reported changes, clean after 1 run", summary);
@@ -1360,7 +1418,7 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Contains("dotnet_diagnostic.BRO1313.severity = warning", lines);   // S927; off after the migration otherwise
         Assert.Contains("dotnet_diagnostic.BRO1135.severity = warning", lines);   // S818
         Assert.Contains("stylebro_upper_case_literal_suffixes = l_only", lines);
-        Assert.Contains("stylebro_keep_overloads_together = true", lines);       // S4136: BRO1001 is on (StyleCop's defaults)
+        Assert.Contains("stylebro_keep_overloads_together = same_access", lines);       // S4136: BRO1001 is on (StyleCop's defaults)
         Assert.DoesNotContain("dotnet_diagnostic.BRO1142.severity = warning", lines);  // S1659 is off
         Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1313.severity", StringComparison.Ordinal));
         Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1309.severity", StringComparison.Ordinal));  // on through SA1300 already
@@ -1486,7 +1544,7 @@ public sealed partial class MigrationTests : IDisposable
         var config = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("Sonar rules on:", output, StringComparison.Ordinal);
         Assert.Contains("dotnet_diagnostic.CA1822.severity = warning\n", config, StringComparison.Ordinal);
-        Assert.Contains("stylebro_keep_overloads_together = true\n", config, StringComparison.Ordinal);  // BRO1001 is on in the preset
+        Assert.Contains("stylebro_keep_overloads_together = same_access\n", config, StringComparison.Ordinal);  // BRO1001 is on in the preset; S4136 groups overloads of one access
         Assert.Contains("dotnet_diagnostic.IDE0055.severity = warning\n", config, StringComparison.Ordinal);
         Assert.Single(System.Text.RegularExpressions.Regex.Matches(config, "# BEGIN stylebro-migrate"));
 

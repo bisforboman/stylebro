@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using StyleBro.Analyzers.Documentation;
 
 namespace StyleBro.Migrate;
 
@@ -25,8 +26,13 @@ internal static class Migration
     public const string EndMarker = "# END stylebro-migrate";
     public const string MainSection = "*.cs";
 
+    /// <summary>How the block names the folders without StyleCop, which 'format' leaves alone (<see cref="UnformattedFolders"/>).</summary>
+    public const string UnformattedPrefix = "# No StyleCop ran in: ";
+
     /// <summary>The comment above a vendored folder's generated_code section.</summary>
     public const string VendoredComment = "# Vendored code (someone else's): formatting and StyleBro leave it alone, like generated code";
+
+    private const string UnformattedSuffix = "; 'stylebro-migrate format' leaves them alone (remove this line to format them)";
 
     /// <summary>The StyleBro rules that read documentation as XML, like the StyleCop rules they replace.</summary>
     private static readonly HashSet<string> XmlDocumentationRules = new(StringComparer.Ordinal)
@@ -225,6 +231,17 @@ internal static class Migration
             result.Notes.Add($"Kept the repository's own settings for: {string.Join(", ", kept.Select(KeyOf))}.");
         }
 
+        // Line endings, judged like init does: without end_of_line 'format' writes the OS's ending into the lines it rewrites
+        // (Soulseek.NET, LF: 8 files with mixed endings after a Windows run).
+        if (fieldStyle is null && !own.Contains("end_of_line") && Conventions.LineEndings(root) is var (endOfLine, endings) && endings is not null)
+        {
+            result.Notes.Add(endings);
+            if (endOfLine is not null)
+            {
+                lines.Add(endOfLine);
+            }
+        }
+
         // Sonar's rules turn on what fixes them, also rules StyleCop doesn't have: a rule on through either is on.
         result.Sonar = sonar?.Apply(lines, id => lines.Any(l => l.StartsWith($"dotnet_diagnostic.{id}.severity = ", StringComparison.Ordinal) && !l.EndsWith("= none", StringComparison.Ordinal)), own);
 
@@ -310,9 +327,11 @@ internal static class Migration
             main.Lines.RemoveAll(line => sortKeys.Contains(KeyOf(line)));
         }
 
+        // Where StyleCop didn't run, nothing changes, whitespace included: 'format' reads the folders from this line.
+        var mainLines = setup.Folders is null || setup.FoldersWithout.Count == 0 ? main.Lines : [UnformattedLine(setup.FoldersWithout), .. main.Lines];
         var plan = new SortedDictionary<string, List<(string, List<string>)>>(StringComparer.OrdinalIgnoreCase)
         {
-            [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, main.Lines)],
+            [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, mainLines)],
         };
         foreach (var folder in MigrationFolders(root))
         {
@@ -404,9 +423,31 @@ internal static class Migration
             .Where(f => folders is null || folders.Any(folder => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), folder)))
             .Select(f => Nearest(Path.GetDirectoryName(Path.GetFullPath(f))))
             .DefaultIfEmpty(Path.Combine(root, "Directory.Build.props"))
+            .Select(StyleCopSetup.OnDisk)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>The comment line naming the folders (relative, '/'-separated) 'format' leaves alone.</summary>
+    public static string UnformattedLine(IEnumerable<string> folders) => UnformattedPrefix + string.Join(", ", folders) + UnformattedSuffix;
+
+    /// <summary>
+    /// The folders (relative, with a trailing '/', as 'dotnet format --exclude' needs) the stylebro-migrate block in the root
+    /// .editorconfig names as without StyleCop: the migration changed no rule there, so 'format' doesn't touch them either
+    /// (its whitespace pass ignores rule severities: Soulseek.NET's examples were reformatted).
+    /// </summary>
+    public static List<string> UnformattedFolders(string root)
+    {
+        var path = Path.Combine(root, ".editorconfig");
+        var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
+        var line = block.Value.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.StartsWith(UnformattedPrefix, StringComparison.Ordinal));
+        var end = line?.IndexOf(';', UnformattedPrefix.Length) ?? -1;
+        return line is null
+            ? []
+            : line.Substring(UnformattedPrefix.Length, (end < 0 ? line.Length : end) - UnformattedPrefix.Length).Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Select(f => f.TrimEnd('/') + "/")
+                .ToList();
     }
 
     /// <summary>The block that goes into an .editorconfig.</summary>
@@ -655,8 +696,8 @@ internal static class Migration
         setup.Setting("documentationRules", "companyName")?.GetString() is { Length: > 0 } name ? name : null;
 
     /// <summary>
-    /// stylecop.json's copyrightText as an .editorconfig value: line breaks as '\n', its custom variables filled in.
-    /// {companyName} and {fileName} stay; both BRO1615 and IDE0073 fill in {fileName} per file.
+    /// stylecop.json's copyrightText with its custom variables filled in (line breaks as they are). {companyName} and
+    /// {fileName} stay; both BRO1615 and IDE0073 fill in {fileName} per file.
     /// </summary>
     private static string CopyrightTemplate(StyleCopSetup setup)
     {
@@ -669,17 +710,21 @@ internal static class Migration
             }
         }
 
-        return text.Replace("\r\n", "\n").Replace("\n", "\\n");
+        return text.Replace("\r\n", "\n");
     }
 
-    /// <summary>BRO1615's settings, from stylecop.json's documentationRules.</summary>
+    /// <summary>
+    /// BRO1615's settings, from stylecop.json's documentationRules. Encoded: ';' and '#' start a comment anywhere in an
+    /// .editorconfig value and the value is trimmed (Soulseek.NET's GPL text was cut at 'WARRANTY;', and BRO1615 rewrote
+    /// 462 headers without the rest of the license).
+    /// </summary>
     private static void AddFileHeader(StyleCopSetup setup, List<string> lines)
     {
-        lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.CompanyKey} = {Company(setup)}");
-        lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.CopyrightKey} = {CopyrightTemplate(setup)}");
+        lines.Add($"{FileHeaderOptions.CompanyKey} = {FileHeaderOptions.Encode(Company(setup))}");
+        lines.Add($"{FileHeaderOptions.CopyrightKey} = {FileHeaderOptions.Encode(CopyrightTemplate(setup))}");
         if (setup.Setting("documentationRules", "headerDecoration")?.GetString() is { Length: > 0 } decoration)
         {
-            lines.Add($"{StyleBro.Analyzers.Documentation.FileHeaderOptions.DecorationKey} = {decoration}");
+            lines.Add($"{FileHeaderOptions.DecorationKey} = {FileHeaderOptions.Encode(decoration)}");
         }
     }
 
@@ -914,10 +959,17 @@ internal static class Migration
         if (!XmlHeader(setup))
         {
             var textOff = new[] { "SA1635", "SA1636" }.Where(sa => !setup.IsOn(sa)).ToList();
-            if (setup.IsOn("SA1633") && textOff.Count == 0)
+            var template = CopyrightTemplate(setup).Replace("{companyName}", Company(setup));
+            if (setup.IsOn("SA1633") && textOff.Count == 0 && template.IndexOfAny([';', '#']) >= 0)
+            {
+                // The SDK reads file_header_template without escapes: the text would be cut at the first ';' or '#'.
+                Rule("IDE0073");
+                result.Reasons["SA1633"] = "the header text has a ';' or '#', which IDE0073's file_header_template can't hold (an .editorconfig value ends there)";
+            }
+            else if (setup.IsOn("SA1633") && textOff.Count == 0)
             {
                 Rule("IDE0073", "SA1633", "SA1635", "SA1636");
-                lines.Add("file_header_template = " + CopyrightTemplate(setup).Replace("{companyName}", Company(setup)));
+                lines.Add("file_header_template = " + template.Replace("\n", "\\n"));
             }
             else
             {

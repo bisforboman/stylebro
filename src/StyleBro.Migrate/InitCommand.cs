@@ -33,6 +33,9 @@ internal static class InitCommand
     /// <summary>The end marker of the --modernize block.</summary>
     public const string ModernizeEnd = "# END stylebro-modernize";
 
+    /// <summary>The comment above the detected conventions in the block.</summary>
+    public const string ConventionsHeader = "# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)";
+
     /// <summary>The first line of the detected conventions in the output (the preview shows that part).</summary>
     public const string DetectedHeader = "Conventions in the code";
 
@@ -92,7 +95,7 @@ internal static class InitCommand
         var detected = new List<string>();
         if (!migrated)
         {
-            var (lines, report) = Detect(root, ownSettings, sonarLines);
+            var (lines, report) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
             detected = lines;
             if (report.Count > 0)
             {
@@ -195,7 +198,7 @@ internal static class InitCommand
 
         if (detected is { Count: > 0 })
         {
-            template += "\n\n# Conventions in this repository's code (stylebro-migrate init counted them)\n" + string.Join("\n", detected);
+            template += "\n\n" + ConventionsHeader + "\n" + string.Join("\n", detected);
         }
 
         if (plainHeader)
@@ -220,11 +223,15 @@ internal static class InitCommand
     /// <summary>
     /// The conventions the repository's code follows (<see cref="Conventions"/>): the lines to write, and the report.
     /// Settings the root .editorconfig or the Sonar setup (<paramref name="sonarLines"/>) set win, and so does an SDK naming
-    /// rule for private fields (BRO1303 follows it).
+    /// rule for private fields (BRO1303 follows it). <paramref name="previous"/>: the convention lines an earlier init wrote
+    /// (<see cref="PreviousConventions"/>); they stay as they are, because the code was counted before StyleBro formatted
+    /// it: counted again, StyleBro's own output would decide (Stateless: 28 of 29 switch sections without a blank line gave
+    /// 'omit'; after a format run a second init found them mixed and turned BRO1526 off).
     /// </summary>
-    public static (List<string> Lines, List<string> Report) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines)
+    public static (List<string> Lines, List<string> Report) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
     {
         var decided = new Dictionary<string, string>(StringComparer.Ordinal);
+        var kept = new List<string>();
         foreach (var convention in Conventions.All)
         {
             if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
@@ -236,6 +243,12 @@ internal static class InitCommand
                 var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
                 decided[convention.Key] = $"set by the Sonar setup ({line.Substring(line.IndexOf('=') + 1).Trim()})";
             }
+            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>()]) is { Count: > 0 } lines)
+            {
+                var setting = lines.Last();
+                decided[convention.Key] = $"kept from the last init ({setting.Substring(setting.IndexOf('=') + 1).Trim()})";
+                kept.AddRange(lines);
+            }
         }
 
         if (!decided.ContainsKey(StyleBro.Analyzers.Naming.FieldNames.StyleKey) && FieldNamingRule(own) is { } rule)
@@ -243,7 +256,26 @@ internal static class InitCommand
             decided[StyleBro.Analyzers.Naming.FieldNames.StyleKey] = $"the naming rule dotnet_naming_rule.{rule} decides";
         }
 
-        return Conventions.Decide(Conventions.Count(root, own), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)), own);
+        // The using order is decided apart from the list (two keys): kept the same way.
+        var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
+        kept.AddRange(usings);
+        var (detected, report) = Conventions.Decide(Conventions.Count(root, own), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own);
+        return ([.. kept, .. detected], report);
+    }
+
+    /// <summary>
+    /// The convention lines (the part under <see cref="ConventionsHeader"/>) of the init block in an existing root
+    /// .editorconfig, or none: without an init block, or one from 'stylebro-migrate --write'.
+    /// </summary>
+    public static List<string> PreviousConventions(string? editorConfig)
+    {
+        var text = editorConfig?.Replace("\r\n", "\n") ?? string.Empty;
+        var begin = text.IndexOf(Migration.BeginMarker + " (stylebro-migrate init", StringComparison.Ordinal);
+        var end = begin < 0 ? -1 : text.IndexOf(Migration.EndMarker, begin, StringComparison.Ordinal);
+        var header = end < 0 ? -1 : text.IndexOf("# Conventions in this repository's code", begin, end - begin, StringComparison.Ordinal);
+        return header < 0
+            ? []
+            : text.Substring(header, end - header).Split('\n').Skip(1).TakeWhile(l => l.Trim().Length > 0 && !l.TrimStart().StartsWith('[')).ToList();
     }
 
     /// <summary>
@@ -399,6 +431,34 @@ internal static class InitCommand
     /// <summary>Whether an MSBuild file under the root sets EnforceCodeStyleInBuild to true (then init doesn't suggest it).</summary>
     public static bool EnforcesCodeStyleInBuild(string root) =>
         StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<EnforceCodeStyleInBuild>\s*true\s*<", RegexOptions.IgnoreCase));
+
+    /// <summary>The previous lines that set one of the keys, each with the '# init:' comments right above it.</summary>
+    private static List<string> KeptLines(IReadOnlyList<string>? previous, IReadOnlyCollection<string> keys)
+    {
+        var result = new List<string>();
+        for (var i = 0; i < (previous?.Count ?? 0); i++)
+        {
+            if (KeyOf(previous![i]) is { } key && keys.Contains(key, StringComparer.OrdinalIgnoreCase))
+            {
+                var first = i;
+                while (first > 0 && previous[first - 1].StartsWith("# init:", StringComparison.Ordinal))
+                {
+                    first--;
+                }
+
+                result.AddRange(previous.Skip(first).Take(i - first + 1));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>The key of a 'key = value' line, or null for comments.</summary>
+    private static string? KeyOf(string line)
+    {
+        var equals = line.IndexOf('=');
+        return line.TrimStart().StartsWith('#') || equals <= 0 ? null : line.Substring(0, equals).Trim();
+    }
 
     private static string List(IReadOnlyList<string> items) => string.Join(", ", items.Take(3)) + (items.Count > 3 ? ", ..." : string.Empty);
 

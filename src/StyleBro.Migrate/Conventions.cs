@@ -156,7 +156,7 @@ internal static class Conventions
                 CountConditional(tree, own);
                 if (LineEnding(text) is var ending and >= 0)
                 {
-                    _ = converted.Contains(Path.GetFullPath(file)) ? own[ConvertedKey][0]++ : own[EndOfLineKey][ending]++;
+                    _ = converted.TryGetValue(Path.GetFullPath(file), out var byAttribute) ? own[ConvertedKey][byAttribute ? 1 : 0]++ : own[EndOfLineKey][ending]++;
                 }
 
                 return (File: file, Tree: tree, Counts: own);
@@ -287,7 +287,7 @@ internal static class Conventions
     {
         var counts = All.ToDictionary(c => c.Key, _ => new int[2], StringComparer.Ordinal);
         counts[UsingsKey] = new int[4];
-        counts[ConvertedKey] = new int[1];
+        counts[ConvertedKey] = new int[2];
         return counts;
     }
 
@@ -304,17 +304,49 @@ internal static class Conventions
     }
 
     /// <summary>
-    /// The files under the root whose line ending git converts on checkout (full paths): 'git ls-files --eol' shows another
-    /// ending in the working tree than in the index, and no 'eol' attribute fixes it (<see cref="ConvertedKey"/>).
+    /// The files under the root whose line ending git converts on checkout (full paths), each with whether a .gitattributes
+    /// 'text' attribute converts it (else core.autocrlf does): 'git ls-files --eol' shows another ending in the working tree
+    /// than in the index, and no 'eol' attribute fixes it (<see cref="ConvertedKey"/>).
     /// </summary>
-    public static HashSet<string> ConvertedByGit(string root)
+    public static Dictionary<string, bool> ConvertedByGit(string root)
     {
         var (code, output) = PreviewCommand.Git(root, "ls-files", "--eol", "-z");
-        return new HashSet<string>(code == 0 ? Converted(output).Select(f => Path.GetFullPath(Path.Combine(root, f))) : Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+        return (code == 0 ? Converted(output) : []).ToDictionary(f => Path.GetFullPath(Path.Combine(root, f.Path)), f => f.ByAttribute, StringComparer.OrdinalIgnoreCase);
     }
 
-    /// <summary>The paths in 'git ls-files --eol -z' output ('i/lf    w/crlf  attr/text=auto \tpath') that git converts.</summary>
-    public static IEnumerable<string> Converted(string output)
+    /// <summary>
+    /// The C# files' line endings for 'stylebro-migrate': init's line-ending convention alone (files git converts on checkout
+    /// don't count). The end_of_line line when the files clearly agree (none when mixed or too few), and what to report
+    /// (null without C# files).
+    /// </summary>
+    public static (string? Line, string? Report) LineEndings(string root)
+    {
+        var counts = NewCounts();
+        var converted = ConvertedByGit(root);
+        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
+        {
+            var text = File.ReadAllText(file);
+            if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text) && LineEnding(text) is var ending and >= 0)
+            {
+                _ = converted.TryGetValue(Path.GetFullPath(file), out var byAttribute) ? counts[ConvertedKey][byAttribute ? 1 : 0]++ : counts[EndOfLineKey][ending]++;
+            }
+        }
+
+        var (lf, crlf) = (counts[EndOfLineKey][0], counts[EndOfLineKey][1]);
+        if (lf + crlf + counts[ConvertedKey].Sum() == 0)
+        {
+            return (null, null);
+        }
+
+        var winner = lf + crlf >= MinimumAgreeing ? Winner(lf, crlf) : -1;
+        var found = winner < 0 ? $"{lf} LF, {crlf} CRLF" : $"{(winner == 0 ? lf : crlf)} of {lf + crlf} {(winner == 0 ? "LF" : "CRLF")}";
+        var report = $"Line endings: C# files {found} -> " + (winner < 0 ? "end_of_line not set ('format' writes your OS's ending into the lines it changes)" : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}")
+            + (ConvertedNote(counts[ConvertedKey]) is { } note ? $"; {note}" : string.Empty);
+        return (winner < 0 ? null : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}", report);
+    }
+
+    /// <summary>The paths in 'git ls-files --eol -z' output ('i/lf    w/crlf  attr/text=auto \tpath') that git converts, and whether a 'text' attribute does.</summary>
+    public static IEnumerable<(string Path, bool ByAttribute)> Converted(string output)
     {
         foreach (var entry in output.Split('\0'))
         {
@@ -324,7 +356,7 @@ internal static class Conventions
             if (fields.Length >= 2 && fields[0] is "i/lf" or "i/crlf" && fields[1] is "w/lf" or "w/crlf"
                 && fields[0].Substring(2) != fields[1].Substring(2) && !info.Contains("eol=", StringComparison.Ordinal))
             {
-                yield return entry.Substring(tab + 1);
+                yield return (entry.Substring(tab + 1), System.Text.RegularExpressions.Regex.IsMatch(info, @"\battr/text\b"));
             }
         }
     }
@@ -769,9 +801,9 @@ internal static class Conventions
         }
 
         DecideUsings(counts, isSet, lines, report, summary);
-        if (counts.TryGetValue(ConvertedKey, out var converted) && converted[0] > 0)
+        if (counts.TryGetValue(ConvertedKey, out var converted) && ConvertedNote(converted) is { } note)
         {
-            report.Add($"  note     line endings: {Plural(converted[0], "file")} that git converts on checkout (core.autocrlf) don't count");
+            report.Add($"  note     line endings: {note}");
         }
 
         report.AddRange(Summary(summary));
@@ -797,6 +829,16 @@ internal static class Conventions
     public static IEnumerable<string> Summary(SummaryLists lists) => SummaryLines(lists).SelectMany(Wrap);
 
     /// <summary>A count with its noun: '1 place', '2 places'.</summary>
+    /// <summary>
+    /// "3 files that git converts on checkout (core.autocrlf) don't count", naming what converts them: [core.autocrlf,
+    /// a .gitattributes 'text' attribute]. Null when there are none.
+    /// </summary>
+    public static string? ConvertedNote(int[] converted)
+    {
+        var causes = new[] { "core.autocrlf", ".gitattributes 'text'" }.Where((_, i) => converted[i] > 0).ToList();
+        return causes.Count == 0 ? null : $"{Plural(converted.Sum(), "file")} that git converts on checkout ({string.Join(", ", causes)}) don't count";
+    }
+
     public static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? string.Empty : "s")}";
 
     /// <summary>

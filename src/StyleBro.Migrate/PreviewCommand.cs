@@ -32,6 +32,9 @@ internal static class PreviewCommand
     /// <summary>The options the preview adds to init and the migration ('--diff=file' counts as '--diff').</summary>
     public static readonly string[] Options = { "--diff", "--keep", "--all", "--project", "--no-restore" };
 
+    /// <summary>Why a '--no-restore' preview stops when the repository has no restore output to copy.</summary>
+    internal const string NoRestoreOutput = "--no-restore: the repository has no restore output (obj/project.assets.json), so 'dotnet format' would load no project and only fix whitespace. Run 'dotnet restore' first, or preview without --no-restore.";
+
     /// <summary>The label of files nothing was reported in.</summary>
     private const string Other = "other";
 
@@ -130,10 +133,7 @@ internal static class PreviewCommand
         {
             Step($"Copying the repository to {copy}", () => Copy(source, copy));
             var noRestore = rest.Contains("--no-restore");
-            if (noRestore)
-            {
-                CopyRestoreOutput(source, copy);
-            }
+            var restored = noRestore && CopyRestoreOutput(source, copy) > 0;
 
             MakeRepository(copy);
             var baseline = Head(copy);
@@ -170,6 +170,12 @@ internal static class PreviewCommand
                     Console.WriteLine("  --no-restore: ignored, the copy needs a restore for that reference.");
                 }
             }
+            else if (noRestore && !restored)
+            {
+                // Without the restore's output 'dotnet format --no-restore' loads no project: whitespace only, and "StyleBro
+                // reported nothing" (obj deleted).
+                return Fail(tail, 1, NoRestoreOutput);
+            }
 
             var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.Option)).ToList();
 
@@ -204,11 +210,8 @@ internal static class PreviewCommand
                         return Fail(tail, 1, "'dotnet format' wrote no report.");
                     }
 
+                    // Printed once, after the summary.
                     notLoaded = NotLoadedWarning(File.ReadAllText(reportFile));
-                    if (notLoaded is not null)
-                    {
-                        Console.WriteLine(notLoaded);
-                    }
                 }
 
                 var next = Tree(copy);
@@ -227,9 +230,9 @@ internal static class PreviewCommand
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
             JsonReport.Set("clean", !changed[^1]);
             Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed));
-            foreach (var (id, file, line) in Samples(attribution, 3))
+            foreach (var (id, file, line, also) in Samples(attribution, 3))
             {
-                Console.WriteLine($"Sample ({id}, {file}):");
+                Console.WriteLine($"Sample ({id}, {file}{(also.Length == 0 ? string.Empty : $"; {string.Join(", ", also)} changed this file too")}):");
                 foreach (var hunkLine in Hunk(Git(copy, "diff", "--cached", "-U0", configured, "--", file).Output, line, 12))
                 {
                     Console.WriteLine("  " + hunkLine);
@@ -393,15 +396,21 @@ internal static class PreviewCommand
         return text.ToString();
     }
 
-    /// <summary>One sample per top rule (not <see cref="Other"/>): its first file and line, a file not sampled yet where it can.</summary>
-    public static IEnumerable<(string Id, string File, int Line)> Samples(Dictionary<string, SortedDictionary<string, int>> attribution, int count)
+    /// <summary>
+    /// One sample per top rule (not <see cref="Other"/>): a file and its first line, preferring files no other rule changed
+    /// (the report's line numbers come from documents earlier fixes already changed, so in a file several rules changed the
+    /// hunk may show another rule's change: Stateless' BRO1603 sample showed BRO1606's sentence), then files not sampled yet.
+    /// <c>Also</c>: the other rules that changed the file, for the label.
+    /// </summary>
+    public static IEnumerable<(string Id, string File, int Line, string[] Also)> Samples(Dictionary<string, SortedDictionary<string, int>> attribution, int count)
     {
         var used = new HashSet<string>(StringComparer.Ordinal);
+        string[] Others(string id, string file) => attribution.Where(a => a.Key != id && a.Value.ContainsKey(file)).Select(a => a.Key).Order(StringComparer.Ordinal).ToArray();
         foreach (var (id, files) in attribution.Where(a => a.Key != Other).OrderByDescending(a => a.Value.Count).ThenBy(a => a.Key, StringComparer.Ordinal).Take(count))
         {
-            var (file, line) = files.FirstOrDefault(f => !used.Contains(f.Key)) is { Key: not null } unused ? unused : files.First();
+            var (file, line) = files.OrderBy(f => Others(id, f.Key).Length).ThenBy(f => used.Contains(f.Key)).First();
             used.Add(file);
-            yield return (id, file, line);
+            yield return (id, file, line, Others(id, file));
         }
     }
 
@@ -545,24 +554,24 @@ internal static class PreviewCommand
             // there fails the restore (NU1008), and one without adds the package a second time.
             if (File.Exists(file) && GlobalStyleCop.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(file))))
             {
-                File.WriteAllText(file, AddItem(File.ReadAllText(file), $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                EditFile(file, text => AddItem(text, $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
                 continue;
             }
 
             var packages = CentralPackages(file, root);
             if (packages is not null && versions.Add(packages))
             {
-                File.WriteAllText(packages, AddItem(File.ReadAllText(packages), $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                EditFile(packages, text => AddPackageVersion(text!, $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
             }
 
-            File.WriteAllText(file, AddItem(File.Exists(file) ? File.ReadAllText(file) : null, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
+            EditFile(file, text => AddItem(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
         }
 
         // LiteBus' analyzer project removes the StyleCop reference its Directory.Build.props adds, and turns central package
         // management off: StyleBro's version-less reference failed its restore (NU1015).
         foreach (var file in removes)
         {
-            File.WriteAllText(file, AddItem(File.ReadAllText(file), "<PackageReference Remove=\"StyleBro.Analyzers\" />"));
+            EditFile(file, text => AddItem(text, "<PackageReference Remove=\"StyleBro.Analyzers\" />"));
         }
 
         string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
@@ -599,7 +608,7 @@ internal static class PreviewCommand
             props.Add(Path.Combine(folder, "Directory.Build.props"));
             if (packages is null && File.Exists(Path.Combine(folder, "Directory.Packages.props")))
             {
-                packages = Path.Combine(folder, "Directory.Packages.props");
+                packages = StyleCopSetup.OnDisk(Path.Combine(folder, "Directory.Packages.props"));
             }
         }
 
@@ -618,6 +627,30 @@ internal static class PreviewCommand
         return end < 0 ? $"<Project>{newLine}{group}</Project>{newLine}" : project!.Substring(0, end) + group + project.Substring(end);
     }
 
+    /// <summary>
+    /// A Directory.Packages.props with <paramref name="item"/> (a PackageVersion) among its PackageVersion items, in
+    /// alphabetical order of Include like the usual sorted list (else in an ItemGroup of its own at the end).
+    /// </summary>
+    public static string AddPackageVersion(string packages, string item)
+    {
+        var name = Regex.Match(item, @"Include=""([^""]+)""").Groups[1].Value;
+        var versions = Regex.Matches(packages, @"<PackageVersion\b[^>]*?\bInclude\s*=\s*""([^""]+)""[^>]*?(?:/>|>.*?</PackageVersion\s*>)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        if (versions.Count == 0)
+        {
+            return AddItem(packages, item);
+        }
+
+        var newLine = packages.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        var next = versions.FirstOrDefault(m => string.Compare(m.Groups[1].Value, name, StringComparison.OrdinalIgnoreCase) > 0);
+        var anchor = next ?? versions[^1];
+        var lineStart = packages.LastIndexOf('\n', anchor.Index) + 1;
+        var indentation = packages.Substring(lineStart, anchor.Index - lineStart);
+        indentation = indentation.Trim().Length == 0 ? indentation : "    ";
+        return next is not null
+            ? packages.Insert(anchor.Index, item + newLine + indentation)
+            : packages.Insert(anchor.Index + anchor.Length, newLine + indentation + item);
+    }
+
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
     public static void MakeRepository(string folder)
     {
@@ -626,6 +659,18 @@ internal static class PreviewCommand
         // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so.
         File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n");
         Commit(folder, "baseline");
+    }
+
+    /// <summary>
+    /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark: File.ReadAllText drops it and
+    /// File.WriteAllText wouldn't write it back (Soulseek.NET's .csproj lost its BOM in the preview).
+    /// </summary>
+    public static void EditFile(string file, Func<string?, string> edit)
+    {
+        var bytes = File.Exists(file) ? File.ReadAllBytes(file) : null;
+        var bom = bytes is [0xEF, 0xBB, 0xBF, ..];
+        var text = bytes is null ? null : Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
+        File.WriteAllText(file, edit(text), new UTF8Encoding(bom));
     }
 
     /// <summary>Runs git; line endings and paths as they are (no autocrlf, no quoting), output as UTF-8.</summary>
@@ -680,6 +725,27 @@ internal static class PreviewCommand
         {
             Console.WriteLine($"Couldn't delete the copy ({e.Message}): {folder}");
         }
+    }
+
+    /// <summary>
+    /// For '--no-restore': the restore's output (project.assets.json and the files next to it) copied into the copy, so
+    /// 'dotnet format --no-restore' finds the packages restored in the repository. Returns how many projects' it found.
+    /// </summary>
+    internal static int CopyRestoreOutput(string source, string copy)
+    {
+        var count = 0;
+        foreach (var assets in Directory.EnumerateFiles(source, "project.assets.json", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true }))
+        {
+            count++;
+            var folder = Path.GetDirectoryName(assets)!;
+            foreach (var file in Directory.EnumerateFiles(folder).Where(f => Path.GetFileName(f) is "project.assets.json" or "project.nuget.cache" || f.EndsWith(".nuget.g.props", StringComparison.OrdinalIgnoreCase)
+                || f.EndsWith(".nuget.g.targets", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nuget.dgspec.json", StringComparison.OrdinalIgnoreCase)))
+            {
+                CopyFile(file, Path.Combine(copy, Path.GetRelativePath(source, file)));
+            }
+        }
+
+        return count;
     }
 
     private static string Part(string output, string firstLine)
@@ -836,22 +902,5 @@ internal static class PreviewCommand
         }
 
         return code == 0 ? 1 : code;
-    }
-
-    /// <summary>
-    /// For '--no-restore': the restore's output (project.assets.json and the files next to it) copied into the copy, so
-    /// 'dotnet format --no-restore' finds the packages restored in the repository.
-    /// </summary>
-    private static void CopyRestoreOutput(string source, string copy)
-    {
-        foreach (var assets in Directory.EnumerateFiles(source, "project.assets.json", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true }))
-        {
-            var folder = Path.GetDirectoryName(assets)!;
-            foreach (var file in Directory.EnumerateFiles(folder).Where(f => Path.GetFileName(f) is "project.assets.json" or "project.nuget.cache" || f.EndsWith(".nuget.g.props", StringComparison.OrdinalIgnoreCase)
-                || f.EndsWith(".nuget.g.targets", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".nuget.dgspec.json", StringComparison.OrdinalIgnoreCase)))
-            {
-                CopyFile(file, Path.Combine(copy, Path.GetRelativePath(source, file)));
-            }
-        }
     }
 }

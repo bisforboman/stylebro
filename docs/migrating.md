@@ -78,9 +78,11 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   topmost folders with no project without StyleCop below, and sibling folders sharing a name start no such project has
   as one wildcard, `src/{LiteBus,LiteBus.Inbox*}`), a
   sub-directory `.editorconfig` that covers all of them counts as the base (a `src/.editorconfig` that turns everything
-  but documentation off), and folders without StyleCop get no settings at all; the report lists them. Once StyleCop
-  is gone, `stylebro-migrate init` can set those up. When every project or none references StyleCop, the settings apply
-  to the whole repository.
+  but documentation off), and folders without StyleCop get no settings at all; the report lists them, and so does a
+  comment line at the top of the block (`# No StyleCop ran in: examples; ...`), which tells `stylebro-migrate format` to
+  leave those folders alone: its whitespace pass would reformat them whatever the rule severities say. Remove that line
+  to have them formatted. Once StyleCop is gone, `stylebro-migrate init` can set those up. When every project or none
+  references StyleCop, the settings apply to the whole repository.
 - StyleCop's own defaults (from the StyleCop 1.2 DLL's rule list).
 - `*.ruleset` files, then `*.globalconfig` files, then the root `.editorconfig`'s sections for all C# files. Later
   sources win, like in the compiler: `dotnet_diagnostic.SAxxxx.severity` and
@@ -90,9 +92,14 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   its own entries. When several rulesets or global configs disagree (one per project type), the strictest wins, a file
   that doesn't mention a rule counting with StyleCop's default, so production code keeps everything StyleCop enforced
   there.
-- A ruleset that a folder's `Directory.Build.props` selects (`<CodeAnalysisRuleSet>`, itself or through what it
-  imports) applies to that folder: a `tests` folder whose ruleset turns ordering off gets BRO1001 off in
-  `tests/.editorconfig`, while the rest keeps it.
+- **Each project's own ruleset and `stylecop.json`.** A project's ruleset is the `<CodeAnalysisRuleSet>` its project
+  file, its `Directory.Build.props`/`.targets` or what they import select (the last one counts), its `stylecop.json` the
+  one it adds as `<AdditionalFiles>`. Only projects that run StyleCop count: a sample project without StyleCop (and so
+  without a ruleset) doesn't bring StyleCop's defaults back. The repository-wide settings take the strictest of those
+  rulesets and the `stylecop.json` most projects use; projects whose ruleset or `stylecop.json` gives other settings get
+  a section of their own in the root `.editorconfig` (`[tests/**.cs]` with BRO1001 off where the tests' ruleset turns
+  ordering off, `[src/**.cs]` with src's own license header). Projects that share a folder but not their settings can't
+  be told apart by a section: the report warns and names the project whose settings the folder gets.
 - Settings the repository's MSBuild files point to are read wherever they are, also inside a git submodule (a shared
   infrastructure repository): imported `.props`/`.targets` (for `GenerateDocumentationFile` and the StyleCop version),
   the rulesets they select, and a `stylecop.json` added as `<AdditionalFiles>`. They're only read.
@@ -142,7 +149,14 @@ tool again replaces the block, so put your own settings outside it.
 - **File header.** With StyleCop's XML header and a `companyName`, [BRO1615](rules/BRO1615.md) is on and IDE0073 off;
   with `xmlHeader: false`, IDE0073 (with `file_header_template`) and BRO1615 off. Never both: each would add its
   header above the other's on every run. Without a `companyName` BRO1615 stays off (StyleCop's default company,
-  `PlaceholderCompany`, is nobody's real header).
+  `PlaceholderCompany`, is nobody's real header). An `.editorconfig` value ends at a `;` or `#` and loses its leading
+  spaces, so the header settings are written with escapes BRO1615 reads back: `\n` for a line break, `\u003B` for `;`,
+  `\u0023` for `#`, `\u005C` for a backslash, `\u0020` for a space at either end (a GPL text's `WARRANTY;` used to cut
+  the rest of the license off). IDE0073's `file_header_template` has no escapes: a plain header with a `;` or `#` leaves
+  IDE0073 off, and the report says why.
+- **Line endings.** `end_of_line` when your C# files clearly use one ending (judged like `init` does; files git
+  converts on checkout don't count) and your `.editorconfig` doesn't set it: without it `format` writes the OS's ending
+  into the lines it changes.
 - **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every
   build (SixLabors' shared infrastructure does). The report notes such a file: the block would be lost on the next
   build, so put it into the copied file (or stop the copy).
@@ -243,7 +257,7 @@ The Sonar rules that are on turn on these rules, at the strongest severity of th
 | S3052 (initialized to the default value) | CA1805 |
 | S3442 (public constructors of abstract classes) | CA1012 |
 | S3878 (arrays for `params`) | BRO1151 |
-| S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = true`, only when BRO1001 is on |
+| S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = same_access` (overloads with the same access, like S4136), only when BRO1001 is on |
 | S8969 (redundant `!`) | [BRO1147](rules/BRO1147.md) |
 
 **Not covered: S3260** (seal private classes). CA1852 would fix it, but its fix also seals private nested classes that
@@ -287,8 +301,8 @@ see [modernizing.md](modernizing.md).
 
 ## Limits
 
-- Per-project rulesets and global configs (`<CodeAnalysisRuleSet>` in a test project's props) can't be mapped to
-  paths; the strictest one wins. Add the test project's exceptions to a `.editorconfig` in its directory.
+- Global configs (`.globalconfig`) apply to every project here; with several, the strictest wins. Per-project rulesets
+  and `stylecop.json` files are mapped (above), except for projects that share a folder.
 - StyleCop's XML file header (`<copyright file=...>`, the default for SA1633) becomes [BRO1615](rules/BRO1615.md) with
   stylecop.json's `companyName`, `copyrightText` (custom `variables` filled in) and `headerDecoration`; a plain
   header (`"xmlHeader": false`) becomes IDE0073's `file_header_template`. BRO1615 is one rule for SA1633-SA1641, so
