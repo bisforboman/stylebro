@@ -504,6 +504,25 @@ public class FixOrderTests
         "BRO1519",
         "BRO1526");
 
+    // realworlddotnet: with BRO1107 off (init, mixed code), BRO1108 keeps the first item on the '(' line, in every order.
+    [Fact]
+    public Task ListsWithBro1107Off_KeepTheFirstItem() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int UpdateBySlug(string slug,
+                int request, int cancellationToken
+                ) => M(slug.Length
+                    , request, cancellationToken);
+
+            private static int M(int a, int b, int c) => a + b + c;
+        }
+        """,
+        "dotnet_diagnostic.BRO1107.severity = none\n",
+        "BRO1108",
+        "BRO1110",
+        "BRO1117");
+
     [Fact]
     public Task ElseAfterJump_BracesAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
         """
