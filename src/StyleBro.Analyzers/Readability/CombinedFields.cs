@@ -29,12 +29,14 @@ internal static class CombinedFields
     /// the dispose order is part of the code's meaning); 'for' initializers and 'fixed' aren't local declaration
     /// statements. Locals get no blank lines between them, and a local that shares its line with other code (in a
     /// single-line block, which BRO1508/BRO1509 expand) is split on that line: <c>{ int a, b; }</c> becomes
-    /// <c>{ int a; int b; }</c>, so the expansion and the split converge in either order.
+    /// <c>{ int a; int b; }</c>, so the expansion and the split converge in either order. <paramref name="useVar"/>
+    /// (<see cref="VarPreference.GetUseVar"/>): per variable, whether its declaration says 'var'; null means it can't be
+    /// split the way the 'var' preference wants.
     /// </summary>
-    public static TextChange? GetChange(LocalDeclarationStatementSyntax declaration, SourceText text) =>
-        declaration.UsingKeyword.IsKind(SyntaxKind.None) ? GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text) : null;
+    public static TextChange? GetChange(LocalDeclarationStatementSyntax declaration, SourceText text, bool[]? useVar) =>
+        declaration.UsingKeyword.IsKind(SyntaxKind.None) && useVar is not null ? GetChange(declaration, declaration.Declaration, declaration.SemicolonToken, text, useVar: useVar) : null;
 
-    private static TextChange? GetChange(SyntaxNode declaration, VariableDeclarationSyntax variableDeclaration, SyntaxToken semicolon, SourceText text, bool allowAdjacentSingleLine = false)
+    private static TextChange? GetChange(SyntaxNode declaration, VariableDeclarationSyntax variableDeclaration, SyntaxToken semicolon, SourceText text, bool allowAdjacentSingleLine = false, bool[]? useVar = null)
     {
         var variables = variableDeclaration.Variables;
         if (variables.Count < 2 || declaration.ContainsDirectives || declaration.ContainsDiagnostics
@@ -66,6 +68,7 @@ internal static class CombinedFields
         // Attributes, modifiers and type. A line break between the type and the first name (Serilog writes
         // 'const string' and then each constant on its own line) becomes a space: every new declaration is one line.
         var prefix = text.ToString(TextSpan.FromBounds(declaration.SpanStart, variables[0].SpanStart)).TrimEnd() + " ";
+        var varPrefix = text.ToString(TextSpan.FromBounds(declaration.SpanStart, variableDeclaration.Type.SpanStart)) + "var ";
 
         // BRO1505 wants a blank line between event fields (unless single-line ones may sit together), and below a field
         // that spans several lines (as SA1516 measures it: below the attributes). BRO1513 wants one above every copy of a
@@ -80,7 +83,7 @@ internal static class CombinedFields
                     || (declaration is EventFieldDeclarationSyntax && (!allowAdjacentSingleLine || multiLinePrefix))
                     || (declaration is BaseFieldDeclarationSyntax && text.ToString(variables[i - 1].Span).IndexOf('\n') >= 0) ? lineBreak + lineBreak : lineBreak)
                     + docText + indent)
-            + prefix + text.ToString(v.Span) + semicolon.Text);
+            + (useVar?[i] == true ? varPrefix : prefix) + text.ToString(v.Span) + semicolon.Text);
         return new TextChange(declaration.Span, string.Concat(parts));
     }
 }

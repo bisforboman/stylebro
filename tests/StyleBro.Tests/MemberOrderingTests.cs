@@ -69,6 +69,87 @@ public class MemberOrderingTests
         }
         """);
 
+    // Stateless: its tests read OnTransitionedEvent's fields as 'GetFields(...)[0]' and '[1]'; the sort swapped them.
+    [Fact]
+    public Task FieldsReadByPositionElsewhere_AreNotSorted() => VerifyNotFixedAsync(
+        [
+            """
+            using System;
+            using System.Collections.Generic;
+
+            internal class OnTransitionedEvent
+            {
+                event Action<int> onTransitioned;
+                readonly List<int> {|BRO1001:onTransitionedAsync|} = new List<int>();
+
+                public void Invoke(int x) => onTransitioned?.Invoke(x + onTransitionedAsync.Count);
+            }
+            """,
+            """
+            using System.Reflection;
+
+            internal class OnTransitionedEventTests
+            {
+                private readonly OnTransitionedEvent subject = new OnTransitionedEvent();
+
+                public object Read()
+                {
+                    FieldInfo[] fields = subject.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+                    return fields[1].GetValue(subject);
+                }
+            }
+            """,
+        ]);
+
+    [Fact]
+    public Task MembersOtherThanTheOnesReadByPosition_AreStillSorted() => VerifyFixAsync(
+        [
+            """
+            internal class Point
+            {
+                public int X;
+                public int Y;
+
+                public override string ToString() => X + "," + Y;
+
+                public {|BRO1001:Point|}()
+                {
+                }
+            }
+            """,
+            """
+            using System.Linq;
+
+            internal static class Reader
+            {
+                public static object Read(Point p) => typeof(Point).GetFields().First().GetValue(p);
+            }
+            """,
+        ],
+        [
+            """
+            internal class Point
+            {
+                public int X;
+                public int Y;
+
+                public Point()
+                {
+                }
+
+                public override string ToString() => X + "," + Y;
+            }
+            """,
+            """
+            using System.Linq;
+
+            internal static class Reader
+            {
+                public static object Read(Point p) => typeof(Point).GetFields().First().GetValue(p);
+            }
+            """,
+        ]);
+
     [Fact]
     public Task StructMembersOtherThanFields_AreStillOrdered() => VerifyFixAsync(
         """
@@ -685,6 +766,48 @@ public class MemberOrderingTests
         }
         """,
         editorConfig: "stylebro_keep_overloads_together = true\n" + KeepRegions);
+
+    // Sonar S4136 (10.31) groups overloads by name, accessibility, static and abstract: it doesn't flag 'public Dispose()'
+    // and 'private Dispose(bool)' apart, but does 'Find(int)' and 'Find(string)'.
+    [Fact]
+    public Task Overloads_SameAccess_GroupsOnlyOverloadsWithTheSameAccessibility() => VerifyFixAsync(
+        """
+        public class C : System.IDisposable
+        {
+            public void Dispose() { Dispose(true); System.GC.SuppressFinalize(this); }
+
+            public int Other() => 1;
+
+            private void Dispose(bool d) { }
+
+            public int {|BRO1001:Find|}(int a) => a;
+
+            public int Other2() => 1;
+
+            public int Find(string a) => a.Length;
+
+            public static int Find(long a) => 0;
+        }
+        """,
+        """
+        public class C : System.IDisposable
+        {
+            public static int Find(long a) => 0;
+
+            public void Dispose() { Dispose(true); System.GC.SuppressFinalize(this); }
+
+            public int Other() => 1;
+
+            public int Find(int a) => a;
+
+            public int Find(string a) => a.Length;
+
+            public int Other2() => 1;
+
+            private void Dispose(bool d) { }
+        }
+        """,
+        editorConfig: "stylebro_keep_overloads_together = same_access\ndotnet_diagnostic.BRO1509.severity = none\n");
 
     [Fact]
     public Task Overloads_KeptTogether_GoWhereTheirBestOverloadGoes() => VerifyFixAsync(

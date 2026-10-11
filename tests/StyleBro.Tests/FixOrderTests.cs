@@ -466,6 +466,83 @@ public class FixOrderTests
         "BRO1519",
         "BRO1526");
 
+    // Stateless (StateMachine.Async.cs): with 'omit', BRO1519 added a blank line after a section's '}' and BRO1504 one above
+    // a comment that starts the next section.
+    [Fact]
+    public Task SwitchSections_Omit_Bro1519AndBro1504LeaveTheGaps() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int M(object x, bool b)
+            {
+                switch (x)
+                {
+                    case int:
+                        return 0;
+                    // A comment that starts the section.
+                    case string s:
+                    {
+                        if (b) return 1;
+                        return 2;
+                    }
+
+                    case long:
+                        if (b)
+                            return 3;
+                        break;
+                    default:
+                        break;
+                }
+
+                return 4;
+            }
+        }
+        """,
+        "stylebro_blank_line_between_switch_sections = omit\n",
+        "BRO1504",
+        "BRO1514",
+        "BRO1519",
+        "BRO1526");
+
+    // realworlddotnet: with BRO1107 off (init, mixed code), BRO1108 keeps the first item on the '(' line, in every order.
+    [Fact]
+    public Task ListsWithBro1107Off_KeepTheFirstItem() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int UpdateBySlug(string slug,
+                int request, int cancellationToken
+                ) => M(slug.Length
+                    , request, cancellationToken);
+
+            private static int M(int a, int b, int c) => a + b + c;
+        }
+        """,
+        "dotnet_diagnostic.BRO1107.severity = none\n",
+        "BRO1108",
+        "BRO1110",
+        "BRO1117");
+
+    // The same list with BRO1107 on: the first item moves too, and every order gives the same text.
+    [Fact]
+    public Task ListsWithBro1107On_MoveTheFirstItem() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int UpdateBySlug(string slug,
+                int request, int cancellationToken
+                ) => M(slug.Length
+                    , request, cancellationToken);
+
+            private static int M(int a, int b, int c) => a + b + c;
+        }
+        """,
+        null,
+        "BRO1107",
+        "BRO1108",
+        "BRO1110",
+        "BRO1117");
+
     [Fact]
     public Task ElseAfterJump_BracesAndBlankLines() => AssertConvergesInEveryOrderWithConfigAsync(
         """

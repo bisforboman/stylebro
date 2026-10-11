@@ -41,7 +41,7 @@ public sealed class CombinedFieldsAnalyzer : DiagnosticAnalyzer
             {
                 var declaration = (LocalDeclarationStatementSyntax)c.Node;
                 if (declaration.Declaration.Variables.Count > 1
-                    && CombinedFields.GetChange(declaration, c.Node.SyntaxTree.GetText(c.CancellationToken)) is not null)
+                    && CombinedFields.GetChange(declaration, c.Node.SyntaxTree.GetText(c.CancellationToken), VarPreference.GetUseVar(declaration, c.Options.AnalyzerConfigOptionsProvider.GetOptions(declaration.SyntaxTree), c.Compilation.Options, () => c.SemanticModel, c.CancellationToken)) is not null)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(
                         Descriptors.CombinedLocals,

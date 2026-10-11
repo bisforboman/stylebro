@@ -146,7 +146,7 @@ public class SwitchSectionBlankLinesTests
         editorConfig: "stylebro_blank_line_between_switch_sections = omit_after_block\ndotnet_diagnostic.BRO1519.severity = none\n");
 
     [Fact]
-    public Task AfterAMultiLineBlock_IsLeftToBro1519_WhenItIsOn() => VerifyNoDiagnosticsAsync(
+    public Task Omit_AfterAMultiLineBlock_IsBro1526s_EvenWithBro1519On() => VerifyFixAsync(
         """
         public class C
         {
@@ -168,6 +168,32 @@ public class SwitchSectionBlankLinesTests
                             return;
                         }
 
+                    {|BRO1526:default|}:
+                        break;
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                    {
+                        break;
+                    }
+                    case 2:
+                        if (x > 0)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            return;
+                        }
                     default:
                         break;
                 }
@@ -175,6 +201,26 @@ public class SwitchSectionBlankLinesTests
         }
         """,
         editorConfig: "stylebro_blank_line_between_switch_sections = omit\n");
+
+    [Fact]
+    public Task Include_AfterAMultiLineBlock_IsLeftToBro1519() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                    {
+                        break;
+                    }
+                    case 2:
+                        break;
+                }
+            }
+        }
+        """);
 
     [Fact]
     public Task Include_ASingleLineBlock_IsNotBro1519s() => VerifyFixAsync(

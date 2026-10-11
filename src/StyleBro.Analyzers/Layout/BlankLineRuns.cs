@@ -17,7 +17,7 @@ namespace StyleBro.Analyzers.Layout;
 internal static class BlankLineRuns
 {
     /// <summary>Every finding in the tree: the rule, the diagnostic's span, and the edit that fixes it.</summary>
-    public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn)
+    public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include)
     {
         // Asked per token: read each rule's severity once per file.
         var known = new Dictionary<string, bool>();
@@ -47,7 +47,7 @@ internal static class BlankLineRuns
                     yield return (DiagnosticIds.BlankLineBeforeCloseBrace, token.Span, before);
                 }
 
-                if (afterOn && MissingBlankLineAfterCloseBrace(token, text, isOn) is { } after)
+                if (afterOn && MissingBlankLineAfterCloseBrace(token, text, isOn, switchSections) is { } after)
                 {
                     yield return (DiagnosticIds.BlankLineAfterCloseBrace, after.Location, after.Change);
                 }
@@ -63,9 +63,10 @@ internal static class BlankLineRuns
     /// <paramref name="gapIsReplaced"/>: the caller rewrites everything between the two tokens, so blank lines already
     /// there don't count.
     /// </summary>
-    public static bool WantsBlankLineAfter(SyntaxNode owner, SyntaxToken brace, SyntaxToken next, Func<string, bool> isOn, bool gapIsReplaced = false)
+    public static bool WantsBlankLineAfter(SyntaxNode owner, SyntaxToken brace, SyntaxToken next, Func<string, bool> isOn, bool gapIsReplaced = false, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include)
     {
         if (!isOn(DiagnosticIds.BlankLineAfterCloseBrace)
+            || SwitchSectionBlankLines.OmitsBlankLineBefore(next, switchSections)
             || owner.IsKind(SyntaxKind.Interpolation)
             || owner is DoStatementSyntax or BlockSyntax { Parent: DoStatementSyntax }
             || next.IsKind(SyntaxKind.EndOfFileToken))
@@ -124,12 +125,12 @@ internal static class BlankLineRuns
     /// with no comment after it, and <see cref="WantsBlankLineAfter"/>. With <paramref name="gapIsReplaced"/> blank lines
     /// already in the gap don't count, so it also says where BRO1519 keeps a blank line (BRO1526 leaves those places to it).
     /// </summary>
-    public static bool JudgesGapAfter(SyntaxToken brace, SyntaxToken next, SourceText text, Func<string, bool> isOn, bool gapIsReplaced)
+    public static bool JudgesGapAfter(SyntaxToken brace, SyntaxToken next, SourceText text, Func<string, bool> isOn, bool gapIsReplaced, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include)
     {
         // The cheap checks first: most '}' are followed by another '}' (WantsBlankLineAfter's first checks).
         return brace.TrailingTrivia.LastOrDefault(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)) is { RawKind: (int)SyntaxKind.EndOfLineTrivia }
             && !brace.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
-            && WantsBlankLineAfter(brace.Parent!, brace, next, isOn, gapIsReplaced)
+            && WantsBlankLineAfter(brace.Parent!, brace, next, isOn, gapIsReplaced, switchSections)
             && OpeningLine(brace, text) != text.Lines.GetLineFromPosition(brace.SpanStart).LineNumber;
     }
 
@@ -285,10 +286,10 @@ internal static class BlankLineRuns
     }
 
     /// <summary>SA1513: no blank line between '}' and the next statement; the fix adds one.</summary>
-    private static (TextSpan Location, TextChange Change)? MissingBlankLineAfterCloseBrace(SyntaxToken brace, SourceText text, Func<string, bool> isOn)
+    private static (TextSpan Location, TextChange Change)? MissingBlankLineAfterCloseBrace(SyntaxToken brace, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections)
     {
         var next = brace.GetNextToken(includeZeroWidth: true, includeSkipped: true);
-        if (!JudgesGapAfter(brace, next, text, isOn, gapIsReplaced: false))
+        if (!JudgesGapAfter(brace, next, text, isOn, gapIsReplaced: false, switchSections))
         {
             return null;
         }

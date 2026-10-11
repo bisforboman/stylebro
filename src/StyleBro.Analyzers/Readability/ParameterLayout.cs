@@ -47,7 +47,7 @@ internal static class ParameterLayout
         var line = GetLines(list, text, joinsEmptyLists);
         var openLine = line(open.SpanStart);
         return line(items[0].SpanStart) == openLine && line(items[1].SpanStart) > openLine
-            && !(options is not null && IsSameLine(options)) && CanRewrite(list, items) ? items[0] : null;
+            && !(options is not null && IsSameLine(options)) && CanRewrite(list, items, text) ? items[0] : null;
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ internal static class ParameterLayout
         }
 
         var misplaced = GetMisplacedItem(items, GetLines(list, text, joinsEmptyLists));
-        return misplaced is not null && CanRewrite(list, items) ? misplaced : null;
+        return misplaced is not null && CanRewrite(list, items, text) ? misplaced : null;
     }
 
     /// <summary>
@@ -118,6 +118,14 @@ internal static class ParameterLayout
     public static bool IsSameLine(AnalyzerConfigOptions options) =>
         options.TryGetValue(FirstItemKey, out var value) && value.Trim().Equals("same_line", System.StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Whether BRO1108's fix leaves a first item on the opening parenthesis's line (<see cref="GetChanges"/>'s
+    /// <c>sameLine</c>): with <c>same_line</c>, and when BRO1107, the rule that moves it, is off (owner's decision,
+    /// 2026-10-11: init turns BRO1107 off for code that mixes both forms, and BRO1108 moved the first item anyway).
+    /// </summary>
+    public static bool KeepsFirstItem(AnalyzerConfigOptions options, Func<string, bool> isOn) =>
+        IsSameLine(options) || !isOn(DiagnosticIds.SplitParametersStartOnNewLine);
+
     public static (SyntaxToken Open, IReadOnlyList<SyntaxNode> Items) GetList(SyntaxNode list)
     {
         return list switch
@@ -151,14 +159,14 @@ internal static class ParameterLayout
 
     /// <summary>
     /// The edits that move the later lines of an item that now starts a line at <paramref name="indentation"/>: each
-    /// line indented at least as deep as the item's old line keeps its depth relative to it. Nothing when a token spans
-    /// lines (a multi-line string: its text can't be reindented).
+    /// line indented at least as deep as the item's old line keeps its depth relative to it. A list with a token spanning
+    /// lines (a multi-line string) never gets here (<see cref="CanRewrite"/>).
     /// </summary>
     private static IEnumerable<TextChange> Reindent(SyntaxNode item, SourceText text, string indentation)
     {
         var first = Line(text, item.SpanStart);
         var last = Line(text, item.Span.End);
-        if (first == last || item.DescendantTokens().Any(t => Line(text, t.SpanStart) != Line(text, t.Span.End)))
+        if (first == last)
         {
             yield break;
         }
@@ -179,12 +187,16 @@ internal static class ParameterLayout
         new(text.ToString(line.Span).TakeWhile(c => c is ' ' or '\t').ToArray());
 
     /// <summary>
-    /// Skipped: lists with syntax errors, and lists with a comment or directive between the opening parenthesis and
-    /// an item or between items, since the fix replaces exactly those gaps.
+    /// Skipped: lists with syntax errors, lists with a comment or directive between the opening parenthesis and
+    /// an item or between items, since the fix replaces exactly those gaps, and lists with an item that has a token
+    /// spanning lines (a multi-line verbatim, raw or interpolated string): its text can't be reindented, and splitting
+    /// <c>Assert.Equal(@"line 1</c> / <c>line 2", actual)</c> around it only scatters the call (spreadcheetah).
     /// </summary>
-    private static bool CanRewrite(SyntaxNode list, IReadOnlyList<SyntaxNode> items)
+    private static bool CanRewrite(SyntaxNode list, IReadOnlyList<SyntaxNode> items, SourceText text)
     {
-        if (list.ContainsDiagnostics)
+        if (list.ContainsDiagnostics
+            || items.Any(i => Line(text, i.SpanStart) != Line(text, i.Span.End)
+                && i.DescendantTokens().Any(t => Line(text, t.SpanStart) != Line(text, t.Span.End))))
         {
             return false;
         }

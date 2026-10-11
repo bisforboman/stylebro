@@ -633,6 +633,53 @@ public class InternalTypeMethodTests
         },
         On);
 
+    // A nameof of another member with the same name doesn't keep the method public (matched by symbol, not by name).
+    [Fact]
+    public Task NameofOfAnotherMemberWithTheName_DoesNotKeepIt() => Verify.VerifyFixAsync(
+        new[]
+        {
+            """
+            internal class C
+            {
+                {|BRO1409:public|} void Run()
+                {
+                }
+            }
+            """,
+            """
+            internal static class D
+            {
+                internal static void Run()
+                {
+                }
+
+                internal static string Name() => nameof(Run);
+            }
+            """,
+        },
+        new[]
+        {
+            """
+            internal class C
+            {
+                internal void Run()
+                {
+                }
+            }
+            """,
+            """
+            internal static class D
+            {
+                internal static void Run()
+                {
+                }
+
+                internal static string Name() => nameof(Run);
+            }
+            """,
+        },
+        On);
+
     [Fact]
     public async Task ATypeAFriendAssemblyDerivesFrom_IsReportedButNotFixed()
     {

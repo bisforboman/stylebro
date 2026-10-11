@@ -39,6 +39,18 @@ internal static class ObservableOrder
         return !before.SequenceEqual(after);
     }
 
+    /// <summary>
+    /// Whether the sort changes the relative order of the type's fields, properties and events (every member with
+    /// <paramref name="everyMember"/>): code elsewhere reads them by position through reflection
+    /// (<see cref="ReflectionByPosition"/>). The fix checks this, since only it sees the other projects.
+    /// </summary>
+    public static bool ReordersReflectedMembers(TypeDeclarationSyntax type, int[] order, bool everyMember)
+    {
+        var members = type.Members;
+        bool IsRead(int i) => everyMember || members[i] is BaseFieldDeclarationSyntax or BasePropertyDeclarationSyntax;
+        return !Enumerable.Range(0, members.Count).Where(IsRead).SequenceEqual(order.Where(IsRead));
+    }
+
     private static bool HasSerializerAttribute(SyntaxList<AttributeListSyntax> lists) =>
         lists.SelectMany(l => l.Attributes).Any(a =>
         {

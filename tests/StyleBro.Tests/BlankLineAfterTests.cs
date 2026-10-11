@@ -349,4 +349,65 @@ public class BlankLineAfterTests
             }
         }
         """);
+
+    [Theory]
+    [InlineData("omit")]
+    [InlineData("omit_after_block")]
+    public Task CommentAboveASwitchSection_IsFine_WhenBro1526OmitsTheBlankLine(string mode) => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                    {
+                        break;
+                    }
+                    // Two.
+                    case 2:
+                        break;
+                }
+            }
+        }
+        """,
+        "stylebro_blank_line_between_switch_sections = " + mode + "\n");
+
+    [Fact]
+    public Task CommentAboveASwitchSection_IsReported_WhenOmitAfterBlockWantsTheBlankLine() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                        break;
+                    {|BRO1504:// Two.|}
+                    case 2:
+                        break;
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                        break;
+
+                    // Two.
+                    case 2:
+                        break;
+                }
+            }
+        }
+        """,
+        "stylebro_blank_line_between_switch_sections = omit_after_block\n");
 }

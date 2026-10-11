@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Maintainability;
+using StyleBro.Analyzers.Naming;
 using StyleBro.CodeFixes.Naming;
 using StyleBro.CodeFixes.Ordering;
 
@@ -61,10 +62,37 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
     {
         var names = await CamelCaseRenamer.GetNamesInCodeAsync(document.Project.Solution).ConfigureAwait(false);
         var name = method.Identifier.ValueText;
+        var symbol = model.GetDeclaredSymbol(method, cancellationToken);
         return names.Strings.Contains(name) ? KeptReason.NameInString
-            : names.Nameofs.Contains(name) ? KeptReason.NameInNameof
-            : await HasDerivedTypesElsewhereAsync(model.GetDeclaredSymbol(method, cancellationToken)?.ContainingType, document.Project, cancellationToken).ConfigureAwait(false) ? KeptReason.DerivedTypeInAnotherProject
+            : names.Nameofs.Contains(name) && await IsInNameofAsync(symbol, document.Project.Solution, cancellationToken).ConfigureAwait(false) ? KeptReason.NameInNameof
+            : await HasDerivedTypesElsewhereAsync(symbol?.ContainingType, document.Project, cancellationToken).ConfigureAwait(false) ? KeptReason.DerivedTypeInAnotherProject
             : null;
+    }
+
+    /// <summary>
+    /// Whether a <c>nameof(...)</c> refers to this method (<c>GetMethod(nameof(Run))</c> finds public methods only), not just
+    /// to something with its name. The names collected by text are the cheap check first.
+    /// </summary>
+    private static async Task<bool> IsInNameofAsync(ISymbol? method, Solution solution, CancellationToken cancellationToken)
+    {
+        if (method is null)
+        {
+            return true;
+        }
+
+        foreach (var referenced in await SymbolFinder.FindReferencesAsync(method, solution, cancellationToken).ConfigureAwait(false))
+        {
+            foreach (var reference in referenced.Locations)
+            {
+                if ((await reference.Document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))?.FindToken(reference.Location.SourceSpan.Start) is { } token
+                    && CamelCaseNames.IsNameofName(token))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static async Task<Document> FixDocumentAsync(Document document, ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken)

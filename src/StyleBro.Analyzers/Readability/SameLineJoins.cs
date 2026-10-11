@@ -52,7 +52,7 @@ internal static class SameLineJoins
             if (isOn(DiagnosticIds.ParametersOnSameOrSeparateLines)
                 && ParameterLayout.GetFirstMisplacedItem(list, text, () => isOn(DiagnosticIds.EmptyListOnOneLine)) is not null)
             {
-                changes.AddRange(ParameterLayout.GetChanges(list, text, Indentation.GetUnit(options), sameLine: ParameterLayout.IsSameLine(options)));
+                changes.AddRange(ParameterLayout.GetChanges(list, text, Indentation.GetUnit(options), sameLine: ParameterLayout.KeepsFirstItem(options, isOn)));
             }
 
             // A ')' the join takes along moves after the position: it doesn't change the column.

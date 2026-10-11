@@ -58,13 +58,15 @@ public sealed class CombinedFieldsCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var changes = new List<TextChange>();
-        var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var allowAdjacent = ElementSeparation.AllowsAdjacentSingleLineMembers(options);
+        var model = diagnostics.Any(d => d.Id == DiagnosticIds.CombinedLocals) ? await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) : null;
         foreach (var diagnostic in diagnostics)
         {
             var declaration = root.FindToken(diagnostic.Location.SourceSpan.Start).Parent?.AncestorsAndSelf()
                 .FirstOrDefault(n => n is BaseFieldDeclarationSyntax or LocalDeclarationStatementSyntax);
             if ((declaration is BaseFieldDeclarationSyntax field ? CombinedFields.GetChange(field, text, allowAdjacent)
-                : declaration is LocalDeclarationStatementSyntax local ? CombinedFields.GetChange(local, text) : null) is { } change)
+                : declaration is LocalDeclarationStatementSyntax local ? CombinedFields.GetChange(local, text, VarPreference.GetUseVar(local, options, document.Project.CompilationOptions, () => model, cancellationToken)) : null) is { } change)
             {
                 changes.Add(change);
             }

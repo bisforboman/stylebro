@@ -102,3 +102,15 @@ stylebro_allow_empty_single_line_blocks = true
 csharp_prefer_simple_default_expression = true
 stylebro_empty_string_style = literal
 stylebro_upper_case_literal_suffixes = l_only
+
+# BRO1108 with BRO1107 off (stylebro-migrate init turns it off for code that mixes both forms): the first item stays.
+[**/Articles.cs]
+dotnet_diagnostic.BRO1107.severity = none
+
+# BRO1526 'omit': no blank lines between switch sections, also after a block or above a comment (BRO1519, BRO1504).
+[**/Switches.cs]
+stylebro_blank_line_between_switch_sections = omit
+
+# BRO1142 writes 'var' where the repository's 'var' preference asks for it.
+[**/Cells.cs]
+csharp_style_var_for_built_in_types = true:warning

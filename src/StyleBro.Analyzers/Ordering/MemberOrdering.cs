@@ -111,6 +111,13 @@ internal static class MemberOrdering
         return null;
     }
 
+    /// <summary>The members' indexes in sorted order (slot by slot), or null when the container is left alone.</summary>
+    public static int[]? GetSortedOrder(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
+    {
+        var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
+        return keys is null ? null : SortedOrder(keys, segments, anchors);
+    }
+
     /// <summary>
     /// Returns the type with its members sorted. Blank-line layout stays with the position ("slot"),
     /// while comments, doc comments and attributes travel with the member.
@@ -270,7 +277,7 @@ internal static class MemberOrdering
 
         if (options.KeepOverloadsTogether)
         {
-            anchors = GetAnchors(members, keys, found);
+            anchors = GetAnchors(members, keys, found, options.OverloadsSameAccessOnly);
         }
 
         // Sorting must not change what field initializers compute, nor an order the runtime sees (struct layout,
@@ -284,15 +291,17 @@ internal static class MemberOrdering
     }
 
     /// <summary>
-    /// stylebro_keep_overloads_together: each method's group of overloads (same name, same region) sorts at the place of
+    /// stylebro_keep_overloads_together: each method's group of overloads (same name, same region; with same_access also the
+    /// same accessibility, static and abstract, like Sonar's S4136) sorts at the place of
     /// the overload that sorts first, the others right behind it in their own order. Constructors and indexers are their
     /// own kinds, so always together; operators aren't grouped ('==' and '!=' pairs stay as written). Every member's
     /// anchor is the index of that first overload (its own index when it has no overloads).
     /// </summary>
-    private static int[] GetAnchors(SyntaxList<MemberDeclarationSyntax> members, MemberKey[] keys, int[] segments)
+    private static int[] GetAnchors(SyntaxList<MemberDeclarationSyntax> members, MemberKey[] keys, int[] segments, bool sameAccessOnly)
     {
         (int, string)? Group(int i) => members[i] is MethodDeclarationSyntax method
-            ? (segments[i], method.ExplicitInterfaceSpecifier?.Name + "." + method.Identifier.ValueText)
+            ? (segments[i], method.ExplicitInterfaceSpecifier?.Name + "." + method.Identifier.ValueText
+                + (sameAccessOnly ? $"|{keys[i].Access}|{method.Modifiers.Any(SyntaxKind.StaticKeyword)}|{method.Modifiers.Any(SyntaxKind.AbstractKeyword)}" : string.Empty))
             : null;
 
         var anchors = Enumerable.Range(0, keys.Length).ToArray();

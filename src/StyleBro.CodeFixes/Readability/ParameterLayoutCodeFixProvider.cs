@@ -61,7 +61,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var indentUnit = Indentation.GetUnit(options);
-        var sameLine = ParameterLayout.IsSameLine(options);
+        var sameLine = ParameterLayout.KeepsFirstItem(options, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken));
         bool JoinsEmptyLists() => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.EmptyListOnOneLine, cancellationToken);
 
         // Once BRO1107 has moved the first item, BRO1108 wants every item on its own line: with it on, BRO1107 does that

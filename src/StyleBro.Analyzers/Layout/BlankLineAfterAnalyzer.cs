@@ -40,10 +40,12 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
             }
         }
 
-        var exempt = BlankLines.GetExemptPrefixes(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree));
+        var configOptions = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
+        var exempt = BlankLines.GetExemptPrefixes(configOptions);
+        var switchSections = SwitchSectionBlankLines.ReadMode(configOptions);
         foreach (var trivia in TreeWalk.Trivia(root))
         {
-            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken), exempt))
+            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken), exempt, switchSections))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.BlankLineBeforeComment, trivia.GetLocation()));
             }

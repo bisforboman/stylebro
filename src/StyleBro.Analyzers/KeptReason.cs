@@ -57,6 +57,9 @@ public enum KeptReason
 
     /// <summary>No declaration of the name can be renamed (public API, names a library prescribes).</summary>
     NothingToRename,
+
+    /// <summary>Code reads the type's members by position through reflection (<c>GetFields()[0]</c>), so sorting would change what it reads.</summary>
+    MembersReadByPosition,
 }
 
 /// <summary>
@@ -119,6 +122,7 @@ public sealed class KeptFinding
         KeptReason.NamespaceFromOutside => "part of the namespace comes from an assembly outside the solution",
         KeptReason.DerivedTypeInAnotherProject => "a type in another project derives from the type",
         KeptReason.UsedInProjectNotLoaded => "a project that doesn't target all of this one's frameworks uses the name, and no format run loads both, so the rename would miss that use",
+        KeptReason.MembersReadByPosition => "code reads the type's members by position through reflection (GetFields()[0]), so sorting them would change what it reads",
         _ => "no declaration can be renamed (public API, or names a library prescribes)",
     };
 

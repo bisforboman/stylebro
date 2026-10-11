@@ -18,7 +18,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_member_constants_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_static_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_readonly_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
-| `stylebro_keep_overloads_together` | `true`, `false` | `false` | [BRO1001](rules/BRO1001.md) |
+| `stylebro_keep_overloads_together` | `true`, `false`, `same_access` | `false` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_constructor_initializer_placement` | `own_line`, `same_line` | `own_line` | [BRO1105](rules/BRO1105.md) |
 | `stylebro_empty_string_style` | `string_empty`, `literal` | `string_empty` | [BRO1106](rules/BRO1106.md) |
 | `stylebro_split_list_first_item` | `next_line`, `same_line` | `next_line` | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) |

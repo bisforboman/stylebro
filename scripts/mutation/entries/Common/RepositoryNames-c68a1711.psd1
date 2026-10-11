@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/RepositoryNames.cs'
     Find = 'else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"'
     Replace = 'else if (false'
-    Tests = 'FieldNamingTests.NameofInAnotherType_KeepsTheName'
+    Tests = 'InternalTypeMethodTests.NamesInStringsOrNameof'
 }

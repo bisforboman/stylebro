@@ -48,7 +48,7 @@ internal enum MemberAccess
 /// stylebro_member_constants_first  = true
 /// stylebro_member_static_first     = true
 /// stylebro_member_readonly_first   = true
-/// stylebro_keep_overloads_together = false
+/// stylebro_keep_overloads_together = false | true | same_access
 /// </code>
 /// Kinds or accessibilities left out of a configured list keep their default relative order, after the listed ones.
 /// </summary>
@@ -104,8 +104,10 @@ internal sealed class MemberOrderOptions
         bool constantsFirst,
         bool staticFirst,
         bool readonlyFirst,
-        bool keepOverloadsTogether)
+        bool keepOverloadsTogether,
+        bool overloadsSameAccessOnly = false)
     {
+        OverloadsSameAccessOnly = overloadsSameAccessOnly;
         kindRanks = BuildRanks(kindOrder, KindCount);
         accessRanks = BuildRanks(accessOrder, AccessCount);
         ConstantsFirst = constantsFirst;
@@ -123,6 +125,12 @@ internal sealed class MemberOrderOptions
     /// <summary>Gets a value indicating whether methods and operators with the same name stay next to each other (Sonar S4136).</summary>
     public bool KeepOverloadsTogether { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether only overloads with the same accessibility, static-ness and abstract-ness count as a
+    /// group (<c>same_access</c>, exactly Sonar's S4136: <c>public Dispose()</c> and <c>private Dispose(bool)</c> may be apart).
+    /// </summary>
+    public bool OverloadsSameAccessOnly { get; }
+
     public int KindRank(MemberKind kind) => kindRanks[(int)kind];
 
     public int AccessRank(MemberAccess access) => accessRanks[(int)access];
@@ -134,14 +142,15 @@ internal sealed class MemberOrderOptions
         var constantsFirst = ReadBool(options, ConstantsFirstKey, true);
         var staticFirst = ReadBool(options, StaticFirstKey, true);
         var readonlyFirst = ReadBool(options, ReadonlyFirstKey, true);
-        var keepOverloadsTogether = ReadBool(options, KeepOverloadsTogetherKey, false);
+        var sameAccess = options.TryGetValue(KeepOverloadsTogetherKey, out var overloads) && overloads?.Trim().Equals("same_access", StringComparison.OrdinalIgnoreCase) == true;
+        var keepOverloadsTogether = sameAccess || ReadBool(options, KeepOverloadsTogetherKey, false);
 
         if (kindOrder is null && accessOrder is null && constantsFirst && staticFirst && readonlyFirst && !keepOverloadsTogether)
         {
             return Default;
         }
 
-        return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether);
+        return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether, sameAccess);
     }
 
     /// <summary>Configured entries rank first (in configured order); the rest follow in default order.</summary>
