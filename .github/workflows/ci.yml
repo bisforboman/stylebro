@@ -27,6 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The fold script's self-check, and every changelog fragment in changes/ parses (section names, no text before
+      # the first heading), so a malformed fragment fails the PR, not the release.
+      - name: Check changelog fragments
+        run: |
+          python3 scripts/changelog.py --test
+          python3 scripts/changelog.py --check
+
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
