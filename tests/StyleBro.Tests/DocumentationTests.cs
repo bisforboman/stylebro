@@ -1314,6 +1314,73 @@ public class DocumentationTests
         }
         """);
 
+    // Like StyleCop: a top-level <inheritdoc> turns off SA1612 and SA1620/SA1621 (vs-validation's Requires.cs), not
+    // SA1613 (unnamed parameter tags), nor an <inheritdoc> nested in a tag.
+    [Fact]
+    public Task InheritDoc_TurnsOffTagMatching_ButNotParameterNames() => VerifyFixAsync(
+        """
+        /// <summary>Tags.</summary>
+        public class Tags
+        {
+            /// <inheritdoc cref="Swapped(int, int)"/>
+            /// <param name="b">The b.</param>
+            /// <param name="a">The a.</param>
+            /// <param name="old">Old.</param>
+            /// <typeparam name="U">The U.</typeparam>
+            /// <typeparam name="T">The T.</typeparam>
+            public void Inherited<T, U>(int a, int b)
+            {
+            }
+
+            /// <summary>Swapped.</summary>
+            /// <inheritdoc cref="Inherited{T, U}(int, int)"/>
+            /// <param name="b">The b.</param>
+            /// {|BRO1612:<param>|}The a.</param>
+            /// <typeparam>The T.</typeparam>
+            public void Unnamed<T>(int a, int b)
+            {
+            }
+
+            /// <summary>Swapped.</summary>
+            /// <param name="{|BRO1611:b|}">The b. <inheritdoc cref="Inherited{T, U}(int, int)"/></param>
+            /// <param name="{|BRO1611:a|}">The a.</param>
+            public void Swapped(int a, int b)
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Tags.</summary>
+        public class Tags
+        {
+            /// <inheritdoc cref="Swapped(int, int)"/>
+            /// <param name="b">The b.</param>
+            /// <param name="a">The a.</param>
+            /// <param name="old">Old.</param>
+            /// <typeparam name="U">The U.</typeparam>
+            /// <typeparam name="T">The T.</typeparam>
+            public void Inherited<T, U>(int a, int b)
+            {
+            }
+
+            /// <summary>Swapped.</summary>
+            /// <inheritdoc cref="Inherited{T, U}(int, int)"/>
+            /// <param name="b">The b.</param>
+            /// <param name="a">The a.</param>
+            /// <typeparam>The T.</typeparam>
+            public void Unnamed<T>(int a, int b)
+            {
+            }
+
+            /// <summary>Swapped.</summary>
+            /// <param name="a">The a.</param>
+            /// <param name="b">The b. <inheritdoc cref="Inherited{T, U}(int, int)"/></param>
+            public void Swapped(int a, int b)
+            {
+            }
+        }
+        """);
+
     // Like StyleCop master (24dd9011): primary constructor parameters of classes, structs and records.
     [Fact]
     public Task PrimaryConstructorParameterTags_AreChecked() => VerifyFixAsync(

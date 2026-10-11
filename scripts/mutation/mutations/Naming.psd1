@@ -171,5 +171,10 @@
         @{ File = 'src/StyleBro.CodeFixes/Naming/CamelCaseRenamer.cs'; Find = 'else if (entry.Kind == RepositoryNames.StringKind && strings.Add(entry.Text))'; Replace = 'else if (false)'; Tests = 'KeptFindingsTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/NamespaceRenamer.cs'; Find = '&& entry.Text.Split('' '').Contains(oldPart))'; Replace = '&& false)'; Tests = 'KeptFindingsTests' }
         @{ File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'; Find = '.Outside.ContainsKey(oldName))'; Replace = '.Outside.ContainsKey(oldName) && false)'; Tests = 'KeptFindingsTests' }
+
+        # Fields in '*NativeMethods' classes keep their names, except SA1311's lower-case static readonly ones (2026-10-11)
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = ' || IsNativeMethodsName(field, name))'; Replace = ')'; Tests = 'FieldNamingTests.NativeMethods_KeepFieldNames_ExceptLowerCaseStaticReadonly' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = '!(field.IsStatic && field.IsReadOnly && char.IsLower(name[0]))'; Replace = 'true'; Tests = 'FieldNamingTests.NativeMethods_KeepFieldNames_ExceptLowerCaseStaticReadonly' }
+        @{ File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'; Find = ' && !HungarianNames.IsInNativeMethods(field))'; Replace = ')'; Tests = 'FieldNamingTests.NativeMethods_KeepFieldNames_ExceptLowerCaseStaticReadonly' }
     )
 }

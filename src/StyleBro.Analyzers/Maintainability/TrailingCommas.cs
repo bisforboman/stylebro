@@ -24,8 +24,8 @@ internal static class TrailingCommas
     /// Roslynator's RCS1260 omit), where a comma never saves a diff line.
     /// <para>
     /// Like StyleCop, the lists are array, object, collection and 'with' initializers, anonymous objects, enums, switch
-    /// expressions and (like StyleCop master) property patterns; a list is multi-line when its braces are on different
-    /// lines. The comma goes right after the last item's code, so before a trailing comment ('2 // last' becomes
+    /// expressions (not property patterns, like StyleCop 1.2.0-beta.556; only its unreleased master checks them); a
+    /// list is multi-line when its braces are on different lines. The comma goes right after the last item's code, so before a trailing comment ('2 // last' becomes
     /// '2, // last'). Lists with a preprocessor directive between their braces are skipped: which item is last can then
     /// depend on the build configuration, and in a multi-targeted project each target framework would want a different
     /// edit to the same file, which 'dotnet format' merges into conflict markers. The options are only read for a list
@@ -118,8 +118,6 @@ internal static class TrailingCommas
                 Describe(enumDeclaration.Members, enumDeclaration.OpenBraceToken, enumDeclaration.CloseBraceToken),
             SwitchExpressionSyntax switchExpression =>
                 Describe(switchExpression.Arms, switchExpression.OpenBraceToken, switchExpression.CloseBraceToken),
-            PropertyPatternClauseSyntax propertyPattern =>
-                Describe(propertyPattern.Subpatterns, propertyPattern.OpenBraceToken, propertyPattern.CloseBraceToken),
             _ => null,
         };
     }

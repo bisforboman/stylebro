@@ -36,4 +36,12 @@ namespace Probe
             + trailing_ + two__underscores + MAX_VALUE + Default_Value + Public_Field + protected_field + m_with_more
             + m_Upper;
     }
+
+    internal static class NativeMethods
+    {
+        private static int m_handle;
+        private static int last_error;
+
+        internal static int Use() => m_handle + last_error;
+    }
 }

@@ -10,7 +10,7 @@ namespace Probe
 
     public enum Single { A, B }
 
-    public class Point { public int X; public int Y; }
+    public class Point { public int X; public int Y; public Point Next; }
 
     public class Commas
     {
@@ -71,12 +71,20 @@ namespace Probe
                 X: 1,
                 Y: 2
             };
+            bool nestedPattern = point is
+            {
+                X: 1,
+                Next:
+                {
+                    Next: { Y: 2 }
+                }
+            };
             bool listPattern = items is
             [
                 1,
                 2
             ];
-            return (array, point, list, anon, dict, sw, collection, done, oneLine, comment, sameLineBrace, pattern, listPattern);
+            return (array, point, list, anon, dict, sw, collection, done, oneLine, comment, sameLineBrace, pattern, nestedPattern, listPattern);
         }
     }
 }

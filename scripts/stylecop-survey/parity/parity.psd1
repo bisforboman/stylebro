@@ -172,6 +172,11 @@
                 'StyleCop output only: Arrows.cs: []'
                 'StyleCop output only: Arrows.cs: []'
                 'StyleCop output only: Arrows.cs: []'
+                # A comment between the links of a call chain needs no blank line above it (owner's decision 2026-10-11).
+                'only StyleCop: BRO1504 Chains.cs(12,17)'
+                'only StyleCop: BRO1504 Chains.cs(16,17)'
+                'StyleCop output only: Chains.cs: []'
+                'StyleCop output only: Chains.cs: []'
             )
         }
         @{
@@ -243,10 +248,6 @@
                 # '2,}' breaks SA1001 (comma followed by whitespace).
                 'StyleBro output only: CommaEdges.cs: [                B = 2, };]'
                 'StyleCop output only: CommaEdges.cs: [                B = 2,};]'
-                # BRO1401: multi-line property patterns, like StyleCop master (94671b70); beta.556 doesn't check them.
-                'only StyleBro: BRO1401 Commas.cs(72,17)'
-                'StyleBro output only: Commas.cs: [                Y: 2,]'
-                'StyleCop output only: Commas.cs: [                Y: 2]'
             )
         }
         @{
@@ -309,13 +310,6 @@
                 'StyleCop output only: StaticFields.cs: [        private static int _Upper;]'
                 'StyleCop output only: StaticFields.cs: [        private static int __twice;]'
                 'StyleCop output only: StaticFields.cs: [        public int Sum() => count + other + _instances + _created + _Upper + __twice + Limit + Max + shared + inherited;]'
-                # StyleCop's naming rules skip classes named '*NativeMethods'; BRO1303 doesn't (an existing difference,
-                # SA1306 skips them too).
-                'only StyleBro: BRO1303 StaticFields.cs(21,28)'
-                'StyleBro output only: StaticFields.cs: [        private static int _handle;]'
-                'StyleBro output only: StaticFields.cs: [        public static int Get() => _handle;]'
-                'StyleCop output only: StaticFields.cs: [        private static int handle;]'
-                'StyleCop output only: StaticFields.cs: [        public static int Get() => handle;]'
             )
         }
         @{

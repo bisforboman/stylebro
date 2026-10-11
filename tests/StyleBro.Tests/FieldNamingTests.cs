@@ -50,6 +50,52 @@ public class FieldNamingTests
     public void NewName(string name, bool underscore, string? expected) =>
         Assert.Equal(expected, FieldNames.GetNewName(name, underscore ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase));
 
+    // Like StyleCop: its field naming rules skip '*NativeMethods' classes (also types nested in one), except SA1311.
+    [Fact]
+    public Task NativeMethods_KeepFieldNames_ExceptLowerCaseStaticReadonly() => VerifyFixAsync(
+        """
+        internal static class SafeNativeMethods
+        {
+            internal const int max_path = 260;
+            internal static int dwFlags;
+            internal static readonly int {|BRO1306:invalid|} = -1;
+            internal static readonly int s_empty = 0;
+            private static int Handle;
+            private static int m_count;
+            private static int a_b;
+
+            internal struct POINT
+            {
+                public int x;
+                private int Y;
+                internal int _z;
+            }
+
+            internal static int Sum(POINT p) => max_path + dwFlags + invalid + Handle + m_count + a_b;
+        }
+        """,
+        """
+        internal static class SafeNativeMethods
+        {
+            internal const int max_path = 260;
+            internal static int dwFlags;
+            internal static readonly int Invalid = -1;
+            internal static readonly int s_empty = 0;
+            private static int Handle;
+            private static int m_count;
+            private static int a_b;
+
+            internal struct POINT
+            {
+                public int x;
+                private int Y;
+                internal int _z;
+            }
+
+            internal static int Sum(POINT p) => max_path + dwFlags + Invalid + Handle + m_count + a_b;
+        }
+        """);
+
     [Fact]
     public Task CamelCase_RenamesAndQualifiesHiddenReferences() => VerifyFixAsync(
         """

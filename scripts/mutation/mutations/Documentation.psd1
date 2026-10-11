@@ -87,5 +87,10 @@
 
         # BRO1606: constructor sentences of their own (Instantiates, Constructs, Creates a new)
         @{ File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'; Find = '|| (member is ConstructorDeclarationSyntax && ConstructorVerbs.Any(v => StartsWithWords(remaining, v)))))'; Replace = '))'; Tests = 'DocumentationTests.SummariesThatCantFollowTheStandardWords_AreNotReported' }
+
+        # BRO1611/BRO1613/BRO1614: a top-level <inheritdoc> turns off tag matching, like StyleCop (2026-10-11)
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ParameterDocumentation.cs'; Find = '|| (inherits && kind == TagKind.TypeParameter)'; Replace = ''; Tests = 'DocumentationTests.InheritDoc_TurnsOffTagMatching_ButNotParameterNames' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ParameterDocumentation.cs'; Find = 'var stale = inherits ? [] : unknown;'; Replace = 'var stale = unknown;'; Tests = 'DocumentationTests.InheritDoc_TurnsOffTagMatching_ButNotParameterNames' }
+        @{ File = 'src/StyleBro.Analyzers/Documentation/ParameterDocumentation.cs'; Find = 'var outOfOrder = !inherits && '; Replace = 'var outOfOrder = '; Tests = 'DocumentationTests.InheritDoc_TurnsOffTagMatching_ButNotParameterNames' }
     )
 }
