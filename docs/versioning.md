@@ -1,7 +1,8 @@
 # Versioning
 
 StyleBro.Analyzers and StyleBro.Migrate share one version number. What changed in each release:
-[GitHub Releases](https://github.com/bisforboman/stylebro/releases).
+[CHANGELOG.md](https://github.com/bisforboman/stylebro/blob/main/CHANGELOG.md) (the same text as the
+[GitHub Releases](https://github.com/bisforboman/stylebro/releases)).
 
 ## Before 1.0
 
