@@ -50,6 +50,7 @@ public class KeptFindingsTests
     [InlineData("Settings[\"_blockedUntil\"]")] // Flow.Launcher: 'type', a JSON key in another plugin
     [InlineData("System.Text.Json.JsonDocument.Parse(\"{}\").RootElement.GetProperty(\"_blockedUntil\")")] // Orleans: JSON, not a Type
     [InlineData("DeleteMembershipEntries(\"_blockedUntil\")")] // 'Member' inside 'Membership' isn't a word
+    [InlineData("FieldsetName(\"_blockedUntil\")")] // nor 'Field' inside 'Fieldset'
     public async Task AFieldWhoseNameIsAnOrdinaryStringElsewhere_IsRenamed(string use)
     {
         var reason = await GetReasonAsync(
@@ -340,6 +341,22 @@ public class KeptFindingsTests
 
         Assert.Null(await GetReasonAsync(DiagnosticIds.PrivateFieldNaming, files));
         Assert.Equal(KeptReason.NameInString, await WithRepositoryNamesAsync(("Tests/CounterTests.cs", tests), () => GetReasonAsync(DiagnosticIds.PrivateFieldNaming, files)));
+    }
+
+    // Names serializers write (public fields, properties, types) still count any string, also inside one: test JSON.
+    [Fact]
+    public async Task ADataFieldInAPlainStringInAProjectThisRunDoesntLoad_IsKept()
+    {
+        var files = new[] { ("Order.cs", "internal class ZqxOrder\n{\n    public int zqx_total;\n}\n") };
+        var tests = """
+            class ZqxOrderTests
+            {
+                string zqxJson => "{ \"zqx_total\": 1 }";
+            }
+            """;
+
+        Assert.Null(await GetReasonAsync(DiagnosticIds.FieldUnderscore, files));
+        Assert.Equal(KeptReason.NameInString, await WithRepositoryNamesAsync(("Tests/OrderTests.cs", tests), () => GetReasonAsync(DiagnosticIds.FieldUnderscore, files)));
     }
 
     [Fact]

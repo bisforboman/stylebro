@@ -75,9 +75,8 @@ internal static class AutoAccessorLines
     /// </summary>
     public static bool BecomesOneLine(PropertyDeclarationSyntax property, SourceText text, AnalyzerConfigOptions options)
     {
-        var start = property.AttributeLists.Count > 0 ? property.AttributeLists.Last().FullSpan.End : property.SpanStart;
+        // GetChanges already skips a header over several lines.
         return property.AccessorList is { } list
-            && Line(text, start) == Line(text, list.OpenBraceToken.GetPreviousToken().Span.End)
             && Line(text, list.CloseBraceToken.SpanStart) == Line(text, property.Span.End)
             && GetChanges(property, text, options, _ => false) is not null;
     }
