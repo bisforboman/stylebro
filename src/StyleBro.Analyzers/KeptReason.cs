@@ -49,6 +49,12 @@ public enum KeptReason
     /// <summary>A type in another project derives from the type (InternalsVisibleTo).</summary>
     DerivedTypeInAnotherProject,
 
+    /// <summary>
+    /// Code in a project this 'stylebro-migrate format' run doesn't load uses the name (a multi-targeted library's run for a
+    /// framework its tests don't target): renaming would leave that use behind.
+    /// </summary>
+    UsedInProjectNotLoaded,
+
     /// <summary>No declaration of the name can be renamed (public API, names a library prescribes).</summary>
     NothingToRename,
 }
@@ -112,6 +118,7 @@ public sealed class KeptFinding
         KeptReason.DisabledCode => "the name is in disabled #if code, which can't be checked",
         KeptReason.NamespaceFromOutside => "part of the namespace comes from an assembly outside the solution",
         KeptReason.DerivedTypeInAnotherProject => "a type in another project derives from the type",
+        KeptReason.UsedInProjectNotLoaded => "a project that doesn't target all of this one's frameworks uses the name, and no format run loads both, so the rename would miss that use",
         _ => "no declaration can be renamed (public API, or names a library prescribes)",
     };
 

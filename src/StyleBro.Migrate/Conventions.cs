@@ -41,6 +41,14 @@ internal static class Conventions
     public const int Width = 120;
 
     /// <summary>
+    /// The key that makes 'dotnet format' sort usings: it sorts whenever this (or dotnet_separate_import_directive_groups) is
+    /// set, whatever the value, and an .editorconfig can't unset a key the preset sets. So the preset doesn't set it, and init
+    /// writes it only when the code sorts them (owner's decision 2026-10-11: "Detect, like other conventions"; the preset
+    /// re-sorted SmartEnum's 44 files).
+    /// </summary>
+    public const string SortUsingsKey = "dotnet_sort_system_directives_first";
+
+    /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
     /// with what each looks like, and the line that stops StyleBro enforcing either form when the code has no clear majority
     /// (owner's decision 2026-10-10, docs/decisions.md; null: no StyleBro rule of its own enforces it, e.g. the SDK formatter's
@@ -71,7 +79,36 @@ internal static class Conventions
         new(ArithmeticKey, "mixed arithmetic ('a + b * c')", "always_for_clarity", ("always_for_clarity", "with parentheses"), ("never_if_unnecessary", "without parentheses"), Off(DiagnosticIds.ArithmeticPrecedence)) { Enforcer = DiagnosticIds.ArithmeticPrecedence, EnforcedValues = new[] { "always_for_clarity" } },
         new(SingleLineStatementsKey, "statements on their 'if'/loop/'case' line", "false", ("false", "on a line of their own"), ("true", "on their owner's line"), null) { KeepAny = true },
         new(InheritDocKey, "overrides/interface implementations", "warning", ("warning", "with a doc comment"), ("none", "without a doc comment"), Off(DiagnosticIds.InheritDocumentation)),
+        new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
+        new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
     };
+
+    /// <summary>
+    /// Overload groups (same-named methods of a type) whose members have different BRO1001 sort keys, so the default sort
+    /// could split them: when the code keeps them next to each other, init writes 'true' (owner's decision 2026-10-11:
+    /// "Detect"; Scrutor's public and private 'CanDecorate' overloads were split).
+    /// </summary>
+    private const string OverloadsKey = StyleBro.Analyzers.Ordering.MemberOrderOptions.KeepOverloadsTogetherKey;
+
+    /// <summary>
+    /// The files' line endings (unit: files). Without the key, 'dotnet format' writes the OS's line ending into the lines it
+    /// rewrites: on Windows CRLF into LF files (SmartEnum: 26 files with mixed endings). Files git converts on checkout don't
+    /// count (<see cref="ConvertedKey"/>).
+    /// </summary>
+    private const string EndOfLineKey = "end_of_line";
+
+    /// <summary>
+    /// Files whose checkout ending git picks per machine (core.autocrlf, or 'text' without 'eol'): CRLF on Windows, LF on
+    /// Linux. Writing one machine's ending would make 'format' rewrite every file on the other OS; without the key, 'format'
+    /// writes the OS's ending, which is what such a checkout has anyway.
+    /// </summary>
+    private const string ConvertedKey = "end_of_line (converted by git)";
+
+    /// <summary>
+    /// Files with a list of 2 or more usings: [sorted with System first only, sorted without only, sorted both ways
+    /// (nothing tells them apart), unsorted].
+    /// </summary>
+    private const string UsingsKey = "using order";
 
     /// <summary>
     /// The SDK option that keeps 'if (a) return;' and 'case 1: a(); break;' on one line. The preset sets it to false, which
@@ -99,6 +136,7 @@ internal static class Conventions
         var trees = new List<SyntaxTree>();
         var documented = new HashSet<SyntaxTree>();
         var generates = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        var converted = ConvertedByGit(root);
 
         // Parsing and counting is per file: in parallel, each file with its own counts, added up in file order.
         var parsed = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
@@ -116,6 +154,11 @@ internal static class Conventions
                 var own = NewCounts();
                 Count(tree, own);
                 CountConditional(tree, own);
+                if (LineEnding(text) is var ending and >= 0)
+                {
+                    _ = converted.Contains(Path.GetFullPath(file)) ? own[ConvertedKey][0]++ : own[EndOfLineKey][ending]++;
+                }
+
                 return (File: file, Tree: tree, Counts: own);
             })
             .Where(p => p.Tree is not null)
@@ -240,7 +283,51 @@ internal static class Conventions
     }
 
     /// <summary>An empty count for every convention.</summary>
-    public static Dictionary<string, int[]> NewCounts() => All.ToDictionary(c => c.Key, _ => new int[2], StringComparer.Ordinal);
+    public static Dictionary<string, int[]> NewCounts()
+    {
+        var counts = All.ToDictionary(c => c.Key, _ => new int[2], StringComparer.Ordinal);
+        counts[UsingsKey] = new int[4];
+        counts[ConvertedKey] = new int[1];
+        return counts;
+    }
+
+    /// <summary>A text's line ending: 0 LF, 1 CRLF, -1 none or both.</summary>
+    public static int LineEnding(string text)
+    {
+        var (lf, crlf) = (0, 0);
+        for (var i = text.IndexOf('\n'); i >= 0; i = text.IndexOf('\n', i + 1))
+        {
+            _ = i > 0 && text[i - 1] == '\r' ? crlf++ : lf++;
+        }
+
+        return lf > 0 && crlf == 0 ? 0 : crlf > 0 && lf == 0 ? 1 : -1;
+    }
+
+    /// <summary>
+    /// The files under the root whose line ending git converts on checkout (full paths): 'git ls-files --eol' shows another
+    /// ending in the working tree than in the index, and no 'eol' attribute fixes it (<see cref="ConvertedKey"/>).
+    /// </summary>
+    public static HashSet<string> ConvertedByGit(string root)
+    {
+        var (code, output) = PreviewCommand.Git(root, "ls-files", "--eol", "-z");
+        return new HashSet<string>(code == 0 ? Converted(output).Select(f => Path.GetFullPath(Path.Combine(root, f))) : Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The paths in 'git ls-files --eol -z' output ('i/lf    w/crlf  attr/text=auto \tpath') that git converts.</summary>
+    public static IEnumerable<string> Converted(string output)
+    {
+        foreach (var entry in output.Split('\0'))
+        {
+            var tab = entry.IndexOf('\t');
+            var info = tab < 0 ? string.Empty : entry.Substring(0, tab);
+            var fields = info.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (fields.Length >= 2 && fields[0] is "i/lf" or "i/crlf" && fields[1] is "w/lf" or "w/crlf"
+                && fields[0].Substring(2) != fields[1].Substring(2) && !info.Contains("eol=", StringComparison.Ordinal))
+            {
+                yield return entry.Substring(tab + 1);
+            }
+        }
+    }
 
     /// <summary>Adds one file's places to <paramref name="counts"/> (with <paramref name="only"/>: those starting in these spans).</summary>
     public static void Count(SyntaxTree tree, Dictionary<string, int[]> counts, IReadOnlyList<TextSpan>? only = null)
@@ -275,6 +362,8 @@ internal static class Conventions
             counts[StyleBro.Analyzers.Naming.FieldNames.StyleKey][0] += plain;
             counts[StyleBro.Analyzers.Naming.FieldNames.StyleKey][1] += underscore;
             UsingPlacement();
+            UsingOrder();
+            Overloads();
         }
 
         foreach (var token in root.DescendantTokens())
@@ -497,6 +586,42 @@ internal static class Conventions
             }
         }
 
+        // Unit = files with a list of 2 or more usings (global usings aside): in the order 'dotnet format' sorts them into, or not.
+        void UsingOrder()
+        {
+            var lists = root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax)
+                .Select(n => n switch { CompilationUnitSyntax u => u.Usings, BaseNamespaceDeclarationSyntax ns => ns.Usings, _ => default })
+                .Select(l => l.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)).ToList())
+                .Where(l => l.Count >= 2)
+                .ToList();
+            if (lists.Count > 0)
+            {
+                var systemFirst = lists.All(l => IsSorted(l, systemFirst: true));
+                var plain = lists.All(l => IsSorted(l, systemFirst: false));
+                counts[UsingsKey][systemFirst ? (plain ? 2 : 0) : plain ? 1 : 3]++;
+            }
+        }
+
+        // Unit = overload groups whose members BRO1001 sorts to different places (only those can be split): adjacent or not.
+        void Overloads()
+        {
+            foreach (var type in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+            {
+                var inInterface = type.IsKind(SyntaxKind.InterfaceDeclaration);
+                var groups = type.Members.Select((member, index) => (Method: member as MethodDeclarationSyntax, Index: index))
+                    .Where(p => p.Method is not null)
+                    .GroupBy(p => p.Method!.ExplicitInterfaceSpecifier?.Name + "." + p.Method.Identifier.ValueText);
+                foreach (var group in groups.Select(g => g.ToList()).Where(g => g.Count > 1))
+                {
+                    var keys = group.Select(p => StyleBro.Analyzers.Ordering.MemberOrdering.GetDefaultKey(p.Method!, inInterface)).ToList();
+                    if (keys.All(k => k is not null) && keys.Any(k => k!.Value.CompareTo(keys[0]!.Value) != 0))
+                    {
+                        Add(OverloadsKey, group[^1].Index - group[0].Index == group.Count - 1);
+                    }
+                }
+            }
+        }
+
         // BRO1406's places: an operation of another kind inside arithmetic. Without parentheses it is the rule's finding; with
         // them only where they change nothing ('a + (b * c)', not '(a + b) * c').
         void Arithmetic(BinaryExpressionSyntax binary)
@@ -560,9 +685,7 @@ internal static class Conventions
             }
 
             var mixed = string.Join(", ", Enumerable.Range(0, 2).Where(i => count[i] > 0).Select(i => $"{count[i]} {convention.Values[i].Label}"));
-            var winner = convention.KeepAny && count[1] >= MinimumAgreeing ? 1
-                : total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)
-                : count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;
+            var winner = convention.KeepAny && count[1] >= MinimumAgreeing ? 1 : Winner(count[0], count[1]);
             var found = winner < 0 ? mixed : $"{count[winner]} of {total} {convention.Values[winner].Label}";
             string tag;
             string verdict;
@@ -573,19 +696,19 @@ internal static class Conventions
                     var rule = convention.Enforcer!;
                     (tag, verdict) = ("off", $".editorconfig says {value}, unenforced: {rule} is off");
                     summary.Unfollowed.Add($"{rule} ({convention.What}: your .editorconfig says {value})");
-                    lines.Add($"# init: {convention.What}: your .editorconfig says {convention.Key} = {value}, but {count[winner]} of {total} places in your code are {convention.Values[winner].Label}; nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
+                    lines.Add($"# init: {convention.What}: your .editorconfig says {convention.Key} = {value}, but {count[winner]} of {Plural(total, convention.Unit)} in your code are {convention.Values[winner].Label}; nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
                     lines.Add(Off(rule));
                 }
                 else
                 {
                     (tag, verdict) = ("set", reason);
-                    found = winner < 0 ? Plural(total, "place") : found;
+                    found = winner < 0 ? Plural(total, convention.Unit) : found;
                 }
             }
             else if (total < MinimumAgreeing)
             {
                 (tag, verdict) = ("too few", $"default stays ({convention.Default})");
-                found = Plural(total, "place");
+                found = Plural(total, convention.Unit);
                 summary.TooFew.Add(convention.Key);
             }
             else if (winner < 0 && convention.Off is { } off && !IsSet(off))
@@ -615,7 +738,7 @@ internal static class Conventions
                 (tag, verdict) = ("default", convention.Default);
                 summary.Matched++;
             }
-            else if (convention.Off is { } offLine && offLine == $"{convention.Key} = {convention.Values[winner].Value}")
+            else if (convention.Off is { } offLine && RuleOf(offLine) is not null && offLine == $"{convention.Key} = {convention.Values[winner].Value}")
             {
                 // A rule-only convention (BRO1601): the code's form is "the rule's fix isn't wanted".
                 var rule = RuleOf(offLine)!;
@@ -629,7 +752,7 @@ internal static class Conventions
                 var value = convention.Values[winner].Value;
                 (tag, verdict) = ("kept", value);
                 summary.Written.Add(convention.Key);
-                lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {total} places in your code"
+                lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code"
                     + (convention.KeepAny ? $" ({MinimumAgreeing} are enough to keep them: {convention.Key} = {convention.Default} would move each to a line of its own)" : string.Empty));
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
@@ -645,8 +768,25 @@ internal static class Conventions
             });
         }
 
+        DecideUsings(counts, isSet, lines, report, summary);
+        if (counts.TryGetValue(ConvertedKey, out var converted) && converted[0] > 0)
+        {
+            report.Add($"  note     line endings: {Plural(converted[0], "file")} that git converts on checkout (core.autocrlf) don't count");
+        }
+
         report.AddRange(Summary(summary));
         return (lines, report);
+    }
+
+    /// <summary>
+    /// Which of two forms the code clearly follows (0 or 1), or -1: all of fewer than <see cref="MinimumSample"/> places, or
+    /// <see cref="Share"/> of more. The caller checks <see cref="MinimumAgreeing"/>.
+    /// </summary>
+    public static int Winner(int first, int second)
+    {
+        var total = first + second;
+        return total < MinimumSample ? (first == 0 ? 1 : second == 0 ? 0 : -1)
+            : second >= Share * total ? 1 : first >= Share * total ? 0 : -1;
     }
 
     /// <summary>
@@ -658,6 +798,99 @@ internal static class Conventions
 
     /// <summary>A count with its noun: '1 place', '2 places'.</summary>
     public static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? string.Empty : "s")}";
+
+    /// <summary>
+    /// The using order (<see cref="SortUsingsKey"/>): sorted files -> the key (System first unless the files that tell the
+    /// two apart clearly don't), unsorted or mixed -> no key, so 'dotnet format' leaves them alone; too few files -> StyleBro's
+    /// default (sorted, System first). A key the repository sets wins.
+    /// </summary>
+    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary)
+    {
+        const string What = "using directives";
+        if (!counts.TryGetValue(UsingsKey, out var c))
+        {
+            return;
+        }
+
+        var (sorted, unsorted) = (c[0] + c[1] + c[2], c[3]);
+        var (total, apart) = (sorted + unsorted, c[0] + c[1]);
+        if (isSet?.Invoke(SortUsingsKey) == true || isSet?.Invoke("dotnet_separate_import_directive_groups") == true)
+        {
+            if (total > 0)
+            {
+                report.Add($"  {"set",-8} {What}: {Plural(total, "file")} -> set in .editorconfig");
+            }
+
+            return;
+        }
+
+        var sort = total < MinimumAgreeing ? 0 : Winner(sorted, unsorted);
+        var system = sort != 0 || apart < MinimumAgreeing ? 0 : Winner(c[0], c[1]);
+        var found = $"{sorted} of {Plural(total, "file")} sorted" + (apart > 0 ? $", {c[0]} of {apart} with System first" : string.Empty);
+        string tag;
+        string verdict;
+        string comment;
+        string? value = null;
+        if (total < MinimumAgreeing)
+        {
+            (tag, verdict, value, found) = ("too few", "default stays (sorted, System first)", "true", Plural(total, "file"));
+            comment = $"too few files with 2 or more to tell ({total}), so StyleBro's default: sorted, System first";
+            if (total > 0)
+            {
+                summary.TooFew.Add(SortUsingsKey);
+            }
+        }
+        else if (sort == 0 && system >= 0)
+        {
+            value = system == 0 ? "true" : "false";
+            (tag, verdict) = system == 0 ? ("default", "sorted, System first") : ("kept", "sorted, System not first");
+            comment = $"{found}";
+            if (system == 0)
+            {
+                summary.Matched++;
+            }
+            else
+            {
+                summary.Written.Add(SortUsingsKey);
+            }
+        }
+        else
+        {
+            comment = (sort == 1 ? $"{unsorted} of {total} files not sorted"
+                : sort < 0 ? $"your code mixes sorted and unsorted files ({found})"
+                : $"sorted, but with System first and without ({found})")
+                + $", so they aren't sorted ('dotnet format' sorts them whenever {SortUsingsKey} is set). To sort them: add {SortUsingsKey} = true";
+            (tag, verdict) = (sort == 1 ? "kept" : "both", "not sorted");
+            if (sort == 1)
+            {
+                summary.Written.Add("unsorted usings");
+            }
+            else
+            {
+                summary.BothAllowed.Add($"{SortUsingsKey} not set ({What})");
+            }
+        }
+
+        lines.Add($"# init: {What}: {comment}");
+        if (value is not null)
+        {
+            lines.Add($"{SortUsingsKey} = {value}");
+        }
+
+        if (total > 0)
+        {
+            report.Add($"  {tag,-8} {What}: {found} -> {verdict}");
+        }
+
+        JsonReport.Add("conventions", new JsonObject
+        {
+            ["key"] = SortUsingsKey,
+            ["what"] = What,
+            ["counts"] = new JsonObject { ["systemFirst"] = c[0], ["systemNotFirst"] = c[1], ["sorted"] = c[2], ["unsorted"] = c[3] },
+            ["verdict"] = tag == "too few" ? "tooFew" : tag,
+            ["result"] = verdict,
+        });
+    }
 
     /// <summary>
     /// The value of the convention's SDK key in the repository's own settings when its <see cref="Convention.Enforcer"/>
@@ -742,6 +975,41 @@ internal static class Conventions
     /// <summary>The line that turns a rule off.</summary>
     private static string Off(string id) => $"dotnet_diagnostic.{id}.severity = none";
 
+    /// <summary>Whether a list of usings is in the order 'dotnet format' sorts them into (Roslyn's: namespaces, static, aliases).</summary>
+    private static bool IsSorted(List<UsingDirectiveSyntax> usings, bool systemFirst)
+    {
+        static int Group(UsingDirectiveSyntax u) => u.Alias is not null ? 2 : u.StaticKeyword.IsKind(SyntaxKind.None) ? 0 : 1;
+        static string[] Segments(UsingDirectiveSyntax u) =>
+            (u.Alias?.Name.Identifier.ValueText ?? u.NamespaceOrType.ToString()).Replace("global::", string.Empty).Replace(" ", string.Empty).Split('.');
+
+        int Compare(UsingDirectiveSyntax a, UsingDirectiveSyntax b)
+        {
+            var (group, sa, sb) = (Group(a), Segments(a), Segments(b));
+            if (group != Group(b))
+            {
+                return group.CompareTo(Group(b));
+            }
+
+            if (systemFirst && group < 2 && (sa[0] == "System") != (sb[0] == "System"))
+            {
+                return sa[0] == "System" ? -1 : 1;
+            }
+
+            for (var i = 0; i < Math.Min(sa.Length, sb.Length); i++)
+            {
+                var c = string.Compare(sa[i], sb[i], StringComparison.OrdinalIgnoreCase);
+                if (c != 0)
+                {
+                    return c;
+                }
+            }
+
+            return sa.Length.CompareTo(sb.Length);
+        }
+
+        return Enumerable.Range(1, usings.Count - 1).All(i => Compare(usings[i - 1], usings[i]) <= 0);
+    }
+
     /// <summary>Whether an empty string literal has to stay a literal (BRO1106 leaves constant contexts alone).</summary>
     private static bool InConstantContext(SyntaxNode literal)
     {
@@ -807,6 +1075,9 @@ internal static class Conventions
 
         /// <summary>Gets the values of the key that <see cref="Enforcer"/> enforces (null: both; 'when_multiline' removes no braces).</summary>
         public string[]? EnforcedValues { get; init; }
+
+        /// <summary>Gets what is counted: places (a token, a statement, ...) or files.</summary>
+        public string Unit { get; init; } = "place";
 
         /// <summary>Gets a value indicating whether <see cref="MinimumAgreeing"/> places of the second form keep it, majority or not.</summary>
         public bool KeepAny { get; init; }

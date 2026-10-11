@@ -23,8 +23,23 @@ dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.5.0-dev.
 dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.5.0-dev.1
 ```
 
-Then add the folder as a package source in your repository's `nuget.config`
-(`<add key="stylebro" value="path/to/stylebro-feed" />`) and use `0.5.0-dev.1` wherever this page says `0.5.0-alpha.1`.
+Then add the folder as a package source in your repository's `nuget.config` and use `0.5.0-dev.1` wherever this page
+says `0.5.0-alpha.1`. When the `nuget.config` has a `<packageSourceMapping>`, the new source needs a mapping too: NuGet
+only looks for a package in the sources mapped to it, so the source alone gives NU1102 (package not found):
+
+```xml
+<configuration>
+  <packageSources>
+    <add key="stylebro" value="path/to/stylebro-feed" />
+  </packageSources>
+  <packageSourceMapping>
+    <!-- the mappings already there stay -->
+    <packageSource key="stylebro">
+      <package pattern="StyleBro.*" />
+    </packageSource>
+  </packageSourceMapping>
+</configuration>
+```
 
 ## Preview first
 
@@ -42,7 +57,12 @@ and deletes the copy. Your repository isn't touched. If it doesn't reference Sty
 reference from [step 1](#1-add-the-package) (the tool's own version) and the output says so. It prints a summary and
 writes the full diff to `stylebro-preview.patch` in the current folder (`--diff=other.patch` names another file).
 `--keep` keeps the copy and prints where it is; `--all` passes on to format; with several solutions or projects in the
-folder, `--project MySolution.sln` names the one to format. FFMpegCore, `stylebro-migrate init --diff`:
+folder, `--project MySolution.sln` names the one to format. `--no-restore` skips the restore in the copy: it takes the
+repository's own restore output, so run `dotnet restore` first (it's ignored when the preview adds the package, which
+needs a restore). Where the preview adds the reference under central package management: next to StyleCop's (a
+`GlobalPackageReference` gets a `GlobalPackageReference`, in the same `Directory.Packages.props`), else a version-less
+`PackageReference` with the version in the `Directory.Packages.props` that applies (also one that a folder's
+`Directory.Packages.props` imports). FFMpegCore, `stylebro-migrate init --diff`:
 
 ```text
 Previewing 'stylebro-migrate init --write' and 'stylebro-migrate format' on a copy; nothing in C:\src\FFMpegCore changes.
@@ -151,7 +171,7 @@ StyleBro rule enforces (operator placement, braces = `true`, using placement, ar
 key alone and turns that rule off (`your .editorconfig says end_of_line, ... so BRO1520 is off`), instead of letting it
 rewrite the code.
 
-Two settings work a little differently:
+A few settings work a little differently:
 
 - **One-line statements** (`if (a) return;`, `case 1: a(); break;`): the preset sets
   `csharp_preserve_single_line_statements = false`, which moves each to a line of its own. From 3 such statements on,
@@ -159,6 +179,14 @@ Two settings work a little differently:
 - **`<inheritdoc/>` on overrides and implementations** ([BRO1601](rules/BRO1601.md)): in projects that generate
   documentation, `init` counts the overrides and interface implementations BRO1601 checks, with and without a doc
   comment. Mostly documented: the rule stays on; mostly undocumented or mixed: it's turned off.
+- **Line endings** count files. Without `end_of_line`, `format` writes your OS's line ending into the lines it rewrites
+  (on Windows CRLF into LF files), so `init` writes the files' ending when it's clear and nothing when it's mixed. Files
+  git converts on checkout (`core.autocrlf`: LF in the repository, CRLF in a Windows checkout) don't count: there the
+  OS's ending is what the checkout has, and a fixed one would make `format` rewrite every file on the other OS.
+- **Using order** counts files with 2 or more usings: sorted with System first, sorted without, or not sorted. `dotnet
+  format` sorts usings whenever `dotnet_sort_system_directives_first` is set (to any value), so the preset doesn't set
+  it: `init` writes it when your usings are sorted (or there are too few files to tell), and only a comment when they
+  aren't, or when some files put System first and others don't.
 
 | Setting | What's counted | Rule | Key |
 |---|---|---|---|
@@ -185,6 +213,9 @@ Two settings work a little differently:
 | Arithmetic parentheses | `a + (b * c)` or `a + b * c` | [BRO1406](rules/BRO1406.md) | `dotnet_style_parentheses_in_arithmetic_binary_operators` |
 | One-line statements | a braceless `if`/`else`/loop body or a `case` label's statements on their owner's line or below it | SDK formatter (IDE0055) | `csharp_preserve_single_line_statements` |
 | Documented overrides | overrides and interface implementations with or without a doc comment | [BRO1601](rules/BRO1601.md) | `dotnet_diagnostic.BRO1601.severity` |
+| Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
+| Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
+| Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 
 The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `both`,
 `mixed`, `too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys
@@ -248,7 +279,7 @@ stylebro-migrate format
 
 This fixes whitespace, the built-in rules and every StyleBro rule. One fix can make work for another rule, so the
 command runs `dotnet format` again until a run changes no file (at most three runs) and prints what each run changed
-(`Run 1: 293 files changed:` and the first 10 of them, `Run 2: 0 files changed, clean.`); `--once` runs it once. It ends
+(`Run 1: 293 files changed:` and the first 10 of them, `Run 2: 0 files changed, clean.`); `--once` runs it once, with the same report and the findings kept in that run. It ends
 with the findings StyleBro's fixes leave on purpose, each with its reason ([Findings kept on purpose](#findings-kept-on-purpose)),
 and exits with 0 when clean, 2 when a run still changed files. When `dotnet format` skips a project because its
 references didn't load (a broken restore or package cache), the command names it and says the run is incomplete (for
@@ -445,7 +476,11 @@ stylebro-migrate format MySolution.sln --verify-no-changes --severity warn
 
 Plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055) without writing anything. The command runs
 `dotnet format` once per target framework instead; without multi-targeted projects it's one run. A diagnostic
-every framework sees is printed once, and `--report` writes one `format-report.json` covering all runs. Why:
+every framework sees is printed once, and `--report` writes one `format-report.json` covering all runs. Spellings of
+one framework share a run (`net6` and `net6.0`, NuGet's short names). A run loads only the projects that target its
+framework, so the renaming fixes also check the names in every other C# file of the repository: a field the tests
+read with `GetField("count")` keeps its name in the library's run too, and a name a project outside the run uses
+(`UsedInProjectNotLoaded`) is left to a run that loads both, or kept. Why:
 [ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
 
 ## Large codebases

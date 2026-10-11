@@ -212,6 +212,31 @@ public class FixOrderTests
         "BRO1110",
         "BRO1520");
 
+    // BRO1523 skips a link with a comment in its gap; BRO1504 leaves a comment between links alone, and a comment above
+    // a link BRO1523 moves stays where it is.
+    [Fact]
+    public Task CallChains_WithCommentsBetweenLinks() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public int M(int[] items)
+            {
+                var a = 1;
+                // first the positive ones
+                return items
+                    .Where(i => i > a)
+                    // then two of them
+                    .Take(2).Select(i => i)
+                    .Count();
+            }
+        }
+        """,
+        "BRO1523",
+        "BRO1504",
+        "BRO1506");
+
     [Fact]
     public Task ClosingParenthesisOnOwnLine_Declarations() => AssertConvergesInEveryOrderWithConfigAsync(
         """

@@ -250,10 +250,10 @@ public class TrailingCommaTests
         }
         """);
 
-    // Like StyleCop master (94671b70): multi-line property patterns, also nested ones in one pass.
+    // Like StyleCop 1.2.0-beta.556: property patterns aren't checked, nested ones neither (only StyleCop's unreleased
+    // master reports them; the owner chose the release, docs/decisions.md).
     [Fact]
-    public Task MultiLinePropertyPatterns_GetATrailingComma() => VerifyFixAsync(
-        """
+    public Task MultiLinePropertyPatterns_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class P
         {
             public int X { get; set; }
@@ -263,33 +263,16 @@ public class TrailingCommaTests
 
         class C
         {
-            bool M(object o) => o is P { X: 1 } && o is P
-            {
-                X: 1,
-                {|BRO1401:Next: P
-                {
-                    {|BRO1401:X: 2|}
-                }|}
-            };
-        }
-        """,
-        """
-        class P
-        {
-            public int X { get; set; }
-
-            public P Next { get; set; }
-        }
-
-        class C
-        {
-            bool M(object o) => o is P { X: 1 } && o is P
+            bool M(object o) => o is P
             {
                 X: 1,
                 Next: P
                 {
-                    X: 2,
-                },
+                    Next:
+                    {
+                        X: 2
+                    }
+                }
             };
         }
         """);

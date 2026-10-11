@@ -378,8 +378,9 @@ internal static class Migration
     /// The Directory.Build.props files (full paths) MSBuild imports for the projects under the root: each project's nearest
     /// one, else the root's (which may not exist yet). A nested one shadows the root's unless it imports its parent's (then
     /// that one counts): Bogus' projects use Source/Directory.Build.props, so a reference added at the root never loaded.
+    /// With <paramref name="folders"/> (root-relative, '/'-separated), only for the projects in them.
     /// </summary>
-    public static List<string> PropsFiles(string root)
+    public static List<string> PropsFiles(string root, IReadOnlyList<string>? folders = null)
     {
         root = Path.GetFullPath(root).TrimEnd('\\', '/');
         string Nearest(string? directory)
@@ -400,6 +401,7 @@ internal static class Migration
 
         return StyleCopSetup.EnumerateFiles(root)
             .Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+            .Where(f => folders is null || folders.Any(folder => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), folder)))
             .Select(f => Nearest(Path.GetDirectoryName(Path.GetFullPath(f))))
             .DefaultIfEmpty(Path.Combine(root, "Directory.Build.props"))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -587,6 +589,9 @@ internal static class Migration
         var list = folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
         return list.Where(f => !list.Any(p => f.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))).ToList();
     }
+
+    private static bool IsUnder(string path, string folder) =>
+        folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsVendorFolder(string name) => name.ToLowerInvariant() is "vendor" or "vendored" or "third_party" or "thirdparty" or "external";
 

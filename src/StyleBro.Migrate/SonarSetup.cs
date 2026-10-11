@@ -36,7 +36,13 @@ internal sealed class SonarSetup
     public static IReadOnlyDictionary<string, (bool SonarWay, string Title)> Rules { get; } = LoadRules();
 
     /// <summary>Gets the Sonar rules a StyleBro or SDK rule fixes, in the order of the mapping file.</summary>
-    public static IReadOnlyList<MappedRule> Mapping { get; } = LoadMapping();
+    public static IReadOnlyList<MappedRule> Mapping { get; } = LoadMapping().Where(m => m.Rule != "-").ToList();
+
+    /// <summary>
+    /// Gets the Sonar rules with a fixing rule that isn't safe (mode 'none' in the mapping file), with the reason: reported as
+    /// not covered. S3260: CA1852 seals private nested classes that have protected constructors (CS0628 in SmartEnum).
+    /// </summary>
+    public static IReadOnlyList<MappedRule> NotCovered { get; } = LoadMapping().Where(m => m.Rule == "-").ToList();
 
     /// <summary>Gets the effective severity of every Sonar rule the setup mentions (the defaults included).</summary>
     public IReadOnlyDictionary<string, Severity> Severities { get; }
@@ -122,6 +128,7 @@ internal sealed class SonarSetup
     {
         var applied = new Applied { On = Severities.Count(p => p.Value >= Severity.Suggestion) };
         var added = new List<string>();
+        applied.NotCovered.AddRange(NotCovered.Where(m => IsOn(m.Sonar)).Select(m => (m.Sonar, m.Note!)));
         foreach (var group in Mapping.Where(m => IsOn(m.Sonar)).GroupBy(m => m.Rule))
         {
             var rule = group.Key;
@@ -201,6 +208,7 @@ internal sealed class SonarSetup
             ["rulesOn"] = applied.On,
             ["fixed"] = new JsonArray(applied.Enforced.Select(e => (JsonNode?)new JsonObject { ["sonar"] = e.Sonar, ["by"] = e.Target }).ToArray()),
             ["notApplied"] = new JsonArray(applied.NotApplied.Select(n => (JsonNode?)new JsonObject { ["sonar"] = n.Sonar, ["reason"] = n.Reason }).ToArray()),
+            ["notCovered"] = new JsonArray(applied.NotCovered.Select(n => (JsonNode?)new JsonObject { ["sonar"] = n.Sonar, ["reason"] = n.Reason }).ToArray()),
             ["notes"] = new JsonArray(applied.Notes.Select(n => (JsonNode?)n).ToArray()),
         });
         var report = new List<string>
@@ -213,6 +221,12 @@ internal sealed class SonarSetup
         {
             report.Add("  Not applied:");
             report.AddRange(applied.NotApplied.Select(n => $"    {n.Sonar}: {n.Reason}"));
+        }
+
+        if (applied.NotCovered.Count > 0)
+        {
+            report.Add("  Not covered (no safe fix):");
+            report.AddRange(applied.NotCovered.Select(n => $"    {n.Sonar}: {n.Reason}"));
         }
 
         report.AddRange(applied.Notes.Select(n => "  " + n));
@@ -344,6 +358,9 @@ internal sealed class SonarSetup
 
         /// <summary>Gets the Sonar rules the mapping knows but that aren't applied here, and why.</summary>
         public List<(string Sonar, string Reason)> NotApplied { get; } = new();
+
+        /// <summary>Gets the Sonar rules on whose fixing rule isn't safe (<see cref="NotCovered"/>), and why.</summary>
+        public List<(string Sonar, string Reason)> NotCovered { get; } = new();
 
         /// <summary>Gets settings that replace the StyleCop setup's.</summary>
         public List<string> Notes { get; } = new();

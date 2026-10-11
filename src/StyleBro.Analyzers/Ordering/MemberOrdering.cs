@@ -182,6 +182,10 @@ internal static class MemberOrdering
         };
     }
 
+    /// <summary>A type member's sort key with the default options (null for an unknown member): init's overload count.</summary>
+    public static MemberKey? GetDefaultKey(MemberDeclarationSyntax member, bool inInterface) =>
+        GetKey(member, GetAccess(member, inInterface, inNamespace: false), MemberOrderOptions.Default);
+
     public static SyntaxToken GetNameToken(MemberDeclarationSyntax member)
     {
         return member switch

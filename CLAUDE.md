@@ -682,7 +682,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   BRO1113 removed 147 of them before). The StyleCop ids stay. Idempotent.
 - `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>` in the root Directory.Build.props) and the
   block writes every preset key (test `TheGeneratedSettings_CoverEveryPresetKey`). Reason, probed: `dotnet format`
-  sorts usings whenever `dotnet_sort_system_directives_first` is SET (any value, even `false`; `unset` doesn't help),
+  sorts usings whenever `dotnet_sort_system_directives_first` is SET (any value, even `false`; `unset` doesn't help; in
+  the style pass, IDE0055's severity doesn't matter; so since 2026-10-11 the PRESET doesn't set it and `init` writes it
+  only when the code sorts its usings, docs/decisions.md),
   and an .editorconfig can't remove a key the preset's global config sets. The private app has SA1208/SA1210 off and
   unsorted usings: the block writing `true` changed ~95 files, `false` ~1,650. Now the sort keys are written only
   when SA1208 or SA1210 is on.
@@ -1007,7 +1009,10 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   members too, never/omit_if_default = nothing), `dotnet_style_parentheses_in_*_binary_operators` (never_if_unnecessary
   turns BRO1406/BRO1407 off; removal stays SA1119), `dotnet_naming_rule.*` (BRO1303 style when no stylebro key; the
   preset no longer sets `stylebro_private_field_naming`; BRO1307 leaves prefixes a naming rule requires, e.g. `s_`).
-  `end_of_line` dropped: the full `dotnet format` whitespace pass normalizes endings before the analyzer fixes run.
+  `end_of_line` dropped from this list (no rule of StyleBro's follows it). CORRECTION (2026-10-11): the whitespace pass
+  does NOT normalize endings without the key; it rewrites only the lines it touches, with the OS's newline (on Windows
+  `Metadata = ` + LF became `Metadata =` + CRLF: SmartEnum got 26 mixed-ending files). With `end_of_line` set it fixes
+  whole files. `init` writes the files' ending when it's clear (files git converts on checkout don't count).
 
 - **Hardening pass, all 88 rules together** (2026-10-03): every repo compiles after one pass, no conflict markers;
   tests: Polly all, private app 6454/6454, Serilog all, FFMpegCore only its 4 known cancellation failures, but
@@ -1043,6 +1048,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   multi-targeted repos. Limit: per-framework indentation conflicts (Newtonsoft.Json's `else` inside `#if`).
 - Scratch scripts: `scratchpad/ide0055-*.ps1`, `try-format*.ps1`. Gotcha: an incremental build re-reports no warnings
   (use `--no-incremental` when counting).
+- Trial 6 (2026-10-11): a per-framework run loads only the projects that target it, so the renamer's solution-wide
+  guards missed the others (Scrutor: a field the tests read with GetField renamed in the library's netstandard2.0 run).
+  `format` now writes every C# file's strings, nameof names and identifiers (`RepositoryNames`, env
+  `STYLEBRO_REPOSITORY_NAMES`) for those runs; the renamers check them (strings like their own, and a non-private
+  name used in a file the run doesn't load: `KeptReason.UsedInProjectNotLoaded`). Framework spellings share a run
+  (`NormalizeFramework`, NuGet's short names: `net6` = `net6.0`, `net10` is .NET Framework 1.0); the run's
+  TargetFramework is the majority spelling, and the hook sets a kept project's own spelling (`StyleBroFormatAliases`).
 
 - **Convergence: one run everywhere** (2026-10-04). `dotnet format` fixes one id at a time (one Fix All each, fresh
   diagnostics) in an order that changes between processes, so the same repo converged in one run or two. Causes found:
