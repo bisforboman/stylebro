@@ -9,8 +9,8 @@ namespace StyleBro.Analyzers.Ordering;
 /// <c>x.GetType().GetProperties().First()</c>, or the array kept in a local and indexed later. Reflection returns members in
 /// declaration order, so BRO1001's sort would change what such code reads (Stateless's tests took an event's backing field
 /// as <c>GetFields(...)[0]</c> and a list as <c>[1]</c>: 5 tests failed). Syntax only, so it also works on the files of
-/// projects a run doesn't load (<see cref="RepositoryNames"/>): the type is known by its simple name, from <c>typeof</c>,
-/// <c>new T()</c>, <c>this</c>, or the declared type of the field, property, local or parameter whose GetType() is called.
+/// projects a run doesn't load (<see cref="RepositoryNames"/>): the type is known by its simple name, from <see langword="typeof"/>,
+/// <c>new T()</c>, <see langword="this"/>, or the declared type of the field, property, local or parameter whose GetType() is called.
 /// </summary>
 public static class ReflectionByPosition
 {

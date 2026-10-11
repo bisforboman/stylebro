@@ -85,10 +85,6 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         return reads.FirstOrDefault(r => ObservableOrder.ReordersReflectedMembers(type, order, ReflectionByPosition.ReadsEveryMember(r.Key.Substring(r.Key.IndexOf(' ') + 1)))).Value;
     }
 
-    private static SyntaxNode? GetContainer(SyntaxNode root, Diagnostic diagnostic) =>
-        root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true)
-            .FirstAncestorOrSelf<MemberDeclarationSyntax>(m => m.Parent is { } parent && MemberOrdering.GetMembers(parent) is not null)?.Parent;
-
     /// <summary>
     /// The edits that sort every container of the document that BRO1001 reports: one per outermost container, replacing
     /// its span. For fixes that change what BRO1001 sees, so it doesn't need another 'dotnet format' run (BRO1112:
@@ -126,6 +122,10 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             .Select(t => new TextChange(t.Span, rewriter.Visit(moved[t])!.ToString()))
             .ToList();
     }
+
+    private static SyntaxNode? GetContainer(SyntaxNode root, Diagnostic diagnostic) =>
+        root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true)
+            .FirstAncestorOrSelf<MemberDeclarationSyntax>(m => m.Parent is { } parent && MemberOrdering.GetMembers(parent) is not null)?.Parent;
 
     private static async Task<Document> FixDocumentAsync(
         Document document,

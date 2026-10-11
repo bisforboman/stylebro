@@ -434,7 +434,8 @@ public class DocumentationTests
 
     // Stateless ('the prefix text would be digraph {') and spreadcheetah ('Example: A1:B10') got a period after code.
     [Fact]
-    public Task TextEndingInCode_GetsNoPeriod_ProseInParenthesesDoes() => VerifyFixAsync("""
+    public Task TextEndingInCode_GetsNoPeriod_ProseInParenthesesDoes() => VerifyFixAsync(
+        """
         /// <summary>
         /// For DOT files the prefix text would be
         /// digraph {
@@ -456,7 +457,8 @@ public class DocumentationTests
             /// <returns>The value, never null{|BRO1603:|}</returns>
             public int C() => 0;
         }
-        """, """
+        """,
+        """
         /// <summary>
         /// For DOT files the prefix text would be
         /// digraph {
