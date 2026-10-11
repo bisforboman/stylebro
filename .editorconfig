@@ -11,6 +11,8 @@ indent_size = 4
 stylebro_summary_layout = single_line_when_fits
 # BRO1008: usings outside the namespace, like the preset (not set: StyleCop's default, inside).
 csharp_using_directive_placement = outside_namespace
+# Usings sorted, System first (the preset leaves sorting to init, which writes this for code like StyleBro's).
+dotnet_sort_system_directives_first = true
 
 [*.{csproj,props,targets,slnx,xml,json,yml}]
 indent_size = 2
