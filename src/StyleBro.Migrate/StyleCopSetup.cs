@@ -699,7 +699,7 @@ internal sealed class StyleCopSetup
                 {
                     ruleset = FromProject(match.Groups["ruleset"].Value, file);
                 }
-                else if (match.Groups["additional"].Success && json is null && Path.GetFileName(match.Groups["additional"].Value.Trim()).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
+                else if (match.Groups["additional"].Success && json is null && Path.GetFileName(match.Groups["additional"].Value.Trim().Replace('\\', '/')).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
                 {
                     json = FromProject(match.Groups["additional"].Value, file);
                 }

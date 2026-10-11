@@ -103,12 +103,14 @@ public sealed partial class MigrationTests
     [Fact]
     public void PackageHints_NameCentralPackageManagementOnlyWhenTheRepositoryUsesIt()
     {
-        Write("Directory.build.props", "<Project><ItemGroup><PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" /></ItemGroup></Project>");
+        // realworlddotnet's file is 'Directory.build.props': named as on disk (MSBuild finds it on Windows only).
+        var props = OperatingSystem.IsWindows() ? "Directory.build.props" : "Directory.Build.props";
+        Write(props, "<Project><ItemGroup><PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" /></ItemGroup></Project>");
         Write("src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
 
         var plain = Program.PackageHints(StyleCopSetup.Read(root), root);
-        Assert.Equal("StyleCop.Analyzers is referenced in Directory.build.props: StyleBro.Analyzers goes there.", Assert.Single(plain));
-        Assert.Equal(Path.Combine(root, "Directory.build.props"), Assert.Single(Migration.PropsFiles(root)));
+        Assert.Equal($"StyleCop.Analyzers is referenced in {props}: StyleBro.Analyzers goes there.", Assert.Single(plain));
+        Assert.Equal(Path.Combine(root, props), Assert.Single(Migration.PropsFiles(root)));
 
         Write("Directory.Packages.props", "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup></Project>");
         Assert.EndsWith("goes there: its version in Directory.Packages.props (central package management).", Assert.Single(Program.PackageHints(StyleCopSetup.Read(root), root)), StringComparison.Ordinal);
