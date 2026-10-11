@@ -158,8 +158,8 @@ tool again replaces the block, so put your own settings outside it.
 Every key the preset sets is written, and `--write` turns the preset off (`<StyleBroPreset>none</StyleBroPreset>` in
 every `Directory.Build.props` the projects import: the root one, created if needed, and a nested one that doesn't import
 the root's): the block replaces it. That matters because an `.editorconfig`
-can't take a key back from the preset: `dotnet format` sorts `using` directives whenever
-`dotnet_sort_system_directives_first` is set, even to `false`, so the block sets it only when StyleCop sorted usings
+can't take a key back from the preset. Using order is the clearest case: `dotnet format` sorts `using` directives whenever
+`dotnet_sort_system_directives_first` is set, even to `false` (so the preset doesn't set it), and the block sets it only when StyleCop sorted usings
 (SA1208 or SA1210 on), and where a sub-directory or path section has both off, the keys go only into the sections that
 sort (a scope can't unset the main block's keys). SDK settings your root
 `.editorconfig` already sets for C# files are left out: your code is already formatted with them.
@@ -241,11 +241,14 @@ The Sonar rules that are on turn on these rules, at the strongest severity of th
 | S2325 (members that could be static) | CA1822, non-public members only (`dotnet_code_quality.CA1822.api_surface = private, internal`) |
 | S2971 (LINQ predicate into `Count`/`Any`/...) | BRO1150 |
 | S3052 (initialized to the default value) | CA1805 |
-| S3260 (seal private classes) | CA1852 |
 | S3442 (public constructors of abstract classes) | CA1012 |
 | S3878 (arrays for `params`) | BRO1151 |
 | S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = true`, only when BRO1001 is on |
 | S8969 (redundant `!`) | [BRO1147](rules/BRO1147.md) |
+
+**Not covered: S3260** (seal private classes). CA1852 would fix it, but its fix also seals private nested classes that
+have `protected` members, and every such member then gets CS0628 (SmartEnum: 144 warnings, which break a build with
+`TreatWarningsAsErrors`). The report lists it under "Not covered" with that reason; it stays Sonar's.
 
 **Sonar's own warnings for S1066, S2971 and S3878** are fixed too when the project references SonarAnalyzer.CSharp:
 BRO1149-BRO1151's fixes are registered for those ids, so `dotnet format` (or a light bulb) applies them to Sonar's
@@ -266,7 +269,7 @@ Sonar's rule needs replaces the one from the StyleCop setup, and the report list
 isn't applied: S4136 only sets an option of BRO1001, so with SA1201 or SA1202 off it stays Sonar's alone.
 
 The report has a Sonar part: what was read, how many Sonar rules are on, which of them StyleBro or the SDK now fixes (and
-with which rule), which mapped ones aren't applied and why, and that the rest stay Sonar's (no safe automatic fix: unused
+with which rule), which mapped ones aren't applied and why, which have no safe fix (S3260), and that the rest stay Sonar's (no safe automatic fix: unused
 private members, cognitive complexity, ...). The generated block has the Sonar-driven lines last, under
 `# From the SonarQube setup`, each with the Sonar rule's title. `--diff` prints the same part of the report before its
 summary. `init` does the same in a repository without StyleCop, and prints it.

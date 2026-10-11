@@ -413,10 +413,10 @@ dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
 dotnet_style_parentheses_in_other_operators = never_if_unnecessary
 
 # Using directives: outside the namespace (works with file-scoped namespaces; StyleCop's SA1200 default is
-# inside), System first, sorted (SA1208, SA1210, SA1211). Sorting happens in 'dotnet format'.
+# inside). Sorting (SA1208, SA1210, SA1211) isn't set here: 'dotnet format' sorts usings whenever
+# dotnet_sort_system_directives_first is set, to any value, and an .editorconfig can't unset a key this file sets.
+# 'stylebro-migrate init' writes it into .editorconfig when the code sorts its usings (or has too few to tell).
 csharp_using_directive_placement = outside_namespace
-dotnet_sort_system_directives_first = true
-dotnet_separate_import_directive_groups = false
 
 # Blank lines (SA1507, SA1508, SA1513). The SDK marks these rules experimental.
 dotnet_style_allow_multiple_blank_lines_experimental = false

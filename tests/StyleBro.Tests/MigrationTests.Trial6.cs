@@ -1,203 +1,234 @@
+using Microsoft.CodeAnalysis.CSharp;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What a trial of main on vs-validation, SmartEnum, Scrutor and TodoApi found in format, the preview and --write.</summary>
+/// <summary>What a trial on vs-validation, SmartEnum, Scrutor and TodoApi found in 'stylebro-migrate init'.</summary>
 public sealed partial class MigrationTests
 {
+    private const string SortKey = "dotnet_sort_system_directives_first";
+
     [Theory]
-    [InlineData("net6", "net6.0")]
-    [InlineData("net60", "net6.0")]
-    [InlineData("NET8", "net8.0")]
-    [InlineData("net8.0", "net8.0")]
-    [InlineData("net6-windows", "net6.0-windows")]
-    [InlineData("netcoreapp31", "netcoreapp3.1")]
-    [InlineData("netstandard20", "netstandard2.0")]
-    [InlineData("net48", "net48")]       // .NET Framework: no dot
-    [InlineData("net472", "net472")]
-    [InlineData("net10", "net10")]       // NuGet: .NET Framework 1.0, not .NET 10
-    [InlineData("net10.0", "net10.0")]
-    public void Format_NormalizesFrameworkSpellings_LikeNuGet(string framework, string expected)
-    {
-        Assert.Equal(expected, FormatCommand.NormalizeFramework(framework));
-    }
+    [InlineData("a\nb\n", 0)]
+    [InlineData("a\r\nb\r\n", 1)]
+    [InlineData("a\r\nb\n", -1)]
+    [InlineData("a", -1)]
+    public void Conventions_LineEnding(string text, int expected) => Assert.Equal(expected, Conventions.LineEnding(text));
 
     [Fact]
-    public void Format_SpellingsOfOneFramework_ShareARun_LikeSmartEnum()
+    public void Init_WritesTheFilesLineEnding_LikeSmartEnum()
     {
-        // SmartEnum: EFCore writes 'net6;net7;net8', the rest 'net6.0;...': 7 runs before, 3 now.
-        var plan = FormatCommand.Plan(new Dictionary<string, string[]>
+        // SmartEnum: LF files, no end_of_line; 'format' on Windows wrote 'Metadata =\r\n' into 26 of them.
+        for (var i = 0; i < 3; i++)
         {
-            ["EFCore.csproj"] = new[] { "net6", "net7", "net8" },
-            ["SmartEnum.csproj"] = new[] { "net6.0", "net7.0", "net8.0", "netstandard2.0" },
-            ["EFCore.Tests.csproj"] = new[] { "net7.0", "net6.0", "net8.0" },
-        });
+            Write($"A{i}.cs", $"class A{i}\n{{\n}}\n");
+        }
 
-        Assert.Equal(new[] { "net6.0", "net7.0", "net8.0", "netstandard2.0" }, plan.Select(p => p.Framework));
-        Assert.Equal(new[] { "EFCore.csproj", "EFCore.Tests.csproj", "SmartEnum.csproj" }, plan[0].Projects);
+        var output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+
+        Assert.Contains("  kept     C# files' line endings: 3 of 3 LF -> lf\n", output);
+        Assert.Contains("# init: C# files' line endings: LF in 3 of 3 files in your code\nend_of_line = lf\n", output);
+
+        // Mixed: nothing written, the verdict says so.
+        Write("B0.cs", "class B0\r\n{\r\n}\r\n");
+        output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+        Assert.Contains("  mixed    C# files' line endings: 3 LF, 1 CRLF -> default stays (unset)\n", output);
+        Assert.DoesNotContain("end_of_line = ", output);
+
+        // The repository's own key stays.
+        File.Delete(Path.Combine(root, "B0.cs"));
+        Write(".editorconfig", "root = true\n[*]\nend_of_line = crlf\n");
+        output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+        Assert.Contains("  set      C# files' line endings: 3 of 3 LF -> set in .editorconfig (crlf)\n", output);
+        Assert.DoesNotContain("end_of_line = lf", output);
     }
 
     [Fact]
-    public void Format_AProjectThatSpellsTheFrameworkAnotherWay_GetsItsOwnSpelling()
+    public void Conventions_Converted_AreFilesGitConvertsOnCheckout()
     {
-        // The 'net6' run set TargetFramework=net6 for the EFCore tests too, which only have restore output for 'net6.0':
-        // "Warnings were encountered while loading the workspace".
-        var projects = new Dictionary<string, (string[] Frameworks, string[] References)>
+        var output = "i/lf    w/crlf  attr/text=auto          \ta.cs\0"
+            + "i/lf    w/lf    attr/                   \tb.cs\0"
+            + "i/lf    w/crlf  attr/text eol=crlf      \tc.cs\0"
+            + "i/crlf  w/crlf  attr/                   \td e.cs\0"
+            + "i/-text w/-text attr/                   \tf.bin\0";
+
+        Assert.Equal(new[] { "a.cs" }, Conventions.Converted(output));
+    }
+
+    [Fact]
+    public void Init_LeavesTheLineEndingUnset_WhenGitConvertsIt()
+    {
+        // core.autocrlf=true: the repository stores LF, a Windows checkout has CRLF and a Linux one LF. Writing crlf would
+        // make 'format' rewrite every file on Linux; unset, 'format' writes the OS's ending, which the checkout has.
+        for (var i = 0; i < 3; i++)
         {
-            [@"C:\r\EFCore.csproj"] = (new[] { "net6", "net7" }, Array.Empty<string>()),
-            [@"C:\r\EFCore.Tests.csproj"] = (new[] { "net6.0", "net7.0" }, new[] { @"C:\r\EFCore.csproj" }),
-            [@"C:\r\Other.Tests.csproj"] = (new[] { "net6.0" }, Array.Empty<string>()),
-        };
-        var keep = FormatCommand.Keep(projects, "net6.0");
+            Write($"A{i}.cs", $"class A{i}\n{{\n}}\n");
+        }
 
-        var (alias, aliases) = FormatCommand.Aliases(projects, keep, "net6.0");
-
-        Assert.Equal(3, keep.Count);
-        Assert.Equal("net6.0", alias); // most projects' spelling: their own conditions see it
-        Assert.Equal(@"|C:\R\EFCORE.CSPROJ=net6|", aliases);
-        Assert.Contains("StyleBroFormatAliases", FormatCommand.SelectFrameworkTargets, StringComparison.Ordinal);
-        Assert.Equal(string.Empty, FormatCommand.Aliases(projects, new[] { @"C:\r\Other.Tests.csproj" }, "net6.0").Aliases);
-    }
-
-    [Fact]
-    public void Format_WritesTheNamesOfEveryCSharpFile_ForRunsThatLoadOnlySomeProjects()
-    {
-        // Scrutor: the tests read 'count' with GetField; the netstandard2.0 run loads only the library.
-        Write("src/Lib/Counter.cs", "class Counter\n{\n    private int count;\n}\n");
-        Write("test/Tests/CounterTests.cs", "class CounterTests\n{\n    object Read(object c) => c.GetType().GetField(\"count\", 0)!;\n\n    string Name => nameof(Counter);\n}\n");
-        Write("src/Lib/obj/Generated.cs", "class Generated { string S => \"not this\"; }\n");
-        var file = Path.Combine(root, "names.tsv");
-
-        FormatCommand.WriteRepositoryNames(root, file);
-
-        var entries = File.ReadAllLines(file).Select(StyleBro.Analyzers.RepositoryNames.Parse).OfType<StyleBro.Analyzers.RepositoryNames.Entry>().ToList();
-        var tests = Path.Combine(root, "test", "Tests", "CounterTests.cs");
-        Assert.Contains(entries, e => e.Kind == 'S' && e.Text == "count" && e.Where == tests + "(3)");
-        Assert.Contains(entries, e => e.Kind == 'N' && e.Text == "Counter");
-        Assert.Contains(entries, e => e.Kind == 'I' && e.Where == tests && e.Text.Split(' ').Contains("GetField"));
-        Assert.DoesNotContain(entries, e => e.Text == "not this"); // bin and obj aren't sources
-    }
-
-    [Fact]
-    public void RepositoryNames_KeepStringsWithTabsAndLineBreaks()
-    {
-        var tree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText("class C { string S => \"a\\tb\\nc\\\\d\"; }");
-
-        var entry = StyleBro.Analyzers.RepositoryNames.Parse(StyleBro.Analyzers.RepositoryNames.Lines(tree.GetRoot(), "C:\\r\\C.cs").First())!;
-
-        Assert.Equal("a\tb\nc\\d", entry.Text);
-        Assert.Equal("C:\\r\\C.cs(1)", entry.Where);
-        Assert.Null(StyleBro.Analyzers.RepositoryNames.Parse("not a line"));
-    }
-
-    [Fact]
-    public void Preview_AGlobalPackageReferenceInANestedPackagesProps_GetsAGlobalPackageReference_LikeVsValidation()
-    {
-        // StyleCop's GlobalPackageReference moved into src/Directory.Packages.props, which imports the root's. The preview
-        // wrote a PackageReference with a version there: NU1008, and the package twice.
-        Write("Directory.Packages.props", "<Project>\n  <PropertyGroup>\n    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n</Project>\n");
-        Write("src/Directory.Packages.props", "<Project>\n  <Import Project=\"$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))\" />\n  <ItemGroup>\n    <GlobalPackageReference Include=\"StyleCop.Analyzers.Unstable\" Version=\"1.2.0.556\" />\n  </ItemGroup>\n</Project>\n");
-        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-
-        var added = PreviewCommand.AddPackage(root);
-
-        var text = File.ReadAllText(Path.Combine(root, "src", "Directory.Packages.props"));
-        Assert.Matches("<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"[^\"]+\" />", text);
-        Assert.DoesNotContain("<PackageReference", text, StringComparison.Ordinal);
-        Assert.DoesNotContain("StyleBro", File.ReadAllText(Path.Combine(root, "Directory.Packages.props")), StringComparison.Ordinal);
-        Assert.Contains("src/Directory.Packages.props", added, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void Preview_CentralPackageManagement_IsFoundThroughImports()
-    {
-        // A project's nearest Directory.Packages.props doesn't turn it on itself; the root's it imports does.
-        Write("Directory.Packages.props", "<Project>\n  <PropertyGroup>\n    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n</Project>\n");
-        Write("src/Directory.Packages.props", "<Project>\n  <Import Project=\"../Directory.Packages.props\" />\n</Project>\n");
-        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-
-        Assert.Equal(Path.Combine(root, "src", "Directory.Packages.props"), PreviewCommand.CentralPackages(Path.Combine(root, "src", "Lib", "Lib.csproj"), root));
-        Write("src/Directory.Packages.props", "<Project />\n");
-        Assert.Null(PreviewCommand.CentralPackages(Path.Combine(root, "src", "Lib", "Lib.csproj"), root));
-    }
-
-    [Fact]
-    public void Write_TurnsThePresetOff_OnlyWhereStyleCopRuns_LikeVsValidation()
-    {
-        // vs-validation: StyleCop runs in src only; test/Directory.Build.props got the opt-out, though no settings apply there.
-        Write("src/Directory.Build.props", "<Project>\n  <ItemGroup>\n    <PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" />\n  </ItemGroup>\n</Project>\n");
-        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-        Write("test/Directory.Build.props", "<Project>\n  <PropertyGroup>\n    <IsPackable>false</IsPackable>\n  </PropertyGroup>\n</Project>\n");
-        Write("test/Tests/Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-
-        var output = Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write" })));
-
-        Assert.Contains("<StyleBroPreset>none</StyleBroPreset>", File.ReadAllText(Path.Combine(root, "src", "Directory.Build.props")), StringComparison.Ordinal);
-        Assert.DoesNotContain("StyleBroPreset", File.ReadAllText(Path.Combine(root, "test", "Directory.Build.props")), StringComparison.Ordinal);
-        Assert.DoesNotContain("test/Directory.Build.props", output, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void Init_NamesPropsFilesAsPropsFiles()
-    {
-        Assert.Equal(
-            "1 project targets several frameworks (src/Lib.csproj); 2 props files set several for other projects (Directory.Build.props, test/Directory.Build.props).",
-            InitCommand.MultiTargetedLine(new[] { "src/Lib.csproj", "Directory.Build.props", "test/Directory.Build.props" }));
-        Assert.Equal("1 props file sets several for the projects (Directory.Build.props).", InitCommand.MultiTargetedLine(new[] { "Directory.Build.props" }));
-    }
-
-    [Fact]
-    public void Format_RestoreHint_NamesTheNuGetError()
-    {
-        var output = new[]
+        Assert.Equal(0, PreviewCommand.Git(root, "init", "-q").Code);
+        Assert.Equal(0, PreviewCommand.Git(root, "add", ".").Code);
+        Assert.Equal(0, PreviewCommand.Git(root, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "x").Code);
+        foreach (var file in Directory.GetFiles(root, "*.cs"))
         {
-            "  Determining projects to restore...",
-            @"C:\r\src\Lib\Lib.csproj : error NU1008: The following PackageReference items cannot define a value for Version: StyleBro.Analyzers. Projects using Central Package Management must define a Version value on a PackageVersion item. For more information, visit https://aka.ms/nuget/cpm/gettingstarted [C:\r\App.slnx]",
-        };
+            File.Delete(file);
+        }
 
-        var hint = FormatCommand.RestoreHintFor(output);
+        Assert.Equal(0, PreviewCommand.Git(root, "-c", "core.autocrlf=true", "checkout", "--", ".").Code);
+        Assert.Equal(1, Conventions.LineEnding(File.ReadAllText(Path.Combine(root, "A0.cs"))));
 
-        Assert.StartsWith("The restore failed with NU1008: The following PackageReference items cannot define a value for Version: StyleBro.Analyzers.", hint, StringComparison.Ordinal);
-        Assert.DoesNotContain("audit", hint, StringComparison.Ordinal);
-        Assert.Contains("nu1008", hint, StringComparison.Ordinal);
-        Assert.Equal(FormatCommand.RestoreHint, FormatCommand.RestoreHintFor(new[] { "Restore operation failed" }));
+        var output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+
+        Assert.Contains("  note     line endings: 3 files that git converts on checkout (core.autocrlf) don't count\n", output);
+        Assert.DoesNotContain("end_of_line = ", output);
     }
 
     [Fact]
-    public void Format_VerifyNoChanges_SaysItChangesNothing()
+    public void Sonar_S3260_IsNotCovered_CA1852SealsClassesWithProtectedMembers()
     {
-        Assert.StartsWith("Checking StyleBro's rules", FormatCommand.RulesLine(verify: true, 140), StringComparison.Ordinal);
-        Assert.Contains("changing nothing", FormatCommand.RulesLine(verify: true, 140), StringComparison.Ordinal);
-        Assert.StartsWith("Fixing StyleBro's rules", FormatCommand.RulesLine(verify: false, 140), StringComparison.Ordinal);
+        // SmartEnum: 'private sealed class TestEnumBool : SmartEnum<...> { protected TestEnumBool(...) }', 144 CS0628 warnings.
+        Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" /></ItemGroup></Project>""");
+
+        var output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+
+        Assert.DoesNotContain("CA1852", output.Substring(output.IndexOf("# BEGIN", StringComparison.Ordinal)));
+        Assert.DoesNotContain("S3260 ->", output);
+        Assert.Contains("  Not covered (no safe fix):\n    S3260: CA1852's fix also seals private nested classes with protected members", output);
+        Assert.DoesNotContain(SonarSetup.Mapping, m => m.Sonar == "S3260");
     }
 
     [Fact]
-    public void Preview_AFailedFormat_SaysWhyFirst_AndDoesntRepeatTheInitReport()
+    public void Conventions_CountTheUsingOrder()
     {
-        Write("App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-        Write("C.cs", "class C { }\n");
-        PreviewCommand.MakeRepository(root);
-        var patch = Path.Combine(root, "out.patch");
-        var error = string.Empty;
-
-        var output = Capture(() => error = CaptureError(() => Assert.Equal(1, PreviewCommand.Run("init", new[] { root, "--diff=" + patch, "--no-restore" }, (args, log) =>
+        var counts = Conventions.NewCounts();
+        foreach (var text in new[]
         {
-            Assert.DoesNotContain("--no-restore", args); // the preview added the package: the copy needs a restore
-            log("error NU1101: Unable to find package StyleBro.Analyzers.");
-            return 1;
-        }))));
+            "using System;\nusing System.Text;\nusing Alpha;\nusing static Beta.C;\nusing X = Gamma;\n",   // System first
+            "using Alpha;\nusing System;\nusing Zeta;\n",                                               // sorted without System first
+            "using Alpha;\nusing Beta.Gamma;\n",                                                        // sorted both ways
+            "using Zeta;\nusing Alpha;\n",                                                              // unsorted
+            "using X = Gamma;\nusing Alpha;\n",                                                         // aliases go last
+            "using System;\nnamespace N\n{\n    using Zeta;\n    using Alpha;\n}\n",                     // a namespace's list unsorted
+            "global using Zeta;\nusing Alpha;\n",                                                       // fewer than 2 (global aside)
+        })
+        {
+            Conventions.Count(CSharpSyntaxTree.ParseText(text), counts);
+        }
 
-        Assert.StartsWith("The preview failed: 'stylebro-migrate format' failed (exit code 1).", error.Replace("\r\n", "\n"), StringComparison.Ordinal);
-        Assert.Contains("  error NU1101", error, StringComparison.Ordinal);
-        Assert.DoesNotContain("Wrote the built-in rule severities", error + output, StringComparison.Ordinal);
-        Assert.Contains("--no-restore: ignored", output, StringComparison.Ordinal);
-        var kept = System.Text.RegularExpressions.Regex.Match(output, @"The copy is kept: (.*) \(log").Groups[1].Value;
-        DeleteFolder(Path.GetDirectoryName(kept)!);
+        Assert.Equal(new[] { 1, 1, 1, 3 }, counts["using order"]);
+    }
+
+    [Theory]
+    [InlineData(0, 0, 0, 0, "true", null)]                     // nothing to count: StyleBro's default (sorted, System first)
+    [InlineData(1, 0, 1, 0, "true", "too few")]
+    [InlineData(20, 2, 10, 2, "true", "default")]              // sorted, System first
+    [InlineData(2, 20, 10, 2, "false", "kept")]                // sorted, System not first
+    [InlineData(1, 1, 10, 0, "true", "default")]               // too few files tell the two apart: the default
+    [InlineData(50, 28, 37, 15, null, "both")]                 // SmartEnum: sorted, but both ways
+    [InlineData(10, 0, 0, 40, null, "kept")]                   // mostly unsorted
+    [InlineData(10, 0, 10, 10, null, "both")]                  // mixed
+    public void Conventions_DecideTheUsingOrder(int systemFirst, int plain, int both, int unsorted, string? value, string? tag)
+    {
+        var counts = Conventions.NewCounts();
+        counts["using order"] = new[] { systemFirst, plain, both, unsorted };
+
+        var (lines, report) = Conventions.Decide(counts, new Dictionary<string, string>());
+
+        Assert.Equal(value is null ? Array.Empty<string>() : new[] { $"{SortKey} = {value}" }, lines.Where(l => !l.StartsWith('#')));
+        Assert.Single(lines, l => l.StartsWith("# init: using directives: ", StringComparison.Ordinal));
+        if (value is null)
+        {
+            Assert.Contains(lines, l => l.EndsWith($"so they aren't sorted ('dotnet format' sorts them whenever {SortKey} is set). To sort them: add {SortKey} = true", StringComparison.Ordinal));
+        }
+
+        Assert.Equal(tag is null ? 0 : 1, report.Count(r => r.StartsWith($"  {tag,-8} using directives: ", StringComparison.Ordinal)));
+
+        // A repository that sets either key keeps its own.
+        foreach (var key in new[] { SortKey, "dotnet_separate_import_directive_groups" })
+        {
+            Assert.Empty(Conventions.Decide(counts, new Dictionary<string, string>(), k => k == key).Lines);
+        }
     }
 
     [Fact]
-    public void Preview_AcceptsNoRestore()
+    public void ThePreset_DoesNotSortUsings()
     {
-        Assert.Contains("--no-restore", PreviewCommand.Options);
+        // 'dotnet format' sorts usings whenever a sort key is set (any value), and an .editorconfig can't unset the preset's.
+        var preset = File.ReadAllLines(Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig"));
+
+        Assert.DoesNotContain(preset, l => l.StartsWith(SortKey, StringComparison.Ordinal) || l.StartsWith("dotnet_separate_import_directive_groups", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Conventions_CountOverloadsBro1001CouldSplit()
+    {
+        var counts = Conventions.NewCounts();
+        Conventions.Count(
+            CSharpSyntaxTree.ParseText("""
+            class Scrutor
+            {
+                public bool CanDecorate(int a) => true;
+                private bool CanDecorate(string a) => true;
+                public void Other() { }
+            }
+
+            class Apart
+            {
+                public void M() { }
+                public void Other() { }
+                private void M(int a) { }
+            }
+
+            class SameKeys
+            {
+                public void N() { }
+                public void Other() { }
+                public void N(int a) { }
+            }
+            """),
+            counts);
+
+        Assert.Equal(new[] { 1, 1 }, counts["stylebro_keep_overloads_together"]);
+    }
+
+    [Theory]
+    [InlineData(0, 3, true)]
+    [InlineData(2, 10, true)]
+    [InlineData(5, 10, false)]   // mixed: the default stays
+    [InlineData(0, 2, false)]    // too few
+    public void Conventions_KeepOverloadsTogether_WhenTheCodeDoes(int apart, int together, bool written)
+    {
+        const string Key = "stylebro_keep_overloads_together";
+        var (lines, _) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { apart, together } }, new Dictionary<string, string>());
+
+        Assert.Equal(written ? new[] { Key + " = true" } : Array.Empty<string>(), lines.Where(l => !l.StartsWith('#')));
+    }
+
+    [Fact]
+    public void Conventions_BracesWithoutAMajority_AreKept_NotAnEmptyRule_LikeSmartEnum()
+    {
+        // SmartEnum: 266 of 314 bodies without braces read "-> is off" and "so  is off".
+        var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { ["csharp_prefer_braces"] = new[] { 48, 266 } }, new Dictionary<string, string>());
+
+        Assert.Equal(new[] { "# init: one-line if/else/loop/using/lock bodies: without braces in 266 of 314 places in your code", "csharp_prefer_braces = when_multiline" }, lines);
+        Assert.Contains("  kept     one-line if/else/loop/using/lock bodies: 266 of 314 without braces -> when_multiline", report);
+    }
+
+    [Fact]
+    public void Conventions_EveryVerdict_NamesItsRule()
+    {
+        foreach (var convention in Conventions.All)
+        {
+            foreach (var count in new[] { new[] { 30, 0 }, new[] { 0, 30 }, new[] { 15, 15 }, new[] { 1, 1 } })
+            {
+                var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [convention.Key] = count }, new Dictionary<string, string>());
+                foreach (var text in lines.Concat(report))
+                {
+                    Assert.DoesNotContain("  is off", text);
+                    Assert.DoesNotContain("->  ", text);
+                    Assert.DoesNotContain(":  (", text);
+                    Assert.DoesNotContain("so  ", text);
+                }
+            }
+        }
     }
 }
