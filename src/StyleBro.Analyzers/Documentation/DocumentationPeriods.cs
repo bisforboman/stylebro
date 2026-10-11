@@ -24,6 +24,8 @@ internal static class DocumentationPeriods
     /// <summary>Closing punctuation that may follow a sentence's period: '(see above.)', '"done."'.</summary>
     private static readonly char[] ClosingPunctuation = [')', ']', '"', '\''];
 
+    private static readonly System.Text.RegularExpressions.Regex NumberOnly = new(@"^[-+]?(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|[0-9][0-9_,]*(?:\.[0-9]+)?)$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
     private static readonly char[] CodeCharacters = ['{', '}', '[', ']', '(', ')', '=', ';', ':', '/', '\\', '|', '$', '#', '_', '`'];
 
     private static readonly HashSet<string> TextElements = new()
@@ -139,6 +141,15 @@ internal static class DocumentationPeriods
         return word.IndexOfAny(CodeCharacters) >= 0;
     }
 
+    /// <summary>
+    /// Whether the element's whole text is one number (<c>&lt;summary&gt;0&lt;/summary&gt;</c> on an enum member: Soulseek.NET's
+    /// message codes): a value, not a sentence. StyleCop 1.1.118 never saw these (its SA1629 doesn't check enum members),
+    /// 1.2 reports them.
+    /// </summary>
+    private static bool IsNumberOnly(XmlElementSyntax element) =>
+        element.Content.All(c => c is XmlTextSyntax)
+        && NumberOnly.IsMatch(string.Concat(element.Content.OfType<XmlTextSyntax>().SelectMany(t => t.TextTokens).Select(t => t.ValueText)).Trim());
+
     private static int? GetInsertionPoint(XmlElementSyntax element, HashSet<string> excluded)
     {
         // The last piece of content that isn't whitespace or a line's '///'.
@@ -158,7 +169,7 @@ internal static class DocumentationPeriods
                     // A period may be followed by closing punctuation: '(see above.)', '"done."'.
                     var untrimmed = string.Concat(text.TextTokens.TakeWhile(t => t != last).Append(last).Select(t => t.ValueText)).TrimEnd();
                     var ending = untrimmed.TrimEnd(ClosingPunctuation);
-                    return (ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':') || EndsInCode(untrimmed) ? null
+                    return (ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':') || EndsInCode(untrimmed) || IsNumberOnly(element) ? null
                         : last.IsKind(SyntaxKind.XmlEntityLiteralToken) ? last.Span.End
                         : last.SpanStart + last.Text.TrimEnd().Length;
 

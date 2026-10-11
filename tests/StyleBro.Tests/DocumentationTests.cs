@@ -457,6 +457,18 @@ public class DocumentationTests
             /// <returns>The value, never null{|BRO1603:|}</returns>
             public int C() => 0;
         }
+
+        /// <summary>Message codes{|BRO1603:|}</summary>
+        public enum Codes
+        {
+            /// <summary>
+            ///     0
+            /// </summary>
+            Ping = 0,
+
+            /// <summary>0x1F</summary>
+            Search = 0x1F,
+        }
         """,
         """
         /// <summary>
@@ -479,6 +491,18 @@ public class DocumentationTests
             /// <summary>Gets the delay (in ms).</summary>
             /// <returns>The value, never null.</returns>
             public int C() => 0;
+        }
+
+        /// <summary>Message codes.</summary>
+        public enum Codes
+        {
+            /// <summary>
+            ///     0
+            /// </summary>
+            Ping = 0,
+
+            /// <summary>0x1F</summary>
+            Search = 0x1F,
         }
         """);
 
