@@ -64,10 +64,12 @@ site leaves out (`decisions.md`, `backlog.md`, `beyond-stylecop.md`, `proposals/
   Configuration, Not reported, Compared with StyleCop), a row in `docs/rules/README.md` and
   `AnalyzerReleases.Unshipped.md`, an entry in `docs/differences-from-stylecop.md`, unit tests for the single fix and
   Fix All, and a case in `samples/Messy`. `DocExamplesTests` runs every rule page's example.
-- **A mutation entry for every guard** in `scripts/mutation/mutations/<Area>.psd1`, named after the guarded file's
-  source folder (`Readability.psd1` for `src/StyleBro.Analyzers/Readability/` and `src/StyleBro.CodeFixes/Readability/`,
-  `Migrate.psd1` for `src/StyleBro.Migrate/`, else `Common.psd1`; an entry in the wrong file fails the run): CI breaks
-  each guard and expects a test to fail.
+- **A mutation entry for every guard**, one file per entry: `scripts/mutation/entries/<Area>/<file>-<hash>.psd1`. Write
+  it with `scripts/mutation/New-Mutation.ps1 -File <path> -Find <text> -Replace <text> -Tests <filter> [-Comment <text>]`,
+  which picks the folder (the guarded file's source folder: `Readability/` for `src/StyleBro.Analyzers/Readability/` and
+  `src/StyleBro.CodeFixes/Readability/`, `Migrate/` for `src/StyleBro.Migrate/`, else `Common/`; an entry in the wrong
+  folder fails the run) and a name no other pull request picks by accident (the guarded file's name and a hash of the
+  mutation). CI breaks each guard and expects a test to fail.
 
 ## Pull requests
 
