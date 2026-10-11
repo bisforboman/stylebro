@@ -4,6 +4,9 @@ namespace StyleBro.Tests;
 
 public class MemberOrderingTests
 {
+    // BRO1001 leaves the members of regions BRO1112 removes to that fix (MemberOrdering.HasRemovableRegions).
+    private const string KeepRegions = "dotnet_diagnostic.BRO1112.severity = none\n";
+
     [Fact]
     public Task SortedType_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         using System;
@@ -353,7 +356,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task Regions_KeepTheirMembers_OrderAcrossThemIsNotChecked() => VerifyNoDiagnosticsAsync("""
+    public Task Regions_KeepTheirMembers_OrderAcrossThemIsNotChecked() => VerifyNoDiagnosticsAsync(
+        """
         class C
         {
             #region Methods
@@ -361,6 +365,20 @@ public class MemberOrderingTests
             #endregion
 
             private int _x;
+        }
+        """,
+        KeepRegions);
+
+    [Fact]
+    public Task Regions_ThatBRO1112Removes_AreLeftToItsFix() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            private void Reset() { }
+
+            #region Behavior
+            private int _x;
+            public void Run() { }
+            #endregion
         }
         """);
 
@@ -417,7 +435,8 @@ public class MemberOrderingTests
 
             private void Last() { }
         }
-        """);
+        """,
+        editorConfig: KeepRegions);
 
     [Fact]
     public Task DocsMovedBelowAFieldWithoutABlankLine_GetOne() => VerifyFixAsync(
@@ -467,7 +486,8 @@ public class MemberOrderingTests
             private void Reset() { }
             #endregion
         }
-        """);
+        """,
+        editorConfig: KeepRegions);
 
     [Fact]
     public Task Regions_InNamespaces_AreSortedOneByOne() => VerifyFixAsync(
@@ -490,7 +510,8 @@ public class MemberOrderingTests
             class A { }
             #endregion
         }
-        """);
+        """,
+        editorConfig: KeepRegions);
 
     [Fact]
     public Task Pragmas_AreFencesToo() => VerifyFixAsync(
@@ -520,7 +541,8 @@ public class MemberOrderingTests
         """);
 
     [Fact]
-    public Task ConditionalDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync("""
+    public Task ConditionalDirectives_OrDocsAboveARegion_AreLeftAlone() => VerifyNoDiagnosticsAsync(
+        """
         class C
         {
         #if true
@@ -541,7 +563,8 @@ public class MemberOrderingTests
             public const int Max = 1;
             #endregion
         }
-        """);
+        """,
+        KeepRegions);
 
     [Fact]
     public Task CustomKindOrder_FromEditorConfig() => VerifyFixAsync(
@@ -661,7 +684,7 @@ public class MemberOrderingTests
             #endregion
         }
         """,
-        editorConfig: "stylebro_keep_overloads_together = true\n");
+        editorConfig: "stylebro_keep_overloads_together = true\n" + KeepRegions);
 
     [Fact]
     public Task Overloads_KeptTogether_GoWhereTheirBestOverloadGoes() => VerifyFixAsync(
@@ -968,7 +991,8 @@ public class MemberOrderingTests
             private int c;
             #endregion
         }
-        """);
+        """,
+        editorConfig: KeepRegions);
 
     // Not a group comment: the next member is of another kind, or a group comment whose member doesn't move.
     [Fact]
