@@ -59,14 +59,15 @@ internal static class Program
               --files formats only those files (paths relative to the current folder or the repository root), loading
               just the project each belongs to: seconds after a small edit. With --verify-no-changes too.
 
-          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--sonar-profile <file>]
-          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
+          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
+          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
           stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
               rule, sample changes) and writes the full diff to stylebro-preview.patch (or <file>). Adds the
               StyleBro.Analyzers reference in the copy when the repository has none. --keep keeps the copy; --project
-              names what format runs on when the folder has several solutions or projects.
+              names what format runs on when the folder has several solutions or projects; --no-restore uses the
+              repository's own restore (run 'dotnet restore' first).
 
           stylebro-migrate baseline [path] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
