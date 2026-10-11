@@ -151,7 +151,7 @@ StyleBro rule enforces (operator placement, braces = `true`, using placement, ar
 key alone and turns that rule off (`your .editorconfig says end_of_line, ... so BRO1520 is off`), instead of letting it
 rewrite the code.
 
-Two settings work a little differently:
+A few settings work a little differently:
 
 - **One-line statements** (`if (a) return;`, `case 1: a(); break;`): the preset sets
   `csharp_preserve_single_line_statements = false`, which moves each to a line of its own. From 3 such statements on,
@@ -159,6 +159,14 @@ Two settings work a little differently:
 - **`<inheritdoc/>` on overrides and implementations** ([BRO1601](rules/BRO1601.md)): in projects that generate
   documentation, `init` counts the overrides and interface implementations BRO1601 checks, with and without a doc
   comment. Mostly documented: the rule stays on; mostly undocumented or mixed: it's turned off.
+- **Line endings** count files. Without `end_of_line`, `format` writes your OS's line ending into the lines it rewrites
+  (on Windows CRLF into LF files), so `init` writes the files' ending when it's clear and nothing when it's mixed. Files
+  git converts on checkout (`core.autocrlf`: LF in the repository, CRLF in a Windows checkout) don't count: there the
+  OS's ending is what the checkout has, and a fixed one would make `format` rewrite every file on the other OS.
+- **Using order** counts files with 2 or more usings: sorted with System first, sorted without, or not sorted. `dotnet
+  format` sorts usings whenever `dotnet_sort_system_directives_first` is set (to any value), so the preset doesn't set
+  it: `init` writes it when your usings are sorted (or there are too few files to tell), and only a comment when they
+  aren't, or when some files put System first and others don't.
 
 | Setting | What's counted | Rule | Key |
 |---|---|---|---|
@@ -185,6 +193,9 @@ Two settings work a little differently:
 | Arithmetic parentheses | `a + (b * c)` or `a + b * c` | [BRO1406](rules/BRO1406.md) | `dotnet_style_parentheses_in_arithmetic_binary_operators` |
 | One-line statements | a braceless `if`/`else`/loop body or a `case` label's statements on their owner's line or below it | SDK formatter (IDE0055) | `csharp_preserve_single_line_statements` |
 | Documented overrides | overrides and interface implementations with or without a doc comment | [BRO1601](rules/BRO1601.md) | `dotnet_diagnostic.BRO1601.severity` |
+| Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
+| Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
+| Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 
 The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `both`,
 `mixed`, `too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys

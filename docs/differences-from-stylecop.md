@@ -45,6 +45,8 @@ always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covere
   modifier comes first and `static` next. On six real repos it changed nothing StyleCop accepts.
 - **IDE0073** (for SA1633 with `xmlHeader: false`) writes a plain header; the XML header is [BRO1615](rules/BRO1615.md).
 - **Using sorting** in `dotnet format` happens whenever `dotnet_sort_system_directives_first` is set, even to `false`.
+  The preset doesn't set it: `stylebro-migrate --write` writes it when SA1208 or SA1210 is on, `init` when the code
+  sorts its usings.
 
 ## Rule by rule
 

@@ -15,7 +15,7 @@
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = '!config.Bulk.Contains(p.Key) || !specific.Contains(p.Key)'; Replace = 'true'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = ' || !order.Contains("accessibility")'; Replace = ''; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/StyleCopSetup.cs'; Find = 'rulesets.Add([]);'; Replace = ''; Tests = 'MigrationTests' }
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': count[1] >= Share * total ? 1 : count[0] >= Share * total ? 0 : -1;'; Replace = ': count[1] > count[0] ? 1 : 0;'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': second >= Share * total ? 1 : first >= Share * total ? 0 : -1;'; Replace = ': second > first ? 1 : 0;'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Migration.cs'; Find = 'if (IsGeneratedOrVendored(relative, text))'; Replace = 'if (false)'; Tests = 'MigrationTests' }
 
@@ -40,12 +40,12 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Where(l => !IsKeptLine(l, keys))'; Replace = 'lines'; Tests = 'KeptFindingsTests' }
 
         # Trial of 0.4.0-alpha.1 (2026-10-10): rules off without a majority, few places, nested Directory.Build.props, vendored code
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)'; Replace = ': total < MinimumSample ? -1'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'return total < MinimumSample ? (first == 0 ? 1 : second == 0 ? 0 : -1)'; Replace = 'return total < MinimumSample ? -1'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'convention.Off is { } off && !IsSet(off)'; Replace = 'convention.Off is { } off'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (total < MinimumAgreeing)'; Replace = 'else if (false)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (written.Count + matched + lists.TurnedOff.Count + lists.Unfollowed.Count + lists.BothAllowed.Count + lists.TooFew.Count == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         # init's report: short verdicts, plurals, the defaults the code follows, wrapped summary (2026-10-10)
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'found = winner < 0 ? Plural(total, "place") : found;'; Replace = 'found = found;'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'found = winner < 0 ? Plural(total, convention.Unit) : found;'; Replace = 'found = found;'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'yield return matched == 0 ?'; Replace = 'yield return true ?'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': written.Count == 0 ? $"{kept}, all already'; Replace = ': false ? $"{kept}, all already'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'while (line.Length > Width)'; Replace = 'while (false)'; Tests = 'MigrationTests' }
@@ -102,5 +102,18 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'args.Contains("--no-restore") ? args : '; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = '            args = NextRun(args);'; Replace = ''; Tests = 'KeptFindingsTests.Format_StillChangingAfterTheLastRun_IsNotClean' }
         @{ File = 'src/StyleBro.Migrate/PreviewCommand.cs'; Find = ': FormatCommand.NextRun(formatArgs.ToArray());'; Replace = ': formatArgs;'; Tests = 'MigrationTests.Preview_AppliesInitAndFormatToACopy' }
+
+        # init after the sixth trial (2026-10-11): line endings, using order, overloads, S3260, the braces verdict
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '&& !info.Contains("eol=", StringComparison.Ordinal)'; Replace = ''; Tests = 'MigrationTests.Conventions_Converted_' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '_ = converted.Contains(Path.GetFullPath(file)) ?'; Replace = '_ = false ?'; Tests = 'MigrationTests.Init_LeavesTheLineEndingUnset_WhenGitConvertsIt' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (isSet?.Invoke(SortUsingsKey) == true || isSet?.Invoke("dotnet_separate_import_directive_groups") == true)'; Replace = 'if (isSet?.Invoke(SortUsingsKey) == true)'; Tests = 'MigrationTests.Conventions_DecideTheUsingOrder' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'var system = sort != 0 || apart < MinimumAgreeing ? 0 : Winner(c[0], c[1]);'; Replace = 'var system = 0;'; Tests = 'MigrationTests.Conventions_DecideTheUsingOrder' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (systemFirst && group < 2 &&'; Replace = 'if (false &&'; Tests = 'MigrationTests.Conventions_CountTheUsingOrder' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = '.Select(l => l.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)).ToList())'; Replace = '.Select(l => l.ToList())'; Tests = 'MigrationTests.Conventions_CountTheUsingOrder' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'keys.All(k => k is not null) && keys.Any(k => k!.Value.CompareTo(keys[0]!.Value) != 0)'; Replace = 'keys.All(k => k is not null)'; Tests = 'MigrationTests.Conventions_CountOverloadsBro1001CouldSplit' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'group[^1].Index - group[0].Index == group.Count - 1'; Replace = 'true'; Tests = 'MigrationTests.Conventions_CountOverloadsBro1001CouldSplit' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'convention.Off is { } offLine && RuleOf(offLine) is not null &&'; Replace = 'convention.Off is { } offLine &&'; Tests = 'MigrationTests.Conventions_BracesWithoutAMajority' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = 'LoadMapping().Where(m => m.Rule != "-").ToList();'; Replace = 'LoadMapping();'; Tests = 'MigrationTests.Sonar_' }
+        @{ File = 'src/StyleBro.Migrate/SonarSetup.cs'; Find = 'applied.NotCovered.AddRange(NotCovered.Where(m => IsOn(m.Sonar)).Select(m => (m.Sonar, m.Note!)));'; Replace = ''; Tests = 'MigrationTests.Sonar_S3260' }
     )
 }
