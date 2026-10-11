@@ -6,7 +6,7 @@ In the 0.3.0-alpha.1 trial, the SDK's IDE0065 (which `stylebro-migrate init` tur
 broke builds: moving usings out of a namespace changes how names are looked up. In eShop
 `CreateOrderDraftCommandHandler.cs` got CS0104 ('Order' is an ambiguous reference), in Ocelot
 `DownstreamRouteProviderFactoryTests.cs` got 7x CS0118 ('DownstreamRouteFinder' is a namespace but is used like a
-type). It also left a blank first line in files and needed second runs (usings sorted, BRO1505's blank line). What to
+type; reported upstream as [dotnet/roslyn#86002](https://github.com/dotnet/roslyn/issues/86002)). It also left a blank first line in files and needed second runs (usings sorted, BRO1505's blank line). What to
 do about using placement?
 
 ## Choices
