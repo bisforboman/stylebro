@@ -3,7 +3,7 @@ name: Real world
 # Every StyleBro rule on public repositories at pinned commits (scripts/realworld/repos.psd1): no analyzer crashes, no
 # new compile errors, no merge-conflict markers, the fixes converge, and no test that passed before fails afterwards.
 # Each repo runs on the runner its `Os` in repos.psd1 names: windows-latest by default (the .NET Framework targets, and
-# CRLF checkouts: git on the Windows runners converts line endings), ubuntu-latest where a Linux run gives the same
+# CRLF checkouts: git on the Windows runners converts line endings), ubuntu-26.04 where a Linux run gives the same
 # results.
 # Pull requests run it before merging; main runs it NIGHTLY instead of after every merge (a bad combination of two
 # merged PRs shows up the next morning: the run fails and opens or updates the issue "Nightly real-world run failed").
@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       relevant: ${{ steps.changes.outputs.relevant }}
       matrix: ${{ steps.matrix.outputs.matrix }}
@@ -46,7 +46,7 @@ jobs:
     name: Real world (${{ matrix.repo }})
     needs: changes
     if: ${{ !cancelled() }}
-    runs-on: ${{ needs.changes.outputs.relevant == 'false' && 'ubuntu-latest' || matrix.os }}
+    runs-on: ${{ needs.changes.outputs.relevant == 'false' && 'ubuntu-26.04' || matrix.os }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
@@ -146,7 +146,7 @@ jobs:
   nightly-issue:
     needs: realworld
     if: ${{ failure() && github.event_name == 'schedule' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       issues: write

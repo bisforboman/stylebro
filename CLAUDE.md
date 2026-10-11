@@ -101,13 +101,13 @@ when we can do that"): don't suggest releases at all; the user says when.
   Messy's project references; harmless while they agree.
 - C# files under `src/` and `tests/` use LF line endings (normalized 2026-09-30; a few had become mixed from scripted
   edits inserting CRLF, which then made exact-text replacements fail). Keep new edits LF.
-- `.github/workflows/ci.yml`: ubuntu-latest, .NET 10; runs test, verify-format, pack, uploads the nupkg; a `parity` job
+- `.github/workflows/ci.yml`: ubuntu-26.04, .NET 10; runs test, verify-format, pack, uploads the nupkg; a `parity` job
   runs every StyleCop parity set (`Compare-WithStyleCop.ps1`).
 - **PR pipeline (2026-10-03, user's request: "verify new changes before merging to main")**: `main` is protected; changes
   land through pull requests whose checks pass. Work on a branch, push it, open a PR (`gh pr create`), let the checks
   run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: one
   job per public repo in `scripts/realworld/repos.psd1`, on the runner its `Os` names (windows-latest by default: .NET
-  Framework targets and CRLF checkouts; Jellyfin, FluentValidation, eShopOnWeb, Mapperly on ubuntu-latest since
+  Framework targets and CRLF checkouts; Jellyfin, FluentValidation, eShopOnWeb, Mapperly on ubuntu-26.04 since
   2026-10-10, same results as on Windows; Serilog/MediatR lose their net462 findings on Linux), prints each phase's
   duration; the untouched code's failing tests are cached (key: repo, commit, SDK, OS, `FailedTests.ps1`, the repo's
   Tests/TestFilter; saved outside PRs after a successful run), so a hit skips that Release build and test run; `scripts/realworld/Invoke-RealWorld.ps1 -Tests`: every rule,
