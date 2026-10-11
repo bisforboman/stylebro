@@ -1,0 +1,6 @@
+{
+  "area": "Upstream",
+  "item": "Offer PRs for the reported SDK bugs",
+  "notes": "Check the four issues from \"Report the SDK fixer bugs\" around 2026-10-25; offer a PR where maintainers are open to one, starting with https://github.com/dotnet/sdk/issues/56585 (per-framework whitespace or a --framework option; on https://github.com/dotnet/format/issues/2057 a maintainer said they'd likely accept a PR).",
+  "status": "Idea"
+}

@@ -1,6 +1,6 @@
 {
   "area": "Upstream",
   "item": "Report the SDK fixer bugs to dotnet/roslyn",
-  "notes": "Minimal repros for IDE0011 (crash), IDE0040/IDE0047 (conflict markers), IDE0055 (crash) and IDE0048 (broken edit) in multi-targeted projects under `dotnet format`: drafts written, a comment for dotnet/format#1634 and new dotnet/roslyn and dotnet/format issues; the owner posts them. Posted so far (2026-10-11): https://github.com/dotnet/roslyn/issues/86000 (conflict markers) and https://github.com/dotnet/roslyn/issues/86001 (the \"Changes must be within bounds of SourceText\" crash); the other two drafts aren't posted yet.",
-  "status": "Done (drafts; 2 of 4 posted)"
+  "notes": "Minimal repros for the SDK fixers in multi-targeted projects under `dotnet format`, all posted (2026-10-11): https://github.com/dotnet/roslyn/issues/86000 (Fix All writes conflict markers), https://github.com/dotnet/roslyn/issues/86001 (\"Changes must be within bounds of SourceText\" crash), https://github.com/dotnet/sdk/issues/56585 (whitespace pass formats only the first target framework's `#if` code), https://github.com/dotnet/roslyn/issues/86002 (IDE0065's fix changes binding: CS0104/CS0118). Follow-up: \"Offer PRs for the reported SDK bugs\".",
+  "status": "Done (4 of 4 posted)"
 }

@@ -1035,7 +1035,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 ## `stylebro-migrate format` (2026-10-03, IDE0055 investigation)
 
 - Plain `dotnet format` with IDE0055 at warning crashes on multi-targeted repos (Roslyn's linked-file merge, no
-  StyleBro needed; the style pass alone too; reported upstream: https://github.com/dotnet/roslyn/issues/86000 and https://github.com/dotnet/roslyn/issues/86001). The whitespace pass formats only the first framework's code. With
+  StyleBro needed; the style pass alone too; reported upstream: https://github.com/dotnet/roslyn/issues/86000 and https://github.com/dotnet/roslyn/issues/86001). The whitespace pass formats only the first framework's code (https://github.com/dotnet/sdk/issues/56585). With
   `TargetFramework=<tfm>` as an ENVIRONMENT variable MSBuild loads each project as an inner build: no linked copies.
   The env var also reaches referenced projects that don't target that framework (Newtonsoft.Json's net46 tests -> the
   library without net46: load failure, tests silently skipped, exit 0); a hook (`BeforeMicrosoftNETSdkTargets`, right
@@ -1308,7 +1308,7 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 (weekly workflow) runs the real pinned package. Sonar is never a dependency of StyleBro's packages.
 
 **Rules and guards added after the trials** (trial 2 #76/#80, trial 3 #91-#93):
-- BRO1008 replaces IDE0065 (SA1200): moves usings only when C#'s lookup order shows every name binds the same (no
+- BRO1008 replaces IDE0065 (SA1200; IDE0065's binding change reported as https://github.com/dotnet/roslyn/issues/86002): moves usings only when C#'s lookup order shows every name binds the same (no
   rebinding: 180 ms -> 5-9 ms); `#region` lines don't block it; UNSET `csharp_using_directive_placement` = nothing
   reported (owner); the preset says outside, migrate writes StyleCop's choice, init detects the repo's majority.
 - BRO1410 parentheses in patterns + hidden `_p` fading companions (NotConfigurable, not in DiagnosticIds; tests
