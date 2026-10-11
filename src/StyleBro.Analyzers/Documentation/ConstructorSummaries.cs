@@ -78,7 +78,7 @@ internal static class ConstructorSummaries
         // standard sentence.
         var replaceLength = member is ConstructorDeclarationSyntax ? GetFillerLength(rest) : 0;
         var nearMiss = string.Join(" ", standard.Split(' ').Take(3));
-        if (replaceLength == 0 && rest.StartsWith(nearMiss, StringComparison.Ordinal))
+        if (rest.StartsWith(nearMiss, StringComparison.Ordinal) && replaceLength == 0)
         {
             var end = rest.IndexOf('.');
             if (end < 0)

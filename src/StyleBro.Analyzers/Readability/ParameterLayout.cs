@@ -159,14 +159,14 @@ internal static class ParameterLayout
 
     /// <summary>
     /// The edits that move the later lines of an item that now starts a line at <paramref name="indentation"/>: each
-    /// line indented at least as deep as the item's old line keeps its depth relative to it. Nothing when a token spans
-    /// lines (a multi-line string: its text can't be reindented).
+    /// line indented at least as deep as the item's old line keeps its depth relative to it. A list with a token spanning
+    /// lines (a multi-line string) never gets here (<see cref="CanRewrite"/>).
     /// </summary>
     private static IEnumerable<TextChange> Reindent(SyntaxNode item, SourceText text, string indentation)
     {
         var first = Line(text, item.SpanStart);
         var last = Line(text, item.Span.End);
-        if (first == last || item.DescendantTokens().Any(t => Line(text, t.SpanStart) != Line(text, t.Span.End)))
+        if (first == last)
         {
             yield break;
         }
