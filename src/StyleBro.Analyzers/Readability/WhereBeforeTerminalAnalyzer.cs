@@ -19,7 +19,7 @@ public sealed class WhereBeforeTerminalAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var where = (InvocationExpressionSyntax)c.Node;

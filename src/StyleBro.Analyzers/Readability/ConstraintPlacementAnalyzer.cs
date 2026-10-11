@@ -20,7 +20,7 @@ public sealed class ConstraintPlacementAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 if (c.Node.ContainsDiagnostics)

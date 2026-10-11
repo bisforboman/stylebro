@@ -19,7 +19,7 @@ public sealed class TupleElementNameAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var name = (IdentifierNameSyntax)c.Node;

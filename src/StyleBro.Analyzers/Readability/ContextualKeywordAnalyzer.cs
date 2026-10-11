@@ -23,7 +23,7 @@ public sealed class ContextualKeywordAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var property = (PropertyDeclarationSyntax)c.Node;

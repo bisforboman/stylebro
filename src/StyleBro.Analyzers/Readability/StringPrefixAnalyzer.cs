@@ -19,7 +19,7 @@ public sealed class StringPrefixAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 if (StringPrefixes.GetChange((ExpressionSyntax)c.Node, c.SemanticModel, c.CancellationToken) is { } found)

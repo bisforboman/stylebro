@@ -19,7 +19,7 @@ public sealed class LiteralSuffixAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 if (LiteralSuffixes.GetChange((CastExpressionSyntax)c.Node, c.SemanticModel, c.CancellationToken) is { } change)
@@ -28,7 +28,7 @@ public sealed class LiteralSuffixAnalyzer : DiagnosticAnalyzer
                 }
             },
             SyntaxKind.CastExpression);
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var token = ((LiteralExpressionSyntax)c.Node).Token;

@@ -19,7 +19,7 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var literal = (LiteralExpressionSyntax)c.Node;
@@ -30,7 +30,7 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
                 }
             },
             SyntaxKind.StringLiteralExpression);
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var access = (MemberAccessExpressionSyntax)c.Node;

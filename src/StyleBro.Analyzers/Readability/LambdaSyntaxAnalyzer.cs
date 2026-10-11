@@ -23,7 +23,7 @@ public sealed class LambdaSyntaxAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var method = (AnonymousMethodExpressionSyntax)c.Node;

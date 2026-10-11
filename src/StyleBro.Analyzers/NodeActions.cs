@@ -6,13 +6,14 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace StyleBro.Analyzers;
 
 /// <summary>
-/// <c>RegisterSyntaxNodeAction</c> without the binding it costs: the same action, called for the same nodes, from a
-/// syntax tree action. A syntax node action makes the compiler's driver compile every method body of the project first
-/// (node actions run on its compilation events), even when the action never asks the semantic model anything.
-/// <c>dotnet format</c> runs the analyzers once per diagnostic id it fixes, on every project, so that binding was most of
-/// a real-world run (Newtonsoft.Json: about 4 s per compilation and id, against 1 s for a tree action). Here the semantic
-/// model is the compilation's own (the driver's caching provider hands out the one it shares), created lazily, so an
-/// action only binds what it asks about.
+/// <c>RegisterSyntaxNodeAction</c> without the binding it costs, for analyzers that never ask the semantic model anything:
+/// the same action, called for the same nodes, from a syntax tree action. A syntax node action makes the compiler's driver
+/// compile every method body of the project first (node actions run on its compilation events). <c>dotnet format</c> runs
+/// the analyzers once per diagnostic id it fixes, on every project, so that binding was most of a real-world run
+/// (Newtonsoft.Json: about 4 s per compilation and id, against under 1 s for a tree action). Analyzers that do query the
+/// semantic model keep <c>RegisterSyntaxNodeAction</c>: from a tree action their queries bound everything again in a
+/// build, next to the compiler's own binding (a whole Newtonsoft.Json compilation with every analyzer: 4 s -> 8-18 s).
+/// The context still carries the compilation's (lazily bound) semantic model, for <c>Compilation.Options</c>.
 /// </summary>
 internal static class NodeActions
 {

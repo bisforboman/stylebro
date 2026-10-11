@@ -19,7 +19,7 @@ public sealed class BaseCallsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 if (BaseCalls.CanUseThis((BaseExpressionSyntax)c.Node, c.SemanticModel, c.CancellationToken))

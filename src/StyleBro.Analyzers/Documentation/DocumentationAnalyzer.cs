@@ -41,8 +41,8 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(AnalyzeMember, DocumentationComments.MemberKinds);
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(AnalyzeMember, DocumentationComments.MemberKinds);
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 if (PropertySummaries.GetFinding((PropertyDeclarationSyntax)c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)) is { } finding)
@@ -54,7 +54,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
                 }
             },
             Microsoft.CodeAnalysis.CSharp.SyntaxKind.PropertyDeclaration);
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 if (ConstructorSummaries.GetFinding((BaseMethodDeclarationSyntax)c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)) is { } finding)
@@ -65,7 +65,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
                 }
             },
             ConstructorSummaries.MemberKinds);
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 foreach (var returns in DocumentationTags.GetVoidReturns(c.Node))
@@ -77,7 +77,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
             },
             Microsoft.CodeAnalysis.CSharp.SyntaxKind.MethodDeclaration,
             Microsoft.CodeAnalysis.CSharp.SyntaxKind.DelegateDeclaration);
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var text = c.Node.SyntaxTree.GetText(c.CancellationToken);

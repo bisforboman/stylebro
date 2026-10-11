@@ -19,7 +19,7 @@ public sealed class RedundantBaseTypeAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var declaration = (BaseTypeDeclarationSyntax)c.Node;

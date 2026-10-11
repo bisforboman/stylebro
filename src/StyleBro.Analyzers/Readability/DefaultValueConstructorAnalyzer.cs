@@ -19,7 +19,7 @@ public sealed class DefaultValueConstructorAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             c =>
             {
                 var creation = (BaseObjectCreationExpressionSyntax)c.Node;

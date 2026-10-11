@@ -86,7 +86,7 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             AnalyzeDeclaration,
             SyntaxKind.ClassDeclaration,
             SyntaxKind.StructDeclaration,
@@ -99,7 +99,7 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
             SyntaxKind.EventDeclaration,
             SyntaxKind.EnumMemberDeclaration,
             SyntaxKind.LocalFunctionStatement);
-        context.RegisterNodeAction(AnalyzeEventField, SyntaxKind.EventFieldDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeEventField, SyntaxKind.EventFieldDeclaration);
     }
 
     private static void AnalyzeDeclaration(SyntaxNodeAnalysisContext context)

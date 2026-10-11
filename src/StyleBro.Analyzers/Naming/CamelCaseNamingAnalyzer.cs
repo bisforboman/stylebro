@@ -67,7 +67,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterNodeAction(
+        context.RegisterSyntaxNodeAction(
             AnalyzeVariable,
             SyntaxKind.VariableDeclarator,
             SyntaxKind.SingleVariableDesignation,
@@ -78,7 +78,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             SyntaxKind.JoinClause,
             SyntaxKind.JoinIntoClause,
             SyntaxKind.QueryContinuation);
-        context.RegisterNodeAction(AnalyzeParameter, SyntaxKind.Parameter);
+        context.RegisterSyntaxNodeAction(AnalyzeParameter, SyntaxKind.Parameter);
     }
 
     /// <summary>The members <paramref name="member"/> overrides or implements (explicitly or implicitly).</summary>
