@@ -196,12 +196,11 @@ internal static class FieldNames
     /// <summary>Like the other overload, without BRO1310.</summary>
     public static (FieldRule Rule, string NewName)? GetRename(IFieldSymbol field, FieldStyles style)
     {
-        if (!IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum)
+        var name = field.Name;
+        if (!IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum || IsNativeMethodsName(field, name))
         {
             return null;
         }
-
-        var name = field.Name;
 
         // Protected fields, like StyleCop with its defaults: the others are camelCase (SA1306, BRO1303); a readonly one's
         // casing isn't checked (SA1306 skips it, and SA1304 leaves non-internal fields to SA1307, which checks public and
@@ -214,7 +213,9 @@ internal static class FieldNames
 
         var hasPrefix = name.Length >= 2 && name[0] is 'm' or 's' or 't' && name[1] == '_';
         var core = hasPrefix ? name.Substring(2) : name;
-        if (hasPrefix || core.TrimStart('_').Contains('_'))
+
+        // In a '*NativeMethods' class only SA1311's casing is left (IsNativeMethodsName): SA1308/SA1310 skip it.
+        if ((hasPrefix || core.TrimStart('_').Contains('_')) && !HungarianNames.IsInNativeMethods(field))
         {
             var casing = pascal ? FieldCasing.Pascal
                 : (camelStatic ?? (IsChecked(field) ? GetPrivateStyle(field, style) : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
@@ -441,6 +442,15 @@ internal static class FieldNames
 
         return CamelCaseNames.IsUsableName(result) ? result : null;
     }
+
+    /// <summary>
+    /// Whether a field inside a '*NativeMethods' class keeps its name: StyleCop's field naming rules (SA1303, SA1304,
+    /// SA1306-SA1310, SX1309, SX1309S) skip those classes, which hold Win32 and COM names. SA1311 doesn't, so a static
+    /// readonly field starting lower-case is still renamed.
+    /// </summary>
+    private static bool IsNativeMethodsName(IFieldSymbol field, string name) =>
+        !(field.IsStatic && field.IsReadOnly && char.IsLower(name[0]))
+        && HungarianNames.IsInNativeMethods(field);
 
     /// <summary>
     /// The style of the SDK naming rule (dotnet_naming_rule.*) that covers private instance fields: its symbols apply to

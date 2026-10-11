@@ -43,4 +43,13 @@ namespace Probe
 
         public int Get() => StructUpper;
     }
+
+    internal class SafeNativeMethods
+    {
+        private int Handle;
+        private int _size;
+        protected int Flags;
+
+        public int Get() => Handle + _size + Flags;
+    }
 }

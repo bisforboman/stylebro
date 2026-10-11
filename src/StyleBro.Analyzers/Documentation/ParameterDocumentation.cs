@@ -73,7 +73,8 @@ internal static class ParameterDocumentation
     /// otherwise. A tag without a name gets one when that's unambiguous: it's the only unnamed tag and exactly one
     /// (type) parameter is undocumented, or every tag is unnamed and there's one per (type) parameter (named in order).
     /// Tags out of order are put in order when each has its own '///' lines. Not reported: duplicate tags, and members
-    /// with an unnamed tag that can't be named that way (the fix would have to guess).
+    /// with an unnamed tag that can't be named that way (the fix would have to guess), and, like StyleCop, a member whose
+    /// docs have a top-level '&lt;inheritdoc&gt;' (only unnamed '&lt;param&gt;' tags are named there).
     /// </summary>
     public static Finding? GetFinding(SyntaxNode member, SourceText text, TagKind kind = TagKind.Parameter)
     {
@@ -82,11 +83,17 @@ internal static class ParameterDocumentation
         var noun = kind == TagKind.Parameter ? "parameter" : "type parameter";
         var matchId = kind == TagKind.Parameter ? DiagnosticIds.ParameterTagsMatch : DiagnosticIds.TypeParameterTagsMatch;
         var nameId = kind == TagKind.Parameter ? DiagnosticIds.ParameterTagHasName : DiagnosticIds.TypeParameterTagHasName;
-        var tags = member.GetLeadingTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>()
-            .SelectMany(d => d.Content.OfType<XmlElementSyntax>())
+        var content = member.GetLeadingTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>()
+            .SelectMany(d => d.Content)
+            .ToList();
+        var tags = content.OfType<XmlElementSyntax>()
             .Where(e => e.StartTag.Name.LocalName.ValueText == element)
             .ToList();
-        if (parameters is null || tags.Count == 0)
+
+        // Like StyleCop, a top-level '<inheritdoc>' turns off the matching (SA1612, SA1620) and the type parameter names
+        // (SA1621); SA1613 still wants parameter tags named.
+        var inherits = tags.Count > 0 && content.Any(IsInheritDoc);
+        if (parameters is null || tags.Count == 0 || (inherits && kind == TagKind.TypeParameter))
         {
             return null;
         }
@@ -100,7 +107,8 @@ internal static class ParameterDocumentation
 
         // Unnamed tags: named only when it's unambiguous.
         var unnamed = tags.Where((t, i) => names[i] is null).ToList();
-        var stale = tags.Where((t, i) => names[i] is not null && !parameters.Contains(names[i]!)).ToList();
+        var unknown = tags.Where((t, i) => names[i] is not null && !parameters.Contains(names[i]!)).ToList();
+        var stale = inherits ? [] : unknown;
         var undocumented = parameters.Where(p => !named.Contains(p)).ToList();
         var assigned = new Dictionary<XmlElementSyntax, string>();
         if (unnamed.Count > 0)
@@ -112,7 +120,7 @@ internal static class ParameterDocumentation
                     assigned[unnamed[i]] = parameters[i];
                 }
             }
-            else if (unnamed.Count == 1 && stale.Count == 0 && undocumented.Count == 1)
+            else if (unnamed.Count == 1 && unknown.Count == 0 && undocumented.Count == 1)
             {
                 assigned[unnamed[0]] = undocumented[0];
             }
@@ -131,7 +139,7 @@ internal static class ParameterDocumentation
             .Where(k => parameters.Contains(k.Name))
             .ToList();
         var ordered = kept.OrderBy(k => parameters.IndexOf(k.Name)).ToList();
-        var outOfOrder = !kept.Select(k => k.Tag).SequenceEqual(ordered.Select(k => k.Tag));
+        var outOfOrder = !inherits && !kept.Select(k => k.Tag).SequenceEqual(ordered.Select(k => k.Tag));
 
         var problems = new List<Problem>();
         var changes = new List<TextChange>();
@@ -212,6 +220,9 @@ internal static class ParameterDocumentation
         var last = text.Lines.GetLineFromPosition(tag.Span.End);
         return TextSpan.FromBounds(first.Start, last.End);
     }
+
+    private static bool IsInheritDoc(XmlNodeSyntax node) =>
+        (node as XmlEmptyElementSyntax)?.Name.ToString() == "inheritdoc" || (node as XmlElementSyntax)?.StartTag.Name.ToString() == "inheritdoc";
 
     private static List<string>? GetTypeParameterNames(SyntaxNode member)
     {

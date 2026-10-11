@@ -148,5 +148,9 @@
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '(content.StartsWith("#region", StringComparison.Ordinal) || content.StartsWith("#endregion", StringComparison.Ordinal))'; Replace = 'false'; Tests = 'FixOrderTests.Regions_ACommentAfterCodeAboveTheRemovedLines' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& IsBlank(text, text.Lines[below].Span)'; Replace = ''; Tests = 'BlankLineAfterTests.ACommentBelowCode_FollowedByABlankLine_IsNotReported' }
         @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = 'while (last + 1 < text.Lines.Count && IsComment(last + 1))'; Replace = 'while (false)'; Tests = 'BlankLineAfterTests.ACommentBelowCode_FollowedByABlankLine_IsNotReported' }
+
+        # BRO1504: a comment between call chain links needs no blank line (owner's decision, 2026-10-11)
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '&& !IsBetweenChainLinks(comment)'; Replace = ''; Tests = 'BlankLineAfterTests.CommentBetweenCallChainLinks_NoDiagnostic' }
+        @{ File = 'src/StyleBro.Analyzers/Layout/BlankLines.cs'; Find = '|| (next.IsKind(SyntaxKind.QuestionToken) && next.Parent is ConditionalAccessExpressionSyntax)'; Replace = ''; Tests = 'BlankLineAfterTests.CommentBetweenCallChainLinks_NoDiagnostic' }
     )
 }

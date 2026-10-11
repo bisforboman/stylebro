@@ -151,6 +151,28 @@ public class BlankLineAfterTests
         }
         """);
 
+    // A deviation from SA1515 (owner's decision, docs/decisions.md): a blank line would split the chain.
+    [Fact]
+    public Task CommentBetweenCallChainLinks_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        using System.Linq;
+
+        class C
+        {
+            int? M(int[] items, string s)
+            {
+                var count = items
+                    .Where(i => i > 0)
+                    // only the first ones
+                    // (two comment lines)
+                    .Take(2)
+                    .Count();
+                return s
+                    // may be null
+                    ?.Length + count;
+            }
+        }
+        """);
+
     [Fact]
     public Task CommentAfterCollectionExpressionBracket_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C
