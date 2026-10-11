@@ -60,6 +60,8 @@ internal static class TreeWalk
     /// <summary>Tokens and nodes from one walk: every tree that needs one also needs the other, and a walk is the cost.</summary>
     private sealed class Walk
     {
+        private readonly Lazy<Dictionary<SyntaxKind, List<SyntaxNode>>> byKind;
+
         public Walk(SyntaxNode root)
         {
             var tokens = new List<SyntaxToken>();
@@ -95,8 +97,6 @@ internal static class TreeWalk
                 return index;
             });
         }
-
-        private readonly Lazy<Dictionary<SyntaxKind, List<SyntaxNode>>> byKind;
 
         public SyntaxToken[] Tokens { get; }
 

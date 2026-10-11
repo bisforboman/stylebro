@@ -34,6 +34,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             // Each type's strings and names are read once for all its fields (they were read per field before).
             var facts = new ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>>(SymbolEqualityComparer.Default);
             var styles = new ConcurrentDictionary<SyntaxTree, FieldStyles>();
+
             // The fields' declarators rather than a symbol action: symbol actions make the driver compile every method body
             // first (NodeActions), declared symbols don't need that. Enum members are fields too, but never these rules'.
             // Only field declarators: asking for a local's symbol would bind its method.
