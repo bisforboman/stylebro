@@ -72,7 +72,7 @@ public class AutoAccessorLinesTests
                 int,
                 IReadOnlyDictionary<string, string>
             >? Factory
-            { get; init; }
+            { get; set; }
 
             public Func<
                 int,

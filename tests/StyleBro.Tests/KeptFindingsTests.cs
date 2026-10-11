@@ -417,6 +417,31 @@ public class KeptFindingsTests
         Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
     }
 
+    // The trial: '--files' loads only the files' project, so it renamed a field the whole-repository run kept for a test
+    // project's GetField. The run gets the repository's names, as a per-framework run does.
+    [Fact]
+    public void Format_Files_GivesTheRunTheNamesOfTheWholeRepository()
+    {
+        var root = NewFolder();
+        Directory.CreateDirectory(Path.Combine(root, ".git"));
+        Directory.CreateDirectory(Path.Combine(root, "src", "A"));
+        Directory.CreateDirectory(Path.Combine(root, "tests", "T"));
+        File.WriteAllText(Path.Combine(root, "src", "A", "A.csproj"), "<Project />");
+        File.WriteAllText(Path.Combine(root, "src", "A", "X.cs"), "class X\n{\n    private int _zqxCount;\n}\n");
+        File.WriteAllText(Path.Combine(root, "tests", "T", "T.cs"), "class T\n{\n    object F => typeof(X).GetField(\"_zqxCount\");\n}\n");
+        var entries = new List<RepositoryNames.Entry>();
+
+        var code = FormatCommand.Run(new[] { "--files", Path.Combine(root, "src", "A", "X.cs") }, _ => { }, (_, _) =>
+        {
+            entries.AddRange(File.ReadAllLines(Environment.GetEnvironmentVariable(RepositoryNames.Variable)!).Select(RepositoryNames.Parse).OfType<RepositoryNames.Entry>());
+            return 0;
+        });
+
+        Assert.Equal(0, code);
+        Assert.Contains(entries, e => e.Kind == RepositoryNames.ReflectionKind && e.Text == "_zqxCount" && e.Where.EndsWith("T.cs(3)", StringComparison.Ordinal));
+        Assert.Null(Environment.GetEnvironmentVariable(RepositoryNames.Variable));
+    }
+
     [Fact]
     public void ReadKept_PrefersTheReasonOfARunThatLoadsEveryUse()
     {

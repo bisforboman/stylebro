@@ -483,12 +483,12 @@ internal static class FieldNames
 
     /// <summary>
     /// A type with [StructLayout], [ComImport] or [UnmanagedFunctionPointer], or one that declares [DllImport],
-    /// [LibraryImport] or extern methods: its fields mirror native structures and constants ('cbSize', 'hSubMenu').
+    /// [LibraryImport] methods: its fields mirror native structures and constants ('cbSize', 'hSubMenu').
     /// </summary>
     private static bool IsInteropType(INamedTypeSymbol type) =>
         type.GetAttributes().Any(a => a.AttributeClass?.Name is "StructLayoutAttribute" or "ComImportAttribute" or "UnmanagedFunctionPointerAttribute")
         || type.GetMembers().Any(m => m is IMethodSymbol method
-            && (method.IsExtern || method.GetAttributes().Any(a => a.AttributeClass?.Name is "DllImportAttribute" or "LibraryImportAttribute")));
+            && method.GetAttributes().Any(a => a.AttributeClass?.Name is "DllImportAttribute" or "LibraryImportAttribute"));
 
     /// <summary>
     /// Whether a field inside a '*NativeMethods' class keeps its name: StyleCop's field naming rules (SA1303, SA1304,

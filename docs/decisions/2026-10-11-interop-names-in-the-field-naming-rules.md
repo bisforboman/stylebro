@@ -17,6 +17,6 @@ interop structs, `cbSize` -> `CbSize`, `hSubMenu` -> `HSubMenu`. StyleCop (and S
 The owner: "Leave interop names alone." BRO1303, BRO1306, BRO1307, BRO1308 and BRO1310 skip SCREAMING_CASE constants
 and `static readonly` fields (no lower-case letter, at least one underscore), COM GUID fields (`IID_`, `CLSID_`,
 `LIBID_`, `DIID_`, `CATID_`, `GUID_`), and every field of a type with `[StructLayout]`, `[ComImport]` or
-`[UnmanagedFunctionPointer]`, or with `[DllImport]`/`[LibraryImport]`/`extern` methods, and of types nested in one
+`[UnmanagedFunctionPointer]`, or with `[DllImport]`/`[LibraryImport]` methods, and of types nested in one
 (`FieldNames.IsInteropName`). Flow's public static `Chinese_TW` in `AvailableLanguages` is still renamed: the class is
 `internal`, so it isn't public API, and `Chinese_TW` isn't SCREAMING_CASE.

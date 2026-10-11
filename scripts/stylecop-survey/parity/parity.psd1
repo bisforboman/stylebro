@@ -356,6 +356,8 @@
                 'only StyleCop: BRO1307 Underscores.cs(13,21)'
                 # 't_thread' has [ThreadStatic]: fields with attributes aren't renamed.
                 'only StyleCop: BRO1307 Underscores.cs(10,28)'
+                # 'MAX_VALUE': SCREAMING_CASE constants are interop names, left alone (docs/decisions.md).
+                'only StyleCop: BRO1308 Underscores.cs(18,27)'
             )
         }
         @{
