@@ -4,7 +4,7 @@
 
 StyleBro leaves formatting to the .NET SDK where the SDK already covers it: `stylebro-migrate init` turns on the SDK's
 IDE rules instead of StyleBro shipping its own. But in multi-targeted projects (`<TargetFrameworks>` with several
-frameworks), some of the SDK's own fixers break `dotnet format`, even without StyleBro installed. Measured on Serilog
+frameworks), some of the SDK's own fixers break `dotnet format`, even without StyleBro installed (reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000)). Measured on Serilog
 and Newtonsoft.Json:
 
 | Rule | StyleCop rules it replaces | What goes wrong |
