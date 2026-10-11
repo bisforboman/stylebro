@@ -409,9 +409,12 @@ internal static class Migration
                 var candidate = Path.Combine(directory, "Directory.Build.props");
                 if (File.Exists(candidate))
                 {
-                    // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation.
-                    var text = Regex.Replace(File.ReadAllText(candidate), "<!--.*?-->", string.Empty, RegexOptions.Singleline);
-                    return Regex.IsMatch(text, @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase) ? Nearest(Path.GetDirectoryName(directory)) : candidate;
+                    // ponytail: text match for an <Import> naming Directory.Build.props (comments removed), not MSBuild's evaluation;
+                    // Imports also follows a property the file defines (Orleans' $(_ParentDirectoryBuildPropsPath)).
+                    var text = StyleCopSetup.WithoutComments(File.ReadAllText(candidate));
+                    var importsParent = Regex.IsMatch(text, @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase)
+                        || StyleCopSetup.Imports(candidate, root).Any(i => Path.GetFileName(i).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase));
+                    return importsParent ? Nearest(Path.GetDirectoryName(directory)) : candidate;
                 }
             }
 

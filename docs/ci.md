@@ -115,6 +115,16 @@ steps:
   builds that list for you, locally and in CI.
 - **Only some checks?** `dotnet format whitespace`, `dotnet format style` (built-in .NET rules) and
   `dotnet format analyzers` (StyleBro and other analyzer packages) check one part each, with the same options.
+- **How long it takes:** a check loads the whole solution, once per target framework in multi-targeted repositories.
+  Orleans (about 200 projects) took 11.5 minutes for `stylebro-migrate format --verify-no-changes` and 57 minutes
+  (about 9 GB of memory) for its first full `format`. Budget the job's timeout accordingly, or check only the projects
+  a change touches.
+- **Kept findings and `TreatWarningsAsErrors`:** the findings StyleBro's fixes keep on purpose don't fail
+  `stylebro-migrate format --verify-no-changes`, but they are warnings, so they fail a build that treats warnings as
+  errors. Suppress or baseline them in the first run ([getting-started.md](getting-started.md#findings-kept-on-purpose)).
+- **Old-style (non-SDK) projects:** restore with Visual Studio's MSBuild before the check
+  (`msbuild -t:restore -p:RestorePackagesConfig=true`) and keep the .NET Framework reference assemblies available:
+  [getting-started.md](getting-started.md#old-style-non-sdk-projects).
 - **A large existing codebase:** commit a [baseline](baseline.md) so CI fails only on new violations. A baseline can't
   hide whitespace formatting; either run `dotnet format whitespace` once, or check only `dotnet format style` and
   `dotnet format analyzers` in CI until you do.

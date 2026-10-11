@@ -338,11 +338,34 @@ internal static class Conventions
             return (null, null);
         }
 
+        if (ConvertedOutnumber(counts))
+        {
+            return (null, $"Line endings: {OutnumberedVerdict(counts)}");
+        }
+
         var winner = lf + crlf >= MinimumAgreeing ? Winner(lf, crlf) : -1;
         var found = winner < 0 ? $"{lf} LF, {crlf} CRLF" : $"{(winner == 0 ? lf : crlf)} of {lf + crlf} {(winner == 0 ? "LF" : "CRLF")}";
         var report = $"Line endings: C# files {found} -> " + (winner < 0 ? "end_of_line not set ('format' writes your OS's ending into the lines it changes)" : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}")
             + (ConvertedNote(counts[ConvertedKey]) is { } note ? $"; {note}" : string.Empty);
         return (winner < 0 ? null : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}", report);
+    }
+
+    /// <summary>
+    /// Whether git converts at least as many C# files on checkout as it leaves alone (init and the migration both ask). Then
+    /// the converted files are the convention, the machine's own ending, and the few committed with a fixed ending are
+    /// outliers, not a vote: xbox-live-developer-tools has 145 converted files and 3 committed as CRLF, and
+    /// 'end_of_line = crlf' gave 12,593 ENDOFLINE errors in an LF checkout.
+    /// </summary>
+    public static bool ConvertedOutnumber(IReadOnlyDictionary<string, int[]> counts) =>
+        counts.TryGetValue(ConvertedKey, out var converted) && converted.Sum() > 0
+        && converted.Sum() >= (counts.TryGetValue(EndOfLineKey, out var fixedEndings) ? fixedEndings.Sum() : 0);
+
+    /// <summary>What init and the migration say when <see cref="ConvertedOutnumber"/>.</summary>
+    public static string OutnumberedVerdict(IReadOnlyDictionary<string, int[]> counts)
+    {
+        var converted = counts[ConvertedKey].Sum();
+        var others = counts.TryGetValue(EndOfLineKey, out var fixedEndings) ? fixedEndings.Sum() : 0;
+        return $"git converts {converted} of {converted + others} C# files on checkout, so end_of_line isn't set (each machine keeps its own ending; the {Plural(others, "file")} committed with a fixed ending don't decide)";
     }
 
     /// <summary>The paths in 'git ls-files --eol -z' output ('i/lf    w/crlf  attr/text=auto \tpath') that git converts, and whether a 'text' attribute does.</summary>
@@ -737,6 +760,10 @@ internal static class Conventions
                     found = winner < 0 ? Plural(total, convention.Unit) : found;
                 }
             }
+            else if (convention.Key == EndOfLineKey && ConvertedOutnumber(counts))
+            {
+                (tag, verdict) = ("git", OutnumberedVerdict(counts));
+            }
             else if (total < MinimumAgreeing)
             {
                 (tag, verdict) = ("too few", $"default stays ({convention.Default})");
@@ -801,7 +828,10 @@ internal static class Conventions
         }
 
         DecideUsings(counts, isSet, lines, report, summary);
-        if (counts.TryGetValue(ConvertedKey, out var converted) && ConvertedNote(converted) is { } note)
+
+        // The 'git' verdict above already says it (only when some files have a fixed ending: else there was no line).
+        var saidAbove = ConvertedOutnumber(counts) && counts.TryGetValue(EndOfLineKey, out var fixedEndings) && fixedEndings.Sum() > 0;
+        if (!saidAbove && counts.TryGetValue(ConvertedKey, out var converted) && ConvertedNote(converted) is { } note)
         {
             report.Add($"  note     line endings: {note}");
         }

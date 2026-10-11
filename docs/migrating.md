@@ -63,7 +63,14 @@ package management off itself, the version-less reference fails its restore (NU1
 ```
 
 The migration's report names the files that reference StyleCop and the ones that remove it, and `--diff` makes both
-changes in its copy.
+changes in its copy. A project that turns central package management off but keeps the inherited reference gets a
+second, versioned reference instead ([getting-started.md](getting-started.md#1-add-the-package) shows the pair);
+`--diff` writes that pair too.
+
+**Old-style projects** (`packages.config`, StyleCop as `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`):
+removing StyleCop means removing its `packages.config` entry and the `<Analyzer>` items. Adding StyleBro and running
+`format` there takes extra steps, and `--diff` doesn't work:
+[getting-started.md](getting-started.md#old-style-non-sdk-projects).
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
@@ -111,8 +118,10 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   their settings, code and project files belong to another repository, and nothing in them is changed
   (`stylebro-migrate format` excludes them too). Files a project
   links from a submodule are another matter: see [excluding vendored code](getting-started.md#excluding-vendored-code).
-- The StyleCop.Analyzers version in the project files: with 1.1.x, the rules added in 1.2 (SA1141, SA1142, SA1316,
-  SA1414) count as off.
+- The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
+  `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
+  off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
+  SA1139, SA1314 and SA1413.
 - Whether any project sets `GenerateDocumentationFile`. Without it the build doesn't parse XML documentation and
   StyleCop's rules that read it never run (it reports SA0001 instead), but `dotnet format` does parse it. So the
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.
@@ -155,8 +164,8 @@ tool again replaces the block, so put your own settings outside it.
   the rest of the license off). IDE0073's `file_header_template` has no escapes: a plain header with a `;` or `#` leaves
   IDE0073 off, and the report says why.
 - **Line endings.** `end_of_line` when your C# files clearly use one ending (judged like `init` does; files git
-  converts on checkout don't count) and your `.editorconfig` doesn't set it: without it `format` writes the OS's ending
-  into the lines it changes.
+  converts on checkout don't count, and when they're the majority nothing is written) and your `.editorconfig`
+  doesn't set it: without it `format` writes the OS's ending into the lines it changes.
 - **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every
   build (SixLabors' shared infrastructure does). The report notes such a file: the block would be lost on the next
   build, so put it into the copied file (or stop the copy).

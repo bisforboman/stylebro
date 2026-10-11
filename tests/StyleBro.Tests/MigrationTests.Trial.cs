@@ -278,8 +278,8 @@ public sealed partial class MigrationTests
     [Fact]
     public void Format_CountsTheFilesARunChanged()
     {
-        var before = new Dictionary<string, (long, DateTime)> { ["a.cs"] = (1, DateTime.MinValue), ["b.cs"] = (2, DateTime.MinValue), ["gone.cs"] = (1, DateTime.MinValue) };
-        var after = new Dictionary<string, (long, DateTime)> { ["a.cs"] = (1, DateTime.MinValue), ["b.cs"] = (3, DateTime.MinValue), ["new.cs"] = (1, DateTime.MinValue) };
+        var before = new Dictionary<string, string> { ["a.cs"] = "1", ["b.cs"] = "2", ["gone.cs"] = "1" };
+        var after = new Dictionary<string, string> { ["a.cs"] = "1", ["b.cs"] = "3", ["new.cs"] = "1" };
 
         Assert.Equal(new[] { "b.cs", "gone.cs", "new.cs" }, FormatCommand.ChangedFiles(before, after));
         Assert.Empty(FormatCommand.ChangedFiles(after, after));

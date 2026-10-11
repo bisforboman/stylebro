@@ -41,6 +41,17 @@ internal static class PreviewCommand
     /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
     private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
 
+    /// <summary>Why '--diff' doesn't run on old-style (non-SDK) projects, and what to do instead.</summary>
+    public static string OldStyleUnsupported(IReadOnlyList<string> projects, string? command)
+    {
+        var write = command switch { "init" => "'stylebro-migrate init --write'", "format" => null, _ => "'stylebro-migrate --write'" };
+        return $"--diff doesn't work with old-style (non-SDK) projects ({string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)}): "
+            + "the copy has no git-ignored packages folder, and 'dotnet restore' can't restore packages.config.\n"
+            + "Instead, on a clean working tree: " + (write is null ? string.Empty : $"run {write}, ")
+            + "restore with Visual Studio's MSBuild (msbuild -t:restore -p:RestorePackagesConfig=true), run 'stylebro-migrate format' and review 'git diff' ('git checkout .' undoes it). "
+            + "See https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects.";
+    }
+
     /// <summary>Whether the options ask for a preview.</summary>
     public static bool Wants(IEnumerable<string> options) => options.Any(o => o == "--diff" || o.StartsWith("--diff=", StringComparison.Ordinal));
 
@@ -57,8 +68,9 @@ internal static class PreviewCommand
         var (profile, others) = command == "format" ? (null, options) : Program.TakeOption(options, Program.SonarProfileOption);
         var rest = others.Where(o => !Wants(new[] { o }) && o != "--keep").ToList();
 
-        // init and the migration: --project names what format runs on (relative to the path) when the folder has several.
-        var projectIndex = command == "format" ? -1 : rest.IndexOf("--project");
+        // --project names what format runs on (relative to the path) when the folder has several; format takes it too
+        // (passed on, 'dotnet format' printed its usage text).
+        var projectIndex = rest.IndexOf("--project");
         var project = projectIndex >= 0 && projectIndex + 1 < rest.Count ? rest[projectIndex + 1] : null;
         if (project is not null)
         {
@@ -76,6 +88,14 @@ internal static class PreviewCommand
         if (!File.Exists(path) && !Directory.Exists(path))
         {
             Console.Error.WriteLine($"Not found: {path}");
+            return 1;
+        }
+
+        // Old-style projects need Visual Studio's restore: the copy has no git-ignored packages folder, and 'dotnet restore'
+        // can't restore packages.config (xbox-live-developer-tools: every project skipped, "Run 'dotnet restore'").
+        if (FormatCommand.OldStyleProjects(File.Exists(path) ? Path.GetDirectoryName(path)! : path) is { Count: > 0 } oldStyle)
+        {
+            Console.Error.WriteLine(OldStyleUnsupported(oldStyle, command));
             return 1;
         }
 
@@ -192,12 +212,6 @@ internal static class PreviewCommand
                 var runArgs = run == 1 ? formatArgs.Concat(new[] { "--report", reportFolder }) : FormatCommand.NextRun(formatArgs.ToArray());
                 Step($"Format run {run}", () => code = format(runArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
 
-                // A project that didn't load would show up as missing changes (a broken package cache: 58 files of side effects).
-                if (incomplete is not null)
-                {
-                    return Fail(tail, 1, $"{incomplete}\n  Run 'dotnet restore' (or 'dotnet build') in the repository and fix what it reports, then preview again.");
-                }
-
                 if (code != 0)
                 {
                     return Fail(tail, code, $"'stylebro-migrate format' failed (exit code {code}).");
@@ -246,6 +260,14 @@ internal static class PreviewCommand
             if (notLoaded is not null)
             {
                 Console.WriteLine(notLoaded);
+            }
+
+            // A project that didn't load is left out, as 'stylebro-migrate format' does (StabilityMatrix: a legacy project the
+            // solution doesn't build, already failing with NU1008, stopped the whole preview), and named at the end.
+            if (incomplete is not null)
+            {
+                Console.WriteLine($"WARNING: {incomplete}");
+                Console.WriteLine("  The preview has no changes for them. To include them: run 'dotnet restore' (or 'dotnet build') in the repository, fix what it reports, then preview again.");
             }
 
             ok = true;
@@ -548,6 +570,7 @@ internal static class PreviewCommand
         var (_, styleCop, removes) = StyleCopSetup.Projects(root, files);
         var targets = styleCop.Count > 0 ? styleCop : Migration.PropsFiles(root);
         var versions = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        var optedOut = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var file in targets)
         {
             // A GlobalPackageReference (central package management) gets one of its own: a PackageReference with a version
@@ -564,6 +587,20 @@ internal static class PreviewCommand
                 EditFile(packages, text => AddPackageVersion(text!, $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
             }
 
+            // StabilityMatrix: its analyzer projects turn central package management off, and the version-less reference from
+            // Directory.Build.props failed their restore (NU1015). Such projects get a reference with a version instead (those
+            // that remove StyleCop's reference remove StyleBro's too, below).
+            var optOuts = packages is null ? [] : OptOuts(file, files, root).Where(p => !removes.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
+            if (optOuts.Count > 0)
+            {
+                optedOut.UnionWith(optOuts);
+                EditFile(file, text => AddItem(
+                    text,
+                    "<PackageReference Include=\"StyleBro.Analyzers\" PrivateAssets=\"all\" Condition=\"'$(ManagePackageVersionsCentrally)' == 'true'\" />",
+                    $"<PackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" PrivateAssets=\"all\" Condition=\"'$(ManagePackageVersionsCentrally)' != 'true'\" />"));
+                continue;
+            }
+
             EditFile(file, text => AddItem(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\" />"));
         }
 
@@ -577,6 +614,7 @@ internal static class PreviewCommand
         string Names(IEnumerable<string> paths) => string.Join(", ", paths.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')));
         return $"StyleBro.Analyzers {version} to {Names(targets)}"
             + (versions.Count > 0 ? $" (version in {Names(versions)})" : string.Empty)
+            + (optedOut.Count > 0 ? $", with a version for {Names(optedOut)} (central package management off there)" : string.Empty)
             + (removes.Count > 0 ? $", removed again in {Names(removes)} (they remove StyleCop.Analyzers)" : string.Empty);
     }
 
@@ -590,11 +628,7 @@ internal static class PreviewCommand
     /// </summary>
     public static string? CentralPackages(string file, string root)
     {
-        // ponytail: text-level; a property set by a Condition isn't seen. Imports are followed (a nested
-        // Directory.Packages.props that imports the root's, which turns it on).
-        bool Sets(string path, string value, int depth = 0) => File.Exists(path)
-            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
-                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => Sets(i, value, depth + 1))));
+        bool Sets(string path, string value) => SetsCentral(path, value, root);
         if (Sets(file, "false"))
         {
             return null;
@@ -616,13 +650,28 @@ internal static class PreviewCommand
     }
 
     /// <summary>
-    /// An MSBuild file with an ItemGroup holding <paramref name="item"/> before its last '&lt;/Project&gt;' (a new file
+    /// The projects that get <paramref name="props"/> (a Directory.Build.props: those under its folder) and turn central
+    /// package management off themselves.
+    /// </summary>
+    public static List<string> OptOuts(string props, IEnumerable<string> files, string root)
+    {
+        if (!Path.GetFileName(props).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase))
+        {
+            return [];
+        }
+
+        var folder = Path.GetDirectoryName(Path.GetFullPath(props))! + Path.DirectorySeparatorChar;
+        return files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase) && SetsCentral(f, "false", root)).ToList();
+    }
+
+    /// <summary>
+    /// An MSBuild file with an ItemGroup holding <paramref name="items"/> before its last '&lt;/Project&gt;' (a new file
     /// without one), in the file's line endings.
     /// </summary>
-    public static string AddItem(string? project, string item)
+    public static string AddItem(string? project, params string[] items)
     {
         var newLine = project?.Contains("\r\n", StringComparison.Ordinal) == true ? "\r\n" : "\n";
-        var group = $"  <ItemGroup>{newLine}    {item}{newLine}  </ItemGroup>{newLine}";
+        var group = $"  <ItemGroup>{newLine}{string.Concat(items.Select(item => $"    {item}{newLine}"))}  </ItemGroup>{newLine}";
         var end = project?.LastIndexOf("</Project>", StringComparison.OrdinalIgnoreCase) ?? -1;
         return end < 0 ? $"<Project>{newLine}{group}</Project>{newLine}" : project!.Substring(0, end) + group + project.Substring(end);
     }
@@ -746,6 +795,18 @@ internal static class PreviewCommand
         }
 
         return count;
+    }
+
+    /// <summary>
+    /// Whether an MSBuild file sets ManagePackageVersionsCentrally to <paramref name="value"/>, itself or in what it imports
+    /// (a nested Directory.Packages.props that imports the root's, which turns it on).
+    /// </summary>
+    private static bool SetsCentral(string path, string value, string root, int depth = 0)
+    {
+        // ponytail: text-level; a property set by a Condition isn't seen.
+        return File.Exists(path)
+            && (Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(path)), $@"<ManagePackageVersionsCentrally\b[^>]*>\s*{value}\s*<", RegexOptions.IgnoreCase)
+                || (depth < 8 && StyleCopSetup.Imports(path, root).Any(i => SetsCentral(i, value, root, depth + 1))));
     }
 
     private static string Part(string output, string firstLine)

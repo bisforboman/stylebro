@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # Writes data/inventory-<version>.csv: every diagnostic in the given StyleCop.Analyzers versions, with title,
 # category, default state and whether StyleCop ships a code fix. Restores the packages into the NuGet cache first.
-param([string[]]$Versions = @('1.1.118', '1.2.0-beta.556'))
+param([string[]]$Versions = @('1.0.2', '1.1.118', '1.2.0-beta.556'))
 $ErrorActionPreference = 'Stop'
 
 $data = Join-Path $PSScriptRoot 'data'
