@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -75,6 +76,23 @@ internal static class NamespaceRenamer
         var assemblies = new HashSet<string>(solution.Projects.Select(p => p.AssemblyName));
 
         var result = new List<(string File, TextChange Change)>();
+
+        // Files of projects this 'stylebro-migrate format' run doesn't load (RepositoryNames): a string with the namespace,
+        // or a use of the part.
+        var loaded = new HashSet<string>(solution.Projects.SelectMany(p => p.Documents).Select(d => d.FilePath).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in CamelCaseRenamer.ReadRepositoryNames())
+        {
+            if (entry.Kind == RepositoryNames.StringKind && fullNameInText.IsMatch(entry.Text) && !loaded.Contains(Regex.Replace(entry.Where, @"\(\d+\)$", string.Empty)))
+            {
+                return (result, KeptReason.NameInString, entry.Where);
+            }
+
+            if (entry.Kind == RepositoryNames.IdentifierKind && !loaded.Contains(entry.Where) && entry.Text.Split(' ').Contains(oldPart))
+            {
+                return (result, KeptReason.UsedInProjectNotLoaded, entry.Where);
+            }
+        }
+
         foreach (var project in solution.Projects)
         {
             foreach (var additional in project.AdditionalDocuments)
