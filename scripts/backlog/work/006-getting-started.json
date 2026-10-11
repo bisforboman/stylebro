@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "Getting started",
+  "notes": "docs/getting-started.md: from install to the first `dotnet format` run, for new projects and for StyleCop users; multi-targeted repos and baselines.",
+  "status": "Done (2026-10-03)"
+}

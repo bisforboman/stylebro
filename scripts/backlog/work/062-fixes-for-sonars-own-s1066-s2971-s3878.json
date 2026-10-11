@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Fixes for Sonar's own S1066, S2971, S3878",
+  "notes": "Owner's decision 2026-10-09: BRO1149-BRO1151's fixes are registered for Sonar's ids too, so `dotnet format` fixes SonarAnalyzer.CSharp's warnings at the places the StyleBro rule would fix (no action elsewhere: the warning stays). Unit tests with a stub reporting where Sonar does; `scripts/sonar-interop.ps1` (weekly workflow) against the real package.",
+  "status": "Done (2026-10-09)"
+}

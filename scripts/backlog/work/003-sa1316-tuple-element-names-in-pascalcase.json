@@ -1,0 +1,6 @@
+{
+  "area": "Parity",
+  "item": "SA1316: tuple element names in PascalCase",
+  "notes": "BRO1311: renamed with every use, literal and override solution-wide (Roslyn's Renamer crashes on tuple elements); `stylebro_tuple_element_name_casing`.",
+  "status": "Done (2026-10-03)"
+}

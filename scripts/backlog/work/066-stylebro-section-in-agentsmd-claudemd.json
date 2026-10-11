@@ -1,0 +1,6 @@
+{
+  "area": "Agents",
+  "item": "StyleBro section in AGENTS.md / CLAUDE.md",
+  "notes": "Owner's request 2026-10-10, opt-in (owner's decision the same day): `init --write --agents-md` and `--write --agents-md` put a StyleBro section into AGENTS.md between markers (created if missing; next to a CLAUDE.md they say to import it); without `--agents-md` they print a tip.",
+  "status": "Done (2026-10-10)"
+}

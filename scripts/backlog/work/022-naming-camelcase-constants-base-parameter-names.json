@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Naming: camelCase constants, base parameter names, `Async` suffix (StyleCop #2641/#3793, #1949; Roslynator RCS1046)",
+  "notes": "BRO1306 follows a `dotnet_naming_rule` that asks for camelCase private constants or static readonly fields; BRO1313 (parameters named like the base member) and BRO1314 (`Async` on methods returning Task/ValueTask/IAsyncEnumerable), both off by default. See decisions.md.",
+  "status": "Done (2026-10-05)"
+}

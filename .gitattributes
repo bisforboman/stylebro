@@ -1,0 +1,13 @@
+# Lists every rule pull request appends to. merge=union keeps both sides' new lines instead of a conflict, in LOCAL merges
+# only (git merge origin/main): GitHub's server-side merge ignores it (checked 2026-10-11), so a pull request can still show
+# a conflict there; merge main locally to resolve it. Check a union merge for doubled lines (both sides editing one line
+# keeps both); tests catch most (duplicate ids don't compile, the rule index must match the site nav and stay in id order).
+src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md merge=union
+src/StyleBro.Analyzers/DiagnosticIds.cs merge=union
+src/StyleBro.Package/build/stylebro.recommended.globalconfig merge=union
+docs/rules/README.md merge=union
+docs/differences-from-stylecop.md merge=union
+mkdocs.yml merge=union
+scripts/stylecop-survey/*.psd1 merge=union
+scripts/stylecop-survey/data/*.csv merge=union
+CLAUDE.md merge=union

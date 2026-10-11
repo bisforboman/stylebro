@@ -1,0 +1,6 @@
+{
+  "area": "Superseding StyleCop",
+  "item": "The remaining other-analyzer candidates",
+  "notes": "beyond-stylecop.md survey #6-#10 and #12-#18: BRO1526, BRO1142, BRO1138, BRO1618, BRO1141, BRO1139, BRO1140, BRO1408, BRO1619, BRO1143, BRO1001's overloads option, BRO1314.",
+  "status": "Done (2026-10-05)"
+}

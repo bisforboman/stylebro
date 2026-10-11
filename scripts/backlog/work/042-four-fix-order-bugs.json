@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "Four fix-order bugs",
+  "notes": "BRO1001 on one-line types and blank lines in other slots, BRO1114 on documented fields, BRO1116 vs BRO1108 (#69).",
+  "status": "Done (2026-10-08)"
+}

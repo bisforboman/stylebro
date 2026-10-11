@@ -1,0 +1,6 @@
+{
+  "area": "Superseding StyleCop",
+  "item": "StyleCop's open bugs",
+  "notes": "54 reports checked against StyleBro: 34 not shared, 12 by design or not applicable, 8 shared (7 fixed, 1 kept like StyleCop by decision; decisions.md). Listed in differences-from-stylecop.md.",
+  "status": "Done (2026-10-04)"
+}

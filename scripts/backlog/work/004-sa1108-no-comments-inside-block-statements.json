@@ -1,0 +1,6 @@
+{
+  "area": "Parity",
+  "item": "SA1108: no comments inside block statements",
+  "notes": "BRO1132: the comment moves into the block, right after `{`; multi-line headers skipped (decisions.md, proposals/sa1108.md).",
+  "status": "Done (2026-10-04)"
+}

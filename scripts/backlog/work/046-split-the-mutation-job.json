@@ -1,0 +1,6 @@
+{
+  "area": "CI",
+  "item": "Split the mutation job",
+  "notes": "Was 70-106 minutes for ~475 entries in one job. Now 4 parallel shards (index modulo 4) plus a summary job named `mutation` (the required check) that fails when any shard fails or is cancelled (#71).",
+  "status": "Done (2026-10-09)"
+}

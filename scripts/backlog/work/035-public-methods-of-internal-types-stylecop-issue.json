@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Public methods of internal types (StyleCop issue #2981)",
+  "notes": "BRO1409, off by default: `public` -> `internal` on ordinary methods of internal types only; members reflection, serializers, frameworks or the compiler look for are left out, names in strings or `nameof` not fixed. See decisions.md. Off after `stylebro-migrate`.",
+  "status": "Done (2026-10-05)"
+}

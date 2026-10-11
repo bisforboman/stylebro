@@ -11,6 +11,7 @@ exclude_docs: |
   backlog.md
   beyond-stylecop.md
   decisions.md
+  decisions/
   proposals/
 
 # With --strict these fail the build: a broken link or anchor, or a page missing from the nav.

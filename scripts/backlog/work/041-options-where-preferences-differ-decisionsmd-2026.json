@@ -1,0 +1,6 @@
+{
+  "area": "Configuration",
+  "item": "Options where preferences differ (decisions.md 2026-10-07)",
+  "notes": "Eleven .editorconfig options from a survey of the 12 reference repos: `default` literal (BRO1104), `\"\"` (BRO1106), `l`-only suffixes (BRO1135), omit trailing commas (BRO1401), empty `{ }` on one line (BRO1508/BRO1509), `)` on its own line (BRO1110), first item on the `(` line (BRO1107), adjacent single-line members (BRO1505), `<inheritdoc />` (BRO1601), `: base` / `where` on the declaration line (BRO1105/BRO1111).",
+  "status": "Done (2026-10-08)"
+}

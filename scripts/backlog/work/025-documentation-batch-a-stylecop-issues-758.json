@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Documentation batch A (StyleCop issues #758, #3546/#1490; Meziantou MA0154; survey #15)",
+  "notes": "BRO1617 cref type arguments in braces (`List{T}`), BRO1618 `<see langword=\"null\"/>` for a keyword alone in `<c>`, BRO1619 top-level doc elements in a fixed order (stable, so BRO1611 keeps `<param>` order); `stylebro_comment_blank_line_exempt_prefixes` for BRO1504. On in the preset, off after `stylebro-migrate` (decisions.md).",
+  "status": "Done (2026-10-05)"
+}

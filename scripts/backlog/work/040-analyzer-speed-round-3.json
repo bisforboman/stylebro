@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "Analyzer speed, round 3",
+  "notes": "Shared trivia array, one walk for tokens and nodes, cheaper checks first: all analyzers about a third faster on Newtonsoft.Json (#63).",
+  "status": "Done (2026-10-07)"
+}

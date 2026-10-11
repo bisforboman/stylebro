@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "Readable release notes",
+  "notes": "Written by hand for every release since 0.3.0-alpha.1 (what's new, how to upgrade, known limits; `gh release edit --notes-file`) instead of GitHub's list of PR titles.",
+  "status": "Done (0.3.0)"
+}

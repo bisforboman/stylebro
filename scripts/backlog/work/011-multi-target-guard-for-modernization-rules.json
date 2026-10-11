@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "Multi-target guard for modernization rules",
+  "notes": "MultiTargetSuppressor: the package passes the project's target frameworks (StyleBroTargetFrameworks, comma-separated) and the suppressor hides a tier C rule where a framework lacks its API, so init --modernize writes tier C at warning everywhere. See modernizing.md.",
+  "status": "Done (2026-10-05)"
+}

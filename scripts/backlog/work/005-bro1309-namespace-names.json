@@ -1,0 +1,6 @@
+{
+  "area": "Parity",
+  "item": "BRO1309: namespace names",
+  "notes": "BRO1312, opt-in (off by default, on through `stylebro-migrate` with SA1300); the root namespace is left out. See docs/proposals/namespace-names.md.",
+  "status": "Done (2026-10-04)"
+}

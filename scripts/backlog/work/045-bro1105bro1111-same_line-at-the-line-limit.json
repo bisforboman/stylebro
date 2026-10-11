@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "BRO1105/BRO1111 same_line at the line limit",
+  "notes": "The joined line is measured as the other fixes leave it (BRO1404/BRO1007 modifier, BRO1109 `(`, BRO1108 split, BRO1110 `)`), so one run converges in any order. Renames and rewrites inside the line aren't counted (documented on both rule pages).",
+  "status": "Done (2026-10-09)"
+}

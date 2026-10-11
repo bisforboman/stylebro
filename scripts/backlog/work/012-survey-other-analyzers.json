@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Survey other analyzers",
+  "notes": "Fixable style rules in Roslynator, Meziantou, Sonar and ErrorProne.NET that the SDK doesn't cover, ranked in [beyond-stylecop.md](beyond-stylecop.md); the top five are under Maybe.",
+  "status": "Done (2026-10-03)"
+}

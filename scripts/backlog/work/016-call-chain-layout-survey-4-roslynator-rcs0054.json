@@ -1,0 +1,6 @@
+{
+  "area": "Beyond StyleCop",
+  "item": "Call chain layout (survey #4, Roslynator RCS0054)",
+  "notes": "BRO1523: in a split call chain every call after the first line starts its own line; the chain keeps its own indentation. Defaults from a survey of the reference repositories, see decisions.md. Off after `stylebro-migrate`.",
+  "status": "Done (2026-10-04)"
+}

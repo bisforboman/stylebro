@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "BRO1112 sort path vs BRO1505",
+  "notes": "Reproduced (FixOrderTests: one order lost a blank line between two fields): the regions fix's sort (`GetSortChangesAsync`) now runs BRO1001's layout pre-step (BRO1505's blank lines, BRO1509's expansion) first, shared with BRO1001's own fix.",
+  "status": "Done (2026-10-09)"
+}

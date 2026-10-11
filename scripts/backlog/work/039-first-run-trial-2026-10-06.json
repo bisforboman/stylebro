@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "First-run trial (2026-10-06)",
+  "notes": "GuardClauses, Dapper, Nerdbank.Streams, CleanArchitecture installed like a new user: fixed BRO1601/BRO1602 looping on `#if` attributes, BRO1601 only with doc generation, BRO1603 period placement, BRO1604/BRO1606 wording, BRO1134 trailing comments, migrate (StyleCop casing pinned, submodules skipped, IDE0073 only with SA1636, merged format reports), getting-started rewritten.",
+  "status": "Done (2026-10-06)"
+}

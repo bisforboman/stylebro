@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "Benchmark `--all-rules` in CI",
+  "notes": "Checked the suspicion that `--all-rules` had no effect: it works (Newtonsoft.Json 4,087 -> 4,439 reports, every off-by-default rule with something to find reports). CI's `performance` job now compares with it, so off-by-default analyzers are measured too.",
+  "status": "Done (2026-10-09)"
+}

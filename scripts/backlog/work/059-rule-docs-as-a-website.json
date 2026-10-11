@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "Rule docs as a website",
+  "notes": "MkDocs Material site from docs/ (user docs only; decisions, backlog and proposals stay on GitHub), built with `--strict` on every PR and deployed to GitHub Pages from main (decisions.md 2026-10-09); rule help links point to its rule pages; `docs/configuration.md` lists every `stylebro_*` key (checked by a test).",
+  "status": "Done (2026-10-09)"
+}

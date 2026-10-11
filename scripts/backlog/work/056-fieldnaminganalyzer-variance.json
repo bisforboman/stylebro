@@ -1,0 +1,6 @@
+{
+  "area": "Performance",
+  "item": "FieldNamingAnalyzer variance",
+  "notes": "Shared cost: its symbol actions run before the tree actions, so it built the `TreeWalk` arrays (~65 ms) and drew the GCs. The benchmark now times the walk as its own line; `NamespaceNames.IsGenerated` is cached per tree. FieldNaming 72-101 -> 17-30 ms with all analyzers, alone 53-109 -> mostly 30-35 ms.",
+  "status": "Done (2026-10-09)"
+}
