@@ -24,6 +24,16 @@ internal static class ConstructorSummaries
         "Initialize", "Initialises", "Initialise", "Instantiates", "Instantiate", "Constructs", "Construct", "Creates a new", "Create a new",
     ];
 
+    // A first sentence that only says it's a constructor (owner's decision, 2026-10-11: "Replace known filler, keep real
+    // text"; Stateless: '... the <see cref="Alarm"/> class. Default constructor.'). A deliberately small list: 'Default
+    // constructor', 'Constructor', 'Ctor', 'Constructor for X', 'Creates a new instance', 'Creates a new instance of X',
+    // 'Creates an instance of X' (also with 'Constructs' or 'Instantiates', 'object' for 'instance', X a name or a
+    // '<see cref/>', optionally followed by 'class', 'struct' or 'type').
+    private static readonly Regex Filler = new(
+        @"^(?:(?:the\s+)?default\s+)?(?:constructor|ctor)(?:\s+(?:for|of)\s+(?:the\s+)?(?:<see\s[^>]*/>|[\w.<>{},]+)(?:\s+(?:class|struct|type))?)?$"
+        + @"|^(?:creates|constructs|instantiates)\s+(?:a\s+new|an?)\s+(?:new\s+)?(?:instance|object)(?:\s+of\s+(?:the\s+)?(?:<see\s[^>]*/>|[\w.<>{},]+)(?:\s+(?:class|struct|type))?)?$",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
     /// <summary>
     /// The finding for a constructor or destructor whose summary doesn't begin with the standard text, or null. Not
     /// reported: members without a summary (missing documentation isn't reported; '&lt;inheritdoc/&gt;' has none), records.
@@ -63,11 +73,12 @@ internal static class ConstructorSummaries
             return null;
         }
 
-        // A near miss of the standard sentence ('Initializes a new instance of the Words class.') is replaced when it
-        // ends on this line; any other text stays, after the standard sentence.
-        var replaceLength = 0;
+        // Filler ('Default constructor.') is replaced by the standard sentence, like a near miss of the standard sentence
+        // ('Initializes a new instance of the Words class.') when it ends on this line; any other text stays, after the
+        // standard sentence.
+        var replaceLength = member is ConstructorDeclarationSyntax ? GetFillerLength(rest) : 0;
         var nearMiss = string.Join(" ", standard.Split(' ').Take(3));
-        if (rest.StartsWith(nearMiss, StringComparison.Ordinal))
+        if (replaceLength == 0 && rest.StartsWith(nearMiss, StringComparison.Ordinal))
         {
             var end = rest.IndexOf('.');
             if (end < 0)
@@ -111,6 +122,31 @@ internal static class ConstructorSummaries
 
         var separator = remaining.Length == 0 || remaining.StartsWith("</", StringComparison.Ordinal) ? string.Empty : " ";
         return new Finding(summary.StartTag.GetLocation(), member is DestructorDeclarationSyntax, new TextSpan(start, replaceLength), standard + separator);
+    }
+
+    /// <summary>
+    /// The length of a filler first sentence at the start of <paramref name="rest"/> (with its period and the spaces after
+    /// it), or 0. The sentence ends at its period, or at the end of the summary or line when it has none.
+    /// </summary>
+    private static int GetFillerLength(string rest)
+    {
+        var end = rest.IndexOf('.');
+        var close = rest.IndexOf("</", StringComparison.Ordinal);
+        var sentence = end >= 0 && (close < 0 || end < close) ? rest.Substring(0, end)
+            : close >= 0 ? rest.Substring(0, close)
+            : rest;
+        if (!Filler.IsMatch(sentence.Trim()))
+        {
+            return 0;
+        }
+
+        var length = sentence.Length + (end >= 0 && end == sentence.Length ? 1 : 0);
+        while (length < rest.Length && rest[length] == ' ')
+        {
+            length++;
+        }
+
+        return length;
     }
 
     /// <summary>

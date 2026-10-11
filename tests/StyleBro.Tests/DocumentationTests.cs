@@ -978,6 +978,94 @@ public class DocumentationTests
         """,
         editorConfig: "stylebro_inheritdoc_style = spaced");
 
+    // Stateless: 'Default constructor.' became '... the <see cref="Alarm"/> class. Default constructor.'.
+    [Fact]
+    public Task ConstructorSummaries_FillerIsReplaced_RealTextKept() => VerifyFixAsync(
+        """
+        /// <summary>An alarm.</summary>
+        public class Alarm
+        {
+            /// {|BRO1606:<summary>|}
+            /// Default constructor.
+            /// </summary>
+            public Alarm()
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Constructor.</summary>
+            /// <param name="a">The a.</param>
+            public Alarm(int a)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Creates a new instance of <see cref="Alarm"/>. Starts it right away.</summary>
+            /// <param name="b">The b.</param>
+            public Alarm(byte b)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Creates an instance of the Alarm class.</summary>
+            /// <param name="c">The c.</param>
+            public Alarm(char c)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Constructor for Alarm. Uses the given delay.</summary>
+            /// <param name="d">The d.</param>
+            public Alarm(double d)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Sets up the alarm.</summary>
+            /// <param name="f">The f.</param>
+            public Alarm(float f)
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>An alarm.</summary>
+        public class Alarm
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Alarm"/> class.
+            /// </summary>
+            public Alarm()
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="Alarm"/> class.</summary>
+            /// <param name="a">The a.</param>
+            public Alarm(int a)
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="Alarm"/> class. Starts it right away.</summary>
+            /// <param name="b">The b.</param>
+            public Alarm(byte b)
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="Alarm"/> class.</summary>
+            /// <param name="c">The c.</param>
+            public Alarm(char c)
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="Alarm"/> class. Uses the given delay.</summary>
+            /// <param name="d">The d.</param>
+            public Alarm(double d)
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="Alarm"/> class. Sets up the alarm.</summary>
+            /// <param name="f">The f.</param>
+            public Alarm(float f)
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task ConstructorSummaries_BeginWithTheStandardText() => VerifyFixAsync(
         """

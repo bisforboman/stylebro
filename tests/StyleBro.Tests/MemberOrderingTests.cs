@@ -744,6 +744,48 @@ public class MemberOrderingTests
         """,
         editorConfig: "stylebro_keep_overloads_together = true\n");
 
+    // Sonar S4136 (10.31) groups overloads by name, accessibility, static and abstract: it doesn't flag 'public Dispose()'
+    // and 'private Dispose(bool)' apart, but does 'Find(int)' and 'Find(string)'.
+    [Fact]
+    public Task Overloads_SameAccess_GroupsOnlyOverloadsWithTheSameAccessibility() => VerifyFixAsync(
+        """
+        public class C : System.IDisposable
+        {
+            public void Dispose() { Dispose(true); System.GC.SuppressFinalize(this); }
+
+            public int Other() => 1;
+
+            private void Dispose(bool d) { }
+
+            public int {|BRO1001:Find|}(int a) => a;
+
+            public int Other2() => 1;
+
+            public int Find(string a) => a.Length;
+
+            public static int Find(long a) => 0;
+        }
+        """,
+        """
+        public class C : System.IDisposable
+        {
+            public static int Find(long a) => 0;
+
+            public void Dispose() { Dispose(true); System.GC.SuppressFinalize(this); }
+
+            public int Other() => 1;
+
+            public int Find(int a) => a;
+
+            public int Find(string a) => a.Length;
+
+            public int Other2() => 1;
+
+            private void Dispose(bool d) { }
+        }
+        """,
+        editorConfig: "stylebro_keep_overloads_together = same_access\ndotnet_diagnostic.BRO1509.severity = none\n");
+
     [Fact]
     public Task Overloads_KeptTogether_GoWhereTheirBestOverloadGoes() => VerifyFixAsync(
         """
