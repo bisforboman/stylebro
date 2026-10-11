@@ -22,5 +22,5 @@ S3052	CA1805	on	-	-
 S3260	-	none	-	CA1852's fix also seals private nested classes with protected members (CS0628 warnings: 144 in SmartEnum)
 S3442	CA1012	on	-	-
 S3878	BRO1151	on	-	-
-S4136	BRO1001	option	stylebro_keep_overloads_together = true	overloads stay together even where their access differs (StyleCop's SA1202 order would split them)
+S4136	BRO1001	option	stylebro_keep_overloads_together = same_access	only overloads with the same access stay together, as Sonar's S4136 asks; between accesses StyleCop's SA1202 order stays
 S8969	BRO1147	on	-	-

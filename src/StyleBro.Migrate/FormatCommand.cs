@@ -97,6 +97,9 @@ internal static class FormatCommand
     /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
     private const string OldMacHeader = "Not formatted:";
 
+    /// <summary>The start of the line that names the folders without StyleCop format leaves alone (printed for the first run only).</summary>
+    private const string UnformattedHeader = "Leaving alone:";
+
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
     private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -687,7 +690,7 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run.
             var code = runOnce(runArgs, run == 1 ? output : line =>
             {
-                if (!new[] { FixingHeader, MultiTargetedHeader, NoWhitespaceHeader, OldMacHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+                if (!new[] { FixingHeader, MultiTargetedHeader, NoWhitespaceHeader, OldMacHeader, UnformattedHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
                 {
                     log(line);
                 }
@@ -925,6 +928,13 @@ internal static class FormatCommand
         if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
         {
             Exclude(submodules);
+        }
+
+        // Folders the migration left without settings (no StyleCop there): the whitespace pass would still reformat them.
+        if (Migration.UnformattedFolders(root) is { Count: > 0 } unformatted)
+        {
+            log($"{UnformattedHeader} {string.Join(", ", unformatted)}: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).");
+            Exclude(unformatted);
         }
 
         // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles.

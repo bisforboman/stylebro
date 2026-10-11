@@ -21,9 +21,13 @@ internal enum Severity
 
 /// <summary>
 /// A part of the repository with its own StyleCop severities: a section of a sub-directory's .editorconfig, or a
-/// path-specific section of the root one (like '[tests/**.cs]'). <see cref="Severities"/> holds only what it sets.
+/// path-specific section of the root one (like '[tests/**.cs]'). <see cref="Severities"/> holds only what it sets;
+/// <see cref="Settings"/> is the stylecop.json its projects use when it isn't the repository-wide one.
 /// </summary>
-internal sealed record Scope(string File, string Section, IReadOnlyDictionary<string, Severity> Severities);
+internal sealed record Scope(string File, string Section, IReadOnlyDictionary<string, Severity> Severities, JsonElement? Settings = null);
+
+/// <summary>The ruleset and stylecop.json (full paths, or null) a project's StyleCop uses.</summary>
+internal sealed record ProjectStyleCop(string? Ruleset, string? Json);
 
 /// <summary>
 /// A repository's StyleCop setup: every StyleCop rule's effective severity, and the settings in stylecop.json.
@@ -106,6 +110,9 @@ internal sealed class StyleCopSetup
     /// <summary>Gets the folders with projects that don't run StyleCop (only when <see cref="Folders"/> isn't null).</summary>
     public IReadOnlyList<string> FoldersWithout { get; init; } = [];
 
+    /// <summary>Gets what the report must point out: settings this reader couldn't map exactly.</summary>
+    public IReadOnlyList<string> Warnings { get; init; } = [];
+
     /// <summary>Gets the MSBuild files (relative) that reference StyleCop.Analyzers.</summary>
     public IReadOnlyList<string> ReferencedIn { get; init; } = [];
 
@@ -131,18 +138,27 @@ internal sealed class StyleCopSetup
             ? LoadIds("StyleCopRules-1.1.118.csv")
             : null;
 
+        // Each project that runs StyleCop, with the ruleset and stylecop.json it gets (its own file, its Directory.Build.props
+        // and .targets, and what they import). Only those projects count: a sample project without StyleCop has no ruleset
+        // and would otherwise bring StyleCop's defaults back in (Soulseek.NET's examples turned SA1101 on: 191 files got
+        // 'this.'). Without any StyleCop reference found, every project counts.
+        var projects = Projects(root, files);
+        var allConfigs = projects.Uses.Keys.Order(StringComparer.OrdinalIgnoreCase).Select(p => (Project: p, Config: ProjectConfig(p, root))).ToList();
+        var configs = allConfigs.Where(c => projects.Uses[c.Project] || !projects.Uses.Values.Contains(true)).ToList();
+
         // Rulesets: the repository's own and the ones its MSBuild files select (also in a submodule), each with the
         // rulesets it includes. A ruleset that is only included is read as part of the including one, whose overrides count.
-        var folderRulesets = FolderRulesets(files, root);
-        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var rootRuleset = folderRulesets.FirstOrDefault(f => string.Equals(f.Folder, rootFolder, StringComparison.OrdinalIgnoreCase)).Ruleset;
-        var selected = new HashSet<string>(references.Rulesets.Concat(folderRulesets.Select(f => f.Ruleset)), StringComparer.OrdinalIgnoreCase);
+        // A ruleset that only projects without StyleCop select doesn't count; one no project can be traced to (selected
+        // through a property this reader can't follow) does.
+        var selected = new HashSet<string>(references.Rulesets.Concat(allConfigs.Select(c => c.Config.Ruleset).OfType<string>()), StringComparer.OrdinalIgnoreCase);
+        var styleCopRulesets = new HashSet<string>(configs.Select(c => c.Config.Ruleset).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+        var otherRulesets = new HashSet<string>(allConfigs.Select(c => c.Config.Ruleset).OfType<string>().Where(r => !styleCopRulesets.Contains(r)), StringComparer.OrdinalIgnoreCase);
         var included = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var read = files.Where(f => Kind(f) == "ruleset").Concat(selected).Distinct(StringComparer.OrdinalIgnoreCase)
             .Select(f => (File: f, Rules: ReadRuleset(f, included)))
             .ToList();
         var rulesets = new List<Dictionary<string, Severity>>();
-        foreach (var (file, rules) in read.Where(r => r.Rules.Count > 0 && (selected.Contains(r.File) || !included.Contains(r.File))))
+        foreach (var (file, rules) in read.Where(r => r.Rules.Count > 0 && (selected.Contains(r.File) || !included.Contains(r.File)) && !otherRulesets.Contains(r.File)))
         {
             rulesets.Add(rules);
             sources.Add(Path.GetRelativePath(root, file));
@@ -212,54 +228,66 @@ internal sealed class StyleCopSetup
             return result;
         }
 
-        // When only some folders' props select a ruleset, a project elsewhere (without one of its own) gets StyleCop's
-        // defaults: they count among the rulesets, else a test folder's ruleset would turn its rules off everywhere.
-        var scoped = folderRulesets.Where(f => f.Ruleset != rootRuleset).Select(f => f.Folder + Path.DirectorySeparatorChar).ToList();
-        if (rulesets.Count > 0 && rootRuleset is null && files.Any(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
-            && !scoped.Any(s => f.StartsWith(s, StringComparison.OrdinalIgnoreCase))
-            && !File.ReadAllText(f).Contains("<CodeAnalysisRuleSet", StringComparison.OrdinalIgnoreCase)))
+        // A StyleCop project without a ruleset gets StyleCop's defaults: they count among the rulesets, else a test
+        // project's ruleset would turn its rules off everywhere.
+        if (rulesets.Count > 0 && configs.Any(c => c.Config.Ruleset is null))
         {
             rulesets.Add([]);
         }
 
         var severities = Effective(rulesets);
 
-        // A folder whose Directory.Build.props selects its own ruleset (tests with ordering off) is a scope.
-        var folderScopes = new List<Scope>();
-        foreach (var (folder, ruleset) in folderRulesets.Where(f => f.Ruleset != rootRuleset))
+        // stylecop.json: the one most StyleCop projects link is the repository-wide one (without any, the shallowest file).
+        var linked = configs.Select(c => c.Config.Json).OfType<string>().ToList();
+        var json = linked.GroupBy(f => f, StringComparer.OrdinalIgnoreCase).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => g.Key).FirstOrDefault()
+            ?? files.Where(f => Path.GetFileName(f).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f.Count(c => c == Path.DirectorySeparatorChar))
+                .ThenBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .Concat(references.StyleCopJson)
+                .FirstOrDefault();
+        var settings = json is null ? null : ReadSettings(json);
+        foreach (var file in new[] { json }.Concat(linked).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            var differences = Effective([ReadRuleset(ruleset, null)])
-                .Where(p => !severities.TryGetValue(p.Key, out var s) || s != p.Value)
-                .ToDictionary(p => p.Key, p => p.Value);
-            if (differences.Count > 0)
-            {
-                folderScopes.Add(new Scope(Path.GetRelativePath(root, Path.Combine(folder, ".editorconfig")), "*.cs", differences));
-            }
+            sources.Add(Path.GetRelativePath(root, file));
         }
 
-        JsonElement? settings = null;
-        var json = files.Where(f => Path.GetFileName(f).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
-            .OrderBy(f => f.Count(c => c == Path.DirectorySeparatorChar))
-            .Concat(references.StyleCopJson)
-            .FirstOrDefault();
-        if (json is not null)
+        // Projects whose ruleset or stylecop.json differs from the repository-wide result get a section of their own
+        // (Soulseek.NET's src and tests each link their own, with different rules and license headers). Projects that share
+        // a folder but not their settings can't be told apart by an .editorconfig section: warned about, never picked silently.
+        var warnings = new List<string>();
+        var projectScopes = new List<Scope>();
+        string FolderOf(string project) => Path.GetRelativePath(root, Path.GetDirectoryName(project)!).Replace('\\', '/');
+        string JsonText(string? file) => file is null ? string.Empty : File.ReadAllText(file);
+        var byFolder = configs.GroupBy(c => FolderOf(c.Project), StringComparer.OrdinalIgnoreCase).ToList();
+        foreach (var folder in byFolder.Where(g => g.Select(c => (c.Config.Ruleset?.ToUpperInvariant(), JsonText(c.Config.Json))).Distinct().Skip(1).Any()))
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(json), new JsonDocumentOptions
+            var names = folder.Select(c => Path.GetFileName(c.Project)).ToList();
+            warnings.Add($"The projects in {folder.Key} ({string.Join(", ", names)}) use different StyleCop rulesets or stylecop.json files, and one folder gets one set of settings: {names[0]}'s are used there. Check the rules and file headers of the others.");
+        }
+
+        var firstPerFolder = byFolder.Select(g => (Folder: g.Key, g.First().Config)).ToList();
+        foreach (var group in firstPerFolder.GroupBy(f => (Ruleset: f.Config.Ruleset?.ToUpperInvariant(), Json: JsonText(f.Config.Json))))
+        {
+            var config = group.First().Config;
+            var differences = Effective([config.Ruleset is null ? [] : ReadRuleset(config.Ruleset, null)])
+                .Where(p => !severities.TryGetValue(p.Key, out var s) || s != p.Value)
+                .ToDictionary(p => p.Key, p => p.Value);
+            var own = config.Json is not null && JsonText(config.Json) != JsonText(json) ? ReadSettings(config.Json) : null;
+            if (differences.Count == 0 && own is null)
             {
-                CommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true,
-            });
-            if (document.RootElement.TryGetProperty("settings", out var element))
-            {
-                settings = element.Clone();
+                continue;
             }
 
-            sources.Add(Path.GetRelativePath(root, json));
+            // The group's folders, widened up to where another group's project would be inside.
+            var inGroup = group.Select(f => f.Folder).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var uses = firstPerFolder.ToDictionary(f => Path.GetFullPath(Path.Combine(root, f.Folder, "x.csproj")), f => inGroup.Contains(f.Folder), StringComparer.OrdinalIgnoreCase);
+            var covered = Cover(uses, true, root) ?? [.. inGroup.Order(StringComparer.OrdinalIgnoreCase)];
+            var others = Cover(uses, false, root) ?? [];
+            projectScopes.Add(new Scope(".editorconfig", SectionFor(covered, others), differences, own));
         }
 
         // Only where StyleCop ran (owner's decision 2026-10-10): the settings there, with the scopes that cover all of it.
-        var allScopes = new List<Scope>([.. folderScopes, .. scopes]);
-        var projects = Projects(root, files);
+        var allScopes = new List<Scope>([.. projectScopes, .. scopes]);
         var folders = Cover(projects.Uses, true, root);
         var without = folders is null ? [] : Cover(projects.Uses, false, root) ?? [];
         if (folders is not null)
@@ -275,6 +303,7 @@ internal sealed class StyleCopSetup
         string Relative(string file) => Path.GetRelativePath(root, file).Replace('\\', '/');
         return new StyleCopSetup(severities, settings, sources, allScopes, version, documentationParsed)
         {
+            Warnings = warnings,
             EditorConfigCopiedBy = copier is null ? null : Path.GetRelativePath(root, copier),
             Folders = folders,
             FoldersWithout = without,
@@ -439,6 +468,16 @@ internal sealed class StyleCopSetup
         return File.Exists(git) || Directory.Exists(git);
     }
 
+    /// <summary>
+    /// The path with its file name as the file system spells it ('Directory.build.props' in realworlddotnet), or as given when
+    /// the file doesn't exist: messages and edits then name the file the repository has.
+    /// </summary>
+    public static string OnDisk(string path)
+    {
+        var folder = Path.GetDirectoryName(path);
+        return folder is not null && Directory.Exists(folder) ? Directory.EnumerateFiles(folder, Path.GetFileName(path)).FirstOrDefault() ?? path : path;
+    }
+
     /// <summary>A .csproj, .props or .targets file.</summary>
     public static bool IsMSBuild(string file)
     {
@@ -457,7 +496,7 @@ internal sealed class StyleCopSetup
             severities[id] = severity;
         }
 
-        return new StyleCopSetup(severities, Settings, Sources, [], Version, DocumentationParsed);
+        return new StyleCopSetup(severities, scope.Settings ?? Settings, Sources, [], Version, DocumentationParsed);
     }
 
     /// <summary>A stylecop.json setting, like ("orderingRules", "usingDirectivesPlacement").</summary>
@@ -493,7 +532,7 @@ internal sealed class StyleCopSetup
                 {
                     if (File.Exists(Path.Combine(folder, name)))
                     {
-                        chain.Add(Path.Combine(folder, name));
+                        chain.Add(OnDisk(Path.Combine(folder, name)));
                         break;
                     }
                 }
@@ -602,6 +641,71 @@ internal sealed class StyleCopSetup
             .Select(m => Resolve(m.Groups["import"].Value, file, root))
             .OfType<string>()
             .Where(IsMSBuild);
+
+    /// <summary>
+    /// The ruleset and stylecop.json a project gets: its nearest Directory.Build.props, the project file and its nearest
+    /// Directory.Build.targets, each with what it imports, in MSBuild's order. The last CodeAnalysisRuleSet counts
+    /// ("'$(CodeAnalysisRuleSet)' == ''" conditions respected; a relative value is the project's), the first stylecop.json
+    /// additional file. Paths are full; null when there's none (or it can't be resolved).
+    /// </summary>
+    internal static ProjectStyleCop ProjectConfig(string project, string root)
+    {
+        // ponytail: text-level evaluation (no PropertyGroup conditions, no other properties); an unknown value counts as none.
+        string? ruleset = null;
+        string? json = null;
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string? Nearest(string name)
+        {
+            for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
+            {
+                if (File.Exists(Path.Combine(folder, name)))
+                {
+                    return Path.Combine(folder, name);
+                }
+            }
+
+            return null;
+        }
+
+        foreach (var file in new[] { Nearest("Directory.Build.props"), project, Nearest("Directory.Build.targets") }.OfType<string>())
+        {
+            Evaluate(file, 0);
+        }
+
+        return new ProjectStyleCop(ruleset, json);
+
+        // MSBuild resolves a relative path in a property or item against the project, wherever it's written.
+        string? FromProject(string value, string file) =>
+            (value.Contains("$(MSBuildThisFileDirectory)", StringComparison.OrdinalIgnoreCase) ? null : Resolve(value, project, root)) ?? Resolve(value, file, root);
+
+        void Evaluate(string file, int depth)
+        {
+            if (depth > 16 || !seen.Add(file))
+            {
+                return;
+            }
+
+            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(file))))
+            {
+                if (match.Groups["import"].Success)
+                {
+                    if (Resolve(match.Groups["import"].Value, file, root) is { } imported && IsMSBuild(imported))
+                    {
+                        Evaluate(imported, depth + 1);
+                    }
+                }
+                else if (match.Groups["ruleset"].Success && (ruleset is null || !match.Groups["condition"].Value.Contains("$(CodeAnalysisRuleSet)", StringComparison.OrdinalIgnoreCase)))
+                {
+                    ruleset = FromProject(match.Groups["ruleset"].Value, file);
+                }
+                else if (match.Groups["additional"].Success && json is null && Path.GetFileName(match.Groups["additional"].Value.Trim().Replace('\\', '/')).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
+                {
+                    json = FromProject(match.Groups["additional"].Value, file);
+                }
+            }
+        }
+    }
 
     /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]').</summary>
     private static bool MayApplyToCSharp(string section)
@@ -750,47 +854,15 @@ internal sealed class StyleCopSetup
         return result;
     }
 
-    /// <summary>
-    /// The ruleset each folder with its own Directory.Build.props (the root's too) gives its projects: the last
-    /// CodeAnalysisRuleSet the props and its imports set, in order ("'$(CodeAnalysisRuleSet)' == ''" conditions respected).
-    /// A value relative to the project is resolved from the folder's projects.
-    /// </summary>
-    private static List<(string Folder, string Ruleset)> FolderRulesets(IReadOnlyList<string> own, string root)
+    /// <summary>stylecop.json's 'settings' object, or null when it has none.</summary>
+    private static JsonElement? ReadSettings(string file)
     {
-        // ponytail: text-level evaluation (no PropertyGroup conditions, no other properties); an unknown value means no scope.
-        var result = new List<(string, string)>();
-        foreach (var props in own.Where(f => Path.GetFileName(f).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase)))
+        using var document = JsonDocument.Parse(File.ReadAllText(file), new JsonDocumentOptions
         {
-            var folder = Path.GetDirectoryName(props)!;
-            var projects = own.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && f.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)).ToList();
-            string? ruleset = null;
-            Evaluate(props, 0);
-            if (ruleset is not null)
-            {
-                result.Add((folder, ruleset));
-            }
-
-            void Evaluate(string file, int depth)
-            {
-                foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(file))))
-                {
-                    if (match.Groups["import"].Success)
-                    {
-                        if (depth < 16 && Resolve(match.Groups["import"].Value, file, root) is { } imported && IsMSBuild(imported))
-                        {
-                            Evaluate(imported, depth + 1);
-                        }
-                    }
-                    else if (match.Groups["ruleset"].Success && (ruleset is null || !match.Groups["condition"].Value.Contains("$(CodeAnalysisRuleSet)", StringComparison.OrdinalIgnoreCase)))
-                    {
-                        var value = match.Groups["ruleset"].Value;
-                        ruleset = Resolve(value, file, root) ?? projects.Select(p => Resolve(value, p, root)).FirstOrDefault(r => r is not null);
-                    }
-                }
-            }
-        }
-
-        return result;
+            CommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true,
+        });
+        return document.RootElement.TryGetProperty("settings", out var element) ? element.Clone() : null;
     }
 
     /// <summary>
@@ -861,7 +933,7 @@ internal sealed class StyleCopSetup
             }
             else if (covered.Count > 0)
             {
-                result.Add(new Scope(".editorconfig", SectionFor(covered, [.. without, .. folders.Except(covered)]), scope.Severities));
+                result.Add(scope with { File = ".editorconfig", Section = SectionFor(covered, [.. without, .. folders.Except(covered)]) });
             }
         }
 

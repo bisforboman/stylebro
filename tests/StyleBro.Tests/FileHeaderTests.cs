@@ -1,3 +1,4 @@
+using StyleBro.Analyzers.Documentation;
 using Verify = StyleBro.Tests.Verifier<StyleBro.Analyzers.Documentation.FileHeaderAnalyzer, StyleBro.CodeFixes.Documentation.FileHeaderCodeFixProvider>;
 
 namespace StyleBro.Tests;
@@ -313,4 +314,33 @@ public class FileHeaderTests
             "// <copyright file=\"Test1.cs\" company=\"Contoso\">\n// Copyright (c) Contoso. All rights reserved.\n// </copyright>\nnamespace P;\n",
         },
         Contoso);
+
+    [Fact]
+    public void Encode_KeepsWhatAnEditorConfigValueWouldLose_AndDecodeReversesIt()
+    {
+        // Soulseek.NET's GPL text: ';' and '#' start a comment anywhere in a value, and the value is trimmed.
+        var text = "    Copyright (c) {companyName}.\n\n    but WITHOUT ANY WARRANTY; without even # 1 C:\\n\\u0041 ";
+        var encoded = FileHeaderOptions.Encode(text);
+
+        Assert.DoesNotContain(';', encoded);
+        Assert.DoesNotContain('#', encoded);
+        Assert.Equal(encoded.Trim(), encoded);
+        Assert.Equal(text, FileHeaderOptions.Decode(encoded));
+    }
+
+    [Fact]
+    public Task EncodedText_IsWrittenWithItsSemicolonsAndIndentation() => Verify.VerifyFixAsync(
+        """
+        {|BRO1615:|}namespace P;
+        """,
+        """
+        // <copyright file="Test0.cs" company="Contoso">
+        //     Copyright (c) Contoso.
+        //
+        //     but WITHOUT ANY WARRANTY; without even # 1
+        // </copyright>
+
+        namespace P;
+        """,
+        Contoso + "stylebro_file_header_copyright = " + FileHeaderOptions.Encode("    Copyright (c) {companyName}.\n\n    but WITHOUT ANY WARRANTY; without even # 1") + "\n");
 }

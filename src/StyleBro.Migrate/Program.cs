@@ -228,10 +228,12 @@ internal static class Program
         }
 
         AgentsFile.Update(root, write, rest.Contains(AgentsFile.Option)).ForEach(Console.WriteLine);
+
+        // Where the swap goes first, then what to do next.
+        PackageHints(setup, root).ForEach(Console.WriteLine);
         Console.WriteLine(write
             ? NextStep
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
-        PackageHints(setup).ForEach(Console.WriteLine);
         PrintWorkspaceHint(root);
         return 0;
     }
@@ -245,22 +247,39 @@ internal static class Program
         static string Names(IReadOnlyList<string> folders) =>
             string.Join(", ", folders.Take(5)) + (folders.Count > 5 ? $" and {folders.Count - 5} more" : string.Empty);
 
-        return setup.Folders is { } folders
+        var lines = setup.Folders is { } folders
             ? new List<string>
             {
                 $"StyleCop runs only in {Names(folders)}: the settings apply there, with the rules StyleCop has on there.",
-                $"No StyleCop in {Names(setup.FoldersWithout)}: no rule changes there. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
+                $"No StyleCop in {Names(setup.FoldersWithout)}: no rule changes there, and 'stylebro-migrate format' leaves them alone. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
             }
             : new List<string>();
+        lines.AddRange(setup.Warnings.Select(w => "Warning: " + w));
+        return lines;
     }
 
     /// <summary>Where the package swap goes: the files that reference StyleCop.Analyzers, and the ones that remove it.</summary>
-    internal static List<string> PackageHints(StyleCopSetup setup)
+    internal static List<string> PackageHints(StyleCopSetup setup, string root)
     {
         var lines = new List<string>();
         if (setup.ReferencedIn.Count > 0)
         {
-            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there (a GlobalPackageReference for StyleCop's GlobalPackageReference; otherwise, with central package management, its version goes into Directory.Packages.props).");
+            // How the reference looks: only the cases this repository has (a GlobalPackageReference, central package management).
+            var files = setup.ReferencedIn.Select(f => Path.Combine(root, f)).Where(File.Exists).ToList();
+            var global = files.Any(f => Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(f)), @"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers", RegexOptions.IgnoreCase));
+            var central = files.Select(f => PreviewCommand.CentralPackages(f, root)).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).ToList();
+            var how = new List<string>();
+            if (global)
+            {
+                how.Add("as a GlobalPackageReference, like StyleCop's");
+            }
+
+            if (central.Count > 0)
+            {
+                how.Add($"{(global ? "otherwise " : string.Empty)}its version in {string.Join(", ", central)} (central package management)");
+            }
+
+            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
         }
 
         if (setup.RemovedIn.Count > 0)

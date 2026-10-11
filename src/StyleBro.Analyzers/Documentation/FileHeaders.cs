@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
@@ -313,6 +315,8 @@ internal sealed class FileHeaderOptions
     /// <summary>StyleCop's default copyright text.</summary>
     public const string DefaultCopyright = "Copyright (c) {companyName}. All rights reserved.";
 
+    private static readonly Regex Escapes = new(@"\\(n|u[0-9A-Fa-f]{4})");
+
     private FileHeaderOptions(string company, string copyright, string decoration)
     {
         Company = company;
@@ -322,7 +326,7 @@ internal sealed class FileHeaderOptions
 
     public string Company { get; }
 
-    /// <summary>Gets the copyright text with '\n' for line breaks and the variables {companyName} and {fileName}.</summary>
+    /// <summary>Gets the copyright text as .editorconfig spells it ('\n' and '\uXXXX' escapes), with the variables {companyName} and {fileName}.</summary>
     public string Copyright { get; }
 
     /// <summary>Gets a line written above and below a new header (StyleCop's headerDecoration), or empty.</summary>
@@ -337,10 +341,44 @@ internal sealed class FileHeaderOptions
 
         var copyright = options.TryGetValue(CopyrightKey, out var value) && !string.IsNullOrWhiteSpace(value) ? value : DefaultCopyright;
         options.TryGetValue(DecorationKey, out var decoration);
-        return new FileHeaderOptions(company.Trim(), copyright, decoration?.Trim() ?? string.Empty);
+        return new FileHeaderOptions(Decode(company.Trim()), copyright, Decode(decoration?.Trim() ?? string.Empty));
     }
 
-    /// <summary>The copyright text for a file: '\n' escapes become line breaks, the variables are filled in.</summary>
+    /// <summary>
+    /// A text as an .editorconfig value: line breaks as '\n'; ';' and '#' (they start a comment anywhere in a value, also
+    /// in the .NET 10 SDK), backslashes and whitespace at either end (the value is trimmed) as '\uXXXX'. Reversed by
+    /// <see cref="Decode"/>.
+    /// </summary>
+    public static string Encode(string text)
+    {
+        text = text.Replace("\r\n", "\n");
+        var first = 0;
+        while (first < text.Length && text[first] is ' ' or '\t')
+        {
+            first++;
+        }
+
+        var last = text.Length;
+        while (last > first && text[last - 1] is ' ' or '\t')
+        {
+            last--;
+        }
+
+        var builder = new StringBuilder();
+        for (var i = 0; i < text.Length; i++)
+        {
+            var c = text[i];
+            builder.Append(c == '\n' ? "\\n" : c is ';' or '#' or '\\' || i < first || i >= last ? $"\\u{(int)c:X4}" : c.ToString());
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>An .editorconfig value with its '\n' and '\uXXXX' escapes turned back into the characters (one pass).</summary>
+    public static string Decode(string value) =>
+        Escapes.Replace(value, m => m.Groups[1].Value == "n" ? "\n" : ((char)Convert.ToInt32(m.Groups[1].Value.Substring(1), 16)).ToString());
+
+    /// <summary>The copyright text for a file: the escapes decoded, the variables filled in.</summary>
     public string GetCopyrightText(string fileName) =>
-        Copyright.Replace("\\n", "\n").Replace("{companyName}", Company).Replace("{fileName}", fileName);
+        Decode(Copyright).Replace("{companyName}", Company).Replace("{fileName}", fileName);
 }
