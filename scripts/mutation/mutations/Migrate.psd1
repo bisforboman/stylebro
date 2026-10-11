@@ -40,12 +40,12 @@
         @{ File = 'src/StyleBro.Migrate/FormatCommand.cs'; Find = 'lines.Where(l => !IsKeptLine(l, keys))'; Replace = 'lines'; Tests = 'KeptFindingsTests' }
 
         # Trial of 0.4.0-alpha.1 (2026-10-10): rules off without a majority, few places, nested Directory.Build.props, vendored code
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': total < MinimumSample ? (count[0] == 0 ? 1 : count[1] == 0 ? 0 : -1)'; Replace = ': total < MinimumSample ? -1'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'return total < MinimumSample ? (first == 0 ? 1 : second == 0 ? 0 : -1)'; Replace = 'return total < MinimumSample ? -1'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'convention.Off is { } off && !IsSet(off)'; Replace = 'convention.Off is { } off'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'else if (total < MinimumAgreeing)'; Replace = 'else if (false)'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'if (written.Count + matched + lists.TurnedOff.Count + lists.Unfollowed.Count + lists.BothAllowed.Count + lists.TooFew.Count == 0)'; Replace = 'if (true)'; Tests = 'MigrationTests' }
         # init's report: short verdicts, plurals, the defaults the code follows, wrapped summary (2026-10-10)
-        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'found = winner < 0 ? Plural(total, "place") : found;'; Replace = 'found = found;'; Tests = 'MigrationTests' }
+        @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'found = winner < 0 ? Plural(total, convention.Unit) : found;'; Replace = 'found = found;'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'yield return matched == 0 ?'; Replace = 'yield return true ?'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = ': written.Count == 0 ? $"{kept}, all already'; Replace = ': false ? $"{kept}, all already'; Tests = 'MigrationTests' }
         @{ File = 'src/StyleBro.Migrate/Conventions.cs'; Find = 'while (line.Length > Width)'; Replace = 'while (false)'; Tests = 'MigrationTests' }
