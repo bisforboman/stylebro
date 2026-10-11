@@ -1336,7 +1336,8 @@ public class DocumentationTests
             /// <inheritdoc cref="Inherited{T, U}(int, int)"/>
             /// <param name="b">The b.</param>
             /// {|BRO1612:<param>|}The a.</param>
-            public void Unnamed(int a, int b)
+            /// <typeparam>The T.</typeparam>
+            public void Unnamed<T>(int a, int b)
             {
             }
 
@@ -1366,7 +1367,8 @@ public class DocumentationTests
             /// <inheritdoc cref="Inherited{T, U}(int, int)"/>
             /// <param name="b">The b.</param>
             /// <param name="a">The a.</param>
-            public void Unnamed(int a, int b)
+            /// <typeparam>The T.</typeparam>
+            public void Unnamed<T>(int a, int b)
             {
             }
 
