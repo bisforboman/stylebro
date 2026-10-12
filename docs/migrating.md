@@ -253,6 +253,10 @@ What it reads, in this order (later wins, like for StyleCop):
   `*none*` are skipped).
 - **Global configs** (`dotnet_diagnostic.Sxxxx.severity`); with several (one per project type) the strictest wins.
 - **The root `.editorconfig`'s** sections for all C# files.
+- **Sub-directory `.editorconfig` files and path sections** (like `[tests/**.cs]`) with Sonar severities are scopes, like
+  StyleCop's: each gets the fixing rules' lines that differ there, in its own file and section, so a Sonar rule lowered
+  for the tests (`S3878 = suggestion`) lowers the rule that fixes it there too, and one turned off turns it off. `init`
+  writes them as sections of its block in the root `.editorconfig`.
 
 Without a Sonar package, a profile or Sonar rule ids in those files, nothing Sonar-related happens.
 
@@ -319,7 +323,7 @@ summary. `init` does the same in a repository without StyleCop, and prints it.
 Suppressions of Sonar ids are carried over like StyleCop's ([Suppressions](#suppressions)): `#pragma warning disable
 S1659` gets `BRO1142`, `[SuppressMessage("...", "S927:...")]` a sibling for `BRO1313`, `<NoWarn>` the replacing ids, so
 code where a team suppressed a Sonar rule doesn't get the fix (`init --write` does this too when it finds a Sonar
-setup). Limits: sub-directory `.editorconfig` files aren't read; Sonar's rule parameters (`SonarLint.xml`) aren't read.
+setup). Limits: Sonar's rule parameters (`SonarLint.xml`) aren't read.
 
 ## Modernizing afterwards
 

@@ -93,9 +93,11 @@ internal static class InitCommand
 
         // A Sonar setup turns on what fixes its rules, like in the migration; StyleBro's own rules are on in the preset.
         var sonarLines = new List<string>();
+        var sonarScopes = new List<(string Section, List<string> Lines)>();
         if (sonar is not null && !migrated)
         {
             sonar.Report(sonar.Apply(sonarLines, _ => true, own)).ForEach(Console.WriteLine);
+            sonarScopes = SonarScopes(root, sonar, sonarLines, own);
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
             var (added, files) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
@@ -107,7 +109,7 @@ internal static class InitCommand
 
         // The root, then every folder with C# code whose .editorconfig says 'root = true': the root's block never reaches it.
         var modernizing = args.Contains("--modernize");
-        var targets = new List<Target> { Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing) };
+        var targets = new List<Target> { Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing, sonarScopes) };
         if (multiTargeted.Count > 0)
         {
             Console.WriteLine(MultiTargetedLine(multiTargeted));
@@ -189,9 +191,10 @@ internal static class InitCommand
     /// IDE0073's file_header_template, so BRO1615's XML header is off (each would add its header above the other's);
     /// <paramref name="sonar"/>: the lines a SonarQube setup adds (<see cref="SonarSetup.Apply"/>); <paramref name="generated"/>:
     /// folders marked as generated code (EF Core migrations, <see cref="Migration.MigrationFolders"/>); <paramref name="vendored"/>:
-    /// vendored folders, marked the same way (<see cref="Migration.VendoredFolders"/>).
+    /// vendored folders, marked the same way (<see cref="Migration.VendoredFolders"/>); <paramref name="sonarScopes"/>: sections
+    /// for the parts of the repository with their own Sonar severities (<see cref="SonarScopes"/>).
     /// </summary>
-    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null)
+    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null)
     {
         // A detected line replaces the template's line for the same key (CSharpier: IDE0055 = none).
         var keys = new HashSet<string>((detected ?? Array.Empty<string>()).Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
@@ -226,6 +229,11 @@ internal static class InitCommand
         if (plainHeader)
         {
             template += $"\n# The file header is IDE0073's (file_header_template); BRO1615's XML header would add a second one\ndotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FileHeader}.severity = none";
+        }
+
+        foreach (var (section, lines) in sonarScopes ?? [])
+        {
+            template += $"\n\n[{section}]\n" + string.Join("\n", lines);
         }
 
         foreach (var folder in generated ?? Array.Empty<string>())
@@ -588,7 +596,7 @@ internal static class InitCommand
     /// one of a folder whose .editorconfig says 'root = true', judged from that folder's own code and settings (the root's
     /// don't reach it; CleanArchitecture's sample/ got CRLF lines in LF files and 'is null' against its '== null').
     /// </summary>
-    private static Target Prepare(string repository, string folder, IReadOnlyList<string> sonarLines, IReadOnlyList<string> multiTargeted, bool modernizing)
+    private static Target Prepare(string repository, string folder, IReadOnlyList<string> sonarLines, IReadOnlyList<string> multiTargeted, bool modernizing, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null)
     {
         var root = folder.Length == 0 ? repository : Path.Combine(repository, folder);
         var prefix = folder.Length == 0 ? string.Empty : folder + "/";
@@ -625,7 +633,7 @@ internal static class InitCommand
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored.Select(v => prefix + v))}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var block = Block(detected, plainHeader: ownSettings.ContainsKey("file_header_template"), sonarLines, generated, vendored);
+        var block = Block(detected, plainHeader: ownSettings.ContainsKey("file_header_template"), sonarLines, generated, vendored, sonarScopes);
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
         var name = prefix + ".editorconfig";
         if (!migrated)
@@ -654,6 +662,34 @@ internal static class InitCommand
             HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
             HasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain),
         };
+    }
+
+    /// <summary>
+    /// The sections for the parts of the repository with their own Sonar severities (a path section of the root
+    /// .editorconfig, a sub-directory's .editorconfig: <see cref="Scope"/>), each with the lines that differ from the
+    /// repository-wide <paramref name="sonarLines"/> (<see cref="Migration.ScopeLines"/>).
+    /// </summary>
+    internal static List<(string Section, List<string> Lines)> SonarScopes(string root, SonarSetup sonar, List<string> sonarLines, ISet<string> own)
+    {
+        var result = new List<(string Section, List<string> Lines)>();
+        var ownRoots = StyleCopSetup.EditorConfigRoots(root);
+        foreach (var scope in StyleCopSetup.Read(root).Scopes.Where(s => s.Sonar is not null))
+        {
+            // ponytail: a sub-directory's section that isn't for all its C# files, or one below a 'root = true' folder, is
+            // skipped; translate its glob into the root's when one turns up.
+            var folder = (Path.GetDirectoryName(scope.File) ?? string.Empty).Replace('\\', '/');
+            var section = folder.Length == 0 ? scope.Section
+                : StyleCopSetup.AppliesToCSharp(scope.Section) && !ownRoots.Any(r => folder == r || folder.StartsWith(r + "/", StringComparison.Ordinal)) ? StyleCopSetup.SectionFor([folder])
+                : null;
+            var inScope = new List<string>();
+            sonar.For(scope).Apply(inScope, _ => true, own);
+            if (section is not null && Migration.ScopeLines(sonarLines, inScope, own) is { Count: > 0 } lines)
+            {
+                result.Add((section, [$"# Sonar's severities in {scope.File} [{scope.Section}]", .. lines]));
+            }
+        }
+
+        return result;
     }
 
     private static bool IsCSharp(string file) => file.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);

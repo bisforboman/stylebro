@@ -22,9 +22,10 @@ internal enum Severity
 /// <summary>
 /// A part of the repository with its own StyleCop severities: a section of a sub-directory's .editorconfig, or a
 /// path-specific section of the root one (like '[tests/**.cs]'). <see cref="Severities"/> holds only what it sets;
-/// <see cref="Settings"/> is the stylecop.json its projects use when it isn't the repository-wide one.
+/// <see cref="Settings"/> is the stylecop.json its projects use when it isn't the repository-wide one; <see cref="Sonar"/>
+/// the Sonar severities it sets (<see cref="SonarSetup.For"/>), or null.
 /// </summary>
-internal sealed record Scope(string File, string Section, IReadOnlyDictionary<string, Severity> Severities, JsonElement? Settings = null);
+internal sealed record Scope(string File, string Section, IReadOnlyDictionary<string, Severity> Severities, JsonElement? Settings = null, IReadOnlyDictionary<string, Severity>? Sonar = null);
 
 /// <summary>The ruleset and stylecop.json (full paths, or null) a project's StyleCop uses.</summary>
 internal sealed record ProjectStyleCop(string? Ruleset, string? Json);
@@ -43,6 +44,7 @@ internal sealed class StyleCopSetup
     private const string AllRules = "*";
 
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*)\.severity$", RegexOptions.IgnoreCase);
+    private static readonly Regex SonarKey = new(@"^dotnet_diagnostic\.(S\d+)\.severity$", RegexOptions.IgnoreCase);
 
     /// <summary>
     /// StyleCop's version: a PackageReference/PackageVersion (attribute or element), a packages.config entry, or an analyzer's
@@ -189,7 +191,7 @@ internal sealed class StyleCopSetup
         var globalConfigs = new List<(Dictionary<string, Severity> Severities, HashSet<string> Bulk)>();
         foreach (var file in files.Where(f => Kind(f) == "globalconfig"))
         {
-            var found = ReadConfig(file, global: true);
+            var found = ReadConfig(file, global: true).Where(s => s.Severities.Count > 0).ToList();
             if (found.Count > 0)
             {
                 globalConfigs.Add((found[0].Severities, found[0].Bulk));
@@ -208,8 +210,13 @@ internal sealed class StyleCopSetup
                 continue;
             }
 
+            // Sonar's severities outside the root's sections for all C# make a scope too (SonarSetup reads the rest).
             var relative = Path.GetRelativePath(root, file);
-            sources.Add(relative);
+            if (sections.Any(s => s.Severities.Count > 0))
+            {
+                sources.Add(relative);
+            }
+
             foreach (var section in sections)
             {
                 if (isRoot && AppliesToCSharp(section.Section))
@@ -218,7 +225,7 @@ internal sealed class StyleCopSetup
                 }
                 else
                 {
-                    scopes.Add(new Scope(relative, section.Section, section.Severities));
+                    scopes.Add(new Scope(relative, section.Section, section.Severities, Sonar: section.Sonar.Count > 0 ? section.Sonar : null));
                 }
             }
         }
@@ -798,11 +805,11 @@ internal sealed class StyleCopSetup
         : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
         : null;
 
-    /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]').</summary>
+    /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]', '[{src/tests/**/*.cs,tests/**/*.cs}]').</summary>
     private static bool MayApplyToCSharp(string section)
     {
         return section.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
-            || Regex.IsMatch(section, @"[{,]\s*cs\s*[,}]")
+            || Regex.IsMatch(section, @"[{,]\s*cs\s*[,}]|\.cs\s*[,}]")
             || section.EndsWith("*", StringComparison.Ordinal);
     }
 
@@ -810,13 +817,13 @@ internal sealed class StyleCopSetup
     /// The StyleCop severities each section of a .editorconfig or .globalconfig sets (a global config is one section):
     /// per rule, or per StyleCop category. Sections that can't apply to C# files are left out. <c>Bulk</c> holds the
     /// rules set only by a category or 'dotnet_analyzer_diagnostic.severity': in the compiler those don't override a
-    /// rule's own entry in a ruleset or another config.
+    /// rule's own entry in a ruleset or another config. <c>Sonar</c>: the Sonar rules' own entries.
     /// </summary>
-    private static List<(string Section, Dictionary<string, Severity> Severities, HashSet<string> Bulk)> ReadConfig(string file, bool global)
+    private static List<(string Section, Dictionary<string, Severity> Severities, HashSet<string> Bulk, Dictionary<string, Severity> Sonar)> ReadConfig(string file, bool global)
     {
-        var sections = new List<(string Section, Dictionary<string, Severity> ByRule, Dictionary<string, Severity> ByCategory)>();
-        (string Section, Dictionary<string, Severity> ByRule, Dictionary<string, Severity> ByCategory)? current =
-            global ? (string.Empty, new(StringComparer.OrdinalIgnoreCase), new()) : null;
+        var sections = new List<(string Section, Dictionary<string, Severity> ByRule, Dictionary<string, Severity> ByCategory, Dictionary<string, Severity> Sonar)>();
+        (string Section, Dictionary<string, Severity> ByRule, Dictionary<string, Severity> ByCategory, Dictionary<string, Severity> Sonar)? current =
+            global ? (string.Empty, new(StringComparer.OrdinalIgnoreCase), new(), new(StringComparer.Ordinal)) : null;
         foreach (var raw in File.ReadAllLines(file))
         {
             var line = raw.Trim();
@@ -829,7 +836,7 @@ internal sealed class StyleCopSetup
             {
                 AddCurrent();
                 var section = line.Trim('[', ']');
-                current = global || MayApplyToCSharp(section) ? (section, new(StringComparer.OrdinalIgnoreCase), new()) : null;
+                current = global || MayApplyToCSharp(section) ? (section, new(StringComparer.OrdinalIgnoreCase), new(), new(StringComparer.Ordinal)) : null;
                 continue;
             }
 
@@ -850,6 +857,10 @@ internal sealed class StyleCopSetup
             {
                 target.ByRule[rule.Groups[1].Value] = severity;
             }
+            else if (SonarKey.Match(key) is { Success: true } sonar)
+            {
+                target.Sonar[sonar.Groups[1].Value.ToUpperInvariant()] = severity;
+            }
             else if (CategoryKey.Match(key) is { Success: true } category)
             {
                 target.ByCategory[category.Groups[1].Value] = severity;
@@ -862,8 +873,8 @@ internal sealed class StyleCopSetup
 
         AddCurrent();
 
-        var result = new List<(string, Dictionary<string, Severity>, HashSet<string>)>();
-        foreach (var (section, byRule, byCategory) in sections)
+        var result = new List<(string, Dictionary<string, Severity>, HashSet<string>, Dictionary<string, Severity>)>();
+        foreach (var (section, byRule, byCategory, sonarRules) in sections)
         {
             var severities = new Dictionary<string, Severity>();
             var bulk = new HashSet<string>(StringComparer.Ordinal);
@@ -884,9 +895,9 @@ internal sealed class StyleCopSetup
                 }
             }
 
-            if (severities.Count > 0)
+            if (severities.Count > 0 || sonarRules.Count > 0)
             {
-                result.Add((section, severities, bulk));
+                result.Add((section, severities, bulk, sonarRules));
             }
         }
 
@@ -1042,7 +1053,12 @@ internal sealed class StyleCopSetup
             }
             else if (covered.Count == folders.Count)
             {
+                // The base has its StyleCop severities; its Sonar ones stay a scope (SonarSetup's base is the root's).
                 Overlay(severities, scope.Severities);
+                if (scope.Sonar is not null)
+                {
+                    result.Add(scope with { Severities = new Dictionary<string, Severity>() });
+                }
             }
             else if (covered.Count > 0)
             {
