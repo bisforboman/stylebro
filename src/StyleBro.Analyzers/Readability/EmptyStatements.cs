@@ -65,7 +65,16 @@ internal static class EmptyStatements
 
             if (Enumerable.Range(0, lineText.Length).All(i => remove[i] || IsBlank(lineText[i])))
             {
-                yield return new TextChange(line.SpanIncludingLineBreak, string.Empty);
+                // Between two blank lines, one of them goes too: BRO1519 or BRO1504 may have added the one above (a '}'
+                // and a ';' on a line of its own, as the SDK's formatter leaves '};'), and two would be BRO1517's.
+                var removed = line.SpanIncludingLineBreak;
+                if (group.Key > 0 && group.Key + 1 < text.Lines.Count && IsBlankLine(text, text.Lines[group.Key - 1])
+                    && IsBlankLine(text, text.Lines[group.Key + 1]) && text.Lines[group.Key + 1].End < text.Length)
+                {
+                    removed = TextSpan.FromBounds(removed.Start, text.Lines[group.Key + 1].EndIncludingLineBreak);
+                }
+
+                yield return new TextChange(removed, string.Empty);
                 continue;
             }
 
@@ -123,6 +132,8 @@ internal static class EmptyStatements
             i = end;
         }
     }
+
+    private static bool IsBlankLine(SourceText text, TextLine line) => text.ToString(line.Span).All(IsBlank);
 
     private static bool IsBlank(char c) => c == ' ' || c == '\t';
 }

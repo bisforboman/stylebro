@@ -173,6 +173,107 @@ public class BlankLineAfterTests
         }
         """);
 
+    // A deviation from SA1515 (owner's decision, docs/decisions): a blank line would split the list (Chickensoft's
+    // GameDemo: a comment between two arguments).
+    [Fact]
+    public Task CommentBetweenListItems_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        using System;
+
+        [AttributeUsage(
+            AttributeTargets.Class,
+            // one per class
+            AllowMultiple = false)]
+        class A : Attribute
+        {
+        }
+
+        class C
+        {
+            int[] a = new[]
+            {
+                1,
+                // two
+                2,
+            };
+
+            int[] b =
+            [
+                1,
+                // two
+                2
+                // (last)
+            ];
+
+            (int First,
+                // the second
+                int Second) t;
+
+            int this[int a,
+                // b
+                int b] => M(a,
+                    // b
+                    b);
+
+            int M(
+                int a,
+                // b
+                int b)
+            {
+                var c = this[a,
+                    // b
+                    b];
+                var t = (a,
+                    // b
+                    b);
+                return a + b;
+            }
+        }
+        """);
+
+    // The exemption is for the gaps between items only: inside an item, the comment follows code as usual.
+    [Fact]
+    public Task CommentInsideAListItem_IsReported() => VerifyFixAsync(
+        """
+        class C
+        {
+            int M(int a, System.Func<int> f) => M(a, () =>
+            {
+                int x = a,
+                    {|BRO1504:// y|}
+                    y = a;
+                if (
+                    {|BRO1504:// x|}
+                    x > y)
+                {
+                }
+
+                // x
+                return x;
+            });
+        }
+        """,
+        """
+        class C
+        {
+            int M(int a, System.Func<int> f) => M(a, () =>
+            {
+                int x = a,
+
+                    // y
+                    y = a;
+                if (
+
+                    // x
+                    x > y)
+                {
+                }
+
+                // x
+                return x;
+            });
+        }
+        """);
+
     [Fact]
     public Task CommentAfterCollectionExpressionBracket_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C

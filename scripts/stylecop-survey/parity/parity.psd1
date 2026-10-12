@@ -179,6 +179,15 @@
                 'only StyleCop: BRO1504 Chains.cs(16,17)'
                 'StyleCop output only: Chains.cs: []'
                 'StyleCop output only: Chains.cs: []'
+                # A comment between the items of a list needs no blank line above it (owner's decision 2026-10-12).
+                'only StyleCop: BRO1504 Lists.cs(13,17)'
+                'only StyleCop: BRO1504 Lists.cs(18,17)'
+                'only StyleCop: BRO1504 Lists.cs(24,13)'
+                'only StyleCop: BRO1504 More.cs(18,17)'
+                'only StyleCop: BRO1504 More.cs(23,17)'
+                'StyleCop output only: Lists.cs: []'
+                'StyleCop output only: Lists.cs: []'
+                'StyleCop output only: Lists.cs: []'
             )
         }
         @{
@@ -805,6 +814,16 @@
                 'only StyleCop: BRO1127 Queries.cs(50,13)'
                 'only StyleCop: BRO1128 Queries.cs(42,13)'
             )
+        }
+        @{
+            # StyleCop reads the SDK's csharp_using_directive_placement from .editorconfig, even at severity none, and it
+            # beats stylecop.json's default (insideNamespace): openmcdf (trial 10) sets outside_namespace:none, and SA1200
+            # was quiet about usings above its file-scoped namespaces. File-scoped namespaces count like block ones
+            # (using-placement's FileScoped.cs is reported by both).
+            Name         = 'using-placement-editorconfig'
+            Map          = @('SA1200=BRO1008')
+            EditorConfig = "csharp_using_directive_placement = outside_namespace:none`n"
+            Expected     = @()
         }
         @{
             Name         = 'using-placement'

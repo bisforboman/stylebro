@@ -205,4 +205,64 @@ public class EmptyStatementTests
             }
         }
         """);
+
+    // actions/runner: '};' split by the SDK's formatter, then a blank line added above the ';' (BRO1519): removing its
+    // line takes one of the two blank lines along.
+    [Fact]
+    public Task EmptyStatementBetweenBlankLines_TakesOneAlong() => VerifyFixAsync(
+        """
+        class C
+        {
+            void M()
+            {
+                M();
+
+                {|BRO1101:;|}
+
+                M();
+            }
+        }
+        """,
+        """
+        class C
+        {
+            void M()
+            {
+                M();
+
+                M();
+            }
+        }
+        """);
+
+    [Fact]
+    public Task EmptyStatementNextToOneBlankLine_TakesNoOtherLineAlong() => VerifyFixAsync(
+        """
+        class C
+        {
+            void M()
+            {
+                M();
+                {|BRO1101:;|}
+
+                M();
+
+                {|BRO1101:;|}
+                M();
+            }
+        }
+        """,
+        """
+        class C
+        {
+            void M()
+            {
+                M();
+
+                M();
+
+                M();
+            }
+        }
+        """);
 }

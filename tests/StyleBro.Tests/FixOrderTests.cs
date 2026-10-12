@@ -1392,6 +1392,59 @@ public class FixOrderTests
         "BRO1146",
         "BRO1509");
 
+    // actions/runner: '};' after a block, then a blank line or a comment. The SDK's formatter puts the ';' on a line of
+    // its own; BRO1519 and BRO1504 then add blank lines around it, and removing the ';' line left two blank lines.
+    [Fact]
+    public Task EmptyStatement_AfterABlockAboveABlankLineOrAComment() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(bool x)
+            {
+                if (x)
+                {
+                    M(!x);
+                };
+
+                M(x);
+                if (x)
+                {
+                    M(!x);
+                }
+                ;
+
+                M(x);
+                if (x)
+                {
+                    M(!x);
+                }
+                ;
+                // next
+                M(x);
+            }
+        }
+        """,
+        "BRO1101",
+        "BRO1504",
+        "BRO1517",
+        "BRO1519",
+        SdkFormatter);
+
+    // actions/runner: '((Double)0).ToString(...)'. BRO1122's literal needs no parentheses, so BRO1405 removed them
+    // in a second run.
+    [Fact]
+    public Task LiteralSuffix_InParenthesesBeforeAMemberAccess() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public string M() => ((double)0).ToString("G") + ((long)1).ToString() + ((long)-1).ToString() + (((float)2)).ToString();
+
+            public double N() => 1 + ((double)2) * 3;
+        }
+        """,
+        "BRO1122",
+        "BRO1405");
+
     // stylebro_allow_adjacent_single_line_members: BRO1001's sort and BRO1527's collapse leave single-line members
     // without a block body together, as BRO1505 judges them.
     [Fact]

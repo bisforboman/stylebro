@@ -112,4 +112,43 @@ public class LiteralSuffixTests
             long M(long a) => a-(long)-1;
         }
         """);
+
+    // actions/runner: '((Double)0).ToString(...)' became '(0D).ToString(...)', and BRO1405 removed the parentheses in a
+    // second run. With BRO1405 on, the fix removes those it would; '(-1L)' keeps them (a sign isn't a simple expression).
+    [Fact]
+    public Task ParenthesesTheLiteralMakesUnnecessary_AreRemovedWithBro1405On() => Verify.VerifyFixAsync(
+        """
+        class C
+        {
+            string b = ({|BRO1122:(double)0|}).ToString();
+            string c = ({|BRO1122:(long)-1|}).ToString();
+            double d = 1 + ({|BRO1122:(double)2|}) * 3;
+            long e = 1 + ({|BRO1122:(long)-1|});
+        }
+        """,
+        """
+        class C
+        {
+            string b = 0D.ToString();
+            string c = (-1L).ToString();
+            double d = 1 + 2D * 3;
+            long e = 1 + (-1L);
+        }
+        """);
+
+    [Fact]
+    public Task ParenthesesAroundTheCast_StayWithBro1405Off() => Verify.VerifyFixAsync(
+        """
+        class C
+        {
+            string b = ({|BRO1122:(double)0|}).ToString();
+        }
+        """,
+        """
+        class C
+        {
+            string b = (0D).ToString();
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1405.severity = none");
 }

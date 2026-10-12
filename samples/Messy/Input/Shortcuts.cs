@@ -39,5 +39,24 @@ namespace Messy.Shortcuts
             Changed += delegate { Console.WriteLine("changed"); };
             items.RemoveAll(delegate (int item) { return item < 0; });
         }
+
+        public string Zero(int x)
+        {
+            if (x > 0)
+            {
+                x--;
+            };
+
+            if (x > 1)
+            {
+                x--;
+            };
+            // what is left
+            return string.Join(
+                ",",
+                // zero, printed the same everywhere
+                ((double)0).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                x);
+        }
     }
 }

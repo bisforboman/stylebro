@@ -267,8 +267,10 @@ public class UsingPlacementTests
         """,
         "csharp_using_directive_placement = inside_namespace:warning\n");
 
+    // The first: openmcdf (trial 10), the SDK key at severity none still sets the placement, as in StyleCop's SA1200.
     [Fact]
     public Task CorrectlyPlaced_Preserve_OrNotSet_NotReported() => Task.WhenAll(
+        Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n", "csharp_using_directive_placement = outside_namespace:none\n"),
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n", Outside),
         Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n", Inside),
         Verify.VerifyNoDiagnosticsAsync("using System;\n\nnamespace App;\n\npublic class C { public Type? T { get; set; } }\n", "csharp_using_directive_placement = preserve\n"),
