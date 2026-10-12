@@ -320,6 +320,29 @@ public class FieldNamingTests
             dotnet_naming_style.s_camel.capitalization = camel_case
             """);
 
+    // BRO1307 leaves a prefix a naming rule requires, also on a non-private field (the private ones are left earlier,
+    // by the naming rule's style StyleBro doesn't write).
+    [Fact]
+    public Task InternalStaticField_KeepsThePrefixANamingRuleRequires() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            internal static int s_total;
+
+            public int Next() => ++s_total;
+        }
+        """,
+        """
+        dotnet_naming_rule.static_fields.symbols = static_fields
+        dotnet_naming_rule.static_fields.style = s_camel
+        dotnet_naming_rule.static_fields.severity = warning
+        dotnet_naming_symbols.static_fields.applicable_kinds = field
+        dotnet_naming_symbols.static_fields.applicable_accessibilities = internal
+        dotnet_naming_symbols.static_fields.required_modifiers = static
+        dotnet_naming_style.s_camel.required_prefix = s_
+        dotnet_naming_style.s_camel.capitalization = camel_case
+        """);
+
     [Fact]
     public Task ProtectedField_IsRenamed_WhenItsNameIsOnlyAWordInAnotherTypesString() => VerifyFixAsync(
         """
