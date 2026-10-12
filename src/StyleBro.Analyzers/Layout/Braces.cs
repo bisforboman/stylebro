@@ -28,7 +28,10 @@ internal enum BracePreference
 
 internal static class Braces
 {
-    /// <summary>StyleCop's allowConsecutiveUsings: 'using (a) using (b) { }' shares one block (default true).</summary>
+    /// <summary>
+    /// StyleCop's allowConsecutiveUsings: 'using (a) using (b) { }' shares one block (default true). Also 'fixed (a) fixed (b) { }',
+    /// the idiom for pinning several arrays, which the SDK's IDE0011 allows too (StyleCop doesn't).
+    /// </summary>
     public const string ConsecutiveUsingsKey = "stylebro_allow_consecutive_usings";
 
     /// <summary>StyleCop issue #2252: 'if (x) return;' (a jump statement on the 'if' line) without braces (default false).</summary>
@@ -89,7 +92,7 @@ internal static class Braces
 
                 break;
 
-            case UsingStatementSyntax { Statement: UsingStatementSyntax } when AllowConsecutiveUsings(options):
+            case UsingStatementSyntax { Statement: UsingStatementSyntax } or FixedStatementSyntax { Statement: FixedStatementSyntax } when AllowConsecutiveUsings(options):
                 yield break;
 
             case CommonForEachStatementSyntax forEach:
