@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Readability/NullableShorthand.cs'
     Find = ' || node.IsPartOfStructuredTrivia())'
     Replace = ')'
-    Tests = 'FullyQualifiedName~CrefTests'
+    Tests = 'CrefTests'
 }

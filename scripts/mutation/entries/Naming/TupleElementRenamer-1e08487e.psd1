@@ -3,5 +3,5 @@
     File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'
     Find = 'a is BlockSyntax or ArrowExpressionClauseSyntax or EqualsValueClauseSyntax'
     Replace = 'a is ArrowExpressionClauseSyntax or EqualsValueClauseSyntax'
-    Tests = 'FullyQualifiedName~KeptFindingsTests'
+    Tests = 'KeptFindingsTests'
 }

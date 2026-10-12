@@ -3,5 +3,5 @@
     File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'
     Find = 'return symbol is null || CamelCaseRenamer.IsVisibleToOtherProjects(symbol);'
     Replace = 'return true;'
-    Tests = 'FullyQualifiedName~KeptFindingsTests'
+    Tests = 'KeptFindingsTests'
 }

@@ -3,5 +3,5 @@
     File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'
     Find = 'if (visible && (await'
     Replace = 'if ((await'
-    Tests = 'FullyQualifiedName~KeptFindingsTests'
+    Tests = 'KeptFindingsTests'
 }

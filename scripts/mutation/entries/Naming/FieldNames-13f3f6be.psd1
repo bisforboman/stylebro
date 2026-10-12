@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'
     Find = ' || ruled == NamingCasing.Other)'
     Replace = ')'
-    Tests = 'FullyQualifiedName~FieldNamingTests'
+    Tests = 'FieldNamingTests'
 }

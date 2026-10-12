@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/FieldNames.cs'
     Find = 'style is null || severity is null ||'
     Replace = 'style is null ||'
-    Tests = 'FullyQualifiedName~FieldNamingTests'
+    Tests = 'FieldNamingTests'
 }

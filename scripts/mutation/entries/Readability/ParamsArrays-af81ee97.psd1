@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Readability/ParamsArrays.cs'
     Find = '        || model.GetTypeInfo(element, cancellationToken).Type is null;'
     Replace = '        ;'
-    Tests = 'FullyQualifiedName~ParamsArrayTests'
+    Tests = 'ParamsArrayTests'
 }
