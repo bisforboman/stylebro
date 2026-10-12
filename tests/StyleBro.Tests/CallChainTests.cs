@@ -32,7 +32,7 @@ public class CallChainTests
         """);
 
     [Fact]
-    public Task TheFirstLine_MayHoldCalls() => VerifyFixAsync(
+    public Task TheFirstLine_MayHoldOneCall() => VerifyFixAsync(
         """
         using System.Linq;
 
@@ -40,8 +40,8 @@ public class CallChainTests
         {
             public int[] M(int[] items)
             {
-                return items.Where(i => i > 0).Select(i => i * 2)
-                    .OrderBy(i => i){|BRO1523:.|}ToArray();
+                return items.Where(i => i > 0)
+                    .Select(i => i * 2){|BRO1523:.|}ToArray();
             }
         }
         """,
@@ -52,10 +52,50 @@ public class CallChainTests
         {
             public int[] M(int[] items)
             {
-                return items.Where(i => i > 0).Select(i => i * 2)
-                    .OrderBy(i => i)
+                return items.Where(i => i > 0)
+                    .Select(i => i * 2)
                     .ToArray();
             }
+        }
+        """);
+
+    // Issue #135 (owner's decision 2026-10-12): a first line with two or more calls fills its lines; the receiver's own
+    // call counts ('Start().Next()').
+    [Fact]
+    public Task AChainThatFillsItsFirstLineWithCalls_IsLeftAlone() => VerifyNoDiagnosticsAsync(
+        """
+        using System.Text;
+
+        public class C
+        {
+            public void M(StringBuilder sb, int id, string text)
+            {
+                sb.Append(id).Append(' ').Append(text)
+                  .Append(text.Length).Append(' ')
+                  .Append(id - 1).Append(';');
+                Start().Next()
+                    .Next().Next();
+            }
+
+            private static C Start() => new();
+
+            private C Next() => this;
+        }
+        """);
+
+    // The first line's call may be followed by a member that leads to the next call: that member isn't moved.
+    [Fact]
+    public Task AMemberAfterTheFirstLinesCall_StaysOnIt() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public C Self => this;
+
+            public C M(C c) =>
+                c.Next().Self
+                    .Next();
+
+            private C Next() => this;
         }
         """);
 
@@ -114,7 +154,7 @@ public class CallChainTests
                              .Select(i => i){|BRO1523:.|}ToArray();
         		var b = items
         			.Where(i => i > 0){|BRO1523:.|}ToArray();
-                return items.Where(i => i > 1).Select(i => i +
+                return items.Select(i => i +
                     1){|BRO1523:.|}Skip(1)
                         .ToArray();
             }
@@ -133,7 +173,7 @@ public class CallChainTests
         		var b = items
         			.Where(i => i > 0)
         			.ToArray();
-                return items.Where(i => i > 1).Select(i => i +
+                return items.Select(i => i +
                     1)
                         .Skip(1)
                         .ToArray();

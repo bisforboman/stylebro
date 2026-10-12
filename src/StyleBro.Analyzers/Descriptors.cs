@@ -1168,13 +1168,13 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor CallChainLayout = new(
         id: DiagnosticIds.CallChainLayout,
         title: "Each call of a split call chain starts its own line",
-        messageFormat: "Start '{0}' on its own line, like the chain's other calls",
+        messageFormat: "Start '{0}' on its own line: in a split chain, each call after the first line starts one",
         category: "Layout",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "When a member access chain is split over several lines (a '.' or '?.' of the chain starts a line), "
-            + "every call after the chain's first line starts its own line. The first line may hold any number of calls, "
-            + "and a member that only leads to the next call ('.WriteTo.Sink(x)') stays with it. Not a StyleCop rule.",
+            + "every call after the chain's first line starts its own line. The first line may hold the receiver and one call "
+            + "(a chain whose first line holds two or more calls fills its lines and isn't checked), and a member that only leads to the next call ('.WriteTo.Sink(x)') stays with it. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.CallChainLayout + "/");
 
     public static readonly DiagnosticDescriptor BlankLineAfterAttributes = new(

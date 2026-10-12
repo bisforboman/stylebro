@@ -11,7 +11,9 @@ namespace StyleBro.Analyzers.Layout;
 /// BRO1523: when a call chain is split (a '.' or '?.' of the chain starts a line), every call after the chain's first
 /// line starts its own line. A link is a '.Name' or '?.Name' of the chain; it has to start a line when it follows a call
 /// ('...)' + '.Name') and its part of the chain has a call ('.WriteTo.Sink(x)' is one part, a trailing '.Count' isn't a
-/// call). The chain's first line may hold any number of calls (like Roslynator's RCS0054). The fix only rewrites the gap
+/// call). The chain's first line may hold the receiver and one call; a chain whose first line holds two or more calls
+/// wraps by filling lines and isn't checked (owner's decision 2026-10-12, issue #135: 'sb.Append(id).Append(x)' + newline
+/// + '.Append(y).Append(z)' was split below the first line only, leaving a mixed layout). The fix only rewrites the gap
 /// before the link: a line break plus the indentation of the chain's lines that already start with a link.
 /// </summary>
 internal static class CallChains
@@ -43,7 +45,7 @@ internal static class CallChains
         }
 
         var links = new List<(SyntaxToken Token, bool Call)>();
-        Walk(chain, links);
+        var receiverCall = Walk(chain, links);
         links.Reverse();
         var starts = links.Select(l => StartsLine(l.Token, text)).ToList();
 
@@ -67,7 +69,14 @@ internal static class CallChains
             yield break;
         }
 
+        // A chain that fills its first line with calls (the receiver's own call counts: 'RuleFor(x).NotNull()') wraps by
+        // filling lines, not one call per line.
         var firstLine = Line(text, chain.SpanStart);
+        if ((receiverCall ? 1 : 0) + links.Count(l => l.Call && Line(text, l.Token.SpanStart) == firstLine) >= 2)
+        {
+            yield break;
+        }
+
         for (var i = 1; i < links.Count; i++)
         {
             var token = links[i].Token;
@@ -118,9 +127,9 @@ internal static class CallChains
 
     /// <summary>
     /// Collects the chain's links from the last to the first: the '.' of a member access or the '?' of a conditional
-    /// access, and whether the member is called.
+    /// access, and whether the member is called. Returns whether the chain's receiver is a call ('RuleFor(x)').
     /// </summary>
-    private static void Walk(ExpressionSyntax expression, List<(SyntaxToken Token, bool Call)> links)
+    private static bool Walk(ExpressionSyntax expression, List<(SyntaxToken Token, bool Call)> links)
     {
         var call = false;
         while (true)
@@ -149,7 +158,7 @@ internal static class CallChains
                 case MemberBindingExpressionSyntax binding:
                     var question = binding.OperatorToken.GetPreviousToken();
                     links.Add((question.IsKind(SyntaxKind.QuestionToken) ? question : binding.OperatorToken, call));
-                    return;
+                    return false;
 
                 case ConditionalAccessExpressionSyntax conditional:
                     Walk(conditional.WhenNotNull, links);
@@ -158,7 +167,7 @@ internal static class CallChains
                     continue;
 
                 default:
-                    return;
+                    return call;
             }
         }
     }
