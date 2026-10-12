@@ -3,7 +3,7 @@ namespace Messy;
 /// <summary>A connection.</summary>
 public class Connection
 {
-    /// <summary>Opens a connection.</summary>
+    /// <summary>Default constructor.</summary>
     /// <param name="host">The host.</param>
     public Connection(string host)
     {

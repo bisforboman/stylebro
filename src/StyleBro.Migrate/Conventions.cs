@@ -158,6 +158,8 @@ internal static class Conventions
         new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
         new(AccessModifiersKey, "private-by-default members", "for_non_interface_members", ("for_non_interface_members", "with 'private'"), ("omit_if_default", "without 'private'"), Off(DiagnosticIds.AccessModifier)) { Enforcer = DiagnosticIds.AccessModifier, EnforcedValues = new[] { "for_non_interface_members" }, Unit = "member" },
+        new(PropertySummaryKey, "property summaries", "warning", ("warning", "starting with 'Gets'/'Sets'"), ("none", "in their own words"), Off(DiagnosticIds.PropertySummaryWording)) { Unit = "summary" },
+        new(ConstructorSummaryKey, "constructor summaries", "warning", ("warning", "with the standard sentence"), ("none", "in their own words"), Off(DiagnosticIds.ConstructorSummary)) { Unit = "summary" },
         new(CombinedLocalsKey, "adjacent locals of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedLocals)),
         new(CombinedFieldsKey, "adjacent fields of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedFields)),
         new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
@@ -254,6 +256,16 @@ internal static class Conventions
     /// </summary>
     private const string CombinedLocalsKey = "dotnet_diagnostic." + DiagnosticIds.CombinedLocals + ".severity";
 
+    /// <summary>
+    /// BRO1604's severity: property summaries that start the StyleCop way ('Gets the samples', 'Gets or sets ...') or in the
+    /// code's own words ('The samples, float32 interleaved'; issue #132: 0 of ~100 in a trial repository, and BRO1604
+    /// rewrote them all). Owner's decision 2026-10-12.
+    /// </summary>
+    private const string PropertySummaryKey = "dotnet_diagnostic." + DiagnosticIds.PropertySummaryWording + ".severity";
+
+    /// <summary>BRO1606's severity: constructor summaries with the standard sentence ('Initializes a new instance of ...') or in their own words ('Opens a file ...').</summary>
+    private const string ConstructorSummaryKey = "dotnet_diagnostic." + DiagnosticIds.ConstructorSummary + ".severity";
+
     /// <summary>BRO1114's severity: fields declared together ('int _rate, _channels;') or one by one, counted like <see cref="CombinedLocalsKey"/>.</summary>
     private const string CombinedFieldsKey = "dotnet_diagnostic." + DiagnosticIds.CombinedFields + ".severity";
 
@@ -285,6 +297,11 @@ internal static class Conventions
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
+
+    /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
+    private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
+
+    private static readonly string[] ConstructorSummaryStarts = { "Initializes a new instance", "Initializes static members", "Prevents a default instance" };
 
     /// <summary>The framework names IDE0049 rewrites to keywords.</summary>
     private static readonly HashSet<string> FrameworkTypeNames = new(StringComparer.Ordinal)
@@ -1137,6 +1154,22 @@ internal static class Conventions
                         .Select(t => Line(t.SpanStart))
                         .Distinct()
                         .ToList();
+
+                    // How property and constructor summaries begin (BRO1604/BRO1606); one that starts with an element isn't counted.
+                    var summaryKey = summary.Parent?.ParentTrivia.Token.Parent?.AncestorsAndSelf().FirstOrDefault(a => a is MemberDeclarationSyntax) switch
+                    {
+                        PropertyDeclarationSyntax => PropertySummaryKey,
+                        ConstructorDeclarationSyntax => ConstructorSummaryKey,
+                        _ => null,
+                    };
+                    var firstToken = summary.Content.SelectMany(c => c.DescendantTokens()).FirstOrDefault(t => !t.IsKind(SyntaxKind.XmlTextLiteralNewLineToken) && !string.IsNullOrWhiteSpace(t.Text));
+                    if (summaryKey is not null && firstToken.IsKind(SyntaxKind.XmlTextLiteralToken))
+                    {
+                        var starts = summaryKey == PropertySummaryKey ? PropertySummaryStarts : ConstructorSummaryStarts;
+                        var words = string.Join(" ", summary.Content.SelectMany(c => c.DescendantTokens()).Where(t => t.IsKind(SyntaxKind.XmlTextLiteralToken)).Select(t => t.Text.Trim()).Where(t => t.Length > 0));
+                        Add(summaryKey, !starts.Any(s => words == s || words.StartsWith(s + " ", StringComparison.Ordinal)));
+                    }
+
                     var startLine = Line(summary.StartTag.SpanStart);
                     var endLine = Line(summary.EndTag.SpanStart);
                     if (textLines.Count == 1 && !summary.EndTag.IsMissing)

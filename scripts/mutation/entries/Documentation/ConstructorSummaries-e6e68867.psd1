@@ -2,7 +2,7 @@
 # tag, BRO1604/BRO1606 text that can't follow the standard words, BRO1134 a comment ending the header's line
 @{
     File = 'src/StyleBro.Analyzers/Documentation/ConstructorSummaries.cs'
-    Find = '&& (StartsWithWords(remaining, standard.Substring(0, standard.IndexOf('' '')))'
-    Replace = '&& (false'
+    Find = 'if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf('' ''))))'
+    Replace = 'if (false)'
     Tests = 'DocumentationTests'
 }
