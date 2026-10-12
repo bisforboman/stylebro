@@ -89,8 +89,7 @@ internal static class InitCommand
         }
 
         var multiTargeted = MultiTargetedProjects(root).ToList();
-        var ownSettings = Migration.OwnSettings(root);
-        var own = new HashSet<string>(ownSettings.Keys, StringComparer.OrdinalIgnoreCase);
+        var own = Migration.OwnKeys(root);
 
         // A Sonar setup turns on what fixes its rules, like in the migration; StyleBro's own rules are on in the preset.
         var sonarLines = new List<string>();
@@ -106,102 +105,76 @@ internal static class InitCommand
             }
         }
 
-        // The conventions the code follows: what the code already does stays (Ocelot: '=>' at the start of a line, '_field').
-        var detected = new List<string>();
-        if (!migrated)
-        {
-            var (lines, report) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
-            detected = lines;
-            if (report.Count > 0)
-            {
-                Console.WriteLine($"{DetectedHeader} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
-                Console.WriteLine("  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;");
-                Console.WriteLine("  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):");
-                report.ForEach(Console.WriteLine);
-                Console.WriteLine();
-            }
-        }
-
-        var generated = migrated ? new List<string>() : Migration.MigrationFolders(root);
-        if (generated.Count > 0)
-        {
-            Console.WriteLine($"EF Core migrations in {string.Join(", ", generated)}: marked generated_code = true, so formatting and StyleBro leave them alone.");
-        }
-
-        var vendored = migrated ? new List<string>() : Migration.VendoredFolders(root);
-        if (vendored.Count > 0)
-        {
-            Console.WriteLine($"Vendored code in {string.Join(", ", vendored)}: marked generated_code = true, so formatting and StyleBro leave it alone.");
-        }
-
-        var block = Block(detected, plainHeader: own.Contains("file_header_template"), sonarLines, generated, vendored);
-        var modernize = args.Contains("--modernize") ? Modernize(root, multiTargeted) : (Block: null, Notes: new List<string>());
+        // The root, then every folder with C# code whose .editorconfig says 'root = true': the root's block never reaches it.
+        var modernizing = args.Contains("--modernize");
+        var targets = new List<Target> { Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing) };
         if (multiTargeted.Count > 0)
         {
             Console.WriteLine(MultiTargetedLine(multiTargeted));
             Console.WriteLine(MultiTargetedHint);
         }
 
-        modernize.Notes.ForEach(Console.WriteLine);
-        if (!migrated)
+        targets[0].ModernizeNotes.ForEach(Console.WriteLine);
+        foreach (var folder in StyleCopSetup.EditorConfigRoots(root).Where(f => StyleCopSetup.EnumerateFiles(Path.Combine(root, f), ownRoot: true).Any(IsCSharp)))
         {
-            JsonReport.AddSettings(".editorconfig", block);
-        }
-
-        if (modernize.Block is not null)
-        {
-            JsonReport.AddSettings(".editorconfig", modernize.Block);
+            Console.WriteLine();
+            Console.WriteLine($"{folder}/.editorconfig says root = true, so the root's settings don't reach {folder}/: it gets a block of its own, from its own code.");
+            targets.Add(Prepare(root, folder, sonarLines, multiTargeted, modernizing));
         }
 
         var agentsMd = args.Contains(AgentsFile.Option);
-
-        // What --write would change: nothing when the settings are there (written by 'stylebro-migrate --write', or by an
-        // earlier init). The dry run says the same as --write (mdx: it showed a block --write then said was there).
-        var plain = existing?.Replace("\r\n", "\n");
-        var hasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain);
-        var hasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain);
         if (!write)
         {
-            if (hasBlock)
+            foreach (var target in targets)
             {
-                Console.WriteLine(migrated ? MigratedLine : PresentLine);
+                if (target.HasBlock)
+                {
+                    Console.WriteLine(target.Prefix + (target.Migrated ? MigratedLine : PresentLine));
+                }
+
+                if (!target.HasBlock || !target.HasModernize)
+                {
+                    Console.WriteLine($"== {target.Name} (run with --write to add it)");
+                }
+
+                Console.Write(target.HasBlock ? null : target.Block);
+                Console.Write(target.HasModernize ? null : target.Modernize);
             }
 
-            if (!hasBlock || !hasModernize)
-            {
-                Console.WriteLine("== .editorconfig (run with --write to add it)");
-            }
-
-            Console.Write(hasBlock ? null : block);
-            Console.Write(hasModernize ? null : modernize.Block);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
         }
 
-        var text = existing ?? "root = true\n";
-        if (hasBlock)
+        var changed = false;
+        foreach (var target in targets)
         {
-            Console.WriteLine(migrated ? MigratedLine : PresentLine);
-        }
-        else
-        {
-            text = Migration.Apply(text, block);
-            Console.WriteLine("Wrote the built-in rule severities to .editorconfig.");
-        }
-
-        if (!hasModernize)
-        {
-            text = Migration.Apply(text, modernize.Block!, ModernizeBegin, ModernizeEnd);
-            Console.WriteLine("Wrote the modernization rules to .editorconfig (see https://bisforboman.github.io/stylebro/modernizing/).");
-        }
-
-        if (text != existing)
-        {
-            PreviewCommand.EditFile(path, _ => text);
-            if (!EnforcesCodeStyleInBuild(root))
+            var text = target.Existing ?? "root = true\n";
+            if (target.HasBlock)
             {
-                Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
+                Console.WriteLine(target.Prefix + (target.Migrated ? MigratedLine : PresentLine));
             }
+            else
+            {
+                text = Migration.Apply(text, target.Block);
+                Console.WriteLine($"Wrote the built-in rule severities to {target.Name}.");
+            }
+
+            if (!target.HasModernize)
+            {
+                text = Migration.Apply(text, target.Modernize!, ModernizeBegin, ModernizeEnd);
+                Console.WriteLine($"Wrote the modernization rules to {target.Name} (see https://bisforboman.github.io/stylebro/modernizing/).");
+            }
+
+            if (text != target.Existing)
+            {
+                PreviewCommand.EditFile(target.Path, _ => text);
+                changed = true;
+            }
+        }
+
+        if (changed && !EnforcesCodeStyleInBuild(root))
+        {
+            Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
         }
 
         AgentsFile.Update(root, write: true, agentsMd).ForEach(Console.WriteLine);
@@ -281,6 +254,18 @@ internal static class InitCommand
     {
         var settings = own;
         var unenforced = Unenforced(own);
+        var counts = Conventions.Count(root, settings);
+
+        // The repository's end_of_line against git's checkout conversion: endings stay out of it, as in the migration.
+        var gitEndings = Conventions.EndingContradiction(root, settings);
+
+        // An end_of_line the committed files clearly contradict was never enforced either: the files decide.
+        var contradictedEnding = gitEndings is null ? Conventions.ContradictedEnding(counts, settings) : null;
+        if (contradictedEnding is not null)
+        {
+            unenforced.Add(Conventions.EndOfLineKey);
+        }
+
         own = own.Where(p => !unenforced.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase);
         var csharpier = Conventions.CSharpier(root) is { } evidence ? Conventions.CSharpierLines(evidence) : default;
         var decided = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -313,20 +298,33 @@ internal static class InitCommand
             decided[StyleBro.Analyzers.Naming.FieldNames.StyleKey] = $"the naming rule dotnet_naming_rule.{rule} decides";
         }
 
+        if (!decided.ContainsKey(Conventions.StaticPrefixKey) && Conventions.PrefixRequiredByNamingRule(own) is { } prefix)
+        {
+            decided[Conventions.StaticPrefixKey] = $"a naming rule requires '{prefix}', which BRO1307 keeps";
+        }
+
         // The using order is decided apart from the list (two keys): kept the same way.
         var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
         kept.AddRange(usings);
-        var (detected, report) = Conventions.Decide(Conventions.Count(root, settings), decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));
-        report.InsertRange(0, unenforced.Select(k => $"  {"note",-8} {k} = {settings[k]} in .editorconfig isn't enforced (its severity is silent or none), so your code decides"));
+        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));
+        report.InsertRange(0, unenforced.Select(k => k == Conventions.EndOfLineKey
+            ? $"  {"note",-8} {contradictedEnding!.Value.Note}"
+            : $"  {"note",-8} {k} = {settings[k]} in .editorconfig isn't enforced (its severity is silent or none), so your code decides"));
+
+        // A folder with too little code to judge (a root = true folder with a sample or two): StyleBro's defaults, said once.
+        if (Conventions.All.All(c => !counts.TryGetValue(c.Key, out var count) || count.Sum() < Conventions.MinimumAgreeing))
+        {
+            report.Insert(0, $"  {"note",-8} too little code here to tell its conventions (fewer than {Conventions.MinimumAgreeing} places each), so StyleBro's defaults apply");
+        }
+
         if (csharpier.Lines is not null)
         {
             report.Insert(0, csharpier.Report);
         }
 
-        // The repository's end_of_line against git's checkout conversion: endings stay out of it, as in the migration. CSharpier
-        // (IDE0055 off) or the team's own IDE0055 severity keep theirs.
+        // CSharpier (IDE0055 off) or the team's own IDE0055 severity keep theirs.
         var endings = new List<string>();
-        if (Conventions.EndingContradiction(root, settings) is ({ } endingLines, { } endingReport))
+        if (gitEndings is ({ } endingLines, { } endingReport))
         {
             report.Add($"  {"note",-8} {endingReport}");
             endings.AddRange(endingLines.Take(csharpier.Lines is null && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
@@ -411,9 +409,9 @@ internal static class InitCommand
     /// framework and 'dotnet format' writes the newer framework's edit into the shared file: the language rules break the
     /// older framework's build unless LangVersion is set (else each framework gets its own C# version). The API rules would
     /// too, but StyleBro's MultiTargetSuppressor hides them there, so they are always warnings. Keys the root .editorconfig
-    /// sets itself are left out.
+    /// (or the one in <paramref name="keysFrom"/>, a folder whose .editorconfig says root = true) sets itself are left out.
     /// </summary>
-    public static (string? Block, List<string> Notes) Modernize(string root, IReadOnlyList<string> multiTargeted)
+    public static (string? Block, List<string> Notes) Modernize(string root, IReadOnlyList<string> multiTargeted, string? keysFrom = null)
     {
         var withoutLangVersion = multiTargeted.Where(p => !SetsLangVersion(root, p)).ToList();
         var notes = new List<string>();
@@ -430,7 +428,7 @@ internal static class InitCommand
                 + "  (e.g. ArgumentNullException.ThrowIfNull in a net48;net8.0 project). The guard comes with the StyleBro.Analyzers package: projects without it would get fixes that break their older framework.");
         }
 
-        var own = Migration.OwnKeys(root);
+        var own = Migration.OwnKeys(keysFrom ?? root);
         var lines = ModernizeTemplate().Replace("\r\n", "\n").TrimEnd('\n').Split('\n')
             .Select(l => l.Replace("{lang}", withoutLangVersion.Count == 0 ? "warning" : "suggestion"))
             .Where(l => l.StartsWith('#') || !l.Contains('=') || !own.Contains(l.Substring(0, l.IndexOf('=')).Trim()));
@@ -555,6 +553,81 @@ internal static class InitCommand
     public static bool EnforcesCodeStyleInBuild(string root) =>
         StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<EnforceCodeStyleInBuild>\s*true\s*<", RegexOptions.IgnoreCase));
 
+    /// <summary>
+    /// One .editorconfig's block, with its convention report printed: the root's (<paramref name="folder"/> empty), or the
+    /// one of a folder whose .editorconfig says 'root = true', judged from that folder's own code and settings (the root's
+    /// don't reach it; CleanArchitecture's sample/ got CRLF lines in LF files and 'is null' against its '== null').
+    /// </summary>
+    private static Target Prepare(string repository, string folder, IReadOnlyList<string> sonarLines, IReadOnlyList<string> multiTargeted, bool modernizing)
+    {
+        var root = folder.Length == 0 ? repository : Path.Combine(repository, folder);
+        var prefix = folder.Length == 0 ? string.Empty : folder + "/";
+        var path = Path.Combine(root, ".editorconfig");
+        var existing = File.Exists(path) ? File.ReadAllText(path) : null;
+        var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
+        var ownSettings = Migration.OwnSettings(root);
+
+        // The conventions the code follows: what the code already does stays (Ocelot: '=>' at the start of a line, '_field').
+        var detected = new List<string>();
+        if (!migrated)
+        {
+            var (lines, report) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
+            detected = lines;
+            if (report.Count > 0)
+            {
+                Console.WriteLine($"{DetectedHeader}{(prefix.Length == 0 ? string.Empty : " under " + prefix)} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
+                Console.WriteLine("  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;");
+                Console.WriteLine("  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):");
+                report.ForEach(Console.WriteLine);
+                Console.WriteLine();
+            }
+        }
+
+        var generated = migrated ? new List<string>() : Migration.MigrationFolders(root);
+        if (generated.Count > 0)
+        {
+            Console.WriteLine($"EF Core migrations in {string.Join(", ", generated.Select(g => prefix + g))}: marked generated_code = true, so formatting and StyleBro leave them alone.");
+        }
+
+        var vendored = migrated ? new List<string>() : Migration.VendoredFolders(root);
+        if (vendored.Count > 0)
+        {
+            Console.WriteLine($"Vendored code in {string.Join(", ", vendored.Select(v => prefix + v))}: marked generated_code = true, so formatting and StyleBro leave it alone.");
+        }
+
+        var block = Block(detected, plainHeader: ownSettings.ContainsKey("file_header_template"), sonarLines, generated, vendored);
+        var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
+        var name = prefix + ".editorconfig";
+        if (!migrated)
+        {
+            JsonReport.AddSettings(name, block);
+        }
+
+        if (modernize.Block is not null)
+        {
+            JsonReport.AddSettings(name, modernize.Block);
+        }
+
+        // What --write would change: nothing when the settings are there (written by 'stylebro-migrate --write', or by an
+        // earlier init). The dry run says the same as --write (mdx: it showed a block --write then said was there).
+        var plain = existing?.Replace("\r\n", "\n");
+        return new Target
+        {
+            Name = name,
+            Prefix = prefix.Length == 0 ? string.Empty : name + ": ",
+            Path = path,
+            Existing = existing,
+            Migrated = migrated,
+            Block = block,
+            Modernize = modernize.Block,
+            ModernizeNotes = modernize.Notes,
+            HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
+            HasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain),
+        };
+    }
+
+    private static bool IsCSharp(string file) => file.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>The previous lines that set one of the keys, each with the '# init:' comments right above it.</summary>
     private static List<string> KeptLines(IReadOnlyList<string>? previous, IReadOnlyCollection<string> keys)
     {
@@ -591,5 +664,29 @@ internal static class InitCommand
             ?? throw new InvalidOperationException($"{resource} is missing from the tool.");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
+    }
+
+    /// <summary>One .editorconfig init writes to (<see cref="Prepare"/>).</summary>
+    private sealed class Target
+    {
+        public required string Name { get; init; }
+
+        public required string Prefix { get; init; }
+
+        public required string Path { get; init; }
+
+        public string? Existing { get; init; }
+
+        public bool Migrated { get; init; }
+
+        public required string Block { get; init; }
+
+        public string? Modernize { get; init; }
+
+        public required List<string> ModernizeNotes { get; init; }
+
+        public bool HasBlock { get; init; }
+
+        public bool HasModernize { get; init; }
     }
 }

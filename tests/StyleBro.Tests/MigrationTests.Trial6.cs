@@ -35,12 +35,12 @@ public sealed partial class MigrationTests
         Assert.Contains("  mixed    C# files' line endings: 3 LF, 1 CRLF -> default stays (unset)\n", output);
         Assert.DoesNotContain("end_of_line = ", output);
 
-        // The repository's own key stays.
+        // The repository's own key stays (one the files contradict doesn't: Init_EndOfLineTheCommittedFilesContradict_FollowsTheFiles).
         File.Delete(Path.Combine(root, "B0.cs"));
-        Write(".editorconfig", "root = true\n[*]\nend_of_line = crlf\n");
+        Write(".editorconfig", "root = true\n[*]\nend_of_line = lf\n");
         output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
-        Assert.Contains("  set      C# files' line endings: 3 of 3 LF -> set in .editorconfig (crlf)\n", output);
-        Assert.DoesNotContain("end_of_line = lf", output);
+        Assert.Contains("  set      C# files' line endings: 3 of 3 LF -> set in .editorconfig (lf)\n", output);
+        Assert.DoesNotContain("end_of_line = lf\n#", output);
     }
 
     [Fact]
