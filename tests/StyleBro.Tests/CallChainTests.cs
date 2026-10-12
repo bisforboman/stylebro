@@ -83,6 +83,22 @@ public class CallChainTests
         }
         """);
 
+    // The first line's call may be followed by a member that leads to the next call: that member isn't moved.
+    [Fact]
+    public Task AMemberAfterTheFirstLinesCall_StaysOnIt() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public C Self => this;
+
+            public C M(C c) =>
+                c.Next().Self
+                    .Next();
+
+            private C Next() => this;
+        }
+        """);
+
     [Fact]
     public Task MembersLeadingToACall_StayWithIt_ATrailingPropertyToo() => VerifyFixAsync(
         """
