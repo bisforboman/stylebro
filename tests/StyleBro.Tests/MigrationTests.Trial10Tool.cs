@@ -93,8 +93,10 @@ public sealed partial class MigrationTests
     [Fact]
     public void Format_AWorkspaceWithoutProjects_Stops()
     {
-        Write("OpenMcdf.slnx", "<Solution />");
-        Write("Empty.slnf", "{ \"solution\": { \"path\": \"OpenMcdf.slnx\", \"projects\": [] } }");
+        // 'dotnet sln Empty.slnf list' fails ("Project `Docs/Docs.vbproj` could not be found in the solution"): read from the JSON.
+        Write("OpenMcdf.slnx", "<Solution>\n  <Project Path=\"Docs/Docs.vbproj\" />\n</Solution>\n");
+        Write("Docs/Docs.vbproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("Empty.slnf", "{ \"solution\": { \"path\": \"OpenMcdf.slnx\", \"projects\": [ \"Docs/Docs.vbproj\" ] } }");
         var lines = new List<string>();
 
         Assert.Equal(1, FormatCommand.Run(new[] { Path.Combine(root, "Empty.slnf"), FormatCommand.OnceOption }, lines.Add));
