@@ -16,7 +16,7 @@ body:
     id: version
     attributes:
       label: StyleBro version
-      placeholder: 0.5.0-alpha.1
+      placeholder: 0.6.0-alpha.1
     validations:
       required: true
   - type: textarea
