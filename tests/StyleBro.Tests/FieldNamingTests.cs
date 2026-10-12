@@ -1217,6 +1217,27 @@ public class FieldNamingTests
         """,
         YamlDotNetNamingRules);
 
+    // A naming rule requiring the 'm_' prefix of private instance fields keeps it (BRO1307 doesn't remove it).
+    [Fact]
+    public Task NamingRule_RequiringAPrefix_KeepsItOnPrivateFields() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private int m_count;
+
+            public int Get() => m_count;
+        }
+        """,
+        """
+        dotnet_naming_rule.private_fields.severity = warning
+        dotnet_naming_rule.private_fields.symbols = private_fields
+        dotnet_naming_rule.private_fields.style = m_prefix
+        dotnet_naming_symbols.private_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+        dotnet_naming_style.m_prefix.capitalization = camel_case
+        dotnet_naming_style.m_prefix.required_prefix = m_
+        """);
+
     // A naming rule asking for a style StyleBro doesn't write ('m_' prefix) leaves the field alone; a rule that is off
     // (severity none) leaves StyleCop's default.
     [Fact]
