@@ -215,8 +215,11 @@ A few settings work a little differently:
   (on Windows CRLF into LF files), so `init` writes the files' ending when it's clear and nothing when it's mixed. Files
   git converts on checkout (`core.autocrlf`, or a `.gitattributes` `text` attribute without `eol`: LF in the repository,
   CRLF in a Windows checkout) don't count, and the report names which of the two converts them: there the OS's ending is
-  what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. `stylebro-migrate
-  --write` writes `end_of_line` the same way. When your `.editorconfig` sets `end_of_line` but git converts the files on
+  what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. When git converts at
+  least as many files as it leaves alone, those are the convention and nothing is written: a few files committed with
+  CRLF don't decide for the rest (one trial repository had 3 such files next to 145 converted ones, and
+  `end_of_line = crlf` from those 3 meant 12,593 line-ending errors in an LF checkout). `stylebro-migrate --write`
+  writes `end_of_line` the same way. When your `.editorconfig` sets `end_of_line` but git converts the files on
   checkout (`end_of_line = lf` with `*.cs text=auto` means CRLF files in a Windows checkout), `init` keeps endings out of
   it: `end_of_line = unset` for C# files and IDE0055 as a suggestion, so neither `format` nor the build touches them, and
   the report says how to settle it (`*.cs text eol=lf` in `.gitattributes`, or removing `end_of_line`). When your
@@ -267,11 +270,6 @@ A few settings work a little differently:
   sections). Run CSharpier after `format`: fixes that rewrite code (an `if` merged into the enclosing one, attributes
   split) leave lines in StyleBro's layout, which CSharpier then lays out its way, and StyleBro leaves that alone. To have
   StyleBro format instead, remove CSharpier and run `init` again.
-  what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. When git converts at
-  least as many files as it leaves alone, those are the convention and nothing is written: a few files committed with
-  CRLF don't decide for the rest (one trial repository had 3 such files next to 145 converted ones, and
-  `end_of_line = crlf` from those 3 meant 12,593 line-ending errors in an LF checkout). `stylebro-migrate --write`
-  writes `end_of_line` the same way.
 - **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
   repository's code`, with their `# init:` comments), and the report says `kept from the last init`. They describe your
   code as it was before StyleBro formatted it: counted again after a `format` run, StyleBro's own output would decide
@@ -384,7 +382,12 @@ with the findings StyleBro's fixes leave on purpose, each with its reason ([Find
 and exits with 0 when clean, 2 when a run still changed files. When `dotnet format` skips a project because its
 references didn't load (a broken restore or package cache), the command names it and says the run is incomplete (for
 one target framework only: the code only that framework compiles); `--diff` stops then instead of showing a partial
-preview. A folder with several solutions
+preview. When no project has StyleBro.Analyzers in its restore output (`obj/project.assets.json`), the command stops
+before `dotnet format` runs: without the analyzers it would fix only whitespace and the built-in rules and report the
+code clean. Projects without it next to ones with it are named (`Without StyleBro: ...`). The command restores once
+before the runs; that restore skips NuGet's audit (`-p:NuGetAudit=false`): vulnerability warnings (NU1901-NU1904) are
+the build's business, and with `TreatWarningsAsErrors` they failed every run. A solution filter (`.slnf`) works like
+its solution, with only its projects. A folder with several solutions
 or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 With none at the root, it looks for a Traversal project there (`dirs.proj` with `Sdk="Microsoft.Build.Traversal"`,
 which `dotnet format` can't load: `format` runs on a temporary solution with the projects it lists), then for solutions
@@ -616,9 +619,10 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   msbuild -t:restore -p:RestorePackagesConfig=true
   ```
 
-  `dotnet restore` can't restore `packages.config`, and for the other projects it writes restore output that Visual
-  Studio's MSBuild then rejects ("Your project file doesn't list 'win' as a RuntimeIdentifier"). So `format` skips its
-  usual restore when it finds old-style projects, and says so. If a build complains like that anyway (something ran
+  `dotnet restore` can't restore `packages.config`, and for the other old-style projects it writes restore output that
+  Visual Studio's MSBuild then rejects ("Your project file doesn't list 'win' as a RuntimeIdentifier"). So `format`
+  restores only the SDK-style projects when it finds old-style ones, and says so (the `-p:RestorePackagesConfig=true`
+  part only matters with `packages.config`). If a build complains like that anyway (something ran
   `dotnet restore`), run the MSBuild restore again.
 - **Reference assemblies.** `dotnet format` loads the projects with the .NET SDK, which needs the .NET Framework
   reference assemblies: without them every project is skipped ("Required references did not load"). Install the
@@ -656,8 +660,9 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   ```
 
   `stylebro-migrate` names the packages.config projects and says this in its report.
-- **`--diff` doesn't work** for them: the copy it formats has no git-ignored `packages` folder, and `dotnet restore`
-  can't restore `packages.config`. It says so and stops. Instead, on a clean working tree: run the command without
+- **`--diff` doesn't work** for `packages.config` projects: the copy it formats has no git-ignored `packages` folder,
+  and `dotnet restore` can't restore `packages.config`. It says so and stops. Other old-style projects preview like
+  `format` runs: unrestored, so the preview has no StyleBro changes for them, and it says which. Instead, on a clean working tree: run the command without
   `--diff`, restore with MSBuild as above, run `stylebro-migrate format`, and review `git diff` (`git checkout .`
   undoes it).
 - If StyleCop came in through `packages.config` or an `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`

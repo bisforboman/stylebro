@@ -68,7 +68,7 @@ plus whitespace formatting. Plain `dotnet format` also applies every other analy
 can break the build; `--all` does that too. Git submodules are never formatted. In a repository with multi-targeted
 projects it runs once per target framework: plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055),
 because Roslyn can't merge the frameworks' copies of a file. Other options pass through (`--severity warn`,
-`--report`, ...). `stylebro-migrate --help` lists every command.
+`--report`, ...). `stylebro-migrate --help` lists every command, `stylebro-migrate --version` prints the version.
 
 It ends by listing the findings StyleBro's fixes keep on purpose, each with its reason (a name read by reflection, used
 in generated code, ...): don't change those by hand without checking the uses; suppress or baseline them.

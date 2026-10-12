@@ -85,14 +85,32 @@ internal static class FormatCommand
     /// <summary>The option that formats only the files named after it (for agents: seconds on a small change).</summary>
     public const string FilesOption = "--files";
 
-    /// <summary>How to restore old-style (non-SDK) projects before 'format' (docs/getting-started.md, "Old-style (non-SDK) projects").</summary>
+    /// <summary>How to restore old-style (non-SDK) projects with packages.config before 'format' (docs/getting-started.md, "Old-style (non-SDK) projects").</summary>
     public const string OldStyleRestore = "Restore them with Visual Studio's MSBuild first: msbuild -t:restore -p:RestorePackagesConfig=true (https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects).";
+
+    /// <summary>The same for old-style projects without packages.config (PackageReference, or no packages).</summary>
+    public const string OldStylePackageReferenceRestore = "Restore them with Visual Studio's MSBuild first: msbuild -t:restore (https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects).";
 
     /// <summary>The SDK bug a run that loads two projects compiling the same files runs into (<see cref="Separate"/>).</summary>
     public const string LinkedMergeIssue = "https://github.com/dotnet/roslyn/issues/86001";
 
-    /// <summary>What to say when the restore 'dotnet format' needs fails (it prints only a stack trace).</summary>
-    internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why (for example NuGet audit warnings with TreatWarningsAsErrors). Once the packages are restored, '--no-restore' skips it.";
+    /// <summary>The start of the line that says old-style projects aren't restored (printed for the first run only).</summary>
+    public const string OldStyleHeader = "Old-style projects:";
+
+    /// <summary>The start of the line that says StyleBro's analyzers didn't load, so the run stopped.</summary>
+    public const string NotLoadedHeader = "StyleBro's analyzers aren't loaded:";
+
+    /// <summary>The start of the line that names projects StyleBro's analyzers don't load in (printed for the first run only).</summary>
+    public const string PartlyLoadedHeader = "Without StyleBro:";
+
+    /// <summary>What to say when the restore fails without a NuGet error to quote.</summary>
+    internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why. Once the packages are restored, '--no-restore' skips it.";
+
+    /// <summary>
+    /// The restore's options: NuGet's audit (NU1901-NU1904, errors under TreatWarningsAsErrors) is the build's business, not
+    /// formatting's (CleanArchitecture: a vulnerable test package failed every format run on a clean clone).
+    /// </summary>
+    internal static readonly string[] RestoreOptions = { "-p:NuGetAudit=false" };
 
     /// <summary>The start of the line that says a Traversal project's projects are formatted (printed for the first run only).</summary>
     private const string TraversalHeader = "Traversal:";
@@ -115,14 +133,11 @@ internal static class FormatCommand
     /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
     private const string OldMacHeader = "Not formatted:";
 
-    /// <summary>The start of the line that says old-style projects aren't restored (printed for the first run only).</summary>
-    private const string OldStyleHeader = "Old-style projects:";
-
     /// <summary>The start of the line that names the folders without StyleCop format leaves alone (printed for the first run only).</summary>
     private const string UnformattedHeader = "Leaving alone:";
 
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
-    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
@@ -553,11 +568,66 @@ internal static class FormatCommand
     public static List<string> OldStyleProjects(string root)
     {
         return StyleCopSetup.EnumerateFiles(root)
-            .Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
-                && !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(f)), @"<Project\b[^>]*\bSdk\s*=|<Import\b[^>]*\bSdk\s*=|<Sdk\b", RegexOptions.IgnoreCase))
+            .Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && IsOldStyle(f))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>Whether a project file is old-style (non-SDK): no 'Sdk' on the Project element, no Sdk import or element.</summary>
+    public static bool IsOldStyle(string project) =>
+        File.Exists(project) && !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(project)), @"<Project\b[^>]*\bSdk\s*=|<Import\b[^>]*\bSdk\s*=|<Sdk\b", RegexOptions.IgnoreCase);
+
+    /// <summary>Whether a project restores through packages.config (one next to it), which 'dotnet restore' can't do.</summary>
+    public static bool UsesPackagesConfig(string project) => File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(project))!, "packages.config"));
+
+    /// <summary>
+    /// What 'format' says about the old-style projects (relative paths) it doesn't restore: the SDK-style ones are restored,
+    /// and the MSBuild restore those need (the packages.config one only when one of them has packages.config).
+    /// </summary>
+    public static string OldStyleNote(IReadOnlyList<string> projects, bool packagesConfig) =>
+        $"{OldStyleHeader} {string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)} (not SDK-style): "
+        + $"restoring the SDK-style projects only ({(packagesConfig ? "'dotnet restore' can't restore packages.config, and it" : "'dotnet restore'")} writes restore output Visual Studio's MSBuild rejects for old-style projects). "
+        + (packagesConfig ? OldStyleRestore : OldStylePackageReferenceRestore);
+
+    /// <summary>
+    /// Whether StyleBro's analyzers load in a project: StyleBro.Analyzers in its restore output (<paramref name="assetsFile"/>,
+    /// project.assets.json: a PackageReference, also from Directory.Build.props or a GlobalPackageReference), or an Analyzer
+    /// item for its DLL that exists (packages.config) or a reference to its project. Without them 'dotnet format' fixes only
+    /// whitespace and the built-in rules and says nothing (actions/runner: "clean", then ~3,000 BRO errors in the build).
+    /// </summary>
+    public static bool LoadsStyleBro(string project, string assetsFile)
+    {
+        if (assetsFile.Length > 0 && File.Exists(assetsFile) && File.ReadAllText(assetsFile).Contains("\"StyleBro.Analyzers/", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var text = File.Exists(project) ? StyleCopSetup.WithoutComments(File.ReadAllText(project)) : string.Empty;
+        return text.Contains("StyleBro.Analyzers.csproj", StringComparison.OrdinalIgnoreCase)
+            || Regex.Matches(text, @"<Analyzer\b[^>]*\bInclude\s*=\s*""(?<dll>[^""]*StyleBro\.Analyzers\.dll)""", RegexOptions.IgnoreCase)
+                .Any(m => File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(project))!, m.Groups["dll"].Value.Replace('\\', Path.DirectorySeparatorChar))));
+    }
+
+    /// <summary>
+    /// What to say when StyleBro's analyzers don't load in the projects a run formats (<see cref="LoadsStyleBro"/>, relative
+    /// paths): null when they load everywhere; when they load nowhere the run stops (<paramref name="all"/>), else a warning.
+    /// </summary>
+    public static string? NotLoadedMessage(IReadOnlyList<string> without, bool all)
+    {
+        if (without.Count == 0)
+        {
+            return null;
+        }
+
+        if (all)
+        {
+            return $"{NotLoadedHeader} no project has StyleBro.Analyzers in its restore output (obj/project.assets.json), so 'dotnet format' would fix only whitespace and the built-in rules and report clean. "
+                + "Add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), restore (without --no-restore, 'format' restores), then run again.";
+        }
+
+        var names = string.Join(", ", without.Take(5)) + (without.Count > 5 ? $" and {without.Count - 5} more" : string.Empty);
+        return $"{PartlyLoadedHeader} {names} {(without.Count == 1 ? "has" : "have")} no StyleBro.Analyzers in {(without.Count == 1 ? "its" : "their")} restore output, so StyleBro's rules don't run there. Add the package there, or restore {(without.Count == 1 ? "it" : "them")}, then run again.";
     }
 
     /// <summary>
@@ -748,6 +818,22 @@ internal static class FormatCommand
         return folders.Concat(outside).Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
+    /// <summary>Whether a workspace is a solution filter (.slnf).</summary>
+    public static bool IsSolutionFilter(string path) => path.EndsWith(".slnf", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// A solution filter's solution (full path; 'solution.path' is relative to the filter) and its projects (as listed:
+    /// relative to the solution).
+    /// </summary>
+    public static (string? Solution, string[] Projects) ReadSolutionFilter(string path)
+    {
+        using var json = JsonDocument.Parse(File.ReadAllText(path), new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+        var solution = json.RootElement.GetProperty("solution");
+        var file = solution.GetProperty("path").GetString()!.Replace('\\', Path.DirectorySeparatorChar);
+        var projects = solution.TryGetProperty("projects", out var list) ? list.EnumerateArray().Select(p => p.GetString()!).ToArray() : Array.Empty<string>();
+        return (Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(path))!, file)), projects);
+    }
+
     /// <summary>A solution filter (.slnf) next to the solution, with the given projects (paths as the solution lists them).</summary>
     public static string SolutionFilter(string solutionFileName, IEnumerable<string> projects)
     {
@@ -759,9 +845,9 @@ internal static class FormatCommand
     /// <summary>
     /// A project's target frameworks ('TargetFrameworks' split, else 'TargetFramework'), project references (full paths) and,
     /// with <paramref name="projectDirectory"/>, the C# files it compiles from outside its folder (full paths): Orleans links
-    /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects.
+    /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects. Also its restore output (project.assets.json, "" when not asked).
     /// </summary>
-    public static (string[] Frameworks, string[] References, string[] Linked, string[] Compile) ParseProject(string msbuildJson, string? projectDirectory = null)
+    public static (string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile) ParseProject(string msbuildJson, string? projectDirectory = null)
     {
         using var json = JsonDocument.Parse(msbuildJson);
         var hasProperties = json.RootElement.TryGetProperty("Properties", out var properties);
@@ -776,7 +862,12 @@ internal static class FormatCommand
             : Array.Empty<string>();
         var folder = projectDirectory is null ? null : Path.TrimEndingDirectorySeparator(Path.GetFullPath(projectDirectory)) + Path.DirectorySeparatorChar;
         var linked = folder is null ? Array.Empty<string>() : FullPaths("Compile").Where(f => !Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase)).ToArray();
-        return (frameworks, FullPaths("ProjectReference"), linked, FullPaths("Compile"));
+
+        // ProjectAssetsFile is set by the restore's own props: before the first restore only the folder is known.
+        var assets = hasProperties && properties.TryGetProperty("ProjectAssetsFile", out var a) && !string.IsNullOrEmpty(a.GetString()) ? a.GetString()!
+            : hasProperties && properties.TryGetProperty("MSBuildProjectExtensionsPath", out var e) && !string.IsNullOrEmpty(e.GetString()) ? Path.Combine(e.GetString()!, "project.assets.json")
+            : string.Empty;
+        return (frameworks, FullPaths("ProjectReference"), linked, FullPaths("Compile"), assets);
     }
 
     /// <summary>
@@ -910,7 +1001,7 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run.
             var code = runOnce(runArgs, run == 1 ? output : line =>
             {
-                if (!new[] { FixingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+                if (!new[] { FixingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
                 {
                     log(line);
                 }
@@ -1209,9 +1300,11 @@ internal static class FormatCommand
         }
 
         // Submodules are someone else's code, even when a project compiles files from them.
+        var excluded = new List<string>();
         if (StyleCopSetup.NestedRepositories(root) is { Count: > 0 } submodules)
         {
             Exclude(submodules);
+            excluded.AddRange(submodules);
         }
 
         // Folders the migration left without settings (no StyleCop there): the whitespace pass would still reformat them.
@@ -1219,6 +1312,7 @@ internal static class FormatCommand
         {
             log($"{UnformattedHeader} {string.Join(", ", unformatted)}: StyleCop didn't run there, so the migration set nothing up there (the stylebro-migrate block in .editorconfig names them).");
             Exclude(unformatted);
+            excluded.AddRange(unformatted);
         }
 
         // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles.
@@ -1254,12 +1348,9 @@ internal static class FormatCommand
 
                 var code = run(new[] { "format", pass }.Where(a => a.Length > 0).Append(target).Concat(passOptions));
                 exit = exit == 0 ? code : exit;
-
-                // The first pass restored: the second one needn't.
-                options = NoRestore(options.ToArray()).ToList();
                 if (code != 0 && code != NotCleanExitCode)
                 {
-                    break; // an error (a failed restore): the next pass would only repeat it
+                    break; // an error: the next pass would only repeat it
                 }
             }
 
@@ -1294,16 +1385,78 @@ internal static class FormatCommand
         var noRestore = passThrough.Remove("--no-restore");
         var checkFirst = passThrough.Remove(CheckFirstOption);
 
-        // 'dotnet restore' rewrote old-style projects' restore output (xbox-live-developer-tools: the next Visual Studio
-        // build failed, "doesn't list 'win' as a RuntimeIdentifier"), and it can't restore packages.config at all.
-        if (!noRestore && OldStyleProjects(root) is { Count: > 0 } oldStyle)
+        // A solution filter's per-framework filters and restore filter name its solution.
+        var solutionPath = IsSolutionFilter(workspacePath) ? ReadSolutionFilter(workspacePath).Solution! : workspacePath;
+        var solutionDirectory = Path.GetDirectoryName(solutionPath)!;
+        var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+        var projects = ReadProjects(workspacePath);
+        if (projects.Count == 0)
         {
-            log($"{OldStyleHeader} {string.Join(", ", oldStyle.Take(3))}{(oldStyle.Count > 3 ? $" and {oldStyle.Count - 3} more" : string.Empty)} (not SDK-style): no restore ('dotnet restore' breaks Visual Studio's). {OldStyleRestore}");
-            noRestore = true;
+            error($"No C# project in {Path.GetFileName(workspacePath)}, so there's nothing to format. Name a solution or project with C# projects.");
+            return 1;
         }
 
-        var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
-        var projects = ReadProjects(workspacePath);
+        // One restore before the runs, which then all get --no-restore. Old-style projects are left out: 'dotnet restore'
+        // rewrote their restore output (xbox-live-developer-tools: the next Visual Studio build failed, "doesn't list 'win'
+        // as a RuntimeIdentifier") and can't restore packages.config at all. Skipping the restore for the whole repository
+        // instead left the SDK-style projects without the just-added StyleBro.Analyzers (actions/runner: "clean").
+        if (!noRestore)
+        {
+            var oldStyle = projects.Values.Select(p => p.FullPath).Where(IsOldStyle).ToList();
+            var restoreTarget = workspacePath;
+            string? restoreFilter = null;
+            if (oldStyle.Count > 0)
+            {
+                log(OldStyleNote(oldStyle.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')).Order(StringComparer.OrdinalIgnoreCase).ToList(), oldStyle.Any(UsesPackagesConfig)));
+                var sdkStyle = projects.Where(p => !oldStyle.Contains(p.Value.FullPath)).Select(p => p.Key).ToList();
+                restoreTarget = sdkStyle.Count == 0 ? null : isSolution ? restoreFilter = Path.Combine(solutionDirectory, $".stylebro-restore-{Guid.NewGuid():N}.slnf") : workspacePath;
+                if (restoreFilter is not null)
+                {
+                    File.WriteAllText(restoreFilter, SolutionFilter(Path.GetFileName(solutionPath), sdkStyle));
+                }
+            }
+
+            // The restore's own output (its "Build succeeded" block) only matters when it fails.
+            var restoreOutput = new List<string>();
+            try
+            {
+                var restore = restoreTarget is null ? 0 : Dotnet(root, null, new[] { "restore", restoreTarget }.Concat(RestoreOptions), restoreOutput.Add);
+                if (restore != 0)
+                {
+                    restoreOutput.ForEach(Watch);
+                    restoreFailed = true;
+                    return Done(restore);
+                }
+            }
+            finally
+            {
+                if (restoreFilter is not null)
+                {
+                    File.Delete(restoreFilter);
+                }
+            }
+        }
+
+        passThrough.Insert(0, "--no-restore");
+
+        // Without StyleBro's analyzers 'dotnet format' fixes whitespace and the built-in rules and says clean.
+        var checkedProjects = projects.Values
+            .Select(p => (p.FullPath, p.AssetsFile, Relative: Path.GetRelativePath(root, p.FullPath).Replace('\\', '/')))
+            .Where(p => !excluded.Any(e => p.Relative.StartsWith(e.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        var without = checkedProjects.Where(p => !LoadsStyleBro(p.FullPath, p.AssetsFile)).Select(p => p.Relative).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        var none = without.Count > 0 && without.Count == checkedProjects.Count;
+        if (NotLoadedMessage(without, none) is { } notLoaded)
+        {
+            if (none)
+            {
+                error(notLoaded);
+                return 1;
+            }
+
+            log(notLoaded);
+        }
+
         var frameworkPlan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
         var byFullPath = projects.ToDictionary(p => p.Value.FullPath, p => p.Key, StringComparer.OrdinalIgnoreCase);
         List<List<string>> Apart(List<string> selected) => Separate(
@@ -1321,7 +1474,7 @@ internal static class FormatCommand
             .ToList();
         if (plan.Count <= 1)
         {
-            var single = Format(workspacePath, passThrough.Concat(noRestore ? new[] { "--no-restore" } : Array.Empty<string>()).ToList(), a => Dotnet(root, null, a, Watch));
+            var single = Format(workspacePath, passThrough, a => Dotnet(root, null, a, Watch));
             Incomplete(skipped, new Dictionary<string, List<string>>(), unsupported).ForEach(log);
             Crashed(projects.Keys);
             return Done(single);
@@ -1335,16 +1488,6 @@ internal static class FormatCommand
         if (SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile))) is { Count: > 0 } sharing)
         {
             log($"{SharedFilesHeader} {string.Join(", ", sharing)} compile the same files, so they're formatted in separate runs (loaded together, 'dotnet format' crashes: {LinkedMergeIssue}).");
-        }
-
-        // The restore's own output (its "Build succeeded" block) only matters when it fails.
-        var restoreOutput = new List<string>();
-        var restore = noRestore ? 0 : Dotnet(root, null, new[] { "restore", workspacePath }, restoreOutput.Add);
-        if (restore != 0)
-        {
-            restoreOutput.ForEach(Watch);
-            restoreFailed = true;
-            return Done(restore);
         }
 
         // Every run would write its own format-report.json over the last one: each gets a folder, merged at the end.
@@ -1363,7 +1506,6 @@ internal static class FormatCommand
             }
         }
 
-        var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
         var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
         File.WriteAllText(select, SelectFrameworkTargets);
 
@@ -1386,7 +1528,7 @@ internal static class FormatCommand
             {
                 if (filter is not null)
                 {
-                    File.WriteAllText(filter, SolutionFilter(Path.GetFileName(workspacePath), selected));
+                    File.WriteAllText(filter, SolutionFilter(Path.GetFileName(solutionPath), selected));
                 }
 
                 var options = passThrough.ToList();
@@ -1395,7 +1537,6 @@ internal static class FormatCommand
                     options[reportIndex + 1] = reportFolders[index];
                 }
 
-                options.Insert(0, "--no-restore");
                 if (verify && !options.Contains("--verify-no-changes"))
                 {
                     options.Add("--verify-no-changes");
@@ -1508,7 +1649,7 @@ internal static class FormatCommand
     /// evaluated in parallel (one 'dotnet msbuild' each, ~1 s: LiteBus has 99) and once per process: the runs until clean
     /// and the preview's runs only edit C# files.
     /// </summary>
-    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile)> ReadProjects(string workspacePath)
+    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile)> ReadProjects(string workspacePath)
     {
         // ponytail: keyed by the workspace only; a project file changed between two runs of one process isn't seen.
         lock (ProjectCache)
@@ -1519,8 +1660,12 @@ internal static class FormatCommand
             }
         }
 
-        var directory = Path.GetDirectoryName(workspacePath)!;
-        var projects = workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+        // A solution filter's projects are relative to its solution ('dotnet sln x.slnf list' fails: "could not be found").
+        var filter = IsSolutionFilter(workspacePath) ? ReadSolutionFilter(workspacePath) : default;
+        var directory = Path.GetDirectoryName(filter.Solution ?? workspacePath)!;
+        var projects = filter.Solution is not null
+            ? filter.Projects.Where(l => l.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).ToArray()
+            : workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             ? new[] { Path.GetFileName(workspacePath) }
             : IsTraversal(workspacePath)
             ? TraversalProjects(workspacePath).Select(p => Path.GetRelativePath(directory, p)).ToArray()
@@ -1528,23 +1673,33 @@ internal static class FormatCommand
                 .Select(l => l.Trim())
                 .Where(l => l.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
-        var read = projects.AsParallel().AsOrdered()
-            .Select(p =>
+        (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile) Evaluate(string p)
+        {
+            var fullPath = Path.GetFullPath(Path.Combine(directory, p.Replace('\\', Path.DirectorySeparatorChar)));
+            var (frameworks, references, linked, compile, assets) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
+
+            // A multi-targeted project's outer evaluation has only its explicit Compile items, not the SDK's default
+            // ones (kubernetes-client's KubernetesClient: none, so its files didn't look shared with KubernetesClient.Aot's).
+            // ponytail: the first framework's files only; a file only another framework compiles isn't seen as shared.
+            if (frameworks.Length > 1)
             {
-                var fullPath = Path.GetFullPath(Path.Combine(directory, p));
-                var (frameworks, references, linked, compile) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
+                compile = compile.Union(ParseProject(Capture(directory, "msbuild", fullPath, $"-property:TargetFramework={frameworks[0]}", "-getItem:Compile", "-nologo")).Compile, StringComparer.OrdinalIgnoreCase).ToArray();
+            }
 
-                // A multi-targeted project's outer evaluation has only its explicit Compile items, not the SDK's default
-                // ones (kubernetes-client's KubernetesClient: none, so its files didn't look shared with KubernetesClient.Aot's).
-                // ponytail: the first framework's files only; a file only another framework compiles isn't seen as shared.
-                if (frameworks.Length > 1)
-                {
-                    compile = compile.Union(ParseProject(Capture(directory, "msbuild", fullPath, $"-property:TargetFramework={frameworks[0]}", "-getItem:Compile", "-nologo")).Compile, StringComparer.OrdinalIgnoreCase).ToArray();
-                }
+            return (fullPath, frameworks, references, linked, compile, assets);
+        }
 
-                return (Key: p, Value: (fullPath, frameworks, references, linked, compile));
-            })
-            .ToDictionary(p => p.Key, p => p.Value);
+        Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile)> read;
+        try
+        {
+            read = projects.AsParallel().AsOrdered().Select(p => (Key: p, Value: Evaluate(p))).ToDictionary(p => p.Key, p => p.Value);
+        }
+        catch (AggregateException e) when (e.InnerException is ToolException failed)
+        {
+            // MSBuild's message (an invalid NuGet.Config, a missing SDK), not PLINQ's wrapper.
+            throw failed;
+        }
+
         lock (ProjectCache)
         {
             ProjectCache[workspacePath] = read;
@@ -1563,8 +1718,16 @@ internal static class FormatCommand
 
         using var process = Process.Start(start)!;
         var output = process.StandardOutput.ReadToEndAsync();
-        process.StandardError.ReadToEnd();
+        var errors = process.StandardError.ReadToEnd();
         process.WaitForExit();
+
+        // A project MSBuild can't evaluate prints its error instead of JSON (GameDemo: "NuGet.Config is not valid XML"; it
+        // was a JsonReaderException with a stack trace before).
+        if (process.ExitCode != 0)
+        {
+            throw new ToolException($"'dotnet {string.Join(" ", arguments.Where(a => a != "-nologo"))}' failed (exit code {process.ExitCode}):{Environment.NewLine}{string.Join(Environment.NewLine, (output.Result + errors).Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).Select(l => "  " + l.TrimStart()))}");
+        }
+
         return output.Result;
     }
 
@@ -1649,3 +1812,6 @@ internal static class FormatCommand
         }
     }
 }
+
+/// <summary>A dotnet command 'format' depends on failed (MSBuild couldn't evaluate a project): its output is the message.</summary>
+internal sealed class ToolException(string message) : Exception(message);

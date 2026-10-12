@@ -77,6 +77,9 @@ internal static class Program
 
           stylebro-migrate help | --help | -h
               This text.
+
+          stylebro-migrate --version
+              The tool's version.
         """;
 
     /// <summary>The option that names a SonarQube quality profile backup (XML) to follow.</summary>
@@ -94,6 +97,10 @@ internal static class Program
     /// <summary>What to do after --write when StyleBro.Analyzers is already in and StyleCop.Analyzers still is.</summary>
     internal const string RemoveStyleCopStep = "Next: remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
 
+    /// <summary>Gets the tool's version ('0.6.0-alpha.1', without the commit the SDK appends).</summary>
+    internal static string Version =>
+        (typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown").Split('+')[0];
+
     public static int Main(string[] args)
     {
         if (args.FirstOrDefault() == "help" || args.Any(a => a is "--help" or "-h" or "-?"))
@@ -102,9 +109,15 @@ internal static class Program
             return 0;
         }
 
+        if (args is ["--version"])
+        {
+            Console.WriteLine(Version);
+            return 0;
+        }
+
         if (!args.Contains(JsonReport.Option))
         {
-            return Dispatch(args);
+            return Guarded(args);
         }
 
         // --json: the human text goes to stderr, the report to stdout.
@@ -117,7 +130,7 @@ internal static class Program
         int code;
         try
         {
-            code = Dispatch(args);
+            code = Guarded(args);
         }
         finally
         {
@@ -432,6 +445,20 @@ internal static class Program
     }
 
     /// <summary>Runs the command the arguments name.</summary>
+    /// <summary>The command; a dotnet command it depends on that failed (MSBuild couldn't evaluate a project) ends it with that command's output, not a stack trace.</summary>
+    private static int Guarded(string[] args)
+    {
+        try
+        {
+            return Dispatch(args);
+        }
+        catch (ToolException e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return 1;
+        }
+    }
+
     private static int Dispatch(string[] args)
     {
         // 'format' passes unknown options on to 'dotnet format'.

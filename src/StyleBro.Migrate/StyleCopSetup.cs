@@ -956,7 +956,9 @@ internal sealed class StyleCopSetup
             var text = WithoutComments(File.ReadAllText(file));
             for (var i = 0; i < 4 && Regex.IsMatch(value, @"\$\(\w+\)"); i++)
             {
+                // MSBuildProjectExtension: openmcdf imports 'Directory$(MSBuildProjectExtension).props' (StyleBro is C# only).
                 value = Regex.Replace(value, @"\$\((\w+)\)", m => m.Groups[1].Value.Equals("_DirectoryBuildPropsFile", StringComparison.OrdinalIgnoreCase) ? "Directory.Build.props"
+                    : m.Groups[1].Value.Equals("MSBuildProjectExtension", StringComparison.OrdinalIgnoreCase) ? ".csproj"
                     : Regex.Match(text, $@"<{m.Groups[1].Value}\b[^>]*>([^<]*)</{m.Groups[1].Value}\s*>") is { Success: true } defined ? defined.Groups[1].Value.Trim()
                     : m.Value);
             }
