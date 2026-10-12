@@ -592,6 +592,34 @@ internal static class InitCommand
         StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<EnforceCodeStyleInBuild>\s*true\s*<", RegexOptions.IgnoreCase));
 
     /// <summary>
+    /// The sections for the parts of the repository with their own Sonar severities (a path section of the root
+    /// .editorconfig, a sub-directory's .editorconfig: <see cref="Scope"/>), each with the lines that differ from the
+    /// repository-wide <paramref name="sonarLines"/> (<see cref="Migration.ScopeLines"/>).
+    /// </summary>
+    internal static List<(string Section, List<string> Lines)> SonarScopes(string root, SonarSetup sonar, List<string> sonarLines, ISet<string> own)
+    {
+        var result = new List<(string Section, List<string> Lines)>();
+        var ownRoots = StyleCopSetup.EditorConfigRoots(root);
+        foreach (var scope in StyleCopSetup.Read(root).Scopes.Where(s => s.Sonar is not null))
+        {
+            // ponytail: a sub-directory's section that isn't for all its C# files, or one below a 'root = true' folder, is
+            // skipped; translate its glob into the root's when one turns up.
+            var folder = (Path.GetDirectoryName(scope.File) ?? string.Empty).Replace('\\', '/');
+            var section = folder.Length == 0 ? scope.Section
+                : StyleCopSetup.AppliesToCSharp(scope.Section) && !ownRoots.Any(r => folder == r || folder.StartsWith(r + "/", StringComparison.Ordinal)) ? StyleCopSetup.SectionFor([folder])
+                : null;
+            var inScope = new List<string>();
+            sonar.For(scope).Apply(inScope, _ => true, own);
+            if (section is not null && Migration.ScopeLines(sonarLines, inScope, own) is { Count: > 0 } lines)
+            {
+                result.Add((section, [$"# Sonar's severities in {scope.File} [{scope.Section}]", .. lines]));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// One .editorconfig's block, with its convention report printed: the root's (<paramref name="folder"/> empty), or the
     /// one of a folder whose .editorconfig says 'root = true', judged from that folder's own code and settings (the root's
     /// don't reach it; CleanArchitecture's sample/ got CRLF lines in LF files and 'is null' against its '== null').
@@ -662,34 +690,6 @@ internal static class InitCommand
             HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
             HasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain),
         };
-    }
-
-    /// <summary>
-    /// The sections for the parts of the repository with their own Sonar severities (a path section of the root
-    /// .editorconfig, a sub-directory's .editorconfig: <see cref="Scope"/>), each with the lines that differ from the
-    /// repository-wide <paramref name="sonarLines"/> (<see cref="Migration.ScopeLines"/>).
-    /// </summary>
-    internal static List<(string Section, List<string> Lines)> SonarScopes(string root, SonarSetup sonar, List<string> sonarLines, ISet<string> own)
-    {
-        var result = new List<(string Section, List<string> Lines)>();
-        var ownRoots = StyleCopSetup.EditorConfigRoots(root);
-        foreach (var scope in StyleCopSetup.Read(root).Scopes.Where(s => s.Sonar is not null))
-        {
-            // ponytail: a sub-directory's section that isn't for all its C# files, or one below a 'root = true' folder, is
-            // skipped; translate its glob into the root's when one turns up.
-            var folder = (Path.GetDirectoryName(scope.File) ?? string.Empty).Replace('\\', '/');
-            var section = folder.Length == 0 ? scope.Section
-                : StyleCopSetup.AppliesToCSharp(scope.Section) && !ownRoots.Any(r => folder == r || folder.StartsWith(r + "/", StringComparison.Ordinal)) ? StyleCopSetup.SectionFor([folder])
-                : null;
-            var inScope = new List<string>();
-            sonar.For(scope).Apply(inScope, _ => true, own);
-            if (section is not null && Migration.ScopeLines(sonarLines, inScope, own) is { Count: > 0 } lines)
-            {
-                result.Add((section, [$"# Sonar's severities in {scope.File} [{scope.Section}]", .. lines]));
-            }
-        }
-
-        return result;
     }
 
     private static bool IsCSharp(string file) => file.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
