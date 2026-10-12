@@ -123,6 +123,7 @@ public class LiteralSuffixTests
             string b = ({|BRO1122:(double)0|}).ToString();
             string c = ({|BRO1122:(long)-1|}).ToString();
             double d = 1 + ({|BRO1122:(double)2|}) * 3;
+            long e = 1 + ({|BRO1122:(long)-1|});
         }
         """,
         """
@@ -131,6 +132,7 @@ public class LiteralSuffixTests
             string b = 0D.ToString();
             string c = (-1L).ToString();
             double d = 1 + 2D * 3;
+            long e = 1 + (-1L);
         }
         """);
 

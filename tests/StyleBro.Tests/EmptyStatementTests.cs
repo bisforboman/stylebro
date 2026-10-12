@@ -234,4 +234,35 @@ public class EmptyStatementTests
             }
         }
         """);
+
+    [Fact]
+    public Task EmptyStatementNextToOneBlankLine_TakesNoOtherLineAlong() => VerifyFixAsync(
+        """
+        class C
+        {
+            void M()
+            {
+                M();
+                {|BRO1101:;|}
+
+                M();
+
+                {|BRO1101:;|}
+                M();
+            }
+        }
+        """,
+        """
+        class C
+        {
+            void M()
+            {
+                M();
+
+                M();
+
+                M();
+            }
+        }
+        """);
 }

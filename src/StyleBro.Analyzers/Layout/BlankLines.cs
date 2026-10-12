@@ -133,13 +133,12 @@ internal static class BlankLines
             return false;
         }
 
-        // The token before the comment: an opening brace (or a collection expression's '[', like StyleCop's #3766), the
-        // colon of a switch label, or '=>' (a switch arm, lambda or expression body, StyleCop's #3392) keeps the comment
-        // attached.
+        // The token before the comment: an opening brace, the colon of a switch label, or '=>' (a switch arm, lambda or
+        // expression body, StyleCop's #3392) keeps the comment attached; so does a collection expression's '[' (StyleCop's
+        // #3766), as the start of a list (IsBetweenListItems).
         var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
         return !previous.IsKind(SyntaxKind.OpenBraceToken)
             && !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)
-            && !(previous.IsKind(SyntaxKind.OpenBracketToken) && previous.Parent.IsKind(SyntaxKind.CollectionExpression))
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenChainLinks(comment)

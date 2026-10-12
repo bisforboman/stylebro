@@ -238,8 +238,16 @@ public class BlankLineAfterTests
         {
             int M(int a, System.Func<int> f) => M(a, () =>
             {
-                var x = a;
-                {|BRO1504:// x|}
+                int x = a,
+                    {|BRO1504:// y|}
+                    y = a;
+                if (
+                    {|BRO1504:// x|}
+                    x > y)
+                {
+                }
+
+                // x
                 return x;
             });
         }
@@ -249,7 +257,16 @@ public class BlankLineAfterTests
         {
             int M(int a, System.Func<int> f) => M(a, () =>
             {
-                var x = a;
+                int x = a,
+
+                    // y
+                    y = a;
+                if (
+
+                    // x
+                    x > y)
+                {
+                }
 
                 // x
                 return x;
