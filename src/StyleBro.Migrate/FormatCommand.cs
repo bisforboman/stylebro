@@ -414,13 +414,15 @@ internal static class FormatCommand
     /// <summary>true: CRLF throughout, false: LF throughout; null: both, a lone CR, no line break, or UTF-16 (not touched).</summary>
     public static bool? Ending(byte[] bytes)
     {
-        const byte Cr = 13, Lf = 10;
+        const byte Cr = 13;
+        const byte Lf = 10;
         if (bytes.Length >= 2 && ((bytes[0] == 0xFF && bytes[1] == 0xFE) || (bytes[0] == 0xFE && bytes[1] == 0xFF)))
         {
             return null;
         }
 
-        int crlf = 0, lf = 0;
+        int crlf = 0;
+        int lf = 0;
         for (var i = 0; i < bytes.Length; i++)
         {
             if (bytes[i] == Cr)
@@ -449,7 +451,8 @@ internal static class FormatCommand
     public static void RestoreLineEndings(IReadOnlyDictionary<string, bool> endings) =>
         endings.AsParallel().ForAll(e =>
         {
-            const byte Cr = 13, Lf = 10;
+            const byte Cr = 13;
+            const byte Lf = 10;
             if (!File.Exists(e.Key))
             {
                 return;
