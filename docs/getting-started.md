@@ -11,21 +11,21 @@ Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your pro
 
 ### Which version
 
-The latest release on nuget.org is **0.5.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
-that exact version. This page describes `main`: what changed since that release (some `init` verdicts,
-for example) ships in the next one and is listed in [changes/](https://github.com/bisforboman/stylebro/tree/main/changes).
+The latest release on nuget.org is **0.6.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
+that exact version. This page describes `main`, which matched that release when it shipped; what changed since then
+ships in the next one and is listed in [changes/](https://github.com/bisforboman/stylebro/tree/main/changes).
 To try the code on `main` before the next release, build both
-packages from a clone into a local folder (any version string works; `0.5.0-dev.1` here):
+packages from a clone into a local folder (any version string works; `0.7.0-dev.1` here):
 
 ```
 git clone https://github.com/bisforboman/stylebro
-dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.5.0-dev.1
-dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.5.0-dev.1
-dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.5.0-dev.1
+dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.7.0-dev.1
+dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.7.0-dev.1
+dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.7.0-dev.1
 ```
 
-Then add the folder as a package source in your repository's `nuget.config` and use `0.5.0-dev.1` wherever this page
-says `0.5.0-alpha.1`. When the `nuget.config` has a `<packageSourceMapping>`, the new source needs a mapping too: NuGet
+Then add the folder as a package source in your repository's `nuget.config` and use `0.7.0-dev.1` wherever this page
+says `0.6.0-alpha.1`. When the `nuget.config` has a `<packageSourceMapping>`, the new source needs a mapping too: NuGet
 only looks for a package in the sources mapped to it, so the source alone gives NU1102 (package not found):
 
 ```xml
@@ -69,7 +69,7 @@ needs a restore). Where the preview adds the reference under central package man
 Previewing 'stylebro-migrate init --write' and 'stylebro-migrate format' on a copy; nothing in C:\src\FFMpegCore changes.
 Copying the repository to C:\Users\me\AppData\Local\Temp\stylebro-preview-fmsw0dps.3qa\FFMpegCore... 0s
 Settings: 31 lines in .editorconfig; 3 lines in Directory.Build.props (StyleBro.Analyzers)
-  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.5.0-alpha.1 to Directory.Build.props for the preview, as docs/getting-started.md says (the patch includes it).
+  StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.6.0-alpha.1 to Directory.Build.props for the preview, as docs/getting-started.md says (the patch includes it).
 Finding what format fixes ('dotnet format --verify-no-changes')... 16s
 Format run 1... 29s
 Format run 2... 14s
@@ -102,7 +102,7 @@ Add it to every project, for example in `Directory.Build.props` at the repositor
 ```xml
 <Project>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.6.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
@@ -112,7 +112,7 @@ With central package management, the version goes in `Directory.Packages.props` 
 ```xml
 <!-- Directory.Packages.props -->
 <ItemGroup>
-  <PackageVersion Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" />
+  <PackageVersion Include="StyleBro.Analyzers" Version="0.6.0-alpha.1" />
 </ItemGroup>
 
 <!-- Directory.Build.props -->
@@ -129,7 +129,7 @@ projects a reference with a version, next to the version-less one:
 <!-- Directory.Build.props -->
 <ItemGroup>
   <PackageReference Include="StyleBro.Analyzers" PrivateAssets="all" Condition="'$(ManagePackageVersionsCentrally)' == 'true'" />
-  <PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
+  <PackageReference Include="StyleBro.Analyzers" Version="0.6.0-alpha.1" PrivateAssets="all" Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
 </ItemGroup>
 ```
 
@@ -463,7 +463,7 @@ before `dotnet format` runs: without the analyzers it would fix only whitespace 
 code clean. Projects without it next to ones with it are named (`Without StyleBro: ...`). The command restores once
 before the runs; that restore skips NuGet's audit (`-p:NuGetAudit=false`): vulnerability warnings (NU1901-NU1904) are
 the build's business, and with `TreatWarningsAsErrors` they failed every run. A solution filter (`.slnf`) works like
-its solution, with only its projects. *Next release:* a solution with several filters of it next to it (Steeltoe's
+its solution, with only its projects. a solution with several filters of it next to it (Steeltoe's
 `Steeltoe.All.slnx` and its seven `.slnf` parts) counts as that solution; the command says how to name a filter instead.
 A folder with several solutions or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 With none at the root, it looks for a Traversal project there (`dirs.proj` with `Sdk="Microsoft.Build.Traversal"`,
@@ -497,10 +497,10 @@ dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 BRO1008
 Run `stylebro-migrate format --verify-no-changes --severity warn` after the build: it changes nothing and fails (exit
 code 2) when formatting would change a file. Findings kept on purpose don't fail it; plain
 `dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
-there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md). *Next release:* `init` and the migration
+there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md). `init` and the migration
 name the workflow lines (`.github/workflows`, `azure-pipelines.yml`) that still run plain `dotnet format --verify-no-changes`.
 
-*Next release:* with `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
+with `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
 agents (opt-in). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
 [Scripts and AI agents](agents.md).
 
@@ -716,18 +716,18 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   `packages.config`:
 
   ```xml
-  <package id="StyleBro.Analyzers" version="0.5.0-alpha.1" targetFramework="net462" developmentDependency="true" />
+  <package id="StyleBro.Analyzers" version="0.6.0-alpha.1" targetFramework="net462" developmentDependency="true" />
   ```
 
   In the project (paths relative to it; the `packages` folder is next to the solution):
 
   ```xml
   <ItemGroup>
-    <Analyzer Include="..\packages\StyleBro.Analyzers.0.5.0-alpha.1\analyzers\dotnet\cs\StyleBro.Analyzers.dll" />
-    <Analyzer Include="..\packages\StyleBro.Analyzers.0.5.0-alpha.1\analyzers\dotnet\cs\StyleBro.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleBro.Analyzers.0.6.0-alpha.1\analyzers\dotnet\cs\StyleBro.Analyzers.dll" />
+    <Analyzer Include="..\packages\StyleBro.Analyzers.0.6.0-alpha.1\analyzers\dotnet\cs\StyleBro.CodeFixes.dll" />
   </ItemGroup>
   <!-- at the end, after the Microsoft.CSharp.targets import: the preset and the baseline -->
-  <Import Project="..\packages\StyleBro.Analyzers.0.5.0-alpha.1\build\StyleBro.Analyzers.targets" Condition="Exists('..\packages\StyleBro.Analyzers.0.5.0-alpha.1\build\StyleBro.Analyzers.targets')" />
+  <Import Project="..\packages\StyleBro.Analyzers.0.6.0-alpha.1\build\StyleBro.Analyzers.targets" Condition="Exists('..\packages\StyleBro.Analyzers.0.6.0-alpha.1\build\StyleBro.Analyzers.targets')" />
   ```
 
   plus an `<Error Condition="!Exists('...StyleBro.Analyzers.targets')" ... />` line in the project's
@@ -737,7 +737,7 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   serves SDK-style projects needs a condition that keeps it away from them:
 
   ```xml
-  <PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" Condition="'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')" />
+  <PackageReference Include="StyleBro.Analyzers" Version="0.6.0-alpha.1" PrivateAssets="all" Condition="'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')" />
   ```
 
   `stylebro-migrate` names the packages.config projects and says this in its report.

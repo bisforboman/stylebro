@@ -5,6 +5,92 @@ StyleBro.Migrate to nuget.org and a GitHub release with its section below as the
 change: [docs/versioning.md](docs/versioning.md). What's merged but not released yet is in [changes/](changes/) (one
 file per pull request).
 
+## 0.6.0-alpha.1 – 2026-10-12
+
+129 rules, each fixed by `dotnet format`. Docs: https://bisforboman.github.io/stylebro/
+
+### Breaking changes
+
+- **The preset no longer sorts usings** (it stopped setting `dotnet_sort_system_directives_first`, which makes
+  `dotnet format` sort whenever it's set). `init` writes the key when your usings are already sorted, else a comment
+  on how to turn sorting on.
+- **Sonar mappings never fix what the Sonar rule accepts** (`stylebro-migrate`): S100, S101, S1118, S1125, S1481,
+  S1854, S1905, S2325, S3052, S3260 and S3442 are no longer mapped (the report lists them with the reason); S121, S818,
+  S1066, S1116, S3878 and S8969 use the new Sonar-matching settings below; S927 turns BRO1313 on with
+  `stylebro_match_base_parameter_names = non_generic_methods`; S4136 maps to `stylebro_keep_overloads_together =
+  same_access`. Where StyleCop turns the same rule on (SA1106, SA1503), StyleCop's wider scope stays.
+- **A StyleCop migration applies only where StyleCop ran:** `stylebro-migrate --write` writes settings (and turns the
+  preset off) only for the folders of projects that reference StyleCop.Analyzers, reading each project's own ruleset
+  and `stylecop.json`. Other folders are listed in the report, and `format` leaves them alone.
+- **More field renames go through:** BRO1303/BRO1306 keep a name only for a string that reaches a member by name
+  (`GetField("_count")`, `Type.GetType(...)`, `[MemberData("...")]`, ...), no longer for any string with that text.
+- **`stylebro-migrate format --verify-no-changes` exits 1 when a project wasn't loaded in any run**, instead of
+  reporting "Clean." (projects skipped for some frameworks only, or for an F# reference, stay warnings).
+- **Old-style (non-SDK) projects:** `format` no longer restores them; run `msbuild -t:restore
+  -p:RestorePackagesConfig=true` first. `packages.config` projects get StyleBro.Analyzers the packages.config way, and
+  the `Directory.Build.props` reference gets a condition that leaves them out (it broke their restore).
+
+### New
+
+- **`stylebro-migrate` for scripts and AI agents** ([docs](https://bisforboman.github.io/stylebro/agents/)): `--json`
+  on every command, `format --files a.cs b.cs` (seconds instead of minutes), `--agents-md` for an `AGENTS.md` section,
+  and `llms.txt`/`llms-full.txt` on the docs site.
+- **Six rules can report exactly what their Sonar rule does:** `stylebro_braces_statements = if_and_loops` (BRO1514,
+  S121), `stylebro_upper_case_literal_suffixes = lone_l` (BRO1135, S818), `stylebro_allow_nested_dynamic_ifs`
+  (BRO1149, S1066), `stylebro_allow_semicolon_after_closing_brace` (BRO1101, S1116),
+  `stylebro_params_arrays = except_object_and_jagged` (BRO1151, S3878), `stylebro_allow_null_forgiving_on_unannotated`
+  (BRO1147, S8969).
+- **More settings:** `stylebro_match_base_parameter_names = all | non_generic_methods` (BRO1313),
+  `stylebro_private_static_field_naming`, `stylebro_private_mutable_static_field_naming`,
+  `stylebro_allow_leading_underscore_in_pascal_fields` (BRO1306; `--write` sets it from SA1309),
+  `stylebro_keep_overloads_together = same_access`.
+- **Finding the solution:** Traversal projects, the only solution one folder down, and a solution next to several
+  `.slnf` filters of it work without naming one. `stylebro-migrate --version`.
+
+### Changed
+
+- **`init` follows more of your code's conventions** (clear code sets the style, mixed code turns the rule off):
+  line endings, charset and final newline (from the files, also against your `.editorconfig`); naming (static field
+  casing, `s_`/`t_` prefixes, `String` vs `string`); layout (member order, one-line statements and jumps, multi-line
+  auto-properties, grouped list items, `#region`s in members, combined declarations, implicit `private`, relative
+  usings, summary wording); other formatters (CSharpier, ReSharper/Rider column alignment). A key the code contradicts,
+  or one nothing enforces, turns off the rule instead; `root = true` folders get their own block; re-runs keep what the
+  last run wrote.
+- **Rules:** BRO1514-BRO1516 allow consecutive `fixed` statements (`stylebro_allow_consecutive_usings`); BRO1523 leaves
+  chains whose first line has several calls; BRO1606 and BRO1604 leave summaries in your own words; BRO1504 needs no
+  blank line before a comment in a list or call chain; BRO1401 skips property patterns; BRO1611/BRO1613/BRO1614 skip
+  `<inheritdoc>`; naming rules leave interop names and `dotnet_naming_rule` prefixes alone; BRO1142 follows
+  `csharp_style_var_*`; nothing is reported in source-generator output.
+- **Faster:** a full `dotnet format` takes about half the time, and `stylebro-migrate`'s first run 35-60 % less.
+
+### Fixed
+
+- **One `dotnet format` run is enough** where several rules used to need a second one (BRO1101, BRO1122, BRO1126,
+  BRO1149, BRO1509, BRO1514-BRO1516, BRO1527, member sorting with region removal, BRO1107 with BRO1108).
+- **Rules that changed meaning:** BRO1001 keeps types read by position through reflection; BRO1301/BRO1302 leave
+  expression-tree names; BRO1303/BRO1306 don't rename a field to its class's name; `nameof` and multi-targeted renames
+  check the right symbols; file headers with `;` or `#` are kept whole.
+- **`format` and `--diff` are sturdier:** the same result on every OS (each file keeps its line ending); no false
+  "clean" when the analyzers didn't load; restores skip NuGet's audit and explain NU1102; projects sharing files,
+  linked files, `.slnf` filters, central package management, nested `Directory.Build.props` and target framework
+  spellings (`net6`, `net6.0`) are handled; clear errors instead of stack traces.
+- **Migration and `init`:** Sonar severities per folder and per SonarAnalyzer version; versions from MSBuild properties;
+  StyleCop 1.0.x; a second `--write` or `init` gives the same settings; edited files keep their line endings.
+
+### Upgrading from 0.5.0-alpha.1
+
+Bump the package, then update the tool: `dotnet tool update -g StyleBro.Migrate --prerelease`.
+
+Run `stylebro-migrate init --write` again (or `stylebro-migrate --write` if you migrated from StyleCop) to pick up the
+new conventions; it keeps what it wrote before. Code a `format` run already sorted keeps BRO1001 on.
+
+- Relied on the preset to sort usings? Re-run `init`, or set `dotnet_sort_system_directives_first = true`.
+- Migrated from StyleCop with SA1309 off? `--write` adds `stylebro_allow_leading_underscore_in_pascal_fields = true`,
+  so BRO1306 stops renaming `_x` static readonly fields.
+- Old-style projects: restore with `msbuild -t:restore -p:RestorePackagesConfig=true` before `stylebro-migrate format`.
+
+Full list of changes: https://github.com/bisforboman/stylebro/compare/v0.5.0-alpha.1...v0.6.0-alpha.1
+
 ## 0.5.0-alpha.1 – 2026-10-10
 
 129 rules, each fixed by `dotnet format`. Docs: https://bisforboman.github.io/stylebro/
