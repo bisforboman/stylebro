@@ -49,6 +49,28 @@ internal static class Conventions
     public const string SortUsingsKey = "dotnet_sort_system_directives_first";
 
     /// <summary>
+    /// The files' line endings (unit: files). Without the key, 'dotnet format' writes the OS's line ending into the lines it
+    /// rewrites: on Windows CRLF into LF files (SmartEnum: 26 files with mixed endings). Files git converts on checkout don't
+    /// count (<see cref="ConvertedKey"/>).
+    /// </summary>
+    public const string EndOfLineKey = "end_of_line";
+
+    /// <summary>
+    /// BRO1307's severity: private static fields with the .NET runtime's 's_' (and 't_' for thread-static) prefix, or without
+    /// (owner's decision 2026-10-12: "Detect both"; actions/runner got ~541 's_' statics renamed). There is no switch for static
+    /// fields alone, so BRO1307 goes off: repositories with 's_' statics rarely use 'm_' (a naming rule that requires 's_'
+    /// would keep them too, but IDE1006 then also suggests 's_' for constants and the other static fields).
+    /// </summary>
+    public const string StaticPrefixKey = "dotnet_diagnostic." + DiagnosticIds.FieldPrefix + ".severity";
+
+    /// <summary>
+    /// IDE0049's severity (unit: files): files that name built-in types only with keywords, or that use framework names
+    /// ('String', 'Int32') IDE0049 would rewrite (owner's decision 2026-10-12: "Detect both"; actions/runner got 'String' ->
+    /// 'string' 6,424 times in 501 files). Files, not places: every 'int' would outvote the few 'String's.
+    /// </summary>
+    public const string TypeAliasKey = "dotnet_diagnostic.IDE0049.severity";
+
+    /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
     /// with what each looks like, and the line that stops StyleBro enforcing either form when the code has no clear majority
     /// (owner's decision 2026-10-10, docs/decisions.md; null: no StyleBro rule of its own enforces it, e.g. the SDK formatter's
@@ -83,6 +105,8 @@ internal static class Conventions
         new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
         new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
+        new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
+        new(TypeAliasKey, "built-in type names", "warning", ("warning", "only keywords ('int')"), ("none", "framework names ('Int32')"), Off("IDE0049"), "dotnet_style_predefined_type_for_locals_parameters_members", "dotnet_style_predefined_type_for_member_access") { Unit = "file" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
     };
 
@@ -159,13 +183,6 @@ internal static class Conventions
     private const string SuffixCaseKey = "dotnet_diagnostic." + DiagnosticIds.LiteralSuffixCase + ".severity";
 
     /// <summary>
-    /// The files' line endings (unit: files). Without the key, 'dotnet format' writes the OS's line ending into the lines it
-    /// rewrites: on Windows CRLF into LF files (SmartEnum: 26 files with mixed endings). Files git converts on checkout don't
-    /// count (<see cref="ConvertedKey"/>).
-    /// </summary>
-    private const string EndOfLineKey = "end_of_line";
-
-    /// <summary>
     /// Files whose checkout ending git picks per machine (core.autocrlf, or 'text' without 'eol'): CRLF on Windows, LF on
     /// Linux. Writing one machine's ending would make 'format' rewrite every file on the other OS; without the key, 'format'
     /// writes the OS's ending, which is what such a checkout has anyway.
@@ -193,6 +210,12 @@ internal static class Conventions
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
+
+    /// <summary>The framework names IDE0049 rewrites to keywords.</summary>
+    private static readonly HashSet<string> FrameworkTypeNames = new(StringComparer.Ordinal)
+    {
+        "String", "Object", "Boolean", "Char", "Byte", "SByte", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Single", "Double", "Decimal",
+    };
 
     /// <summary>The SDK formatter's options (IDE0055's): with CSharpier they don't apply.</summary>
     private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey };
@@ -248,7 +271,7 @@ internal static class Conventions
         var converted = ConvertedByGit(root);
 
         // Parsing and counting is per file: in parallel, each file with its own counts, added up in file order.
-        var parsed = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+        var parsed = Migration.OwnCSharpFiles(root)
             .AsParallel()
             .AsOrdered()
             .Select(file =>
@@ -430,17 +453,7 @@ internal static class Conventions
     /// </summary>
     public static (string? Line, string? Report) LineEndings(string root)
     {
-        var counts = NewCounts();
-        var converted = ConvertedByGit(root);
-        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
-        {
-            var text = File.ReadAllText(file);
-            if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text) && LineEnding(text) is var ending and >= 0)
-            {
-                _ = converted.TryGetValue(Path.GetFullPath(file), out var byAttribute) ? counts[ConvertedKey][byAttribute ? 1 : 0]++ : counts[EndOfLineKey][ending]++;
-            }
-        }
-
+        var counts = EndingCounts(root);
         var (lf, crlf) = (counts[EndOfLineKey][0], counts[EndOfLineKey][1]);
         if (lf + crlf + counts[ConvertedKey].Sum() == 0)
         {
@@ -457,6 +470,23 @@ internal static class Conventions
         var report = $"Line endings: C# files {found} -> " + (winner < 0 ? "end_of_line not set ('format' writes your OS's ending into the lines it changes)" : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}")
             + (ConvertedNote(counts[ConvertedKey]) is { } note ? $"; {note}" : string.Empty);
         return (winner < 0 ? null : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}", report);
+    }
+
+    /// <summary>The C# files' line endings alone (<see cref="Count(string, IReadOnlyDictionary{string, string}?)"/>'s, without parsing).</summary>
+    public static Dictionary<string, int[]> EndingCounts(string root)
+    {
+        var counts = NewCounts();
+        var converted = ConvertedByGit(root);
+        foreach (var file in Migration.OwnCSharpFiles(root))
+        {
+            var text = File.ReadAllText(file);
+            if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text) && LineEnding(text) is var ending and >= 0)
+            {
+                _ = converted.TryGetValue(Path.GetFullPath(file), out var byAttribute) ? counts[ConvertedKey][byAttribute ? 1 : 0]++ : counts[EndOfLineKey][ending]++;
+            }
+        }
+
+        return counts;
     }
 
     /// <summary>
@@ -507,6 +537,33 @@ internal static class Conventions
             ],
             $"Line endings: {why}. Set end_of_line = unset for C# files and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: '*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig.");
     }
+
+    /// <summary>
+    /// The report note when the repository's own end_of_line (<paramref name="own"/>) says one ending and the C# files git
+    /// leaves alone clearly have the other (the usual majority), or null. Nothing enforced the key, so the files decide, like a
+    /// convention key at severity silent (owner's decision 2026-10-12, extended: "Keep endings out of it, warn"):
+    /// CleanArchitecture says 'end_of_line = crlf' with 349 of 350 files LF and no conversion, and 'format' turned 86 files to
+    /// CRLF, 44 with no other change. 'unset' would be worse there: probed, 'dotnet format' then writes the OS's ending into
+    /// every file it formats (a Windows run turned an untouched LF file CRLF), while without the key it keeps a file's ending.
+    /// </summary>
+    public static (string Ending, string Note)? ContradictedEnding(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own)
+    {
+        if (!own.TryGetValue(EndOfLineKey, out var setting) || ConvertedOutnumber(counts) || !counts.TryGetValue(EndOfLineKey, out var endings)
+            || endings.Sum() < MinimumAgreeing)
+        {
+            return null;
+        }
+
+        var value = setting.Split(':')[0].Trim().ToLowerInvariant();
+        var files = Winner(endings[0], endings[1]) switch { 0 => "lf", 1 => "crlf", _ => null };
+        return value is not ("lf" or "crlf") || files is null || files == value
+            ? null
+            : (files, $"Line endings: your .editorconfig says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files and 'format' leaves the endings alone. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
+    }
+
+    /// <summary>The prefix ('s_' or 't_') an active naming rule of the repository requires (BRO1307 then keeps it), or null.</summary>
+    public static string? PrefixRequiredByNamingRule(IReadOnlyDictionary<string, string> own) =>
+        new[] { "s_", "t_" }.FirstOrDefault(p => StyleBro.Analyzers.Naming.FieldNames.IsPrefixRequiredByNamingRule(p, new Options(own)));
 
     /// <summary>
     /// How many files in 'git ls-files --eol -z' output get the machine's ending on checkout: stored as LF, and converted
@@ -567,6 +624,8 @@ internal static class Conventions
             counts[StyleBro.Analyzers.Naming.FieldNames.StyleKey][1] += underscore;
             UsingPlacement();
             UsingOrder();
+            StaticPrefixes();
+            TypeAliases();
             Overloads();
             MemberOrder();
         }
@@ -800,6 +859,49 @@ internal static class Conventions
                 {
                     Add("csharp_using_directive_placement", inside);
                 }
+            }
+        }
+
+        // Unit = private static fields (not constants): with an 's_'/'t_' prefix or without.
+        void StaticPrefixes()
+        {
+            foreach (var field in root.DescendantNodes().OfType<FieldDeclarationSyntax>().Where(f => f.Modifiers.Any(SyntaxKind.StaticKeyword)
+                && !f.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword) || m.IsKind(SyntaxKind.InternalKeyword) || m.IsKind(SyntaxKind.ProtectedKeyword) || m.IsKind(SyntaxKind.ConstKeyword))))
+            {
+                foreach (var variable in field.Declaration.Variables)
+                {
+                    Add(StaticPrefixKey, variable.Identifier.ValueText is ['s' or 't', '_', _, ..]);
+                }
+            }
+        }
+
+        // Unit = files naming a built-in type: only with keywords, or with a framework name IDE0049 would rewrite ('String',
+        // 'System.Int32'; not 'x.String', 'Other.String' or one in a using directive).
+        void TypeAliases()
+        {
+            var (keywords, names) = (false, false);
+            foreach (var node in root.DescendantNodes())
+            {
+                if (node is PredefinedTypeSyntax predefined && !predefined.Keyword.IsKind(SyntaxKind.VoidKeyword))
+                {
+                    keywords = true;
+                }
+                else if (node is IdentifierNameSyntax identifier && FrameworkTypeNames.Contains(identifier.Identifier.ValueText)
+                    && !identifier.Ancestors().Any(a => a is UsingDirectiveSyntax)
+                    && identifier.Parent switch
+                    {
+                        QualifiedNameSyntax q when q.Right == identifier => q.Left.ToString() is "System" or "global::System",
+                        MemberAccessExpressionSyntax m when m.Name == identifier => m.Expression.ToString() is "System" or "global::System",
+                        _ => true,
+                    })
+                {
+                    names = true;
+                }
+            }
+
+            if (keywords || names)
+            {
+                Add(TypeAliasKey, names);
             }
         }
 
@@ -1342,6 +1444,8 @@ internal static class Conventions
     /// <summary>The root .editorconfig's settings as analyzer options (BRO1601's stylebro_document_* keys).</summary>
     private sealed class Options(IReadOnlyDictionary<string, string>? settings) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions
     {
+        public override IEnumerable<string> Keys => settings?.Keys ?? Enumerable.Empty<string>();
+
         public override bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value)
         {
             value = null;

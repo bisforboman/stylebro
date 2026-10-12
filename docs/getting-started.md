@@ -169,6 +169,11 @@ file sets it yet).
 forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count; code inside `#if`
 counts too, as `format` sees it in the target framework that defines the symbol):
 
+Vendored folders are recognized by their name (`vendor`, `third_party`, ...). Code copied in under another name (a
+`src/Sdk` from another product) counts as yours and can decide a convention; mark its folder `generated_code = true` in
+your root `.editorconfig` (`[src/Sdk/**]`, see [excluding vendored code](#excluding-vendored-code)) and run `init` again:
+folders marked that way don't count.
+
 - **fewer than 3 places** (or none): too few to tell, StyleBro's default stays and nothing is written;
 - **3 to 9 places**: followed when they all agree;
 - **10 places or more**: followed when one form has at least 75 %;
@@ -192,6 +197,12 @@ it writes the code's form into the block, which comes later in the file and wins
 default). This applies to every convention whose key takes a severity: braces (IDE0011), using placement (IDE0065),
 arithmetic parentheses (IDE0048), default values (IDE0034) and operator placement.
 
+**Folders with their own `root = true` `.editorconfig`** (a `sample/` with its own solution): the root's settings never
+reach their files, since `root = true` stops the lookup there. `init` gives each such folder with C# code a block of its
+own in its `.editorconfig`, with the built-in rule severities, judged from that folder's code and settings alone (the
+report has a section per folder). A folder with too little code to tell keeps StyleBro's defaults, and the report says so.
+`stylebro-migrate --write` writes the whole block into such a folder too.
+
 A few settings work a little differently:
 
 - **One-line statements** (`if (a) return;`, `case 1: a(); break;`): the preset sets
@@ -208,7 +219,17 @@ A few settings work a little differently:
   --write` writes `end_of_line` the same way. When your `.editorconfig` sets `end_of_line` but git converts the files on
   checkout (`end_of_line = lf` with `*.cs text=auto` means CRLF files in a Windows checkout), `init` keeps endings out of
   it: `end_of_line = unset` for C# files and IDE0055 as a suggestion, so neither `format` nor the build touches them, and
-  the report says how to settle it (`*.cs text eol=lf` in `.gitattributes`, or removing `end_of_line`).
+  the report says how to settle it (`*.cs text eol=lf` in `.gitattributes`, or removing `end_of_line`). When your
+  `end_of_line` says one ending but the files git leaves alone clearly have the other (`crlf`, with nearly every file LF),
+  nothing ever enforced it: `init` writes the files' ending for C# files, so `format` doesn't flip every file it touches,
+  and the report says how to switch to the key's ending instead.
+- **`s_`/`t_` prefixes** count private static fields (constants aside) with and without the .NET runtime's `s_` (or `t_`)
+  prefix. Mostly without: [BRO1307](rules/BRO1307.md) stays on; mostly with or mixed: it's turned off, so `format` doesn't
+  rename them (there is no switch for static fields alone, so `m_` fields keep their prefix too). A `dotnet_naming_rule`
+  of yours that requires `s_` decides instead.
+- **Type names** count files: files that name built-in types only with keywords (`string`, `int`), and files with a
+  framework name IDE0049 would rewrite (`String`, `System.Int32`). Mostly keywords: IDE0049 stays on; mostly framework
+  names or mixed: it's turned off. Your own `dotnet_style_predefined_type_*` keys decide instead.
 - **Member order** ([BRO1001](rules/BRO1001.md)) counts types whose members BRO1001 would sort apart (two or more
   members with different sort keys), with your own order settings: already in its order or not. A type that is in order
   once overloads stay together counts as sorted (whether they do is the overloads convention's call). Mostly sorted: the
@@ -291,6 +312,8 @@ A few settings work a little differently:
 | Member order | types whose members BRO1001 sorts apart: already in its order or not | [BRO1001](rules/BRO1001.md) | `dotnet_diagnostic.BRO1001.severity` |
 | Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
+| `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
+| Type names | files with only keywords (`int`) or framework names (`Int32`) | IDE0049 | `dotnet_diagnostic.IDE0049.severity` |
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 

@@ -19,7 +19,7 @@ public sealed partial class MigrationTests
         Assert.Contains("end_of_line = lf", result.Lines);
         Assert.Contains("Line endings: C# files 3 of 3 LF -> end_of_line = lf", result.Notes);
 
-        Write(".editorconfig", "root = true\n[*]\nend_of_line = crlf\n");
+        Write(".editorconfig", "root = true\n[*]\nend_of_line = lf\n");
         Assert.DoesNotContain(Migration.Generate(StyleCopSetup.Read(root), root).Lines, l => l.StartsWith("end_of_line", StringComparison.Ordinal));
     }
 

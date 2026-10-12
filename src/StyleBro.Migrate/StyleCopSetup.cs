@@ -421,7 +421,13 @@ internal sealed class StyleCopSetup
     /// Files in the repository, skipping build output, version control and nested repositories (git submodules and other
     /// folders with their own '.git' file or folder): their settings and code belong to another repository.
     /// </summary>
-    public static IEnumerable<string> EnumerateFiles(string root)
+    public static IEnumerable<string> EnumerateFiles(string root) => EnumerateFiles(root, ownRoot: false);
+
+    /// <summary>
+    /// <see cref="EnumerateFiles(string)"/>; with <paramref name="ownRoot"/>, also without the folders below the root whose
+    /// .editorconfig says 'root = true' (<see cref="EditorConfigRoots"/>): the root's settings don't reach their files.
+    /// </summary>
+    public static IEnumerable<string> EnumerateFiles(string root, bool ownRoot)
     {
         var pending = new Stack<string>();
         pending.Push(root);
@@ -436,12 +442,54 @@ internal sealed class StyleCopSetup
             foreach (var child in Directory.EnumerateDirectories(directory))
             {
                 var name = Path.GetFileName(child);
-                if (name is not ("bin" or "obj" or ".git" or ".vs" or "node_modules" or "artifacts") && !IsNestedRepository(child))
+                if (name is not ("bin" or "obj" or ".git" or ".vs" or "node_modules" or "artifacts") && !IsNestedRepository(child) && !(ownRoot && IsEditorConfigRoot(child)))
                 {
                     pending.Push(child);
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// The folders below the root (relative, '/'-separated, sorted) whose .editorconfig says 'root = true': the lookup for
+    /// their files stops there, so nothing the root .editorconfig sets reaches them. init and the migration give each one a
+    /// block of its own, judged from its own code (CleanArchitecture's sample/ and MinimalClean/: the root's block never
+    /// reached them, and formatting sample/ left 41 files with mixed line endings and rewrote its '== null' checks).
+    /// </summary>
+    public static List<string> EditorConfigRoots(string root)
+    {
+        var top = Path.GetFullPath(root).TrimEnd('\\', '/');
+        return EnumerateFiles(root)
+            .Where(f => Path.GetFileName(f) == ".editorconfig" && Path.GetDirectoryName(Path.GetFullPath(f)) is { } folder
+                && !string.Equals(folder, top, StringComparison.OrdinalIgnoreCase) && IsEditorConfigRoot(folder))
+            .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>Whether a folder's .editorconfig says 'root = true' (in its preamble, before the first section).</summary>
+    public static bool IsEditorConfigRoot(string directory)
+    {
+        var path = Path.Combine(directory, ".editorconfig");
+        if (!File.Exists(path))
+        {
+            return false;
+        }
+
+        foreach (var line in File.ReadLines(path).Select(l => l.Trim()))
+        {
+            if (line.StartsWith('['))
+            {
+                return false;
+            }
+
+            if (Regex.IsMatch(line, @"^root\s*=\s*true$", RegexOptions.IgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>The folders under the root that are their own git repositories (submodules), relative, with a trailing '/'.</summary>

@@ -24,3 +24,17 @@ for C# files) meets C# files stored as LF that git converts on checkout (a `text
 `end_of_line = lf` in KubernetesClient) reports none; `format` still fixes other whitespace. The report names the
 contradiction and both ways out: `*.cs text eol=lf` in `.gitattributes` (then `git add --renormalize .`), or removing
 `end_of_line`. `init` does the same for the IDE0055 it writes (not with CSharpier, where IDE0055 is off).
+
+### Extended: an `end_of_line` the committed files contradict (2026-10-12, trial 10)
+
+CleanArchitecture says `end_of_line = crlf`, but 349 of 350 C# files are committed (and checked out) as LF: no
+`.gitattributes`, `core.autocrlf = false`. `init` reported the key as set, and `format` turned 86 files to CRLF, 44 of them
+with no other change. The same choice applies: endings stay as they are. But `unset` isn't how here: probed with
+`dotnet format whitespace` on Windows, `end_of_line = unset` rewrote an untouched LF file to CRLF (the formatter then uses
+the OS's ending for the whole file), while without the key it kept the file's LF. With git converting on checkout, the OS's
+ending is the checkout's, so `unset` is right there; here it isn't. So when the C# files git leaves alone clearly (the usual
+majority) have the other ending, nothing enforced the key, and the files decide, like a convention key at severity
+`silent`: the block writes `end_of_line = <the files' ending>` for C# files, IDE0055 keeps its severity (the key now
+matches the files), and the report says how to get the key's ending instead (remove the line and let `format` rewrite the
+files, or `*.cs text eol=<key>` in `.gitattributes` and `git add --renormalize .`). The migration does the same. Measured on
+CleanArchitecture: the root's `format` run changed 40 files, none of them only in their endings, and none became CRLF.
