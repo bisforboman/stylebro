@@ -108,20 +108,33 @@ internal static class InitCommand
         }
 
         // The root, then every folder with C# code whose .editorconfig says 'root = true': the root's block never reaches it.
+        // Without an .editorconfig of its own and C# code it would reach, the root gets none: the starter kit's code is all
+        // under src/, whose .editorconfig says root = true, and init created a root one nothing read.
         var modernizing = args.Contains("--modernize");
-        var targets = new List<Target> { Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing, sonarScopes) };
+        var folders = StyleCopSetup.EditorConfigRoots(root).Where(f => StyleCopSetup.EnumerateFiles(Path.Combine(root, f), ownRoot: true).Any(IsCSharp)).ToList();
+        var skipRoot = existing is null && folders.Count > 0 && !StyleCopSetup.EnumerateFiles(root, ownRoot: true).Any(IsCSharp);
+        var targets = skipRoot ? new List<Target>() : [Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing, sonarScopes)];
+        if (skipRoot)
+        {
+            Console.WriteLine($"No C# code outside {string.Join(", ", folders.Select(f => f + "/"))}, whose .editorconfig says root = true: no root .editorconfig is written.");
+        }
+
         if (multiTargeted.Count > 0)
         {
             Console.WriteLine(MultiTargetedLine(multiTargeted));
             Console.WriteLine(MultiTargetedHint);
         }
 
-        targets[0].ModernizeNotes.ForEach(Console.WriteLine);
-        foreach (var folder in StyleCopSetup.EditorConfigRoots(root).Where(f => StyleCopSetup.EnumerateFiles(Path.Combine(root, f), ownRoot: true).Any(IsCSharp)))
+        targets.FirstOrDefault()?.ModernizeNotes.ForEach(Console.WriteLine);
+        foreach (var folder in folders)
         {
             Console.WriteLine();
             Console.WriteLine($"{folder}/.editorconfig says root = true, so the root's settings don't reach {folder}/: it gets a block of its own, from its own code.");
             targets.Add(Prepare(root, folder, sonarLines, multiTargeted, modernizing));
+            if (targets.Count == 1)
+            {
+                targets[0].ModernizeNotes.ForEach(Console.WriteLine);
+            }
         }
 
         var agentsMd = args.Contains(AgentsFile.Option);
@@ -276,13 +289,26 @@ internal static class InitCommand
 
         own = own.Where(p => !unenforced.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase);
         var csharpier = Conventions.CSharpier(root) is { } evidence ? Conventions.CSharpierLines(evidence) : default;
+
+        // ReSharper/Rider's column alignment: IDE0055 off, like with CSharpier (RestSharp: 414 aligned hunks flattened).
+        var alignment = csharpier.Lines is null ? Conventions.AlignmentLines(settings) : null;
         var decided = new Dictionary<string, string>(StringComparer.Ordinal);
         var kept = new List<string>();
         foreach (var convention in Conventions.All)
         {
             if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
             {
-                decided[convention.Key] = $"set in .editorconfig ({own[key]})";
+                // A rule the last init turned off against this key (the code contradicted it, or was mixed) stays off: counted
+                // again after 'format', the numbers move (sourcegit: 263 operators, then 264, and the block changed).
+                if (csharpier.Lines is null && convention.Enforcer is { } enforcer && KeptLines(previous, [$"dotnet_diagnostic.{enforcer}.severity"]) is { Count: > 0 } offLines)
+                {
+                    decided[convention.Key] = $"kept from the last init ({enforcer} off; .editorconfig says {own[key]})";
+                    kept.AddRange(offLines);
+                }
+                else
+                {
+                    decided[convention.Key] = $"set in .editorconfig ({own[key]})";
+                }
             }
             else if (csharpier.Lines is not null && Conventions.IsCSharpiers(convention))
             {
@@ -330,7 +356,8 @@ internal static class InitCommand
         // The using order is decided apart from the list (two keys): kept the same way.
         var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
         kept.AddRange(usings);
-        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));
+        var keptKeys = new HashSet<string>(kept.Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));
         report.InsertRange(0, unenforced.Select(k => k == Conventions.EndOfLineKey
             ? $"  {"note",-8} {contradictedEnding!.Value.Note}"
             : $"  {"note",-8} {k} = {settings[k]} in .editorconfig isn't enforced (its severity is silent or none), so your code decides"));
@@ -346,12 +373,17 @@ internal static class InitCommand
             report.Insert(0, csharpier.Report);
         }
 
+        if (alignment is var (_, alignmentReport))
+        {
+            report.Insert(0, alignmentReport);
+        }
+
         // CSharpier (IDE0055 off) or the team's own IDE0055 severity keep theirs.
         var endings = new List<string>();
         if (gitEndings is ({ } endingLines, { } endingReport))
         {
             report.Add($"  {"note",-8} {endingReport}");
-            endings.AddRange(endingLines.Take(csharpier.Lines is null && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
+            endings.AddRange(endingLines.Take(csharpier.Lines is null && alignment is null && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
         }
 
         if (Conventions.EmptyHeaderLines(counts, own) is { } headerLines)
@@ -360,15 +392,23 @@ internal static class InitCommand
             endings.AddRange(headerLines);
         }
 
-        // A charset the files don't follow wasn't enforced either: the files decide, like the line endings.
-        if (Conventions.ContradictedCharset(counts, settings) is var (charsetLine, charsetNote))
+        // A charset or final line break the files don't follow wasn't enforced either: the files decide, like the line endings.
+        foreach (var key in new[] { Conventions.CharsetKey, Conventions.FinalNewlineKey })
         {
-            report.Add($"  {"note",-8} {charsetNote}");
-            endings.Add($"# init: {charsetNote}");
-            endings.Add(charsetLine);
+            if (Conventions.ContradictedFileSetting(counts, settings, key) is var (fileLine, fileNote))
+            {
+                report.Add($"  {"note",-8} {fileNote}");
+                endings.Add($"# init: {fileNote}");
+                endings.Add(fileLine);
+            }
         }
 
-        return ([.. csharpier.Lines ?? [], .. kept, .. detected, .. endings], report);
+        if (csharpier.Lines is null && alignment is null && Conventions.TrailingWhitespaceNote(counts, settings) is { } whitespaceNote)
+        {
+            report.Add($"  {"note",-8} {whitespaceNote}");
+        }
+
+        return ([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings], report);
     }
 
     /// <summary>
@@ -661,7 +701,7 @@ internal static class InitCommand
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored.Select(v => prefix + v))}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var block = Block(detected, plainHeader: ownSettings.ContainsKey("file_header_template"), sonarLines, generated, vendored, sonarScopes);
+        var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes);
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
         var name = prefix + ".editorconfig";
         if (!migrated)

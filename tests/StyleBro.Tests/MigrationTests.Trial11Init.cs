@@ -130,10 +130,10 @@ public sealed partial class MigrationTests
         var counts = Conventions.NewCounts();
         counts[Conventions.CharsetKey] = files;
 
-        var result = Conventions.ContradictedCharset(counts, new Dictionary<string, string> { ["charset"] = setting });
+        var result = Conventions.ContradictedFileSetting(counts, new Dictionary<string, string> { ["charset"] = setting }, Conventions.CharsetKey);
 
         Assert.Equal(expected, result?.Line);
-        Assert.Null(Conventions.ContradictedCharset(counts, new Dictionary<string, string>()));
+        Assert.Null(Conventions.ContradictedFileSetting(counts, new Dictionary<string, string>(), Conventions.CharsetKey));
     }
 
     [Fact]

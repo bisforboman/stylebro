@@ -22,3 +22,12 @@ removes no braces), using placement (BRO1008), arithmetic parentheses (`always_f
 form counts (the usual thresholds); a mixed result leaves the key in charge. A severity the repository sets for the rule
 wins. Not included: brace and `else` placement (IDE0055 enforces them), `default` (IDE0034), and the private field style
 from a naming rule (IDE1006).
+
+### Extended: mixed code under such a key (2026-10-12, trial 12)
+
+The starter kit says `dotnet_style_operator_placement_when_wrapping = beginning_of_line` (no severity, nothing enforces
+it), and its code is mixed: 486 operators start the line, 285 end it (63 %). The key decided, and BRO1520 moved 285
+operators. Owner's policy: a repository key that nothing enforced doesn't win over the code; with mixed code the rule goes
+off, as for a mixed convention without a key (`.editorconfig says beginning_of_line, unenforced, code mixed: BRO1520 is
+off`). The same keys and exceptions as above (a severity the repository sets for the rule wins). A second `init` keeps
+the line (sourcegit: after `format` the count went from 263 to 264 operators and the line was rewritten).

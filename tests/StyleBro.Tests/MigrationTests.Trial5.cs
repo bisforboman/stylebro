@@ -27,7 +27,7 @@ public sealed partial class MigrationTests
     [Theory]
     [InlineData(OperatorKey, "end_of_line", 85, 2, "BRO1520")]                                          // NCronJob
     [InlineData(OperatorKey, "beginning_of_line", 85, 2, null)]                                         // the code agrees
-    [InlineData(OperatorKey, "end_of_line", 50, 37, null)]                                              // no clear majority: the key decides
+    [InlineData(OperatorKey, "end_of_line", 50, 37, "BRO1520")]                                         // mixed under a key nothing enforced: off too (trial 12)
     [InlineData(OperatorKey, "end_of_line:warning", 2, 0, null)]                                        // too few to tell
     [InlineData(OperatorKey, "beginning_of_line:warning", 0, 30, "BRO1520")]
     [InlineData(OperatorKey, "sideways", 85, 2, null)]                                                  // not a value of the key
