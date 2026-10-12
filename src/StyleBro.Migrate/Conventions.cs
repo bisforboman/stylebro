@@ -266,11 +266,6 @@ internal static class Conventions
     /// <summary>BRO1606's severity: constructor summaries with the standard sentence ('Initializes a new instance of ...') or in their own words ('Opens a file ...').</summary>
     private const string ConstructorSummaryKey = "dotnet_diagnostic." + DiagnosticIds.ConstructorSummary + ".severity";
 
-    /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
-    private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
-
-    private static readonly string[] ConstructorSummaryStarts = { "Initializes a new instance", "Initializes static members", "Prevents a default instance" };
-
     /// <summary>BRO1114's severity: fields declared together ('int _rate, _channels;') or one by one, counted like <see cref="CombinedLocalsKey"/>.</summary>
     private const string CombinedFieldsKey = "dotnet_diagnostic." + DiagnosticIds.CombinedFields + ".severity";
 
@@ -302,6 +297,11 @@ internal static class Conventions
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
+
+    /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
+    private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
+
+    private static readonly string[] ConstructorSummaryStarts = { "Initializes a new instance", "Initializes static members", "Prevents a default instance" };
 
     /// <summary>The framework names IDE0049 rewrites to keywords.</summary>
     private static readonly HashSet<string> FrameworkTypeNames = new(StringComparer.Ordinal)
@@ -1154,8 +1154,9 @@ internal static class Conventions
                         .Select(t => Line(t.SpanStart))
                         .Distinct()
                         .ToList();
+
                     // How property and constructor summaries begin (BRO1604/BRO1606); one that starts with an element isn't counted.
-                    var summaryKey = (summary.Parent?.ParentTrivia.Token.Parent?.AncestorsAndSelf().FirstOrDefault(a => a is MemberDeclarationSyntax)) switch
+                    var summaryKey = summary.Parent?.ParentTrivia.Token.Parent?.AncestorsAndSelf().FirstOrDefault(a => a is MemberDeclarationSyntax) switch
                     {
                         PropertyDeclarationSyntax => PropertySummaryKey,
                         ConstructorDeclarationSyntax => ConstructorSummaryKey,

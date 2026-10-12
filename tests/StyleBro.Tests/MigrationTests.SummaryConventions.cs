@@ -15,7 +15,8 @@ public sealed partial class MigrationTests
         var counts = Conventions.NewCounts();
 
         Conventions.Count(
-            CSharpSyntaxTree.ParseText("""
+            CSharpSyntaxTree.ParseText(
+                """
             class A
             {
                 /// <summary>Initializes a new instance of the <see cref="A"/> class.</summary>
@@ -50,7 +51,8 @@ public sealed partial class MigrationTests
                 /// <summary>Runs.</summary>
                 public void Run() { }
             }
-            """, new CSharpParseOptions(documentationMode: Microsoft.CodeAnalysis.DocumentationMode.Diagnose)),
+            """,
+                new CSharpParseOptions(documentationMode: Microsoft.CodeAnalysis.DocumentationMode.Diagnose)),
             counts);
 
         // Properties: Name, Size the StyleCop way; Samples, IsFloat, Other in their own words. Constructors: A(), static A()
