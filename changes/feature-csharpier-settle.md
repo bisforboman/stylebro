@@ -11,6 +11,12 @@
 - **`stylebro-migrate --write`** (from StyleCop) detects CSharpier like `init`: IDE0055 and the same layout rules are
   off, and the report lists the StyleCop rules only they replaced under "CSharpier decides it".
 
+### Fixed
+
+- **`stylebro-migrate format --verify-no-changes`** no longer says "Not clean" in a repository whose restore installs git
+  hooks (Husky.Net's `dotnet husky install`, common next to CSharpier) when only findings StyleBro keeps on purpose are
+  left.
+
 ### Upgrading
 
 - In a repository that uses CSharpier, run `stylebro-migrate init --write` (or `--write`) again to get the two new keys.

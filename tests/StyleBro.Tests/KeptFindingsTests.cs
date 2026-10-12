@@ -258,6 +258,30 @@ public class KeptFindingsTests
         Assert.Contains(lines, l => l.StartsWith("1 of these is kept on purpose (marked 'kept')", StringComparison.Ordinal));
     }
 
+    // Mapperly: its restore runs 'dotnet husky install', which fails outside a git repository, so the copy's run failed and
+    // verify said "Not clean" with only kept findings left. The copy of a git repository is one too.
+    [Fact]
+    public void Verify_TheCopyOfAGitRepository_IsAGitRepository()
+    {
+        var root = NewFolder();
+        PreviewCommand.Git(root, "init", "-q");
+        var lines = new List<string>();
+
+        var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (args, output) =>
+        {
+            if (args.Contains("--verify-no-changes"))
+            {
+                output?.Invoke($"{Path.Combine(root, "C.cs")}(3,17): warning BRO1303: Rename '_count' to 'count' [{Path.Combine(root, "App.csproj")}]");
+                return 2;
+            }
+
+            WriteKept(Path.Combine(args[0], "C.cs"));
+            return Directory.Exists(Path.Combine(args[0], ".git")) ? 0 : 1;
+        });
+
+        Assert.Equal(0, code);
+    }
+
     [Fact]
     public void Format_OnlyKeptFindingsLeft_IsClean_AndListsThem()
     {

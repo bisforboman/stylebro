@@ -30,6 +30,9 @@ $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $repos = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'repos.psd1')
 if (-not $repos.ContainsKey($Repo)) { throw "Unknown repo '$Repo'. Known: $($repos.Keys -join ', ')" }
 $r = $repos[$Repo]
+# Env (repos.psd1): environment variables the repository's build needs here (Mediator: Nerdbank.GitVersioning can't compute
+# a version in the shallow clone).
+if ($r.Env) { foreach ($name in $r.Env.Keys) { Set-Item "env:$name" $r.Env[$name] } }
 
 # Every rule in the release tracking files.
 $ids = @(Select-String -Path (Join-Path $root 'src/StyleBro.Analyzers/AnalyzerReleases.*.md') -Pattern '^(BRO\d{4})\s*\|' |
@@ -43,7 +46,11 @@ $csharpier = $r.Formatter -eq 'csharpier'
 if ($csharpier) {
     dotnet build (Join-Path $root 'src/StyleBro.Migrate') -c $Configuration -nologo -v q | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Building stylebro-migrate failed.' }
-    $migrate = Join-Path $root "src/StyleBro.Migrate/bin/$Configuration/net8.0/StyleBro.Migrate.dll"
+    # A copy, like the analyzers: a run in progress doesn't lock this repository's build output.
+    $migrateBin = Join-Path $Work 'stylebro-migrate'
+    Remove-Item -Recurse -Force $migrateBin -ErrorAction SilentlyContinue
+    Copy-Item -Recurse (Join-Path $root "src/StyleBro.Migrate/bin/$Configuration/net8.0") $migrateBin
+    $migrate = Join-Path $migrateBin 'StyleBro.Migrate.dll'
 
     # 'stylebro-migrate format' wants the package in the restore output, as a team would have it: packed under a version
     # of its own (a compiler server never sees an older build under the same path) and put straight into the global

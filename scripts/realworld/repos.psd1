@@ -1,6 +1,6 @@
 # Public repositories the real-world check runs StyleBro on, pinned to the commits the results in CLAUDE.md were
 # measured on. Tests: 'dotnet' (dotnet test), 'mtp' (Microsoft Testing Platform: run the test executables), or $null
-# (no tests: OpenTelemetry's depend on the machine, see CLAUDE.md). KnownFailures: tests the fixes are known to break, each
+# (no tests: OpenTelemetry's depend on the machine, see CLAUDE.md). Env: environment variables for the repository's build. KnownFailures: tests the fixes are known to break, each
 # a documented limit (they don't fail the check). TestFilter: a 'dotnet test --filter' that leaves out tests that depend on
 # something other than the code (the network). MaxRuns: 'dotnet format' runs until a run changes nothing, when a repo
 # needs more than 2 (one that changes, one clean) for a documented reason. Os: the runner, windows-latest unless set.
@@ -37,5 +37,6 @@
     # CSharpier repositories (Formatter): StyleBro's init flow and the repository's own CSharpier must settle. Mapperly again
     # (CSharpier 1.3.0), and Mediator, a source generator with snapshot tests (CSharpier 1.2.1).
     MapperlyCSharpier = @{ Url = 'https://github.com/riok/mapperly'; Os = 'ubuntu-26.04'; Commit = 'f87d48b12a6010a224ca26ad112fb48c07cd6d5d'; Solution = 'Riok.Mapperly.slnx'; Tests = 'dotnet'; Formatter = 'csharpier' }
-    Mediator      = @{ Url = 'https://github.com/martinothamar/Mediator'; Os = 'ubuntu-26.04'; Commit = '8b87a0ed74747b7e4be907db220b930a50fbeb98'; Solution = 'Mediator.slnx'; Tests = 'dotnet'; Formatter = 'csharpier' }
+    Mediator      = @{ Url = 'https://github.com/martinothamar/Mediator'; Os = 'ubuntu-26.04'; Commit = '8b87a0ed74747b7e4be907db220b930a50fbeb98'; Solution = 'Mediator.slnx'; Tests = 'dotnet'; Formatter = 'csharpier'
+        Env = @{ NBGV_GitEngine = 'Disabled' } }
 }

@@ -1136,6 +1136,14 @@ internal static class FormatCommand
         try
         {
             PreviewCommand.Copy(source, copy);
+
+            // A git repository, like the source: a restore that installs git hooks fails without one (Mapperly's
+            // 'dotnet husky install', common next to CSharpier), and the copy's run then fails although nothing is left.
+            if (Directory.Exists(Path.Combine(source, ".git")) || File.Exists(Path.Combine(source, ".git")))
+            {
+                PreviewCommand.Git(copy, "init", "-q");
+            }
+
             var copyArgs = args.Where(a => a != "--verify-no-changes").ToList();
             var report = copyArgs.IndexOf("--report");
             if (report >= 0)
