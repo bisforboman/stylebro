@@ -22,7 +22,7 @@ probe cases covering the differences (with the setting, StyleBro reports nothing
 |---|---|
 | S121 | BRO1514 with `csharp_prefer_braces = true` and `stylebro_braces_statements = if_and_loops`: not `using`, `lock`, `fixed` or a deconstructing `foreach` (S121 registers if, else, for, foreach, while and do only) |
 | S818 | BRO1135 with `stylebro_upper_case_literal_suffixes = lone_l`: only a suffix that is just `l` (S818 skips an `l` after a `u`, and a suffix ending in `u`) |
-| S1066 | BRO1149, no setting: it now skips `dynamic` conditions always (merging them can change what binds at run time), which also covers S1066's exception |
+| S1066 | BRO1149 with `stylebro_allow_nested_dynamic_ifs = true`: no merge when a condition has a part of type `dynamic` (S1066 skips the inner condition's; a setting, not always on, because asking for the types costs ~20 ms on Newtonsoft.Json, over the benchmark's limit) |
 | S1116 | BRO1101 with `stylebro_allow_semicolon_after_closing_brace = true` (S1116 reports empty statements only) |
 | S3878 | BRO1151 with `stylebro_params_arrays = except_object_and_jagged`: not for `params object[]`, `params Array[]` or jagged arrays |
 | S8969 | BRO1147 with `stylebro_allow_null_forgiving_on_unannotated = true`: a `!` on a property, field or method return without nullable annotations (or a `var` local initialized from one) stays, Sonar's "oblivious" check |

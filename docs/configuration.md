@@ -28,6 +28,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_null_check_style` | `pattern_matching`, `equality_operator` | `pattern_matching` | [BRO1133](rules/BRO1133.md), [BRO1148](rules/BRO1148.md) |
 | `stylebro_upper_case_literal_suffixes` | `all`, `l_only`, `lone_l` (Sonar's S818: only a suffix that is just `l`) | `all` | [BRO1135](rules/BRO1135.md) |
 | `stylebro_allow_null_forgiving_on_unannotated` | `true`, `false` (`true`: Sonar's S8969, a `!` on a value declared without nullable annotations stays) | `false` | [BRO1147](rules/BRO1147.md) |
+| `stylebro_allow_nested_dynamic_ifs` | `true`, `false` (`true`: Sonar's S1066, nested `if`s with a `dynamic` condition aren't merged) | `false` | [BRO1149](rules/BRO1149.md) |
 | `stylebro_params_arrays` | `all`, `except_object_and_jagged` (Sonar's S3878: not for `params object[]`, `params Array[]` or jagged arrays) | `all` | [BRO1151](rules/BRO1151.md) |
 | `stylebro_object_creation_parentheses` | `omit`, `include` | `omit` | [BRO1141](rules/BRO1141.md) |
 | `stylebro_private_field_naming` | `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `camelCase` | [BRO1303](rules/BRO1303.md), [BRO1307](rules/BRO1307.md), [BRO1310](rules/BRO1310.md) |

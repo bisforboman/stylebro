@@ -265,7 +265,7 @@ isn't mapped.
 | S121 (braces) | [BRO1514](rules/BRO1514.md) with `csharp_prefer_braces = true` and `stylebro_braces_statements = if_and_loops` (not `using`, `lock`, `fixed` or a deconstructing `foreach`, like S121) |
 | S818 (upper-case literal suffixes) | [BRO1135](rules/BRO1135.md) with `stylebro_upper_case_literal_suffixes = lone_l` (only a suffix that is just `l`, like S818) |
 | S927 (parameter names match the base) | [BRO1313](rules/BRO1313.md) with `stylebro_match_base_parameter_names = non_generic_methods` (methods only, and not a parameter whose type in the base is a type parameter the method fills in, like S927) |
-| S1066 (mergeable `if`s) | [BRO1149](rules/BRO1149.md) (it skips `dynamic` conditions itself, like S1066) |
+| S1066 (mergeable `if`s) | [BRO1149](rules/BRO1149.md) with `stylebro_allow_nested_dynamic_ifs = true` (conditions with a `dynamic` part aren't merged, like S1066) |
 | S1116 (empty statements) | [BRO1101](rules/BRO1101.md) with `stylebro_allow_semicolon_after_closing_brace = true` (the `;` after a type's `}` stays, like S1116) |
 | S1659 (one variable per declaration) | [BRO1142](rules/BRO1142.md) |
 | S1939 (redundant base types) | [BRO1408](rules/BRO1408.md) |

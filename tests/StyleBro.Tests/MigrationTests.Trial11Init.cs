@@ -224,7 +224,7 @@ public sealed partial class MigrationTests
             "stylebro_braces_statements = if_and_loops",                     // S121
             "stylebro_params_arrays = except_object_and_jagged",             // S3878
             "stylebro_allow_null_forgiving_on_unannotated = true",           // S8969
-            "dotnet_diagnostic.BRO1149.severity = warning",                  // S1066: BRO1149 skips dynamic conditions itself
+            "stylebro_allow_nested_dynamic_ifs = true",                      // S1066
         })
         {
             Assert.Contains("\n" + line + "\n", output, StringComparison.Ordinal);

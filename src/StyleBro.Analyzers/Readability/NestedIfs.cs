@@ -19,6 +19,9 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class NestedIfs
 {
+    /// <summary>Nested ifs with a dynamic condition are fine (default false): Sonar's S1066 skips them.</summary>
+    public const string AllowDynamicKey = "stylebro_allow_nested_dynamic_ifs";
+
     /// <summary>
     /// The enclosing <see langword="if"/> that <paramref name="inner"/> can be merged into, or null: neither has an
     /// <see langword="else"/>, and the text that goes (<c>) {</c>, <c>if (</c>, the closing <c>}</c>) holds no comment or directive.
@@ -61,8 +64,8 @@ internal static class NestedIfs
     /// with the chains in its body), so a single fix and Fix All give the same text. When the brace rules are on
     /// (<paramref name="isOn"/>), the statements they want in braces in the merged chains get them in the same edit:
     /// a merge can turn which rule reports a statement of an if/else chain (BRO1514 into BRO1516), and 'dotnet format'
-    /// may have run that rule already. A condition of a dynamic type anywhere in the merge leaves the nest alone (like Sonar's
-    /// S1066): 'a &amp;&amp; d' binds '&amp;' at run time, where 'if (d)' only needed d to convert to bool.
+    /// may have run that rule already. With <see cref="AllowDynamicKey"/>, a condition with a part of type dynamic anywhere in
+    /// the merge leaves the nest alone (like Sonar's S1066; it needs the semantic model, so it's an option).
     /// </summary>
     public static TextChange? GetChange(IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
@@ -93,7 +96,8 @@ internal static class NestedIfs
     private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
         if (Render(top, text, WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true)) is not { } rendered || !rendered.Merged.Contains(inner)
-            || rendered.Merged.Any(m => IsDynamic(m.Condition, model) || IsDynamic(GetOuter(m)!.Condition, model)))
+            || (options.TryGetValue(AllowDynamicKey, out var allow) && bool.TryParse(allow.Trim(), out var allowed) && allowed
+                && rendered.Merged.Any(m => IsDynamic(m.Condition, model) || IsDynamic(GetOuter(m)!.Condition, model))))
         {
             return null;
         }

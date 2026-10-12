@@ -651,9 +651,9 @@ public class NestedIfTests
         }
         """);
 
-    // A dynamic condition: 'a && d' binds '&' at run time, where 'if (d)' only needed d to convert to bool (Sonar's S1066 skips it).
+    // Sonar's S1066 skips an inner condition with a part of type dynamic; with the option, BRO1149 skips any merge with one.
     [Fact]
-    public Task DynamicConditions_AreLeftAlone() => Verify.VerifyNoDiagnosticsAsync(
+    public Task AllowNestedDynamicIfs_LeavesDynamicConditionsAlone() => Verify.VerifyFixAsync(
         """
         public class C
         {
@@ -684,6 +684,84 @@ public class NestedIfTests
                             M(a, b, d);
                         }
                     }
+                }
+
+                if (a)
+                {
+                    {|BRO1149:if|} (b)
+                    {
+                        M(a, b, d);
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool a, bool b, dynamic d)
+            {
+                if (a)
+                {
+                    if (d == 1)
+                    {
+                        M(a, b, d);
+                    }
+                }
+
+                if (d)
+                {
+                    if (b)
+                    {
+                        M(a, b, d);
+                    }
+                }
+
+                if (a)
+                {
+                    if (b)
+                    {
+                        if (d.X)
+                        {
+                            M(a, b, d);
+                        }
+                    }
+                }
+
+                if (a && b)
+                {
+                    M(a, b, d);
+                }
+            }
+        }
+        """,
+        "stylebro_allow_nested_dynamic_ifs = true" + "\n");
+
+    [Fact]
+    public Task DynamicConditions_AreMergedByDefault() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool a, dynamic d)
+            {
+                if (a)
+                {
+                    {|BRO1149:if|} (d == 1)
+                    {
+                        M(a, d);
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool a, dynamic d)
+            {
+                if (a && d == 1)
+                {
+                    M(a, d);
                 }
             }
         }

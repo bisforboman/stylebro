@@ -8,7 +8,7 @@ S100	-	none	-	BRO1309 is stricter: it also checks events and enum members, and n
 S101	-	none	-	BRO1309 is stricter: it also checks enums, delegates and test classes ('fooTests'), which S101 accepts	-	-
 S818	BRO1135	on	stylebro_upper_case_literal_suffixes = lone_l	-	-	-
 S927	BRO1313	on	stylebro_match_base_parameter_names = non_generic_methods	-	-	-
-S1066	BRO1149	on	-	-	-	-
+S1066	BRO1149	on	stylebro_allow_nested_dynamic_ifs = true	-	-	-
 S1116	BRO1101	on	stylebro_allow_semicolon_after_closing_brace = true	-	-	-
 S1118	-	none	-	CA1052 is stricter: it reports classes with a private or protected constructor, a static member of their own type (a singleton) or a non-static nested type, which S1118 accepts	-	-
 S121	BRO1514	on	csharp_prefer_braces = true; stylebro_braces_statements = if_and_loops	-	-	-
