@@ -242,7 +242,7 @@ internal static class PreviewCommand
 
                 var next = Tree(copy);
                 changed.Add(next != tree);
-                JsonReport.AddRun(run, Git(copy, "diff", "--name-only", tree, next).Output.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.Combine(source, f.Trim())), null);
+                JsonReport.AddRun(run, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.Combine(source, f.Trim())), null);
                 tree = next;
                 if (!changed[^1])
                 {
@@ -256,16 +256,12 @@ internal static class PreviewCommand
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
             JsonReport.Set("clean", !changed[^1]);
             Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed));
-            foreach (var (id, file, line, also) in Samples(attribution, 3))
+            foreach (var line in SampleLines(Samples(attribution, 3), (file, line) => Hunk(GitChecked(copy, "diff", "--cached", "-U0", configured, "--", file), line, 12)))
             {
-                Console.WriteLine($"Sample ({id}, {file}{(also.Length == 0 ? string.Empty : $"; {string.Join(", ", also)} changed this file too")}):");
-                foreach (var hunkLine in Hunk(Git(copy, "diff", "--cached", "-U0", configured, "--", file).Output, line, 12))
-                {
-                    Console.WriteLine("  " + hunkLine);
-                }
+                Console.WriteLine(line);
             }
 
-            Git(copy, "diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline);
+            GitChecked(copy, "diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline);
             JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
@@ -286,6 +282,11 @@ internal static class PreviewCommand
 
             ok = true;
             return 0;
+        }
+        catch (GitFailedException e)
+        {
+            // Never a "nothing to change" from commits git couldn't make.
+            return Fail(tail, 1, e.Message);
         }
         finally
         {
@@ -451,6 +452,36 @@ internal static class PreviewCommand
     }
 
     /// <summary>
+    /// The samples as printed: one block per file and hunk, naming every rule whose sample it is (a file with three rules
+    /// printed the same hunk three times, once per rule).
+    /// </summary>
+    public static List<string> SampleLines(IEnumerable<(string Id, string File, int Line, string[] Also)> samples, Func<string, int, List<string>> hunk)
+    {
+        var blocks = new List<(List<string> Ids, string File, string[] Also, List<string> Hunk)>();
+        foreach (var (id, file, line, also) in samples)
+        {
+            var lines = hunk(file, line);
+            if (blocks.FirstOrDefault(b => b.File == file && b.Hunk.SequenceEqual(lines)) is { Ids: not null } same)
+            {
+                same.Ids.Add(id);
+                continue;
+            }
+
+            blocks.Add((new List<string> { id }, file, also, lines));
+        }
+
+        var result = new List<string>();
+        foreach (var (ids, file, also, lines) in blocks)
+        {
+            var others = also.Except(ids, StringComparer.Ordinal).ToList();
+            result.Add($"Sample ({string.Join(", ", ids)}, {file}{(others.Count == 0 ? string.Empty : $"; {string.Join(", ", others)} changed this file too")}):");
+            result.AddRange(lines.Select(l => "  " + l));
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// The lines of the hunk (of a '-U0' diff) that covers <paramref name="line"/> of the old text (an insertion after line
     /// N covers N and N + 1), else the nearest one; at most <paramref name="max"/> lines. A byte order mark is left out
     /// (it printed as '?' before the first line of a file). A change nobody could see in the lines ('-}' / '+}' for a final
@@ -534,13 +565,13 @@ internal static class PreviewCommand
     {
         var parts = new List<string>();
         var suppressions = new Dictionary<string, int>(StringComparer.Ordinal);
-        foreach (var (added, file) in NumStat(Git(copy, "diff", "--numstat", from, to).Output))
+        foreach (var (added, file) in NumStat(GitChecked(copy, "diff", "--numstat", from, to)))
         {
             if (file.EndsWith(".editorconfig", StringComparison.OrdinalIgnoreCase) || Path.GetFileName(file).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase)
                 || file.Equals(AgentsFile.FileName, StringComparison.Ordinal)
                 || Path.GetFileName(file).Equals("Directory.Packages.props", StringComparison.OrdinalIgnoreCase))
             {
-                var addedText = Git(copy, "diff", "-U0", from, to, "--", file).Output;
+                var addedText = GitChecked(copy, "diff", "-U0", from, to, "--", file);
                 var notes = new[] { ("StyleBroPreset>none", "StyleBroPreset=none"), ("Include=\"StyleBro.Analyzers\"", "StyleBro.Analyzers"), ("<NoWarn>", "NoWarn") }
                     .Where(n => addedText.Contains(n.Item1, StringComparison.Ordinal))
                     .Select(n => n.Item2)
@@ -549,10 +580,18 @@ internal static class PreviewCommand
                 continue;
             }
 
-            foreach (var line in Git(copy, "diff", "-U0", from, to, "--", file).Output.Split('\n').Where(l => l.StartsWith('+') && !l.StartsWith("+++", StringComparison.Ordinal)))
+            // In a project file or packages.config only <NoWarn> is a suppression: the rest is the StyleBro.Analyzers reference
+            // (Autofac: its 9 PackageReference edits counted as "27 other lines").
+            var projectFile = Path.GetExtension(file).ToLowerInvariant() is ".csproj" or ".props" or ".targets" || Path.GetFileName(file).Equals("packages.config", StringComparison.OrdinalIgnoreCase);
+            foreach (var line in GitChecked(copy, "diff", "-U0", from, to, "--", file).Split('\n').Where(l => l.StartsWith('+') && !l.StartsWith("+++", StringComparison.Ordinal)))
             {
                 var kind = line.Contains("#pragma", StringComparison.Ordinal) ? "#pragma" : line.Contains("SuppressMessage", StringComparison.Ordinal) ? "[SuppressMessage]"
                     : line.Contains("NoWarn", StringComparison.Ordinal) ? "<NoWarn>" : "other lines";
+                if (projectFile && kind != "<NoWarn>")
+                {
+                    continue;
+                }
+
                 suppressions[kind] = suppressions.TryGetValue(kind, out var n) ? n + 1 : 1;
             }
         }
@@ -605,7 +644,7 @@ internal static class PreviewCommand
                 (null, null) => string.Empty,
                 (null, _) => $" Condition=\"{guard}\"",
                 (_, null) => $" Condition=\"{central}\"",
-                _ => $" Condition=\"{central} and {guard}\"",
+                _ => $" Condition=\"{central} and ({guard})\"",
             };
 
             // A GlobalPackageReference (central package management) gets one of its own: a PackageReference with a version
@@ -746,7 +785,7 @@ internal static class PreviewCommand
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
     public static void MakeRepository(string folder)
     {
-        Git(folder, "init", "-q");
+        GitChecked(folder, "init", "-q");
 
         // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so.
         File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n");
@@ -781,31 +820,8 @@ internal static class PreviewCommand
     /// <summary>Runs git; line endings and paths as they are (no autocrlf, no quoting), output as UTF-8.</summary>
     public static (int Code, string Output) Git(string directory, params string[] arguments)
     {
-        var start = new ProcessStartInfo("git")
-        {
-            WorkingDirectory = directory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            StandardOutputEncoding = Encoding.UTF8,
-        };
-        foreach (var argument in new[] { "-c", "core.autocrlf=false", "-c", "core.safecrlf=false", "-c", "core.quotepath=off" }.Concat(arguments))
-        {
-            start.ArgumentList.Add(argument);
-        }
-
-        try
-        {
-            using var process = Process.Start(start)!;
-            var error = process.StandardError.ReadToEndAsync();
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-            _ = error.Result;
-            return (process.ExitCode, output);
-        }
-        catch (System.ComponentModel.Win32Exception)
-        {
-            return (-1, string.Empty); // no git: the copy falls back to a plain folder copy, and the commits fail later
-        }
+        var (code, output, _) = RunGit(directory, arguments);
+        return (code, output);
     }
 
     /// <summary>The Sonar part of the report in the command's output (from 'Sonar: read' to the next empty line), or nothing.</summary>
@@ -813,6 +829,22 @@ internal static class PreviewCommand
 
     /// <summary>The conventions init found in the code (from its header to the next empty line), or nothing.</summary>
     public static string DetectedPart(string output) => Part(output, InitCommand.DetectedHeader);
+
+    /// <summary>
+    /// Runs git in the preview's copy, where every command must work: a failure throws <see cref="GitFailedException"/>
+    /// with git's error. Fitnet: 'git add' failed on paths of 261+ characters, the commits were empty, and the preview
+    /// reported "nothing to change" while the real run changed 117 files.
+    /// </summary>
+    internal static string GitChecked(string directory, params string[] arguments)
+    {
+        var (code, output, error) = RunGit(directory, arguments);
+        if (code == 0)
+        {
+            return output;
+        }
+
+        throw new GitFailedException($"'git {string.Join(' ', arguments)}' failed (exit code {code}){(error.Trim().Length == 0 ? "." : ": " + error.Trim())}");
+    }
 
     internal static void Delete(string folder)
     {
@@ -851,6 +883,36 @@ internal static class PreviewCommand
         }
 
         return count;
+    }
+
+    private static (int Code, string Output, string Error) RunGit(string directory, string[] arguments)
+    {
+        var start = new ProcessStartInfo("git")
+        {
+            WorkingDirectory = directory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.UTF8,
+        };
+
+        // core.longpaths: Windows' git can't add paths of 260+ characters without it (Fitnet).
+        foreach (var argument in new[] { "-c", "core.autocrlf=false", "-c", "core.safecrlf=false", "-c", "core.quotepath=off", "-c", "core.longpaths=true" }.Concat(arguments))
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        try
+        {
+            using var process = Process.Start(start)!;
+            var error = process.StandardError.ReadToEndAsync();
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return (process.ExitCode, output, error.Result);
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            return (-1, string.Empty, e.Message); // no git: the copy falls back to a plain folder copy, and the commits fail later
+        }
     }
 
     /// <summary>
@@ -938,13 +1000,19 @@ internal static class PreviewCommand
     /// <summary>The changed files between a commit and the index after 'git add -A' (paths relative to the copy), with the lines added.</summary>
     private static Dictionary<string, int> Changed(string copy, string from)
     {
-        Git(copy, "add", "-A");
-        return NumStat(Git(copy, "diff", "--cached", "--numstat", "--ignore-submodules", from).Output).ToDictionary(n => n.File, n => n.Added, StringComparer.Ordinal);
+        GitChecked(copy, "add", "-A");
+        return NumStat(GitChecked(copy, "diff", "--cached", "--numstat", "--ignore-submodules", from)).ToDictionary(n => n.File, n => n.Added, StringComparer.Ordinal);
     }
 
     private static bool WhitespaceOnly(string copy, string from, string file)
     {
-        return Git(copy, "diff", "--cached", "--quiet", "--ignore-all-space", "--ignore-blank-lines", from, "--", file).Code == 0;
+        // --quiet: 0 the same, 1 different, anything else an error.
+        return Git(copy, "diff", "--cached", "--quiet", "--ignore-all-space", "--ignore-blank-lines", from, "--", file).Code switch
+        {
+            0 => true,
+            1 => false,
+            var code => throw new GitFailedException($"'git diff --quiet' on {file} failed (exit code {code})."),
+        };
     }
 
     private static IEnumerable<(int Added, string File)> NumStat(string output)
@@ -958,17 +1026,17 @@ internal static class PreviewCommand
     /// <summary>The tree the working copy would commit: equal trees mean a format run changed nothing.</summary>
     private static string Tree(string copy)
     {
-        Git(copy, "add", "-A");
-        return Git(copy, "write-tree").Output.Trim();
+        GitChecked(copy, "add", "-A");
+        return GitChecked(copy, "write-tree").Trim();
     }
 
     private static void Commit(string folder, string message)
     {
-        Git(folder, "add", "-A");
-        Git(folder, "-c", "user.name=stylebro-preview", "-c", "user.email=preview@stylebro.invalid", "-c", "commit.gpgsign=false", "commit", "-q", "--no-verify", "--allow-empty", "-m", message);
+        GitChecked(folder, "add", "-A");
+        GitChecked(folder, "-c", "user.name=stylebro-preview", "-c", "user.email=preview@stylebro.invalid", "-c", "commit.gpgsign=false", "commit", "-q", "--no-verify", "--allow-empty", "-m", message);
     }
 
-    private static string Head(string folder) => Git(folder, "rev-parse", "HEAD").Output.Trim();
+    private static string Head(string folder) => GitChecked(folder, "rev-parse", "HEAD").Trim();
 
     private static void CopyFolder(string source, string target)
     {
@@ -1021,3 +1089,6 @@ internal static class PreviewCommand
         return code == 0 ? 1 : code;
     }
 }
+
+/// <summary>A git command in the preview's copy failed: the preview stops instead of showing an incomplete diff.</summary>
+internal sealed class GitFailedException(string message) : Exception(message);

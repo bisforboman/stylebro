@@ -405,7 +405,8 @@ with the findings StyleBro's fixes leave on purpose, each with its reason ([Find
 and exits with 0 when clean, 2 when a run still changed files. When `dotnet format` skips a project because its
 references didn't load (a broken restore or package cache), the command names it and says the run is incomplete (for
 one target framework only: the code only that framework compiles); `--diff` stops then instead of showing a partial
-preview. When no project has StyleBro.Analyzers in its restore output (`obj/project.assets.json`), the command stops
+preview, and `--verify-no-changes` fails when a project wasn't loaded in any run (a project that references an F#
+project, which `dotnet format` can't load, stays a warning). When no project has StyleBro.Analyzers in its restore output (`obj/project.assets.json`), the command stops
 before `dotnet format` runs: without the analyzers it would fix only whitespace and the built-in rules and report the
 code clean. Projects without it next to ones with it are named (`Without StyleBro: ...`). The command restores once
 before the runs; that restore skips NuGet's audit (`-p:NuGetAudit=false`): vulnerability warnings (NU1901-NU1904) are
@@ -564,6 +565,7 @@ Exit codes of `stylebro-migrate format`, for CI and agents:
 |---|---|---|
 | 0 | clean: the last run changed nothing (kept findings don't count) | formatting would change nothing; only kept findings are left |
 | 2 | still changing after three runs | formatting would change a file |
+| 1 | | a project no run loaded (`Incomplete:`): its files weren't checked |
 | other | `dotnet format` failed (load or build errors) | the same |
 
 `--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats a temporary
@@ -679,7 +681,7 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   serves SDK-style projects needs a condition that keeps it away from them:
 
   ```xml
-  <PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" Condition="!Exists('$(MSBuildProjectDirectory)\packages.config')" />
+  <PackageReference Include="StyleBro.Analyzers" Version="0.5.0-alpha.1" PrivateAssets="all" Condition="'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')" />
   ```
 
   `stylebro-migrate` names the packages.config projects and says this in its report.

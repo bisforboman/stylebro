@@ -40,13 +40,20 @@ internal enum FieldRule
 /// </summary>
 internal readonly struct FieldStyles
 {
-    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null)
+    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null, bool pascalAllowsUnderscore = false)
     {
         Private = @private;
         Constant = constant;
         StaticReadOnly = staticReadOnly;
         MutableStatic = mutableStatic;
+        PascalAllowsUnderscore = pascalAllowsUnderscore;
     }
+
+    /// <summary>
+    /// Gets a value indicating whether a PascalCase field (BRO1306) may start with '_': StyleCop's SA1303/SA1304/SA1307/SA1311
+    /// check only that the first character isn't lower-case, and the underscore is SA1309's (<see cref="FieldNames.AllowUnderscoreKey"/>).
+    /// </summary>
+    public bool PascalAllowsUnderscore { get; }
 
     public FieldStyle Private { get; }
 
@@ -80,6 +87,12 @@ internal static class FieldNames
     /// When unset, an SDK naming rule for private fields requiring just 'static' decides (else <see cref="StyleKey"/>'s).
     /// </summary>
     public const string MutableStaticStyleKey = "stylebro_private_mutable_static_field_naming";
+
+    /// <summary>
+    /// true: constants, static readonly and non-private fields starting with '_' aren't renamed by BRO1306, like StyleCop
+    /// with SA1309 off ('stylebro-migrate --write' sets it then). Default false.
+    /// </summary>
+    public const string AllowUnderscoreKey = "stylebro_allow_leading_underscore_in_pascal_fields";
 
     private static readonly string[] GuidPrefixes = { "IID_", "CLSID_", "LIBID_", "DIID_", "CATID_", "GUID_" };
 
@@ -121,17 +134,19 @@ internal static class FieldNames
         var mutableStatic = options.TryGetValue(MutableStaticStyleKey, out var mutableValue)
             ? ToCamelStyle(mutableValue)
             : GetStaticStyleFromNamingRules(options, m => m.Length == 1 && m[0] == "static");
+        var allowUnderscore = options.TryGetValue(AllowUnderscoreKey, out var allowValue) && allowValue.Trim().Equals("true", System.StringComparison.OrdinalIgnoreCase);
         if (options.TryGetValue(StaticStyleKey, out var value))
         {
             var style = ToCamelStyle(value);
-            return new(GetStyle(options), style, style, mutableStatic);
+            return new(GetStyle(options), style, style, mutableStatic, allowUnderscore);
         }
 
         return new(
             GetStyle(options),
             GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
             GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")),
-            mutableStatic);
+            mutableStatic,
+            allowUnderscore);
 
         static FieldStyle? ToCamelStyle(string value) => value.Split(':')[0].Trim() switch
         {
@@ -216,6 +231,12 @@ internal static class FieldNames
         var isProtected = IsProtectedChecked(field);
         var camelStatic = GetCamelStaticStyle(field, style);
         var pascal = camelStatic is null && IsPascalChecked(field);
+
+        // StyleCop's PascalCase rules and SA1310 skip a name starting with '_' (it's SA1309's): with SA1309 off, so does BRO1306.
+        if (pascal && style.PascalAllowsUnderscore && name.StartsWith("_", System.StringComparison.Ordinal))
+        {
+            return null;
+        }
 
         var hasPrefix = name.Length >= 2 && name[0] is 'm' or 's' or 't' && name[1] == '_';
         var core = hasPrefix ? name.Substring(2) : name;

@@ -40,9 +40,13 @@ internal static class FormatCommand
     public const string SelectFrameworkTargets = """
         <Project>
           <!-- stylebro-migrate format: TargetFramework comes from the environment; projects not on the keep list load as usual. -->
-          <PropertyGroup Condition="'$(StyleBroFormatKeep)' != '' and '$(TargetFrameworks)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))">
+          <PropertyGroup Condition="'$(TargetFrameworks)' != '' and (('$(StyleBroFormatKeep)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))) or '$(StyleBroFormatLoose)' == 'true')">
             <TargetFramework></TargetFramework>
           </PropertyGroup>
+          <!-- A project without the run's framework asks the projects it references for all of theirs (StyleBroFormatLoose). -->
+          <ItemGroup Condition="'$(StyleBroFormatOther)' != '' and $(StyleBroFormatOther.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))">
+            <ProjectReference Update="@(ProjectReference)" AdditionalProperties="%(ProjectReference.AdditionalProperties);StyleBroFormatLoose=true" />
+          </ItemGroup>
           <!-- A project that writes the run's framework another way ('net6' for 'net6.0') gets its own spelling. -->
           <PropertyGroup Condition="'$(StyleBroFormatAliases)' != '' and '$(TargetFramework)' != ''">
             <_StyleBroAliasKey>|$(MSBuildProjectFullPath.ToUpperInvariant())=</_StyleBroAliasKey>
@@ -78,6 +82,12 @@ internal static class FormatCommand
 
     /// <summary>Where people and agents read what a kept finding means.</summary>
     public const string KeptFindingsHelp = "https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose";
+
+    /// <summary>The start of the line that names projects 'dotnet format' can't load (F#) as the reason for skipped ones.</summary>
+    public const string LikelyCause = "  Likely cause:";
+
+    /// <summary>What --verify-no-changes says when a project wasn't loaded in any run (<see cref="IncompleteMarker"/>).</summary>
+    public const string NotVerified = "Not verified: the files of the projects 'dotnet format' skipped weren't checked.";
 
     /// <summary>The start of the line that says a project wasn't formatted at all (<see cref="Incomplete"/>).</summary>
     public const string IncompleteMarker = "Incomplete:";
@@ -434,6 +444,11 @@ internal static class FormatCommand
         {
             lines.Add($"{IncompleteMarker} 'dotnet format' skipped {string.Join(", ", whole)} (references didn't load), so those files weren't formatted.");
             lines.Add("  Run 'dotnet restore' (or 'dotnet build') and fix what it reports, e.g. a missing SDK or package or a corrupt package cache, then run again.");
+            if (whole.Any(w => skipped[w].Any(f => f.Length > 0)))
+            {
+                // Autofac: the build was fine; the per-framework run made a reference fail (fixed since, see Other).
+                lines.Add("  If the build succeeds, the per-framework runs are the cause: please report it at https://github.com/bisforboman/stylebro/issues with the output of 'dotnet format <solution> --verbosity diagnostic'.");
+            }
         }
 
         // One line per set of frameworks (Orleans: 27 test projects for net10.0, one line each before).
@@ -447,7 +462,7 @@ internal static class FormatCommand
         // Orleans: the test projects reference F# projects, which 'dotnet format' can't load; a restore doesn't help.
         if (lines.Count > 0 && unsupported is { Count: > 0 })
         {
-            lines.Add($"  Likely cause: they reference {string.Join(", ", unsupported.Order(StringComparer.OrdinalIgnoreCase))}, which 'dotnet format' can't load (C# and Visual Basic only), so a restore won't help. Nothing is broken; that code just isn't formatted.");
+            lines.Add($"{LikelyCause} they reference {string.Join(", ", unsupported.Order(StringComparer.OrdinalIgnoreCase))}, which 'dotnet format' can't load (C# and Visual Basic only), so a restore won't help. Nothing is broken; that code just isn't formatted.");
         }
 
         return lines;
@@ -578,8 +593,12 @@ internal static class FormatCommand
     public static bool IsOldStyle(string project) =>
         File.Exists(project) && !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(project)), @"<Project\b[^>]*\bSdk\s*=|<Import\b[^>]*\bSdk\s*=|<Sdk\b", RegexOptions.IgnoreCase);
 
-    /// <summary>Whether a project restores through packages.config (one next to it), which 'dotnet restore' can't do.</summary>
-    public static bool UsesPackagesConfig(string project) => File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(project))!, "packages.config"));
+    /// <summary>
+    /// Whether a project restores through packages.config, which 'dotnet restore' can't do: an old-style project with one
+    /// next to it. NuGet ignores packages.config in an SDK-style project (Mapster.EFCore has a stray one).
+    /// </summary>
+    public static bool UsesPackagesConfig(string project) =>
+        File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(project))!, "packages.config")) && IsOldStyle(project);
 
     /// <summary>
     /// What 'format' says about the old-style projects (relative paths) it doesn't restore: the SDK-style ones are restored,
@@ -740,6 +759,18 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The projects of <paramref name="keep"/>'s run that don't target its framework but reference a project it forces onto
+    /// it. Their references ask for the referenced project's own frameworks (StyleBroFormatLoose clears the forced one, see
+    /// <see cref="SelectFrameworkTargets"/>): Autofac's ScannedAssembly (netstandard2.1) references Autofac, which offered
+    /// only net10.0 then ("It cannot be referenced by a project that targets .NETStandard,Version=v2.1"), and the test
+    /// projects that reference ScannedAssembly didn't load in the net10.0 run.
+    /// </summary>
+    public static HashSet<string> Other(IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> projects, IReadOnlySet<string> keep, string framework) =>
+        new(
+            projects.Where(p => !p.Value.Frameworks.Any(f => NormalizeFramework(f) == NormalizeFramework(framework)) && p.Value.References.Any(keep.Contains)).Select(p => p.Key),
+            StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// A run's projects split into groups that run one after another, so no file is compiled by two projects one
     /// 'dotnet format' run loads (a group's projects and what they reference, transitively). kubernetes-client: KubernetesClient
     /// and KubernetesClient.Aot compile the same files with other DefineConstants; loaded together, Roslyn's linked-file
@@ -832,6 +863,20 @@ internal static class FormatCommand
         var file = solution.GetProperty("path").GetString()!.Replace('\\', Path.DirectorySeparatorChar);
         var projects = solution.TryGetProperty("projects", out var list) ? list.EnumerateArray().Select(p => p.GetString()!).ToArray() : Array.Empty<string>();
         return (Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(path))!, file)), projects);
+    }
+
+    /// <summary>What's wrong with a solution filter (malformed JSON, no 'solution.path'), or null.</summary>
+    public static string? SolutionFilterError(string path)
+    {
+        try
+        {
+            ReadSolutionFilter(path);
+            return null;
+        }
+        catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException or ArgumentException or NullReferenceException)
+        {
+            return $"{Path.GetFileName(path)} isn't a valid solution filter ({e.Message.Split('\n')[0].Trim()}). A .slnf is JSON like {{ \"solution\": {{ \"path\": \"App.sln\", \"projects\": [ \"src/App/App.csproj\" ] }} }}.";
+        }
     }
 
     /// <summary>A solution filter (.slnf) next to the solution, with the given projects (paths as the solution lists them).</summary>
@@ -933,6 +978,126 @@ internal static class FormatCommand
     /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
     public static IEnumerable<(string FullPath, string[] Frameworks)> EvaluatedProjects(string workspacePath) =>
         ReadProjects(workspacePath).Values.Select(p => (p.FullPath, p.Frameworks));
+
+    /// <summary>
+    /// --verify-no-changes: 'dotnet format --verify-no-changes' fails on every finding it would hand to a fix, also those a
+    /// StyleBro fix leaves on purpose, so a loop "until clean" never ends. When it fails, this formats a temporary copy of
+    /// the repository (the fixes only run when files are written) and decides by the copy: no file changed means only
+    /// findings no fix changes are left, listed with the reasons the fixes recorded; exit 0. A changed file means work is
+    /// left: 'dotnet format''s output and exit code. The repository itself is never touched.
+    /// </summary>
+    internal static int Verify(string[] args, string root, Action<string> log, Func<string[], Action<string>?, int> runOnce)
+    {
+        var lines = new List<string>();
+        var code = runOnce(args, lines.Add);
+        if (code == 0)
+        {
+            lines.ForEach(log);
+
+            // A project no run loaded wasn't checked at all: not "Clean." (Autofac's tests). One skipped for some frameworks
+            // only ("Partly incomplete") was checked in the others' runs, all but code only those frameworks compile; one that
+            // references an F# project ("Likely cause") can never load, which a restore doesn't change: both stay warnings.
+            if (lines.Any(l => l.StartsWith(IncompleteMarker, StringComparison.Ordinal)) && !lines.Any(l => l.StartsWith(LikelyCause, StringComparison.Ordinal)))
+            {
+                log(NotVerified);
+                return 1;
+            }
+
+            log("Clean.");
+            return 0;
+        }
+
+        // 'dotnet format --verify-no-changes' says "would change" with 2; anything else is an error of its own (an
+        // unknown option, a failed restore), which formatting a copy would only repeat.
+        if (code != NotCleanExitCode)
+        {
+            lines.ForEach(log);
+            return code;
+        }
+
+        // The whole repository: settings above the folder (.editorconfig, Directory.Build.props, nuget.config) count.
+        var source = RepositoryRoot(root) ?? root;
+        var copy = Path.Combine(Path.GetTempPath(), $"stylebro-verify-{Guid.NewGuid():N}");
+        var keptFile = copy + ".kept.tsv";
+        try
+        {
+            PreviewCommand.Copy(source, copy);
+            var copyArgs = args.Where(a => a != "--verify-no-changes").ToList();
+            var report = copyArgs.IndexOf("--report");
+            if (report >= 0)
+            {
+                copyArgs.RemoveRange(report, Math.Min(2, copyArgs.Count - report));
+            }
+
+            var working = copyArgs.IndexOf(WorkingFolderOption);
+            if (working >= 0 && working + 1 < copyArgs.Count)
+            {
+                copyArgs[working + 1] = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, Path.GetFullPath(copyArgs[working + 1]))));
+            }
+
+            if (copyArgs.Count > 0 && !copyArgs[0].StartsWith("-", StringComparison.Ordinal))
+            {
+                copyArgs[0] = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, Path.GetFullPath(copyArgs[0]))));
+            }
+            else
+            {
+                copyArgs.Insert(0, Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, root))));
+            }
+
+            var before = Snapshot(copy);
+            int copyCode;
+            List<KeptFinding> kept;
+
+            // --files: the repository's names, written again for the copy's paths (the files a run loads are told apart by path).
+            var namesFile = copy + ".names.tsv";
+            var namesInCopy = string.IsNullOrEmpty(Environment.GetEnvironmentVariable(RepositoryNames.Variable)) ? null : new KeptVariable(namesFile, RepositoryNames.Variable);
+            if (namesInCopy is not null)
+            {
+                WriteRepositoryNames(copy, namesFile);
+            }
+
+            using (namesInCopy)
+            using (new KeptVariable(keptFile))
+            {
+                copyCode = runOnce(copyArgs.ToArray(), _ => { });
+                kept = ReadKept(keptFile, copy, source);
+            }
+
+            var changedFiles = ChangedFiles(before, Snapshot(copy));
+            var changed = changedFiles.Count;
+            JsonReport.AddRun(1, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))), null);
+            var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
+            if (copyCode != 0 || changed > 0)
+            {
+                // The kept findings among them are marked: they aren't what makes it fail.
+                lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);
+                if (lines.Count(l => IsKeptLine(l, keys)) is var marked and > 0)
+                {
+                    log($"{marked} of these {(marked == 1 ? "is" : "are")} kept on purpose (marked 'kept'): StyleBro's fixes leave them, they don't make this fail ({KeptFindingsHelp}).");
+                }
+
+                log(changed > 0
+                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'stylebro-migrate format'."
+                    : "Not clean: formatting a copy of the repository failed (see above).");
+                return code;
+            }
+
+            JsonReport.AddKept(kept);
+            lines.Where(l => !IsKeptLine(l, keys)).ToList().ForEach(log);
+            KeptSummary(kept, root).ForEach(log);
+            if (kept.Count == 0)
+            {
+                log("Clean: formatting would change nothing.");
+            }
+
+            return 0;
+        }
+        finally
+        {
+            PreviewCommand.Delete(copy);
+            File.Delete(keptFile);
+        }
+    }
 
     /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
@@ -1049,116 +1214,6 @@ internal static class FormatCommand
         }
     }
 
-    /// <summary>
-    /// --verify-no-changes: 'dotnet format --verify-no-changes' fails on every finding it would hand to a fix, also those a
-    /// StyleBro fix leaves on purpose, so a loop "until clean" never ends. When it fails, this formats a temporary copy of
-    /// the repository (the fixes only run when files are written) and decides by the copy: no file changed means only
-    /// findings no fix changes are left, listed with the reasons the fixes recorded; exit 0. A changed file means work is
-    /// left: 'dotnet format''s output and exit code. The repository itself is never touched.
-    /// </summary>
-    private static int Verify(string[] args, string root, Action<string> log, Func<string[], Action<string>?, int> runOnce)
-    {
-        var lines = new List<string>();
-        var code = runOnce(args, lines.Add);
-        if (code == 0)
-        {
-            lines.ForEach(log);
-            log("Clean.");
-            return 0;
-        }
-
-        // 'dotnet format --verify-no-changes' says "would change" with 2; anything else is an error of its own (an
-        // unknown option, a failed restore), which formatting a copy would only repeat.
-        if (code != NotCleanExitCode)
-        {
-            lines.ForEach(log);
-            return code;
-        }
-
-        // The whole repository: settings above the folder (.editorconfig, Directory.Build.props, nuget.config) count.
-        var source = RepositoryRoot(root) ?? root;
-        var copy = Path.Combine(Path.GetTempPath(), $"stylebro-verify-{Guid.NewGuid():N}");
-        var keptFile = copy + ".kept.tsv";
-        try
-        {
-            PreviewCommand.Copy(source, copy);
-            var copyArgs = args.Where(a => a != "--verify-no-changes").ToList();
-            var report = copyArgs.IndexOf("--report");
-            if (report >= 0)
-            {
-                copyArgs.RemoveRange(report, Math.Min(2, copyArgs.Count - report));
-            }
-
-            var working = copyArgs.IndexOf(WorkingFolderOption);
-            if (working >= 0 && working + 1 < copyArgs.Count)
-            {
-                copyArgs[working + 1] = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, Path.GetFullPath(copyArgs[working + 1]))));
-            }
-
-            if (copyArgs.Count > 0 && !copyArgs[0].StartsWith("-", StringComparison.Ordinal))
-            {
-                copyArgs[0] = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, Path.GetFullPath(copyArgs[0]))));
-            }
-            else
-            {
-                copyArgs.Insert(0, Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, root))));
-            }
-
-            var before = Snapshot(copy);
-            int copyCode;
-            List<KeptFinding> kept;
-
-            // --files: the repository's names, written again for the copy's paths (the files a run loads are told apart by path).
-            var namesFile = copy + ".names.tsv";
-            var namesInCopy = string.IsNullOrEmpty(Environment.GetEnvironmentVariable(RepositoryNames.Variable)) ? null : new KeptVariable(namesFile, RepositoryNames.Variable);
-            if (namesInCopy is not null)
-            {
-                WriteRepositoryNames(copy, namesFile);
-            }
-
-            using (namesInCopy)
-            using (new KeptVariable(keptFile))
-            {
-                copyCode = runOnce(copyArgs.ToArray(), _ => { });
-                kept = ReadKept(keptFile, copy, source);
-            }
-
-            var changedFiles = ChangedFiles(before, Snapshot(copy));
-            var changed = changedFiles.Count;
-            JsonReport.AddRun(1, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))), null);
-            var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
-            if (copyCode != 0 || changed > 0)
-            {
-                // The kept findings among them are marked: they aren't what makes it fail.
-                lines.Select(l => MarkKept(l, keys)).ToList().ForEach(log);
-                if (lines.Count(l => IsKeptLine(l, keys)) is var marked and > 0)
-                {
-                    log($"{marked} of these {(marked == 1 ? "is" : "are")} kept on purpose (marked 'kept'): StyleBro's fixes leave them, they don't make this fail ({KeptFindingsHelp}).");
-                }
-
-                log(changed > 0
-                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'stylebro-migrate format'."
-                    : "Not clean: formatting a copy of the repository failed (see above).");
-                return code;
-            }
-
-            JsonReport.AddKept(kept);
-            lines.Where(l => !IsKeptLine(l, keys)).ToList().ForEach(log);
-            KeptSummary(kept, root).ForEach(log);
-            if (kept.Count == 0)
-            {
-                log("Clean: formatting would change nothing.");
-            }
-
-            return 0;
-        }
-        finally
-        {
-            PreviewCommand.Delete(copy);
-            File.Delete(keptFile);
-        }
-    }
-
     /// <summary>The severity word of a line that reports a kept finding (its position in the line), or null.</summary>
     private static Group? KeptLine(string line, ISet<(string Path, int Line, string Id)> kept)
     {
@@ -1246,6 +1301,12 @@ internal static class FormatCommand
         }
 
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
+        if (IsSolutionFilter(workspacePath) && SolutionFilterError(workspacePath) is { } invalid)
+        {
+            error(invalid);
+            return 1;
+        }
+
         if (BaselineCommand.IsBelow(workspace) && !File.Exists(path))
         {
             log(BaselineCommand.BelowNote(workspace));
@@ -1552,7 +1613,8 @@ internal static class FormatCommand
                 var byPath = projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase);
                 var keep = framework.Length == 0 ? new HashSet<string>() : Keep(byPath, framework);
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
-                var environment = new RunEnvironment(alias, select, keep.Count == 0 ? string.Empty : "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|", aliases, names);
+                var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);
+                var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names);
                 return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output));
             }
             finally
@@ -1749,6 +1811,7 @@ internal static class FormatCommand
             }
 
             start.Environment["StyleBroFormatKeep"] = f.Keep;
+            start.Environment["StyleBroFormatOther"] = f.Other;
             start.Environment["BeforeMicrosoftNETSdkTargets"] = f.SelectTargets;
             start.Environment["StyleBroFormatAliases"] = f.Aliases;
             start.Environment[RepositoryNames.Variable] = f.Names;
@@ -1784,8 +1847,11 @@ internal static class FormatCommand
         return process.ExitCode;
     }
 
+    /// <summary>Full paths as the hook matches them: '|A|B|', upper-case; empty for none.</summary>
+    private static string PathList(IReadOnlyCollection<string> paths) => paths.Count == 0 ? string.Empty : "|" + string.Join("|", paths.Select(k => k.ToUpperInvariant())) + "|";
+
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>
-    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Aliases, string Names);
+    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Other, string Aliases, string Names);
 
     /// <summary>
     /// Sets <see cref="KeptFinding.Variable"/> (or another variable that names a file) for the 'dotnet format' runs this

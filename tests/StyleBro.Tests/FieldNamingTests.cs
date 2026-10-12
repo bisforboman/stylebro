@@ -905,6 +905,37 @@ public class FieldNamingTests
         CamelConstants + "\nstylebro_private_static_field_naming = PascalCase");
 
     [Fact]
+    public Task AllowUnderscore_KeepsPascalFieldsStartingWithUnderscore_LikeStyleCopWithoutSA1309() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private const int _limit = 2;
+            private static readonly string _cache = "";
+            private static readonly string _my_value = "";
+            internal static readonly string _shared = "";
+            private static readonly string {|BRO1306:lower|} = "";
+
+            public int Sum() => _limit + _cache.Length + _my_value.Length + _shared.Length + lower.Length;
+        }
+        """,
+        """
+        public class C
+        {
+            private const int _limit = 2;
+            private static readonly string _cache = "";
+            private static readonly string _my_value = "";
+            internal static readonly string _shared = "";
+            private static readonly string Lower = "";
+
+            public int Sum() => _limit + _cache.Length + _my_value.Length + _shared.Length + Lower.Length;
+        }
+        """,
+        """
+        stylebro_private_static_field_naming = PascalCase
+        stylebro_allow_leading_underscore_in_pascal_fields = true
+        """);
+
+    [Fact]
     public Task StaticStyleKey_CamelCase_RenamesWithoutANamingRule() => VerifyFixAsync(
         """
         public class C

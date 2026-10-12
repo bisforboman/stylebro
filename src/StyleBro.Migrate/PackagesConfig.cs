@@ -17,16 +17,17 @@ internal static class PackagesConfig
 {
     /// <summary>
     /// The condition a PackageReference in a Directory.Build.props gets when packages.config projects import it: they keep
-    /// packages.config restore.
+    /// packages.config restore. An SDK-style project (UsingMicrosoftNETSdk, set before Directory.Build.props) always gets it:
+    /// NuGet ignores a stray packages.config there (Mapster.EFCore).
     /// </summary>
-    public const string NotPackagesConfig = @"!Exists('$(MSBuildProjectDirectory)\packages.config')";
+    public const string NotPackagesConfig = @"'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')";
 
     /// <summary>The package's analyzer DLLs, in the order NuGet lists them.</summary>
     private static readonly string[] Dlls = { "StyleBro.Analyzers.dll", "StyleBro.CodeFixes.dll" };
 
-    /// <summary>The projects (.csproj) with a packages.config next to them.</summary>
+    /// <summary>The old-style projects (.csproj) with a packages.config next to them (SDK-style ones ignore it).</summary>
     public static List<string> Projects(IEnumerable<string> files) =>
-        files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && File.Exists(Path.Combine(Path.GetDirectoryName(f)!, "packages.config")))
+        files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && FormatCommand.UsesPackagesConfig(f))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
