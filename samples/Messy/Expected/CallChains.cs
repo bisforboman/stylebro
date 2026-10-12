@@ -25,5 +25,10 @@ namespace Messy.CallChains
             name.Trim()
                 .ToUpperInvariant()
                 .Replace(" ", "_");
+
+        // A first line with two or more calls fills its lines: left alone.
+        public string Shout(string name) =>
+            name.Trim().ToUpperInvariant()
+                .Replace(" ", "_").Trim();
     }
 }
