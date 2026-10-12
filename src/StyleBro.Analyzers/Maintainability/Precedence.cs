@@ -44,8 +44,8 @@ internal static class Precedence
             _ => (null!, null!, default),
         };
 
-        // Not in preprocessor directives ('#if A || B && C'), like StyleCop.
-        if (op.RawKind == 0 || node.IsPartOfStructuredTrivia())
+        // Preprocessor directives ('#if A || B && C') aren't reported, like StyleCop: node actions don't visit them.
+        if (op.RawKind == 0)
         {
             yield break;
         }

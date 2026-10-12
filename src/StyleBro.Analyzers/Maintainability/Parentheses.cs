@@ -16,7 +16,7 @@ internal static class Parentheses
 {
     /// <summary>Whether StyleCop's SA1119 reports these parentheses and removing them keeps the code's meaning.</summary>
     public static bool IsUnnecessary(ParenthesizedExpressionSyntax node, SourceText text) =>
-        !node.IsPartOfStructuredTrivia() && IsReportedByStyleCop(node) && ParsesTheSame(new[] { node }, text);
+        IsReportedByStyleCop(node) && ParsesTheSame(new[] { node }, text);
 
     /// <summary>
     /// Whether removing these pattern parentheses keeps the code's meaning. <paramref name="keepPrecedence"/>: whether
