@@ -58,8 +58,38 @@ internal static class Conventions
     /// <summary>Files with a '//' header: [without, with] an empty '//' line at its top or bottom (<see cref="EmptyHeaderLines"/>).</summary>
     public const string HeaderKey = "file header";
 
-    /// <summary>The C# files' charset (unit: files): [no BOM, BOM] (<see cref="ContradictedCharset"/>).</summary>
+    /// <summary>The C# files' charset (unit: files): [no BOM, BOM] (<see cref="ContradictedFileSetting"/>).</summary>
     public const string CharsetKey = "charset";
+
+    /// <summary>
+    /// The C# files' last line break (unit: files): [without, with] (<see cref="ContradictedFileSetting"/>). The starter kit says
+    /// 'insert_final_newline = false' with 1,203 of 1,716 files ending in one; nothing enforced it until init turned the
+    /// whitespace pass on, and 'format' removed the line break from 1,092 files.
+    /// </summary>
+    public const string FinalNewlineKey = "insert_final_newline";
+
+    /// <summary>
+    /// The C# files with trailing whitespace (unit: files): [without, with]. 'dotnet format' doesn't read trim_trailing_whitespace:
+    /// its whitespace pass trims every line it formats whatever the key says (probed), so 'false' can't be kept; only a note.
+    /// </summary>
+    public const string TrailingWhitespaceKey = "trim_trailing_whitespace";
+
+    /// <summary>BRO1527's severity: properties whose accessors are all auto-accessors, on one line or on several (sourcegit: 732 and 306).</summary>
+    public const string AutoAccessorsKey = "dotnet_diagnostic." + DiagnosticIds.AutoAccessorsOnOneLine + ".severity";
+
+    /// <summary>
+    /// BRO1113's severity: '#region's inside members (the starter kit's '#region Arrange/Act/Assert' in 38 tests, which BRO1113
+    /// removed). Only the regions are counted: from <see cref="MinimumAgreeing"/> on, the code uses them and BRO1113 goes off.
+    /// BRO1112 (regions between members) is off in the preset, so only a team's own setting turns it on, and that wins.
+    /// </summary>
+    public const string RegionsKey = "dotnet_diagnostic." + DiagnosticIds.NoRegionsInCodeElements + ".severity";
+
+    /// <summary>
+    /// One-line jumps ('if (x) return;', 'break', 'continue', 'throw', 'goto', 'yield break' on the 'if' line) against jumps
+    /// in braces: from <see cref="MinimumAgreeing"/> braceless ones on, BRO1514 leaves them (the starter kit: 878 of 1,130
+    /// bodies with braces, and BRO1514 braced 194 one-line jumps).
+    /// </summary>
+    public const string SingleLineJumpsKey = StyleBro.Analyzers.Layout.Braces.SingleLineJumpsKey;
 
     /// <summary>
     /// BRO1307's severity: private static fields with the .NET runtime's 's_' (and 't_' for thread-static) prefix, or without
@@ -103,6 +133,7 @@ internal static class Conventions
         new("csharp_new_line_before_open_brace", "'{' of multi-line blocks", "all", ("all", "on its own line"), ("none", "at the end of the line"), null),
         new("csharp_new_line_before_else", "else/catch/finally after '}'", "true", ("true", "on a new line"), ("false", "on the '}' line"), null, "csharp_new_line_before_catch", "csharp_new_line_before_finally"),
         new("csharp_prefer_braces", "one-line if/else/loop/using/lock bodies", "true", ("true", "with braces"), ("when_multiline", "without braces"), "csharp_prefer_braces = when_multiline") { Enforcer = DiagnosticIds.BracesOmitted, EnforcedValues = new[] { "true" } },
+        new(SingleLineJumpsKey, "one-line jumps ('if (x) return;')", "false", ("false", "in braces"), ("true", "on the 'if' line without braces"), null) { KeepAny = true, Keeps = $"without it {DiagnosticIds.BracesOmitted} would add braces to each" },
         new("dotnet_style_operator_placement_when_wrapping", "operators where a line wraps", "beginning_of_line", ("beginning_of_line", "at the start of the line"), ("end_of_line", "at the end of the line"), Off(DiagnosticIds.OperatorPlacement)) { Enforcer = DiagnosticIds.OperatorPlacement },
         new(StyleBro.Analyzers.Layout.WrappingPlacement.ArrowKey, "'=>' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.ArrowPlacement)),
         new(StyleBro.Analyzers.Layout.WrappingPlacement.EqualsKey, "'=' where a line wraps", "end_of_line", ("end_of_line", "at the end of the line"), ("beginning_of_line", "at the start of the line"), Off(DiagnosticIds.EqualsPlacement)),
@@ -120,7 +151,7 @@ internal static class Conventions
         new("stylebro_blank_line_between_switch_sections", "switch sections", "include", ("include", "after a blank line"), ("omit", "without a blank line"), Off(DiagnosticIds.BlankLineBetweenSwitchSections)),
         new("csharp_using_directive_placement", "files' using directives", "outside_namespace", ("outside_namespace", "outside the namespace"), ("inside_namespace", "inside the namespace"), Off(DiagnosticIds.UsingPlacement)) { Enforcer = DiagnosticIds.UsingPlacement },
         new(ArithmeticKey, "mixed arithmetic ('a + b * c')", "always_for_clarity", ("always_for_clarity", "with parentheses"), ("never_if_unnecessary", "without parentheses"), Off(DiagnosticIds.ArithmeticPrecedence)) { Enforcer = DiagnosticIds.ArithmeticPrecedence, EnforcedValues = new[] { "always_for_clarity" } },
-        new(SingleLineStatementsKey, "statements on their 'if'/loop/'case' line", "false", ("false", "on a line of their own"), ("true", "on their owner's line"), null) { KeepAny = true },
+        new(SingleLineStatementsKey, "statements on their 'if'/loop/'case' line", "false", ("false", "on a line of their own"), ("true", "on their owner's line"), null) { KeepAny = true, Keeps = "csharp_preserve_single_line_statements = false would move each to a line of its own" },
         new(InheritDocKey, "overrides/interface implementations", "warning", ("warning", "with a doc comment"), ("none", "without a doc comment"), Off(DiagnosticIds.InheritDocumentation)),
         new(MemberOrderKey, "types' members", "warning", ("warning", "in BRO1001's order"), ("none", "in another order"), Off(DiagnosticIds.MemberOrdering)) { Unit = "type" },
         new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
@@ -129,6 +160,8 @@ internal static class Conventions
         new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
         new(RelativeUsingsKey, "usings inside a namespace", "warning", ("warning", "fully qualified"), ("none", "relative ('using Common;')"), Off(DiagnosticIds.QualifiedUsing)) { Unit = "using" },
         new(TypeAliasKey, "built-in type names", "warning", ("warning", "only keywords ('int')"), ("none", "framework names ('Int32')"), Off("IDE0049"), "dotnet_style_predefined_type_for_locals_parameters_members", "dotnet_style_predefined_type_for_member_access") { Unit = "file" },
+        new(AutoAccessorsKey, "auto-property accessors ('{ get; set; }')", "warning", ("warning", "on one line"), ("none", "on several lines"), Off(DiagnosticIds.AutoAccessorsOnOneLine)) { Unit = "property declaration" },
+        new(RegionsKey, "'#region's inside members", "warning", ("warning", "without"), ("none", "'#region's"), Off(DiagnosticIds.NoRegionsInCodeElements)) { Unit = "region", KeepAny = true, Keeps = $"{DiagnosticIds.NoRegionsInCodeElements} would remove them" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
     };
 
@@ -314,6 +347,7 @@ internal static class Conventions
                 }
 
                 own[CharsetKey][HasBom(file) ? 1 : 0]++;
+                CountFile(text, own);
                 return (File: file, Tree: tree, Counts: own);
             })
             .Where(p => p.Tree is not null)
@@ -485,6 +519,8 @@ internal static class Conventions
         counts[UsingsKey] = new int[4];
         counts[StaticCasingKey] = new int[3];
         counts[CharsetKey] = new int[2];
+        counts[FinalNewlineKey] = new int[2];
+        counts[TrailingWhitespaceKey] = new int[2];
         counts[HeaderKey] = new int[2];
         counts[ConvertedKey] = new int[2];
         return counts;
@@ -539,7 +575,10 @@ internal static class Conventions
         return (winner < 0 ? null : $"end_of_line = {(winner == 0 ? "lf" : "crlf")}", report);
     }
 
-    /// <summary>The C# files' line endings alone (<see cref="Count(string, IReadOnlyDictionary{string, string}?)"/>'s, without parsing).</summary>
+    /// <summary>
+    /// The C# files' line endings, charset and last line breaks alone (<see cref="Count(string, IReadOnlyDictionary{string, string}?)"/>'s,
+    /// without parsing; the migration asks).
+    /// </summary>
     public static Dictionary<string, int[]> EndingCounts(string root)
     {
         var counts = NewCounts();
@@ -547,10 +586,19 @@ internal static class Conventions
         foreach (var file in Migration.OwnCSharpFiles(root))
         {
             var text = File.ReadAllText(file);
-            if (!Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text) && LineEnding(text) is var ending and >= 0)
+            var relative = Path.GetRelativePath(root, file);
+            if (Migration.IsGeneratedOrVendored(relative, text))
+            {
+                continue;
+            }
+
+            if (LineEnding(text) is var ending and >= 0)
             {
                 _ = converted.TryGetValue(Path.GetFullPath(file), out var byAttribute) ? counts[ConvertedKey][byAttribute ? 1 : 0]++ : counts[EndOfLineKey][ending]++;
             }
+
+            counts[CharsetKey][HasBom(file) ? 1 : 0]++;
+            CountFile(text, counts);
         }
 
         return counts;
@@ -629,32 +677,89 @@ internal static class Conventions
     }
 
     /// <summary>
-    /// The note and the charset line when the repository's own charset (utf-8 or utf-8-bom for C# files) doesn't have
-    /// <see cref="Winner"/>'s share of the C# files (BOM or not), or null. Like an end_of_line the files contradict (owner's
-    /// decision 2026-10-12, "Keep endings out of it, warn"): nothing enforced it, so the files decide. Ical.Net says
-    /// 'charset = utf-8' with 108 of 223 files starting with a BOM, and 'format' stripped all 108. Files clearly of the other
-    /// form get their charset; mixed files get 'charset = unset', which 'dotnet format' leaves each file's BOM alone with (probed;
-    /// 'utf-8' stripped the BOM from files it didn't otherwise change).
+    /// The line and the note when the repository's own <paramref name="key"/> (<see cref="CharsetKey"/> or
+    /// <see cref="FinalNewlineKey"/>, for C# files) doesn't have <see cref="Winner"/>'s share of the C# files, or null. Like an
+    /// end_of_line the files contradict (owner's decision 2026-10-12, "Keep endings out of it, warn"): nothing enforced it, so
+    /// the files decide. Ical.Net says 'charset = utf-8' with 108 of 223 files starting with a BOM, and 'format' stripped all
+    /// 108; the starter kit says 'insert_final_newline = false' with 1,203 of 1,716 files ending in a line break, and 'format'
+    /// removed 1,092. Files clearly of the other form get their value; mixed files get 'unset', which 'dotnet format' leaves
+    /// each file alone with (probed for both keys).
     /// </summary>
-    public static (string Line, string Note)? ContradictedCharset(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own)
+    public static (string Line, string Note)? ContradictedFileSetting(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string key)
     {
-        if (!own.TryGetValue(CharsetKey, out var setting) || !counts.TryGetValue(CharsetKey, out var files) || files.Sum() < MinimumAgreeing)
+        var (title, values, found, each) = key == CharsetKey
+            ? ("Charset", new[] { "utf-8", "utf-8-bom" }, "start with a BOM", "each file's BOM (or its absence)")
+            : ("Final line breaks", new[] { "false", "true" }, "end with a line break", "each file's last line break (or its absence)");
+        if (!own.TryGetValue(key, out var setting) || !counts.TryGetValue(key, out var files) || files.Sum() < MinimumAgreeing)
         {
             return null;
         }
 
         var value = setting.Split(':')[0].Trim().ToLowerInvariant();
-        var keyForm = value switch { "utf-8" => 0, "utf-8-bom" => 1, _ => -1 };
+        var keyForm = Array.IndexOf(values, value);
         var winner = Winner(files[0], files[1]);
         if (keyForm < 0 || winner == keyForm)
         {
             return null;
         }
 
-        var found = $"{files[1]} of {Plural(files.Sum(), "C# file")} start with a BOM";
-        var line = winner < 0 ? $"{CharsetKey} = unset" : $"{CharsetKey} = {(winner == 1 ? "utf-8-bom" : "utf-8")}";
-        var keeps = winner < 0 ? "'format' leaves each file's BOM (or its absence) as it is" : "'format' leaves the files alone";
-        return (line, $"Charset: your .editorconfig says charset = {value}, but {found}: nothing enforced it, so {line} is written for C# files and {keeps}. To have {value} everywhere: remove that line and run 'stylebro-migrate format' (it rewrites the files).");
+        var line = $"{key} = {(winner < 0 ? "unset" : values[winner])}";
+        var keeps = winner < 0 ? $"'format' leaves {each} as it is" : "'format' leaves the files alone";
+        return (line, $"{title}: your .editorconfig says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files and {keeps}. To have {key} = {value} everywhere: remove that line and run 'stylebro-migrate format' (it rewrites the files).");
+    }
+
+    /// <summary>
+    /// The note when the repository says 'trim_trailing_whitespace = false' and C# files have trailing whitespace: 'dotnet
+    /// format' doesn't read the key and trims every line its whitespace pass formats (probed), so nothing can keep it but
+    /// IDE0055 off. Null otherwise.
+    /// </summary>
+    public static string? TrailingWhitespaceNote(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own) =>
+        own.TryGetValue(TrailingWhitespaceKey, out var setting) && setting.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase)
+        && counts.TryGetValue(TrailingWhitespaceKey, out var files) && files[1] > 0
+            ? $"Trailing whitespace: your .editorconfig says {TrailingWhitespaceKey} = false, but 'dotnet format' doesn't read that key: its whitespace pass (IDE0055) trims trailing whitespace anyway, in {Plural(files[1], "C# file")} here. To keep it: dotnet_diagnostic.IDE0055.severity = none (no whitespace formatting at all)."
+            : null;
+
+    /// <summary>Counts a file's last line break and trailing whitespace (unit: files; empty files don't count).</summary>
+    public static void CountFile(string text, Dictionary<string, int[]> counts)
+    {
+        if (text.Length == 0)
+        {
+            return;
+        }
+
+        counts[FinalNewlineKey][text[^1] == '\n' ? 1 : 0]++;
+        counts[TrailingWhitespaceKey][System.Text.RegularExpressions.Regex.IsMatch(text, @"[ \t]\r?\n") ? 1 : 0]++;
+    }
+
+    /// <summary>
+    /// The ReSharper/Rider keys that align code in columns ('resharper_int_align_variables = true' and the like; RestSharp:
+    /// 'var doc      = CreateAttributesXml();'), set to true; the comments' alignment aside (IDE0055 leaves the spaces before
+    /// a trailing comment). IDE0055's whitespace formatting flattens such columns: 414 hunks in 171 of RestSharp's files.
+    /// </summary>
+    public static List<string> AlignmentKeys(IReadOnlyDictionary<string, string> own) =>
+        own.Where(p => System.Text.RegularExpressions.Regex.IsMatch(p.Key, @"^resharper_(csharp_)?int_align_(?!comments$)\w+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                && p.Value.Split(':')[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase))
+            .Select(p => p.Key)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+
+    /// <summary>
+    /// The lines that turn IDE0055 off (with the '# init:' comment) and the report line, when the repository aligns code in
+    /// columns (<see cref="AlignmentKeys"/>), or null: without such keys, or when the repository sets IDE0055's severity itself.
+    /// Like CSharpier (owner's policy, trial 12): another formatter decides the spacing, and the two would undo each other.
+    /// </summary>
+    public static (List<string> Lines, string Report)? AlignmentLines(IReadOnlyDictionary<string, string> own)
+    {
+        var keys = AlignmentKeys(own);
+        if (keys.Count == 0 || own.ContainsKey("dotnet_diagnostic.IDE0055.severity"))
+        {
+            return null;
+        }
+
+        var named = string.Join(", ", keys.Take(3)) + (keys.Count > 3 ? $" and {keys.Count - 3} more" : string.Empty);
+        return (
+            [$"# init: column alignment: your .editorconfig aligns code in columns for ReSharper/Rider ({named} = true), and IDE0055's whitespace formatting would flatten it ('var x      = 1;' -> 'var x = 1;'), so IDE0055 is off: 'format' skips the whitespace pass. To have StyleBro format the whitespace instead: remove the next line.", Off("IDE0055")],
+            $"  {"off",-8} column alignment ({named} = true) -> IDE0055 is off: its whitespace formatting would flatten aligned code");
     }
 
     /// <summary>
@@ -766,6 +871,9 @@ internal static class Conventions
             TypeAliases();
             Overloads();
             MemberOrder();
+
+            // Unit = regions inside members (BRO1113's): only the uses count.
+            counts[RegionsKey][1] += StyleBro.Analyzers.Readability.Regions.GetRegions(root).Count(r => r.InCodeElement);
         }
 
         foreach (var token in root.DescendantTokens())
@@ -819,6 +927,15 @@ internal static class Conventions
                     if (inner is not (BlockSyntax or IfStatementSyntax or UsingStatementSyntax) && Line(inner.SpanStart) == Line(inner.Span.End))
                     {
                         Add("csharp_prefer_braces", body is not BlockSyntax);
+                    }
+
+                    // One-line jumps: 'if (a) return;' on the 'if' line, or a lone jump in braces.
+                    if (node is IfStatementSyntax ifStatement && (body is BlockSyntax { Statements.Count: 1 } single ? single.Statements[0] : body) is var jump
+                        && jump is ReturnStatementSyntax or ThrowStatementSyntax or BreakStatementSyntax or ContinueStatementSyntax or GotoStatementSyntax
+                            or YieldStatementSyntax { RawKind: (int)SyntaxKind.YieldBreakStatement }
+                        && (body is BlockSyntax || Line(ifStatement.IfKeyword.SpanStart) == Line(jump.Span.End)))
+                    {
+                        Add(SingleLineJumpsKey, body is not BlockSyntax);
                     }
 
                     // csharp_preserve_single_line_statements: a body without braces on its owner's line ('if (a) return;').
@@ -954,6 +1071,20 @@ internal static class Conventions
                     {
                         var line = Line(section.SpanStart);
                         Add("stylebro_blank_line_between_switch_sections", line < 1 || !string.IsNullOrWhiteSpace(text.Lines[line - 1].ToString()));
+                    }
+
+                    break;
+
+                case BasePropertyDeclarationSyntax { AccessorList: { Accessors.Count: > 0 } list } property
+                    when list.Accessors.All(a => a.Body is null && a.ExpressionBody is null && a.AttributeLists.Count == 0):
+                    // BRO1527's places: what it would put on one line, or what already is (from the name to the '}').
+                    if (StyleBro.Analyzers.Layout.AutoAccessorLines.GetChanges(property, text, new Options(settings), _ => false) is not null)
+                    {
+                        Add(AutoAccessorsKey, true);
+                    }
+                    else if (Line(list.OpenBraceToken.GetPreviousToken().Span.End) == Line(list.CloseBraceToken.SpanStart))
+                    {
+                        Add(AutoAccessorsKey, false);
                     }
 
                     break;
@@ -1203,12 +1334,22 @@ internal static class Conventions
 
             var mixed = string.Join(", ", Enumerable.Range(0, 2).Where(i => count[i] > 0).Select(i => $"{count[i]} {convention.Values[i].Label}"));
             var winner = convention.KeepAny && count[1] >= MinimumAgreeing ? 1 : Winner(count[0], count[1]);
-            var found = winner < 0 ? mixed : $"{count[winner]} of {total} {convention.Values[winner].Label}";
+            var found = winner < 0 ? mixed : count[1 - winner] == 0 && convention.KeepAny ? $"{count[winner]} {convention.Values[winner].Label}" : $"{count[winner]} of {total} {convention.Values[winner].Label}";
             string tag;
             string verdict;
             if (decided.TryGetValue(convention.Key, out var reason))
             {
-                if (total >= MinimumAgreeing && winner >= 0 && Contradicted(convention, convention.Values[winner].Value, repository) is { } value && !IsSet(Off(convention.Enforcer!)))
+                if (total >= MinimumAgreeing && winner < 0 && Contradicted(convention, null, repository) is { } setting && !IsSet(Off(convention.Enforcer!)))
+                {
+                    // Mixed code under a key nothing enforced (the starter kit: beginning_of_line, 63 % of 771 operators start
+                    // the line, and BRO1520 moved 285): the key was never the code's, so the rule goes off as for mixed code.
+                    var rule = convention.Enforcer!;
+                    (tag, verdict) = ("off", $".editorconfig says {setting}, unenforced, code mixed: {rule} is off");
+                    summary.TurnedOff.Add($"{rule} ({convention.What}: your .editorconfig says {setting})");
+                    lines.Add($"# init: {convention.What}: your .editorconfig says {convention.Key} = {setting}, but your code mixes both forms ({mixed}); nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
+                    lines.Add(Off(rule));
+                }
+                else if (total >= MinimumAgreeing && winner >= 0 && Contradicted(convention, convention.Values[winner].Value, repository) is { } value && !IsSet(Off(convention.Enforcer!)))
                 {
                     var rule = convention.Enforcer!;
                     (tag, verdict) = ("off", $".editorconfig says {value}, unenforced: {rule} is off");
@@ -1264,8 +1405,10 @@ internal static class Conventions
                 // A rule-only convention (BRO1601): the code's form is "the rule's fix isn't wanted".
                 var rule = RuleOf(offLine)!;
                 (tag, verdict) = ("off", $"{rule} is off");
-                summary.Unfollowed.Add($"{rule} ({convention.What}: {count[winner]} of {total} {convention.Values[winner].Label})");
-                lines.Add($"# init: {convention.What}: {count[winner]} of {total} in your code are {convention.Values[winner].Label}, so {rule} is off. To turn it on: remove the next line.");
+                summary.Unfollowed.Add($"{rule} ({convention.What}: {found})");
+                lines.Add(convention.KeepAny
+                    ? $"# init: {convention.What}: {Plural(count[winner], convention.Unit)} in your code ({MinimumAgreeing} are enough to keep them: {convention.Keeps}), so {rule} is off. To turn it on: remove the next line."
+                    : $"# init: {convention.What}: {count[winner]} of {total} in your code are {convention.Values[winner].Label}, so {rule} is off. To turn it on: remove the next line.");
                 lines.Add(offLine);
             }
             else
@@ -1275,7 +1418,7 @@ internal static class Conventions
                 summary.Written.Add(convention.Key);
                 lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code"
                     + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced)" : string.Empty)
-                    + (convention.KeepAny ? $" ({MinimumAgreeing} are enough to keep them: {convention.Key} = {convention.Default} would move each to a line of its own)" : string.Empty));
+                    + (convention.KeepAny ? $" ({MinimumAgreeing} are enough to keep them: {convention.Keeps})" : string.Empty));
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
 
@@ -1290,7 +1433,7 @@ internal static class Conventions
             });
         }
 
-        DecideUsings(counts, isSet, lines, report, summary);
+        DecideUsings(counts, isSet, lines, report, summary, repository);
         DecideStaticCasing(counts, decided, isSet, lines, report, summary);
 
         // The 'git' verdict above already says it (only when some files have a fixed ending: else there was no line).
@@ -1336,11 +1479,37 @@ internal static class Conventions
     public static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? string.Empty : "s")}";
 
     /// <summary>
+    /// The note when the repository sets the sort key (<see cref="SortUsingsKey"/> or dotnet_separate_import_directive_groups)
+    /// and at least <see cref="MinimumAgreeing"/> files aren't in that order (<paramref name="c"/>: <see cref="UsingsKey"/>'s
+    /// counts), or null. 'dotnet format' sorts usings whenever the key is set, whatever its value, and 'unset' doesn't help
+    /// (an .editorconfig can't remove a key): the starter kit says 'dotnet_sort_system_directives_first = false' with 262 of
+    /// 1,120 files in another order (not a clear majority either way of thinking: 77 % are in that order), and 'format'
+    /// reordered 264 files. The key is the team's, so init only names it as the cause, with the count.
+    /// </summary>
+    public static string? UnsortedUnderKey(int[] c, IReadOnlyDictionary<string, string>? repository)
+    {
+        string? Value(string key) => repository is not null && repository.TryGetValue(key, out var v) ? v.Split(':')[0].Trim().ToLowerInvariant() : null;
+        var key = Value(SortUsingsKey) is not null ? SortUsingsKey : Value("dotnet_separate_import_directive_groups") is not null ? "dotnet_separate_import_directive_groups" : null;
+        var total = c.Sum();
+        if (key is null || total < MinimumAgreeing)
+        {
+            return null;
+        }
+
+        // ponytail: without dotnet_sort_system_directives_first, the order counts as System first ('dotnet format''s default).
+        var systemFirst = Value(SortUsingsKey) != "false";
+        var sorted = c[systemFirst ? 0 : 1] + c[2];
+        return total - sorted < MinimumAgreeing
+            ? null
+            : $"using directives: your .editorconfig sets {key} = {Value(key)}, and 'dotnet format' sorts usings whenever it is set (to any value): {total - sorted} of {Plural(total, "file")} aren't in that order ({(systemFirst ? "System first" : "System not first")}), and 'format' will reorder them. If your team doesn't keep usings in that order, remove {key} from .editorconfig (init can't: 'unset' sorts them too).";
+    }
+
+    /// <summary>
     /// The using order (<see cref="SortUsingsKey"/>): sorted files -> the key (System first unless the files that tell the
     /// two apart clearly don't), unsorted or mixed -> no key, so 'dotnet format' leaves them alone; too few files -> StyleBro's
     /// default (sorted, System first). A key the repository sets wins.
     /// </summary>
-    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary)
+    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary, IReadOnlyDictionary<string, string>? repository = null)
     {
         const string What = "using directives";
         if (!counts.TryGetValue(UsingsKey, out var c))
@@ -1350,11 +1519,17 @@ internal static class Conventions
 
         var (sorted, unsorted) = (c[0] + c[1] + c[2], c[3]);
         var (total, apart) = (sorted + unsorted, c[0] + c[1]);
+        var found = $"{sorted} of {Plural(total, "file")} sorted" + (apart > 0 ? $", {c[0]} of {apart} with System first" : string.Empty);
         if (isSet?.Invoke(SortUsingsKey) == true || isSet?.Invoke("dotnet_separate_import_directive_groups") == true)
         {
             if (total > 0)
             {
-                report.Add($"  {"set",-8} {What}: {Plural(total, "file")} -> set in .editorconfig");
+                report.Add($"  {"set",-8} {What}: {found} -> set in .editorconfig");
+            }
+
+            if (UnsortedUnderKey(c, repository) is { } note)
+            {
+                report.Add($"  {"note",-8} {note}");
             }
 
             return;
@@ -1362,7 +1537,6 @@ internal static class Conventions
 
         var sort = total < MinimumAgreeing ? 0 : Winner(sorted, unsorted);
         var system = sort != 0 || apart < MinimumAgreeing ? 0 : Winner(c[0], c[1]);
-        var found = $"{sorted} of {Plural(total, "file")} sorted" + (apart > 0 ? $", {c[0]} of {apart} with System first" : string.Empty);
         string tag;
         string verdict;
         string comment;
@@ -1494,9 +1668,9 @@ internal static class Conventions
 
     /// <summary>
     /// The value of the convention's SDK key in the repository's own settings when its <see cref="Convention.Enforcer"/>
-    /// enforces it and the code's form (<paramref name="code"/>) is the other one; else null.
+    /// enforces it and the code's form (<paramref name="code"/>; null: mixed) is the other one; else null.
     /// </summary>
-    private static string? Contradicted(Convention convention, string code, IReadOnlyDictionary<string, string>? repository)
+    private static string? Contradicted(Convention convention, string? code, IReadOnlyDictionary<string, string>? repository)
     {
         if (convention.Enforcer is null || repository is null || !repository.TryGetValue(convention.Key, out var setting))
         {
@@ -1681,6 +1855,9 @@ internal static class Conventions
 
         /// <summary>Gets a value indicating whether <see cref="MinimumAgreeing"/> places of the second form keep it, majority or not.</summary>
         public bool KeepAny { get; init; }
+
+        /// <summary>Gets what <see cref="Default"/> would do to the second form, for the '# init:' comment of a <see cref="KeepAny"/> convention.</summary>
+        public string? Keeps { get; init; }
     }
 
     /// <summary>The root .editorconfig's settings as analyzer options (BRO1601's stylebro_document_* keys).</summary>

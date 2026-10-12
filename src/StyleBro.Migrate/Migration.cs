@@ -268,10 +268,22 @@ internal static class Migration
 
         // An end_of_line the committed files clearly contradict, with nothing converting them (CleanArchitecture: crlf, 349 of
         // 350 LF): the files decide, as in init.
-        if (fieldStyle is null && gitEndings is null && Conventions.ContradictedEnding(Conventions.EndingCounts(root), ownSettings) is var (ending, endingNote))
+        var fileCounts = fieldStyle is null ? Conventions.EndingCounts(root) : null;
+        if (fileCounts is not null && gitEndings is null && Conventions.ContradictedEnding(fileCounts, ownSettings) is var (ending, endingNote))
         {
             result.Notes.Add(endingNote);
             lines.Add($"end_of_line = {ending}");
+        }
+
+        // A charset or insert_final_newline the files don't follow, as in init: IDE0055 on makes 'format' apply them to every
+        // file (the starter kit's 'insert_final_newline = false' removed the last line break from 1,092 files).
+        foreach (var key in fileCounts is null ? [] : new[] { Conventions.CharsetKey, Conventions.FinalNewlineKey })
+        {
+            if (Conventions.ContradictedFileSetting(fileCounts!, ownSettings, key) is var (fileLine, fileNote))
+            {
+                result.Notes.Add(fileNote);
+                lines.Add(fileLine);
+            }
         }
 
         // Line endings, judged like init does: without end_of_line 'format' writes the OS's ending into the lines it rewrites
@@ -506,8 +518,11 @@ internal static class Migration
             return Path.Combine(root, "Directory.Build.props");
         }
 
-        return StyleCopSetup.EnumerateFiles(root)
-            .Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+        // A project without C# files next to projects with some (the starter kit's template pack project) gets nothing from
+        // the analyzers: a root Directory.Build.props created only for it was read by nothing else.
+        var projects = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).ToList();
+        var withCode = projects.Where(f => StyleCopSetup.EnumerateFiles(Path.GetDirectoryName(f)!).Any(c => c.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))).ToList();
+        return (withCode.Count > 0 ? withCode : projects)
             .Where(f => folders is null || folders.Any(folder => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), folder)))
             .Select(f => Nearest(Path.GetDirectoryName(Path.GetFullPath(f))))
             .DefaultIfEmpty(Path.Combine(root, "Directory.Build.props"))
