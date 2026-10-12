@@ -1228,6 +1228,29 @@ internal static class FormatCommand
         }
     }
 
+    internal static string Capture(string directory, params string[] arguments)
+    {
+        var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var argument in arguments)
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(start)!;
+        var output = process.StandardOutput.ReadToEndAsync();
+        var errors = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        // A project MSBuild can't evaluate prints its error instead of JSON (GameDemo: "NuGet.Config is not valid XML"; it
+        // was a JsonReaderException with a stack trace before).
+        if (process.ExitCode != 0)
+        {
+            throw new ToolException($"'dotnet {string.Join(" ", arguments.Where(a => a != "-nologo"))}' failed (exit code {process.ExitCode}):{Environment.NewLine}{string.Join(Environment.NewLine, (output.Result + errors).Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).Select(l => "  " + l.TrimStart()))}");
+        }
+
+        return output.Result;
+    }
+
     /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
     /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.
@@ -1897,29 +1920,6 @@ internal static class FormatCommand
         }
 
         return read;
-    }
-
-    internal static string Capture(string directory, params string[] arguments)
-    {
-        var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var argument in arguments)
-        {
-            start.ArgumentList.Add(argument);
-        }
-
-        using var process = Process.Start(start)!;
-        var output = process.StandardOutput.ReadToEndAsync();
-        var errors = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        // A project MSBuild can't evaluate prints its error instead of JSON (GameDemo: "NuGet.Config is not valid XML"; it
-        // was a JsonReaderException with a stack trace before).
-        if (process.ExitCode != 0)
-        {
-            throw new ToolException($"'dotnet {string.Join(" ", arguments.Where(a => a != "-nologo"))}' failed (exit code {process.ExitCode}):{Environment.NewLine}{string.Join(Environment.NewLine, (output.Result + errors).Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).Select(l => "  " + l.TrimStart()))}");
-        }
-
-        return output.Result;
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>

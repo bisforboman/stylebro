@@ -581,6 +581,14 @@ internal sealed class StyleCopSetup
             || file.EndsWith(".targets", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Whether StyleCop.Analyzers runs anywhere: false when the repository has projects and none references it (evaluated,
+    /// <see cref="Evaluate"/>), and no earlier --write recorded a version (after the package swap it's gone on purpose).
+    /// Its settings are leftovers then (Spectre.Console kept 'dotnet_diagnostic.sa1101.severity = none' lines after dropping it).
+    /// </summary>
+    public static bool IsInstalled(string root, Func<string, bool?>? evaluate = null) =>
+        Migration.RecordedVersion(root) is not null || Evaluate(root, Projects(root, EnumerateFiles(root).ToList()).Uses, evaluate ?? EvaluateStyleCop, []);
+
     public bool IsOn(string id) => Severities.TryGetValue(id, out var severity) && severity >= Severity.Suggestion;
 
     /// <summary>The setup as seen inside a scope: the base severities with the scope's on top.</summary>
@@ -640,14 +648,6 @@ internal sealed class StyleCopSetup
 
         return (uses, referenced.ToList(), removed.ToList());
     }
-
-    /// <summary>
-    /// Whether StyleCop.Analyzers runs anywhere: false when the repository has projects and none references it (evaluated,
-    /// <see cref="Evaluate"/>), and no earlier --write recorded a version (after the package swap it's gone on purpose).
-    /// Its settings are leftovers then (Spectre.Console kept 'dotnet_diagnostic.sa1101.severity = none' lines after dropping it).
-    /// </summary>
-    public static bool IsInstalled(string root, Func<string, bool?>? evaluate = null) =>
-        Migration.RecordedVersion(root) is not null || Evaluate(root, Projects(root, EnumerateFiles(root).ToList()).Uses, evaluate ?? EvaluateStyleCop, []);
 
     /// <summary>
     /// Settles <paramref name="uses"/> (from <see cref="Projects"/>, text-level) with MSBuild where the text can't: projects
@@ -731,41 +731,6 @@ internal sealed class StyleCopSetup
         {
             return true;
         }
-    }
-
-    /// <summary>
-    /// A project's MSBuild files as the text reads them: the project, the Directory.Build.props/.targets and
-    /// Directory.Packages.props it gets (nearest, under the root), and what those import.
-    /// </summary>
-    private static List<string> Chain(string project, string root)
-    {
-        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var chain = new List<string> { project };
-        foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
-        {
-            for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
-            {
-                if (File.Exists(Path.Combine(folder, name)))
-                {
-                    chain.Add(OnDisk(Path.Combine(folder, name)));
-                    break;
-                }
-            }
-        }
-
-        for (var i = 0; i < chain.Count && i < 64; i++)
-        {
-            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
-            {
-                if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
-                    && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
-                {
-                    chain.Add(imported);
-                }
-            }
-        }
-
-        return chain;
     }
 
     /// <summary>
@@ -941,6 +906,41 @@ internal sealed class StyleCopSetup
         : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
         : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
         : null;
+
+    /// <summary>
+    /// A project's MSBuild files as the text reads them: the project, the Directory.Build.props/.targets and
+    /// Directory.Packages.props it gets (nearest, under the root), and what those import.
+    /// </summary>
+    private static List<string> Chain(string project, string root)
+    {
+        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var chain = new List<string> { project };
+        foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
+        {
+            for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
+            {
+                if (File.Exists(Path.Combine(folder, name)))
+                {
+                    chain.Add(OnDisk(Path.Combine(folder, name)));
+                    break;
+                }
+            }
+        }
+
+        for (var i = 0; i < chain.Count && i < 64; i++)
+        {
+            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
+            {
+                if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
+                    && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
+                {
+                    chain.Add(imported);
+                }
+            }
+        }
+
+        return chain;
+    }
 
     /// <summary>Whether an .editorconfig section can apply to C# files at all ('[tests/**.cs]', '[*Tests.cs]', '[{src/tests/**/*.cs,tests/**/*.cs}]').</summary>
     private static bool MayApplyToCSharp(string section)
