@@ -196,8 +196,7 @@ internal static class Program
             JsonReport.AddSettings(file, block);
             if (write)
             {
-                var existing = File.Exists(path) ? File.ReadAllText(path) : null;
-                File.WriteAllText(path, Migration.Apply(existing, block));
+                PreviewCommand.EditFile(path, existing => Migration.Apply(existing, block));
                 Console.WriteLine($"Wrote the settings to {file}.");
             }
             else
@@ -221,7 +220,7 @@ internal static class Program
 
             if (write)
             {
-                File.WriteAllText(props, disabled);
+                PreviewCommand.EditFile(props, _ => disabled);
                 Console.WriteLine($"Turned the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.");
             }
             else
@@ -425,7 +424,7 @@ internal static class Program
             files++;
             if (write)
             {
-                File.WriteAllText(file, rewritten, new UTF8Encoding(bom));
+                PreviewCommand.EditFile(file, _ => rewritten);
             }
         }
 

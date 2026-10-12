@@ -363,6 +363,12 @@ references didn't load (a broken restore or package cache), the command names it
 one target framework only: the code only that framework compiles); `--diff` stops then instead of showing a partial
 preview. A folder with several solutions
 or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
+With none at the root, it looks for a Traversal project there (`dirs.proj` with `Sdk="Microsoft.Build.Traversal"`,
+which `dotnet format` can't load: `format` runs on a temporary solution with the projects it lists), then for solutions
+one folder down (`src/MySolution.slnx`): the only one is used, and the command says so (`Using src/MySolution.slnx`);
+several are listed, as at the root. `baseline` and `--diff` find them the same way.
+If `dotnet format` crashes, the command names the projects of that run, and when the crash came after some files were
+written, lists every file it changed (`Run 1 failed after changing 12 files:`).
 Review the diff and commit it. In a large codebase you may not want one big change: see
 [Large codebases](#large-codebases).
 
@@ -565,7 +571,11 @@ framework, so the renaming fixes also check the names in every other C# file of 
 read with `GetField("count")` keeps its name in the library's run too, and a name a project outside the run uses
 (`UsedInProjectNotLoaded`) is left to a run that loads both, or kept. Files a project compiles from outside its own
 folder (`<Compile Include="..\Shared\*.cs" />`) are formatted in the runs of the projects that compile them, and
-`--files` finds such a file's project too. Why:
+`--files` finds such a file's project too. Projects that compile the same files (a library and its AOT variant
+compiling `..\Lib\*.cs` with other `DefineConstants`) run in separate parts of a framework's run (`== net8.0, part 1
+of 2`), each with what it references: loaded together, `dotnet format` crashes on their different edits of one file
+([dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)). This applies without multi-targeted projects
+too. Why:
 [ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
 
 A project `dotnet format` can't load at all (F#, `.fsproj`) makes it skip the C# projects that reference it, for the

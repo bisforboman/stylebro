@@ -21,6 +21,9 @@ internal static class BaselineCommand
     /// What 'dotnet format' reports for its formatting passes, not as diagnostics: whitespace, line endings, the charset
     /// (BOM), the final newline, using order. Nothing can suppress them, so they can't be baselined.
     /// </summary>
+    /// <summary>Folders below the root never searched for a solution (build output, packages).</summary>
+    private static readonly string[] SkippedFolders = { "bin", "obj", "node_modules", "artifacts", "packages" };
+
     private static readonly HashSet<string> FormattingIds = new(StringComparer.Ordinal) { "WHITESPACE", "ENDOFLINE", "CHARSET", "FINALNEWLINE", "IMPORTS" };
 
     public static int Run(string[] args)
@@ -40,6 +43,15 @@ internal static class BaselineCommand
             Console.Error.WriteLine(NoWorkspace(root, "--project <file>"));
             return 1;
         }
+
+        if (IsBelow(project))
+        {
+            Console.WriteLine(BelowNote(project));
+        }
+
+        // 'dotnet format' can't load a Traversal project: a solution with its projects instead.
+        var traversal = FormatCommand.IsTraversal(Path.Combine(root, project)) ? FormatCommand.TraversalSolution(Path.GetFullPath(Path.Combine(root, project))) : null;
+        project = traversal ?? project;
 
         var path = Path.Combine(root, Baseline.FileName);
         var aside = path + ".previous";
@@ -75,6 +87,11 @@ internal static class BaselineCommand
         }
         finally
         {
+            if (traversal is not null)
+            {
+                File.Delete(traversal);
+            }
+
             if (Directory.Exists(reportDir))
             {
                 Directory.Delete(reportDir, recursive: true);
@@ -145,20 +162,48 @@ internal static class BaselineCommand
     public static string? FindWorkspace(string root) => WorkspaceCandidates(root) is [var only] ? only : null;
 
     /// <summary>
-    /// What the commands could run on in a folder (file names): its solutions (.slnx, .sln, .slnf; a .sln next to the .slnx
-    /// of the same name is that solution, not another), else its projects. Several are never picked from silently: eShop's
-    /// eShop.slnx next to eShop.Web.slnf (the slnx needs MAUI workloads), Ocelot's two .slnx files.
+    /// What the commands could run on in a folder (paths relative to it): its solutions (.slnx, .sln, .slnf; a .sln next to
+    /// the .slnx of the same name is that solution, not another), else its projects, else a Traversal project
+    /// (Microsoft.Build.Traversal, kubernetes-client's root build), else the solutions one folder down (tfplan2md keeps its
+    /// only one in src/; <see cref="IsBelow"/>). Several are never picked from silently: eShop's eShop.slnx next to
+    /// eShop.Web.slnf (the slnx needs MAUI workloads), Ocelot's two .slnx files.
     /// </summary>
     public static List<string> WorkspaceCandidates(string root)
     {
-        // Not Directory.GetFiles(root, "*.sln"): on Windows a three-letter extension pattern also matches .slnx and .slnf.
         var files = Directory.EnumerateFiles(root).Select(Path.GetFileName).OfType<string>().ToList();
-        bool Is(string file, string extension) => string.Equals(Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase);
-        var solutions = files.Where(f => Is(f, ".slnx") || Is(f, ".slnf") || (Is(f, ".sln") && !files.Contains(Path.ChangeExtension(f, ".slnx"), StringComparer.OrdinalIgnoreCase)))
+        var here = Solutions(files);
+        if (here.Count == 0)
+        {
+            here = files.Where(f => Is(f, ".csproj")).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        if (here.Count == 0)
+        {
+            here = files.Where(f => Is(f, ".proj") && FormatCommand.IsTraversal(Path.Combine(root, f))).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        return here.Count > 0
+            ? here
+            : Directory.EnumerateDirectories(root)
+                .Where(d => !Path.GetFileName(d).StartsWith('.') && !SkippedFolders.Contains(Path.GetFileName(d), StringComparer.OrdinalIgnoreCase))
+                .SelectMany(d => Solutions(Directory.EnumerateFiles(d).Select(Path.GetFileName).OfType<string>().ToList()).Select(f => Path.Combine(Path.GetFileName(d), f)))
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+    }
+
+    /// <summary>Whether a picked workspace (<see cref="FindWorkspace"/>) is in a folder below the root, not at it.</summary>
+    public static bool IsBelow(string workspace) => Path.GetDirectoryName(workspace) is { Length: > 0 };
+
+    /// <summary>What to say when the workspace was picked one folder down (<see cref="IsBelow"/>).</summary>
+    public static string BelowNote(string workspace) => $"Using {workspace.Replace('\\', '/')}: no solution or project at the root, and it's the only solution one folder down.";
+
+    // Not Directory.GetFiles(root, "*.sln"): on Windows a three-letter extension pattern also matches .slnx and .slnf.
+    private static bool Is(string file, string extension) => string.Equals(Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase);
+
+    private static List<string> Solutions(List<string> files) =>
+        files.Where(f => Is(f, ".slnx") || Is(f, ".slnf") || (Is(f, ".sln") && !files.Contains(Path.ChangeExtension(f, ".slnx"), StringComparer.OrdinalIgnoreCase)))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
-        return solutions.Count > 0 ? solutions : files.Where(f => Is(f, ".csproj")).Order(StringComparer.OrdinalIgnoreCase).ToList();
-    }
 
     /// <summary>Why no solution or project was picked in <paramref name="root"/>, and how to name one (<paramref name="how"/>, e.g. "--project &lt;file&gt;").</summary>
     public static string NoWorkspace(string root, string how)
