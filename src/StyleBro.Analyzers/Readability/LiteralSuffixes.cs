@@ -85,6 +85,13 @@ internal static class LiteralSuffixes
             return null;
         }
 
+        // With BRO1135 off the code's unsigned suffixes may be lower case (init turns it off for '0u'): 'u' and 'ul' then, so
+        // BRO1122 doesn't bring in upper case nobody asked for. 'L' stays: a lower-case 'l' alone looks like '1' (CS0078).
+        if (suffix.Contains('U') && !Severities.IsOn(model.Compilation.Options, cast.SyntaxTree, DiagnosticIds.LiteralSuffixCase, cancellationToken))
+        {
+            suffix = suffix.ToLowerInvariant();
+        }
+
         var newText = StripSuffix(literal.Token.Text) + suffix;
         var token = SyntaxFactory.ParseToken(newText);
         if (!token.IsKind(SyntaxKind.NumericLiteralToken) || token.Text != newText || token.ContainsDiagnostics || token.Value is null)

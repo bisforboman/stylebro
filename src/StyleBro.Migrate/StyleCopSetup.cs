@@ -91,6 +91,9 @@ internal sealed class StyleCopSetup
     /// <summary>Gets the StyleCop.Analyzers version the repository references, or null when none was found.</summary>
     public string? Version { get; }
 
+    /// <summary>Gets a value indicating whether <see cref="Version"/> comes from the block an earlier --write wrote (no reference left).</summary>
+    public bool VersionRecorded { get; init; }
+
     /// <summary>
     /// Gets a value indicating whether some project generates a documentation file. Without one the compiler doesn't parse XML documentation
     /// in the build, and StyleCop's rules that read it stay silent (SA0001), while 'dotnet format' does parse it.
@@ -140,6 +143,11 @@ internal sealed class StyleCopSetup
             .Select(m => m.Groups["v"].Value.Trim())
             .OrderBy(v => v, StringComparer.Ordinal)
             .FirstOrDefault();
+
+        // After the package swap the reference is gone: the version the last --write recorded counts (kubernetes-client: a
+        // second run turned on BRO1123, BRO1124 and BRO1311, which replace rules StyleCop 1.1.118 doesn't have).
+        var recorded = version is null ? Migration.RecordedVersion(root) : null;
+        version ??= recorded;
         var old = OldRules(version);
 
         // Each project that runs StyleCop, with the ruleset and stylecop.json it gets (its own file, its Directory.Build.props
@@ -312,6 +320,7 @@ internal sealed class StyleCopSetup
             Folders = folders,
             FoldersWithout = without,
             ReferencedIn = projects.ReferencedIn.Select(Relative).ToList(),
+            VersionRecorded = recorded is not null,
             RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
         };
     }
@@ -792,10 +801,12 @@ internal sealed class StyleCopSetup
             var bulk = new HashSet<string>(StringComparer.Ordinal);
             foreach (var (id, category, defaultSeverity, _) in Rules)
             {
-                // 'dotnet_analyzer_diagnostic.severity' (every rule; a folder of vendored code often sets it to none)
-                // comes last, and like in the compiler it doesn't turn on rules that are off by default.
-                if (byRule.TryGetValue(id, out var severity) || byCategory.TryGetValue(category, out severity)
-                    || (byCategory.TryGetValue(AllRules, out severity) && (defaultSeverity > Severity.None || severity == Severity.None)))
+                // A rule's own entry, else its category's, else 'dotnet_analyzer_diagnostic.severity' (every rule; a folder of
+                // vendored code often sets it to none). Like in the compiler (TryGetSeverityFromBulkConfiguration), the two bulk
+                // entries only apply to rules that are on by default: tfplan2md's 'category-StyleCop.CSharp.NamingRules.severity
+                // = warning' never turned SA1305 on, and reading it so turned BRO1310 on (6 files renamed).
+                if (byRule.TryGetValue(id, out var severity)
+                    || (defaultSeverity > Severity.None && (byCategory.TryGetValue(category, out severity) || byCategory.TryGetValue(AllRules, out severity))))
                 {
                     severities[id] = severity;
                     if (!byRule.ContainsKey(id))

@@ -1,26 +1,29 @@
 # Sonar rules that a StyleBro or SDK rule fixes (docs/migrating.md, "Coming from SonarQube"). Tab-separated:
 # Sonar id, the rule that fixes it, mode (on: the rule is turned on; option: only the setting, the rule must be on already),
 # a setting written with it (or -), a note for the report (or -). Mode none: not covered, the note says why (rule -).
-S100	BRO1309	on	-	-
-S101	BRO1309	on	-	BRO1309 also checks methods, properties, events and enum members (Sonar's S100)
-S818	BRO1135	on	stylebro_upper_case_literal_suffixes = l_only	-
-S927	BRO1313	on	-	-
-S1066	BRO1149	on	-	-
-S1116	BRO1101	on	-	-
-S1118	CA1052	on	dotnet_code_quality.CA1052.api_surface = private, internal	public classes stay Sonar's (making them static changes the API)
-S121	BRO1514	on	csharp_prefer_braces = true	-
-S1125	IDE0075	on	-	-
-S1125	IDE0100	on	-	-
-S1481	IDE0059	on	-	-
-S1659	BRO1142	on	-	-
-S1854	IDE0059	on	-	-
-S1905	IDE0004	on	-	-
-S1939	BRO1408	on	-	-
-S2325	CA1822	on	dotnet_code_quality.CA1822.api_surface = private, internal	public members stay Sonar's (making them static changes the API)
-S2971	BRO1150	on	-	-
-S3052	CA1805	on	-	-
-S3260	-	none	-	CA1852's fix also seals private nested classes with protected members (CS0628 warnings: 144 in SmartEnum)
-S3442	CA1012	on	-	-
-S3878	BRO1151	on	-	-
-S4136	BRO1001	option	stylebro_keep_overloads_together = same_access	only overloads with the same access stay together, as Sonar's S4136 asks; between accesses StyleCop's SA1202 order stays
-S8969	BRO1147	on	-	-
+# Then per Sonar version (SonarAnalyzer.CSharp): the first one with the rule (or -: 9.16 or older) and the first one
+# with it in "Sonar way" when that changed (or -), from the rule metadata in github.com/SonarSource/sonar-dotnet
+# (analyzers/rspec/cs at the release tags). Older versions don't have the rule, or don't turn it on by default.
+S100	BRO1309	on	-	-	-	-
+S101	BRO1309	on	-	BRO1309 also checks methods, properties, events and enum members (Sonar's S100)	-	-
+S818	BRO1135	on	stylebro_upper_case_literal_suffixes = l_only	-	-	-
+S927	BRO1313	on	-	-	-	-
+S1066	BRO1149	on	-	-	-	-
+S1116	BRO1101	on	-	-	-	-
+S1118	CA1052	on	dotnet_code_quality.CA1052.api_surface = private, internal	public classes stay Sonar's (making them static changes the API)	-	-
+S121	BRO1514	on	csharp_prefer_braces = true	-	-	-
+S1125	IDE0075	on	-	-	-	-
+S1125	IDE0100	on	-	-	-	-
+S1481	IDE0059	on	-	-	-	-
+S1659	BRO1142	on	-	-	-	-
+S1854	IDE0059	on	-	-	-	-
+S1905	IDE0004	on	-	-	-	-
+S1939	BRO1408	on	-	-	-	-
+S2325	CA1822	on	dotnet_code_quality.CA1822.api_surface = private, internal	public members stay Sonar's (making them static changes the API)	-	9.32
+S2971	BRO1150	on	-	-	-	-
+S3052	CA1805	on	-	-	-	-
+S3260	-	none	-	CA1852's fix also seals private nested classes with protected members (CS0628 warnings: 144 in SmartEnum)	-	-
+S3442	CA1012	on	-	-	-	-
+S3878	BRO1151	on	-	-	-	-
+S4136	BRO1001	option	stylebro_keep_overloads_together = same_access	only overloads with the same access stay together, as Sonar's S4136 asks; between accesses StyleCop's SA1202 order stays	-	-
+S8969	BRO1147	on	-	-	10.30	-

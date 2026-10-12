@@ -302,7 +302,16 @@ internal static class InitCommand
             report.Insert(0, csharpier.Report);
         }
 
-        return ([.. csharpier.Lines ?? [], .. kept, .. detected], report);
+        // The repository's end_of_line against git's checkout conversion: endings stay out of it, as in the migration. CSharpier
+        // (IDE0055 off) or the team's own IDE0055 severity keep theirs.
+        var endings = new List<string>();
+        if (Conventions.EndingContradiction(root, settings) is ({ } endingLines, { } endingReport))
+        {
+            report.Add($"  {"note",-8} {endingReport}");
+            endings.AddRange(endingLines.Take(csharpier.Lines is null && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
+        }
+
+        return ([.. csharpier.Lines ?? [], .. kept, .. detected, .. endings], report);
     }
 
     /// <summary>

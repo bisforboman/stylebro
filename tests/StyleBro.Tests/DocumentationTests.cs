@@ -880,6 +880,12 @@ public class DocumentationTests
             /// <summary>Gets the return value condition.</summary>
             public bool ReturnValue { get; }
 
+            /// <summary>Gets whether the mapping file exists.</summary>
+            public bool? MappingExists { get; }
+
+            /// <summary>Gets a value indicating whether the mapping file is valid.</summary>
+            public bool? MappingValid { get; }
+
             /// <summary>Sets only.</summary>
             public int WriteOnly { set { } }
 

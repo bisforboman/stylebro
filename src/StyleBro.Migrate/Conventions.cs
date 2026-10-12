@@ -81,6 +81,7 @@ internal static class Conventions
         new(InheritDocKey, "overrides/interface implementations", "warning", ("warning", "with a doc comment"), ("none", "without a doc comment"), Off(DiagnosticIds.InheritDocumentation)),
         new(MemberOrderKey, "types' members", "warning", ("warning", "in BRO1001's order"), ("none", "in another order"), Off(DiagnosticIds.MemberOrdering)) { Unit = "type" },
         new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
+        new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
     };
@@ -146,6 +147,13 @@ internal static class Conventions
     /// sorted). Type members only: namespaces mostly hold one type per file, and BRO1001 reports per type.
     /// </summary>
     private const string MemberOrderKey = "dotnet_diagnostic." + DiagnosticIds.MemberOrdering + ".severity";
+
+    /// <summary>
+    /// BRO1108's severity: the items of argument and parameter lists that span lines each on a line of their own, or grouped
+    /// (owner's decision 2026-10-12: "Detect, like other conventions"; metadata-extractor groups them, and BRO1108 split
+    /// 'GetIndexedDescription(TagX, 1,' + '"a", "b")' (two lines) into one item per line in 25 files). A migration keeps SA1117's setting.
+    /// </summary>
+    private const string ItemsPerLineKey = "dotnet_diagnostic." + DiagnosticIds.ParametersOnSameOrSeparateLines + ".severity";
 
     /// <summary>BRO1135's severity: unsigned literal suffixes ('u', 'ul') in upper case or not (Orleans: 114 '0u' became '0U').</summary>
     private const string SuffixCaseKey = "dotnet_diagnostic." + DiagnosticIds.LiteralSuffixCase + ".severity";
@@ -469,6 +477,46 @@ internal static class Conventions
         return $"git converts {converted} of {converted + others} C# files on checkout, so end_of_line isn't set (each machine keeps its own ending; the {Plural(others, "file")} committed with a fixed ending don't decide)";
     }
 
+    /// <summary>
+    /// The repository's own end_of_line when git gives C# files each machine's ending on checkout (owner's decision
+    /// 2026-10-12: "Keep endings out of it, warn"). kubernetes-client says 'end_of_line = lf' with '*.cs text=auto': a
+    /// Windows checkout has CRLF, so IDE0055 at error failed the build 266 times and 'format' rewrote 205 files to LF (4
+    /// tests compare against "\r\n"). Then the generated settings unset end_of_line for C# files ('format' and IDE0055 leave
+    /// the checkout's endings alone, probed with dotnet format and the build), IDE0055 is a suggestion, and the report says
+    /// how to settle it. Null without a contradiction; <paramref name="own"/>: <see cref="Migration.OwnSettings"/>.
+    /// </summary>
+    public static (List<string> Lines, string Report)? EndingContradiction(string root, IReadOnlyDictionary<string, string> own)
+    {
+        if (!own.TryGetValue(EndOfLineKey, out var value) || value.ToLowerInvariant() is not ("lf" or "crlf") || PreviewCommand.Git(root, "ls-files", "--eol", "-z", "--", "*.cs") is not (0, var output))
+        {
+            return null;
+        }
+
+        var count = PickedPerMachine(output);
+        if (count == 0)
+        {
+            return null;
+        }
+
+        var why = $"your .editorconfig says end_of_line = {value}, but git checks out {Plural(count, "C# file")} with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so {(value == "lf" ? "Windows" : "Linux and macOS")} checkouts don't match it";
+        return (
+            [
+                $"# Line endings: {why}. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: '*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig; then run stylebro-migrate again.",
+                $"{EndOfLineKey} = unset",
+                "dotnet_diagnostic.IDE0055.severity = suggestion",
+            ],
+            $"Line endings: {why}. Set end_of_line = unset for C# files and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: '*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig.");
+    }
+
+    /// <summary>
+    /// How many files in 'git ls-files --eol -z' output get the machine's ending on checkout: stored as LF, and converted
+    /// here (<see cref="Converted"/>) or by a 'text' attribute without 'eol' (LF on Linux, CRLF on Windows).
+    /// </summary>
+    public static int PickedPerMachine(string output) =>
+        output.Split('\0').Count(entry => entry.IndexOf('\t') is var tab and > 0 && entry.Substring(0, tab) is var info
+            && info.StartsWith("i/lf ", StringComparison.Ordinal) && !info.Contains("eol=", StringComparison.Ordinal)
+            && (System.Text.RegularExpressions.Regex.IsMatch(info, @"\battr/text\b") || info.Contains("w/crlf", StringComparison.Ordinal)));
+
     /// <summary>The paths in 'git ls-files --eol -z' output ('i/lf    w/crlf  attr/text=auto \tpath') that git converts, and whether a 'text' attribute does.</summary>
     public static IEnumerable<(string Path, bool ByAttribute)> Converted(string output)
     {
@@ -681,6 +729,12 @@ internal static class Conventions
                         if (items.Count > 1 && Line(items[0].SpanStart) != Line(items[1].SpanStart))
                         {
                             Add("stylebro_split_list_first_item", Line(items[0].SpanStart) == Line(open.SpanStart));
+                        }
+
+                        // Items on several lines: each on its own (BRO1108's layout) or grouped ('F(TagX, 1,' + '"a", "b")').
+                        if (items.Count > 1 && Line(items[0].SpanStart) != Line(items[^1].SpanStart))
+                        {
+                            Add(ItemsPerLineKey, Enumerable.Range(1, items.Count - 1).Any(i => Line(items[i].SpanStart) == Line(items[i - 1].Span.End)));
                         }
                     }
 

@@ -205,7 +205,10 @@ A few settings work a little differently:
   git converts on checkout (`core.autocrlf`, or a `.gitattributes` `text` attribute without `eol`: LF in the repository,
   CRLF in a Windows checkout) don't count, and the report names which of the two converts them: there the OS's ending is
   what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. `stylebro-migrate
-  --write` writes `end_of_line` the same way.
+  --write` writes `end_of_line` the same way. When your `.editorconfig` sets `end_of_line` but git converts the files on
+  checkout (`end_of_line = lf` with `*.cs text=auto` means CRLF files in a Windows checkout), `init` keeps endings out of
+  it: `end_of_line = unset` for C# files and IDE0055 as a suggestion, so neither `format` nor the build touches them, and
+  the report says how to settle it (`*.cs text eol=lf` in `.gitattributes`, or removing `end_of_line`).
 - **Member order** ([BRO1001](rules/BRO1001.md)) counts types whose members BRO1001 would sort apart (two or more
   members with different sort keys), with your own order settings: already in its order or not. A type that is in order
   once overloads stay together counts as sorted (whether they do is the overloads convention's call). Mostly sorted: the
@@ -214,7 +217,10 @@ A few settings work a little differently:
   files hold one type, so they would say little.
 - **Unsigned literal suffixes** ([BRO1135](rules/BRO1135.md)) count `u`/`ul` suffixes in upper or lower case (`0U` or
   `0u`); `L` alone doesn't count, since nobody writes `1l`. Mostly upper case: the rule stays on; mostly lower case or
-  mixed: it's turned off (Orleans: 423 upper, 185 lower).
+  mixed: it's turned off (Orleans: 423 upper, 185 lower). With it off, BRO1122 writes `6u`/`1ul` instead of `6U`/`1UL`.
+- **Items of split lists** ([BRO1108](rules/BRO1108.md)) count argument and parameter lists whose items start on more
+  than one line: each item on its own line, or grouped (`F(tag, 1,` and `"a", "b")` on the next line). Mostly one per
+  line: the rule stays on; mostly grouped or mixed: it's turned off (metadata-extractor: 104 one per line, 197 grouped).
 - **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,
   `.csharpierrc.yaml` or `.csharpierrc.yml` at the root, a `csharpier` tool in `.config/dotnet-tools.json` or
   `dotnet-tools.json`, or a `CSharpier.MsBuild` package reference), the two formatters would undo each other's layout
@@ -273,6 +279,7 @@ A few settings work a little differently:
 | Default values | `default(T)` or `default` | IDE0034 | `csharp_prefer_simple_default_expression` |
 | `)` of split lists | after the last item or on its own line | [BRO1110](rules/BRO1110.md) | `stylebro_closing_parenthesis_placement` |
 | First item of split lists | on the next line or after `(` | [BRO1107](rules/BRO1107.md) | `stylebro_split_list_first_item` |
+| Items of split lists | one per line or grouped on lines | [BRO1108](rules/BRO1108.md) | `dotnet_diagnostic.BRO1108.severity` |
 | Constructor initializers | `: base(...)`/`: this(...)` on its own line or the constructor's | [BRO1105](rules/BRO1105.md) | `stylebro_constructor_initializer_placement` |
 | Constraints | `where` on its own line or the declaration's | [BRO1111](rules/BRO1111.md) | `stylebro_constraint_placement` |
 | `new T { ... }` | with or without `()` before an initializer | [BRO1141](rules/BRO1141.md) | `stylebro_object_creation_parentheses` |
