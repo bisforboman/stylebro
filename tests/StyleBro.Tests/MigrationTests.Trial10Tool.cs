@@ -93,8 +93,8 @@ public sealed partial class MigrationTests
     [Fact]
     public void Format_AWorkspaceWithoutProjects_Stops()
     {
-        // 'dotnet sln Empty.slnf list' fails ("Project `Docs/Docs.vbproj` could not be found in the solution"): read from the JSON.
-        Write("OpenMcdf.slnx", "<Solution>\n  <Project Path=\"Docs/Docs.vbproj\" />\n</Solution>\n");
+        // The filter is read from its JSON, not with 'dotnet sln Empty.slnf list' (on Windows it fails: "Project ... could not
+        // be found in the solution"). The solution isn't there, so 'dotnet sln' would fail on every OS.
         Write("Docs/Docs.vbproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
         Write("Empty.slnf", "{ \"solution\": { \"path\": \"OpenMcdf.slnx\", \"projects\": [ \"Docs/Docs.vbproj\" ] } }");
         var lines = new List<string>();
