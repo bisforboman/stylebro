@@ -1048,6 +1048,32 @@ public class DocumentationTests
         editorConfig: "stylebro_inheritdoc_style = spaced");
 
     // Stateless: 'Default constructor.' became '... the <see cref="Alarm"/> class. Default constructor.'.
+    // After replaced filler, text that can't follow the standard sentence is left to a person; a finalizer summary that is
+    // a 'Finalizes' sentence of its own is kept.
+    [Fact]
+    public Task ConstructorSummaries_TextThatCantFollowTheStandardSentence_IsNotReported() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>A bag.</summary>
+        public class Bag
+        {
+            /// <summary>Default constructor. construct a dynamic bag.</summary>
+            public Bag()
+            {
+            }
+
+            /// <summary>Constructor. If set, it starts right away.</summary>
+            /// <param name="a">The a.</param>
+            public Bag(int a)
+            {
+            }
+
+            /// <summary>Finalizes the handle.</summary>
+            ~Bag()
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task ConstructorSummaries_FillerIsReplaced_RealTextKept() => VerifyFixAsync(
         """
