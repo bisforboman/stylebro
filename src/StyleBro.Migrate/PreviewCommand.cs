@@ -35,17 +35,20 @@ internal static class PreviewCommand
     /// <summary>Why a '--no-restore' preview stops when the repository has no restore output to copy.</summary>
     internal const string NoRestoreOutput = "--no-restore: the repository has no restore output (obj/project.assets.json), so 'dotnet format' would load no project and only fix whitespace. Run 'dotnet restore' first, or preview without --no-restore.";
 
+    /// <summary>Why a preview that adds the StyleBro.Analyzers reference restores the copy despite --no-restore.</summary>
+    internal const string NoRestoreIgnored = "  --no-restore: ignored, the copy needs a restore for the StyleBro.Analyzers reference the preview adds. That restore skips NuGet's audit, so vulnerability warnings treated as errors (NU1901-NU1904) don't stop it; other restore errors need fixing in the repository first.";
+
     /// <summary>The label of files nothing was reported in.</summary>
     private const string Other = "other";
 
     /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
     private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
 
-    /// <summary>Why '--diff' doesn't run on old-style (non-SDK) projects, and what to do instead.</summary>
+    /// <summary>Why '--diff' doesn't run on old-style (non-SDK) projects with packages.config, and what to do instead.</summary>
     public static string OldStyleUnsupported(IReadOnlyList<string> projects, string? command)
     {
         var write = command switch { "init" => "'stylebro-migrate init --write'", "format" => null, _ => "'stylebro-migrate --write'" };
-        return $"--diff doesn't work with old-style (non-SDK) projects ({string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)}): "
+        return $"--diff doesn't work with packages.config projects ({string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)}): "
             + "the copy has no git-ignored packages folder, and 'dotnet restore' can't restore packages.config.\n"
             + "Instead, on a clean working tree: " + (write is null ? string.Empty : $"run {write}, ")
             + "restore with Visual Studio's MSBuild (msbuild -t:restore -p:RestorePackagesConfig=true), run 'stylebro-migrate format' and review 'git diff' ('git checkout .' undoes it). "
@@ -91,11 +94,13 @@ internal static class PreviewCommand
             return 1;
         }
 
-        // Old-style projects need Visual Studio's restore: the copy has no git-ignored packages folder, and 'dotnet restore'
-        // can't restore packages.config (xbox-live-developer-tools: every project skipped, "Run 'dotnet restore'").
-        if (FormatCommand.OldStyleProjects(File.Exists(path) ? Path.GetDirectoryName(path)! : path) is { Count: > 0 } oldStyle)
+        // packages.config projects need Visual Studio's restore: the copy has no git-ignored packages folder, and 'dotnet
+        // restore' can't restore packages.config (xbox-live-developer-tools: every project skipped, "Run 'dotnet restore'").
+        // Other old-style projects preview like format runs: without a restore (format says so, the end of the preview too).
+        var pathFolder = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
+        if (FormatCommand.OldStyleProjects(pathFolder).Where(p => FormatCommand.UsesPackagesConfig(Path.Combine(pathFolder, p))).ToList() is { Count: > 0 } packagesConfig)
         {
-            Console.Error.WriteLine(OldStyleUnsupported(oldStyle, command));
+            Console.Error.WriteLine(OldStyleUnsupported(packagesConfig, command));
             return 1;
         }
 
@@ -115,6 +120,7 @@ internal static class PreviewCommand
         using var log = new StreamWriter(Path.Combine(temp, "preview.log")) { AutoFlush = true };
         var tail = new Queue<string>();
         string? incomplete = null;
+        var notes = new List<string>();
         void LogFile(string line)
         {
             lock (log)
@@ -130,6 +136,12 @@ internal static class PreviewCommand
                 if (line.StartsWith(FormatCommand.IncompleteMarker, StringComparison.Ordinal))
                 {
                     incomplete ??= line;
+                }
+
+                // What format left out on purpose (old-style projects it doesn't restore, projects without StyleBro).
+                if ((line.StartsWith(FormatCommand.OldStyleHeader, StringComparison.Ordinal) || line.StartsWith(FormatCommand.PartlyLoadedHeader, StringComparison.Ordinal)) && !notes.Contains(line))
+                {
+                    notes.Add(line);
                 }
 
                 log.WriteLine(line);
@@ -187,7 +199,7 @@ internal static class PreviewCommand
                 if (noRestore)
                 {
                     rest.Remove("--no-restore");
-                    Console.WriteLine("  --no-restore: ignored, the copy needs a restore for that reference.");
+                    Console.WriteLine(NoRestoreIgnored);
                 }
             }
             else if (noRestore && !restored)
@@ -261,6 +273,8 @@ internal static class PreviewCommand
             {
                 Console.WriteLine(notLoaded);
             }
+
+            notes.ForEach(n => Console.WriteLine($"Note: {n}"));
 
             // A project that didn't load is left out, as 'stylebro-migrate format' does (StabilityMatrix: a legacy project the
             // solution doesn't build, already failing with NU1008, stopped the whole preview), and named at the end.

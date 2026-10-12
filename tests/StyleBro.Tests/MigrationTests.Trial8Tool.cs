@@ -223,10 +223,12 @@ public sealed partial class MigrationTests
         Write("Imported/Imported.csproj", "<Project>\n  <Import Project=\"Sdk.props\" Sdk=\"Microsoft.NET.Sdk\" />\n</Project>\n");
         Write("App.sln", string.Empty);
 
+        Write("Old/packages.config", "<packages />");
+
         Assert.Equal(new[] { "Old/Old.csproj" }, FormatCommand.OldStyleProjects(root));
 
         Assert.Equal(1, PreviewCommand.Run("format", new[] { root, "--diff" }, (_, _) => throw new InvalidOperationException("no format")));
-        Assert.Contains("--diff doesn't work with old-style (non-SDK) projects (Old/Old.csproj)", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, "format"), StringComparison.Ordinal);
+        Assert.Contains("--diff doesn't work with packages.config projects (Old/Old.csproj)", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, "format"), StringComparison.Ordinal);
         Assert.Contains("msbuild -t:restore -p:RestorePackagesConfig=true", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, null), StringComparison.Ordinal);
     }
 
