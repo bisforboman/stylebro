@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/Migration.cs'
     Find = 'r.Value.All(Conventions.CSharpierRules.Contains)'
     Replace = 'r.Value.Any(Conventions.CSharpierRules.Contains)'
-    Tests = 'FullyQualifiedName~MigrationTests.Migration_WithCSharpier'
+    Tests = 'MigrationTests.Migration_WithCSharpier'
 }

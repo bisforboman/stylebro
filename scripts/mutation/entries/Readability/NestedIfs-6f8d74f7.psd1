@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'
     Find = 'if (operandLine.Length > width)'
     Replace = 'if (false)'
-    Tests = 'FullyQualifiedName~NestedIfTests.WithCSharpier'
+    Tests = 'NestedIfTests.WithCSharpier'
 }

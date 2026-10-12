@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Layout/Braces.cs'
     Find = 'before.Span.End - ownerLine.Start > width)'
     Replace = 'before.Span.End - ownerLine.Start > width + 1000)'
-    Tests = 'FullyQualifiedName~BracesTests.WithCSharpier'
+    Tests = 'BracesTests.WithCSharpier'
 }

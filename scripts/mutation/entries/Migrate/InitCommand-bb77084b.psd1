@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/InitCommand.cs'
     Find = '.Where(l => csharpier.Lines?.Contains(l) != true).ToList();'
     Replace = '.ToList();'
-    Tests = 'FullyQualifiedName~MigrationTests.Init_WithCSharpier'
+    Tests = 'MigrationTests.Init_WithCSharpier'
 }

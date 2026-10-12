@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Layout/Braces.cs'
     Find = '|| (width is { } printWidth && CSharpierBreaks('
     Replace = '|| (false && width is { } printWidth && CSharpierBreaks('
-    Tests = 'FullyQualifiedName~BracesTests.WithCSharpier'
+    Tests = 'BracesTests.WithCSharpier'
 }

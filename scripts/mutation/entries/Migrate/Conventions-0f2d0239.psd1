@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/Conventions.cs'
     Find = 'if (Value(SortUsingsKey) is { } systemFirst && systemFirst != "true")'
     Replace = 'if (false)'
-    Tests = 'FullyQualifiedName~MigrationTests.Init_WithCSharpier'
+    Tests = 'MigrationTests.Init_WithCSharpier'
 }

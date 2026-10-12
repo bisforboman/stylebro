@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'
     Find = 'CSharpierCondition(ifs, text, top, layout.Width, layout.Unit) is { } laidOut)'
     Replace = 'CSharpierCondition(ifs, text, top, layout.Width, layout.Unit) is { } laidOut && false)'
-    Tests = 'FullyQualifiedName~NestedIfTests.WithCSharpier'
+    Tests = 'NestedIfTests.WithCSharpier'
 }

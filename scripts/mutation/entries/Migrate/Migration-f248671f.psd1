@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/Migration.cs'
     Find = 'if (Conventions.CSharpier(root) is { } csharpier)'
     Replace = 'if (Conventions.CSharpier(root) is { } csharpier && false)'
-    Tests = 'FullyQualifiedName~MigrationTests.Migration_WithCSharpier'
+    Tests = 'MigrationTests.Migration_WithCSharpier'
 }
