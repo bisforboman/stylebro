@@ -1447,13 +1447,14 @@ internal static class Conventions
         var winner = Enumerable.Range(0, 3).FirstOrDefault(i => Winner(c[i], total - c[i]) == 0, -1);
         var mixed = string.Join(", ", Enumerable.Range(0, 3).Where(i => c[i] > 0).Select(i => $"{c[i]} {forms[i]}"));
         var found = winner < 0 ? mixed : $"{c[winner]} of {total} {forms[winner]}";
+        var tooFew = total < MinimumAgreeing;
         string tag;
         string verdict;
         if (decided.TryGetValue(StaticCasingKey, out var reason) || isSet?.Invoke(KeyOf(off)) == true)
         {
             (tag, verdict, found) = ("set", reason ?? $"{DiagnosticIds.FieldPascalCase}'s severity is set", Plural(total, "field"));
         }
-        else if (total < MinimumAgreeing)
+        else if (tooFew)
         {
             (tag, verdict, found) = ("too few", "default stays (PascalCase)", Plural(total, "field"));
             summary.TooFew.Add(StaticCasingKey);

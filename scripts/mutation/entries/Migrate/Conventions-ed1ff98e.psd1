@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/Conventions.cs'
     Find = 'Where(n => !n.TrimStart(''_'').Contains(''_''))'
     Replace = 'Where(n => true)'
-    Tests = 'FullyQualifiedName~MigrationTests.Conventions_CountPrivateConstants'
+    Tests = 'MigrationTests.Conventions_CountPrivateConstants'
 }

@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'
     Find = '&& (member is not IMethodSymbol'
     Replace = '&& (false'
-    Tests = 'FullyQualifiedName~ParameterMatchesBaseTests'
+    Tests = 'ParameterMatchesBaseTests'
 }

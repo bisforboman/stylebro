@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'
     Find = '(expected.TypeKind == TypeKind.TypeParameter && actual.TypeKind != TypeKind.TypeParameter)'
     Replace = 'false'
-    Tests = 'FullyQualifiedName~ParameterMatchesBaseTests'
+    Tests = 'ParameterMatchesBaseTests'
 }

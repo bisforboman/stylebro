@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/Conventions.cs'
     Find = 'if (own.ContainsKey($"dotnet_diagnostic.{rule}.severity"))'
     Replace = 'if (false)'
-    Tests = 'FullyQualifiedName~MigrationTests.EmptyHeaderLines'
+    Tests = 'MigrationTests.EmptyHeaderLines'
 }

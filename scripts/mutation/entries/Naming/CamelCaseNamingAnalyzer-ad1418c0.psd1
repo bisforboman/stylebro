@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Naming/CamelCaseNamingAnalyzer.cs'
     Find = 'a.TypeArguments.Zip(e.TypeArguments, (x, y) => x.TypeKind != y.TypeKind).Any(different => different)'
     Replace = 'false'
-    Tests = 'FullyQualifiedName~ParameterMatchesBaseTests'
+    Tests = 'ParameterMatchesBaseTests'
 }
