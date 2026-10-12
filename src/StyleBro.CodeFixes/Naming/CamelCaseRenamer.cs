@@ -188,6 +188,24 @@ internal static class CamelCaseRenamer
 #pragma warning restore RS1035
     }
 
+    /// <summary>
+    /// Whether code in another project can use the symbol by name: not private (internal counts, InternalsVisibleTo), nor
+    /// in a private type; a parameter by its member (named arguments). Locals and local functions can't.
+    /// </summary>
+    internal static bool IsVisibleToOtherProjects(ISymbol symbol)
+    {
+        var current = symbol is IParameterSymbol or ITypeParameterSymbol ? symbol.ContainingSymbol : symbol;
+        for (; current is not null and not INamespaceSymbol; current = current.ContainingSymbol)
+        {
+            if (current.DeclaredAccessibility is Accessibility.Private or Accessibility.NotApplicable)
+            {
+                return false;
+            }
+        }
+
+        return current is not null;
+    }
+
     private static (string OldName, string NewName)? GetNamespaceRename(Diagnostic diagnostic) =>
         diagnostic.Properties.TryGetValue(NamespaceNames.NamespaceKey, out var oldNamespace) && oldNamespace is not null
         && diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newPart) && newPart is not null
@@ -418,24 +436,6 @@ internal static class CamelCaseRenamer
     private static bool HasKeptProperty(INamedTypeSymbol type, NamesInCode names, ConcurrentDictionary<ISymbol, bool> cache) =>
         cache.GetOrAdd(type, _ => type.GetMembers().OfType<IPropertySymbol>()
             .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null));
-
-    /// <summary>
-    /// Whether code in another project can use the symbol by name: not private (internal counts, InternalsVisibleTo), nor
-    /// in a private type; a parameter by its member (named arguments). Locals and local functions can't.
-    /// </summary>
-    private static bool IsVisibleToOtherProjects(ISymbol symbol)
-    {
-        var current = symbol is IParameterSymbol or ITypeParameterSymbol ? symbol.ContainingSymbol : symbol;
-        for (; current is not null and not INamespaceSymbol; current = current.ContainingSymbol)
-        {
-            if (current.DeclaredAccessibility is Accessibility.Private or Accessibility.NotApplicable)
-            {
-                return false;
-            }
-        }
-
-        return current is not null;
-    }
 
     /// <summary>Symbols whose conflicts are checked by syntax over their member (<see cref="CamelCaseNames.CanRename"/>).</summary>
     private static bool IsMemberScoped(ISymbol symbol) =>

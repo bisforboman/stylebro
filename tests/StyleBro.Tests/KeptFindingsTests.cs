@@ -453,6 +453,19 @@ public class KeptFindingsTests
         Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
     }
 
+    // eShop: a tuple element in a private member's signature (or a body) can't be seen by code the run doesn't load; a
+    // local of that name in another project (the MAUI app outside the solution filter) doesn't keep it.
+    [Fact]
+    public async Task ATupleElementOnlyThisProjectSees_IsRenamedWhateverOutsideCodeIsNamed()
+    {
+        var (solution, _, _) = await FindAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "namespace ZqxApp\n{\n    public class C\n    {\n        private int _zqxN;\n\n        private (int zqxUser, int zqxClaims) Find() => (1, 0);\n\n        public int Get()\n        {\n            (int zqxUser, int zqxClaims) pair = Find();\n            return pair.zqxUser + pair.zqxClaims + _zqxN;\n        }\n    }\n}\n"));
+        var app = ("ClientApp/T.cs", "namespace ZqxClient\n{\n    class ZqxT\n    {\n        int zqxRead()\n        {\n            var zqxUser = 1;\n            return zqxUser;\n        }\n    }\n}\n");
+
+        Assert.Null(await WithRepositoryNamesAsync(app, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxUser", "ZqxUser", CancellationToken.None)));
+    }
+
     // The trial: '--files' loads only the files' project, so it renamed a field the whole-repository run kept for a test
     // project's GetField. The run gets the repository's names, as a per-framework run does.
     [Fact]

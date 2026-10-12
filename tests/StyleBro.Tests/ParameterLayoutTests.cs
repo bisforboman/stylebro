@@ -164,6 +164,69 @@ public class ParameterLayoutTests
         }
         """);
 
+    // eShop's minimal APIs: the lambda after the moved first argument starts with an attribute list on its own line, and
+    // keeps its own lines where they are.
+    [Fact]
+    public Task AttributedLambda_KeepsItsLines() => VerifyFixAsync(
+        """
+        using System;
+
+        class ProducesAttribute : Attribute
+        {
+        }
+
+        class C
+        {
+            static C Map(string pattern, Delegate handler) => new C();
+
+            C Named(string name) => this;
+
+            void M()
+            {
+                Map({|BRO1107:"/catalogtypes"|},
+                    [Produces]
+                    async (int context) => await System.Threading.Tasks.Task.FromResult(context))
+                    .Named("ListItemTypes");
+                Map({|BRO1107:"/catalogbrands"|},
+                    [Produces]
+                    (int context) =>
+                    {
+                        return context;
+                    });
+            }
+        }
+        """,
+        """
+        using System;
+
+        class ProducesAttribute : Attribute
+        {
+        }
+
+        class C
+        {
+            static C Map(string pattern, Delegate handler) => new C();
+
+            C Named(string name) => this;
+
+            void M()
+            {
+                Map(
+                    "/catalogtypes",
+                    [Produces]
+                    async (int context) => await System.Threading.Tasks.Task.FromResult(context))
+                    .Named("ListItemTypes");
+                Map(
+                    "/catalogbrands",
+                    [Produces]
+                    (int context) =>
+                    {
+                        return context;
+                    });
+            }
+        }
+        """);
+
     [Fact]
     public Task MovedLambda_TakesItsBodyAlong() => VerifyFixAsync(
         """
