@@ -95,8 +95,9 @@ internal static class BlankLines
     /// <summary>
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
-    /// an opening brace, '=>' or a 'case'/'default' label, or between the links of a call chain
-    /// (<see cref="IsBetweenChainLinks"/>); and not for '///' and '////' (commented-out code). Not for a comment
+    /// an opening brace, '=>' or a 'case'/'default' label, between the links of a call chain
+    /// (<see cref="IsBetweenChainLinks"/>) or the items of a list (<see cref="IsBetweenListItems"/>); and not for '///'
+    /// and '////' (commented-out code). Not for a comment
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
     /// behind. Not for a comment whose text starts with one of <paramref name="exemptPrefixes"/> (tool markers such as
     /// '// ReSharper disable once ...', from <see cref="ExemptPrefixesKey"/>). Not for a comment below code
@@ -142,6 +143,7 @@ internal static class BlankLines
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenChainLinks(comment)
+            && !IsBetweenListItems(comment)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
             && !IsCommentBelowCode(comment, text);
     }
@@ -243,6 +245,26 @@ internal static class BlankLines
         return (next.IsKind(SyntaxKind.DotToken) && next.Parent is MemberAccessExpressionSyntax)
             || (next.IsKind(SyntaxKind.QuestionToken) && next.Parent is ConditionalAccessExpressionSyntax);
     }
+
+    /// <summary>
+    /// Whether the comment sits between the items of an argument, parameter, attribute argument, initializer, collection
+    /// expression or tuple list: right after its '(', '[', '{' or a ',', or right before a ',' or its closing token. The
+    /// comment describes the next item, and a blank line would split the list (owner's decision, trial 10: "Don't require
+    /// it inside lists"; a deviation from SA1515, which only makes BRO1504 quieter).
+    /// </summary>
+    private static bool IsBetweenListItems(SyntaxTrivia comment)
+    {
+        var next = comment.Token.SpanStart >= comment.Span.End ? comment.Token : comment.Token.GetNextToken();
+        var previous = next.GetPreviousToken();
+        return (previous.Kind() is SyntaxKind.OpenParenToken or SyntaxKind.OpenBracketToken or SyntaxKind.OpenBraceToken or SyntaxKind.CommaToken
+                && IsList(previous.Parent))
+            || (next.Kind() is SyntaxKind.CommaToken or SyntaxKind.CloseParenToken or SyntaxKind.CloseBracketToken or SyntaxKind.CloseBraceToken
+                && IsList(next.Parent));
+    }
+
+    private static bool IsList(SyntaxNode? node) => node is ArgumentListSyntax or BracketedArgumentListSyntax or AttributeArgumentListSyntax
+        or ParameterListSyntax or BracketedParameterListSyntax or InitializerExpressionSyntax or CollectionExpressionSyntax
+        or TupleExpressionSyntax or TupleTypeSyntax;
 
     private static bool IsBlank(SourceText text, TextSpan span)
     {

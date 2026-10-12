@@ -259,4 +259,34 @@ public class RegionsTests
         }
         #endif
         """);
+
+    // BRO1504's list exemption holds here too: a comment that ends up below an item gets no blank line.
+    [Fact]
+    public Task ACommentBetweenArgumentsBelowTheRemovedLines_GetsNoBlankLine() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int a, int b)
+            {
+                return M(
+                    1,
+                    {|BRO1113:#region Second|}
+                    // the second
+                    2);
+                #endregion
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int a, int b)
+            {
+                return M(
+                    1,
+                    // the second
+                    2);
+            }
+        }
+        """);
 }

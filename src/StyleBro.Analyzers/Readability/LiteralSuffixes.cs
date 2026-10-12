@@ -120,6 +120,33 @@ internal static class LiteralSuffixes
         return new TextChange(cast.Span, replacement);
     }
 
+    /// <summary>
+    /// The fix's edit: <see cref="GetChange"/>, and when BRO1405 is on, without the parentheses around the cast that
+    /// the new literal leaves unnecessary (<c>((double)0).ToString()</c> -> <c>0D.ToString()</c>, not <c>(0D)</c> for
+    /// BRO1405's next run). Those it would keep stay (<c>(-1L).ToString()</c>).
+    /// </summary>
+    public static TextChange? GetFixChange(CastExpressionSyntax cast, SemanticModel model, SourceText text, CancellationToken cancellationToken)
+    {
+        var change = GetChange(cast, model, cancellationToken);
+        if (change is null || cast.Parent is not ParenthesizedExpressionSyntax parenthesized
+            || !Severities.IsOn(model.Compilation.Options, cast.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken))
+        {
+            return change;
+        }
+
+        var newText = text.WithChanges(change.Value);
+        if (cast.SyntaxTree.WithChangedText(newText).GetRoot(cancellationToken).FindToken(parenthesized.SpanStart).Parent
+                is not ParenthesizedExpressionSyntax newParenthesized
+            || !Maintainability.Parentheses.IsUnnecessary(newParenthesized, newText))
+        {
+            return change;
+        }
+
+        var edits = Maintainability.Parentheses.GetChanges(new[] { newParenthesized }, newText);
+        var length = newParenthesized.Span.Length + edits.Sum(e => e.NewText!.Length - e.Span.Length);
+        return new TextChange(parenthesized.Span, newText.WithChanges(edits).ToString(new TextSpan(parenthesized.SpanStart, length)));
+    }
+
     private static string? Suffix(SyntaxKind keyword) => keyword switch
     {
         SyntaxKind.IntKeyword => string.Empty,

@@ -63,7 +63,7 @@ public sealed class LiteralSuffixCodeFixProvider : CodeFixProvider
                 changes.Add(new TextChange(literal.Token.Span, newText));
             }
             else if (node is CastExpressionSyntax cast
-                && LiteralSuffixes.GetChange(cast, model, cancellationToken) is { } change)
+                && LiteralSuffixes.GetFixChange(cast, model, text, cancellationToken) is { } change)
             {
                 changes.Add(change);
             }
