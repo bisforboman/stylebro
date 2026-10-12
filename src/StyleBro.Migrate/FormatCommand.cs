@@ -161,7 +161,7 @@ internal static class FormatCommand
     public static int Run(string[] args, Action<string>? output = null, Func<string[], Action<string>?, int>? runOnce = null)
     {
         Action<string> log = output ?? Console.WriteLine;
-        runOnce ??= RunOnce;
+        runOnce = KeepingLineEndings(runOnce ?? RunOnce);
 
         // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
         if (args.Contains("--report") && !args.Contains("--verify-no-changes"))
@@ -384,6 +384,110 @@ internal static class FormatCommand
         StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             .AsParallel()
             .ToDictionary(f => f, f => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(f))), StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// <paramref name="runOnce"/>, after which a C# file that used one line ending throughout and now mixes them gets its own
+    /// back. Without end_of_line, the SDK's whitespace pass writes the OS's ending into the line breaks it rewrites (after
+    /// '=>' followed by a comment, probed with plain 'dotnet format whitespace'): a CRLF file got LF lines on Linux, an LF
+    /// file CRLF lines on Windows, and '--verify-no-changes' was clean on one OS and failed on the other (issue #133).
+    /// A file the run converts completely (end_of_line set) doesn't mix and stays converted.
+    /// </summary>
+    public static Func<string[], Action<string>?, int> KeepingLineEndings(Func<string[], Action<string>?, int> runOnce) => (args, output) =>
+    {
+        var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
+        var folder = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
+        var root = RepositoryRoot(folder) ?? folder;
+        var endings = Directory.Exists(root) ? LineEndings(root) : new Dictionary<string, bool>();
+        var code = runOnce(args, output);
+        RestoreLineEndings(endings);
+        return code;
+    };
+
+    /// <summary>The C# files under the root that use one line ending throughout (true: CRLF, false: LF).</summary>
+    public static Dictionary<string, bool> LineEndings(string root) =>
+        StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .AsParallel()
+            .Select(f => (File: f, Crlf: Ending(File.ReadAllBytes(f))))
+            .Where(e => e.Crlf is not null)
+            .ToDictionary(e => e.File, e => e.Crlf!.Value, StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>true: CRLF throughout, false: LF throughout; null: both, a lone CR, no line break, or UTF-16 (not touched).</summary>
+    public static bool? Ending(byte[] bytes)
+    {
+        const byte Cr = 13, Lf = 10;
+        if (bytes.Length >= 2 && ((bytes[0] == 0xFF && bytes[1] == 0xFE) || (bytes[0] == 0xFE && bytes[1] == 0xFF)))
+        {
+            return null;
+        }
+
+        int crlf = 0, lf = 0;
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            if (bytes[i] == Cr)
+            {
+                if (i + 1 >= bytes.Length || bytes[i + 1] != Lf)
+                {
+                    return null;
+                }
+
+                crlf++;
+                i++;
+            }
+            else if (bytes[i] == Lf)
+            {
+                lf++;
+            }
+        }
+
+        return crlf > 0 && lf == 0 ? true : lf > 0 && crlf == 0 ? false : null;
+    }
+
+    /// <summary>
+    /// Gives each file of <paramref name="endings"/> that now mixes CRLF and LF (and nothing else) its own ending back.
+    /// Files that still use one ending aren't written.
+    /// </summary>
+    public static void RestoreLineEndings(IReadOnlyDictionary<string, bool> endings) =>
+        endings.AsParallel().ForAll(e =>
+        {
+            const byte Cr = 13, Lf = 10;
+            if (!File.Exists(e.Key))
+            {
+                return;
+            }
+
+            var bytes = File.ReadAllBytes(e.Key);
+            if (Ending(bytes) is not null || !bytes.Contains(Cr))
+            {
+                return;
+            }
+
+            var restored = new List<byte>(bytes.Length + 64);
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                if (bytes[i] == Cr)
+                {
+                    // A lone CR: not a mix of CRLF and LF, left as it was.
+                    if (i + 1 >= bytes.Length || bytes[i + 1] != Lf)
+                    {
+                        return;
+                    }
+
+                    continue;
+                }
+
+                if (bytes[i] == Lf && e.Value)
+                {
+                    restored.Add(Cr);
+                }
+
+                restored.Add(bytes[i]);
+            }
+
+            File.WriteAllBytes(e.Key, restored.ToArray());
+        });
+
+    /// <summary>A line of 'dotnet format --verify-no-changes' output for its whitespace pass ('error WHITESPACE: ...').</summary>
+    public static bool IsWhitespaceLine(string line) => line.Contains(" WHITESPACE: ", StringComparison.Ordinal) || line.Contains(" ENDOFLINE: ", StringComparison.Ordinal);
 
     /// <summary>The files that differ between two snapshots (added, removed or with other content), sorted.</summary>
     public static List<string> ChangedFiles(IReadOnlyDictionary<string, string> before, IReadOnlyDictionary<string, string> after) =>
@@ -1083,7 +1187,15 @@ internal static class FormatCommand
             }
 
             JsonReport.AddKept(kept);
-            lines.Where(l => !IsKeptLine(l, keys)).ToList().ForEach(log);
+
+            // Whitespace findings in a copy that formats clean only swapped line endings (KeepingLineEndings).
+            var endingsOnly = lines.Count(IsWhitespaceLine);
+            lines.Where(l => !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).ToList().ForEach(log);
+            if (endingsOnly > 0)
+            {
+                log($"{endingsOnly} whitespace finding{(endingsOnly == 1 ? " is" : "s are")} only this OS's line ending where a file uses the other one: ignored, 'format' keeps each file's own ending (set end_of_line to choose one).");
+            }
+
             KeptSummary(kept, root).ForEach(log);
             if (kept.Count == 0)
             {
