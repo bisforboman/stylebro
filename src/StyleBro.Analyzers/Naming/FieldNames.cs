@@ -17,6 +17,45 @@ internal enum FieldStyle
     Other,
 }
 
+/// <summary>The casing an SDK naming rule asks for: one StyleBro writes, or <see cref="Other"/> (the name stays).</summary>
+internal enum NamingCasing
+{
+    Camel,
+    UnderscoreCamel,
+    Pascal,
+    Other,
+}
+
+/// <summary>An SDK naming rule for fields (dotnet_naming_rule.*); null lists mean every value.</summary>
+internal sealed class NamingRule
+{
+    public NamingRule(int priority, string name, string[]? kinds, string[]? accessibilities, string[] modifiers, char casing)
+    {
+        Priority = priority;
+        Name = name;
+        Kinds = kinds;
+        Accessibilities = accessibilities;
+        Modifiers = modifiers;
+        Casing = casing;
+    }
+
+    public int Priority { get; }
+
+    public string Name { get; }
+
+    public string[]? Kinds { get; }
+
+    public string[]? Accessibilities { get; }
+
+    public string[] Modifiers { get; }
+
+    /// <summary>Gets 'c' camelCase, 'u' _camelCase, 'P' PascalCase, 'o' another style, ' ' turned off.</summary>
+    public char Casing { get; }
+
+    public static System.Collections.Generic.IComparer<NamingRule> By(System.Comparison<NamingRule> compare) =>
+        System.Collections.Generic.Comparer<NamingRule>.Create(compare);
+}
+
 /// <summary>Which field naming rule applies to a field.</summary>
 internal enum FieldRule
 {
@@ -43,8 +82,9 @@ internal enum FieldRule
 /// </summary>
 internal readonly struct FieldStyles
 {
-    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null, bool pascalAllowsUnderscore = false)
+    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null, bool pascalAllowsUnderscore = false, string? nonPrivate = null)
     {
+        NonPrivate = nonPrivate;
         Private = @private;
         Constant = constant;
         StaticReadOnly = staticReadOnly;
@@ -65,6 +105,12 @@ internal readonly struct FieldStyles
     public FieldStyle? Constant { get; }
 
     public FieldStyle? StaticReadOnly { get; }
+
+    /// <summary>
+    /// Gets the casing the SDK naming rules ask for, per non-private accessibility and modifiers (see
+    /// <see cref="FieldNames.GetNonPrivateCasing"/>); null without naming rules for fields.
+    /// </summary>
+    public string? NonPrivate { get; }
 
     public static implicit operator FieldStyles(FieldStyle style) => new(style, null, null);
 }
@@ -96,6 +142,13 @@ internal static class FieldNames
     /// with SA1309 off ('stylebro-migrate --write' sets it then). Default false.
     /// </summary>
     public const string AllowUnderscoreKey = "stylebro_allow_leading_underscore_in_pascal_fields";
+
+    private static readonly Accessibility[] NonPrivateAccessibilities =
+    {
+        Accessibility.Public, Accessibility.Internal, Accessibility.Protected, Accessibility.ProtectedOrInternal, Accessibility.ProtectedAndInternal,
+    };
+
+    private static readonly string[] NonPrivateAccessibilityNames = { "public", "internal", "protected", "protected_internal", "private_protected" };
 
     private static readonly string[] GuidPrefixes = { "IID_", "CLSID_", "LIBID_", "DIID_", "CATID_", "GUID_" };
 
@@ -141,7 +194,7 @@ internal static class FieldNames
         if (options.TryGetValue(StaticStyleKey, out var value))
         {
             var style = ToCamelStyle(value);
-            return new(GetStyle(options), style, style, mutableStatic, allowUnderscore);
+            return new(GetStyle(options), style, style, mutableStatic, allowUnderscore, GetNonPrivateStyles(options));
         }
 
         return new(
@@ -149,7 +202,8 @@ internal static class FieldNames
             GetStaticStyleFromNamingRules(options, m => m.Contains("const") && m.All(x => x is "const" or "static")),
             GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")),
             mutableStatic,
-            allowUnderscore);
+            allowUnderscore,
+            GetNonPrivateStyles(options));
 
         static FieldStyle? ToCamelStyle(string value) => value.Split(':')[0].Trim() switch
         {
@@ -234,12 +288,13 @@ internal static class FieldNames
         // A private constant or static readonly field that a naming rule wants in camel case is BRO1306's too.
         var isProtected = IsProtectedChecked(field);
         var camelStatic = GetCamelStaticStyle(field, style);
-        if (IsLeftByNamingRule(field, style))
+        var ruled = GetNonPrivateCasing(field, style);
+        if (IsLeftByNamingRule(field, style) || ruled == NamingCasing.Other)
         {
             return null;
         }
 
-        var pascal = camelStatic is null && IsPascalChecked(field);
+        var pascal = ruled is { } r ? r == NamingCasing.Pascal : camelStatic is null && IsPascalChecked(field);
 
         // StyleCop's PascalCase rules and SA1310 skip a name starting with '_' (it's SA1309's): with SA1309 off, so does BRO1306.
         if (pascal && style.PascalAllowsUnderscore && name.StartsWith("_", System.StringComparison.Ordinal))
@@ -254,6 +309,7 @@ internal static class FieldNames
         if ((hasPrefix || core.TrimStart('_').Contains('_')) && !HungarianNames.IsInNativeMethods(field))
         {
             var casing = pascal ? FieldCasing.Pascal
+                : ruled is not null ? (ruled == NamingCasing.UnderscoreCamel ? FieldCasing.UnderscoreCamel : FieldCasing.Camel)
                 : (camelStatic ?? (IsChecked(field) ? GetPrivateStyle(field, style) : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
                 : FieldCasing.Camel;
             return GetJoinedName(core, casing) is { } joined && joined != name
@@ -262,7 +318,8 @@ internal static class FieldNames
         }
 
         var camelStyle = style.Private == FieldStyle.CamelCase;
-        var newName = isProtected && field.IsReadOnly ? (camelStyle ? WithoutLeadingUnderscores(name) : null)
+        var newName = ruled is not null ? (pascal ? GetPascalName(name) : GetNewName(name, ruled == NamingCasing.UnderscoreCamel ? FieldStyle.UnderscoreCamelCase : FieldStyle.CamelCase))
+            : isProtected && field.IsReadOnly ? (camelStyle ? WithoutLeadingUnderscores(name) : null)
             : isProtected ? (camelStyle ? CamelCaseNames.GetNewName(name) : LowerAfterUnderscores(name))
             : pascal ? GetPascalName(name)
             : camelStatic is { } staticStyle ? GetNewName(name, staticStyle)
@@ -644,6 +701,109 @@ internal static class FieldNames
             && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
             && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator"))
             && (Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty) is var p && (p.Length == 0 || p == prefix);
+    }
+
+    /// <summary>
+    /// The casing the first SDK naming rule that covers a non-private field asks for (YamlDotNet: camelCase for internal
+    /// instance fields): it wins over StyleCop's defaults (PascalCase for public and internal fields, camelCase for
+    /// protected ones). Null for private fields, without a rule, or when the first rule is off (severity none/silent).
+    /// </summary>
+    internal static NamingCasing? GetNonPrivateCasing(IFieldSymbol field, FieldStyles style)
+    {
+        var index = System.Array.IndexOf(NonPrivateAccessibilities, field.DeclaredAccessibility);
+        return style.NonPrivate is not { } table || index < 0 ? null
+            : table[(index * 5) + (field.IsConst ? 4 : (field.IsStatic ? 2 : 0) + (field.IsReadOnly ? 1 : 0))] switch
+            {
+                'c' => NamingCasing.Camel,
+                'u' => NamingCasing.UnderscoreCamel,
+                'P' => NamingCasing.Pascal,
+                'o' => NamingCasing.Other,
+                _ => null,
+            };
+    }
+
+    /// <summary>
+    /// For every non-private accessibility (<see cref="NonPrivateAccessibilities"/>, times 5) and set of modifiers (none,
+    /// readonly, static, static readonly, const), the casing of the first SDK naming rule that matches such a field,
+    /// ordered like Roslyn's EditorConfigNamingStyleParser: priority (default 0), then the rule requiring a superset of
+    /// the other's modifiers, then the one for a subset of the other's accessibilities, then for a subset of its symbol
+    /// kinds, then the name. A rule without a severity doesn't exist for Roslyn; a constant counts as static and readonly
+    /// too. ' ' where no rule applies or the first one is off. Null when no rule applies to fields.
+    /// </summary>
+    private static string? GetNonPrivateStyles(AnalyzerConfigOptions options)
+    {
+        string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
+        static string[]? List(string? value) =>
+            value is null || value.Split(',').Any(p => p.Trim() == "*") ? null : value.Split(',').Select(p => p.Trim()).Where(p => p.Length > 0).ToArray();
+
+        var rules = new System.Collections.Generic.List<NamingRule>();
+        foreach (var key in options.Keys)
+        {
+            if (!key.StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) || !key.EndsWith(".symbols", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var rule = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
+            var symbols = Get(key);
+            var style = Get($"dotnet_naming_rule.{rule}.style");
+            var severity = Get($"dotnet_naming_rule.{rule}.severity");
+            var kinds = List(Get($"dotnet_naming_symbols.{symbols}.applicable_kinds"));
+            if (symbols is null || style is null || severity is null || (kinds is not null && !kinds.Contains("field")))
+            {
+                continue;
+            }
+
+            var casing = ToFieldStyle(options, style) switch
+            {
+                FieldStyle.CamelCase => 'c',
+                FieldStyle.UnderscoreCamelCase => 'u',
+                _ => IsPlainStyle(options, style, "pascal_case") ? 'P' : 'o',
+            };
+            rules.Add(new NamingRule(
+                int.TryParse(Get($"dotnet_naming_rule.{rule}.priority"), out var priority) ? priority : 0,
+                rule,
+                kinds,
+                List(Get($"dotnet_naming_symbols.{symbols}.applicable_accessibilities")),
+                List(Get($"dotnet_naming_symbols.{symbols}.required_modifiers")) ?? new string[0],
+                severity is "none" or "silent" ? ' ' : casing));
+        }
+
+        if (rules.Count == 0)
+        {
+            return null;
+        }
+
+        var ordered = rules
+            .OrderBy(r => r.Priority)
+            .ThenBy(r => r, NamingRule.By((a, b) => Subset(b.Modifiers, a.Modifiers)))
+            .ThenBy(r => r, NamingRule.By((a, b) => Subset(a.Accessibilities, b.Accessibilities)))
+            .ThenBy(r => r, NamingRule.By((a, b) => Subset(a.Kinds, b.Kinds)))
+            .ThenBy(r => r.Name, System.StringComparer.OrdinalIgnoreCase)
+            .ThenBy(r => r.Name, System.StringComparer.Ordinal)
+            .ToList();
+
+        string[][] modifierSets = { new string[0], new[] { "readonly" }, new[] { "static" }, new[] { "static", "readonly" }, new[] { "const", "static", "readonly" } };
+        var table = new char[NonPrivateAccessibilityNames.Length * 5];
+        for (var access = 0; access < NonPrivateAccessibilityNames.Length; access++)
+        {
+            for (var modifiers = 0; modifiers < 5; modifiers++)
+            {
+                var match = ordered.FirstOrDefault(r => (r.Accessibilities is null || r.Accessibilities.Contains(NonPrivateAccessibilityNames[access]))
+                    && r.Modifiers.All(modifierSets[modifiers].Contains));
+                table[(access * 5) + modifiers] = match?.Casing ?? ' ';
+            }
+        }
+
+        return new string(table);
+
+        // -1 when x is a proper subset of y (null: everything), 1 the other way round, else 0.
+        static int Subset(string[]? x, string[]? y)
+        {
+            var xInY = y is null || (x is not null && x.All(y.Contains));
+            var yInX = x is null || (y is not null && y.All(x.Contains));
+            return xInY == yInX ? 0 : xInY ? -1 : 1;
+        }
     }
 
     /// <summary>The style of a field <see cref="IsChecked"/> checks: its own for static fields when one is configured.</summary>

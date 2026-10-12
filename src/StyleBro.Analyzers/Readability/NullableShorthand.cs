@@ -42,9 +42,10 @@ internal static class NullableShorthand
             }
         }
 
-        // Only where nothing but a type can stand. This also leaves out 'is'/'as' operands, patterns, using aliases and
-        // crefs (checked by tests; explicit checks for them were dead code).
-        if (!SyntaxFacts.IsInTypeOnlyContext(node))
+        // Only where nothing but a type can stand. This also leaves out 'is'/'as' operands, patterns and using aliases
+        // (checked by tests; explicit checks for them were dead code). Not in doc comments: a type argument inside a cref
+        // ('Func{Nullable{int}}') is a type-only context, but crefs have no 'T?' there.
+        if (!SyntaxFacts.IsInTypeOnlyContext(node) || node.IsPartOfStructuredTrivia())
         {
             return null;
         }

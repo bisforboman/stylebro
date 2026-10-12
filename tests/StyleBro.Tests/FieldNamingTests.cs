@@ -1131,6 +1131,132 @@ public class FieldNamingTests
         dotnet_naming_style.pascal.capitalization = pascal_case
         """);
 
+    // YamlDotNet's naming rules, exactly: camelCase instance fields of every accessibility but public, PascalCase for the
+    // rest. The readonly rule has no severity, so Roslyn ignores it (internal readonly fields are camelCase too).
+    private const string YamlDotNetNamingRules = """
+        dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.severity = suggestion
+        dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.symbols = non_private_static_fields
+        dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.style = non_private_static_field_style
+        dotnet_naming_symbols.non_private_static_fields.applicable_kinds = field
+        dotnet_naming_symbols.non_private_static_fields.applicable_accessibilities = public, protected, internal, protected_internal, private_protected
+        dotnet_naming_symbols.non_private_static_fields.required_modifiers = static
+        dotnet_naming_style.non_private_static_field_style.capitalization = pascal_case
+        dotnet_naming_rule.non_private_readonly_fields_should_be_pascal_case.symbols = non_private_readonly_fields
+        dotnet_naming_rule.non_private_readonly_fields_should_be_pascal_case.style = non_private_readonly_field_style
+        dotnet_naming_symbols.non_private_readonly_fields.applicable_kinds = field
+        dotnet_naming_symbols.non_private_readonly_fields.applicable_accessibilities = public, protected, internal, protected_internal, private_protected
+        dotnet_naming_symbols.non_private_readonly_fields.required_modifiers = readonly
+        dotnet_naming_style.non_private_readonly_field_style.capitalization = pascal_case
+        dotnet_naming_rule.constants_should_be_pascal_case.severity = suggestion
+        dotnet_naming_rule.constants_should_be_pascal_case.symbols = constants
+        dotnet_naming_rule.constants_should_be_pascal_case.style = constant_style
+        dotnet_naming_symbols.constants.applicable_kinds = field, local
+        dotnet_naming_symbols.constants.required_modifiers = const
+        dotnet_naming_style.constant_style.capitalization = pascal_case
+        dotnet_naming_rule.static_fields_should_be_camel_case.severity = suggestion
+        dotnet_naming_rule.static_fields_should_be_camel_case.symbols = static_fields
+        dotnet_naming_rule.static_fields_should_be_camel_case.style = static_field_style
+        dotnet_naming_symbols.static_fields.applicable_kinds = field
+        dotnet_naming_symbols.static_fields.required_modifiers = static
+        dotnet_naming_style.static_field_style.capitalization = pascal_case
+        dotnet_naming_rule.instance_fields_should_be_camel_case.severity = suggestion
+        dotnet_naming_rule.instance_fields_should_be_camel_case.symbols = instance_fields
+        dotnet_naming_rule.instance_fields_should_be_camel_case.style = instance_field_style
+        dotnet_naming_symbols.instance_fields.applicable_kinds = field
+        dotnet_naming_symbols.instance_fields.applicable_accessibilities = protected, internal, protected_internal, private_protected, private
+        dotnet_naming_style.instance_field_style.capitalization = camel_case
+        dotnet_naming_rule.locals_should_be_camel_case.severity = suggestion
+        dotnet_naming_rule.locals_should_be_camel_case.symbols = locals_and_parameters
+        dotnet_naming_rule.locals_should_be_camel_case.style = camel_case_style
+        dotnet_naming_symbols.locals_and_parameters.applicable_kinds = parameter, local
+        dotnet_naming_style.camel_case_style.capitalization = camel_case
+        dotnet_naming_rule.members_should_be_pascal_case.severity = suggestion
+        dotnet_naming_rule.members_should_be_pascal_case.symbols = all_members
+        dotnet_naming_rule.members_should_be_pascal_case.style = pascal_case_style
+        dotnet_naming_symbols.all_members.applicable_kinds = *
+        dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+        """;
+
+    [Fact]
+    public Task NamingRules_DecideNonPrivateFields() => VerifyFixAsync(
+        """
+        public class BuilderSkeleton
+        {
+            internal int namingConvention;
+            internal readonly int overrides;
+            internal int {|BRO1303:EnumNamingConvention|};
+            internal readonly int {|BRO1303:TypeConverterFactories|};
+            protected int {|BRO1303:Depth|};
+            protected internal int {|BRO1303:Width|};
+            public int {|BRO1306:count|};
+            public readonly int {|BRO1306:limit|};
+            public static int {|BRO1306:shared|};
+            internal static readonly int {|BRO1306:empty|};
+            internal const int {|BRO1306:max|} = 1;
+
+            public int Sum() => namingConvention + overrides + EnumNamingConvention + TypeConverterFactories + Depth + Width + count + limit + shared + empty + max;
+        }
+        """,
+        """
+        public class BuilderSkeleton
+        {
+            internal int namingConvention;
+            internal readonly int overrides;
+            internal int enumNamingConvention;
+            internal readonly int typeConverterFactories;
+            protected int depth;
+            protected internal int width;
+            public int Count;
+            public readonly int Limit;
+            public static int Shared;
+            internal static readonly int Empty;
+            internal const int Max = 1;
+
+            public int Sum() => namingConvention + overrides + enumNamingConvention + typeConverterFactories + depth + width + Count + Limit + Shared + Empty + Max;
+        }
+        """,
+        YamlDotNetNamingRules);
+
+    // A naming rule asking for a style StyleBro doesn't write ('m_' prefix) leaves the field alone; a rule that is off
+    // (severity none) leaves StyleCop's default.
+    [Fact]
+    public Task NamingRules_OtherStylesLeaveTheName() => VerifyFixAsync(
+        """
+        public class C
+        {
+            internal int Value;
+            protected int m_depth;
+            public int {|BRO1306:count|};
+
+            public int Sum() => Value + m_depth + count;
+        }
+        """,
+        """
+        public class C
+        {
+            internal int Value;
+            protected int m_depth;
+            public int Count;
+
+            public int Sum() => Value + m_depth + Count;
+        }
+        """,
+        """
+        dotnet_naming_rule.prefixed.severity = warning
+        dotnet_naming_rule.prefixed.symbols = non_public
+        dotnet_naming_rule.prefixed.style = m_prefix
+        dotnet_naming_symbols.non_public.applicable_kinds = field
+        dotnet_naming_symbols.non_public.applicable_accessibilities = internal, protected
+        dotnet_naming_style.m_prefix.capitalization = camel_case
+        dotnet_naming_style.m_prefix.required_prefix = m_
+        dotnet_naming_rule.public_off.severity = none
+        dotnet_naming_rule.public_off.symbols = public_fields
+        dotnet_naming_rule.public_off.style = camel
+        dotnet_naming_symbols.public_fields.applicable_kinds = field
+        dotnet_naming_symbols.public_fields.applicable_accessibilities = public
+        dotnet_naming_style.camel.capitalization = camel_case
+        """);
+
     [Fact]
     public Task NothingIsRenamedToField_ACSharp14KeywordInAccessors() => VerifyNoDiagnosticsAsync(
         """

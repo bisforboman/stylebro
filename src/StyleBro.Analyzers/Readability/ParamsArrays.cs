@@ -69,7 +69,8 @@ internal static class ParamsArrays
             || method.Parameters[method.Parameters.Length - 1] is not { IsParams: true } parameter
             || list.Arguments.Count != method.Parameters.Length
             || !SymbolEqualityComparer.Default.Equals(GetType(model.GetTypeInfo(array, cancellationToken), array), parameter.Type)
-            || (elements.Count == 1 && model.ClassifyConversion(elements[0], parameter.Type).IsImplicit))
+            || (elements.Count == 1 && model.ClassifyConversion(elements[0], parameter.Type).IsImplicit)
+            || elements.Any(e => IsTargetTyped(e, model, cancellationToken)))
         {
             return null;
         }
@@ -78,6 +79,15 @@ internal static class ParamsArrays
         var expanded = SyntaxFactory.ParseExpression(text.WithChanges(changes).ToString(new TextSpan(call.SpanStart, call.Span.Length - removed.Sum(s => s.Length))));
         return SymbolEqualityComparer.Default.Equals(Speculation.SymbolAfterReplacing(model, call, expanded, cancellationToken), method) ? changes : null;
     }
+
+    // An element whose meaning comes from the type it converts to: out of the array it could convert to the array type
+    // itself (the call's normal form) or to another overload's parameter. 'new()', 'default', 'null', lambdas, anonymous
+    // methods, collection expressions, switch expressions, and anything without a type of its own (method groups,
+    // conditionals of target-typed parts, parenthesized ones).
+    private static bool IsTargetTyped(ExpressionSyntax element, SemanticModel model, CancellationToken cancellationToken) =>
+        element is ImplicitObjectCreationExpressionSyntax or AnonymousFunctionExpressionSyntax
+            or CollectionExpressionSyntax or SwitchExpressionSyntax or LiteralExpressionSyntax { RawKind: (int)SyntaxKind.DefaultLiteralExpression or (int)SyntaxKind.NullLiteralExpression }
+        || model.GetTypeInfo(element, cancellationToken).Type is null;
 
     /// <summary>
     /// Whether the array goes to a <c>params object[]</c>, <c>params Array[]</c> or jagged <c>params T[][]</c> parameter, which Sonar's

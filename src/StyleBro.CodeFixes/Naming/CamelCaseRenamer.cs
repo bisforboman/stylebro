@@ -423,7 +423,7 @@ internal static class CamelCaseRenamer
     /// Whether code in another project can use the symbol by name: not private (internal counts, InternalsVisibleTo), nor
     /// in a private type; a parameter by its member (named arguments). Locals and local functions can't.
     /// </summary>
-    private static bool IsVisibleToOtherProjects(ISymbol symbol)
+    internal static bool IsVisibleToOtherProjects(ISymbol symbol)
     {
         var current = symbol is IParameterSymbol or ITypeParameterSymbol ? symbol.ContainingSymbol : symbol;
         for (; current is not null and not INamespaceSymbol; current = current.ContainingSymbol)

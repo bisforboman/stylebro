@@ -22,8 +22,9 @@ internal static class TupleSyntax
     /// </summary>
     public static Finding? GetType(GenericNameSyntax name, SemanticModel model, CancellationToken cancellationToken)
     {
+        // Not in doc comments: crefs have no tuple syntax ('Func{ValueTuple{int, string}}' is a type-only context there).
         var node = Outermost(name);
-        if (!IsSupported(name) || !SyntaxFacts.IsInTypeOnlyContext(node) || node.Parent is ObjectCreationExpressionSyntax
+        if (!IsSupported(name) || !SyntaxFacts.IsInTypeOnlyContext(node) || node.IsPartOfStructuredTrivia() || node.Parent is ObjectCreationExpressionSyntax
             || ToTuple(name, model, cancellationToken) is not { } replacement)
         {
             return null;
