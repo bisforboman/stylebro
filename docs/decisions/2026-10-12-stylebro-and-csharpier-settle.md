@@ -33,7 +33,14 @@ there is no `.csharpierrc`, else 100). With `stylebro_layout_by = csharpier`:
   the operator first, `)` on its own line (CSharpier's layout). An operand over several lines or longer than the width
   keeps the usual layout: CSharpier would break it further, which this doesn't model.
 
-Measured on StabilityMatrix (CSharpier 1.0.1, printWidth 110) with the real-world script's CSharpier mode: files CSharpier
-rejects after StyleBro's format 16 -> 6 (left: BRO1141 making an initializer fit on one line, BRO1407 parentheses, and
-BRO1149 merges with a multi-line operand), files StyleBro changes after CSharpier 3 -> 0. `stylebro-migrate --write`
-detects CSharpier the same way and reports the StyleCop rules only the turned-off rules replaced as "CSharpier decides it".
+Also found on the way: CSharpier sorts using directives itself (System first), and `dotnet format` sorts them whenever
+`dotnet_sort_system_directives_first` is set; Mediator sets it to `false`, so `format` and CSharpier reordered each
+other's usings (most of the 76 files CSharpier rejected after StyleBro's format). With CSharpier, `init` and `--write` write `dotnet_sort_system_directives_first = true` (and
+`dotnet_separate_import_directive_groups = false`) where the repository sets another value.
+
+Measured with the real-world script's CSharpier mode (init, format, CSharpier, then format must change nothing and
+CSharpier's check must pass): StabilityMatrix (CSharpier 1.0.1, printWidth 110) files CSharpier rejects after StyleBro's
+format 16 -> 6 (left: BRO1141 making an initializer fit on one line, BRO1407 parentheses, BRO1149 merges with a
+multi-line operand), files StyleBro changes after CSharpier 3 -> 0; Mediator 76 -> 3 rejected, settles; Mapperly 3
+rejected, settles. `stylebro-migrate --write` detects CSharpier the same way and reports the StyleCop rules only the
+turned-off rules replaced as "CSharpier decides it".

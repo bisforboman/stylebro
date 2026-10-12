@@ -297,7 +297,7 @@ A few settings work a little differently:
   sorts usings whenever either key is set, so the two would reorder each other's usings). Run
   CSharpier after `format`: other fixes that rewrite code (attributes split, parentheses added) leave lines in StyleBro's
   layout, which CSharpier then lays out its way, and StyleBro leaves that alone: after CSharpier, `stylebro-migrate
-  format --verify-no-changes` is clean. `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro
+  format` changes nothing more. `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro
   format instead, remove CSharpier and run `init` again.
 - **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
   repository's code`, with their `# init:` comments), and the report says `kept from the last init`. They describe your

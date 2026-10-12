@@ -1,7 +1,7 @@
 ### Changed
 
 - **StyleBro and CSharpier settle** in a repository that formats with CSharpier: after `stylebro-migrate format` and
-  then `dotnet csharpier format .`, `stylebro-migrate format --verify-no-changes` is clean.
+  then `dotnet csharpier format .`, `stylebro-migrate format` changes nothing more.
   - `stylebro-migrate init` also writes `stylebro_layout_by = csharpier` and CSharpier's line width
     (`stylebro_layout_print_width`, from the `.csharpierrc`'s `printWidth`, else `max_line_length`, else 100).
   - **BRO1149** then writes a merged condition the way CSharpier does: on the `if` line when it fits, otherwise each
