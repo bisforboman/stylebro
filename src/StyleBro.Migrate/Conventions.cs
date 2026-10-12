@@ -586,7 +586,8 @@ internal static class Conventions
         foreach (var file in Migration.OwnCSharpFiles(root))
         {
             var text = File.ReadAllText(file);
-            if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
+            var relative = Path.GetRelativePath(root, file);
+            if (Migration.IsGeneratedOrVendored(relative, text))
             {
                 continue;
             }
