@@ -245,6 +245,17 @@ A few settings work a little differently:
 - **Items of split lists** ([BRO1108](rules/BRO1108.md)) count argument and parameter lists whose items start on more
   than one line: each item on its own line, or grouped (`F(tag, 1,` and `"a", "b")` on the next line). Mostly one per
   line: the rule stays on; mostly grouped or mixed: it's turned off (metadata-extractor: 104 one per line, 197 grouped).
+- **Implicit `private`** ([BRO1404](rules/BRO1404.md)) counts the members of classes, structs and records that are private
+  when nothing says otherwise (fields, methods, properties, events, constructors, nested types; not what BRO1404 skips:
+  partial members, explicit implementations, static constructors): with `private` or without an access modifier. Mostly
+  with: the default stays; mostly without: `dotnet_style_require_accessibility_modifiers = omit_if_default`, so neither
+  BRO1404 nor [BRO1007](rules/BRO1007.md) adds modifiers (IDE0040, which would remove them, is off in `init`'s block);
+  mixed: BRO1404 is turned off.
+- **Combined declarations** ([BRO1142](rules/BRO1142.md) for locals, [BRO1114](rules/BRO1114.md) for fields) count
+  declarations of two or more (`int n = h.Length, i = 0;`) and one-variable declarations right after one of the same type
+  and modifiers they could have been combined with (not `var`, not fields with attributes). Mostly one by one: the rule
+  stays on; mostly combined or mixed: it's turned off, so `format` doesn't split them. Locals and fields are counted apart:
+  a repository may combine locals in hot loops and never fields.
 - **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,
   `.csharpierrc.yaml` or `.csharpierrc.yml` at the root, a `csharpier` tool in `.config/dotnet-tools.json` or
   `dotnet-tools.json`, or a `CSharpier.MsBuild` package reference), the two formatters would undo each other's layout
@@ -330,6 +341,9 @@ A few settings work a little differently:
 | Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
 | `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
+| Implicit `private` | members that are private by default, with or without `private` | [BRO1404](rules/BRO1404.md) | `dotnet_style_require_accessibility_modifiers` |
+| Combined locals | `int a, b;` or one local per declaration | [BRO1142](rules/BRO1142.md) | `dotnet_diagnostic.BRO1142.severity` |
+| Combined fields | `int _a, _b;` or one field per declaration | [BRO1114](rules/BRO1114.md) | `dotnet_diagnostic.BRO1114.severity` |
 | Type names | files with only keywords (`int`) or framework names (`Int32`) | IDE0049 | `dotnet_diagnostic.IDE0049.severity` |
 | Private constants and static readonly fields | `PascalCase`, `camelCase` or `_camelCase` | [BRO1306](rules/BRO1306.md) | `stylebro_private_static_field_naming` |
 | Usings inside a namespace | fully qualified or relative to an enclosing namespace | [BRO1126](rules/BRO1126.md) | `dotnet_diagnostic.BRO1126.severity` |

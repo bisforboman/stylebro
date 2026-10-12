@@ -126,6 +126,9 @@ internal static class Conventions
         new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
         new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
+        new(AccessModifiersKey, "private-by-default members", "for_non_interface_members", ("for_non_interface_members", "with 'private'"), ("omit_if_default", "without 'private'"), Off(DiagnosticIds.AccessModifier)) { Enforcer = DiagnosticIds.AccessModifier, EnforcedValues = new[] { "for_non_interface_members" }, Unit = "member" },
+        new(CombinedLocalsKey, "adjacent locals of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedLocals)),
+        new(CombinedFieldsKey, "adjacent fields of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedFields)),
         new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
         new(RelativeUsingsKey, "usings inside a namespace", "warning", ("warning", "fully qualified"), ("none", "relative ('using Common;')"), Off(DiagnosticIds.QualifiedUsing)) { Unit = "using" },
         new(TypeAliasKey, "built-in type names", "warning", ("warning", "only keywords ('int')"), ("none", "framework names ('Int32')"), Off("IDE0049"), "dotnet_style_predefined_type_for_locals_parameters_members", "dotnet_style_predefined_type_for_member_access") { Unit = "file" },
@@ -203,6 +206,23 @@ internal static class Conventions
 
     /// <summary>BRO1135's severity: unsigned literal suffixes ('u', 'ul') in upper case or not (Orleans: 114 '0u' became '0U').</summary>
     private const string SuffixCaseKey = "dotnet_diagnostic." + DiagnosticIds.LiteralSuffixCase + ".severity";
+
+    /// <summary>
+    /// The SDK key BRO1404/BRO1007 follow: members of a class, struct or record that are private by default, with 'private' or
+    /// without an access modifier (issue #129: a trial repository leaves 'private' out everywhere, and BRO1404 added it in 58
+    /// files). 'omit_if_default' turns both rules off; IDE0040, which would remove the modifiers, is off in init's block.
+    /// </summary>
+    private const string AccessModifiersKey = "dotnet_style_require_accessibility_modifiers";
+
+    /// <summary>
+    /// BRO1142's severity: locals declared together ('int n = h.Length, i = 0;') or one by one (issue #129: ~180 such
+    /// declarations in a trial repository's hot loops, all split). Places: a declaration of two or more, and a one-variable
+    /// declaration right after one it could have been combined with.
+    /// </summary>
+    private const string CombinedLocalsKey = "dotnet_diagnostic." + DiagnosticIds.CombinedLocals + ".severity";
+
+    /// <summary>BRO1114's severity: fields declared together ('int _rate, _channels;') or one by one, counted like <see cref="CombinedLocalsKey"/>.</summary>
+    private const string CombinedFieldsKey = "dotnet_diagnostic." + DiagnosticIds.CombinedFields + ".severity";
 
     /// <summary>
     /// Files whose checkout ending git picks per machine (core.autocrlf, or 'text' without 'eol'): CRLF on Windows, LF on
@@ -802,6 +822,28 @@ internal static class Conventions
                 continue;
             }
 
+            if (node is MemberDeclarationSyntax member && IsPrivateByDefault(member))
+            {
+                var access = member.Modifiers.Where(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword or SyntaxKind.PrivateKeyword).ToList();
+                if (access.Count <= 1 && access.All(m => m.IsKind(SyntaxKind.PrivateKeyword)))
+                {
+                    Add(AccessModifiersKey, access.Count == 0);
+                }
+            }
+
+            if (node is FieldDeclarationSyntax or LocalDeclarationStatementSyntax)
+            {
+                var key = node is FieldDeclarationSyntax ? CombinedFieldsKey : CombinedLocalsKey;
+                if (Declared(node).Variables.Count > 1)
+                {
+                    Add(key, true);
+                }
+                else if (node.Parent?.ChildNodes().TakeWhile(n => n != node).LastOrDefault() is { } previous && CouldCombine(previous, node))
+                {
+                    Add(key, false);
+                }
+            }
+
             switch (node)
             {
                 case IfStatementSyntax or ElseClauseSyntax or ForStatementSyntax or CommonForEachStatementSyntax or WhileStatementSyntax or UsingStatementSyntax or LockStatementSyntax:
@@ -1162,6 +1204,37 @@ internal static class Conventions
 
         // StyleCop's families: '%' is one of its own.
         static int Family(SyntaxKind kind) => kind == SyntaxKind.ModuloExpression ? 4 : Level(kind);
+
+        // BRO1404's declarations that are private when nothing says otherwise: members of a class, struct or record, without
+        // what it skips (partial members, 'file' types, explicit implementations, static constructors).
+        static bool IsPrivateByDefault(MemberDeclarationSyntax member) =>
+            member.Parent is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax
+            && !member.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword) || m.IsKind(SyntaxKind.FileKeyword))
+            && member switch
+            {
+                BaseTypeDeclarationSyntax or DelegateDeclarationSyntax or BaseFieldDeclarationSyntax or MethodDeclarationSyntax { ExplicitInterfaceSpecifier: null } => true,
+                BasePropertyDeclarationSyntax property => property.ExplicitInterfaceSpecifier is null,
+                ConstructorDeclarationSyntax constructor => !constructor.Modifiers.Any(SyntaxKind.StaticKeyword),
+                _ => false,
+            };
+
+        static VariableDeclarationSyntax Declared(SyntaxNode node) => node is FieldDeclarationSyntax field ? field.Declaration : ((LocalDeclarationStatementSyntax)node).Declaration;
+
+        // A one-variable declaration right after another of the same kind, type and modifiers ('var' can't declare two; fields
+        // with attributes would share them).
+        static bool CouldCombine(SyntaxNode previous, SyntaxNode node) =>
+            previous.RawKind == node.RawKind
+            && Declared(previous).Variables.Count == 1
+            && Declared(previous).Type.IsEquivalentTo(Declared(node).Type)
+            && !Declared(node).Type.IsVar
+            && previous switch
+            {
+                FieldDeclarationSyntax field => field.AttributeLists.Count == 0 && ((FieldDeclarationSyntax)node).AttributeLists.Count == 0
+                    && field.Modifiers.ToString() == ((FieldDeclarationSyntax)node).Modifiers.ToString(),
+                LocalDeclarationStatementSyntax local => local.Modifiers.ToString() == ((LocalDeclarationStatementSyntax)node).Modifiers.ToString()
+                    && local.UsingKeyword.IsKind(SyntaxKind.None) == ((LocalDeclarationStatementSyntax)node).UsingKeyword.IsKind(SyntaxKind.None),
+                _ => false,
+            };
 
         void TrailingComma(SyntaxToken open, SyntaxToken close, int items, int separators)
         {
