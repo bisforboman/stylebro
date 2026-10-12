@@ -74,7 +74,14 @@ internal static class InitCommand
         var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
 
         // A StyleCop repository gets StyleBro's rules only where StyleCop enforced them: that's the migration, not init.
-        if (!migrated && StyleCopSetup.Evidence(root) is { Count: > 0 } evidence)
+        // Settings StyleCop.Analyzers no longer reads (Spectre.Console dropped the package, kept its 'sa1101 = none' lines)
+        // describe nothing: init proceeds and follows the code (docs/decisions/2026-10-13-stylecop-settings-without-the-stylecop-package-are-leftovers.md).
+        var evidence = migrated ? new List<string>() : StyleCopSetup.Evidence(root);
+        if (evidence.Count > 0 && !StyleCopSetup.IsInstalled(root))
+        {
+            Console.WriteLine(Program.LeftoverLine(evidence) + " init ignores them and follows the code's own conventions; delete them when convenient.");
+        }
+        else if (evidence.Count > 0)
         {
             Console.WriteLine("This repository has a StyleCop setup:");
             evidence.ForEach(e => Console.WriteLine("  " + e));
@@ -100,7 +107,7 @@ internal static class InitCommand
             sonarScopes = SonarScopes(root, sonar, sonarLines, own);
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
-            var (added, files) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
+            var (added, files, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
             if (added > 0)
             {
                 Console.WriteLine($"Suppressions: {added} {(write ? "added" : "to add")} for the rules that fix Sonar's in {files} files (the Sonar ones stay).");

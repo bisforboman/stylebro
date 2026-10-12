@@ -752,11 +752,17 @@ internal static class Conventions
             return null;
         }
 
+        // The minority is converted where 'format' runs (DynamicData: 794 of 847 LF, and its 53 CRLF files became LF, 21 of
+        // them whole-file diffs, while the note said 'format' left endings alone). 'unset' would convert more (see above).
         var value = setting.Split(':')[0].Trim().ToLowerInvariant();
         var files = Winner(endings[0], endings[1]) switch { 0 => "lf", 1 => "crlf", _ => null };
+        var others = files == "lf" ? endings[1] : endings[0];
+        var keeps = others == 0
+            ? "'format' leaves the endings alone"
+            : $"'format' converts the other {others} ({value.ToUpperInvariant()}) to {files?.ToUpperInvariant()} where it formats them";
         return value is not ("lf" or "crlf") || files is null || files == value
             ? null
-            : (files, $"Line endings: your .editorconfig says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files and 'format' leaves the endings alone. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
+            : (files, $"Line endings: your .editorconfig says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files and {keeps}. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
     }
 
     /// <summary>
@@ -1628,7 +1634,13 @@ internal static class Conventions
         return causes.Count == 0 ? null : $"{Plural(converted.Sum(), "file")} that git converts on checkout ({string.Join(", ", causes)}) don't count";
     }
 
-    public static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? string.Empty : "s")}";
+    public static string Plural(int count, string noun) => $"{count} {(count == 1 ? noun : PluralOf(noun))}";
+
+    /// <summary>A noun's plural, English rules: 'summary' -> 'summaries', 'class' -> 'classes', 'file' -> 'files'.</summary>
+    public static string PluralOf(string noun) =>
+        noun.Length > 1 && noun[^1] == 'y' && !"aeiou".Contains(noun[^2]) ? noun[..^1] + "ies"
+        : new[] { "s", "x", "z", "ch", "sh" }.Any(e => noun.EndsWith(e, StringComparison.Ordinal)) ? noun + "es"
+        : noun + "s";
 
     /// <summary>
     /// The note when the repository sets the sort key (<see cref="SortUsingsKey"/> or dotnet_separate_import_directive_groups)

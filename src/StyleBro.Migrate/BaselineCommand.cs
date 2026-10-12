@@ -273,7 +273,7 @@ internal static class BaselineCommand
         var candidates = WorkspaceCandidates(root);
         return candidates.Count == 0
             ? $"No solution or project in {root}; name one with {how}."
-            : $"Several solutions or projects in {root}: {string.Join(", ", candidates)}. Name the one to use with {how.Replace("<file>", candidates[0])}.";
+            : $"Several solutions or projects in {root}: {string.Join(", ", candidates)}. None is picked for you (a solution filter may leave projects out on purpose): name one, e.g. {string.Join(" or ", candidates.Take(3).Select(c => how.Replace("<file>", c)))}{(how.Contains("--project", StringComparison.Ordinal) ? string.Empty : " (--project <file> works too)")}.";
     }
 
     private static void Report(Result result)

@@ -50,8 +50,9 @@ public enum KeptReason
     DerivedTypeInAnotherProject,
 
     /// <summary>
-    /// Code in a project this 'stylebro-migrate format' run doesn't load uses the name (a multi-targeted library's run for a
-    /// framework its tests don't target): renaming would leave that use behind.
+    /// Code this 'stylebro-migrate format' run doesn't load uses the name: a project formatted in another run (a
+    /// multi-targeted library's run for a framework its tests don't target, projects sharing files), or a file no loaded
+    /// project compiles. Renaming would leave that use behind.
     /// </summary>
     UsedInProjectNotLoaded,
 
@@ -121,7 +122,7 @@ public sealed class KeptFinding
         KeptReason.DisabledCode => "the name is in disabled #if code, which can't be checked",
         KeptReason.NamespaceFromOutside => "part of the namespace comes from an assembly outside the solution",
         KeptReason.DerivedTypeInAnotherProject => "a type in another project derives from the type",
-        KeptReason.UsedInProjectNotLoaded => "a project that doesn't target all of this one's frameworks uses the name, and no format run loads both, so the rename would miss that use",
+        KeptReason.UsedInProjectNotLoaded => "code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use",
         KeptReason.MembersReadByPosition => "code reads the type's members by position through reflection (GetFields()[0]), so sorting them would change what it reads",
         _ => "no declaration can be renamed (public API, or names a library prescribes)",
     };

@@ -58,18 +58,19 @@ public class GeneratedFileSuppressorTests
     [InlineData(Generated, null)]
     public async Task EveryAnalyzer_IsQuietInGeneratedFiles(string path, string? folders)
     {
-        var generated = await RunAsync(path, folders);
-        var source = await RunAsync(@"C:\repo\src\RestSharp\RestClient.cs", folders);
+        var generated = await RunAsync(Code, path, folders);
+        var source = await RunAsync(Code, @"C:\repo\src\RestSharp\RestClient.cs", folders);
 
         Assert.NotEmpty(generated);
         Assert.All(generated, d => Assert.True(d.IsSuppressed, d.ToString()));
         Assert.Contains(source, d => !d.IsSuppressed);
     }
 
-    private static async Task<ImmutableArray<Diagnostic>> RunAsync(string path, string? folders)
+    /// <summary>Every StyleBro analyzer with every BRO rule on, over <paramref name="code"/>: its BRO diagnostics.</summary>
+    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null)
     {
         var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        var tree = CSharpSyntaxTree.ParseText(Code, parse, path);
+        var tree = CSharpSyntaxTree.ParseText(code, parse, path);
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator)
             .Where(p => Path.GetFileName(p) is "System.Runtime.dll" or "System.Private.CoreLib.dll")
             .Select(p => MetadataReference.CreateFromFile(p));

@@ -184,4 +184,52 @@ public class ParamsArrayTests
             }
         }
         """);
+
+    // Out of the array, a target-typed element converts to whatever the call wants there: a single 'new()' to the array
+    // type itself (eShop: CS8752), the others possibly to another overload. None of these is reported.
+    [Fact]
+    public Task TargetTypedElements_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+
+        public class Parameter
+        {
+            public string Name { get; set; } = string.Empty;
+        }
+
+        public static class Routes
+        {
+            public static string Match(this string route, params Parameter[] parameters) => route;
+
+            public static int Run(params Func<int>[] actions) => actions.Length;
+
+            public static int Run(params Action[] actions) => actions.Length;
+
+            public static int Lists(params List<int>[] lists) => lists.Length;
+
+            public static int Values(params int?[] values) => values.Length;
+
+            public static int Numbers(params long[] values) => values.Length;
+
+            public static int Parameters(params Parameter?[] values) => values.Length;
+
+            public static int Get() => 1;
+
+            public static void M(string route, bool flag, int x)
+            {
+                route.Match([new() { Name = "api-version" }]);
+                route.Match([new() { Name = "a" }, new() { Name = "b" }]);
+                route.Match(new Parameter[] { new() });
+                Run(new Func<int>[] { () => 1 });
+                Run(new Func<int>[] { delegate { return 1; } });
+                Run(new Func<int>[] { Get });
+                Lists(new List<int>[] { [1, 2] });
+                Values(new int?[] { default });
+                Values(new int?[] { null, 1 });
+                Numbers(new long[] { x switch { 1 => 1, _ => 2 } });
+                Parameters(new Parameter?[] { flag ? new() : null });
+            }
+        }
+        """);
 }

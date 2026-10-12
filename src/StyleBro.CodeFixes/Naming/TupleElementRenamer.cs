@@ -45,7 +45,7 @@ internal static class TupleElementRenamer
 
             foreach (var item in rename)
             {
-                KeptFindings.Record(item.Diagnostic, reason ?? KeptReason.NothingToRename);
+                KeptFindings.Record(item.Diagnostic, reason?.Reason ?? KeptReason.NothingToRename, reason?.Where);
             }
         }
 
@@ -54,24 +54,48 @@ internal static class TupleElementRenamer
 
     /// <summary>Why the fix leaves a rename on purpose, or null when it makes it (the same checks as <see cref="RenameAsync"/>).</summary>
     public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken) =>
-        (await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false)).Reason;
+        (await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false)).Reason?.Reason;
 
-    private static async Task<(Solution? Renamed, KeptReason? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
     {
-        // A project this 'stylebro-migrate format' run doesn't load may use the element (RepositoryNames).
-        if ((await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).Outside.ContainsKey(oldName))
+        var (renamed, visible) = await RenameOneAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
+        if (renamed is null)
         {
-            return (null, KeptReason.UsedInProjectNotLoaded);
+            return (null, (KeptReason.NothingToRename, null));
         }
 
-        var renamed = await RenameOneAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
-        return renamed is null ? (null, KeptReason.NothingToRename)
-            : await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, KeptReason.AddsErrors)
-            : (renamed, null);
+        // Code this 'stylebro-migrate format' run doesn't load (RepositoryNames) can only see an element declared in a
+        // signature other projects see: eShop's private 'FindUserFromExternalProviderAsync' returning '(ApplicationUser
+        // user, ...)' was kept for a local 'user' in the MAUI app, outside the run.
+        if (visible && (await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).Outside.TryGetValue(oldName, out var outside))
+        {
+            return (null, (KeptReason.UsedInProjectNotLoaded, outside));
+        }
+
+        return await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, (KeptReason.AddsErrors, null)) : (renamed, null);
     }
 
-    private static async Task<Solution?> RenameOneAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    /// <summary>
+    /// Whether another project can see the element: it's in the signature of a member visible outside its type's
+    /// project (not in a body, an initializer or a private member).
+    /// </summary>
+    private static bool IsVisibleToOtherProjects(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken)
     {
+        if (element.Ancestors().Any(a => a is BlockSyntax or ArrowExpressionClauseSyntax or EqualsValueClauseSyntax))
+        {
+            return false;
+        }
+
+        var member = element.Ancestors().OfType<MemberDeclarationSyntax>().FirstOrDefault();
+        var symbol = member is BaseFieldDeclarationSyntax field ? model.GetDeclaredSymbol(field.Declaration.Variables[0], cancellationToken)
+            : member is null ? null
+            : model.GetDeclaredSymbol(member, cancellationToken);
+        return symbol is null || CamelCaseRenamer.IsVisibleToOtherProjects(symbol);
+    }
+
+    private static async Task<(Solution? Renamed, bool Visible)> RenameOneAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    {
+        var visible = false;
         var documents = new List<(Document Document, SyntaxNode Root, SemanticModel Model)>();
         foreach (var document in solution.Projects.Where(p => p.Language == LanguageNames.CSharp).SelectMany(p => p.Documents))
         {
@@ -109,6 +133,7 @@ internal static class TupleElementRenamer
                         || !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))
                 {
                     renamed.Add(Key(element.Identifier.GetLocation()));
+                    visible = visible || IsVisibleToOtherProjects(element, model, cancellationToken);
                     Rename(document, element.Identifier);
                 }
             }
@@ -158,7 +183,7 @@ internal static class TupleElementRenamer
 
         if (changes.Count == 0)
         {
-            return null;
+            return (null, visible);
         }
 
         foreach (var file in changes)
@@ -172,7 +197,7 @@ internal static class TupleElementRenamer
             }
         }
 
-        return solution;
+        return (solution, visible);
     }
 
     /// <summary>

@@ -1283,6 +1283,36 @@ public class FixOrderTests
         "BRO1527",
         SdkFormatter);
 
+    // eShop's CatalogApi: a lambda with its attribute list on its own line, after a first argument BRO1107 moves. The SDK's
+    // formatter puts the lambda at the statement's indentation, below its own attribute line, in EVERY layout (the original
+    // one too: probed with 'dotnet format whitespace', SDK 10.0.401); BRO1107 doesn't touch the lambda's lines.
+    [Fact]
+    public Task AttributedLambda_AfterTheMovedFirstArgument_WithTheSdkFormatter() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        class ProducesAttribute : Attribute
+        {
+        }
+
+        class C
+        {
+            static C Map(string pattern, Delegate handler) => new C();
+
+            C Named(string name) => this;
+
+            void M()
+            {
+                Map("/catalogtypes",
+                    [Produces]
+                    async (int context) => await System.Threading.Tasks.Task.FromResult(context))
+                    .Named("ListItemTypes");
+            }
+        }
+        """,
+        "BRO1107",
+        SdkFormatter);
+
     [Fact]
     public Task AutoAccessors_NextToTheBlankLineRules() => AssertConvergesInEveryOrderAsync(
         """

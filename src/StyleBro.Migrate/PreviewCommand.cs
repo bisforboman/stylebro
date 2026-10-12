@@ -44,6 +44,9 @@ internal static class PreviewCommand
     /// <summary>StyleCop referenced as a GlobalPackageReference.</summary>
     private static readonly Regex GlobalStyleCop = new(@"<GlobalPackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
 
+    /// <summary>A whole StyleCop.Analyzers (global) package reference element: self-closing, or up to its closing tag.</summary>
+    private static readonly Regex StyleCopItem = new(@"<((?:Global)?PackageReference)\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?(?:/>|>.*?</\1\s*>)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
     /// <summary>Why '--diff' doesn't run on old-style (non-SDK) projects with packages.config, and what to do instead.</summary>
     public static string OldStyleUnsupported(IReadOnlyList<string> projects, string? command)
     {
@@ -620,10 +623,11 @@ internal static class PreviewCommand
             };
 
             // A GlobalPackageReference (central package management) gets one of its own: a PackageReference with a version
-            // there fails the restore (NU1008), and one without adds the package a second time.
+            // there fails the restore (NU1008), and one without adds the package a second time. Next to StyleCop's, so the
+            // ItemGroup's Condition holds for both (DynamicData's '!$(IsTestProject) AND !$(IsBenchmarkProject)').
             if (File.Exists(file) && GlobalStyleCop.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(file))))
             {
-                EditFile(file, text => AddItem(text, $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                EditFile(file, text => AddNextToStyleCop(text, $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
                 continue;
             }
 
@@ -654,7 +658,7 @@ internal static class PreviewCommand
                 continue;
             }
 
-            EditFile(file, text => AddItem(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\"{Condition(null)} />"));
+            EditFile(file, text => AddNextToStyleCop(text, $"<PackageReference Include=\"StyleBro.Analyzers\"{(packages is not null ? string.Empty : $" Version=\"{version}\"")} PrivateAssets=\"all\"{Condition(null)} />"));
         }
 
         // LiteBus' analyzer project removes the StyleCop reference its Directory.Build.props adds, and turns central package
@@ -728,6 +732,40 @@ internal static class PreviewCommand
         var group = $"  <ItemGroup>{newLine}{string.Concat(items.Select(item => $"    {item}{newLine}"))}  </ItemGroup>{newLine}";
         var end = project?.LastIndexOf("</Project>", StringComparison.OrdinalIgnoreCase) ?? -1;
         return end < 0 ? $"<Project>{newLine}{group}</Project>{newLine}" : project!.Substring(0, end) + group + project.Substring(end);
+    }
+
+    /// <summary>
+    /// <see cref="AddItem"/>, except when the file's StyleCop.Analyzers reference depends on a Condition
+    /// (<see cref="StyleCopSetup.ConditionalReference"/>): then the item goes right after it, in its ItemGroup, under the same
+    /// Condition. DynamicData's '&lt;ItemGroup Condition="!$(IsTestProject) AND !$(IsBenchmarkProject)"&gt;' kept StyleCop
+    /// out of its tests, and StyleBro's reference in a new unconditional ItemGroup brought StyleBro into them.
+    /// </summary>
+    public static string AddNextToStyleCop(string? text, string item)
+    {
+        if (text is null || !StyleCopSetup.ConditionalReference(text))
+        {
+            return AddItem(text, item);
+        }
+
+        // The first reference outside a comment: its element ends at '/>' or its closing tag.
+        var reference = StyleCopItem.Matches(text).FirstOrDefault(m => text.LastIndexOf("<!--", m.Index, StringComparison.Ordinal) <= text.LastIndexOf("-->", m.Index, StringComparison.Ordinal));
+        if (reference is null)
+        {
+            return AddItem(text, item);
+        }
+
+        // A Condition on StyleCop's item itself goes onto StyleBro's too.
+        var startTag = reference.Value.Substring(0, reference.Value.IndexOf('>') + 1);
+        if (Regex.Match(startTag, @"\bCondition\s*=\s*""[^""]*""", RegexOptions.IgnoreCase) is { Success: true } condition && !item.Contains(" Condition=", StringComparison.Ordinal))
+        {
+            item = item.Substring(0, item.LastIndexOf("/>", StringComparison.Ordinal)).TrimEnd() + " " + condition.Value + " />";
+        }
+
+        var newLine = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        var lineStart = text.LastIndexOf('\n', reference.Index) + 1;
+        var indentation = text.Substring(lineStart, reference.Index - lineStart);
+        indentation = indentation.Trim().Length == 0 ? indentation : "    ";
+        return text.Insert(reference.Index + reference.Length, newLine + indentation + item);
     }
 
     /// <summary>
