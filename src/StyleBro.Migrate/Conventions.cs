@@ -77,6 +77,21 @@ internal static class Conventions
     public const string TypeAliasKey = "dotnet_diagnostic.IDE0049.severity";
 
     /// <summary>
+    /// The casing of private constants and private static readonly fields (BRO1306), three forms: [PascalCase, camelCase,
+    /// _camelCase] (owner's policy, trial 11: Ical.Net had 65 camelCase or '_camelCase' names and 26 PascalCase ones, and
+    /// BRO1306 renamed them in 28 files). A clear form is written as <see cref="StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey"/>
+    /// (PascalCase is BRO1306's default); mixed turns BRO1306 off.
+    /// </summary>
+    public const string StaticCasingKey = StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey;
+
+    /// <summary>
+    /// BRO1126's severity: usings inside a namespace that name their namespace fully ('using Company.App.Common;'), or
+    /// relative to an enclosing namespace ('using Common;'; owner's policy, trial 11: Fitnet had 97 such usings, and BRO1126
+    /// expanded every one).
+    /// </summary>
+    public const string RelativeUsingsKey = "dotnet_diagnostic." + DiagnosticIds.QualifiedUsing + ".severity";
+
+    /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
     /// with what each looks like, and the line that stops StyleBro enforcing either form when the code has no clear majority
     /// (owner's decision 2026-10-10, docs/decisions.md; null: no StyleBro rule of its own enforces it, e.g. the SDK formatter's
@@ -195,21 +210,6 @@ internal static class Conventions
     /// writes the OS's ending, which is what such a checkout has anyway.
     /// </summary>
     private const string ConvertedKey = "end_of_line (converted by git)";
-
-    /// <summary>
-    /// The casing of private constants and private static readonly fields (BRO1306), three forms: [PascalCase, camelCase,
-    /// _camelCase] (owner's policy, trial 11: Ical.Net had 65 camelCase or '_camelCase' names and 26 PascalCase ones, and
-    /// BRO1306 renamed them in 28 files). A clear form is written as <see cref="StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey"/>
-    /// (PascalCase is BRO1306's default); mixed turns BRO1306 off.
-    /// </summary>
-    public const string StaticCasingKey = StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey;
-
-    /// <summary>
-    /// BRO1126's severity: usings inside a namespace that name their namespace fully ('using Company.App.Common;'), or
-    /// relative to an enclosing namespace ('using Common;'; owner's policy, trial 11: Fitnet had 97 such usings, and BRO1126
-    /// expanded every one).
-    /// </summary>
-    public const string RelativeUsingsKey = "dotnet_diagnostic." + DiagnosticIds.QualifiedUsing + ".severity";
 
     /// <summary>
     /// Files with a list of 2 or more usings: [sorted with System first only, sorted without only, sorted both ways
