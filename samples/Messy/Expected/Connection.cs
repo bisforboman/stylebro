@@ -3,7 +3,7 @@ namespace Messy;
 /// <summary>A connection.</summary>
 public class Connection
 {
-    /// <summary>Initializes a new instance of the <see cref="Connection"/> class. Opens a connection.</summary>
+    /// <summary>Initializes a new instance of the <see cref="Connection"/> class.</summary>
     /// <param name="host">The host.</param>
     public Connection(string host)
     {
