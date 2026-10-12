@@ -171,9 +171,8 @@ internal sealed class SonarSetup
 
             // A rule the StyleCop setup turns on keeps StyleCop's scope: a stylebro_ setting of a Sonar row only narrows the rule to
             // what the Sonar rule reports (BRO1101 leaving the ';' after '}', which SA1106 reports).
-            var narrowing = optionOnly ? new List<string>()
-                : settings.Where(s => KeyOf(s)!.StartsWith("stylebro_", StringComparison.Ordinal)
-                    && lines.Any(l => KeyOf(l) == key && (StyleCopSetup.ParseSeverity(ValueOf(l)) ?? Severity.None) > Severity.None)).ToList();
+            var onWithoutSonar = !optionOnly && lines.Any(l => KeyOf(l) == key && (StyleCopSetup.ParseSeverity(ValueOf(l)) ?? Severity.None) > Severity.None);
+            var narrowing = settings.Where(s => onWithoutSonar && KeyOf(s)!.StartsWith("stylebro_", StringComparison.Ordinal)).ToList();
             if (narrowing.Count > 0)
             {
                 applied.Notes.Add($"{string.Join(", ", narrowing.Select(KeyOf))} not written for {string.Join(", ", ids)}: the StyleCop setup turns {rule} on for more than the Sonar rule reports, and that stays.");
