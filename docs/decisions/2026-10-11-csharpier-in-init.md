@@ -28,3 +28,13 @@ blank lines CSharpier keeps as written (BRO1506, BRO1511, BRO1513, BRO1519, BRO1
 structural rewrites CSharpier then lays out (BRO1102, BRO1114, BRO1139, BRO1142, ...), comments and documentation. The
 layout conventions are reported as `set` (`CSharpier formats it`) instead of being counted into lines of their own.
 BRO1527's loop with IDE0055 on CSharpier's multi-line generic layout can't happen here: both are off.
+
+### Extended: column alignment for ReSharper/Rider (2026-10-12, trial 12)
+
+RestSharp's `.editorconfig` says `resharper_int_align_variables = true` (and the fields', properties', assignments', ...),
+and its code is aligned in columns (`var doc      = CreateAttributesXml();`). IDE0055's whitespace formatting flattened
+414 aligned hunks in 171 files. Owner's policy: another formatter decides the spacing, as with CSharpier, so `init` turns
+IDE0055 off (with an `# init:` comment and an `off` verdict) when a `resharper_*int_align_*` key other than the comments'
+is `true`; `format` then skips the whitespace pass. No StyleBro rule changes the spaces inside a line, so the StyleBro
+rules stay on. A team's own IDE0055 severity wins. The code itself isn't measured for alignment: the keys are the
+evidence.

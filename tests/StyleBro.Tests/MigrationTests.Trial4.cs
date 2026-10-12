@@ -39,7 +39,7 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain("stylebro_private_field_naming", editorConfig);
         Assert.DoesNotContain("BRO1303", editorConfig);
         Assert.Contains("  too few  private fields: 2 places -> default stays (camelCase)", output);
-        Assert.Contains("  2 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,", output);
+        Assert.Contains("  4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,", output);
 
         // Three that agree are followed, with a comment saying why.
         Write("A.cs", "class A { private int _logger; private int _mediator; private int _clock; }");
@@ -47,7 +47,7 @@ public sealed partial class MigrationTests
         editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("# init: private fields: named '_field' in 3 of 3 places in your code\nstylebro_private_field_naming = _camelCase", editorConfig);
         Assert.Contains("  kept     private fields: 3 of 3 named '_field' -> _camelCase", output);
-        Assert.Contains("Kept your style for 1 setting: stylebro_private_field_naming.", output);
+        Assert.Contains("Kept your style for 2 settings (1 written, 1 already StyleBro's default): stylebro_private_field_naming.", output);
 
         // Three that disagree: the rule is off (a fresh init: a second one keeps what the first wrote).
         Write("A.cs", "class A { private int _logger; private int _mediator; private int clock; }");

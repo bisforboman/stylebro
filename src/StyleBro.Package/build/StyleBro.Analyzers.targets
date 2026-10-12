@@ -52,7 +52,19 @@
       <StyleBroSonar Condition="'$(StyleBroSonar)' == ''">@(_StyleBroSonarAnalyzer->'%(FullPath)', '|')</StyleBroSonar>
     </PropertyGroup>
   </Target>
+  <!--
+    The folders source generators write to, for GeneratedFileSuppressor: the compiler puts generated files under the
+    intermediate output folder (obj/), or under CompilerGeneratedFilesOutputPath when EmitCompilerGeneratedFiles is on.
+    A target, so both paths are final. '|'-separated.
+  -->
+  <Target Name="_StyleBroFindGeneratedFolders" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroGeneratedFolders)' == ''">
+    <PropertyGroup>
+      <StyleBroGeneratedFolders Condition="'$(BaseIntermediateOutputPath)' != ''">$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(BaseIntermediateOutputPath)'))))</StyleBroGeneratedFolders>
+      <StyleBroGeneratedFolders Condition="'$(EmitCompilerGeneratedFiles)' == 'true' and '$(CompilerGeneratedFilesOutputPath)' != ''">$(StyleBroGeneratedFolders)|$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(CompilerGeneratedFilesOutputPath)'))))</StyleBroGeneratedFolders>
+    </PropertyGroup>
+  </Target>
   <ItemGroup>
+    <CompilerVisibleProperty Include="StyleBroGeneratedFolders" />
     <CompilerVisibleProperty Include="StyleBroSonar" />
     <CompilerVisibleProperty Include="StyleBroPackageFolders" />    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <!-- BRO1145 (C# 12 syntax): the SDK sets LangVersion to MaxSupportedLangVersion unless the project sets it. -->

@@ -190,7 +190,10 @@ A followed form that is StyleBro's default needs no line; any other is written i
 StyleBro rule enforces (operator placement, braces = `true`, using placement, arithmetic parentheses =
 `always_for_clarity`) and your code clearly does the other thing, nothing ever enforced that key. Then `init` leaves the
 key alone and turns that rule off (`your .editorconfig says end_of_line, ... so BRO1520 is off`), instead of letting it
-rewrite the code.
+rewrite the code. The same goes when the code mixes both forms under such a key (the starter kit says
+`beginning_of_line`, 486 operators start the line and 285 end it): nothing enforced the key, so the rule goes off as for
+any mixed convention (`.editorconfig says beginning_of_line, unenforced, code mixed: BRO1520 is off`). Running `init`
+again keeps such a line, even when `format` changed the counts.
 
 A key your `.editorconfig` sets at severity `silent` or `none` (`csharp_prefer_braces = true:silent`, or
 `dotnet_diagnostic.IDE0011.severity = silent` next to it) isn't enforced by anything: it's what the IDE wrote, not what the
@@ -247,6 +250,17 @@ A few settings work a little differently:
 - **Items of split lists** ([BRO1108](rules/BRO1108.md)) count argument and parameter lists whose items start on more
   than one line: each item on its own line, or grouped (`F(tag, 1,` and `"a", "b")` on the next line). Mostly one per
   line: the rule stays on; mostly grouped or mixed: it's turned off (metadata-extractor: 104 one per line, 197 grouped).
+- **Implicit `private`** ([BRO1404](rules/BRO1404.md)) counts the members of classes, structs and records that are private
+  when nothing says otherwise (fields, methods, properties, events, constructors, nested types; not what BRO1404 skips:
+  partial members, explicit implementations, static constructors): with `private` or without an access modifier. Mostly
+  with: the default stays; mostly without: `dotnet_style_require_accessibility_modifiers = omit_if_default`, so neither
+  BRO1404 nor [BRO1007](rules/BRO1007.md) adds modifiers (IDE0040, which would remove them, is off in `init`'s block);
+  mixed: BRO1404 is turned off.
+- **Combined declarations** ([BRO1142](rules/BRO1142.md) for locals, [BRO1114](rules/BRO1114.md) for fields) count
+  declarations of two or more (`int n = h.Length, i = 0;`) and one-variable declarations right after one of the same type
+  and modifiers they could have been combined with (not `var`, not fields with attributes). Mostly one by one: the rule
+  stays on; mostly combined or mixed: it's turned off, so `format` doesn't split them. Locals and fields are counted apart:
+  a repository may combine locals in hot loops and never fields.
 - **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,
   `.csharpierrc.yaml` or `.csharpierrc.yml` at the root, a `csharpier` tool in `.config/dotnet-tools.json` or
   `dotnet-tools.json`, or a `CSharpier.MsBuild` package reference), the two formatters would undo each other's layout
@@ -292,15 +306,38 @@ A few settings work a little differently:
   writes an empty `//` line there), or most files' headers start or end with an empty `//` line, `init` turns
   [BRO1120](rules/BRO1120.md) off: it would remove those lines, and every new file from the template would bring them
   back (Ical.Net: 222 of 223 files).
-- **Charset**: when your `.editorconfig` sets `charset` (`utf-8` or `utf-8-bom`) but the C# files don't clearly follow it
-  (BOM or not, the same 75 %), nothing ever enforced it, and `format` would add or strip the BOM in every file. Like a
-  line ending the files contradict, `init` writes the files' charset for C# files (`charset = unset` when they're mixed:
-  each file keeps its own), and the report says how to switch (remove the line and run `stylebro-migrate format`).
-  Ical.Net: `charset = utf-8` with 108 of 223 files starting with a BOM, all 108 stripped.
+- **Charset** and **final line breaks**: when your `.editorconfig` sets `charset` (`utf-8` or `utf-8-bom`) or
+  `insert_final_newline` but the C# files don't clearly follow it (BOM or not, last line break or not, the same 75 %),
+  nothing ever enforced it, and `format` would add or strip the BOM or the last line break in every file. Like a line
+  ending the files contradict, `init` writes the files' value for C# files (`unset` when they're mixed: each file keeps
+  its own), and the report says how to switch (remove the line and run `stylebro-migrate format`). Ical.Net:
+  `charset = utf-8` with 108 of 223 files starting with a BOM, all 108 stripped; the starter kit:
+  `insert_final_newline = false` with 1,092 of 1,597 files ending in a line break, all 1,092 removed. `stylebro-migrate
+  --write` does the same. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
+  and trims trailing whitespace on every line it formats, so the report only says so (with IDE0055 off nothing is trimmed).
+- **Column alignment**: when your `.editorconfig` aligns code in columns for ReSharper or Rider
+  (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
+  the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
+  `var doc      = CreateAttributesXml();` became `var doc = CreateAttributesXml();` in 171 files). `init` turns IDE0055
+  off, with a `# init:` comment, so `stylebro-migrate format` skips the whitespace pass. No StyleBro rule changes the
+  spaces inside a line, so they stay on. An IDE0055 severity of your own wins.
+- **One-line jumps** (`if (x) return;`, also `break`, `continue`, `throw`, `goto`, `yield break` on the `if` line): from
+  3 of them on, `init` writes `stylebro_allow_single_line_jump_statements = true`, majority or not, so
+  [BRO1514](rules/BRO1514.md) doesn't brace them (the starter kit: 878 of 1,130 bodies with braces, and BRO1514 braced
+  194 one-line jumps).
+- **`#region`s inside members** ([BRO1113](rules/BRO1113.md), the starter kit's `#region Arrange` / `Act` / `Assert` in
+  its tests): from 3 of them on, the rule is turned off, so `format` doesn't remove them. [BRO1112](rules/BRO1112.md)
+  (regions between members) is off in the preset already.
 - **Using order** counts files with 2 or more usings: sorted with System first, sorted without, or not sorted. `dotnet
   format` sorts usings whenever `dotnet_sort_system_directives_first` is set (to any value), so the preset doesn't set
   it: `init` writes it when your usings are sorted (or there are too few files to tell), and only a comment when they
-  aren't, or when some files put System first and others don't.
+  aren't, or when some files put System first and others don't. When your `.editorconfig` sets the key itself and 3 or
+  more files aren't in its order, the report says how many `format` will reorder and that removing the key keeps them
+  (the starter kit: `false`, 262 of 1,120 files); `init` can't do it for you, since `unset` sorts them too.
+- **No root `.editorconfig` without code for it**: when all your C# sits in folders whose `.editorconfig` says
+  `root = true` (the starter kit's `src/`) and the root has no `.editorconfig`, `init` writes none there. Likewise the
+  preview adds the package reference only where projects with C# files read it (a template pack project without code
+  doesn't get a root `Directory.Build.props`).
 
 | Setting | What's counted | Rule | Key |
 |---|---|---|---|
@@ -332,11 +369,19 @@ A few settings work a little differently:
 | Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
 | `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
+| Implicit `private` | members that are private by default, with or without `private` | [BRO1404](rules/BRO1404.md) | `dotnet_style_require_accessibility_modifiers` |
+| Combined locals | `int a, b;` or one local per declaration | [BRO1142](rules/BRO1142.md) | `dotnet_diagnostic.BRO1142.severity` |
+| Combined fields | `int _a, _b;` or one field per declaration | [BRO1114](rules/BRO1114.md) | `dotnet_diagnostic.BRO1114.severity` |
 | Type names | files with only keywords (`int`) or framework names (`Int32`) | IDE0049 | `dotnet_diagnostic.IDE0049.severity` |
 | Private constants and static readonly fields | `PascalCase`, `camelCase` or `_camelCase` | [BRO1306](rules/BRO1306.md) | `stylebro_private_static_field_naming` |
 | Usings inside a namespace | fully qualified or relative to an enclosing namespace | [BRO1126](rules/BRO1126.md) | `dotnet_diagnostic.BRO1126.severity` |
 | File headers | headers with or without an empty `//` line at the top or bottom (or a `file_header_template` with one) | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
+| One-line jumps | `if (x) return;` on the `if` line, or a lone jump in braces | [BRO1514](rules/BRO1514.md) | `stylebro_allow_single_line_jump_statements` |
+| Auto-property accessors | `{ get; set; }` on the declaration's line or on several lines | [BRO1527](rules/BRO1527.md) | `dotnet_diagnostic.BRO1527.severity` |
+| `#region`s inside members | the `#region`s inside members (3 turn the rule off) | [BRO1113](rules/BRO1113.md) | `dotnet_diagnostic.BRO1113.severity` |
+| Column alignment | your `resharper_*int_align_*` keys set to `true` | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
 | Charset | files with or without a BOM, when your `charset` doesn't match them | SDK formatter | `charset` |
+| Final line breaks | files with or without a last line break, when your `insert_final_newline` doesn't match them | SDK formatter | `insert_final_newline` |
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 

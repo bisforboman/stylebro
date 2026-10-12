@@ -61,6 +61,21 @@ public class KeptFindingsTests
         Assert.Null(reason);
     }
 
+    // sourcegit: a public field of a private nested class is private in effect, so a word in another project's strings
+    // doesn't keep it (only a reflection-shaped string would); an internal type's field is data a serializer writes.
+    [Theory]
+    [InlineData("private", false)]
+    [InlineData("internal", true)]
+    public async Task APublicFieldOfAPrivateType_IsGuardedLikeAPrivateField(string access, bool kept)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.FieldPascalCase,
+            ("Engine.cs", $"public class Engine {{ {access} class Variable {{ public string name = string.Empty; }} }}"),
+            ("Xshd.cs", "class Xshd { string Write() => \"<Color name='x' />\"; }"));
+
+        Assert.Equal(kept ? KeptReason.NameInString : null, reason);
+    }
+
     [Fact]
     public void RepositoryNames_ListReflectionShapedStrings()
     {

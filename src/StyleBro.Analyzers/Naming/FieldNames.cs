@@ -12,6 +12,9 @@ internal enum FieldStyle
 {
     CamelCase,
     UnderscoreCamelCase,
+
+    /// <summary>A naming rule asks for a style StyleBro doesn't write (sourcegit's 's_' for static fields): the name stays.</summary>
+    Other,
 }
 
 /// <summary>Which field naming rule applies to a field.</summary>
@@ -200,6 +203,7 @@ internal static class FieldNames
     {
         var rename = GetRename(field, style);
         if (hungarian is null || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum
+            || IsLeftByNamingRule(field, style)
             || HungarianNames.IsInNativeMethods(field)
             || IsInteropName(field)
             || hungarian.GetNewName((rename?.NewName ?? field.Name).TrimStart('_')) is not { } stripped)
@@ -230,6 +234,11 @@ internal static class FieldNames
         // A private constant or static readonly field that a naming rule wants in camel case is BRO1306's too.
         var isProtected = IsProtectedChecked(field);
         var camelStatic = GetCamelStaticStyle(field, style);
+        if (IsLeftByNamingRule(field, style))
+        {
+            return null;
+        }
+
         var pascal = camelStatic is null && IsPascalChecked(field);
 
         // StyleCop's PascalCase rules and SA1310 skip a name starting with '_' (it's SA1309's): with SA1309 off, so does BRO1306.
@@ -284,11 +293,14 @@ internal static class FieldNames
     /// Whether code outside the type may use the field's name as data: serializers write public instance fields under
     /// their name (Json.NET does by default), so their names are also looked for inside strings, not just as a whole
     /// string. Protected fields aren't written (and [Serializable] types are skipped anyway): they're guarded like
-    /// private ones, by their exact name.
+    /// private ones, by their exact name. So are the public fields of a private nested type: they're private in effect,
+    /// code outside the type never sees them (sourcegit's TemplateEngine: 'name' and 'count' were kept for words in
+    /// another project's strings, next to a renamed 'Replacement').
     /// </summary>
     public static bool IsDataMember(IFieldSymbol field) =>
         !field.IsConst && !field.IsStatic
-        && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal;
+        && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal
+        && !IsInPrivateType(field);
 
     /// <summary>
     /// Whether a serializer may write the type's members by name: [Serializable] (binary serialization writes every
@@ -374,7 +386,10 @@ internal static class FieldNames
     public static bool CanRename(IFieldSymbol field, string newName, FieldStyles style, TypeFacts facts, HungarianNames? hungarian = null)
     {
         var type = field.ContainingType;
-        if (field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field) || NamespaceNames.HasGeneratedPart(type))
+
+        // A member can't have its type's name (CS0542; sourcegit's 'class Text' with a field 'text').
+        if (newName == type.Name
+            || field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field) || NamespaceNames.HasGeneratedPart(type))
         {
             return false;
         }
@@ -502,6 +517,19 @@ internal static class FieldNames
         return CamelCaseNames.IsUsableName(result) ? result : null;
     }
 
+    private static bool IsInPrivateType(ISymbol symbol)
+    {
+        for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
+        {
+            if (type.DeclaredAccessibility is Accessibility.Private)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// A type with [StructLayout], [ComImport] or [UnmanagedFunctionPointer], or one that declares [DllImport],
     /// [LibraryImport] methods: its fields mirror native structures and constants ('cbSize', 'hSubMenu').
@@ -540,7 +568,8 @@ internal static class FieldNames
     /// <summary>
     /// The style of the naming rule for private fields whose required modifiers fit <paramref name="modifiersMatch"/>
     /// (constants, or static readonly fields): the first by 'priority', then the most required modifiers (the more
-    /// specific rule), then the name. Null unless that rule asks for camel case without a prefix or with '_'.
+    /// specific rule), then the name. Null without a rule or when it asks for plain PascalCase (StyleCop's);
+    /// <see cref="FieldStyle.Other"/> when it asks for anything else StyleBro doesn't write ('s_' prefix, ...).
     /// </summary>
     private static FieldStyle? GetStaticStyleFromNamingRules(AnalyzerConfigOptions options, System.Func<string[], bool> modifiersMatch)
     {
@@ -549,7 +578,9 @@ internal static class FieldNames
             .ThenByDescending(r => r.Modifiers)
             .ThenBy(r => r.Name, System.StringComparer.Ordinal)
             .FirstOrDefault();
-        return rule.Style is null ? null : ToFieldStyle(options, rule.Style);
+        return rule.Style is null
+            ? null
+            : ToFieldStyle(options, rule.Style) ?? (IsPlainStyle(options, rule.Style, "pascal_case") ? null : FieldStyle.Other);
     }
 
     /// <summary>The active naming rules for private fields whose required modifiers fit <paramref name="modifiersMatch"/>.</summary>
@@ -593,9 +624,7 @@ internal static class FieldNames
     private static FieldStyle? ToFieldStyle(AnalyzerConfigOptions options, string style)
     {
         string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
-        if (Get($"dotnet_naming_style.{style}.capitalization") != "camel_case"
-            || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
-            || !string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator")))
+        if (!IsPlainStyle(options, style, "camel_case", "_"))
         {
             return null;
         }
@@ -603,14 +632,27 @@ internal static class FieldNames
         return (Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty) switch
         {
             "" => FieldStyle.CamelCase,
-            "_" => FieldStyle.UnderscoreCamelCase,
-            _ => null,
+            _ => FieldStyle.UnderscoreCamelCase,
         };
+    }
+
+    /// <summary>A naming style with this capitalization, no suffix or word separator, and no prefix (or <paramref name="prefix"/>).</summary>
+    private static bool IsPlainStyle(AnalyzerConfigOptions options, string style, string capitalization, string prefix = "")
+    {
+        string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
+        return Get($"dotnet_naming_style.{style}.capitalization") == capitalization
+            && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
+            && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator"))
+            && (Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty) is var p && (p.Length == 0 || p == prefix);
     }
 
     /// <summary>The style of a field <see cref="IsChecked"/> checks: its own for static fields when one is configured.</summary>
     private static FieldStyle GetPrivateStyle(IFieldSymbol field, FieldStyles style) =>
         field.IsStatic && style.MutableStatic is { } mutableStatic ? mutableStatic : style.Private;
+
+    /// <summary>A static field whose naming rule asks for a style StyleBro doesn't write ('s_'): its name stays.</summary>
+    private static bool IsLeftByNamingRule(IFieldSymbol field, FieldStyles style) =>
+        GetCamelStaticStyle(field, style) == FieldStyle.Other || (IsChecked(field) && GetPrivateStyle(field, style) == FieldStyle.Other);
 
     /// <summary>The camel style a naming rule asks for when <paramref name="field"/> is a private constant or static readonly field.</summary>
     private static FieldStyle? GetCamelStaticStyle(IFieldSymbol field, FieldStyles style) =>

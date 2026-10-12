@@ -47,3 +47,14 @@ from files it changed nothing else in, probed). Fitnet says `charset = utf-8-bom
 have the conventions' share (75 % of at least 10, all of 3 to 9), `init` writes the files' charset for C# files, or
 `charset = unset` when they're mixed: probed, `dotnet format` then leaves each file's BOM (or its absence) alone. The
 report says how to get the key's charset instead (remove the line and run `stylebro-migrate format`).
+
+### Extended: an `insert_final_newline` the files don't follow (2026-10-12, trial 12)
+
+The starter kit's `src/.editorconfig` says `insert_final_newline = false`, but 1,092 of its 1,597 C# files (git's
+conversion aside) end with a line break; nothing enforced it until `init` turned the whitespace pass on, and `format`
+removed the line break from 1,092 files. The same choice applies, judged like `charset`: the files' value is written for
+C# files, or `insert_final_newline = unset` when they're mixed (probed: `dotnet format whitespace` then leaves files with
+and without a final line break alone), with a report note. The migration does the same (and for `charset`, which it
+didn't before). `trim_trailing_whitespace` isn't read by `dotnet format` at all (probed: `false` still trimmed every
+formatted line), so it can't be kept that way; the report says so when the key is `false` and files have trailing
+whitespace.

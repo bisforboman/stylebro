@@ -58,8 +58,11 @@ internal static class Braces
     /// "multi-line" is what the SDK's IDE0011 counts as such; with false, nothing is. With
     /// stylebro_allow_single_line_jump_statements, a jump statement on its 'if' line is fine unless BRO1516 wants braces; with
     /// stylebro_braces_statements = if_and_loops, using, lock, fixed and deconstructing foreach statements aren't checked.
+    /// With <paramref name="afterFix"/> (for the fixes), a chain counts as inconsistent once any clause gets braces: the
+    /// fix wraps the clauses that become BRO1516's in the same run (sourcegit: a multi-line 'else if' wrapped by BRO1515
+    /// left its single-line 'if' for a second run).
     /// </summary>
-    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn, AnalyzerConfigOptions options)
+    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn, AnalyzerConfigOptions options, bool afterFix = false)
     {
         var preference = GetPreference(options);
         var allowSingleLineJumps = AllowSingleLineJumps(options);
@@ -101,7 +104,9 @@ internal static class Braces
                 break;
         }
 
-        var inconsistent = node is IfStatementSyntax && children.Any(c => c is BlockSyntax);
+        var inconsistent = node is IfStatementSyntax
+            && (children.Any(c => c is BlockSyntax)
+                || (afterFix && isOn(DiagnosticIds.BracesConsistent) && GetFindings(node, text, isOn, options).Any()));
         List<StatementSyntax>? allowed = null;
         var reported = false;
         foreach (var child in children)

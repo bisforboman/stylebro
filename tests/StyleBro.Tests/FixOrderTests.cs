@@ -43,6 +43,52 @@ public class FixOrderTests
         "BRO1515",
         "BRO1516");
 
+    // sourcegit: with when_multiline, BRO1515 wraps the multi-line 'else if' and makes the single-line 'if' BRO1516's,
+    // which used to need a second run.
+    [Fact]
+    public Task Braces_AMultiLineClauseMakesTheChainInconsistent() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            public static int M(string line, int count)
+            {
+                if (line.StartsWith("Binary"))
+                    count = -1;
+                else if (line.StartsWith("++<") ||
+                    line.StartsWith("++>"))
+                    count++;
+
+                return count;
+            }
+        }
+        """,
+        "csharp_prefer_braces = when_multiline:warning\n",
+        "BRO1514",
+        "BRO1515",
+        "BRO1516");
+
+    // sourcegit: BRO1149's wrapped '&&' goes where BRO1520 wants it, so BRO1520 has nothing left on a second run.
+    [Fact]
+    public Task NestedIf_WrappedOperatorNextToBRO1520() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null &&
+                    msg > 0)
+                {
+                    if (msg == 1)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        """,
+        "BRO1149",
+        "BRO1520");
+
     [Fact]
     public Task InternalMethods_SortedBelowPublicOnes() => AssertConvergesInEveryOrderWithConfigAsync(
         """
