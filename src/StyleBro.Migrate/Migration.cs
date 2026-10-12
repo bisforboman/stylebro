@@ -307,11 +307,24 @@ internal static class Migration
     /// <summary>The settings for a scope: the lines whose value differs from the repository-wide ones (<paramref name="main"/>).</summary>
     public static List<string> GenerateScope(StyleCopSetup setup, Scope scope, string root, Result main)
     {
-        var inScope = Generate(setup.For(scope), root, main.FieldStyle, main.SonarSetup);
-        var mainValues = main.Lines.Select(Split).Where(p => p.Key is not null).ToDictionary(p => p.Key!, p => p.Value);
-        return inScope.Lines
-            .Where(line => Split(line) is { Key: { } key } pair && !main.OwnKeys.Contains(key)
+        var inScope = Generate(setup.For(scope), root, main.FieldStyle, main.SonarSetup?.For(scope));
+        return ScopeLines(main.Lines, inScope.Lines, main.OwnKeys);
+    }
+
+    /// <summary>
+    /// The lines of a scope's settings (<paramref name="inScope"/>) whose value differs from the repository-wide ones
+    /// (<paramref name="main"/>), keys in <paramref name="own"/> left out. A rule fixing a Sonar rule that the main lines turn
+    /// on and the scope's don't is turned off there: the Sonar rule is off in the scope (also used by init).
+    /// </summary>
+    public static List<string> ScopeLines(IReadOnlyList<string> main, IReadOnlyList<string> inScope, ISet<string> own)
+    {
+        var mainValues = main.Select(Split).Where(p => p.Key is not null).ToDictionary(p => p.Key!, p => p.Value);
+        var scopeKeys = new HashSet<string>(inScope.Select(l => Split(l).Key).OfType<string>(), StringComparer.Ordinal);
+        var fixingSonar = new HashSet<string>(SonarSetup.Mapping.Select(m => $"dotnet_diagnostic.{m.Rule}.severity"), StringComparer.Ordinal);
+        return inScope
+            .Where(line => Split(line) is { Key: { } key } pair && !own.Contains(key)
                 && (!mainValues.TryGetValue(key, out var value) || value != pair.Value))
+            .Concat(mainValues.Keys.Where(key => fixingSonar.Contains(key) && !scopeKeys.Contains(key) && !own.Contains(key) && mainValues[key] != "none").Select(key => $"{key} = none"))
             .ToList();
 
         static (string? Key, string Value) Split(string line)

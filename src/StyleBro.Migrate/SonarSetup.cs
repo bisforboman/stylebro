@@ -150,6 +150,24 @@ internal sealed class SonarSetup
     public bool IsOn(string id) => Severities.TryGetValue(id, out var severity) && severity >= Severity.Suggestion;
 
     /// <summary>
+    /// The setup inside a scope (a sub-directory's .editorconfig, a path section): its Sonar severities on top, so a rule
+    /// lowered or off there (tfplan2md's tests: S3878 = suggestion) lowers or turns off the rule that fixes it there too.
+    /// </summary>
+    public SonarSetup For(Scope scope)
+    {
+        var severities = new Dictionary<string, Severity>(Severities, StringComparer.Ordinal);
+        foreach (var (id, severity) in scope.Sonar ?? new Dictionary<string, Severity>())
+        {
+            if (Exists(id, ParseVersion(Version)))
+            {
+                severities[id] = severity;
+            }
+        }
+
+        return new SonarSetup(severities, [.. Sources], Version);
+    }
+
+    /// <summary>
     /// Adds the settings for the Sonar rules that are on to <paramref name="lines"/> (an .editorconfig section): the rule
     /// that fixes each, at the strongest severity of the Sonar rules it stands for, unless it's already on at least as
     /// strongly (a rule on through StyleCop or Sonar is on), and its settings, which replace the same key's value from the
