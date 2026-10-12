@@ -628,9 +628,16 @@ internal static class FormatCommand
     public static string RestoreHintFor(IEnumerable<string> output)
     {
         var error = output.Select(l => Regex.Match(l, @"\berror (?<code>NU\d{4}): (?<message>.*?)(?: For more information|\s*\[[^\]]*\]\s*$|$)")).FirstOrDefault(m => m.Success);
-        return error is null
-            ? RestoreHint
-            : $"The restore failed with {error.Groups["code"].Value}: {error.Groups["message"].Value.Trim().TrimEnd('.')}. Fix that (https://learn.microsoft.com/nuget/reference/errors-and-warnings/{error.Groups["code"].Value.ToLowerInvariant()}), then run again. Once the packages are restored, '--no-restore' skips the restore.";
+        if (error is null)
+        {
+            return RestoreHint;
+        }
+
+        // NU1102 for StyleBro itself: a local feed that isn't a package source yet, or one packageSourceMapping doesn't map.
+        var feed = error.Groups["code"].Value == "NU1102" && error.Groups["message"].Value.Contains("StyleBro.", StringComparison.OrdinalIgnoreCase)
+            ? " NuGet searched no source that has it: add the folder or feed with the StyleBro packages to nuget.config's <packageSources> (<add key=\"stylebro\" value=\"path/to/feed\" />), and when nuget.config has a <packageSourceMapping>, map StyleBro to it too (<packageSource key=\"stylebro\"><package pattern=\"StyleBro.*\" /></packageSource>): https://bisforboman.github.io/stylebro/getting-started/."
+            : string.Empty;
+        return $"The restore failed with {error.Groups["code"].Value}: {error.Groups["message"].Value.Trim().TrimEnd('.')}.{feed} Fix that (https://learn.microsoft.com/nuget/reference/errors-and-warnings/{error.Groups["code"].Value.ToLowerInvariant()}), then run again. Once the packages are restored, '--no-restore' skips the restore.";
     }
 
     /// <summary>Whether a 'dotnet format' output line says its restore failed (it prints a stack trace, nothing about why).</summary>
@@ -1422,9 +1429,9 @@ internal static class FormatCommand
             return 1;
         }
 
-        if (BaselineCommand.IsBelow(workspace) && !File.Exists(path))
+        if (!File.Exists(path) && BaselineCommand.PickedNote(root, workspace) is { } picked)
         {
-            log(BaselineCommand.BelowNote(workspace));
+            log(picked);
         }
 
         // 'dotnet format' can't load a Traversal project ("Format currently supports only C# and Visual Basic projects"): a

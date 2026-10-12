@@ -84,7 +84,7 @@ internal sealed class SonarSetup
         var known = ParseVersion(version);
         if (profile is null && version is not null)
         {
-            sources.Add($"SonarAnalyzer.CSharp {version} (its default rules, \"Sonar way\"{(known is null ? $", as of {DefaultsVersion}" : string.Empty)})");
+            sources.Add($"SonarAnalyzer.CSharp {(version == "?" ? "(version unknown)" : version)} (its default rules, \"Sonar way\"{(known is null ? $", as of {DefaultsVersion}" : string.Empty)})");
             foreach (var id in Rules.Keys.Where(id => OnByDefault(id, known)))
             {
                 severities[id] = Severity.Warning;
@@ -311,22 +311,25 @@ internal sealed class SonarSetup
     /// <summary>
     /// The SonarAnalyzer.CSharp version the repository references, like StyleCop's: a PackageReference or central
     /// PackageVersion (attribute or element), a packages.config entry or an analyzer path in the packages folder; the
-    /// lowest of several. '?' when only a reference without a version is found, null without any.
+    /// lowest of several. '?' when only a reference without a version (or with an undefined property) is found, null without any.
     /// </summary>
     private static string? PackageVersion(IEnumerable<string> msbuild, IEnumerable<string> files)
     {
         var found = new List<string>();
         var named = false;
-        foreach (var file in msbuild.Distinct(StringComparer.OrdinalIgnoreCase))
+        var texts = msbuild.Distinct(StringComparer.OrdinalIgnoreCase).Select(f => StyleCopSetup.WithoutComments(File.ReadAllText(f))).ToList();
+        foreach (var text in texts)
         {
-            var text = StyleCopSetup.WithoutComments(File.ReadAllText(file));
             foreach (Match match in Package.Matches(text))
             {
                 named = true;
                 var version = VersionAttribute.Match(match.Groups["rest"].Value);
-                if (version.Success || match.Groups["element"].Success)
+
+                // '$(SonarAnalyzerVersion)' (Steeltoe): its value from the MSBuild files; one no file defines counts as no version.
+                if ((version.Success || match.Groups["element"].Success)
+                    && StyleCopSetup.ResolveProperties((version.Success ? version.Groups["version"].Value : match.Groups["element"].Value).Trim(), texts) is { } resolved)
                 {
-                    found.Add((version.Success ? version.Groups["version"].Value : match.Groups["element"].Value).Trim());
+                    found.Add(resolved);
                 }
             }
 

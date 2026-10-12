@@ -69,7 +69,7 @@ internal static class Program
               names what format runs on when the folder has several solutions or projects; --no-restore uses the
               repository's own restore (run 'dotnet restore' first).
 
-          stylebro-migrate baseline [path] [--project <solution or project>]
+          stylebro-migrate baseline [path or solution or project] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
 
           --json (any command): one JSON object on stdout (settings, conventions, runs, changes per rule, kept
@@ -168,6 +168,10 @@ internal static class Program
         if (setup.Version is { } version)
         {
             Console.WriteLine($"StyleCop.Analyzers version: {version}{(setup.VersionRecorded ? " (recorded by the last --write; the package is gone)" : string.Empty)}{(version.StartsWith("1.2", StringComparison.Ordinal) ? string.Empty : " (rules added in later versions count as off)")}");
+        }
+        else if (setup.UnresolvedVersion is { } unresolved)
+        {
+            Console.WriteLine($"StyleCop.Analyzers version: unknown (the reference says {unresolved}, and no MSBuild file in the repository defines it): every StyleCop 1.2 rule counts.");
         }
 
         foreach (var line in ScopeReport(setup))
@@ -325,13 +329,44 @@ internal static class Program
         return lines;
     }
 
-    /// <summary>When the folder has several solutions or projects, which ones, and that format needs one named.</summary>
+    /// <summary>
+    /// The hints for running format after init or the migration: when the folder has several solutions or projects, which
+    /// ones (format needs one named), and the CI steps a plain 'dotnet format --verify-no-changes' would fail (<see cref="VerifyNoChangesSteps"/>).
+    /// </summary>
     internal static void PrintWorkspaceHint(string root)
     {
         if (BaselineCommand.WorkspaceCandidates(root) is { Count: > 1 } several)
         {
             Console.WriteLine($"This folder has several solutions or projects ({string.Join(", ", several)}): name the one to format, e.g. 'stylebro-migrate format {several[0]}'.");
         }
+
+        VerifyNoChangesSteps(root).ForEach(Console.WriteLine);
+    }
+
+    /// <summary>
+    /// The CI steps (GitHub workflows, Azure Pipelines) that run plain 'dotnet format --verify-no-changes', one note each
+    /// ('file:line'): findings StyleBro keeps on purpose (a rename a guard holds back) fail them for good (sourcegit).
+    /// </summary>
+    internal static List<string> VerifyNoChangesSteps(string root)
+    {
+        var workflows = Path.Combine(root, ".github", "workflows");
+        var files = (Directory.Exists(workflows) ? Directory.EnumerateFiles(workflows).Where(f => f.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)) : [])
+            .Concat(Directory.EnumerateFiles(root, "azure-pipelines*.y*ml"))
+            .Order(StringComparer.OrdinalIgnoreCase);
+        var notes = new List<string>();
+        foreach (var file in files)
+        {
+            var lines = File.ReadAllLines(file);
+            for (var i = 0; i < lines.Length; i++)
+            {
+                if (Regex.IsMatch(lines[i], @"\bdotnet\s+format\b.*--verify-no-changes") && !lines[i].TrimStart().StartsWith('#'))
+                {
+                    notes.Add($"{Path.GetRelativePath(root, file).Replace('\\', '/')}:{i + 1} runs 'dotnet format --verify-no-changes': findings StyleBro keeps on purpose (a rename that would break reflection, for example) fail it every time. Run 'stylebro-migrate format --verify-no-changes' there instead (it checks the same and accepts those), or write a baseline (stylebro-migrate baseline).");
+                }
+            }
+        }
+
+        return notes;
     }
 
     /// <summary>
