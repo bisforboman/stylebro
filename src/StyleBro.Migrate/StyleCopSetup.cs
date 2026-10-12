@@ -96,6 +96,9 @@ internal sealed class StyleCopSetup
     /// <summary>Gets a value indicating whether <see cref="Version"/> comes from the block an earlier --write wrote (no reference left).</summary>
     public bool VersionRecorded { get; init; }
 
+    /// <summary>Gets the version text of the StyleCop.Analyzers reference when it names a property no MSBuild file defines ('$(X)'), else null.</summary>
+    public string? UnresolvedVersion { get; init; }
+
     /// <summary>
     /// Gets a value indicating whether some project generates a documentation file. Without one the compiler doesn't parse XML documentation
     /// in the build, and StyleCop's rules that read it stay silent (SA0001), while 'dotnet format' does parse it.
@@ -139,12 +142,17 @@ internal sealed class StyleCopSetup
         // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x: off, whatever the configs say.
         var msbuild = files.Where(IsMSBuild).Concat(references.MSBuild).Select(f => (File: f, Text: File.ReadAllText(f))).ToList();
         var documentationParsed = msbuild.Any(m => DocumentationFile.IsMatch(m.Text));
-        var version = msbuild.Select(m => m.Text)
+
+        // A version from a property ('$(StyleCopVersion)', Steeltoe's versions.props) is resolved from the MSBuild files.
+        var properties = msbuild.Select(m => WithoutComments(m.Text)).ToList();
+        var versions = msbuild.Select(m => m.Text)
             .Concat(files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)).Select(File.ReadAllText))
             .SelectMany(text => PackageVersion.Matches(text))
             .Select(m => m.Groups["v"].Value.Trim())
-            .OrderBy(v => v, StringComparer.Ordinal)
-            .FirstOrDefault();
+            .Select(v => (Raw: v, Value: ResolveProperties(v, properties)))
+            .ToList();
+        var version = versions.Select(v => v.Value).OfType<string>().OrderBy(v => v, StringComparer.Ordinal).FirstOrDefault();
+        var unresolved = version is null ? versions.Select(v => v.Raw).FirstOrDefault() : null;
 
         // After the package swap the reference is gone: the version the last --write recorded counts (kubernetes-client: a
         // second run turned on BRO1123, BRO1124 and BRO1311, which replace rules StyleCop 1.1.118 doesn't have).
@@ -338,6 +346,7 @@ internal sealed class StyleCopSetup
             FoldersWithout = without,
             ReferencedIn = projects.ReferencedIn.Select(Relative).ToList(),
             VersionRecorded = recorded is not null,
+            UnresolvedVersion = recorded is null ? unresolved : null,
             RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
         };
     }
@@ -799,6 +808,23 @@ internal sealed class StyleCopSetup
     /// The rules a StyleCop version before 1.2 has (its DLL's inventory), or null for 1.2 and later: 1.0.x lacks SA1135,
     /// SA1136, SA1137, SA1139, SA1314 and SA1413 too (xbox-live-developer-tools, 1.0.2: 94 findings in StyleCop-clean code).
     /// </summary>
+    /// <summary>
+    /// A version with its '$(Name)' properties replaced by the values the MSBuild files (<paramref name="texts"/>, without
+    /// comments) give them ('&lt;StyleCopVersion&gt;1.2.0-beta.556&lt;/StyleCopVersion&gt;'), or null when one isn't defined.
+    /// </summary>
+    internal static string? ResolveProperties(string value, IReadOnlyList<string> texts)
+    {
+        // ponytail: the first definition wins, conditions aren't evaluated (MSBuild's evaluation would be a process per repository).
+        for (var depth = 0; depth < 8 && value.Contains("$(", StringComparison.Ordinal); depth++)
+        {
+            value = Regex.Replace(value, @"\$\((?<name>[\w.-]+)\)", m => texts
+                .Select(t => Regex.Match(t, $@"<{Regex.Escape(m.Groups["name"].Value)}(?:\s[^>]*)?>\s*(?<v>[^<]*?)\s*</{Regex.Escape(m.Groups["name"].Value)}\s*>"))
+                .FirstOrDefault(d => d.Success && d.Groups["v"].Value.Length > 0)?.Groups["v"].Value ?? m.Value);
+        }
+
+        return value.Contains("$(", StringComparison.Ordinal) ? null : value;
+    }
+
     internal static HashSet<string>? OldRules(string? version) =>
         version is null ? null
         : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")

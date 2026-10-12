@@ -12,9 +12,10 @@ dotnet tool install --global StyleBro.Migrate --prerelease
 stylebro-migrate baseline
 ```
 
-Run it in the folder with your solution (or name it: `stylebro-migrate baseline --project MySolution.sln`). It runs
-`dotnet format --verify-no-changes` to find every violation `dotnet format` would fix today and writes them to
-`stylebro.baseline` in that folder. Commit the file.
+Run it in the folder with your solution (or name it, like `format`: `stylebro-migrate baseline src/MySolution.sln`, or
+`--project`). It runs `dotnet format --verify-no-changes` to find every violation `dotnet format` would fix today and
+writes them to `stylebro.baseline` in that folder (the current folder when you name a solution or project below it).
+Commit the file.
 
 ```text
 Wrote stylebro.baseline: 820 violations on 759 lines.

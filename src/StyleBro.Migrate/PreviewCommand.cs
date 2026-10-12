@@ -204,8 +204,7 @@ internal static class PreviewCommand
             }
             else if (noRestore && !restored)
             {
-                // Without the restore's output 'dotnet format --no-restore' loads no project: whitespace only, and "StyleBro
-                // reported nothing" (obj deleted).
+                // Without the restore's output 'dotnet format --no-restore' loads no project: whitespace only (obj deleted).
                 return Fail(tail, 1, NoRestoreOutput);
             }
 
@@ -215,7 +214,6 @@ internal static class PreviewCommand
             // cost of a whole run). Later runs are FormatCommand.NextRun's.
             var reportFolder = Path.Combine(temp, "report");
             var reportFile = Path.Combine(reportFolder, "format-report.json");
-            string? notLoaded = null;
             var changed = new List<bool>();
             var tree = Tree(copy);
             for (var run = 1; run <= MaxRuns; run++)
@@ -229,15 +227,9 @@ internal static class PreviewCommand
                     return Fail(tail, code, $"'stylebro-migrate format' failed (exit code {code}).");
                 }
 
-                if (run == 1)
+                if (run == 1 && !File.Exists(reportFile))
                 {
-                    if (!File.Exists(reportFile))
-                    {
-                        return Fail(tail, 1, "'dotnet format' wrote no report.");
-                    }
-
-                    // Printed once, after the summary.
-                    notLoaded = NotLoadedWarning(File.ReadAllText(reportFile));
+                    return Fail(tail, 1, "'dotnet format' wrote no report.");
                 }
 
                 var next = Tree(copy);
@@ -265,11 +257,6 @@ internal static class PreviewCommand
             JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
-            if (notLoaded is not null)
-            {
-                Console.WriteLine(notLoaded);
-            }
-
             notes.ForEach(n => Console.WriteLine($"Note: {n}"));
 
             // A project that didn't load is left out, as 'stylebro-migrate format' does (StabilityMatrix: a legacy project the
@@ -391,21 +378,6 @@ internal static class PreviewCommand
         }
 
         return (result, changes);
-    }
-
-    /// <summary>
-    /// The warning when the report before the fixes has no StyleBro rule at all, else null. With 150 rules that almost always
-    /// means the analyzers didn't load (Bogus: the reference went into a Directory.Build.props its projects never imported,
-    /// and the preview showed only the SDK's formatting).
-    /// </summary>
-    public static string? NotLoadedWarning(string reportJson)
-    {
-        using var report = JsonDocument.Parse(reportJson);
-        var any = report.RootElement.EnumerateArray().SelectMany(d => d.GetProperty("FileChanges").EnumerateArray())
-            .Any(c => c.GetProperty("DiagnosticId").GetString()?.StartsWith("BRO", StringComparison.Ordinal) == true);
-        return any ? null : "WARNING: StyleBro reported nothing, so its analyzers probably didn't load (or the code already follows every rule).\n"
-            + "  Check that every project gets the StyleBro.Analyzers reference: a nested Directory.Build.props shadows the root's unless it\n"
-            + "  imports it, a reference in a conditional ItemGroup (one TargetFramework) misses the others, and RunAnalyzers=false turns analyzers off.";
     }
 
     /// <summary>The format part of the summary: files, reported changes, runs, and the rules by the number of files they changed.</summary>

@@ -138,7 +138,8 @@ or a property like Orleans' `$(_ParentDirectoryBuildPropsPath)`), the root's ref
 restore (NU1504, duplicate reference). A reference inside a conditional
 `ItemGroup` (`Condition="'$(TargetFramework)' == 'net8.0'"`) reaches only that target framework, and
 `<RunAnalyzers>false</RunAnalyzers>` turns all analyzers off where it applies. `--diff` adds the reference to every
-`Directory.Build.props` the projects use and warns when StyleBro reported nothing at all.
+`Directory.Build.props` the projects use and names the projects whose restore output has no StyleBro.Analyzers (a
+code base that already follows every rule reports nothing, and that's fine).
 
 The package brings StyleBro's rules and its preset: rule severities and formatting options, close to StyleCop's
 defaults. Your own `.editorconfig` wins over the preset. To configure everything yourself instead:
@@ -411,8 +412,9 @@ before `dotnet format` runs: without the analyzers it would fix only whitespace 
 code clean. Projects without it next to ones with it are named (`Without StyleBro: ...`). The command restores once
 before the runs; that restore skips NuGet's audit (`-p:NuGetAudit=false`): vulnerability warnings (NU1901-NU1904) are
 the build's business, and with `TreatWarningsAsErrors` they failed every run. A solution filter (`.slnf`) works like
-its solution, with only its projects. A folder with several solutions
-or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
+its solution, with only its projects. *Next release:* a solution with several filters of it next to it (Steeltoe's
+`Steeltoe.All.slnx` and its seven `.slnf` parts) counts as that solution; the command says how to name a filter instead.
+A folder with several solutions or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 With none at the root, it looks for a Traversal project there (`dirs.proj` with `Sdk="Microsoft.Build.Traversal"`,
 which `dotnet format` can't load: `format` runs on a temporary solution with the projects it lists), then for solutions
 one folder down (`src/MySolution.slnx`): the only one is used, and the command says so (`Using src/MySolution.slnx`);
@@ -442,7 +444,8 @@ dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 BRO1008
 Run `stylebro-migrate format --verify-no-changes --severity warn` after the build: it changes nothing and fails (exit
 code 2) when formatting would change a file. Findings kept on purpose don't fail it; plain
 `dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
-there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md).
+there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md). *Next release:* `init` and the migration
+name the workflow lines (`.github/workflows`, `azure-pipelines.yml`) that still run plain `dotnet format --verify-no-changes`.
 
 *Next release:* with `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
 agents (opt-in). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
