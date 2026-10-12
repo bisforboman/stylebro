@@ -77,7 +77,7 @@ internal static class AgentsFile
 
         if (changed)
         {
-            File.WriteAllText(path, text);
+            PreviewCommand.EditFile(path, _ => text);
             lines.Add($"{(existing is null ? "Wrote" : "Updated")} the StyleBro section in {FileName} (instructions for AI agents).");
         }
 

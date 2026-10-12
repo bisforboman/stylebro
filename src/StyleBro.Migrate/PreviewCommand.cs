@@ -602,17 +602,24 @@ internal static class PreviewCommand
                 continue;
             }
 
+            // Blazor.Diagrams: site/Site/Site.csproj turns central package management on in its own file, below a
+            // Directory.Build.props that doesn't: a version there failed its restore (NU1008). Such projects get the
+            // version-less reference (and the version in their Directory.Packages.props), the others one with a version.
             var packages = CentralPackages(file, root);
-            if (packages is not null && versions.Add(packages))
+            var optIns = packages is null ? OptOuts(file, files, root, "true") : [];
+            foreach (var central in optIns.Select(p => CentralPackages(p, root)).Prepend(packages).OfType<string>())
             {
-                EditFile(packages, text => AddPackageVersion(text!, $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                if (versions.Add(central))
+                {
+                    EditFile(central, text => AddPackageVersion(text!, $"<PackageVersion Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                }
             }
 
             // StabilityMatrix: its analyzer projects turn central package management off, and the version-less reference from
             // Directory.Build.props failed their restore (NU1015). Such projects get a reference with a version instead (those
             // that remove StyleCop's reference remove StyleBro's too, below).
             var optOuts = packages is null ? [] : OptOuts(file, files, root).Where(p => !removes.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
-            if (optOuts.Count > 0)
+            if (optOuts.Count > 0 || optIns.Count > 0)
             {
                 optedOut.UnionWith(optOuts);
                 EditFile(file, text => AddItem(
@@ -673,9 +680,9 @@ internal static class PreviewCommand
 
     /// <summary>
     /// The projects that get <paramref name="props"/> (a Directory.Build.props: those under its folder) and turn central
-    /// package management off themselves.
+    /// package management off themselves (<paramref name="value"/> "true": on).
     /// </summary>
-    public static List<string> OptOuts(string props, IEnumerable<string> files, string root)
+    public static List<string> OptOuts(string props, IEnumerable<string> files, string root, string value = "false")
     {
         if (!Path.GetFileName(props).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase))
         {
@@ -683,7 +690,7 @@ internal static class PreviewCommand
         }
 
         var folder = Path.GetDirectoryName(Path.GetFullPath(props))! + Path.DirectorySeparatorChar;
-        return files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase) && SetsCentral(f, "false", root)).ToList();
+        return files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase) && SetsCentral(f, value, root)).ToList();
     }
 
     /// <summary>
@@ -733,15 +740,28 @@ internal static class PreviewCommand
     }
 
     /// <summary>
-    /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark: File.ReadAllText drops it and
-    /// File.WriteAllText wouldn't write it back (Soulseek.NET's .csproj lost its BOM in the preview).
+    /// Rewrites a file (null text: it doesn't exist yet) keeping its UTF-8 byte order mark (File.ReadAllText drops it and
+    /// File.WriteAllText wouldn't write it back: Soulseek.NET's .csproj lost its BOM in the preview) and its line endings
+    /// (<see cref="KeepLineEndings"/>). Every settings and project file the tool edits goes through here.
     /// </summary>
     public static void EditFile(string file, Func<string?, string> edit)
     {
         var bytes = File.Exists(file) ? File.ReadAllBytes(file) : null;
         var bom = bytes is [0xEF, 0xBB, 0xBF, ..];
         var text = bytes is null ? null : Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
-        File.WriteAllText(file, edit(text), new UTF8Encoding(bom));
+        File.WriteAllText(file, KeepLineEndings(text, edit(text)), new UTF8Encoding(bom));
+    }
+
+    /// <summary>
+    /// The new text of a file in the line endings of its <paramref name="original"/> text when those are all one kind (mdx's
+    /// CRLF .editorconfig came back LF from init: the edits write LF); a file with mixed or no line endings gets the text as is.
+    /// </summary>
+    public static string KeepLineEndings(string? original, string text)
+    {
+        var crlf = original is null ? 0 : Regex.Count(original, "\r\n");
+        var lf = original is null ? 0 : original.Count(c => c == '\n') - crlf;
+        var plain = text.Replace("\r\n", "\n");
+        return crlf > 0 && lf == 0 ? plain.Replace("\n", "\r\n") : lf > 0 && crlf == 0 ? plain : text;
     }
 
     /// <summary>Runs git; line endings and paths as they are (no autocrlf, no quoting), output as UTF-8.</summary>

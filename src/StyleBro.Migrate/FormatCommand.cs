@@ -88,8 +88,17 @@ internal static class FormatCommand
     /// <summary>How to restore old-style (non-SDK) projects before 'format' (docs/getting-started.md, "Old-style (non-SDK) projects").</summary>
     public const string OldStyleRestore = "Restore them with Visual Studio's MSBuild first: msbuild -t:restore -p:RestorePackagesConfig=true (https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects).";
 
+    /// <summary>The SDK bug a run that loads two projects compiling the same files runs into (<see cref="Separate"/>).</summary>
+    public const string LinkedMergeIssue = "https://github.com/dotnet/roslyn/issues/86001";
+
     /// <summary>What to say when the restore 'dotnet format' needs fails (it prints only a stack trace).</summary>
     internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why (for example NuGet audit warnings with TreatWarningsAsErrors). Once the packages are restored, '--no-restore' skips it.";
+
+    /// <summary>The start of the line that says a Traversal project's projects are formatted (printed for the first run only).</summary>
+    private const string TraversalHeader = "Traversal:";
+
+    /// <summary>The start of the line that names the projects formatted in separate runs (printed for the first run only).</summary>
+    private const string SharedFilesHeader = "Shared files:";
 
     /// <summary>The start of the line that says which rules a run fixes (printed for the first run only).</summary>
     private const string FixingHeader = "Fixing StyleBro's rules";
@@ -113,7 +122,7 @@ internal static class FormatCommand
     private const string UnformattedHeader = "Leaving alone:";
 
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
-    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
@@ -370,6 +379,26 @@ internal static class FormatCommand
     /// </summary>
     public static string? SkippedProject(string line) =>
         Regex.Match(line, "Required references did not load for (.+?) or referenced project") is { Success: true } match ? match.Groups[1].Value : null;
+
+    /// <summary>Whether a line of 'dotnet format''s output says it crashed (an unhandled exception: its changes may be half written).</summary>
+    public static bool IsCrash(string line) => line.StartsWith("Unhandled exception", StringComparison.Ordinal);
+
+    /// <summary>What to say after a run crashed: the run's projects, and the SDK bug when the crash is the linked-file merge's.</summary>
+    public static string CrashMessage(IEnumerable<string> projects) =>
+        $"'dotnet format' crashed in the run for {string.Join(", ", projects.Order(StringComparer.OrdinalIgnoreCase))}, possibly after writing part of its changes (listed below). "
+        + $"If the error says \"Changes must be within bounds of SourceText\", it's Roslyn's linked-file merge ({LinkedMergeIssue}): two projects of that run compile the same file. Please report it with the projects named here.";
+
+    /// <summary>The names of the projects that compile a file another project compiles too (<see cref="Separate"/>).</summary>
+    public static List<string> SharingProjects(IEnumerable<(string FullPath, string[] Compile)> projects)
+    {
+        var list = projects.ToList();
+        var owners = list.SelectMany(p => p.Compile.Distinct(StringComparer.OrdinalIgnoreCase).Select(f => (File: f, p.FullPath)))
+            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g.Select(x => x.FullPath))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return list.Where(p => owners.Contains(p.FullPath)).Select(p => Path.GetFileNameWithoutExtension(p.FullPath)).Order(StringComparer.OrdinalIgnoreCase).ToList();
+    }
 
     /// <summary>The file name of a project 'dotnet format' can't load (F#: "Could not format '...fsproj'. Format currently supports only C# ..."), else null.</summary>
     public static string? UnsupportedProject(string line) =>
@@ -641,6 +670,59 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// A run's projects split into groups that run one after another, so no file is compiled by two projects one
+    /// 'dotnet format' run loads (a group's projects and what they reference, transitively). kubernetes-client: KubernetesClient
+    /// and KubernetesClient.Aot compile the same files with other DefineConstants; loaded together, Roslyn's linked-file
+    /// merge crashed on their different edits (dotnet/roslyn#86001) after writing part of the files. First fit, in the
+    /// given order; one group when nothing is shared.
+    /// </summary>
+    public static List<List<string>> Separate(IEnumerable<string> projects, Func<string, IEnumerable<string>> references, Func<string, IEnumerable<string>> compile)
+    {
+        HashSet<string> Loaded(string project)
+        {
+            var loaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var next = new Stack<string>(new[] { project });
+            while (next.Count > 0)
+            {
+                var current = next.Pop();
+                if (loaded.Add(current))
+                {
+                    foreach (var reference in references(current))
+                    {
+                        next.Push(reference);
+                    }
+                }
+            }
+
+            return loaded;
+        }
+
+        var groups = new List<(List<string> Projects, HashSet<string> Loaded, Dictionary<string, string> Owner)>();
+        foreach (var project in projects)
+        {
+            var loaded = Loaded(project);
+            var group = groups.FirstOrDefault(g => loaded.Where(p => !g.Loaded.Contains(p))
+                .All(p => compile(p).All(f => !g.Owner.TryGetValue(f, out var owner) || owner.Equals(p, StringComparison.OrdinalIgnoreCase))));
+            if (group.Projects is null)
+            {
+                group = (new List<string>(), new HashSet<string>(StringComparer.OrdinalIgnoreCase), new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+                groups.Add(group);
+            }
+
+            group.Projects.Add(project);
+            foreach (var p in loaded.Where(group.Loaded.Add))
+            {
+                foreach (var file in compile(p))
+                {
+                    group.Owner.TryAdd(file, p);
+                }
+            }
+        }
+
+        return groups.Select(g => g.Projects).ToList();
+    }
+
+    /// <summary>
     /// The folders of a run's projects, relative to <paramref name="root"/>, for 'dotnet format --include'. Referenced
     /// projects that load as usual (multi-targeted) would get their files formatted too, merging the frameworks' copies
     /// again (Newtonsoft.Json: conflict markers in the library during the tests' net6.0 run). Only the run's own projects
@@ -679,7 +761,7 @@ internal static class FormatCommand
     /// with <paramref name="projectDirectory"/>, the C# files it compiles from outside its folder (full paths): Orleans links
     /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects.
     /// </summary>
-    public static (string[] Frameworks, string[] References, string[] Linked) ParseProject(string msbuildJson, string? projectDirectory = null)
+    public static (string[] Frameworks, string[] References, string[] Linked, string[] Compile) ParseProject(string msbuildJson, string? projectDirectory = null)
     {
         using var json = JsonDocument.Parse(msbuildJson);
         var hasProperties = json.RootElement.TryGetProperty("Properties", out var properties);
@@ -694,7 +776,7 @@ internal static class FormatCommand
             : Array.Empty<string>();
         var folder = projectDirectory is null ? null : Path.TrimEndingDirectorySeparator(Path.GetFullPath(projectDirectory)) + Path.DirectorySeparatorChar;
         var linked = folder is null ? Array.Empty<string>() : FullPaths("Compile").Where(f => !Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase)).ToArray();
-        return (frameworks, FullPaths("ProjectReference"), linked);
+        return (frameworks, FullPaths("ProjectReference"), linked, FullPaths("Compile"));
     }
 
     /// <summary>
@@ -726,6 +808,35 @@ internal static class FormatCommand
             .AsOrdered()
             .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList());
         File.WriteAllLines(file, lines);
+    }
+
+    /// <summary>Whether a file is a Traversal project (Microsoft.Build.Traversal: a .proj that only lists projects to build).</summary>
+    public static bool IsTraversal(string path) =>
+        path.EndsWith(".proj", StringComparison.OrdinalIgnoreCase) && File.Exists(path) && File.ReadAllText(path).Contains("Microsoft.Build.Traversal", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The C# projects a Traversal project lists (full paths: its ProjectReference items as MSBuild evaluates them, so globs
+    /// and conditions count), nested Traversal projects expanded.
+    /// </summary>
+    public static List<string> TraversalProjects(string path)
+    {
+        var references = ParseProject(Capture(Path.GetDirectoryName(path)!, "msbuild", path, "-getItem:ProjectReference", "-nologo")).References;
+        return references.SelectMany(r => IsTraversal(r) ? TraversalProjects(r) : r.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ? new List<string> { r } : new List<string>())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>A solution (.slnx) with the given projects (full paths), written relative to <paramref name="folder"/>.</summary>
+    public static string SolutionText(string folder, IEnumerable<string> projects) =>
+        "<Solution>\n" + string.Concat(projects.Select(p => $"  <Project Path=\"{System.Security.SecurityElement.Escape(Path.GetRelativePath(folder, p).Replace('\\', '/'))}\" />\n")) + "</Solution>\n";
+
+    /// <summary>Writes a temporary solution next to a Traversal project, with the projects it lists; returns its path (the caller deletes it).</summary>
+    public static string TraversalSolution(string path)
+    {
+        var folder = Path.GetDirectoryName(path)!;
+        var solution = Path.Combine(folder, $".stylebro-{Path.GetFileNameWithoutExtension(path)}.slnx");
+        File.WriteAllText(solution, SolutionText(folder, TraversalProjects(path)));
+        return solution;
     }
 
     /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
@@ -799,7 +910,7 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run.
             var code = runOnce(runArgs, run == 1 ? output : line =>
             {
-                if (!new[] { FixingHeader, MultiTargetedHeader, NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+                if (!new[] { FixingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
                 {
                     log(line);
                 }
@@ -813,6 +924,13 @@ internal static class FormatCommand
 
             if (code != 0)
             {
+                // A crash can come after 'dotnet format' wrote part of its changes (kubernetes-client: 242 files).
+                if (changed.Count > 0)
+                {
+                    log($"Run {run} failed after changing {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")}:");
+                    ListFiles(root, changed, int.MaxValue).ForEach(log);
+                }
+
                 return code;
             }
 
@@ -990,10 +1108,12 @@ internal static class FormatCommand
         var unsupported = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var current = string.Empty;
         var restoreFailed = false;
+        var crashed = false;
         var nuGetErrors = new List<string>();
         void Record(string line)
         {
             restoreFailed |= IsRestoreFailure(line);
+            crashed |= IsCrash(line);
             if (line.Contains("error NU", StringComparison.Ordinal))
             {
                 nuGetErrors.Add(line);
@@ -1035,6 +1155,27 @@ internal static class FormatCommand
         }
 
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
+        if (BaselineCommand.IsBelow(workspace) && !File.Exists(path))
+        {
+            log(BaselineCommand.BelowNote(workspace));
+        }
+
+        // 'dotnet format' can't load a Traversal project ("Format currently supports only C# and Visual Basic projects"): a
+        // temporary solution with the projects it lists, next to it (the per-framework filters name it relative to there).
+        if (IsTraversal(workspacePath))
+        {
+            var solution = TraversalSolution(workspacePath);
+            try
+            {
+                log($"{TraversalHeader} {Path.GetFileName(workspacePath)} is a Traversal project: formatting the {ReadProjects(solution).Count} C# projects it lists.");
+                return RunOnce(new[] { solution }.Concat(args.Skip(hasPath ? 1 : 0)).ToArray(), output);
+            }
+            finally
+            {
+                File.Delete(solution);
+            }
+        }
+
         var workingAt = passThrough.IndexOf(WorkingFolderOption);
         if (workingAt >= 0 && workingAt + 1 < passThrough.Count)
         {
@@ -1130,6 +1271,16 @@ internal static class FormatCommand
             return exit;
         }
 
+        // A crash leaves part of the files written: say which run it was (Repeat lists the files it changed).
+        void Crashed(IEnumerable<string> runProjects)
+        {
+            if (crashed)
+            {
+                log(CrashMessage(runProjects.Select(Path.GetFileNameWithoutExtension).OfType<string>()));
+                crashed = false;
+            }
+        }
+
         int Done(int code)
         {
             if (restoreFailed)
@@ -1153,15 +1304,38 @@ internal static class FormatCommand
 
         var solutionDirectory = Path.GetDirectoryName(workspacePath)!;
         var projects = ReadProjects(workspacePath);
-        var plan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
+        var frameworkPlan = Plan(projects.ToDictionary(p => p.Key, p => p.Value.Frameworks));
+        var byFullPath = projects.ToDictionary(p => p.Value.FullPath, p => p.Key, StringComparer.OrdinalIgnoreCase);
+        List<List<string>> Apart(List<string> selected) => Separate(
+                selected.Select(p => projects[p].FullPath),
+                r => byFullPath.TryGetValue(r, out var key) ? projects[key].References : Array.Empty<string>(),
+                c => byFullPath.TryGetValue(c, out var key) ? projects[key].Compile : Array.Empty<string>())
+            .Select(g => g.Select(f => byFullPath[f]).ToList())
+            .ToList();
+
+        // "" for a run without a framework of its own (no project is multi-targeted).
+        var plan = (frameworkPlan.Count <= 1 ? new List<(string Framework, List<string> Projects)> { (string.Empty, projects.Keys.ToList()) } : frameworkPlan)
+            .SelectMany(p => Apart(p.Projects) is var parts && parts.Count > 1
+                ? parts.Select((part, i) => (p.Framework, Projects: part, Label: $"{(p.Framework.Length == 0 ? string.Empty : p.Framework + ", ")}part {i + 1} of {parts.Count}"))
+                : new[] { (p.Framework, p.Projects, Label: p.Framework) })
+            .ToList();
         if (plan.Count <= 1)
         {
             var single = Format(workspacePath, passThrough.Concat(noRestore ? new[] { "--no-restore" } : Array.Empty<string>()).ToList(), a => Dotnet(root, null, a, Watch));
             Incomplete(skipped, new Dictionary<string, List<string>>(), unsupported).ForEach(log);
+            Crashed(projects.Keys);
             return Done(single);
         }
 
-        log($"{MultiTargetedHeader}one 'dotnet format' run per target framework ({string.Join(", ", plan.Select(p => p.Framework))}).");
+        if (frameworkPlan.Count > 1)
+        {
+            log($"{MultiTargetedHeader}one 'dotnet format' run per target framework ({string.Join(", ", frameworkPlan.Select(p => p.Framework))}).");
+        }
+
+        if (SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile))) is { Count: > 0 } sharing)
+        {
+            log($"{SharedFilesHeader} {string.Join(", ", sharing)} compile the same files, so they're formatted in separate runs (loaded together, 'dotnet format' crashes: {LinkedMergeIssue}).");
+        }
 
         // The restore's own output (its "Build succeeded" block) only matters when it fails.
         var restoreOutput = new List<string>();
@@ -1206,8 +1380,8 @@ internal static class FormatCommand
         reportFolders.AddRange(plan.Select(_ => Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}")).Where(_ => report is not null));
         int RunFramework(int index, bool verify, Action<string> output)
         {
-            var (framework, selected) = plan[index];
-            var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{framework}.slnf") : null;
+            var (framework, selected, _) = plan[index];
+            var filter = isSolution ? Path.Combine(solutionDirectory, $".stylebro-format-{index}.slnf") : null;
             try
             {
                 if (filter is not null)
@@ -1233,10 +1407,11 @@ internal static class FormatCommand
                     options.AddRange(Include(root, solutionDirectory, selected, selected.SelectMany(p => projects[p].Linked)));
                 }
 
+                // A run without a framework of its own still gets the repository's names (it loads only some projects).
                 var byPath = projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase);
-                var keep = Keep(byPath, framework);
-                var (alias, aliases) = Aliases(byPath, keep, framework);
-                var environment = new RunEnvironment(alias, select, "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|", aliases, names);
+                var keep = framework.Length == 0 ? new HashSet<string>() : Keep(byPath, framework);
+                var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
+                var environment = new RunEnvironment(alias, select, keep.Count == 0 ? string.Empty : "|" + string.Join("|", keep.Select(k => k.ToUpperInvariant())) + "|", aliases, names);
                 return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output));
             }
             finally
@@ -1251,10 +1426,11 @@ internal static class FormatCommand
         var exit = 0;
         void RunOrReplay(int index, (int Code, List<string> Lines)? ran)
         {
-            log($"== {plan[index].Framework} ({plan[index].Projects.Count} project(s))");
+            log($"== {(plan[index].Label.Length == 0 ? "all projects" : plan[index].Label)} ({plan[index].Projects.Count} project(s))");
             current = plan[index].Framework;
             ran?.Lines.ForEach(Show);
             var code = ran?.Code ?? RunFramework(index, verify: false, Show);
+            Crashed(plan[index].Projects);
             exit = exit == 0 ? code : exit;
         }
 
@@ -1332,7 +1508,7 @@ internal static class FormatCommand
     /// evaluated in parallel (one 'dotnet msbuild' each, ~1 s: LiteBus has 99) and once per process: the runs until clean
     /// and the preview's runs only edit C# files.
     /// </summary>
-    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked)> ReadProjects(string workspacePath)
+    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile)> ReadProjects(string workspacePath)
     {
         // ponytail: keyed by the workspace only; a project file changed between two runs of one process isn't seen.
         lock (ProjectCache)
@@ -1346,6 +1522,8 @@ internal static class FormatCommand
         var directory = Path.GetDirectoryName(workspacePath)!;
         var projects = workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             ? new[] { Path.GetFileName(workspacePath) }
+            : IsTraversal(workspacePath)
+            ? TraversalProjects(workspacePath).Select(p => Path.GetRelativePath(directory, p)).ToArray()
             : Capture(directory, "sln", workspacePath, "list").Split('\n')
                 .Select(l => l.Trim())
                 .Where(l => l.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
@@ -1354,8 +1532,17 @@ internal static class FormatCommand
             .Select(p =>
             {
                 var fullPath = Path.GetFullPath(Path.Combine(directory, p));
-                var (frameworks, references, linked) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
-                return (Key: p, Value: (fullPath, frameworks, references, linked));
+                var (frameworks, references, linked, compile) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
+
+                // A multi-targeted project's outer evaluation has only its explicit Compile items, not the SDK's default
+                // ones (kubernetes-client's KubernetesClient: none, so its files didn't look shared with KubernetesClient.Aot's).
+                // ponytail: the first framework's files only; a file only another framework compiles isn't seen as shared.
+                if (frameworks.Length > 1)
+                {
+                    compile = compile.Union(ParseProject(Capture(directory, "msbuild", fullPath, $"-property:TargetFramework={frameworks[0]}", "-getItem:Compile", "-nologo")).Compile, StringComparer.OrdinalIgnoreCase).ToArray();
+                }
+
+                return (Key: p, Value: (fullPath, frameworks, references, linked, compile));
             })
             .ToDictionary(p => p.Key, p => p.Value);
         lock (ProjectCache)
@@ -1393,7 +1580,11 @@ internal static class FormatCommand
         // See the remarks on the class: the environment, cleared again for projects that should load as usual.
         if (framework is { } f)
         {
-            start.Environment["TargetFramework"] = f.Name;
+            if (f.Name.Length > 0)
+            {
+                start.Environment["TargetFramework"] = f.Name;
+            }
+
             start.Environment["StyleBroFormatKeep"] = f.Keep;
             start.Environment["BeforeMicrosoftNETSdkTargets"] = f.SelectTargets;
             start.Environment["StyleBroFormatAliases"] = f.Aliases;

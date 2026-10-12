@@ -39,6 +39,12 @@ internal static class InitCommand
     /// <summary>The first line of the detected conventions in the output (the preview shows that part).</summary>
     public const string DetectedHeader = "Conventions in the code";
 
+    /// <summary>What init says, with or without --write, when 'stylebro-migrate --write' already wrote the settings.</summary>
+    public const string MigratedLine = ".editorconfig already has settings from 'stylebro-migrate --write'; they include the built-in rules.";
+
+    /// <summary>What init says, with or without --write, when the .editorconfig already has the settings it would write.</summary>
+    public const string PresentLine = ".editorconfig already has these settings: nothing to add.";
+
     /// <summary>The IDE rule that enforces a convention's SDK key (its severity tells whether the key is enforced).</summary>
     private static readonly Dictionary<string, string> IdeRules = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -148,19 +154,34 @@ internal static class InitCommand
         }
 
         var agentsMd = args.Contains(AgentsFile.Option);
+
+        // What --write would change: nothing when the settings are there (written by 'stylebro-migrate --write', or by an
+        // earlier init). The dry run says the same as --write (mdx: it showed a block --write then said was there).
+        var plain = existing?.Replace("\r\n", "\n");
+        var hasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain);
+        var hasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain);
         if (!write)
         {
-            Console.WriteLine("== .editorconfig (run with --write to add it)");
-            Console.Write(block);
-            Console.Write(modernize.Block);
+            if (hasBlock)
+            {
+                Console.WriteLine(migrated ? MigratedLine : PresentLine);
+            }
+
+            if (!hasBlock || !hasModernize)
+            {
+                Console.WriteLine("== .editorconfig (run with --write to add it)");
+            }
+
+            Console.Write(hasBlock ? null : block);
+            Console.Write(hasModernize ? null : modernize.Block);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
         }
 
         var text = existing ?? "root = true\n";
-        if (migrated)
+        if (hasBlock)
         {
-            Console.WriteLine(".editorconfig already has settings from 'stylebro-migrate --write'; they include the built-in rules.");
+            Console.WriteLine(migrated ? MigratedLine : PresentLine);
         }
         else
         {
@@ -168,15 +189,15 @@ internal static class InitCommand
             Console.WriteLine("Wrote the built-in rule severities to .editorconfig.");
         }
 
-        if (modernize.Block is not null)
+        if (!hasModernize)
         {
-            text = Migration.Apply(text, modernize.Block, ModernizeBegin, ModernizeEnd);
+            text = Migration.Apply(text, modernize.Block!, ModernizeBegin, ModernizeEnd);
             Console.WriteLine("Wrote the modernization rules to .editorconfig (see https://bisforboman.github.io/stylebro/modernizing/).");
         }
 
         if (text != existing)
         {
-            File.WriteAllText(path, text);
+            PreviewCommand.EditFile(path, _ => text);
             if (!EnforcesCodeStyleInBuild(root))
             {
                 Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
