@@ -53,12 +53,12 @@ public sealed class LiteralSuffixCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var lOnly = LiteralSuffixes.UpperCasesOnlyL(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var scope = LiteralSuffixes.GetScope(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
         var changes = new List<TextChange>();
         foreach (var diagnostic in diagnostics)
         {
             var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
-            if (node is LiteralExpressionSyntax literal && LiteralSuffixes.GetUpperCaseSuffix(literal.Token, lOnly) is { } newText)
+            if (node is LiteralExpressionSyntax literal && LiteralSuffixes.GetUpperCaseSuffix(literal.Token, scope) is { } newText)
             {
                 changes.Add(new TextChange(literal.Token.Span, newText));
             }

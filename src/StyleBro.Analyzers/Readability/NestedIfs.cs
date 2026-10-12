@@ -61,9 +61,10 @@ internal static class NestedIfs
     /// with the chains in its body), so a single fix and Fix All give the same text. When the brace rules are on
     /// (<paramref name="isOn"/>), the statements they want in braces in the merged chains get them in the same edit:
     /// a merge can turn which rule reports a statement of an if/else chain (BRO1514 into BRO1516), and 'dotnet format'
-    /// may have run that rule already.
+    /// may have run that rule already. A condition of a dynamic type anywhere in the merge leaves the nest alone (like Sonar's
+    /// S1066): 'a &amp;&amp; d' binds '&amp;' at run time, where 'if (d)' only needed d to convert to bool.
     /// </summary>
-    public static TextChange? GetChange(IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    public static TextChange? GetChange(IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
         if (GetOuter(inner) is null)
         {
@@ -73,7 +74,7 @@ internal static class NestedIfs
         // The chains around it, outermost first: the first that merges this 'if' decides.
         foreach (var top in inner.Ancestors().OfType<IfStatementSyntax>().Where(i => GetOuter(i) is null && GetInner(i) is not null).Reverse())
         {
-            if (GetChange(top, inner, text, options, isOn) is { } change)
+            if (GetChange(top, inner, text, options, isOn, model) is { } change)
             {
                 return change;
             }
@@ -82,13 +83,17 @@ internal static class NestedIfs
         return null;
     }
 
+    private static bool IsDynamic(ExpressionSyntax condition, SemanticModel model) =>
+        condition.DescendantNodesAndSelf().OfType<ExpressionSyntax>().Any(e => model.GetTypeInfo(e).Type is { TypeKind: TypeKind.Dynamic });
+
     private static bool HasConditionalDirective(IEnumerable<SyntaxTrivia> trivia) =>
         trivia.Any(t => t.IsKind(SyntaxKind.IfDirectiveTrivia) || t.IsKind(SyntaxKind.ElifDirectiveTrivia) || t.IsKind(SyntaxKind.ElseDirectiveTrivia)
             || t.IsKind(SyntaxKind.EndIfDirectiveTrivia) || t.IsKind(SyntaxKind.DisabledTextTrivia));
 
-    private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
-        if (Render(top, text, WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true)) is not { } rendered || !rendered.Merged.Contains(inner))
+        if (Render(top, text, WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true)) is not { } rendered || !rendered.Merged.Contains(inner)
+            || rendered.Merged.Any(m => IsDynamic(m.Condition, model) || IsDynamic(GetOuter(m)!.Condition, model)))
         {
             return null;
         }
@@ -111,7 +116,7 @@ internal static class NestedIfs
 
         var root = Braces.GetChain(mergedTop.Statement) ?? mergedTop;
         var children = mergedTop.Statement.DescendantNodesAndSelf().Where(n => Braces.Kinds.Contains(n.Kind())).Prepend(root)
-            .SelectMany(n => Braces.GetFindings(n, merged, isOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options)))
+            .SelectMany(n => Braces.GetFindings(n, merged, isOn, options))
             .Where(f => !Braces.IsLeftToExpansion(f.Child, merged, options, isOn))
             .Select(f => f.Child)
             .Distinct()

@@ -104,4 +104,84 @@ public class ParamsArrayTests
             }
         }
         """);
+
+    // Sonar's S3878 accepts arrays for 'params object[]', 'params Array[]' and jagged 'params' arrays.
+    [Fact]
+    public Task ExceptObjectAndJagged_LeavesWhatSonarAccepts() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public static int Sum(int first, params int[] rest) => first;
+
+            public static int Objects(params object[] values) => 0;
+
+            public static int Arrays(params System.Array[] values) => 0;
+
+            public static int Jagged(params int[][] values) => 0;
+
+            public void M(int[] other)
+            {
+                Sum(1, {|BRO1151:new[] { 2, 3 }|});
+                Sum(1, {|BRO1151:[2, 3]|});
+                Objects(new object[] { 1, "a" });
+                Objects([1, "a"]);
+                Arrays(new System.Array[] { other, other });
+                Jagged(new[] { other, other });
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public static int Sum(int first, params int[] rest) => first;
+
+            public static int Objects(params object[] values) => 0;
+
+            public static int Arrays(params System.Array[] values) => 0;
+
+            public static int Jagged(params int[][] values) => 0;
+
+            public void M(int[] other)
+            {
+                Sum(1, 2, 3);
+                Sum(1, 2, 3);
+                Objects(new object[] { 1, "a" });
+                Objects([1, "a"]);
+                Arrays(new System.Array[] { other, other });
+                Jagged(new[] { other, other });
+            }
+        }
+        """,
+        "stylebro_params_arrays = except_object_and_jagged\n");
+
+    [Fact]
+    public Task ObjectArraysAndJaggedArrays_AreReportedByDefault() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public static int Objects(params object[] values) => 0;
+
+            public static int Jagged(params int[][] values) => 0;
+
+            public void M(int[] other)
+            {
+                Objects({|BRO1151:new object[] { 1, "a" }|});
+                Jagged({|BRO1151:new[] { other, other }|});
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public static int Objects(params object[] values) => 0;
+
+            public static int Jagged(params int[][] values) => 0;
+
+            public void M(int[] other)
+            {
+                Objects(1, "a");
+                Jagged(other, other);
+            }
+        }
+        """);
 }

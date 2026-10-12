@@ -1,17 +1,17 @@
 # Sonar rules that a StyleBro or SDK rule fixes (docs/migrating.md, "Coming from SonarQube"). Tab-separated:
 # Sonar id, the rule that fixes it, mode (on: the rule is turned on; option: only the setting, the rule must be on already),
-# a setting written with it (or -), a note for the report (or -). Mode none: not covered, the note says why (rule -).
+# the settings written with it ('; '-separated, or -), a note for the report (or -). Mode none: not covered, the note says why (rule -).
 # Then per Sonar version (SonarAnalyzer.CSharp): the first one with the rule (or -: 9.16 or older) and the first one
 # with it in "Sonar way" when that changed (or -), from the rule metadata in github.com/SonarSource/sonar-dotnet
 # (analyzers/rspec/cs at the release tags). Older versions don't have the rule, or don't turn it on by default.
 S100	-	none	-	BRO1309 is stricter: it also checks events and enum members, and names with '_' inside, which S100 accepts	-	-
 S101	-	none	-	BRO1309 is stricter: it also checks enums, delegates and test classes ('fooTests'), which S101 accepts	-	-
-S818	-	none	-	BRO1135 is stricter: with l_only it reports any lower-case 'l' in the suffix ('1ul', '1lu'), S818 only a last 'l' without 'u' before it	-	-
+S818	BRO1135	on	stylebro_upper_case_literal_suffixes = lone_l	-	-	-
 S927	BRO1313	on	stylebro_match_base_parameter_names = non_generic_methods	-	-	-
-S1066	-	none	-	BRO1149 is stricter: it also merges ifs whose inner condition is dynamic, which S1066 skips	-	-
-S1116	-	none	-	BRO1101 is stricter: it also removes the ';' after a type's or namespace's '}', which S1116 accepts	-	-
+S1066	BRO1149	on	-	-	-	-
+S1116	BRO1101	on	stylebro_allow_semicolon_after_closing_brace = true	-	-	-
 S1118	-	none	-	CA1052 is stricter: it reports classes with a private or protected constructor, a static member of their own type (a singleton) or a non-static nested type, which S1118 accepts	-	-
-S121	-	none	-	BRO1514 is stricter: it also wants braces on 'using', 'lock' and 'fixed' bodies, which S121 doesn't check	-	-
+S121	BRO1514	on	csharp_prefer_braces = true; stylebro_braces_statements = if_and_loops	-	-	-
 S1125	-	none	-	IDE0075 and IDE0100 are stricter: IDE0075 also simplifies constants and 'default', and 'c ? true : true'; IDE0100 also inside a conditional with a throw, which S1125 accepts	-	-
 S1481	-	none	-	IDE0059 is stricter: it also removes dead stores to variables that are used later, which S1481 accepts	-	-
 S1659	BRO1142	on	-	-	-	-
@@ -23,6 +23,6 @@ S2971	BRO1150	on	-	-	-	-
 S3052	-	none	-	CA1805 is stricter: it also reports 'default', 'new Guid()', enums set to 0 and nullable value types set to null, which S3052 accepts	-	-
 S3260	-	none	-	CA1852's fix also seals private nested classes with protected members (CS0628 warnings: 144 in SmartEnum)	-	-
 S3442	-	none	-	CA1012 is stricter: it also reports a public constructor in another part of a partial abstract class, which S3442 accepts	-	-
-S3878	-	none	-	BRO1151 is stricter: it also reports arrays and collection expressions passed to 'params object[]' and jagged 'params' arrays, which S3878 accepts	-	-
+S3878	BRO1151	on	stylebro_params_arrays = except_object_and_jagged	-	-	-
 S4136	BRO1001	option	stylebro_keep_overloads_together = same_access	only overloads with the same access stay together, as Sonar's S4136 asks; between accesses StyleCop's SA1202 order stays	-	-
-S8969	-	none	-	BRO1147 is stricter: it also removes '!' on values declared without nullable annotations (#nullable disable, unannotated libraries), which S8969 accepts	10.30	-
+S8969	BRO1147	on	stylebro_allow_null_forgiving_on_unannotated = true	-	10.30	-

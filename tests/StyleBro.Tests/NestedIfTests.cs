@@ -650,4 +650,42 @@ public class NestedIfTests
             }
         }
         """);
+
+    // A dynamic condition: 'a && d' binds '&' at run time, where 'if (d)' only needed d to convert to bool (Sonar's S1066 skips it).
+    [Fact]
+    public Task DynamicConditions_AreLeftAlone() => Verify.VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public void M(bool a, bool b, dynamic d)
+            {
+                if (a)
+                {
+                    if (d == 1)
+                    {
+                        M(a, b, d);
+                    }
+                }
+
+                if (d)
+                {
+                    if (b)
+                    {
+                        M(a, b, d);
+                    }
+                }
+
+                if (a)
+                {
+                    if (b)
+                    {
+                        if (d.X)
+                        {
+                            M(a, b, d);
+                        }
+                    }
+                }
+            }
+        }
+        """);
 }

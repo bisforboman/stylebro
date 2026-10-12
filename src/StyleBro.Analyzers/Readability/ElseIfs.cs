@@ -115,7 +115,7 @@ internal static class ElseIfs
         var sorted = changes.OrderBy(c => c.Span.Start).ToList();
         int Map(int position) => position + sorted.Where(c => c.Span.End <= position).Sum(c => c.NewText!.Length - c.Span.Length);
         IEnumerable<(StatementSyntax Child, string Id)> Findings(IfStatementSyntax chainRoot, SourceText chainText) =>
-            Braces.GetFindings(chainRoot, chainText, isOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options))
+            Braces.GetFindings(chainRoot, chainText, isOn, options)
                 .Where(f => !Braces.IsLeftToExpansion(f.Child, chainText, options, isOn));
 
         // The brace rules' findings before the join (the outer chains, and the inner chains that were in a block) ...

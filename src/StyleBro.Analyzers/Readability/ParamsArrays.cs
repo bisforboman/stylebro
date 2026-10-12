@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -76,6 +78,20 @@ internal static class ParamsArrays
         var expanded = SyntaxFactory.ParseExpression(text.WithChanges(changes).ToString(new TextSpan(call.SpanStart, call.Span.Length - removed.Sum(s => s.Length))));
         return SymbolEqualityComparer.Default.Equals(Speculation.SymbolAfterReplacing(model, call, expanded, cancellationToken), method) ? changes : null;
     }
+
+    /// <summary>
+    /// Whether the array goes to a <c>params object[]</c>, <c>params Array[]</c> or jagged <c>params T[][]</c> parameter, which Sonar's
+    /// S3878 accepts (stylebro_params_arrays = except_object_and_jagged). Call it on an array <see cref="GetChanges"/> fixes.
+    /// </summary>
+    public static bool GoesToObjectOrJagged(ExpressionSyntax array, SemanticModel model, CancellationToken cancellationToken) =>
+        array.Parent?.Parent?.Parent is ExpressionSyntax call
+        && model.GetSymbolInfo(call, cancellationToken).Symbol is IMethodSymbol { Parameters.Length: > 0 } method
+        && method.Parameters[method.Parameters.Length - 1].Type is IArrayTypeSymbol { ElementType: var element }
+        && (element.SpecialType is SpecialType.System_Object or SpecialType.System_Array || element is IArrayTypeSymbol);
+
+    /// <summary>Whether stylebro_params_arrays is except_object_and_jagged (default: all).</summary>
+    public static bool ExceptObjectAndJagged(AnalyzerConfigOptions options) =>
+        options.TryGetValue("stylebro_params_arrays", out var value) && value.Trim().Equals("except_object_and_jagged", StringComparison.OrdinalIgnoreCase);
 
     // A collection expression has no type of its own; an array's own type must be the parameter's (no covariance).
     private static ITypeSymbol? GetType(TypeInfo info, ExpressionSyntax array) =>

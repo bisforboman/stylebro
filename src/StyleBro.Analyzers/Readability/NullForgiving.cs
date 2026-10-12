@@ -17,6 +17,13 @@ namespace StyleBro.Analyzers.Readability;
 internal static class NullForgiving
 {
     /// <summary>
+    /// A '!' on a value whose declaration has no nullable annotation (a property, field or method return declared under
+    /// '#nullable disable' or in an unannotated library, or a 'var' local initialized from one) stays (default false), like
+    /// Sonar's S8969: the compiler treats such a value as not null without knowing it.
+    /// </summary>
+    public const string AllowOnUnannotatedKey = "stylebro_allow_null_forgiving_on_unannotated";
+
+    /// <summary>
     /// The edit that removes the '!' of <paramref name="node"/>, or null when it isn't redundant or is skipped: 'null!' and
     /// 'default!' (intentional), nullable analysis off or changed by '#nullable' from the project's setting, an operand of a
     /// type parameter, an array or a type with type arguments other than plain value types (the '!' also hides nested
@@ -52,6 +59,8 @@ internal static class NullForgiving
         // state the original had there.
         return IsFlat(model.GetTypeInfo(operand, cancellationToken).Type)
             && !ReturnsMaybeNull(operand, model, cancellationToken)
+            && !(options.TryGetValue(AllowOnUnannotatedKey, out var allow) && bool.TryParse(allow.Trim(), out var allowed) && allowed
+                && IsUnannotated(operand, model, cancellationToken))
             && StateWithout(node, model, cancellationToken) == NullableFlowState.NotNull
             ? new TextChange(node.OperatorToken.Span, string.Empty)
             : null;
@@ -63,6 +72,20 @@ internal static class NullForgiving
         operand is InvocationExpressionSyntax
             && model.GetSymbolInfo(operand, cancellationToken).Symbol is IMethodSymbol { ReturnNullableAnnotation: NullableAnnotation.Annotated } method
             && method.GetReturnTypeAttributes().Length == 0;
+
+    // Sonar's S8969 'oblivious' check, exactly: the operand's symbol has no annotation of its own; a 'var' local is judged by its
+    // initializer (explicitly typed locals and parameters aren't checked).
+    private static bool IsUnannotated(ExpressionSyntax operand, SemanticModel model, CancellationToken cancellationToken) =>
+        model.GetSymbolInfo(operand, cancellationToken).Symbol switch
+        {
+            IPropertySymbol property => property.NullableAnnotation == NullableAnnotation.None,
+            IFieldSymbol field => field.NullableAnnotation == NullableAnnotation.None,
+            IMethodSymbol method => method.ReturnNullableAnnotation == NullableAnnotation.None,
+            ILocalSymbol local => local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(cancellationToken)
+                is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: true }, Initializer.Value: { } initializer }
+                && IsUnannotated(initializer, model, cancellationToken),
+            _ => false,
+        };
 
     private static NullableFlowState StateWithout(PostfixUnaryExpressionSyntax node, SemanticModel model, CancellationToken cancellationToken)
     {
