@@ -31,7 +31,7 @@ public sealed partial class MigrationTests
         Assert.Equal(new[] { "KubernetesClient", "KubernetesClient.Tests" }, groups[1]);
         Assert.Equal(2, groups.Count);
         Assert.Single(FormatCommand.Separate(new[] { "KubernetesClient.Tests", "Other" }, Refs, p => compile[p]));
-        Assert.Equal(new[] { "KubernetesClient", "KubernetesClient.Aot" }, FormatCommand.SharingProjects(compile.Select(c => ($@"C:\r\{c.Key}.csproj", c.Value))));
+        Assert.Equal(new[] { "KubernetesClient", "KubernetesClient.Aot" }, FormatCommand.SharingProjects(compile.Select(c => (Path.Combine(root, c.Key + ".csproj"), c.Value))));
     }
 
     [Fact]
