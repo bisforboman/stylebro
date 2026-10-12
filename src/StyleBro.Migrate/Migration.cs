@@ -521,30 +521,59 @@ internal static class Migration
     public static string UnformattedLine(IEnumerable<string> folders) => UnformattedPrefix + string.Join(", ", folders) + UnformattedSuffix;
 
     /// <summary>
-    /// The folders (relative, with a trailing '/', as 'dotnet format --exclude' needs) the stylebro-migrate block in the root
-    /// .editorconfig names as without StyleCop: the migration changed no rule there, so 'format' doesn't touch them either
-    /// (its whitespace pass ignores rule severities: Soulseek.NET's examples were reformatted).
+    /// The folders (relative to <paramref name="root"/>, with a trailing '/', as 'dotnet format --exclude' needs) the
+    /// stylebro-migrate block names as without StyleCop: the migration changed no rule there, so 'format' doesn't touch them
+    /// either (its whitespace pass ignores rule severities: Soulseek.NET's examples were reformatted). The block is the one
+    /// in the nearest .editorconfig at or above the root (<see cref="BlockFolder"/>), and its paths are relative to that
+    /// folder: Steeltoe's solution is in src/, the block in the repository root names src/Tools/src.
     /// </summary>
     public static List<string> UnformattedFolders(string root)
     {
-        var path = Path.Combine(root, ".editorconfig");
+        var folder = BlockFolder(root);
+        var path = Path.Combine(folder, ".editorconfig");
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var line = block.Value.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.StartsWith(UnformattedPrefix, StringComparison.Ordinal));
         var end = line?.IndexOf(';', UnformattedPrefix.Length) ?? -1;
         return line is null
             ? []
             : line.Substring(UnformattedPrefix.Length, (end < 0 ? line.Length : end) - UnformattedPrefix.Length).Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Select(f => Path.GetRelativePath(root, Path.Combine(folder, f)).Replace('\\', '/'))
+                .Where(f => f != "." && !f.StartsWith("../", StringComparison.Ordinal) && f != "..") // outside the root: nothing there is formatted
                 .Select(f => f.TrimEnd('/') + "/")
                 .ToList();
     }
 
-    /// <summary>The StyleCop.Analyzers version the stylebro-migrate block in the root .editorconfig records, or null.</summary>
+    /// <summary>
+    /// The folder whose .editorconfig holds the stylebro-migrate block: the nearest at or above <paramref name="root"/>, up to
+    /// the repository's top (the folder with .git); <paramref name="root"/> itself when there is none.
+    /// </summary>
+    public static string BlockFolder(string root)
+    {
+        root = Path.GetFullPath(root);
+        for (var folder = new DirectoryInfo(root); folder is not null; folder = folder.Parent)
+        {
+            var path = Path.Combine(folder.FullName, ".editorconfig");
+            if (File.Exists(path) && File.ReadAllText(path).Contains(BeginMarker, StringComparison.Ordinal))
+            {
+                return folder.FullName;
+            }
+
+            if (Directory.Exists(Path.Combine(folder.FullName, ".git")) || File.Exists(Path.Combine(folder.FullName, ".git")))
+            {
+                break;
+            }
+        }
+
+        return root;
+    }
+
+    /// <summary>The StyleCop.Analyzers version the stylebro-migrate block (<see cref="BlockFolder"/>) records, or null.</summary>
     public static string? RecordedVersion(string root)
     {
-        var path = Path.Combine(root, ".editorconfig");
+        var path = Path.Combine(BlockFolder(root), ".editorconfig");
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var version = Regex.Match(block.Value, "^" + Regex.Escape(VersionPrefix) + @"(\S+)", RegexOptions.Multiline);
-        return version.Success ? version.Groups[1].Value : null;
+        return version.Success && !version.Groups[1].Value.Contains("$(", StringComparison.Ordinal) ? version.Groups[1].Value : null; // an earlier run recorded the property itself
     }
 
     /// <summary>The block that goes into an .editorconfig.</summary>

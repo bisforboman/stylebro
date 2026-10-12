@@ -100,7 +100,7 @@ without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the
 ## Baseline
 
 ```
-stylebro-migrate baseline [path] [--project MySolution.sln]
+stylebro-migrate baseline [path or solution] [--project MySolution.sln]
 ```
 
 Writes `stylebro.baseline` with every violation `dotnet format` would fix today. The StyleBro.Analyzers package then

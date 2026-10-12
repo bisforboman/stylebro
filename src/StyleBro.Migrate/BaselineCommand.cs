@@ -28,25 +28,26 @@ internal static class BaselineCommand
 
     public static int Run(string[] args)
     {
-        var projectIndex = Array.IndexOf(args, "--project");
-        var project = projectIndex >= 0 && projectIndex + 1 < args.Length ? args[projectIndex + 1] : null;
-        var root = Path.GetFullPath(args.Where((a, i) => !a.StartsWith("--", StringComparison.Ordinal) && (projectIndex < 0 || i != projectIndex + 1)).FirstOrDefault() ?? ".");
+        var (root, project) = Arguments(args, Environment.CurrentDirectory);
         if (!Directory.Exists(root))
         {
-            Console.Error.WriteLine($"Not a directory: {root}");
+            Console.Error.WriteLine($"Not found: {root}");
             return 1;
         }
 
-        project ??= FindWorkspace(root);
         if (project is null)
         {
-            Console.Error.WriteLine(NoWorkspace(root, "--project <file>"));
-            return 1;
-        }
+            project = FindWorkspace(root);
+            if (project is null)
+            {
+                Console.Error.WriteLine(NoWorkspace(root, "--project <file>"));
+                return 1;
+            }
 
-        if (IsBelow(project))
-        {
-            Console.WriteLine(BelowNote(project));
+            if (PickedNote(root, project) is { } note)
+            {
+                Console.WriteLine(note);
+            }
         }
 
         // 'dotnet format' can't load a Traversal project: a solution with its projects instead.
@@ -97,6 +98,27 @@ internal static class BaselineCommand
                 Directory.Delete(reportDir, recursive: true);
             }
         }
+    }
+
+    /// <summary>
+    /// The folder the baseline goes into and the solution or project ('--project', relative to it; null: pick one). Like
+    /// format, a solution or project may come first ('baseline src/SourceGit.csproj'): the baseline then goes into
+    /// <paramref name="current"/> when the file is below it (the build looks for it above every project), else next to it.
+    /// </summary>
+    public static (string Root, string? Project) Arguments(string[] args, string current)
+    {
+        var projectIndex = Array.IndexOf(args, "--project");
+        var project = projectIndex >= 0 && projectIndex + 1 < args.Length ? args[projectIndex + 1] : null;
+        var root = Path.GetFullPath(Path.Combine(current, args.Where((a, i) => !a.StartsWith("--", StringComparison.Ordinal) && (projectIndex < 0 || i != projectIndex + 1)).FirstOrDefault() ?? "."));
+        if (project is not null || !File.Exists(root))
+        {
+            return (root, project);
+        }
+
+        var relative = Path.GetRelativePath(current, root);
+        return relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative)
+            ? (Path.GetDirectoryName(root)!, Path.GetFileName(root))
+            : (Path.GetFullPath(current), relative);
     }
 
     /// <summary>
@@ -166,12 +188,13 @@ internal static class BaselineCommand
     /// the .slnx of the same name is that solution, not another), else its projects, else a Traversal project
     /// (Microsoft.Build.Traversal, kubernetes-client's root build), else the solutions one folder down (tfplan2md keeps its
     /// only one in src/; <see cref="IsBelow"/>). Several are never picked from silently: eShop's eShop.slnx next to
-    /// eShop.Web.slnf (the slnx needs MAUI workloads), Ocelot's two .slnx files.
+    /// eShop.Web.slnf (the slnx needs MAUI workloads), Ocelot's two .slnx files; a solution with several filters of it is
+    /// that solution (<see cref="Solutions"/>).
     /// </summary>
     public static List<string> WorkspaceCandidates(string root)
     {
         var files = Directory.EnumerateFiles(root).Select(Path.GetFileName).OfType<string>().ToList();
-        var here = Solutions(files);
+        var here = Solutions(root, files);
         if (here.Count == 0)
         {
             here = files.Where(f => Is(f, ".csproj")).Order(StringComparer.OrdinalIgnoreCase).ToList();
@@ -186,7 +209,7 @@ internal static class BaselineCommand
             ? here
             : Directory.EnumerateDirectories(root)
                 .Where(d => !Path.GetFileName(d).StartsWith('.') && !SkippedFolders.Contains(Path.GetFileName(d), StringComparer.OrdinalIgnoreCase))
-                .SelectMany(d => Solutions(Directory.EnumerateFiles(d).Select(Path.GetFileName).OfType<string>().ToList()).Select(f => Path.Combine(Path.GetFileName(d), f)))
+                .SelectMany(d => Solutions(d, Directory.EnumerateFiles(d).Select(Path.GetFileName).OfType<string>().ToList()).Select(f => Path.Combine(Path.GetFileName(d), f)))
                 .Order(StringComparer.OrdinalIgnoreCase)
                 .ToList();
     }
@@ -200,10 +223,49 @@ internal static class BaselineCommand
     // Not Directory.GetFiles(root, "*.sln"): on Windows a three-letter extension pattern also matches .slnx and .slnf.
     private static bool Is(string file, string extension) => string.Equals(Path.GetExtension(file), extension, StringComparison.OrdinalIgnoreCase);
 
-    private static List<string> Solutions(List<string> files) =>
-        files.Where(f => Is(f, ".slnx") || Is(f, ".slnf") || (Is(f, ".sln") && !files.Contains(Path.ChangeExtension(f, ".slnx"), StringComparer.OrdinalIgnoreCase)))
+    /// <summary>
+    /// The solutions in a folder. One solution with several filters of it is that solution (Steeltoe: Steeltoe.All.slnx and
+    /// seven .slnf parts of it); a single filter next to it stays a choice (eShop.Web.slnf leaves out the projects that need
+    /// MAUI workloads).
+    /// </summary>
+    private static List<string> Solutions(string folder, List<string> files)
+    {
+        var solutions = files.Where(f => Is(f, ".slnx") || Is(f, ".slnf") || (Is(f, ".sln") && !files.Contains(Path.ChangeExtension(f, ".slnx"), StringComparer.OrdinalIgnoreCase)))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
+        var filters = solutions.Where(f => Is(f, ".slnf")).ToList();
+        return solutions.Except(filters).ToList() is [var only] && filters.Count > 1 && filters.All(f => IsFilterOf(Path.Combine(folder, f), Path.Combine(folder, only)))
+            ? [only]
+            : solutions;
+    }
+
+    /// <summary>Whether a solution filter filters the solution (a .sln and .slnx of the same name are one solution).</summary>
+    private static bool IsFilterOf(string filter, string solution) =>
+        FormatCommand.SolutionFilterError(filter) is null
+            && string.Equals(Path.ChangeExtension(FormatCommand.ReadSolutionFilter(filter).Solution, null), Path.ChangeExtension(Path.GetFullPath(solution), null), StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// What to say about a workspace <see cref="FindWorkspace"/> picked: one folder down (<see cref="BelowNote"/>), and the
+    /// solution filters of it next to it, which a run can name instead; null when there's nothing to say.
+    /// </summary>
+    public static string? PickedNote(string root, string workspace)
+    {
+        var folder = Path.GetDirectoryName(workspace) ?? string.Empty;
+        var filters = Directory.EnumerateFiles(Path.Combine(root, folder)).Where(f => Is(f, ".slnf") && IsFilterOf(f, Path.Combine(root, workspace)))
+            .Select(f => Path.Combine(folder, Path.GetFileName(f)).Replace('\\', '/'))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var filtersText = filters.Count == 0
+            ? null
+            : $"its solution filters ({string.Join(", ", filters.Take(5))}{(filters.Count > 5 ? $" and {filters.Count - 5} more" : string.Empty)}) are parts of it: name one to run on only its projects, e.g. 'stylebro-migrate format {filters[0]}'.";
+        return (IsBelow(workspace), filtersText) switch
+        {
+            (true, null) => BelowNote(workspace),
+            (true, { } text) => BelowNote(workspace).TrimEnd('.') + "; " + text,
+            (false, { } text) => $"Using {workspace.Replace('\\', '/')}; {text}",
+            _ => null,
+        };
+    }
 
     /// <summary>Why no solution or project was picked in <paramref name="root"/>, and how to name one (<paramref name="how"/>, e.g. "--project &lt;file&gt;").</summary>
     public static string NoWorkspace(string root, string how)

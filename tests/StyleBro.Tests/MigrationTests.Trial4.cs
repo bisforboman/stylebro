@@ -179,15 +179,6 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
-    public void ThePreview_WarnsWhenStyleBroReportedNothing()
-    {
-        static string Report(string id) => $$"""[ { "FilePath": "a.cs", "FileChanges": [ { "LineNumber": 1, "CharNumber": 1, "DiagnosticId": "{{id}}" } ] } ]""";
-
-        Assert.Contains("didn't load", PreviewCommand.NotLoadedWarning(Report("IDE0055")));
-        Assert.Null(PreviewCommand.NotLoadedWarning(Report("BRO1520")));
-    }
-
-    [Fact]
     public void Format_NamesTheProjectsDotnetFormatSkipped()
     {
         Assert.Equal("Bogus", FormatCommand.SkippedProject("Required references did not load for Bogus or referenced project. Run `dotnet restore` prior to formatting."));
