@@ -261,6 +261,11 @@ A few settings work a little differently:
   and modifiers they could have been combined with (not `var`, not fields with attributes). Mostly one by one: the rule
   stays on; mostly combined or mixed: it's turned off, so `format` doesn't split them. Locals and fields are counted apart:
   a repository may combine locals in hot loops and never fields.
+- **Summary wording** ([BRO1604](rules/BRO1604.md) for properties, [BRO1606](rules/BRO1606.md) for constructors) counts
+  summaries that start the StyleCop way (`Gets ...`, `Gets or sets ...`; `Initializes a new instance of ...`) against
+  ones in their own words (`The samples, ...`, `Whether ...`; `Opens a file ...`). Mostly the StyleCop way: the rule
+  stays on; mostly their own words or mixed: it's turned off, so `format` doesn't reword public documentation. A summary
+  that starts with an element (`<see cref="..."/>`) isn't counted.
 - **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,
   `.csharpierrc.yaml` or `.csharpierrc.yml` at the root, a `csharpier` tool in `.config/dotnet-tools.json` or
   `dotnet-tools.json`, or a `CSharpier.MsBuild` package reference), the two formatters would undo each other's layout
