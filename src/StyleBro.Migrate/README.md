@@ -53,7 +53,7 @@ Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()
 Both the migration and `init` also read a SonarQube/SonarAnalyzer setup: a `SonarAnalyzer.CSharp` reference (its
 default rules), Sonar rule severities in rulesets (SonarLint's and the scanner's too), global configs and
 `.editorconfig`, or a quality profile exported from the server (`--sonar-profile profile.xml`). The Sonar rules that
-are on turn on the StyleBro and .NET rules that fix what they report (S2325 -> CA1822, S1659 -> BRO1142, S4136 ->
+are on turn on the StyleBro and .NET rules that fix what they report (S927 -> BRO1313, S1659 -> BRO1142, S4136 ->
 overloads kept together, ...), and the report says which Sonar rules stay Sonar's. Sonar keeps reporting its own ids.
 Details: [docs/migrating.md](https://bisforboman.github.io/stylebro/migrating/#coming-from-sonarqube).
 

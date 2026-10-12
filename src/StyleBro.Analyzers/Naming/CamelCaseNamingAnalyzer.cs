@@ -18,6 +18,14 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
 {
     public const string NewNameKey = "NewName";
 
+    /// <summary>
+    /// BRO1313's scope: <c>all</c> (default) or <c>non_generic_methods</c>, Sonar's S927: methods only, and not where the
+    /// base's parameter type is a type parameter the member fills in (MediatR's <c>Handle(TNotification notification)</c>
+    /// implemented as <c>Handle(OrderPlaced @event)</c>) or a generic type whose type arguments differ in kind
+    /// (<c>IEnumerable&lt;T&gt;</c> against <c>IEnumerable&lt;int&gt;</c>). stylebro-migrate writes it for S927.
+    /// </summary>
+    public const string BaseNameScopeKey = "stylebro_match_base_parameter_names";
+
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Descriptors.VariableCasing, Descriptors.ParameterCasing, Descriptors.HungarianNotation, Descriptors.ParameterMatchesBase);
@@ -221,6 +229,15 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             return false;
         }
 
+        if (context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree).TryGetValue(BaseNameScopeKey, out var scope)
+            && scope.Trim() == "non_generic_methods"
+            && (member is not IMethodSymbol
+                || GetBaseMembers(member).Any(b => GetParameters(b.OriginalDefinition) is { } bases && parameter.Ordinal < bases.Length
+                    && FillsInTypeParameter(parameter.Type, bases[parameter.Ordinal].Type))))
+        {
+            return false;
+        }
+
         var hungarian = GetHungarian(context);
         Func<string, string?> getNewName = name => HungarianNames.GetVariableName(name, hungarian);
         var casingOn = Severities.IsOn(context.Compilation.Options, node.SyntaxTree, DiagnosticIds.ParameterCasing, context.CancellationToken);
@@ -244,6 +261,12 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             newName));
         return true;
     }
+
+    /// <summary>Sonar's S927 exceptions: the base's type is a type parameter and ours isn't, or their type arguments differ in kind.</summary>
+    private static bool FillsInTypeParameter(ITypeSymbol actual, ITypeSymbol expected) =>
+        (expected.TypeKind == TypeKind.TypeParameter && actual.TypeKind != TypeKind.TypeParameter)
+        || (actual is INamedTypeSymbol a && expected is INamedTypeSymbol e && a.TypeArguments.Length == e.TypeArguments.Length
+            && a.TypeArguments.Zip(e.TypeArguments, (x, y) => x.TypeKind != y.TypeKind).Any(different => different));
 
     // BRO1310 (null when off): the Hungarian prefix goes in the same rename ('_iCount' -> 'count'), so one run converges.
     private static HungarianNames? GetHungarian(SyntaxNodeAnalysisContext context) =>

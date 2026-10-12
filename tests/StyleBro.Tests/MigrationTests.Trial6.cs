@@ -97,7 +97,8 @@ public sealed partial class MigrationTests
 
         Assert.DoesNotContain("CA1852", output.Substring(output.IndexOf("# BEGIN", StringComparison.Ordinal)));
         Assert.DoesNotContain("S3260 ->", output);
-        Assert.Contains("  Not covered (no safe fix):\n    S3260: CA1852's fix also seals private nested classes with protected members", output);
+        Assert.Contains("  Not covered (no safe fix):\n", output);
+        Assert.Contains("\n    S3260: CA1852's fix also seals private nested classes with protected members", output);
         Assert.DoesNotContain(SonarSetup.Mapping, m => m.Sonar == "S3260");
     }
 

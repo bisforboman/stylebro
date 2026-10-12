@@ -317,34 +317,34 @@ public sealed partial class MigrationTests
     public void SonarSuppressions_AreCarriedOver()
     {
         var replacements = Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>());
-        Assert.Contains("CA1822", replacements["S2325"]);
+        Assert.Contains("BRO1313", replacements["S927"]);
 
         var code = """
             using System.Diagnostics.CodeAnalysis;
             class C
             {
-            #pragma warning disable S1481 // kept on purpose
-                [SuppressMessage("Performance", "S2325:Methods should be static", Justification = "API")]
+            #pragma warning disable S1659 // kept on purpose
+                [SuppressMessage("Naming", "S927:Parameter names should match base declaration", Justification = "API")]
                 int M() { var unused = 1; return 1; }
-            #pragma warning restore S1481
+            #pragma warning restore S1659
             }
             """;
         var (text, added) = Suppressions.Rewrite(code, replacements);
 
         Assert.Equal(3, added); // the pragma pair's disable, and the attribute
-        Assert.Contains("#pragma warning disable S1481, IDE0059 // kept on purpose", text);
-        Assert.Contains("#pragma warning restore S1481, IDE0059", text);
-        Assert.Contains("[SuppressMessage(\"Style\", \"CA1822\", Justification = \"API\")]", text);
+        Assert.Contains("#pragma warning disable S1659, BRO1142 // kept on purpose", text);
+        Assert.Contains("#pragma warning restore S1659, BRO1142", text);
+        Assert.Contains("[SuppressMessage(\"StyleBro\", \"BRO1313\", Justification = \"API\")]", text);
         Assert.Equal(0, Suppressions.Rewrite(text, replacements).Added); // a second run adds nothing
 
-        var (props, noWarn) = Suppressions.RewriteNoWarn("<Project><PropertyGroup><NoWarn>$(NoWarn);S1481</NoWarn></PropertyGroup></Project>", replacements);
+        var (props, noWarn) = Suppressions.RewriteNoWarn("<Project><PropertyGroup><NoWarn>$(NoWarn);S1659</NoWarn></PropertyGroup></Project>", replacements);
         Assert.Equal(1, noWarn);
-        Assert.Contains("<NoWarn>$(NoWarn);S1481;IDE0059</NoWarn>", props);
+        Assert.Contains("<NoWarn>$(NoWarn);S1659;BRO1142</NoWarn>", props);
 
         // The migration carries them over with --write.
         Write("C.cs", code);
         Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write" })));
-        Assert.Contains("S1481, IDE0059", File.ReadAllText(Path.Combine(root, "C.cs")));
+        Assert.Contains("S1659, BRO1142", File.ReadAllText(Path.Combine(root, "C.cs")));
     }
 
     private static string CaptureError(Action action)

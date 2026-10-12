@@ -276,6 +276,25 @@ A few settings work a little differently:
   (a rule that added blank lines in some places would make your code look mixed, and the setting would flip). To have a
   convention counted again, delete its line from the block and run `init` again; to count everything again, delete the
   block. Conventions the first run left at StyleBro's default (no line) are counted again each time.
+- **Private constants and static readonly fields** ([BRO1306](rules/BRO1306.md)) count three forms: `PascalCase`,
+  `camelCase` and `_camelCase`. A clear one is written as `stylebro_private_static_field_naming` (PascalCase is the
+  default and needs no line); mixed turns BRO1306 off, so `format` doesn't rename them (Ical.Net: 26 PascalCase, 8
+  camelCase, 50 `_camelCase`; BRO1306 renamed them in 28 files). With it off, public and internal fields aren't checked
+  either. A `dotnet_naming_rule` for constants or static readonly fields decides instead.
+- **Usings inside a namespace** ([BRO1126](rules/BRO1126.md)) count fully qualified ones (`using Company.App.Common;`)
+  and ones relative to an enclosing namespace (`using Common;` inside `namespace Company.App.Orders`). Mostly qualified:
+  the rule stays on; mostly relative or mixed: it's turned off (Fitnet: 91 qualified, 92 relative). A name is relative
+  when an enclosing namespace has a namespace your code declares with its first part; a namespace from a package doesn't
+  count.
+- **File headers with empty `//` lines**: when your `file_header_template` starts or ends with a line break (IDE0073
+  writes an empty `//` line there), or most files' headers start or end with an empty `//` line, `init` turns
+  [BRO1120](rules/BRO1120.md) off: it would remove those lines, and every new file from the template would bring them
+  back (Ical.Net: 222 of 223 files).
+- **Charset**: when your `.editorconfig` sets `charset` (`utf-8` or `utf-8-bom`) but the C# files don't clearly follow it
+  (BOM or not, the same 75 %), nothing ever enforced it, and `format` would add or strip the BOM in every file. Like a
+  line ending the files contradict, `init` writes the files' charset for C# files (`charset = unset` when they're mixed:
+  each file keeps its own), and the report says how to switch (remove the line and run `stylebro-migrate format`).
+  Ical.Net: `charset = utf-8` with 108 of 223 files starting with a BOM, all 108 stripped.
 - **Using order** counts files with 2 or more usings: sorted with System first, sorted without, or not sorted. `dotnet
   format` sorts usings whenever `dotnet_sort_system_directives_first` is set (to any value), so the preset doesn't set
   it: `init` writes it when your usings are sorted (or there are too few files to tell), and only a comment when they
@@ -312,6 +331,10 @@ A few settings work a little differently:
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
 | `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
 | Type names | files with only keywords (`int`) or framework names (`Int32`) | IDE0049 | `dotnet_diagnostic.IDE0049.severity` |
+| Private constants and static readonly fields | `PascalCase`, `camelCase` or `_camelCase` | [BRO1306](rules/BRO1306.md) | `stylebro_private_static_field_naming` |
+| Usings inside a namespace | fully qualified or relative to an enclosing namespace | [BRO1126](rules/BRO1126.md) | `dotnet_diagnostic.BRO1126.severity` |
+| File headers | headers with or without an empty `//` line at the top or bottom (or a `file_header_template` with one) | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
+| Charset | files with or without a BOM, when your `charset` doesn't match them | SDK formatter | `charset` |
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 
@@ -366,7 +389,7 @@ StyleCop enforced them.
 
 With SonarQube or SonarCloud (a `SonarAnalyzer.CSharp` reference, Sonar rule severities in rulesets or configs, or a
 quality profile you export and pass with `--sonar-profile profile.xml`), `init` also turns on the StyleBro and .NET rules
-that fix what your Sonar rules report (S2325 -> CA1822, S4136 -> overloads kept together, ...) and prints which:
+that fix what your Sonar rules report (S927 -> BRO1313, S4136 -> overloads kept together, ...) and prints which:
 [Coming from SonarQube](migrating.md#coming-from-sonarqube). The same works for `stylebro-migrate --write` in path B.
 
 ### 3. Run stylebro-migrate format

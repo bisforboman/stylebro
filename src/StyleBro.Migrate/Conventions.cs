@@ -55,6 +55,12 @@ internal static class Conventions
     /// </summary>
     public const string EndOfLineKey = "end_of_line";
 
+    /// <summary>Files with a '//' header: [without, with] an empty '//' line at its top or bottom (<see cref="EmptyHeaderLines"/>).</summary>
+    public const string HeaderKey = "file header";
+
+    /// <summary>The C# files' charset (unit: files): [no BOM, BOM] (<see cref="ContradictedCharset"/>).</summary>
+    public const string CharsetKey = "charset";
+
     /// <summary>
     /// BRO1307's severity: private static fields with the .NET runtime's 's_' (and 't_' for thread-static) prefix, or without
     /// (owner's decision 2026-10-12: "Detect both"; actions/runner got ~541 's_' statics renamed). There is no switch for static
@@ -106,6 +112,7 @@ internal static class Conventions
         new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
         new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
+        new(RelativeUsingsKey, "usings inside a namespace", "warning", ("warning", "fully qualified"), ("none", "relative ('using Common;')"), Off(DiagnosticIds.QualifiedUsing)) { Unit = "using" },
         new(TypeAliasKey, "built-in type names", "warning", ("warning", "only keywords ('int')"), ("none", "framework names ('Int32')"), Off("IDE0049"), "dotnet_style_predefined_type_for_locals_parameters_members", "dotnet_style_predefined_type_for_member_access") { Unit = "file" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
     };
@@ -188,6 +195,21 @@ internal static class Conventions
     /// writes the OS's ending, which is what such a checkout has anyway.
     /// </summary>
     private const string ConvertedKey = "end_of_line (converted by git)";
+
+    /// <summary>
+    /// The casing of private constants and private static readonly fields (BRO1306), three forms: [PascalCase, camelCase,
+    /// _camelCase] (owner's policy, trial 11: Ical.Net had 65 camelCase or '_camelCase' names and 26 PascalCase ones, and
+    /// BRO1306 renamed them in 28 files). A clear form is written as <see cref="StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey"/>
+    /// (PascalCase is BRO1306's default); mixed turns BRO1306 off.
+    /// </summary>
+    public const string StaticCasingKey = StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey;
+
+    /// <summary>
+    /// BRO1126's severity: usings inside a namespace that name their namespace fully ('using Company.App.Common;'), or
+    /// relative to an enclosing namespace ('using Common;'; owner's policy, trial 11: Fitnet had 97 such usings, and BRO1126
+    /// expanded every one).
+    /// </summary>
+    public const string RelativeUsingsKey = "dotnet_diagnostic." + DiagnosticIds.QualifiedUsing + ".severity";
 
     /// <summary>
     /// Files with a list of 2 or more usings: [sorted with System first only, sorted without only, sorted both ways
@@ -291,6 +313,7 @@ internal static class Conventions
                     _ = converted.TryGetValue(Path.GetFullPath(file), out var byAttribute) ? own[ConvertedKey][byAttribute ? 1 : 0]++ : own[EndOfLineKey][ending]++;
                 }
 
+                own[CharsetKey][HasBom(file) ? 1 : 0]++;
                 return (File: file, Tree: tree, Counts: own);
             })
             .Where(p => p.Tree is not null)
@@ -313,7 +336,48 @@ internal static class Conventions
         }
 
         CountInheritDoc(trees, counts, settings, documented);
+        CountRelativeUsings(trees, counts);
         return counts;
+    }
+
+    /// <summary>
+    /// BRO1126's places: usings inside a namespace (not global, not 'global::' or alias-qualified), relative when an
+    /// enclosing namespace has a namespace the code declares named like their first part ('using Common;' inside
+    /// 'namespace App.Contracts' with an 'App.Common'), else fully qualified. Across files: the declared namespaces are
+    /// the repository's (ponytail: syntax only, so a name relative to a package's namespace counts as qualified).
+    /// </summary>
+    public static void CountRelativeUsings(IReadOnlyList<SyntaxTree> trees, Dictionary<string, int[]> counts)
+    {
+        var declared = new HashSet<string>(StringComparer.Ordinal);
+        var usings = new List<(string[] Namespace, string First)>();
+        foreach (var tree in trees)
+        {
+            foreach (var ns in tree.GetRoot().DescendantNodes(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax).OfType<BaseNamespaceDeclarationSyntax>())
+            {
+                var parts = ns.AncestorsAndSelf().OfType<BaseNamespaceDeclarationSyntax>().Reverse()
+                    .SelectMany(n => n.Name.ToString().Replace(" ", string.Empty).Split('.'))
+                    .ToArray();
+                for (var i = 1; i <= parts.Length; i++)
+                {
+                    declared.Add(string.Join(".", parts.Take(i)));
+                }
+
+                foreach (var directive in ns.Usings.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)))
+                {
+                    if (directive.NamespaceOrType is NameSyntax name and not AliasQualifiedNameSyntax
+                        && name.DescendantNodesAndSelf().OfType<SimpleNameSyntax>().FirstOrDefault() is { } first)
+                    {
+                        usings.Add((parts, first.Identifier.ValueText));
+                    }
+                }
+            }
+        }
+
+        foreach (var (parts, first) in usings)
+        {
+            var relative = Enumerable.Range(1, parts.Length).Any(i => declared.Contains(string.Join(".", parts.Take(i)) + "." + first));
+            counts[RelativeUsingsKey][relative ? 1 : 0]++;
+        }
     }
 
     /// <summary>
@@ -419,6 +483,9 @@ internal static class Conventions
     {
         var counts = All.ToDictionary(c => c.Key, _ => new int[2], StringComparer.Ordinal);
         counts[UsingsKey] = new int[4];
+        counts[StaticCasingKey] = new int[3];
+        counts[CharsetKey] = new int[2];
+        counts[HeaderKey] = new int[2];
         counts[ConvertedKey] = new int[2];
         return counts;
     }
@@ -561,6 +628,75 @@ internal static class Conventions
             : (files, $"Line endings: your .editorconfig says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files and 'format' leaves the endings alone. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
     }
 
+    /// <summary>
+    /// The note and the charset line when the repository's own charset (utf-8 or utf-8-bom for C# files) doesn't have
+    /// <see cref="Winner"/>'s share of the C# files (BOM or not), or null. Like an end_of_line the files contradict (owner's
+    /// decision 2026-10-12, "Keep endings out of it, warn"): nothing enforced it, so the files decide. Ical.Net says
+    /// 'charset = utf-8' with 108 of 223 files starting with a BOM, and 'format' stripped all 108. Files clearly of the other
+    /// form get their charset; mixed files get 'charset = unset', which 'dotnet format' leaves each file's BOM alone with (probed;
+    /// 'utf-8' stripped the BOM from files it didn't otherwise change).
+    /// </summary>
+    public static (string Line, string Note)? ContradictedCharset(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own)
+    {
+        if (!own.TryGetValue(CharsetKey, out var setting) || !counts.TryGetValue(CharsetKey, out var files) || files.Sum() < MinimumAgreeing)
+        {
+            return null;
+        }
+
+        var value = setting.Split(':')[0].Trim().ToLowerInvariant();
+        var keyForm = value switch { "utf-8" => 0, "utf-8-bom" => 1, _ => -1 };
+        var winner = Winner(files[0], files[1]);
+        if (keyForm < 0 || winner == keyForm)
+        {
+            return null;
+        }
+
+        var found = $"{files[1]} of {Plural(files.Sum(), "C# file")} start with a BOM";
+        var line = winner < 0 ? $"{CharsetKey} = unset" : $"{CharsetKey} = {(winner == 1 ? "utf-8-bom" : "utf-8")}";
+        var keeps = winner < 0 ? "'format' leaves each file's BOM (or its absence) as it is" : "'format' leaves the files alone";
+        return (line, $"Charset: your .editorconfig says charset = {value}, but {found}: nothing enforced it, so {line} is written for C# files and {keeps}. To have {value} everywhere: remove that line and run 'stylebro-migrate format' (it rewrites the files).");
+    }
+
+    /// <summary>
+    /// The lines that turn BRO1120 off, or null, when the repository's file headers keep empty '//' lines: its
+    /// file_header_template starts or ends with a line break (IDE0073 writes '//' lines there), or most files' headers have
+    /// them (owner's policy, trial 11: Ical.Net's template is '\nCopyright ...\nLicensed under the MIT license.\n', and BRO1120
+    /// removed both empty lines in 222 of 223 files, which every new file from the template brings back). A BRO1120
+    /// severity the repository sets stays.
+    /// </summary>
+    public static List<string>? EmptyHeaderLines(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own)
+    {
+        var rule = DiagnosticIds.EmptyComment;
+        if (own.ContainsKey($"dotnet_diagnostic.{rule}.severity"))
+        {
+            return null;
+        }
+
+        string why;
+        if (own.TryGetValue("file_header_template", out var template) && (template.StartsWith(@"\n", StringComparison.Ordinal) || template.EndsWith(@"\n", StringComparison.Ordinal)))
+        {
+            why = "your file_header_template starts or ends with an empty line, which IDE0073 writes as an empty '//' line";
+        }
+        else if (counts.TryGetValue(HeaderKey, out var headers) && headers.Sum() >= MinimumAgreeing && Winner(headers[0], headers[1]) == 1)
+        {
+            why = $"{headers[1]} of {Plural(headers.Sum(), "file header")} start or end with an empty '//' line";
+        }
+        else
+        {
+            return null;
+        }
+
+        return [$"# init: file headers: {why}; {rule} would remove those lines, so it is off. To turn it on: remove the next line (and the empty lines from the template).", Off(rule)];
+    }
+
+    /// <summary>Whether a file starts with the UTF-8 byte order mark.</summary>
+    public static bool HasBom(string file)
+    {
+        using var stream = File.OpenRead(file);
+        Span<byte> start = stackalloc byte[3];
+        return stream.Read(start) == 3 && start[0] == 0xEF && start[1] == 0xBB && start[2] == 0xBF;
+    }
+
     /// <summary>The prefix ('s_' or 't_') an active naming rule of the repository requires (BRO1307 then keeps it), or null.</summary>
     public static string? PrefixRequiredByNamingRule(IReadOnlyDictionary<string, string> own) =>
         new[] { "s_", "t_" }.FirstOrDefault(p => StyleBro.Analyzers.Naming.FieldNames.IsPrefixRequiredByNamingRule(p, new Options(own)));
@@ -625,6 +761,8 @@ internal static class Conventions
             UsingPlacement();
             UsingOrder();
             StaticPrefixes();
+            StaticFieldCasing();
+            HeaderEmptyLines();
             TypeAliases();
             Overloads();
             MemberOrder();
@@ -875,6 +1013,45 @@ internal static class Conventions
             }
         }
 
+        // Unit = files starting with a '//' comment group (a file header): with an empty '//' line at its top or bottom (what
+        // BRO1120 removes, and what a file_header_template starting with '\n' writes) or without.
+        void HeaderEmptyLines()
+        {
+            var group = root.GetLeadingTrivia().TakeWhile(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
+                .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                .Select(t => t.ToString())
+                .ToList();
+            if (group.Count > 0 && !group[0].StartsWith("///", StringComparison.Ordinal))
+            {
+                counts[HeaderKey][group[0].Trim() == "//" || group[^1].Trim() == "//" ? 1 : 0]++;
+            }
+        }
+
+        // Unit = private constants and private static readonly fields (BRO1306's): PascalCase, camelCase or _camelCase.
+        // Other names ('s_x', '_X', 'x_y') are other rules' (BRO1307, BRO1308) and don't count.
+        void StaticFieldCasing()
+        {
+            foreach (var field in root.DescendantNodes().OfType<FieldDeclarationSyntax>().Where(f => f.Parent is not InterfaceDeclarationSyntax
+                && (f.Modifiers.Any(SyntaxKind.ConstKeyword) || (f.Modifiers.Any(SyntaxKind.StaticKeyword) && f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword)))
+                && !f.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword) || m.IsKind(SyntaxKind.InternalKeyword) || m.IsKind(SyntaxKind.ProtectedKeyword))))
+            {
+                foreach (var name in field.Declaration.Variables.Select(v => v.Identifier.ValueText).Where(n => !n.TrimStart('_').Contains('_')))
+                {
+                    var form = name switch
+                    {
+                        [>= 'A' and <= 'Z', ..] => 0,
+                        [>= 'a' and <= 'z', ..] => 1,
+                        ['_', >= 'a' and <= 'z', ..] => 2,
+                        _ => -1,
+                    };
+                    if (form >= 0)
+                    {
+                        counts[StaticCasingKey][form]++;
+                    }
+                }
+            }
+        }
+
         // Unit = files naming a built-in type: only with keywords, or with a framework name IDE0049 would rewrite ('String',
         // 'System.Int32'; not 'x.String', 'Other.String' or one in a using directive).
         void TypeAliases()
@@ -1114,6 +1291,7 @@ internal static class Conventions
         }
 
         DecideUsings(counts, isSet, lines, report, summary);
+        DecideStaticCasing(counts, decided, isSet, lines, report, summary);
 
         // The 'git' verdict above already says it (only when some files have a fixed ending: else there was no line).
         var saidAbove = ConvertedOutnumber(counts) && counts.TryGetValue(EndOfLineKey, out var fixedEndings) && fixedEndings.Sum() > 0;
@@ -1248,6 +1426,69 @@ internal static class Conventions
             ["verdict"] = tag == "too few" ? "tooFew" : tag,
             ["result"] = verdict,
         });
+    }
+
+    /// <summary>
+    /// The casing of private constants and static readonly fields (<see cref="StaticCasingKey"/>), like a convention with three
+    /// forms: a clear one (<see cref="Winner"/>'s share against the other two together) is written unless it is BRO1306's
+    /// default (PascalCase); mixed turns BRO1306 off (it has no switch for these fields alone, so its public fields go too).
+    /// A key or naming rule the repository sets (<paramref name="decided"/>), or BRO1306's own severity, wins.
+    /// </summary>
+    private static void DecideStaticCasing(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary)
+    {
+        const string What = "private constants/static readonly fields";
+        string[] forms = ["PascalCase", "camelCase", "_camelCase"];
+        if (!counts.TryGetValue(StaticCasingKey, out var c) || c.Sum() is not (> 0 and var total))
+        {
+            return;
+        }
+
+        var off = Off(DiagnosticIds.FieldPascalCase);
+        var winner = Enumerable.Range(0, 3).FirstOrDefault(i => Winner(c[i], total - c[i]) == 0, -1);
+        var mixed = string.Join(", ", Enumerable.Range(0, 3).Where(i => c[i] > 0).Select(i => $"{c[i]} {forms[i]}"));
+        var found = winner < 0 ? mixed : $"{c[winner]} of {total} {forms[winner]}";
+        string tag;
+        string verdict;
+        if (decided.TryGetValue(StaticCasingKey, out var reason) || isSet?.Invoke(KeyOf(off)) == true)
+        {
+            (tag, verdict, found) = ("set", reason ?? $"{DiagnosticIds.FieldPascalCase}'s severity is set", Plural(total, "field"));
+        }
+        else if (total < MinimumAgreeing)
+        {
+            (tag, verdict, found) = ("too few", "default stays (PascalCase)", Plural(total, "field"));
+            summary.TooFew.Add(StaticCasingKey);
+        }
+        else if (winner < 0)
+        {
+            (tag, verdict) = ("off", $"{DiagnosticIds.FieldPascalCase} is off");
+            summary.TurnedOff.Add($"{DiagnosticIds.FieldPascalCase} ({What})");
+            lines.Add($"# init: {What}: your code mixes their casing ({mixed}), so {DiagnosticIds.FieldPascalCase} is off (it checks constants, static readonly and non-private fields). To choose one: set {StaticCasingKey} (PascalCase, camelCase or _camelCase) and remove the next line.");
+            lines.Add(off);
+        }
+        else if (winner == 0)
+        {
+            (tag, verdict) = ("default", forms[0]);
+            summary.Matched++;
+        }
+        else
+        {
+            (tag, verdict) = ("kept", forms[winner]);
+            summary.Written.Add(StaticCasingKey);
+            lines.Add($"# init: {What}: {forms[winner]} in {c[winner]} of {Plural(total, "field")} in your code");
+            lines.Add($"{StaticCasingKey} = {forms[winner]}");
+        }
+
+        report.Add($"  {tag,-8} {What}: {found} -> {verdict}");
+        JsonReport.Add("conventions", new JsonObject
+        {
+            ["key"] = StaticCasingKey,
+            ["what"] = What,
+            ["counts"] = new JsonObject { [forms[0]] = c[0], [forms[1]] = c[1], [forms[2]] = c[2] },
+            ["verdict"] = tag == "too few" ? "tooFew" : tag,
+            ["result"] = verdict,
+        });
+
+        static string KeyOf(string line) => line.Substring(0, line.IndexOf('=')).Trim();
     }
 
     /// <summary>
@@ -1442,7 +1683,7 @@ internal static class Conventions
     }
 
     /// <summary>The root .editorconfig's settings as analyzer options (BRO1601's stylebro_document_* keys).</summary>
-    private sealed class Options(IReadOnlyDictionary<string, string>? settings) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions
+    internal sealed class Options(IReadOnlyDictionary<string, string>? settings) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions
     {
         public override IEnumerable<string> Keys => settings?.Keys ?? Enumerable.Empty<string>();
 

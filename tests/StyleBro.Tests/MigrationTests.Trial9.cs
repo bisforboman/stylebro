@@ -141,7 +141,7 @@ public sealed partial class MigrationTests
         Assert.Equal(s8969, sonar.IsOn("S8969"));
         Assert.Equal(s2325, sonar.IsOn("S2325"));
         Assert.True(sonar.IsOn("S1116"));
-        Assert.Equal(s8969, Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines.Contains("dotnet_diagnostic.BRO1147.severity = warning"));
+        Assert.DoesNotContain("dotnet_diagnostic.BRO1147.severity = warning", Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines);   // S8969 isn't mapped (BRO1147 is stricter)
     }
 
     [Fact]
