@@ -816,6 +816,16 @@
             )
         }
         @{
+            # StyleCop reads the SDK's csharp_using_directive_placement from .editorconfig, even at severity none, and it
+            # beats stylecop.json's default (insideNamespace): openmcdf (trial 10) sets outside_namespace:none, and SA1200
+            # was quiet about usings above its file-scoped namespaces. File-scoped namespaces count like block ones
+            # (using-placement's FileScoped.cs is reported by both).
+            Name         = 'using-placement-editorconfig'
+            Map          = @('SA1200=BRO1008')
+            EditorConfig = "csharp_using_directive_placement = outside_namespace:none`n"
+            Expected     = @()
+        }
+        @{
             Name         = 'using-placement'
             Map          = @('SA1200=BRO1008')
             # StyleCop's default is inside; StyleBro needs the setting (migrate writes it).
