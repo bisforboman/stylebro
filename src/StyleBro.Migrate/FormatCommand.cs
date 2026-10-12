@@ -837,6 +837,13 @@ internal static class FormatCommand
     /// </summary>
     public static string NormalizeFramework(string framework)
     {
+        // .NET Framework written with dots ('net4.7', 'net4.7.2') is 'net47'/'net472' to NuGet: one run, not two.
+        var dotted = Regex.Match(framework.Trim().ToLowerInvariant(), @"^net(?<version>[1-4](?:\.\d){1,2})$");
+        if (dotted.Success)
+        {
+            return "net" + dotted.Groups["version"].Value.Replace(".", string.Empty);
+        }
+
         var match = Regex.Match(framework.Trim().ToLowerInvariant(), @"^(?<name>net|netcoreapp|netstandard)(?<digits>\d+)(?<platform>-.*)?$");
         if (!match.Success || (match.Groups["name"].Value == "net" && match.Groups["digits"].Value[0] < '5'))
         {
@@ -1892,7 +1899,7 @@ internal static class FormatCommand
         return read;
     }
 
-    private static string Capture(string directory, params string[] arguments)
+    internal static string Capture(string directory, params string[] arguments)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var argument in arguments)

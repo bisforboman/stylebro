@@ -132,7 +132,14 @@ internal sealed class StyleCopSetup
     /// <summary>Gets the MSBuild files (relative) that remove the StyleCop.Analyzers reference they inherit.</summary>
     public IReadOnlyList<string> RemovedIn { get; init; } = [];
 
-    public static StyleCopSetup Read(string root)
+    /// <summary>Gets a value indicating whether no project runs StyleCop (<see cref="IsInstalled"/>): its settings are leftovers.</summary>
+    public bool NotInstalled { get; init; }
+
+    /// <summary>
+    /// Reads the setup. <paramref name="evaluate"/> tells whether StyleCop.Analyzers is among a project's evaluated items
+    /// (null: MSBuild failed); by default 'dotnet msbuild' (<see cref="EvaluateStyleCop"/>).
+    /// </summary>
+    public static StyleCopSetup Read(string root, Func<string, bool?>? evaluate = null)
     {
         var files = EnumerateFiles(root).ToList();
         var references = FollowReferences(root, files);
@@ -165,6 +172,8 @@ internal sealed class StyleCopSetup
         // and would otherwise bring StyleCop's defaults back in (Soulseek.NET's examples turned SA1101 on: 191 files got
         // 'this.'). Without any StyleCop reference found, every project counts.
         var projects = Projects(root, files);
+        var warnings = new List<string>();
+        var installed = recorded is not null || Evaluate(root, projects.Uses, evaluate ?? EvaluateStyleCop, warnings);
 
         // After the package swap no project references StyleCop, and every project would count: the projects the last
         // --write found without it (the block's "No StyleCop ran in" line) still don't, so --write gives the same block
@@ -291,7 +300,6 @@ internal sealed class StyleCopSetup
         // Projects whose ruleset or stylecop.json differs from the repository-wide result get a section of their own
         // (Soulseek.NET's src and tests each link their own, with different rules and license headers). Projects that share
         // a folder but not their settings can't be told apart by an .editorconfig section: warned about, never picked silently.
-        var warnings = new List<string>();
         var projectScopes = new List<Scope>();
         string FolderOf(string project) => Path.GetRelativePath(root, Path.GetDirectoryName(project)!).Replace('\\', '/');
         string JsonText(string? file) => file is null ? string.Empty : File.ReadAllText(file);
@@ -348,6 +356,7 @@ internal sealed class StyleCopSetup
             VersionRecorded = recorded is not null,
             UnresolvedVersion = recorded is null ? unresolved : null,
             RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
+            NotInstalled = !installed,
         };
     }
 
@@ -367,7 +376,7 @@ internal sealed class StyleCopSetup
             {
                 evidence.Add(relative);
             }
-            else if (Kind(file) == "ruleset" && Regex.IsMatch(File.ReadAllText(file), @"\bId\s*=\s*""S[AX]\d{4}"""))
+            else if (Kind(file) == "ruleset" && Regex.IsMatch(File.ReadAllText(file), @"\bId\s*=\s*""S[AX]\d{4}""", RegexOptions.IgnoreCase))
             {
                 evidence.Add($"{relative} (StyleCop rules)");
             }
@@ -614,39 +623,14 @@ internal sealed class StyleCopSetup
     /// </summary>
     internal static (Dictionary<string, bool> Uses, List<string> ReferencedIn, List<string> RemovedIn) Projects(string root, IReadOnlyCollection<string> files)
     {
-        // ponytail: text-level, like FolderRulesets: Conditions are ignored, a Remove anywhere in the chain wins.
+        // ponytail: text-level, like FolderRulesets: Conditions are ignored (Evaluate settles those), a Remove anywhere in the chain wins.
         var own = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
-        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var uses = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         var referenced = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var removed = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var project in files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
         {
-            var chain = new List<string> { project };
-            foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
-            {
-                for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
-                {
-                    if (File.Exists(Path.Combine(folder, name)))
-                    {
-                        chain.Add(OnDisk(Path.Combine(folder, name)));
-                        break;
-                    }
-                }
-            }
-
-            for (var i = 0; i < chain.Count && i < 64; i++)
-            {
-                foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
-                {
-                    if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
-                        && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
-                    {
-                        chain.Add(imported);
-                    }
-                }
-            }
-
+            var chain = Chain(project, root);
             var references = chain.Where(f => StyleCopReference.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
             var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
             uses[project] = references.Count > 0 && removes.Count == 0;
@@ -655,6 +639,133 @@ internal sealed class StyleCopSetup
         }
 
         return (uses, referenced.ToList(), removed.ToList());
+    }
+
+    /// <summary>
+    /// Whether StyleCop.Analyzers runs anywhere: false when the repository has projects and none references it (evaluated,
+    /// <see cref="Evaluate"/>), and no earlier --write recorded a version (after the package swap it's gone on purpose).
+    /// Its settings are leftovers then (Spectre.Console kept 'dotnet_diagnostic.sa1101.severity = none' lines after dropping it).
+    /// </summary>
+    public static bool IsInstalled(string root, Func<string, bool?>? evaluate = null) =>
+        Migration.RecordedVersion(root) is not null || Evaluate(root, Projects(root, EnumerateFiles(root).ToList()).Uses, evaluate ?? EvaluateStyleCop, []);
+
+    /// <summary>
+    /// Settles <paramref name="uses"/> (from <see cref="Projects"/>, text-level) with MSBuild where the text can't: projects
+    /// whose StyleCop reference sits under a Condition (DynamicData's '&lt;ItemGroup Condition="!$(IsTestProject) AND
+    /// !$(IsBenchmarkProject)"&gt;' counted its tests, and 360 test files changed where StyleCop never ran), and, when no
+    /// project references it in the text, every project (a reference the text can't see, before its settings count as
+    /// leftovers). A project MSBuild can't evaluate keeps the text's answer, with a warning. Returns whether any project
+    /// uses StyleCop (true without projects: nothing tells otherwise).
+    /// </summary>
+    internal static bool Evaluate(string root, Dictionary<string, bool> uses, Func<string, bool?> evaluate, List<string> warnings)
+    {
+        if (uses.Count == 0)
+        {
+            return true;
+        }
+
+        var check = !uses.Values.Contains(true)
+            ? uses.Keys.ToList()
+            : uses.Where(p => p.Value && Chain(p.Key, root).Any(f => ConditionalReference(File.ReadAllText(f)))).Select(p => p.Key).ToList();
+        var results = check.AsParallel().Select(p => (Project: p, Uses: evaluate(p))).ToList();
+        foreach (var (project, value) in results)
+        {
+            if (value is { } evaluated)
+            {
+                uses[project] = evaluated;
+            }
+        }
+
+        var failed = results.Where(r => r.Uses is null).Select(r => Path.GetRelativePath(root, r.Project).Replace('\\', '/')).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        if (failed.Count > 0)
+        {
+            warnings.Add($"MSBuild couldn't evaluate {string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}: whether StyleCop runs there was read from the project files' text, Conditions ignored.");
+        }
+
+        return uses.Values.Contains(true);
+    }
+
+    /// <summary>
+    /// Whether StyleCop.Analyzers is among a project's evaluated PackageReference, GlobalPackageReference or Analyzer items
+    /// ('dotnet msbuild -getItem', Conditions applied), or null when MSBuild can't evaluate it.
+    /// </summary>
+    internal static bool? EvaluateStyleCop(string project)
+    {
+        try
+        {
+            var json = FormatCommand.Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo");
+            using var document = JsonDocument.Parse(json);
+            return document.RootElement.TryGetProperty("Items", out var items)
+                && items.EnumerateObject().SelectMany(i => i.Value.EnumerateArray())
+                    .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
+        }
+        catch (Exception e) when (e is ToolException or JsonException or System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Whether an evaluated item's Identity is StyleCop's package, or an analyzer DLL from it.</summary>
+    internal static bool IsStyleCopItem(string identity) =>
+        Regex.IsMatch(identity, @"^StyleCop\.Analyzers(\.Unstable)?$|StyleCop\.Analyzers[^\\/]*[\\/].*\.dll$", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Whether an MSBuild file's StyleCop reference depends on a Condition (on the item, an enclosing ItemGroup, or a
+    /// Choose's When/Otherwise). Unparsable XML counts as conditional: MSBuild decides.
+    /// </summary>
+    internal static bool ConditionalReference(string text)
+    {
+        if (!StyleCopReference.IsMatch(WithoutComments(text)))
+        {
+            return false;
+        }
+
+        try
+        {
+            return XDocument.Parse(text).Descendants()
+                .Where(e => e.Name.LocalName is "PackageReference" or "GlobalPackageReference" or "Analyzer"
+                    && ((string?)e.Attribute("Include"))?.Contains("StyleCop.Analyzers", StringComparison.OrdinalIgnoreCase) == true)
+                .Any(e => e.AncestorsAndSelf().Any(a => a.Attribute("Condition") is not null || a.Name.LocalName is "When" or "Otherwise"));
+        }
+        catch (System.Xml.XmlException)
+        {
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A project's MSBuild files as the text reads them: the project, the Directory.Build.props/.targets and
+    /// Directory.Packages.props it gets (nearest, under the root), and what those import.
+    /// </summary>
+    private static List<string> Chain(string project, string root)
+    {
+        var rootFolder = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var chain = new List<string> { project };
+        foreach (var name in new[] { "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props" })
+        {
+            for (var folder = Path.GetDirectoryName(project); folder is not null && folder.Length >= rootFolder.Length; folder = Path.GetDirectoryName(folder))
+            {
+                if (File.Exists(Path.Combine(folder, name)))
+                {
+                    chain.Add(OnDisk(Path.Combine(folder, name)));
+                    break;
+                }
+            }
+        }
+
+        for (var i = 0; i < chain.Count && i < 64; i++)
+        {
+            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
+            {
+                if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
+                    && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
+                {
+                    chain.Add(imported);
+                }
+            }
+        }
+
+        return chain;
     }
 
     /// <summary>
@@ -970,9 +1081,9 @@ internal sealed class StyleCopSetup
             {
                 var id = (string?)rule.Attribute("Id");
                 var action = (string?)rule.Attribute("Action");
-                if (id is not null && (id.StartsWith("SA", StringComparison.Ordinal) || id.StartsWith("SX", StringComparison.Ordinal)) && action is not null && ParseSeverity(action) is { } severity)
+                if (id is not null && (id.StartsWith("SA", StringComparison.OrdinalIgnoreCase) || id.StartsWith("SX", StringComparison.OrdinalIgnoreCase)) && action is not null && ParseSeverity(action) is { } severity)
                 {
-                    result[id] = severity;
+                    result[id.ToUpperInvariant()] = severity;
                 }
             }
         }

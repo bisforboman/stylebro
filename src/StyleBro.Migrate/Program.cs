@@ -161,6 +161,21 @@ internal static class Program
         }
 
         var setup = StyleCopSetup.Read(root);
+
+        // StyleCop settings no project uses are leftovers (Spectre.Console): init's job, unless a Sonar setup is migrated too.
+        if (setup.NotInstalled && sonar is null)
+        {
+            setup.Warnings.ToList().ForEach(w => Console.WriteLine("Warning: " + w));
+            Console.WriteLine(LeftoverLine(StyleCopSetup.Evidence(root)));
+            Console.WriteLine($"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'stylebro-migrate init' instead: it follows the code's own conventions and ignores those lines.");
+            return 1;
+        }
+
+        if (setup.NotInstalled)
+        {
+            Console.WriteLine(LeftoverLine(StyleCopSetup.Evidence(root)) + " The Sonar setup is still migrated, and StyleCop's rules count as those settings say.");
+        }
+
         var result = Migration.Generate(setup, root, sonar: sonar);
         var plan = Migration.Plan(setup, root, result);
 
@@ -204,6 +219,10 @@ internal static class Program
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
+        if (suppressions.NotCarried > 0)
+        {
+            Console.WriteLine($"Suppressions not carried over: {suppressions.NotCarried} for rules IDE0055 replaces (whitespace, like SA1028): 'dotnet format' formats whitespace whatever a suppression says. To keep such code as it is, exclude its files from formatting (generated_code = true in an .editorconfig section for them).");
+        }
 
         Console.WriteLine();
         foreach (var (file, sections) in plan)
@@ -269,6 +288,11 @@ internal static class Program
             (true, false) => FormatHint,
             _ => AddPackageHint,
         };
+
+    /// <summary>What the migration and init say about StyleCop settings no project uses (<see cref="StyleCopSetup.NotInstalled"/>).</summary>
+    internal static string LeftoverLine(IReadOnlyCollection<string> evidence) => evidence.Count == 0
+        ? "StyleCop.Analyzers isn't referenced by any project, and there are no StyleCop settings: StyleCop doesn't run here."
+        : $"StyleCop.Analyzers isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers ({string.Join(", ", evidence)}).";
 
     /// <summary>The next step after init: format, or first add the package when no MSBuild file references it.</summary>
     internal static string NextHint(string root) => PreviewCommand.ReferencesStyleBro(root) ? FormatHint : AddPackageHint;
@@ -443,26 +467,39 @@ internal static class Program
 
     /// <summary>
     /// Carries the suppressions in the code over (<see cref="Suppressions"/>): StyleCop's and Sonar's ids, to the rules that
-    /// replace them. Returns how many were (or would be) added, in how many files.
+    /// replace them. Returns how many were (or would be) added, in how many files, and how many weren't carried over (IDE0055).
     /// </summary>
-    internal static (int Added, int Files) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write)
+    internal static (int Added, int Files, int NotCarried) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write)
     {
         int added = 0;
         int files = 0;
-        var mentions = new Regex(@"\bS[AX]?\d{3,4}\b");
+        int notCarried = 0;
+        var mentions = new Regex(@"\bS[AX]?\d{3,4}\b", RegexOptions.IgnoreCase);
+
+        // Suppressions of a rule 'dotnet format' ignores can't take effect: its whitespace pass ignores
+        // '#pragma warning disable IDE0055' (Spectre.Console's SA1028 pragmas got one), so none is added; the report says so.
+        var all = replacements.ToDictionary(r => r.Key, r => r.Value, StringComparer.OrdinalIgnoreCase);
+        var effective = replacements.ToDictionary(r => r.Key, r => new SortedSet<string>(r.Value.Where(id => !Suppressions.Ineffective.Contains(id)), StringComparer.Ordinal), StringComparer.OrdinalIgnoreCase);
+
+        // Generated code isn't the team's: checked-in source generator output (Spectre.Console's Generated/ folders) stays as is.
+        var marked = Migration.MarkedGeneratedFolders(root);
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || StyleCopSetup.IsMSBuild(f)))
         {
             var bytes = File.ReadAllBytes(file);
             var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
             var text = Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
-            if (!mentions.IsMatch(text))
+            var relative = Path.GetRelativePath(root, file).Replace('\\', '/');
+            if (!mentions.IsMatch(text)
+                || (!StyleCopSetup.IsMSBuild(file) && (Migration.IsGeneratedOrVendored(relative, text) || marked.Any(m => relative.StartsWith(m.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase)))))
             {
                 continue;
             }
 
-            var (rewritten, count) = StyleCopSetup.IsMSBuild(file)
-                ? Suppressions.RewriteNoWarn(text, replacements)
-                : Suppressions.Rewrite(text, replacements);
+            (string Text, int Added) Rewrite(IReadOnlyDictionary<string, SortedSet<string>> ids) => StyleCopSetup.IsMSBuild(file)
+                ? Suppressions.RewriteNoWarn(text, ids)
+                : Suppressions.Rewrite(text, ids);
+            var (rewritten, count) = Rewrite(effective);
+            notCarried += Rewrite(all).Added - count;
             if (count == 0)
             {
                 continue;
@@ -476,7 +513,7 @@ internal static class Program
             }
         }
 
-        return (added, files);
+        return (added, files, notCarried);
     }
 
     /// <summary>Runs the command the arguments name.</summary>
