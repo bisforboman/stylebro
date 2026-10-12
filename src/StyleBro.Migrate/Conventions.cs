@@ -1225,7 +1225,7 @@ internal static class Conventions
         static bool CouldCombine(SyntaxNode previous, SyntaxNode node) =>
             previous.RawKind == node.RawKind
             && Declared(previous).Variables.Count == 1
-            && Declared(previous).Type.IsEquivalentTo(Declared(node).Type)
+            && Declared(previous).Type.ToString() == Declared(node).Type.ToString()
             && !Declared(node).Type.IsVar
             && previous switch
             {
