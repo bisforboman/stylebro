@@ -202,4 +202,40 @@ public class LambdaSyntaxTests
         }
         """,
         "dotnet_diagnostic.BRO1125.severity = none\n");
+
+    // Mapster: the SDK's formatter had already put 'delegate { };' as 'delegate' + '{ };' on two lines, and the lambda
+    // kept that line break ('() =>' + '{ };'). A one-line body goes back on the arrow's line; a multi-line one keeps it.
+    [Fact]
+    public Task OneLineBody_AfterALineBreak_JoinsTheArrowsLine() => Verify.VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            void M()
+            {
+                Action a = {|BRO1125:delegate|}
+                { };
+                Action b = {|BRO1125:delegate|}
+                {
+                    Console.WriteLine();
+                };
+            }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            void M()
+            {
+                Action a = () => { };
+                Action b = () =>
+                {
+                    Console.WriteLine();
+                };
+            }
+        }
+        """);
 }

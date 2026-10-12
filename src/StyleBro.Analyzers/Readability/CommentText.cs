@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -65,9 +66,10 @@ internal static class CommentText
     /// BRO1120: the empty comments StyleCop reports, each with the comments the fix removes. Comments on consecutive
     /// lines form a group, and like StyleCop an empty comment is only reported at the start or end of a group (empty
     /// lines in the middle separate paragraphs). The fix removes all empty comments at that end of the group, so one
-    /// pass is enough.
+    /// pass is enough. <paramref name="skipHeader"/>: the group of comments the file starts with isn't checked (the SDK's
+    /// file_header_template is set, and IDE0073 writes that header, empty '//' lines included).
     /// </summary>
-    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text)
+    public static IEnumerable<(SyntaxTrivia Reported, IReadOnlyList<SyntaxTrivia> Removed)> GetEmptyComments(IEnumerable<SyntaxTrivia> trivia, SourceText text, bool skipHeader = false)
     {
         var comments = trivia
             .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
@@ -80,7 +82,7 @@ internal static class CommentText
             var afterCode = text.ToString(TextSpan.FromBounds(line.Start, comment.SpanStart)).Trim().Length > 0;
             if (group.Count > 0 && (afterCode || line.LineNumber != Line(text, group[group.Count - 1].Span.End) + 1))
             {
-                foreach (var finding in GetGroupFindings(group))
+                foreach (var finding in GetGroupFindings(group, skipHeader, text))
                 {
                     yield return finding;
                 }
@@ -91,11 +93,15 @@ internal static class CommentText
             group.Add(comment);
         }
 
-        foreach (var finding in GetGroupFindings(group))
+        foreach (var finding in GetGroupFindings(group, skipHeader, text))
         {
             yield return finding;
         }
     }
+
+    /// <summary>Whether the SDK's file_header_template is set (IDE0073 then owns the file header, BRO1120 leaves it alone).</summary>
+    public static bool HasHeaderTemplate(AnalyzerConfigOptions options) =>
+        options.TryGetValue("file_header_template", out var value) && value.Trim().Length > 0 && value.Trim() != "unset";
 
     /// <summary>
     /// The edits that remove a run of empty comments on consecutive lines (<see cref="GetEmptyComments"/>). When whole
@@ -155,9 +161,9 @@ internal static class CommentText
         return new TextChange(TextSpan.FromBounds(start, comment.Span.End), string.Empty);
     }
 
-    private static IEnumerable<(SyntaxTrivia, IReadOnlyList<SyntaxTrivia>)> GetGroupFindings(List<SyntaxTrivia> group)
+    private static IEnumerable<(SyntaxTrivia, IReadOnlyList<SyntaxTrivia>)> GetGroupFindings(List<SyntaxTrivia> group, bool skipHeader, SourceText text)
     {
-        if (group.Count == 0)
+        if (group.Count == 0 || (skipHeader && text.ToString(TextSpan.FromBounds(0, group[0].SpanStart)).Trim().Length == 0))
         {
             yield break;
         }

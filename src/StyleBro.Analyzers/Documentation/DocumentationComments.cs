@@ -144,7 +144,8 @@ internal static class DocumentationComments
 
     /// <summary>
     /// The edits for BRO1602: every '///' at the start of a line of the comment becomes '//', plus a space when text
-    /// follows directly ('///note' -> '// note'), so the result also satisfies BRO1002.
+    /// follows directly ('///note' -> '// note'), so the result also satisfies BRO1002. Also a '///' after code on its
+    /// line: every reported comment must get an edit.
     /// </summary>
     public static IEnumerable<TextChange> GetSlashChanges(SyntaxTrivia comment, SourceText text)
     {
@@ -153,9 +154,11 @@ internal static class DocumentationComments
         for (var number = first; number <= last; number++)
         {
             var line = text.Lines[number];
+
+            // The first line's '///' may trail code ('void X() /// note'): it starts where the comment does.
             var lineText = text.ToString(line.Span);
-            var start = lineText.Length - lineText.TrimStart().Length;
-            if (string.CompareOrdinal(lineText, start, "///", 0, 3) != 0 || line.Start + start < comment.FullSpan.Start)
+            var start = number == first ? comment.FullSpan.Start - line.Start : lineText.Length - lineText.TrimStart().Length;
+            if (string.CompareOrdinal(lineText, start, "///", 0, 3) != 0)
             {
                 continue;
             }

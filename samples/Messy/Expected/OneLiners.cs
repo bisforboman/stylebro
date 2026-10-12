@@ -70,3 +70,18 @@ public class Thermostat
         _target--;
     }
 }
+
+public class Dial
+{
+    private readonly int _level = 1;
+
+    public int Low
+    {
+        get { return _level; }
+    }
+
+    public int High
+    {
+        get { return _level + 1; }
+    }
+}

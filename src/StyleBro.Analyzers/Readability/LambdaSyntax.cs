@@ -70,8 +70,13 @@ internal static class LambdaSyntax
         var parameters = names.Count == 1 ? names[0] : "(" + string.Join(", ", names) + ")";
         var modifiers = method.ToString().Substring(0, method.DelegateKeyword.SpanStart - method.SpanStart);
         var beforeBody = method.Block.GetFirstToken().GetPreviousToken();
-        var gap = method.SyntaxTree.GetText(cancellationToken).ToString(TextSpan.FromBounds(beforeBody.Span.End, method.Block.SpanStart));
-        var lambda = modifiers + parameters + " =>" + (gap.Contains("\n") ? gap : " ") + method.Block;
+        var text = method.SyntaxTree.GetText(cancellationToken);
+        var gap = text.ToString(TextSpan.FromBounds(beforeBody.Span.End, method.Block.SpanStart));
+
+        // A one-line body stays on the arrow's line: the SDK's formatter puts an anonymous method's '{ }' on a line of its
+        // own ('delegate { };' -> 'delegate' + '{ };'), but leaves a lambda's one-line body where it is (Mapster).
+        var oneLineBody = text.Lines.GetLineFromPosition(method.Block.SpanStart).LineNumber == text.Lines.GetLineFromPosition(method.Block.Span.End).LineNumber;
+        var lambda = modifiers + parameters + " =>" + (gap.Contains("\n") && !oneLineBody ? gap : " ") + method.Block;
         if (method.Parent is not (ArgumentSyntax or EqualsValueClauseSyntax or AssignmentExpressionSyntax or ReturnStatementSyntax
             or ArrowExpressionClauseSyntax or ParenthesizedExpressionSyntax or YieldStatementSyntax or InitializerExpressionSyntax))
         {

@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace StyleBro.Analyzers.Naming;
 
@@ -127,7 +128,7 @@ internal static class CamelCaseNames
                 continue;
             }
 
-            if (model.GetOperation(argument, cancellationToken) is Microsoft.CodeAnalysis.Operations.IArgumentOperation { Parameter: { } target }
+            if (model.GetOperation(argument, cancellationToken) is IArgumentOperation { Parameter: { } target }
                 && target.ContainingSymbol is IMethodSymbol method
                 && method.Parameters.Any(p => p.GetAttributes().Any(a =>
                     a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
@@ -139,6 +140,20 @@ internal static class CamelCaseNames
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Whether a lambda's parameters or a query's range variables end up in an expression tree (System.Linq.Expressions):
+    /// the lambda, or one of the query's clauses, or a lambda inside it, is converted to an Expression, or the whole
+    /// thing sits inside one. The names are then data at run time: in the expression's ToString (Mapster's tests compare
+    /// it), in providers that translate them. Not reported, like the other names that reach run time.
+    /// </summary>
+    public static bool IsInExpressionTree(SyntaxNode lambdaOrQuery, SemanticModel model, System.Threading.CancellationToken cancellationToken)
+    {
+        return (model.GetOperation(lambdaOrQuery, cancellationToken) is { } operation
+                && operation.DescendantsAndSelf().Any(o => o is IAnonymousFunctionOperation
+                    && o.Parent?.Type?.ContainingNamespace?.ToDisplayString() == "System.Linq.Expressions"))
+            || Readability.NullChecks.IsInExpressionTree(lambdaOrQuery, model, cancellationToken);
     }
 
     /// <summary>The member whose code can refer to a variable or parameter by its simple name.</summary>

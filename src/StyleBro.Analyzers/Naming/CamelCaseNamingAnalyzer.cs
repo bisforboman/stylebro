@@ -174,7 +174,9 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
         }
 
         var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node, context.CancellationToken);
-        if (symbol is ILocalSymbol { IsConst: false } or IRangeVariableSymbol)
+        if (symbol is ILocalSymbol { IsConst: false }
+            || (symbol is IRangeVariableSymbol && !(context.Node.FirstAncestorOrSelf<QueryExpressionSyntax>() is { } query
+                && CamelCaseNames.IsInExpressionTree(query, context.SemanticModel, context.CancellationToken))))
         {
             Report(context, Descriptors.VariableCasing, identifier);
         }
@@ -194,6 +196,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             || context.SemanticModel.GetDeclaredSymbol(node, context.CancellationToken) is not { } parameter
             || InheritsName(parameter)
             || NamesAMember(parameter)
+            || (GetLambda(node) is { } lambda && CamelCaseNames.IsInExpressionTree(lambda, context.SemanticModel, context.CancellationToken))
             || !PublicApi.CanRename(parameter, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))
             || parameter.ContainingSymbol is IMethodSymbol { PartialDefinitionPart: not null } or IMethodSymbol { PartialImplementationPart: not null })
         {
@@ -273,6 +276,13 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
                 newName));
         }
     }
+
+    private static AnonymousFunctionExpressionSyntax? GetLambda(ParameterSyntax node) => node.Parent switch
+    {
+        SimpleLambdaExpressionSyntax lambda => lambda,
+        ParameterListSyntax { Parent: AnonymousFunctionExpressionSyntax lambda } => lambda,
+        _ => null,
+    };
 
     private static ImmutableArray<IParameterSymbol>? GetParameters(ISymbol member)
     {

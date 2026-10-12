@@ -588,4 +588,48 @@ public class CamelCaseNamingTests
             }
         }
         """);
+
+    // Mapster: 'from Param_0 in products.AsQueryable()' became 'param0', and a test comparing the query's ToString failed.
+    // Names in an expression tree are data at run time: range variables of an IQueryable query and parameters of a
+    // lambda converted to an Expression (or nested in one) aren't reported. The same names in delegates still are.
+    [Fact]
+    public Task NamesInExpressionTrees_AreNotReported() => VerifyFixAsync(
+        """
+        using System;
+        using System.Linq;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            void M(IQueryable<int> q, int[] a)
+            {
+                var r1 = from Param_0 in q select Param_0 + 1;
+                var r2 = from x in q let Doubled = x * 2 where Doubled > 1 select Doubled;
+                var r3 = q.Select(Item => Item + 1);
+                Expression<Func<int, int>> e1 = (Value) => Value;
+                Expression<Func<int[], int>> e2 = Arr => Arr.Count(Inner => Inner > 0);
+                var d1 = from {|BRO1301:Row|} in a select Row;
+                Func<int, int> d2 = {|BRO1302:Other|} => Other;
+            }
+        }
+        """,
+        """
+        using System;
+        using System.Linq;
+        using System.Linq.Expressions;
+
+        class C
+        {
+            void M(IQueryable<int> q, int[] a)
+            {
+                var r1 = from Param_0 in q select Param_0 + 1;
+                var r2 = from x in q let Doubled = x * 2 where Doubled > 1 select Doubled;
+                var r3 = q.Select(Item => Item + 1);
+                Expression<Func<int, int>> e1 = (Value) => Value;
+                Expression<Func<int[], int>> e2 = Arr => Arr.Count(Inner => Inner > 0);
+                var d1 = from row in a select row;
+                Func<int, int> d2 = other => other;
+            }
+        }
+        """);
 }
