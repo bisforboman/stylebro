@@ -165,9 +165,20 @@ internal sealed class SonarSetup
         {
             var rule = group.Key;
             var ids = group.Select(m => m.Sonar).Distinct().ToList();
-            var settings = group.Select(m => m.Setting).OfType<string>().Distinct().ToList();
+            var settings = group.Select(m => m.Setting).OfType<string>().SelectMany(s => s.Split("; ")).Distinct().ToList();
             var key = $"dotnet_diagnostic.{rule}.severity";
             var optionOnly = group.All(m => m.OptionOnly);
+
+            // A rule the StyleCop setup turns on keeps StyleCop's scope: a stylebro_ setting of a Sonar row only narrows the rule to
+            // what the Sonar rule reports (BRO1101 leaving the ';' after '}', which SA1106 reports).
+            var onWithoutSonar = !optionOnly && lines.Any(l => KeyOf(l) == key && (StyleCopSetup.ParseSeverity(ValueOf(l)) ?? Severity.None) > Severity.None);
+            var narrowing = settings.Where(s => onWithoutSonar && KeyOf(s)!.StartsWith("stylebro_", StringComparison.Ordinal)).ToList();
+            if (narrowing.Count > 0)
+            {
+                applied.Notes.Add($"{string.Join(", ", narrowing.Select(KeyOf))} not written for {string.Join(", ", ids)}: the StyleCop setup turns {rule} on for more than the Sonar rule reports, and that stays.");
+                settings = settings.Except(narrowing).ToList();
+            }
+
             string? reason = optionOnly && !ruleOn(rule) ? $"{rule} is off here, and {string.Join(", ", settings.Select(KeyOf))} is one of its options"
                 : own.Contains(key) || settings.Any(s => own.Contains(KeyOf(s)!)) ? $"the repository's .editorconfig sets {rule} or its options itself"
                 : null;

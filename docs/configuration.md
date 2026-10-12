@@ -19,13 +19,17 @@ stylebro_null_check_style = equality_operator
 | `stylebro_member_static_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_readonly_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_keep_overloads_together` | `true`, `false`, `same_access` | `false` | [BRO1001](rules/BRO1001.md) |
+| `stylebro_allow_semicolon_after_closing_brace` | `true`, `false` (`true`: Sonar's S1116, the `;` after a type's or namespace's `}` stays) | `false` | [BRO1101](rules/BRO1101.md) |
 | `stylebro_constructor_initializer_placement` | `own_line`, `same_line` | `own_line` | [BRO1105](rules/BRO1105.md) |
 | `stylebro_empty_string_style` | `string_empty`, `literal` | `string_empty` | [BRO1106](rules/BRO1106.md) |
 | `stylebro_split_list_first_item` | `next_line`, `same_line` | `next_line` | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) |
 | `stylebro_closing_parenthesis_placement` | `last_item`, `own_line` | `last_item` | [BRO1110](rules/BRO1110.md) |
 | `stylebro_constraint_placement` | `own_line`, `same_line` | `own_line` | [BRO1111](rules/BRO1111.md) |
 | `stylebro_null_check_style` | `pattern_matching`, `equality_operator` | `pattern_matching` | [BRO1133](rules/BRO1133.md), [BRO1148](rules/BRO1148.md) |
-| `stylebro_upper_case_literal_suffixes` | `all`, `l_only` | `all` | [BRO1135](rules/BRO1135.md) |
+| `stylebro_upper_case_literal_suffixes` | `all`, `l_only`, `lone_l` (Sonar's S818: only a suffix that is just `l`) | `all` | [BRO1135](rules/BRO1135.md) |
+| `stylebro_allow_null_forgiving_on_unannotated` | `true`, `false` (`true`: Sonar's S8969, a `!` on a value declared without nullable annotations stays) | `false` | [BRO1147](rules/BRO1147.md) |
+| `stylebro_allow_nested_dynamic_ifs` | `true`, `false` (`true`: Sonar's S1066, nested `if`s with a `dynamic` condition aren't merged) | `false` | [BRO1149](rules/BRO1149.md) |
+| `stylebro_params_arrays` | `all`, `except_object_and_jagged` (Sonar's S3878: not for `params object[]`, `params Array[]` or jagged arrays) | `all` | [BRO1151](rules/BRO1151.md) |
 | `stylebro_object_creation_parentheses` | `omit`, `include` | `omit` | [BRO1141](rules/BRO1141.md) |
 | `stylebro_private_field_naming` | `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `camelCase` | [BRO1303](rules/BRO1303.md), [BRO1307](rules/BRO1307.md), [BRO1310](rules/BRO1310.md) |
 | `stylebro_private_mutable_static_field_naming` | `camelCase`, `_camelCase` | not set: a naming rule requiring just `static` decides, else `stylebro_private_field_naming`'s style | [BRO1303](rules/BRO1303.md) |
@@ -43,6 +47,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_allow_empty_single_line_blocks` | `true`, `false` | `false` | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) |
 | `stylebro_allow_consecutive_usings` | `true`, `false` | `true` | [BRO1514](rules/BRO1514.md) |
 | `stylebro_allow_single_line_jump_statements` | `true`, `false` | `false` | [BRO1514](rules/BRO1514.md) |
+| `stylebro_braces_statements` | `all`, `if_and_loops` (Sonar's S121: not `using`, `lock`, `fixed` or a deconstructing `foreach`) | `all` | [BRO1514](rules/BRO1514.md)-[BRO1516](rules/BRO1516.md) |
 | `stylebro_arrow_placement_when_wrapping` | `end_of_line`, `beginning_of_line` | `end_of_line` | [BRO1521](rules/BRO1521.md) |
 | `stylebro_equals_placement_when_wrapping` | `end_of_line`, `beginning_of_line` | `end_of_line` | [BRO1522](rules/BRO1522.md) |
 | `stylebro_blank_line_between_switch_sections` | `include`, `omit`, `omit_after_block` | `include` | [BRO1526](rules/BRO1526.md) |

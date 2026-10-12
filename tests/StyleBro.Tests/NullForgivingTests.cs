@@ -275,7 +275,7 @@ public class NullForgivingTests
         reported ? "public class C { public int M(string s) => s.Length; }" : null,
         frameworks: frameworks);
 
-    private static Task VerifyAsync(string source, string? fixedSource = null, NullableContextOptions nullable = NullableContextOptions.Enable, string? frameworks = null)
+    private static Task VerifyAsync(string source, string? fixedSource = null, NullableContextOptions nullable = NullableContextOptions.Enable, string? frameworks = null, string? editorConfig = null)
     {
         var test = new CSharpCodeFixTest<NullForgivingAnalyzer, NullForgivingCodeFixProvider, DefaultVerifier>
         {
@@ -290,6 +290,11 @@ public class NullForgivingTests
             test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", $"is_global = true\nbuild_property.StyleBroTargetFrameworks = {frameworks}\n"));
         }
 
+        if (editorConfig is not null)
+        {
+            test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $"root = true\n\n[*]\n{editorConfig}\n"));
+        }
+
         test.SolutionTransforms.Add((solution, projectId) =>
         {
             var options = (CSharpCompilationOptions)solution.GetProject(projectId)!.CompilationOptions!;
@@ -298,4 +303,84 @@ public class NullForgivingTests
         });
         return test.RunAsync();
     }
+
+    // Sonar's S8969 keeps a '!' on a value declared without nullable annotations (and a 'var' local initialized from one).
+    [Fact]
+    public Task AllowOnUnannotated_KeepsTheBangOnUnannotatedDeclarations() => VerifyAsync(
+        """
+        #nullable disable
+        public class Legacy
+        {
+            public string Name { get; set; }
+
+            public string Field;
+
+            public static string Make() => "";
+        }
+        #nullable enable
+
+        public class C
+        {
+            public int M(Legacy legacy, string s)
+            {
+                var local = legacy.Name;
+                string typed = legacy.Name;
+                var known = s;
+                return legacy.Name!.Length + legacy.Field!.Length + Legacy.Make()!.Length + local!.Length + typed{|BRO1147:!|}.Length + s{|BRO1147:!|}.Length + known{|BRO1147:!|}.Length;
+            }
+        }
+        """,
+        """
+        #nullable disable
+        public class Legacy
+        {
+            public string Name { get; set; }
+
+            public string Field;
+
+            public static string Make() => "";
+        }
+        #nullable enable
+
+        public class C
+        {
+            public int M(Legacy legacy, string s)
+            {
+                var local = legacy.Name;
+                string typed = legacy.Name;
+                var known = s;
+                return legacy.Name!.Length + legacy.Field!.Length + Legacy.Make()!.Length + local!.Length + typed.Length + s.Length + known.Length;
+            }
+        }
+        """,
+        editorConfig: "stylebro_allow_null_forgiving_on_unannotated = true");
+
+    [Fact]
+    public Task UnannotatedDeclarations_AreReportedByDefault() => VerifyAsync(
+        """
+        #nullable disable
+        public class Legacy
+        {
+            public string Name { get; set; }
+        }
+        #nullable enable
+
+        public class C
+        {
+            public int M(Legacy legacy) => legacy.Name{|BRO1147:!|}.Length;
+        }
+        """,
+        """
+        #nullable disable
+        public class Legacy
+        {
+            public string Name { get; set; }
+        }
+        #nullable enable
+
+        public class C
+        {
+            public int M(Legacy legacy) => legacy.Name.Length;
+        }
+        """);
 }

@@ -103,7 +103,7 @@ internal static class ElseAfterJump
     /// </summary>
     public static StatementSyntax? GetBranchToWrap(IfStatementSyntax node, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn) =>
         node.Statement is not BlockSyntax
-        && Braces.GetFindings(node, text, isOn, Braces.AllowConsecutiveUsings(options), Braces.GetPreference(options), Braces.AllowSingleLineJumps(options))
+        && Braces.GetFindings(node, text, isOn, options)
             .Any(f => f.Child == node.Statement)
             ? node.Statement
             : null;

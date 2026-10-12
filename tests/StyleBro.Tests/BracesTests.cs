@@ -660,4 +660,58 @@ public class BracesTests
             private static int Add(int x, int y) => x + y;
         }
         """);
+
+    // Sonar's S121: if/else and loops only, not using, lock, fixed or a foreach that deconstructs.
+    [Fact]
+    public Task IfAndLoops_LeavesUsingLockAndFixed() => VerifyFixAsync(
+        """
+        using System;
+
+        public unsafe class C
+        {
+            private readonly object gate = new();
+
+            public void M(bool a, int[] xs, (int, int)[] pairs, IDisposable d)
+            {
+                if (a) {|BRO1514:M(a, xs, pairs, d);|}
+                foreach (var x in xs) {|BRO1514:M(a, xs, pairs, d);|}
+                foreach (var (p, q) in pairs) M(a, xs, pairs, d);
+                using (d) M(a, xs, pairs, d);
+                lock (gate) M(a, xs, pairs, d);
+                fixed (int* p = xs) M(a, xs, pairs, d);
+                if (a) {|BRO1514:using (d) M(a, xs, pairs, d);|}
+            }
+        }
+        """,
+        """
+        using System;
+
+        public unsafe class C
+        {
+            private readonly object gate = new();
+
+            public void M(bool a, int[] xs, (int, int)[] pairs, IDisposable d)
+            {
+                if (a)
+                {
+                    M(a, xs, pairs, d);
+                }
+
+                foreach (var x in xs)
+                {
+                    M(a, xs, pairs, d);
+                }
+
+                foreach (var (p, q) in pairs) M(a, xs, pairs, d);
+                using (d) M(a, xs, pairs, d);
+                lock (gate) M(a, xs, pairs, d);
+                fixed (int* p = xs) M(a, xs, pairs, d);
+                if (a)
+                {
+                    using (d) M(a, xs, pairs, d);
+                }
+            }
+        }
+        """,
+        editorConfig: "stylebro_braces_statements = if_and_loops");
 }

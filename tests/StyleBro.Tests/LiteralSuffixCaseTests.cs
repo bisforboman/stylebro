@@ -55,7 +55,7 @@ public class LiteralSuffixCaseTests
         }
         """);
 
-    // Like Sonar S818: only 'l' must be upper case, and only the 'l' changes.
+    // Only 'l' must be upper case, and only the 'l' changes.
     [Fact]
     public Task LOnly_UpperCasesJustTheL() => Verify.VerifyFixAsync(
         """
@@ -77,4 +77,25 @@ public class LiteralSuffixCaseTests
         }
         """,
         "stylebro_upper_case_literal_suffixes = l_only\n");
+
+    // Sonar's S818: only a suffix that is just 'l'; 'ul', 'Ul', 'lu' and 'lU' are fine.
+    [Fact]
+    public Task LoneL_ReportsOnlyASuffixThatIsJustL() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            private const long A = {|BRO1135:1l|} + {|BRO1135:0xFFl|} + 2L;
+            private const uint B = 2u;
+            private const ulong D = 3ul + 4Ul + 5uL + 6lu + 7lU + 8UL;
+        }
+        """,
+        """
+        public class C
+        {
+            private const long A = 1L + 0xFFL + 2L;
+            private const uint B = 2u;
+            private const ulong D = 3ul + 4Ul + 5uL + 6lu + 7lU + 8UL;
+        }
+        """,
+        "stylebro_upper_case_literal_suffixes = lone_l\n");
 }

@@ -934,7 +934,7 @@ internal static class Descriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "'1L' instead of '1l', which looks like '11'; 'U' and 'UL' likewise. Real suffixes ('f', 'd', 'm') aren't "
-            + "checked; stylebro_upper_case_literal_suffixes = l_only checks only 'l'. Not a StyleCop rule.",
+            + "checked; stylebro_upper_case_literal_suffixes = l_only checks only 'l', lone_l only a suffix that is just 'l'. Not a StyleCop rule.",
         helpLinkUri: HelpBase + DiagnosticIds.LiteralSuffixCase + "/");
 
     public static readonly DiagnosticDescriptor NullCheckStyle = new(

@@ -1421,7 +1421,9 @@ public sealed partial class MigrationTests : IDisposable
         Assert.DoesNotContain(lines, l => l.Contains("CA1822", StringComparison.Ordinal));   // S2325 isn't mapped: CA1822 is stricter
         Assert.Contains("dotnet_diagnostic.BRO1313.severity = warning", lines);   // S927; off after the migration otherwise
         Assert.Contains("stylebro_match_base_parameter_names = non_generic_methods", lines);   // S927's exceptions
-        Assert.DoesNotContain("stylebro_upper_case_literal_suffixes = l_only", lines);   // S818 isn't mapped: BRO1135 is stricter
+        Assert.Contains("stylebro_upper_case_literal_suffixes = lone_l", lines);   // S818: only what Sonar reports ('1l', not '1ul')
+        Assert.Contains("dotnet_diagnostic.BRO1101.severity = warning", lines);     // SA1106 (StyleCop's defaults) and S1116
+        Assert.DoesNotContain("stylebro_allow_semicolon_after_closing_brace = true", lines);   // SA1106 also wants the ';' after '}' gone
         Assert.Contains("stylebro_keep_overloads_together = same_access", lines);       // S4136: BRO1001 is on (StyleCop's defaults)
         Assert.DoesNotContain("dotnet_diagnostic.BRO1142.severity = warning", lines);  // S1659 is off
         Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1313.severity", StringComparison.Ordinal));

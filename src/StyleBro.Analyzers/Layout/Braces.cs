@@ -34,6 +34,12 @@ internal static class Braces
     /// <summary>StyleCop issue #2252: 'if (x) return;' (a jump statement on the 'if' line) without braces (default false).</summary>
     public const string SingleLineJumpsKey = "stylebro_allow_single_line_jump_statements";
 
+    /// <summary>
+    /// Which statements' bodies need braces: all (default) or if_and_loops, Sonar's S121 (if/else, for, foreach, while, do; not
+    /// using, lock, fixed or a foreach that deconstructs).
+    /// </summary>
+    public const string StatementsKey = "stylebro_braces_statements";
+
     public static readonly SyntaxKind[] Kinds =
     {
         SyntaxKind.IfStatement, SyntaxKind.DoStatement, SyntaxKind.WhileStatement, SyntaxKind.ForStatement,
@@ -47,17 +53,15 @@ internal static class Braces
     /// its statements to the next one. <paramref name="isOn"/> says whether a rule is on. With the SDK's
     /// csharp_prefer_braces = when_multiline, single-line statements in a consistent chain aren't reported, and
     /// "multi-line" is what the SDK's IDE0011 counts as such; with false, nothing is. With
-    /// <paramref name="allowSingleLineJumps"/>, a jump statement on its 'if' line is fine unless BRO1516 wants braces.
+    /// stylebro_allow_single_line_jump_statements, a jump statement on its 'if' line is fine unless BRO1516 wants braces; with
+    /// stylebro_braces_statements = if_and_loops, using, lock, fixed and deconstructing foreach statements aren't checked.
     /// </summary>
-    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(
-        SyntaxNode node,
-        SourceText text,
-        Func<string, bool> isOn,
-        bool allowConsecutiveUsings = true,
-        BracePreference preference = BracePreference.Always,
-        bool allowSingleLineJumps = false)
+    public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn, AnalyzerConfigOptions options)
     {
-        if (preference == BracePreference.Never)
+        var preference = GetPreference(options);
+        var allowSingleLineJumps = AllowSingleLineJumps(options);
+        if (preference == BracePreference.Never
+            || (node is UsingStatementSyntax or LockStatementSyntax or FixedStatementSyntax or ForEachVariableStatementSyntax && OnlyIfAndLoops(options)))
         {
             yield break;
         }
@@ -82,7 +86,7 @@ internal static class Braces
 
                 break;
 
-            case UsingStatementSyntax { Statement: UsingStatementSyntax } when allowConsecutiveUsings:
+            case UsingStatementSyntax { Statement: UsingStatementSyntax } when AllowConsecutiveUsings(options):
                 yield break;
 
             case CommonForEachStatementSyntax forEach:
@@ -306,7 +310,7 @@ internal static class Braces
         var children = items
             .SelectMany(i => i.New.DescendantNodesAndSelf())
             .Where(n => Kinds.Contains(n.Kind()) && n.Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock)
-            .SelectMany(n => GetFindings(n, expanded, isOn, AllowConsecutiveUsings(options), GetPreference(options), AllowSingleLineJumps(options)))
+            .SelectMany(n => GetFindings(n, expanded, isOn, options))
             .Select(f => f.Child)
             .Where(c => GetChanges(new[] { c }, expanded, options) is not null)
             .ToList();
@@ -335,6 +339,10 @@ internal static class Braces
     /// <summary>The <see cref="ConsecutiveUsingsKey"/> setting.</summary>
     public static bool AllowConsecutiveUsings(AnalyzerConfigOptions options) =>
         !(options.TryGetValue(ConsecutiveUsingsKey, out var value) && bool.TryParse(value.Trim(), out var allowed) && !allowed);
+
+    /// <summary>Whether <see cref="StatementsKey"/> is if_and_loops.</summary>
+    public static bool OnlyIfAndLoops(AnalyzerConfigOptions options) =>
+        options.TryGetValue(StatementsKey, out var value) && value.Trim().Equals("if_and_loops", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>The <see cref="SingleLineJumpsKey"/> setting.</summary>
     public static bool AllowSingleLineJumps(AnalyzerConfigOptions options) =>

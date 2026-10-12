@@ -207,4 +207,44 @@ public sealed partial class MigrationTests
         Assert.Contains("    S1905: IDE0004 removes more casts than S1905", output, StringComparison.Ordinal);
         Assert.DoesNotContain("dotnet_diagnostic.IDE0004.severity", output, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Sonar_StyleBroRules_ComeWithTheOptionsThatMatchSonar()
+    {
+        // The owner's decision (2026-10-12): each StyleBro rule a Sonar rule maps to reports no more than the Sonar rule.
+        Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" /></ItemGroup></Project>""");
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S121.severity = warning\n");
+        var output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+
+        foreach (var line in new[]
+        {
+            "stylebro_upper_case_literal_suffixes = lone_l",                 // S818
+            "stylebro_allow_semicolon_after_closing_brace = true",           // S1116
+            "csharp_prefer_braces = true",                                   // S121
+            "stylebro_braces_statements = if_and_loops",                     // S121
+            "stylebro_params_arrays = except_object_and_jagged",             // S3878
+            "stylebro_allow_null_forgiving_on_unannotated = true",           // S8969
+            "stylebro_allow_nested_dynamic_ifs = true",                      // S1066
+        })
+        {
+            Assert.Contains("\n" + line + "\n", output, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("  S121 -> BRO1514 (csharp_prefer_braces = true; stylebro_braces_statements = if_and_loops)", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Sonar_ARuleTheStyleCopSetupTurnsOn_KeepsStyleCopsScope()
+    {
+        // SA1503 and S121 both on: BRO1514 keeps the braces on 'using', 'lock' and 'fixed' that SA1503 wants.
+        Write("Directory.Build.props", """<Project><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" /><PackageReference Include="StyleCop.Analyzers" Version="1.1.118" /></ItemGroup></Project>""");
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S121.severity = warning\n");
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root, sonar: SonarSetup.Read(root));
+
+        Assert.Contains("dotnet_diagnostic.BRO1514.severity = warning", result.Lines);
+        Assert.Contains("csharp_prefer_braces = true", result.Lines);
+        Assert.DoesNotContain("stylebro_braces_statements = if_and_loops", result.Lines);
+        Assert.Contains(result.Sonar!.Notes, n => n.StartsWith("stylebro_braces_statements not written for S121: the StyleCop setup turns BRO1514 on", StringComparison.Ordinal));
+    }
 }

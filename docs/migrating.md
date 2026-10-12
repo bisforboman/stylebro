@@ -262,22 +262,26 @@ isn't mapped.
 
 | Sonar | Fixed by |
 |---|---|
+| S121 (braces) | [BRO1514](rules/BRO1514.md) with `csharp_prefer_braces = true` and `stylebro_braces_statements = if_and_loops` (not `using`, `lock`, `fixed` or a deconstructing `foreach`, like S121) |
+| S818 (upper-case literal suffixes) | [BRO1135](rules/BRO1135.md) with `stylebro_upper_case_literal_suffixes = lone_l` (only a suffix that is just `l`, like S818) |
 | S927 (parameter names match the base) | [BRO1313](rules/BRO1313.md) with `stylebro_match_base_parameter_names = non_generic_methods` (methods only, and not a parameter whose type in the base is a type parameter the method fills in, like S927) |
+| S1066 (mergeable `if`s) | [BRO1149](rules/BRO1149.md) with `stylebro_allow_nested_dynamic_ifs = true` (conditions with a `dynamic` part aren't merged, like S1066) |
+| S1116 (empty statements) | [BRO1101](rules/BRO1101.md) with `stylebro_allow_semicolon_after_closing_brace = true` (the `;` after a type's `}` stays, like S1116) |
 | S1659 (one variable per declaration) | [BRO1142](rules/BRO1142.md) |
 | S1939 (redundant base types) | [BRO1408](rules/BRO1408.md) |
 | S2971 (LINQ predicate into `Count`/`Any`/...) | BRO1150 |
+| S3878 (arrays for `params`) | [BRO1151](rules/BRO1151.md) with `stylebro_params_arrays = except_object_and_jagged` (not for `params object[]`, `params Array[]` or jagged arrays, like S3878) |
 | S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = same_access` (overloads with the same access, like S4136), only when BRO1001 is on |
+| S8969 (redundant `!`) | [BRO1147](rules/BRO1147.md) with `stylebro_allow_null_forgiving_on_unannotated = true` (a `!` on a value declared without nullable annotations stays, like S8969) |
 
 **Not covered** (the report lists each under "Not covered" with its reason; they stay Sonar's). The fixing rule reports what
-the Sonar rule accepts, and has no setting that narrows it:
+the Sonar rule accepts, and has no setting that narrows it. (BRO1101, BRO1135, BRO1147, BRO1149, BRO1151 and BRO1514 got
+one each for S1116, S818, S8969, S1066, S3878 and S121, the owner's decision of 2026-10-12; the .NET SDK's rules can't be
+changed.)
 
 | Sonar | Rule | What it reports that Sonar accepts |
 |---|---|---|
 | S100, S101 (PascalCase names) | BRO1309 | events, enum members, enums, delegates, names with `_` inside, test classes (`fooTests`) |
-| S121 (braces) | BRO1514 | `using`, `lock` and `fixed` bodies |
-| S818 (upper-case literal suffixes) | BRO1135 | `1ul`, `1lu` (S818 only reports a last `l` without `u` before it) |
-| S1066 (mergeable `if`s) | BRO1149 | an inner condition that is `dynamic` |
-| S1116 (empty statements) | BRO1101 | the `;` after a type's or namespace's `}` |
 | S1118 (utility classes) | CA1052 | a private or protected constructor, a singleton member, a non-static nested type |
 | S1125 (redundant boolean literals) | IDE0075, IDE0100 | constants and `default`, `c ? true : true`, a comparison inside a conditional with a throw |
 | S1481, S1854 (unused locals and assignments) | IDE0059 | initial values like `0`, `null`, `""`, stores to captured variables, dead stores to used variables |
@@ -286,8 +290,6 @@ the Sonar rule accepts, and has no setting that narrows it:
 | S3052 (initialized to the default value) | CA1805 | `default`, `new Guid()`, an enum set to `0`, a nullable value type set to `null` |
 | S3260 (seal private classes) | CA1852 | its fix also seals private nested classes that have `protected` members, and every such member then gets CS0628 (SmartEnum: 144 warnings) |
 | S3442 (public constructors of abstract classes) | CA1012 | a constructor in another part of a partial abstract class |
-| S3878 (arrays for `params`) | BRO1151 | arrays and collection expressions for `params object[]`, jagged `params` arrays |
-| S8969 (redundant `!`) | BRO1147 | `!` on values declared without nullable annotations (`#nullable disable`, unannotated libraries) |
 
 **Sonar's own warnings for S1066, S2971 and S3878** are fixed too when the project references SonarAnalyzer.CSharp:
 BRO1149-BRO1151's fixes are registered for those ids, so `dotnet format` (or a light bulb) applies them to Sonar's
@@ -303,7 +305,9 @@ The data lives in the tool: `src/StyleBro.Migrate/data/sonar-mapping.tsv` (the m
 
 **With StyleCop too**, a rule is on when either setup turns it on, at the stronger severity: the migration normally turns
 the rules beyond StyleCop off (BRO1142, BRO1313, ...), but not when the matching Sonar rule is on. A setting
-Sonar's rule needs replaces the one from the StyleCop setup, and the report lists each such conflict. An option of a rule StyleCop's setup leaves off
+Sonar's rule needs replaces the one from the StyleCop setup, and the report lists each such conflict. A `stylebro_` setting that
+only narrows a rule to the Sonar rule's cases isn't written when the StyleCop setup turns that rule on (SA1106 also wants
+the `;` after a type's `}` gone, SA1503 braces on `using`): StyleCop's wider scope stays, and the report says so. An option of a rule StyleCop's setup leaves off
 isn't applied: S4136 only sets an option of BRO1001, so with SA1201 or SA1202 off it stays Sonar's alone.
 
 The report has a Sonar part: what was read, how many Sonar rules are on, which of them StyleBro or the SDK now fixes (and

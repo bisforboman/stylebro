@@ -22,6 +22,9 @@ public sealed class NestedIfCodeFixProvider : NodeCodeFixProvider<IfStatementSyn
     }
 
     /// <inheritdoc/>
+    private protected override bool NeedsSemanticModel => true;
+
+    /// <inheritdoc/>
     private protected override IEnumerable<TextChange>? GetChanges(IfStatementSyntax node, SourceText text, SemanticModel? model, AnalyzerConfigOptions options, Func<string, bool> isOn, CancellationToken cancellationToken) =>
-        NestedIfs.GetChange(node, text, options, isOn) is { } change ? new[] { change } : null;
+        NestedIfs.GetChange(node, text, options, isOn, model!) is { } change ? new[] { change } : null;
 }

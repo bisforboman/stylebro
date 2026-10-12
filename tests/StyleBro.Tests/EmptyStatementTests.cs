@@ -265,4 +265,37 @@ public class EmptyStatementTests
             }
         }
         """);
+
+    // Sonar's S1116 reports empty statements only: the ';' after a type's or namespace's '}' stays.
+    [Fact]
+    public Task AllowSemicolonAfterClosingBrace_KeepsItButNotEmptyStatements() => VerifyFixAsync(
+        """
+        namespace N
+        {
+            class C
+            {
+                void M()
+                {
+                    M(); {|BRO1101:;|}
+                }
+            };
+
+            enum E { A };
+        };
+        """,
+        """
+        namespace N
+        {
+            class C
+            {
+                void M()
+                {
+                    M();
+                }
+            };
+
+            enum E { A };
+        };
+        """,
+        "stylebro_allow_semicolon_after_closing_brace = true\n");
 }

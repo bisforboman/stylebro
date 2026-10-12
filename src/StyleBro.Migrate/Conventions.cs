@@ -786,7 +786,7 @@ internal static class Conventions
             {
                 // An unsigned suffix ('0u', '1UL'; real literals never end in 'u' or 'l'): lower case anywhere in it is BRO1135's.
                 // 'L' alone doesn't count: nobody writes '1l' (it reads as 11), so it would only outvote the 'u's.
-                Add(SuffixCaseKey, StyleBro.Analyzers.Readability.LiteralSuffixes.GetUpperCaseSuffix(token, lOnly: false) is not null);
+                Add(SuffixCaseKey, StyleBro.Analyzers.Readability.LiteralSuffixes.GetUpperCaseSuffix(token, StyleBro.Analyzers.Readability.SuffixScope.All) is not null);
             }
             else if ((token.IsKind(SyntaxKind.ElseKeyword) || token.IsKind(SyntaxKind.CatchKeyword) || token.IsKind(SyntaxKind.FinallyKeyword))
                 && token.GetPreviousToken().IsKind(SyntaxKind.CloseBraceToken))

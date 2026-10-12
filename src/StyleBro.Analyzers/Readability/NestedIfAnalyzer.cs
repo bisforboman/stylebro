@@ -28,7 +28,8 @@ public sealed class NestedIfAnalyzer : DiagnosticAnalyzer
                         inner,
                         c.Node.SyntaxTree.GetText(c.CancellationToken),
                         c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Node.SyntaxTree),
-                        id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken)) is not null)
+                        id => Severities.IsOn(c.Compilation.Options, c.Node.SyntaxTree, id, c.CancellationToken),
+                        c.SemanticModel) is not null)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.NestedIf, inner.IfKeyword.GetLocation()));
                 }
