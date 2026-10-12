@@ -90,7 +90,7 @@ public class FixOrderTests
         "BRO1520");
 
     [Fact]
-    public Task InternalMethods_SortedBelowPublicOnes() =>AssertConvergesInEveryOrderWithConfigAsync(
+    public Task InternalMethods_SortedBelowPublicOnes() => AssertConvergesInEveryOrderWithConfigAsync(
         """
         internal class C
         {

@@ -302,19 +302,6 @@ internal static class FieldNames
         && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal
         && !IsInPrivateType(field);
 
-    private static bool IsInPrivateType(ISymbol symbol)
-    {
-        for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
-        {
-            if (type.DeclaredAccessibility is Accessibility.Private)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /// <summary>
     /// Whether a serializer may write the type's members by name: [Serializable] (binary serialization writes every
     /// field), or an attribute that looks like a serializer setting ('JsonObject(MemberSerialization.Fields)',
@@ -530,6 +517,19 @@ internal static class FieldNames
         return CamelCaseNames.IsUsableName(result) ? result : null;
     }
 
+    private static bool IsInPrivateType(ISymbol symbol)
+    {
+        for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
+        {
+            if (type.DeclaredAccessibility is Accessibility.Private)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// A type with [StructLayout], [ComImport] or [UnmanagedFunctionPointer], or one that declares [DllImport],
     /// [LibraryImport] methods: its fields mirror native structures and constants ('cbSize', 'hSubMenu').
@@ -578,7 +578,8 @@ internal static class FieldNames
             .ThenByDescending(r => r.Modifiers)
             .ThenBy(r => r.Name, System.StringComparer.Ordinal)
             .FirstOrDefault();
-        return rule.Style is null ? null
+        return rule.Style is null
+            ? null
             : ToFieldStyle(options, rule.Style) ?? (IsPlainStyle(options, rule.Style, "pascal_case") ? null : FieldStyle.Other);
     }
 
