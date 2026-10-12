@@ -26,36 +26,6 @@ internal enum NamingCasing
     Other,
 }
 
-/// <summary>An SDK naming rule for fields (dotnet_naming_rule.*); null lists mean every value.</summary>
-internal sealed class NamingRule
-{
-    public NamingRule(int priority, string name, string[]? kinds, string[]? accessibilities, string[] modifiers, char casing)
-    {
-        Priority = priority;
-        Name = name;
-        Kinds = kinds;
-        Accessibilities = accessibilities;
-        Modifiers = modifiers;
-        Casing = casing;
-    }
-
-    public int Priority { get; }
-
-    public string Name { get; }
-
-    public string[]? Kinds { get; }
-
-    public string[]? Accessibilities { get; }
-
-    public string[] Modifiers { get; }
-
-    /// <summary>Gets 'c' camelCase, 'u' _camelCase, 'P' PascalCase, 'o' another style, ' ' turned off.</summary>
-    public char Casing { get; }
-
-    public static System.Collections.Generic.IComparer<NamingRule> By(System.Comparison<NamingRule> compare) =>
-        System.Collections.Generic.Comparer<NamingRule>.Create(compare);
-}
-
 /// <summary>Which field naming rule applies to a field.</summary>
 internal enum FieldRule
 {
@@ -574,6 +544,26 @@ internal static class FieldNames
         return CamelCaseNames.IsUsableName(result) ? result : null;
     }
 
+    /// <summary>
+    /// The casing the first SDK naming rule that covers a non-private field asks for (YamlDotNet: camelCase for internal
+    /// instance fields): it wins over StyleCop's defaults (PascalCase for public and internal fields, camelCase for
+    /// protected ones). Null for private fields, without a rule, or when the first rule is off (severity none/silent).
+    /// </summary>
+    internal static NamingCasing? GetNonPrivateCasing(IFieldSymbol field, FieldStyles style)
+    {
+        var index = System.Array.IndexOf(NonPrivateAccessibilities, field.DeclaredAccessibility);
+        return style.NonPrivate is not { } table || index < 0
+            ? null
+            : table[(index * 5) + (field.IsConst ? 4 : (field.IsStatic ? 2 : 0) + (field.IsReadOnly ? 1 : 0))] switch
+            {
+                'c' => NamingCasing.Camel,
+                'u' => NamingCasing.UnderscoreCamel,
+                'P' => NamingCasing.Pascal,
+                'o' => NamingCasing.Other,
+                _ => null,
+            };
+    }
+
     private static bool IsInPrivateType(ISymbol symbol)
     {
         for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
@@ -701,25 +691,6 @@ internal static class FieldNames
             && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.required_suffix"))
             && string.IsNullOrEmpty(Get($"dotnet_naming_style.{style}.word_separator"))
             && (Get($"dotnet_naming_style.{style}.required_prefix") ?? string.Empty) is var p && (p.Length == 0 || p == prefix);
-    }
-
-    /// <summary>
-    /// The casing the first SDK naming rule that covers a non-private field asks for (YamlDotNet: camelCase for internal
-    /// instance fields): it wins over StyleCop's defaults (PascalCase for public and internal fields, camelCase for
-    /// protected ones). Null for private fields, without a rule, or when the first rule is off (severity none/silent).
-    /// </summary>
-    internal static NamingCasing? GetNonPrivateCasing(IFieldSymbol field, FieldStyles style)
-    {
-        var index = System.Array.IndexOf(NonPrivateAccessibilities, field.DeclaredAccessibility);
-        return style.NonPrivate is not { } table || index < 0 ? null
-            : table[(index * 5) + (field.IsConst ? 4 : (field.IsStatic ? 2 : 0) + (field.IsReadOnly ? 1 : 0))] switch
-            {
-                'c' => NamingCasing.Camel,
-                'u' => NamingCasing.UnderscoreCamel,
-                'P' => NamingCasing.Pascal,
-                'o' => NamingCasing.Other,
-                _ => null,
-            };
     }
 
     /// <summary>
@@ -967,4 +938,34 @@ internal static class FieldNames
             return counts.TryGetValue(newName, out var count) ? count : 0;
         }
     }
+}
+
+/// <summary>An SDK naming rule for fields (dotnet_naming_rule.*); null lists mean every value.</summary>
+internal sealed class NamingRule
+{
+    public NamingRule(int priority, string name, string[]? kinds, string[]? accessibilities, string[] modifiers, char casing)
+    {
+        Priority = priority;
+        Name = name;
+        Kinds = kinds;
+        Accessibilities = accessibilities;
+        Modifiers = modifiers;
+        Casing = casing;
+    }
+
+    public int Priority { get; }
+
+    public string Name { get; }
+
+    public string[]? Kinds { get; }
+
+    public string[]? Accessibilities { get; }
+
+    public string[] Modifiers { get; }
+
+    /// <summary>Gets 'c' camelCase, 'u' _camelCase, 'P' PascalCase, 'o' another style, ' ' turned off.</summary>
+    public char Casing { get; }
+
+    public static System.Collections.Generic.IComparer<NamingRule> By(System.Comparison<NamingRule> compare) =>
+        System.Collections.Generic.Comparer<NamingRule>.Create(compare);
 }
