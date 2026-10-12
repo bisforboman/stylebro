@@ -105,6 +105,11 @@ steps:
   `stylebro-migrate format` formats a temporary copy of the repository (the fixes only run when they may write) and
   checks whether any file changed; the fixes write down which findings they kept and why. The copy is deleted, the
   repository isn't touched. That costs a second format run, only when there are findings.
+- **The same result on every OS:** without `end_of_line` in `.editorconfig`, `dotnet format`'s whitespace pass writes
+  the OS's line ending into the line breaks it rewrites (after `=>` followed by a comment, for example), so a CRLF file
+  checked on Linux, or an LF file on Windows, looked unformatted. `stylebro-migrate format` keeps each file's own
+  ending when the file used one throughout, and `--verify-no-changes` ignores findings that only swap it. Setting
+  `end_of_line` (`stylebro-migrate init` does when your files agree) picks one ending for every file instead.
 - **Without the tool:** plain `dotnet format --verify-no-changes --severity warn` works too, but it fails on kept
   findings. Suppress or baseline them first.
 - **Other analyzers and compiler fixes.** Plain `dotnet format --verify-no-changes` also fails on every other analyzer
