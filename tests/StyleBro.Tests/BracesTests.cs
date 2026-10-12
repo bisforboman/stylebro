@@ -348,6 +348,76 @@ public class BracesTests
         """,
         editorConfig: "csharp_prefer_braces = when_multiline:warning");
 
+    // StabilityMatrix: CSharpier split a long one-line 'if' (a merged condition) after StyleBro's run, and BRO1515 then wanted
+    // braces on the next one. With CSharpier laying the code out, a header or a child statement longer than its line width
+    // is multi-line already; one that fits isn't.
+    [Fact]
+    public Task WithCSharpier_AStatementCSharpierWillSplit_IsMultiLine() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int alpha, int beta)
+            {
+                if (alpha > 0 && beta > 0 && alpha + beta < 10000000)
+                    {|BRO1515:return 1;|}
+
+                if (alpha > 1)
+                    {|BRO1515:return alpha + beta + alpha * beta + alpha - beta;|}
+
+                if (beta > 1) {|BRO1515:return alpha * beta + alpha - beta + beta * 2 + 1;|}
+
+                if (alpha > 2)
+                    return 2;
+
+                return 0;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int alpha, int beta)
+            {
+                if (alpha > 0 && beta > 0 && alpha + beta < 10000000)
+                {
+                    return 1;
+                }
+
+                if (alpha > 1)
+                {
+                    return alpha + beta + alpha * beta + alpha - beta;
+                }
+
+                if (beta > 1)
+                {
+                    return alpha * beta + alpha - beta + beta * 2 + 1;
+                }
+
+                if (alpha > 2)
+                    return 2;
+
+                return 0;
+            }
+        }
+        """,
+        editorConfig: "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_by = csharpier\nstylebro_layout_print_width = 60");
+
+    [Fact]
+    public Task WithoutCSharpier_TheLineWidthDoesNotCount() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public int M(int alpha, int beta)
+            {
+                if (alpha > 0 && beta > 0 && alpha + beta < 10000000)
+                    return 1;
+
+                return 0;
+            }
+        }
+        """,
+        editorConfig: "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_print_width = 60");
+
     [Fact]
     public Task SingleLineJumps_AllowedWithTheOption() => VerifyNoDiagnosticsAsync(
         """

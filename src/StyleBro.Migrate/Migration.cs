@@ -35,6 +35,9 @@ internal static class Migration
     /// <summary>How the block records the StyleCop.Analyzers version, read back once the package is gone (<see cref="RecordedVersion"/>).</summary>
     public const string VersionPrefix = "# StyleCop.Analyzers version: ";
 
+    /// <summary>Why a StyleCop rule isn't enforced in a repository CSharpier formats (the report groups these).</summary>
+    public const string CSharpierReason = "CSharpier decides it";
+
     private const string UnformattedSuffix = "; 'stylebro-migrate format' leaves them alone (remove this line to format them)";
 
     /// <summary>The StyleBro rules that read documentation as XML, like the StyleCop rules they replace.</summary>
@@ -299,6 +302,23 @@ internal static class Migration
 
         // Sonar's rules turn on what fixes them, also rules StyleCop doesn't have: a rule on through either is on.
         result.Sonar = sonar?.Apply(lines, id => lines.Any(l => l.StartsWith($"dotnet_diagnostic.{id}.severity = ", StringComparison.Ordinal) && !l.EndsWith("= none", StringComparison.Ordinal)), own);
+
+        // CSharpier formats the repository: IDE0055 and the layout rules go off as in init, and a StyleCop rule only they
+        // replaced is CSharpier's now, not enforced by StyleBro (the two formatters would undo each other).
+        if (Conventions.CSharpier(root) is { } csharpier)
+        {
+            var (csharpierLines, csharpierReport) = Conventions.CSharpierLines(csharpier, root, OwnSettings(root));
+            lines.RemoveAll(l => Conventions.CSharpierRules.Any(id => l.StartsWith($"dotnet_diagnostic.{id}.severity = ", StringComparison.Ordinal)));
+            lines.Add(string.Empty);
+            lines.AddRange(csharpierLines.Select(l => l.Replace("# init: ", "# ")));
+            foreach (var (sa, ids) in result.Replacements.Where(r => setup.IsOn(r.Key) && r.Value.All(Conventions.CSharpierRules.Contains)))
+            {
+                result.Covered.Remove(sa);
+                result.Reasons[sa] = CSharpierReason;
+            }
+
+            result.Notes.Add(csharpierReport.Trim());
+        }
 
         if (setup.EditorConfigCopiedBy is { } copier)
         {

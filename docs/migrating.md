@@ -173,6 +173,10 @@ tool again replaces the block, so put your own settings outside it.
   `core.autocrlf`), the endings are kept out of it: `end_of_line = unset` for C# files and IDE0055 as a suggestion (not
   the error SA1500 would give it), so a Windows checkout neither fails the build nor gets rewritten; the report says how
   to settle it.
+- **CSharpier.** When the repository formats with [CSharpier](https://csharpier.com) (detected like `init` does, see
+  [getting started](getting-started.md)), IDE0055 and the same layout rules `init` turns off are off, so the two
+  formatters don't undo each other. The StyleCop rules only those replaced (SA1000-SA1028, SA1116, SA1117, ...) are
+  listed in the report under "CSharpier decides it" instead of being enforced.
 - **The StyleCop version** is recorded in the block (`# StyleCop.Analyzers version: ...`), so running `--write` again
   after removing the package still leaves the rules that version didn't have off.
 - **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every

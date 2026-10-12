@@ -60,5 +60,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_file_header_copyright` | text (`\n`, `{companyName}`, `{fileName}`) | StyleCop's copyright text | [BRO1615](rules/BRO1615.md) |
 | `stylebro_file_header_decoration` | a line of text | none | [BRO1615](rules/BRO1615.md) |
 | `stylebro_summary_layout` | `multi_line`, `single_line_when_fits` | `multi_line` | [BRO1616](rules/BRO1616.md) |
+| `stylebro_layout_by` | `csharpier`, or not set | not set | [BRO1149](rules/BRO1149.md) lays a merged condition out as CSharpier would; [BRO1514](rules/BRO1514.md)-[BRO1516](rules/BRO1516.md) count a statement CSharpier will split as multi-line. `stylebro-migrate` writes it when the repository uses CSharpier ([getting started](getting-started.md)) |
+| `stylebro_layout_print_width` | a number | `100` (CSharpier's) | with `stylebro_layout_by = csharpier`: CSharpier's `printWidth` |
 
 Coming from StyleCop, [`stylebro-migrate`](migrating.md) writes these from your `stylecop.json` and rule settings.

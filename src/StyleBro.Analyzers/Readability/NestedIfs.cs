@@ -95,7 +95,8 @@ internal static class NestedIfs
 
     private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
-        if (Render(top, text, OperatorAtBeginning(options, isOn)) is not { } rendered || !rendered.Merged.Contains(inner)
+        var layout = CSharpierLayout.PrintWidth(options) is { } width ? (width, Indentation.GetUnit(options)) : ((int, string)?)null;
+        if (Render(top, text, OperatorAtBeginning(options, isOn), layout) is not { } rendered || !rendered.Merged.Contains(inner)
             || (options.TryGetValue(AllowDynamicKey, out var allow) && bool.TryParse(allow.Trim(), out var allowed) && allowed
                 && rendered.Merged.Any(m => IsDynamic(m.Condition, model) || IsDynamic(GetOuter(m)!.Condition, model))))
         {
@@ -172,7 +173,7 @@ internal static class NestedIfs
     /// lines keep their indentation relative to it (Flow.Launcher's 'HandleMenuMsg(' went to the end of the wrapped
     /// condition's last line, its arguments below at the old place).
     /// </summary>
-    private static Rendered? Render(IfStatementSyntax top, SourceText text, bool beginning)
+    private static Rendered? Render(IfStatementSyntax top, SourceText text, bool beginning, (int Width, string Unit)? csharpier)
     {
         var ifs = new List<IfStatementSyntax> { top };
         while (GetInner(ifs[ifs.Count - 1]) is { } next)
@@ -208,6 +209,14 @@ internal static class NestedIfs
                 .Append(parenthesized ? "(" + condition + ")" : condition);
         }
 
+        // CSharpier lays the code out: the condition as CSharpier writes it, from the '(' (the top one may already be broken).
+        var start = top.Condition.SpanStart;
+        if (csharpier is { } layout && CSharpierCondition(ifs, text, top, layout.Width, layout.Unit) is { } laidOut)
+        {
+            builder.Clear().Append(laidOut);
+            start = top.OpenParenToken.Span.End;
+        }
+
         builder.Append(')');
 
         var gap = text.ToString(TextSpan.FromBounds(deepest.CloseParenToken.Span.End, body.SpanStart));
@@ -229,7 +238,7 @@ internal static class NestedIfs
         var nested = new List<TextChange>();
         void Collect(SyntaxNode node)
         {
-            if (node is IfStatementSyntax candidate && GetOuter(candidate) is null && GetInner(candidate) is not null && Render(candidate, text, beginning) is { } inside)
+            if (node is IfStatementSyntax candidate && GetOuter(candidate) is null && GetInner(candidate) is not null && Render(candidate, text, beginning, csharpier) is { } inside)
             {
                 nested.Add(new TextChange(new TextSpan(inside.Change.Span.Start - body.SpanStart, inside.Change.Span.Length), inside.Change.NewText!));
                 merged.AddRange(inside.Merged);
@@ -250,8 +259,63 @@ internal static class NestedIfs
         }
 
         builder.Append(bodyText);
-        return new Rendered(new TextChange(TextSpan.FromBounds(top.Condition.SpanStart, top.Span.End), builder.ToString()), merged);
+        return new Rendered(new TextChange(TextSpan.FromBounds(start, top.Span.End), builder.ToString()), merged);
     }
+
+    /// <summary>
+    /// The merged condition the way CSharpier writes it (<see cref="CSharpierLayout"/>), up to the closing ')': on the 'if' line
+    /// when it fits in <paramref name="width"/>, else every '&amp;&amp;' operand on a line of its own, one level deeper, the
+    /// operator first, and ')' on a line of its own. Null (the usual layout) when an operand spans lines or doesn't fit on its
+    /// line: CSharpier would break it further. Without this, CSharpier relaid every merge whose condition got too long
+    /// (StabilityMatrix: 10 of the 16 files it rejected after StyleBro's format).
+    /// </summary>
+    private static string? CSharpierCondition(List<IfStatementSyntax> ifs, SourceText text, IfStatementSyntax top, int width, string unit)
+    {
+        var operands = new List<string>();
+        foreach (var current in ifs)
+        {
+            foreach (var operand in NeedsParentheses(current.Condition) ? new[] { current.Condition } : AndOperands(current.Condition))
+            {
+                var value = text.ToString(operand.Span);
+                if (value.IndexOf('\n') >= 0)
+                {
+                    return null;
+                }
+
+                operands.Add(operand == current.Condition && NeedsParentheses(operand) ? "(" + value + ")" : value);
+            }
+        }
+
+        var line = text.Lines.GetLineFromPosition(top.SpanStart);
+        var flat = string.Join(" && ", operands);
+        if (top.OpenParenToken.Span.End - line.Start + flat.Length + 1 <= width
+            && text.Lines.GetLineFromPosition(top.OpenParenToken.SpanStart).LineNumber == line.LineNumber)
+        {
+            return flat;
+        }
+
+        var lineBreak = SingleLineBlocks.LineBreak(text, top.SpanStart);
+        var indent = text.ToString(new TextSpan(line.Start, IndentOf(text, top.SpanStart)));
+        var builder = new StringBuilder();
+        for (var i = 0; i < operands.Count; i++)
+        {
+            var operandLine = indent + unit + (i == 0 ? string.Empty : "&& ") + operands[i];
+            if (operandLine.Length > width)
+            {
+                return null;
+            }
+
+            builder.Append(lineBreak).Append(operandLine);
+        }
+
+        return builder.Append(lineBreak).Append(indent).ToString();
+    }
+
+    /// <summary>The operands of an '&amp;&amp;' chain (the expression itself when it isn't one).</summary>
+    private static IEnumerable<ExpressionSyntax> AndOperands(ExpressionSyntax condition) =>
+        condition is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalAndExpression } and
+            ? AndOperands(and.Left).Concat(AndOperands(and.Right))
+            : new[] { condition };
 
     /// <summary>
     /// Whether a variable declared in an inner condition (<c>out var x</c>, <c>is string s</c>) would collide once it moves into

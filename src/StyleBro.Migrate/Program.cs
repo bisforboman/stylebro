@@ -557,7 +557,8 @@ internal static class Program
         var mapping = LoadMapping();
         var titles = StyleCopSetup.Rules.ToDictionary(r => r.Id, r => r.Title);
         var groups = uncovered.GroupBy(id =>
-            result.Reasons.ContainsKey(id) ? "Partly covered or not expressible"
+            result.Reasons.TryGetValue(id, out var why) && why == Migration.CSharpierReason ? Migration.CSharpierReason + " (the repository formats with CSharpier)"
+            : result.Reasons.ContainsKey(id) ? "Partly covered or not expressible"
             : mapping.TryGetValue(id, out var proposal) && (proposal.StartsWith("Drop", StringComparison.Ordinal) || proposal.StartsWith("Not applicable", StringComparison.Ordinal)) ? "Dropped by design (no safe automatic fix, or not applicable)"
             : "Not covered yet");
         Console.WriteLine($"Not enforced after removing StyleCop ({uncovered.Count}):");
@@ -566,7 +567,8 @@ internal static class Program
             Console.WriteLine($"  {group.Key}:");
             foreach (var id in group)
             {
-                var reason = result.Reasons.TryGetValue(id, out var r) ? r
+                var reason = group.Key.StartsWith(Migration.CSharpierReason, StringComparison.Ordinal) ? titles[id]
+                    : result.Reasons.TryGetValue(id, out var r) ? r
                     : group.Key.StartsWith("Dropped", StringComparison.Ordinal) ? UserFacingReason(mapping[id])
                     : titles[id];
                 Console.WriteLine($"    {id}{(reason.Length == 0 ? string.Empty : ": " + reason)}");

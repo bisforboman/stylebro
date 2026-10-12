@@ -65,6 +65,7 @@ internal static class Braces
     public static IEnumerable<(StatementSyntax Child, string Id)> GetFindings(SyntaxNode node, SourceText text, Func<string, bool> isOn, AnalyzerConfigOptions options, bool afterFix = false)
     {
         var preference = GetPreference(options);
+        var width = CSharpierLayout.PrintWidth(options);
         var allowSingleLineJumps = AllowSingleLineJumps(options);
         if (preference == BracePreference.Never
             || (node is UsingStatementSyntax or LockStatementSyntax or FixedStatementSyntax or ForEachVariableStatementSyntax && OnlyIfAndLoops(options)))
@@ -116,7 +117,8 @@ internal static class Braces
                 continue;
             }
 
-            var multiLine = preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text);
+            var multiLine = (preference == BracePreference.WhenMultiline ? IsMultiLineForSdk(child, text) : IsMultiLine(child, text))
+                || (width is { } printWidth && CSharpierBreaks(child, text, printWidth, Indentation.GetUnit(options).Length, preference == BracePreference.WhenMultiline));
             if (preference == BracePreference.WhenMultiline && !multiLine && !inconsistent)
             {
                 continue;
@@ -421,6 +423,28 @@ internal static class Braces
         return owner.GetLastToken() != child.GetLastToken()
             && !(owner is IfStatementSyntax ifStatement && ifStatement.Statement == child)
             && !SameLine(child.GetLastToken().GetNextToken(), owner.GetLastToken());
+    }
+
+    /// <summary>
+    /// Whether CSharpier (<see cref="CSharpierLayout"/>) lays the statement over several lines, as far as its line width
+    /// shows: the child alone on its line (where CSharpier puts it) is longer than <paramref name="width"/>, or, with
+    /// <paramref name="header"/> (IDE0011's 'multi-line'), the part before it on one line is. Otherwise a long statement that
+    /// CSharpier splits after StyleBro's run wants braces on the next one (StabilityMatrix: merged 'if' conditions). Lines
+    /// that already span lines are judged by the text.
+    /// </summary>
+    private static bool CSharpierBreaks(StatementSyntax child, SourceText text, int width, int unit, bool header)
+    {
+        var owner = child.Parent!;
+        var before = child.GetFirstToken().GetPreviousToken();
+        var ownerLine = text.Lines.GetLineFromPosition(owner.SpanStart);
+        if (header && Line(text, owner.SpanStart) == Line(text, before.Span.End) && before.Span.End - ownerLine.Start > width)
+        {
+            return true;
+        }
+
+        var childLine = text.Lines.GetLineFromPosition(child.SpanStart);
+        var indent = childLine.LineNumber == ownerLine.LineNumber ? LeadingWhitespace(text, ownerLine).Length + unit : child.SpanStart - childLine.Start;
+        return Line(text, child.SpanStart) == Line(text, child.Span.End) && indent + child.Span.Length > width;
     }
 
     /// <summary>
