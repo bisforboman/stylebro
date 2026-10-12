@@ -114,8 +114,8 @@ internal static class ElseIfs
 
         var sorted = changes.OrderBy(c => c.Span.Start).ToList();
         int Map(int position) => position + sorted.Where(c => c.Span.End <= position).Sum(c => c.NewText!.Length - c.Span.Length);
-        IEnumerable<(StatementSyntax Child, string Id)> Findings(IfStatementSyntax chainRoot, SourceText chainText) =>
-            Braces.GetFindings(chainRoot, chainText, isOn, options)
+        IEnumerable<(StatementSyntax Child, string Id)> Findings(IfStatementSyntax chainRoot, SourceText chainText, bool afterFix = false) =>
+            Braces.GetFindings(chainRoot, chainText, isOn, options, afterFix)
                 .Where(f => !Braces.IsLeftToExpansion(f.Child, chainText, options, isOn));
 
         // The brace rules' findings before the join (the outer chains, and the inner chains that were in a block) ...
@@ -130,18 +130,19 @@ internal static class ElseIfs
 
         // Incremental: a full parse of the joined file cost ~10 ms per candidate in a 100 KB file (per edit in the IDE).
         var root = chain.SyntaxTree.WithChangedText(joined).GetRoot();
-        var after = parts.Select(p => Map(p.If.SpanStart))
+        var joinedChains = parts.Select(p => Map(p.If.SpanStart))
             .Select(start => root.FindToken(start).Parent is IfStatementSyntax joinedIf && joinedIf.SpanStart == start ? Braces.GetChain(joinedIf) : null)
             .OfType<IfStatementSyntax>()
             .Distinct()
-            .SelectMany(c => Findings(c, joined))
             .ToList();
-        if (after.All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))
+        if (joinedChains.SelectMany(c => Findings(c, joined)).All(f => before.TryGetValue(f.Child.SpanStart, out var id) && id == f.Id))
         {
             return changes;
         }
 
-        if (Braces.GetChanges(after.Select(f => f.Child).ToList(), joined, options, isOn) is not { } wraps)
+        // All of them: also the clauses that braces on another one make BRO1516's.
+        var after = joinedChains.SelectMany(c => Findings(c, joined, afterFix: true)).Select(f => f.Child).Distinct().ToList();
+        if (Braces.GetChanges(after, joined, options, isOn) is not { } wraps)
         {
             return null;
         }
