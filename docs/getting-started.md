@@ -12,8 +12,9 @@ Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your pro
 ### Which version
 
 The latest release on nuget.org is **0.5.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
-that exact version. Everything on this page is in it, except what's marked *Next release*. To try the code on `main`
-before the next release, build both
+that exact version. This page describes `main`: what changed since that release (some `init` verdicts,
+for example) ships in the next one and is listed in [changes/](https://github.com/bisforboman/stylebro/tree/main/changes).
+To try the code on `main` before the next release, build both
 packages from a clone into a local folder (any version string works; `0.5.0-dev.1` here):
 
 ```
@@ -419,8 +420,10 @@ one folder down (`src/MySolution.slnx`): the only one is used, and the command s
 several are listed, as at the root. `baseline` and `--diff` find them the same way.
 If `dotnet format` crashes, the command names the projects of that run, and when the crash came after some files were
 written, lists every file it changed (`Run 1 failed after changing 12 files:`).
-Review the diff and commit it. In a large codebase you may not want one big change: see
-[Large codebases](#large-codebases).
+Review the diff and commit it. In an established codebase, land that commit when few pull requests are open (they
+will conflict with it), and add its hash to `.git-blame-ignore-revs` so `git blame` skips it (GitHub reads that file
+too; locally: `git config blame.ignoreRevsFile .git-blame-ignore-revs`). In a large codebase you may not want one big
+change: see [Large codebases](#large-codebases).
 
 **Why not plain `dotnet format`?** It also applies every other analyzer's fixes and the compiler's own, and some of
 those change behavior or break the build: on one trial repository it added `required` to properties (CS8618) and a
