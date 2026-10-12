@@ -23,20 +23,30 @@ internal sealed class SonarSetup
     public const string DefaultsVersion = "10.35.0.4138";
 
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S\d+)\.severity$", RegexOptions.IgnoreCase);
-    private static readonly Regex Package = new(@"\b(?:Include|Update)\s*=\s*""SonarAnalyzer\.CSharp""(?<rest>[^>]*)>", RegexOptions.IgnoreCase);
-    private static readonly Regex Version = new(@"\bVersion\s*=\s*""(?<version>[^""]+)""", RegexOptions.IgnoreCase);
+    private static readonly Regex Package = new(@"\b(?:Include|Update)\s*=\s*""SonarAnalyzer\.CSharp""(?<rest>[^>]*)>(?:\s*<Version>(?<element>[^<]+)</Version>)?", RegexOptions.IgnoreCase);
 
-    private SonarSetup(Dictionary<string, Severity> severities, List<string> sources)
+    /// <summary>A packages.config entry or an analyzer's path in the packages folder (old-style projects), like StyleCop's.</summary>
+    private static readonly Regex OldStylePackage = new(@"<package\b[^>]*?\bid=""SonarAnalyzer\.CSharp""[^>]*?\bversion=""(?<v>[^""]+)""|SonarAnalyzer\.CSharp\.(?<v>\d+(?:\.\d+){2,3})[\\/]", RegexOptions.IgnoreCase);
+    private static readonly Regex VersionAttribute = new(@"\bVersion\s*=\s*""(?<version>[^""]+)""", RegexOptions.IgnoreCase);
+
+    private SonarSetup(Dictionary<string, Severity> severities, List<string> sources, string? version)
     {
         Severities = severities;
         Sources = sources;
+        Version = version;
     }
+
+    /// <summary>Gets the SonarAnalyzer.CSharp version the repository references (null: none found, or none named).</summary>
+    public string? Version { get; }
 
     /// <summary>Gets every Sonar C# rule: on by default ("Sonar way") and its title.</summary>
     public static IReadOnlyDictionary<string, (bool SonarWay, string Title)> Rules { get; } = LoadRules();
 
     /// <summary>Gets the Sonar rules a StyleBro or SDK rule fixes, in the order of the mapping file.</summary>
     public static IReadOnlyList<MappedRule> Mapping { get; } = LoadMapping().Where(m => m.Rule != "-").ToList();
+
+    /// <summary>Gets every row of the mapping, the ones not covered too (their versions count).</summary>
+    private static IReadOnlyList<MappedRule> AllMapped { get; } = LoadMapping();
 
     /// <summary>
     /// Gets the Sonar rules with a fixing rule that isn't safe (mode 'none' in the mapping file), with the reason: reported as
@@ -69,10 +79,13 @@ internal sealed class SonarSetup
                 severities[id] = Severity.Warning;
             }
         }
-        else if (PackageVersion(files.Where(StyleCopSetup.IsMSBuild).Concat(references.MSBuild)) is { } version)
+
+        var version = PackageVersion(files.Where(StyleCopSetup.IsMSBuild).Concat(references.MSBuild), files);
+        var known = ParseVersion(version);
+        if (profile is null && version is not null)
         {
-            sources.Add($"SonarAnalyzer.CSharp {version} (its default rules, \"Sonar way\", as of {DefaultsVersion})");
-            foreach (var (id, rule) in Rules.Where(r => r.Value.SonarWay))
+            sources.Add($"SonarAnalyzer.CSharp {version} (its default rules, \"Sonar way\"{(known is null ? $", as of {DefaultsVersion}" : string.Empty)})");
+            foreach (var id in Rules.Keys.Where(id => OnByDefault(id, known)))
             {
                 severities[id] = Severity.Warning;
             }
@@ -112,8 +125,27 @@ internal sealed class SonarSetup
             sources.Add(".editorconfig");
         }
 
-        return sources.Count > 0 ? new SonarSetup(severities, sources) : null;
+        // A rule the referenced version doesn't have reports nothing, whatever the settings say (tfplan2md has 9.16, which
+        // has no S8969: it came in 10.30, and turning BRO1147 on for it removed '!' in 26 files).
+        foreach (var id in severities.Keys.Where(id => !Exists(id, known)).ToList())
+        {
+            severities.Remove(id);
+        }
+
+        return sources.Count > 0 ? new SonarSetup(severities, sources, known is null ? null : version) : null;
     }
+
+    /// <summary>
+    /// Whether a Sonar version has the rule (<paramref name="version"/> null: the newest known). Per-version data covers the
+    /// mapped rules only (sonar-mapping.tsv); the others count as in every version.
+    /// </summary>
+    public static bool Exists(string id, System.Version? version) =>
+        version is null || ParseVersion(AllMapped.FirstOrDefault(m => m.Sonar == id)?.Since) is not { } since || since <= version;
+
+    /// <summary>Whether a Sonar version has the rule on by default ("Sonar way"); <paramref name="version"/> null: <see cref="DefaultsVersion"/>'s.</summary>
+    public static bool OnByDefault(string id, System.Version? version) =>
+        Rules.TryGetValue(id, out var rule) && rule.SonarWay && Exists(id, version)
+        && (version is null || ParseVersion(AllMapped.FirstOrDefault(m => m.Sonar == id)?.SonarWaySince) is not { } since || since <= version);
 
     public bool IsOn(string id) => Severities.TryGetValue(id, out var severity) && severity >= Severity.Suggestion;
 
@@ -247,21 +279,42 @@ internal sealed class SonarSetup
 
     private static string ValueOf(string line) => line.Substring(line.IndexOf('=') + 1).Trim();
 
-    /// <summary>The SonarAnalyzer.CSharp version the MSBuild files reference ('?' when only the reference names none), or null.</summary>
-    private static string? PackageVersion(IEnumerable<string> msbuild)
+    /// <summary>
+    /// The SonarAnalyzer.CSharp version the repository references, like StyleCop's: a PackageReference or central
+    /// PackageVersion (attribute or element), a packages.config entry or an analyzer path in the packages folder; the
+    /// lowest of several. '?' when only a reference without a version is found, null without any.
+    /// </summary>
+    private static string? PackageVersion(IEnumerable<string> msbuild, IEnumerable<string> files)
     {
-        string? found = null;
+        var found = new List<string>();
+        var named = false;
         foreach (var file in msbuild.Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            foreach (Match match in Package.Matches(StyleCopSetup.WithoutComments(File.ReadAllText(file))))
+            var text = StyleCopSetup.WithoutComments(File.ReadAllText(file));
+            foreach (Match match in Package.Matches(text))
             {
-                var version = Version.Match(match.Groups["rest"].Value);
-                found = version.Success ? version.Groups["version"].Value : found ?? "?";
+                named = true;
+                var version = VersionAttribute.Match(match.Groups["rest"].Value);
+                if (version.Success || match.Groups["element"].Success)
+                {
+                    found.Add((version.Success ? version.Groups["version"].Value : match.Groups["element"].Value).Trim());
+                }
             }
+
+            found.AddRange(OldStylePackage.Matches(text).Select(m => m.Groups["v"].Value));
         }
 
-        return found;
+        foreach (var config in files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)))
+        {
+            found.AddRange(OldStylePackage.Matches(File.ReadAllText(config)).Select(m => m.Groups["v"].Value));
+        }
+
+        return found.OrderBy(v => ParseVersion(v) ?? new System.Version(int.MaxValue, 0)).FirstOrDefault() ?? (named ? "?" : null);
     }
+
+    /// <summary>A Sonar version ('9.16.0.82469', '10.30'), or null when it isn't one ('?', '$(SonarVersion)', '10.*').</summary>
+    private static System.Version? ParseVersion(string? version) =>
+        System.Version.TryParse(version?.Split('-')[0], out var parsed) ? parsed : null;
 
     /// <summary>The Sonar rules a quality profile backup ('/api/qualityprofiles/backup') activates for C#.</summary>
     private static List<string> ReadProfile(string file)
@@ -342,10 +395,10 @@ internal sealed class SonarSetup
         ReadTable("SonarRules.tsv").ToDictionary(f => f[0], f => (f[1] == "on", f[3]), StringComparer.Ordinal);
 
     private static List<MappedRule> LoadMapping() =>
-        ReadTable("SonarMapping.tsv").Select(f => new MappedRule(f[0], f[1], f[2] == "option", f[3] == "-" ? null : f[3], f[4] == "-" ? null : f[4])).ToList();
+        ReadTable("SonarMapping.tsv").Select(f => new MappedRule(f[0], f[1], f[2] == "option", f[3] == "-" ? null : f[3], f[4] == "-" ? null : f[4], f[5] == "-" ? null : f[5], f[6] == "-" ? null : f[6])).ToList();
 
     /// <summary>A row of the mapping: a Sonar rule, the rule that fixes it, whether only its setting is written, and a note.</summary>
-    internal sealed record MappedRule(string Sonar, string Rule, bool OptionOnly, string? Setting, string? Note);
+    internal sealed record MappedRule(string Sonar, string Rule, bool OptionOnly, string? Setting, string? Note, string? Since = null, string? SonarWaySince = null);
 
     /// <summary>What <see cref="Apply"/> did, for the report.</summary>
     internal sealed class Applied

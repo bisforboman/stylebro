@@ -91,6 +91,9 @@ internal static class Program
     /// <summary>What to do after --write: swap the packages and format.</summary>
     internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
 
+    /// <summary>What to do after --write when StyleBro.Analyzers is already in and StyleCop.Analyzers still is.</summary>
+    internal const string RemoveStyleCopStep = "Next: remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
+
     public static int Main(string[] args)
     {
         if (args.FirstOrDefault() == "help" || args.Any(a => a is "--help" or "-h" or "-?"))
@@ -151,7 +154,7 @@ internal static class Program
         Console.WriteLine($"Read: {(setup.Sources.Count == 0 ? "no StyleCop settings (StyleCop's defaults)" : string.Join(", ", setup.Sources))}");
         if (setup.Version is { } version)
         {
-            Console.WriteLine($"StyleCop.Analyzers version: {version}{(version.StartsWith("1.2", StringComparison.Ordinal) ? string.Empty : " (rules added in later versions count as off)")}");
+            Console.WriteLine($"StyleCop.Analyzers version: {version}{(setup.VersionRecorded ? " (recorded by the last --write; the package is gone)" : string.Empty)}{(version.StartsWith("1.2", StringComparison.Ordinal) ? string.Empty : " (rules added in later versions count as off)")}");
         }
 
         foreach (var line in ScopeReport(setup))
@@ -232,11 +235,24 @@ internal static class Program
         // Where the swap goes first, then what to do next.
         PackageHints(setup, root).ForEach(Console.WriteLine);
         Console.WriteLine(write
-            ? NextStep
+            ? NextAfterWrite(setup, root)
             : "Run with --write to put these settings into the .editorconfig files and carry the suppressions over.");
         PrintWorkspaceHint(root);
         return 0;
     }
+
+    /// <summary>
+    /// The next step after --write, from where the package swap stands: both packages still to swap, StyleCop still to
+    /// remove, only format left (a second --write after the swap said "add StyleBro.Analyzers" again), or StyleBro to add.
+    /// </summary>
+    internal static string NextAfterWrite(StyleCopSetup setup, string root) =>
+        (PreviewCommand.ReferencesStyleBro(root), setup.ReferencedIn.Count > 0) switch
+        {
+            (false, true) => NextStep,
+            (true, true) => RemoveStyleCopStep,
+            (true, false) => FormatHint,
+            _ => AddPackageHint,
+        };
 
     /// <summary>The next step after init: format, or first add the package when no MSBuild file references it.</summary>
     internal static string NextHint(string root) => PreviewCommand.ReferencesStyleBro(root) ? FormatHint : AddPackageHint;

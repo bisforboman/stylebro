@@ -166,7 +166,13 @@ tool again replaces the block, so put your own settings outside it.
   IDE0073 off, and the report says why.
 - **Line endings.** `end_of_line` when your C# files clearly use one ending (judged like `init` does; files git
   converts on checkout don't count, and when they're the majority nothing is written) and your `.editorconfig`
-  doesn't set it: without it `format` writes the OS's ending into the lines it changes.
+  doesn't set it: without it `format` writes the OS's ending into the lines it changes. When your `.editorconfig` sets
+  `end_of_line` but git converts the files on checkout (a `.gitattributes` `text` attribute without `eol`, or
+  `core.autocrlf`), the endings are kept out of it: `end_of_line = unset` for C# files and IDE0055 as a suggestion (not
+  the error SA1500 would give it), so a Windows checkout neither fails the build nor gets rewritten; the report says how
+  to settle it.
+- **The StyleCop version** is recorded in the block (`# StyleCop.Analyzers version: ...`), so running `--write` again
+  after removing the package still leaves the rules that version didn't have off.
 - **A build that copies `.editorconfig`.** Some shared build setups copy an `.editorconfig` over the root one on every
   build (SixLabors' shared infrastructure does). The report notes such a file: the block would be lost on the next
   build, so put it into the copied file (or stop the copy).
@@ -236,8 +242,10 @@ What it reads, in this order (later wins, like for StyleCop):
 - **The base.** A quality profile exported from the server, when you pass one: `--sonar-profile profile.xml` (the XML from
   the server's `api/qualityprofiles/backup?language=cs&qualityProfile=<name>`, or Quality Profiles > Back up in the UI;
   its `csharpsquid` rules are on). Without it, when a project references `SonarAnalyzer.CSharp` (`PackageReference`,
-  `GlobalPackageReference` or central package versions), the package's own defaults ("Sonar way", from SonarAnalyzer.CSharp
-  10.35's rule list).
+  `GlobalPackageReference`, central package versions or `packages.config`), the package's own defaults ("Sonar way", from
+  SonarAnalyzer.CSharp 10.35's rule list, adjusted to the referenced version for the rules StyleBro maps: S8969 only from
+  10.30, S2325 on by default only from 9.32). A rule the referenced version doesn't have counts as off, also when a
+  ruleset or config sets it.
 - **Rulesets** with Sonar rules (`<Rules AnalyzerId="SonarAnalyzer.CSharp">`): your own, SonarLint's
   `.sonarlint/*csharp.ruleset`, and the scanner's `.sonarqube/conf/Sonar-cs.ruleset` when it's there (rulesets named
   `*none*` are skipped).

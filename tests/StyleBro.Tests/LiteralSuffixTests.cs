@@ -43,6 +43,29 @@ public class LiteralSuffixTests
         }
         """);
 
+    // tfplan2md: init found '0u' and turned BRO1135 off, and BRO1122 still wrote '6U'. 'L' stays upper case (CS0078).
+    [Fact]
+    public Task WithBro1135Off_UnsignedSuffixesAreLowerCase() => Verify.VerifyFixAsync(
+        """
+        class C
+        {
+            uint a = {|BRO1122:(uint)6|};
+            ulong b = {|BRO1122:(ulong)1|};
+            long c = {|BRO1122:(long)1|};
+            float d = {|BRO1122:(float)1|};
+        }
+        """,
+        """
+        class C
+        {
+            uint a = 6u;
+            ulong b = 1ul;
+            long c = 1L;
+            float d = 1F;
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1135.severity = none");
+
     [Fact]
     public Task ValueOrTypeWouldChange_IsNotReported() => Verify.VerifyNoDiagnosticsAsync("""
         class C

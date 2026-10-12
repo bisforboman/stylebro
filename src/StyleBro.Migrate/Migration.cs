@@ -32,6 +32,9 @@ internal static class Migration
     /// <summary>The comment above a vendored folder's generated_code section.</summary>
     public const string VendoredComment = "# Vendored code (someone else's): formatting and StyleBro leave it alone, like generated code";
 
+    /// <summary>How the block records the StyleCop.Analyzers version, read back once the package is gone (<see cref="RecordedVersion"/>).</summary>
+    public const string VersionPrefix = "# StyleCop.Analyzers version: ";
+
     private const string UnformattedSuffix = "; 'stylebro-migrate format' leaves them alone (remove this line to format them)";
 
     /// <summary>The StyleBro rules that read documentation as XML, like the StyleCop rules they replace.</summary>
@@ -231,6 +234,23 @@ internal static class Migration
             result.Notes.Add($"Kept the repository's own settings for: {string.Join(", ", kept.Select(KeyOf))}.");
         }
 
+        // The repository's end_of_line against git's checkout conversion (kubernetes-client): endings stay out of it.
+        if (Conventions.EndingContradiction(root, OwnSettings(root)) is ({ } endingLines, { } endingReport))
+        {
+            if (fieldStyle is null)
+            {
+                result.Notes.Add(endingReport);
+                lines.Add(endingLines[0]);
+            }
+
+            lines.Add(endingLines[1]);
+            var ide0055 = lines.FindIndex(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal));
+            if (ide0055 >= 0 && StyleCopSetup.ParseSeverity(lines[ide0055].Substring(lines[ide0055].IndexOf('=') + 1)) > Severity.Suggestion)
+            {
+                lines[ide0055] = endingLines[2];
+            }
+        }
+
         // Line endings, judged like init does: without end_of_line 'format' writes the OS's ending into the lines it rewrites
         // (Soulseek.NET, LF: 8 files with mixed endings after a Windows run).
         if (fieldStyle is null && !own.Contains("end_of_line") && Conventions.LineEndings(root) is var (endOfLine, endings) && endings is not null)
@@ -329,6 +349,11 @@ internal static class Migration
 
         // Where StyleCop didn't run, nothing changes, whitespace included: 'format' reads the folders from this line.
         var mainLines = setup.Folders is null || setup.FoldersWithout.Count == 0 ? main.Lines : [UnformattedLine(setup.FoldersWithout), .. main.Lines];
+        if (setup.Version is { } version)
+        {
+            mainLines = [.. mainLines, string.Empty, VersionPrefix + version + " (rules it doesn't have stay off after the package is removed)"];
+        }
+
         var plan = new SortedDictionary<string, List<(string, List<string>)>>(StringComparer.OrdinalIgnoreCase)
         {
             [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, mainLines)],
@@ -451,6 +476,15 @@ internal static class Migration
             : line.Substring(UnformattedPrefix.Length, (end < 0 ? line.Length : end) - UnformattedPrefix.Length).Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
                 .Select(f => f.TrimEnd('/') + "/")
                 .ToList();
+    }
+
+    /// <summary>The StyleCop.Analyzers version the stylebro-migrate block in the root .editorconfig records, or null.</summary>
+    public static string? RecordedVersion(string root)
+    {
+        var path = Path.Combine(root, ".editorconfig");
+        var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
+        var version = Regex.Match(block.Value, "^" + Regex.Escape(VersionPrefix) + @"(\S+)", RegexOptions.Multiline);
+        return version.Success ? version.Groups[1].Value : null;
     }
 
     /// <summary>The block that goes into an .editorconfig.</summary>

@@ -469,6 +469,30 @@ public class ParameterLayoutTests
         """,
         editorConfig: "dotnet_diagnostic.BRO1107.severity = none");
 
+    // metadata-extractor: init turns BRO1108 off for grouped items; BRO1107 then moves only the first item, the groups stay.
+    [Fact]
+    public Task WithBro1108Off_GroupedItemsStayGrouped() => VerifyFixAsync(
+        """
+        class C
+        {
+            string M(int tag, int index, string a, string b) => a;
+
+            string N() => M({|BRO1107:1|},
+                2, "a", "b");
+        }
+        """,
+        """
+        class C
+        {
+            string M(int tag, int index, string a, string b) => a;
+
+            string N() => M(
+                1,
+                2, "a", "b");
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1108.severity = none");
+
     // spreadcheetah: 'Assert.Equal(@"Address line 2 (verbatim' + 'string: "", \)", name.Name)' was split around the literal.
     [Fact]
     public Task ListsWithAMultiLineString_AreLeftAlone() => VerifyNoDiagnosticsAsync(

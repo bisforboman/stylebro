@@ -89,8 +89,9 @@ internal static class PropertySummaries
 
         string[] accepted = initOnly && getter && visibleSetter ? [verb, "Gets"] : [verb];
 
-        var isBool = property.Type is PredefinedTypeSyntax { Keyword.RawKind: (int)SyntaxKind.BoolKeyword }
-            || (property.Type is NullableTypeSyntax { ElementType: PredefinedTypeSyntax { Keyword.RawKind: (int)SyntaxKind.BoolKeyword } });
+        // Only 'bool', like StyleCop's SA1623: a 'bool?' summary takes the plain verb ('Gets whether' stays; tfplan2md's
+        // became 'Gets a value indicating whether').
+        var isBool = property.Type is PredefinedTypeSyntax { Keyword.RawKind: (int)SyntaxKind.BoolKeyword };
 
         if (GetSummaryTextStart(property) is not { } start)
         {
