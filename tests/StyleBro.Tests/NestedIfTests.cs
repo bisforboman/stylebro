@@ -119,6 +119,42 @@ public class NestedIfTests
         """,
         editorConfig: "dotnet_style_operator_placement_when_wrapping = end_of_line\n");
 
+    // sourcegit: the key says beginning_of_line, but nothing enforces it (init turned BRO1520 off: the code puts its
+    // operators at the end), so the merged '&&' stays where the outer condition ended.
+    [Fact]
+    public Task TheOperatorKeyWithBRO1520Off_EndOfLine() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null &&
+                    msg > 0)
+                {
+                    {|BRO1149:if|} (msg == 1)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (menu != null &&
+                    msg > 0 &&
+                    msg == 1)
+                {
+                    return;
+                }
+            }
+        }
+        """,
+        editorConfig: "dotnet_style_operator_placement_when_wrapping = beginning_of_line\ndotnet_diagnostic.BRO1520.severity = none\n");
+
     // An '#endregion' right after the 'if' kept it until BRO1113 removed the region, so the merge came on a second run.
     [Fact]
     public Task RegionLinesAroundTheIf_AreMerged() => Verify.VerifyFixAsync(

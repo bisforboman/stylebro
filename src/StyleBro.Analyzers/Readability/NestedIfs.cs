@@ -95,7 +95,7 @@ internal static class NestedIfs
 
     private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
-        if (Render(top, text, WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true)) is not { } rendered || !rendered.Merged.Contains(inner)
+        if (Render(top, text, OperatorAtBeginning(options, isOn)) is not { } rendered || !rendered.Merged.Contains(inner)
             || (options.TryGetValue(AllowDynamicKey, out var allow) && bool.TryParse(allow.Trim(), out var allowed) && allowed
                 && rendered.Merged.Any(m => IsDynamic(m.Condition, model) || IsDynamic(GetOuter(m)!.Condition, model))))
         {
@@ -120,7 +120,7 @@ internal static class NestedIfs
 
         var root = Braces.GetChain(mergedTop.Statement) ?? mergedTop;
         var children = mergedTop.Statement.DescendantNodesAndSelf().Where(n => Braces.Kinds.Contains(n.Kind())).Prepend(root)
-            .SelectMany(n => Braces.GetFindings(n, merged, isOn, options))
+            .SelectMany(n => Braces.GetFindings(n, merged, isOn, options, afterFix: true))
             .Where(f => !Braces.IsLeftToExpansion(f.Child, merged, options, isOn))
             .Select(f => f.Child)
             .Distinct()
@@ -154,6 +154,15 @@ internal static class NestedIfs
 
         return new TextChange(new TextSpan(root.SpanStart + start, before.Length - start - end), after.Substring(start, after.Length - start - end));
     }
+
+    /// <summary>
+    /// Where a wrapped '&amp;&amp;' goes: where dotnet_style_operator_placement_when_wrapping says (the beginning by default)
+    /// when BRO1520 enforces it, else at the end of the line, where the outer condition ended. sourcegit sets
+    /// beginning_of_line but writes 254 of 264 operators at the end (init turns BRO1520 off there), and the merge put its
+    /// '&amp;&amp;' first.
+    /// </summary>
+    private static bool OperatorAtBeginning(AnalyzerConfigOptions options, Func<string, bool> isOn) =>
+        isOn(DiagnosticIds.OperatorPlacement) && WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true);
 
     /// <summary>
     /// The merged chain starting at <paramref name="top"/>: one edit from its condition to its end, with the chains in the

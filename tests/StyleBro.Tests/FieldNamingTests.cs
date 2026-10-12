@@ -957,13 +957,15 @@ public class FieldNamingTests
         """,
         "stylebro_private_static_field_naming = camelCase");
 
+    // A naming rule for statics that asks for a style StyleBro doesn't write ('s_') leaves their names (before, 'cache'
+    // became 'Cache', against the rule); constants follow their own rule.
     [Fact]
-    public Task NamingRuleForStatics_WithAnotherStyle_KeepsPascalCase() => VerifyFixAsync(
+    public Task NamingRuleForStatics_WithAnotherStyle_LeavesThem() => VerifyFixAsync(
         """
         public class C
         {
             private const int {|BRO1306:limit|} = 2;
-            private static readonly string {|BRO1306:cache|} = "";
+            private static readonly string cache = "";
             private static readonly string s_shared = "";
 
             public int Sum() => limit + cache.Length + s_shared.Length;
@@ -973,10 +975,10 @@ public class FieldNamingTests
         public class C
         {
             private const int Limit = 2;
-            private static readonly string Cache = "";
+            private static readonly string cache = "";
             private static readonly string s_shared = "";
 
-            public int Sum() => Limit + Cache.Length + s_shared.Length;
+            public int Sum() => Limit + cache.Length + s_shared.Length;
         }
         """,
         """
@@ -1026,6 +1028,52 @@ public class FieldNamingTests
         dotnet_naming_symbols.static_readonly.required_modifiers = static, readonly
         dotnet_naming_style.camel.capitalization = camel_case
         dotnet_naming_style.pascal.capitalization = pascal_case
+        """);
+
+    // sourcegit: its rule wants 's_' on private static fields, readonly ones included. StyleBro doesn't write that style,
+    // so the names stay (BRO1306 renamed '_culture' to 'Culture', BRO1303 'count' to '_count').
+    [Fact]
+    public Task NamingRuleWithAStyleStyleBroDoesNotWrite_LeavesStaticFields() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            private static readonly string _culture = "";
+            private static readonly string s_format = "";
+            private static int count;
+            private int _value;
+
+            public int Get() => _culture.Length + s_format.Length + count + _value;
+        }
+        """,
+        """
+        dotnet_naming_rule.private_static_fields_should_have_prefix.severity = suggestion
+        dotnet_naming_rule.private_static_fields_should_have_prefix.symbols = private_static_fields
+        dotnet_naming_rule.private_static_fields_should_have_prefix.style = private_static_prefix_style
+        dotnet_naming_symbols.private_static_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_static_fields.required_modifiers = static
+        dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
+        dotnet_naming_style.private_static_prefix_style.required_prefix = s_
+        dotnet_naming_style.private_static_prefix_style.capitalization = camel_case
+        dotnet_naming_rule.camel_case_for_private_internal_fields.severity = suggestion
+        dotnet_naming_rule.camel_case_for_private_internal_fields.symbols = private_internal_fields
+        dotnet_naming_rule.camel_case_for_private_internal_fields.style = camel_case_underscore_style
+        dotnet_naming_symbols.private_internal_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_internal_fields.applicable_accessibilities = private, internal
+        dotnet_naming_style.camel_case_underscore_style.required_prefix = _
+        dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
+        """);
+
+    // sourcegit: 'Text' would be the name of its own class (CS0542).
+    [Fact]
+    public Task AFieldNamedLikeItsType_IsNotRenamed() => VerifyNoDiagnosticsAsync(
+        """
+        public class Engine
+        {
+            internal class Text
+            {
+                public string text = string.Empty;
+            }
+        }
         """);
 
     [Fact]

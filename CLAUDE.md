@@ -1340,6 +1340,12 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   leave it, BRO1001 skips types whose sort would separate them); group comments keep their group.
 - BRO1604 only prefixes noun phrases; BRO1601 skips projects without doc generation and members with `#if` above;
   findings in NuGet package folders (contentFiles) are suppressed (`PackageFileSuppressor`).
+- Source generator output (trial 12, RestSharp: ~950 warnings in a header-less generated file): Roslyn 4.8 counts a file as
+  generated only by name/header (`GeneratedCodeAnalysisFlags.None` doesn't help) and has no public marker for generator
+  trees. Probed: the compiler names them `<IntermediateOutputPath>/<generator assembly>/<generator type>/<hint>` (under
+  `generated/` or `CompilerGeneratedFilesOutputPath` with EmitCompilerGeneratedFiles). `GeneratedFileSuppressor` hides BRO
+  findings under the folders the package targets pass (`StyleBroGeneratedFolders`: obj/ + the emit path), else under an
+  `obj` folder. `GeneratedFileSuppressorTests` runs every analyzer on such a file.
 - `init` (Conventions.cs) detects 20 conventions (incl. `_` fields and using placement) and writes the majority at
   >= 75 % of >= 10 places; stops for StyleCop repos (use `--write`); `format` limits fixes to BRO + init's IDE/CA ids
   (`--all` for everything) and repeats until clean; `--diff` previews init / migrate / format on a temp copy.
