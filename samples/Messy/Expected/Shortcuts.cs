@@ -38,6 +38,7 @@ namespace Messy.Shortcuts
         {
             Changed += (sender, e) => { Console.WriteLine("changed"); };
             items.RemoveAll(item => { return item < 0; });
+            Action noop = () => { };
         }
 
         public string Zero(int x)

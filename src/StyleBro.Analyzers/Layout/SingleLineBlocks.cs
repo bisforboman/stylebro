@@ -249,7 +249,9 @@ internal static class SingleLineBlocks
                 var blankLine = node is BlockSyntax
                     ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
                         && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
-                    : node is not EnumDeclarationSyntax && ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options));
+                    : node is not EnumDeclarationSyntax && (ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))
+                        || (items[i - 1] is PropertyDeclarationSyntax && items[i] is PropertyDeclarationSyntax
+                            && (BecomesMultiLine(items[i - 1], text, options, isOn) || BecomesMultiLine(items[i], text, options, isOn))));
                 var separator = blankLine ? lineBreak + lineBreak : lineBreak;
                 if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
                 {
@@ -293,6 +295,27 @@ internal static class SingleLineBlocks
             changes.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), lineBreak));
         }
 
+        // A property spans several lines once its accessor list is expanded, so BRO1505 wants a blank line between it and a
+        // neighbouring property (two one-line properties may sit together): add it in the same run (runner's
+        // VssStringComparer: 15 one-line properties in a row needed a second run). Neighbours on the same line are the
+        // enclosing type's expansion's (above).
+        if (isOn is not null && node is AccessorListSyntax { Parent: PropertyDeclarationSyntax property } && property.Parent is TypeDeclarationSyntax type
+            && isOn(DiagnosticIds.ElementsSeparatedByBlankLine))
+        {
+            var index = type.Members.IndexOf(property);
+            var pairs = new (MemberDeclarationSyntax? Previous, MemberDeclarationSyntax? Current)[] { (index > 0 ? type.Members[index - 1] : null, property), (property, index + 1 < type.Members.Count ? type.Members[index + 1] : null) };
+            foreach (var (previous, current) in pairs)
+            {
+                if (previous is PropertyDeclarationSyntax && current is PropertyDeclarationSyntax
+                    && Line(text, previous.Span.End) < Line(text, current.SpanStart)
+                    && !ElementSeparation.HasBlankLineBetween(previous, current, text)
+                    && ElementSeparation.GetChange(previous, current, text) is { } separation)
+                {
+                    changes.Add(separation);
+                }
+            }
+        }
+
         // The statements' braces (BRO1514-BRO1516 leave statements of a single-line block to this expansion).
         if (isOn is not null && node is BlockSyntax block)
         {
@@ -301,6 +324,11 @@ internal static class SingleLineBlocks
 
         return changes;
     }
+
+    /// <summary>A property whose one-line accessor list BRO1509 expands in the same run (it then spans several lines).</summary>
+    private static bool BecomesMultiLine(SyntaxNode member, SourceText text, AnalyzerConfigOptions options, Func<string, bool>? isOn) =>
+        member is PropertyDeclarationSyntax { AccessorList: { } list } && isOn?.Invoke(DiagnosticIds.SingleLineElement) == true
+            && GetOwnChanges(list, text, options, trailingComma: false, isOn: null) is not null;
 
     /// <summary>
     /// What the braces belong to, for their indentation: the statement or clause that owns a block, the block itself when

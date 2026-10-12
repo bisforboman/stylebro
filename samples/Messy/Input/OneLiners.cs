@@ -22,3 +22,11 @@ public class Thermostat
 
     private void Cool() { target--; }
 }
+
+public class Dial
+{
+    private readonly int level = 1;
+
+    public int Low { get { return level; } }
+    public int High { get { return level + 1; } }
+}

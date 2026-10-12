@@ -118,4 +118,56 @@ public class CommentTextTests
             }
         }
         """);
+
+    // Like StyleCop's SA1120, the empty lines of a file header are reported...
+    [Fact]
+    public Task EmptyLinesInTheHeader_AreReported() => VerifyFixAsync(
+        """
+        {|BRO1120://|}
+        // Copyright (c) Example Authors.
+        // Licensed under the MIT license.
+        {|BRO1120://|}
+
+        public class C
+        {
+        }
+        """,
+        """
+        // Copyright (c) Example Authors.
+        // Licensed under the MIT license.
+
+        public class C
+        {
+        }
+        """);
+
+    // ...unless file_header_template is set: IDE0073 writes that header, empty lines included (Ical.Net: 222 files).
+    [Fact]
+    public Task EmptyLinesInTheHeader_StayWithAHeaderTemplate() => VerifyFixAsync(
+        """
+        //
+        // Copyright (c) Example Authors.
+        // Licensed under the MIT license.
+        //
+
+        public class C
+        {
+            {|BRO1120://|}
+            // Not the header.
+            public int M() => 1;
+        }
+        """,
+        """
+        //
+        // Copyright (c) Example Authors.
+        // Licensed under the MIT license.
+        //
+
+        public class C
+        {
+            // Not the header.
+            public int M() => 1;
+        }
+        """,
+        editorConfig: @"file_header_template = \nCopyright (c) Example Authors.\nLicensed under the MIT license.\n");
 }

@@ -1371,6 +1371,27 @@ public class FixOrderTests
         "BRO1145",
         "BRO1509");
 
+    // actions/runner's VssStringComparer: one-line properties with block accessors in a row. BRO1509 expands each, and
+    // BRO1505 then wants blank lines between them (two one-line properties may sit together, multi-line ones not).
+    [Fact]
+    public Task OneLineProperties_ExpandedWithBlankLinesBetween() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            private static readonly string s = "x";
+
+            public static string A { get { return s; } }
+            public static string B { get { return s; } }
+            public static string C2 { get { return s; } }
+            public static string D => s;
+            public int E { get; set; }
+        }
+
+        public class D { public int A { get { return 1; } } public int B { get { return 2; } } }
+        """,
+        "BRO1505",
+        "BRO1509");
+
     [Fact]
     public Task RecordClass_NextToAnEmptyRecordBody() => AssertConvergesInEveryOrderAsync(
         """

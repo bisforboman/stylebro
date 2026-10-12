@@ -288,6 +288,37 @@ public class DocumentationTests
         }
         """);
 
+    // Mapster: '///' trailing code was reported but not fixed (the fix only looked at '///' starting a line), so
+    // 'dotnet format' said clean while the build still warned. Every shape that's reported must be fixed.
+    [Fact]
+    public Task TripleSlashComments_AfterCode_BecomePlainComments() => VerifyFixAsync(
+        """
+        class C
+        {
+            public void X() {|BRO1602:/// Warning: trailing.|}
+            {
+                var x = 1; {|BRO1602:///tight|}
+                M(1, {|BRO1602:/// inside a list|}
+                    2);
+            }
+
+            void M(int a, int b) { } {|BRO1602:///|}
+        }
+        """,
+        """
+        class C
+        {
+            public void X() // Warning: trailing.
+            {
+                var x = 1; // tight
+                M(1, // inside a list
+                    2);
+            }
+
+            void M(int a, int b) { } //
+        }
+        """);
+
     [Fact]
     public Task DocumentationText_EndsWithAPeriod() => VerifyFixAsync(
         """
