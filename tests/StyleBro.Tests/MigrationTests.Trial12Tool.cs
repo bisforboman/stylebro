@@ -40,8 +40,10 @@ public sealed partial class MigrationTests
         Assert.Null(setup.UnresolvedVersion);
         Assert.Contains(SonarSetup.Read(root)!.Sources, s => s.StartsWith("SonarAnalyzer.CSharp 10.33.0.1635 ", StringComparison.Ordinal));
 
-        // Not defined anywhere: never the property's text, and the report says so.
+        // Not defined anywhere: never the property's text, and the report says so. A block an earlier version wrote with
+        // the property's text in it doesn't count either.
         Write("versions.props", "<Project />");
+        Write(".editorconfig", $"{Migration.BeginMarker}\n{Migration.VersionPrefix}$(StyleCopVersion) (x)\n{Migration.EndMarker}\n");
         setup = StyleCopSetup.Read(root);
         Assert.Null(setup.Version);
         Assert.Equal("$(StyleCopVersion)", setup.UnresolvedVersion);
