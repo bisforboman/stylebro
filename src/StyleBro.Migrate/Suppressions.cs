@@ -18,7 +18,10 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal static class Suppressions
 {
-    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|S\d{3,4})\b");
+    /// <summary>Rules whose suppressions do nothing under 'dotnet format': its whitespace pass formats regardless (IDE0055).</summary>
+    public static readonly IReadOnlySet<string> Ineffective = new HashSet<string>(StringComparer.Ordinal) { "IDE0055" };
+
+    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|S\d{3,4})\b", RegexOptions.IgnoreCase);
 
     private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
 

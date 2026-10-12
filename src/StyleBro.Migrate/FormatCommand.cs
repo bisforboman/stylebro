@@ -837,6 +837,13 @@ internal static class FormatCommand
     /// </summary>
     public static string NormalizeFramework(string framework)
     {
+        // .NET Framework written with dots ('net4.7', 'net4.7.2') is 'net47'/'net472' to NuGet: one run, not two.
+        var dotted = Regex.Match(framework.Trim().ToLowerInvariant(), @"^net(?<version>[1-4](?:\.\d){1,2})$");
+        if (dotted.Success)
+        {
+            return "net" + dotted.Groups["version"].Value.Replace(".", string.Empty);
+        }
+
         var match = Regex.Match(framework.Trim().ToLowerInvariant(), @"^(?<name>net|netcoreapp|netstandard)(?<digits>\d+)(?<platform>-.*)?$");
         if (!match.Success || (match.Groups["name"].Value == "net" && match.Groups["digits"].Value[0] < '5'))
         {
@@ -1219,6 +1226,29 @@ internal static class FormatCommand
             PreviewCommand.Delete(copy);
             File.Delete(keptFile);
         }
+    }
+
+    internal static string Capture(string directory, params string[] arguments)
+    {
+        var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var argument in arguments)
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(start)!;
+        var output = process.StandardOutput.ReadToEndAsync();
+        var errors = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        // A project MSBuild can't evaluate prints its error instead of JSON (GameDemo: "NuGet.Config is not valid XML"; it
+        // was a JsonReaderException with a stack trace before).
+        if (process.ExitCode != 0)
+        {
+            throw new ToolException($"'dotnet {string.Join(" ", arguments.Where(a => a != "-nologo"))}' failed (exit code {process.ExitCode}):{Environment.NewLine}{string.Join(Environment.NewLine, (output.Result + errors).Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).Select(l => "  " + l.TrimStart()))}");
+        }
+
+        return output.Result;
     }
 
     /// <summary>
@@ -1890,29 +1920,6 @@ internal static class FormatCommand
         }
 
         return read;
-    }
-
-    private static string Capture(string directory, params string[] arguments)
-    {
-        var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var argument in arguments)
-        {
-            start.ArgumentList.Add(argument);
-        }
-
-        using var process = Process.Start(start)!;
-        var output = process.StandardOutput.ReadToEndAsync();
-        var errors = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        // A project MSBuild can't evaluate prints its error instead of JSON (GameDemo: "NuGet.Config is not valid XML"; it
-        // was a JsonReaderException with a stack trace before).
-        if (process.ExitCode != 0)
-        {
-            throw new ToolException($"'dotnet {string.Join(" ", arguments.Where(a => a != "-nologo"))}' failed (exit code {process.ExitCode}):{Environment.NewLine}{string.Join(Environment.NewLine, (output.Result + errors).Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0).Select(l => "  " + l.TrimStart()))}");
-        }
-
-        return output.Result;
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
