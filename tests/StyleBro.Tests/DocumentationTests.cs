@@ -746,6 +746,9 @@ public class DocumentationTests
             /// <summary>Is it closed.</summary>
             public bool IsClosed { get; set; }
 
+            /// <summary>The tokenizer predicted a multi-word token here.</summary>
+            public bool IsCandidate { get; set; }
+
             /// <summary>Whether it is paid.</summary>
             public bool {|BRO1604:IsPaid|} { get; set; }
 
@@ -794,6 +797,9 @@ public class DocumentationTests
 
             /// <summary>Is it closed.</summary>
             public bool IsClosed { get; set; }
+
+            /// <summary>The tokenizer predicted a multi-word token here.</summary>
+            public bool IsCandidate { get; set; }
 
             /// <summary>Gets or sets a value indicating whether it is paid.</summary>
             public bool IsPaid { get; set; }
@@ -1079,7 +1085,7 @@ public class DocumentationTests
             {
             }
 
-            /// {|BRO1606:<summary>|}Sets up the alarm.</summary>
+            /// <summary>Sets up the alarm.</summary>
             /// <param name="f">The f.</param>
             public Alarm(float f)
             {
@@ -1121,7 +1127,7 @@ public class DocumentationTests
             {
             }
 
-            /// <summary>Initializes a new instance of the <see cref="Alarm"/> class. Sets up the alarm.</summary>
+            /// <summary>Sets up the alarm.</summary>
             /// <param name="f">The f.</param>
             public Alarm(float f)
             {
@@ -1140,7 +1146,7 @@ public class DocumentationTests
             {
             }
 
-            /// {|BRO1606:<summary>|}Creates a words object.</summary>
+            /// <summary>Creates a words object.</summary>
             /// <param name="x">The x.</param>
             public Words(int x)
             {
@@ -1164,7 +1170,7 @@ public class DocumentationTests
             {
             }
 
-            /// {|BRO1606:<summary>|}
+            /// <summary>
             /// Loads the defaults.
             /// </summary>
             static Words()
@@ -1200,7 +1206,7 @@ public class DocumentationTests
         /// <typeparam name="T">The type.</typeparam>
         public struct Point<T>
         {
-            /// {|BRO1606:<summary>|}Makes a point.</summary>
+            /// <summary>Makes a point.</summary>
             /// <param name="x">The x.</param>
             public Point(int x)
             {
@@ -1216,7 +1222,7 @@ public class DocumentationTests
             {
             }
 
-            /// <summary>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</summary>
+            /// <summary>Creates a words object.</summary>
             /// <param name="x">The x.</param>
             public Words(int x)
             {
@@ -1241,7 +1247,7 @@ public class DocumentationTests
             }
 
             /// <summary>
-            /// Initializes static members of the <see cref="Words"/> class. Loads the defaults.
+            /// Loads the defaults.
             /// </summary>
             static Words()
             {
@@ -1277,7 +1283,7 @@ public class DocumentationTests
         /// <typeparam name="T">The type.</typeparam>
         public struct Point<T>
         {
-            /// <summary>Initializes a new instance of the <see cref="Point{T}"/> struct. Makes a point.</summary>
+            /// <summary>Makes a point.</summary>
             /// <param name="x">The x.</param>
             public Point(int x)
             {
@@ -1352,7 +1358,7 @@ public class DocumentationTests
             }
 
             /// {|BRO1606:<summary>|}
-            /// <para>Creates a words object.</para>
+            /// <para>Default constructor.</para>
             /// </summary>
             /// <param name="x">The x.</param>
             public Words(int x)
@@ -1379,7 +1385,7 @@ public class DocumentationTests
             }
 
             /// <summary>
-            /// <para>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</para>
+            /// <para>Initializes a new instance of the <see cref="Words"/> class.</para>
             /// </summary>
             /// <param name="x">The x.</param>
             public Words(int x)

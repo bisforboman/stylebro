@@ -123,6 +123,14 @@ internal static class PropertySummaries
             return null;
         }
 
+        // A bool's summary that starts with an article is often a clause ('The tokenizer predicted a token here'): neither
+        // 'Gets the tokenizer predicted ...' nor '... a value indicating whether the open state' makes a sentence of every
+        // one, so it isn't reported (owner's decision 2026-10-12, issue #132).
+        if (old.Length == 0 && isBool && StartsWithAnyWord(rest, Articles))
+        {
+            return null;
+        }
+
         var prefix = isBool && old.EndsWith("whether", StringComparison.OrdinalIgnoreCase) ? longForm : verb;
 
         // Replace the wrong prefix, or none, and lower the next word's first letter ('The name' -> 'the name').

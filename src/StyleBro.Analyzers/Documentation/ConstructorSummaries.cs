@@ -17,13 +17,6 @@ internal static class ConstructorSummaries
     /// <summary>The members BRO1606 and BRO1607 check.</summary>
     public static readonly SyntaxKind[] MemberKinds = [SyntaxKind.ConstructorDeclaration, SyntaxKind.DestructorDeclaration];
 
-    // How a constructor summary of its own starts, besides the standard sentence's 'Initializes' ('Creates a words object'
-    // isn't one: it gets the standard sentence in front).
-    private static readonly string[] ConstructorVerbs =
-    [
-        "Initialize", "Initialises", "Initialise", "Instantiates", "Instantiate", "Constructs", "Construct", "Creates a new", "Create a new",
-    ];
-
     // A first sentence that only says it's a constructor (owner's decision, 2026-10-11: "Replace known filler, keep real
     // text"; Stateless: '... the <see cref="Alarm"/> class. Default constructor.'). A deliberately small list: 'Default
     // constructor', 'Constructor', 'Ctor', 'Constructor for X', 'Creates a new instance', 'Creates a new instance of X',
@@ -102,6 +95,15 @@ internal static class ConstructorSummaries
             }
         }
 
+        // A constructor summary with text of its own ('Opens a file or URL ...') isn't reported: only an empty summary,
+        // filler and a near miss of the standard sentence get it (owner's decision 2026-10-12, issue #132: putting the
+        // standard sentence in front gave two sentences doing one job, on ~100 public summaries in a trial). StyleCop's
+        // SA1642 reports it.
+        if (member is ConstructorDeclarationSyntax && replaceLength == 0 && !rest.StartsWith("</", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
         // The kept text becomes the second sentence: one that starts in lower case or with a condition ('construct a
         // bag', 'If true, ...') wouldn't read as one, so it's left alone.
         var remaining = rest.Substring(replaceLength);
@@ -110,12 +112,9 @@ internal static class ConstructorSummaries
             return null;
         }
 
-        // A summary that is a constructor sentence of its own ('Initializes the attribute with the specified value.',
-        // 'Instantiates a new Hashids encoder ...') would follow the standard one ('... class. Instantiates ...'), and
-        // replacing it would lose what it says (Scrutor, Hashids): left alone.
-        if (replaceLength == 0
-            && (StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' ')))
-                || (member is ConstructorDeclarationSyntax && ConstructorVerbs.Any(v => StartsWithWords(remaining, v)))))
+        // A finalizer summary that is a sentence of its own ('Finalizes the handle.') would follow the standard one, and
+        // replacing it would lose what it says: left alone.
+        if (replaceLength == 0 && StartsWithWords(remaining, standard.Substring(0, standard.IndexOf(' '))))
         {
             return null;
         }
