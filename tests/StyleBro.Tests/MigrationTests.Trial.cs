@@ -258,7 +258,7 @@ public sealed partial class MigrationTests
     public void Workspace_IsNeverPickedSilentlyFromSeveral()
     {
         Write("eShop.slnx", "<Solution />");
-        Write("eShop.Web.slnf", "{}");
+        Write("eShop.Web.slnf", "{ \"solution\": { \"path\": \"eShop.slnx\", \"projects\": [] } }"); // one filter of it: still a choice
         Assert.Null(BaselineCommand.FindWorkspace(root));
         Assert.Equal(new[] { "eShop.slnx", "eShop.Web.slnf" }, BaselineCommand.WorkspaceCandidates(root));
         Assert.Contains("eShop.slnx, eShop.Web.slnf", BaselineCommand.NoWorkspace(root, "--project <file>"));

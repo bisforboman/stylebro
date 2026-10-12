@@ -818,7 +818,7 @@ internal sealed class StyleCopSetup
         for (var depth = 0; depth < 8 && value.Contains("$(", StringComparison.Ordinal); depth++)
         {
             value = Regex.Replace(value, @"\$\((?<name>[\w.-]+)\)", m => texts
-                .Select(t => Regex.Match(t, $@"<{Regex.Escape(m.Groups["name"].Value)}(?:\s[^>]*)?>\s*(?<v>[^<]*?)\s*</{Regex.Escape(m.Groups["name"].Value)}\s*>"))
+                .SelectMany(t => Regex.Matches(t, $@"<{Regex.Escape(m.Groups["name"].Value)}(?:\s[^>]*)?>\s*(?<v>[^<]*?)\s*</{Regex.Escape(m.Groups["name"].Value)}\s*>"))
                 .FirstOrDefault(d => d.Success && d.Groups["v"].Value.Length > 0)?.Groups["v"].Value ?? m.Value);
         }
 
