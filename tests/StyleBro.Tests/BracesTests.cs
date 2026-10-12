@@ -714,4 +714,53 @@ public class BracesTests
         }
         """,
         editorConfig: "stylebro_braces_statements = if_and_loops");
+
+    // 'fixed (a) fixed (b) { }' pins several arrays for one block, like consecutive usings (IDE0011 allows it too).
+    [Fact]
+    public Task ConsecutiveFixed_ShareOneBlock() => VerifyNoDiagnosticsAsync(
+        """
+        public unsafe class C
+        {
+            public int M(int[] a, int[] b)
+            {
+                fixed (int* pa = a)
+                fixed (int* pb = b)
+                {
+                    return pa[0] + pb[0];
+                }
+            }
+        }
+        """);
+
+    [Fact]
+    public Task ConsecutiveFixed_GetBraces_WhenNotAllowed() => VerifyFixAsync(
+        """
+        public unsafe class C
+        {
+            public int M(int[] a, int[] b)
+            {
+                fixed (int* pa = a)
+                    {|BRO1515:fixed (int* pb = b)
+                    {
+                        return pa[0] + pb[0];
+                    }|}
+            }
+        }
+        """,
+        """
+        public unsafe class C
+        {
+            public int M(int[] a, int[] b)
+            {
+                fixed (int* pa = a)
+                {
+                    fixed (int* pb = b)
+                    {
+                        return pa[0] + pb[0];
+                    }
+                }
+            }
+        }
+        """,
+        editorConfig: "stylebro_allow_consecutive_usings = false");
 }
