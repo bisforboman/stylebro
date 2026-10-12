@@ -35,8 +35,14 @@ there is no `.csharpierrc`, else 100). With `stylebro_layout_by = csharpier`:
 
 Also found on the way: CSharpier sorts using directives itself (System first), and `dotnet format` sorts them whenever
 `dotnet_sort_system_directives_first` is set; Mediator sets it to `false`, so `format` and CSharpier reordered each
-other's usings (most of the 76 files CSharpier rejected after StyleBro's format). With CSharpier, `init` and `--write` write `dotnet_sort_system_directives_first = true` (and
-`dotnet_separate_import_directive_groups = false`) where the repository sets another value.
+other's usings (most of the 76 files CSharpier rejected after StyleBro's format). With CSharpier, `init` and `--write`
+write `dotnet_sort_system_directives_first = true` (and `dotnet_separate_import_directive_groups = false`) where the
+repository sets another value.
+
+`stylebro-migrate format --verify-no-changes` formats a copy without build output, where an in-solution source generator
+(Mapperly's) doesn't run, so renames its generated strings keep back go through there and verify fails; the real-world
+check runs `format` again instead and requires no change. Also fixed: verify's copy is a git repository when the source
+is one (Husky.Net's `dotnet husky install` runs on restore and failed without one).
 
 Measured with the real-world script's CSharpier mode (init, format, CSharpier, then format must change nothing and
 CSharpier's check must pass): StabilityMatrix (CSharpier 1.0.1, printWidth 110) files CSharpier rejects after StyleBro's
