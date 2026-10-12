@@ -291,7 +291,10 @@ A few settings work a little differently:
   sections). `init` also writes `stylebro_layout_by = csharpier` and CSharpier's line width
   (`stylebro_layout_print_width`: `printWidth` from the `.csharpierrc`, else `max_line_length`, else 100): an `if` merged
   into the enclosing one ([BRO1149](rules/BRO1149.md)) gets its condition the way CSharpier writes it, and the brace
-  rules count a statement CSharpier will split over lines as multi-line, so its braces come in the same run. Run
+  rules count a statement CSharpier will split over lines as multi-line, so its braces come in the same run. CSharpier
+  sorts using directives itself (System first): where your `.editorconfig` says `dotnet_sort_system_directives_first =
+  false` or `dotnet_separate_import_directive_groups = true`, `init` writes the opposite in its block (`dotnet format`
+  sorts usings whenever either key is set, so the two would reorder each other's usings). Run
   CSharpier after `format`: other fixes that rewrite code (attributes split, parentheses added) leave lines in StyleBro's
   layout, which CSharpier then lays out its way, and StyleBro leaves that alone: after CSharpier, `stylebro-migrate
   format --verify-no-changes` is clean. `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro
