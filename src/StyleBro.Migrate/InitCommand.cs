@@ -303,6 +303,22 @@ internal static class InitCommand
             decided[Conventions.StaticPrefixKey] = $"a naming rule requires '{prefix}', which BRO1307 keeps";
         }
 
+        // The casing of private constants and static readonly fields (three forms, decided apart from the list too).
+        var staticCasing = KeptLines(previous, [Conventions.StaticCasingKey, $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FieldPascalCase}.severity"]);
+        kept.AddRange(staticCasing);
+        if (own.TryGetValue(Conventions.StaticCasingKey, out var staticValue))
+        {
+            decided[Conventions.StaticCasingKey] = $"set in .editorconfig ({staticValue})";
+        }
+        else if (StyleBro.Analyzers.Naming.FieldNames.GetStyles(new Conventions.Options(own)) is { Constant: not null } or { StaticReadOnly: not null })
+        {
+            decided[Conventions.StaticCasingKey] = "a dotnet_naming_rule decides";
+        }
+        else if (staticCasing.Count > 0)
+        {
+            decided[Conventions.StaticCasingKey] = $"kept from the last init ({staticCasing[^1].Substring(staticCasing[^1].IndexOf('=') + 1).Trim()})";
+        }
+
         // The using order is decided apart from the list (two keys): kept the same way.
         var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
         kept.AddRange(usings);
@@ -328,6 +344,20 @@ internal static class InitCommand
         {
             report.Add($"  {"note",-8} {endingReport}");
             endings.AddRange(endingLines.Take(csharpier.Lines is null && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
+        }
+
+        if (Conventions.EmptyHeaderLines(counts, own) is { } headerLines)
+        {
+            report.Add($"  {"off",-8} {headerLines[0].Substring("# init: ".Length)}");
+            endings.AddRange(headerLines);
+        }
+
+        // A charset the files don't follow wasn't enforced either: the files decide, like the line endings.
+        if (Conventions.ContradictedCharset(counts, settings) is var (charsetLine, charsetNote))
+        {
+            report.Add($"  {"note",-8} {charsetNote}");
+            endings.Add($"# init: {charsetNote}");
+            endings.Add(charsetLine);
         }
 
         return ([.. csharpier.Lines ?? [], .. kept, .. detected, .. endings], report);

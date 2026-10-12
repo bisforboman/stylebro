@@ -1413,11 +1413,10 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Equal(SonarSetup.Rules.Count(r => r.Value.SonarWay), sonar.Severities.Count(s => s.Value == Severity.Warning));
 
         var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
-        Assert.Contains("dotnet_diagnostic.CA1822.severity = warning", lines);
-        Assert.Contains("dotnet_code_quality.CA1822.api_surface = private, internal", lines);
+        Assert.DoesNotContain(lines, l => l.Contains("CA1822", StringComparison.Ordinal));   // S2325 isn't mapped: CA1822 is stricter
         Assert.Contains("dotnet_diagnostic.BRO1313.severity = warning", lines);   // S927; off after the migration otherwise
-        Assert.Contains("dotnet_diagnostic.BRO1135.severity = warning", lines);   // S818
-        Assert.Contains("stylebro_upper_case_literal_suffixes = l_only", lines);
+        Assert.Contains("stylebro_match_base_parameter_names = non_generic_methods", lines);   // S927's exceptions
+        Assert.DoesNotContain("stylebro_upper_case_literal_suffixes = l_only", lines);   // S818 isn't mapped: BRO1135 is stricter
         Assert.Contains("stylebro_keep_overloads_together = same_access", lines);       // S4136: BRO1001 is on (StyleCop's defaults)
         Assert.DoesNotContain("dotnet_diagnostic.BRO1142.severity = warning", lines);  // S1659 is off
         Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1313.severity", StringComparison.Ordinal));
@@ -1447,9 +1446,7 @@ public sealed partial class MigrationTests : IDisposable
         Assert.DoesNotContain(sonar.Sources, s => s.Contains("none", StringComparison.Ordinal));
 
         var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
-        Assert.Contains("dotnet_diagnostic.BRO1309.severity = error", lines);       // S100, stronger than SA1300's warning
-        Assert.Single(lines, l => l.StartsWith("dotnet_diagnostic.BRO1309.severity", StringComparison.Ordinal));
-        Assert.Contains("dotnet_diagnostic.CA1822.severity = suggestion", lines);
+        Assert.DoesNotContain("dotnet_diagnostic.BRO1309.severity = error", lines);   // S100 isn't mapped: BRO1309 is stricter
         Assert.Contains("dotnet_diagnostic.BRO1142.severity = warning", lines);
         Assert.DoesNotContain(lines, l => l.StartsWith("dotnet_diagnostic.CA1805", StringComparison.Ordinal));
     }
@@ -1465,8 +1462,8 @@ public sealed partial class MigrationTests : IDisposable
               <name>Team way</name>
               <language>cs</language>
               <rules>
-                <rule><repositoryKey>csharpsquid</repositoryKey><key>S1066</key><type>CODE_SMELL</type><priority>MAJOR</priority><parameters/></rule>
-                <rule><repositoryKey>csharpsquid</repositoryKey><key>S3052</key><type>CODE_SMELL</type><priority>MINOR</priority><parameters/></rule>
+                <rule><repositoryKey>csharpsquid</repositoryKey><key>S1939</key><type>CODE_SMELL</type><priority>MAJOR</priority><parameters/></rule>
+                <rule><repositoryKey>csharpsquid</repositoryKey><key>S2971</key><type>CODE_SMELL</type><priority>MINOR</priority><parameters/></rule>
                 <rule><repositoryKey>vbnet</repositoryKey><key>S2325</key><type>CODE_SMELL</type><priority>MINOR</priority><parameters/></rule>
               </rules>
             </profile>
@@ -1474,16 +1471,16 @@ public sealed partial class MigrationTests : IDisposable
         try
         {
             var sonar = SonarSetup.Read(root, profile)!;
-            Assert.Equal(new[] { "S1066", "S3052" }, sonar.Severities.Where(s => s.Value >= Severity.Suggestion).Select(s => s.Key).Order());
+            Assert.Equal(new[] { "S1939", "S2971" }, sonar.Severities.Where(s => s.Value >= Severity.Suggestion).Select(s => s.Key).Order());
 
             var lines = Migration.Generate(StyleCopSetup.Read(root), root, sonar: sonar).Lines;
-            Assert.Contains("dotnet_diagnostic.BRO1149.severity = warning", lines);
-            Assert.Contains("dotnet_diagnostic.CA1805.severity = warning", lines);
-            Assert.DoesNotContain(lines, l => l.StartsWith("dotnet_diagnostic.CA1822", StringComparison.Ordinal));
+            Assert.Contains("dotnet_diagnostic.BRO1408.severity = warning", lines);
+            Assert.Contains("dotnet_diagnostic.BRO1150.severity = warning", lines);
+            Assert.DoesNotContain("dotnet_diagnostic.BRO1313.severity = warning", lines);
 
             // On the command line; a missing file fails before anything is read.
             var output = Capture(() => Assert.Equal(0, Program.Main(new[] { "--sonar-profile", profile, root })));
-            Assert.Contains("S1066 -> BRO1149", output, StringComparison.Ordinal);
+            Assert.Contains("S1939 -> BRO1408", output, StringComparison.Ordinal);
             Assert.Contains("quality profile", output, StringComparison.Ordinal);
             Assert.Equal(1, Program.Main(new[] { root, "--sonar-profile=" + profile + ".missing" }));
         }
@@ -1498,19 +1495,13 @@ public sealed partial class MigrationTests : IDisposable
     {
         // StyleCop's ordering off: BRO1001 stays off, so S4136's overloads option can't apply.
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SA1201.severity = none\ndotnet_diagnostic.SA1503.severity = none\ndotnet_diagnostic.SA1519.severity = none\ndotnet_diagnostic.SA1520.severity = none\n"
-            + "dotnet_diagnostic.S4136.severity = warning\ndotnet_diagnostic.S121.severity = warning\n");
+            + "dotnet_diagnostic.S4136.severity = warning\n");
 
         var result = Migration.Generate(StyleCopSetup.Read(root), root, sonar: SonarSetup.Read(root));
 
         Assert.Contains("dotnet_diagnostic.BRO1001.severity = none", result.Lines);
         Assert.DoesNotContain(result.Lines, l => l.StartsWith("stylebro_keep_overloads_together", StringComparison.Ordinal));
         Assert.Contains(result.Sonar!.NotApplied, n => n.Sonar == "S4136" && n.Reason.Contains("BRO1001 is off", StringComparison.Ordinal));
-
-        // S121 turns BRO1514 on and wants braces everywhere, where StyleCop's setup didn't: Sonar's setting wins, noted.
-        Assert.Contains("dotnet_diagnostic.BRO1514.severity = warning", result.Lines);
-        Assert.Single(result.Lines, l => l.StartsWith("csharp_prefer_braces", StringComparison.Ordinal));
-        Assert.Contains("csharp_prefer_braces = true", result.Lines);
-        Assert.Contains(result.Sonar.Notes, n => n.StartsWith("csharp_prefer_braces: true for S121 instead of false", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -1523,10 +1514,10 @@ public sealed partial class MigrationTests : IDisposable
 
         Assert.Contains("Sonar: read SonarAnalyzer.CSharp 10.35.0.4138", output, StringComparison.Ordinal);
         Assert.Contains($"Sonar rules on: {SonarSetup.Rules.Count(r => r.Value.SonarWay)}; fixed by StyleBro or the SDK from now on: ", output, StringComparison.Ordinal);
-        Assert.Contains("  S2325 -> CA1822 (dotnet_code_quality.CA1822.api_surface = private, internal; public members stay Sonar's", output, StringComparison.Ordinal);
+        Assert.Contains("  S927 -> BRO1313 (stylebro_match_base_parameter_names = non_generic_methods)", output, StringComparison.Ordinal);
         Assert.Contains("    S4136: BRO1001 is off here", output, StringComparison.Ordinal);
         Assert.Contains("Sonar keeps reporting its own ids", output, StringComparison.Ordinal);
-        Assert.Contains("# S2325: Methods and properties that don't access instance data should be static", output, StringComparison.Ordinal);
+        Assert.Contains("# S927: Parameter names should match base declaration and other partial definitions", output, StringComparison.Ordinal);
 
         // The preview shows the same part of the report.
         var part = PreviewCommand.SonarPart(output);
@@ -1543,13 +1534,13 @@ public sealed partial class MigrationTests : IDisposable
 
         var config = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("Sonar rules on:", output, StringComparison.Ordinal);
-        Assert.Contains("dotnet_diagnostic.CA1822.severity = warning\n", config, StringComparison.Ordinal);
+        Assert.Contains("dotnet_diagnostic.BRO1313.severity = warning\n", config, StringComparison.Ordinal);
         Assert.Contains("stylebro_keep_overloads_together = same_access\n", config, StringComparison.Ordinal);  // BRO1001 is on in the preset; S4136 groups overloads of one access
         Assert.Contains("dotnet_diagnostic.IDE0055.severity = warning\n", config, StringComparison.Ordinal);
         Assert.Single(System.Text.RegularExpressions.Regex.Matches(config, "# BEGIN stylebro-migrate"));
 
-        // The format command fixes the CA rules the block turns on.
-        Assert.Contains("CA1822", FormatCommand.Diagnostics(root));
+        // The format command fixes the rules the block turns on.
+        Assert.Contains("BRO1313", FormatCommand.Diagnostics(root));
     }
 
     [Fact]

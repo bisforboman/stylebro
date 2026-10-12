@@ -4,26 +4,25 @@
 # Then per Sonar version (SonarAnalyzer.CSharp): the first one with the rule (or -: 9.16 or older) and the first one
 # with it in "Sonar way" when that changed (or -), from the rule metadata in github.com/SonarSource/sonar-dotnet
 # (analyzers/rspec/cs at the release tags). Older versions don't have the rule, or don't turn it on by default.
-S100	BRO1309	on	-	-	-	-
-S101	BRO1309	on	-	BRO1309 also checks methods, properties, events and enum members (Sonar's S100)	-	-
-S818	BRO1135	on	stylebro_upper_case_literal_suffixes = l_only	-	-	-
-S927	BRO1313	on	-	-	-	-
-S1066	BRO1149	on	-	-	-	-
-S1116	BRO1101	on	-	-	-	-
-S1118	CA1052	on	dotnet_code_quality.CA1052.api_surface = private, internal	public classes stay Sonar's (making them static changes the API)	-	-
-S121	BRO1514	on	csharp_prefer_braces = true	-	-	-
-S1125	IDE0075	on	-	-	-	-
-S1125	IDE0100	on	-	-	-	-
-S1481	IDE0059	on	-	-	-	-
+S100	-	none	-	BRO1309 is stricter: it also checks events and enum members, and names with '_' inside, which S100 accepts	-	-
+S101	-	none	-	BRO1309 is stricter: it also checks enums, delegates and test classes ('fooTests'), which S101 accepts	-	-
+S818	-	none	-	BRO1135 is stricter: with l_only it reports any lower-case 'l' in the suffix ('1ul', '1lu'), S818 only a last 'l' without 'u' before it	-	-
+S927	BRO1313	on	stylebro_match_base_parameter_names = non_generic_methods	-	-	-
+S1066	-	none	-	BRO1149 is stricter: it also merges ifs whose inner condition is dynamic, which S1066 skips	-	-
+S1116	-	none	-	BRO1101 is stricter: it also removes the ';' after a type's or namespace's '}', which S1116 accepts	-	-
+S1118	-	none	-	CA1052 is stricter: it reports classes with a private or protected constructor, a static member of their own type (a singleton) or a non-static nested type, which S1118 accepts	-	-
+S121	-	none	-	BRO1514 is stricter: it also wants braces on 'using', 'lock' and 'fixed' bodies, which S121 doesn't check	-	-
+S1125	-	none	-	IDE0075 and IDE0100 are stricter: IDE0075 also simplifies constants and 'default', and 'c ? true : true'; IDE0100 also inside a conditional with a throw, which S1125 accepts	-	-
+S1481	-	none	-	IDE0059 is stricter: it also removes dead stores to variables that are used later, which S1481 accepts	-	-
 S1659	BRO1142	on	-	-	-	-
-S1854	IDE0059	on	-	-	-	-
-S1905	IDE0004	on	-	-	-	-
+S1854	-	none	-	IDE0059 is stricter: it also removes initial values like 0, null and "", stores to captured variables, unused 'out var' and pattern variables, which S1854 accepts	-	-
+S1905	-	none	-	IDE0004 removes more casts than S1905 (an upcast, a numeric conversion), and it has no option to narrow it	-	-
 S1939	BRO1408	on	-	-	-	-
-S2325	CA1822	on	dotnet_code_quality.CA1822.api_surface = private, internal	public members stay Sonar's (making them static changes the API)	-	9.32
+S2325	-	none	-	CA1822 is stricter: it also reports members with attributes, empty and recursive methods, events and members of generic types, which S2325 accepts	-	9.32
 S2971	BRO1150	on	-	-	-	-
-S3052	CA1805	on	-	-	-	-
+S3052	-	none	-	CA1805 is stricter: it also reports 'default', 'new Guid()', enums set to 0 and nullable value types set to null, which S3052 accepts	-	-
 S3260	-	none	-	CA1852's fix also seals private nested classes with protected members (CS0628 warnings: 144 in SmartEnum)	-	-
-S3442	CA1012	on	-	-	-	-
-S3878	BRO1151	on	-	-	-	-
+S3442	-	none	-	CA1012 is stricter: it also reports a public constructor in another part of a partial abstract class, which S3442 accepts	-	-
+S3878	-	none	-	BRO1151 is stricter: it also reports arrays and collection expressions passed to 'params object[]' and jagged 'params' arrays, which S3878 accepts	-	-
 S4136	BRO1001	option	stylebro_keep_overloads_together = same_access	only overloads with the same access stay together, as Sonar's S4136 asks; between accesses StyleCop's SA1202 order stays	-	-
-S8969	BRO1147	on	-	-	10.30	-
+S8969	-	none	-	BRO1147 is stricter: it also removes '!' on values declared without nullable annotations (#nullable disable, unannotated libraries), which S8969 accepts	10.30	-

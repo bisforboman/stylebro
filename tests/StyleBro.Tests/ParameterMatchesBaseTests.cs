@@ -117,6 +117,60 @@ public class ParameterMatchesBaseTests
         On);
 
     [Fact]
+    public Task NonGenericMethods_SkipsWhatSonarsS927Accepts() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+
+        public interface IHandler<TNotification>
+        {
+            void Handle(TNotification notification, int token);
+
+            void All(IEnumerable<TNotification> items);
+
+            int this[int index] { get; }
+        }
+
+        public class OrderPlaced
+        {
+        }
+
+        public class Handler : IHandler<OrderPlaced>
+        {
+            public void Handle(OrderPlaced @event, int {|BRO1313:cancellation|}) => System.Console.WriteLine(cancellation);
+
+            public void All(IEnumerable<OrderPlaced> orders) => System.Console.WriteLine(orders);
+
+            public int this[int i] => i;
+        }
+        """,
+        """
+        using System.Collections.Generic;
+
+        public interface IHandler<TNotification>
+        {
+            void Handle(TNotification notification, int token);
+
+            void All(IEnumerable<TNotification> items);
+
+            int this[int index] { get; }
+        }
+
+        public class OrderPlaced
+        {
+        }
+
+        public class Handler : IHandler<OrderPlaced>
+        {
+            public void Handle(OrderPlaced @event, int token) => System.Console.WriteLine(token);
+
+            public void All(IEnumerable<OrderPlaced> orders) => System.Console.WriteLine(orders);
+
+            public int this[int i] => i;
+        }
+        """,
+        On + "\nstylebro_match_base_parameter_names = non_generic_methods");
+
+    [Fact]
     public Task OffByDefault_AndBaseNamesAreKept() => VerifyNoDiagnosticsAsync(
         """
         public class Shape

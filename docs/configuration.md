@@ -34,6 +34,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_allow_common_hungarian_prefixes` | `true`, `false` | `true` | [BRO1310](rules/BRO1310.md) |
 | `stylebro_rename_public_api` | `true`, `false` | `false` | [BRO1302](rules/BRO1302.md)-[BRO1314](rules/BRO1314.md): names other assemblies see |
 | `stylebro_tuple_element_name_casing` | `PascalCase`, `camelCase` | `PascalCase` | [BRO1311](rules/BRO1311.md) |
+| `stylebro_match_base_parameter_names` | `all`, `non_generic_methods` (Sonar's S927: methods only, not where the base's parameter type is a type parameter the member fills in) | `all` | [BRO1313](rules/BRO1313.md) |
 | `stylebro_allowed_namespace_components` | names, comma-separated | none | [BRO1312](rules/BRO1312.md) |
 | `stylebro_trailing_comma` | `include`, `omit` | `include` | [BRO1401](rules/BRO1401.md), [BRO1509](rules/BRO1509.md) |
 | `stylebro_comment_blank_line_exempt_prefixes` | prefixes, comma-separated, case-sensitive | none | [BRO1504](rules/BRO1504.md) |

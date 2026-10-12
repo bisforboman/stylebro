@@ -252,13 +252,13 @@ public sealed partial class MigrationTests
     [Fact]
     public void Init_AddsNoSuppressionsForASonarRuleThatIsOff_LikeBlog()
     {
-        // linkdotnet/Blog: S8969 is off in .editorconfig and in NoWarn; init added BRO1147 to NoWarn although it stays off.
-        Write("Directory.Build.props", "<Project><PropertyGroup><NoWarn>$(NoWarn);S8969;S1481</NoWarn></PropertyGroup><ItemGroup><PackageReference Include=\"SonarAnalyzer.CSharp\" Version=\"10.35.0.4138\" /></ItemGroup></Project>");
-        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S8969.severity = none\n");
+        // linkdotnet/Blog: S8969 (here S927, which still maps) is off in .editorconfig and in NoWarn; init added BRO1147 to NoWarn although it stays off.
+        Write("Directory.Build.props", "<Project><PropertyGroup><NoWarn>$(NoWarn);S927;S2971</NoWarn></PropertyGroup><ItemGroup><PackageReference Include=\"SonarAnalyzer.CSharp\" Version=\"10.35.0.4138\" /></ItemGroup></Project>");
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S927.severity = none\n");
         Write("A.cs", "class A { }\n");
 
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
 
-        Assert.Contains("<NoWarn>$(NoWarn);S8969;S1481;IDE0059</NoWarn>", File.ReadAllText(Path.Combine(root, "Directory.Build.props")));
+        Assert.Contains("<NoWarn>$(NoWarn);S927;S2971;BRO1150</NoWarn>", File.ReadAllText(Path.Combine(root, "Directory.Build.props")));
     }
 }

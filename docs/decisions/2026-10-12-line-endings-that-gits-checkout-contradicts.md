@@ -38,3 +38,12 @@ majority) have the other ending, nothing enforced the key, and the files decide,
 matches the files), and the report says how to get the key's ending instead (remove the line and let `format` rewrite the
 files, or `*.cs text eol=<key>` in `.gitattributes` and `git add --renormalize .`). The migration does the same. Measured on
 CleanArchitecture: the root's `format` run changed 40 files, none of them only in their endings, and none became CRLF.
+
+### Extended: a `charset` the files don't follow (2026-10-12, trial 11)
+
+Ical.Net says `charset = utf-8` in `[*]`, but 108 of its 223 C# files start with a BOM; `format` stripped all 108 (also
+from files it changed nothing else in, probed). Fitnet says `charset = utf-8-bom` with 15 of 127 files having one, and
+`format` added 112. The same choice applies: nothing enforced the key, so the files decide. When the key's form doesn't
+have the conventions' share (75 % of at least 10, all of 3 to 9), `init` writes the files' charset for C# files, or
+`charset = unset` when they're mixed: probed, `dotnet format` then leaves each file's BOM (or its absence) alone. The
+report says how to get the key's charset instead (remove the line and run `stylebro-migrate format`).

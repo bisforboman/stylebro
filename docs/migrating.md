@@ -243,7 +243,7 @@ What it reads, in this order (later wins, like for StyleCop):
   the server's `api/qualityprofiles/backup?language=cs&qualityProfile=<name>`, or Quality Profiles > Back up in the UI;
   its `csharpsquid` rules are on). Without it, when a project references `SonarAnalyzer.CSharp` (`PackageReference`,
   `GlobalPackageReference`, central package versions or `packages.config`), the package's own defaults ("Sonar way", from
-  SonarAnalyzer.CSharp 10.35's rule list, adjusted to the referenced version for the rules StyleBro maps: S8969 only from
+  SonarAnalyzer.CSharp 10.35's rule list, adjusted to the referenced version for the rules in the mapping: S8969 only from
   10.30, S2325 on by default only from 9.32). A rule the referenced version doesn't have counts as off, also when a
   ruleset or config sets it.
 - **Rulesets** with Sonar rules (`<Rules AnalyzerId="SonarAnalyzer.CSharp">`): your own, SonarLint's
@@ -254,33 +254,38 @@ What it reads, in this order (later wins, like for StyleCop):
 
 Without a Sonar package, a profile or Sonar rule ids in those files, nothing Sonar-related happens.
 
-The Sonar rules that are on turn on these rules, at the strongest severity of the Sonar rules behind each:
+The Sonar rules that are on turn on these rules, at the strongest severity of the Sonar rules behind each. A mapping never
+reports what the Sonar rule itself accepts (owner's policy): a rule that is stricter than Sonar's and can't be narrowed to it
+isn't mapped.
 
 | Sonar | Fixed by |
 |---|---|
-| S100, S101 (PascalCase names) | [BRO1309](rules/BRO1309.md) |
-| S121 (braces) | [BRO1514](rules/BRO1514.md) with `csharp_prefer_braces = true` |
-| S818 (upper-case literal suffixes) | [BRO1135](rules/BRO1135.md) with `stylebro_upper_case_literal_suffixes = l_only` |
-| S927 (parameter names match the base) | [BRO1313](rules/BRO1313.md) |
-| S1066 (mergeable `if`s) | BRO1149 |
-| S1116 (empty statements) | [BRO1101](rules/BRO1101.md) |
-| S1118 (utility classes) | CA1052, non-public classes only (`dotnet_code_quality.CA1052.api_surface = private, internal`) |
-| S1125 (redundant boolean literals) | IDE0075, IDE0100 |
-| S1481, S1854 (unused locals and assignments) | IDE0059 |
+| S927 (parameter names match the base) | [BRO1313](rules/BRO1313.md) with `stylebro_match_base_parameter_names = non_generic_methods` (methods only, and not a parameter whose type in the base is a type parameter the method fills in, like S927) |
 | S1659 (one variable per declaration) | [BRO1142](rules/BRO1142.md) |
-| S1905 (redundant casts) | IDE0004 |
 | S1939 (redundant base types) | [BRO1408](rules/BRO1408.md) |
-| S2325 (members that could be static) | CA1822, non-public members only (`dotnet_code_quality.CA1822.api_surface = private, internal`) |
 | S2971 (LINQ predicate into `Count`/`Any`/...) | BRO1150 |
-| S3052 (initialized to the default value) | CA1805 |
-| S3442 (public constructors of abstract classes) | CA1012 |
-| S3878 (arrays for `params`) | BRO1151 |
 | S4136 (overloads together) | [BRO1001](rules/BRO1001.md)'s `stylebro_keep_overloads_together = same_access` (overloads with the same access, like S4136), only when BRO1001 is on |
-| S8969 (redundant `!`) | [BRO1147](rules/BRO1147.md) |
 
-**Not covered: S3260** (seal private classes). CA1852 would fix it, but its fix also seals private nested classes that
-have `protected` members, and every such member then gets CS0628 (SmartEnum: 144 warnings, which break a build with
-`TreatWarningsAsErrors`). The report lists it under "Not covered" with that reason; it stays Sonar's.
+**Not covered** (the report lists each under "Not covered" with its reason; they stay Sonar's). The fixing rule reports what
+the Sonar rule accepts, and has no setting that narrows it:
+
+| Sonar | Rule | What it reports that Sonar accepts |
+|---|---|---|
+| S100, S101 (PascalCase names) | BRO1309 | events, enum members, enums, delegates, names with `_` inside, test classes (`fooTests`) |
+| S121 (braces) | BRO1514 | `using`, `lock` and `fixed` bodies |
+| S818 (upper-case literal suffixes) | BRO1135 | `1ul`, `1lu` (S818 only reports a last `l` without `u` before it) |
+| S1066 (mergeable `if`s) | BRO1149 | an inner condition that is `dynamic` |
+| S1116 (empty statements) | BRO1101 | the `;` after a type's or namespace's `}` |
+| S1118 (utility classes) | CA1052 | a private or protected constructor, a singleton member, a non-static nested type |
+| S1125 (redundant boolean literals) | IDE0075, IDE0100 | constants and `default`, `c ? true : true`, a comparison inside a conditional with a throw |
+| S1481, S1854 (unused locals and assignments) | IDE0059 | initial values like `0`, `null`, `""`, stores to captured variables, dead stores to used variables |
+| S1905 (redundant casts) | IDE0004 | upcasts and numeric conversions Sonar doesn't call redundant (Autofac: `(Service)`, `(int)`) |
+| S2325 (members that could be static) | CA1822 | members with attributes, empty and recursive methods, events, members of generic types |
+| S3052 (initialized to the default value) | CA1805 | `default`, `new Guid()`, an enum set to `0`, a nullable value type set to `null` |
+| S3260 (seal private classes) | CA1852 | its fix also seals private nested classes that have `protected` members, and every such member then gets CS0628 (SmartEnum: 144 warnings) |
+| S3442 (public constructors of abstract classes) | CA1012 | a constructor in another part of a partial abstract class |
+| S3878 (arrays for `params`) | BRO1151 | arrays and collection expressions for `params object[]`, jagged `params` arrays |
+| S8969 (redundant `!`) | BRO1147 | `!` on values declared without nullable annotations (`#nullable disable`, unannotated libraries) |
 
 **Sonar's own warnings for S1066, S2971 and S3878** are fixed too when the project references SonarAnalyzer.CSharp:
 BRO1149-BRO1151's fixes are registered for those ids, so `dotnet format` (or a light bulb) applies them to Sonar's
@@ -295,19 +300,18 @@ The data lives in the tool: `src/StyleBro.Migrate/data/sonar-mapping.tsv` (the m
 `sonar-rules-10.35.0.4138.tsv` (Sonar's rule list and defaults, public metadata only).
 
 **With StyleCop too**, a rule is on when either setup turns it on, at the stronger severity: the migration normally turns
-the rules beyond StyleCop off (BRO1135, BRO1142, BRO1313, ...), but not when the matching Sonar rule is on. A setting
-Sonar's rule needs replaces the one from the StyleCop setup, and the report lists each such conflict (S121's
-`csharp_prefer_braces = true` where StyleCop's braces rules were off). An option of a rule StyleCop's setup leaves off
+the rules beyond StyleCop off (BRO1142, BRO1313, ...), but not when the matching Sonar rule is on. A setting
+Sonar's rule needs replaces the one from the StyleCop setup, and the report lists each such conflict. An option of a rule StyleCop's setup leaves off
 isn't applied: S4136 only sets an option of BRO1001, so with SA1201 or SA1202 off it stays Sonar's alone.
 
 The report has a Sonar part: what was read, how many Sonar rules are on, which of them StyleBro or the SDK now fixes (and
-with which rule), which mapped ones aren't applied and why, which have no safe fix (S3260), and that the rest stay Sonar's (no safe automatic fix: unused
+with which rule), which mapped ones aren't applied and why, which have no safe fix (S3260, ...), and that the rest stay Sonar's (no safe automatic fix: unused
 private members, cognitive complexity, ...). The generated block has the Sonar-driven lines last, under
 `# From the SonarQube setup`, each with the Sonar rule's title. `--diff` prints the same part of the report before its
 summary. `init` does the same in a repository without StyleCop, and prints it.
 
 Suppressions of Sonar ids are carried over like StyleCop's ([Suppressions](#suppressions)): `#pragma warning disable
-S2325` gets `CA1822`, `[SuppressMessage("...", "S1481:...")]` a sibling for `IDE0059`, `<NoWarn>` the replacing ids, so
+S1659` gets `BRO1142`, `[SuppressMessage("...", "S927:...")]` a sibling for `BRO1313`, `<NoWarn>` the replacing ids, so
 code where a team suppressed a Sonar rule doesn't get the fix (`init --write` does this too when it finds a Sonar
 setup). Limits: sub-directory `.editorconfig` files aren't read; Sonar's rule parameters (`SonarLint.xml`) aren't read.
 
