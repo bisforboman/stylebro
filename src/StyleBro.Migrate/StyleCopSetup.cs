@@ -155,6 +155,16 @@ internal sealed class StyleCopSetup
         // and would otherwise bring StyleCop's defaults back in (Soulseek.NET's examples turned SA1101 on: 191 files got
         // 'this.'). Without any StyleCop reference found, every project counts.
         var projects = Projects(root, files);
+
+        // After the package swap no project references StyleCop, and every project would count: the projects the last
+        // --write found without it (the block's "No StyleCop ran in" line) still don't, so --write gives the same block
+        // again (Autofac: SA1309 came on from its AOT test projects, and BRO1303 switched to 'camelCase').
+        if (recorded is not null && !projects.Uses.Values.Contains(true) && Migration.UnformattedFolders(root) is { Count: > 0 } recordedWithout)
+        {
+            var uses = projects.Uses.ToDictionary(p => p.Key, p => !recordedWithout.Any(folder => InFolder(root, p.Key, folder)), StringComparer.OrdinalIgnoreCase);
+            projects = (uses, projects.ReferencedIn, projects.RemovedIn);
+        }
+
         var allConfigs = projects.Uses.Keys.Order(StringComparer.OrdinalIgnoreCase).Select(p => (Project: p, Config: ProjectConfig(p, root))).ToList();
         var configs = allConfigs.Where(c => projects.Uses[c.Project] || !projects.Uses.Values.Contains(true)).ToList();
 
@@ -569,6 +579,16 @@ internal sealed class StyleCopSetup
             && sectionElement.TryGetProperty(name, out var value)
                 ? value
                 : null;
+    }
+
+    /// <summary>Whether a project (full path) is in a folder of the block's list ('a/b/', or a 'a/b*' pattern).</summary>
+    internal static bool InFolder(string root, string project, string folder)
+    {
+        var path = Path.GetRelativePath(root, Path.GetDirectoryName(project)!).Replace('\\', '/') + "/";
+        var trimmed = folder.Trim().TrimEnd('/');
+        return trimmed.EndsWith('*')
+            ? path.StartsWith(trimmed.TrimEnd('*'), StringComparison.OrdinalIgnoreCase)
+            : path.StartsWith(trimmed + "/", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

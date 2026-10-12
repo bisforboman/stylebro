@@ -199,6 +199,10 @@ internal static class Migration
         // StyleCop wants private constants and static readonly fields in PascalCase (SA1303, SA1311), whatever the SDK's
         // naming rules say: pinned, so BRO1306 doesn't follow a naming rule StyleCop never enforced.
         lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey} = PascalCase");
+
+        // StyleCop's PascalCase field rules (SA1303, SA1304, SA1307, SA1311) and SA1310 skip a name starting with '_': only
+        // SA1309 reports it. With SA1309 off, BRO1306 leaves those names too (Autofac: 28 private static readonly '_x').
+        lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.AllowUnderscoreKey} = {Bool(!setup.IsOn("SA1309"))}");
         AddDocumentationScope(setup, lines);
         AddPunctuationExclusions(setup, lines);
         if (NonEnglishCulture(setup) is { } documentationCulture)

@@ -631,6 +631,9 @@ public sealed partial class MigrationTests : IDisposable
 
         Assert.Contains("stylebro_private_field_naming = _camelCase", result.Lines);
         Assert.Contains(result.Notes, n => n.Contains("2 named '_field', 1 named 'field'"));
+
+        // SA1309 off: StyleCop's SA1303/SA1311 accept '_x' (they only check for a lower-case first letter).
+        Assert.Contains("stylebro_allow_leading_underscore_in_pascal_fields = true", result.Lines);
     }
 
     [Fact]
@@ -638,7 +641,9 @@ public sealed partial class MigrationTests : IDisposable
     {
         Write("C.cs", "class C { private int _a; private int _b; }");
 
-        Assert.Contains("stylebro_private_field_naming = camelCase", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+        var lines = Migration.Generate(StyleCopSetup.Read(root), root).Lines;
+        Assert.Contains("stylebro_private_field_naming = camelCase", lines);
+        Assert.Contains("stylebro_allow_leading_underscore_in_pascal_fields = false", lines);
     }
 
     [Fact]
