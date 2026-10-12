@@ -502,7 +502,6 @@
                 'only StyleCop: BRO1604 Bools.cs(7,21)'
                 'StyleBro output only: Bools.cs: [        /// <summary>Gets the return value condition.</summary>]'
                 'StyleBro output only: Bools.cs: [        /// <summary>Gets or sets the flag.</summary>]'
-                'StyleBro output only: Bools.cs: [        /// <summary>Gets the open state.</summary>]'
                 'StyleBro output only: Bools.cs: [        /// <summary>Gets a value indicating whether it is closed.</summary>]'
                 'StyleCop output only: Bools.cs: [        /// <summary>Gets a value indicating whether gets the return value condition.</summary>]'
                 'StyleCop output only: Bools.cs: [        /// <summary>Gets or sets a value indicating whether gets or sets the flag.</summary>]'
@@ -565,6 +564,10 @@
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets value doc.</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets ends with a quote "done".</summary>]'
                 'StyleCop output only: Periods.cs: [        /// <summary>Gets or sets number 42.</summary>]'
+                # A bool summary that starts with an article isn't reported: it's often a clause (owner's decision
+                # 2026-10-12, #132).
+                'only StyleCop: BRO1604 Bools.cs(13,21)'
+                'StyleBro output only: Bools.cs: [        /// <summary>The open state.</summary>]'
             )
         }
         @{
@@ -572,10 +575,10 @@
             Map      = @('SA1642=BRO1606', 'SA1643=BRO1607', 'SA1617=BRO1608', 'SA1651=BRO1609')
             Expected = @(
                 # StyleBro puts a space after the standard sentence; StyleCop's fix doesn't ('class.Creates').
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class. Creates a words object.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Creates a words object.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Point"/> struct. Makes a point.</summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Generic{T}"/> class. Makes one.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Makes a point.</summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary>Makes one.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Creates a words object.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes static members of the <see cref="Words"/> class.Initializes the static members.</summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class.Cleans up.</summary>]'
@@ -585,7 +588,7 @@
                 # StyleBro's fix puts the sentence inside the paragraph, StyleCop's in front of it.
                 'only StyleCop: BRO1606 Words.cs(31,13)'
                 'StyleBro output only: Words.cs: [        /// <summary><para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
-                'StyleBro output only: Words.cs: [        /// <summary><para>Initializes a new instance of the <see cref="Words"/> class. Creates a words object from a float.</para></summary>]'
+                'StyleBro output only: Words.cs: [        /// <summary><para>Creates a words object from a float.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Initializes a new instance of the <see cref="Words"/> class.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.<para>Creates a words object from a float.</para></summary>]'
                 'StyleCop output only: Words.cs: [        /// <summary>Initializes a new instance of the <see cref="Words"/> class.Initializes a new instance of Words with the given name.</summary>]'
@@ -595,6 +598,11 @@
                 'only StyleCop: BRO1606 Words.cs(43,13)'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes a new instance of Words with the given name.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Initializes the static members.</summary>]'
+                # BRO1606: a constructor summary with text of its own isn't reported (owner's decision 2026-10-12, #132).
+                'only StyleCop: BRO1606 Words.cs(13,13)'
+                'only StyleCop: BRO1606 Words.cs(37,13)'
+                'only StyleCop: BRO1606 Words.cs(124,13)'
+                'only StyleCop: BRO1606 Words.cs(135,13)'
             )
         }
         @{
