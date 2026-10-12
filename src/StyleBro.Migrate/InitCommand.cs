@@ -610,9 +610,9 @@ internal static class InitCommand
                 : null;
             var inScope = new List<string>();
             sonar.For(scope).Apply(inScope, _ => true, own);
-            if (section is not null && Migration.ScopeLines(sonarLines, inScope, own) is { Count: > 0 } lines)
+            if (section is not null && Migration.ScopeLines(sonarLines, inScope, own) is { Count: > 0 } differing)
             {
-                result.Add((section, [$"# Sonar's severities in {scope.File} [{scope.Section}]", .. lines]));
+                result.Add((section, [$"# Sonar's severities in {scope.File} [{scope.Section}]", .. differing]));
             }
         }
 
