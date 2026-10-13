@@ -129,6 +129,9 @@ internal sealed class StyleCopSetup
     /// <summary>Gets the MSBuild files (relative) that reference StyleCop.Analyzers.</summary>
     public IReadOnlyList<string> ReferencedIn { get; init; } = [];
 
+    /// <summary>Gets the MSBuild files (relative) outside the repository's own (a git submodule's) that reference StyleCop.Analyzers.</summary>
+    public IReadOnlyList<string> ReferencedOutside { get; init; } = [];
+
     /// <summary>Gets the MSBuild files (relative) that remove the StyleCop.Analyzers reference they inherit.</summary>
     public IReadOnlyList<string> RemovedIn { get; init; } = [];
 
@@ -163,7 +166,8 @@ internal sealed class StyleCopSetup
 
         // After the package swap the reference is gone: the version the last --write recorded counts (kubernetes-client: a
         // second run turned on BRO1123, BRO1124 and BRO1311, which replace rules StyleCop 1.1.118 doesn't have).
-        var recorded = version is null ? Migration.RecordedVersion(root) : null;
+        var recordedVersion = Migration.RecordedVersion(root);
+        var recorded = version is null ? recordedVersion : null;
         version ??= recorded;
         var old = OldRules(version);
 
@@ -173,15 +177,18 @@ internal sealed class StyleCopSetup
         // 'this.'). Without any StyleCop reference found, every project counts.
         var projects = Projects(root, files);
         var warnings = new List<string>();
-        var installed = recorded is not null || Evaluate(root, projects.Uses, evaluate ?? EvaluateStyleCop, warnings);
+
+        // Also when a file outside the repository's own still references it and the swap removed it (Fonts' submodule): the
+        // block the last --write recorded is the migrated state, not leftovers.
+        var installed = recordedVersion is not null || Evaluate(root, projects.Uses, evaluate ?? EvaluateStyleCop, warnings);
 
         // After the package swap no project references StyleCop, and every project would count: the projects the last
         // --write found without it (the block's "No StyleCop ran in" line) still don't, so --write gives the same block
         // again (Autofac: SA1309 came on from its AOT test projects, and BRO1303 switched to 'camelCase').
-        if (recorded is not null && !projects.Uses.Values.Contains(true) && Migration.UnformattedFolders(root) is { Count: > 0 } recordedWithout)
+        if (recordedVersion is not null && !projects.Uses.Values.Contains(true) && Migration.UnformattedFolders(root) is { Count: > 0 } recordedWithout)
         {
             var uses = projects.Uses.ToDictionary(p => p.Key, p => !recordedWithout.Any(folder => InFolder(root, p.Key, folder)), StringComparer.OrdinalIgnoreCase);
-            projects = (uses, projects.ReferencedIn, projects.RemovedIn);
+            projects = (uses, projects.ReferencedIn, projects.RemovedIn, projects.ReferencedOutside);
         }
 
         var allConfigs = projects.Uses.Keys.Order(StringComparer.OrdinalIgnoreCase).Select(p => (Project: p, Config: ProjectConfig(p, root))).ToList();
@@ -356,6 +363,7 @@ internal sealed class StyleCopSetup
             VersionRecorded = recorded is not null,
             UnresolvedVersion = recorded is null ? unresolved : null,
             RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
+            ReferencedOutside = projects.ReferencedOutside.Select(Relative).ToList(),
             NotInstalled = !installed,
         };
     }
@@ -627,15 +635,17 @@ internal sealed class StyleCopSetup
     /// <summary>
     /// Each project (full path) under the root and whether StyleCop runs in it: a StyleCop.Analyzers reference in the project,
     /// the Directory.Build.props/.targets or Directory.Packages.props it gets, or what those import, and no Remove item for it.
-    /// Also the repository's own files that reference it and that remove it.
+    /// Also the repository's own files that reference it and that remove it, and the files outside them that reference it
+    /// (a git submodule's: SixLabors' shared-infrastructure props, which this repository can't edit).
     /// </summary>
-    internal static (Dictionary<string, bool> Uses, List<string> ReferencedIn, List<string> RemovedIn) Projects(string root, IReadOnlyCollection<string> files)
+    internal static (Dictionary<string, bool> Uses, List<string> ReferencedIn, List<string> RemovedIn, List<string> ReferencedOutside) Projects(string root, IReadOnlyCollection<string> files)
     {
         // ponytail: text-level, like FolderRulesets: Conditions are ignored (Evaluate settles those), a Remove anywhere in the chain wins.
         var own = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
         var uses = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         var referenced = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         var removed = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        var outside = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var project in files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
         {
             var chain = Chain(project, root);
@@ -643,10 +653,11 @@ internal sealed class StyleCopSetup
             var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
             uses[project] = references.Count > 0 && removes.Count == 0;
             referenced.UnionWith(references.Where(own.Contains));
+            outside.UnionWith(references.Where(f => !own.Contains(f)));
             removed.UnionWith(removes.Where(own.Contains));
         }
 
-        return (uses, referenced.ToList(), removed.ToList());
+        return (uses, referenced.ToList(), removed.ToList(), outside.ToList());
     }
 
     /// <summary>

@@ -82,7 +82,27 @@
       <StyleBroGeneratedFolders Condition="'$(EmitCompilerGeneratedFiles)' == 'true' and '$(CompilerGeneratedFilesOutputPath)' != ''">$(StyleBroGeneratedFolders)|$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(CompilerGeneratedFilesOutputPath)'))))</StyleBroGeneratedFolders>
     </PropertyGroup>
   </Target>
+  <!--
+    The repository's git submodules, for PackageFileSuppressor: another repository's code a project compiles (SixLabors'
+    shared-infrastructure) can't be fixed here, and 'dotnet format' skips it. Their paths come from the .gitmodules
+    nearest above the project. '|'-separated.
+  -->
+  <Target Name="_StyleBroFindSubmodules" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroSubmoduleFolders)' == ''">
+    <PropertyGroup>
+      <_StyleBroGitRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', '.gitmodules'))</_StyleBroGitRoot>
+    </PropertyGroup>
+    <ReadLinesFromFile File="$(_StyleBroGitRoot)/.gitmodules" Condition="'$(_StyleBroGitRoot)' != ''">
+      <Output TaskParameter="Lines" ItemName="_StyleBroGitModulesLine" />
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <_StyleBroSubmodule Include="$([MSBuild]::NormalizeDirectory('$(_StyleBroGitRoot)', $([System.Text.RegularExpressions.Regex]::Replace('%(_StyleBroGitModulesLine.Identity)', '^\s*path\s*=\s*', '').Trim())))" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(_StyleBroGitModulesLine.Identity)', '^\s*path\s*='))" />
+    </ItemGroup>
+    <PropertyGroup>
+      <StyleBroSubmoduleFolders>@(_StyleBroSubmodule, '|')</StyleBroSubmoduleFolders>
+    </PropertyGroup>
+  </Target>
   <ItemGroup>
+    <CompilerVisibleProperty Include="StyleBroSubmoduleFolders" />
     <CompilerVisibleProperty Include="StyleBroGeneratedFolders" />
     <CompilerVisibleProperty Include="StyleBroSonar" />
     <CompilerVisibleProperty Include="StyleBroPackageFolders" />    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />

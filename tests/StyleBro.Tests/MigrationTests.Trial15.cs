@@ -16,7 +16,7 @@ public sealed partial class MigrationTests
         Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
         Write("test/Lib.Tests/Lib.Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
 
-        var (uses, _, _) = StyleCopSetup.Projects(root, StyleCopSetup.EnumerateFiles(root).ToList());
+        var (uses, _, _, _) = StyleCopSetup.Projects(root, StyleCopSetup.EnumerateFiles(root).ToList());
         Assert.All(uses.Values, Assert.True);
         Assert.Equal([Path.Combine(root, "Directory.Packages.props")], StyleCopSetup.Imports(Path.Combine(root, "test", "Directory.Packages.props"), root));
 

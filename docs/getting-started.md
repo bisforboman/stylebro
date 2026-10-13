@@ -168,6 +168,12 @@ Put your own settings outside it. To get these rules reported by the build too, 
 `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` to `Directory.Build.props` (`init` says so when no project
 file sets it yet).
 
+An `.editorconfig` that silences analyzers in bulk (`dotnet_analyzer_diagnostic.severity = silent`, or a category's
+severity below warning) would hide StyleBro's rules from `dotnet format`, while the build still reports them at the
+preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules; a rule
+your `.editorconfig` sets by id stays as you set it. `stylebro-migrate format` never says clean while such a bulk setting
+hides rules from it.
+
 #### init also looks at your code
 
 `init` looks at your code first and keeps the conventions it clearly follows. For each setting below it counts both
@@ -258,7 +264,10 @@ A few settings work a little differently:
   partial members, explicit implementations, static constructors): with `private` or without an access modifier. Mostly
   with: the default stays; mostly without: `dotnet_style_require_accessibility_modifiers = omit_if_default`, so neither
   BRO1404 nor [BRO1007](rules/BRO1007.md) adds modifiers (IDE0040, which would remove them, is off in `init`'s block);
-  mixed: BRO1404 is turned off.
+  mixed: BRO1404 is turned off. Interface members are counted apart: when the `.editorconfig` says `always` (which asks
+  for `public` on interface members too), the build doesn't enforce it (no `EnforceCodeStyleInBuild`), and the code's
+  interface members are mostly without an access modifier or mixed, `init` writes `for_non_interface_members`, so
+  BRO1404 adds no `public` there (BaGetter: none of its 102 interface members had one).
 - **Combined declarations** ([BRO1142](rules/BRO1142.md) for locals, [BRO1114](rules/BRO1114.md) for fields) count
   declarations of two or more (`int n = h.Length, i = 0;`) and one-variable declarations right after one of the same type
   and modifiers they could have been combined with (not `var`, not fields with attributes). Mostly one by one: the rule
@@ -278,7 +287,7 @@ A few settings work a little differently:
   package reference), the two formatters would undo each other's layout
   (StabilityMatrix's pre-commit check rejected 161 files StyleBro had formatted). `init` then turns off IDE0055 (so
   `stylebro-migrate format` skips the whitespace pass; when CSharpier formats only some folders, IDE0055 is off in those
-  folders' sections and the whitespace pass leaves just them out) and every StyleBro rule for something CSharpier decides, and the
+  folders' sections, one section per folder CSharpier formats, and the whitespace pass leaves just them out) and every StyleBro rule for something CSharpier decides, and the
   layout conventions in the table are reported as `set` (`CSharpier formats it`). Off:
   - line breaks in lists: [BRO1107](rules/BRO1107.md)-[BRO1110](rules/BRO1110.md),
     [BRO1116](rules/BRO1116.md)-[BRO1119](rules/BRO1119.md); constraints [BRO1111](rules/BRO1111.md), constructor
@@ -699,10 +708,10 @@ every replacing rule as `none` into such a folder's `.editorconfig`, and it neve
 (folders with their own `.git`).
 
 **Files linked from a submodule.** A project can compile files from another folder (`<Compile Include="..\..\ext\Lib\Code.cs" />`,
-or a shared `.projitems`). They're checked like the project's own files, but `stylebro-migrate format` never formats
-anything inside a git submodule (it passes `--exclude` with every submodule folder), so their warnings stay. Mark the
-submodule's folder as generated code too, with a section for its path in the root `.editorconfig` (`[ext/**]`, then
-`generated_code = true`).
+or a shared `.projitems`). `stylebro-migrate format` never formats anything inside a git submodule (it passes `--exclude`
+with every submodule folder), so StyleBro doesn't report findings there either: the package's build targets read the
+submodule paths from the `.gitmodules` above the project and hide StyleBro's findings in those folders. A folder that
+is not a submodule (a copied library) still needs the `generated_code = true` section above.
 
 ## Multi-targeted repositories
 

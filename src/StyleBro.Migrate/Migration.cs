@@ -77,6 +77,14 @@ internal static class Migration
             .ToList();
     }
 
+    /// <summary>Every StyleBro rule's category (what a 'dotnet_analyzer_diagnostic.category-X.severity' key sets).</summary>
+    public static Dictionary<string, string> RuleCategories() =>
+        typeof(StyleBro.Analyzers.DiagnosticIds).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && typeof(DiagnosticAnalyzer).IsAssignableFrom(t))
+            .SelectMany(t => ((DiagnosticAnalyzer)Activator.CreateInstance(t)!).SupportedDiagnostics)
+            .GroupBy(d => d.Id)
+            .ToDictionary(g => g.Key, g => g.First().Category, StringComparer.Ordinal);
+
     /// <summary>
     /// The settings for the whole repository. <paramref name="fieldStyle"/> null: inferred from the code;
     /// <paramref name="sonar"/>: the SonarQube setup, whose rules turn on the rules that fix what they report.
@@ -321,14 +329,15 @@ internal static class Migration
         // CSharpier formats the repository: IDE0055 and the layout rules go off as in init, and a StyleCop rule only they
         // replaced is CSharpier's now, not enforced by StyleBro (the two formatters would undo each other).
         // Only a folder (the rest isn't CSharpier's): its settings go into that folder's section, the StyleCop rules stay.
-        var csharpierScope = Conventions.CSharpierScope(root);
-        if (csharpierScope is ({ } partEvidence, { Length: > 0 } part))
+        var csharpierScopes = Conventions.CSharpierScopes(root);
+        foreach (var (partEvidence, part) in csharpierScopes.Where(s => s.Folder.Length > 0))
         {
             var (partLines, partReport) = Conventions.CSharpierLines(partEvidence, root, OwnSettings(root), part);
-            result.CSharpierSection = ($"{part}/**.cs", partLines.Select(l => l.Replace("# init: ", "# ")).ToList());
+            result.CSharpierSections.Add(($"{part}/**.cs", partLines.Select(l => l.Replace("# init: ", "# ")).ToList()));
             result.Notes.Add(partReport.Trim().Replace("CSharpier (", $"CSharpier in {part}/ (", StringComparison.Ordinal));
         }
-        else if (csharpierScope is var (csharpier, _))
+
+        if (csharpierScopes is [(var csharpier, "")])
         {
             var (csharpierLines, csharpierReport) = Conventions.CSharpierLines(csharpier, root, OwnSettings(root));
             lines.RemoveAll(l => Conventions.CSharpierRules.Any(id => l.StartsWith($"dotnet_diagnostic.{id}.severity = ", StringComparison.Ordinal)));
@@ -417,8 +426,11 @@ internal static class Migration
     /// <summary>The keys the root .editorconfig sets for all C# files, outside the generated blocks (init/--write and --modernize).</summary>
     public static HashSet<string> OwnKeys(string root) => new(OwnSettings(root).Keys, StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>The settings (key, value) the root .editorconfig sets for all C# files, outside the generated blocks; later lines win.</summary>
-    public static Dictionary<string, string> OwnSettings(string root)
+    /// <summary>
+    /// The settings (key, value) the root .editorconfig sets for all C# files, outside the generated blocks (inside them too
+    /// with <paramref name="withBlocks"/>); later lines win.
+    /// </summary>
+    public static Dictionary<string, string> OwnSettings(string root, bool withBlocks = false)
     {
         var keys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var path = Path.Combine(root, ".editorconfig");
@@ -441,7 +453,7 @@ internal static class Migration
             {
                 inCSharp = StyleCopSetup.AppliesToCSharp(line.Trim('[', ']'));
             }
-            else if (!inBlock && inCSharp && KeyOf(line) is { } key)
+            else if ((!inBlock || withBlocks) && inCSharp && KeyOf(line) is { } key)
             {
                 keys[key] = line.Substring(line.IndexOf('=') + 1).Split('#', ';')[0].Trim();
             }
@@ -472,10 +484,7 @@ internal static class Migration
         {
             [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, mainLines)],
         };
-        if (main.CSharpierSection is { } csharpierSection)
-        {
-            plan[".editorconfig"].Add(csharpierSection);
-        }
+        plan[".editorconfig"].AddRange(main.CSharpierSections);
 
         foreach (var folder in MigrationFolders(root))
         {
@@ -1382,7 +1391,7 @@ internal static class Migration
         /// </summary>
         public SortedDictionary<string, List<string>?> Whitespace { get; } = new(StringComparer.Ordinal);
 
-        /// <summary>Gets or sets the section for the folder CSharpier formats, when it formats only part of the code (<see cref="Conventions.CSharpierScope"/>).</summary>
-        public (string Section, List<string> Lines)? CSharpierSection { get; set; }
+        /// <summary>Gets the sections for the folders CSharpier formats, when it formats only part of the code (<see cref="Conventions.CSharpierScopes"/>).</summary>
+        public List<(string Section, List<string> Lines)> CSharpierSections { get; } = [];
     }
 }

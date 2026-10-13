@@ -76,8 +76,10 @@ internal static class PackagesConfig
         var packages = Regex.Matches(config, @"^(?<indent>[ \t]*)<package\b[^>]*\bid=""(?<id>[^""]+)""[^>]*>", RegexOptions.Multiline);
         if (packages.Count == 0)
         {
+            // The entry gets a line of its own also when '</packages>' shares its line with others (synth2's one-line file).
             var end = config.LastIndexOf("</packages>", StringComparison.OrdinalIgnoreCase);
-            return end < 0 ? config : config.Insert(end, "  " + entry + newLine);
+            var alone = end >= 0 && config.LastIndexOf('\n', Math.Max(end - 1, 0)) is var lineStart && config.Substring(lineStart + 1, end - lineStart - 1).Trim().Length == 0;
+            return end < 0 ? config : config.Insert(end, (alone ? string.Empty : newLine) + "  " + entry + newLine);
         }
 
         var next = packages.FirstOrDefault(p => string.Compare(p.Groups["id"].Value, "StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase) > 0);
@@ -114,11 +116,15 @@ internal static class PackagesConfig
 
         var targets = $@"{folder}\build\StyleBro.Analyzers.targets";
         var error = $"    <Error Condition=\"!Exists('{targets}')\" Text=\"$([System.String]::Format('$(ErrorText)', '{targets}'))\" />{newLine}";
-        var ensure = Regex.Match(project, @"<Target\b[^>]*\bName=""EnsureNuGetPackageBuildImports""[^>]*>.*?(?=^[ \t]*</Target>)", RegexOptions.Singleline | RegexOptions.Multiline);
+
+        // NuGet's target, however it's written (quotes, '</Target>' after other content): a second target of that name
+        // would replace it (MSBuild keeps the last), and its own Error lines with it.
+        var ensure = Regex.Match(project, @"<Target\b[^>]*\bName\s*=\s*[""']EnsureNuGetPackageBuildImports[""'][^>]*>.*?(?<close>(?<=^)[ \t]*</Target>|</Target>)", RegexOptions.Singleline | RegexOptions.Multiline);
         var tail = $"  <Import Project=\"{targets}\" Condition=\"Exists('{targets}')\" />{newLine}";
         if (ensure.Success)
         {
-            project = project.Insert(ensure.Index + ensure.Length, error);
+            var close = ensure.Groups["close"];
+            project = project.Insert(close.Index, close.Value.StartsWith("</", StringComparison.Ordinal) && close.Index > 0 && project[close.Index - 1] != '\n' ? newLine + error : error);
         }
         else
         {

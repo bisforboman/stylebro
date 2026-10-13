@@ -73,6 +73,28 @@ a `packages.config` entry, its `<Analyzer>` items and the import of its build ta
 Running `format` there takes extra steps, and `--diff` leaves those projects out:
 [getting-started.md](getting-started.md#old-style-non-sdk-projects).
 
+### StyleCop referenced in a git submodule
+
+Some repositories get StyleCop from a shared submodule, such as SixLabors' `shared-infrastructure`, whose
+`SixLabors.Global.props` the repository's `Directory.Build.props` imports. The submodule belongs to another repository,
+so it can't be edited here. The report names the file and says where the swap goes instead: in the repository's own
+`Directory.Build.props`, after the line that imports the submodule's file.
+
+```xml
+<Import Project="$(MSBuildThisFileDirectory)shared-infrastructure\msbuild\props\SixLabors.Global.props" />
+
+<!-- StyleBro replaces StyleCop (referenced in the shared infrastructure). -->
+<ItemGroup>
+  <PackageReference Remove="StyleCop.Analyzers" />
+  <PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" />
+</ItemGroup>
+```
+
+After the swap, a second `--write` recognizes the migrated setup from the StyleCop version the first one recorded in
+the block. It doesn't treat the setup as leftovers. Code that a project compiles from the submodule is not reported:
+StyleBro can't fix it there, and `format` skips submodules. The package's build targets read the submodule paths from
+`.gitmodules`.
+
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
 real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).

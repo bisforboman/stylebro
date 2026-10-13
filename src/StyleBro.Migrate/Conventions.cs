@@ -320,6 +320,9 @@ internal static class Conventions
     /// </summary>
     private const string UsingsKey = "using order";
 
+    /// <summary>Interface members (methods, properties, indexers, events): [with an access modifier, without].</summary>
+    private const string InterfaceAccessKey = "interface member access";
+
     /// <summary>
     /// The SDK option that keeps 'if (a) return;' and 'case 1: a(); break;' on one line. The preset sets it to false, which
     /// splits them (NSubstitute: 58 lines), so init keeps them once the code has <see cref="MinimumAgreeing"/> (owner's
@@ -375,7 +378,14 @@ internal static class Conventions
     /// covers every C# file under the root (tusdotnet: all its code is under Source/, so the whole repository), else that
     /// folder, whose own section gets the CSharpier settings.
     /// </summary>
-    public static (string Evidence, string Folder)? CSharpierScope(string root)
+    public static (string Evidence, string Folder)? CSharpierScope(string root) => CSharpierScopes(root) is [var first, ..] ? first : null;
+
+    /// <summary>
+    /// Every folder CSharpier formats (<see cref="CSharpierScope"/>), one entry each: synth1 configures it in src/Pretty/ and
+    /// src/Pretty2/, and with only the first recognised BRO1110 fought CSharpier in Pretty2 forever. One entry with an empty
+    /// folder when it covers every C# file; a folder inside another's is left out (the outer section reaches it).
+    /// </summary>
+    public static List<(string Evidence, string Folder)> CSharpierScopes(string root)
     {
         var files = StyleCopSetup.EnumerateFiles(root).ToList();
         string Relative(string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
@@ -384,28 +394,41 @@ internal static class Conventions
             .Prepend(root)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(f => f.Length);
-        string? evidence = null;
+        var evidences = new List<string>();
         foreach (var folder in folders)
         {
-            evidence = CSharpierConfigs.Select(f => Path.Combine(folder, f)).FirstOrDefault(File.Exists)
+            var evidence = CSharpierConfigs.Select(f => Path.Combine(folder, f)).FirstOrDefault(File.Exists)
                 ?? new[] { Path.Combine(folder, ".config", "dotnet-tools.json"), Path.Combine(folder, "dotnet-tools.json") }
                     .FirstOrDefault(f => File.Exists(f) && System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(f), @"""csharpier""", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
             if (evidence is not null)
             {
-                break;
+                evidences.Add(evidence);
             }
         }
 
-        evidence ??= files.Where(StyleCopSetup.IsMSBuild).FirstOrDefault(f => File.ReadAllText(f).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase));
-        if (evidence is null)
+        if (evidences.Count == 0 && files.Where(StyleCopSetup.IsMSBuild).FirstOrDefault(f => File.ReadAllText(f).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase)) is { } msbuild)
         {
-            return null;
+            evidences.Add(msbuild);
         }
 
-        var scope = Relative(CSharpierFolder(evidence));
-        scope = scope == "." ? string.Empty : scope;
-        var covers = scope.Length == 0 || files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).All(f => Relative(f).StartsWith(scope + "/", StringComparison.OrdinalIgnoreCase));
-        return (Relative(evidence), covers ? string.Empty : scope);
+        var cs = files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(Relative).ToList();
+        var result = new List<(string Evidence, string Folder)>();
+        foreach (var evidence in evidences)
+        {
+            var scope = Relative(CSharpierFolder(evidence));
+            scope = scope == "." ? string.Empty : scope;
+            if (scope.Length == 0 || cs.All(f => f.StartsWith(scope + "/", StringComparison.OrdinalIgnoreCase)))
+            {
+                return [(Relative(evidence), string.Empty)];
+            }
+
+            if (!result.Any(r => (scope + "/").StartsWith(r.Folder + "/", StringComparison.OrdinalIgnoreCase)))
+            {
+                result.Add((Relative(evidence), scope));
+            }
+        }
+
+        return result;
 
         IEnumerable<string> Ancestors(string folder)
         {
@@ -697,6 +720,7 @@ internal static class Conventions
         counts[TrailingWhitespaceKey] = new int[2];
         counts[HeaderKey] = new int[2];
         counts[ConvertedKey] = new int[2];
+        counts[InterfaceAccessKey] = new int[2];
         foreach (var aspect in Spacing)
         {
             counts[SpacingCountKey(aspect)] = new int[3];
@@ -848,7 +872,7 @@ internal static class Conventions
             : $"'format' converts the other {others} ({value.ToUpperInvariant()}) to {files?.ToUpperInvariant()} where it formats them";
         return value is not ("lf" or "crlf") || files is null || files == value
             ? null
-            : (files, $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
+            : (files, $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To keep {value.ToUpperInvariant()}: put 'end_of_line = {value}' below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
     }
 
     /// <summary>
@@ -880,7 +904,7 @@ internal static class Conventions
 
         var line = $"{key} = {(winner < 0 ? "unset" : values[winner])}";
         var keeps = winner < 0 ? $"'format' leaves {each} as it is" : "'format' leaves the files alone";
-        return (line, $"{title}: {file ?? "your .editorconfig"} says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {key} = {value} everywhere: remove that line and run 'stylebro-migrate format' (it rewrites the files).");
+        return (line, $"{title}: {file ?? "your .editorconfig"} says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {key} = {value} everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'stylebro-migrate format' (it rewrites the files).");
     }
 
     /// <summary>
@@ -1193,6 +1217,13 @@ internal static class Conventions
             if (Skip(node.SpanStart))
             {
                 continue;
+            }
+
+            // Interface members that could take 'public': not the ones with another modifier (static, private, abstract, ...).
+            if (node is MethodDeclarationSyntax or BasePropertyDeclarationSyntax or EventFieldDeclarationSyntax && node.Parent is InterfaceDeclarationSyntax
+                && ((MemberDeclarationSyntax)node).Modifiers.All(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.NewKeyword))
+            {
+                Add(InterfaceAccessKey, !((MemberDeclarationSyntax)node).Modifiers.Any(SyntaxKind.PublicKeyword));
             }
 
             if (node is MemberDeclarationSyntax member && IsPrivateByDefault(member))
@@ -1864,7 +1895,7 @@ internal static class Conventions
                 lines.Add((convention.KeepAny
                         ? $"# init: {convention.What}: allowed, because your code has some ({count[winner]} of {Plural(total, convention.Unit)} {convention.Values[winner].Label}; any {MinimumAgreeing} keep them allowed: {convention.Keeps})"
                         : $"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code")
-                    + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced)" : string.Empty));
+                    + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced; to keep it, set it again below this block)" : string.Empty));
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
 
@@ -1960,6 +1991,26 @@ internal static class Conventions
     /// <summary>The count key of a <see cref="Spacing"/> aspect.</summary>
     public static string SpacingCountKey((string Key, string? Flag, string What, string Default, string Other) aspect) =>
         "spacing: " + aspect.Key + (aspect.Flag is null ? string.Empty : "=" + aspect.Flag);
+
+    /// <summary>
+    /// The lines and the report line when the repository's <see cref="AccessModifiersKey"/> says 'always' (interface members
+    /// too) and the code's interface members don't follow it, clearly or mixed, while nothing enforces the key in the build
+    /// (<paramref name="enforcedInBuild"/>: EnforceCodeStyleInBuild with IDE0040 on): BaGetter says 'always:warning', IDE-only,
+    /// none of its 102 interface members has one, and BRO1404 added 'public' to all of them. A key the code contradicts
+    /// that nothing enforces doesn't win: for_non_interface_members keeps the rest of 'always'. Null otherwise.
+    /// </summary>
+    public static (List<string> Lines, string Report)? InterfaceAccess(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> repository, bool enforcedInBuild)
+    {
+        if (enforcedInBuild || !repository.TryGetValue(AccessModifiersKey, out var setting) || setting.Split(':')[0].Trim().ToLowerInvariant() != "always"
+            || counts[InterfaceAccessKey] is not [var with, var without] || with + without < MinimumAgreeing || Winner(with, without) == 0)
+        {
+            return null;
+        }
+
+        var found = Winner(with, without) < 0 ? $"mixes both forms ({with} with, {without} without)" : $"has {without} of {Plural(with + without, "interface member")} without one";
+        var note = $"interface members: your .editorconfig says {AccessModifiersKey} = {setting}, but your code {found}; nothing enforces it in the build, so {DiagnosticIds.AccessModifier} adds no access modifier to them ({AccessModifiersKey} = for_non_interface_members). To enforce it: change the code, then remove the next line.";
+        return ([$"# init: {note}", $"{AccessModifiersKey} = for_non_interface_members"], $"  {"off",-8} {note.Substring(0, note.IndexOf(" To enforce", StringComparison.Ordinal))}");
+    }
 
     /// <summary>The folder a piece of <see cref="CSharpier"/>'s evidence applies to: its own, or the one above '.config'.</summary>
     private static string CSharpierFolder(string evidence)

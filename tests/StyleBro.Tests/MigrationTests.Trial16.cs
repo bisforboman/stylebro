@@ -61,7 +61,7 @@ public sealed partial class MigrationTests
 
         // The migration the same way.
         var result = Migration.Generate(StyleCopSetup.Read(root), root);
-        Assert.Equal("Source/**.cs", result.CSharpierSection?.Section);
+        Assert.Equal("Source/**.cs", Assert.Single(result.CSharpierSections).Section);
         Assert.DoesNotContain("stylebro_layout_by = csharpier", result.Lines);
         Assert.Contains("[Source/**.cs]", Migration.Render(Migration.Plan(StyleCopSetup.Read(root), root, result)[".editorconfig"]), StringComparison.Ordinal);
     }
@@ -160,6 +160,10 @@ public sealed partial class MigrationTests
 
         Assert.Contains("packages.config projects left out of the preview: Old/Old.csproj", output, StringComparison.Ordinal);
         Assert.Contains("Note: packages.config projects left out", output, StringComparison.Ordinal);
+
+        // Trial 18: and really left out, without the package install or formatting in their folders.
+        Assert.DoesNotContain("Old/", File.ReadAllText(patch), StringComparison.Ordinal);
+        Assert.Contains("+++ b/Directory.Build.props", File.ReadAllText(patch), StringComparison.Ordinal);
 
         // Trial 17: left out on purpose, so no "To include them: run 'dotnet restore'" (it can't restore them).
         Assert.DoesNotContain("WARNING", output, StringComparison.Ordinal);
