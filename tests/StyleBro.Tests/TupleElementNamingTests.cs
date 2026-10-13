@@ -135,6 +135,90 @@ public class TupleElementNamingTests
             """,
         });
 
+    // sharpcompress (trial 18): the local 'pointer' kept IDE0042 (an error there) quiet; 'Pointer' would end the clash.
+    [Fact]
+    public Task RenamesThatLetIde0042Report_AreLeftWhereItIsEnforced() => VerifyNotFixedAsync(
+        new[]
+        {
+            """
+            public class C
+            {
+                private static (int Code, string {|BRO1311:pointer|}) Decode() => (0, "x");
+
+                public string Run()
+                {
+                    string pointer;
+                    var result = Decode();
+                    pointer = result.pointer;
+                    return pointer + result.Code;
+                }
+            }
+            """,
+        },
+        "dotnet_diagnostic.IDE0042.severity = error");
+
+    [Theory]
+    [InlineData("dotnet_diagnostic.IDE0042.severity = suggestion")]
+    [InlineData("csharp_style_deconstructed_variable_declaration = false:error")]
+    public Task RenamesThatLetIde0042Report_AreMadeWhereItIsNotEnforced(string editorConfig) => VerifyFixAsync(
+        """
+        public class C
+        {
+            private static (int {|BRO1311:code|}, string {|BRO1311:pointer|}) Decode() => (0, "x");
+
+            public string Run()
+            {
+                string pointer;
+                var result = Decode();
+                pointer = result.pointer;
+                return pointer + result.code;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            private static (int Code, string Pointer) Decode() => (0, "x");
+
+            public string Run()
+            {
+                string pointer;
+                var result = Decode();
+                pointer = result.Pointer;
+                return pointer + result.Code;
+            }
+        }
+        """,
+        editorConfig);
+
+    // IDE0042's own conditions: a tuple used as a whole or by 'Item2' can't be deconstructed, a foreach variable can.
+    [Theory]
+    [InlineData("var result = Decode(); return pointer + result.pointer;", true)]
+    [InlineData("foreach (var item in items) { pointer = item.pointer; } return pointer;", true)]
+    [InlineData("var result = Decode(); return pointer + result;", false)]
+    [InlineData("var result = Decode(); return pointer + result.Item2;", false)]
+    public Task RenamesThatLetIde0042Report_FollowItsConditions(string body, bool kept)
+    {
+        var source = $$"""
+            using System.Collections.Generic;
+
+            public class C
+            {
+                private static (int Code, string {|BRO1311:pointer|}) Decode() => (0, "x");
+
+                public string Run(List<(int Code, string {|BRO1311:pointer|})> items)
+                {
+                    string pointer = "";
+                    {{body}}
+                }
+            }
+            """;
+        const string EditorConfig = "dotnet_diagnostic.IDE0042.severity = error";
+        return kept
+            ? VerifyNotFixedAsync(new[] { source }, EditorConfig)
+            : VerifyFixAsync(source, source.Replace("{|BRO1311:pointer|}", "Pointer").Replace(".pointer", ".Pointer"), EditorConfig);
+    }
+
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;

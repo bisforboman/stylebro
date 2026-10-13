@@ -84,6 +84,12 @@ internal static class CamelCaseRenamer
         }
 
         await NamespaceRenamer.AddChangesAsync(solution, namespaces, changes, cancellationToken).ConfigureAwait(false);
+        return await ApplyAsync(solution, changes, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>The solution with the edits, keyed by <see cref="GetFileKey"/>.</summary>
+    private static async Task<Solution> ApplyAsync(Solution solution, Dictionary<string, List<TextChange>> changes, CancellationToken cancellationToken)
+    {
         var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
         var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
         var paths = new HashSet<string>(StringComparer.Ordinal);
@@ -271,6 +277,16 @@ internal static class CamelCaseRenamer
             }
 
             itemChanges.AddRange(symbolChanges);
+        }
+
+        // A rename can end a clash that kept IDE0042 quiet ('var r = Get(); int Count;' with '(int Count, ...)').
+        if (itemChanges.Count > 0)
+        {
+            var edits = itemChanges.GroupBy(c => c.File).ToDictionary(g => g.Key, g => g.Select(c => c.Change).ToList());
+            if (await Deconstruction.AddsReportsAsync(solution, await ApplyAsync(solution, edits, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
+            {
+                return (new List<(string File, TextChange Change)>(), KeptReason.AddsDeconstruction, null);
+            }
         }
 
         return (itemChanges, null, null);

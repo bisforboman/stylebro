@@ -27,8 +27,9 @@ namespace StyleBro.CodeFixes.Naming;
 /// <item>every use ('t.count', 't?.count', 'nameof', '(count: var c)' in a pattern) of an element declared at a renamed
 /// place. Inferred names and elements from libraries keep theirs.</item>
 /// </list>
-/// A rename that adds compile errors anywhere is dropped and its warning stays (a deliberate exception, like the
-/// naming rules' reflection guard).
+/// A rename that adds compile errors anywhere, or a report of IDE0042 where that's a warning or an error
+/// (<see cref="Deconstruction"/>), is dropped and its warning stays (a deliberate exception, like the naming rules'
+/// reflection guard).
 /// </summary>
 internal static class TupleElementRenamer
 {
@@ -76,7 +77,9 @@ internal static class TupleElementRenamer
             return (null, (KeptReason.UsedInProjectNotLoaded, outside));
         }
 
-        return await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, (KeptReason.AddsErrors, null)) : (renamed, null);
+        return await AddsErrorsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, (KeptReason.AddsErrors, null))
+            : await Deconstruction.AddsReportsAsync(solution, renamed, cancellationToken).ConfigureAwait(false) ? (null, (KeptReason.AddsDeconstruction, null))
+            : (renamed, null);
     }
 
     /// <summary>
