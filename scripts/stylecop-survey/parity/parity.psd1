@@ -36,6 +36,23 @@
                 'only StyleCop: BRO1519 Blank.cs(49,10)'
                 'StyleCop output only: Blank.cs: []'
                 'StyleCop output only: Blank.cs: []'
+                # Deviation: a '}' inside an expression or pattern followed by a token that continues it ('?', '??', 'with',
+                # a binary operator, 'as', 'when', '?.') doesn't end a block (StyleCop exempts only '.', ':', '&&', '||', ...).
+                # recyclarr: CSharpier removes the blank line before '?', BRO1519 added it back on every run.
+                'only StyleCop: BRO1519 Continuations.cs(13,18)'
+                'only StyleCop: BRO1519 Continuations.cs(19,14)'
+                'only StyleCop: BRO1519 Continuations.cs(24,14)'
+                'only StyleCop: BRO1519 Continuations.cs(33,14)'
+                'only StyleCop: BRO1519 Continuations.cs(38,14)'
+                'only StyleCop: BRO1519 Continuations.cs(45,18)'
+                'only StyleCop: BRO1519 Continuations.cs(52,14)'
+                'StyleCop output only: Continuations.cs: []'
+                'StyleCop output only: Continuations.cs: []'
+                'StyleCop output only: Continuations.cs: []'
+                'StyleCop output only: Continuations.cs: []'
+                'StyleCop output only: Continuations.cs: []'
+                'StyleCop output only: Continuations.cs: []'
+                'StyleCop output only: Continuations.cs: []'
             )
         }
         @{
@@ -769,6 +786,9 @@
                 'only StyleCop: BRO1123 Tuples.cs(25,21)'
                 # nameof(t.Item1) would change its string.
                 'only StyleCop: BRO1124 Tuples.cs(29,30)'
+                # 'x.Item1' whose element is named 'x' would read 'x.x' (recyclarr: a name inferred from another lambda's x).
+                'only StyleCop: BRO1124 Tuples.cs(32,91)'
+                'only StyleCop: BRO1124 Tuples.cs(34,48)'
                 # StyleCop's SA1141 fix doesn't support Fix All in Solution and its SA1142 fix throws under 'dotnet format',
                 # so StyleCop leaves every tuple as it is.
                 'StyleBro output only: Tuples.cs: [        public (int, string) Field;]'

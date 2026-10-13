@@ -108,9 +108,17 @@ internal static class BlankLineRuns
             return false;
         }
 
-        if (next.IsKind(SyntaxKind.IdentifierToken)
-            && owner.FirstAncestorOrSelf<RecursivePatternSyntax>() is { } pattern
-            && next.Parent!.FirstAncestorOrSelf<RecursivePatternSyntax>() == pattern)
+        // A '}' inside an expression or pattern followed by a token that continues it ('?', '??', '?.', a binary
+        // operator, 'switch', 'with', 'is', 'as', 'when', a designation, ...) doesn't end a block: no blank line there.
+        // StyleCop lists only some of these tokens ('.', ':', '&&', '||'; reporting '?', CSharpier removed the line again).
+        if (next.Parent!.AncestorsAndSelf().FirstOrDefault(a => a.Span.Contains(owner.Span)) is ExpressionSyntax or PatternSyntax
+            or SwitchExpressionArmSyntax or SwitchLabelSyntax)
+        {
+            return false;
+        }
+
+        // A property's accessor list followed by its initializer (StyleCop's exception).
+        if (next.IsKind(SyntaxKind.EqualsToken) && owner is AccessorListSyntax)
         {
             return false;
         }

@@ -280,6 +280,70 @@ public class FieldNamingTests
         """,
         editorConfig: Underscore);
 
+    // Fluid: 'this.pet = pet' became 'this._pet = pet'. The 'this.' was only there to step around the parameter; once the
+    // field is '_pet', it isn't needed. A 'this.' the code didn't need, or one a parameter still needs, stays.
+    [Fact]
+    public Task UnderscoreStyle_DropsTheThisTheRenameMadeRedundant() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int {|BRO1303:pet|};
+            private int {|BRO1303:other|};
+            private int {|BRO1303:count|};
+
+            public C(int pet, int _count)
+            {
+                this.pet = pet;
+                this.other = this.pet;
+                this.count = _count;
+                System.Action<int> set = _pet => this.pet = pet + _pet;
+            }
+        }
+        """,
+        """
+        class C
+        {
+            private int _pet;
+            private int _other;
+            private int _count;
+
+            public C(int pet, int _count)
+            {
+                _pet = pet;
+                this._other = _pet;
+                this._count = _count;
+                System.Action<int> set = _pet => this._pet = pet + _pet;
+            }
+        }
+        """,
+        editorConfig: Underscore);
+
+    [Fact]
+    public Task UnderscoreStyle_KeepsThis_WhenTheRepoAsksForIt() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int {|BRO1303:pet|};
+
+            public C(int pet)
+            {
+                this.pet = pet;
+            }
+        }
+        """,
+        """
+        class C
+        {
+            private int _pet;
+
+            public C(int pet)
+            {
+                this._pet = pet;
+            }
+        }
+        """,
+        editorConfig: Underscore + "\ndotnet_style_qualification_for_field = true:warning");
+
     [Fact]
     public Task NamingRuleForPrivateFields_PicksTheStyle() => VerifyFixAsync(
         """

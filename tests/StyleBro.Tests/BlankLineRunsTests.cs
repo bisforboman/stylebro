@@ -174,6 +174,81 @@ public class BlankLineRunsTests
         }
         """);
 
+    // recyclarr (CSharpier layout): a '}' that ends a pattern or expression, followed by a token that continues it, isn't
+    // the end of a block. BRO1519 added a blank line before '?', CSharpier removed it again.
+    [Fact]
+    public Task ContinuationAfterCloseBrace_NotReported() => VerifyNoDiagnosticsAsync(
+        """
+        using System.Linq;
+
+        public class C
+        {
+            public int Value { get; set; }
+
+            public int[] Items
+            {
+                get;
+                set;
+            }
+            = new int[0];
+
+            public object M(object o, C c, int[] items)
+            {
+                var a = o
+                    is C
+                    {
+                        Value: 1,
+                    }
+                    ? 1
+                    : 2;
+                var b = new C
+                {
+                    Value = 1,
+                }
+                ?? c;
+                var d = new
+                {
+                    Value = 2,
+                }
+                with
+                {
+                    Value = 3,
+                };
+                var e = c.Value switch
+                {
+                    1 => 1,
+                    _ => 2,
+                }
+                + a;
+                var f = new[]
+                {
+                    1,
+                }
+                as object;
+                var g = o switch
+                {
+                    C
+                    {
+                        Value: 1,
+                    }
+                    when b != null => 1,
+                    C
+                    {
+                        Value: 2,
+                    }
+                    x => x.Value,
+                    _ => 0,
+                };
+                return new C
+                {
+                    Value = 1,
+                }
+                ?.Value;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
+
     [Fact]
     public Task OtherRulesPlaces_AreLeftToThem() => VerifyNoDiagnosticsAsync(
         """
