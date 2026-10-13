@@ -30,6 +30,13 @@ public static class RepositoryNames
     public const char IdentifierKind = 'I';
 
     /// <summary>
+    /// A file's identifiers used as member names, space-separated (<see cref="Entry.Where"/>: the path): after <c>.</c> or
+    /// <c>?.</c>, before <c>:</c> in <c>name:</c>, and tuple elements. What code elsewhere can use a tuple element by: a lambda
+    /// parameter or a local with the element's name isn't a use (EntityGraphQL: <c>(_, value) =&gt;</c> kept a rename).
+    /// </summary>
+    public const char MemberNameKind = 'M';
+
+    /// <summary>
     /// A type whose members code reads by position (<see cref="Ordering.ReflectionByPosition"/>): the type's simple name and
     /// the method, space-separated (<see cref="Entry.Where"/>: 'path(line)').
     /// </summary>
@@ -107,6 +114,8 @@ public static class RepositoryNames
 
         var identifiers = new SortedSet<string>(TreeWalk.Tokens(root).Where(t => t.IsKind(SyntaxKind.IdentifierToken)).Select(t => t.ValueText), System.StringComparer.Ordinal);
         yield return Line(IdentifierKind, path, string.Join(" ", identifiers));
+        var members = new SortedSet<string>(TreeWalk.Tokens(root).Where(IsMemberName).Select(t => t.ValueText), System.StringComparer.Ordinal);
+        yield return Line(MemberNameKind, path, string.Join(" ", members));
     }
 
     /// <summary>
@@ -160,6 +169,15 @@ public static class RepositoryNames
         var second = first < 0 ? -1 : line.IndexOf('\t', first + 1);
         return first == 1 && second > 0 ? new Entry(line[0], Unescape(line.Substring(2, second - 2)), Unescape(line.Substring(second + 1))) : null;
     }
+
+    private static bool IsMemberName(SyntaxToken token) =>
+        token.IsKind(SyntaxKind.IdentifierToken)
+        && token.Parent switch
+        {
+            TupleElementSyntax => true,
+            IdentifierNameSyntax name => name.Parent is MemberAccessExpressionSyntax access ? access.Name == name : name.Parent is MemberBindingExpressionSyntax or NameColonSyntax,
+            _ => false,
+        };
 
     /// <summary>
     /// Whether an expression looks like a <see cref="System.Type"/>: <c>typeof(C)</c>, <c>x.GetType()</c>,

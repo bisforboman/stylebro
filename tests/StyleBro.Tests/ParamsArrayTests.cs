@@ -232,4 +232,59 @@ public class ParamsArrayTests
             }
         }
         """);
+
+    // A single element the call would take as the array itself: the normal form binds, and the one-element array became
+    // that value (trial 14: 'Take(new Item[] { default! })' became 'Take(default!)', a null array). The compiler decides,
+    // so every shape is covered, however it's wrapped.
+    [Fact]
+    public Task ElementsThatBindAsTheArray_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
+        """
+        #nullable enable
+        public class Item
+        {
+        }
+
+        public static class Bag
+        {
+            public static int Take(params Item[] items) => items.Length;
+
+            public static int TakeAll(params object[] values) => values.Length;
+
+            public static int M(object[] objects, object o)
+            {
+                return Take(new Item[] { default! })
+                    + Take(new Item[] { (default)! })
+                    + Take(new Item[] { ((default!)) })
+                    + Take(new Item[] { (null)! })
+                    + TakeAll(new object[] { (object[])null! })
+                    + TakeAll(new object[] { (null as object[])! })
+                    + TakeAll([objects!])
+                    + TakeAll(new object[] { objects })
+                    + TakeAll(new object[] { ((objects)) })
+                    + TakeAll(new object[] { (object[])o });
+            }
+        }
+        """);
+
+    // The same wrappers around an element that binds as an element: still reported.
+    [Fact]
+    public Task WrappedElements_AreReported() => Verify.VerifyFixAsync(
+        """
+        #nullable enable
+        public static class Bag
+        {
+            public static int TakeAll(params object[] values) => values.Length;
+
+            public static int M(object o, string s) => TakeAll({|BRO1151:new object[] { o! }|}) + TakeAll({|BRO1151:new object[] { ((s)) }|});
+        }
+        """,
+        """
+        #nullable enable
+        public static class Bag
+        {
+            public static int TakeAll(params object[] values) => values.Length;
+
+            public static int M(object o, string s) => TakeAll(o!) + TakeAll(((s)));
+        }
+        """);
 }

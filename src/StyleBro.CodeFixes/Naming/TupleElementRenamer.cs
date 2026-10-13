@@ -65,9 +65,13 @@ internal static class TupleElementRenamer
         }
 
         // Code this 'stylebro-migrate format' run doesn't load (RepositoryNames) can only see an element declared in a
-        // signature other projects see: eShop's private 'FindUserFromExternalProviderAsync' returning '(ApplicationUser
-        // user, ...)' was kept for a local 'user' in the MAUI app, outside the run.
-        if (visible && (await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).Outside.TryGetValue(oldName, out var outside))
+        // signature other projects see (eShop's private 'FindUserFromExternalProviderAsync' returning '(ApplicationUser
+        // user, ...)' was kept for a local 'user' in the MAUI app, outside the run), only from a project that sees the
+        // member (an internal one: InternalsVisibleTo), and only uses it as a member ('.value', 'value:', another tuple
+        // type's element): EntityGraphQL's internal '(bool IsSet, object? value)' was kept for a lambda's '(_, value) =>'
+        // in an example project.
+        if ((await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).OutsideMembers.TryGetValue(oldName, out var files)
+            && files.FirstOrDefault(file => visible.Any(member => CanSee(member, file))) is { } outside)
         {
             return (null, (KeptReason.UsedInProjectNotLoaded, outside));
         }
@@ -77,25 +81,81 @@ internal static class TupleElementRenamer
 
     /// <summary>
     /// Whether another project can see the element: it's in the signature of a member visible outside its type's
-    /// project (not in a body, an initializer or a private member).
+    /// project (not in a body, an initializer or a private member). <paramref name="member"/>: that member, or null when
+    /// unknown (counts as public).
     /// </summary>
-    private static bool IsVisibleToOtherProjects(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken)
+    private static bool IsVisibleToOtherProjects(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken, out ISymbol? member)
     {
+        member = null;
         if (element.Ancestors().Any(a => a is BlockSyntax or ArrowExpressionClauseSyntax or EqualsValueClauseSyntax))
         {
             return false;
         }
 
-        var member = element.Ancestors().OfType<MemberDeclarationSyntax>().FirstOrDefault();
-        var symbol = member is BaseFieldDeclarationSyntax field ? model.GetDeclaredSymbol(field.Declaration.Variables[0], cancellationToken)
-            : member is null ? null
-            : model.GetDeclaredSymbol(member, cancellationToken);
-        return symbol is null || CamelCaseRenamer.IsVisibleToOtherProjects(symbol);
+        var declaration = element.Ancestors().OfType<MemberDeclarationSyntax>().FirstOrDefault();
+        member = declaration is BaseFieldDeclarationSyntax field ? model.GetDeclaredSymbol(field.Declaration.Variables[0], cancellationToken)
+            : declaration is null ? null
+            : model.GetDeclaredSymbol(declaration, cancellationToken);
+        return member is null || CamelCaseRenamer.IsVisibleToOtherProjects(member);
     }
 
-    private static async Task<(Solution? Renamed, bool Visible)> RenameOneAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    /// <summary>
+    /// Whether code in <paramref name="file"/> (a project this run didn't load) can see <paramref name="member"/>: an
+    /// internal one only from an InternalsVisibleTo assembly, judged by the nearest project file's name (the default
+    /// assembly name). A file without a project file above it counts.
+    /// </summary>
+    private static bool CanSee(ISymbol? member, string file)
     {
-        var visible = false;
+        if (member is null || !IsInternal(member))
+        {
+            return true;
+        }
+
+        // ponytail: the project file's name stands for the assembly name; a project with its own <AssemblyName> that an
+        // InternalsVisibleTo names counts only when the names match.
+        var project = FindProjectName(file);
+        return project is null || member.ContainingAssembly.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "InternalsVisibleToAttribute" && a.ConstructorArguments.Length == 1)
+            .Any(a => a.ConstructorArguments[0].Value is string name && string.Equals(name.Split(',')[0].Trim(), project, System.StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsInternal(ISymbol member)
+    {
+        for (var current = member; current is not null and not INamespaceSymbol; current = current.ContainingSymbol)
+        {
+            if (current.DeclaredAccessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string? FindProjectName(string file)
+    {
+#pragma warning disable RS1035 // Only for files 'stylebro-migrate format' listed (RepositoryNames): the IDE and the build never get here.
+        try
+        {
+            for (var directory = System.IO.Path.GetDirectoryName(file); !string.IsNullOrEmpty(directory); directory = System.IO.Path.GetDirectoryName(directory))
+            {
+                if (System.IO.Directory.EnumerateFiles(directory, "*.csproj").FirstOrDefault() is { } project)
+                {
+                    return System.IO.Path.GetFileNameWithoutExtension(project);
+                }
+            }
+        }
+        catch (System.Exception e) when (e is System.IO.IOException or System.UnauthorizedAccessException or System.ArgumentException)
+        {
+        }
+
+        return null;
+#pragma warning restore RS1035
+    }
+
+    private static async Task<(Solution? Renamed, List<ISymbol?> Visible)> RenameOneAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    {
+        var visible = new List<ISymbol?>();
         var documents = new List<(Document Document, SyntaxNode Root, SemanticModel Model)>();
         foreach (var document in solution.Projects.Where(p => p.Language == LanguageNames.CSharp).SelectMany(p => p.Documents))
         {
@@ -133,7 +193,11 @@ internal static class TupleElementRenamer
                         || !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))
                 {
                     renamed.Add(Key(element.Identifier.GetLocation()));
-                    visible = visible || IsVisibleToOtherProjects(element, model, cancellationToken);
+                    if (IsVisibleToOtherProjects(element, model, cancellationToken, out var member))
+                    {
+                        visible.Add(member);
+                    }
+
                     Rename(document, element.Identifier);
                 }
             }
