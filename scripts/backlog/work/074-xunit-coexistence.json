@@ -1,0 +1,6 @@
+{
+  "area": "Hardening",
+  "item": "StyleBro and xunit.analyzers coexist",
+  "notes": "Owner's idea 2026-10-13: check that StyleBro's fixes never create xunit.analyzers warnings (renames of [MemberData]/[ClassData] members and theory data, member ordering, layout of test classes, BRO1601/BRO1313 on test methods) and that xUnit's fixes don't fight StyleBro's. A survey on xUnit-heavy repos with both analyzers on; fix conflicts found, add FixOrderTests where they interact.",
+  "status": "Planned"
+}
