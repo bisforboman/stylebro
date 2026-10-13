@@ -7,7 +7,7 @@ public class Counter
 
     public Counter(int count)
     {
-        this._count = count;
+        _count = count;
     }
 
     public int Next() => _count += _step;
