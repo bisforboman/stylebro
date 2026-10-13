@@ -30,7 +30,7 @@ Fixing a failure is the same everywhere: run `stylebro-migrate format` (or `dotn
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.6.0-alpha.1" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
