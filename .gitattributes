@@ -4,7 +4,7 @@
 # keeps both); tests catch most (duplicate ids don't compile, the rule index must match the site nav and stay in id order).
 src/StyleBro.Analyzers/AnalyzerReleases.Unshipped.md merge=union
 src/StyleBro.Analyzers/DiagnosticIds.cs merge=union
-src/StyleBro.Package/build/stylebro.recommended.globalconfig merge=union
+src/StyleBro.Package/build/presets/*.globalconfig merge=union
 docs/rules/README.md merge=union
 docs/differences-from-stylecop.md merge=union
 mkdocs.yml merge=union

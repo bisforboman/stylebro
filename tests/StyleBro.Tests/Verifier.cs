@@ -128,12 +128,14 @@ internal static class Verifier<TAnalyzer, TCodeFix>
 
     /// <summary>
     /// The framework turns on every supported diagnostic; rules that are off by default (BRO1310) stay off here unless the
-    /// test's .editorconfig turns them on, like in a build.
+    /// test's .editorconfig turns them on, like in a build. A newer minor's rules (off by default, on in the latest preset)
+    /// count as on.
     /// </summary>
     private static Task RunAsync(CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier> test, string? editorConfig)
     {
         test.TestState.AnalyzerConfigFiles.Add(PublicApi.RenameEverything);
         var off = new TAnalyzer().SupportedDiagnostics.Where(d => !d.IsEnabledByDefault).Select(d => d.Id)
+            .Where(id => !Presets.TurnedOn.Contains(id))
             .Where(id => editorConfig?.Contains($"dotnet_diagnostic.{id}.severity", StringComparison.Ordinal) != true)
             .ToList();
         if (off.Count > 0)

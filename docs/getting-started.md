@@ -143,7 +143,9 @@ restore (NU1504, duplicate reference). A reference inside a conditional
 code base that already follows every rule reports nothing, and that's fine).
 
 The package brings StyleBro's rules and its preset: rule severities and formatting options, close to StyleCop's
-defaults. Your own `.editorconfig` wins over the preset. To configure everything yourself instead:
+defaults. Your own `.editorconfig` wins over the preset. The preset has a version, and `stylebro-migrate init --write`
+(step 2) pins it in `Directory.Build.props` (`<StyleBroPreset>1.0</StyleBroPreset>`), so a later package upgrade adds no
+new rules until you raise it ([versioning](versioning.md#new-rules)). To configure everything yourself instead:
 `<StyleBroPreset>none</StyleBroPreset>`.
 
 ### 2. Turn on the built-in rules

@@ -184,6 +184,7 @@ internal static class InitCommand
                 Console.Write(target.HasModernize ? null : target.Modernize);
             }
 
+            PinPreset(root, write: false);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
         }
@@ -215,6 +216,7 @@ internal static class InitCommand
             }
         }
 
+        PinPreset(root, write: true);
         if (changed && !EnforcesCodeStyleInBuild(root))
         {
             Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
@@ -833,6 +835,38 @@ internal static class InitCommand
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Pins the preset version (docs/versioning.md) in every Directory.Build.props the projects import: a new setup takes
+    /// every rule this version knows, and later package upgrades add none by themselves. A file that already sets
+    /// StyleBroPreset (a migration's 'none', the team's own) is left alone.
+    /// </summary>
+    private static void PinPreset(string root, bool write)
+    {
+        var property = $"<StyleBroPreset>{StyleBro.Analyzers.PresetVersions.Latest}</StyleBroPreset>";
+        foreach (var props in Migration.PropsFiles(root))
+        {
+            var pinned = Migration.SetPreset(
+                File.Exists(props) ? File.ReadAllText(props) : null,
+                StyleBro.Analyzers.PresetVersions.Latest,
+                "StyleBro's rules up to this preset version: raise it (or 'latest') for the rules of newer releases.");
+            if (pinned is null)
+            {
+                continue;
+            }
+
+            var name = Path.GetRelativePath(root, props).Replace('\\', '/');
+            if (write)
+            {
+                PreviewCommand.EditFile(props, _ => pinned);
+                Console.WriteLine($"Set the preset version in {name} ({property}): rules of newer releases stay off until you raise it.");
+            }
+            else
+            {
+                Console.WriteLine($"--write also sets the preset version in {name} ({property}).");
+            }
+        }
     }
 
     /// <summary>

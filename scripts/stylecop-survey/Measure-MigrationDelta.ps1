@@ -28,7 +28,8 @@ dotnet build (Join-Path $repo 'src/StyleBro.Migrate') -nologo -v q | Out-Null
 $work = Join-Path ([IO.Path]::GetTempPath()) 'stylebro-delta'
 New-Item -ItemType Directory -Force $work | Out-Null
 Copy-Item (Join-Path $repo 'src/StyleBro.CodeFixes/bin/Debug/netstandard2.0/StyleBro.*.dll') $work -Force
-Copy-Item (Join-Path $repo 'src/StyleBro.Package/build/stylebro.recommended.globalconfig') $work -Force
+# Every preset layer ('latest'): the hook adds them all.
+Copy-Item (Join-Path $repo 'src/StyleBro.Package/build/presets/*.globalconfig') $work -Force
 $hook = Join-Path $work 'delta-hook.targets'
 Set-Content $hook @"
 <Project>
@@ -36,7 +37,7 @@ Set-Content $hook @"
     <Analyzer Include="$work\StyleBro.Analyzers.dll" />
     <Analyzer Include="$work\StyleBro.CodeFixes.dll" />
     <!-- EditorConfigFiles, not GlobalAnalyzerConfigFiles: from CustomAfterMicrosoftCommonTargets the latter is too late. -->
-    <EditorConfigFiles Include="$work\stylebro.recommended.globalconfig" Condition="'`$(StyleBroPreset)' != 'none'" />
+    <EditorConfigFiles Include="$work\stylebro.*.globalconfig" Condition="'`$(StyleBroPreset)' != 'none'" />
   </ItemGroup>
   <!-- A real migration removes StyleCop.Analyzers; its own fixes (SA1651 under dotnet format, which parses docs even
        where the build doesn't) aren't StyleBro's. -->

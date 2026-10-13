@@ -112,12 +112,21 @@ public partial class DocExamplesTests
         var fixer = FindCodeFix(id);
         var exampleStart = markdown.IndexOf("## Example", StringComparison.Ordinal);
         var settings = ConfigPattern().Match(markdown, exampleStart, markdown.IndexOf("### Before", exampleStart, StringComparison.Ordinal) - exampleStart);
+        var config = settings.Success ? settings.Groups["config"].Value : null;
+
+        // A newer minor's rule is off by default and on in the latest preset (docs/versioning.md).
+        var enable = Presets.EnableLines(analyzer.SelectMany(a => a.SupportedDiagnostics).Where(d => d.Id == id).Take(1));
+        if (enable.Length > 0)
+        {
+            config = (config is null ? string.Empty : config + "\n") + "[*.cs]\n" + enable;
+        }
+
         foreach (Match example in examples)
         {
             var before = example.Groups["before"].Value;
             var after = example.Groups["after"].Value;
 
-            var document = CreateDocument(before, settings.Success ? settings.Groups["config"].Value : null);
+            var document = CreateDocument(before, config);
             await AssertCompilesAsync(document, id, "Before");
             var diagnostics = await GetDiagnosticsAsync(document, analyzer, id);
             Assert.True(diagnostics.Length > 0, $"{id}: the Before example doesn't get a {id} diagnostic.");

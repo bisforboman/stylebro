@@ -78,6 +78,10 @@ $hook = Join-Path $Work 'stylebro-hook.targets'
 $enableItem = ''
 # 'pwsh Invoke-RealWorld.ps1 -Enable A,B' (from another shell, or CI) passes one string "A,B".
 $Enable = @($Enable | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+# Rules of minors after 1.0 are off by default and on in the latest preset (docs/versioning.md): on here too.
+$Enable += @(Get-ChildItem (Join-Path $root 'src/StyleBro.Package/build/presets') -Filter *.globalconfig |
+    Where-Object Name -ne 'stylebro.1.0.globalconfig' | Get-Content |
+    ForEach-Object { if ($_ -match '^dotnet_diagnostic\.(BRO\d{4})\.severity\s*=\s*(?!none)') { $Matches[1] } })
 if ($Enable) {
     $enableConfig = Join-Path $Work 'stylebro-enable.globalconfig'
     Set-Content $enableConfig (@('is_global = true') + @($Enable | ForEach-Object { "dotnet_diagnostic.$_.severity = warning" }))
