@@ -75,11 +75,19 @@ internal static class DocumentationPeriods
                 continue;
             }
 
+            // Malformed XML is checked once there's a finding: most comments have none.
+            bool? malformed = null;
             foreach (var element in documentation.Content.OfType<XmlElementSyntax>())
             {
                 var name = element.StartTag.Name.LocalName.ValueText;
                 if (TextElements.Contains(name) && !excluded.Contains(name) && GetInsertionPoint(element, excluded) is { } position)
                 {
+                    malformed ??= DocumentationComments.IsMalformed(documentation);
+                    if (malformed.Value)
+                    {
+                        break;
+                    }
+
                     yield return position;
                 }
             }
@@ -88,7 +96,8 @@ internal static class DocumentationPeriods
 
     /// <summary>
     /// The edit for BRO1603: a period at <paramref name="position"/>. Spaces between it and a closing tag on the same line
-    /// go ('true &lt;/returns&gt;' -> 'true.&lt;/returns&gt;'), else they'd stay after the period.
+    /// go ('true &lt;/returns&gt;' -> 'true.&lt;/returns&gt;'), and so do spaces ending the line (GuardClauses: 'text ' became
+    /// 'text. ', the line still ending in whitespace); else they'd stay after the period.
     /// </summary>
     public static TextChange GetPeriodChange(int position, SourceText text)
     {
@@ -98,7 +107,8 @@ internal static class DocumentationPeriods
             end++;
         }
 
-        return new TextChange(TextSpan.FromBounds(position, end + 1 < text.Length && text[end] == '<' && text[end + 1] == '/' ? end : position), ".");
+        var drop = end == text.Length || text[end] is '\r' or '\n' || (end + 1 < text.Length && text[end] == '<' && text[end + 1] == '/');
+        return new TextChange(TextSpan.FromBounds(position, drop ? end : position), ".");
     }
 
     /// <summary>The tags <see cref="ExcludeKey"/> names (StyleCop's default when it isn't set).</summary>

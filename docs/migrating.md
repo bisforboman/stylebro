@@ -14,7 +14,7 @@ stylebro-migrate path/to/repo --write   # writes them
 
 `--diff` runs `--write` and then `stylebro-migrate format` (until a run changes nothing) on a temporary copy of the
 repository, prints which files each rule changed with a few sample hunks, and writes the full diff to
-`stylebro-preview.patch` (`--diff=file` for another name, `--keep` keeps the copy). The copy also gets the
+`.git/stylebro-preview.patch` (`--diff=file` for another name, `--keep` keeps the copy). The copy also gets the
 StyleBro.Analyzers reference if the repository has none, next to StyleCop's (see [Swap the package](#swap-the-package));
 StyleCop.Analyzers stays, but format only fixes StyleBro's
 and the built-in rules' ids, so it changes nothing. In a StyleCop-clean repository the format part should be close to
@@ -70,7 +70,7 @@ second, versioned reference instead ([getting-started.md](getting-started.md#1-a
 **Old-style projects** (`packages.config`, StyleCop as `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`):
 removing StyleCop means removing its `packages.config` entry and the `<Analyzer>` items. StyleBro goes in the same way:
 a `packages.config` entry, its `<Analyzer>` items and the import of its build targets, not a `PackageReference`.
-Running `format` there takes extra steps, and `--diff` doesn't work:
+Running `format` there takes extra steps, and `--diff` leaves those projects out:
 [getting-started.md](getting-started.md#old-style-non-sdk-projects).
 
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:

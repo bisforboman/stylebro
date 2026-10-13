@@ -50,7 +50,8 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
                     c.ReportDiagnostic(Diagnostic.Create(
                         finding.RestrictedSetter ? Descriptors.PropertySummaryRestrictedSetter : Descriptors.PropertySummaryWording,
                         finding.Identifier.GetLocation(),
-                        finding.Prefix));
+                        finding.Prefix,
+                        finding.Prefix.StartsWith("Gets", System.StringComparison.Ordinal) ? "setter" : "getter"));
                 }
             },
             Microsoft.CodeAnalysis.CSharp.SyntaxKind.PropertyDeclaration);

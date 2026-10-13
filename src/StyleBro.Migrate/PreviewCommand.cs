@@ -23,7 +23,7 @@ namespace StyleBro.Migrate;
 /// </summary>
 internal static class PreviewCommand
 {
-    /// <summary>The patch file when '--diff' names none.</summary>
+    /// <summary>The patch file's name when '--diff' names none (<see cref="DefaultPatchPath"/>).</summary>
     public const string DefaultPatch = "stylebro-preview.patch";
 
     /// <summary>The most format runs a preview makes (a second one should change nothing).</summary>
@@ -64,6 +64,24 @@ internal static class PreviewCommand
         + "('dotnet restore' can't restore packages.config, and the copy has no packages folder). The other projects are previewed; "
         + "'stylebro-migrate format' covers those too once Visual Studio's MSBuild restored them (msbuild -t:restore -p:RestorePackagesConfig=true).";
 
+    /// <summary>
+    /// Whether every project an <see cref="FormatCommand.IncompleteMarker"/> line names is one of the packages.config projects
+    /// (relative paths) the preview left out.
+    /// </summary>
+    public static bool OnlyLeftOut(string incomplete, IReadOnlyList<string> leftOut)
+    {
+        var names = Regex.Match(incomplete, @"skipped (?<names>.*?) \(references").Groups["names"].Value.Split(", ", StringSplitOptions.RemoveEmptyEntries);
+        var left = leftOut.Select(Path.GetFileNameWithoutExtension).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return names.Length > 0 && names.All(left.Contains);
+    }
+
+    /// <summary>
+    /// Where the patch goes when '--diff' names no file: the repository's git folder (.git/stylebro-preview.patch), where it
+    /// isn't an untracked file in the working tree ('git apply .git/stylebro-preview.patch' applies it), else the temp folder.
+    /// </summary>
+    public static string DefaultPatchPath(string folder) =>
+        Path.GetFullPath(Path.Combine(Git(folder, "rev-parse", "--absolute-git-dir") is (0, var gitDir) && gitDir.Trim().Length > 0 ? gitDir.Trim() : Path.GetTempPath(), DefaultPatch));
+
     /// <summary>Whether the options ask for a preview.</summary>
     public static bool Wants(IEnumerable<string> options) => options.Any(o => o == "--diff" || o.StartsWith("--diff=", StringComparison.Ordinal));
 
@@ -75,7 +93,8 @@ internal static class PreviewCommand
     {
         format ??= FormatCommand.RunPlain;
         var clock = Stopwatch.StartNew();
-        var patch = Path.GetFullPath(options.FirstOrDefault(o => o.StartsWith("--diff=", StringComparison.Ordinal))?.Substring("--diff=".Length) ?? DefaultPatch);
+        var named = options.FirstOrDefault(o => o.StartsWith("--diff=", StringComparison.Ordinal))?.Substring("--diff=".Length);
+        var patch = named is null ? null : Path.GetFullPath(named);
         var keep = options.Contains("--keep");
         var (profile, others) = command == "format" ? (null, options) : Program.TakeOption(options, Program.SonarProfileOption);
         var rest = others.Where(o => !Wants(new[] { o }) && o != "--keep").ToList();
@@ -126,6 +145,7 @@ internal static class PreviewCommand
         var folder = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
         var source = Git(folder, "rev-parse", "--show-toplevel") is (0, var top) ? Path.GetFullPath(top.Trim()) : folder;
         var prefix = source == folder ? string.Empty : Git(folder, "rev-parse", "--show-prefix").Output.Trim();
+        patch ??= DefaultPatchPath(folder);
         var temp = Directory.CreateTempSubdirectory("stylebro-preview-").FullName;
         var copy = Path.Combine(temp, Path.GetFileName(source.TrimEnd('\\', '/')));
         var target = Path.GetFullPath(Path.Combine(copy, prefix, File.Exists(path) ? Path.GetFileName(path) : string.Empty));
@@ -283,7 +303,8 @@ internal static class PreviewCommand
 
             // A project that didn't load is left out, as 'stylebro-migrate format' does (StabilityMatrix: a legacy project the
             // solution doesn't build, already failing with NU1008, stopped the whole preview), and named at the end.
-            if (incomplete is not null)
+            // packages.config projects were left out on purpose (the note says why): no restore advice for them, it can't work.
+            if (incomplete is not null && !OnlyLeftOut(incomplete, packagesConfig))
             {
                 Console.WriteLine($"WARNING: {incomplete}");
                 Console.WriteLine("  The preview has no changes for them. To include them: run 'dotnet restore' (or 'dotnet build') in the repository, fix what it reports, then preview again.");

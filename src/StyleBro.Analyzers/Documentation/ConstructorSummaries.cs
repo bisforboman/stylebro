@@ -177,7 +177,7 @@ internal static class ConstructorSummaries
     private static XmlElementSyntax? GetSummary(SyntaxNode member)
     {
         var documentation = member.GetLeadingTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().FirstOrDefault();
-        if (documentation is null)
+        if (documentation is null || DocumentationComments.IsMalformed(documentation))
         {
             return null;
         }
@@ -225,11 +225,12 @@ internal static class ConstructorSummaries
 
     /// <summary>
     /// Compares documentation text independent of spacing that doesn't change the link: '&lt;see cref="X" /&gt;',
-    /// 'X{TKey, TValue}'.
+    /// 'X{TKey, TValue}', '&lt;see cref = "X" /&gt;' (FakeItEasy: StyleCop accepts it, so it isn't rewritten).
     /// </summary>
     private static string Normalize(string text)
     {
-        return Regex.Replace(text.Replace(" />", "/>"), @"\{[^}]*\}", m => Regex.Replace(m.Value, @"\s+", string.Empty));
+        var tags = Regex.Replace(text, "<[^>]*>", m => Regex.Replace(Regex.Replace(m.Value, @"\s*=\s*", "="), @"\s+/>", "/>"));
+        return Regex.Replace(tags, @"\{[^}]*\}", m => Regex.Replace(m.Value, @"\s+", string.Empty));
     }
 
     /// <summary>A constructor or destructor whose summary doesn't begin with the standard text, and the edit.</summary>

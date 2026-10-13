@@ -185,4 +185,16 @@ public class DocumentationStyleTests
             public int H() => 1;
         }
         """);
+
+    // Malformed XML ('IList<T>' in prose opens an element) is left to a person: the element boundaries are guesses.
+    [Fact]
+    public Task MalformedDocumentation_IsLeftAlone() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>Returns <c>null</c> for an IList<T>.</summary>
+        /// <returns>Something.</returns>
+        /// <param name="x">The x.</param>
+        public class C
+        {
+        }
+        """);
 }

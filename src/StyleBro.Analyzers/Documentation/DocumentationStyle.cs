@@ -34,6 +34,22 @@ internal static class DocumentationStyle
     /// <summary>Every finding in one documentation comment: the rule, where it's reported, the message argument, the edits.</summary>
     public static IEnumerable<Finding> GetFindings(DocumentationCommentTriviaSyntax documentation, SourceText text)
     {
+        // Malformed XML (DocumentationComments.IsMalformed) is checked once there's a finding: most comments have none.
+        using var findings = GetAllFindings(documentation, text).GetEnumerator();
+        if (!findings.MoveNext() || DocumentationComments.IsMalformed(documentation))
+        {
+            yield break;
+        }
+
+        do
+        {
+            yield return findings.Current;
+        }
+        while (findings.MoveNext());
+    }
+
+    private static IEnumerable<Finding> GetAllFindings(DocumentationCommentTriviaSyntax documentation, SourceText text)
+    {
         foreach (var node in documentation.DescendantNodes(n => !IsCode(n)))
         {
             if (node is XmlCrefAttributeSyntax cref && GetGenericCrefChanges(cref) is { } crefChanges)

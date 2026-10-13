@@ -273,6 +273,12 @@ public class SummaryLayoutTests
             public void Erase()
             {
             }
+
+            // Trial 17: an element opened in the text ('IList<T>') takes the summary's end tag.
+            /// <summary>Fills an IList<T>.</summary>
+            public void Fill()
+            {
+            }
         }
         """);
 

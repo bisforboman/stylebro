@@ -64,7 +64,7 @@ internal static class Program
           stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
-              rule, sample changes) and writes the full diff to stylebro-preview.patch (or <file>). Adds the
+              rule, sample changes) and writes the full diff to .git/stylebro-preview.patch (or <file>). Adds the
               StyleBro.Analyzers reference in the copy when the repository has none. --keep keeps the copy; --project
               names what format runs on when the folder has several solutions or projects; --no-restore uses the
               repository's own restore (run 'dotnet restore' first).

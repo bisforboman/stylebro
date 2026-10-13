@@ -261,11 +261,35 @@ public sealed partial class MigrationTests
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.IDE0055.severity = none\n");
         Assert.False(FormatCommand.WhitespaceOff(root)); // not stylebro's settings
 
+        Write("src/A/A.cs", "class A { }\n");
         Write(".editorconfig", Migration.Render(new[] { ("{src/A}/**.cs", new List<string> { "dotnet_diagnostic.IDE0055.severity = none" }) }));
         Assert.True(FormatCommand.WhitespaceOff(root));
 
-        Write("src/B/.editorconfig", Migration.Render(new[] { ("*.cs", new List<string> { "dotnet_diagnostic.IDE0055.severity = warning" }) }));
+        // GuardClauses: CSharpier in one folder. Off only there: the whitespace pass runs on its own and leaves it out.
+        Write("src/B/B.cs", "class B { }\n");
+        Write("src/A/Inner/C.cs", "class C { }\n");
         Assert.False(FormatCommand.WhitespaceOff(root));
+        Assert.Equal(new[] { "src/A/" }, FormatCommand.WhitespaceExclusions(root));
+
+        // A formatted file next to them: the off files are left out one by one.
+        Write("src/A/D.cs", "class D { }\n");
+        Write("src/A/.editorconfig", Migration.Render(new[] { ("D.cs", new List<string> { "dotnet_diagnostic.IDE0055.severity = warning" }) }));
+        Assert.Equal(new[] { "src/A/A.cs", "src/A/Inner/" }, FormatCommand.WhitespaceExclusions(root));
+
+        Write("src/A/.editorconfig", Migration.Render(new[] { ("*.cs", new List<string> { "dotnet_diagnostic.IDE0055.severity = warning" }) }));
+        Assert.Null(FormatCommand.WhitespaceExclusions(root));
+    }
+
+    [Fact]
+    public void Format_WhitespacePassOnItsOwn_DropsTheDiagnosticOptions_AndExcludesTheFolders()
+    {
+        Assert.Equal(new[] { string.Empty }, FormatCommand.Passes(null));
+        Assert.Equal(new[] { "style", "analyzers" }, FormatCommand.Passes([]));
+        Assert.Equal(new[] { "whitespace", "style", "analyzers" }, FormatCommand.Passes(["src/A/"]));
+
+        var options = new List<string> { "--diagnostics", "BRO1001", "IDE0055", "--severity", "warn", "--exclude", "lib/", "--report", "r", "--exclude-diagnostics", "X" };
+        Assert.Equal(new[] { "--exclude", "src/A/", "lib/", "--report", "r" }, FormatCommand.WhitespaceOptions(options, ["src/A/"]));
+        Assert.Equal(new[] { "--verify-no-changes", "--exclude", "src/A/" }, FormatCommand.WhitespaceOptions(["--verify-no-changes"], ["src/A/"]));
     }
 
     [Fact]

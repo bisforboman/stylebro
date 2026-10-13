@@ -152,6 +152,7 @@ public sealed partial class MigrationTests
                 File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), "[]");
             }
 
+            log($"{FormatCommand.IncompleteMarker} 'dotnet format' skipped Old (references didn't load), so those files weren't formatted.");
             return 0;
         }
 
@@ -159,6 +160,11 @@ public sealed partial class MigrationTests
 
         Assert.Contains("packages.config projects left out of the preview: Old/Old.csproj", output, StringComparison.Ordinal);
         Assert.Contains("Note: packages.config projects left out", output, StringComparison.Ordinal);
+
+        // Trial 17: left out on purpose, so no "To include them: run 'dotnet restore'" (it can't restore them).
+        Assert.DoesNotContain("WARNING", output, StringComparison.Ordinal);
+        Assert.True(PreviewCommand.OnlyLeftOut("Incomplete: 'dotnet format' skipped Old (references didn't load)", ["Old/Old.csproj"]));
+        Assert.False(PreviewCommand.OnlyLeftOut("Incomplete: 'dotnet format' skipped New, Old (references didn't load)", ["Old/Old.csproj"]));
 
         // Only packages.config projects: nothing to preview.
         File.Delete(Path.Combine(root, "New", "New.csproj"));

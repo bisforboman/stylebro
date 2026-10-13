@@ -143,11 +143,17 @@ internal static class FormatCommand
     /// <summary>The start of the line that says the whitespace pass doesn't run (printed for the first run only).</summary>
     private const string NoWhitespaceHeader = "No whitespace pass:";
 
+    /// <summary>How 'dotnet format' starts its note about workspace load warnings.</summary>
+    private const string WorkspaceWarnings = "Warnings were encountered while loading the workspace";
+
     /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
     private const string OldMacHeader = "Not formatted:";
 
     /// <summary>The start of the line that names the folders without StyleCop format leaves alone (printed for the first run only).</summary>
     private const string UnformattedHeader = "Leaving alone:";
+
+    /// <summary>What <see cref="Explain"/> has said in this command.</summary>
+    private static readonly HashSet<string> Explained = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
     private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
@@ -174,6 +180,8 @@ internal static class FormatCommand
     public static int Run(string[] args, Action<string>? output = null, Func<string[], Action<string>?, int>? runOnce = null)
     {
         Action<string> log = output ?? Console.WriteLine;
+        ResetExplained();
+
         runOnce = KeepingLineEndings(runOnce ?? RunOnce);
 
         // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
@@ -549,6 +557,37 @@ internal static class FormatCommand
         return list.Where(p => owners.Contains(p.FullPath)).Select(p => Path.GetFileNameWithoutExtension(p.FullPath)).Order(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
+    /// <summary>Starts a command: <see cref="Explain"/> says its notes again.</summary>
+    public static void ResetExplained()
+    {
+        lock (Explained)
+        {
+            Explained.Clear();
+        }
+    }
+
+    /// <summary>
+    /// 'dotnet format''s notes said in plain words, once per command (every run and framework printed them again, unexplained:
+    /// FakeItEasy's F# test helper, "Warnings were encountered while loading the workspace"); null: already said.
+    /// </summary>
+    public static string? Explain(string line)
+    {
+        var (key, text) = UnsupportedProject(line) is { } name
+            ? (name, $"Not formatted: {name}: 'dotnet format' formats C# and Visual Basic projects only, so it's left alone; the C# projects are formatted.")
+            : line.StartsWith(WorkspaceWarnings, StringComparison.Ordinal)
+                ? (WorkspaceWarnings, "'dotnet format' had warnings loading the workspace (a project or reference it couldn't load completely, e.g. one in another language); they don't stop the run. 'dotnet format <solution> --verbosity diagnostic' lists them.")
+                : (null, line);
+        if (key is null)
+        {
+            return line;
+        }
+
+        lock (Explained)
+        {
+            return Explained.Add(key) ? text : null;
+        }
+    }
+
     /// <summary>The file name of a project 'dotnet format' can't load (F#: "Could not format '...fsproj'. Format currently supports only C# ..."), else null.</summary>
     public static string? UnsupportedProject(string line) =>
         Regex.Match(line, @"Could not format '(?:[^']*[\\/])?(?<name>[^'\\/]+)'\. Format currently supports only") is { Success: true } match ? match.Groups["name"].Value : null;
@@ -660,24 +699,118 @@ internal static class FormatCommand
     /// <summary>Whether a 'dotnet format' output line says its restore failed (it prints a stack trace, nothing about why).</summary>
     public static bool IsRestoreFailure(string line) => line.Contains("Restore operation failed", StringComparison.Ordinal);
 
+    /// <summary>Whether the whitespace pass is off everywhere: <see cref="WhitespaceExclusions"/> leaves every C# file out.</summary>
+    public static bool WhitespaceOff(string root) => WhitespaceExclusions(root) is { Count: 0 };
+
     /// <summary>
-    /// Whether the stylebro blocks of the .editorconfig files above, at and below the root set IDE0055 and only to 'none'
-    /// (a migration from a StyleCop setup with its spacing rules off). Without a block saying so, whitespace formatting runs.
+    /// Where the whitespace pass must not run: null when it runs everywhere, empty when it runs nowhere, else the folders
+    /// (relative, '/'-terminated) and files it leaves out. Only once a stylebro block sets IDE0055 (a user's own 'none'
+    /// alone doesn't stop 'dotnet format'); then each C# file's effective IDE0055 decides, read through the whole
+    /// .editorconfig chain like the compiler does. 'dotnet format' runs its whitespace pass whatever IDE0055 says, so a
+    /// CSharpier folder ('[src/GuardClauses/**.cs]' with IDE0055 = none) has to be left out by path, else the two
+    /// formatters undo each other forever (GuardClauses: '[NotNull] [ValidatedNotNull]' against '[NotNull][ValidatedNotNull]').
     /// </summary>
-    public static bool WhitespaceOff(string root)
+    public static List<string>? WhitespaceExclusions(string root)
     {
-        var files = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetFileName(f) == ".editorconfig").ToList();
+        var configs = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetFileName(f) == ".editorconfig").Select(Path.GetFullPath).ToList();
         for (var folder = new DirectoryInfo(root).Parent; folder is not null; folder = folder.Parent)
         {
-            files.Add(Path.Combine(folder.FullName, ".editorconfig"));
+            configs.Add(Path.Combine(folder.FullName, ".editorconfig"));
         }
 
-        var values = files.Where(File.Exists)
-            .SelectMany(f => Regex.Matches(File.ReadAllText(f), "# BEGIN stylebro-.*?# END stylebro-", RegexOptions.Singleline))
-            .SelectMany(block => Regex.Matches(block.Value, @"^\s*dotnet_diagnostic\.IDE0055\.severity\s*=\s*(\w+)", RegexOptions.Multiline | RegexOptions.IgnoreCase))
-            .Select(m => m.Groups[1].Value.ToLowerInvariant())
-            .ToList();
-        return values.Count > 0 && values.All(v => v == "none");
+        var texts = configs.Where(File.Exists).Select(f => (Path: f, Text: File.ReadAllText(f))).ToList();
+        var setByStyleBro = texts
+            .SelectMany(t => Regex.Matches(t.Text, "# BEGIN stylebro-.*?# END stylebro-", RegexOptions.Singleline))
+            .Any(block => Regex.IsMatch(block.Value, @"^\s*dotnet_diagnostic\.IDE0055\.severity\s*=", RegexOptions.Multiline | RegexOptions.IgnoreCase));
+        if (!setByStyleBro)
+        {
+            return null;
+        }
+
+        var set = Microsoft.CodeAnalysis.AnalyzerConfigSet.Create(texts.Select(t => Microsoft.CodeAnalysis.AnalyzerConfig.Parse(t.Text, t.Path)).ToList());
+        var top = Path.GetFullPath(root);
+        var off = new List<string>();
+        var onFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(Path.GetFullPath))
+        {
+            var relative = Path.GetRelativePath(top, file).Replace(Path.DirectorySeparatorChar, '/');
+            if (set.GetOptionsForSourcePath(file).TreeOptions.TryGetValue("IDE0055", out var severity) && severity == Microsoft.CodeAnalysis.ReportDiagnostic.Suppress)
+            {
+                off.Add(relative);
+                continue;
+            }
+
+            for (var folder = Parent(relative); folder.Length > 0; folder = Parent(folder))
+            {
+                onFolders.Add(folder);
+            }
+
+            onFolders.Add(string.Empty);
+        }
+
+        static string Parent(string path) => path.LastIndexOf('/') is var at && at < 0 ? string.Empty : path[..at];
+
+        if (off.Count == 0)
+        {
+            return null;
+        }
+
+        if (!onFolders.Contains(string.Empty))
+        {
+            return [];
+        }
+
+        // Each off file's folder when nothing in it is formatted, else the file itself; folders below one already left out go.
+        var result = new SortedSet<string>(off.Select(f => Parent(f) is var folder && folder.Length > 0 && !onFolders.Contains(folder) ? folder + "/" : f), StringComparer.OrdinalIgnoreCase);
+        result.RemoveWhere(p => result.Any(other => other != p && other.EndsWith('/') && p.StartsWith(other, StringComparison.OrdinalIgnoreCase)));
+        return result.ToList();
+    }
+
+    /// <summary>
+    /// The 'dotnet format' passes for <see cref="WhitespaceExclusions"/>: one run of all three (null), style and analyzers
+    /// (empty: no whitespace pass), or the whitespace pass on its own (<see cref="WhitespaceOptions"/>) then the other two.
+    /// </summary>
+    public static string[] Passes(IReadOnlyCollection<string>? whitespaceExclusions) => whitespaceExclusions switch
+    {
+        null => [string.Empty],
+        { Count: 0 } => ["style", "analyzers"],
+        _ => ["whitespace", "style", "analyzers"],
+    };
+
+    /// <summary>
+    /// The options for 'dotnet format whitespace': without the diagnostic options it rejects ('--diagnostics',
+    /// '--exclude-diagnostics', '--severity' and their values), and with <paramref name="exclusions"/> added to '--exclude'.
+    /// </summary>
+    public static List<string> WhitespaceOptions(IReadOnlyList<string> options, IReadOnlyCollection<string> exclusions)
+    {
+        var result = new List<string>();
+        for (var i = 0; i < options.Count; i++)
+        {
+            if (options[i] is "--diagnostics" or "--exclude-diagnostics" or "--severity")
+            {
+                while (i + 1 < options.Count && !options[i + 1].StartsWith('-'))
+                {
+                    i++;
+                }
+
+                continue;
+            }
+
+            result.Add(options[i]);
+        }
+
+        var exclude = result.IndexOf("--exclude");
+        if (exclude < 0)
+        {
+            result.Add("--exclude");
+            result.AddRange(exclusions);
+        }
+        else
+        {
+            result.InsertRange(exclude + 1, exclusions);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -1573,7 +1706,10 @@ internal static class FormatCommand
         void Watch(string line)
         {
             Record(line);
-            log(line);
+            if (Explain(line) is { } shownLine)
+            {
+                log(shownLine);
+            }
         }
 
         // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
@@ -1679,10 +1815,16 @@ internal static class FormatCommand
 
         // 'dotnet format' runs its whitespace pass whatever IDE0055's severity says: where the settings turn IDE0055 off,
         // only the style and analyzer passes run (LiteBus: aligned switch arms flattened, '(T)x' became '(T) x').
-        var passes = WhitespaceOff(root) ? new[] { "style", "analyzers" } : new[] { string.Empty };
-        if (passes.Length > 1)
+        // Where it's off only in some folders (CSharpier formats one), the whitespace pass runs on its own and leaves them out.
+        var whitespaceExclusions = WhitespaceExclusions(root);
+        var passes = Passes(whitespaceExclusions);
+        if (whitespaceExclusions is { Count: 0 })
         {
             log($"{NoWhitespaceHeader} IDE0055 is off in the stylebro settings, so no whitespace formatting: style and analyzer fixes only.");
+        }
+        else if (whitespaceExclusions is not null)
+        {
+            log($"{NoWhitespaceHeader} {string.Join(", ", whitespaceExclusions)}: IDE0055 is off there in the stylebro settings (another formatter's code), so whitespace formatting leaves {(whitespaceExclusions.Count == 1 ? "it" : "them")} alone; style and analyzer fixes still run there.");
         }
 
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run)
@@ -1699,6 +1841,11 @@ internal static class FormatCommand
                 {
                     folders.Add(Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}"));
                     passOptions[at + 1] = folders[^1];
+                }
+
+                if (pass == "whitespace")
+                {
+                    passOptions = WhitespaceOptions(passOptions, whitespaceExclusions!);
                 }
 
                 var code = run(new[] { "format", pass }.Where(a => a.Length > 0).Append(target).Concat(passOptions));
@@ -1865,9 +2012,9 @@ internal static class FormatCommand
         void Show(string line)
         {
             Record(line);
-            if (IsNewLine(shown, line))
+            if (IsNewLine(shown, line) && Explain(line) is { } shownLine)
             {
-                log(line);
+                log(shownLine);
             }
         }
 

@@ -72,14 +72,16 @@ internal static class PropertySummaries
         var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration) || a.IsKind(SyntaxKind.InitAccessorDeclaration));
         var initOnly = setter is not null && setter.IsKind(SyntaxKind.InitAccessorDeclaration);
 
-        // Like StyleCop, a protected setter is usable (by derived types); a private or internal one isn't.
-        var restrictedSetter = setter is not null
-            && setter.Modifiers.Any(m => m.IsKind(SyntaxKind.PrivateKeyword) || m.IsKind(SyntaxKind.InternalKeyword))
-            && !setter.Modifiers.Any(m => m.IsKind(SyntaxKind.ProtectedKeyword) && setter.Modifiers.Any(n => n.IsKind(SyntaxKind.InternalKeyword)));
+        // Like StyleCop, a protected accessor is usable (by derived types); a private or internal one isn't. That goes for the
+        // getter too: '{ private get; set; }' says 'Sets' (FakeItEasy's BuildableCallRule, SA1623 accepts it).
+        var getAccessor = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration));
+        var restrictedSetter = setter is not null && IsRestricted(setter);
+        var restrictedGetter = setter is not null && getAccessor is not null && IsRestricted(getAccessor);
         var visibleSetter = setter is not null && !restrictedSetter;
+        var visibleGetter = getter && !restrictedGetter;
 
-        var verb = getter && visibleSetter ? (initOnly ? "Gets or initializes" : "Gets or sets")
-            : getter ? "Gets"
+        var verb = visibleGetter && visibleSetter ? (initOnly ? "Gets or initializes" : "Gets or sets")
+            : visibleGetter ? "Gets"
             : visibleSetter ? (initOnly ? "Initializes" : "Sets")
             : null;
         if (verb is null)
@@ -87,7 +89,7 @@ internal static class PropertySummaries
             return null;
         }
 
-        string[] accepted = initOnly && getter && visibleSetter ? [verb, "Gets"] : [verb];
+        string[] accepted = initOnly && visibleGetter && visibleSetter ? [verb, "Gets"] : [verb];
 
         // Only 'bool', like StyleCop's SA1623: a 'bool?' summary takes the plain verb ('Gets whether' stays; tfplan2md's
         // became 'Gets a value indicating whether').
@@ -152,7 +154,7 @@ internal static class PropertySummaries
         return new Finding(
             property.Identifier,
             prefix,
-            restrictedSetter && (old.StartsWith("Gets or sets", StringComparison.Ordinal) || old.StartsWith("Gets or initializes", StringComparison.Ordinal)),
+            (restrictedSetter || restrictedGetter) && (old.StartsWith("Gets or sets", StringComparison.Ordinal) || old.StartsWith("Gets or initializes", StringComparison.Ordinal)),
             new TextSpan(start, afterOld + 1),
             prefix + " " + lowered);
     }
@@ -164,12 +166,18 @@ internal static class PropertySummaries
             && (text.Length == w.Length || !char.IsLetterOrDigit(text[w.Length])));
     }
 
+    /// <summary>Whether other code can't use the accessor: private or internal, not protected internal.</summary>
+    private static bool IsRestricted(AccessorDeclarationSyntax accessor) =>
+        accessor.Modifiers.Any(m => m.IsKind(SyntaxKind.PrivateKeyword) || m.IsKind(SyntaxKind.InternalKeyword))
+        && !accessor.Modifiers.Any(m => m.IsKind(SyntaxKind.ProtectedKeyword) && accessor.Modifiers.Any(n => n.IsKind(SyntaxKind.InternalKeyword)));
+
     /// <summary>Where the summary's text starts, or null when there's no summary or it starts with an element.</summary>
     private static int? GetSummaryTextStart(SyntaxNode member)
     {
         var summary = member.GetLeadingTrivia()
             .Select(t => t.GetStructure())
             .OfType<DocumentationCommentTriviaSyntax>()
+            .Where(d => !DocumentationComments.IsMalformed(d))
             .SelectMany(d => d.Content.OfType<XmlElementSyntax>())
             .FirstOrDefault(e => e.StartTag.Name.LocalName.ValueText == "summary");
         if (summary is null)
