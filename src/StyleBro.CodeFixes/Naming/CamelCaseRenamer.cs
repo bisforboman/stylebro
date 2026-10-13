@@ -585,7 +585,8 @@ internal static class CamelCaseRenamer
                         return (result, KeptReason.NewNameMeansSomethingElse);
                     }
 
-                    if (await TryAddAsync(reference.Document, reference.Location.SourceSpan, replacement).ConfigureAwait(false) is { } referenceKept)
+                    var editSpan = await GetUnneededThisAsync(current, reference.Document, reference.Location.SourceSpan, oldName, newName, cancellationToken).ConfigureAwait(false);
+                    if (await TryAddAsync(reference.Document, reference.Location.SourceSpan, replacement, editSpan).ConfigureAwait(false) is { } referenceKept)
                     {
                         return (result, referenceKept);
                     }
@@ -628,7 +629,7 @@ internal static class CamelCaseRenamer
         }
 
         // Null when the edit is added, else why it can't be.
-        async Task<KeptReason?> TryAddAsync(Document? document, TextSpan span, string replacement)
+        async Task<KeptReason?> TryAddAsync(Document? document, TextSpan span, string replacement, TextSpan? editSpan = null)
         {
             // Generated code can't be renamed with the rest (a tool writes it again): a Razor page's or a source generator's
             // reference would be left behind.
@@ -646,7 +647,7 @@ internal static class CamelCaseRenamer
                 return KeptReason.ReferenceNotByName;
             }
 
-            result.Add((GetFileKey(document), new TextChange(span, replacement)));
+            result.Add((GetFileKey(document), new TextChange(editSpan ?? span, replacement)));
             return null;
         }
     }
@@ -702,6 +703,32 @@ internal static class CamelCaseRenamer
 
         var qualifier = field.IsStatic ? field.ContainingType.ToMinimalDisplayString(model, span.Start) : "this";
         return qualifier + "." + newName;
+    }
+
+    /// <summary>
+    /// The span of 'this.oldName' when the rename makes the 'this.' redundant (Fluid: 'this.pet = pet' would become
+    /// 'this._pet = pet'), so the whole access is replaced by the new name: only a 'this.' the original code needed (a
+    /// local or parameter named like the field), when nothing at that spot is named like the new name (the plain new
+    /// name then binds to the field) and the repo doesn't ask for 'this.' (dotnet_style_qualification_for_field true).
+    /// Null to keep the qualifier.
+    /// </summary>
+    private static async Task<TextSpan?> GetUnneededThisAsync(ISymbol symbol, Document document, TextSpan span, string oldName, string newName, CancellationToken cancellationToken)
+    {
+        if (symbol is not IFieldSymbol { IsStatic: false }
+            || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
+            || root.FindToken(span.Start).Parent is not IdentifierNameSyntax { Parent: MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } access } name
+            || access.Name != name
+            || !access.Expression.GetTrailingTrivia().Concat(access.OperatorToken.LeadingTrivia).Concat(access.OperatorToken.TrailingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
+            || (document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree).TryGetValue("dotnet_style_qualification_for_field", out var value)
+                && value.Split(':')[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase))
+            || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
+            || !model.LookupSymbols(access.SpanStart, name: newName).IsEmpty
+            || !model.LookupSymbols(access.SpanStart, name: oldName).Any(s => s is ILocalSymbol or IParameterSymbol or IRangeVariableSymbol))
+        {
+            return null;
+        }
+
+        return access.Span;
     }
 
     /// <summary>A name that is looked up in scope, as opposed to the member part of 'x.Name' or 'Name = ...'.</summary>

@@ -28,8 +28,13 @@ internal static class TupleElementNames
             return null;
         }
 
-        return field.ContainingType.TupleElements
+        var element = field.ContainingType.TupleElements
             .FirstOrDefault(e => SymbolEqualityComparer.Default.Equals(e.CorrespondingTupleField, field) && e.Name != field.Name)?.Name;
+
+        // 'x.x': a name inferred from a variable elsewhere ('.Select(x => (x, y))') read through a receiver that has the same
+        // name says nothing ('x => x.Item1' in recyclarr). 'Item1' stays (a deviation: StyleCop reports it).
+        var receiver = name.Parent is MemberAccessExpressionSyntax member ? member.Expression : name.FirstAncestorOrSelf<ConditionalAccessExpressionSyntax>()?.Expression;
+        return receiver is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == element ? null : element;
     }
 
     private static bool IsNameOf(InvocationExpressionSyntax invocation, SemanticModel model, CancellationToken cancellationToken) =>
