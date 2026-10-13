@@ -9,7 +9,7 @@
 #   - Formatter = 'csharpier' (repos.psd1): a repository CSharpier formats, run the way its team would: 'stylebro-migrate
 #     init --write' (which detects CSharpier and turns the layout rules off) and 'stylebro-migrate format' instead of every
 #     rule; then the repository's own CSharpier ('dotnet tool restore', 'dotnet csharpier format .'), after which
-#     'stylebro-migrate format' must change no file and 'dotnet csharpier check .' must be clean: the two settle
+#     'stylebro-migrate format --verify-no-changes' and 'dotnet csharpier check .' must be clean: the two settle
 #
 #   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>] [-Enable BRO1313,BRO1314] [-TestCache <file>]
 # -Enable turns on rules that are off by default (they don't run otherwise).
@@ -163,7 +163,9 @@ function Invoke-Format([switch]$Verify) {
     $env:CustomAfterMicrosoftCommonTargets = $hook
     try {
         if ($csharpier) {
-            dotnet $migrate format $sln 2>&1 | Out-Host
+            $migrateArgs = @('format', $sln)
+            if ($Verify) { $migrateArgs += '--verify-no-changes' }
+            dotnet $migrate @migrateArgs 2>&1 | Out-Host
             return $LASTEXITCODE
         }
         $formatArgs = @('format', 'analyzers', $sln, '--diagnostics') + $ids + @('--severity', 'warn', '--no-restore')
@@ -262,13 +264,11 @@ if ($csharpier) {
         [void](Measure-Phase 'dotnet csharpier format .' { dotnet csharpier format . 2>&1 | Out-Null })
     }
     finally { Pop-Location }
-    # Not '--verify-no-changes' (it formats a copy without the build output, where an in-solution source generator, like
-    # Mapperly's, doesn't run and the renames its strings keep back go through): the files StyleBro changes after CSharpier,
-    # against the index.
-    git -C $path add -A
-    [void](Measure-Phase 'stylebro-migrate format after CSharpier' { Invoke-Format })
-    $again = @(git -C $path diff --name-only)
-    if ($again.Count) { $problems.Add("after CSharpier, 'stylebro-migrate format' changed $($again.Count) files again: $($again -join ', ')") }
+    # '--verify-no-changes' must say clean (it formats a copy of the repository; the generator projects' build output goes
+    # along, so Mapperly's in-solution generator runs there too).
+    $verifyCode = 0
+    [void](Measure-Phase 'stylebro-migrate format --verify-no-changes after CSharpier' { $script:verifyCode = Invoke-Format -Verify })
+    if ($verifyCode -ne 0) { $problems.Add("after CSharpier, 'stylebro-migrate format --verify-no-changes' failed (exit $verifyCode)") }
     Push-Location $path
     try {
         $left = @(Get-CSharpierRejected)

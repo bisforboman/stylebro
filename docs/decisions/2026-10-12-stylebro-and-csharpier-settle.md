@@ -50,3 +50,11 @@ format 16 -> 6 (left: BRO1141 making an initializer fit on one line, BRO1407 par
 multi-line operand), files StyleBro changes after CSharpier 3 -> 0; Mediator 76 -> 3 rejected, settles; Mapperly 3
 rejected, settles. `stylebro-migrate --write` detects CSharpier the same way and reports the StyleCop rules only the
 turned-off rules replaced as "CSharpier decides it".
+
+## Extended (2026-10-13): verify runs the in-solution generator
+
+`--verify-no-changes` now copies the build output of the projects the workspace references as analyzers
+(`OutputItemType="Analyzer"`) into its copy, so an in-solution source generator runs there as it does in place: the
+repository's own output, no build, so verify answers like `format`. Mapperly reproduced it (verify: "would change 2
+files", `format` clean); with the fix verify reports the same 4 kept findings and exits 0, and the real-world CSharpier
+mode checks `--verify-no-changes` again instead of a second `format`.

@@ -147,7 +147,7 @@ internal static class FormatCommand
     private const string UnformattedHeader = "Leaving alone:";
 
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
-    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
@@ -1011,9 +1011,10 @@ internal static class FormatCommand
     /// <summary>
     /// A project's target frameworks ('TargetFrameworks' split, else 'TargetFramework'), project references (full paths) and,
     /// with <paramref name="projectDirectory"/>, the C# files it compiles from outside its folder (full paths): Orleans links
-    /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects. Also its restore output (project.assets.json, "" when not asked).
+    /// '..\Orleans.CodeGenerator.Shared\*.cs' into three projects. Also its restore output (project.assets.json, "" when not asked)
+    /// and the project references it takes as analyzers (in-solution source generators, <see cref="CopyAnalyzerOutputs"/>).
     /// </summary>
-    public static (string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile) ParseProject(string msbuildJson, string? projectDirectory = null)
+    public static (string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers) ParseProject(string msbuildJson, string? projectDirectory = null)
     {
         using var json = JsonDocument.Parse(msbuildJson);
         var hasProperties = json.RootElement.TryGetProperty("Properties", out var properties);
@@ -1033,7 +1034,15 @@ internal static class FormatCommand
         var assets = hasProperties && properties.TryGetProperty("ProjectAssetsFile", out var a) && !string.IsNullOrEmpty(a.GetString()) ? a.GetString()!
             : hasProperties && properties.TryGetProperty("MSBuildProjectExtensionsPath", out var e) && !string.IsNullOrEmpty(e.GetString()) ? Path.Combine(e.GetString()!, "project.assets.json")
             : string.Empty;
-        return (frameworks, FullPaths("ProjectReference"), linked, FullPaths("Compile"), assets);
+
+        // Project references whose output is an analyzer (an in-solution source generator: 'OutputItemType="Analyzer"').
+        var analyzers = json.RootElement.TryGetProperty("Items", out var all) && all.TryGetProperty("ProjectReference", out var projectReferences)
+            ? projectReferences.EnumerateArray()
+                .Where(r => r.TryGetProperty("OutputItemType", out var type) && string.Equals(type.GetString(), "Analyzer", StringComparison.OrdinalIgnoreCase))
+                .Select(r => r.GetProperty("FullPath").GetString()!)
+                .ToArray()
+            : Array.Empty<string>();
+        return (frameworks, FullPaths("ProjectReference"), linked, FullPaths("Compile"), assets, analyzers);
     }
 
     /// <summary>
@@ -1151,6 +1160,7 @@ internal static class FormatCommand
                 PreviewCommand.Git(copy, "init", "-q");
             }
 
+            CopyAnalyzerOutputs(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? Path.GetFullPath(args[0]) : root, source, copy);
             var copyArgs = args.Where(a => a != "--verify-no-changes").ToList();
             var report = copyArgs.IndexOf("--report");
             if (report >= 0)
@@ -1233,6 +1243,50 @@ internal static class FormatCommand
         {
             PreviewCommand.Delete(copy);
             File.Delete(keptFile);
+        }
+    }
+
+    /// <summary>
+    /// Copies the build output of the projects a workspace (<paramref name="path"/>: a solution, project or folder in
+    /// <paramref name="source"/>) references as analyzers ('OutputItemType="Analyzer"': Mapperly's in-solution source
+    /// generator) into <paramref name="copy"/>. Git ignores it, so a copy of the tracked files has none, the generator doesn't
+    /// run there, and the renames its generated code keeps back go through: verify failed where 'format' is clean. The
+    /// repository's own output, not a build: a generator 'format' can't run in place doesn't run in the copy either.
+    /// </summary>
+    internal static void CopyAnalyzerOutputs(string path, string source, string copy)
+    {
+        var workspace = File.Exists(path) ? path : BaselineCommand.FindWorkspace(path) is { } found ? Path.Combine(path, found) : null;
+        if (workspace is null)
+        {
+            return;
+        }
+
+        var sourceRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(source)) + Path.DirectorySeparatorChar;
+        foreach (var project in ReadProjects(Path.GetFullPath(workspace)).Values.SelectMany(p => p.Analyzers).Distinct(StringComparer.OrdinalIgnoreCase).Where(File.Exists))
+        {
+            // A multi-targeted project's outer TargetDir has no framework folder: every framework's output goes along.
+            string output;
+            try
+            {
+                output = Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getProperty:TargetDir", "-nologo").Trim();
+            }
+            catch (ToolException)
+            {
+                // The copy's run reports a project MSBuild can't evaluate itself.
+                continue;
+            }
+
+            if (output.Length == 0 || !Directory.Exists(output) || !Path.GetFullPath(output).StartsWith(sourceRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories))
+            {
+                var to = Path.Combine(copy, Path.GetRelativePath(source, file));
+                Directory.CreateDirectory(Path.GetDirectoryName(to)!);
+                File.Copy(file, to, overwrite: true);
+            }
         }
     }
 
@@ -1871,7 +1925,7 @@ internal static class FormatCommand
     /// evaluated in parallel (one 'dotnet msbuild' each, ~1 s: LiteBus has 99) and once per process: the runs until clean
     /// and the preview's runs only edit C# files.
     /// </summary>
-    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile)> ReadProjects(string workspacePath)
+    private static Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)> ReadProjects(string workspacePath)
     {
         // ponytail: keyed by the workspace only; a project file changed between two runs of one process isn't seen.
         lock (ProjectCache)
@@ -1895,10 +1949,10 @@ internal static class FormatCommand
                 .Select(l => l.Trim())
                 .Where(l => l.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
-        (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile) Evaluate(string p)
+        (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers) Evaluate(string p)
         {
             var fullPath = Path.GetFullPath(Path.Combine(directory, p.Replace('\\', Path.DirectorySeparatorChar)));
-            var (frameworks, references, linked, compile, assets) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
+            var (frameworks, references, linked, compile, assets, analyzers) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
 
             // A multi-targeted project's outer evaluation has only its explicit Compile items, not the SDK's default
             // ones (kubernetes-client's KubernetesClient: none, so its files didn't look shared with KubernetesClient.Aot's).
@@ -1908,10 +1962,10 @@ internal static class FormatCommand
                 compile = compile.Union(ParseProject(Capture(directory, "msbuild", fullPath, $"-property:TargetFramework={frameworks[0]}", "-getItem:Compile", "-nologo")).Compile, StringComparer.OrdinalIgnoreCase).ToArray();
             }
 
-            return (fullPath, frameworks, references, linked, compile, assets);
+            return (fullPath, frameworks, references, linked, compile, assets, analyzers);
         }
 
-        Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile)> read;
+        Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)> read;
         try
         {
             read = projects.AsParallel().AsOrdered().Select(p => (Key: p, Value: Evaluate(p))).ToDictionary(p => p.Key, p => p.Value);
