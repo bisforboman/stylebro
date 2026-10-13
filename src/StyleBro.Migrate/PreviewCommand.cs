@@ -167,6 +167,10 @@ internal static class PreviewCommand
         try
         {
             Step($"Copying the repository to {copy}", () => Copy(source, copy));
+
+            // An in-solution source generator runs from its project's build output, which git ignores: without it in the
+            // copy, the preview applied renames the real run keeps back (as verify did, FormatCommand.CopyAnalyzerOutputs).
+            FormatCommand.CopyAnalyzerOutputs(project is null ? path : Path.Combine(folder, project), source, copy);
             var noRestore = rest.Contains("--no-restore");
             var restored = noRestore && CopyRestoreOutput(source, copy) > 0;
 

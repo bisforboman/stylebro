@@ -140,4 +140,50 @@ public sealed partial class MigrationTests
 
         Assert.Equal(new[] { "Directory.csproj.props" }, StyleCopSetup.Read(root).ReferencedIn);
     }
+
+    [Fact]
+    public void Copies_GetTheBuildOutputOfInSolutionGenerators()
+    {
+        // Mapperly: verify and the --diff preview format a copy of the tracked files; without the generator project's build
+        // output there, the generator didn't run and renames its generated code keeps back went through.
+        Write("App/App.csproj", """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net8.0</TargetFramework>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="../Gen/Gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+                <ProjectReference Include="../Lib/Lib.csproj" />
+              </ItemGroup>
+            </Project>
+            """);
+        Write("Gen/Gen.csproj", """<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>netstandard2.0</TargetFramework></PropertyGroup></Project>""");
+        Write("Lib/Lib.csproj", """<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>""");
+        Write("Gen/bin/Debug/netstandard2.0/Gen.dll", "x");
+        Write("Lib/bin/Debug/net8.0/Lib.dll", "x");
+        var copy = Directory.CreateTempSubdirectory("stylebro-copy-").FullName;
+        try
+        {
+            PreviewCommand.Copy(root, copy);
+            FormatCommand.CopyAnalyzerOutputs(Path.Combine(root, "App/App.csproj"), root, copy);
+
+            Assert.True(File.Exists(Path.Combine(copy, "Gen/bin/Debug/netstandard2.0/Gen.dll")));
+            Assert.False(File.Exists(Path.Combine(copy, "Lib/bin/Debug/net8.0/Lib.dll")));
+        }
+        finally
+        {
+            Directory.Delete(copy, recursive: true);
+        }
+
+        // The --diff preview's copy too (git-ignored output, as in a real repository).
+        Write(".gitignore", "bin/\nobj/\n");
+        PreviewCommand.MakeRepository(root);
+        var generatorRan = false;
+        Capture(() => PreviewCommand.Run("format", new[] { Path.Combine(root, "App/App.csproj"), "--diff=" + Path.Combine(root, "out.patch") }, (args, log) =>
+        {
+            generatorRan = File.Exists(Path.Combine(Path.GetDirectoryName(args[0])!, "../Gen/bin/Debug/netstandard2.0/Gen.dll"));
+            return 0;
+        }));
+        Assert.True(generatorRan);
+    }
 }
