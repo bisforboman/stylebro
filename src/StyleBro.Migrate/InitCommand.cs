@@ -54,6 +54,11 @@ internal static class InitCommand
     /// <summary>What init says, with or without --write, when the .editorconfig already has the settings it would write.</summary>
     public const string PresentLine = ".editorconfig already has these settings: nothing to add.";
 
+    /// <summary>The comment above StyleBro's rules set by id (<see cref="HiddenFromFormat"/>).</summary>
+    public const string ByIdComment =
+        "# StyleBro's rules by id: this file's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) would hide them from\n"
+        + "# 'dotnet format', while the build reports them (the preset's own entries win over a bulk one). Turn one off below this block.";
+
     /// <summary>The line that turns IDE0055 off.</summary>
     private const string IdeOff = "dotnet_diagnostic.IDE0055.severity = none";
 
@@ -149,7 +154,12 @@ internal static class InitCommand
         if (multiTargeted.Count > 0)
         {
             Console.WriteLine(MultiTargetedLine(multiTargeted));
-            Console.WriteLine(MultiTargetedHint);
+
+            // Not where IDE0055 is off (CSharpier formats the code: sharpcompress got the crash warning anyway).
+            if (targets.FirstOrDefault()?.FormatsWhitespace != false)
+            {
+                Console.WriteLine(MultiTargetedHint);
+            }
         }
 
         targets.FirstOrDefault()?.ModernizeNotes.ForEach(Console.WriteLine);
@@ -246,9 +256,10 @@ internal static class InitCommand
     /// <paramref name="sonar"/>: the lines a SonarQube setup adds (<see cref="SonarSetup.Apply"/>); <paramref name="generated"/>:
     /// folders marked as generated code (EF Core migrations, <see cref="Migration.MigrationFolders"/>); <paramref name="vendored"/>:
     /// vendored folders, marked the same way (<see cref="Migration.VendoredFolders"/>); <paramref name="sonarScopes"/>: sections
-    /// for the parts of the repository with their own Sonar severities (<see cref="SonarScopes"/>).
+    /// for the parts of the repository with their own Sonar severities (<see cref="SonarScopes"/>); <paramref name="byId"/>: StyleBro's
+    /// rules by id, where a bulk severity would hide them from 'dotnet format' (<see cref="HiddenFromFormat"/>).
     /// </summary>
-    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null)
+    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null, IReadOnlyList<string>? byId = null)
     {
         // A detected line replaces the template's line for the same key (CSharpier: IDE0055 = none).
         var keys = new HashSet<string>((detected ?? Array.Empty<string>()).Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
@@ -273,6 +284,11 @@ internal static class InitCommand
         if (sonar is { Count: > 0 })
         {
             template += "\n" + string.Join("\n", sonar);
+        }
+
+        if (byId is { Count: > 0 })
+        {
+            template += "\n\n" + ByIdComment + "\n" + string.Join("\n", byId);
         }
 
         if (detected is { Count: > 0 })
@@ -347,15 +363,15 @@ internal static class InitCommand
 
         // CSharpier formats all the code, or only a folder: then its settings go into that folder's section, and the rest of
         // the code is judged as usual.
-        var csharpierScope = Conventions.CSharpierScope(root);
-        var csharpier = csharpierScope is ({ } evidence, "") ? Conventions.CSharpierLines(evidence, root, settings) : default;
+        var csharpierScopes = Conventions.CSharpierScopes(root);
+        var csharpier = csharpierScopes is [({ } evidence, "")] ? Conventions.CSharpierLines(evidence, root, settings) : default;
         var scopes = new List<(string Section, List<string> Lines)>();
-        string? partReport = null;
-        if (csharpierScope is ({ } partEvidence, { Length: > 0 } part))
+        var partReports = new List<string>();
+        foreach (var (partEvidence, part) in csharpierScopes.Where(s => s.Folder.Length > 0))
         {
-            (var partLines, partReport) = Conventions.CSharpierLines(partEvidence, root, settings, part);
+            var (partLines, partReport) = Conventions.CSharpierLines(partEvidence, root, settings, part);
             scopes.Add(($"{part}/**.cs", partLines));
-            partReport = partReport.Replace("CSharpier (", $"CSharpier in {part}/ (", StringComparison.Ordinal);
+            partReports.Add(partReport.Replace("CSharpier (", $"CSharpier in {part}/ (", StringComparison.Ordinal));
         }
 
         // ReSharper/Rider's column alignment: IDE0055 off, like with CSharpier (RestSharp: 414 aligned hunks flattened).
@@ -364,11 +380,17 @@ internal static class InitCommand
         var kept = new List<string>();
         foreach (var convention in Conventions.All)
         {
-            if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
+            if (csharpier.Lines is not null && Conventions.IsCSharpiers(convention))
+            {
+                // Before the repository's key: its rule is off with CSharpier anyway (a second 'off' line moved on every init).
+                decided[convention.Key] = "CSharpier formats it";
+            }
+            else if (new[] { convention.Key }.Concat(convention.AlsoKeys).FirstOrDefault(own.ContainsKey) is { } key)
             {
                 // A rule the last init turned off against this key (the code contradicted it, or was mixed) stays off: counted
-                // again after 'format', the numbers move (sourcegit: 263 operators, then 264, and the block changed).
-                if (csharpier.Lines is null && convention.Enforcer is { } enforcer && KeptLines(previous, [$"dotnet_diagnostic.{enforcer}.severity"]) is { Count: > 0 } offLines)
+                // again after 'format', the numbers move (sourcegit: 263 operators, then 264, and the block changed). Also with
+                // CSharpier (its own rules are decided above): recomputed, sharpcompress' BRO1406 line moved on a second init.
+                if (convention.Enforcer is { } enforcer && KeptLines(previous, [$"dotnet_diagnostic.{enforcer}.severity"]) is { Count: > 0 } offLines)
                 {
                     decided[convention.Key] = $"kept from the last init ({enforcer} off; .editorconfig says {own[key]})";
                     kept.AddRange(offLines);
@@ -377,10 +399,6 @@ internal static class InitCommand
                 {
                     decided[convention.Key] = $"set in .editorconfig ({own[key]})";
                 }
-            }
-            else if (csharpier.Lines is not null && Conventions.IsCSharpiers(convention))
-            {
-                decided[convention.Key] = "CSharpier formats it";
             }
             else if (sonarLines.Any(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal)))
             {
@@ -446,7 +464,14 @@ internal static class InitCommand
             : settings.TryGetValue("dotnet_diagnostic.IDE0055.severity", out var ideSeverity) ? $"your .editorconfig sets IDE0055 ({ideSeverity})"
             : keptSpacing.Count > 0 ? "kept from the last init"
             : null;
-        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]), spacing);
+        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), csharpier.Lines is null ? own : own.Where(p => !Conventions.All.Any(c => Conventions.IsCSharpiers(c) && (c.Key == p.Key || c.AlsoKeys.Contains(p.Key)))).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase), unenforced.ToDictionary(k => k, k => settings[k]), spacing);
+
+        // 'always' asks for 'public' on interface members too: only when the code has them or the build enforces it (BaGetter).
+        if (Conventions.InterfaceAccess(counts, settings, EnforcesCodeStyleInBuild(root) && !unenforced.Contains("dotnet_style_require_accessibility_modifiers")) is var (interfaceLines, interfaceReport))
+        {
+            detected.AddRange(interfaceLines);
+            report.Insert(report.FindIndex(l => l.Contains(" private-by-default members: ", StringComparison.Ordinal)) + 1, interfaceReport);
+        }
 
         // A using verdict without a setting ("they aren't sorted") goes where the last init wrote it, before the kept static
         // casing: appended after it, a second init wrote the block in another order (Fluid).
@@ -471,10 +496,7 @@ internal static class InitCommand
             report.Insert(0, $"  {"note",-8} too little code here to tell its conventions (fewer than {Conventions.MinimumAgreeing} places each), so StyleBro's defaults apply");
         }
 
-        if ((csharpier.Lines is not null ? csharpier.Report : partReport) is { } csharpierReport)
-        {
-            report.Insert(0, csharpierReport);
-        }
+        report.InsertRange(0, csharpier.Lines is not null ? [csharpier.Report] : partReports);
 
         if (alignment is var (_, alignmentReport))
         {
@@ -656,6 +678,54 @@ internal static class InitCommand
                 || (IdeRules.TryGetValue(key, out var ide) && own.TryGetValue($"dotnet_diagnostic.{ide}.severity", out var severity) && Silent(severity)))
             {
                 result.Add(key);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>The StyleBro rules the preset turns on, with their severity, from every layer in the package (init pins the latest).</summary>
+    public static SortedDictionary<string, string> PresetSeverities()
+    {
+        var result = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        foreach (var name in Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(n => n.StartsWith("Preset.", StringComparison.Ordinal)))
+        {
+            foreach (Match match in Regex.Matches(Read(name), @"^dotnet_diagnostic\.(BRO\d+)\.severity\s*=\s*(\w+)", RegexOptions.Multiline))
+            {
+                if (match.Groups[2].Value != "none")
+                {
+                    result[match.Groups[1].Value] = match.Groups[2].Value;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The lines that set, by id, the StyleBro rules the preset turns on but <paramref name="settings"/> (an .editorconfig's
+    /// for all C# files) hide from 'dotnet format' with a bulk or category severity below warning ('dotnet_analyzer_diagnostic
+    /// .severity = silent', sharpcompress). 'dotnet format' reads severities from .editorconfig only, so it skipped every
+    /// rule and said clean, while the build takes the preset's own entries (a rule's own entry wins over a bulk one) and
+    /// failed with ~40,000 warnings as errors. Rules the settings set by id are the team's. Empty when nothing is hidden.
+    /// </summary>
+    public static List<string> HiddenFromFormat(IReadOnlyDictionary<string, string> settings)
+    {
+        static bool Below(string? severity) => severity?.Trim().ToLowerInvariant() is "silent" or "none" or "suggestion" or "hidden" or "info";
+        settings.TryGetValue("dotnet_analyzer_diagnostic.severity", out var bulk);
+        var categories = Migration.RuleCategories();
+        var result = new List<string>();
+        foreach (var (id, severity) in PresetSeverities())
+        {
+            if (settings.ContainsKey($"dotnet_diagnostic.{id}.severity"))
+            {
+                continue;
+            }
+
+            var category = categories.TryGetValue(id, out var name) && settings.TryGetValue($"dotnet_analyzer_diagnostic.category-{name}.severity", out var value) ? value : bulk;
+            if (Below(category))
+            {
+                result.Add($"dotnet_diagnostic.{id}.severity = {severity}");
             }
         }
 
@@ -1001,7 +1071,14 @@ internal static class InitCommand
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored.Select(v => prefix + v))}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes);
+        // A bulk 'silent' hides StyleBro from 'dotnet format' but not from the build: set by id, they agree (docs/decisions).
+        var byId = migrated ? [] : HiddenFromFormat(ownSettings).Where(l => !detected.Concat(sonarLines).Any(d => KeyOf(d) == KeyOf(l))).ToList();
+        if (byId.Count > 0)
+        {
+            Console.WriteLine($"{prefix}.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {byId.Count} StyleBro rules the build reports. The block sets them by id, so both agree.");
+        }
+
+        var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId);
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
         var name = prefix + ".editorconfig";
         if (!migrated)
@@ -1030,6 +1107,7 @@ internal static class InitCommand
             HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
             HasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain),
             Nested = nested,
+            FormatsWhitespace = !detected.Contains(IdeOff),
         };
     }
 
@@ -1111,6 +1189,9 @@ internal static class InitCommand
 
         /// <summary>Gets the block's end marker.</summary>
         public string End { get; init; } = Migration.EndMarker;
+
+        /// <summary>Gets a value indicating whether the block leaves IDE0055 on for all C# files (not with CSharpier or column alignment).</summary>
+        public bool FormatsWhitespace { get; init; } = true;
 
         /// <summary>Gets the whitespace blocks for the .editorconfig files below this one that decide a key themselves.</summary>
         public List<Target> Nested { get; init; } = [];

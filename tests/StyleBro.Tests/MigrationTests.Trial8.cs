@@ -151,7 +151,7 @@ public sealed partial class MigrationTests
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root }))).Replace("\r\n", "\n");
 
         Assert.Contains("  note     csharp_prefer_braces = true:silent in .editorconfig isn't enforced", output, StringComparison.Ordinal);
-        Assert.Contains("(your .editorconfig's csharp_prefer_braces = true:silent isn't enforced)\ncsharp_prefer_braces = when_multiline\n", output, StringComparison.Ordinal);
+        Assert.Contains("(your .editorconfig's csharp_prefer_braces = true:silent isn't enforced; to keep it, set it again below this block)\ncsharp_prefer_braces = when_multiline\n", output, StringComparison.Ordinal);
 
         // The other way round: the code's form is StyleBro's default, but the silent key says otherwise, so it's written.
         Write("A.cs", $"class A\n{{\n    int M(int x)\n    {{\n{bodies.Replace("            return", "        {\n            return").Replace(";\n", ";\n        }\n")}        return 0;\n    }}\n}}\n");

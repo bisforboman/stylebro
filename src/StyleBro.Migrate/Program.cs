@@ -312,7 +312,7 @@ internal static class Program
     /// remove, only format left (a second --write after the swap said "add StyleBro.Analyzers" again), or StyleBro to add.
     /// </summary>
     internal static string NextAfterWrite(StyleCopSetup setup, string root) =>
-        (PreviewCommand.ReferencesStyleBro(root), setup.ReferencedIn.Count > 0) switch
+        (PreviewCommand.ReferencesStyleBro(root), setup.ReferencedIn.Count > 0 || (setup.ReferencedOutside.Count > 0 && setup.RemovedIn.Count == 0)) switch
         {
             (false, true) => NextStep,
             (true, true) => RemoveStyleCopStep,
@@ -369,6 +369,13 @@ internal static class Program
             lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
         }
 
+        // A submodule's file can't be edited here (SixLabors' shared-infrastructure): the repository's own props swap it.
+        if (setup.ReferencedOutside.Count > 0 && setup.RemovedIn.Count == 0)
+        {
+            var props = string.Join(", ", Migration.PropsFiles(root).Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')));
+            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedOutside)}, outside this repository's own files (a git submodule), which can't be edited here: swap it in {props}, after the line that imports that file: <PackageReference Remove=\"StyleCop.Analyzers\" /> and StyleBro.Analyzers' <PackageReference Include=\"StyleBro.Analyzers\" Version=\"...\" PrivateAssets=\"all\" /> (https://bisforboman.github.io/stylebro/migrating/#stylecop-referenced-in-a-git-submodule).");
+        }
+
         // Old-style projects install packages through packages.config: a PackageReference would switch their restore.
         if (PackagesConfig.Projects(StyleCopSetup.EnumerateFiles(root)) is { Count: > 0 } packagesConfig)
         {
@@ -376,9 +383,11 @@ internal static class Program
             lines.Add($"{string.Join(", ", names.Take(3))}{(names.Count > 3 ? $" and {names.Count - 3} more" : string.Empty)} use packages.config: install StyleBro.Analyzers there the packages.config way (Visual Studio's package manager writes the packages.config entry, the <Analyzer> items and the build targets import), and give a PackageReference in Directory.Build.props Condition=\"{PackagesConfig.NotPackagesConfig}\" (https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects).");
         }
 
-        if (setup.RemovedIn.Count > 0)
+        // Not a file that swaps StyleCop for StyleBro itself (the submodule case above, done).
+        var removedIn = setup.RemovedIn.Where(f => !File.Exists(Path.Combine(root, f)) || !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(Path.Combine(root, f))), @"Include\s*=\s*""StyleBro\.Analyzers""", RegexOptions.IgnoreCase)).ToList();
+        if (removedIn.Count > 0)
         {
-            lines.Add($"{string.Join(", ", setup.RemovedIn)} remove{(setup.RemovedIn.Count == 1 ? "s" : string.Empty)} the StyleCop.Analyzers reference (<PackageReference Remove=\"StyleCop.Analyzers\" />): add <PackageReference Remove=\"StyleBro.Analyzers\" /> next to it, else that project gets StyleBro (and a restore error, NU1015, when it doesn't use central package management).");
+            lines.Add($"{string.Join(", ", removedIn)} remove{(removedIn.Count == 1 ? "s" : string.Empty)} the StyleCop.Analyzers reference (<PackageReference Remove=\"StyleCop.Analyzers\" />): add <PackageReference Remove=\"StyleBro.Analyzers\" /> next to it, else that project gets StyleBro (and a restore error, NU1015, when it doesn't use central package management).");
         }
 
         return lines;

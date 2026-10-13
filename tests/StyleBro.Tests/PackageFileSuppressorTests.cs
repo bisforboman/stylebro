@@ -28,6 +28,30 @@ public class PackageFileSuppressorTests
     }
 
     [Theory]
+    [InlineData(@"C:\repo\shared-infrastructure\src\Guard.cs", @"C:\repo\shared-infrastructure\|C:\repo\tests\harfbuzz\", true)]
+    [InlineData(@"C:\repo\shared-infrastructure-old\Guard.cs", @"C:\repo\shared-infrastructure\", false)]
+    [InlineData(@"C:\repo\src\Guard.cs", null, false)]
+    [InlineData(@"C:\repo\obj\x\contentFiles\Guard.cs", "", false)]
+    public void IsSubmoduleFile(string path, string? folders, bool expected)
+    {
+        // Fonts compiles shared-infrastructure's code from a git submodule: 88 warnings 'format' can never fix.
+        Assert.Equal(expected, PackageFileSuppressor.IsSubmoduleFile(path, folders));
+    }
+
+    [Fact]
+    public async Task SuppressesStyleBroFindingsInSubmoduleFiles()
+    {
+        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText("class C { }", path: @"C:\repo\shared\Guard.cs") }, Array.Empty<MetadataReference>());
+        var global = ImmutableDictionary<string, string>.Empty.Add(PackageFileSuppressor.SubmoduleProperty, @"C:\repo\shared\");
+        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new Provider(global));
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FakeRule("BRO1306"), new PackageFileSuppressor());
+        var diagnostics = await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
+            .GetAnalyzerDiagnosticsAsync();
+
+        Assert.True(Assert.Single(diagnostics).IsSuppressed);
+    }
+
+    [Theory]
     [InlineData(PackageFile, "BRO1306", true)]
     [InlineData(@"C:\repo\src\App\Program.cs", "BRO1306", false)]
     [InlineData(PackageFile, "IDE0055", false)]

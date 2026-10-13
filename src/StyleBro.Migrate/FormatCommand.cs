@@ -206,9 +206,53 @@ internal static class FormatCommand
             json["path"] = root;
         }
 
-        var exit = args.Contains("--verify-no-changes") ? Verify(args, root, log, runOnce) : Repeat(args, root, log, output, runOnce, once ? 1 : MaxRuns);
+        // Rules a bulk severity hides from 'dotnet format' but not from the build: no run is clean then.
+        var hidden = HiddenLine(root);
+        var runLog = hidden is null ? log : line => log(line.StartsWith("Clean", StringComparison.Ordinal) ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal));
+        var exit = args.Contains("--verify-no-changes") ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
+        if (hidden is not null)
+        {
+            log(hidden);
+            exit = exit == 0 ? NotCleanExitCode : exit;
+        }
+
         JsonReport.Set("clean", exit == 0);
         return exit;
+    }
+
+    /// <summary>
+    /// What to say when the root .editorconfig's bulk severity hides StyleBro rules the build reports from 'dotnet format'
+    /// (<see cref="InitCommand.HiddenFromFormat"/>), or null: then a clean run isn't clean (sharpcompress: "clean", then
+    /// ~40,000 BRO errors in the build). Not with the preset off: a migration's block sets every rule by id.
+    /// </summary>
+    public static string? HiddenLine(string root)
+    {
+        // The project's folder up to the .editorconfig that says root = true: the outer files first, nearer ones win.
+        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var props = (string?)null;
+        var folders = new List<string>();
+        for (var directory = Path.GetFullPath(root); directory is not null; directory = Path.GetDirectoryName(directory))
+        {
+            folders.Add(directory);
+            props ??= File.Exists(Path.Combine(directory, "Directory.Build.props")) ? Path.Combine(directory, "Directory.Build.props") : null;
+            var editorConfig = Path.Combine(directory, ".editorconfig");
+            if (File.Exists(editorConfig) && Regex.IsMatch(File.ReadAllText(editorConfig), @"^\s*root\s*=\s*true\s*$", RegexOptions.IgnoreCase | RegexOptions.Multiline))
+            {
+                break;
+            }
+        }
+
+        folders.Reverse();
+        folders.ForEach(f => Migration.OwnSettings(f, withBlocks: true).ToList().ForEach(p => settings[p.Key] = p.Value));
+        if ((props is not null && Regex.IsMatch(File.ReadAllText(props), @"<StyleBroPreset>\s*none\s*<", RegexOptions.IgnoreCase))
+            || InitCommand.HiddenFromFormat(settings) is not { Count: > 0 } hidden)
+        {
+            return null;
+        }
+
+        var ids = hidden.Select(l => l.Split('.')[1]).ToList();
+        return $"Not clean: .editorconfig's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) hides {ids.Count} StyleBro rules from 'dotnet format' "
+            + $"({string.Join(", ", ids.Take(3))}{(ids.Count > 3 ? ", ..." : string.Empty)}), which the build reports. Run 'stylebro-migrate init --write': it sets them by id.";
     }
 
     /// <summary>The line that says which rules a run fixes, or (<paramref name="verify"/>) checks without changing anything.</summary>

@@ -14,7 +14,9 @@ namespace StyleBro.Analyzers;
 /// format' would edit the shared package cache (Spectre.Console: BRO1306 and BRO1133 in wcwidth.sources). The package's
 /// build targets pass the restore's package folders (<see cref="Property"/>, '|'-separated); without them, a path with a
 /// 'contentFiles' folder counts. Not the project directory: shared source linked from elsewhere in the repository
-/// (OpenTelemetry's src/Shared) is the user's own code.
+/// (OpenTelemetry's src/Shared) is the user's own code. Files in the repository's git submodules too
+/// (<see cref="SubmoduleProperty"/>): another repository's code a project compiles (SixLabors.Fonts' shared-infrastructure:
+/// 88 warnings on code its own .editorconfig governs), which 'dotnet format' skips and nobody here can fix.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PackageFileSuppressor : DiagnosticSuppressor
@@ -22,8 +24,11 @@ public sealed class PackageFileSuppressor : DiagnosticSuppressor
     /// <summary>The package folders, from the package's build targets (NuGetPackageFolders).</summary>
     public const string Property = "build_property.StyleBroPackageFolders";
 
+    /// <summary>The repository's git submodule folders, from the package's build targets (.gitmodules).</summary>
+    public const string SubmoduleProperty = "build_property.StyleBroSubmoduleFolders";
+
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = BaselineSuppressor.BroIds()
-        .ToImmutableDictionary(id => id, id => new SuppressionDescriptor("PACKAGE_" + id, id, "In a file from a NuGet package"));
+        .ToImmutableDictionary(id => id, id => new SuppressionDescriptor("PACKAGE_" + id, id, "In a file from a NuGet package or a git submodule"));
 
     /// <inheritdoc/>
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } = Descriptors.Values.ToImmutableArray();
@@ -31,17 +36,18 @@ public sealed class PackageFileSuppressor : DiagnosticSuppressor
     /// <summary>Whether <paramref name="path"/> is in one of the package folders or, without them, in a 'contentFiles' folder.</summary>
     public static bool IsPackageFile(string path, string? folders)
     {
-        var file = path.Replace('\\', '/');
-        var roots = (folders ?? string.Empty).Split('|').Select(f => f.Trim().Replace('\\', '/').TrimEnd('/')).Where(f => f.Length > 0).ToList();
-        return roots.Count > 0
-            ? roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase))
-            : file.IndexOf("/contentFiles/", StringComparison.OrdinalIgnoreCase) >= 0;
+        var roots = Roots(folders);
+        return roots.Count > 0 ? IsUnder(path, roots) : path.Replace('\\', '/').IndexOf("/contentFiles/", StringComparison.OrdinalIgnoreCase) >= 0;
     }
+
+    /// <summary>Whether <paramref name="path"/> is in one of the submodule folders ('|'-separated).</summary>
+    public static bool IsSubmoduleFile(string path, string? folders) => IsUnder(path, Roots(folders));
 
     /// <inheritdoc/>
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
         context.Options.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue(Property, out var folders);
+        context.Options.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue(SubmoduleProperty, out var submodules);
 
         // Decided once per file.
         var packageFiles = new Dictionary<SyntaxTree, bool>();
@@ -54,7 +60,7 @@ public sealed class PackageFileSuppressor : DiagnosticSuppressor
 
             if (!packageFiles.TryGetValue(tree, out var isPackageFile))
             {
-                packageFiles[tree] = isPackageFile = IsPackageFile(tree.FilePath, folders);
+                packageFiles[tree] = isPackageFile = IsPackageFile(tree.FilePath, folders) || IsSubmoduleFile(tree.FilePath, submodules);
             }
 
             if (isPackageFile)
@@ -62,5 +68,14 @@ public sealed class PackageFileSuppressor : DiagnosticSuppressor
                 context.ReportSuppression(Suppression.Create(descriptor, diagnostic));
             }
         }
+    }
+
+    private static List<string> Roots(string? folders) =>
+        (folders ?? string.Empty).Split('|').Select(f => f.Trim().Replace('\\', '/').TrimEnd('/')).Where(f => f.Length > 0).ToList();
+
+    private static bool IsUnder(string path, List<string> roots)
+    {
+        var file = path.Replace('\\', '/');
+        return roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase));
     }
 }

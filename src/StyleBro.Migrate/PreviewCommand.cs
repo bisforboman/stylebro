@@ -284,7 +284,11 @@ internal static class PreviewCommand
                 }
             }
 
-            var files = Changed(copy, configured);
+            // The packages.config projects the note says are left out stay out: no changes in their folders (the settings step
+            // installed the package there, and the whitespace pass formatted their files).
+            var leftOut = packagesConfig.Select(p => (prefix + Path.GetDirectoryName(p)!.Replace('\\', '/')).Trim('/')).Where(d => d.Length > 0).Distinct().ToList();
+            bool IsLeftOut(string file) => leftOut.Any(d => file.StartsWith(d + "/", StringComparison.OrdinalIgnoreCase));
+            var files = Changed(copy, configured).Where(f => !IsLeftOut(f.Key)).ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal);
             var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetFileName(temp) + "/" + Path.GetFileName(copy), files.Keys, f => WhitespaceOnly(copy, configured, f));
             JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
@@ -295,7 +299,7 @@ internal static class PreviewCommand
                 Console.WriteLine(line);
             }
 
-            GitChecked(copy, "diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline);
+            GitChecked(copy, ["diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline, "--", ".", .. leftOut.Select(d => $":(exclude){d}/")]);
             JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
@@ -635,7 +639,7 @@ internal static class PreviewCommand
         }
 
         var version = typeof(PreviewCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.0.0";
-        var (_, styleCop, removes) = StyleCopSetup.Projects(root, files);
+        var (_, styleCop, removes, _) = StyleCopSetup.Projects(root, files);
 
         // packages.config projects get it the packages.config way, like StyleCop came in there (PackagesConfig).
         var packagesConfig = PackagesConfig.Projects(files);
