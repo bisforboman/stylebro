@@ -74,9 +74,6 @@ internal static class Conventions
     /// </summary>
     public const string TrailingWhitespaceKey = "trim_trailing_whitespace";
 
-    /// <summary>The whitespace keys judged against the .editorconfig that decides each file's value (<see cref="FileSettings"/>).</summary>
-    public static readonly string[] FileKeys = { EndOfLineKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey };
-
     /// <summary>BRO1527's severity: properties whose accessors are all auto-accessors, on one line or on several (sourcegit: 732 and 306).</summary>
     public const string AutoAccessorsKey = "dotnet_diagnostic." + DiagnosticIds.AutoAccessorsOnOneLine + ".severity";
 
@@ -123,6 +120,15 @@ internal static class Conventions
     /// expanded every one).
     /// </summary>
     public const string RelativeUsingsKey = "dotnet_diagnostic." + DiagnosticIds.QualifiedUsing + ".severity";
+
+    /// <summary>The SDK key for spaces inside parentheses: a list of flags (<see cref="Spacing"/>), 'false' for none.</summary>
+    public const string SpaceBetweenParenthesesKey = "csharp_space_between_parentheses";
+
+    /// <summary>The comment start of init's line that turns IDE0055 off for mixed spacing (kept on a second init).</summary>
+    public const string SpacingComment = "# init: spacing:";
+
+    /// <summary>The whitespace keys judged against the .editorconfig that decides each file's value (<see cref="FileSettings"/>).</summary>
+    public static readonly string[] FileKeys = { EndOfLineKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey };
 
     /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
@@ -191,12 +197,6 @@ internal static class Conventions
         ("csharp_space_between_method_call_parameter_list_parentheses", null, "call arguments", "'F(x)'", "'F( x )'"),
         ("csharp_space_between_method_declaration_parameter_list_parentheses", null, "declared parameters", "'void F(int x)'", "'void F( int x )'"),
     };
-
-    /// <summary>The SDK key for spaces inside parentheses: a list of flags (<see cref="Spacing"/>), 'false' for none.</summary>
-    public const string SpaceBetweenParenthesesKey = "csharp_space_between_parentheses";
-
-    /// <summary>The comment start of init's line that turns IDE0055 off for mixed spacing (kept on a second init).</summary>
-    public const string SpacingComment = "# init: spacing:";
 
     /// <summary>
     /// The rules that decide what CSharpier decides too (owner's decision 2026-10-11: "Detect it, turn layout rules off";
@@ -1888,6 +1888,10 @@ internal static class Conventions
             : $"using directives: your .editorconfig sets {key} = {Value(key)}, and 'dotnet format' sorts usings whenever it is set (to any value): {total - sorted} of {Plural(total, "file")} aren't in that order ({(systemFirst ? "System first" : "System not first")}), and 'format' will reorder them. If your team doesn't keep usings in that order, remove {key} from .editorconfig (init can't: 'unset' sorts them too).";
     }
 
+    /// <summary>The count key of a <see cref="Spacing"/> aspect.</summary>
+    public static string SpacingCountKey((string Key, string? Flag, string What, string Default, string Other) aspect) =>
+        "spacing: " + aspect.Key + (aspect.Flag is null ? string.Empty : "=" + aspect.Flag);
+
     /// <summary>
     /// The using order (<see cref="SortUsingsKey"/>): sorted files -> the key (System first unless the files that tell the
     /// two apart clearly don't), unsorted or mixed -> no key, so 'dotnet format' leaves them alone; too few files -> StyleBro's
@@ -1985,10 +1989,6 @@ internal static class Conventions
             ["result"] = verdict,
         });
     }
-
-    /// <summary>The count key of a <see cref="Spacing"/> aspect.</summary>
-    public static string SpacingCountKey((string Key, string? Flag, string What, string Default, string Other) aspect) =>
-        "spacing: " + aspect.Key + (aspect.Flag is null ? string.Empty : "=" + aspect.Flag);
 
     /// <summary>
     /// IDE0055's spacing options (<see cref="Spacing"/>): a clear form other than the SDK's default is written (the flags of

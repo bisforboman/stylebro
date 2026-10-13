@@ -42,9 +42,6 @@ internal static class InitCommand
     /// <summary>The end marker of the whitespace block.</summary>
     public const string WhitespaceEnd = "# END stylebro-whitespace";
 
-    /// <summary>The line that turns IDE0055 off.</summary>
-    private const string IdeOff = "dotnet_diagnostic.IDE0055.severity = none";
-
     /// <summary>The comment above the detected conventions in the block.</summary>
     public const string ConventionsHeader = "# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)";
 
@@ -56,6 +53,9 @@ internal static class InitCommand
 
     /// <summary>What init says, with or without --write, when the .editorconfig already has the settings it would write.</summary>
     public const string PresentLine = ".editorconfig already has these settings: nothing to add.";
+
+    /// <summary>The line that turns IDE0055 off.</summary>
+    private const string IdeOff = "dotnet_diagnostic.IDE0055.severity = none";
 
     /// <summary>The IDE rule that enforces a convention's SDK key (its severity tells whether the key is enforced).</summary>
     private static readonly Dictionary<string, string> IdeRules = new(StringComparer.OrdinalIgnoreCase)

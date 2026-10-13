@@ -260,7 +260,6 @@ public sealed partial class MigrationTests
         var projects = new[] { Path.Combine(source, "Bogus", "Bogus.csproj"), Path.Combine(source, "Builder", "Builder.csproj"), Path.Combine(source, "Bogus", "Shared", "Shared.csproj"), Path.Combine(source, "Bogus", "Parent.csproj"), Path.Combine(source, "Lib", "Lib.csproj") };
 
         // Parent isn't built, but Bogus (built) is in its folder: leaving the folder out would leave Bogus out.
-
         Assert.Equal(["Source/Bogus/Shared/", "Source/Builder/"], FormatCommand.NotBuiltFolders(Path.Combine(source, "Bogus.sln"), projects, root));
         Assert.Empty(FormatCommand.NotBuiltFolders(Path.Combine(source, "Bogus.slnx"), projects, root));
     }

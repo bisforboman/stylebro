@@ -1113,6 +1113,42 @@ internal static class FormatCommand
         ReadProjects(workspacePath).Values.Select(p => (p.FullPath, p.Frameworks));
 
     /// <summary>
+    /// The folders (relative to <paramref name="root"/>, '/'-separated with a trailing '/', as '--exclude' takes them) of the
+    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder),
+    /// when no other of its <paramref name="projects"/> (full paths) is in that folder. Other workspaces: none.
+    /// </summary>
+    public static List<string> NotBuiltFolders(string solutionPath, IReadOnlyList<string> projects, string root)
+    {
+        if (!solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || !File.Exists(solutionPath))
+        {
+            return [];
+        }
+
+        // ponytail: .sln only; a .slnx's '<Build Project="false" />' isn't read.
+        var text = File.ReadAllText(solutionPath);
+        var folders = new List<string>();
+        foreach (Match project in Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline))
+        {
+            var guid = Regex.Escape(project.Groups["guid"].Value);
+            if (!Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) || Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
+            {
+                continue;
+            }
+
+            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, project.Groups["path"].Value.Replace('\\', Path.DirectorySeparatorChar)));
+            var folder = Path.GetDirectoryName(full)!;
+            var relative = Path.GetRelativePath(root, folder).Replace('\\', '/');
+            if (relative != "." && !relative.StartsWith("..", StringComparison.Ordinal)
+                && !projects.Any(p => !string.Equals(p, full, StringComparison.OrdinalIgnoreCase) && p.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+            {
+                folders.Add(relative + "/");
+            }
+        }
+
+        return folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    /// <summary>
     /// --verify-no-changes: 'dotnet format --verify-no-changes' fails on every finding it would hand to a fix, also those a
     /// StyleBro fix leaves on purpose, so a loop "until clean" never ends. When it fails, this formats a temporary copy of
     /// the repository (the fixes only run when files are written) and decides by the copy: no file changed means only
@@ -2007,42 +2043,6 @@ internal static class FormatCommand
         }
 
         return read;
-    }
-
-    /// <summary>
-    /// The folders (relative to <paramref name="root"/>, '/'-separated with a trailing '/', as '--exclude' takes them) of the
-    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder),
-    /// when no other of its <paramref name="projects"/> (full paths) is in that folder. Other workspaces: none.
-    /// </summary>
-    public static List<string> NotBuiltFolders(string solutionPath, IReadOnlyList<string> projects, string root)
-    {
-        if (!solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || !File.Exists(solutionPath))
-        {
-            return [];
-        }
-
-        // ponytail: .sln only; a .slnx's '<Build Project="false" />' isn't read.
-        var text = File.ReadAllText(solutionPath);
-        var folders = new List<string>();
-        foreach (Match project in Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline))
-        {
-            var guid = Regex.Escape(project.Groups["guid"].Value);
-            if (!Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) || Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
-            {
-                continue;
-            }
-
-            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, project.Groups["path"].Value.Replace('\\', Path.DirectorySeparatorChar)));
-            var folder = Path.GetDirectoryName(full)!;
-            var relative = Path.GetRelativePath(root, folder).Replace('\\', '/');
-            if (relative != "." && !relative.StartsWith("..", StringComparison.Ordinal)
-                && !projects.Any(p => !string.Equals(p, full, StringComparison.OrdinalIgnoreCase) && p.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
-            {
-                folders.Add(relative + "/");
-            }
-        }
-
-        return folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
