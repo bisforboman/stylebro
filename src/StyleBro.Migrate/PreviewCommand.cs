@@ -791,9 +791,29 @@ internal static class PreviewCommand
         var lineStart = packages.LastIndexOf('\n', anchor.Index) + 1;
         var indentation = packages.Substring(lineStart, anchor.Index - lineStart);
         indentation = indentation.Trim().Length == 0 ? indentation : "    ";
-        return next is not null
-            ? packages.Insert(anchor.Index, item + newLine + indentation)
-            : packages.Insert(anchor.Index + anchor.Length, newLine + indentation + item);
+        if (next is null)
+        {
+            return packages.Insert(anchor.Index + anchor.Length, newLine + indentation + item);
+        }
+
+        // Above the comment lines right above the next item: they describe it (Fluid's '<!-- Only used with netstandard2.0 -->'
+        // got StyleBro's line between it and its item).
+        var at = lineStart;
+        var inComment = false;
+        while (at >= 2)
+        {
+            var above = packages.LastIndexOf('\n', at - 2) + 1;
+            var line = packages[above..at].Trim();
+            if (!inComment && !line.EndsWith("-->", StringComparison.Ordinal))
+            {
+                break;
+            }
+
+            inComment = !line.Contains("<!--", StringComparison.Ordinal);
+            at = above;
+        }
+
+        return packages.Insert(at, indentation + item + newLine);
     }
 
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>

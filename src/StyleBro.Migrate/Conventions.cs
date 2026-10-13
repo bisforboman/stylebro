@@ -127,6 +127,9 @@ internal static class Conventions
     /// <summary>The comment start of init's line that turns IDE0055 off for mixed spacing (kept on a second init).</summary>
     public const string SpacingComment = "# init: spacing:";
 
+    /// <summary>What the using order's '# init:' comment is about ('# init: using directives: ...').</summary>
+    public const string UsingsWhat = "using directives";
+
     /// <summary>The whitespace keys judged against the .editorconfig that decides each file's value (<see cref="FileSettings"/>).</summary>
     public static readonly string[] FileKeys = { EndOfLineKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey };
 
@@ -1902,7 +1905,7 @@ internal static class Conventions
     /// </summary>
     private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary, IReadOnlyDictionary<string, string>? repository = null)
     {
-        const string What = "using directives";
+        const string What = UsingsWhat;
         if (!counts.TryGetValue(UsingsKey, out var c))
         {
             return;

@@ -89,7 +89,10 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   but documentation off), and folders without StyleCop get no settings at all; the report lists them, and so does a
   comment line at the top of the block (`# No StyleCop ran in: examples; ...`), which tells `stylebro-migrate format` to
   leave those folders alone: its whitespace pass would reformat them whatever the rule severities say. Remove that line
-  to have them formatted. Once StyleCop is gone, `stylebro-migrate init` can set those up. When every project or none
+  to have them formatted. StyleBro's rules still report there in the build (at the preset's or their default
+  severities), since no settings turn them off. Whether StyleCop runs in a project is MSBuild's answer: with several
+  projects, each one is evaluated (`dotnet msbuild -getItem`, in parallel, a few seconds in all); only a project MSBuild
+  can't evaluate falls back to reading the files' text, with a warning. When every project or none
   references StyleCop, the settings apply to the whole repository.
 - StyleCop's own defaults (from the StyleCop 1.2 DLL's rule list).
 - `*.ruleset` files, then `*.globalconfig` files, then the root `.editorconfig`'s sections for all C# files. Later

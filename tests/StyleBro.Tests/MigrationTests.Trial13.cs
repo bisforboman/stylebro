@@ -35,9 +35,9 @@ public sealed partial class MigrationTests
         Assert.Null(setup.Folders);
         Assert.Contains(setup.Warnings, w => w.Contains("MSBuild couldn't evaluate src/Lib.Tests/Lib.Tests.csproj, src/Lib/Lib.csproj", StringComparison.Ordinal));
 
-        // An unconditional reference needs no evaluation.
+        // An unconditional reference: MSBuild still decides, with several projects (Nerdbank.Streams, AnUnquotedGetPathOfFileAbove_IsFollowed).
         Write("src/Directory.Packages.props", "<Project><ItemGroup><GlobalPackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" /></ItemGroup></Project>");
-        Assert.Null(StyleCopSetup.Read(root, _ => throw new InvalidOperationException("evaluated")).Folders);
+        Assert.Null(StyleCopSetup.Read(root, _ => true).Folders);
     }
 
     [Fact]

@@ -338,7 +338,7 @@ internal static class Program
             ? new List<string>
             {
                 $"StyleCop runs only in {Names(folders)}: the settings apply there, with the rules StyleCop has on there.",
-                $"No StyleCop in {Names(setup.FoldersWithout)}: no rule changes there, and 'stylebro-migrate format' leaves them alone. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
+                $"No StyleCop in {Names(setup.FoldersWithout)}: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
             }
             : new List<string>();
         lines.AddRange(setup.Warnings.Select(w => "Warning: " + w));

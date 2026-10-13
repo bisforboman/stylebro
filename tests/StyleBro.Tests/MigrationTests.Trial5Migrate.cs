@@ -67,6 +67,9 @@ public sealed partial class MigrationTests
         Assert.Equal(new[] { "samples", "src/LiteBus.Analyzers", "tests" }, setup.FoldersWithout);
         Assert.Empty(setup.Scopes); // src/.editorconfig is the base now, tests/.editorconfig has no StyleCop to follow
 
+        // The text's answer (MSBuild's fallback) sees the Remove too.
+        Assert.Equal(new[] { "src/LiteBus.Core", "src/LiteBus.Events" }, StyleCopSetup.Read(root, _ => null).Folders);
+
         // The settings StyleCop had there: documentation only.
         Assert.False(setup.IsOn("SA1101"));
         Assert.False(setup.IsOn("SA1309"));
@@ -95,7 +98,7 @@ public sealed partial class MigrationTests
             new[]
             {
                 "StyleCop runs only in src/LiteBus.Core, src/LiteBus.Events: the settings apply there, with the rules StyleCop has on there.",
-                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no rule changes there, and 'stylebro-migrate format' leaves them alone. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
+                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
             },
             Program.ScopeReport(setup));
         var hints = Program.PackageHints(setup, root);

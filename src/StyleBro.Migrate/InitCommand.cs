@@ -228,7 +228,9 @@ internal static class InitCommand
         PinPreset(root, write: true);
         if (changed && !EnforcesCodeStyleInBuild(root))
         {
-            Console.WriteLine("To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in Directory.Build.props.");
+            // The file the projects import (Moonglade has only src/Directory.Build.props).
+            var props = string.Join(", ", Migration.PropsFiles(root).Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')));
+            Console.WriteLine($"To report them on build too: <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> in {props}.");
         }
 
         AgentsFile.Update(root, write: true, agentsMd).ForEach(Console.WriteLine);
@@ -409,6 +411,7 @@ internal static class InitCommand
         // Not the keys the CSharpier lines write again (CSharpier's using order).
         var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]).Where(l => csharpier.Lines?.Contains(l) != true).ToList();
         kept.AddRange(usings);
+        var usingsAt = kept.Count;
 
         // In the order a first run writes them (Decide: the list, the using order, the static casing, the spacing), so a
         // second init that keeps them all writes the same block (EntityGraphQL's swapped two lines).
@@ -424,6 +427,17 @@ internal static class InitCommand
             : keptSpacing.Count > 0 ? "kept from the last init"
             : null;
         var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]), spacing);
+
+        // A using verdict without a setting ("they aren't sorted") goes where the last init wrote it, before the kept static
+        // casing: appended after it, a second init wrote the block in another order (Fluid).
+        var usingsComment = $"# init: {Conventions.UsingsWhat}:";
+        if (usings.Count == 0 && previous?.Any(l => l.StartsWith(usingsComment, StringComparison.Ordinal)) == true
+            && detected.FindIndex(l => l.StartsWith(usingsComment, StringComparison.Ordinal)) is >= 0 and var at
+            && (at + 1 == detected.Count || detected[at + 1].StartsWith('#')))
+        {
+            kept.Insert(usingsAt, detected[at]);
+            detected.RemoveAt(at);
+        }
 
         // Whether IDE0055 formats whitespace at all (not with CSharpier, column alignment or mixed spacing).
         var formatsWhitespace = !(csharpier.Lines ?? []).Concat(alignment?.Lines ?? []).Concat(keptSpacing).Concat(detected).Contains(IdeOff);
@@ -864,6 +878,33 @@ internal static class InitCommand
     }
 
     /// <summary>
+    /// The previous lines that set one of the keys, each with the '# init:' comments right above it that are about the same
+    /// thing (the topic before the comment's first ': '). Not a comment-only verdict above it (Fluid: the using order's
+    /// "they aren't sorted" sat above BRO1306's comment, was kept with it and written again: a second copy on every re-run).
+    /// </summary>
+    internal static List<string> KeptLines(IReadOnlyList<string>? previous, IReadOnlyCollection<string> keys)
+    {
+        static string Topic(string comment) => comment.Split(": ", 3) is { Length: 3 } parts ? parts[1] : comment;
+        var result = new List<string>();
+        for (var i = 0; i < (previous?.Count ?? 0); i++)
+        {
+            if (KeyOf(previous![i]) is { } key && keys.Contains(key, StringComparer.OrdinalIgnoreCase))
+            {
+                var first = i;
+                while (first > 0 && previous[first - 1].StartsWith("# init:", StringComparison.Ordinal)
+                    && (first == i || Topic(previous[first - 1]) == Topic(previous[i - 1])))
+                {
+                    first--;
+                }
+
+                result.AddRange(previous.Skip(first).Take(i - first + 1));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Pins the preset version (docs/versioning.md) in every Directory.Build.props the projects import: a new setup takes
     /// every rule this version knows, and later package upgrades add none by themselves. A file that already sets
     /// StyleBroPreset (a migration's 'none', the team's own) is left alone.
@@ -1003,27 +1044,6 @@ internal static class InitCommand
     }
 
     private static bool IsCSharp(string file) => file.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>The previous lines that set one of the keys, each with the '# init:' comments right above it.</summary>
-    private static List<string> KeptLines(IReadOnlyList<string>? previous, IReadOnlyCollection<string> keys)
-    {
-        var result = new List<string>();
-        for (var i = 0; i < (previous?.Count ?? 0); i++)
-        {
-            if (KeyOf(previous![i]) is { } key && keys.Contains(key, StringComparer.OrdinalIgnoreCase))
-            {
-                var first = i;
-                while (first > 0 && previous[first - 1].StartsWith("# init:", StringComparison.Ordinal))
-                {
-                    first--;
-                }
-
-                result.AddRange(previous.Skip(first).Take(i - first + 1));
-            }
-        }
-
-        return result;
-    }
 
     /// <summary>The key of a 'key = value' line, or null for comments.</summary>
     private static string? KeyOf(string line)

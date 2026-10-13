@@ -288,9 +288,10 @@ public sealed partial class MigrationTests
         var before = new Dictionary<string, string> { ["a.cs"] = "1", ["b.cs"] = "2", ["gone.cs"] = "1" };
         var after = new Dictionary<string, string> { ["a.cs"] = "1", ["b.cs"] = "3", ["new.cs"] = "1" };
 
-        Assert.Equal(new[] { "b.cs", "gone.cs", "new.cs" }, FormatCommand.ChangedFiles(before, after));
+        // A new file is a build step's (recyclarr's generated code), never the format's.
+        Assert.Equal(new[] { "b.cs", "gone.cs" }, FormatCommand.ChangedFiles(before, after));
         Assert.Empty(FormatCommand.ChangedFiles(after, after));
-        Assert.Equal(new[] { "  b.cs", "  gone.cs", "  ... and 1 more" }, FormatCommand.ListFiles(".", FormatCommand.ChangedFiles(before, after), 2));
+        Assert.Equal(new[] { "  b.cs", "  ... and 1 more" }, FormatCommand.ListFiles(".", FormatCommand.ChangedFiles(before, after), 1));
     }
 
     [Fact]

@@ -152,6 +152,16 @@ internal static class FormatCommand
     /// <summary>The projects <see cref="ReadProjects"/> evaluated, per workspace.</summary>
     private static readonly Dictionary<string, Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)>> ProjectCache = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>What <see cref="EvaluateProject"/> asks MSBuild for: what format needs, and the items that tell whether StyleCop runs.</summary>
+    private static readonly string[] ProjectQuery =
+    [
+        "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath",
+        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo",
+    ];
+
+    /// <summary>The projects <see cref="EvaluateProject"/> evaluated (full path), once per process.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> Evaluations = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
     /// Runs the command; with <paramref name="output"/>, everything it and 'dotnet format' print goes there instead of the
     /// console. It runs again until a run changes no file (at most <see cref="MaxRuns"/>), printing the files each run
@@ -495,9 +505,13 @@ internal static class FormatCommand
     /// <summary>A line of 'dotnet format --verify-no-changes' output for its whitespace pass ('error WHITESPACE: ...').</summary>
     public static bool IsWhitespaceLine(string line) => line.Contains(" WHITESPACE: ", StringComparison.Ordinal) || line.Contains(" ENDOFLINE: ", StringComparison.Ordinal);
 
-    /// <summary>The files that differ between two snapshots (added, removed or with other content), sorted.</summary>
+    /// <summary>
+    /// The files that differ between two snapshots (removed or with other content), sorted. Not new files: 'dotnet format'
+    /// never adds one, a build step does (recyclarr's git-ignored Generated/*.g.cs, missing in verify's copy and written
+    /// during its run: "would change 3 files" for 1).
+    /// </summary>
     public static List<string> ChangedFiles(IReadOnlyDictionary<string, string> before, IReadOnlyDictionary<string, string> after) =>
-        after.Where(a => !before.TryGetValue(a.Key, out var b) || b != a.Value).Select(a => a.Key)
+        after.Where(a => before.TryGetValue(a.Key, out var b) && b != a.Value).Select(a => a.Key)
             .Concat(before.Keys.Where(k => !after.ContainsKey(k)))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -1148,6 +1162,10 @@ internal static class FormatCommand
         return folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
+    /// <summary>Whether the file at <paramref name="path"/> exists and has <paramref name="text"/>, line endings aside.</summary>
+    internal static bool SameButEndings(string text, string path) =>
+        File.Exists(path) && File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal) == text.Replace("\r\n", "\n", StringComparison.Ordinal);
+
     /// <summary>
     /// --verify-no-changes: 'dotnet format --verify-no-changes' fails on every finding it would hand to a fix, also those a
     /// StyleBro fix leaves on purpose, so a loop "until clean" never ends. When it fails, this formats a temporary copy of
@@ -1241,7 +1259,11 @@ internal static class FormatCommand
                 kept = ReadKept(keptFile, copy, source);
             }
 
-            var changedFiles = ChangedFiles(before, Snapshot(copy));
+            // Not a file whose only change is a line ending (a mixed file the whitespace pass wrote this OS's ending into):
+            // like the whitespace findings below, it's no reason to fail.
+            var changedFiles = ChangedFiles(before, Snapshot(copy))
+                .Where(f => !File.Exists(f) || !SameButEndings(File.ReadAllText(f), Path.Combine(source, Path.GetRelativePath(copy, f))))
+                .ToList();
             var changed = changedFiles.Count;
             JsonReport.AddRun(1, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))), null);
             var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
@@ -1280,7 +1302,6 @@ internal static class FormatCommand
         }
         finally
         {
-            PreviewCommand.Delete(copy);
             File.Delete(keptFile);
         }
     }
@@ -1340,6 +1361,14 @@ internal static class FormatCommand
             }
         }
     }
+
+    /// <summary>
+    /// A project's evaluation ('dotnet msbuild -getProperty/-getItem' JSON, <see cref="ProjectQuery"/>), once per process: the
+    /// migration's check for StyleCop (<see cref="StyleCopSetup.EvaluateStyleCop"/>) and format's project list share it.
+    /// Throws <see cref="ToolException"/> when MSBuild can't evaluate the project.
+    /// </summary>
+    internal static string EvaluateProject(string fullPath) =>
+        Evaluations.GetOrAdd(fullPath, p => new Lazy<string>(() => Capture(Path.GetDirectoryName(p)!, ["msbuild", p, .. ProjectQuery]))).Value;
 
     internal static string Capture(string directory, params string[] arguments)
     {
@@ -2013,7 +2042,7 @@ internal static class FormatCommand
         (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers) Evaluate(string p)
         {
             var fullPath = Path.GetFullPath(Path.Combine(directory, p.Replace('\\', Path.DirectorySeparatorChar)));
-            var (frameworks, references, linked, compile, assets, analyzers) = ParseProject(Capture(directory, "msbuild", fullPath, "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getItem:ProjectReference", "-getItem:Compile", "-nologo"), Path.GetDirectoryName(fullPath));
+            var (frameworks, references, linked, compile, assets, analyzers) = ParseProject(EvaluateProject(fullPath), Path.GetDirectoryName(fullPath));
 
             // A multi-targeted project's outer evaluation has only its explicit Compile items, not the SDK's default
             // ones (kubernetes-client's KubernetesClient: none, so its files didn't look shared with KubernetesClient.Aot's).
