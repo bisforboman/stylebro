@@ -187,3 +187,5 @@ if ($failures.Count -gt 0) {
 }
 
 Write-Host 'Package check: all good.'
+# The last check's build failed on purpose; its exit code isn't the script's.
+exit 0
