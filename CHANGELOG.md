@@ -5,6 +5,57 @@ StyleBro.Migrate to nuget.org and a GitHub release with its section below as the
 change: [docs/versioning.md](docs/versioning.md). What's merged but not released yet is in [changes/](changes/) (one
 file per pull request).
 
+## 0.7.0-alpha.1 – 2026-10-13
+
+129 rules, each fixed by `dotnet format`. Docs: https://bisforboman.github.io/stylebro/
+
+### Changed
+
+- **Field renames follow your naming rules for non-private fields too** (BRO1303/BRO1306): the first
+  `dotnet_naming_rule` that covers a public, internal or protected field, in Roslyn's order, decides its casing, but
+  only when something enforces it (IDE1006's severity, or the rule's own, is `suggestion`, `warning` or `error`).
+  A rule for camelCase internal fields no longer gets them renamed to PascalCase; a style StyleBro doesn't write (a
+  prefix) leaves the name alone; an unenforced rule leaves StyleCop's defaults. `init` lets your code decide the
+  private field style while IDE1006 is off.
+- **StyleBro and CSharpier settle:** after `stylebro-migrate format` and `dotnet csharpier format .`, another `format`
+  changes nothing.
+  - `init` writes `stylebro_layout_by = csharpier` and `stylebro_layout_print_width` (the `.csharpierrc`'s
+    `printWidth`, else `max_line_length`, else 100), and the opposite of a `dotnet_sort_system_directives_first =
+    false` or `dotnet_separate_import_directive_groups = true` it finds, since CSharpier sorts usings System first.
+  - BRO1149 lays out a merged condition the way CSharpier does; BRO1514-BRO1516 count a statement CSharpier will split
+    as multi-line, so its braces come in the same run.
+  - `stylebro-migrate --write` (from StyleCop) detects CSharpier like `init` (IDE0055 and the same layout rules off;
+    the report lists the StyleCop rules they replaced under "CSharpier decides it").
+- **Leftover StyleCop settings** (no project references StyleCop.Analyzers any more): `init` proceeds and follows the
+  code, noting the lines; `--write` says StyleCop isn't installed and points to `init`.
+
+### Fixed
+
+- **Rules:** BRO1151 no longer unwraps an array whose elements take their type from it (`M([new() { ... }])` became
+  code that doesn't compile); BRO1123 and BRO1115 leave doc comment crefs alone (`Func{Nullable{int}}`), where the
+  build warned and `dotnet format` had nothing to fix; BRO1311 renames a tuple element only its own project sees even
+  when code the run doesn't load has a variable of that name, and says so when it keeps one.
+- **In-solution source generators** (Mapperly): `format --verify-no-changes` and `--diff` previews run the generator in
+  their copy too, so verify no longer fails where `format` is clean and previews no longer show renames `format` keeps
+  back. Verify also stays clean where the restore installs git hooks (Husky.Net).
+- **Migration where StyleCop is referenced conditionally:** the MSBuild `Condition` is evaluated, so settings go only
+  where StyleCop ran (a `root = true` folder where it didn't gets none), and StyleBro.Analyzers is added next to the
+  StyleCop reference under the same condition.
+- **stylebro-migrate:** suppressions are no longer carried into generated code or onto IDE0055; lower-case `sa1234`
+  ids are read; the line-ending and private-field (SA1309 in a sub-folder) notes judge the code correctly; `net4.7`
+  and `net47` share one format run; clearer messages.
+
+### Upgrading from 0.6.0-alpha.1
+
+Bump the package, then update the tool: `dotnet tool update -g StyleBro.Migrate --prerelease`.
+
+- Using CSharpier? Run `stylebro-migrate init --write` (or `--write` if you migrated from StyleCop) again to get
+  `stylebro_layout_by` and `stylebro_layout_print_width`.
+- Have `dotnet_naming_rule` entries for non-private fields? Check the first `format` run: BRO1303/BRO1306 now follow
+  the enforced ones.
+
+Full list of changes: https://github.com/bisforboman/stylebro/compare/v0.6.0-alpha.1...v0.7.0-alpha.1
+
 ## 0.6.0-alpha.1 – 2026-10-12
 
 129 rules, each fixed by `dotnet format`. Docs: https://bisforboman.github.io/stylebro/
