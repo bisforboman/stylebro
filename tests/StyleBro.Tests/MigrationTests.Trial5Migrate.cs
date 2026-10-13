@@ -67,6 +67,9 @@ public sealed partial class MigrationTests
         Assert.Equal(new[] { "samples", "src/LiteBus.Analyzers", "tests" }, setup.FoldersWithout);
         Assert.Empty(setup.Scopes); // src/.editorconfig is the base now, tests/.editorconfig has no StyleCop to follow
 
+        // The text's answer (MSBuild's fallback) sees the Remove too.
+        Assert.Equal(new[] { "src/LiteBus.Core", "src/LiteBus.Events" }, StyleCopSetup.Read(root, _ => null).Folders);
+
         // The settings StyleCop had there: documentation only.
         Assert.False(setup.IsOn("SA1101"));
         Assert.False(setup.IsOn("SA1309"));
