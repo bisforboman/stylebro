@@ -87,39 +87,6 @@ internal static class CamelCaseRenamer
         return await ApplyAsync(solution, changes, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>The solution with the edits, keyed by <see cref="GetFileKey"/>.</summary>
-    private static async Task<Solution> ApplyAsync(Solution solution, Dictionary<string, List<TextChange>> changes, CancellationToken cancellationToken)
-    {
-        var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
-        var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
-        var paths = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var file in changes)
-        {
-            // Copies of one file whose text differs: every copy gets the first variant's text with its renames (see
-            // LinkedFileFixAllProvider); the other variants' edits don't fit that text.
-            var path = file.Key.Substring(0, file.Key.LastIndexOf('|'));
-            if (!paths.Add(path))
-            {
-                continue;
-            }
-
-            var documents = documentsByKey[file.Key].ToList();
-            if (documents.Count == 0)
-            {
-                continue;
-            }
-
-            var original = await documents[0].GetTextAsync(cancellationToken).ConfigureAwait(false);
-            var merged = original.WithChanges(LinkedFileFixAllProvider.Merge(file.Value));
-            foreach (var document in documentsByPath[path])
-            {
-                solution = solution.WithDocumentText(document.Id, merged);
-            }
-        }
-
-        return solution;
-    }
-
     /// <summary>
     /// Why the fix leaves the diagnostic on purpose, or null when it renames it: the same checks as
     /// <see cref="RenameAsync"/>. The analyzer doesn't report what it can see is unsafe; these are the reasons it can't
@@ -210,6 +177,39 @@ internal static class CamelCaseRenamer
         }
 
         return current is not null;
+    }
+
+    /// <summary>The solution with the edits, keyed by <see cref="GetFileKey"/>.</summary>
+    private static async Task<Solution> ApplyAsync(Solution solution, Dictionary<string, List<TextChange>> changes, CancellationToken cancellationToken)
+    {
+        var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
+        var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
+        var paths = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var file in changes)
+        {
+            // Copies of one file whose text differs: every copy gets the first variant's text with its renames (see
+            // LinkedFileFixAllProvider); the other variants' edits don't fit that text.
+            var path = file.Key.Substring(0, file.Key.LastIndexOf('|'));
+            if (!paths.Add(path))
+            {
+                continue;
+            }
+
+            var documents = documentsByKey[file.Key].ToList();
+            if (documents.Count == 0)
+            {
+                continue;
+            }
+
+            var original = await documents[0].GetTextAsync(cancellationToken).ConfigureAwait(false);
+            var merged = original.WithChanges(LinkedFileFixAllProvider.Merge(file.Value));
+            foreach (var document in documentsByPath[path])
+            {
+                solution = solution.WithDocumentText(document.Id, merged);
+            }
+        }
+
+        return solution;
     }
 
     private static (string OldName, string NewName)? GetNamespaceRename(Diagnostic diagnostic) =>
