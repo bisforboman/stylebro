@@ -9,6 +9,14 @@ file per pull request).
 
 129 rules, each fixed by `dotnet format`. Docs: https://bisforboman.github.io/stylebro/
 
+### New
+
+- **Preset versions.** `<StyleBroPreset>` takes a version (`1.0`, later `1.1`, ...), `latest` or `none`, like .NET's
+  `AnalysisLevel`: from 1.1 on, a release's new rules stay off until you raise it, so upgrading the package never adds
+  warnings by itself. Unset means the package's major version (`1.0`); before 1.0 every rule is a 1.0 rule, so nothing
+  changes yet. A version newer than the package warns (STYLEBRO002); any other value fails the build (STYLEBRO001).
+  See https://bisforboman.github.io/stylebro/versioning/#new-rules
+
 ### Changed
 
 - **Field renames follow your naming rules for non-private fields too** (BRO1303/BRO1306): the first
@@ -22,35 +30,51 @@ file per pull request).
   - `init` writes `stylebro_layout_by = csharpier` and `stylebro_layout_print_width` (the `.csharpierrc`'s
     `printWidth`, else `max_line_length`, else 100), and the opposite of a `dotnet_sort_system_directives_first =
     false` or `dotnet_separate_import_directive_groups = true` it finds, since CSharpier sorts usings System first.
-  - BRO1149 lays out a merged condition the way CSharpier does; BRO1514-BRO1516 count a statement CSharpier will split
-    as multi-line, so its braces come in the same run.
+  - BRO1149 lays out a merged condition the way CSharpier does (also `||` chains that don't fit); BRO1514-BRO1516
+    count a statement CSharpier will split as multi-line, so its braces come in the same run.
   - `stylebro-migrate --write` (from StyleCop) detects CSharpier like `init` (IDE0055 and the same layout rules off;
     the report lists the StyleCop rules they replaced under "CSharpier decides it").
+- **`init` follows more conventions:** spacing IDE0055 enforces (`if(x)`, `( a + b )`, `(int) x`, `F( x )`: a clear
+  form is written as `csharp_space_*` keys, mixed code turns IDE0055 off), and blank lines between members (BRO1505)
+  and above doc comments (BRO1513): compact or mixed code turns the rule off. `init` also takes `--project`.
 - **Leftover StyleCop settings** (no project references StyleCop.Analyzers any more): `init` proceeds and follows the
   code, noting the lines; `--write` says StyleCop isn't installed and points to `init`.
+- The preset file moved from `build/stylebro.recommended.globalconfig` to `build/presets/stylebro.1.0.globalconfig` in
+  the package. Only matters if your build references the file by path.
 
 ### Fixed
 
-- **Rules:** BRO1151 no longer unwraps an array whose elements take their type from it (`M([new() { ... }])` became
-  code that doesn't compile); BRO1123 and BRO1115 leave doc comment crefs alone (`Func{Nullable{int}}`), where the
-  build warned and `dotnet format` had nothing to fix; BRO1311 renames a tuple element only its own project sees even
-  when code the run doesn't load has a variable of that name, and says so when it keeps one.
+- **Wrong code:** BRO1151 no longer unwraps a one-element array the call would take as the array itself
+  (`Take(new Item[] { default! })` became `Take(default!)`, a null array; the compiler now decides), nor an array whose
+  elements take their type from it (`M([new() { ... }])` didn't compile).
+- **Rules:** BRO1123 and BRO1115 leave doc comment crefs alone (`Func{Nullable{int}}`), where the build warned and
+  `dotnet format` had nothing to fix; BRO1311 keeps a tuple element's rename only for a use as a member in code the run
+  doesn't load (`.value`, `value:`; internal members only where `InternalsVisibleTo` reaches), and says so.
+- **Line endings, charset, final newline:** `init` judges them against the `.editorconfig` that decides each file (the
+  nearest one setting the key) and writes its line there (a `# BEGIN stylebro-whitespace` block), so a nested
+  `insert_final_newline = false` no longer makes `format` strip line breaks the report said it would keep.
 - **In-solution source generators** (Mapperly): `format --verify-no-changes` and `--diff` previews run the generator in
   their copy too, so verify no longer fails where `format` is clean and previews no longer show renames `format` keeps
   back. Verify also stays clean where the restore installs git hooks (Husky.Net).
 - **Migration where StyleCop is referenced conditionally:** the MSBuild `Condition` is evaluated, so settings go only
   where StyleCop ran (a `root = true` folder where it didn't gets none), and StyleBro.Analyzers is added next to the
   StyleCop reference under the same condition.
-- **stylebro-migrate:** suppressions are no longer carried into generated code or onto IDE0055; lower-case `sa1234`
-  ids are read; the line-ending and private-field (SA1309 in a sub-folder) notes judge the code correctly; `net4.7`
-  and `net47` share one format run; clearer messages.
+- **stylebro-migrate:** `baseline` skips the whitespace pass where IDE0055 is off (CSharpier), like `format`; `format`
+  leaves projects no solution configuration builds alone and says so; a second `init` writes its lines in the same
+  order; suppressions are no longer carried into generated code or onto IDE0055; lower-case `sa1234` ids are read; the
+  line-ending and private-field (SA1309 in a sub-folder) notes judge the code correctly; `net4.7` and `net47` share
+  one format run; clearer messages.
 
 ### Upgrading from 0.6.0-alpha.1
 
 Bump the package, then update the tool: `dotnet tool update -g StyleBro.Migrate --prerelease`.
 
-- Using CSharpier? Run `stylebro-migrate init --write` (or `--write` if you migrated from StyleCop) again to get
-  `stylebro_layout_by` and `stylebro_layout_print_width`.
+- `StyleBroPreset` unset means `1.0`, which is every current rule, so nothing changes. `stylebro-migrate init --write`
+  pins `<StyleBroPreset>1.0</StyleBroPreset>` in `Directory.Build.props`; repositories migrated from StyleCop keep
+  `none`.
+- Run `stylebro-migrate init --write` (or `--write` if you migrated from StyleCop) again if you use CSharpier (for
+  `stylebro_layout_by` and `stylebro_layout_print_width`), have a nested `.editorconfig` that sets line endings, the
+  charset or the final line break, or space your code differently from the SDK's defaults.
 - Have `dotnet_naming_rule` entries for non-private fields? Check the first `format` run: BRO1303/BRO1306 now follow
   the enforced ones.
 

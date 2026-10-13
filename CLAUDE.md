@@ -25,9 +25,9 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 (see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Since
 2026-10-05: 118 rules, 842 tests. Migration tool
 `stylebro-migrate` added (2026-10-01, see below).
-0.7.0-alpha.1 (2026-10-13, 129 rules: StyleBro + CSharpier settle (`stylebro_layout_by`,
-`stylebro_layout_print_width`), naming rules only when enforced, verify/preview with in-solution generators,
-MSBuild-evaluated StyleCop conditions, leftover StyleCop config, trial-13 fixes; owner's call) is the latest on
+0.7.0-alpha.1 (2026-10-13, 129 rules: preset versions (`StyleBroPreset` X.Y/latest/none), StyleBro + CSharpier
+settle (`stylebro_layout_by`, `stylebro_layout_print_width`), naming rules only when enforced, verify/preview with
+in-solution generators, MSBuild-evaluated StyleCop conditions, leftover StyleCop config, trial 13-14 fixes; owner's call) is the latest on
 nuget.org once its release PR merges; bump `StyleBroSelfVersion` after it's live. Before it:
 0.6.0-alpha.1 (2026-10-12, 129 rules: `--json`/`format --files`/`--agents-md` for agents, Sonar-matching settings,
 init follows many more conventions, the preset no longer sorts usings, trials 6-12 fixes; owner's call "Release the
