@@ -28,10 +28,10 @@ DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since
 0.7.0-alpha.1 (2026-10-13, 129 rules: preset versions (`StyleBroPreset` X.Y/latest/none), StyleBro + CSharpier
 settle (`stylebro_layout_by`, `stylebro_layout_print_width`), naming rules only when enforced, verify/preview with
 in-solution generators, MSBuild-evaluated StyleCop conditions, leftover StyleCop config, trial 13-14 fixes; owner's call) is the latest on
-nuget.org once its release PR merges; bump `StyleBroSelfVersion` after it's live. Before it:
+nuget.org (released 2026-10-13; `StyleBroSelfVersion` is 0.7.0-alpha.1). Before it:
 0.6.0-alpha.1 (2026-10-12, 129 rules: `--json`/`format --files`/`--agents-md` for agents, Sonar-matching settings,
 init follows many more conventions, the preset no longer sorts usings, trials 6-12 fixes; owner's call "Release the
-alpha"; `StyleBroSelfVersion` is 0.6.0-alpha.1). Before it:
+alpha"). Before it:
 0.5.0-alpha.1 (2026-10-10: kept findings with reasons and a clean check, init explains its adoptions and needs
 3 places, the trial-4 fixes; owner's call). Before it: 0.4.0-alpha.1 (129 rules: BRO1008 replaces IDE0065, BRO1149-BRO1151 mirror Sonar; Sonar setups in migrate,
 init adapts to the repo's conventions, public API not renamed by default; owner's call, 2026-10-10) is the latest on
