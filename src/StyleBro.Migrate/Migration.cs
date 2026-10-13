@@ -251,8 +251,14 @@ internal static class Migration
             result.Notes.Add($"Kept the repository's own settings for: {string.Join(", ", kept.Select(KeyOf))}.");
         }
 
+        // The whitespace keys per file, as init judges them (#171): files a nearer .editorconfig decides a key for don't count
+        // for the root's block, which never reaches them; that file gets the decision in a whitespace block of its own
+        // (Bogus's Source/.editorconfig says insert_final_newline = false over the root's true).
+        var fileSettings = fieldStyle is null ? Conventions.FileSettings(root) : [];
+        var nearer = fileSettings.Where(g => g.Source is { Length: > 0 } && g.Key != Conventions.TrailingWhitespaceKey).ToList();
+
         // The repository's end_of_line against git's checkout conversion (kubernetes-client): endings stay out of it.
-        var gitEndings = Conventions.EndingContradiction(root, OwnSettings(root));
+        var gitEndings = Conventions.EndingContradiction(root, OwnSettings(root), nearer.Where(g => g.Key == Conventions.EndOfLineKey).Sum(g => g.PickedPerMachine));
         if (gitEndings is ({ } endingLines, { } endingReport))
         {
             if (fieldStyle is null)
@@ -272,6 +278,15 @@ internal static class Migration
         // An end_of_line the committed files clearly contradict, with nothing converting them (CleanArchitecture: crlf, 349 of
         // 350 LF): the files decide, as in init.
         var fileCounts = fieldStyle is null ? Conventions.EndingCounts(root) : null;
+        foreach (var group in nearer)
+        {
+            foreach (var (key, values) in group.Counts.Where(p => p.Key == group.Key || (group.Key == Conventions.EndOfLineKey && p.Key.StartsWith(Conventions.EndOfLineKey, StringComparison.Ordinal))))
+            {
+                fileCounts![key][0] -= values[0];
+                fileCounts[key][1] -= values[1];
+            }
+        }
+
         if (fileCounts is not null && gitEndings is null && Conventions.ContradictedEnding(fileCounts, ownSettings) is var (ending, endingNote))
         {
             result.Notes.Add(endingNote);
@@ -291,7 +306,7 @@ internal static class Migration
 
         // Line endings, judged like init does: without end_of_line 'format' writes the OS's ending into the lines it rewrites
         // (Soulseek.NET, LF: 8 files with mixed endings after a Windows run).
-        if (fieldStyle is null && !own.Contains("end_of_line") && Conventions.LineEndings(root) is var (endOfLine, endings) && endings is not null)
+        if (fieldStyle is null && !own.Contains("end_of_line") && Conventions.LineEndings(fileCounts!) is var (endOfLine, endings) && endings is not null)
         {
             result.Notes.Add(endings);
             if (endOfLine is not null)
@@ -323,6 +338,26 @@ internal static class Migration
         if (setup.EditorConfigCopiedBy is { } copier)
         {
             result.Notes.Add($"{copier} copies an .editorconfig, maybe over the root one on every build (SixLabors' shared infrastructure does): check after a build that the stylebro-migrate block is still there, else put it into the copied file.");
+        }
+
+        // The nearer .editorconfig files' whitespace blocks, judged like init's (and a block nothing needs any more removed).
+        if (fieldStyle is null)
+        {
+            var ide = lines.LastOrDefault(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal));
+            var severity = ide is not null ? StyleCopSetup.ParseSeverity(ide.Substring(ide.IndexOf('=') + 1))
+                : ownSettings.TryGetValue("dotnet_diagnostic.IDE0055.severity", out var ownIde) ? StyleCopSetup.ParseSeverity(ownIde) : null;
+            var report = new List<string>();
+            var nested = InitCommand.NestedWhitespace(root, fileSettings, report, ide is not null && severity > Severity.Suggestion, severity is not Severity.None);
+            result.Notes.AddRange(report.Select(n => n.Substring($"  {"note",-8} ".Length)));
+            foreach (var (source, nestedLines) in nested)
+            {
+                result.Whitespace[source] = nestedLines;
+            }
+
+            foreach (var source in InitCommand.StaleWhitespace(root, nested))
+            {
+                result.Whitespace[source] = null;
+            }
         }
 
         // IDE0055 on in a multi-targeted repository: plain 'dotnet format' crashes there, 'stylebro-migrate format' doesn't.
@@ -461,6 +496,11 @@ internal static class Migration
             foreach (var vendored in VendoredFolders(Path.Combine(root, folder)))
             {
                 plan[file].Add(($"{vendored}/**", [VendoredComment, "generated_code = true"]));
+            }
+
+            foreach (var (source, nested) in inFolder.Whitespace)
+            {
+                main.Whitespace[$"{folder}/{source}"] = nested;
             }
 
             main.Notes.Add($"{folder}/.editorconfig says root = true, so the root's settings don't reach {folder}/: it gets them in a block of its own, with its own settings kept.");
@@ -1319,5 +1359,11 @@ internal static class Migration
 
         /// <summary>Gets keys left out because the repository sets them itself.</summary>
         public HashSet<string> OwnKeys { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Gets the whitespace blocks (<see cref="InitCommand.WhitespaceBegin"/>) for the .editorconfig files below the root that
+        /// decide a whitespace key themselves, by folder (relative to the repository); null removes a block nothing needs.
+        /// </summary>
+        public SortedDictionary<string, List<string>?> Whitespace { get; } = new(StringComparer.Ordinal);
     }
 }
