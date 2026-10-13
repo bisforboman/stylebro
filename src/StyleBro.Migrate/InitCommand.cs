@@ -33,6 +33,18 @@ internal static class InitCommand
     /// <summary>The end marker of the --modernize block.</summary>
     public const string ModernizeEnd = "# END stylebro-modernize";
 
+    /// <summary>
+    /// The start marker of the block init writes into an .editorconfig below the root that decides a whitespace key itself
+    /// (<see cref="NestedWhitespace"/>; its own marker, so 'format' and the migration don't take it for the main block).
+    /// </summary>
+    public const string WhitespaceBegin = "# BEGIN stylebro-whitespace";
+
+    /// <summary>The end marker of the whitespace block.</summary>
+    public const string WhitespaceEnd = "# END stylebro-whitespace";
+
+    /// <summary>The line that turns IDE0055 off.</summary>
+    private const string IdeOff = "dotnet_diagnostic.IDE0055.severity = none";
+
     /// <summary>The comment above the detected conventions in the block.</summary>
     public const string ConventionsHeader = "# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)";
 
@@ -57,12 +69,20 @@ internal static class InitCommand
     public static int Run(string[] args)
     {
         var (profile, rest) = Program.TakeOption(args, Program.SonarProfileOption);
-        args = rest;
+
+        // --project names the solution or project format will run on (relative to the path), as for the preview and format.
+        (var workspace, args) = Program.TakeOption(rest, "--project");
         var write = args.Contains("--write");
         var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
         if (!Directory.Exists(root))
         {
             Console.Error.WriteLine($"Not a directory: {root}");
+            return 1;
+        }
+
+        if (workspace is { Length: > 0 } && !File.Exists(Path.Combine(root, workspace)))
+        {
+            Console.Error.WriteLine($"Not found: {Path.Combine(root, workspace)} (--project is relative to {root})");
             return 1;
         }
 
@@ -95,7 +115,7 @@ internal static class InitCommand
             return 1;
         }
 
-        var multiTargeted = MultiTargetedProjects(root).ToList();
+        var multiTargeted = MultiTargetedProjects(root, workspace).ToList();
         var own = Migration.OwnKeys(root);
 
         // A Sonar setup turns on what fixes its rules, like in the migration; StyleBro's own rules are on in the preset.
@@ -145,6 +165,7 @@ internal static class InitCommand
         }
 
         var agentsMd = args.Contains(AgentsFile.Option);
+        targets = targets.SelectMany(t => t.Nested.Prepend(t)).ToList();
         if (!write)
         {
             foreach (var target in targets)
@@ -177,8 +198,8 @@ internal static class InitCommand
             }
             else
             {
-                text = Migration.Apply(text, target.Block);
-                Console.WriteLine($"Wrote the built-in rule severities to {target.Name}.");
+                text = Migration.Apply(text, target.Block, target.Begin, target.End);
+                Console.WriteLine(target.Begin == WhitespaceBegin ? $"Wrote the whitespace settings it decides to {target.Name}." : $"Wrote the built-in rule severities to {target.Name}.");
             }
 
             if (!target.HasModernize)
@@ -201,7 +222,7 @@ internal static class InitCommand
 
         AgentsFile.Update(root, write: true, agentsMd).ForEach(Console.WriteLine);
         Console.WriteLine(Program.NextHint(root));
-        Program.PrintWorkspaceHint(root);
+        Program.PrintWorkspaceHint(root, workspace);
         return 0;
     }
 
@@ -278,17 +299,31 @@ internal static class InitCommand
     /// it: counted again, StyleBro's own output would decide (Stateless: 28 of 29 switch sections without a blank line gave
     /// 'omit'; after a format run a second init found them mixed and turned BRO1526 off).
     /// </summary>
-    public static (List<string> Lines, List<string> Report) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
+    public static (List<string> Lines, List<string> Report, Dictionary<string, List<string>> Nested) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
     {
         var settings = own;
         var unenforced = Unenforced(own);
         var counts = Conventions.Count(root, settings);
 
+        // The whitespace keys per file, from the .editorconfig that decides each (the nearest that sets it): this block only
+        // reaches the files nothing nearer decides (Bogus's Source/.editorconfig says insert_final_newline = false).
+        var fileSettings = Conventions.FileSettings(root);
+        Conventions.FileSettingGroup? RootGroup(string key) => fileSettings.FirstOrDefault(g => g.Key == key && g.Source == string.Empty && g.Value is not null && settings.ContainsKey(key));
+        foreach (var group in fileSettings.Where(g => g.Key == Conventions.EndOfLineKey && g.Source is { Length: > 0 }))
+        {
+            foreach (var (key, values) in group.Counts.Where(p => p.Key.StartsWith(Conventions.EndOfLineKey, StringComparison.Ordinal)))
+            {
+                counts[key][0] -= values[0];
+                counts[key][1] -= values[1];
+            }
+        }
+
         // The repository's end_of_line against git's checkout conversion: endings stay out of it, as in the migration.
-        var gitEndings = Conventions.EndingContradiction(root, settings);
+        var rootEnding = RootGroup(Conventions.EndOfLineKey);
+        var gitEndings = rootEnding is null ? null : Conventions.EndingContradiction(rootEnding.Value!, rootEnding.PickedPerMachine);
 
         // An end_of_line the committed files clearly contradict was never enforced either: the files decide.
-        var contradictedEnding = gitEndings is null ? Conventions.ContradictedEnding(counts, settings) : null;
+        var contradictedEnding = gitEndings is null && rootEnding is not null ? Conventions.ContradictedEnding(rootEnding.Counts, settings) : null;
         if (contradictedEnding is not null)
         {
             unenforced.Add(Conventions.EndOfLineKey);
@@ -346,7 +381,6 @@ internal static class InitCommand
 
         // The casing of private constants and static readonly fields (three forms, decided apart from the list too).
         var staticCasing = KeptLines(previous, [Conventions.StaticCasingKey, $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FieldPascalCase}.severity"]);
-        kept.AddRange(staticCasing);
         if (own.TryGetValue(Conventions.StaticCasingKey, out var staticValue))
         {
             decided[Conventions.StaticCasingKey] = $"set in .editorconfig ({staticValue})";
@@ -364,8 +398,24 @@ internal static class InitCommand
         // Not the keys the CSharpier lines write again (CSharpier's using order).
         var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]).Where(l => csharpier.Lines?.Contains(l) != true).ToList();
         kept.AddRange(usings);
+
+        // In the order a first run writes them (Decide: the list, the using order, the static casing, the spacing), so a
+        // second init that keeps them all writes the same block (EntityGraphQL's swapped two lines).
+        kept.AddRange(staticCasing);
+
+        // IDE0055's spacing: another formatter's, the team's, or the last init's call.
+        var keptSpacing = KeptSpacing(previous);
+        kept.AddRange(keptSpacing);
         var keptKeys = new HashSet<string>(kept.Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
-        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));
+        var spacing = csharpier.Lines is not null ? "CSharpier formats it"
+            : alignment is not null ? "IDE0055 is off for column alignment"
+            : settings.TryGetValue("dotnet_diagnostic.IDE0055.severity", out var ideSeverity) ? $"your .editorconfig sets IDE0055 ({ideSeverity})"
+            : keptSpacing.Count > 0 ? "kept from the last init"
+            : null;
+        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]), spacing);
+
+        // Whether IDE0055 formats whitespace at all (not with CSharpier, column alignment or mixed spacing).
+        var formatsWhitespace = !(csharpier.Lines ?? []).Concat(alignment?.Lines ?? []).Concat(keptSpacing).Concat(detected).Contains(IdeOff);
         report.InsertRange(0, unenforced.Select(k => k == Conventions.EndOfLineKey
             ? $"  {"note",-8} {contradictedEnding!.Value.Note}"
             : $"  {"note",-8} {k} = {settings[k]} in .editorconfig isn't enforced (its severity is silent or none), so your code decides"));
@@ -391,7 +441,7 @@ internal static class InitCommand
         if (gitEndings is ({ } endingLines, { } endingReport))
         {
             report.Add($"  {"note",-8} {endingReport}");
-            endings.AddRange(endingLines.Take(csharpier.Lines is null && alignment is null && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
+            endings.AddRange(endingLines.Take(formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
         }
 
         if (Conventions.EmptyHeaderLines(counts, own) is { } headerLines)
@@ -401,9 +451,20 @@ internal static class InitCommand
         }
 
         // A charset or final line break the files don't follow wasn't enforced either: the files decide, like the line endings.
+        // What the last init wrote stays: counted again after 'format', the files are StyleBro's output.
         foreach (var key in new[] { Conventions.CharsetKey, Conventions.FinalNewlineKey })
         {
-            if (Conventions.ContradictedFileSetting(counts, settings, key) is var (fileLine, fileNote))
+            if (RootGroup(key) is not { } group)
+            {
+                continue;
+            }
+
+            if (KeptLines(previous, [key]) is { Count: > 0 } keptLines)
+            {
+                report.Add($"  {"note",-8} {key}: kept from the last init ({keptLines[^1].Substring(keptLines[^1].IndexOf('=') + 1).Trim()})");
+                endings.AddRange(keptLines);
+            }
+            else if (Conventions.ContradictedFileSetting(group.Counts, settings, key) is var (fileLine, fileNote))
             {
                 report.Add($"  {"note",-8} {fileNote}");
                 endings.Add($"# init: {fileNote}");
@@ -411,13 +472,109 @@ internal static class InitCommand
             }
         }
 
-        if (csharpier.Lines is null && alignment is null && Conventions.TrailingWhitespaceNote(counts, settings) is { } whitespaceNote)
+        if (formatsWhitespace && RootGroup(Conventions.TrailingWhitespaceKey) is { } trailing && Conventions.TrailingWhitespaceNote(trailing.Counts, settings) is { } whitespaceNote)
         {
             report.Add($"  {"note",-8} {whitespaceNote}");
         }
 
-        return ([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings], report);
+        var nested = NestedWhitespace(root, fileSettings, report, formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity"), formatsWhitespace);
+        return ([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings], report, nested);
     }
+
+    /// <summary>
+    /// The lines for the .editorconfig files below the root that decide a whitespace key for C# files themselves (not 'root =
+    /// true': those get a block of their own), per file (folder relative to the root): the same decisions as for the root's
+    /// keys, written where they take effect, since a nearer file wins over any line in the root's block (Bogus: the root
+    /// block's 'insert_final_newline = unset' never reached Source/, and 'format' stripped 48 files' last line break). What
+    /// the last init wrote there stays. <paramref name="ideSeverity"/>: IDE0055 can be lowered for line endings git converts.
+    /// </summary>
+    public static Dictionary<string, List<string>> NestedWhitespace(string root, IReadOnlyList<Conventions.FileSettingGroup> fileSettings, List<string> report, bool ideSeverity, bool formatsWhitespace)
+    {
+        var nested = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+
+        // ponytail: one value per file and key (its largest group); path sections in that file giving other values are overridden too.
+        foreach (var group in fileSettings.Where(g => g.Source is { Length: > 0 } && g.Value is not null)
+            .GroupBy(g => (g.Source, g.Key))
+            .Select(g => g.MaxBy(x => x.Counts[Conventions.CharsetKey].Sum())!)
+            .OrderBy(g => g.Source, StringComparer.Ordinal)
+            .ThenBy(g => Array.IndexOf(Conventions.FileKeys, g.Key)))
+        {
+            var file = group.File!;
+            var own = new Dictionary<string, string> { [group.Key] = group.Value! };
+            var path = Path.Combine(root, group.Source!, ".editorconfig");
+            var keys = group.Key == Conventions.EndOfLineKey ? new[] { group.Key, "dotnet_diagnostic.IDE0055.severity" } : new[] { group.Key };
+            List<string>? lines = null;
+            string? note = null;
+            if (group.Key == Conventions.TrailingWhitespaceKey)
+            {
+                note = formatsWhitespace ? Conventions.TrailingWhitespaceNote(group.Counts, own, file) : null;
+            }
+            else if (KeptLines(PreviousWhitespace(File.Exists(path) ? File.ReadAllText(path) : null), keys) is { Count: > 0 } kept)
+            {
+                (lines, note) = (kept, $"{file}: {group.Key} kept from the last init");
+            }
+            else if (group.Key == Conventions.EndOfLineKey && Conventions.EndingContradiction(group.Value!, group.PickedPerMachine, file) is var (endingLines, endingReport))
+            {
+                (lines, note) = (endingLines.Take(ideSeverity ? 3 : 2).ToList(), endingReport);
+            }
+            else if (group.Key == Conventions.EndOfLineKey && Conventions.ContradictedEnding(group.Counts, own, file) is var (ending, endingNote))
+            {
+                (lines, note) = ([$"# init: {endingNote}", $"{Conventions.EndOfLineKey} = {ending}"], endingNote);
+            }
+            else if (group.Key != Conventions.EndOfLineKey && Conventions.ContradictedFileSetting(group.Counts, own, group.Key, file) is var (line, fileNote))
+            {
+                (lines, note) = ([$"# init: {fileNote}", line], fileNote);
+            }
+
+            if (note is not null)
+            {
+                report.Add($"  {"note",-8} {note}");
+            }
+
+            if (lines is not null)
+            {
+                (nested.TryGetValue(group.Source!, out var list) ? list : nested[group.Source!] = []).AddRange(lines);
+            }
+        }
+
+        return nested;
+    }
+
+    /// <summary>
+    /// The spacing lines the last init wrote (<see cref="Conventions.SpacingComment"/> comments and the lines below each up to
+    /// the next comment): kept, like the other conventions, since 'format' changes the spacing they were counted on.
+    /// </summary>
+    public static List<string> KeptSpacing(IReadOnlyList<string>? previous)
+    {
+        var result = new List<string>();
+        for (var i = 0; i < (previous?.Count ?? 0); i++)
+        {
+            if (previous![i].StartsWith(Conventions.SpacingComment, StringComparison.Ordinal))
+            {
+                result.Add(previous[i]);
+                for (; i + 1 < previous.Count && !previous[i + 1].TrimStart().StartsWith('#'); i++)
+                {
+                    result.Add(previous[i + 1]);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>The lines of the whitespace block (<see cref="WhitespaceBegin"/>) in a nested .editorconfig's text, or none.</summary>
+    public static List<string> PreviousWhitespace(string? editorConfig)
+    {
+        var text = editorConfig?.Replace("\r\n", "\n") ?? string.Empty;
+        var begin = text.IndexOf(WhitespaceBegin, StringComparison.Ordinal);
+        var end = begin < 0 ? -1 : text.IndexOf(WhitespaceEnd, begin, StringComparison.Ordinal);
+        return end < 0 ? [] : text.Substring(begin, end - begin).Split('\n').Skip(1).Where(l => l.Trim().Length > 0 && !l.TrimStart().StartsWith('[')).ToList();
+    }
+
+    /// <summary>The block for a nested .editorconfig's whitespace lines (<see cref="NestedWhitespace"/>).</summary>
+    public static string WhitespaceBlock(IEnumerable<string> lines) =>
+        WhitespaceBegin + " (stylebro-migrate init: whitespace settings this file decides for C# files; edits inside are replaced)\n[*.cs]\n"
+        + string.Join("\n", lines) + "\n" + WhitespaceEnd + "\n";
 
     /// <summary>
     /// The convention keys the root .editorconfig sets without enforcing them (owner's decision 2026-10-11): severity 'silent'
@@ -546,9 +703,9 @@ internal static class InitCommand
     /// through '$(DefaultTargetFrameworks)': 9 found in the text, ~130 evaluated), else the project and props files whose text
     /// sets several (<see cref="MultiTargetedFiles"/>).
     /// </summary>
-    public static IEnumerable<string> MultiTargetedProjects(string root)
+    public static IEnumerable<string> MultiTargetedProjects(string root, string? named = null)
     {
-        if (BaselineCommand.FindWorkspace(root) is { } workspace)
+        if ((named is { Length: > 0 } ? named : BaselineCommand.FindWorkspace(root)) is { } workspace)
         {
             try
             {
@@ -694,10 +851,12 @@ internal static class InitCommand
 
         // The conventions the code follows: what the code already does stays (Ocelot: '=>' at the start of a line, '_field').
         var detected = new List<string>();
+        var nested = new List<Target>();
         if (!migrated)
         {
-            var (lines, report) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
+            var (lines, report, nestedLines) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
             detected = lines;
+            nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).ToList();
             if (report.Count > 0)
             {
                 Console.WriteLine($"{DetectedHeader}{(prefix.Length == 0 ? string.Empty : " under " + prefix)} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
@@ -748,6 +907,31 @@ internal static class InitCommand
             ModernizeNotes = modernize.Notes,
             HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
             HasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain),
+            Nested = nested,
+        };
+    }
+
+    /// <summary>The whitespace block for an .editorconfig below <paramref name="root"/> (<paramref name="source"/>: its folder) that decides a key itself.</summary>
+    private static Target NestedTarget(string root, string prefix, string source, List<string> lines)
+    {
+        var path = Path.Combine(root, source, ".editorconfig");
+        var existing = File.ReadAllText(path);
+        var block = WhitespaceBlock(lines);
+        var name = prefix + source + "/.editorconfig";
+        JsonReport.AddSettings(name, block);
+        var plain = existing.Replace("\r\n", "\n");
+        return new Target
+        {
+            Name = name,
+            Prefix = name + ": ",
+            Path = path,
+            Existing = existing,
+            Block = block,
+            Begin = WhitespaceBegin,
+            End = WhitespaceEnd,
+            ModernizeNotes = [],
+            HasBlock = Migration.Apply(plain, block, WhitespaceBegin, WhitespaceEnd) == plain,
+            HasModernize = true,
         };
     }
 
@@ -813,5 +997,14 @@ internal static class InitCommand
         public bool HasBlock { get; init; }
 
         public bool HasModernize { get; init; }
+
+        /// <summary>Gets the block's start marker (<see cref="WhitespaceBegin"/> in a nested .editorconfig).</summary>
+        public string Begin { get; init; } = Migration.BeginMarker;
+
+        /// <summary>Gets the block's end marker.</summary>
+        public string End { get; init; } = Migration.EndMarker;
+
+        /// <summary>Gets the whitespace blocks for the .editorconfig files below this one that decide a key themselves.</summary>
+        public List<Target> Nested { get; init; } = [];
     }
 }

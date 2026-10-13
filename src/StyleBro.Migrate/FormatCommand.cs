@@ -113,6 +113,9 @@ internal static class FormatCommand
     /// <summary>The start of the line that names projects StyleBro's analyzers don't load in (printed for the first run only).</summary>
     public const string PartlyLoadedHeader = "Without StyleBro:";
 
+    /// <summary>The start of the line that names the solution's projects no configuration builds (printed for the first run only).</summary>
+    public const string NotBuiltHeader = "Not built:";
+
     /// <summary>What to say when the restore fails without a NuGet error to quote.</summary>
     internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why. Once the packages are restored, '--no-restore' skips it.";
 
@@ -1392,7 +1395,7 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run.
             var code = runOnce(runArgs, run == 1 ? output : line =>
             {
-                if (!new[] { FixingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
+                if (!new[] { FixingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)))
                 {
                     log(line);
                 }
@@ -1681,6 +1684,16 @@ internal static class FormatCommand
         {
             error($"No C# project in {Path.GetFileName(workspacePath)}, so there's nothing to format. Name a solution or project with C# projects.");
             return 1;
+        }
+
+        // Projects the solution lists but no configuration builds: the restore skips them, so StyleBro wouldn't run there, and
+        // only the whitespace pass and the SDK's rules would (Bogus's Nuke builder: its usings were sorted, and the run warned
+        // "Without StyleBro"). They're left alone, like the build leaves them.
+        if (NotBuiltFolders(solutionPath, projects.Values.Select(p => p.FullPath).ToList(), root) is { Count: > 0 } notBuilt)
+        {
+            log($"{NotBuiltHeader} {string.Join(", ", notBuilt)}: no configuration of {Path.GetFileName(solutionPath)} builds {(notBuilt.Count == 1 ? "the project there" : "their projects")}, so 'dotnet restore' skips {(notBuilt.Count == 1 ? "it" : "them")} and 'format' leaves {(notBuilt.Count == 1 ? "it" : "them")} alone.");
+            Exclude(notBuilt);
+            excluded.AddRange(notBuilt);
         }
 
         // One restore before the runs, which then all get --no-restore. Old-style projects are left out: 'dotnet restore'
@@ -1994,6 +2007,42 @@ internal static class FormatCommand
         }
 
         return read;
+    }
+
+    /// <summary>
+    /// The folders (relative to <paramref name="root"/>, '/'-separated with a trailing '/', as '--exclude' takes them) of the
+    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder),
+    /// when no other of its <paramref name="projects"/> (full paths) is in that folder. Other workspaces: none.
+    /// </summary>
+    public static List<string> NotBuiltFolders(string solutionPath, IReadOnlyList<string> projects, string root)
+    {
+        if (!solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || !File.Exists(solutionPath))
+        {
+            return [];
+        }
+
+        // ponytail: .sln only; a .slnx's '<Build Project="false" />' isn't read.
+        var text = File.ReadAllText(solutionPath);
+        var folders = new List<string>();
+        foreach (Match project in Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline))
+        {
+            var guid = Regex.Escape(project.Groups["guid"].Value);
+            if (!Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) || Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
+            {
+                continue;
+            }
+
+            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, project.Groups["path"].Value.Replace('\\', Path.DirectorySeparatorChar)));
+            var folder = Path.GetDirectoryName(full)!;
+            var relative = Path.GetRelativePath(root, folder).Replace('\\', '/');
+            if (relative != "." && !relative.StartsWith("..", StringComparison.Ordinal)
+                && !projects.Any(p => !string.Equals(p, full, StringComparison.OrdinalIgnoreCase) && p.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+            {
+                folders.Add(relative + "/");
+            }
+        }
+
+        return folders.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
