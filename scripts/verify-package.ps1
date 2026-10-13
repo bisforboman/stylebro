@@ -169,7 +169,7 @@ try {
     Write-Host '== 9. Preset versions'
     $latest = [regex]::Match((Get-Content (Join-Path $root 'src/StyleBro.Package/build/StyleBro.Analyzers.targets') -Raw), '<_StyleBroPresetLatest>([\d.]+)<').Groups[1].Value
     $default = Build @('-p:StyleBroPreset=')
-    Check (($default -match '^BRO1106 ') -and -not ($default -match '^BRO1112 ')) 'unset: the preset applies'
+    Check (-not ($default -match '^BRO1112 ') -and ((Build @('-p:StyleBroPreset=none')) -contains 'BRO1112 Regions.cs')) 'unset: the preset applies (BRO1112 off; on with none)'
     Check (((Build @("-p:StyleBroPreset=$latest")) -join ',') -eq ($default -join ',')) "StyleBroPreset=$latest gives the same findings"
     Check (((Build @('-p:StyleBroPreset=latest')) -join ',') -eq ($default -join ',')) 'StyleBroPreset=latest gives the same findings'
     $newer = dotnet build $project --nologo --no-incremental -p:TreatWarningsAsErrors=false -p:StyleBroPreset=99.0 2>&1 | Out-String
