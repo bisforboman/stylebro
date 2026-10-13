@@ -78,17 +78,31 @@ internal static class ParamsArrays
         var expanded = SyntaxFactory.ParseExpression(text.WithChanges(changes).ToString(new TextSpan(call.SpanStart, call.Span.Length - removed.Sum(s => s.Length))));
         return Speculation.Replace(model, call, expanded) is { } bound
             && SymbolEqualityComparer.Default.Equals(bound.Model.GetSymbolInfo(bound.Node, cancellationToken).Symbol, method)
-            && BindsExpanded(bound.Model, bound.Node, list.Arguments.Count - 1, ((IArrayTypeSymbol)parameter.Type).ElementType, cancellationToken)
+            && BindsExpanded(bound.Model, bound.Node, list.Arguments.Count - 1, GetElementType(parameter.Type), cancellationToken)
                 ? changes
                 : null;
     }
+
+    // The element type of a params array or a params collection (C# 13: 'params ReadOnlySpan<T>', 'params List<T>'; a
+    // collection expression goes to one, Jellyfin). Null for a collection type with no single type argument: not unwrapped.
+    private static ITypeSymbol? GetElementType(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol array => array.ElementType,
+        INamedTypeSymbol { TypeArguments.Length: 1 } named => named.TypeArguments[0],
+        _ => null,
+    };
 
     // Whether every argument from 'first' on converts to the params element type, i.e. the call binds in its expanded
     // form. A single element that converts to the array type itself ('default!', '(T[])null', an array variable, an
     // object[] for params object[]) binds in the normal form: it would be passed AS the array (trial 14: a one-element
     // array became null). Asked of the compiler, so no list of shapes can miss one.
-    private static bool BindsExpanded(SemanticModel model, SyntaxNode call, int first, ITypeSymbol elementType, CancellationToken cancellationToken)
+    private static bool BindsExpanded(SemanticModel model, SyntaxNode call, int first, ITypeSymbol? elementType, CancellationToken cancellationToken)
     {
+        if (elementType is null)
+        {
+            return false;
+        }
+
         var arguments = call switch
         {
             InvocationExpressionSyntax invocation => invocation.ArgumentList.Arguments,
