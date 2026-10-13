@@ -125,7 +125,7 @@ public sealed partial class MigrationTests
     {
         // markdig: the version landed in the ItemGroup for net462/netstandard2.0, and the other frameworks failed (NU1010). A
         // conditional item isn't a neighbour either.
-        const string Packages = "<Project>\n  <ItemGroup>\n    <PackageVersion Include=\"NUnit\" Version=\"4\" />\n    <PackageVersion Include=\"Swift\" Version=\"1\" Condition=\"'$(X)' == 'y'\" />\n    <PackageVersion Include=\"Zed\" Version=\"1\" />\n  </ItemGroup>\n  <ItemGroup Condition=\" '$(TargetFramework)' == 'net462'\">\n    <PackageVersion Include=\"System.Memory\" Version=\"4.6.3\" />\n  </ItemGroup>\n</Project>\n";
+        const string Packages = "<Project>\n  <ItemGroup>\n    <PackageVersion Include=\"NUnit\" Version=\"4\" />\n    <PackageVersion Include=\"Swift\" Version=\"1\" Condition=\"'$(X)' == 'y'\" />\n  </ItemGroup>\n  <ItemGroup Condition=\" '$(TargetFramework)' == 'net462'\">\n    <PackageVersion Include=\"System.Memory\" Version=\"4.6.3\" />\n  </ItemGroup>\n  <ItemGroup>\n    <PackageVersion Include=\"Zed\" Version=\"1\" />\n  </ItemGroup>\n</Project>\n";
 
         Assert.Equal(
             Packages.Replace("    <PackageVersion Include=\"Zed\"", "    <PackageVersion Include=\"StyleBro.Analyzers\" Version=\"1\" />\n    <PackageVersion Include=\"Zed\"", StringComparison.Ordinal),
