@@ -121,6 +121,15 @@ internal static class Conventions
     /// </summary>
     public const string RelativeUsingsKey = "dotnet_diagnostic." + DiagnosticIds.QualifiedUsing + ".severity";
 
+    /// <summary>The SDK key for spaces inside parentheses: a list of flags (<see cref="Spacing"/>), 'false' for none.</summary>
+    public const string SpaceBetweenParenthesesKey = "csharp_space_between_parentheses";
+
+    /// <summary>The comment start of init's line that turns IDE0055 off for mixed spacing (kept on a second init).</summary>
+    public const string SpacingComment = "# init: spacing:";
+
+    /// <summary>The whitespace keys judged against the .editorconfig that decides each file's value (<see cref="FileSettings"/>).</summary>
+    public static readonly string[] FileKeys = { EndOfLineKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey };
+
     /// <summary>
     /// Every convention init detects: the setting, what is counted, StyleBro's default (or the preset's), and the two values
     /// with what each looks like, and the line that stops StyleBro enforcing either form when the code has no clear majority
@@ -168,6 +177,25 @@ internal static class Conventions
         new(AutoAccessorsKey, "auto-property accessors ('{ get; set; }')", "warning", ("warning", "on one line"), ("none", "on several lines"), Off(DiagnosticIds.AutoAccessorsOnOneLine)) { Unit = "property declaration" },
         new(RegionsKey, "'#region's inside members", "warning", ("warning", "without"), ("none", "'#region's"), Off(DiagnosticIds.NoRegionsInCodeElements)) { Unit = "region", KeepAny = true, Keeps = $"{DiagnosticIds.NoRegionsInCodeElements} would remove them" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
+        new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
+        new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
+    };
+
+    /// <summary>
+    /// The spacing options IDE0055 enforces that real code varies on (Bogus writes 'foreach( var x in y )' in 341 places and
+    /// 'foreach (var x in y)' in 187; IDE0055 rewrote the 341): the key, the flag of csharp_space_between_parentheses (null:
+    /// a true/false key), what is counted, and the two forms (the SDK's default first). Counts: [default form, other form,
+    /// neither] (one-sided parentheses like 'F( x)': IDE0055 changes them either way).
+    /// </summary>
+    public static readonly (string Key, string? Flag, string What, string Default, string Other)[] Spacing =
+    {
+        ("csharp_space_after_keywords_in_control_flow_statements", null, "control-flow keywords", "'if (x)'", "'if(x)'"),
+        (SpaceBetweenParenthesesKey, "control_flow_statements", "control-flow parentheses", "'if (x)'", "'if ( x )'"),
+        (SpaceBetweenParenthesesKey, "expressions", "parenthesized expressions", "'(a + b)'", "'( a + b )'"),
+        (SpaceBetweenParenthesesKey, "type_casts", "cast parentheses", "'(int)x'", "'( int )x'"),
+        ("csharp_space_after_cast", null, "casts", "'(int)x'", "'(int) x'"),
+        ("csharp_space_between_method_call_parameter_list_parentheses", null, "call arguments", "'F(x)'", "'F( x )'"),
+        ("csharp_space_between_method_declaration_parameter_list_parentheses", null, "declared parameters", "'void F(int x)'", "'void F( int x )'"),
     };
 
     /// <summary>
@@ -294,6 +322,15 @@ internal static class Conventions
     /// (owner's decision 2026-10-10: NCronJob left 43 of 68 undocumented). 'none' is the form "without one".
     /// </summary>
     private const string InheritDocKey = "dotnet_diagnostic." + DiagnosticIds.InheritDocumentation + ".severity";
+
+    /// <summary>
+    /// BRO1505's severity: neighbouring members of a type that need a blank line between them (one spans several lines, or is
+    /// documented), with one or without (owner's policy, trial 14: Kavita's compact code got blank lines in 392 files).
+    /// </summary>
+    private const string SeparationKey = "dotnet_diagnostic." + DiagnosticIds.ElementsSeparatedByBlankLine + ".severity";
+
+    /// <summary>BRO1513's severity: doc comments right below code, or after a blank line (Kavita: 312 files changed).</summary>
+    private const string DocBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineBeforeDocumentation + ".severity";
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
@@ -606,6 +643,11 @@ internal static class Conventions
         counts[TrailingWhitespaceKey] = new int[2];
         counts[HeaderKey] = new int[2];
         counts[ConvertedKey] = new int[2];
+        foreach (var aspect in Spacing)
+        {
+            counts[SpacingCountKey(aspect)] = new int[3];
+        }
+
         return counts;
     }
 
@@ -720,20 +762,7 @@ internal static class Conventions
             return null;
         }
 
-        var count = PickedPerMachine(output);
-        if (count == 0)
-        {
-            return null;
-        }
-
-        var why = $"your .editorconfig says end_of_line = {value}, but git checks out {Plural(count, "C# file")} with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so {(value == "lf" ? "Windows" : "Linux and macOS")} checkouts don't match it";
-        return (
-            [
-                $"# Line endings: {why}. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: '*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig; then run stylebro-migrate again.",
-                $"{EndOfLineKey} = unset",
-                "dotnet_diagnostic.IDE0055.severity = suggestion",
-            ],
-            $"Line endings: {why}. Set end_of_line = unset for C# files and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: '*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from .editorconfig.");
+        return EndingContradiction(value.ToLowerInvariant(), PickedPerMachine(output));
     }
 
     /// <summary>
@@ -744,7 +773,7 @@ internal static class Conventions
     /// CRLF, 44 with no other change. 'unset' would be worse there: probed, 'dotnet format' then writes the OS's ending into
     /// every file it formats (a Windows run turned an untouched LF file CRLF), while without the key it keeps a file's ending.
     /// </summary>
-    public static (string Ending, string Note)? ContradictedEnding(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own)
+    public static (string Ending, string Note)? ContradictedEnding(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string? file = null)
     {
         if (!own.TryGetValue(EndOfLineKey, out var setting) || ConvertedOutnumber(counts) || !counts.TryGetValue(EndOfLineKey, out var endings)
             || endings.Sum() < MinimumAgreeing)
@@ -762,7 +791,7 @@ internal static class Conventions
             : $"'format' converts the other {others} ({value.ToUpperInvariant()}) to {files?.ToUpperInvariant()} where it formats them";
         return value is not ("lf" or "crlf") || files is null || files == value
             ? null
-            : (files, $"Line endings: your .editorconfig says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files and {keeps}. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
+            : (files, $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {value.ToUpperInvariant()} instead: remove that line and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
     }
 
     /// <summary>
@@ -774,7 +803,7 @@ internal static class Conventions
     /// removed 1,092. Files clearly of the other form get their value; mixed files get 'unset', which 'dotnet format' leaves
     /// each file alone with (probed for both keys).
     /// </summary>
-    public static (string Line, string Note)? ContradictedFileSetting(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string key)
+    public static (string Line, string Note)? ContradictedFileSetting(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string key, string? file = null)
     {
         var (title, values, found, each) = key == CharsetKey
             ? ("Charset", new[] { "utf-8", "utf-8-bom" }, "start with a BOM", "each file's BOM (or its absence)")
@@ -794,7 +823,108 @@ internal static class Conventions
 
         var line = $"{key} = {(winner < 0 ? "unset" : values[winner])}";
         var keeps = winner < 0 ? $"'format' leaves {each} as it is" : "'format' leaves the files alone";
-        return (line, $"{title}: your .editorconfig says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files and {keeps}. To have {key} = {value} everywhere: remove that line and run 'stylebro-migrate format' (it rewrites the files).");
+        return (line, $"{title}: {file ?? "your .editorconfig"} says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {key} = {value} everywhere: remove that line and run 'stylebro-migrate format' (it rewrites the files).");
+    }
+
+    /// <summary>
+    /// C# files grouped by the .editorconfig that decides one whitespace key (<see cref="FileKeys"/>) for them, the way the
+    /// compiler and 'dotnet format' read it: the nearest file that sets the key wins, within it the last matching section, and
+    /// the lookup stops at 'root = true' (Roslyn's own <see cref="AnalyzerConfigSet"/> per file). Bogus's Source/.editorconfig
+    /// ('[*]', not root = true) says insert_final_newline = false over the root's '[*.cs]' true: init judged the files against
+    /// the root's key, wrote 'unset' into the root block, which never reached them, and 'format' stripped the last line break
+    /// from 48 files. The stylebro blocks don't count (init's own lines aren't the repository's), and the files are the ones
+    /// <see cref="Count(string, IReadOnlyDictionary{string, string}?)"/> counts.
+    /// </summary>
+    public static List<FileSettingGroup> FileSettings(string root)
+    {
+        var top = Path.GetFullPath(root).TrimEnd('\\', '/');
+        var configs = new Dictionary<string, AnalyzerConfigSet>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(f => Path.GetFileName(f) == ".editorconfig"))
+        {
+            var path = Path.GetFullPath(file);
+            var text = System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(path), @"# BEGIN stylebro-.*?# END stylebro-[^\n]*", string.Empty, System.Text.RegularExpressions.RegexOptions.Singleline);
+            configs[Path.GetDirectoryName(path)!] = AnalyzerConfigSet.Create(new[] { AnalyzerConfig.Parse(text, path) });
+        }
+
+        var (code, output) = PreviewCommand.Git(root, "ls-files", "--eol", "-z");
+        var converted = (code == 0 ? Converted(output) : []).ToDictionary(f => Path.GetFullPath(Path.Combine(root, f.Path)), f => f.ByAttribute, StringComparer.OrdinalIgnoreCase);
+        var picked = new HashSet<string>((code == 0 ? PickedPerMachinePaths(output) : []).Select(p => Path.GetFullPath(Path.Combine(root, p))), StringComparer.OrdinalIgnoreCase);
+        var groups = new Dictionary<(string Key, string? Source, string? Value), FileSettingGroup>();
+        foreach (var file in Migration.OwnCSharpFiles(root).Select(Path.GetFullPath))
+        {
+            var text = File.ReadAllText(file);
+            if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(top, file), text))
+            {
+                continue;
+            }
+
+            var own = FileCounts();
+            if (LineEnding(text) is var ending and >= 0)
+            {
+                _ = converted.TryGetValue(file, out var viaAttribute) ? own[ConvertedKey][viaAttribute ? 1 : 0]++ : own[EndOfLineKey][ending]++;
+            }
+
+            own[CharsetKey][HasBom(file) ? 1 : 0]++;
+            CountFile(text, own);
+
+            // The chain from the file's folder up to the root: the nearest file that sets the key decides ('unset' included:
+            // no value). Folders whose .editorconfig says 'root = true' aren't in it: init judges them on their own.
+            var chain = new List<(string Folder, IReadOnlyDictionary<string, string> Options)>();
+            for (var folder = Path.GetDirectoryName(file); folder is not null && folder.Length >= top.Length; folder = Path.GetDirectoryName(folder))
+            {
+                if (configs.TryGetValue(folder, out var config))
+                {
+                    chain.Add((folder, config.GetOptionsForSourcePath(file).AnalyzerOptions));
+                }
+            }
+
+            foreach (var key in FileKeys)
+            {
+                var (source, value) = chain.FirstOrDefault(c => c.Options.ContainsKey(key)) is { Options: not null } decider
+                    ? (Path.GetRelativePath(top, decider.Folder).Replace('\\', '/') is var relative && relative == "." ? string.Empty : relative, decider.Options[key].Trim().Trim('"').ToLowerInvariant())
+                    : ((string?)null, (string?)null);
+                var group = groups.TryGetValue((key, source, value), out var known) ? known : groups[(key, source, value)] = new FileSettingGroup(key, source, value == "unset" ? null : value);
+                foreach (var (k, values) in own)
+                {
+                    for (var i = 0; i < values.Length; i++)
+                    {
+                        group.Counts[k][i] += values[i];
+                    }
+                }
+
+                group.PickedPerMachine += picked.Contains(file) ? 1 : 0;
+            }
+        }
+
+        return groups.Values.ToList();
+    }
+
+    /// <summary>Empty per-file counts for the whitespace keys (<see cref="FileSettings"/>).</summary>
+    public static Dictionary<string, int[]> FileCounts() =>
+        new[] { EndOfLineKey, ConvertedKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey }.ToDictionary(k => k, _ => new int[2], StringComparer.Ordinal);
+
+    /// <summary>
+    /// The lines (comment first) and the report note when the end_of_line one .editorconfig sets (<paramref name="value"/>, for
+    /// C# files) meets <paramref name="picked"/> C# files that git gives each machine's ending (<see cref="EndingContradiction(string, IReadOnlyDictionary{string, string})"/>),
+    /// or null. <paramref name="file"/>: the .editorconfig that says it, when it isn't the root's.
+    /// </summary>
+    public static (List<string> Lines, string Report)? EndingContradiction(string value, int picked, string? file = null)
+    {
+        if (value is not ("lf" or "crlf") || picked == 0)
+        {
+            return null;
+        }
+
+        var where = file ?? "your .editorconfig";
+        var why = $"{where} says end_of_line = {value}, but git checks out {Plural(picked, "C# file")} with each machine's ending (a .gitattributes 'text' attribute without 'eol', or core.autocrlf), so {(value == "lf" ? "Windows" : "Linux and macOS")} checkouts don't match it";
+        var settle = $"'*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from {file ?? ".editorconfig"}";
+        return (
+            [
+                $"# {(file is null ? string.Empty : "init: ")}Line endings: {why}. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: {settle}; then run stylebro-migrate again.",
+                $"{EndOfLineKey} = unset",
+                "dotnet_diagnostic.IDE0055.severity = suggestion",
+            ],
+            $"Line endings: {why}. Set end_of_line = unset for C# files{(file is null ? string.Empty : $" in {file}")} and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: {settle}.");
     }
 
     /// <summary>
@@ -802,10 +932,10 @@ internal static class Conventions
     /// format' doesn't read the key and trims every line its whitespace pass formats (probed), so nothing can keep it but
     /// IDE0055 off. Null otherwise.
     /// </summary>
-    public static string? TrailingWhitespaceNote(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own) =>
+    public static string? TrailingWhitespaceNote(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> own, string? file = null) =>
         own.TryGetValue(TrailingWhitespaceKey, out var setting) && setting.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase)
         && counts.TryGetValue(TrailingWhitespaceKey, out var files) && files[1] > 0
-            ? $"Trailing whitespace: your .editorconfig says {TrailingWhitespaceKey} = false, but 'dotnet format' doesn't read that key: its whitespace pass (IDE0055) trims trailing whitespace anyway, in {Plural(files[1], "C# file")} here. To keep it: dotnet_diagnostic.IDE0055.severity = none (no whitespace formatting at all)."
+            ? $"Trailing whitespace: {file ?? "your .editorconfig"} says {TrailingWhitespaceKey} = false, but 'dotnet format' doesn't read that key: its whitespace pass (IDE0055) trims trailing whitespace anyway, in {Plural(files[1], "C# file")} here. To keep it: dotnet_diagnostic.IDE0055.severity = none (no whitespace formatting at all)."
             : null;
 
     /// <summary>Counts a file's last line break and trailing whitespace (unit: files; empty files don't count).</summary>
@@ -899,10 +1029,14 @@ internal static class Conventions
     /// How many files in 'git ls-files --eol -z' output get the machine's ending on checkout: stored as LF, and converted
     /// here (<see cref="Converted"/>) or by a 'text' attribute without 'eol' (LF on Linux, CRLF on Windows).
     /// </summary>
-    public static int PickedPerMachine(string output) =>
-        output.Split('\0').Count(entry => entry.IndexOf('\t') is var tab and > 0 && entry.Substring(0, tab) is var info
+    public static int PickedPerMachine(string output) => PickedPerMachinePaths(output).Count(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>The paths of <see cref="PickedPerMachine"/>'s files (any extension).</summary>
+    public static IEnumerable<string> PickedPerMachinePaths(string output) =>
+        output.Split('\0').Where(entry => entry.IndexOf('\t') is var tab and > 0 && entry.Substring(0, tab) is var info
             && info.StartsWith("i/lf ", StringComparison.Ordinal) && !info.Contains("eol=", StringComparison.Ordinal)
-            && (System.Text.RegularExpressions.Regex.IsMatch(info, @"\battr/text\b") || info.Contains("w/crlf", StringComparison.Ordinal)));
+            && (System.Text.RegularExpressions.Regex.IsMatch(info, @"\battr/text\b") || info.Contains("w/crlf", StringComparison.Ordinal)))
+            .Select(entry => entry.Substring(entry.IndexOf('\t') + 1));
 
     /// <summary>The paths in 'git ls-files --eol -z' output ('i/lf    w/crlf  attr/text=auto \tpath') that git converts, and whether a 'text' attribute does.</summary>
     public static IEnumerable<(string Path, bool ByAttribute)> Converted(string output)
@@ -960,6 +1094,7 @@ internal static class Conventions
             TypeAliases();
             Overloads();
             MemberOrder();
+            Separation();
 
             // Unit = regions inside members (BRO1113's): only the uses count.
             counts[RegionsKey][1] += StyleBro.Analyzers.Readability.Regions.GetRegions(root).Count(r => r.InCodeElement);
@@ -989,6 +1124,10 @@ internal static class Conventions
                 && token.GetPreviousToken().IsKind(SyntaxKind.CloseBraceToken))
             {
                 Add("csharp_new_line_before_else", Line(token.GetPreviousToken().SpanStart) == Line(token.SpanStart));
+            }
+            else if (token.IsKind(SyntaxKind.OpenParenToken))
+            {
+                Spaces(token);
             }
         }
 
@@ -1340,6 +1479,86 @@ internal static class Conventions
             }
         }
 
+        // IDE0055's spacing options (Spacing): a control-flow keyword and the space before its '(', and the spaces inside
+        // parentheses on one line (not empty ones), and after a cast's ')'.
+        void Spaces(SyntaxToken open)
+        {
+            var parent = open.Parent;
+            var close = parent?.ChildTokens().FirstOrDefault(t => t.IsKind(SyntaxKind.CloseParenToken)) ?? default;
+            if (parent is null || close.IsMissing || !close.IsKind(SyntaxKind.CloseParenToken) || close == open.GetNextToken() || Line(open.SpanStart) != Line(close.SpanStart))
+            {
+                return;
+            }
+
+            var flag = parent switch
+            {
+                IfStatementSyntax or WhileStatementSyntax or DoStatementSyntax or ForStatementSyntax or CommonForEachStatementSyntax or SwitchStatementSyntax
+                    or UsingStatementSyntax or LockStatementSyntax or FixedStatementSyntax or CatchDeclarationSyntax => "control_flow_statements",
+                ParenthesizedExpressionSyntax => "expressions",
+                CastExpressionSyntax => "type_casts",
+                ArgumentListSyntax { Parent: InvocationExpressionSyntax or BaseObjectCreationExpressionSyntax } => "csharp_space_between_method_call_parameter_list_parentheses",
+                ParameterListSyntax { Parent: BaseMethodDeclarationSyntax or LocalFunctionStatementSyntax } => "csharp_space_between_method_declaration_parameter_list_parentheses",
+                _ => null,
+            };
+            if (flag is null)
+            {
+                return;
+            }
+
+            static bool Spaced(SyntaxTriviaList trivia) => trivia.Any(t => t.IsKind(SyntaxKind.WhitespaceTrivia));
+            var (after, before) = (Spaced(open.TrailingTrivia), Spaced(close.GetPreviousToken().TrailingTrivia) || Spaced(close.LeadingTrivia));
+            counts[SpacingCountKey(Spacing.First(a => a.Flag == flag || a.Key == flag))][after == before ? (after ? 1 : 0) : 2]++;
+            if (flag == "control_flow_statements" && open.GetPreviousToken() is var keyword && keyword.IsKeyword() && Line(keyword.SpanStart) == Line(open.SpanStart))
+            {
+                counts[SpacingCountKey(Spacing[0])][Spaced(keyword.TrailingTrivia) ? 0 : 1]++;
+            }
+
+            if (parent is CastExpressionSyntax cast && Line(cast.Expression.SpanStart) == Line(close.SpanStart))
+            {
+                counts[SpacingCountKey(Spacing[4])][Spaced(close.TrailingTrivia) ? 1 : 0]++;
+            }
+        }
+
+        // Unit = pairs of a type's neighbouring members that BRO1505 wants a blank line between (with one or without), and
+        // documented members whose doc comment BRO1513 wants a blank line above (after a blank line or right below code).
+        void Separation()
+        {
+            var adjacent = StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(new Options(settings));
+            foreach (var type in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+            {
+                for (var i = 1; i < type.Members.Count; i++)
+                {
+                    if (StyleBro.Analyzers.Layout.ElementSeparation.NeedsBlankLine(type.Members[i - 1], type.Members[i], text, allowAdjacentSingleLine: adjacent))
+                    {
+                        Add(SeparationKey, !StyleBro.Analyzers.Layout.ElementSeparation.HasBlankLineBetween(type.Members[i - 1], type.Members[i], text));
+                    }
+                }
+            }
+
+            foreach (var member in root.DescendantNodes(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax or TypeDeclarationSyntax).OfType<MemberDeclarationSyntax>())
+            {
+                var documentation = StyleBro.Analyzers.Layout.DocumentationBlankLines.GetDocumentation(member);
+                if (documentation.RawKind == 0)
+                {
+                    continue;
+                }
+
+                // The nearest non-blank line above: code BRO1513 wants a blank line below (not '{', a comment or '#if').
+                var line = text.Lines.GetLineFromPosition(documentation.FullSpan.Start).LineNumber;
+                var above = line - 1;
+                while (above >= 0 && text.Lines[above].ToString().Trim().Length == 0)
+                {
+                    above--;
+                }
+
+                if (above >= 0 && text.ToString(TextSpan.FromBounds(text.Lines[line].Start, documentation.FullSpan.Start)).Trim().Length == 0
+                    && StyleBro.Analyzers.Layout.DocumentationBlankLines.WantsBlankLineAbove(text.Lines[above + 1], text))
+                {
+                    Add(DocBlankLineKey, above == line - 1);
+                }
+            }
+        }
+
         // Unit = files with a list of 2 or more usings (global usings aside): in the order 'dotnet format' sorts them into, or not.
         void UsingOrder()
         {
@@ -1474,7 +1693,7 @@ internal static class Conventions
     /// <paramref name="unenforced"/>: keys the repository sets at severity silent (<see cref="InitCommand.Unenforced"/>), with
     /// their values: the code decides, and a default the key contradicts is written too (the block comes later and wins).
     /// </summary>
-    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null, IReadOnlyDictionary<string, string>? repository = null, IReadOnlyDictionary<string, string>? unenforced = null)
+    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null, IReadOnlyDictionary<string, string>? repository = null, IReadOnlyDictionary<string, string>? unenforced = null, string? spacing = null)
     {
         static string Value(string setting) => setting.Split(':')[0].Trim().ToLowerInvariant();
         var lines = new List<string>();
@@ -1593,6 +1812,7 @@ internal static class Conventions
 
         DecideUsings(counts, isSet, lines, report, summary, repository);
         DecideStaticCasing(counts, decided, isSet, lines, report, summary);
+        DecideSpacing(counts, spacing, repository, lines, report, summary);
 
         // The 'git' verdict above already says it (only when some files have a fixed ending: else there was no line).
         var saidAbove = ConvertedOutnumber(counts) && counts.TryGetValue(EndOfLineKey, out var fixedEndings) && fixedEndings.Sum() > 0;
@@ -1667,6 +1887,10 @@ internal static class Conventions
             ? null
             : $"using directives: your .editorconfig sets {key} = {Value(key)}, and 'dotnet format' sorts usings whenever it is set (to any value): {total - sorted} of {Plural(total, "file")} aren't in that order ({(systemFirst ? "System first" : "System not first")}), and 'format' will reorder them. If your team doesn't keep usings in that order, remove {key} from .editorconfig (init can't: 'unset' sorts them too).";
     }
+
+    /// <summary>The count key of a <see cref="Spacing"/> aspect.</summary>
+    public static string SpacingCountKey((string Key, string? Flag, string What, string Default, string Other) aspect) =>
+        "spacing: " + aspect.Key + (aspect.Flag is null ? string.Empty : "=" + aspect.Flag);
 
     /// <summary>
     /// The using order (<see cref="SortUsingsKey"/>): sorted files -> the key (System first unless the files that tell the
@@ -1764,6 +1988,105 @@ internal static class Conventions
             ["verdict"] = tag == "too few" ? "tooFew" : tag,
             ["result"] = verdict,
         });
+    }
+
+    /// <summary>
+    /// IDE0055's spacing options (<see cref="Spacing"/>): a clear form other than the SDK's default is written (the flags of
+    /// csharp_space_between_parentheses together); any aspect with mixed code turns IDE0055 off with one '# init: spacing:'
+    /// comment, since IDE0055 can't be narrowed to one option (owner's policy, trial 14: Bogus's 'foreach( var x in y )' in
+    /// 341 places, 65 %, became 'foreach (var x in y)'). <paramref name="reason"/>: why IDE0055's spacing isn't init's to decide
+    /// (CSharpier, column alignment, the repository's own IDE0055 severity, the last init's lines), then only reported.
+    /// A key the repository sets itself (<paramref name="repository"/>) stays.
+    /// </summary>
+    private static void DecideSpacing(IReadOnlyDictionary<string, int[]> counts, string? reason, IReadOnlyDictionary<string, string>? repository, List<string> lines, List<string> report, SummaryLists summary)
+    {
+        if (reason is not null)
+        {
+            // One line: what IDE0055 would do with the spaces isn't init's call here.
+            if (Spacing.Any(a => counts.TryGetValue(SpacingCountKey(a), out var c) && c.Sum() > 0))
+            {
+                report.Add($"  {"set",-8} spacing (csharp_space_*): {reason}");
+            }
+
+            return;
+        }
+
+        var mixed = new List<string>();
+        var flags = new List<string>();
+        var flagsSeen = false;
+        var keys = new List<string>();
+        foreach (var aspect in Spacing)
+        {
+            var c = counts.TryGetValue(SpacingCountKey(aspect), out var found) ? found : new int[3];
+            var total = c.Sum();
+            if (total == 0)
+            {
+                continue;
+            }
+
+            var winner = Winner(c[0], c[1] + c[2]) == 0 ? 0 : Winner(c[0] + c[2], c[1]) == 1 ? 1 : -1;
+            var text = string.Join(", ", new[] { (c[0], aspect.Default), (c[1], aspect.Other), (c[2], "one-sided") }.Where(p => p.Item1 > 0).Select(p => $"{p.Item1} {p.Item2}"));
+            var name = aspect.Flag is null ? aspect.Key : $"{aspect.Key} ({aspect.Flag})";
+            string tag;
+            string verdict;
+            if (repository?.ContainsKey(aspect.Key) == true)
+            {
+                (tag, verdict) = ("set", $"set in .editorconfig ({repository[aspect.Key]})");
+            }
+            else if (c.Sum() < MinimumAgreeing)
+            {
+                (tag, verdict) = ("too few", "default stays");
+                summary.TooFew.Add(name);
+            }
+            else if (winner < 0)
+            {
+                (tag, verdict) = ("off", "IDE0055 is off");
+                mixed.Add($"{aspect.What} ({text})");
+            }
+            else if (winner == 0)
+            {
+                (tag, verdict) = ("default", aspect.Default);
+                summary.Matched++;
+            }
+            else
+            {
+                (tag, verdict) = ("kept", aspect.Other);
+                summary.Written.Add(name);
+            }
+
+            if (aspect.Flag is not null && repository?.ContainsKey(aspect.Key) != true)
+            {
+                flagsSeen |= winner == 1;
+                if (winner == 1)
+                {
+                    flags.Add(aspect.Flag);
+                }
+            }
+            else if (aspect.Flag is null && tag == "kept")
+            {
+                keys.Add($"{aspect.Key} = {(aspect.Key == Spacing[0].Key ? "false" : "true")}");
+            }
+
+            report.Add($"  {tag,-8} spacing, {aspect.What}: {(winner < 0 ? text : $"{c[winner]} of {total} {(winner == 0 ? aspect.Default : aspect.Other)}")} -> {verdict}");
+        }
+
+        if (flagsSeen)
+        {
+            keys.Add($"{SpaceBetweenParenthesesKey} = {string.Join(", ", flags)}");
+        }
+
+        if (keys.Count > 0)
+        {
+            lines.Add($"{SpacingComment} your code's spacing differs from the SDK's default ({string.Join("; ", keys)})");
+            lines.AddRange(keys);
+        }
+
+        if (mixed.Count > 0)
+        {
+            summary.TurnedOff.Add($"IDE0055 (spacing: {string.Join(", ", mixed.Select(m => m.Substring(0, m.IndexOf(" (", StringComparison.Ordinal))))})");
+            lines.Add($"{SpacingComment} your code mixes {string.Join("; ", mixed)}; IDE0055 can't be limited to one spacing option, so it is off: 'format' skips the whitespace pass. To have it format: set the spacing keys (csharp_space_*) and remove the next line.");
+            lines.Add(Off("IDE0055"));
+        }
     }
 
     /// <summary>
@@ -1976,6 +2299,29 @@ internal static class Conventions
 
         /// <summary>Gets the keys with too few places to tell.</summary>
         public List<string> TooFew { get; } = new();
+    }
+
+    /// <summary>
+    /// C# files whose <see cref="Key"/> one .editorconfig decides (<see cref="FileSettings"/>): <see cref="Source"/> is its folder,
+    /// relative to the root ('' the root's own, null when no file sets the key), <see cref="Value"/> what it says (lower case;
+    /// null for 'unset' or none).
+    /// </summary>
+    internal sealed class FileSettingGroup(string key, string? source, string? value)
+    {
+        public string Key { get; } = key;
+
+        public string? Source { get; } = source;
+
+        public string? Value { get; } = value;
+
+        /// <summary>Gets the files' counts (<see cref="FileCounts"/>).</summary>
+        public Dictionary<string, int[]> Counts { get; } = FileCounts();
+
+        /// <summary>Gets or sets how many of the files git gives each machine's ending (<see cref="PickedPerMachine"/>).</summary>
+        public int PickedPerMachine { get; set; }
+
+        /// <summary>Gets the .editorconfig (relative path) that decides it, or null for the root's own and for none.</summary>
+        public string? File => Source is { Length: > 0 } ? Source + "/.editorconfig" : null;
     }
 
     /// <summary>A convention init detects (see <see cref="All"/>).</summary>

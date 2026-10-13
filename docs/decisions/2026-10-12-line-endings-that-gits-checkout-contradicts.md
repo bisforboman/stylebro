@@ -58,3 +58,17 @@ and without a final line break alone), with a report note. The migration does th
 didn't before). `trim_trailing_whitespace` isn't read by `dotnet format` at all (probed: `false` still trimmed every
 formatted line), so it can't be kept that way; the report says so when the key is `false` and files have trailing
 whitespace.
+
+### Extended: the .editorconfig that decides (2026-10-13, trial 14)
+
+Bogus's `Source/.editorconfig` (`[*]`, not `root = true`) says `end_of_line = crlf` and `insert_final_newline = false`;
+the root's `[*.cs]` says `insert_final_newline = true`. `init` judged the files against the root's keys only, wrote
+`insert_final_newline = unset` into the root block, which a nearer file overrides, and `format` stripped the last line
+break from 48 files; in an LF checkout verify failed on 200 files, since the nested `crlf` was never seen. Owner's policy:
+judge each file against its effective value, the way Roslyn reads the chain (the nearest file that sets the key wins,
+within it the last matching section, stopping at `root = true`; the stylebro blocks don't count), and write the decision
+where it takes effect: into the root block for the files the root decides, else into a `# BEGIN stylebro-whitespace`
+block (`[*.cs]`, appended) in the nearer file that sets the key. A second `init` keeps those lines. Measured on Bogus:
+the nested file gets `end_of_line = unset` (git converts its 200 C# files); its `insert_final_newline = false` is followed
+by 152 of the 200 files it decides (76 %), so by the same rule the key stays (the earlier "74 %" counted 6 files the root
+decides). Since the spacing convention turns IDE0055 off there, `format` makes no whitespace changes in Bogus.
