@@ -28,5 +28,9 @@ namespace P
             var f = maybe?.Item2;
             var g = nameof(t.Item1);
         }
+
+        public int Inferred(List<int> items) => items.ConvertAll(x => (x, 1)).Find(x => x.Item1 > 0).Item2;
+
+        public int Same((int x, int y) x) => x.Item1;
     }
 }

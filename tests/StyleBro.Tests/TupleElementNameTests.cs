@@ -51,6 +51,38 @@ public class TupleElementNameTests
         }
         """);
 
+    // recyclarr: '.Select(x => (x, F(x)))' infers the name 'x'; '.ToDictionary(..., x => x.Item1)' became 'x => x.x'.
+    [Fact]
+    public Task NameEqualToTheReceiversName_IsNotReported() => Verify.VerifyFixAsync(
+        """
+        using System.Linq;
+
+        class C
+        {
+            void M(string[] items)
+            {
+                var pairs = items.Select(x => (x, x.Length)).Where(x => x.Item1 != null);
+                var y = pairs.Select(p => p.{|BRO1124:Item1|});
+            }
+
+            string N((string x, int)? x) => x?.Item1;
+        }
+        """,
+        """
+        using System.Linq;
+
+        class C
+        {
+            void M(string[] items)
+            {
+                var pairs = items.Select(x => (x, x.Length)).Where(x => x.Item1 != null);
+                var y = pairs.Select(p => p.x);
+            }
+
+            string N((string x, int)? x) => x?.Item1;
+        }
+        """);
+
     [Fact]
     public Task EighthElement_UsesItsName() => Verify.VerifyFixAsync(
         """
