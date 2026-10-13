@@ -333,6 +333,7 @@ internal static class CamelCaseRenamer
 
         // 'stylebro-migrate format' runs one target framework at a time: the files of projects this run doesn't load.
         var outside = new Dictionary<string, string>(StringComparer.Ordinal);
+        var outsideMembers = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         foreach (var entry in ReadRepositoryNames())
         {
             if (entry.Kind == RepositoryNames.NameofKind)
@@ -361,9 +362,21 @@ internal static class CamelCaseRenamer
                     }
                 }
             }
+            else if (entry.Kind == RepositoryNames.MemberNameKind && !paths.Contains(entry.Where))
+            {
+                foreach (var name in entry.Text.Split(' '))
+                {
+                    if (!outsideMembers.TryGetValue(name, out var files))
+                    {
+                        outsideMembers[name] = files = new List<string>();
+                    }
+
+                    files.Add(entry.Where);
+                }
+            }
         }
 
-        return new NamesInCode(strings, nameofs, where, outside, positional, reflection);
+        return new NamesInCode(strings, nameofs, where, outside, positional, reflection) { OutsideMembers = outsideMembers };
 
         // The reflection read is where the finding points: a field is kept for it, not for the first string with its name.
         void AddReflection(string text, string at)
@@ -824,6 +837,9 @@ internal static class CamelCaseRenamer
 
         /// <summary>Identifiers in files of projects this run didn't load, with the first such file (<see cref="RepositoryNames"/>).</summary>
         public Dictionary<string, string> Outside { get; }
+
+        /// <summary>Names used as members (<see cref="RepositoryNames.MemberNameKind"/>) in files of projects this run didn't load, with those files.</summary>
+        public Dictionary<string, List<string>> OutsideMembers { get; set; } = new(StringComparer.Ordinal);
 
         public bool Contains(string name) => Strings.Contains(name) || Nameofs.Contains(name);
 

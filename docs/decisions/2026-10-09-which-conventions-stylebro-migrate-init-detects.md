@@ -55,3 +55,17 @@ covers private instance fields (the rule BRO1303 itself follows). The same trial
 Core migration folders `generated_code = true` (eShop: 7 migration files reformatted), and the migration write
 `csharp_preserve_single_line_statements = true` (vs-threading: `delegate { /* ... */ }` split), listing SA1107 as not
 expressible.
+
+### Extended: spacing and member separation (2026-10-13, trial 14)
+
+Bogus writes `foreach( var x in y )` in 341 places and `foreach (var x in y)` in 187; IDE0055 rewrote the 341. Kavita's
+code is compact, and BRO1505/BRO1513 added blank lines in 392 and 312 files. Owner's policy, the usual thresholds:
+- The spacing options IDE0055 enforces are counted (`csharp_space_after_keywords_in_control_flow_statements`, the
+  `control_flow_statements`/`expressions`/`type_casts` flags of `csharp_space_between_parentheses`,
+  `csharp_space_after_cast`, and the spaces inside call and parameter lists). A clear form is written; mixed code turns
+  IDE0055 off with one `# init: spacing:` note (it can't be narrowed to one option), so `format` skips the whitespace
+  pass. Bogus (63 %) gets IDE0055 off; Kavita too (casts: 207 `(int)x`, 220 `(int) x`). With CSharpier, column
+  alignment or a team's own IDE0055 severity nothing is written; a second `init` keeps the lines.
+- BRO1505's places (neighbouring type members that need a blank line) and BRO1513's (doc comments right below code)
+  are counted with and without the blank line; compact or mixed code turns the rule off (Kavita: 6,033 with, 2,082
+  without; 2,042 with, 1,237 without: both off).

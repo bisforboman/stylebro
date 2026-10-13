@@ -64,18 +64,28 @@ internal static class BaselineCommand
 
         try
         {
-            Console.WriteLine($"Running 'dotnet format {project} --verify-no-changes' to find today's violations...");
-            Directory.CreateDirectory(reportDir);
-            var exit = RunDotnetFormat(root, project, reportDir);
-            var report = Path.Combine(reportDir, "format-report.json");
-            if (!File.Exists(report))
+            // Where IDE0055 is off (CSharpier, column alignment), whitespace isn't StyleBro's: like 'format', only the style
+            // and analyzer passes run (EntityGraphQL: 156 whitespace changes against CSharpier's layout were reported).
+            var passes = FormatCommand.WhitespaceOff(root) ? new[] { "style", "analyzers" } : new[] { string.Empty };
+            Console.WriteLine($"Running 'dotnet format {(passes.Length > 1 ? "style/analyzers " : string.Empty)}{project} --verify-no-changes' to find today's violations...");
+            var reports = new List<string>();
+            foreach (var pass in passes)
             {
-                Console.Error.WriteLine($"'dotnet format' wrote no report (exit code {exit}).");
-                RestoreAside(path, aside);
-                return 1;
+                var folder = Path.Combine(reportDir, pass.Length == 0 ? "all" : pass);
+                Directory.CreateDirectory(folder);
+                var exit = RunDotnetFormat(root, project, folder, pass);
+                var report = Path.Combine(folder, "format-report.json");
+                if (!File.Exists(report))
+                {
+                    Console.Error.WriteLine($"'dotnet format' wrote no report (exit code {exit}).");
+                    RestoreAside(path, aside);
+                    return 1;
+                }
+
+                reports.Add(File.ReadAllText(report));
             }
 
-            var result = Build(root, File.ReadAllText(report));
+            var result = Build(root, MergeReports(reports));
             File.WriteAllText(path, result.Baseline.Render());
             File.Delete(aside);
             Report(result);
@@ -298,10 +308,14 @@ internal static class BaselineCommand
         }
     }
 
-    private static int RunDotnetFormat(string root, string project, string reportDir)
+    /// <summary>Several 'dotnet format' JSON reports (arrays of documents) as one.</summary>
+    public static string MergeReports(IEnumerable<string> reports) =>
+        new System.Text.Json.Nodes.JsonArray(reports.SelectMany(r => System.Text.Json.Nodes.JsonNode.Parse(r)!.AsArray().Select(d => d?.DeepClone())).ToArray()).ToJsonString();
+
+    private static int RunDotnetFormat(string root, string project, string reportDir, string pass)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var argument in new[] { "format", project, "--verify-no-changes", "--severity", "warn", "--report", reportDir })
+        foreach (var argument in new[] { "format", pass, project, "--verify-no-changes", "--severity", "warn", "--report", reportDir }.Where(a => a.Length > 0))
         {
             start.ArgumentList.Add(argument);
         }

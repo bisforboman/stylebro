@@ -14,5 +14,4 @@ warnings (and `dotnet format` changes) to a build that was clean. How should new
 
 ## Decision
 
-**Choice 1** (owner, 2026-10-11). Not implemented yet: backlog item "Preset versions". `docs/versioning.md` describes it
-as planned.
+**Choice 1** (owner, 2026-10-11). Details decided and implemented 2026-10-13: [preset versions](2026-10-13-preset-versions-default-init-start-values.md).

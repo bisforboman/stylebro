@@ -25,9 +25,6 @@ what a fix writes. Read the release notes before upgrading.
 
 ### New rules
 
-!!! note "Planned, not yet implemented"
-    Today every rule is on in the preset, so a new rule takes effect as soon as you upgrade.
-
 Rules added after 1.0 stay off until you opt in through a preset version, like .NET's `AnalysisLevel`:
 
 ```xml
@@ -36,7 +33,18 @@ Rules added after 1.0 stay off until you opt in through a preset version, like .
 ```
 
 So upgrading the package never breaks a build by itself: you raise the preset version when you're ready for the new
-rules.
+rules (each release's notes list them).
+
+- Unset means the package's major version: `1.0` in all of 1.x.
+- `stylebro-migrate init --write` pins the newest version it knows in `Directory.Build.props`, so a new setup gets
+  every rule at once.
+- With `<StyleBroPreset>none</StyleBroPreset>` (also after `stylebro-migrate --write`), rules added after 1.0 are off
+  too: they are off by default, and only the preset turns them on. To turn on a single one,
+  `dotnet_diagnostic.BROxxxx.severity = warning` in `.editorconfig`.
+- A version newer than the package warns (STYLEBRO002) and uses the package's newest; anything else fails the build
+  (STYLEBRO001).
+
+Before 1.0 every rule counts as a 1.0 rule: `1.0`, `latest` and unset are the same.
 
 ## When 1.0 ships
 

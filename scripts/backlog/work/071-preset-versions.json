@@ -1,6 +1,6 @@
 {
   "area": "Stable",
   "item": "Preset versions",
-  "notes": "Owner's decision 2026-10-11 (docs/decisions/2026-10-11-new-rules-after-10.md): rules added after 1.0 stay off until `<StyleBroPreset>` names a version that includes them (`1.1`, or `latest`), like .NET's AnalysisLevel. Each rule records the version it was added in, the package targets pick the preset globalconfig for that version, and init/migrate write the current version. Open questions: what `recommended` (today's value) maps to, and how the IDE and `dotnet format` see the chosen preset (both read the globalconfig the targets add as EditorConfigFiles).",
-  "status": "Planned"
+  "notes": "Owner's decisions 2026-10-11 and 2026-10-13 (docs/decisions/2026-10-13-preset-versions-default-init-start-values.md, docs/proposals/preset-versions.md): one global config per minor under build/presets (each with only its new rules), the targets add the layers up to `<StyleBroPreset>` (`X.Y`, `latest`, `none`; unset = the package's major), rules added after 1.0 ship off by default, `init --write` pins the version. Shipped with one layer (1.0); per-minor layers from 1.1.",
+  "status": "Done (2026-10-13)"
 }

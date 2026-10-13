@@ -18,6 +18,8 @@
   -->
   <PropertyGroup>
     <StyleBroSelfVersion>0.6.0-alpha.1</StyleBroSelfVersion>
+    <!-- Every rule, also those of minors newer than the default preset (docs/versioning.md). -->
+    <StyleBroPreset>latest</StyleBroPreset>
     <!-- StyleBroSelf=none from outside (scripts/verify-format.ps1) turns the self-check off everywhere. -->
     <StyleBroSelf Condition="'$(StyleBroSelf)' == '' and ('$(MSBuildProjectName)' == 'StyleBro.Analyzers' or '$(MSBuildProjectName)' == 'StyleBro.CodeFixes')">download</StyleBroSelf>
     <StyleBroSelf Condition="'$(MSBuildProjectName)' == 'Messy' or '$(MSBuildProjectName)' == 'MultiTarget' or '$(MSBuildProjectName)' == 'StyleBro.Package'">none</StyleBroSelf>

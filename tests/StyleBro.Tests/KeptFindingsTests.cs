@@ -478,16 +478,76 @@ public class KeptFindingsTests
     }
 
     // eShop: a tuple element in a private member's signature (or a body) can't be seen by code the run doesn't load; a
-    // local of that name in another project (the MAUI app outside the solution filter) doesn't keep it.
+    // use of that name in another project (the MAUI app outside the solution filter) doesn't keep it.
     [Fact]
     public async Task ATupleElementOnlyThisProjectSees_IsRenamedWhateverOutsideCodeIsNamed()
     {
         var (solution, _, _) = await FindAsync(
             DiagnosticIds.PrivateFieldNaming,
             ("C.cs", "namespace ZqxApp\n{\n    public class C\n    {\n        private int _zqxN;\n\n        private (int zqxUser, int zqxClaims) Find() => (1, 0);\n\n        public int Get()\n        {\n            (int zqxUser, int zqxClaims) pair = Find();\n            return pair.zqxUser + pair.zqxClaims + _zqxN;\n        }\n    }\n}\n"));
-        var app = ("ClientApp/T.cs", "namespace ZqxClient\n{\n    class ZqxT\n    {\n        int zqxRead()\n        {\n            var zqxUser = 1;\n            return zqxUser;\n        }\n    }\n}\n");
+        var app = ("ClientApp/T.cs", "namespace ZqxClient\n{\n    class ZqxT\n    {\n        int zqxRead((int zqxUser, int zqxId) zqxP) => zqxP.zqxUser;\n    }\n}\n");
 
         Assert.Null(await WithRepositoryNamesAsync(app, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxUser", "ZqxUser", CancellationToken.None)));
+    }
+
+    // EntityGraphQL: an internal method's '(bool IsSet, object? value)' was kept for a lambda's '(_, value) =>' in an example
+    // project. Only member uses count ('.value', 'value:', another tuple's element), and for an internal member only in a
+    // project InternalsVisibleTo names (the nearest project file's name).
+    [Fact]
+    public async Task AnInternalTupleElement_IsKeptOnlyForMemberUsesInProjectsThatSeeIt()
+    {
+        var files = new[]
+        {
+            ("C.cs", """
+                [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ZqxTests, PublicKey=00")]
+
+                namespace ZqxApp
+                {
+                    public class C
+                    {
+                        private int _zqxN;
+
+                        internal static (bool IsSet, object? zqxValue) Build() => (true, null);
+
+                        public int GetN() => _zqxN;
+                    }
+                }
+
+                """),
+        };
+        var lambda = """
+            class ZqxT
+            {
+                System.Func<int, int, int> zqxF = (_, zqxValue) => zqxValue;
+            }
+
+            """;
+        var member = """
+            class ZqxT
+            {
+                object zqxRead() => ZqxApp.C.Build().zqxValue;
+            }
+
+            """;
+        var folder = Path.Combine(Path.GetTempPath(), "stylebro-ivt-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(folder, "Examples"));
+        Directory.CreateDirectory(Path.Combine(folder, "ZqxTests"));
+        File.WriteAllText(Path.Combine(folder, "Examples", "Examples.csproj"), "<Project />");
+        File.WriteAllText(Path.Combine(folder, "ZqxTests", "ZqxTests.csproj"), "<Project />");
+        try
+        {
+            // A new solution each time: the names are collected once per solution.
+            async Task<KeptReason?> Reason() => await TupleElementRenamer.GetKeptReasonAsync((await FindAsync(DiagnosticIds.PrivateFieldNaming, files)).Solution, "zqxValue", "ZqxValue", CancellationToken.None);
+
+            Assert.Null(await WithRepositoryNamesAsync(("Tests/T.cs", lambda), Reason));
+            Assert.Null(await WithRepositoryNamesAsync((Path.Combine(folder, "Examples", "T.cs"), member), Reason));
+            Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync((Path.Combine(folder, "ZqxTests", "T.cs"), member), Reason));
+            Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(("Tests/T.cs", member), Reason));
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
     }
 
     // The trial: '--files' loads only the files' project, so it renamed a field the whole-repository run kept for a test

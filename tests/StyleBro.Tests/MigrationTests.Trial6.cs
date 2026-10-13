@@ -159,7 +159,7 @@ public sealed partial class MigrationTests
     public void ThePreset_DoesNotSortUsings()
     {
         // 'dotnet format' sorts usings whenever a sort key is set (any value), and an .editorconfig can't unset the preset's.
-        var preset = File.ReadAllLines(Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig"));
+        var preset = Presets.AllLines();
 
         Assert.DoesNotContain(preset, l => l.StartsWith(SortKey, StringComparison.Ordinal) || l.StartsWith("dotnet_separate_import_directive_groups", StringComparison.Ordinal));
     }
