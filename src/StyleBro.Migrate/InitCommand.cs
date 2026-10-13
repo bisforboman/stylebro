@@ -295,7 +295,7 @@ internal static class InitCommand
         }
 
         own = own.Where(p => !unenforced.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase);
-        var csharpier = Conventions.CSharpier(root) is { } evidence ? Conventions.CSharpierLines(evidence) : default;
+        var csharpier = Conventions.CSharpier(root) is { } evidence ? Conventions.CSharpierLines(evidence, root, settings) : default;
 
         // ReSharper/Rider's column alignment: IDE0055 off, like with CSharpier (RestSharp: 414 aligned hunks flattened).
         var alignment = csharpier.Lines is null ? Conventions.AlignmentLines(settings) : null;
@@ -361,7 +361,8 @@ internal static class InitCommand
         }
 
         // The using order is decided apart from the list (two keys): kept the same way.
-        var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
+        // Not the keys the CSharpier lines write again (CSharpier's using order).
+        var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]).Where(l => csharpier.Lines?.Contains(l) != true).ToList();
         kept.AddRange(usings);
         var keptKeys = new HashSet<string>(kept.Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
         var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), own, unenforced.ToDictionary(k => k, k => settings[k]));

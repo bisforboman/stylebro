@@ -337,13 +337,59 @@ internal static class Conventions
 
     /// <summary>
     /// The lines that turn <see cref="CSharpierRules"/> off (with the '# init:' comment saying why) and the report line, for a
-    /// repository CSharpier formats (<paramref name="evidence"/>: <see cref="CSharpier"/>).
+    /// repository CSharpier formats (<paramref name="evidence"/>: <see cref="CSharpier"/>), and the keys that tell the fixes
+    /// so (stylebro_layout_by, and CSharpier's line width: <see cref="CSharpierPrintWidth"/>), so a fix that rewrites code lays
+    /// it out as CSharpier would where it can, and the brace rules judge a statement by how CSharpier will break it.
     /// </summary>
-    public static (List<string> Lines, string Report) CSharpierLines(string evidence)
+    public static (List<string> Lines, string Report) CSharpierLines(string evidence, string root, IReadOnlyDictionary<string, string>? settings)
     {
         var lines = new List<string> { $"# init: CSharpier formats this repository ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
         lines.AddRange(CSharpierRules.Select(Off));
+        lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.Key} = csharpier");
+        lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.WidthKey} = {CSharpierPrintWidth(root, settings)}");
+        lines.AddRange(CSharpierUsingLines(settings));
         return (lines, $"  {"off",-8} CSharpier ({evidence}) -> IDE0055 and {CSharpierRules.Length - 1} layout rules are off: {string.Join(", ", CSharpierRules.Skip(1))}");
+    }
+
+    /// <summary>
+    /// The using sort keys CSharpier's order needs, where the repository sets them otherwise (<paramref name="settings"/>):
+    /// CSharpier sorts using directives itself (System first, no blank lines added between groups), and 'dotnet format' sorts
+    /// them whenever a sort key is set, whatever its value. Mediator says dotnet_sort_system_directives_first = false, and
+    /// 'format' reordered the usings of every file CSharpier had sorted (and CSharpier put them back).
+    /// </summary>
+    public static List<string> CSharpierUsingLines(IReadOnlyDictionary<string, string>? settings)
+    {
+        string? Value(string key) => settings is not null && settings.TryGetValue(key, out var v) ? v.Split(':')[0].Trim().ToLowerInvariant() : null;
+        var lines = new List<string>();
+        if (Value(SortUsingsKey) is { } systemFirst && systemFirst != "true")
+        {
+            lines.Add($"{SortUsingsKey} = true");
+        }
+
+        if (Value("dotnet_separate_import_directive_groups") is { } separate && separate != "false")
+        {
+            lines.Add("dotnet_separate_import_directive_groups = false");
+        }
+
+        return lines;
+    }
+
+    /// <summary>
+    /// CSharpier's line width: printWidth from the .csharpierrc (CSharpier then ignores .editorconfig), else the
+    /// .editorconfig's max_line_length (<paramref name="settings"/>), else CSharpier's default (100).
+    /// </summary>
+    public static int CSharpierPrintWidth(string root, IReadOnlyDictionary<string, string>? settings)
+    {
+        if (new[] { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" }.Select(f => Path.Combine(root, f)).FirstOrDefault(File.Exists) is { } config)
+        {
+            return System.Text.RegularExpressions.Regex.Match(File.ReadAllText(config), @"printWidth""?\s*:\s*(\d+)") is { Success: true } match
+                ? int.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture)
+                : StyleBro.Analyzers.Layout.CSharpierLayout.DefaultWidth;
+        }
+
+        return settings is not null && settings.TryGetValue("max_line_length", out var value) && int.TryParse(value.Trim(), out var width) && width > 0
+            ? width
+            : StyleBro.Analyzers.Layout.CSharpierLayout.DefaultWidth;
     }
 
     /// <summary>Whether CSharpier decides a convention (<see cref="CSharpierRules"/>): its rule is one of them, or it is an SDK formatter option.</summary>

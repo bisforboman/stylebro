@@ -40,6 +40,123 @@ public class NestedIfTests
         }
         """);
 
+    // StabilityMatrix: CSharpier relaid every merged condition that got longer than its line width. With CSharpier laying
+    // the code out, the merge writes CSharpier's layout: '&&' operands on lines of their own, ')' on its own line; and
+    // a body without braces gets them in the same edit (CSharpier's split makes it multi-line, BRO1515).
+    [Fact]
+    public Task WithCSharpier_ALongMergedCondition_IsLaidOutAsCSharpierWould() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool first, bool second, int count)
+            {
+                if (first && second)
+                {
+                    {|BRO1149:if|} (count > 100 && count < 1000000)
+                    {
+                        M(first, second, count);
+                    }
+                }
+
+                if (
+                    first
+                )
+                {
+                    {|BRO1149:if|} (second)
+                        return;
+                }
+
+                if (first)
+                {
+                    {|BRO1149:if|} (count > 100 && count < 1000000 && second)
+                        return;
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool first, bool second, int count)
+            {
+                if (
+                    first
+                    && second
+                    && count > 100
+                    && count < 1000000
+                )
+                {
+                    M(first, second, count);
+                }
+
+                if (first && second)
+                    return;
+
+                if (
+                    first
+                    && count > 100
+                    && count < 1000000
+                    && second
+                )
+                {
+                    return;
+                }
+            }
+        }
+        """,
+        "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_by = csharpier\nstylebro_layout_print_width = 60\n");
+
+    // What CSharpier would break further (an operand over several lines or longer than the line) keeps the usual layout.
+    [Fact]
+    public Task WithCSharpier_AnOperandCSharpierWouldBreak_KeepsTheUsualLayout() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool first, bool second, int count)
+            {
+                if (first)
+                {
+                    {|BRO1149:if|} (Check(count, count + 1, count + 2, count + 3, count + 4))
+                    {
+                        return;
+                    }
+                }
+
+                if (second)
+                {
+                    {|BRO1149:if|} (Check(
+                        count, count))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            private static bool Check(params int[] values) => values.Length > 0;
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool first, bool second, int count)
+            {
+                if (first && Check(count, count + 1, count + 2, count + 3, count + 4))
+                {
+                    return;
+                }
+
+                if (second && Check(
+                    count, count))
+                {
+                    return;
+                }
+            }
+
+            private static bool Check(params int[] values) => values.Length > 0;
+        }
+        """,
+        "stylebro_layout_by = csharpier\nstylebro_layout_print_width = 60\n");
+
     // Flow.Launcher's ShellContextMenu: the inner condition's arguments were left behind ('...DRAWITEM) && x.HandleMenuMsg(' and
     // a line indented by the old dedent). An inner condition over several lines gets a line of its own, '&&' first.
     [Fact]
