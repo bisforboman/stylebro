@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/RepositoryNames.cs'
     Find = 'IdentifierNameSyntax name => name.Parent is MemberAccessExpressionSyntax access ? access.Name == name : name.Parent is MemberBindingExpressionSyntax or NameColonSyntax,'
     Replace = 'IdentifierNameSyntax => true,'
-    Tests = 'FullyQualifiedName~AnInternalTupleElement'
+    Tests = 'KeptFindingsTests.AnInternalTupleElement_IsKeptOnlyForMemberUsesInProjectsThatSeeIt'
 }

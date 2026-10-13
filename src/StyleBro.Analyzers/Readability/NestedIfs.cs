@@ -310,7 +310,8 @@ internal static class NestedIfs
                 continue;
             }
 
-            if (operands[i].Ors is not { } ors)
+            var ors = operands[i].Ors;
+            if (ors is null)
             {
                 return null;
             }

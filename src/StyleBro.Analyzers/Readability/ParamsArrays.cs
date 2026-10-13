@@ -69,7 +69,6 @@ internal static class ParamsArrays
             || method.Parameters[method.Parameters.Length - 1] is not { IsParams: true } parameter
             || list.Arguments.Count != method.Parameters.Length
             || !SymbolEqualityComparer.Default.Equals(GetType(model.GetTypeInfo(array, cancellationToken), array), parameter.Type)
-            || (elements.Count == 1 && model.ClassifyConversion(elements[0], parameter.Type).IsImplicit)
             || elements.Any(e => IsTargetTyped(e, model, cancellationToken)))
         {
             return null;

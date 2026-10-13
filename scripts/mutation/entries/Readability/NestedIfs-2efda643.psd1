@@ -1,7 +1,7 @@
-# BRO1149: an || chain operand breaks inside its parentheses under CSharpier.
+# BRO1149: an || operand longer than its line keeps the usual layout.
 @{
     File = 'src/StyleBro.Analyzers/Readability/NestedIfs.cs'
-    Find = '            if (operands[i].Ors is not { } ors)'
-    Replace = '            if (true)'
-    Tests = 'FullyQualifiedName~AnOrChainOperand'
+    Find = 'if (orLine.Length > width)'
+    Replace = 'if (false)'
+    Tests = 'NestedIfTests.WithCSharpier_AnOrChainOperand_BreaksInsideItsParentheses'
 }

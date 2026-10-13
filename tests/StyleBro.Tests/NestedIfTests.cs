@@ -107,7 +107,8 @@ public class NestedIfTests
         "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_by = csharpier\nstylebro_layout_print_width = 60\n");
 
     // EntityGraphQL's GraphQLParser: the inner condition was an '||' chain CSharpier had already broken over lines. Merged, it
-    // becomes '&& (...)' and breaks inside its parentheses the way CSharpier does; one that fits its line stays on it.
+    // becomes '&& (...)' and breaks inside its parentheses the way CSharpier does; one that fits its line stays on it, and
+    // one with an operand CSharpier would break further keeps the usual layout.
     [Fact]
     public Task WithCSharpier_AnOrChainOperand_BreaksInsideItsParentheses() => Verify.VerifyFixAsync(
         """
@@ -131,6 +132,17 @@ public class NestedIfTests
                     {|BRO1149:if|} (
                         count < 5
                         || second
+                    )
+                    {
+                        return;
+                    }
+                }
+
+                if (second)
+                {
+                    {|BRO1149:if|} (
+                        (count > 100 && second && first && count < 99999)
+                        || first
                     )
                     {
                         return;
@@ -161,6 +173,12 @@ public class NestedIfTests
                     && count > 1000
                     && (count < 5 || second)
                 )
+                {
+                    return;
+                }
+
+                if (second && ((count > 100 && second && first && count < 99999)
+                    || first))
                 {
                     return;
                 }

@@ -3,5 +3,5 @@
     File = 'src/StyleBro.CodeFixes/Naming/TupleElementRenamer.cs'
     Find = '        if (member is null || !IsInternal(member))'
     Replace = '        if (true)'
-    Tests = 'FullyQualifiedName~AnInternalTupleElement'
+    Tests = 'KeptFindingsTests.AnInternalTupleElement_IsKeptOnlyForMemberUsesInProjectsThatSeeIt'
 }

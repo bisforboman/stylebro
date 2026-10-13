@@ -70,8 +70,7 @@ internal static class TupleElementRenamer
         // member (an internal one: InternalsVisibleTo), and only uses it as a member ('.value', 'value:', another tuple
         // type's element): EntityGraphQL's internal '(bool IsSet, object? value)' was kept for a lambda's '(_, value) =>'
         // in an example project.
-        if (visible.Count > 0
-            && (await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).OutsideMembers.TryGetValue(oldName, out var files)
+        if ((await CamelCaseRenamer.GetNamesInCodeAsync(solution).ConfigureAwait(false)).OutsideMembers.TryGetValue(oldName, out var files)
             && files.FirstOrDefault(file => visible.Any(member => CanSee(member, file))) is { } outside)
         {
             return (null, (KeptReason.UsedInProjectNotLoaded, outside));
