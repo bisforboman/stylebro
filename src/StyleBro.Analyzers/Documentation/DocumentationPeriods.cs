@@ -26,6 +26,12 @@ internal static class DocumentationPeriods
 
     private static readonly System.Text.RegularExpressions.Regex NumberOnly = new(@"^[-+]?(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|[0-9][0-9_,]*(?:\.[0-9]+)?)$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
 
+    // A quoted literal that reads as code: followed by ';' (',';), with an escape ("\r\n"), or a punctuation char (',').
+    // A quoted word ('the word "done"') is prose and gets its period.
+    private static readonly System.Text.RegularExpressions.Regex QuotedLiteral = new(
+        @"(?:(?:'(?:[^'\\]|\\[^']{1,5})'|""[^""]*"");|'(?:[^'\\\w]|\\[^']{1,5})'|""[^""]*\\[^""]*"")$",
+        System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
     private static readonly char[] CodeCharacters = ['{', '}', '[', ']', '(', ')', '=', ';', ':', '/', '\\', '|', '$', '#', '_', '`'];
 
     private static readonly HashSet<string> TextElements = new()
@@ -137,11 +143,17 @@ internal static class DocumentationPeriods
     /// Whether the text ends in code rather than a sentence: its last word has a bracket, brace, '=', ';', ':', a slash,
     /// '|', '$', '#', '_' or a backtick in it (Stateless: 'the prefix text would be digraph {', spreadcheetah: 'Example:
     /// A1:B10'). A period there reads as part of the code. A closing ')' or ']' whose opener isn't in the word ends a
-    /// parenthetical ('(in ms)') and doesn't count, nor do a closing quote or a trailing ',' or ';'. StyleCop's SA1629 has no such exception: a deviation.
+    /// parenthetical ('(in ms)') and doesn't count, nor do a closing quote or a trailing ',' or ';'. A quoted char or
+    /// string literal at the end is code too (CsvHelper: 'Default is ',';'). StyleCop's SA1629 has no such exception: a deviation.
     /// </summary>
     private static bool EndsInCode(string text)
     {
         var word = text.Substring(text.LastIndexOfAny([' ', '\t', '\n', '\r']) + 1);
+        if (QuotedLiteral.IsMatch(word))
+        {
+            return true;
+        }
+
         while (word.Length > 0 && ((word[word.Length - 1] == ')' && word.IndexOf('(') < 0) || (word[word.Length - 1] == ']' && word.IndexOf('[') < 0)
             || word[word.Length - 1] is '"' or '\'' or ',' or ';'))
         {

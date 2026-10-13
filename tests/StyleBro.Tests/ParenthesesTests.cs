@@ -77,6 +77,71 @@ public class ParenthesesTests
         """);
 
     [Fact]
+    public Task CommentsInside_AreKept_OrTheParenthesesStay() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int A(int x)
+            {
+                return {|BRO1405:(x + 1 /* inner block */)|};
+            }
+
+            public int B(int x)
+            {
+                return {|BRO1405:(/* first */ x + 1)|};
+            }
+
+            public int D(int x)
+            {
+                return (
+                    x + 1 // plus one
+                );
+            }
+
+            public bool E(bool a, bool b)
+            {
+                var c =
+                    (
+                        a // first
+                        || b // second
+                    );
+                return c;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int A(int x)
+            {
+                return x + 1 /* inner block */;
+            }
+
+            public int B(int x)
+            {
+                return /* first */ x + 1;
+            }
+
+            public int D(int x)
+            {
+                return (
+                    x + 1 // plus one
+                );
+            }
+
+            public bool E(bool a, bool b)
+            {
+                var c =
+                    (
+                        a // first
+                        || b // second
+                    );
+                return c;
+            }
+        }
+        """);
+
+    [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         #if !(DEBUG)
         using System;

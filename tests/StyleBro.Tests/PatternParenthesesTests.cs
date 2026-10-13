@@ -76,8 +76,22 @@ public class PatternParenthesesTests
                 || x is (1 or 2) and > 0
                 || x is 1 or (2 or 3)
                 || x is (> 0 and < 5) or 10
-                || x is 1 or (> 5 and < 9)
-                || x is (/* one */ 1);
+                || x is 1 or (> 5 and < 9);
+        }
+        """);
+
+    [Fact]
+    public Task CommentsInside_AreKept() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public bool M(int x) => x is {|BRO1410:(> 1 /* low */)|} and {|BRO1410:(/* high */ < 10)|};
+        }
+        """,
+        """
+        public class C
+        {
+            public bool M(int x) => x is > 1 /* low */ and /* high */ < 10;
         }
         """);
 
