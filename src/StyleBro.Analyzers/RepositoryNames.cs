@@ -118,15 +118,6 @@ public static class RepositoryNames
         yield return Line(MemberNameKind, path, string.Join(" ", members));
     }
 
-    private static bool IsMemberName(SyntaxToken token) =>
-        token.IsKind(SyntaxKind.IdentifierToken)
-        && token.Parent switch
-        {
-            TupleElementSyntax => true,
-            IdentifierNameSyntax name => name.Parent is MemberAccessExpressionSyntax access ? access.Name == name : name.Parent is MemberBindingExpressionSyntax or NameColonSyntax,
-            _ => false,
-        };
-
     /// <summary>
     /// Whether a string literal is where code names a member to reach it by name: an argument of a reflection method
     /// (<c>typeof(C).GetField("count")</c>, <c>GetType().GetProperty(...)</c>, <c>Type.GetType("App.C")</c>,
@@ -178,6 +169,15 @@ public static class RepositoryNames
         var second = first < 0 ? -1 : line.IndexOf('\t', first + 1);
         return first == 1 && second > 0 ? new Entry(line[0], Unescape(line.Substring(2, second - 2)), Unescape(line.Substring(second + 1))) : null;
     }
+
+    private static bool IsMemberName(SyntaxToken token) =>
+        token.IsKind(SyntaxKind.IdentifierToken)
+        && token.Parent switch
+        {
+            TupleElementSyntax => true,
+            IdentifierNameSyntax name => name.Parent is MemberAccessExpressionSyntax access ? access.Name == name : name.Parent is MemberBindingExpressionSyntax or NameColonSyntax,
+            _ => false,
+        };
 
     /// <summary>
     /// Whether an expression looks like a <see cref="System.Type"/>: <c>typeof(C)</c>, <c>x.GetType()</c>,
