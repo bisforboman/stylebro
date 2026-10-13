@@ -2092,4 +2092,99 @@ public class DocumentationTests
             public int Size { get; set; }
         }
         """);
+
+    // GuardClauses: 'IComparable<T> can use OutOfRange' starts an element 'T' that takes the summary's end tag, and BRO1603
+    // wrote 'IComparable.<T>'. A comment whose XML is malformed is left to a person, by every rule that edits text.
+    [Fact]
+    public Task MalformedDocumentation_IsLeftAlone() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>
+        /// Every type that implements IComparable and IComparable<T> can use OutOfRange
+        /// </summary>
+        public class Range
+        {
+            /// <summary>
+            /// the <see cref="Range"/> of IList<T>
+            /// </summary>
+            public int Size { get; set; }
+
+            /// <summary>
+            /// Default constructor. <T>
+            /// </summary>
+            public Range()
+            {
+            }
+        }
+        """);
+
+    // Without documentation generation the parser reports nothing: the end tags tell.
+    [Theory]
+    [InlineData(DocumentationMode.Parse, "<summary>IList<T> items</summary>", true)]
+    [InlineData(DocumentationMode.Diagnose, "<summary>IList<T> items</summary>", true)]
+    [InlineData(DocumentationMode.Parse, "<summary><T></summary></summary>", true)]
+    [InlineData(DocumentationMode.Parse, "<summary>IList&lt;T&gt; <c>x</c> items</summary>", false)]
+    public void MalformedDocumentation_IsToldByTheEndTags(DocumentationMode mode, string documentation, bool malformed)
+    {
+        var tree = CSharpSyntaxTree.ParseText($"/// {documentation}\nclass A {{ }}\n", new CSharpParseOptions(documentationMode: mode));
+        var comment = tree.GetRoot().DescendantTrivia().Select(t => t.GetStructure()).OfType<Microsoft.CodeAnalysis.CSharp.Syntax.DocumentationCommentTriviaSyntax>().Single();
+
+        Assert.Equal(malformed, DocumentationComments.IsMalformed(comment));
+    }
+
+    // GuardClauses: the period went before the line's trailing spaces ('<paramref name="input"/>. '): they go too.
+    [Fact]
+    public Task PeriodAtTheEndOfALine_TakesThePlaceOfTrailingSpaces() => VerifyFixAsync(
+        "/// <summary>A guard{|BRO1603:|}</summary>\npublic class Guard\n{\n    /// <summary>\n    /// Checks <paramref name=\"input\"/>{|BRO1603:|} \t\n    /// </summary>\n"
+            + "    /// <param name=\"input\">The input{|BRO1603:|}  </param>\n    public void Check(bool input) { }\n}\n",
+        "/// <summary>A guard.</summary>\npublic class Guard\n{\n    /// <summary>\n    /// Checks <paramref name=\"input\"/>.\n    /// </summary>\n"
+            + "    /// <param name=\"input\">The input.</param>\n    public void Check(bool input) { }\n}\n");
+
+    // FakeItEasy's BuildableCallRule: '{ private get; set; }' documented 'Sets ...' became 'Gets or sets ...'. Like SA1623, a
+    // restricted getter makes it a 'Sets' property, and 'Gets or sets' there is BRO1605's (SA1624's).
+    [Fact]
+    public Task RestrictedGetter_SaysSets() => VerifyFixAsync(
+        """
+        /// <summary>A rule.</summary>
+        public class Rule
+        {
+            /// <summary>Sets a function that produces the values.</summary>
+            public int Producer { private get; set; }
+
+            /// <summary>Gets or sets the name.</summary>
+            public string {|BRO1605:Name|} { internal get; set; }
+
+            /// <summary>Gets or sets the size.</summary>
+            public int Size { protected internal get; set; }
+        }
+        """,
+        """
+        /// <summary>A rule.</summary>
+        public class Rule
+        {
+            /// <summary>Sets a function that produces the values.</summary>
+            public int Producer { private get; set; }
+
+            /// <summary>Sets the name.</summary>
+            public string Name { internal get; set; }
+
+            /// <summary>Gets or sets the size.</summary>
+            public int Size { protected internal get; set; }
+        }
+        """);
+
+    // FakeItEasy: StyleCop accepts '<see cref = "ArgumentCollection" />' in the standard sentence; it isn't rewritten.
+    [Fact]
+    public Task ConstructorSentence_WithSpacedCref_IsAccepted() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>A collection.</summary>
+        public class ArgumentCollection
+        {
+            /// <summary>
+            ///   Initializes a new instance of the <see cref = "ArgumentCollection" /> class.
+            /// </summary>
+            public ArgumentCollection()
+            {
+            }
+        }
+        """);
 }

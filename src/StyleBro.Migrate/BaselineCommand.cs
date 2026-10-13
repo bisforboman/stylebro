@@ -66,14 +66,16 @@ internal static class BaselineCommand
         {
             // Where IDE0055 is off (CSharpier, column alignment), whitespace isn't StyleBro's: like 'format', only the style
             // and analyzer passes run (EntityGraphQL: 156 whitespace changes against CSharpier's layout were reported).
-            var passes = FormatCommand.WhitespaceOff(root) ? new[] { "style", "analyzers" } : new[] { string.Empty };
-            Console.WriteLine($"Running 'dotnet format {(passes.Length > 1 ? "style/analyzers " : string.Empty)}{project} --verify-no-changes' to find today's violations...");
+            // Where it's off in some folders only (CSharpier formats one), the whitespace pass runs on its own without them.
+            var exclusions = FormatCommand.WhitespaceExclusions(root);
+            var passes = FormatCommand.Passes(exclusions);
+            Console.WriteLine($"Running 'dotnet format {(passes.Length > 1 ? string.Join("/", passes) + " " : string.Empty)}{project} --verify-no-changes' to find today's violations...");
             var reports = new List<string>();
             foreach (var pass in passes)
             {
                 var folder = Path.Combine(reportDir, pass.Length == 0 ? "all" : pass);
                 Directory.CreateDirectory(folder);
-                var exit = RunDotnetFormat(root, project, folder, pass);
+                var exit = RunDotnetFormat(root, project, folder, pass, exclusions);
                 var report = Path.Combine(folder, "format-report.json");
                 if (!File.Exists(report))
                 {
@@ -312,10 +314,12 @@ internal static class BaselineCommand
     public static string MergeReports(IEnumerable<string> reports) =>
         new System.Text.Json.Nodes.JsonArray(reports.SelectMany(r => System.Text.Json.Nodes.JsonNode.Parse(r)!.AsArray().Select(d => d?.DeepClone())).ToArray()).ToJsonString();
 
-    private static int RunDotnetFormat(string root, string project, string reportDir, string pass)
+    private static int RunDotnetFormat(string root, string project, string reportDir, string pass, IReadOnlyCollection<string>? exclusions)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var argument in new[] { "format", pass, project, "--verify-no-changes", "--severity", "warn", "--report", reportDir }.Where(a => a.Length > 0))
+        var options = new List<string> { "--verify-no-changes", "--severity", "warn", "--report", reportDir };
+        options = pass == "whitespace" ? FormatCommand.WhitespaceOptions(options, exclusions!) : options;
+        foreach (var argument in new[] { "format", pass, project }.Where(a => a.Length > 0).Concat(options))
         {
             start.ArgumentList.Add(argument);
         }

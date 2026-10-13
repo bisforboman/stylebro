@@ -93,7 +93,7 @@ stylebro-migrate format [path] --diff[=file] [--keep]
 
 Shows what the command would change without touching the repository: it runs on a temporary copy (`--write` for the
 first two, then `stylebro-migrate format` until a run changes nothing), prints the settings it wrote, the files each
-rule changed and a few sample hunks, and writes the full diff to `stylebro-preview.patch` (or `file`). A repository
+rule changed and a few sample hunks, and writes the full diff to `.git/stylebro-preview.patch` (or `file`). A repository
 without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the copy. Example:
 [docs/getting-started.md](https://bisforboman.github.io/stylebro/getting-started/#preview-first).
 

@@ -355,11 +355,12 @@ internal static class Descriptors
     public static readonly DiagnosticDescriptor PropertySummaryRestrictedSetter = new(
         id: DiagnosticIds.PropertySummaryRestrictedSetter,
         title: "Property summary documentation should omit accessor with restricted access",
-        messageFormat: "Begin the summary with '{0}': other code can't use the setter",
+        messageFormat: "Begin the summary with '{0}': other code can't use the {1}",
         category: "Documentation",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "A property with a private or otherwise restricted setter is documented as 'Gets', not 'Gets or sets'. "
+        description: "A property with a private or otherwise restricted setter is documented as 'Gets', not 'Gets or sets' "
+            + "(one with a restricted getter as 'Sets'). "
             + "Replaces StyleCop SA1624.",
         helpLinkUri: HelpBase + DiagnosticIds.PropertySummaryRestrictedSetter + "/");
 

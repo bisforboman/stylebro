@@ -56,7 +56,8 @@ The preview copies the repository to a temporary folder (git's tracked and untra
 working trees of submodules too), runs the command there, then `stylebro-migrate format` until a run changes nothing,
 and deletes the copy. Your repository isn't touched. If it doesn't reference StyleBro.Analyzers yet, the copy gets the
 reference from [step 1](#1-add-the-package) (the tool's own version) and the output says so. It prints a summary and
-writes the full diff to `stylebro-preview.patch` in the current folder (`--diff=other.patch` names another file).
+writes the full diff to `.git/stylebro-preview.patch` in the repository's git folder, where it isn't an untracked file
+(outside a git repository: the temp folder; `--diff=other.patch` names another file).
 `--keep` keeps the copy and prints where it is; `--all` passes on to format; with several solutions or projects in the
 folder, `--project MySolution.sln` names the one to format. `--no-restore` skips the restore in the copy: it takes the
 repository's own restore output, so run `dotnet restore` first (it's ignored when the preview adds the package, which
@@ -85,13 +86,13 @@ Sample (BRO1603, FFMpegCore.Extensions.Downloader/Exceptions/FFMpegDownloaderExc
 Sample (BRO1401, FFMpegCore.Examples/Program.cs):
   -            FrameRate = 30 //set source frame rate
   +            FrameRate = 30, // set source frame rate
-Full diff: stylebro-preview.patch (5,966 lines)
+Full diff: .git\stylebro-preview.patch (5,966 lines)
 Done in 1m 2s.
 ```
 
 Files are counted under every rule `dotnet format --verify-no-changes` reported in them before the fixes; a file with
 only whitespace changes counts as IDE0055, one with nothing reported (another fix's side effect) as `other`. The patch
-is what the real commands write (byte for byte on FFMpegCore); `git apply stylebro-preview.patch` applies it.
+is what the real commands write (byte for byte on FFMpegCore); `git apply .git/stylebro-preview.patch` applies it.
 
 ## A. A new project, or no StyleCop
 
@@ -276,7 +277,8 @@ A few settings work a little differently:
   `dotnet-tools.json`, at the root or in a solution's or project's folder or a folder above it; or a `CSharpier.MsBuild`
   package reference), the two formatters would undo each other's layout
   (StabilityMatrix's pre-commit check rejected 161 files StyleBro had formatted). `init` then turns off IDE0055 (so
-  `stylebro-migrate format` skips the whitespace pass) and every StyleBro rule for something CSharpier decides, and the
+  `stylebro-migrate format` skips the whitespace pass; when CSharpier formats only some folders, IDE0055 is off in those
+  folders' sections and the whitespace pass leaves just them out) and every StyleBro rule for something CSharpier decides, and the
   layout conventions in the table are reported as `set` (`CSharpier formats it`). Off:
   - line breaks in lists: [BRO1107](rules/BRO1107.md)-[BRO1110](rules/BRO1110.md),
     [BRO1116](rules/BRO1116.md)-[BRO1119](rules/BRO1119.md); constraints [BRO1111](rules/BRO1111.md), constructor
@@ -505,7 +507,7 @@ before `dotnet format` runs: without the analyzers it would fix only whitespace 
 code clean. Projects without it next to ones with it are named (`Without StyleBro: ...`). The command restores once
 before the runs; that restore skips NuGet's audit (`-p:NuGetAudit=false`): vulnerability warnings (NU1901-NU1904) are
 the build's business, and with `TreatWarningsAsErrors` they failed every run. A solution filter (`.slnf`) works like
-its solution, with only its projects. a solution with several filters of it next to it (Steeltoe's
+its solution, with only its projects. A solution with several filters of it next to it (Steeltoe's
 `Steeltoe.All.slnx` and its seven `.slnf` parts) counts as that solution; the command says how to name a filter instead.
 A folder with several solutions or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
 With none at the root, it looks for a Traversal project there (`dirs.proj` with `Sdk="Microsoft.Build.Traversal"`,
@@ -542,7 +544,7 @@ code 2) when formatting would change a file. Findings kept on purpose don't fail
 there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md). `init` and the migration
 name the workflow lines (`.github/workflows`, `azure-pipelines.yml`) that still run plain `dotnet format --verify-no-changes`.
 
-with `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
+With `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
 agents (opt-in). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
 [Scripts and AI agents](agents.md).
 
@@ -783,11 +785,12 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   ```
 
   `stylebro-migrate` names the packages.config projects and says this in its report.
-- **`--diff` doesn't work** for `packages.config` projects: the copy it formats has no git-ignored `packages` folder,
-  and `dotnet restore` can't restore `packages.config`. It says so and stops. Other old-style projects preview like
-  `format` runs: unrestored, so the preview has no StyleBro changes for them, and it says which. Instead, on a clean working tree: run the command without
-  `--diff`, restore with MSBuild as above, run `stylebro-migrate format`, and review `git diff` (`git checkout .`
-  undoes it).
+- **`--diff` leaves `packages.config` projects out**: the copy it formats has no git-ignored `packages` folder, and
+  `dotnet restore` can't restore `packages.config`. It previews the other projects and names the ones it left out; only
+  when every project uses `packages.config` does it stop. Other old-style projects preview like `format` runs:
+  unrestored, so the preview has no StyleBro changes for them, and it says which. To see the changes in the
+  `packages.config` projects, on a clean working tree: run the command without `--diff`, restore with MSBuild as above,
+  run `stylebro-migrate format`, and review `git diff` (`git checkout .` undoes it).
 - If StyleCop came in through `packages.config` or an `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`
   hint path, `stylebro-migrate` reads its version there: rules that version doesn't have stay off.
 

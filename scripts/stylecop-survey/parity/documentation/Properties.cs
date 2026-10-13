@@ -38,5 +38,14 @@ namespace Probe
 
         /// <summary>Gets or initializes the set thing.</summary>
         public int SetThing { get; set; }
+
+        /// <summary>Sets the private-get thing.</summary>
+        public int PrivateGet { private get; set; }
+
+        /// <summary>Gets or sets the private-get name.</summary>
+        public int PrivateGetName { private get; set; }
+
+        /// <summary>Gets the internal-get thing.</summary>
+        public int InternalGet { internal get; set; }
     }
 }
