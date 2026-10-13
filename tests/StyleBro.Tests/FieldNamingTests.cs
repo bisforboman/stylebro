@@ -296,6 +296,7 @@ public class FieldNamingTests
                 this.pet = pet;
                 this.other = this.pet;
                 this.count = _count;
+                System.Action<int> set = _pet => this.pet = pet + _pet;
             }
         }
         """,
@@ -311,6 +312,7 @@ public class FieldNamingTests
                 _pet = pet;
                 this._other = _pet;
                 this._count = _count;
+                System.Action<int> set = _pet => this._pet = pet + _pet;
             }
         }
         """,
