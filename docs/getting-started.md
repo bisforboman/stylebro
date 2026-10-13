@@ -263,14 +263,18 @@ A few settings work a little differently:
   and modifiers they could have been combined with (not `var`, not fields with attributes). Mostly one by one: the rule
   stays on; mostly combined or mixed: it's turned off, so `format` doesn't split them. Locals and fields are counted apart:
   a repository may combine locals in hot loops and never fields.
+- **Combined attributes** ([BRO1102](rules/BRO1102.md)) count declarations with two or more attributes (not parameters
+  or type parameters): in one list (`[A, B]`) or one per list. Mostly one per list: the rule stays on; mostly combined or
+  mixed: it's turned off, so `format` doesn't split them.
 - **Summary wording** ([BRO1604](rules/BRO1604.md) for properties, [BRO1606](rules/BRO1606.md) for constructors) counts
   summaries that start the StyleCop way (`Gets ...`, `Gets or sets ...`; `Initializes a new instance of ...`) against
   ones in their own words (`The samples, ...`, `Whether ...`; `Opens a file ...`). Mostly the StyleCop way: the rule
   stays on; mostly their own words or mixed: it's turned off, so `format` doesn't reword public documentation. A summary
   that starts with an element (`<see cref="..."/>`) isn't counted.
 - **CSharpier**: when the repository uses [CSharpier](https://csharpier.com) (a `.csharpierrc`, `.csharpierrc.json`,
-  `.csharpierrc.yaml` or `.csharpierrc.yml` at the root, a `csharpier` tool in `.config/dotnet-tools.json` or
-  `dotnet-tools.json`, or a `CSharpier.MsBuild` package reference), the two formatters would undo each other's layout
+  `.csharpierrc.yaml` or `.csharpierrc.yml`, or a `csharpier` tool in `.config/dotnet-tools.json` or
+  `dotnet-tools.json`, at the root or in a solution's or project's folder or a folder above it; or a `CSharpier.MsBuild`
+  package reference), the two formatters would undo each other's layout
   (StabilityMatrix's pre-commit check rejected 161 files StyleBro had formatted). `init` then turns off IDE0055 (so
   `stylebro-migrate format` skips the whitespace pass) and every StyleBro rule for something CSharpier decides, and the
   layout conventions in the table are reported as `set` (`CSharpier formats it`). Off:
@@ -293,10 +297,13 @@ A few settings work a little differently:
   sections). `init` also writes `stylebro_layout_by = csharpier` and CSharpier's line width
   (`stylebro_layout_print_width`: `printWidth` from the `.csharpierrc`, else `max_line_length`, else 100): an `if` merged
   into the enclosing one ([BRO1149](rules/BRO1149.md)) gets its condition the way CSharpier writes it, and the brace
-  rules count a statement CSharpier will split over lines as multi-line, so its braces come in the same run. CSharpier
-  sorts using directives itself (System first): where your `.editorconfig` says `dotnet_sort_system_directives_first =
-  false` or `dotnet_separate_import_directive_groups = true`, `init` writes the opposite in its block (`dotnet format`
-  sorts usings whenever either key is set, so the two would reorder each other's usings). Run
+  rules count a statement CSharpier will split over lines as multi-line, so its braces come in the same run. When
+  CSharpier formats only one folder (its tool or config there, with C# code outside it), these settings go into that
+  folder's section (`[Source/**.cs]`) and the rest of the code is judged as usual. CSharpier
+  sorts using directives itself (System first), so `init` writes no sort key (`dotnet format` sorts usings whenever
+  `dotnet_sort_system_directives_first` or `dotnet_separate_import_directive_groups` is set, and its order differs from
+  CSharpier's in places: `App3._0` against `App3_0`). Where your `.editorconfig` sets one (`false`, or `true` for the
+  groups), `init` writes the closer value in its block: a key can't be unset. Run
   CSharpier after `format`: other fixes that rewrite code (attributes split, parentheses added) leave lines in StyleBro's
   layout, which CSharpier then lays out its way, and StyleBro leaves that alone: after CSharpier, `stylebro-migrate
   format` changes nothing more. `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro
@@ -406,6 +413,7 @@ A few settings work a little differently:
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
 | `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
 | Implicit `private` | members that are private by default, with or without `private` | [BRO1404](rules/BRO1404.md) | `dotnet_style_require_accessibility_modifiers` |
+| Combined attributes | `[A, B]` or one attribute per list | [BRO1102](rules/BRO1102.md) | `dotnet_diagnostic.BRO1102.severity` |
 | Combined locals | `int a, b;` or one local per declaration | [BRO1142](rules/BRO1142.md) | `dotnet_diagnostic.BRO1142.severity` |
 | Combined fields | `int _a, _b;` or one field per declaration | [BRO1114](rules/BRO1114.md) | `dotnet_diagnostic.BRO1114.severity` |
 | Type names | files with only keywords (`int`) or framework names (`Int32`) | IDE0049 | `dotnet_diagnostic.IDE0049.severity` |

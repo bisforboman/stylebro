@@ -70,9 +70,9 @@ public sealed partial class MigrationTests
     {
         // actions/runner: RunnerService.csproj has no packages.config, yet --diff refused with the packages.config explanation.
         Write("Old/Old.csproj", "<?xml version=\"1.0\"?>\n<Project ToolsVersion=\"15.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\" />\n");
-        Write("New/New.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
         Write("App.sln", string.Empty);
 
+        // Alone: with another project, a packages.config one isn't refused either (trial 16).
         var error = CaptureError(() => Capture(() => Assert.Throws<InvalidOperationException>(() => PreviewCommand.Run("format", new[] { root, "--diff" }, (_, _) => throw new InvalidOperationException("format ran")))));
         Assert.DoesNotContain("packages.config", error, StringComparison.Ordinal);
     }

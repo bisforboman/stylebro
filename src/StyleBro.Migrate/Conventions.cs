@@ -173,6 +173,7 @@ internal static class Conventions
         new(PropertySummaryKey, "property summaries", "warning", ("warning", "starting with 'Gets'/'Sets'"), ("none", "in their own words"), Off(DiagnosticIds.PropertySummaryWording)) { Unit = "summary" },
         new(ConstructorSummaryKey, "constructor summaries", "warning", ("warning", "with the standard sentence"), ("none", "in their own words"), Off(DiagnosticIds.ConstructorSummary)) { Unit = "summary" },
         new(CombinedLocalsKey, "adjacent locals of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedLocals)),
+        new(CombinedAttributesKey, "declarations with 2+ attributes", "warning", ("warning", "one per list ('[A]' '[B]')"), ("none", "combined ('[A, B]')"), Off(DiagnosticIds.CombinedAttributes)),
         new(CombinedFieldsKey, "adjacent fields of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedFields)),
         new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
         new(RelativeUsingsKey, "usings inside a namespace", "warning", ("warning", "fully qualified"), ("none", "relative ('using Common;')"), Off(DiagnosticIds.QualifiedUsing)) { Unit = "using" },
@@ -297,6 +298,12 @@ internal static class Conventions
     /// <summary>BRO1606's severity: constructor summaries with the standard sentence ('Initializes a new instance of ...') or in their own words ('Opens a file ...').</summary>
     private const string ConstructorSummaryKey = "dotnet_diagnostic." + DiagnosticIds.ConstructorSummary + ".severity";
 
+    /// <summary>
+    /// BRO1102's severity: declarations with two or more attributes, combined in a list ('[A, B]') or one per list (tusdotnet:
+    /// 76 combined and 42 separate, and BRO1102 split 75 lists). Not parameters or type parameters (BRO1102 leaves them).
+    /// </summary>
+    private const string CombinedAttributesKey = "dotnet_diagnostic." + DiagnosticIds.CombinedAttributes + ".severity";
+
     /// <summary>BRO1114's severity: fields declared together ('int _rate, _channels;') or one by one, counted like <see cref="CombinedLocalsKey"/>.</summary>
     private const string CombinedFieldsKey = "dotnet_diagnostic." + DiagnosticIds.CombinedFields + ".severity";
 
@@ -349,30 +356,64 @@ internal static class Conventions
         "String", "Object", "Boolean", "Char", "Byte", "SByte", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Single", "Double", "Decimal",
     };
 
+    /// <summary>CSharpier's configuration files.</summary>
+    private static readonly string[] CSharpierConfigs = { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" };
+
     /// <summary>The SDK formatter's options (IDE0055's): with CSharpier they don't apply.</summary>
     private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey };
 
     /// <summary>
-    /// What shows that CSharpier formats the repository (a file, relative to the root), or null: a .csharpierrc(.json/.yaml/.yml),
-    /// a 'csharpier' tool in [.config/]dotnet-tools.json, or a CSharpier.MsBuild package reference in an MSBuild file.
+    /// What shows that CSharpier formats the repository (a file, relative to the root), or null: a .csharpierrc(.json/.yaml/.yml)
+    /// or a 'csharpier' tool in [.config/]dotnet-tools.json in the root or a folder the code is run from (a solution's or a
+    /// project's folder, or one above it: tusdotnet keeps its solution and tool manifest under Source/), or a CSharpier.MsBuild
+    /// package reference in an MSBuild file.
     /// </summary>
-    public static string? CSharpier(string root)
+    public static string? CSharpier(string root) => CSharpierScope(root)?.Evidence;
+
+    /// <summary>
+    /// <see cref="CSharpier"/>'s evidence and the folder CSharpier formats (relative to the root, '/'-separated): empty when it
+    /// covers every C# file under the root (tusdotnet: all its code is under Source/, so the whole repository), else that
+    /// folder, whose own section gets the CSharpier settings.
+    /// </summary>
+    public static (string Evidence, string Folder)? CSharpierScope(string root)
     {
-        if (new[] { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" }.FirstOrDefault(f => File.Exists(Path.Combine(root, f))) is { } config)
+        var files = StyleCopSetup.EnumerateFiles(root).ToList();
+        string Relative(string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
+        var folders = files.Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf" or ".csproj")
+            .SelectMany(f => Ancestors(Path.GetDirectoryName(f)!))
+            .Prepend(root)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(f => f.Length);
+        string? evidence = null;
+        foreach (var folder in folders)
         {
-            return config;
+            evidence = CSharpierConfigs.Select(f => Path.Combine(folder, f)).FirstOrDefault(File.Exists)
+                ?? new[] { Path.Combine(folder, ".config", "dotnet-tools.json"), Path.Combine(folder, "dotnet-tools.json") }
+                    .FirstOrDefault(f => File.Exists(f) && System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(f), @"""csharpier""", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+            if (evidence is not null)
+            {
+                break;
+            }
         }
 
-        if (new[] { Path.Combine(".config", "dotnet-tools.json"), "dotnet-tools.json" }
-            .FirstOrDefault(f => File.Exists(Path.Combine(root, f)) && System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(Path.Combine(root, f)), @"""csharpier""", System.Text.RegularExpressions.RegexOptions.IgnoreCase)) is { } tools)
+        evidence ??= files.Where(StyleCopSetup.IsMSBuild).FirstOrDefault(f => File.ReadAllText(f).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase));
+        if (evidence is null)
         {
-            return tools.Replace('\\', '/');
+            return null;
         }
 
-        return StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild)
-            .FirstOrDefault(f => File.ReadAllText(f).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase)) is { } project
-            ? Path.GetRelativePath(root, project).Replace('\\', '/')
-            : null;
+        var scope = Relative(CSharpierFolder(evidence));
+        scope = scope == "." ? string.Empty : scope;
+        var covers = scope.Length == 0 || files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).All(f => Relative(f).StartsWith(scope + "/", StringComparison.OrdinalIgnoreCase));
+        return (Relative(evidence), covers ? string.Empty : scope);
+
+        IEnumerable<string> Ancestors(string folder)
+        {
+            for (var f = folder; f.Length >= root.Length && f.StartsWith(root, StringComparison.OrdinalIgnoreCase); f = Path.GetDirectoryName(f)!)
+            {
+                yield return f;
+            }
+        }
     }
 
     /// <summary>
@@ -381,12 +422,13 @@ internal static class Conventions
     /// so (stylebro_layout_by, and CSharpier's line width: <see cref="CSharpierPrintWidth"/>), so a fix that rewrites code lays
     /// it out as CSharpier would where it can, and the brace rules judge a statement by how CSharpier will break it.
     /// </summary>
-    public static (List<string> Lines, string Report) CSharpierLines(string evidence, string root, IReadOnlyDictionary<string, string>? settings)
+    public static (List<string> Lines, string Report) CSharpierLines(string evidence, string root, IReadOnlyDictionary<string, string>? settings, string folder = "")
     {
-        var lines = new List<string> { $"# init: CSharpier formats this repository ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
+        var what = folder.Length == 0 ? "this repository" : folder + "/";
+        var lines = new List<string> { $"# init: CSharpier formats {what} ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
         lines.AddRange(CSharpierRules.Select(Off));
         lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.Key} = csharpier");
-        lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.WidthKey} = {CSharpierPrintWidth(root, settings)}");
+        lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.WidthKey} = {CSharpierPrintWidth(CSharpierFolder(Path.Combine(root, evidence)), settings, root)}");
         lines.AddRange(CSharpierUsingLines(settings));
         return (lines, $"  {"off",-8} CSharpier ({evidence}) -> IDE0055 and {CSharpierRules.Length - 1} layout rules are off: {string.Join(", ", CSharpierRules.Skip(1))}");
     }
@@ -415,12 +457,21 @@ internal static class Conventions
     }
 
     /// <summary>
-    /// CSharpier's line width: printWidth from the .csharpierrc (CSharpier then ignores .editorconfig), else the
-    /// .editorconfig's max_line_length (<paramref name="settings"/>), else CSharpier's default (100).
+    /// CSharpier's line width for the code under <paramref name="folder"/>: printWidth from the nearest .csharpierrc at or above
+    /// it, up to <paramref name="root"/> (CSharpier then ignores .editorconfig), else the .editorconfig's max_line_length
+    /// (<paramref name="settings"/>), else CSharpier's default (100).
     /// </summary>
-    public static int CSharpierPrintWidth(string root, IReadOnlyDictionary<string, string>? settings)
+    public static int CSharpierPrintWidth(string folder, IReadOnlyDictionary<string, string>? settings, string? root = null)
     {
-        if (new[] { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" }.Select(f => Path.Combine(root, f)).FirstOrDefault(File.Exists) is { } config)
+        // CSharpier reads the nearest .csharpierrc above a file: from the folder it formats up to the root.
+        root ??= folder;
+        var configs = new List<string>();
+        for (var f = folder; f is not null && f.StartsWith(root, StringComparison.OrdinalIgnoreCase); f = Path.GetDirectoryName(f))
+        {
+            configs.AddRange(CSharpierConfigs.Select(c => Path.Combine(f, c)));
+        }
+
+        if (configs.FirstOrDefault(File.Exists) is { } config)
         {
             return System.Text.RegularExpressions.Regex.Match(File.ReadAllText(config), @"printWidth""?\s*:\s*(\d+)") is { Success: true } match
                 ? int.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture)
@@ -1153,6 +1204,17 @@ internal static class Conventions
                 }
             }
 
+            // Attributes: once per declaration (at its first list) with 2+ in the lists of one target.
+            if (node is AttributeListSyntax attributeList && attributeList.Parent is { } owner and not (ParameterSyntax or TypeParameterSyntax or CompilationUnitSyntax)
+                && owner.ChildNodes().OfType<AttributeListSyntax>().First() == attributeList)
+            {
+                var lists = owner.ChildNodes().OfType<AttributeListSyntax>().Where(l => l.Target?.Identifier.Text == attributeList.Target?.Identifier.Text).ToList();
+                if (lists.Sum(l => l.Attributes.Count) > 1)
+                {
+                    Add(CombinedAttributesKey, lists.Any(l => l.Attributes.Count > 1));
+                }
+            }
+
             if (node is FieldDeclarationSyntax or LocalDeclarationStatementSyntax)
             {
                 var key = node is FieldDeclarationSyntax ? CombinedFieldsKey : CombinedLocalsKey;
@@ -1790,18 +1852,19 @@ internal static class Conventions
                 (tag, verdict) = ("off", $"{rule} is off");
                 summary.Unfollowed.Add($"{rule} ({convention.What}: {found})");
                 lines.Add(convention.KeepAny
-                    ? $"# init: {convention.What}: {Plural(count[winner], convention.Unit)} in your code ({MinimumAgreeing} are enough to keep them: {convention.Keeps}), so {rule} is off. To turn it on: remove the next line."
+                    ? $"# init: {convention.What}: kept, because your code has some ({Plural(count[winner], convention.Unit)}; any {MinimumAgreeing} keep them: {convention.Keeps}), so {rule} is off. To turn it on: remove the next line."
                     : $"# init: {convention.What}: {count[winner]} of {total} in your code are {convention.Values[winner].Label}, so {rule} is off. To turn it on: remove the next line.");
                 lines.Add(offLine);
             }
             else
             {
                 var value = convention.Values[winner].Value;
-                (tag, verdict) = ("kept", value);
+                (tag, verdict) = ("kept", convention.KeepAny ? $"{value} ({MinimumAgreeing} are enough)" : value);
                 summary.Written.Add(convention.Key);
-                lines.Add($"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code"
-                    + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced)" : string.Empty)
-                    + (convention.KeepAny ? $" ({MinimumAgreeing} are enough to keep them: {convention.Keeps})" : string.Empty));
+                lines.Add((convention.KeepAny
+                        ? $"# init: {convention.What}: allowed, because your code has some ({count[winner]} of {Plural(total, convention.Unit)} {convention.Values[winner].Label}; any {MinimumAgreeing} keep them allowed: {convention.Keeps})"
+                        : $"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code")
+                    + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced)" : string.Empty));
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
 
@@ -1816,7 +1879,7 @@ internal static class Conventions
             });
         }
 
-        DecideUsings(counts, isSet, lines, report, summary, repository);
+        DecideUsings(counts, decided, isSet, lines, report, summary, repository);
         DecideStaticCasing(counts, decided, isSet, lines, report, summary);
         DecideSpacing(counts, spacing, repository, lines, report, summary);
 
@@ -1898,12 +1961,19 @@ internal static class Conventions
     public static string SpacingCountKey((string Key, string? Flag, string What, string Default, string Other) aspect) =>
         "spacing: " + aspect.Key + (aspect.Flag is null ? string.Empty : "=" + aspect.Flag);
 
+    /// <summary>The folder a piece of <see cref="CSharpier"/>'s evidence applies to: its own, or the one above '.config'.</summary>
+    private static string CSharpierFolder(string evidence)
+    {
+        var folder = Path.GetDirectoryName(evidence)!;
+        return Path.GetFileName(folder) == ".config" ? Path.GetDirectoryName(folder)! : folder;
+    }
+
     /// <summary>
     /// The using order (<see cref="SortUsingsKey"/>): sorted files -> the key (System first unless the files that tell the
     /// two apart clearly don't), unsorted or mixed -> no key, so 'dotnet format' leaves them alone; too few files -> StyleBro's
     /// default (sorted, System first). A key the repository sets wins.
     /// </summary>
-    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary, IReadOnlyDictionary<string, string>? repository = null)
+    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary, IReadOnlyDictionary<string, string>? repository = null)
     {
         const string What = UsingsWhat;
         if (!counts.TryGetValue(UsingsKey, out var c))
@@ -1914,6 +1984,17 @@ internal static class Conventions
         var (sorted, unsorted) = (c[0] + c[1] + c[2], c[3]);
         var (total, apart) = (sorted + unsorted, c[0] + c[1]);
         var found = $"{sorted} of {Plural(total, "file")} sorted" + (apart > 0 ? $", {c[0]} of {apart} with System first" : string.Empty);
+        if (isSet?.Invoke(SortUsingsKey) != true && isSet?.Invoke("dotnet_separate_import_directive_groups") != true && decided.TryGetValue(SortUsingsKey, out var reason))
+        {
+            // Another tool sorts them (CSharpier): no key, so 'dotnet format' leaves them alone.
+            if (total > 0)
+            {
+                report.Add($"  {"set",-8} {What}: {found} -> {reason}");
+            }
+
+            return;
+        }
+
         if (isSet?.Invoke(SortUsingsKey) == true || isSet?.Invoke("dotnet_separate_import_directive_groups") == true)
         {
             if (total > 0)
