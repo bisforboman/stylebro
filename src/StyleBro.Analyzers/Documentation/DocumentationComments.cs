@@ -46,14 +46,14 @@ internal static class DocumentationComments
     ];
 
     /// <summary>
-    /// Whether the comment's XML is malformed: the parser reported an error (only when the project generates documentation),
-    /// or an element isn't closed by its own end tag. 'IComparable&lt;T&gt; can use it' in prose starts an element 'T' that takes
-    /// the summary's end tag, so the rules that edit text would guess where it ends (BRO1603 wrote 'IComparable.&lt;T&gt;' in
-    /// GuardClauses). The rules that edit text skip such a comment; a person fixes the XML.
+    /// Whether the comment's XML is malformed: an element isn't closed by its own end tag. 'IComparable&lt;T&gt; can use it' in
+    /// prose starts an element 'T' that takes the summary's end tag, so the rules that edit text would guess where it ends
+    /// (BRO1603 wrote 'IComparable.&lt;T&gt;' in GuardClauses). The rules that edit text skip such a comment; a person fixes
+    /// the XML. Judged by the end tags only, not the parser's errors: those exist only when the project generates
+    /// documentation, and the same comment would be judged differently with and without it.
     /// </summary>
     public static bool IsMalformed(DocumentationCommentTriviaSyntax documentation) =>
-        documentation.ContainsDiagnostics
-        || documentation.DescendantNodes().OfType<XmlElementSyntax>().Any(e => e.EndTag.IsMissing || e.EndTag.Name.LocalName.ValueText != e.StartTag.Name.LocalName.ValueText);
+        documentation.DescendantNodes().OfType<XmlElementSyntax>().Any(e => e.EndTag.IsMissing || e.EndTag.Name.LocalName.ValueText != e.StartTag.Name.LocalName.ValueText);
 
     /// <summary>Whether the declaration has a documentation comment ('///' or '/**') before it.</summary>
     public static bool HasDocumentation(SyntaxNode member)
