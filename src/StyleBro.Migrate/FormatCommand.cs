@@ -1255,14 +1255,26 @@ internal static class FormatCommand
     /// </summary>
     internal static void CopyAnalyzerOutputs(string path, string source, string copy)
     {
+        // Only where an MSBuild file names one (the copy holds just the tracked files): evaluating every project costs ~1 s each.
         var workspace = File.Exists(path) ? path : BaselineCommand.FindWorkspace(path) is { } found ? Path.Combine(path, found) : null;
-        if (workspace is null)
+        if (workspace is null || !Directory.EnumerateFiles(copy, "*", SearchOption.AllDirectories).Where(StyleCopSetup.IsMSBuild).Any(f => File.ReadAllText(f).Contains("OutputItemType", StringComparison.OrdinalIgnoreCase)))
         {
             return;
         }
 
+        string[] generators;
+        try
+        {
+            generators = ReadProjects(Path.GetFullPath(workspace)).Values.SelectMany(p => p.Analyzers).Distinct(StringComparer.OrdinalIgnoreCase).Where(File.Exists).ToArray();
+        }
+        catch (ToolException)
+        {
+            // The run on the copy reports a workspace MSBuild can't evaluate itself.
+            return;
+        }
+
         var sourceRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(source)) + Path.DirectorySeparatorChar;
-        foreach (var project in ReadProjects(Path.GetFullPath(workspace)).Values.SelectMany(p => p.Analyzers).Distinct(StringComparer.OrdinalIgnoreCase).Where(File.Exists))
+        foreach (var project in generators)
         {
             // A multi-targeted project's outer TargetDir has no framework folder: every framework's output goes along.
             string output;
