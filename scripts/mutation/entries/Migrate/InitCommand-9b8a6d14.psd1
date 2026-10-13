@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/InitCommand.cs'
     Find = '&& (first == i || Topic(previous[first - 1]) == Topic(previous[i - 1]))'
     Replace = ''
-    Tests = 'FullyQualifiedName~MigrationTests.KeptLines_LeaveAnotherTopicsCommentAbove|FullyQualifiedName~MigrationTests.Init_ACommentOnlyUsingVerdict_IsWrittenOnceInItsPlace'
+    Tests = 'MigrationTests.KeptLines_LeaveAnotherTopicsCommentAbove'
 }

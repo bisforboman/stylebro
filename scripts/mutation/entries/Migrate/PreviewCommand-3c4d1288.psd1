@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/PreviewCommand.cs'
     Find = 'if (!inComment && !line.EndsWith("-->", StringComparison.Ordinal))'
     Replace = 'if (true)'
-    Tests = 'FullyQualifiedName~MigrationTests.ThePackageVersion_DoesNotSplitACommentFromItsItem'
+    Tests = 'MigrationTests.ThePackageVersion_DoesNotSplitACommentFromItsItem'
 }

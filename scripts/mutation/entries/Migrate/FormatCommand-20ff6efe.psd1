@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
     Find = 'after.Where(a => before.TryGetValue(a.Key, out var b) && b != a.Value)'
     Replace = 'after.Where(a => !before.TryGetValue(a.Key, out var b) || b != a.Value)'
-    Tests = 'FullyQualifiedName~MigrationTests.Format_CountsTheFilesARunChanged'
+    Tests = 'MigrationTests.Format_CountsTheFilesARunChanged'
 }

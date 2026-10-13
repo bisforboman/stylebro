@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/StyleCopSetup.cs'
     Find = 'var check = uses.Count > 1 || !uses.Values.Contains(true)'
     Replace = 'var check = !uses.Values.Contains(true)'
-    Tests = 'FullyQualifiedName~MigrationTests.WithSeveralProjects_MSBuildDecidesForEveryOne'
+    Tests = 'MigrationTests.WithSeveralProjects_MSBuildDecidesForEveryOne'
 }

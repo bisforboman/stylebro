@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/InitCommand.cs'
     Find = 'in {props}.");'
     Replace = 'in Directory.Build.props.");'
-    Tests = 'FullyQualifiedName~MigrationTests.Init_NamesTheDirectoryBuildPropsTheProjectsImport'
+    Tests = 'MigrationTests.Init_NamesTheDirectoryBuildPropsTheProjectsImport'
 }
