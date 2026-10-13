@@ -243,6 +243,37 @@ internal static class Program
             }
         }
 
+        // The whitespace keys a nearer .editorconfig decides: init's block there (null: a stale one goes).
+        foreach (var (source, lines) in result.Whitespace)
+        {
+            var file = source + "/.editorconfig";
+            var path = Path.Combine(root, source, ".editorconfig");
+            if (lines is null)
+            {
+                if (write)
+                {
+                    PreviewCommand.EditFile(path, existing => InitCommand.RemoveWhitespaceBlock(existing ?? string.Empty));
+                }
+
+                Console.WriteLine(write ? $"Removed the whitespace block from {file}: it no longer decides those settings." : $"== {file}: its stylebro-whitespace block is no longer needed (--write removes it)");
+                continue;
+            }
+
+            var block = InitCommand.WhitespaceBlock(lines);
+            JsonReport.AddSettings(file, block);
+            if (write)
+            {
+                PreviewCommand.EditFile(path, existing => Migration.Apply(existing, block, InitCommand.WhitespaceBegin, InitCommand.WhitespaceEnd));
+                Console.WriteLine($"Wrote the whitespace settings it decides to {file}.");
+            }
+            else
+            {
+                Console.WriteLine($"== {file}");
+                Console.Write(block);
+                Console.WriteLine();
+            }
+        }
+
         // Every Directory.Build.props a project imports where StyleCop runs (a nested one shadows the root's): elsewhere no
         // settings are written, so the preset stays (vs-validation's tests).
         foreach (var props in Migration.PropsFiles(root, setup.Folders))

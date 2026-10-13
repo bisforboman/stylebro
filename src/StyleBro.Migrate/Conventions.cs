@@ -679,9 +679,11 @@ internal static class Conventions
     /// don't count). The end_of_line line when the files clearly agree (none when mixed or too few), and what to report
     /// (null without C# files).
     /// </summary>
-    public static (string? Line, string? Report) LineEndings(string root)
+    public static (string? Line, string? Report) LineEndings(string root) => LineEndings(EndingCounts(root));
+
+    /// <summary><see cref="LineEndings(string)"/> from counts (<see cref="EndingCounts"/>), e.g. without the files a nearer .editorconfig decides.</summary>
+    public static (string? Line, string? Report) LineEndings(IReadOnlyDictionary<string, int[]> counts)
     {
-        var counts = EndingCounts(root);
         var (lf, crlf) = (counts[EndOfLineKey][0], counts[EndOfLineKey][1]);
         if (lf + crlf + counts[ConvertedKey].Sum() == 0)
         {
@@ -753,16 +755,17 @@ internal static class Conventions
     /// Windows checkout has CRLF, so IDE0055 at error failed the build 266 times and 'format' rewrote 205 files to LF (4
     /// tests compare against "\r\n"). Then the generated settings unset end_of_line for C# files ('format' and IDE0055 leave
     /// the checkout's endings alone, probed with dotnet format and the build), IDE0055 is a suggestion, and the report says
-    /// how to settle it. Null without a contradiction; <paramref name="own"/>: <see cref="Migration.OwnSettings"/>.
+    /// how to settle it. Null without a contradiction; <paramref name="own"/>: <see cref="Migration.OwnSettings"/>;
+    /// <paramref name="excluded"/>: how many of those files a nearer .editorconfig decides end_of_line for (<see cref="FileSettings"/>).
     /// </summary>
-    public static (List<string> Lines, string Report)? EndingContradiction(string root, IReadOnlyDictionary<string, string> own)
+    public static (List<string> Lines, string Report)? EndingContradiction(string root, IReadOnlyDictionary<string, string> own, int excluded = 0)
     {
         if (!own.TryGetValue(EndOfLineKey, out var value) || value.ToLowerInvariant() is not ("lf" or "crlf") || PreviewCommand.Git(root, "ls-files", "--eol", "-z", "--", "*.cs") is not (0, var output))
         {
             return null;
         }
 
-        return EndingContradiction(value.ToLowerInvariant(), PickedPerMachine(output));
+        return EndingContradiction(value.ToLowerInvariant(), PickedPerMachine(output) - excluded);
     }
 
     /// <summary>
@@ -905,7 +908,7 @@ internal static class Conventions
 
     /// <summary>
     /// The lines (comment first) and the report note when the end_of_line one .editorconfig sets (<paramref name="value"/>, for
-    /// C# files) meets <paramref name="picked"/> C# files that git gives each machine's ending (<see cref="EndingContradiction(string, IReadOnlyDictionary{string, string})"/>),
+    /// C# files) meets <paramref name="picked"/> C# files that git gives each machine's ending (<see cref="EndingContradiction(string, IReadOnlyDictionary{string, string}, int)"/>),
     /// or null. <paramref name="file"/>: the .editorconfig that says it, when it isn't the root's.
     /// </summary>
     public static (List<string> Lines, string Report)? EndingContradiction(string value, int picked, string? file = null)

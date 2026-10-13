@@ -175,7 +175,11 @@ internal static class InitCommand
                     Console.WriteLine(target.Prefix + (target.Migrated ? MigratedLine : PresentLine));
                 }
 
-                if (!target.HasBlock || !target.HasModernize)
+                if (target.Block.Length == 0)
+                {
+                    Console.WriteLine($"== {target.Name}: its stylebro-whitespace block is no longer needed (run with --write to remove it)");
+                }
+                else if (!target.HasBlock || !target.HasModernize)
                 {
                     Console.WriteLine($"== {target.Name} (run with --write to add it)");
                 }
@@ -196,6 +200,11 @@ internal static class InitCommand
             if (target.HasBlock)
             {
                 Console.WriteLine(target.Prefix + (target.Migrated ? MigratedLine : PresentLine));
+            }
+            else if (target.Block.Length == 0)
+            {
+                text = RemoveWhitespaceBlock(text);
+                Console.WriteLine($"Removed the whitespace block from {target.Name}: it no longer decides those settings.");
             }
             else
             {
@@ -573,6 +582,23 @@ internal static class InitCommand
         return end < 0 ? [] : text.Substring(begin, end - begin).Split('\n').Skip(1).Where(l => l.Trim().Length > 0 && !l.TrimStart().StartsWith('[')).ToList();
     }
 
+    /// <summary>
+    /// The folders (relative to <paramref name="root"/>) whose .editorconfig has a whitespace block that <paramref name="nested"/>
+    /// no longer writes: the file stopped deciding a key (removed, or 'unset'), so the block is stale and goes, else a later
+    /// run would keep it forever.
+    /// </summary>
+    public static List<string> StaleWhitespace(string root, IReadOnlyDictionary<string, List<string>> nested) =>
+        StyleCopSetup.EnumerateFiles(root, ownRoot: true)
+            .Where(f => Path.GetFileName(f) == ".editorconfig")
+            .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+            .Where(s => s != "." && !nested.ContainsKey(s) && File.ReadAllText(Path.Combine(root, s, ".editorconfig")).Contains(WhitespaceBegin, StringComparison.Ordinal))
+            .Order(StringComparer.Ordinal)
+            .ToList();
+
+    /// <summary>The .editorconfig text without its whitespace block (and the blank line above it).</summary>
+    public static string RemoveWhitespaceBlock(string text) =>
+        Regex.Replace(text.Replace("\r\n", "\n"), $@"\n*{Regex.Escape(WhitespaceBegin)}.*?{Regex.Escape(WhitespaceEnd)}[^\n]*\n?", "\n", RegexOptions.Singleline);
+
     /// <summary>The block for a nested .editorconfig's whitespace lines (<see cref="NestedWhitespace"/>).</summary>
     public static string WhitespaceBlock(IEnumerable<string> lines) =>
         WhitespaceBegin + " (stylebro-migrate init: whitespace settings this file decides for C# files; edits inside are replaced)\n[*.cs]\n"
@@ -890,7 +916,7 @@ internal static class InitCommand
         {
             var (lines, report, nestedLines) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
             detected = lines;
-            nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).ToList();
+            nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
             if (report.Count > 0)
             {
                 Console.WriteLine($"{DetectedHeader}{(prefix.Length == 0 ? string.Empty : " under " + prefix)} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
@@ -945,14 +971,21 @@ internal static class InitCommand
         };
     }
 
-    /// <summary>The whitespace block for an .editorconfig below <paramref name="root"/> (<paramref name="source"/>: its folder) that decides a key itself.</summary>
-    private static Target NestedTarget(string root, string prefix, string source, List<string> lines)
+    /// <summary>
+    /// The whitespace block for an .editorconfig below <paramref name="root"/> (<paramref name="source"/>: its folder) that decides
+    /// a key itself; <paramref name="lines"/> null: its stale block goes (<see cref="StaleWhitespace"/>, an empty block).
+    /// </summary>
+    private static Target NestedTarget(string root, string prefix, string source, List<string>? lines)
     {
         var path = Path.Combine(root, source, ".editorconfig");
         var existing = File.ReadAllText(path);
-        var block = WhitespaceBlock(lines);
+        var block = lines is null ? string.Empty : WhitespaceBlock(lines);
         var name = prefix + source + "/.editorconfig";
-        JsonReport.AddSettings(name, block);
+        if (lines is not null)
+        {
+            JsonReport.AddSettings(name, block);
+        }
+
         var plain = existing.Replace("\r\n", "\n");
         return new Target
         {
@@ -964,7 +997,7 @@ internal static class InitCommand
             Begin = WhitespaceBegin,
             End = WhitespaceEnd,
             ModernizeNotes = [],
-            HasBlock = Migration.Apply(plain, block, WhitespaceBegin, WhitespaceEnd) == plain,
+            HasBlock = lines is not null && Migration.Apply(plain, block, WhitespaceBegin, WhitespaceEnd) == plain,
             HasModernize = true,
         };
     }
