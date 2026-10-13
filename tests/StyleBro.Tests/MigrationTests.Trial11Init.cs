@@ -82,6 +82,11 @@ public sealed partial class MigrationTests
         output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
         Assert.Contains("  set      private constants/static readonly fields: 6 fields -> a dotnet_naming_rule decides", output, StringComparison.Ordinal);
         Assert.DoesNotContain("BRO1306.severity = none", output, StringComparison.Ordinal);
+
+        // A rule nothing enforces (IDE1006 off) doesn't decide: the code does again.
+        Write(".editorconfig", File.ReadAllText(Path.Combine(root, ".editorconfig")) + "dotnet_diagnostic.IDE1006.severity = none\n");
+        output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
+        Assert.Contains("\ndotnet_diagnostic.BRO1306.severity = none\n", output, StringComparison.Ordinal);
     }
 
     [Fact]

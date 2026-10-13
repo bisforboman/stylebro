@@ -1278,6 +1278,61 @@ public class FieldNamingTests
         dotnet_naming_style.camel.capitalization = camel_case
         """);
 
+    // A naming rule nothing enforces doesn't decide non-private fields (owner's decision 2026-10-13): with IDE1006 off,
+    // YamlDotNet's camelCase rule for internal and protected fields leaves StyleCop's defaults (PascalCase for internal).
+    [Fact]
+    public Task NamingRules_NotEnforced_LeaveStyleCopsDefaults() => VerifyFixAsync(
+        """
+        public class C
+        {
+            internal int {|BRO1306:namingConvention|};
+            protected int depth;
+
+            public int Sum() => namingConvention + depth;
+        }
+        """,
+        """
+        public class C
+        {
+            internal int NamingConvention;
+            protected int depth;
+
+            public int Sum() => NamingConvention + depth;
+        }
+        """,
+        YamlDotNetNamingRules + "\ndotnet_diagnostic.IDE1006.severity = none");
+
+    // IDE1006's own severity enforces a rule whose severity is silent; without it the silent rule doesn't count.
+    [Theory]
+    [InlineData("dotnet_diagnostic.IDE1006.severity = warning", "{|BRO1303:Value|}", "Value", "value")]
+    [InlineData("", "{|BRO1306:value|}", "value", "Value")]
+    public Task NamingRules_EnforcedByIde1006(string ide1006, string declared, string before, string after) => VerifyFixAsync(
+        $$"""
+        public class C
+        {
+            internal int {{declared}};
+
+            public int Get() => {{before}};
+        }
+        """,
+        $$"""
+        public class C
+        {
+            internal int {{after}};
+
+            public int Get() => {{after}};
+        }
+        """,
+        $"""
+        dotnet_naming_rule.internal_fields.severity = silent
+        dotnet_naming_rule.internal_fields.symbols = internal_fields
+        dotnet_naming_rule.internal_fields.style = camel
+        dotnet_naming_symbols.internal_fields.applicable_kinds = field
+        dotnet_naming_symbols.internal_fields.applicable_accessibilities = internal
+        dotnet_naming_style.camel.capitalization = camel_case
+        {ide1006}
+        """);
+
     [Fact]
     public Task NothingIsRenamedToField_ACSharp14KeywordInAccessors() => VerifyNoDiagnosticsAsync(
         """

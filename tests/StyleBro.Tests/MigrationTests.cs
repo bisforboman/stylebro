@@ -836,6 +836,11 @@ public sealed partial class MigrationTests : IDisposable
         var single = FormatCommand.ParseProject("""{ "Properties": { "TargetFrameworks": "", "TargetFramework": "net8.0" }, "Items": { "ProjectReference": [ { "Identity": "../Lib/Lib.csproj", "FullPath": "C:/r/Lib/Lib.csproj" } ] } }""");
         Assert.Equal(new[] { "net8.0" }, single.Frameworks);
         Assert.Equal(new[] { "C:/r/Lib/Lib.csproj" }, single.References);
+        Assert.Empty(single.Analyzers);
+
+        // An in-solution source generator (Mapperly): its build output goes into verify's copy.
+        var generator = FormatCommand.ParseProject("""{ "Items": { "ProjectReference": [ { "FullPath": "C:/r/Lib/Lib.csproj", "OutputItemType": "" }, { "FullPath": "C:/r/Gen/Gen.csproj", "OutputItemType": "Analyzer" } ] } }""");
+        Assert.Equal(new[] { "C:/r/Gen/Gen.csproj" }, generator.Analyzers);
 
         Assert.Equal(new[] { "src/Lib/" }, FormatCommand.Include(root, root, new[] { Path.Combine("src", "Lib", "Lib.csproj"), Path.Combine("src", "Lib", "Other.csproj") }));
         Assert.Equal(new[] { "**/*.cs" }, FormatCommand.Include(root, root, new[] { "App.csproj" }));

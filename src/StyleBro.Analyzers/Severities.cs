@@ -22,6 +22,15 @@ internal static class Severities
         .GroupBy(d => d.Id)
         .ToDictionary(g => g.Key, g => g.First().IsEnabledByDefault);
 
+    /// <summary>The severity a file's settings give an id (also an SDK rule's, 'IDE1006'), or null when nothing sets it.</summary>
+    public static ReportDiagnostic? Configured(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken) =>
+        compilationOptions?.SyntaxTreeOptionsProvider is { } provider
+            && (provider.TryGetDiagnosticValue(tree, id, cancellationToken, out var severity) || provider.TryGetGlobalDiagnosticValue(id, cancellationToken, out severity))
+            ? severity
+            : compilationOptions is not null && compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity) && severity != ReportDiagnostic.Default
+            ? severity
+            : null;
+
     public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool? enabledByDefault = null)
     {
         var byDefault = enabledByDefault ?? (!Defaults.TryGetValue(id, out var known) || known);
