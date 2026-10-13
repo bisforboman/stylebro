@@ -106,11 +106,11 @@ public class DocumentationStyleTests
         /// <summary>
         /// Not keywords: <c>Null</c>, <c>value</c>, <c>get</c>, <c>__arglist</c>; more than a keyword: <c>null!</c>,
         /// <c> null </c>, <c>x is null</c>, <c>null&amp;&amp;</c>, <c>null<b>x</b></c>; an attribute: <c lang="cs">null</c>; in code:
-        /// <code>null</code>, <code><c>null</c></code>; not <c>: <i>null</i>; already: <see langword="null"/>.
+        /// <code>null</code>, <code><c>null</c></code>; not c: <i>null</i>; already: <see langword="null"/>.
         /// </summary>
         public class C
         {
-            /// <summary>Malformed: <c>null</C>, <C>null</c>.</summary>
+            /// <summary>Malformed: <c>null</C>, <C>null</c>; not <c>: <i>null</i>.</summary>
             public void M()
             {
             }
