@@ -110,7 +110,6 @@ internal static class DocumentationStyle
     {
         if (element.StartTag.Name.LocalName.ValueText != "c"
             || element.StartTag.Attributes.Count > 0
-            || element.EndTag.Name.LocalName.ValueText != "c"
             || element.Content.Count != 1
             || element.Content[0] is not XmlTextSyntax { TextTokens.Count: 1 } content)
         {

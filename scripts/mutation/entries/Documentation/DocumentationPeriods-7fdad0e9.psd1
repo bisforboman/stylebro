@@ -2,7 +2,7 @@
 # tag, BRO1604/BRO1606 text that can't follow the standard words, BRO1134 a comment ending the header's line
 @{
     File = 'src/StyleBro.Analyzers/Documentation/DocumentationPeriods.cs'
-    Find = 'end + 1 < text.Length && text[end] == ''<'' && text[end + 1] == ''/'' ? end : position'
-    Replace = 'position'
+    Find = ' || (end + 1 < text.Length && text[end] == ''<'' && text[end + 1] == ''/'')'
+    Replace = ''
     Tests = 'DocumentationTests'
 }

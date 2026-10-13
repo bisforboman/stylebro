@@ -51,11 +51,16 @@ public class DocumentationStyleTests
         using System.Collections.Generic;
 
         /// <summary>
-        /// Already braces: <see cref="List{T}"/>; an error: <see cref="List&lt;List&lt;int&gt;&gt;"/>; an operator: <see cref="C.op_LessThan"/>, <see cref="operator &lt;(C, C)"/>;
+        /// Already braces: <see cref="List{T}"/>; an operator: <see cref="C.op_LessThan"/>, <see cref="operator &lt;(C, C)"/>;
         /// text, not a cref: List&lt;T&gt;; in code: <code><see cref="List&lt;T&gt;"/></code>.
         /// </summary>
         public class C
         {
+            /// <summary>An error: <see cref="List&lt;List&lt;int&gt;&gt;"/>.</summary>
+            public void M()
+            {
+            }
+
             /// <summary>Compares.</summary>
             /// <param name="a">A.</param>
             /// <param name="b">B.</param>
@@ -100,11 +105,15 @@ public class DocumentationStyleTests
         """
         /// <summary>
         /// Not keywords: <c>Null</c>, <c>value</c>, <c>get</c>, <c>__arglist</c>; more than a keyword: <c>null!</c>,
-        /// <c> null </c>, <c>x is null</c>, <c>null</C>, <C>null</c>, <c>null&amp;&amp;</c>, <c>null<b>x</b></c>; an attribute: <c lang="cs">null</c>; in code:
+        /// <c> null </c>, <c>x is null</c>, <c>null&amp;&amp;</c>, <c>null<b>x</b></c>; an attribute: <c lang="cs">null</c>; in code:
         /// <code>null</code>, <code><c>null</c></code>; not <c>: <i>null</i>; already: <see langword="null"/>.
         /// </summary>
         public class C
         {
+            /// <summary>Malformed: <c>null</C>, <C>null</c>.</summary>
+            public void M()
+            {
+            }
         }
         """);
 
