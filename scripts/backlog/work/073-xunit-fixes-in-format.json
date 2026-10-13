@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "stylebro-migrate format applies xunit.analyzers' fixes",
+  "notes": "Owner's idea 2026-10-13: xunit.analyzers ships with every xunit reference. When a repo has it, `stylebro-migrate format` also applies its code fixes (e.g. xUnit2004 `Assert.Equal(true, x)` -> `Assert.True(x)`, xUnit2013 `Assert.Equal(0, list.Count)` -> `Assert.Empty(list)`), following the repo's own severities, like the Sonar support (off unless the repo's setup turns the rules on). Today format limits fixes to BRO + init's IDE/CA ids. Check which xUnit fixes support Fix All and converge in one run, and test on real xUnit repos.",
+  "status": "Planned"
+}
