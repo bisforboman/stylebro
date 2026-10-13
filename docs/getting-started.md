@@ -330,6 +330,27 @@ A few settings work a little differently:
   `insert_final_newline = false` with 1,092 of 1,597 files ending in a line break, all 1,092 removed. `stylebro-migrate
   --write` does the same. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
   and trims trailing whitespace on every line it formats, so the report only says so (with IDE0055 off nothing is trimmed).
+  These keys (and `end_of_line`) are judged per file against the `.editorconfig` that decides it, as the compiler reads
+  them: the nearest one that sets the key wins, within it the last matching section. A nearer file overrides anything
+  the root block says, so when a folder's own `.editorconfig` (one without `root = true`, like Bogus's `Source/`) sets
+  the key, `init` writes its line there, in a block between `# BEGIN stylebro-whitespace` and `# END stylebro-whitespace`
+  (Bogus: the root block's `insert_final_newline = unset` never reached `Source/`, and `format` stripped 48 files' last
+  line break).
+- **Spacing** that IDE0055 enforces counts places on one line: a space after `if`/`for`/`foreach`/`while`/`switch`/
+  `using`/`lock`/`catch` or not (`if (x)` or `if(x)`), spaces inside parentheses (control-flow statements, parenthesized
+  expressions, casts), after a cast (`(int) x`), and inside call and parameter lists (`F( x )`). A clear form other than
+  the SDK's default is written (`csharp_space_after_keywords_in_control_flow_statements`,
+  `csharp_space_between_parentheses`, `csharp_space_after_cast`,
+  `csharp_space_between_method_call_parameter_list_parentheses`,
+  `csharp_space_between_method_declaration_parameter_list_parentheses`). When any of them is mixed, IDE0055 is turned
+  off with one `# init: spacing:` note, since it can't be limited to one option, and `format` skips the whitespace pass
+  (Bogus: `foreach( var x in y )` in 341 places, 65 %, which IDE0055 had rewritten). With CSharpier, column alignment or
+  an IDE0055 severity of your own, nothing is written.
+- **Blank lines between members** ([BRO1505](rules/BRO1505.md)) count the neighbouring members of a type that need one
+  (one spans several lines, or is documented), with a blank line between them or without; **blank lines above doc
+  comments** ([BRO1513](rules/BRO1513.md)) count doc comments right below code or after a blank line. Mostly with: the rule
+  stays on; mostly without or mixed: it's turned off, so `format` doesn't add blank lines to compact code (Kavita: 392
+  and 312 files).
 - **Column alignment**: when your `.editorconfig` aligns code in columns for ReSharper or Rider
   (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
   the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
@@ -395,10 +416,13 @@ A few settings work a little differently:
 | Auto-property accessors | `{ get; set; }` on the declaration's line or on several lines | [BRO1527](rules/BRO1527.md) | `dotnet_diagnostic.BRO1527.severity` |
 | `#region`s inside members | the `#region`s inside members (3 turn the rule off) | [BRO1113](rules/BRO1113.md) | `dotnet_diagnostic.BRO1113.severity` |
 | Column alignment | your `resharper_*int_align_*` keys set to `true` | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
-| Charset | files with or without a BOM, when your `charset` doesn't match them | SDK formatter | `charset` |
-| Final line breaks | files with or without a last line break, when your `insert_final_newline` doesn't match them | SDK formatter | `insert_final_newline` |
+| Charset | files with or without a BOM, when the `charset` that applies to them doesn't match them | SDK formatter | `charset` |
+| Final line breaks | files with or without a last line break, when the `insert_final_newline` that applies to them doesn't match them | SDK formatter | `insert_final_newline` |
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
+| Spacing | `if (x)` or `if(x)`; spaces inside parentheses, after casts, inside call and parameter lists (mixed: IDE0055 off) | SDK formatter (IDE0055) | `csharp_space_after_keywords_in_control_flow_statements`, `csharp_space_between_parentheses`, `csharp_space_after_cast`, `csharp_space_between_method_call_parameter_list_parentheses`, `csharp_space_between_method_declaration_parameter_list_parentheses` |
+| Member separation | neighbouring members that need a blank line, with or without one | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
+| Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 
 The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `both`,
 `mixed`, `too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys

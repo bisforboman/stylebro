@@ -32,10 +32,10 @@ internal static class Program
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize] [--agents-md] [--sonar-profile <file>]
+          stylebro-migrate init [path] [--write] [--modernize] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. A repository with a StyleCop setup is told to
-              use 'stylebro-migrate --write' instead.
+              use 'stylebro-migrate --write' instead. --project names what 'format' will run on (relative to 'path').
 
               --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
               markers, updated on every run). Opt-in.
@@ -357,9 +357,13 @@ internal static class Program
     /// The hints for running format after init or the migration: when the folder has several solutions or projects, which
     /// ones (format needs one named), and the CI steps a plain 'dotnet format --verify-no-changes' would fail (<see cref="VerifyNoChangesSteps"/>).
     /// </summary>
-    internal static void PrintWorkspaceHint(string root)
+    internal static void PrintWorkspaceHint(string root, string? named = null)
     {
-        if (BaselineCommand.WorkspaceCandidates(root) is { Count: > 1 } several)
+        if (named is { Length: > 0 })
+        {
+            Console.WriteLine($"To format it: 'stylebro-migrate format {named}'.");
+        }
+        else if (BaselineCommand.WorkspaceCandidates(root) is { Count: > 1 } several)
         {
             Console.WriteLine($"This folder has several solutions or projects ({string.Join(", ", several)}): name the one to format, e.g. 'stylebro-migrate format {several[0]}'.");
         }
