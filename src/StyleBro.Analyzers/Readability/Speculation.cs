@@ -15,14 +15,21 @@ internal static class Speculation
     /// statement, initializer or expression body bound again (a position-based lookup misses parameters and locals in
     /// some places). Null when it can't be checked.
     /// </summary>
-    public static ISymbol? SymbolAfterReplacing(SemanticModel model, ExpressionSyntax original, ExpressionSyntax replacement, CancellationToken cancellationToken)
+    public static ISymbol? SymbolAfterReplacing(SemanticModel model, ExpressionSyntax original, ExpressionSyntax replacement, CancellationToken cancellationToken) =>
+        Replace(model, original, replacement) is { } bound ? bound.Model.GetSymbolInfo(bound.Node, cancellationToken).Symbol : null;
+
+    /// <summary>
+    /// <paramref name="replacement"/> bound in place of <paramref name="original"/> like <see cref="SymbolAfterReplacing"/>:
+    /// the speculative model and the replacement's node in it. Null when it can't be checked.
+    /// </summary>
+    public static (SemanticModel Model, SyntaxNode Node)? Replace(SemanticModel model, ExpressionSyntax original, ExpressionSyntax replacement)
     {
         var annotation = new SyntaxAnnotation();
         replacement = replacement.WithAdditionalAnnotations(annotation);
         return GetContainer(original) is { } container
             && Speculate(model, container, container.ReplaceNode(original, replacement)) is { } speculative
             && speculative.Container.GetAnnotatedNodes(annotation).FirstOrDefault() is { } bound
-            ? speculative.Model.GetSymbolInfo(bound, cancellationToken).Symbol
+            ? (speculative.Model, bound)
             : null;
     }
 

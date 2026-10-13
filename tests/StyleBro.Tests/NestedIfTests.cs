@@ -106,6 +106,69 @@ public class NestedIfTests
         """,
         "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_by = csharpier\nstylebro_layout_print_width = 60\n");
 
+    // EntityGraphQL's GraphQLParser: the inner condition was an '||' chain CSharpier had already broken over lines. Merged, it
+    // becomes '&& (...)' and breaks inside its parentheses the way CSharpier does; one that fits its line stays on it.
+    [Fact]
+    public Task WithCSharpier_AnOrChainOperand_BreaksInsideItsParentheses() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(bool first, bool second, int count)
+            {
+                if (first)
+                {
+                    {|BRO1149:if|} (
+                        (count > 100 && second)
+                        || (count < 5 && first)
+                    )
+                    {
+                        return;
+                    }
+                }
+
+                if (first && second && count > 1000)
+                {
+                    {|BRO1149:if|} (
+                        count < 5
+                        || second
+                    )
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(bool first, bool second, int count)
+            {
+                if (
+                    first
+                    && (
+                        (count > 100 && second)
+                        || (count < 5 && first)
+                    )
+                )
+                {
+                    return;
+                }
+
+                if (
+                    first
+                    && second
+                    && count > 1000
+                    && (count < 5 || second)
+                )
+                {
+                    return;
+                }
+            }
+        }
+        """,
+        "stylebro_layout_by = csharpier\nstylebro_layout_print_width = 60\n");
+
     // What CSharpier would break further (an operand over several lines or longer than the line) keeps the usual layout.
     [Fact]
     public Task WithCSharpier_AnOperandCSharpierWouldBreak_KeepsTheUsualLayout() => Verify.VerifyFixAsync(

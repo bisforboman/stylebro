@@ -77,7 +77,34 @@ internal static class ParamsArrays
 
         var changes = removed.Select(span => new TextChange(span, string.Empty)).ToArray();
         var expanded = SyntaxFactory.ParseExpression(text.WithChanges(changes).ToString(new TextSpan(call.SpanStart, call.Span.Length - removed.Sum(s => s.Length))));
-        return SymbolEqualityComparer.Default.Equals(Speculation.SymbolAfterReplacing(model, call, expanded, cancellationToken), method) ? changes : null;
+        return Speculation.Replace(model, call, expanded) is { } bound
+            && SymbolEqualityComparer.Default.Equals(bound.Model.GetSymbolInfo(bound.Node, cancellationToken).Symbol, method)
+            && BindsExpanded(bound.Model, bound.Node, list.Arguments.Count - 1, ((IArrayTypeSymbol)parameter.Type).ElementType, cancellationToken)
+                ? changes
+                : null;
+    }
+
+    // Whether every argument from 'first' on converts to the params element type, i.e. the call binds in its expanded
+    // form. A single element that converts to the array type itself ('default!', '(T[])null', an array variable, an
+    // object[] for params object[]) binds in the normal form: it would be passed AS the array (trial 14: a one-element
+    // array became null). Asked of the compiler, so no list of shapes can miss one.
+    private static bool BindsExpanded(SemanticModel model, SyntaxNode call, int first, ITypeSymbol elementType, CancellationToken cancellationToken)
+    {
+        var arguments = call switch
+        {
+            InvocationExpressionSyntax invocation => invocation.ArgumentList.Arguments,
+            BaseObjectCreationExpressionSyntax { ArgumentList: { } argumentList } => argumentList.Arguments,
+            _ => default,
+        };
+        for (var i = first; i < arguments.Count; i++)
+        {
+            if (!SymbolEqualityComparer.Default.Equals(model.GetTypeInfo(arguments[i].Expression, cancellationToken).ConvertedType, elementType))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // An element whose meaning comes from the type it converts to: out of the array it could convert to the array type

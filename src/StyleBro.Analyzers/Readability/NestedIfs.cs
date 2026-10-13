@@ -265,29 +265,33 @@ internal static class NestedIfs
     /// <summary>
     /// The merged condition the way CSharpier writes it (<see cref="CSharpierLayout"/>), up to the closing ')': on the 'if' line
     /// when it fits in <paramref name="width"/>, else every '&amp;&amp;' operand on a line of its own, one level deeper, the
-    /// operator first, and ')' on a line of its own. Null (the usual layout) when an operand spans lines or doesn't fit on its
-    /// line: CSharpier would break it further. Without this, CSharpier relaid every merge whose condition got too long
-    /// (StabilityMatrix: 10 of the 16 files it rejected after StyleBro's format).
+    /// operator first, and ')' on a line of its own. An operand that doesn't fit its line and is an '||' chain (parenthesized
+    /// by the merge) breaks inside its parentheses: '&amp;&amp; (', each '||' operand on a line of its own one level deeper,
+    /// ')' (EntityGraphQL's GraphQLParser: an inner condition CSharpier had already broken that way). Null (the usual layout)
+    /// when another operand, or an '||' operand, spans lines or doesn't fit on its line: CSharpier would break it further.
+    /// Without this, CSharpier relaid every merge whose condition got too long (StabilityMatrix: 10 of the 16 files it rejected
+    /// after StyleBro's format).
     /// </summary>
     private static string? CSharpierCondition(List<IfStatementSyntax> ifs, SourceText text, IfStatementSyntax top, int width, string unit)
     {
-        var operands = new List<string>();
+        var operands = new List<(string Flat, List<string>? Ors)>();
         foreach (var current in ifs)
         {
             foreach (var operand in NeedsParentheses(current.Condition) ? new[] { current.Condition } : AndOperands(current.Condition))
             {
-                var value = text.ToString(operand.Span);
-                if (value.IndexOf('\n') >= 0)
+                var parts = (operand.IsKind(SyntaxKind.LogicalOrExpression) ? OrOperands(operand) : new[] { operand }).Select(o => text.ToString(o.Span)).ToList();
+                if (parts.Any(p => p.IndexOf('\n') >= 0))
                 {
                     return null;
                 }
 
-                operands.Add(operand == current.Condition && NeedsParentheses(operand) ? "(" + value + ")" : value);
+                var value = string.Join(" || ", parts);
+                operands.Add(NeedsParentheses(operand) ? ("(" + value + ")", parts.Count > 1 ? parts : null) : (value, null));
             }
         }
 
         var line = text.Lines.GetLineFromPosition(top.SpanStart);
-        var flat = string.Join(" && ", operands);
+        var flat = string.Join(" && ", operands.Select(o => o.Flat));
         if (top.OpenParenToken.Span.End - line.Start + flat.Length + 1 <= width
             && text.Lines.GetLineFromPosition(top.OpenParenToken.SpanStart).LineNumber == line.LineNumber)
         {
@@ -299,17 +303,41 @@ internal static class NestedIfs
         var builder = new StringBuilder();
         for (var i = 0; i < operands.Count; i++)
         {
-            var operandLine = indent + unit + (i == 0 ? string.Empty : "&& ") + operands[i];
-            if (operandLine.Length > width)
+            var prefix = indent + unit + (i == 0 ? string.Empty : "&& ");
+            if ((prefix + operands[i].Flat).Length <= width)
+            {
+                builder.Append(lineBreak).Append(prefix).Append(operands[i].Flat);
+                continue;
+            }
+
+            if (operands[i].Ors is not { } ors)
             {
                 return null;
             }
 
-            builder.Append(lineBreak).Append(operandLine);
+            builder.Append(lineBreak).Append(prefix).Append('(');
+            for (var j = 0; j < ors.Count; j++)
+            {
+                var orLine = indent + unit + unit + (j == 0 ? string.Empty : "|| ") + ors[j];
+                if (orLine.Length > width)
+                {
+                    return null;
+                }
+
+                builder.Append(lineBreak).Append(orLine);
+            }
+
+            builder.Append(lineBreak).Append(indent).Append(unit).Append(')');
         }
 
         return builder.Append(lineBreak).Append(indent).ToString();
     }
+
+    /// <summary>The operands of an '||' chain.</summary>
+    private static IEnumerable<ExpressionSyntax> OrOperands(ExpressionSyntax condition) =>
+        condition is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.LogicalOrExpression } or
+            ? OrOperands(or.Left).Concat(OrOperands(or.Right))
+            : new[] { condition };
 
     /// <summary>The operands of an '&amp;&amp;' chain (the expression itself when it isn't one).</summary>
     private static IEnumerable<ExpressionSyntax> AndOperands(ExpressionSyntax condition) =>
