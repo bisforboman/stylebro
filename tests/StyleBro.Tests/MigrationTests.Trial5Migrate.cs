@@ -256,12 +256,13 @@ public sealed partial class MigrationTests
     [Fact]
     public void Format_SkipsTheWhitespacePass_WhereTheSettingsTurnIDE0055Off()
     {
+        Write("src/A/A.cs", "class A { }\n");
         Assert.False(FormatCommand.WhitespaceOff(root)); // nothing says so
 
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.IDE0055.severity = none\n");
         Assert.False(FormatCommand.WhitespaceOff(root)); // not stylebro's settings
+        Assert.Null(FormatCommand.WhitespaceExclusions(root));
 
-        Write("src/A/A.cs", "class A { }\n");
         Write(".editorconfig", Migration.Render(new[] { ("{src/A}/**.cs", new List<string> { "dotnet_diagnostic.IDE0055.severity = none" }) }));
         Assert.True(FormatCommand.WhitespaceOff(root));
 
