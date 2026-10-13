@@ -487,6 +487,14 @@ public class DocumentationTests
             /// <summary>Gets the delay (in ms){|BRO1603:|}</summary>
             /// <returns>The value, never null{|BRO1603:|}</returns>
             public int C() => 0;
+
+            /// <summary>
+            /// Gets the delimiter.
+            /// Default is ',';
+            /// </summary>
+            /// <remarks>The quote is '\"'</remarks>
+            /// <returns>Usually "\r\n"</returns>
+            public string D() => ",";
         }
 
         /// <summary>Message codes{|BRO1603:|}</summary>
@@ -522,6 +530,14 @@ public class DocumentationTests
             /// <summary>Gets the delay (in ms).</summary>
             /// <returns>The value, never null.</returns>
             public int C() => 0;
+
+            /// <summary>
+            /// Gets the delimiter.
+            /// Default is ',';
+            /// </summary>
+            /// <remarks>The quote is '\"'</remarks>
+            /// <returns>Usually "\r\n"</returns>
+            public string D() => ",";
         }
 
         /// <summary>Message codes.</summary>

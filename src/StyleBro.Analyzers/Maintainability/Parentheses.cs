@@ -56,26 +56,47 @@ internal static class Parentheses
         return changes;
     }
 
-    /// <summary>Removes '(' and ')' and the spaces inside them; a space stays where the tokens would run together.</summary>
+    /// <summary>
+    /// Removes '(' and ')' and the spaces inside them; a space stays where the tokens would run together. Comments inside
+    /// stay; a gap with a comment or directive and a line break is skipped (the ')' line or a '//' comment would leave
+    /// code in a bad place).
+    /// </summary>
     private static List<TextChange>? GetChanges(SyntaxNode node, SourceText text)
     {
         var (open, inner, close) = Parts(node);
-        if (open.IsMissing || close.IsMissing
-            || !open.TrailingTrivia.Concat(close.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia)))
+        if (open.IsMissing || close.IsMissing)
         {
             return null;
         }
 
+        var innerFirst = inner.GetFirstToken();
+        var innerLast = inner.GetLastToken();
+        var openGap = open.TrailingTrivia.Concat(innerFirst.LeadingTrivia).ToList();
+        var closeGap = innerLast.TrailingTrivia.Concat(close.LeadingTrivia).ToList();
+        if (!IsRemovable(openGap) || !IsRemovable(closeGap))
+        {
+            return null;
+        }
+
+        // Only the whitespace between the token and the nearest comment goes.
+        var openEnd = openGap.FirstOrDefault(t => !IsSpace(t)) is { RawKind: not 0 } firstKept ? firstKept.SpanStart : inner.SpanStart;
+        var closeStart = closeGap.LastOrDefault(t => !IsSpace(t)) is { RawKind: not 0 } lastKept ? lastKept.Span.End : inner.Span.End;
         var before = open.GetPreviousToken();
         var after = close.GetNextToken();
-        var openText = before.Span.End == open.SpanStart && Glues(before, inner.GetFirstToken()) ? " " : string.Empty;
-        var closeText = after.SpanStart == close.Span.End && Glues(inner.GetLastToken(), after) ? " " : string.Empty;
+        var openText = before.Span.End == open.SpanStart && Glues(before, innerFirst) ? " " : string.Empty;
+        var closeText = after.SpanStart == close.Span.End && Glues(innerLast, after) ? " " : string.Empty;
         return new List<TextChange>
         {
-            new(TextSpan.FromBounds(open.SpanStart, inner.SpanStart), openText),
-            new(TextSpan.FromBounds(inner.Span.End, close.Span.End), closeText),
+            new(TextSpan.FromBounds(open.SpanStart, openEnd), openText),
+            new(TextSpan.FromBounds(closeStart, close.Span.End), closeText),
         };
     }
+
+    private static bool IsRemovable(List<SyntaxTrivia> gap) =>
+        gap.All(IsSpace) || !gap.Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia) || t.HasStructure);
+
+    private static bool IsSpace(SyntaxTrivia trivia) =>
+        trivia.IsKind(SyntaxKind.WhitespaceTrivia) || trivia.IsKind(SyntaxKind.EndOfLineTrivia);
 
     private static bool Glues(SyntaxToken left, SyntaxToken right) =>
         left.Text.Length > 0 && right.Text.Length > 0 && IsWordChar(left.Text[left.Text.Length - 1]) && IsWordChar(right.Text[0]);

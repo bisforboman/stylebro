@@ -42,7 +42,8 @@ internal static class DefaultValueConstructors
     {
         if (creation.ArgumentList is { Arguments.Count: > 0 }
             || creation.Initializer is not null
-            || creation.Parent is ExpressionStatementSyntax)
+            || creation.Parent is ExpressionStatementSyntax
+            || !Trivia.IsBlank(creation, creation.Span))
         {
             return null;
         }

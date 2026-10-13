@@ -25,7 +25,7 @@ internal static class TupleSyntax
         // Not in doc comments: crefs have no tuple syntax ('Func{ValueTuple{int, string}}' is a type-only context there).
         var node = Outermost(name);
         if (!IsSupported(name) || !SyntaxFacts.IsInTypeOnlyContext(node) || node.IsPartOfStructuredTrivia() || node.Parent is ObjectCreationExpressionSyntax
-            || ToTuple(name, model, cancellationToken) is not { } replacement)
+            || ToTuple(name, model, cancellationToken) is not { } replacement || !Trivia.IsBlank(node, node.Span))
         {
             return null;
         }
@@ -116,7 +116,7 @@ internal static class TupleSyntax
             }
         }
 
-        return IsInExpressionTree(expression, model, cancellationToken)
+        return !Trivia.IsBlank(expression, expression.Span) || IsInExpressionTree(expression, model, cancellationToken)
             ? null
             : new Finding(expression, location, "(" + string.Join(", ", items) + ")");
     }
