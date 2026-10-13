@@ -650,10 +650,11 @@ internal sealed class StyleCopSetup
     }
 
     /// <summary>
-    /// Settles <paramref name="uses"/> (from <see cref="Projects"/>, text-level) with MSBuild where the text can't: projects
+    /// Settles <paramref name="uses"/> (from <see cref="Projects"/>, text-level) with MSBuild: every project when there are
+    /// several (the text is only the fallback for a project MSBuild can't evaluate); with one, where the text can't: a project
     /// whose StyleCop reference sits under a Condition (DynamicData's '&lt;ItemGroup Condition="!$(IsTestProject) AND
     /// !$(IsBenchmarkProject)"&gt;' counted its tests, and 360 test files changed where StyleCop never ran), and, when no
-    /// project references it in the text, every project (a reference the text can't see, before its settings count as
+    /// project references it in the text, that one (a reference the text can't see, before its settings count as
     /// leftovers). A project MSBuild can't evaluate keeps the text's answer, with a warning. Returns whether any project
     /// uses StyleCop (true without projects: nothing tells otherwise).
     /// </summary>
@@ -664,7 +665,11 @@ internal sealed class StyleCopSetup
             return true;
         }
 
-        var check = !uses.Values.Contains(true)
+        // With several projects MSBuild decides for every one: the text keeps missing ways of importing a file (Nerdbank.Streams'
+        // test/Directory.Packages.props imports the root's, which has StyleCop, as 'GetPathOfFileAbove($(MSBuildThisFile), ...)':
+        // test/ looked like it had no StyleCop, and kept 874 warnings that contradict it). ~1-2 s per project, in parallel, and
+        // format reuses it (FormatCommand.EvaluateProject). One project: only where the text can't tell.
+        var check = uses.Count > 1 || !uses.Values.Contains(true)
             ? uses.Keys.ToList()
             : uses.Where(p => p.Value && Chain(p.Key, root).Any(f => ConditionalReference(File.ReadAllText(f)))).Select(p => p.Key).ToList();
         var results = check.AsParallel().Select(p => (Project: p, Uses: evaluate(p))).ToList();
@@ -679,7 +684,7 @@ internal sealed class StyleCopSetup
         var failed = results.Where(r => r.Uses is null).Select(r => Path.GetRelativePath(root, r.Project).Replace('\\', '/')).Order(StringComparer.OrdinalIgnoreCase).ToList();
         if (failed.Count > 0)
         {
-            warnings.Add($"MSBuild couldn't evaluate {string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}: whether StyleCop runs there was read from the project files' text, Conditions ignored.");
+            warnings.Add($"MSBuild couldn't evaluate {string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}: whether StyleCop runs there was read from the project files' text (Conditions ignored, and an import this reader can't follow is missed).");
         }
 
         return uses.Values.Contains(true);
@@ -693,10 +698,9 @@ internal sealed class StyleCopSetup
     {
         try
         {
-            var json = FormatCommand.Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo");
-            using var document = JsonDocument.Parse(json);
+            using var document = JsonDocument.Parse(FormatCommand.EvaluateProject(Path.GetFullPath(project)));
             return document.RootElement.TryGetProperty("Items", out var items)
-                && items.EnumerateObject().SelectMany(i => i.Value.EnumerateArray())
+                && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
                     .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
         }
         catch (Exception e) when (e is ToolException or JsonException or System.ComponentModel.Win32Exception)
@@ -1125,7 +1129,9 @@ internal sealed class StyleCopSetup
             for (var i = 0; i < 4 && Regex.IsMatch(value, @"\$\(\w+\)"); i++)
             {
                 // MSBuildProjectExtension: openmcdf imports 'Directory$(MSBuildProjectExtension).props' (StyleBro is C# only).
+                // MSBuildThisFile: the Library.Template's 'GetPathOfFileAbove($(MSBuildThisFile), $(MSBuildThisFileDirectory)..)'.
                 value = Regex.Replace(value, @"\$\((\w+)\)", m => m.Groups[1].Value.Equals("_DirectoryBuildPropsFile", StringComparison.OrdinalIgnoreCase) ? "Directory.Build.props"
+                    : m.Groups[1].Value.Equals("MSBuildThisFile", StringComparison.OrdinalIgnoreCase) ? Path.GetFileName(file)
                     : m.Groups[1].Value.Equals("MSBuildProjectExtension", StringComparison.OrdinalIgnoreCase) ? ".csproj"
                     : Regex.Match(text, $@"<{m.Groups[1].Value}\b[^>]*>([^<]*)</{m.Groups[1].Value}\s*>") is { Success: true } defined ? defined.Groups[1].Value.Trim()
                     : m.Value);
@@ -1134,7 +1140,9 @@ internal sealed class StyleCopSetup
             value = Regex.Replace(value, @"^\$\(\[System\.IO\.Path\]::Combine\(\s*'([^']*)'\s*,\s*'([^']*)'\s*\)\)$", m => Path.Combine(m.Groups[1].Value, m.Groups[2].Value), RegexOptions.IgnoreCase);
         }
 
-        var above = Regex.Match(value, @"^\$\(\[MSBuild\]::GetPathOfFileAbove\(\s*'([^']+)'\s*(?:,\s*'([^']*)')?\s*\)\)$", RegexOptions.IgnoreCase);
+        // Quoted or not (Nerdbank.Streams' test/Directory.Packages.props: its import of the root file, with StyleCop's
+        // GlobalPackageReference, wasn't followed, and test/ looked like it had no StyleCop).
+        var above = Regex.Match(value, @"^\$\(\[MSBuild\]::GetPathOfFileAbove\(\s*'?([^',]+?)'?\s*(?:,\s*'?(.*?)'?)?\s*\)\)$", RegexOptions.IgnoreCase);
         if (above.Success)
         {
             var start = above.Groups[2].Success ? Path.GetFullPath(Path.Combine(directory, above.Groups[2].Value)) : directory;

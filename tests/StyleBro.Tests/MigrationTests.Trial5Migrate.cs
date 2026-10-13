@@ -95,7 +95,7 @@ public sealed partial class MigrationTests
             new[]
             {
                 "StyleCop runs only in src/LiteBus.Core, src/LiteBus.Events: the settings apply there, with the rules StyleCop has on there.",
-                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no rule changes there, and 'stylebro-migrate format' leaves them alone. Once StyleCop is gone, 'stylebro-migrate init' can set those up.",
+                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
             },
             Program.ScopeReport(setup));
         var hints = Program.PackageHints(setup, root);
