@@ -110,10 +110,17 @@ internal static class Deconstruction
         // Only used to read named elements ('t.count'), never the tuple itself or 'Item1'.
         foreach (var name in scope.DescendantNodes().OfType<IdentifierNameSyntax>())
         {
-            if (name.Identifier.ValueText == local.Name
-                && SymbolEqualityComparer.Default.Equals(local, model.GetSymbolInfo(name, cancellationToken).Symbol)
-                && (name.Parent is not MemberAccessExpressionSyntax access
-                    || model.GetSymbolInfo(access, cancellationToken).Symbol is not IFieldSymbol { IsImplicitlyDeclared: false }))
+            if (name.Identifier.ValueText != local.Name || !SymbolEqualityComparer.Default.Equals(local, model.GetSymbolInfo(name, cancellationToken).Symbol))
+            {
+                continue;
+            }
+
+            if (name.Parent is not MemberAccessExpressionSyntax access)
+            {
+                return false;
+            }
+
+            if (model.GetSymbolInfo(access, cancellationToken).Symbol is not IFieldSymbol { IsImplicitlyDeclared: false })
             {
                 return false;
             }
