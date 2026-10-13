@@ -107,6 +107,12 @@ public class ParenthesesTests
                     );
                 return c;
             }
+
+            public int F(int x)
+            {
+                return (// first
+                    x + 1);
+            }
         }
         """,
         """
@@ -137,6 +143,12 @@ public class ParenthesesTests
                         || b // second
                     );
                 return c;
+            }
+
+            public int F(int x)
+            {
+                return (// first
+                    x + 1);
             }
         }
         """);
