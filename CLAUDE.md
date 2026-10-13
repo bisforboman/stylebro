@@ -51,7 +51,19 @@ when we can do that"): don't suggest releases at all; the user says when.
   Must never reference Workspaces (RS1038).
 - `src/StyleBro.CodeFixes`: netstandard2.0, Workspaces, code fixes + Fix All providers. References Analyzers.
 - `src/StyleBro.Package`: packs both DLLs into `analyzers/dotnet/cs`, plus `build/StyleBro.Analyzers.targets`
-  that adds `stylebro.recommended.globalconfig` (global_level -1; opt out with `<StyleBroPreset>none</StyleBroPreset>`).
+  that adds the preset layers `build/presets/stylebro.X.Y.globalconfig` (global_level -1) up to `<StyleBroPreset>`.
+  **Preset versions (2026-10-13, docs/versioning.md, docs/proposals/preset-versions.md):** one layer per minor holding
+  only that minor's new rules and keys (no key in two layers: same-level global configs conflict); values `X.Y`,
+  `latest`, `none`; unset = the package's major (`_StyleBroPresetDefault`, 1.0); newer than the package = STYLEBRO002
+  warning, anything else STYLEBRO001 error; added at evaluation time with `VersionGreaterThanOrEquals`. Rules added
+  after 1.0 MUST be `isEnabledByDefault: false` (only the preset turns them on, so `none` and migrated repos stay quiet;
+  probed: a global-config `severity = warning` enables such a rule in the build and in `dotnet format`). The version a
+  rule was added in = its AnalyzerReleases.Shipped.md header (pre-1.0 = 1.0; Unshipped = `PresetVersions.Latest`).
+  A minor's first new rule: add `presets/stylebro.1.1.globalconfig`, its line in the targets, raise
+  `_StyleBroPresetLatest` and `PresetVersions.Latest` (PresetVersionTests checks all of it). `init --write` pins
+  `PresetVersions.Latest` in Directory.Build.props (`Migration.SetPreset`); `--write` keeps `none`. Tests count a rule the
+  latest preset turns on as on (Verifier, DocExamplesTests); realworld enables newer layers' rules; StyleBro's own code
+  uses `latest`.
 - `src/StyleBro.Migrate`: net8.0 console tool `stylebro-migrate` (PackAsTool, published from alpha.5 with the analyzers;
   its package README is `src/StyleBro.Migrate/README.md`), see "Migration tool".
   References StyleBro.Analyzers (reads every rule's "Replaces StyleCop SAxxxx" from its description) and embeds

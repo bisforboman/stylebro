@@ -12,7 +12,10 @@
 #   7. a file compiled from the package folder (a source package's contentFiles) isn't checked;
 #   8. a rename the fix keeps on purpose (the name read by reflection in another file): 'stylebro-migrate format' lists it
 #      with its reason, and its --verify-no-changes exits 2 while something is left to fix, then 0 with only it left;
-#      with --files and --json, the JSON on stdout has it with its reason.
+#      with --files and --json, the JSON on stdout has it with its reason;
+#   9. preset versions: 'init --write' pinned <StyleBroPreset>; unset, the newest version and 'latest' give the same
+#      findings while the package has one layer; a version newer than the package warns (STYLEBRO002), an invalid one
+#      fails the build (STYLEBRO001). Once a minor adds a layer: also check that its rule is off by default and on with it.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -92,6 +95,7 @@ try {
     Check ((Get-Content (Join-Path $app 'Regions.cs') -Raw) -match '#region') 'regions were left alone (BRO1112 is off)'
     dotnet format $project --severity warn --verify-no-changes | Out-Host
     Check ($LASTEXITCODE -eq 0) 'a second dotnet format run changes nothing'
+    Check ((Get-Content (Join-Path $repo 'Directory.Build.props') -Raw) -match '<StyleBroPreset>\d+\.\d+</StyleBroPreset>') 'init pinned the preset version in Directory.Build.props'
 
     Write-Host '== 4. Baseline'
     Set-Content (Join-Path $app 'Old.cs') "namespace App;`n`ninternal class Old`n{`n    public string Name = `"`";`n}`n" -NoNewline
@@ -161,6 +165,17 @@ try {
     Check ($LASTEXITCODE -eq 0 -and $verified -match '1 finding kept on purpose') 'format --verify-no-changes exits 0 with only the kept finding left'
     $json = dotnet @migrate --verify-no-changes --files (Join-Path $keptRepo 'Counter.cs') --json 2>$null | Out-String | ConvertFrom-Json
     Check ($LASTEXITCODE -eq 0 -and $json.clean -and $json.keptFindings[0].rule -eq 'BRO1303' -and $json.keptFindings[0].reason -eq 'NameInString') 'format --files --json reports the kept finding with its reason'
+
+    Write-Host '== 9. Preset versions'
+    $latest = [regex]::Match((Get-Content (Join-Path $root 'src/StyleBro.Package/build/StyleBro.Analyzers.targets') -Raw), '<_StyleBroPresetLatest>([\d.]+)<').Groups[1].Value
+    $default = Build @('-p:StyleBroPreset=')
+    Check (($default -match '^BRO1106 ') -and -not ($default -match '^BRO1112 ')) 'unset: the preset applies'
+    Check (((Build @("-p:StyleBroPreset=$latest")) -join ',') -eq ($default -join ',')) "StyleBroPreset=$latest gives the same findings"
+    Check (((Build @('-p:StyleBroPreset=latest')) -join ',') -eq ($default -join ',')) 'StyleBroPreset=latest gives the same findings'
+    $newer = dotnet build $project --nologo --no-incremental -p:TreatWarningsAsErrors=false -p:StyleBroPreset=99.0 2>&1 | Out-String
+    Check ($LASTEXITCODE -eq 0 -and $newer -match 'warning STYLEBRO002') 'a version newer than the package warns (STYLEBRO002) and builds'
+    $invalid = dotnet build $project --nologo --no-incremental -p:StyleBroPreset=bogus 2>&1 | Out-String
+    Check ($LASTEXITCODE -ne 0 -and $invalid -match 'error STYLEBRO001') 'an invalid value fails the build (STYLEBRO001)'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue

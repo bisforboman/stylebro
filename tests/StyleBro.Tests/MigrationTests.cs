@@ -498,8 +498,7 @@ public sealed partial class MigrationTests : IDisposable
     [Fact]
     public void TheGeneratedSettings_CoverEveryPresetKey()
     {
-        var preset = Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig");
-        var presetKeys = File.ReadAllLines(preset)
+        var presetKeys = Presets.AllLines()
             .Where(l => l.Contains('=') && !l.TrimStart().StartsWith('#'))
             .Select(l => l.Substring(0, l.IndexOf('=')).Trim())
             .Where(k => k is not "is_global" and not "global_level");
@@ -514,12 +513,10 @@ public sealed partial class MigrationTests : IDisposable
     [Fact]
     public void TheBaseline_CoversEverySdkRuleInitOrTheToolTurnsOn()
     {
-        var preset = Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig");
-
         // A repository with a plain file header and SX1101 turns on IDE0073 and IDE0003 too.
         Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
         Write(".editorconfig", "[*.cs]\ndotnet_diagnostic.SX1101.severity = warning\n");
-        var ids = File.ReadAllLines(preset).Concat(InitCommand.Template().Split('\n')).Concat(InitCommand.ModernizeTemplate().Split('\n'))
+        var ids = Presets.AllLines().Concat(InitCommand.Template().Split('\n')).Concat(InitCommand.ModernizeTemplate().Split('\n'))
             .Concat(Migration.Generate(StyleCopSetup.Read(root), root).Lines)
             .Concat(SonarSetup.Mapping.Select(m => $"dotnet_diagnostic.{m.Rule}.severity"))
             .Select(l => System.Text.RegularExpressions.Regex.Match(l, @"^dotnet_diagnostic\.((?:IDE|CA)\d{4})\.severity"))
@@ -539,7 +536,7 @@ public sealed partial class MigrationTests : IDisposable
         var styleCop = KeyValues(Migration.Generate(StyleCopSetup.Read(root), root).Lines);
 
         // ... against the preset: every key the preset sets differently must be named in docs/differences-from-stylecop.md.
-        var preset = KeyValues(File.ReadAllLines(Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig")));
+        var preset = KeyValues(Presets.AllLines());
         var page = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "differences-from-stylecop.md"));
         var different = preset.Where(p => p.Key is not "is_global" and not "global_level"
             && styleCop.TryGetValue(p.Key, out var value) && value != p.Value).Select(p => p.Key).ToList();
@@ -773,7 +770,7 @@ public sealed partial class MigrationTests : IDisposable
     public void ThePreset_SetsNoBuiltInRuleSeverities()
     {
         // 'dotnet format' ignores rule severities in a package's global config; they belong in 'stylebro-migrate init'.
-        var preset = File.ReadAllLines(Path.Combine(RepositoryRoot(), "src", "StyleBro.Package", "build", "stylebro.recommended.globalconfig"));
+        var preset = Presets.AllLines();
 
         Assert.DoesNotContain(preset, l => l.StartsWith("dotnet_diagnostic.IDE", StringComparison.Ordinal));
     }

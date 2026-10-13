@@ -6,6 +6,19 @@ this page lists them all in one place. Severities work like any analyzer's
 `.editorconfig` says otherwise. Some rules also follow the SDK's own settings (`csharp_prefer_braces`, `csharp_using_directive_placement`,
 `dotnet_style_qualification_for_*`, `dotnet_naming_rule.*`, `max_line_length`, ...): see their rule pages.
 
+Which rules the preset turns on depends on its version, an MSBuild property (in `Directory.Build.props` or the project
+file), not an `.editorconfig` key:
+
+| `<StyleBroPreset>` | Rules |
+|---|---|
+| unset | the package's major version: `1.0` in all of 1.x |
+| `1.0`, `1.1`, ... | the rules up to that release; newer releases' rules stay off |
+| `latest` | every rule in the package |
+| `none` | no preset: rules at their own defaults (rules added after 1.0 off), no preset settings |
+
+A version newer than the package warns (STYLEBRO002) and uses the package's newest; any other value fails the build
+(STYLEBRO001). See [versioning](versioning.md#new-rules).
+
 ```ini
 [*.cs]
 stylebro_null_check_style = equality_operator

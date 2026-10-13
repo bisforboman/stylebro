@@ -1,16 +1,35 @@
 <Project>
   <!--
-    Applies the recommended preset unless the consuming project sets <StyleBroPreset>none</StyleBroPreset>.
-    This is a .targets file (not .props) so a StyleBroPreset set in the project file is already visible here.
-    The preset is a global config with a low global_level: anything in the project's own
-    .editorconfig or .globalconfig wins.
-    It goes in EditorConfigFiles, not GlobalAnalyzerConfigFiles: the SDK turns GlobalAnalyzerConfigFiles into
-    EditorConfigFiles in Microsoft.Managed.Core.targets, which is evaluated before a package's build targets, so an item
-    added here was never passed to the compiler (alpha.1 to alpha.8). The compiler reads it as global (is_global = true).
+    The preset (docs/versioning.md): one global config per minor release, each with only that minor's new rules, so a
+    package upgrade never turns rules on by itself. <StyleBroPreset> picks how far up the layers go: X.Y, 'latest', or
+    'none' (no preset); unset means the package's major (1.0 in all of 1.x). This is a .targets file (not .props) so a
+    StyleBroPreset set in the project file is already visible here.
+    The layers are global configs with a low global_level: anything in the project's own .editorconfig or .globalconfig
+    wins. No key is in two layers (PresetVersionTests), so they never conflict.
+    They go in EditorConfigFiles, not GlobalAnalyzerConfigFiles, and at evaluation time (not in a target): the SDK turns
+    GlobalAnalyzerConfigFiles into EditorConfigFiles in Microsoft.Managed.Core.targets, which is evaluated before a
+    package's build targets, so an item added that way was never passed to the compiler (alpha.1 to alpha.8). The
+    compiler reads them as global (is_global = true).
+    A new minor's layer: add the file under presets/, a line below with
+    Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(_StyleBroPresetLevel)', '1.1'))", and raise _StyleBroPresetLatest
+    and StyleBro.Analyzers' PresetVersions.Latest (PresetVersionTests checks that they agree).
   -->
-  <ItemGroup Condition="'$(StyleBroPreset)' != 'none'">
-    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)stylebro.recommended.globalconfig" />
+  <PropertyGroup>
+    <_StyleBroPresetLatest>1.0</_StyleBroPresetLatest>
+    <_StyleBroPresetDefault>1.0</_StyleBroPresetDefault>
+    <_StyleBroPresetLevel>$(StyleBroPreset.Trim())</_StyleBroPresetLevel>
+    <_StyleBroPresetLevel Condition="'$(_StyleBroPresetLevel)' == ''">$(_StyleBroPresetDefault)</_StyleBroPresetLevel>
+    <_StyleBroPresetLevel Condition="'$(_StyleBroPresetLevel)' == 'latest'">$(_StyleBroPresetLatest)</_StyleBroPresetLevel>
+    <_StyleBroPresetValid Condition="'$(_StyleBroPresetLevel)' != 'none' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(_StyleBroPresetLevel)', '^\d+\.\d+$'))">true</_StyleBroPresetValid>
+    <_StyleBroPresetValid Condition="'$(_StyleBroPresetValid)' == 'true' and $([MSBuild]::VersionLessThan('$(_StyleBroPresetLevel)', '$(_StyleBroPresetDefault)'))">false</_StyleBroPresetValid>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(_StyleBroPresetValid)' == 'true'">
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)presets/stylebro.1.0.globalconfig" />
   </ItemGroup>
+  <Target Name="_StyleBroCheckPreset" BeforeTargets="CoreCompile" Condition="'$(_StyleBroPresetLevel)' != 'none'">
+    <Error Condition="'$(_StyleBroPresetValid)' != 'true'" Code="STYLEBRO001" Text="StyleBroPreset is '$(StyleBroPreset)': use a preset version ($(_StyleBroPresetDefault) up to $(_StyleBroPresetLatest)), 'latest' or 'none'. See https://bisforboman.github.io/stylebro/versioning/#new-rules" />
+    <Warning Condition="'$(_StyleBroPresetValid)' == 'true' and $([MSBuild]::VersionGreaterThan('$(_StyleBroPresetLevel)', '$(_StyleBroPresetLatest)'))" Code="STYLEBRO002" Text="StyleBroPreset is $(StyleBroPreset), but this StyleBro.Analyzers package's newest preset is $(_StyleBroPresetLatest): using $(_StyleBroPresetLatest). Upgrade the package or lower the setting." />
+  </Target>
 
   <!--
     The baseline: existing violations that aren't reported (docs/baseline.md). The nearest stylebro.baseline above the

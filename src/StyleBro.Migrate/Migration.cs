@@ -491,12 +491,19 @@ internal static class Migration
     /// and an .editorconfig can't take back a key the preset sets (any value of the using-sorting keys makes
     /// 'dotnet format' sort usings). Null when it's already there.
     /// </summary>
-    public static string? DisablePreset(string? existing)
+    public static string? DisablePreset(string? existing) =>
+        SetPreset(existing, "none", "The settings come from stylebro-migrate's block in .editorconfig.");
+
+    /// <summary>
+    /// Directory.Build.props with &lt;StyleBroPreset&gt;<paramref name="value"/>&lt;/StyleBroPreset&gt; (and
+    /// <paramref name="comment"/> above it in a new file). Null when the file already sets StyleBroPreset: that's the team's.
+    /// </summary>
+    public static string? SetPreset(string? existing, string value, string comment)
     {
-        const string Property = "<StyleBroPreset>none</StyleBroPreset>";
+        var property = $"<StyleBroPreset>{value}</StyleBroPreset>";
         if (existing is null)
         {
-            return "<Project>\n  <PropertyGroup>\n    <!-- The settings come from stylebro-migrate's block in .editorconfig. -->\n    " + Property + "\n  </PropertyGroup>\n</Project>\n";
+            return $"<Project>\n  <PropertyGroup>\n    <!-- {comment} -->\n    {property}\n  </PropertyGroup>\n</Project>\n";
         }
 
         if (existing.Contains("<StyleBroPreset>", StringComparison.Ordinal))
@@ -508,12 +515,12 @@ internal static class Migration
         var group = Regex.Match(existing, @"<PropertyGroup\s*>");
         if (group.Success)
         {
-            return existing.Insert(group.Index + group.Length, newLine + "    " + Property);
+            return existing.Insert(group.Index + group.Length, newLine + "    " + property);
         }
 
         var project = Regex.Match(existing, @"<Project\b[^>]*>");
         return project.Success
-            ? existing.Insert(project.Index + project.Length, newLine + "  <PropertyGroup>" + newLine + "    " + Property + newLine + "  </PropertyGroup>")
+            ? existing.Insert(project.Index + project.Length, newLine + "  <PropertyGroup>" + newLine + "    " + property + newLine + "  </PropertyGroup>")
             : null;
     }
 
