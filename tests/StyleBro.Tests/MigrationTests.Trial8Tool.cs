@@ -227,6 +227,9 @@ public sealed partial class MigrationTests
 
         Assert.Equal(new[] { "Old/Old.csproj" }, FormatCommand.OldStyleProjects(root));
 
+        // Only packages.config projects: nothing to preview (with others, those are previewed: Trial16).
+        File.Delete(Path.Combine(root, "New", "New.csproj"));
+        File.Delete(Path.Combine(root, "Imported", "Imported.csproj"));
         Assert.Equal(1, PreviewCommand.Run("format", new[] { root, "--diff" }, (_, _) => throw new InvalidOperationException("no format")));
         Assert.Contains("--diff doesn't work with packages.config projects (Old/Old.csproj)", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, "format"), StringComparison.Ordinal);
         Assert.Contains("msbuild -t:restore -p:RestorePackagesConfig=true", PreviewCommand.OldStyleUnsupported(new[] { "Old/Old.csproj" }, null), StringComparison.Ordinal);

@@ -102,7 +102,7 @@ public sealed partial class MigrationTests
         var (lines, report) = Conventions.Decide(new Dictionary<string, int[]> { [Key] = new[] { own, shared } }, new Dictionary<string, string>());
 
         Assert.Equal(kept, lines.Contains(Key + " = true"));
-        Assert.Equal(kept, lines.Contains($"# init: statements on their 'if'/loop/'case' line: on their owner's line in {shared} of {own + shared} places in your code (3 are enough to keep them: {Key} = false would move each to a line of its own)"));
+        Assert.Equal(kept, lines.Contains($"# init: statements on their 'if'/loop/'case' line: allowed, because your code has some ({shared} of {own + shared} places on their owner's line; any 3 keep them allowed: {Key} = false would move each to a line of its own)"));
         Assert.DoesNotContain(lines, l => l.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal));
         Assert.Equal(kept, report.Any(r => r.StartsWith("  kept ", StringComparison.Ordinal)));
 

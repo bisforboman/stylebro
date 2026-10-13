@@ -310,9 +310,10 @@ internal static class InitCommand
     /// rule for private fields (BRO1303 follows it). <paramref name="previous"/>: the convention lines an earlier init wrote
     /// (<see cref="PreviousConventions"/>); they stay as they are, because the code was counted before StyleBro formatted
     /// it: counted again, StyleBro's own output would decide (Stateless: 28 of 29 switch sections without a blank line gave
-    /// 'omit'; after a format run a second init found them mixed and turned BRO1526 off).
+    /// 'omit'; after a format run a second init found them mixed and turned BRO1526 off). Scopes: the section for the folder
+    /// CSharpier formats when it formats only part of the code.
     /// </summary>
-    public static (List<string> Lines, List<string> Report, Dictionary<string, List<string>> Nested) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
+    public static (List<string> Lines, List<string> Report, Dictionary<string, List<string>> Nested, List<(string Section, List<string> Lines)> Scopes) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
     {
         var settings = own;
         var unenforced = Unenforced(own);
@@ -343,7 +344,19 @@ internal static class InitCommand
         }
 
         own = own.Where(p => !unenforced.Contains(p.Key)).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase);
-        var csharpier = Conventions.CSharpier(root) is { } evidence ? Conventions.CSharpierLines(evidence, root, settings) : default;
+
+        // CSharpier formats all the code, or only a folder: then its settings go into that folder's section, and the rest of
+        // the code is judged as usual.
+        var csharpierScope = Conventions.CSharpierScope(root);
+        var csharpier = csharpierScope is ({ } evidence, "") ? Conventions.CSharpierLines(evidence, root, settings) : default;
+        var scopes = new List<(string Section, List<string> Lines)>();
+        string? partReport = null;
+        if (csharpierScope is ({ } partEvidence, { Length: > 0 } part))
+        {
+            (var partLines, partReport) = Conventions.CSharpierLines(partEvidence, root, settings, part);
+            scopes.Add(($"{part}/**.cs", partLines));
+            partReport = partReport.Replace("CSharpier (", $"CSharpier in {part}/ (", StringComparison.Ordinal);
+        }
 
         // ReSharper/Rider's column alignment: IDE0055 off, like with CSharpier (RestSharp: 414 aligned hunks flattened).
         var alignment = csharpier.Lines is null ? Conventions.AlignmentLines(settings) : null;
@@ -409,7 +422,14 @@ internal static class InitCommand
 
         // The using order is decided apart from the list (two keys): kept the same way.
         // Not the keys the CSharpier lines write again (CSharpier's using order).
-        var usings = KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]).Where(l => csharpier.Lines?.Contains(l) != true).ToList();
+        // With CSharpier, no sort key unless the repository sets one: CSharpier sorts usings itself, and 'dotnet format' sorts
+        // whenever a key is set, with another comparer (tusdotnet: 'App3._0' and 'App3_0' swapped back and forth).
+        var usings = csharpier.Lines is not null ? [] : KeptLines(previous, [Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups"]);
+        if (csharpier.Lines is not null)
+        {
+            decided[Conventions.SortUsingsKey] = "CSharpier sorts them";
+        }
+
         kept.AddRange(usings);
         var usingsAt = kept.Count;
 
@@ -451,9 +471,9 @@ internal static class InitCommand
             report.Insert(0, $"  {"note",-8} too little code here to tell its conventions (fewer than {Conventions.MinimumAgreeing} places each), so StyleBro's defaults apply");
         }
 
-        if (csharpier.Lines is not null)
+        if ((csharpier.Lines is not null ? csharpier.Report : partReport) is { } csharpierReport)
         {
-            report.Insert(0, csharpier.Report);
+            report.Insert(0, csharpierReport);
         }
 
         if (alignment is var (_, alignmentReport))
@@ -503,7 +523,7 @@ internal static class InitCommand
         }
 
         var nested = NestedWhitespace(root, fileSettings, report, formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity"), formatsWhitespace);
-        return ([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings], report, nested);
+        return ([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings], report, nested, scopes);
     }
 
     /// <summary>
@@ -955,8 +975,9 @@ internal static class InitCommand
         var nested = new List<Target>();
         if (!migrated)
         {
-            var (lines, report, nestedLines) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
+            var (lines, report, nestedLines, scopes) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
             detected = lines;
+            sonarScopes = [.. sonarScopes ?? [], .. scopes];
             nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
             if (report.Count > 0)
             {

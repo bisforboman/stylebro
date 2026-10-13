@@ -58,6 +58,12 @@ internal static class PreviewCommand
             + "See https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects.";
     }
 
+    /// <summary>What the preview says about the packages.config projects it leaves out (relative paths), when others remain.</summary>
+    public static string PackagesConfigLeftOut(IReadOnlyList<string> projects) =>
+        $"packages.config projects left out of the preview: {string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)} "
+        + "('dotnet restore' can't restore packages.config, and the copy has no packages folder). The other projects are previewed; "
+        + "'stylebro-migrate format' covers those too once Visual Studio's MSBuild restored them (msbuild -t:restore -p:RestorePackagesConfig=true).";
+
     /// <summary>Whether the options ask for a preview.</summary>
     public static bool Wants(IEnumerable<string> options) => options.Any(o => o == "--diff" || o.StartsWith("--diff=", StringComparison.Ordinal));
 
@@ -100,8 +106,11 @@ internal static class PreviewCommand
         // packages.config projects need Visual Studio's restore: the copy has no git-ignored packages folder, and 'dotnet
         // restore' can't restore packages.config (xbox-live-developer-tools: every project skipped, "Run 'dotnet restore'").
         // Other old-style projects preview like format runs: without a restore (format says so, the end of the preview too).
+        // With other projects too, they are left out like format leaves them (tusdotnet's one Owin_net452 test site stopped the
+        // whole preview): named here and at the end.
         var pathFolder = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
-        if (FormatCommand.OldStyleProjects(pathFolder).Where(p => FormatCommand.UsesPackagesConfig(Path.Combine(pathFolder, p))).ToList() is { Count: > 0 } packagesConfig)
+        var packagesConfig = FormatCommand.OldStyleProjects(pathFolder).Where(p => FormatCommand.UsesPackagesConfig(Path.Combine(pathFolder, p))).ToList();
+        if (packagesConfig.Count > 0 && packagesConfig.Count == StyleCopSetup.EnumerateFiles(pathFolder).Count(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
         {
             Console.Error.WriteLine(OldStyleUnsupported(packagesConfig, command));
             return 1;
@@ -163,6 +172,12 @@ internal static class PreviewCommand
             _ => "'stylebro-migrate --write' and 'stylebro-migrate format'",
         };
         Console.WriteLine($"Previewing {what} on a copy; nothing in {source} changes.");
+        if (packagesConfig.Count > 0)
+        {
+            notes.Add(PackagesConfigLeftOut(packagesConfig));
+            Console.WriteLine(notes[^1]);
+        }
+
         var ok = false;
         try
         {
@@ -639,7 +654,9 @@ internal static class PreviewCommand
             // Directory.Build.props that doesn't: a version there failed its restore (NU1008). Such projects get the
             // version-less reference (and the version in their Directory.Packages.props), the others one with a version.
             var packages = CentralPackages(file, root);
-            var optIns = packages is null ? OptOuts(file, files, root, "true") : [];
+
+            // markdig: no Directory.Build.props, and src/Directory.Packages.props turns it on for the projects under src/ only.
+            var optIns = packages is null ? OptOuts(file, files, root, "true").Union(CentralProjects(file, files, root), StringComparer.OrdinalIgnoreCase).ToList() : [];
             foreach (var central in optIns.Select(p => CentralPackages(p, root)).Prepend(packages).OfType<string>())
             {
                 if (versions.Add(central))
@@ -712,6 +729,21 @@ internal static class PreviewCommand
     }
 
     /// <summary>
+    /// The projects that get <paramref name="props"/> (a Directory.Build.props: those under its folder) with central package
+    /// management on (<see cref="CentralPackages"/>): a Directory.Packages.props between them and the props turns it on.
+    /// </summary>
+    public static List<string> CentralProjects(string props, IEnumerable<string> files, string root)
+    {
+        if (!Path.GetFileName(props).Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase))
+        {
+            return [];
+        }
+
+        var folder = Path.GetDirectoryName(Path.GetFullPath(props))! + Path.DirectorySeparatorChar;
+        return files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(f).StartsWith(folder, StringComparison.OrdinalIgnoreCase) && CentralPackages(f, root) is not null).ToList();
+    }
+
+    /// <summary>
     /// The projects that get <paramref name="props"/> (a Directory.Build.props: those under its folder) and turn central
     /// package management off themselves (<paramref name="value"/> "true": on).
     /// </summary>
@@ -778,8 +810,13 @@ internal static class PreviewCommand
     /// </summary>
     public static string AddPackageVersion(string packages, string item)
     {
+        // Only among unconditional items: markdig's list ends in an ItemGroup for net462/netstandard2.0, and StyleBro's version
+        // there left the other frameworks without one (NU1010).
+        static bool Conditional(string element) => Regex.IsMatch(element.Substring(0, element.IndexOf('>') + 1), @"\bCondition\s*=", RegexOptions.IgnoreCase);
         var name = Regex.Match(item, @"Include=""([^""]+)""").Groups[1].Value;
-        var versions = Regex.Matches(packages, @"<PackageVersion\b[^>]*?\bInclude\s*=\s*""([^""]+)""[^>]*?(?:/>|>.*?</PackageVersion\s*>)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        var versions = Regex.Matches(packages, @"<PackageVersion\b[^>]*?\bInclude\s*=\s*""([^""]+)""[^>]*?(?:/>|>.*?</PackageVersion\s*>)", RegexOptions.Singleline | RegexOptions.IgnoreCase)
+            .Where(m => !Conditional(m.Value) && (Regex.Matches(packages.Substring(0, m.Index), @"<ItemGroup\b[^>]*>", RegexOptions.IgnoreCase).LastOrDefault() is not { } group || !Conditional(group.Value)))
+            .ToList();
         if (versions.Count == 0)
         {
             return AddItem(packages, item);
@@ -836,7 +873,51 @@ internal static class PreviewCommand
         var bytes = File.Exists(file) ? File.ReadAllBytes(file) : null;
         var bom = bytes is [0xEF, 0xBB, 0xBF, ..];
         var text = bytes is null ? null : Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
-        File.WriteAllText(file, KeepLineEndings(text, edit(text)), new UTF8Encoding(bom));
+        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edit(text)), new UTF8Encoding(bom));
+    }
+
+    /// <summary>
+    /// The line ending of the files around a new one (its folder's, else the nearest folder above with files of one kind),
+    /// or null: tusdotnet's CRLF checkout got an LF Source/Directory.Build.props from init, which CSharpier's check rejected.
+    /// </summary>
+    public static string? FolderLineEnding(string file)
+    {
+        // Up to the repository's root (a folder with .git); outside a repository only the file's own folder.
+        var start = Path.GetDirectoryName(Path.GetFullPath(file))!;
+        var top = start;
+        for (var f = start; f is not null; f = Path.GetDirectoryName(f))
+        {
+            if (Path.Exists(Path.Combine(f, ".git")))
+            {
+                top = f;
+                break;
+            }
+        }
+
+        for (var folder = start; folder is not null && folder.StartsWith(top, StringComparison.OrdinalIgnoreCase); folder = Path.GetDirectoryName(folder))
+        {
+            var (crlf, lf) = (0, 0);
+            foreach (var other in (Directory.Exists(folder) ? Directory.EnumerateFiles(folder) : []).Where(f => new FileInfo(f).Length < 1_000_000).Take(50))
+            {
+                var text = File.ReadAllText(other);
+                var pairs = Regex.Count(text, "\r\n");
+                var bare = text.Count(c => c == '\n') - pairs;
+                if (text.Contains('\0'))
+                {
+                    continue;
+                }
+
+                crlf += pairs > 0 && bare == 0 ? 1 : 0;
+                lf += bare > 0 && pairs == 0 ? 1 : 0;
+            }
+
+            if (crlf != lf)
+            {
+                return crlf > lf ? "\r\n" : "\n";
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
