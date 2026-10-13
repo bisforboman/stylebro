@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'
     Find = '.Where(d => !DocumentationComments.IsMalformed(d))'
     Replace = ''
-    Tests = 'FullyQualifiedName~DocumentationTests.MalformedDocumentation_IsLeftAlone'
+    Tests = 'DocumentationTests.MalformedDocumentation_IsLeftAlone'
 }

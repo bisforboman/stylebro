@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
     Find = 'if (!setByStyleBro)'
     Replace = 'if (false)'
-    Tests = 'FullyQualifiedName~Format_SkipsTheWhitespacePass_WhereTheSettingsTurnIDE0055Off'
+    Tests = 'MigrationTests.Format_SkipsTheWhitespacePass_WhereTheSettingsTurnIDE0055Off'
 }

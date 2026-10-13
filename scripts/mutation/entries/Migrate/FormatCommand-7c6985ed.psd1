@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
     Find = 'if (options[i] is "--diagnostics" or "--exclude-diagnostics" or "--severity")'
     Replace = 'if (false)'
-    Tests = 'FullyQualifiedName~Format_WhitespacePassOnItsOwn'
+    Tests = 'MigrationTests.Format_WhitespacePassOnItsOwn'
 }

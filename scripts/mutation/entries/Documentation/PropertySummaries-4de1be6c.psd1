@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Documentation/PropertySummaries.cs'
     Find = 'var restrictedGetter = setter is not null && getAccessor is not null && IsRestricted(getAccessor);'
     Replace = 'var restrictedGetter = false;'
-    Tests = 'FullyQualifiedName~RestrictedGetter_SaysSets'
+    Tests = 'DocumentationTests.RestrictedGetter_SaysSets'
 }

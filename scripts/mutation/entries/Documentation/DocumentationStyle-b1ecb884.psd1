@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Documentation/DocumentationStyle.cs'
     Find = 'if (!findings.MoveNext() || DocumentationComments.IsMalformed(documentation))'
     Replace = 'if (!findings.MoveNext())'
-    Tests = 'FullyQualifiedName~DocumentationStyleTests.MalformedDocumentation_IsLeftAlone'
+    Tests = 'DocumentationStyleTests.MalformedDocumentation_IsLeftAlone'
 }
