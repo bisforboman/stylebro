@@ -151,11 +151,16 @@ internal static class FieldNames
     /// _camelCase when the SDK naming rule that singles them out (one requiring 'const', or 'static'/'readonly') asks for
     /// it (StyleCop issues #2641, #3793); otherwise null, PascalCase like StyleCop.
     /// </summary>
+    /// <param name="options">The file's settings.</param>
+    /// <param name="namingRuleSeverity">
+    /// IDE1006's severity for the file (null: not set; severity keys aren't in <paramref name="options"/>): whether the SDK
+    /// naming rules are enforced, which decides if they count for non-private fields (<see cref="GetNonPrivateStyles"/>).
+    /// </param>
     /// <remarks>
     /// <see cref="StaticStyleKey"/> wins over the naming rules for both: 'stylebro-migrate --write' sets it to PascalCase,
     /// so a naming rule StyleCop never enforced (IDE1006 off) doesn't rename a StyleCop-clean repository's fields.
     /// </remarks>
-    public static FieldStyles GetStyles(AnalyzerConfigOptions options)
+    public static FieldStyles GetStyles(AnalyzerConfigOptions options, ReportDiagnostic? namingRuleSeverity = null)
     {
         var mutableStatic = options.TryGetValue(MutableStaticStyleKey, out var mutableValue)
             ? ToCamelStyle(mutableValue)
@@ -164,7 +169,7 @@ internal static class FieldNames
         if (options.TryGetValue(StaticStyleKey, out var value))
         {
             var style = ToCamelStyle(value);
-            return new(GetStyle(options), style, style, mutableStatic, allowUnderscore, GetNonPrivateStyles(options));
+            return new(GetStyle(options), style, style, mutableStatic, allowUnderscore, GetNonPrivateStyles(options, namingRuleSeverity));
         }
 
         return new(
@@ -173,7 +178,7 @@ internal static class FieldNames
             GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")),
             mutableStatic,
             allowUnderscore,
-            GetNonPrivateStyles(options));
+            GetNonPrivateStyles(options, namingRuleSeverity));
 
         static FieldStyle? ToCamelStyle(string value) => value.Split(':')[0].Trim() switch
         {
@@ -699,9 +704,11 @@ internal static class FieldNames
     /// ordered like Roslyn's EditorConfigNamingStyleParser: priority (default 0), then the rule requiring a superset of
     /// the other's modifiers, then the one for a subset of the other's accessibilities, then for a subset of its symbol
     /// kinds, then the name. A rule without a severity doesn't exist for Roslyn; a constant counts as static and readonly
-    /// too. ' ' where no rule applies or the first one is off. Null when no rule applies to fields.
+    /// too. ' ' where no rule applies or the first one isn't enforced (owner's decision 2026-10-13: a naming rule nothing
+    /// enforces doesn't win, StyleCop's default applies): IDE1006's severity when set (<paramref name="ide1006"/>), else the
+    /// rule's own, must be suggestion, warning or error, and a rule at 'none' never counts. Null when no rule applies to fields.
     /// </summary>
-    private static string? GetNonPrivateStyles(AnalyzerConfigOptions options)
+    private static string? GetNonPrivateStyles(AnalyzerConfigOptions options, ReportDiagnostic? ide1006)
     {
         string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
         static string[]? List(string? value) =>
@@ -737,7 +744,7 @@ internal static class FieldNames
                 kinds,
                 List(Get($"dotnet_naming_symbols.{symbols}.applicable_accessibilities")),
                 List(Get($"dotnet_naming_symbols.{symbols}.required_modifiers")) ?? new string[0],
-                severity is "none" or "silent" ? ' ' : casing));
+                IsEnforced(severity, ide1006) ? casing : ' '));
         }
 
         if (rules.Count == 0)
@@ -767,6 +774,11 @@ internal static class FieldNames
         }
 
         return new string(table);
+
+        static bool IsEnforced(string severity, ReportDiagnostic? ide1006) => severity != "none"
+            && (ide1006 is { } set and not ReportDiagnostic.Default
+                ? set is ReportDiagnostic.Info or ReportDiagnostic.Warn or ReportDiagnostic.Error
+                : severity is "suggestion" or "warning" or "error");
 
         // -1 when x is a proper subset of y (null: everything), 1 the other way round, else 0.
         static int Subset(string[]? x, string[]? y)

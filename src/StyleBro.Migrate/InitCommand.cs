@@ -351,7 +351,7 @@ internal static class InitCommand
         {
             decided[Conventions.StaticCasingKey] = $"set in .editorconfig ({staticValue})";
         }
-        else if (StyleBro.Analyzers.Naming.FieldNames.GetStyles(new Conventions.Options(own)) is { Constant: not null } or { StaticReadOnly: not null })
+        else if (!NamingRulesOff(own) && StyleBro.Analyzers.Naming.FieldNames.GetStyles(new Conventions.Options(own)) is { Constant: not null } or { StaticReadOnly: not null })
         {
             decided[Conventions.StaticCasingKey] = "a dotnet_naming_rule decides";
         }
@@ -461,10 +461,17 @@ internal static class InitCommand
     /// <summary>
     /// The SDK naming rule BRO1303 follows (like the analyzer): one whose symbols are fields (or '*'), private (or '*') with
     /// no required modifiers, not turned off, with a camel case style without a prefix or with '_'. Null without one: rules
-    /// for interfaces, constants or static fields don't decide the private field style.
+    /// for interfaces, constants or static fields don't decide the private field style. Nor does any rule while IDE1006 is
+    /// off (<see cref="NamingRulesOff"/>): a naming rule nothing enforces doesn't win (owner's decision 2026-10-13), the code
+    /// decides, and the key init then writes wins over the rule in the analyzer too.
     /// </summary>
     public static string? FieldNamingRule(IReadOnlyDictionary<string, string> settings)
     {
+        if (NamingRulesOff(settings))
+        {
+            return null;
+        }
+
         string? Get(string key) => settings.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
         static bool Has(string? list, string item) => list is null || list.Split(',').Select(p => p.Trim()).Any(p => p == "*" || p.Equals(item, StringComparison.OrdinalIgnoreCase));
 
@@ -488,6 +495,10 @@ internal static class InitCommand
 
         return null;
     }
+
+    /// <summary>Whether the repository turns IDE1006 off (none or silent), so no naming rule is enforced.</summary>
+    public static bool NamingRulesOff(IReadOnlyDictionary<string, string> settings) =>
+        settings.TryGetValue("dotnet_diagnostic.IDE1006.severity", out var severity) && severity.Trim().ToLowerInvariant() is "none" or "silent";
 
     /// <summary>
     /// The --modernize block: the SDK's rules that rewrite code into newer C# (tier B) and newer APIs (tier C), at warning

@@ -56,6 +56,13 @@ public sealed partial class MigrationTests
         settings.Remove("dotnet_naming_symbols.private_fields.required_modifiers");
         settings["dotnet_naming_symbols.private_fields.applicable_kinds"] = "interface";
         Assert.Null(InitCommand.FieldNamingRule(settings));
+
+        // A rule nothing enforces (IDE1006 off) doesn't decide either: the code does.
+        settings["dotnet_naming_symbols.private_fields.applicable_kinds"] = "field";
+        settings["dotnet_diagnostic.IDE1006.severity"] = "none";
+        Assert.Null(InitCommand.FieldNamingRule(settings));
+        settings["dotnet_diagnostic.IDE1006.severity"] = "warning";
+        Assert.Equal("private_fields", InitCommand.FieldNamingRule(settings));
     }
 
     [Fact]
