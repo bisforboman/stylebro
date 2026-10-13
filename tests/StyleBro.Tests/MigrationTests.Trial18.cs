@@ -130,6 +130,16 @@ public sealed partial class MigrationTests
         Assert.Contains("interface members: your .editorconfig says dotnet_style_require_accessibility_modifiers = always:warning, but your code has 3 of 3 interface members without one", output, StringComparison.Ordinal);
         Assert.Contains("\ndotnet_style_require_accessibility_modifiers = for_non_interface_members\n", File.ReadAllText(Path.Combine(root, ".editorconfig")).Replace("\r\n", "\n"), StringComparison.Ordinal);
 
+        // Code that follows 'always', or too little code to tell: the key stays; mixed: interface members are left alone.
+        var counts = Conventions.NewCounts();
+        var always = new Dictionary<string, string> { ["dotnet_style_require_accessibility_modifiers"] = "always" };
+        counts["interface member access"] = [3, 0];
+        Assert.Null(Conventions.InterfaceAccess(counts, always, enforcedInBuild: false));
+        counts["interface member access"] = [0, 2];
+        Assert.Null(Conventions.InterfaceAccess(counts, always, enforcedInBuild: false));
+        counts["interface member access"] = [2, 3];
+        Assert.Contains("mixes both forms (2 with, 3 without)", Conventions.InterfaceAccess(counts, always, enforcedInBuild: false)?.Report, StringComparison.Ordinal);
+
         // Enforced in the build (EnforceCodeStyleInBuild): the key stays the team's.
         Write(".editorconfig", "root = true\n\n[*.cs]\ndotnet_style_require_accessibility_modifiers = always:warning\n");
         Write("Directory.Build.props", "<Project><PropertyGroup><EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild></PropertyGroup></Project>\n");
