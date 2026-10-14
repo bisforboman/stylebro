@@ -162,18 +162,14 @@ internal static class Program
 
         var setup = StyleCopSetup.Read(root);
 
-        // StyleCop settings no project uses are leftovers (Spectre.Console): init's job, unless a Sonar setup is migrated too.
-        if (setup.NotInstalled && sonar is null)
+        // StyleCop settings no project uses are leftovers (Spectre.Console): init's job, also with a Sonar setup, which init follows
+        // too (Splat: a leftover stylecop.json read with StyleCop's defaults next to Sonar renamed 72 files' '_fields').
+        if (setup.NotInstalled)
         {
             setup.Warnings.ToList().ForEach(w => Console.WriteLine("Warning: " + w));
             Console.WriteLine(LeftoverLine(StyleCopSetup.Evidence(root)));
-            Console.WriteLine($"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'stylebro-migrate init' instead: it follows the code's own conventions and ignores those lines.");
+            Console.WriteLine($"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'stylebro-migrate init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")} and ignores those lines.");
             return 1;
-        }
-
-        if (setup.NotInstalled)
-        {
-            Console.WriteLine(LeftoverLine(StyleCopSetup.Evidence(root)) + " The Sonar setup is still migrated, and StyleCop's rules count as those settings say.");
         }
 
         var result = Migration.Generate(setup, root, sonar: sonar);
@@ -193,6 +189,11 @@ internal static class Program
         else if (setup.UnresolvedVersion is { } unresolved)
         {
             Console.WriteLine($"StyleCop.Analyzers version: unknown (the reference says {unresolved}, and no MSBuild file in the repository defines it): every StyleCop 1.2 rule counts.");
+        }
+
+        if (setup.StyleSharp is { } styleSharp)
+        {
+            Console.WriteLine($"StyleSharp.Analyzers{(styleSharp.Version is { } v ? " " + v : string.Empty)}: its SST rules count as the StyleCop rules they stand for (SST1309 as StyleCop's SX1309: fields start with '_'), its stylesharp.* settings as stylecop.json's.");
         }
 
         foreach (var line in ScopeReport(setup))
@@ -221,7 +222,7 @@ internal static class Program
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored)}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var suppressions = RewriteSuppressions(root, Suppressions.WithSonar(result.Replacements, sonar), write);
+        var suppressions = RewriteSuppressions(root, Suppressions.WithSonar(Suppressions.WithStyleSharp(result.Replacements, setup), sonar), write);
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
@@ -327,16 +328,16 @@ internal static class Program
     internal static string NextAfterWrite(StyleCopSetup setup, string root) =>
         (PreviewCommand.ReferencesStyleBro(root), setup.ReferencedIn.Count > 0 || (setup.ReferencedOutside.Count > 0 && setup.RemovedIn.Count == 0)) switch
         {
-            (false, true) => NextStep,
-            (true, true) => RemoveStyleCopStep,
+            (false, true) => NextStep.Replace("StyleCop.Analyzers", setup.PackageName, StringComparison.Ordinal),
+            (true, true) => RemoveStyleCopStep.Replace("StyleCop.Analyzers", setup.PackageName, StringComparison.Ordinal),
             (true, false) => FormatHint,
             _ => AddPackageHint,
         };
 
     /// <summary>What the migration and init say about StyleCop settings no project uses (<see cref="StyleCopSetup.NotInstalled"/>).</summary>
     internal static string LeftoverLine(IReadOnlyCollection<string> evidence) => evidence.Count == 0
-        ? "StyleCop.Analyzers isn't referenced by any project, and there are no StyleCop settings: StyleCop doesn't run here."
-        : $"StyleCop.Analyzers isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers ({string.Join(", ", evidence)}).";
+        ? "StyleCop.Analyzers (or StyleSharp.Analyzers) isn't referenced by any project, and there are no StyleCop settings: StyleCop doesn't run here."
+        : $"StyleCop.Analyzers (or StyleSharp.Analyzers) isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers ({string.Join(", ", evidence)}).";
 
     /// <summary>The next step after init: format, or first add the package when no MSBuild file references it.</summary>
     internal static string NextHint(string root) => PreviewCommand.ReferencesStyleBro(root) ? FormatHint : AddPackageHint;
@@ -379,7 +380,7 @@ internal static class Program
                 how.Add($"{(global ? "otherwise " : string.Empty)}its version in {string.Join(", ", central)} (central package management)");
             }
 
-            lines.Add($"StyleCop.Analyzers is referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
+            lines.Add($"{setup.PackageName} {(setup.StyleSharp is { WithStyleCop: true } ? "are" : "is")} referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
         }
 
         // A submodule's file can't be edited here (SixLabors' shared-infrastructure): the repository's own props swap it.
@@ -531,7 +532,7 @@ internal static class Program
         int added = 0;
         int files = 0;
         int notCarried = 0;
-        var mentions = new Regex(@"\bS[AX]?\d{3,4}\b", RegexOptions.IgnoreCase);
+        var mentions = new Regex(@"\bS(?:[AX]|ST)?\d{3,4}\b", RegexOptions.IgnoreCase);
 
         // Suppressions of a rule 'dotnet format' ignores can't take effect: its whitespace pass ignores
         // '#pragma warning disable IDE0055' (Spectre.Console's SA1028 pragmas got one), so none is added; the report says so.
@@ -572,6 +573,14 @@ internal static class Program
 
         return (added, files, notCarried);
     }
+
+    /// <summary>The StyleSharp rules that are on and stand for no StyleCop rule (<see cref="StyleCopSetup.StandsFor"/>), or none without StyleSharp.</summary>
+    internal static List<string> StyleSharpOnly(StyleCopSetup setup) => setup.StyleSharp is not { } styleSharp || setup.Raw is not { } raw
+        ? []
+        : StyleCopSetup.StyleSharpRules
+            .Where(r => raw.TryGetValue(r.Id, out var s) && s >= Severity.Suggestion && StyleCopSetup.StandsFor(r.Id, r.StyleCop, styleSharp).Count == 0)
+            .Select(r => r.Id)
+            .ToList();
 
     /// <summary>Runs the command the arguments name.</summary>
     /// <summary>The command; a dotnet command it depends on that failed (MSBuild couldn't evaluate a project) ends it with that command's output, not a stack trace.</summary>
@@ -642,7 +651,14 @@ internal static class Program
         var cannotFire = Migration.CannotFire(setup);
         var on = StyleCopSetup.Rules.Where(r => setup.IsOn(r.Id) && !(r.Id == "SA0001" && setup.DocumentationParsed) && !cannotFire.Contains(r.Id)).Select(r => r.Id).ToList();
         var uncovered = on.Where(id => !result.Covered.Contains(id)).ToList();
-        Console.WriteLine($"StyleCop rules on: {on.Count}; enforced by StyleBro or the SDK after migrating: {on.Count - uncovered.Count}");
+        Console.WriteLine($"StyleCop rules on{(setup.StyleSharp is null ? string.Empty : " (StyleSharp's, read as the StyleCop rules they stand for)")}: {on.Count}; enforced by StyleBro or the SDK after migrating: {on.Count - uncovered.Count}");
+
+        // StyleSharp's rules StyleCop doesn't have (digit separators, complexity, ...): no StyleBro rule replaces them.
+        if (StyleSharpOnly(setup) is { Count: > 0 } own)
+        {
+            Console.WriteLine($"StyleSharp rules on that StyleCop doesn't have ({own.Count}): StyleBro doesn't replace them, so they stop when StyleSharp.Analyzers is removed: {string.Join(", ", own.Take(40))}{(own.Count > 40 ? $" and {own.Count - 40} more" : string.Empty)}.");
+        }
+
         if (uncovered.Count == 0)
         {
             return;

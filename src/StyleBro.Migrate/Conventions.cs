@@ -1786,11 +1786,7 @@ internal static class Conventions
         // Unit = files with a list of 2 or more usings (global usings aside): in the order 'dotnet format' sorts them into, or not.
         void UsingOrder()
         {
-            var lists = root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax)
-                .Select(n => n switch { CompilationUnitSyntax u => u.Usings, BaseNamespaceDeclarationSyntax ns => ns.Usings, _ => default })
-                .Select(l => l.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)).ToList())
-                .Where(l => l.Count >= 2)
-                .ToList();
+            var lists = UsingLists(root);
             if (lists.Count > 0)
             {
                 var systemFirst = lists.All(l => IsSorted(l, systemFirst: true));
@@ -2137,6 +2133,9 @@ internal static class Conventions
         var note = $"interface members: your .editorconfig says {AccessModifiersKey} = {setting}, but your code {found}; {(codeStyleInBuild ? "IDE0040 is off in init's block (its fix breaks multi-targeted projects)" : "nothing enforces it in the build")}, so {DiagnosticIds.AccessModifier} adds no access modifier to them ({AccessModifiersKey} = for_non_interface_members). To enforce it: change the code, then remove the next line.";
         return ([$"# init: {note}", $"{AccessModifiersKey} = for_non_interface_members"], $"  {"off",-8} {note.Substring(0, note.IndexOf(" To enforce", StringComparison.Ordinal))}");
     }
+
+    /// <summary>Whether a file's using lists are in the order 'dotnet format' sorts them into (<see cref="IsSorted"/>).</summary>
+    public static bool UsingsSorted(SyntaxNode root, bool systemFirst) => UsingLists(root).All(l => IsSorted(l, systemFirst));
 
     /// <summary>The folder a piece of <see cref="CSharpier"/>'s evidence applies to: its own, or the one above '.config'.</summary>
     private static string CSharpierFolder(string evidence)
@@ -2499,6 +2498,14 @@ internal static class Conventions
 
     /// <summary>The line that turns a rule off.</summary>
     private static string Off(string id) => $"dotnet_diagnostic.{id}.severity = none";
+
+    /// <summary>A file's lists of 2 or more usings (global usings aside): the file's and each namespace's.</summary>
+    private static List<List<UsingDirectiveSyntax>> UsingLists(SyntaxNode root) =>
+        root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax)
+            .Select(n => n switch { CompilationUnitSyntax u => u.Usings, BaseNamespaceDeclarationSyntax ns => ns.Usings, _ => default })
+            .Select(l => l.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)).ToList())
+            .Where(l => l.Count >= 2)
+            .ToList();
 
     /// <summary>Whether a list of usings is in the order 'dotnet format' sorts them into (Roslyn's: namespaces, static, aliases).</summary>
     private static bool IsSorted(List<UsingDirectiveSyntax> usings, bool systemFirst)

@@ -887,7 +887,9 @@ internal static class FormatCommand
         var parts = new List<string>();
         if (other.Count > 0)
         {
-            parts.Add($"{string.Join(", ", other)}: IDE0055 is off there in the stylebro settings (another formatter's code), so whitespace formatting leaves {Them(other.Count)} alone; style and analyzer fixes still run there.");
+            // Not "another formatter's code" unless one is there: Splat just has IDE0055 = none (trial 21).
+            var formatter = Conventions.CSharpier(root) is null ? string.Empty : " (CSharpier's code)";
+            parts.Add($"{string.Join(", ", other)}: IDE0055 is off there in the stylebro settings{formatter}, so whitespace formatting leaves {Them(other.Count)} alone; style and analyzer fixes still run there.");
         }
 
         if (optOut.Count > 0)
@@ -1538,9 +1540,21 @@ internal static class FormatCommand
 
         var changedSet = new HashSet<string>(changed.Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase);
         var changedProjects = new HashSet<string>(changedSet.Select(ProjectOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+
+        // A file its evaluated project doesn't compile isn't rebuilt here either (Splat's Resource.designer.cs: Android only,
+        // a framework this machine didn't build). ponytail: the outer and first framework's Compile items (ReadProjects).
+        Dictionary<string, HashSet<string>> compiled;
+        lock (ProjectCache)
+        {
+            compiled = ProjectCache.Values.SelectMany(d => d.Values).Where(p => p.Compile.Length > 0)
+                .GroupBy(p => Path.GetFullPath(p.FullPath), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => new HashSet<string>(g.SelectMany(p => p.Compile).Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase);
+        }
+
+        bool NotCompiled(string file, string project) => compiled.TryGetValue(Path.GetFullPath(project), out var files) && !files.Contains(file);
         return list.Split('\0', StringSplitOptions.RemoveEmptyEntries)
             .Select(f => Path.GetFullPath(Path.Combine(repository, f)))
-            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) != otherProjects && IsGenerated(f))
+            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) != otherProjects && !NotCompiled(f, project) && IsGenerated(f))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();

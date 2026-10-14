@@ -35,6 +35,9 @@ internal static class Migration
     /// <summary>How the block records the StyleCop.Analyzers version, read back once the package is gone (<see cref="RecordedVersion"/>).</summary>
     public const string VersionPrefix = "# StyleCop.Analyzers version: ";
 
+    /// <summary>How the block records StyleSharp.Analyzers' version: once the package is gone, the setup is still read as StyleSharp's.</summary>
+    public const string StyleSharpVersionPrefix = "# StyleSharp.Analyzers version: ";
+
     /// <summary>Why a StyleCop rule isn't enforced in a repository CSharpier formats (the report groups these).</summary>
     public const string CSharpierReason = "CSharpier decides it";
 
@@ -189,6 +192,11 @@ internal static class Migration
         // StyleCop's SX1309 (private instance fields begin with '_') and SX1309S (private static fields that aren't
         // readonly) are BRO1303 with '_camelCase'. SX1309S alone can't be: StyleCop's SA1309 (no '_') checks every field,
         // so it is off there, and BRO1303's 'camelCase' would remove the '_' of instance fields StyleCop accepts.
+        foreach (var sx in new[] { "SX1309", "SX1309S" })
+        {
+            AddReplacement(result, sx, StyleBro.Analyzers.DiagnosticIds.PrivateFieldNaming);
+        }
+
         foreach (var sx in new[] { "SX1309", "SX1309S" }.Where(setup.IsOn))
         {
             if (result.FieldStyle != "_camelCase")
@@ -256,6 +264,11 @@ internal static class Migration
         if (unenforced.Count > 0)
         {
             result.Notes.Add($"Not kept, because nothing enforces them (severity silent or none): {string.Join(", ", unenforced.Select(k => $"{k} = {ownSettings[k]}"))}; StyleCop's setting is written instead.");
+        }
+
+        if (fieldStyle is null && UnsortedUnderOwnKey(setup, root, ownSettings) is { } usingsNote)
+        {
+            result.Notes.Add(usingsNote);
         }
 
         var kept = lines.Skip(sdkStart).Where(line => KeyOf(line) is { } key && own.Contains(key)).ToList();
@@ -487,6 +500,11 @@ internal static class Migration
             mainLines = [.. mainLines, string.Empty, VersionPrefix + version + " (rules it doesn't have stay off after the package is removed)"];
         }
 
+        if (setup.StyleSharp is { } styleSharp)
+        {
+            mainLines = [.. mainLines, .. setup.Version is null ? [string.Empty] : Array.Empty<string>(), StyleSharpVersionPrefix + (styleSharp.Version ?? "unknown") + " (its SST rules are read as the StyleCop rules they stand for, also after the package is removed)"];
+        }
+
         var plan = new SortedDictionary<string, List<(string, List<string>)>>(StringComparer.OrdinalIgnoreCase)
         {
             [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, mainLines)],
@@ -517,8 +535,19 @@ internal static class Migration
                 continue;
             }
 
-            var inFolder = Generate(setup, Path.Combine(root, folder), sonar: main.SonarSetup);
             var file = Path.GetRelativePath(root, Path.Combine(root, folder, ".editorconfig"));
+
+            // A folder that turns every analyzer off itself gets init's opt-out block (#200): StyleBro's rules and the built-in ones
+            // off by id, which wins over its bulk 'none' (Splat's benchmarks got the full block: 93 IDE0009, 6 BRO1303).
+            var folderSettings = OwnSettings(Path.Combine(root, folder));
+            if (InitCommand.OptsOut(folderSettings))
+            {
+                plan[file] = [(MainSection, [InitCommand.OptOutComment, .. InitCommand.OptOutLines(main.Lines.Select(l => KeyOf(l) is { } k ? new KeyValuePair<string, string>(k, l.Substring(l.IndexOf('=') + 1).Trim()) : default).Where(p => p.Key is not null), folderSettings)])];
+                main.Notes.Add($"{folder}/.editorconfig turns every analyzer off (dotnet_analyzer_diagnostic.severity = {folderSettings["dotnet_analyzer_diagnostic.severity"]}): its block turns StyleBro's rules and the built-in ones off there by id too, so the build and 'format' leave {folder}/ alone.");
+                continue;
+            }
+
+            var inFolder = Generate(setup, Path.Combine(root, folder), sonar: main.SonarSetup);
             plan[file] = [(MainSection, inFolder.Lines)];
             foreach (var generated in MigrationFolders(Path.Combine(root, folder)))
             {
@@ -704,12 +733,15 @@ internal static class Migration
         return root;
     }
 
-    /// <summary>The StyleCop.Analyzers version the stylebro-migrate block (<see cref="BlockFolder"/>) records, or null.</summary>
-    public static string? RecordedVersion(string root)
+    /// <summary>
+    /// The StyleCop.Analyzers version the stylebro-migrate block (<see cref="BlockFolder"/>) records, or null; with
+    /// <paramref name="prefix"/> <see cref="StyleSharpVersionPrefix"/>, StyleSharp.Analyzers' ('unknown' when it wasn't found).
+    /// </summary>
+    public static string? RecordedVersion(string root, string prefix = VersionPrefix)
     {
         var path = Path.Combine(BlockFolder(root), ".editorconfig");
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
-        var version = Regex.Match(block.Value, "^" + Regex.Escape(VersionPrefix) + @"(\S+)", RegexOptions.Multiline);
+        var version = Regex.Match(block.Value, "^" + Regex.Escape(prefix) + @"(\S+)", RegexOptions.Multiline);
         return version.Success && !version.Groups[1].Value.Contains("$(", StringComparison.Ordinal) ? version.Groups[1].Value : null; // an earlier run recorded the property itself
     }
 
@@ -911,6 +943,42 @@ internal static class Migration
         return result;
     }
 
+    /// <summary>
+    /// The note when the repository's own .editorconfig sets a using-sorting key and some files aren't in the order 'dotnet
+    /// format' then sorts them into (it does whatever the value; an .editorconfig can't remove the key, and it's the team's, so
+    /// it stays). Splat: dotnet_sort_system_directives_first = true, while StyleSharp's SST1210 keeps 'using Splat.Log4Net;'
+    /// above 'using log4net;' (it compares case-sensitively); format's IMPORTS reordered 2 files, and SST1210 reported them.
+    /// Null when every file is in that order.
+    /// </summary>
+    internal static string? UnsortedUnderOwnKey(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> ownSettings)
+    {
+        var key = new[] { Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups" }.FirstOrDefault(ownSettings.ContainsKey);
+        if (key is null)
+        {
+            return null;
+        }
+
+        var systemFirst = !ownSettings.TryGetValue(Conventions.SortUsingsKey, out var value) || !value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
+        var unsorted = OwnCSharpFiles(root)
+            .Select(f => (Relative: Path.GetRelativePath(root, f).Replace('\\', '/'), Text: File.ReadAllText(f)))
+            .Where(f => (setup.Folders is null || setup.Folders.Any(folder => IsUnder(f.Relative, folder))) && !IsGeneratedOrVendored(f.Relative, f.Text)
+                && !Conventions.UsingsSorted(CSharpSyntaxTree.ParseText(f.Text).GetRoot(), systemFirst))
+            .Select(f => f.Relative)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (unsorted.Count == 0)
+        {
+            return null;
+        }
+
+        var enforcers = new[] { "SA1208", "SA1210" }.Where(setup.IsOn).ToList();
+        var enforcer = enforcers.Count == 0 ? string.Empty
+            : setup.StyleSharp is not null
+                ? $" StyleSharp's {string.Join("/", enforcers.Select(id => "SST" + id[2..]))} (on here) keep{(enforcers.Count == 1 ? "s" : string.Empty)} another order (case-sensitive: 'MyApp.Logging' above 'log4net') and report what 'format' writes for as long as StyleSharp runs."
+                : $" {string.Join("/", enforcers)} (on here) accept{(enforcers.Count == 1 ? "s" : string.Empty)} their order.";
+        return $"using directives: your .editorconfig sets {key} = {ownSettings[key]}, and 'dotnet format' sorts usings whenever it is set (to any value): {unsorted.Count} file{(unsorted.Count == 1 ? " isn't" : "s aren't")} in that order ({string.Join(", ", unsorted.Take(3))}{(unsorted.Count > 3 ? ", ..." : string.Empty)}), and 'format' will reorder {(unsorted.Count == 1 ? "it" : "them")}.{enforcer} The key is yours, so it stays: if your team doesn't want that order, remove {key} from .editorconfig ('unset' sorts them too).";
+    }
+
     /// <summary>Whether a C# file (path relative to the root) is generated or someone else's code.</summary>
     internal static bool IsGeneratedOrVendored(string relativePath, string text)
     {
@@ -998,6 +1066,13 @@ internal static class Migration
 
         if (id == StyleBro.Analyzers.DiagnosticIds.PrivateFieldNaming && fieldStyle == "_camelCase")
         {
+            // StyleSharp's SST1309 is the whole '_camelCase' convention, the case after the '_' too (read as SX1309): it decides
+            // alone, and SST1306 (SA1306, off by default there because it would forbid the '_') doesn't count.
+            if (setup.StyleSharp is not null && setup.IsOn("SX1309"))
+            {
+                return ["SX1309"];
+            }
+
             moot.Add("SA1309");
         }
 
@@ -1136,7 +1211,7 @@ internal static class Migration
     {
         if (setup.IsOn("SX1309"))
         {
-            notes.Add("SX1309 (fields begin with an underscore) is on, so BRO1303 uses '_camelCase'.");
+            notes.Add($"{(setup.StyleSharp is null ? "SX1309" : "StyleSharp's SST1309")} (fields begin with an underscore) is on, so BRO1303 uses '_camelCase'.");
             return "_camelCase";
         }
 

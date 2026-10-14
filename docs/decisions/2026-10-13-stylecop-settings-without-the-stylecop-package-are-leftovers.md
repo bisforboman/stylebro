@@ -24,3 +24,5 @@ should `init` and the migration do with StyleCop settings no project uses?
 intent into lines nobody has enforced since the package went. Exception: a repository with a Sonar setup still runs the
 migration (it carries the Sonar part), with the leftover note. A repository without any .csproj (nothing to evaluate)
 keeps the old behaviour.
+
+Update (2026-10-14): the Sonar exception is dropped, see [Read StyleSharp like StyleCop](2026-10-14-read-stylesharp-like-stylecop.md): with a Sonar setup the migration points to `init` too.

@@ -1,5 +1,6 @@
-// Lists every diagnostic a StyleCop.Analyzers package reports, and which of them its code fix providers can fix.
-// Usage: Inventory <folder with StyleCop.Analyzers.dll> <output csv>
+// Lists every diagnostic a StyleCop.Analyzers (or StyleSharp.Analyzers) package reports, and which of them its code fix
+// providers can fix.
+// Usage: Inventory <folder with StyleCop.Analyzers.dll or StyleSharp.Analyzers.dll> <output csv>
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,8 +17,9 @@ AppDomain.CurrentDomain.AssemblyResolve += (_, e) =>
     return File.Exists(path) ? Assembly.LoadFrom(path) : null;
 };
 
-var analyzers = Assembly.LoadFrom(Path.Combine(dir, "StyleCop.Analyzers.dll"));
-var codeFixes = Assembly.LoadFrom(Path.Combine(dir, "StyleCop.Analyzers.CodeFixes.dll"));
+var name = File.Exists(Path.Combine(dir, "StyleSharp.Analyzers.dll")) ? "StyleSharp.Analyzers" : "StyleCop.Analyzers";
+var analyzers = Assembly.LoadFrom(Path.Combine(dir, name + ".dll"));
+var codeFixes = Assembly.LoadFrom(Path.Combine(dir, name + ".CodeFixes.dll"));
 
 var fixable = new HashSet<string>();
 foreach (var provider in Instantiate<CodeFixProvider>(codeFixes))
