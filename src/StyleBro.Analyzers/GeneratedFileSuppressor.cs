@@ -32,11 +32,10 @@ public sealed class GeneratedFileSuppressor : DiagnosticSuppressor
     /// <summary>Whether <paramref name="path"/> is in one of the folders or, without them, in an 'obj' folder.</summary>
     public static bool IsGeneratedFile(string path, string? folders)
     {
-        var file = path.Replace('\\', '/');
-        var roots = (folders ?? string.Empty).Split('|').Select(f => f.Trim().Replace('\\', '/').TrimEnd('/')).Where(f => f.Length > 0).ToList();
+        var roots = PackageFileSuppressor.Roots(folders);
         return roots.Count > 0
-            ? roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase))
-            : file.IndexOf("/obj/", StringComparison.OrdinalIgnoreCase) >= 0;
+            ? PackageFileSuppressor.IsUnder(path, roots)
+            : PackageFileSuppressor.Normalize(path).IndexOf("/obj/", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     /// <inheritdoc/>

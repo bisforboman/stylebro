@@ -170,8 +170,9 @@ file sets it yet).
 
 An `.editorconfig` that silences analyzers in bulk (`dotnet_analyzer_diagnostic.severity = silent`, or a category's
 severity below warning) would hide StyleBro's rules from `dotnet format`, while the build still reports them at the
-preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules; a rule
-your `.editorconfig` sets by id stays as you set it. `stylebro-migrate format` never says clean while such a bulk setting
+preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules (in a
+folder's own `.editorconfig` too, such as `tests/.editorconfig`); a rule your `.editorconfig` sets by id stays as you
+set it. `stylebro-migrate format` never says clean while such a bulk setting
 hides rules from it.
 
 #### init also looks at your code
