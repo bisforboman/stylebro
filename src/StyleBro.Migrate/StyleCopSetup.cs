@@ -27,6 +27,62 @@ internal enum Severity
 /// </summary>
 internal sealed record Scope(string File, string Section, IReadOnlyDictionary<string, Severity> Severities, JsonElement? Settings = null, IReadOnlyDictionary<string, Severity>? Sonar = null);
 
+/// <summary>
+/// StyleSharp.Analyzers (SST ids, a StyleCop successor) in a repository, read like StyleCop (owner's decision 2026-10-14):
+/// its version (null when unknown), its options ('stylesharp.*' keys and file_header_template, from the root .editorconfig's
+/// sections for all C# and global configs; StyleSharp doesn't read stylecop.json), and whether StyleCop runs next to it (a
+/// rule then counts as on when either enforces it).
+/// </summary>
+internal sealed record StyleSharpUse(string? Version, IReadOnlyDictionary<string, string> Options, bool WithStyleCop = false)
+{
+    /// <summary>An option's value: the rule's own key ('stylesharp.SST1316.tuple_element_naming') over the shared one, or null.</summary>
+    public string? Option(string name, string? rule = null) =>
+        (rule is not null && Options.TryGetValue($"stylesharp.{rule}.{name}", out var own) ? own : null)
+        ?? (Options.TryGetValue($"stylesharp.{name}", out var shared) ? shared : null);
+
+    /// <summary>
+    /// The options as stylecop.json's 'settings' (what <see cref="Migration"/> reads): no XML header (StyleSharp's header is
+    /// file_header_template's plain one), usings outside the namespace (SST1200), which members need documentation, the
+    /// tuple element casing and the Hungarian prefixes allowed.
+    /// </summary>
+    public JsonElement Settings()
+    {
+        var documentation = new System.Text.Json.Nodes.JsonObject { ["xmlHeader"] = false };
+        if (Options.TryGetValue("file_header_template", out var template) && template.Length > 0)
+        {
+            documentation["copyrightText"] = template.Replace("\\n", "\n", StringComparison.Ordinal);
+        }
+
+        foreach (var (key, name) in new[] { ("document_exposed_elements", "documentExposedElements"), ("document_internal_elements", "documentInternalElements"), ("document_private_elements", "documentPrivateElements") })
+        {
+            if (bool.TryParse(Option(key), out var value))
+            {
+                documentation[name] = value;
+            }
+        }
+
+        var naming = new System.Text.Json.Nodes.JsonObject();
+        if (Option("tuple_element_naming", "SST1316") is { } casing)
+        {
+            naming["tupleElementNameCasing"] = casing.Replace("_", string.Empty, StringComparison.Ordinal).Equals("camelcase", StringComparison.OrdinalIgnoreCase) ? "camelCase" : "PascalCase";
+        }
+
+        if (Option("allowed_hungarian_prefixes", "SST1305") is { Length: > 0 } prefixes)
+        {
+            naming["allowedHungarianPrefixes"] = new System.Text.Json.Nodes.JsonArray(prefixes.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(p => (System.Text.Json.Nodes.JsonNode?)p).ToArray());
+        }
+
+        var settings = new System.Text.Json.Nodes.JsonObject
+        {
+            ["documentationRules"] = documentation,
+            ["namingRules"] = naming,
+            ["orderingRules"] = new System.Text.Json.Nodes.JsonObject { ["usingDirectivesPlacement"] = "outsideNamespace" },
+        };
+        using var document = JsonDocument.Parse(settings.ToJsonString());
+        return document.RootElement.Clone();
+    }
+}
+
 /// <summary>The ruleset and stylecop.json (full paths, or null) a project's StyleCop uses.</summary>
 internal sealed record ProjectStyleCop(string? Ruleset, string? Json);
 
@@ -43,27 +99,41 @@ internal sealed class StyleCopSetup
     /// <summary>The key ReadConfig files a 'dotnet_analyzer_diagnostic.severity' (every rule) under, next to the categories.</summary>
     private const string AllRules = "*";
 
-    private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*)\.severity$", RegexOptions.IgnoreCase);
+    private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*|SST\d{4})\.severity$", RegexOptions.IgnoreCase);
     private static readonly Regex SonarKey = new(@"^dotnet_diagnostic\.(S\d+)\.severity$", RegexOptions.IgnoreCase);
 
     /// <summary>
     /// StyleCop's version: a PackageReference/PackageVersion (attribute or element), a packages.config entry, or an analyzer's
     /// hint path into a packages.config 'packages' folder ('..\packages\StyleCop.Analyzers.1.0.2\analyzers\...': xbox-live-developer-tools).
     /// </summary>
-    private static readonly Regex PackageVersion = new(@"Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?Version=""(?<v>[^""]+)""|Include=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*>\s*<Version>(?<v>[^<]+)</Version>|<package\b[^>]*?\bid=""StyleCop\.Analyzers(?:\.Unstable)?""[^>]*?\bversion=""(?<v>[^""]+)""|StyleCop\.Analyzers(?:\.Unstable)?\.(?<v>\d+(?:\.\d+){2,3}(?:-[\w.]+)?)[\\/]", RegexOptions.IgnoreCase);
+    private static readonly Regex PackageVersion = VersionPattern(@"StyleCop\.Analyzers(?:\.Unstable)?");
+
+    /// <summary>StyleSharp's version, found the same ways as StyleCop's (<see cref="PackageVersion"/>).</summary>
+    private static readonly Regex StyleSharpVersion = VersionPattern(@"StyleSharp\.Analyzers");
     private static readonly Regex DocumentationFile = new(@"<GenerateDocumentationFile>\s*true\s*<|<DocumentationFile>", RegexOptions.IgnoreCase);
-    private static readonly Regex CategoryKey = new(@"^dotnet_analyzer_diagnostic\.category-StyleCop\.CSharp\.(\w+)\.severity$", RegexOptions.IgnoreCase);
+
+    /// <summary>A category's bulk severity: StyleCop's ('StyleCop.CSharp.NamingRules') or StyleSharp's (plain: 'Naming').</summary>
+    private static readonly Regex CategoryKey = new(@"^dotnet_analyzer_diagnostic\.category-(?:StyleCop\.CSharp\.)?(\w+)\.severity$", RegexOptions.IgnoreCase);
 
     /// <summary>What an MSBuild file points to: an import, a ruleset, an additional file (stylecop.json).</summary>
     private static readonly Regex Reference = new(
         @"<Import\b[^>]*?\bProject\s*=\s*""(?<import>[^""]+)""|<CodeAnalysisRuleSet\b(?:[^>]*?\bCondition\s*=\s*""(?<condition>[^""]*)"")?[^>]*>(?<ruleset>[^<]+)</CodeAnalysisRuleSet>|<AdditionalFiles\b[^>]*?\bInclude\s*=\s*""(?<additional>[^""]+)""",
         RegexOptions.IgnoreCase);
 
-    /// <summary>A reference that runs StyleCop in a project: a (global) package reference or an analyzer DLL.</summary>
-    private static readonly Regex StyleCopReference = new(@"<(?:Global)?PackageReference\b[^>]*?\bInclude\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*StyleCop\.Analyzers", RegexOptions.IgnoreCase);
+    /// <summary>
+    /// A reference that runs StyleCop in a project: a (global) package reference or an analyzer DLL, of StyleCop.Analyzers or
+    /// StyleSharp.Analyzers (a StyleCop successor, read the same way: <see cref="StyleSharpUse"/>).
+    /// </summary>
+    private static readonly Regex StyleCopReference = new(@"<(?:Global)?PackageReference\b[^>]*?\bInclude\s*=\s*""(?:StyleCop\.Analyzers(?:\.Unstable)?|StyleSharp\.Analyzers)""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*(?:StyleCop|StyleSharp)\.Analyzers", RegexOptions.IgnoreCase);
 
     /// <summary>A project that opts out of the StyleCop reference it inherits ('&lt;PackageReference Remove="StyleCop.Analyzers" /&gt;').</summary>
-    private static readonly Regex StyleCopRemove = new(@"<PackageReference\b[^>]*?\bRemove\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""", RegexOptions.IgnoreCase);
+    private static readonly Regex StyleCopRemove = new(@"<PackageReference\b[^>]*?\bRemove\s*=\s*""(?:StyleCop\.Analyzers(?:\.Unstable)?|StyleSharp\.Analyzers)""", RegexOptions.IgnoreCase);
+
+    /// <summary>A StyleSharp.Analyzers reference or central version in an MSBuild file.</summary>
+    private static readonly Regex StyleSharpReference = new(@"\b(?:Include|Update)\s*=\s*""StyleSharp\.Analyzers""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*StyleSharp\.Analyzers", RegexOptions.IgnoreCase);
+
+    /// <summary>A StyleCop.Analyzers reference or central version in an MSBuild file.</summary>
+    private static readonly Regex StyleCopPackage = new(@"\b(?:Include|Update)\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*StyleCop\.Analyzers", RegexOptions.IgnoreCase);
 
     /// <summary>An item or Copy task taking an .editorconfig (not one the compiler reads as a config file).</summary>
     private static readonly Regex CopiesEditorConfig = new(@"<(?!EditorConfigFiles\b|GlobalAnalyzerConfigFiles\b)[\w.]+\s[^>]*\b(?:Include|SourceFiles)\s*=\s*""[^""]*\.editorconfig""", RegexOptions.IgnoreCase);
@@ -81,8 +151,23 @@ internal sealed class StyleCopSetup
     /// <summary>Gets styleCop's rules: id, category, default severity and title, from the inventory of the DLLs.</summary>
     public static IReadOnlyList<(string Id, string Category, Severity Default, string Title)> Rules { get; } = LoadRules();
 
-    /// <summary>Gets every StyleCop rule's effective severity.</summary>
+    /// <summary>
+    /// Gets styleSharp's rules (SST ids): id, category, default severity and title, and the StyleCop rules each stands for
+    /// (scripts/stylecop-survey/New-StyleSharpMapping.ps1; none for a rule StyleCop doesn't have).
+    /// </summary>
+    public static IReadOnlyList<(string Id, string Category, Severity Default, string Title, IReadOnlyList<string> StyleCop)> StyleSharpRules { get; } = LoadStyleSharpRules();
+
+    /// <summary>Gets every StyleCop rule's effective severity (with StyleSharp, read from its SST rules: <see cref="Translate"/>).</summary>
     public IReadOnlyDictionary<string, Severity> Severities { get; }
+
+    /// <summary>Gets styleSharp.Analyzers' use in the repository, or null when it doesn't run StyleSharp.</summary>
+    public StyleSharpUse? StyleSharp { get; init; }
+
+    /// <summary>Gets the severities as the configs set them (SA, SX and SST ids), before <see cref="Translate"/>; null without StyleSharp.</summary>
+    public IReadOnlyDictionary<string, Severity>? Raw { get; init; }
+
+    /// <summary>Gets the analyzer package(s) the setup is read from, for the report: 'StyleCop.Analyzers', 'StyleSharp.Analyzers' or both.</summary>
+    public string PackageName => StyleSharp is null ? "StyleCop.Analyzers" : StyleSharp.WithStyleCop ? "StyleCop.Analyzers and StyleSharp.Analyzers" : "StyleSharp.Analyzers";
 
     /// <summary>Gets the 'settings' object of stylecop.json, or null when there's none.</summary>
     public JsonElement? Settings { get; }
@@ -138,6 +223,10 @@ internal sealed class StyleCopSetup
     /// <summary>Gets a value indicating whether no project runs StyleCop (<see cref="IsInstalled"/>): its settings are leftovers.</summary>
     public bool NotInstalled { get; init; }
 
+    /// <summary>Gets the rules the configs are read for: StyleCop's and StyleSharp's (declared after both, which it reads).</summary>
+    private static IReadOnlyList<(string Id, string Category, Severity Default)> ReadRules { get; } =
+        [.. Rules.Select(r => (r.Id, r.Category, r.Default)), .. StyleSharpRules.Select(r => (r.Id, r.Category, r.Default))];
+
     /// <summary>
     /// Reads the setup. <paramref name="evaluate"/> tells whether StyleCop.Analyzers is among a project's evaluated items
     /// (null: MSBuild failed); by default 'dotnet msbuild' (<see cref="EvaluateStyleCop"/>).
@@ -155,12 +244,14 @@ internal sealed class StyleCopSetup
 
         // A version from a property ('$(StyleCopVersion)', Steeltoe's versions.props) is resolved from the MSBuild files.
         var properties = msbuild.Select(m => WithoutComments(m.Text)).ToList();
-        var versions = msbuild.Select(m => m.Text)
-            .Concat(files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)).Select(File.ReadAllText))
-            .SelectMany(text => PackageVersion.Matches(text))
+        var packagesConfigs = files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)).Select(File.ReadAllText).ToList();
+        List<(string Raw, string? Value)> Versions(Regex pattern) => msbuild.Select(m => m.Text)
+            .Concat(packagesConfigs)
+            .SelectMany(text => pattern.Matches(text))
             .Select(m => m.Groups["v"].Value.Trim())
             .Select(v => (Raw: v, Value: ResolveProperties(v, properties)))
             .ToList();
+        var versions = Versions(PackageVersion);
         var version = versions.Select(v => v.Value).OfType<string>().OrderBy(v => v, StringComparer.Ordinal).FirstOrDefault();
         var unresolved = version is null ? versions.Select(v => v.Raw).FirstOrDefault() : null;
 
@@ -171,6 +262,14 @@ internal sealed class StyleCopSetup
         version ??= recorded;
         var old = OldRules(version);
 
+        // StyleSharp, StyleCop's successor with SST ids (Splat: SST1309 = error, '_camelCase', read as StyleCop's defaults
+        // from a leftover stylecop.json, and 72 files lost their '_'): referenced, or recorded by the last --write.
+        var recordedStyleSharp = Migration.RecordedVersion(root, Migration.StyleSharpVersionPrefix);
+        var styleSharpVersions = Versions(StyleSharpVersion);
+        var styleSharpReferenced = recordedStyleSharp is not null || styleSharpVersions.Count > 0 || msbuild.Any(m => StyleSharpReference.IsMatch(WithoutComments(m.Text)));
+        var styleCopReferenced = version is not null || versions.Count > 0 || msbuild.Any(m => StyleCopPackage.IsMatch(WithoutComments(m.Text)));
+        var styleSharpOnly = styleSharpReferenced && !styleCopReferenced;
+
         // Each project that runs StyleCop, with the ruleset and stylecop.json it gets (its own file, its Directory.Build.props
         // and .targets, and what they import). Only those projects count: a sample project without StyleCop has no ruleset
         // and would otherwise bring StyleCop's defaults back in (Soulseek.NET's examples turned SA1101 on: 191 files got
@@ -180,12 +279,12 @@ internal sealed class StyleCopSetup
 
         // Also when a file outside the repository's own still references it and the swap removed it (Fonts' submodule): the
         // block the last --write recorded is the migrated state, not leftovers.
-        var installed = recordedVersion is not null || Evaluate(root, projects.Uses, evaluate ?? EvaluateStyleCop, warnings);
+        var installed = recordedVersion is not null || recordedStyleSharp is not null || Evaluate(root, projects.Uses, evaluate ?? EvaluateStyleCop, warnings);
 
         // After the package swap no project references StyleCop, and every project would count: the projects the last
         // --write found without it (the block's "No StyleCop ran in" line) still don't, so --write gives the same block
         // again (Autofac: SA1309 came on from its AOT test projects, and BRO1303 switched to 'camelCase').
-        if (recordedVersion is not null && !projects.Uses.Values.Contains(true) && Migration.UnformattedFolders(root) is { Count: > 0 } recordedWithout)
+        if ((recordedVersion ?? recordedStyleSharp) is not null && !projects.Uses.Values.Contains(true) && Migration.UnformattedFolders(root) is { Count: > 0 } recordedWithout)
         {
             var uses = projects.Uses.ToDictionary(p => p.Key, p => !recordedWithout.Any(folder => InFolder(root, p.Key, folder)), StringComparer.OrdinalIgnoreCase);
             projects = (uses, projects.ReferencedIn, projects.RemovedIn, projects.ReferencedOutside);
@@ -269,11 +368,11 @@ internal sealed class StyleCopSetup
         var rootInEffect = rootSections.Select(WithoutBulkOverrides).ToList();
         Dictionary<string, Severity> Effective(IReadOnlyList<Dictionary<string, Severity>> inEffect)
         {
-            var result = Rules.ToDictionary(r => r.Id, r => r.Default);
+            var result = ReadRules.ToDictionary(r => r.Id, r => r.Default);
             OverlayStrictest(result, inEffect);
             OverlayStrictest(result, globalInEffect);
             rootInEffect.ForEach(section => Overlay(result, section));
-            foreach (var id in old is null ? [] : result.Keys.Where(id => !old.Contains(id)).ToList())
+            foreach (var id in old is null ? [] : result.Keys.Where(id => !old.Contains(id) && !IsStyleSharpId(id)).ToList())
             {
                 result[id] = Severity.None;
             }
@@ -291,6 +390,7 @@ internal sealed class StyleCopSetup
         var severities = Effective(rulesets);
 
         // stylecop.json: the one most StyleCop projects link is the repository-wide one (without any, the shallowest file).
+        // StyleSharp doesn't read it: in a StyleSharp repository it's a leftover (Splat's said camelCase fields), never read.
         var linked = configs.Select(c => c.Config.Json).OfType<string>().ToList();
         var json = linked.GroupBy(f => f, StringComparer.OrdinalIgnoreCase).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => g.Key).FirstOrDefault()
             ?? files.Where(f => Path.GetFileName(f).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase))
@@ -298,6 +398,17 @@ internal sealed class StyleCopSetup
                 .ThenBy(f => f, StringComparer.OrdinalIgnoreCase)
                 .Concat(references.StyleCopJson)
                 .FirstOrDefault();
+        if (styleSharpOnly)
+        {
+            if (json is not null)
+            {
+                warnings.Add($"{Path.GetRelativePath(root, json).Replace('\\', '/')}: StyleSharp doesn't read stylecop.json, so its settings aren't read here either (a leftover from StyleCop); StyleSharp's own are its 'stylesharp.*' keys.");
+            }
+
+            (json, linked) = (null, []);
+            configs = configs.Select(c => c with { Config = c.Config with { Json = null } }).ToList();
+        }
+
         var settings = json is null ? null : ReadSettings(json);
         foreach (var file in new[] { json }.Concat(linked).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase))
         {
@@ -342,10 +453,25 @@ internal sealed class StyleCopSetup
         var allScopes = new List<Scope>([.. projectScopes, .. scopes]);
         var folders = Cover(projects.Uses, true, root);
         var without = folders is null ? [] : Cover(projects.Uses, false, root) ?? [];
+
+        // Code in folders without a project of their own, compiled by projects elsewhere, goes with StyleCop's folders (Splat's
+        // src/Polyfills, linked into its StyleSharp projects, was left out of the section and got StyleBro's defaults).
+        // ponytail: not which projects compile it; a projectless folder below a folder without StyleCop stays out.
+        if (folders is not null)
+        {
+            var projectFolders = files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/')).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            bool Under(string path, string folder) => folder == "." || path.Equals(folder, StringComparison.OrdinalIgnoreCase) || path.StartsWith(folder + "/", StringComparison.OrdinalIgnoreCase);
+            var projectless = files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+                .Where(f => f != "." && !folders.Concat(without).Any(c => Under(f, c)) && !projectFolders.Any(p => p != "." && Under(f, p)))
+                .Select(f => f.Split('/')[0] is var top && !projectFolders.Any(p => Under(p, top)) ? top : f);
+            folders = Migration.Topmost([.. folders, .. projectless]);
+        }
+
         if (folders is not null)
         {
             allScopes = InStyleCopFolders(allScopes, folders, without, severities);
-            foreach (var id in old is null ? [] : severities.Keys.Where(id => !old.Contains(id)).ToList())
+            foreach (var id in old is null ? [] : severities.Keys.Where(id => !old.Contains(id) && !IsStyleSharpId(id)).ToList())
             {
                 severities[id] = Severity.None;
             }
@@ -353,8 +479,30 @@ internal sealed class StyleCopSetup
 
         var copier = msbuild.FirstOrDefault(m => CopiesEditorConfig.IsMatch(WithoutComments(m.Text))).File;
         string Relative(string file) => Path.GetRelativePath(root, file).Replace('\\', '/');
+
+        // StyleSharp's SST rules count as the StyleCop rules they stand for, its options as stylecop.json's settings.
+        var styleSharp = styleSharpReferenced
+            ? new StyleSharpUse(
+                styleSharpVersions.Select(v => v.Value).OfType<string>().Order(StringComparer.Ordinal).FirstOrDefault() ?? recordedStyleSharp,
+                ReadStyleSharpOptions(root, files),
+                styleCopReferenced)
+            : null;
+        IReadOnlyDictionary<string, Severity>? raw = null;
+        if (styleSharp is not null)
+        {
+            raw = severities;
+            severities = Translate(severities, styleSharp);
+            settings = styleSharp.WithStyleCop ? settings : styleSharp.Settings();
+            if (styleSharp.WithStyleCop)
+            {
+                warnings.Add("Both StyleCop.Analyzers and StyleSharp.Analyzers are referenced: a StyleCop rule counts as on when either enforces it (StyleSharp's SST rules read as the StyleCop rules they stand for), and stylecop.json's settings are used.");
+            }
+        }
+
         return new StyleCopSetup(severities, settings, sources, allScopes, version, documentationParsed)
         {
+            StyleSharp = styleSharp,
+            Raw = raw,
             Warnings = warnings,
             EditorConfigCopiedBy = copier is null ? null : Path.GetRelativePath(root, copier),
             Folders = folders,
@@ -388,14 +536,27 @@ internal sealed class StyleCopSetup
             {
                 evidence.Add($"{relative} (StyleCop rules)");
             }
+            else if (Kind(file) == "ruleset" && Regex.IsMatch(File.ReadAllText(file), @"\bId\s*=\s*""SST\d{4}""", RegexOptions.IgnoreCase))
+            {
+                evidence.Add($"{relative} (StyleSharp rules)");
+            }
             else if (Kind(file) is "editorconfig" or "globalconfig"
                 && File.ReadLines(file).Any(l => Regex.IsMatch(l, @"^\s*(dotnet_diagnostic\.S[AX]\d{4}\b|dotnet_analyzer_diagnostic\.category-StyleCop)", RegexOptions.IgnoreCase)))
             {
                 evidence.Add($"{relative} (StyleCop rule severities)");
             }
-            else if (IsMSBuild(file) && Regex.IsMatch(WithoutComments(File.ReadAllText(file)), @"\b(Include|Update)\s*=\s*""StyleCop\.Analyzers", RegexOptions.IgnoreCase))
+            else if (Kind(file) is "editorconfig" or "globalconfig"
+                && File.ReadLines(file).Any(l => Regex.IsMatch(l, @"^\s*(dotnet_diagnostic\.SST\d{4}\b|stylesharp[._])", RegexOptions.IgnoreCase)))
+            {
+                evidence.Add($"{relative} (StyleSharp rule severities or settings)");
+            }
+            else if (IsMSBuild(file) && StyleCopPackage.IsMatch(WithoutComments(File.ReadAllText(file))))
             {
                 evidence.Add($"{relative} (StyleCop.Analyzers package)");
+            }
+            else if (IsMSBuild(file) && StyleSharpReference.IsMatch(WithoutComments(File.ReadAllText(file))))
+            {
+                evidence.Add($"{relative} (StyleSharp.Analyzers package)");
             }
         }
 
@@ -595,20 +756,24 @@ internal sealed class StyleCopSetup
     /// Its settings are leftovers then (Spectre.Console kept 'dotnet_diagnostic.sa1101.severity = none' lines after dropping it).
     /// </summary>
     public static bool IsInstalled(string root, Func<string, bool?>? evaluate = null) =>
-        Migration.RecordedVersion(root) is not null || Evaluate(root, Projects(root, EnumerateFiles(root).ToList()).Uses, evaluate ?? EvaluateStyleCop, []);
+        Migration.RecordedVersion(root) is not null || Migration.RecordedVersion(root, Migration.StyleSharpVersionPrefix) is not null || Evaluate(root, Projects(root, EnumerateFiles(root).ToList()).Uses, evaluate ?? EvaluateStyleCop, []);
 
     public bool IsOn(string id) => Severities.TryGetValue(id, out var severity) && severity >= Severity.Suggestion;
 
     /// <summary>The setup as seen inside a scope: the base severities with the scope's on top.</summary>
     public StyleCopSetup For(Scope scope)
     {
-        var severities = Severities.ToDictionary(p => p.Key, p => p.Value);
+        var severities = (Raw ?? Severities).ToDictionary(p => p.Key, p => p.Value);
         foreach (var (id, severity) in scope.Severities)
         {
             severities[id] = severity;
         }
 
-        return new StyleCopSetup(severities, scope.Settings ?? Settings, Sources, [], Version, DocumentationParsed);
+        return new StyleCopSetup(StyleSharp is null ? severities : Translate(severities, StyleSharp), scope.Settings ?? Settings, Sources, [], Version, DocumentationParsed)
+        {
+            StyleSharp = StyleSharp,
+            Raw = StyleSharp is null ? null : severities,
+        };
     }
 
     /// <summary>A stylecop.json setting, like ("orderingRules", "usingDirectivesPlacement").</summary>
@@ -621,6 +786,46 @@ internal sealed class StyleCopSetup
                 ? value
                 : null;
     }
+
+    /// <summary>
+    /// The severities with every StyleCop rule (SA and SX ids) read from StyleSharp's SST rules (<see cref="StyleSharpRules"/>):
+    /// one stands for several (SA1117's list kinds) at the weakest of them, a StyleCop rule no SST rule stands for is off.
+    /// SST1117 is SA1101 or StyleCop's SX1101 as stylesharp.instance_member_qualification says (StyleSharp omits 'this.' by
+    /// default); SST1633 only checks a header with file_header_template set. With StyleCop running too (<see
+    /// cref="StyleSharpUse.WithStyleCop"/>), a rule is on when either enforces it.
+    /// </summary>
+    internal static Dictionary<string, Severity> Translate(IReadOnlyDictionary<string, Severity> raw, StyleSharpUse styleSharp)
+    {
+        var fromStyleSharp = new Dictionary<string, Severity>(StringComparer.Ordinal);
+        foreach (var (sst, _, defaultSeverity, _, styleCop) in StyleSharpRules)
+        {
+            var severity = raw.TryGetValue(sst, out var set) ? set : defaultSeverity;
+            foreach (var id in StandsFor(sst, styleCop, styleSharp))
+            {
+                fromStyleSharp[id] = fromStyleSharp.TryGetValue(id, out var before) && before < severity ? before : severity;
+            }
+        }
+
+        var result = raw.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
+        foreach (var (id, _, _, _) in Rules)
+        {
+            var mine = fromStyleSharp.TryGetValue(id, out var s) ? s : Severity.None;
+            result[id] = styleSharp.WithStyleCop && raw.TryGetValue(id, out var styleCopSeverity) && styleCopSeverity > mine ? styleCopSeverity : mine;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The StyleCop rules an SST rule stands for here (<paramref name="styleCop"/>: the mapping's): SST1117 is SA1101 with
+    /// stylesharp.instance_member_qualification = require_this, else SX1101; SST1633 checks nothing without file_header_template.
+    /// </summary>
+    internal static IReadOnlyList<string> StandsFor(string sst, IReadOnlyList<string> styleCop, StyleSharpUse styleSharp) => sst switch
+    {
+        "SST1117" => [styleSharp.Option("instance_member_qualification", sst) is { } q && q.Equals("require_this", StringComparison.OrdinalIgnoreCase) ? "SA1101" : "SX1101"],
+        "SST1633" => styleSharp.Options.TryGetValue("file_header_template", out var template) && template.Length > 0 ? styleCop : [],
+        _ => styleCop,
+    };
 
     /// <summary>Whether a project (full path) is in a folder of the block's list ('a/b/', or a 'a/b*' pattern).</summary>
     internal static bool InFolder(string root, string project, string folder)
@@ -720,9 +925,9 @@ internal sealed class StyleCopSetup
         }
     }
 
-    /// <summary>Whether an evaluated item's Identity is StyleCop's package, or an analyzer DLL from it.</summary>
+    /// <summary>Whether an evaluated item's Identity is StyleCop's (or StyleSharp's) package, or an analyzer DLL from it.</summary>
     internal static bool IsStyleCopItem(string identity) =>
-        Regex.IsMatch(identity, @"^StyleCop\.Analyzers(\.Unstable)?$|StyleCop\.Analyzers[^\\/]*[\\/].*\.dll$", RegexOptions.IgnoreCase);
+        Regex.IsMatch(identity, @"^(StyleCop\.Analyzers(\.Unstable)?|StyleSharp\.Analyzers)$|(StyleCop|StyleSharp)\.Analyzers[^\\/]*[\\/].*\.dll$", RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Whether an MSBuild file's StyleCop reference depends on a Condition (on the item, an enclosing ItemGroup, or a
@@ -739,7 +944,7 @@ internal sealed class StyleCopSetup
         {
             return XDocument.Parse(text).Descendants()
                 .Where(e => e.Name.LocalName is "PackageReference" or "GlobalPackageReference" or "Analyzer"
-                    && ((string?)e.Attribute("Include"))?.Contains("StyleCop.Analyzers", StringComparison.OrdinalIgnoreCase) == true)
+                    && ((string?)e.Attribute("Include") is { } include && (include.Contains("StyleCop.Analyzers", StringComparison.OrdinalIgnoreCase) || include.Contains("StyleSharp.Analyzers", StringComparison.OrdinalIgnoreCase))))
                 .Any(e => e.AncestorsAndSelf().Any(a => a.Attribute("Condition") is not null || a.Name.LocalName is "When" or "Otherwise"));
         }
         catch (System.Xml.XmlException)
@@ -1030,7 +1235,7 @@ internal sealed class StyleCopSetup
         {
             var severities = new Dictionary<string, Severity>();
             var bulk = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var (id, category, defaultSeverity, _) in Rules)
+            foreach (var (id, category, defaultSeverity) in ReadRules)
             {
                 // A rule's own entry, else its category's, else 'dotnet_analyzer_diagnostic.severity' (every rule; a folder of
                 // vendored code often sets it to none). Like in the compiler (TryGetSeverityFromBulkConfiguration), the two bulk
@@ -1096,7 +1301,7 @@ internal sealed class StyleCopSetup
             {
                 var id = (string?)rule.Attribute("Id");
                 var action = (string?)rule.Attribute("Action");
-                if (id is not null && (id.StartsWith("SA", StringComparison.OrdinalIgnoreCase) || id.StartsWith("SX", StringComparison.OrdinalIgnoreCase)) && action is not null && ParseSeverity(action) is { } severity)
+                if (id is not null && (id.StartsWith("SA", StringComparison.OrdinalIgnoreCase) || id.StartsWith("SX", StringComparison.OrdinalIgnoreCase) || IsStyleSharpId(id)) && action is not null && ParseSeverity(action) is { } severity)
                 {
                     result[id.ToUpperInvariant()] = severity;
                 }
@@ -1265,6 +1470,75 @@ internal sealed class StyleCopSetup
         }
 
         return ids;
+    }
+
+    /// <summary>Whether a rule id is StyleSharp's ('SST1309').</summary>
+    private static bool IsStyleSharpId(string id) => id.StartsWith("SST", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// A package's version in MSBuild files and packages.config: a PackageReference/PackageVersion (attribute or element), a
+    /// packages.config entry, or an analyzer's hint path into a packages.config 'packages' folder.
+    /// </summary>
+    private static Regex VersionPattern(string package) => new(
+        $@"Include=""{package}""[^>]*?Version=""(?<v>[^""]+)""|Include=""{package}""[^>]*>\s*<Version>(?<v>[^<]+)</Version>|<package\b[^>]*?\bid=""{package}""[^>]*?\bversion=""(?<v>[^""]+)""|{package}\.(?<v>\d+(?:\.\d+){{2,3}}(?:-[\w.]+)?)[\\/]",
+        RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// StyleSharp's options ('stylesharp.*' keys, 'stylesharp_*' spelled with '.', and file_header_template, which SST1633 reads):
+    /// from the global configs, then the root .editorconfig's sections for all C# (later wins).
+    /// ponytail: repository-wide only; a sub-folder's own 'stylesharp.*' keys aren't scopes.
+    /// </summary>
+    private static Dictionary<string, string> ReadStyleSharpOptions(string root, IReadOnlyList<string> files)
+    {
+        var options = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var rootConfig = Path.Combine(root, ".editorconfig");
+        foreach (var file in files.Where(f => Kind(f) == "globalconfig").Order(StringComparer.OrdinalIgnoreCase).Concat(File.Exists(rootConfig) ? [rootConfig] : []))
+        {
+            var applies = Kind(file) == "globalconfig";
+            foreach (var line in Regex.Replace(File.ReadAllText(file), $"{Migration.BeginMarker}.*?{Migration.EndMarker}", string.Empty, RegexOptions.Singleline).Split('\n').Select(l => l.Trim()))
+            {
+                if (line.Length > 0 && line[0] == '[')
+                {
+                    applies = Kind(file) == "globalconfig" || AppliesToCSharp(line.Trim('[', ']'));
+                    continue;
+                }
+
+                var equals = line.IndexOf('=');
+                var key = equals > 0 && !line.StartsWith('#') && !line.StartsWith(';') ? line.Substring(0, equals).Trim() : string.Empty;
+                if (applies && (key.StartsWith("stylesharp", StringComparison.OrdinalIgnoreCase) || key.Equals("file_header_template", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var name = Regex.Replace(key, "^stylesharp_", "stylesharp.", RegexOptions.IgnoreCase);
+                    options[name] = line.Substring(equals + 1).Split('#', ';')[0].Trim();
+                }
+            }
+        }
+
+        return options;
+    }
+
+    private static IReadOnlyList<(string Id, string Category, Severity Default, string Title, IReadOnlyList<string> StyleCop)> LoadStyleSharpRules()
+    {
+        static List<List<string>> Rows(string resource)
+        {
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource)
+                ?? throw new InvalidOperationException($"{resource} isn't embedded.");
+            using var reader = new StreamReader(stream);
+            reader.ReadLine();
+            var rows = new List<List<string>>();
+            while (reader.ReadLine() is { } line)
+            {
+                rows.Add(Regex.Matches(line, "\"((?:[^\"]|\"\")*)\"|([^,]+)|(?<=,)(?=,)").Select(m => m.Groups[1].Success ? m.Groups[1].Value.Replace("\"\"", "\"") : m.Value).ToList());
+            }
+
+            return rows;
+        }
+
+        // Id,Title,Category,EnabledByDefault,DefaultSeverity,... and Id,StyleCop,Note
+        var mapping = Rows("StyleSharpMapping.csv").ToDictionary(r => r[0], r => (IReadOnlyList<string>)r[1].Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
+        return Rows("StyleSharpRules.csv")
+            .Where(f => f.Count >= 5)
+            .Select(f => (f[0], f[2], f[3].Equals("True", StringComparison.OrdinalIgnoreCase) ? ParseSeverity(f[4]) ?? Severity.Warning : Severity.None, f[1], mapping.TryGetValue(f[0], out var ids) ? ids : []))
+            .ToList();
     }
 
     private static IReadOnlyList<(string Id, string Category, Severity Default, string Title)> LoadRules()

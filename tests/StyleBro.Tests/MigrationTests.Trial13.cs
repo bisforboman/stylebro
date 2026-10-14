@@ -121,7 +121,7 @@ public sealed partial class MigrationTests
         Assert.False(setup.For(Assert.Single(setup.Scopes)).IsOn("SA1101")); // lower-case ids count
 
         var output = Capture(() => Assert.Equal(1, Program.Migrate([root, "--write"])));
-        Assert.Contains("StyleCop.Analyzers isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers (src", output, StringComparison.Ordinal);
+        Assert.Contains("StyleCop.Analyzers (or StyleSharp.Analyzers) isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers (src", output, StringComparison.Ordinal);
         Assert.Contains("Nothing to migrate, nothing written", output, StringComparison.Ordinal);
         Assert.Contains("Run 'stylebro-migrate init' instead", output, StringComparison.Ordinal);
         Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
