@@ -7,9 +7,10 @@ public sealed partial class MigrationTests
     [Fact]
     public void Init_SetsStyleBroRulesById_WhereANestedBulkSeverityHidesThemFromFormat()
     {
-        // Trial 19: tests/.editorconfig with 'dotnet_analyzer_diagnostic.severity = none'; format said clean, the build failed.
+        // Trial 19: a bulk severity below warning in tests/.editorconfig (it was 'none': trial 20 made that an opt-out folder,
+        // Init_TurnsRulesOffById_WhereAFolderTurnsEveryAnalyzerOff); format said clean, the build failed.
         Write(".editorconfig", "root = true\n\n[*.cs]\nindent_size = 4\n");
-        Write("tests/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = none\ndotnet_diagnostic.BRO1002.severity = none\n");
+        Write("tests/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = suggestion\ndotnet_diagnostic.BRO1002.severity = none\n");
         Write("tests/App.Tests/App.Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
         Write("tests/App.Tests/C.cs", "class C\n{\n}\n");
         Assert.StartsWith("Not clean: .editorconfig's bulk severity", FormatCommand.HiddenLine(root), StringComparison.Ordinal);

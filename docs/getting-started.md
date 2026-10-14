@@ -170,10 +170,18 @@ file sets it yet).
 
 An `.editorconfig` that silences analyzers in bulk (`dotnet_analyzer_diagnostic.severity = silent`, or a category's
 severity below warning) would hide StyleBro's rules from `dotnet format`, while the build still reports them at the
-preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules (in a
-folder's own `.editorconfig` too, such as `tests/.editorconfig`); a rule your `.editorconfig` sets by id stays as you
-set it. `stylebro-migrate format` never says clean while such a bulk setting
+preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules; a rule
+your `.editorconfig` sets by id stays as you set it. `stylebro-migrate format` never says clean while such a bulk setting
 hides rules from it.
+
+A folder whose own `.editorconfig` turns every analyzer off (`dotnet_analyzer_diagnostic.severity = none` or `silent`,
+with or without `root = true`; test samples, for example) is left alone instead: `init` writes StyleBro's rules, IDE0055
+and the other built-in rules it manages as `none` by id there (a rule's own entry wins over the bulk one, in the
+preset as in the root block), so the build reports nothing there and `format` doesn't touch those files, not even their
+whitespace. A rule that folder's `.editorconfig` sets by id stays as you set it. These lines go into a block between
+`# BEGIN stylebro-folder` and `# END stylebro-folder` (in a `root = true` folder: its `stylebro-migrate` block, with
+nothing else in it). Your own IDE0055 severity (say `suggestion`) is kept everywhere: the block doesn't set it then, and
+`format` still formats whitespace.
 
 #### init also looks at your code
 
@@ -352,7 +360,7 @@ A few settings work a little differently:
   These keys (and `end_of_line`) are judged per file against the `.editorconfig` that decides it, as the compiler reads
   them: the nearest one that sets the key wins, within it the last matching section. A nearer file overrides anything
   the root block says, so when a folder's own `.editorconfig` (one without `root = true`, like Bogus's `Source/`) sets
-  the key, `init` writes its line there, in a block between `# BEGIN stylebro-whitespace` and `# END stylebro-whitespace`
+  the key, `init` writes its line there, in a block between `# BEGIN stylebro-folder` and `# END stylebro-folder`
   (Bogus: the root block's `insert_final_newline = unset` never reached `Source/`, and `format` stripped 48 files' last
   line break).
 - **Spacing** that IDE0055 enforces counts places on one line: a space after `if`/`for`/`foreach`/`while`/`switch`/
@@ -375,7 +383,23 @@ A few settings work a little differently:
   below. Mostly right above: the rule stays on; mostly with a blank line or mixed: it's turned off (RecyclableMemoryStream
   keeps one below commented-out tests).
 - **`this.`**: when your `.editorconfig` requires it (a `dotnet_style_qualification_for_*` key `= true:warning`, or
-  IDE0009 at `suggestion` or above), the block leaves IDE0009 alone instead of turning it off.
+  `= true` with IDE0009 at `suggestion` or above, by its id, the `Style` category's severity or the bulk one), the block
+  leaves IDE0009 alone instead of turning it off.
+- **Interface members**: `dotnet_style_require_accessibility_modifiers = always` asks for `public` on interface members
+  too. When your code doesn't have them and the build doesn't enforce it (`EnforceCodeStyleInBuild` with IDE0040 at
+  warning or error by id, category or bulk; a `:warning` after the value doesn't count in the build), `init` writes
+  `for_non_interface_members`, so [BRO1404](rules/BRO1404.md) doesn't add them.
+- **`else`/`catch`/`finally` placement** counts only blocks that span lines: in a one-line method
+  (`{ if (x) { return 1; } else return 2; }`) the layout isn't a choice.
+- **Blank lines below doc comments** ([BRO1511](rules/BRO1511.md)) count doc comments right above their element or with
+  a blank line between. Mostly right above: the rule stays on; mostly with one or mixed: it's turned off (MoreLINQ).
+- **Primary-constructor parameters** ([BRO1302](rules/BRO1302.md)) count those named like parameters (`logger`) or like
+  the fields they replace (`_logger`). Mostly `_logger` or mixed turns BRO1302 off: it has no switch for these
+  parameters alone, so it's then off for every parameter (the `# init:` line says so).
+- **Tuple element names** ([BRO1311](rules/BRO1311.md)) count `(int Count, ...)` and `(int count, ...)`. Mostly camelCase
+  writes `stylebro_tuple_element_name_casing = camelCase`; mixed turns the rule off.
+- **Preset version**: `init --write` sets `<StyleBroPreset>` in each `Directory.Build.props` your projects read, but not
+  in one whose projects no solution lists and that doesn't mention StyleBro.Analyzers (example or test-fixture folders).
 - **Column alignment**: when your `.editorconfig` aligns code in columns for ReSharper or Rider
   (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
   the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
@@ -450,6 +474,9 @@ A few settings work a little differently:
 | Member separation | neighbouring members that need a blank line, with or without one | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 | Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |
+| Blank line below doc comments | doc comments right above their element or with a blank line between | [BRO1511](rules/BRO1511.md) | `dotnet_diagnostic.BRO1511.severity` |
+| Primary-constructor parameters | named `logger` or `_logger` (classes and structs) | [BRO1302](rules/BRO1302.md) | `dotnet_diagnostic.BRO1302.severity` |
+| Tuple element names | `(int Count, ...)` or `(int count, ...)` | [BRO1311](rules/BRO1311.md) | `stylebro_tuple_element_name_casing` |
 
 The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `both`,
 `mixed`, `too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys

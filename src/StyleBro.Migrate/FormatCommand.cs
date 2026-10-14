@@ -243,15 +243,24 @@ internal static class FormatCommand
         }
 
         folders.Reverse();
+        var plain = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         folders.ForEach(f => Migration.OwnSettings(f, withBlocks: true).ToList().ForEach(p => settings[p.Key] = p.Value));
+        folders.ForEach(f => Migration.OwnSettings(f).ToList().ForEach(p => plain[p.Key] = p.Value));
         if (props is not null && Regex.IsMatch(File.ReadAllText(props), @"<StyleBroPreset>\s*none\s*<", RegexOptions.IgnoreCase))
         {
             return null;
         }
 
-        // Also a nested .editorconfig's (trial 19: tests/.editorconfig with 'none').
+        // Also a nested .editorconfig's (trial 19: tests/.editorconfig with 'none'; a folder that turns every analyzer off gets
+        // StyleBro's rules off by id, trial 20), and a 'root = true' folder's own (coverlet's samples).
+        var written = settings.Keys.Where(k => !plain.TryGetValue(k, out var value) || value != settings[k]).ToList();
+        var top = Path.GetFullPath(root);
+        var ownRoots = StyleCopSetup.EditorConfigRoots(top).Select(f => Path.Combine(top, f)).ToList();
         var ids = InitCommand.HiddenFromFormat(settings)
-            .Concat(InitCommand.NestedHiddenFromFormat(Path.GetFullPath(root), settings, withBlocks: true).Values.SelectMany(l => l))
+            .Concat(InitCommand.NestedHiddenFromFormat(top, settings, withBlocks: true, written).Values.SelectMany(l => l))
+            .Concat(ownRoots.SelectMany(f => Migration.OwnSettings(f, withBlocks: true) is var own && InitCommand.OptsOut(Migration.OwnSettings(f))
+                ? InitCommand.OptOutLines([], own)
+                : InitCommand.HiddenFromFormat(own).Concat(InitCommand.NestedHiddenFromFormat(f, own, withBlocks: true).Values.SelectMany(l => l))))
             .Select(l => l.Split('.')[1])
             .Distinct()
             .ToList();

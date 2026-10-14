@@ -28,3 +28,7 @@ choice, and so do the lines the conventions or a Sonar setup write. To turn one 
 to the project hide preset rules the build reports. It names them, points to `init --write` and exits with the not-clean
 code. A migrated repository (`StyleBroPreset` none) sets every rule by id, so nothing is hidden there. The check reads
 the .editorconfig files instead of building the project, which would take minutes.
+
+Update 2026-10-14 (owner's choice, trial 20): a folder whose own `.editorconfig` turns every analyzer off (`dotnet_analyzer_diagnostic.severity`
+= `none` or `silent`) gets StyleBro's rules `none` by id instead, see
+[Folders that turn every analyzer off stay off](2026-10-14-folders-that-turn-every-analyzer-off-stay-off.md).

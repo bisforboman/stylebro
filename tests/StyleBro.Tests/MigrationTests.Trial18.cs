@@ -140,11 +140,15 @@ public sealed partial class MigrationTests
         counts["interface member access"] = [2, 3];
         Assert.Contains("mixes both forms (2 with, 3 without)", Conventions.InterfaceAccess(counts, always, enforcedInBuild: false)?.Report, StringComparison.Ordinal);
 
-        // Enforced in the build (EnforceCodeStyleInBuild): the key stays the team's.
-        Write(".editorconfig", "root = true\n\n[*.cs]\ndotnet_style_require_accessibility_modifiers = always:warning\n");
+        // Enforced in the build (EnforceCodeStyleInBuild and IDE0040 a warning by id, category or bulk): the key stays the
+        // team's. The ':warning' suffix alone doesn't count (trial 20, probed: the build reports no IDE0040 then).
         Write("Directory.Build.props", "<Project><PropertyGroup><EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild></PropertyGroup></Project>\n");
-        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
-        Assert.DoesNotContain("= for_non_interface_members", File.ReadAllText(Path.Combine(root, ".editorconfig")), StringComparison.Ordinal);
+        foreach (var (extra, guarded) in new[] { (string.Empty, true), ("dotnet_diagnostic.IDE0040.severity = suggestion\n", true), ("dotnet_diagnostic.IDE0040.severity = warning\n", false), ("dotnet_analyzer_diagnostic.category-Style.severity = warning\n", false), ("dotnet_analyzer_diagnostic.severity = error\n", false) })
+        {
+            Write(".editorconfig", "root = true\n\n[*.cs]\ndotnet_style_require_accessibility_modifiers = always:warning\n" + extra);
+            Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+            Assert.Equal(guarded, File.ReadAllText(Path.Combine(root, ".editorconfig")).Contains("= for_non_interface_members", StringComparison.Ordinal));
+        }
     }
 
     [Fact]

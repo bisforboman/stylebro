@@ -36,8 +36,15 @@ internal static class Severities
             : compilationOptions is not null && compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity) && severity != ReportDiagnostic.Default
             ? severity
             : options is null ? null
-            : Parse(category is null ? null : Get(options, $"dotnet_analyzer_diagnostic.category-{category}.severity"))
-                ?? Parse(Get(options, "dotnet_analyzer_diagnostic.severity"));
+            : Bulk(options, category);
+
+    /// <summary>
+    /// The severity .editorconfig settings give an id: its own 'dotnet_diagnostic.ID.severity', else its category's, else the
+    /// bulk one. For stylebro-migrate, which reads the files itself (trial 20: 'category-Style.severity = warning' enforced
+    /// IDE0009 and IDE0040, which init judged by the id's own line only).
+    /// </summary>
+    public static ReportDiagnostic? FromSettings(AnalyzerConfigOptions options, string id, string? category) =>
+        Parse(Get(options, $"dotnet_diagnostic.{id}.severity")) ?? Bulk(options, category);
 
     public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool? enabledByDefault = null)
     {
@@ -61,6 +68,10 @@ internal static class Severities
             _ => true,
         };
     }
+
+    private static ReportDiagnostic? Bulk(AnalyzerConfigOptions options, string? category) =>
+        Parse(category is null ? null : Get(options, $"dotnet_analyzer_diagnostic.category-{category}.severity"))
+            ?? Parse(Get(options, "dotnet_analyzer_diagnostic.severity"));
 
     private static string? Get(AnalyzerConfigOptions options, string key) => options.TryGetValue(key, out var value) ? value : null;
 
