@@ -1242,7 +1242,7 @@ internal static class FormatCommand
         foreach (var project in projects)
         {
             var projectFolder = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(listedFrom, project.Replace('\\', Path.DirectorySeparatorChar))))!;
-            while (Path.GetRelativePath(folder, projectFolder) is var relative && (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative))
+            while (Path.GetRelativePath(folder, projectFolder) is var relative && (Path.IsPathRooted(relative) || relative.StartsWith("..", StringComparison.Ordinal))
                 && Path.GetDirectoryName(folder) is { } parent)
             {
                 folder = parent;

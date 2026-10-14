@@ -6,5 +6,5 @@
             return result;
         }'
     Replace = ''
-    Tests = 'FullyQualifiedName~MigrationTests.Baseline_RunsEachPassOnItsOwn'
+    Tests = 'MigrationTests.Baseline_RunsEachPassOnItsOwn'
 }

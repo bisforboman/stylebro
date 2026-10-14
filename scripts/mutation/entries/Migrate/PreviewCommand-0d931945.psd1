@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/PreviewCommand.cs'
     Find = '&& !File.Exists(Path.Combine(copy, f))) is { } name'
     Replace = ') is { } name'
-    Tests = 'FullyQualifiedName~MigrationTests.PreviewCopy_SaysWhenAnIgnoredNuGetConfigStaysBehind'
+    Tests = 'MigrationTests.PreviewCopy_SaysWhenAnIgnoredNuGetConfigStaysBehind'
 }
