@@ -979,6 +979,22 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The passes that can fix one of <paramref name="diagnostics"/> (all when null): the style pass only the SDK's code
+    /// style rules (IDE), the analyzer pass only the others. The whitespace pass and a plain run stay.
+    /// </summary>
+    public static string[] Relevant(string[] passes, IReadOnlyCollection<string>? diagnostics)
+    {
+        static bool IsStyle(string id) => id.StartsWith("IDE", StringComparison.OrdinalIgnoreCase);
+        var relevant = diagnostics is null ? passes : passes.Where(p => p switch
+        {
+            "style" => diagnostics.Any(IsStyle),
+            "analyzers" => diagnostics.Any(d => !IsStyle(d)),
+            _ => true,
+        }).ToArray();
+        return relevant.Length == 0 ? passes : relevant;
+    }
+
+    /// <summary>
     /// Whether the '--include' path <paramref name="outer"/> matches every file <paramref name="inner"/> matches: '**/*.cs'
     /// everything, a folder ('src/A/') what's below it, a file itself.
     /// </summary>
@@ -1771,6 +1787,13 @@ internal static class FormatCommand
             {
                 copyArgs.Add("--include");
                 copyArgs.AddRange(findingFiles);
+
+                // And only their rules: a pass none of them is in (the style pass for StyleBro's) isn't made.
+                if (FindingIds(lines) is { Count: > 0 } ids && !copyArgs.Contains("--diagnostics") && !copyArgs.Contains("--all"))
+                {
+                    copyArgs.Add("--diagnostics");
+                    copyArgs.AddRange(ids);
+                }
             }
 
             var report = copyArgs.IndexOf("--report");
@@ -1875,6 +1898,15 @@ internal static class FormatCommand
             File.Delete(keptFile);
         }
     }
+
+    /// <summary>The rules of the finding lines in a check's output (not the whitespace pass's), in order.</summary>
+    public static List<string> FindingIds(IEnumerable<string> lines) =>
+        lines.Where(l => IsFindingLine(l) && !IsWhitespaceLine(l))
+            .Select(l => Regex.Match(l, @"\(\d+,\d+\): \w+ (?<id>\w+):").Groups["id"].Value)
+            .Where(id => id.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.Ordinal)
+            .ToList();
 
     /// <summary>
     /// Copies the build output of the projects a workspace (<paramref name="path"/>: a solution, project or folder in
@@ -2318,7 +2350,7 @@ internal static class FormatCommand
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run, string[]? runPasses = null)
         {
             // Each pass would write its own format-report.json over the last one: each gets a folder, merged after.
-            runPasses ??= passes;
+            runPasses = Relevant(runPasses ?? passes, OptionValues(options, "--diagnostics"));
             var at = options.IndexOf("--report");
             var report = runPasses.Length > 1 && at >= 0 && at + 1 < options.Count ? options[at + 1] : null;
             var folders = new List<string>();

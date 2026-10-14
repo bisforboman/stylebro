@@ -113,6 +113,13 @@ public sealed partial class MigrationTests
 
         Assert.Equal(new[] { "src/A/X.cs", "tests/T.cs" }, FormatCommand.FindingFiles(lines, root));
         Assert.Null(FormatCommand.FindingFiles(lines.Take(1), root));
+
+        // Only their rules, and only the passes that fix them: no style pass for StyleBro's rules.
+        Assert.Equal(new[] { "BRO1306" }, FormatCommand.FindingIds(lines));
+        Assert.Equal(new[] { "analyzers" }, FormatCommand.Relevant(["style", "analyzers"], ["BRO1306"]));
+        Assert.Equal(new[] { "whitespace", "style" }, FormatCommand.Relevant(["whitespace", "style", "analyzers"], ["IDE0005"]));
+        Assert.Equal(new[] { "style", "analyzers" }, FormatCommand.Relevant(["style", "analyzers"], null));
+        Assert.Equal(new[] { string.Empty }, FormatCommand.Relevant([string.Empty], ["BRO1306"]));
         Assert.Null(FormatCommand.FindingFiles(lines.Append($@"{Path.Combine(Path.GetDirectoryName(root)!, "Elsewhere.cs")}(1,1): warning BRO1001: x [y]"), root));
     }
 }
