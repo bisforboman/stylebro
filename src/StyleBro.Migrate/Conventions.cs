@@ -187,7 +187,7 @@ internal static class Conventions
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
-        new(PrimaryParametersKey, "primary-constructor parameters", "warning", ("warning", "named 'logger'"), ("none", "named like fields ('_logger')"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
+        new(PrimaryParametersKey, "primary-constructor parameters", "warning", ("warning", "camelCase ('logger')"), ("none", "with a leading '_' ('_logger')"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
     };
 
@@ -500,7 +500,7 @@ internal static class Conventions
     /// </summary>
     public static (List<string> Lines, string Report) CSharpierLines(string evidence, string root, IReadOnlyDictionary<string, string>? settings, string folder = "")
     {
-        var what = folder.Length == 0 ? "this repository" : folder + "/";
+        var what = folder.Length > 0 ? folder + "/" : evidence.StartsWith("../", StringComparison.Ordinal) ? "this folder" : "this repository";
         var lines = new List<string> { $"# init: CSharpier formats {what} ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
         lines.AddRange(CSharpierRules.Select(Off));
         lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.Key} = csharpier");
@@ -2125,7 +2125,7 @@ internal static class Conventions
     /// none of its 102 interface members has one, and BRO1404 added 'public' to all of them. A key the code contradicts
     /// that nothing enforces doesn't win: for_non_interface_members keeps the rest of 'always'. Null otherwise.
     /// </summary>
-    public static (List<string> Lines, string Report)? InterfaceAccess(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> repository, bool enforcedInBuild)
+    public static (List<string> Lines, string Report)? InterfaceAccess(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> repository, bool enforcedInBuild, bool codeStyleInBuild = false)
     {
         if (enforcedInBuild || !repository.TryGetValue(AccessModifiersKey, out var setting) || setting.Split(':')[0].Trim().ToLowerInvariant() != "always"
             || counts[InterfaceAccessKey] is not [var with, var without] || with + without < MinimumAgreeing || Winner(with, without) == 0)
@@ -2134,7 +2134,7 @@ internal static class Conventions
         }
 
         var found = Winner(with, without) < 0 ? $"mixes both forms ({with} with, {without} without)" : $"has {without} of {Plural(with + without, "interface member")} without one";
-        var note = $"interface members: your .editorconfig says {AccessModifiersKey} = {setting}, but your code {found}; nothing enforces it in the build, so {DiagnosticIds.AccessModifier} adds no access modifier to them ({AccessModifiersKey} = for_non_interface_members). To enforce it: change the code, then remove the next line.";
+        var note = $"interface members: your .editorconfig says {AccessModifiersKey} = {setting}, but your code {found}; {(codeStyleInBuild ? "IDE0040 is off in init's block (its fix breaks multi-targeted projects)" : "nothing enforces it in the build")}, so {DiagnosticIds.AccessModifier} adds no access modifier to them ({AccessModifiersKey} = for_non_interface_members). To enforce it: change the code, then remove the next line.";
         return ([$"# init: {note}", $"{AccessModifiersKey} = for_non_interface_members"], $"  {"off",-8} {note.Substring(0, note.IndexOf(" To enforce", StringComparison.Ordinal))}");
     }
 

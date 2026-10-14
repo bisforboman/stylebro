@@ -875,7 +875,31 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// The 'dotnet format' passes for <see cref="WhitespaceExclusions"/>: one run of all three (null), style and analyzers
+    /// What format says about the folders its whitespace pass leaves out (<see cref="WhitespaceExclusions"/>): another
+    /// formatter's code, where the rest still runs, or a folder whose .editorconfig turns every analyzer off, where nothing
+    /// runs (the opt-out spot was told "style and analyzer fixes still run there").
+    /// </summary>
+    public static string NoWhitespaceLine(string root, IReadOnlyCollection<string> exclusions)
+    {
+        var optOut = exclusions.Where(e => e.EndsWith('/') && InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, e.TrimEnd('/'))))).ToList();
+        var other = exclusions.Except(optOut).ToList();
+        string Them(int count) => count == 1 ? "it" : "them";
+        var parts = new List<string>();
+        if (other.Count > 0)
+        {
+            parts.Add($"{string.Join(", ", other)}: IDE0055 is off there in the stylebro settings (another formatter's code), so whitespace formatting leaves {Them(other.Count)} alone; style and analyzer fixes still run there.");
+        }
+
+        if (optOut.Count > 0)
+        {
+            parts.Add($"{string.Join(", ", optOut)}: {(optOut.Count == 1 ? "its" : "their")} .editorconfig turns every analyzer off, so 'format' leaves {Them(optOut.Count)} alone.");
+        }
+
+        return $"{NoWhitespaceHeader} {string.Join(" ", parts)}";
+    }
+
+    /// <summary>
+    /// The 'dotnet format' passes for <see cref="WhitespaceExclusions"/>:one run of all three (null), style and analyzers
     /// (empty: no whitespace pass), or the whitespace pass on its own (<see cref="WhitespaceOptions"/>) then the other two.
     /// </summary>
     public static string[] Passes(IReadOnlyCollection<string>? whitespaceExclusions) => whitespaceExclusions switch
@@ -1473,6 +1497,11 @@ internal static class FormatCommand
             notes.Add($"... and {generated.Count - 10} more generated files checked in: rebuild and commit them.");
         }
 
+        if (CheckedInGenerated(root, changed, otherProjects: true) is { Count: > 0 } others)
+        {
+            notes.Add($"Other projects have generated files checked in ({string.Join(", ", others.Take(3))}{(others.Count > 3 ? $" and {others.Count - 3} more" : string.Empty)}): a build may regenerate them from the changed code too, so rebuild and check.");
+        }
+
         if (Conventions.CSharpier(root) is { } evidence)
         {
             notes.Add($"CSharpier formats this repository ({evidence}): run it now (e.g. 'dotnet csharpier format .'), it has the last word on layout.");
@@ -1487,7 +1516,11 @@ internal static class FormatCommand
     /// '&lt;auto-generated' header. A build regenerates them from the code format changed (MoreLINQ's Extensions.g.cs from the
     /// doc comments), and a CI's 'git diff --exit-code' failed. Format leaves them alone; the note says to rebuild.
     /// </summary>
-    public static List<string> CheckedInGenerated(string root, IEnumerable<string> changed)
+    /// <remarks>
+    /// <paramref name="otherProjects"/>: those in the other projects instead (gencheck2: Lib2's build regenerates Docs2.g.cs from
+    /// Lib's sources, which no project reference shows), for a note that they may change too.
+    /// </remarks>
+    public static List<string> CheckedInGenerated(string root, IEnumerable<string> changed, bool otherProjects = false)
     {
         var repository = RepositoryRoot(root);
         if (repository is null || PreviewCommand.Git(repository, "ls-files", "-z", "--", "*.cs") is not (0, var list))
@@ -1506,7 +1539,7 @@ internal static class FormatCommand
         var changedProjects = new HashSet<string>(changedSet.Select(ProjectOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
         return list.Split('\0', StringSplitOptions.RemoveEmptyEntries)
             .Select(f => Path.GetFullPath(Path.Combine(repository, f)))
-            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) && IsGenerated(f))
+            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) != otherProjects && IsGenerated(f))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -1516,6 +1549,13 @@ internal static class FormatCommand
     public static bool IsGenerated(string file)
     {
         var name = Path.GetFileName(file);
+
+        // A resource or WinForms designer's file is written by the designer, never by a build (SSH.NET's Resources.Designer.cs).
+        if (name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase) && DesignerWritten(file))
+        {
+            return false;
+        }
+
         if (name.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".g.i.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase)
             || File.Exists(Path.Combine(Path.GetDirectoryName(file)!, name.Split('.')[0] + ".tt")))
         {
@@ -1523,6 +1563,17 @@ internal static class FormatCommand
         }
 
         return File.ReadLines(file).Take(10).Any(l => l.Contains("<auto-generated", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Whether an 'X.Designer.cs' belongs to a designer: an 'X.resx' next to it (resource designer), or an 'X.cs' next to it and
+    /// an InitializeComponent in it (WinForms/WPF form).
+    /// </summary>
+    private static bool DesignerWritten(string file)
+    {
+        var stem = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file)[..^".designer.cs".Length]);
+        return File.Exists(stem + ".resx")
+            || (File.Exists(stem + ".cs") && File.ReadAllText(file).Contains("InitializeComponent", StringComparison.Ordinal));
     }
 
     /// <summary>Whether the file at <paramref name="path"/> exists and has <paramref name="text"/>, line endings aside.</summary>
@@ -2084,7 +2135,7 @@ internal static class FormatCommand
         }
         else if (whitespaceExclusions is not null)
         {
-            log($"{NoWhitespaceHeader} {string.Join(", ", whitespaceExclusions)}: IDE0055 is off there in the stylebro settings (another formatter's code), so whitespace formatting leaves {(whitespaceExclusions.Count == 1 ? "it" : "them")} alone; style and analyzer fixes still run there.");
+            log(NoWhitespaceLine(root, whitespaceExclusions));
         }
 
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run)

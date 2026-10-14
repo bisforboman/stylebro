@@ -244,7 +244,10 @@ stays exempt:
 ```
 
 The StyleCop suppressions stay: they're harmless once StyleCop is gone, and needed while both run. Running the tool
-again adds nothing. Sonar's suppressions get the same treatment ([Coming from SonarQube](#coming-from-sonarqube)).
+again adds nothing. A suppression gets every rule that replaces the StyleCop one, also one that can't report on the
+code it covers (SA1300 around a local function gets BRO1312, the namespace rule, too): an id that doesn't apply is
+harmless, and the suppression stays right if the code changes. The count the tool prints is of rule ids added (a
+`disable`/`restore` pair counts twice), and the preview counts the same way. Sonar's suppressions get the same treatment ([Coming from SonarQube](#coming-from-sonarqube)).
 
 EF Core migrations are `dotnet ef`'s output: when the repository has them, the block marks their folders
 `generated_code = true` (a section per folder, e.g. `[src/Ordering.Infrastructure/Migrations/**]`), so formatting

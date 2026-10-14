@@ -621,23 +621,25 @@ internal static class PreviewCommand
 
             // In a project file or packages.config only <NoWarn> is a suppression: the rest is the StyleBro.Analyzers reference
             // (Autofac: its 9 PackageReference edits counted as "27 other lines").
+            // A '#pragma' or '<NoWarn>' counts its ids added, like the migration's own count (SSH.NET: 25 lines here, 27 there).
             var projectFile = Path.GetExtension(file).ToLowerInvariant() is ".csproj" or ".props" or ".targets" || Path.GetFileName(file).Equals("packages.config", StringComparison.OrdinalIgnoreCase);
-            foreach (var line in GitChecked(copy, "diff", "-U0", from, to, "--", file).Split('\n').Where(l => l.StartsWith('+') && !l.StartsWith("+++", StringComparison.Ordinal)))
+            foreach (var line in GitChecked(copy, "diff", "-U0", from, to, "--", file).Split('\n').Where(l => (l.StartsWith('+') && !l.StartsWith("+++", StringComparison.Ordinal)) || (l.StartsWith('-') && !l.StartsWith("---", StringComparison.Ordinal))))
             {
                 var kind = line.Contains("#pragma", StringComparison.Ordinal) ? "#pragma" : line.Contains("SuppressMessage", StringComparison.Ordinal) ? "[SuppressMessage]"
                     : line.Contains("NoWarn", StringComparison.Ordinal) ? "<NoWarn>" : "other lines";
-                if (projectFile && kind != "<NoWarn>")
+                if ((projectFile && kind != "<NoWarn>") || (line[0] == '-' && kind is not ("#pragma" or "<NoWarn>")))
                 {
                     continue;
                 }
 
-                suppressions[kind] = suppressions.TryGetValue(kind, out var n) ? n + 1 : 1;
+                var count = kind is "#pragma" or "<NoWarn>" ? (line[0] == '+' ? 1 : -1) * Regex.Matches(line, @"\b(?:BRO|IDE|CA)\d{4}\b").Count : 1;
+                suppressions[kind] = (suppressions.TryGetValue(kind, out var n) ? n : 0) + count;
             }
         }
 
-        if (suppressions.Count > 0)
+        if (suppressions.Any(s => s.Value > 0))
         {
-            parts.Add("suppressions carried over: " + string.Join(", ", suppressions.Select(s => $"{s.Value} {s.Key}")));
+            parts.Add("suppressions carried over: " + string.Join(", ", suppressions.Where(s => s.Value > 0).Select(s => $"{s.Value} {s.Key}")));
         }
 
         return "Settings: " + (parts.Count == 0 ? "nothing to write" : string.Join("; ", parts));

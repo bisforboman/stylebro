@@ -225,6 +225,12 @@ internal static class Program
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
+        // SSH.NET kept its stylecop.json without a word: StyleBro never reads it, the settings are in the block now.
+        if (setup.Sources.Where(s => Path.GetFileName(s).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase)).ToList() is { Count: > 0 } styleCopJson)
+        {
+            Console.WriteLine($"{string.Join(", ", styleCopJson.Select(s => s.Replace('\\', '/')))}: StyleBro doesn't read {(styleCopJson.Count == 1 ? "it" : "them")} (the settings are in the block now). Once StyleCop.Analyzers is gone, remove {(styleCopJson.Count == 1 ? "it" : "them")} and the <AdditionalFiles> item{(styleCopJson.Count == 1 ? string.Empty : "s")} naming {(styleCopJson.Count == 1 ? "it" : "them")}.");
+        }
+
         if (suppressions.NotCarried > 0)
         {
             Console.WriteLine($"Suppressions not carried over: {suppressions.NotCarried} for rules IDE0055 replaces (whitespace, like SA1028): 'dotnet format' formats whitespace whatever a suppression says. To keep such code as it is, exclude its files from formatting (generated_code = true in an .editorconfig section for them).");

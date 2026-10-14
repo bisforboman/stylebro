@@ -511,7 +511,7 @@ internal static class InitCommand
 
         // 'always' asks for 'public' on interface members too: only when the code has them or the build enforces it (BaGetter):
         // IDE0040 a warning or an error by id, category or bulk (trial 20: 'always' alone, or ':suggestion', reported nothing).
-        if (Conventions.InterfaceAccess(counts, settings, EnforcesCodeStyleInBuild(root) && IsEnforced(settings, "IDE0040")) is var (interfaceLines, interfaceReport))
+        if (Conventions.InterfaceAccess(counts, settings, EnforcesCodeStyleInBuild(root) && IsEnforced(settings, "IDE0040"), EnforcesCodeStyleInBuild(root)) is var (interfaceLines, interfaceReport))
         {
             detected.AddRange(interfaceLines);
             report.Insert(report.FindIndex(l => l.Contains(" private-by-default members: ", StringComparison.Ordinal)) + 1, interfaceReport);
