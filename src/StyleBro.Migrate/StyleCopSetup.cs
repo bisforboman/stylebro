@@ -1497,7 +1497,7 @@ internal sealed class StyleCopSetup
             var applies = Kind(file) == "globalconfig";
             foreach (var line in Regex.Replace(File.ReadAllText(file), $"{Migration.BeginMarker}.*?{Migration.EndMarker}", string.Empty, RegexOptions.Singleline).Split('\n').Select(l => l.Trim()))
             {
-                if (line.StartsWith('['))
+                if (line.Length > 0 && line[0] == '[')
                 {
                     applies = Kind(file) == "globalconfig" || AppliesToCSharp(line.Trim('[', ']'));
                     continue;
