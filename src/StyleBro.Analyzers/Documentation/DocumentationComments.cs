@@ -50,12 +50,23 @@ internal static class DocumentationComments
     /// prose starts an element 'T' that takes the summary's end tag, so the rules that edit text would guess where it ends
     /// (BRO1603 wrote 'IComparable.&lt;T&gt;' in GuardClauses). The rules that edit text skip such a comment; a person fixes
     /// the XML. A bare '&lt;' ('when a &lt; b') starts an element too, one whose '/&gt;' is missing: BRO1603 wrote 'a. &lt; b'.
+    /// A missing token inside an attribute isn't: <c>name=""</c> is well-formed XML (an empty name BRO1612 fills in).
     /// Judged by the tags only (a missing token, an end tag that isn't the element's), not the parser's errors: those exist
     /// only when the project generates documentation, and the same comment would be judged differently with and without it.
     /// </summary>
     public static bool IsMalformed(DocumentationCommentTriviaSyntax documentation) =>
-        documentation.DescendantTokens().Any(t => t.IsMissing)
+        documentation.DescendantTokens().Any(t => t.IsMissing && !t.Parent!.AncestorsAndSelf().Any(n => n is XmlAttributeSyntax))
         || documentation.DescendantNodes().OfType<XmlElementSyntax>().Any(e => e.EndTag.Name.LocalName.ValueText != e.StartTag.Name.LocalName.ValueText);
+
+    /// <summary>
+    /// The places in a comment a rule would edit, or none when its XML is malformed (<see cref="IsMalformed"/>). Shared by
+    /// every rule's analyzer and fix, so the two agree; the XML is checked only when there's something to edit.
+    /// </summary>
+    public static List<T> UnlessMalformed<T>(DocumentationCommentTriviaSyntax documentation, IEnumerable<T> places)
+    {
+        var list = places.ToList();
+        return list.Count == 0 || IsMalformed(documentation) ? [] : list;
+    }
 
     /// <summary>Whether the declaration has a documentation comment ('///' or '/**') before it.</summary>
     public static bool HasDocumentation(SyntaxNode member)

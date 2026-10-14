@@ -326,7 +326,7 @@ internal static class SingleLineBlocks
         {
             foreach (var statement in statements.Statements)
             {
-                AddEmbeddedStatementLines(statement, inner, unit, lineBreak, text, changes);
+                AddEmbeddedStatementLines(statement, inner, unit, lineBreak, text, options, changes);
             }
         }
 
@@ -342,10 +342,13 @@ internal static class SingleLineBlocks
     /// on its own line, one level deeper, but not inside a single-line block. Once the block is expanded it would, and
     /// 'dotnet format' runs its whitespace pass before the analyzers' fixes: a second run (trial 19). So the expansion
     /// does it, where BRO1514-BRO1516 add no braces (their edits come first and win the gap in the fix's merge). Like the
-    /// formatter, 'else' and a do-while's 'while' start a line too, and 'else if' stays together. Skipped: comments in the
-    /// gap, an embedded statement holding statements (the formatter doesn't indent a nested 'if (a) if (b) c;').
+    /// formatter, 'else' and a do-while's 'while' start a line too, and 'else if' stays together. An embedded block
+    /// (<c>if (x) { a; } else b;</c>) stays on one line: its '{' starts one per csharp_new_line_before_open_brace, an 'else'
+    /// after its '}' per csharp_new_line_before_else, and the else's statement gets its own line either way. Skipped:
+    /// comments in the gap, an embedded statement holding statements (the formatter doesn't indent a nested
+    /// 'if (a) if (b) c;').
     /// </summary>
-    private static void AddEmbeddedStatementLines(StatementSyntax statement, string indent, string unit, string lineBreak, SourceText text, List<TextChange> changes)
+    private static void AddEmbeddedStatementLines(StatementSyntax statement, string indent, string unit, string lineBreak, SourceText text, AnalyzerConfigOptions options, List<TextChange> changes)
     {
         var (header, embedded) = statement switch
         {
@@ -359,29 +362,36 @@ internal static class SingleLineBlocks
             DoStatementSyntax s => (s.DoKeyword, s.Statement),
             _ => (default(SyntaxToken), null!),
         };
-        if (embedded is null || embedded is BlockSyntax || !Break(header, embedded.GetFirstToken(), indent + unit, embedded))
+        if (embedded is null || !Embedded(header, embedded))
         {
             return;
         }
 
         switch (statement)
         {
-            case DoStatementSyntax @do:
+            case DoStatementSyntax @do when embedded is not BlockSyntax:
                 Break(@do.Statement.GetLastToken(), @do.WhileKeyword, indent);
                 break;
 
-            case IfStatementSyntax { Else: { } @else } when Break(embedded.GetLastToken(), @else.ElseKeyword, indent):
+            case IfStatementSyntax { Else: { } @else }
+                when (embedded is BlockSyntax && !IsClauseKeyword(@else.ElseKeyword, options)) || Break(embedded.GetLastToken(), @else.ElseKeyword, indent):
                 if (@else.Statement is IfStatementSyntax elseIf)
                 {
-                    AddEmbeddedStatementLines(elseIf, indent, unit, lineBreak, text, changes);
+                    AddEmbeddedStatementLines(elseIf, indent, unit, lineBreak, text, options, changes);
                 }
-                else if (@else.Statement is not BlockSyntax)
+                else
                 {
-                    Break(@else.ElseKeyword, @else.Statement.GetFirstToken(), indent + unit, @else.Statement);
+                    Embedded(@else.ElseKeyword, @else.Statement);
                 }
 
                 break;
         }
+
+        // The embedded statement on its own line, one level deeper; a block stays on one line, its '{' on a line of its own
+        // at the statement's level when csharp_new_line_before_open_brace says so (or where it is: the rest still follows).
+        bool Embedded(SyntaxToken before, StatementSyntax body) => body is BlockSyntax block
+            ? !NewLineBeforeBrace(block, options) || Break(before, block.OpenBraceToken, indent)
+            : Break(before, body.GetFirstToken(), indent + unit, body);
 
         bool Break(SyntaxToken before, SyntaxToken after, string newIndent, SyntaxNode? moved = null)
         {

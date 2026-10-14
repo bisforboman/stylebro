@@ -2145,6 +2145,20 @@ public class DocumentationTests
         }
         """);
 
+    // The rules that remove, unwrap, rename or reorder tags leave a malformed comment alone too: one rule each, the
+    // malformed text after the tag it would edit (the same comment with '&lt;' is reported).
+    [Theory]
+    [InlineData("/// <returns>Nothing.</returns>\n    /// <remarks>When a < b.</remarks>\n    public void M() { }")] // BRO1608
+    [InlineData("/// <remarks><placeholder>Sorted</placeholder> when a < b.</remarks>\n    public void M() { }")] // BRO1609
+    [InlineData("/// <remarks></remarks>\n    /// <returns>True when a < b.</returns>\n    public bool M() => true;")] // BRO1610
+    [InlineData("/// <param name=\"old\">The value.</param>\n    /// <remarks>When a < b.</remarks>\n    public void M(int value) { }")] // BRO1611
+    [InlineData("/// <param name=\"b\">B.</param>\n    /// <param name=\"a\">A.</param>\n    /// <remarks>When a < b.</remarks>\n    public void M(int a, int b) { }")] // BRO1611 order
+    [InlineData("/// <param>The value.</param>\n    /// <remarks>When a < b.</remarks>\n    public void M(int value) { }")] // BRO1612
+    [InlineData("/// <typeparam name=\"TOld\">The type.</typeparam>\n    /// <remarks>When a < b.</remarks>\n    public void M<T>() { }")] // BRO1613
+    [InlineData("/// <typeparam>The type.</typeparam>\n    /// <remarks>When a < b.</remarks>\n    public void M<T>() { }")] // BRO1614
+    public Task MalformedDocumentation_IsLeftAloneByTheTagRules(string member) => VerifyNoDiagnosticsAsync(
+        "/// <summary>A shape.</summary>\npublic class Shape\n{\n    /// <summary>Sorts.</summary>\n    " + member + "\n}\n");
+
     // Without documentation generation the parser reports nothing: the end tags tell.
     [Theory]
     [InlineData(DocumentationMode.Parse, "<summary>IList<T> items</summary>", true)]
@@ -2155,6 +2169,8 @@ public class DocumentationTests
     [InlineData(DocumentationMode.Parse, "<summary>x < 0 or y > 1</summary>", true)]
     [InlineData(DocumentationMode.Parse, "<summary>IList&lt;T&gt; <c>x</c> items</summary>", false)]
     [InlineData(DocumentationMode.Parse, "<summary>a &amp; b <see cref=\"A\"/> & c</summary>", false)]
+    [InlineData(DocumentationMode.Parse, "<param name=\"\">The a.</param>", false)]
+    [InlineData(DocumentationMode.Diagnose, "<param name=\"\">The a.</param><see cref=\"\"/>", false)]
     public void MalformedDocumentation_IsToldByTheEndTags(DocumentationMode mode, string documentation, bool malformed)
     {
         var tree = CSharpSyntaxTree.ParseText($"/// {documentation}\nclass A {{ }}\n", new CSharpParseOptions(documentationMode: mode));

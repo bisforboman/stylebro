@@ -279,6 +279,13 @@ public class SummaryLayoutTests
             public void Fill()
             {
             }
+
+            // Malformed XML anywhere in the comment ('a < b'): left to a person, like the other doc rules do.
+            /// <summary>Sorts.</summary>
+            /// <remarks>When a < b.</remarks>
+            public void Sort()
+            {
+            }
         }
         """);
 

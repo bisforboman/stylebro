@@ -28,8 +28,9 @@ internal static class DocumentationTags
             return [];
         }
 
-        return GetDocumentation(member).SelectMany(d => d.Content)
-            .Where(n => n is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "returns" } or XmlEmptyElementSyntax { Name.LocalName.ValueText: "returns" });
+        return GetDocumentation(member).SelectMany(d => DocumentationComments.UnlessMalformed(
+            d,
+            d.Content.Where(n => n is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "returns" } or XmlEmptyElementSyntax { Name.LocalName.ValueText: "returns" })));
     }
 
     /// <summary>Every '&lt;placeholder&gt;' element in the tree's documentation comments.</summary>
@@ -38,8 +39,9 @@ internal static class DocumentationTags
         return trivia
             .Select(t => t.GetStructure())
             .OfType<DocumentationCommentTriviaSyntax>()
-            .SelectMany(d => d.DescendantNodes().OfType<XmlElementSyntax>())
-            .Where(e => e.StartTag.Name.LocalName.ValueText == "placeholder");
+            .SelectMany(d => DocumentationComments.UnlessMalformed(
+                d,
+                d.DescendantNodes().OfType<XmlElementSyntax>().Where(e => e.StartTag.Name.LocalName.ValueText == "placeholder")));
     }
 
     /// <summary>
