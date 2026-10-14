@@ -1123,10 +1123,6 @@ internal static class InitCommand
         return result;
     }
 
-    /// <summary>Whether another convention turns the same rule off (BRO1404: members and types).</summary>
-    private static bool SharesOff(Conventions.Convention convention) =>
-        convention.Off is { } off && Conventions.All.Count(c => c.Off == off) > 1;
-
     /// <summary>
     /// The lines without a setting line that repeats an earlier one, with the '# init:' comment right above it (BRO1404's off
     /// line, from the members' and the types' conventions, or kept from the last init and decided again).
@@ -1176,6 +1172,10 @@ internal static class InitCommand
 
         return result;
     }
+
+    /// <summary>Whether another convention turns the same rule off (BRO1404: members and types).</summary>
+    private static bool SharesOff(Conventions.Convention convention) =>
+        convention.Off is { } off && Conventions.All.Count(c => c.Off == off) > 1;
 
     /// <summary>
     /// Pins the preset version (docs/versioning.md) in every Directory.Build.props the projects import: a new setup takes

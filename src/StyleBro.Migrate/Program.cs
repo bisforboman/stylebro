@@ -225,6 +225,7 @@ internal static class Program
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
+
         // SSH.NET kept its stylecop.json without a word: StyleBro never reads it, the settings are in the block now.
         if (setup.Sources.Where(s => Path.GetFileName(s).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase)).ToList() is { Count: > 0 } styleCopJson)
         {

@@ -373,6 +373,20 @@ internal static class Conventions
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
 
+    /// <summary>
+    /// BRO1404's severity for types that are internal by default (in a namespace or a file): with 'internal' or without an
+    /// access modifier. AngleSharp leaves it out on 273 types (26 say 'internal'), and BRO1404 added it to all; no setting
+    /// asks for it on types only, so the rule goes off (its members' 'private' then isn't added either).
+    /// </summary>
+    private const string TypeAccessKey = "dotnet_diagnostic." + DiagnosticIds.AccessModifier + ".severity";
+
+    /// <summary>
+    /// The SDK formatter's indentation of a block that is a switch section's content ('case X:' + '{' on the next line):
+    /// below the label (true, the default) or at its indentation. AngleSharp writes all 131 at the label's, and IDE0055
+    /// re-indented thousands of lines.
+    /// </summary>
+    private const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
+
     /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
     private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
 
@@ -389,20 +403,6 @@ internal static class Conventions
 
     /// <summary>The SDK formatter's options (IDE0055's): with CSharpier they don't apply.</summary>
     private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey, IndentCaseBlockKey };
-
-    /// <summary>
-    /// BRO1404's severity for types that are internal by default (in a namespace or a file): with 'internal' or without an
-    /// access modifier. AngleSharp leaves it out on 273 types (26 say 'internal'), and BRO1404 added it to all; no setting
-    /// asks for it on types only, so the rule goes off (its members' 'private' then isn't added either).
-    /// </summary>
-    private const string TypeAccessKey = "dotnet_diagnostic." + DiagnosticIds.AccessModifier + ".severity";
-
-    /// <summary>
-    /// The SDK formatter's indentation of a block that is a switch section's content ('case X:' + '{' on the next line):
-    /// below the label (true, the default) or at its indentation. AngleSharp writes all 131 at the label's, and IDE0055
-    /// re-indented thousands of lines.
-    /// </summary>
-    private const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
 
     /// <summary>
     /// What shows that CSharpier formats the repository (a file, relative to the root), or null: a .csharpierrc(.json/.yaml/.yml)
