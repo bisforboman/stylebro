@@ -155,7 +155,7 @@ internal static class DocumentationPeriods
             .Where(t => t.IsKind(SyntaxKind.XmlTextLiteralToken) || t.IsKind(SyntaxKind.XmlEntityLiteralToken))
             .Select(t => t.ValueText)).TrimEnd();
         var sentence = text.TrimEnd(ClosingPunctuation).TrimEnd();
-        return (element.StartTag.Name.LocalName.ValueText != "c" || (text.Length > sentence.Length && text[text.Length - 1] is '"' or '\''))
+        return (element.StartTag.Name.LocalName.ValueText != "c" || (text.Length > 0 && text[text.Length - 1] is '"' or '\''))
             && sentence.Length > 0 && sentence[sentence.Length - 1] is '.' or '?' or '!';
     }
 
