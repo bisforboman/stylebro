@@ -39,18 +39,6 @@ internal static class Severities
             : Parse(category is null ? null : Get(options, $"dotnet_analyzer_diagnostic.category-{category}.severity"))
                 ?? Parse(Get(options, "dotnet_analyzer_diagnostic.severity"));
 
-    private static string? Get(AnalyzerConfigOptions options, string key) => options.TryGetValue(key, out var value) ? value : null;
-
-    private static ReportDiagnostic? Parse(string? severity) => severity?.Trim().ToLowerInvariant() switch
-    {
-        "none" => ReportDiagnostic.Suppress,
-        "silent" or "hidden" => ReportDiagnostic.Hidden,
-        "suggestion" or "info" => ReportDiagnostic.Info,
-        "warning" => ReportDiagnostic.Warn,
-        "error" => ReportDiagnostic.Error,
-        _ => null,
-    };
-
     public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool? enabledByDefault = null)
     {
         var byDefault = enabledByDefault ?? (!Defaults.TryGetValue(id, out var known) || known);
@@ -73,4 +61,16 @@ internal static class Severities
             _ => true,
         };
     }
+
+    private static string? Get(AnalyzerConfigOptions options, string key) => options.TryGetValue(key, out var value) ? value : null;
+
+    private static ReportDiagnostic? Parse(string? severity) => severity?.Trim().ToLowerInvariant() switch
+    {
+        "none" => ReportDiagnostic.Suppress,
+        "silent" or "hidden" => ReportDiagnostic.Hidden,
+        "suggestion" or "info" => ReportDiagnostic.Info,
+        "warning" => ReportDiagnostic.Warn,
+        "error" => ReportDiagnostic.Error,
+        _ => null,
+    };
 }
