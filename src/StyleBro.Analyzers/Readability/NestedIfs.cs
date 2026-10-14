@@ -96,7 +96,7 @@ internal static class NestedIfs
     private static TextChange? GetChange(IfStatementSyntax top, IfStatementSyntax inner, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn, SemanticModel model)
     {
         var layout = CSharpierLayout.PrintWidth(options) is { } width ? (width, Indentation.GetUnit(options)) : ((int, string)?)null;
-        if (Render(top, text, OperatorAtBeginning(options, isOn), layout) is not { } rendered || !rendered.Merged.Contains(inner)
+        if (Render(top, text, OperatorAtBeginning(top, text, options, isOn), layout) is not { } rendered || !rendered.Merged.Contains(inner)
             || (options.TryGetValue(AllowDynamicKey, out var allow) && bool.TryParse(allow.Trim(), out var allowed) && allowed
                 && rendered.Merged.Any(m => IsDynamic(m.Condition, model) || IsDynamic(GetOuter(m)!.Condition, model))))
         {
@@ -158,12 +158,29 @@ internal static class NestedIfs
 
     /// <summary>
     /// Where a wrapped '&amp;&amp;' goes: where dotnet_style_operator_placement_when_wrapping says (the beginning by default)
-    /// when BRO1520 enforces it, else at the end of the line, where the outer condition ended. sourcegit sets
-    /// beginning_of_line but writes 254 of 264 operators at the end (init turns BRO1520 off there), and the merge put its
-    /// '&amp;&amp;' first.
+    /// when BRO1520 enforces it. Otherwise at the end of the line when the chain's conditions already wrap after an operator
+    /// (sourcegit sets beginning_of_line but writes 254 of 264 operators at the end; init turns BRO1520 off there), else
+    /// still where the key says: AzureEventGridSimulator (CSharpier, which turns BRO1520 off) puts all 189 at the beginning.
     /// </summary>
-    private static bool OperatorAtBeginning(AnalyzerConfigOptions options, Func<string, bool> isOn) =>
-        isOn(DiagnosticIds.OperatorPlacement) && WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true);
+    private static bool OperatorAtBeginning(IfStatementSyntax top, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    {
+        var beginning = WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true);
+        if (isOn(DiagnosticIds.OperatorPlacement))
+        {
+            return beginning;
+        }
+
+        for (var current = top; current is not null; current = GetInner(current))
+        {
+            if (current.Condition.DescendantNodesAndSelf().OfType<BinaryExpressionSyntax>()
+                .Any(b => text.Lines.GetLineFromPosition(b.OperatorToken.Span.End).LineNumber < text.Lines.GetLineFromPosition(b.Right.SpanStart).LineNumber))
+            {
+                return false;
+            }
+        }
+
+        return beginning;
+    }
 
     /// <summary>
     /// The merged chain starting at <paramref name="top"/>: one edit from its condition to its end, with the chains in the

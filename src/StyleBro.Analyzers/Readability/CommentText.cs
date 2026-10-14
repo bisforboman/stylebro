@@ -163,7 +163,8 @@ internal static class CommentText
 
     private static IEnumerable<(SyntaxTrivia, IReadOnlyList<SyntaxTrivia>)> GetGroupFindings(List<SyntaxTrivia> group, bool skipHeader, SourceText text)
     {
-        if (group.Count == 0 || (skipHeader && text.ToString(TextSpan.FromBounds(0, group[0].SpanStart)).Trim().Length == 0))
+        if (group.Count == 0 || (skipHeader && text.ToString(TextSpan.FromBounds(0, group[0].SpanStart)).Trim().Length == 0)
+            || MarksEmptyBraces(group))
         {
             yield break;
         }
@@ -182,6 +183,18 @@ internal static class CommentText
                 yield return (group[group.Count - 1], trailing);
             }
         }
+    }
+
+    // Empty comments that are all a pair of braces holds ('catch { // }'): they mark the block as empty on purpose (trial 21,
+    // AzureEventGridSimulator), and removing them would leave a bare '{ }'.
+    private static bool MarksEmptyBraces(List<SyntaxTrivia> group)
+    {
+        var token = group[0].Token;
+        var (open, close) = token.IsKind(SyntaxKind.OpenBraceToken) ? (token, token.GetNextToken()) : (token.GetPreviousToken(), token);
+        return open.IsKind(SyntaxKind.OpenBraceToken) && close.IsKind(SyntaxKind.CloseBraceToken) && open.Parent == close.Parent
+            && open.TrailingTrivia.Concat(close.LeadingTrivia)
+                .Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
+                .All(IsEmpty);
     }
 
     private static bool IsEmpty(SyntaxTrivia comment)

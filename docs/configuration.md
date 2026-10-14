@@ -57,6 +57,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_trailing_comma` | `include`, `omit` | `include` | [BRO1401](rules/BRO1401.md), [BRO1509](rules/BRO1509.md) |
 | `stylebro_comment_blank_line_exempt_prefixes` | prefixes, comma-separated, case-sensitive | none | [BRO1504](rules/BRO1504.md) |
 | `stylebro_allow_adjacent_single_line_members` | `true`, `false` | `false` | [BRO1505](rules/BRO1505.md) |
+| `stylebro_blank_line_below_standalone_comments` | `allow`, `remove` (like StyleCop's SA1512) | `allow` | [BRO1506](rules/BRO1506.md) |
 | `stylebro_allow_empty_single_line_blocks` | `true`, `false` | `false` | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) |
 | `stylebro_allow_consecutive_usings` | `true`, `false` | `true` | [BRO1514](rules/BRO1514.md) |
 | `stylebro_allow_single_line_jump_statements` | `true`, `false` | `false` | [BRO1514](rules/BRO1514.md) |

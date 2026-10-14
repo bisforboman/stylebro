@@ -24,5 +24,7 @@ public class Receipts
         ).Trim();
     }
 
-    public string Short(decimal total) => Format("anonymous", total);
+    // Already below the last item: BRO1110's own_line mode leaves it where it is.
+    public string Short(decimal total) => Format("anonymous", total
+        );
 }

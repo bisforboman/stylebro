@@ -222,6 +222,13 @@ internal static class Migration
         }
 
         lines.Add($"{StyleBro.Analyzers.Layout.Braces.ConsecutiveUsingsKey} = {Bool(setup.Setting("layoutRules", "allowConsecutiveUsings") is not { ValueKind: JsonValueKind.False })}");
+
+        // SA1512 also removes the blank line below a comment that stands on its own; BRO1506 keeps that one unless told.
+        if (setup.IsOn("SA1512"))
+        {
+            lines.Add($"{StyleBro.Analyzers.Layout.TrailingBlankLines.StandaloneKey} = remove");
+        }
+
         AddHungarianPrefixes(setup, lines);
         AddTupleElementCasing(setup, lines, result);
         if (setup.Setting("namingRules", "allowedNamespaceComponents") is { ValueKind: JsonValueKind.Array } components && components.GetArrayLength() > 0)

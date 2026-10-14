@@ -277,5 +277,38 @@ public class BlankLineRunsTests
             }
         }
         """,
-        "dotnet_diagnostic.BRO1503.severity = warning\ndotnet_diagnostic.BRO1504.severity = warning\ndotnet_diagnostic.BRO1505.severity = warning\ndotnet_diagnostic.BRO1506.severity = warning");
+        "dotnet_diagnostic.BRO1503.severity = warning\ndotnet_diagnostic.BRO1504.severity = warning\ndotnet_diagnostic.BRO1505.severity = warning\ndotnet_diagnostic.BRO1506.severity = warning\nstylebro_blank_line_below_standalone_comments = remove");
+
+    // Trial 21: BRO1506 leaves a standalone comment (blank lines above and below) by default, so its extra blank lines are
+    // BRO1517's.
+    [Fact]
+    public Task BlankLinesBelowAStandaloneComment_AreBro1517s() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+                M();
+
+                // A note.
+        {|BRO1517:
+
+        |}        M();
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M()
+            {
+                M();
+
+                // A note.
+
+                M();
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1506.severity = warning");
 }

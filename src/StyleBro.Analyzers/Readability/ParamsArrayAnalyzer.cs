@@ -23,7 +23,7 @@ public sealed class ParamsArrayAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var array = (ExpressionSyntax)c.Node;
-                if (array.Parent is ArgumentSyntax && ParamsArrays.GetChanges(array, c.SemanticModel, c.CancellationToken) is not null
+                if (array.Parent is ArgumentSyntax && ParamsArrays.GetChanges(array, c.SemanticModel, c.Options.AnalyzerConfigOptionsProvider.GetOptions(array.SyntaxTree), c.CancellationToken) is not null
                     && !(ParamsArrays.ExceptObjectAndJagged(c.Options.AnalyzerConfigOptionsProvider.GetOptions(array.SyntaxTree))
                         && ParamsArrays.GoesToObjectOrJagged(array, c.SemanticModel, c.CancellationToken)))
                 {

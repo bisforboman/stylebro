@@ -54,16 +54,11 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
     /// <inheritdoc/>
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
-        var frameworks = GetFrameworks(context.Options.AnalyzerConfigOptionsProvider.GlobalOptions);
-        if (frameworks.Count < 2)
-        {
-            // Single target: the rule itself checks that the API exists.
-            return;
-        }
-
+        // A single target: the rule itself checks that the API exists (AllHave).
+        var options = context.Options.AnalyzerConfigOptionsProvider.GlobalOptions;
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
-            if (Descriptors.TryGetValue(diagnostic.Id, out var descriptor) && !frameworks.All(f => Has(f, Minimums[diagnostic.Id])))
+            if (Descriptors.TryGetValue(diagnostic.Id, out var descriptor) && !AllHave(options, Minimums[diagnostic.Id]))
             {
                 context.ReportSuppression(Suppression.Create(descriptor, diagnostic));
             }
@@ -78,6 +73,18 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
         options.TryGetValue(Property, out var value)
             ? value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 0).ToList()
             : new List<string>();
+
+    /// <summary>
+    /// Whether every target framework of the project reaches the minimum; true for a single target (the compilation itself
+    /// shows what it has) or an unknown list. For StyleBro's own fixes whose result binds only where an API exists (trial
+    /// 21: BRO1151's params collections), since 'stylebro-migrate format' and 'dotnet format' fix the file every framework
+    /// shares from the newest framework's findings.
+    /// </summary>
+    internal static bool AllHave(AnalyzerConfigOptions options, (Version Core, Version? Standard) minimum)
+    {
+        var frameworks = GetFrameworks(options);
+        return frameworks.Count < 2 || frameworks.All(f => Has(f, minimum));
+    }
 
     /// <summary>Whether a target framework (net48, netstandard2.1, netcoreapp3.1, net8.0-windows, ...) reaches the minimum.</summary>
     internal static bool Has(string framework, (Version Core, Version? Standard) minimum)

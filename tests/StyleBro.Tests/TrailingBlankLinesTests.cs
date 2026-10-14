@@ -121,8 +121,6 @@ public class TrailingBlankLinesTests
 
             void M()
             {
-                M();
-
                 {|BRO1506:// a comment above code|}
 
                 M();
@@ -154,8 +152,6 @@ public class TrailingBlankLinesTests
 
             void M()
             {
-                M();
-
                 // a comment above code
                 M();
             }
@@ -173,4 +169,98 @@ public class TrailingBlankLinesTests
             int O() => 2;
         }
         """);
+
+    // Trial 21 (AzureEventGridSimulator; owner's choice 2026-10-14): a comment with a blank line above and below stands on
+    // its own (a note on the code above, a section header), so its blank line stays. Below '{' or before '}' it's still
+    // reported; stylebro_blank_line_below_standalone_comments = remove reports it too, like SA1512.
+    [Fact]
+    public Task StandaloneComments_KeepTheirBlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int a;
+
+            // Properties
+
+            public int A => a;
+
+            #region Methods
+            // Methods
+            // more
+
+            #endregion
+            void M()
+            {
+                {|BRO1506:// below a brace|}
+
+                M();
+
+                {|BRO1506:// before a brace|}
+
+            }
+        }
+        """,
+        """
+        class C
+        {
+            private int a;
+
+            // Properties
+
+            public int A => a;
+
+            #region Methods
+            // Methods
+            // more
+
+            #endregion
+            void M()
+            {
+                // below a brace
+                M();
+
+                // before a brace
+            }
+        }
+        """);
+
+    [Fact]
+    public Task StandaloneComments_WithRemove_LoseTheirBlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            private int a;
+
+            {|BRO1506:// Properties|}
+
+            public int A => a;
+
+            #region Methods
+            // Methods
+            {|BRO1506:// more|}
+
+            #endregion
+            void M()
+            {
+            }
+        }
+        """,
+        """
+        class C
+        {
+            private int a;
+
+            // Properties
+            public int A => a;
+
+            #region Methods
+            // Methods
+            // more
+            #endregion
+            void M()
+            {
+            }
+        }
+        """,
+        "stylebro_blank_line_below_standalone_comments = remove");
 }

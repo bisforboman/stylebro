@@ -353,6 +353,47 @@ public class NestedIfTests
         """,
         editorConfig: "dotnet_style_operator_placement_when_wrapping = beginning_of_line\ndotnet_diagnostic.BRO1520.severity = none\n");
 
+    // AzureEventGridSimulator (CSharpier, so BRO1520 is off): no operator wraps at the end of a line yet, so the key decides,
+    // and its default is the beginning, where CSharpier and the repo put them.
+    [Fact]
+    public Task TheOperatorKeyWithBRO1520Off_NothingWrappedAtTheEnd_Beginning() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (
+                    menu
+                    is string
+                        or int
+                )
+                {
+                    {|BRO1149:if|} (msg == 1)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(object? menu, int msg)
+            {
+                if (
+                    menu
+                    is string
+                        or int
+                    && msg == 1)
+                {
+                    return;
+                }
+            }
+        }
+        """,
+        editorConfig: "stylebro_layout_by = csharpier\ndotnet_diagnostic.BRO1520.severity = none\n");
+
     // An '#endregion' right after the 'if' kept it until BRO1113 removed the region, so the merge came on a second run.
     [Fact]
     public Task RegionLinesAroundTheIf_AreMerged() => Verify.VerifyFixAsync(

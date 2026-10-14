@@ -17,7 +17,7 @@ namespace StyleBro.Analyzers.Layout;
 internal static class BlankLineRuns
 {
     /// <summary>Every finding in the tree: the rule, the diagnostic's span, and the edit that fixes it.</summary>
-    public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include)
+    public static IEnumerable<(string Id, TextSpan Location, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, Func<string, bool> isOn, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include, bool removeStandaloneComments = false)
     {
         // Asked per token: read each rule's severity once per file.
         var known = new Dictionary<string, bool>();
@@ -32,7 +32,7 @@ internal static class BlankLineRuns
         var (multipleOn, beforeOn, afterOn) = (isOn(DiagnosticIds.MultipleBlankLines), isOn(DiagnosticIds.BlankLineBeforeCloseBrace), isOn(DiagnosticIds.BlankLineAfterCloseBrace));
         foreach (var token in TreeWalk.Tokens(root))
         {
-            if (multipleOn && MultipleBlankLines(token, text, isOn) is { } runs)
+            if (multipleOn && MultipleBlankLines(token, text, isOn, removeStandaloneComments) is { } runs)
             {
                 foreach (var multiple in runs)
                 {
@@ -147,7 +147,7 @@ internal static class BlankLineRuns
     /// separate them, e.g. empty regions in a row); the fix keeps one blank line of each. Null when there are none (asked
     /// for every token: no allocation then).
     /// </summary>
-    private static List<(TextSpan Location, TextChange Change)>? MultipleBlankLines(SyntaxToken token, SourceText text, Func<string, bool> isOn)
+    private static List<(TextSpan Location, TextChange Change)>? MultipleBlankLines(SyntaxToken token, SourceText text, Func<string, bool> isOn, bool removeStandaloneComments)
     {
         if (token.IsKind(SyntaxKind.EndOfFileToken))
         {
@@ -175,7 +175,7 @@ internal static class BlankLineRuns
                 continue;
             }
 
-            if (Run(token, trivia, start, end, count, text, isOn) is { } found)
+            if (Run(token, trivia, start, end, count, text, isOn, removeStandaloneComments) is { } found)
             {
                 (runs ??= []).Add(found);
             }
@@ -187,7 +187,7 @@ internal static class BlankLineRuns
         return runs;
     }
 
-    private static (TextSpan Location, TextChange Change)? Run(SyntaxToken token, SyntaxTriviaList trivia, int start, int end, int count, SourceText text, Func<string, bool> isOn)
+    private static (TextSpan Location, TextChange Change)? Run(SyntaxToken token, SyntaxTriviaList trivia, int start, int end, int count, SourceText text, Func<string, bool> isOn, bool removeStandaloneComments)
     {
         if (end <= start)
         {
@@ -203,7 +203,7 @@ internal static class BlankLineRuns
 
             // Blank lines below a '//' comment are BRO1506's, where it reports them (not above another comment).
             if (trivia[start - 2].IsKind(SyntaxKind.SingleLineCommentTrivia) && isOn(DiagnosticIds.BlankLineAfterComment)
-                && TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text).Count > 0)
+                && TrailingBlankLines.GetBlankLinesAfterComment(trivia[start - 2], text, removeStandaloneComments).Count > 0)
             {
                 return null;
             }

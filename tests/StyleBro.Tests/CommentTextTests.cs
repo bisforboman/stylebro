@@ -119,6 +119,77 @@ public class CommentTextTests
         }
         """);
 
+    // Trial 21 (AzureEventGridSimulator): a lone '//' in an empty block marks it as empty on purpose. With other text in the
+    // block, or code, it's reported as before.
+    [Fact]
+    public Task EmptyComments_ThatAreAllABlockHolds_AreKept() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M()
+            {
+                try
+                {
+                    M();
+                }
+                catch
+                {
+                    //
+                }
+
+                try
+                {
+                    M();
+                }
+                catch { /* */ }
+
+                if (true)
+                {
+                    // Nothing to do.
+                    {|BRO1120://|}
+                }
+
+                if (true)
+                {
+                    M();
+                    {|BRO1120://|}
+                }
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M()
+            {
+                try
+                {
+                    M();
+                }
+                catch
+                {
+                    //
+                }
+
+                try
+                {
+                    M();
+                }
+                catch { /* */ }
+
+                if (true)
+                {
+                    // Nothing to do.
+                }
+
+                if (true)
+                {
+                    M();
+                }
+            }
+        }
+        """);
+
     // Like StyleCop's SA1120, the empty lines of a file header are reported...
     [Fact]
     public Task EmptyLinesInTheHeader_AreReported() => VerifyFixAsync(

@@ -97,7 +97,8 @@ public sealed partial class MigrationTests
             """),
             counts);
 
-        Assert.Equal(new[] { 1, 2 }, counts[CommentBlankLineKey]);
+        // "blank below" stands on its own (a blank line above it too): BRO1506 leaves it by default, so it isn't counted.
+        Assert.Equal(new[] { 1, 1 }, counts[CommentBlankLineKey]);
     }
 
     [Theory]

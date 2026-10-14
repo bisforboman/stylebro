@@ -139,7 +139,7 @@ internal static class DocumentationComments
 
         if (noBlankLineBelowComment && indentation.Trim().Length == 0
             && member.GetLeadingTrivia().LastOrDefault(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia)) is { RawKind: not 0 } comment
-            && Layout.TrailingBlankLines.GetBlankLinesAfterComment(comment, text) is { Count: > 0 } blankLines
+            && Layout.TrailingBlankLines.GetBlankLinesAfterComment(comment, text, Layout.TrailingBlankLines.RemovesStandalone(options)) is { Count: > 0 } blankLines
             && blankLines[blankLines.Count - 1].LineNumber == line.LineNumber - 1)
         {
             return new TextChange(TextSpan.FromBounds(blankLines[0].Start, member.SpanStart), indentation + tag + lineBreak + indentation);

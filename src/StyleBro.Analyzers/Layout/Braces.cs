@@ -310,9 +310,11 @@ internal static class Braces
     /// BRO1509's edits): <c>void M(bool x) { if (x) return; }</c> gets its method body and the braces in one run, in any
     /// fix order. The findings and their edits are computed on the expanded text, for the statements directly in the
     /// block (a nested single-line block's are its own expansion's), and mapped back; nothing is added when an edit
-    /// falls outside the statements.
+    /// falls outside the statements. Which statements get braces is decided with <paramref name="lines"/> applied too (the
+    /// expansion's statement lines, csharp_preserve_single_line_statements = false): one they make multi-line is BRO1515's
+    /// although BRO1514 is off (trial 21); the braces themselves are computed without them, as for BRO1514.
     /// </summary>
-    public static void AddToExpansion(BlockSyntax block, SourceText text, List<TextChange> expansion, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    public static void AddToExpansion(BlockSyntax block, SourceText text, List<TextChange> expansion, IReadOnlyList<TextChange> lines, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
         if (!block.Statements.Any(s => s.DescendantNodesAndSelf().Any(n => Kinds.Contains(n.Kind()))))
         {
@@ -335,12 +337,27 @@ internal static class Braces
             items.Add((statement, found, shift));
         }
 
+        // The same statements with the lines broken: only whitespace differs, so their nodes pair up in document order.
         var newBlock = items[0].New.Parent;
-        var children = items
-            .SelectMany(i => i.New.DescendantNodesAndSelf())
-            .Where(n => Kinds.Contains(n.Kind()) && n.Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock)
-            .SelectMany(n => GetFindings(n, expanded, isOn, options))
-            .Select(f => f.Child)
+        var nodes = items.SelectMany(i => i.New.DescendantNodesAndSelf()).ToList();
+        var judgedText = lines.Count == 0 ? expanded : text.WithChanges(sorted.Concat(lines).OrderBy(c => c.Span.Start));
+        var start = items[0].New.SpanStart;
+        var judged = lines.Count == 0
+            ? nodes
+            : (block.SyntaxTree.WithChangedText(judgedText).GetRoot().FindToken(start).Parent?.AncestorsAndSelf().OfType<StatementSyntax>()
+                .LastOrDefault(s => s.SpanStart == start && s.Parent is BlockSyntax)?.Parent as BlockSyntax)?.Statements
+                .SelectMany(s => s.DescendantNodesAndSelf())
+                .ToList();
+        if (judged is null || judged.Count != nodes.Count)
+        {
+            return;
+        }
+
+        var index = judged.Select((n, i) => (n, i)).ToDictionary(x => x.n, x => x.i);
+        var children = Enumerable.Range(0, nodes.Count)
+            .Where(i => Kinds.Contains(nodes[i].Kind()) && nodes[i].Ancestors().OfType<BlockSyntax>().FirstOrDefault() == newBlock)
+            .SelectMany(i => GetFindings(judged[i], judgedText, isOn, options))
+            .Select(f => (StatementSyntax)nodes[index[f.Child]])
             .Where(c => GetChanges(new[] { c }, expanded, options) is not null)
             .ToList();
         if (children.Count == 0 || GetChanges(children, expanded, options, isOn) is not { } wraps)

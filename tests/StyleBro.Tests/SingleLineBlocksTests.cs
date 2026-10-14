@@ -447,7 +447,8 @@ public class SingleLineBlocksTests
 
     // Trial 19: with csharp_preserve_single_line_statements = false the SDK's whitespace pass splits 'if (x) y;' once it's
     // no longer in a single-line block, but it ran before the fix: the expansion does it, so one run converges. Nested
-    // embedded statements go one level deeper each (trial 20), comments in a gap are left alone.
+    // embedded statements go one level deeper each (trial 20), comments in a gap are left alone, and a statement that
+    // becomes multi-line gets BRO1515's braces (trial 21).
     [Fact]
     public Task EmbeddedStatements_GetTheirOwnLines_WhenSingleLineStatementsArentPreserved() => VerifyFixAsync(
         """
@@ -487,8 +488,11 @@ public class SingleLineBlocksTests
             public void N(int x)
             {
                 if (x > 0)
+                {
                     if (x > 1)
                         x++;
+                }
+
                 if (x > 0) /* c */ x++;
                 for (; x < 3; x++)
                     x--;

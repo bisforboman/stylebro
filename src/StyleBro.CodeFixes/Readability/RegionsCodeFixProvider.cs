@@ -100,7 +100,7 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
                 }
 
                 var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
-                foreach (var blank in TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText))
+                foreach (var blank in TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText, TrailingBlankLines.RemovesStandalone(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree))))
                 {
                     blanks.Add(new TextChange(TextSpan.FromBounds(ToOriginal(blank.Start), ToOriginal(blank.EndIncludingLineBreak)), string.Empty));
                 }

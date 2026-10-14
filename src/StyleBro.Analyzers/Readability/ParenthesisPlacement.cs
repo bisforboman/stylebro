@@ -69,7 +69,7 @@ internal static class ParenthesisPlacement
     /// With <paramref name="ownLine"/>, a split list (see <see cref="GetSplitListLine"/>) has it on
     /// its own line, indented like that line: '    b)' turns into '    b' / ')'. The line of the opening token is the
     /// name's line when BRO1109 (<paramref name="openMoves"/>) moves the token up there, so both fixes agree in any order.
-    /// A token already on its own line gets that indentation too. The indentation is the one that line has once the fixes
+    /// A token already below the last item stays where it is. The indentation is the one that line has once the fixes
     /// that move tokens across lines are done (see <see cref="GetIndentation"/>), so nested lists agree in one run.
     /// Skipped in <c>own_line</c> mode: a comment between the last item and the token, directives in the list (each
     /// target framework's copy may have another last item) and a last item ending in single-line braces.
@@ -77,6 +77,17 @@ internal static class ParenthesisPlacement
     /// <param name="options">The file's options, with <paramref name="isOn"/>: for BRO1105, which moves ': base('.</param>
     public static (SyntaxToken Close, TextChange Change)? GetCloseFix(SyntaxNode list, SourceText text, bool ownLine, bool openMoves, AnalyzerConfigOptions? options = null, Func<string, bool>? isOn = null)
     {
+        if (ownLine)
+        {
+            // Already below the last item: left where it is, split list or not (trial 21: CSharpier indents a ')' deeper than
+            // its opening line inside a wrapped expression, and keeps '}' / ')' apart when a lambda's body starts below '=>').
+            var (_, items, close) = ParameterLayoutList(list);
+            if (items.Count > 0 && !close.IsMissing && Line(text, items[items.Count - 1].Span.End) != Line(text, close.SpanStart))
+            {
+                return null;
+            }
+        }
+
         var split = ownLine ? GetSplitListLine(list, text, openMoves) : default;
         if (split.Skip)
         {
@@ -87,29 +98,13 @@ internal static class ParenthesisPlacement
         {
             var (_, items, close) = ParameterLayoutList(list);
             var last = items[items.Count - 1].GetLastToken();
-            if (list.ContainsDirectives)
-            {
-                return null;
-            }
-
-            var indentation = GetIndentation(list, openLine, text, openMoves, options, isOn);
-            if (Line(text, last.Span.End) != Line(text, close.SpanStart))
-            {
-                // Already on its own line: only its indentation is checked, the same the fix gives a ')' it moves down.
-                var closeLine = text.Lines.GetLineFromPosition(close.SpanStart);
-                var before = text.ToString(TextSpan.FromBounds(closeLine.Start, close.SpanStart));
-                return before == indentation || !string.IsNullOrWhiteSpace(before)
-                    ? null
-                    : (close, new TextChange(TextSpan.FromBounds(closeLine.Start, close.SpanStart), indentation));
-            }
-
-            if (!IsPlainGap(last, close))
+            if (list.ContainsDirectives || !IsPlainGap(last, close))
             {
                 return null;
             }
 
             var lineBreak = text.ToString(TextSpan.FromBounds(openLine.End, openLine.EndIncludingLineBreak));
-            return (close, new TextChange(TextSpan.FromBounds(last.Span.End, close.SpanStart), (lineBreak.Length == 0 ? "\n" : lineBreak) + indentation));
+            return (close, new TextChange(TextSpan.FromBounds(last.Span.End, close.SpanStart), (lineBreak.Length == 0 ? "\n" : lineBreak) + GetIndentation(list, openLine, text, openMoves, options, isOn)));
         }
 
         return GetMisplacedClose(list, text) is { } misplaced ? (misplaced, GetCloseChange(misplaced, text)) : null;
@@ -123,10 +118,7 @@ internal static class ParenthesisPlacement
     public static bool MovesCloseToLastItem(SyntaxNode list, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
     {
         var ownLine = IsOwnLine(options);
-
-        // A ')' on its own line is only reindented where it is (that edit starts at its line, not after the last item).
-        return GetCloseFix(list, text, ownLine, ownLine && isOn(DiagnosticIds.OpenParenthesisOnNameLine), options, isOn) is { } fix
-            && fix.Change.Span.Start == fix.Close.GetPreviousToken().Span.End;
+        return GetCloseFix(list, text, ownLine, ownLine && isOn(DiagnosticIds.OpenParenthesisOnNameLine), options, isOn) is not null;
     }
 
     /// <summary>The list's opening token, items and closing token, for the list kinds <see cref="ParameterLayout"/> checks.</summary>
@@ -247,9 +239,8 @@ internal static class ParenthesisPlacement
 
     /// <summary>
     /// The indentation of the token's line once BRO1110 and BRO1109 are done: a ')' before the token that BRO1110 puts on a
-    /// line of its own starts the line, with the indentation the fix gives it; a ')' starting the line that moves up to
-    /// the line before (BRO1110's last_item placement for a list that isn't split), or an empty '()' that BRO1109 joins
-    /// to the name, takes the line along (BRO1109 keeps the rest of a non-empty list's line where it is).
+    /// line of its own starts the line, with the indentation the fix gives it; an empty '()' that BRO1109 joins to the
+    /// name takes the line along (BRO1109 keeps the rest of a non-empty list's line where it is).
     /// </summary>
     private static string GetLineIndentation(SyntaxToken token, SourceText text, bool openMoves, AnalyzerConfigOptions? options, Func<string, bool>? isOn)
     {
@@ -258,23 +249,10 @@ internal static class ParenthesisPlacement
         {
             var startsLine = string.IsNullOrWhiteSpace(text.ToString(TextSpan.FromBounds(line.Start, current.SpanStart)));
             if (current.Parent is { } parent && (current.IsKind(SyntaxKind.CloseParenToken) || current.IsKind(SyntaxKind.CloseBracketToken))
-                && ParameterLayoutList(parent).Close == current && GetCloseFix(parent, text, true, openMoves, options, isOn) is { } fix)
+                && ParameterLayoutList(parent).Close == current && GetCloseFix(parent, text, true, openMoves, options, isOn) is { } fix
+                && fix.Change.NewText!.IndexOf('\n') is var lineBreak and >= 0)
             {
-                var newText = fix.Change.NewText!;
-                if (newText.IndexOf('\n') is var lineBreak and >= 0)
-                {
-                    return newText.Substring(lineBreak + 1);
-                }
-
-                if (fix.Change.Span.Start >= line.Start)
-                {
-                    return newText; // reindented where it is
-                }
-
-                if (startsLine)
-                {
-                    return GetLineIndentation(current.GetPreviousToken(), text, openMoves, options, isOn);
-                }
+                return fix.Change.NewText.Substring(lineBreak + 1);
             }
             else if (startsLine && openMoves && current.Parent is { } list && ParameterLayoutList(list) is var (open, _, close)
                 && open == current && current.GetNextToken() == close && GetMisplacedOpen(list, text) is not null)

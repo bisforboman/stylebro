@@ -56,7 +56,7 @@ public sealed class BlankLineRunsCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var wanted = new HashSet<(string, int, int)>(diagnostics.Select(d => (d.Id, d.Location.SourceSpan.Start, d.Location.SourceSpan.End)));
         var options = document.Project.CompilationOptions;
-        var changes = BlankLineRuns.GetFindings(root, text, id => Severities.IsOn(options, root.SyntaxTree, id, cancellationToken), SwitchSectionBlankLines.ReadMode(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)))
+        var changes = BlankLineRuns.GetFindings(root, text, id => Severities.IsOn(options, root.SyntaxTree, id, cancellationToken), SwitchSectionBlankLines.ReadMode(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), TrailingBlankLines.RemovesStandalone(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)))
             .Where(f => wanted.Contains((f.Id, f.Location.Start, f.Location.End)))
             .Select(f => f.Change)
             .ToList();

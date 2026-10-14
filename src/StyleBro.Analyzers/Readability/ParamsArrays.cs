@@ -17,14 +17,20 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class ParamsArrays
 {
+    // The base library's params collections: .NET 9 on, no .NET Standard.
+    private static readonly (Version Core, Version? Standard) ParamsCollections = (new Version(9, 0), null);
+
     /// <summary>
     /// The edits that pass the elements instead of the array, or null. The array (<c>new T[] { ... }</c>,
     /// <c>new[] { ... }</c> or a collection expression <c>[...]</c>) is the call's last argument, unnamed, on one line, of
     /// exactly the params parameter's type (an array of a derived type stays: the callee could rely on it), and the call
     /// with the elements binds to the same method (same type arguments). One element that converts to the array type
-    /// itself (<see langword="null"/>, another array) is skipped: the call would pass it as the array.
+    /// itself (<see langword="null"/>, another array) is skipped: the call would pass it as the array. A params collection
+    /// (<c>params ReadOnlySpan&lt;T&gt;</c>) in a project with a target framework before .NET 9 is skipped too: the base
+    /// library has them from .NET 9 on (C# 13), so the older framework's copy binds the elements to nothing (trial 21,
+    /// AngleSharp: <c>SearchValues.Create(['&lt;', '&amp;'])</c> broke net8.0).
     /// </summary>
-    public static TextChange[]? GetChanges(ExpressionSyntax array, SemanticModel model, CancellationToken cancellationToken)
+    public static TextChange[]? GetChanges(ExpressionSyntax array, SemanticModel model, AnalyzerConfigOptions options, CancellationToken cancellationToken)
     {
         if (GetElements(array) is not { } elements
             || array.Parent is not ArgumentSyntax { NameColon: null, RefKindKeyword.RawKind: 0 } argument
@@ -67,6 +73,7 @@ internal static class ParamsArrays
         if (removed.Any(span => !Trivia.IsBlank(call, span))
             || model.GetSymbolInfo(call, cancellationToken).Symbol is not IMethodSymbol { Parameters.Length: > 0 } method
             || method.Parameters[method.Parameters.Length - 1] is not { IsParams: true } parameter
+            || (parameter.Type is not IArrayTypeSymbol && !Modernize.MultiTargetSuppressor.AllHave(options, ParamsCollections))
             || list.Arguments.Count != method.Parameters.Length
             || !SymbolEqualityComparer.Default.Equals(GetType(model.GetTypeInfo(array, cancellationToken), array), parameter.Type)
             || elements.Any(e => IsTargetTyped(e, model, cancellationToken)))
