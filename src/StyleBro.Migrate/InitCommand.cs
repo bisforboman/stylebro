@@ -440,7 +440,7 @@ internal static class InitCommand
                 var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
                 decided[convention.Key] = $"set by the Sonar setup ({line.Substring(line.IndexOf('=') + 1).Trim()})";
             }
-            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>()]) is { Count: > 0 } lines)
+            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>()], SharesOff(convention) ? convention.What : null) is { Count: > 0 } lines)
             {
                 var setting = lines.Last();
                 decided[convention.Key] = $"kept from the last init ({setting.Substring(setting.IndexOf('=') + 1).Trim()})";
@@ -589,7 +589,7 @@ internal static class InitCommand
         }
 
         var nested = NestedWhitespace(root, fileSettings, report, formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity"), formatsWhitespace);
-        return ([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings], report, nested, scopes);
+        return (WithoutRepeats([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings]), report, nested, scopes);
     }
 
     /// <summary>
@@ -1123,18 +1123,45 @@ internal static class InitCommand
         return result;
     }
 
+    /// <summary>Whether another convention turns the same rule off (BRO1404: members and types).</summary>
+    private static bool SharesOff(Conventions.Convention convention) =>
+        convention.Off is { } off && Conventions.All.Count(c => c.Off == off) > 1;
+
+    /// <summary>
+    /// The lines without a setting line that repeats an earlier one, with the '# init:' comment right above it (BRO1404's off
+    /// line, from the members' and the types' conventions, or kept from the last init and decided again).
+    /// </summary>
+    internal static List<string> WithoutRepeats(List<string> lines)
+    {
+        for (var i = lines.Count - 1; i > 0; i--)
+        {
+            if (!lines[i].StartsWith('#') && lines.IndexOf(lines[i]) < i)
+            {
+                lines.RemoveAt(i);
+                if (lines[i - 1].StartsWith("# init:", StringComparison.Ordinal) && (i == lines.Count || lines[i].StartsWith('#')))
+                {
+                    lines.RemoveAt(i - 1);
+                }
+            }
+        }
+
+        return lines;
+    }
+
     /// <summary>
     /// The previous lines that set one of the keys, each with the '# init:' comments right above it that are about the same
     /// thing (the topic before the comment's first ': '). Not a comment-only verdict above it (Fluid: the using order's
     /// "they aren't sorted" sat above BRO1306's comment, was kept with it and written again: a second copy on every re-run).
     /// </summary>
-    internal static List<string> KeptLines(IReadOnlyList<string>? previous, IReadOnlyCollection<string> keys)
+    internal static List<string> KeptLines(IReadOnlyList<string>? previous, IReadOnlyCollection<string> keys, string? topic = null)
     {
         static string Topic(string comment) => comment.Split(": ", 3) is { Length: 3 } parts ? parts[1] : comment;
         var result = new List<string>();
         for (var i = 0; i < (previous?.Count ?? 0); i++)
         {
-            if (KeyOf(previous![i]) is { } key && keys.Contains(key, StringComparer.OrdinalIgnoreCase))
+            // With a topic, only a line under that convention's comment (BRO1404's off line is the members' or the types').
+            if (KeyOf(previous![i]) is { } key && keys.Contains(key, StringComparer.OrdinalIgnoreCase)
+                && (topic is null || i == 0 || !previous[i - 1].StartsWith("# init:", StringComparison.Ordinal) || Topic(previous[i - 1]) == topic))
             {
                 var first = i;
                 while (first > 0 && previous[first - 1].StartsWith("# init:", StringComparison.Ordinal)

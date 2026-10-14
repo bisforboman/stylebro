@@ -39,7 +39,7 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain("stylebro_private_field_naming", editorConfig);
         Assert.DoesNotContain("BRO1303", editorConfig);
         Assert.Contains("  too few  private fields: 2 places -> default stays (camelCase)", output);
-        Assert.Contains("  4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,", output);
+        Assert.Contains("  5 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,", output);
 
         // Three that agree are followed, with a comment saying why.
         Write("A.cs", "class A { private int _logger; private int _mediator; private int _clock; }");

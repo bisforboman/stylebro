@@ -463,6 +463,9 @@ internal static class FormatCommand
     /// <summary>Whether a 'dotnet format' output line reports one of the kept findings ('path(line,column): warning ID: ...').</summary>
     public static bool IsKeptLine(string line, ISet<(string Path, int Line, string Id)> kept) => KeptLine(line, kept) is not null;
 
+    /// <summary>Whether a 'dotnet format' output line is a finding at warning or error ('path(1,2): error IDE0049: ...').</summary>
+    public static bool IsFindingLine(string line) => Regex.IsMatch(line, @"^\s*.+?\(\d+,\d+\): (?:error|warning) \w+:");
+
     /// <summary>
     /// A 'dotnet format' output line, with a kept finding's severity replaced by 'kept' ('path(1,2): kept BRO1303: ...'), so
     /// it doesn't read (or count in CI) as one to fix.
@@ -1639,6 +1642,16 @@ internal static class FormatCommand
             }
 
             KeptSummary(kept, root).ForEach(log);
+
+            // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
+            // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            if (unfixed > 0)
+            {
+                log($"Not clean: {unfixed} finding{(unfixed == 1 ? string.Empty : "s")} above no fix changes (the build reports {(unfixed == 1 ? "it" : "them")}): fix {(unfixed == 1 ? "it" : "them")} by hand, or suppress or baseline {(unfixed == 1 ? "it" : "them")}.");
+                return NotCleanExitCode;
+            }
+
             if (kept.Count == 0)
             {
                 log("Clean: formatting would change nothing.");
@@ -1876,7 +1889,7 @@ internal static class FormatCommand
     }
 
     /// <summary>The git repository that holds the folder (the nearest folder above with a .git), or null.</summary>
-    private static string? RepositoryRoot(string folder)
+    internal static string? RepositoryRoot(string folder)
     {
         for (var current = new DirectoryInfo(folder); current is not null; current = current.Parent)
         {

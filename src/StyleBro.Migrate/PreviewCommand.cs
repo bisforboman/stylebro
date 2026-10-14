@@ -810,7 +810,8 @@ internal static class PreviewCommand
     public static string AddItem(string? project, params string[] items)
     {
         var newLine = project?.Contains("\r\n", StringComparison.Ordinal) == true ? "\r\n" : "\n";
-        var group = $"  <ItemGroup>{newLine}{string.Concat(items.Select(item => $"    {item}{newLine}"))}  </ItemGroup>{newLine}";
+        var (child, unit) = Migration.MSBuildIndentation(project);
+        var group = $"{child}<ItemGroup>{newLine}{string.Concat(items.Select(item => $"{child}{unit}{item}{newLine}"))}{child}</ItemGroup>{newLine}";
         var end = project?.LastIndexOf("</Project>", StringComparison.OrdinalIgnoreCase) ?? -1;
         return end < 0 ? $"<Project>{newLine}{group}</Project>{newLine}" : project!.Substring(0, end) + group + project.Substring(end);
     }
@@ -865,6 +866,14 @@ internal static class PreviewCommand
         if (versions.Count == 0)
         {
             return AddItem(packages, item);
+        }
+
+        // In the ItemGroup with the other analyzers when there is one: AngleSharp's labelled groups put StyleBro's version
+        // into the one for the package's only shipped dependency.
+        int GroupOf(Match m) => packages.LastIndexOf("<ItemGroup", m.Index, StringComparison.OrdinalIgnoreCase);
+        if (versions.FirstOrDefault(m => m.Groups[1].Value.Contains("Analyzer", StringComparison.OrdinalIgnoreCase)) is { } analyzer)
+        {
+            versions = versions.Where(m => GroupOf(m) == GroupOf(analyzer)).ToList();
         }
 
         var newLine = packages.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
