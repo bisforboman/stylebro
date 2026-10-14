@@ -543,7 +543,7 @@ public class SingleLineBlocksTests
         {
             public int M(int x) {|BRO1509:{|} switch (x) { case 1: case 2: x++; break; default: return 30; } return x; }
             public void E(int x) {|BRO1509:{|} switch (x) { } }
-            public void N(int x) {|BRO1509:{|} switch (x) { case 1: /* c */ break; } switch (x) { case 1: if (x > 0) x++; break; } switch (x) { case 1: { break; } } }
+            public void N(int x) {|BRO1509:{|} switch (x) { case 1: /* c */ break; } switch (x) { case 1: if (x > 0) x++; break; } switch (x) { case 1: { } break; } }
         }
         """,
         """
@@ -576,7 +576,7 @@ public class SingleLineBlocksTests
 
                 switch (x) { case 1: if (x > 0) x++; break; }
 
-                switch (x) { case 1: { break; } }
+                switch (x) { case 1: { } break; }
             }
         }
         """,

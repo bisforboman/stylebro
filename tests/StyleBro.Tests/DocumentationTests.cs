@@ -495,6 +495,9 @@ public class DocumentationTests
             /// <remarks>The quote is '\"'</remarks>
             /// <returns>Usually "\r\n"</returns>
             public string D() => ",";
+
+            /// <summary>The separator '-'</summary>
+            public string E() => ",";
         }
 
         /// <summary>Message codes{|BRO1603:|}</summary>
@@ -538,6 +541,9 @@ public class DocumentationTests
             /// <remarks>The quote is '\"'</remarks>
             /// <returns>Usually "\r\n"</returns>
             public string D() => ",";
+
+            /// <summary>The separator '-'</summary>
+            public string E() => ",";
         }
 
         /// <summary>Message codes.</summary>
