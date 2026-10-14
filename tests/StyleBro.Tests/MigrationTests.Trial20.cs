@@ -196,6 +196,7 @@ public sealed partial class MigrationTests
         Write("Examples/Demo/Directory.Build.props", "<Project>\n</Project>\n");
         Write("Examples/Demo/Demo.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
         Write("Examples/Demo/D.cs", "class D\n{\n}\n");
+        Write("Examples/Demo/Demo.slnx", "<Solution>\n  <Project Path=\"Demo.csproj\" />\n</Solution>\n");
 
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
 

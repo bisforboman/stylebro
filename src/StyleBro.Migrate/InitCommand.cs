@@ -692,7 +692,7 @@ internal static class InitCommand
         StyleCopSetup.EnumerateFiles(root, ownRoot: true)
             .Where(f => Path.GetFileName(f) == ".editorconfig")
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
-            .Where(s => s != "." && !nested.ContainsKey(s) && File.ReadAllText(Path.Combine(root, s, ".editorconfig"))is var text && (text.Contains(WhitespaceBegin, StringComparison.Ordinal) || text.Contains(LegacyWhitespaceBegin, StringComparison.Ordinal)))
+            .Where(s => s != "." && !nested.ContainsKey(s) && File.ReadAllText(Path.Combine(root, s, ".editorconfig")) is var text && (text.Contains(WhitespaceBegin, StringComparison.Ordinal) || text.Contains(LegacyWhitespaceBegin, StringComparison.Ordinal)))
             .Order(StringComparer.Ordinal)
             .ToList();
 
@@ -1158,7 +1158,7 @@ internal static class InitCommand
     private static void PinPreset(string root, bool write)
     {
         var property = $"<StyleBroPreset>{StyleBro.Analyzers.PresetVersions.Latest}</StyleBroPreset>";
-        var solutions = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf").Select(File.ReadAllText).ToList();
+        var solutions = Directory.EnumerateFiles(root).Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf").Select(f => File.ReadAllText(f).Replace('\\', '/')).ToList();
         foreach (var props in Migration.PropsFiles(root).Where(p => !IsOutsideTheBuild(root, p, solutions)))
         {
             var pinned = Migration.SetPreset(
@@ -1185,8 +1185,9 @@ internal static class InitCommand
 
     /// <summary>
     /// Whether a nested Directory.Build.props serves only projects no solution lists and that don't get StyleBro (trial 20:
-    /// coverlet's Documentation/Examples and Altinn's test apps got a preset version nothing reads). Not the root's, and not
-    /// when the repository has no solution or StyleBro.Analyzers is mentioned under the props' folder.
+    /// coverlet's Documentation/Examples and Altinn's test apps got a preset version nothing reads). The solutions are the
+    /// root's (an example's own solution doesn't count), a project matched by its path. Not the root's props, and not when
+    /// the root has no solution or StyleBro.Analyzers is mentioned under the props' folder.
     /// </summary>
     private static bool IsOutsideTheBuild(string root, string props, IReadOnlyList<string> solutions)
     {
@@ -1198,7 +1199,7 @@ internal static class InitCommand
 
         var files = StyleCopSetup.EnumerateFiles(folder).Where(StyleCopSetup.IsMSBuild).ToList();
         return !files.Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase))
-            && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => solutions.Any(s => s.Contains(Path.GetFileName(p), StringComparison.OrdinalIgnoreCase)));
+            && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => solutions.Any(s => s.Contains(Path.GetRelativePath(root, p).Replace('\\', '/'), StringComparison.OrdinalIgnoreCase)));
     }
 
     /// <summary>
