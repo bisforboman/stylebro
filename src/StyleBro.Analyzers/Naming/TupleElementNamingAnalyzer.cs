@@ -34,7 +34,9 @@ public sealed class TupleElementNamingAnalyzer : DiagnosticAnalyzer
         if (TupleElementNames.GetNewName(name, TupleElementNames.IsCamelCase(options)) is not { } newName
             || TupleElementNames.InheritsNames(element, context.SemanticModel, context.CancellationToken)
             || DisabledCode.Mentions(context.Compilation, name)
-            || (!PublicApi.IsRenameAllowed(options) && TupleElementNames.IsInPublicSignature(element, context.SemanticModel, context.CancellationToken)))
+            || (!PublicApi.IsRenameAllowed(options) && TupleElementNames.IsInPublicSignature(element, context.SemanticModel, context.CancellationToken))
+            || (context.ContainingSymbol is { } owner
+                && !NamingRules.AllowsRename(context.Compilation, options, element.Identifier.GetLocation(), owner, null, context.CancellationToken)))
         {
             return;
         }

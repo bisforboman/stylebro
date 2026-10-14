@@ -461,4 +461,119 @@ public class PascalCaseNamingTests
             #endif
             }
             """));
+
+    private const string PrivateMembersRule = """
+        dotnet_naming_symbols.private_members.applicable_kinds = property, event, field
+        dotnet_naming_symbols.private_members.applicable_accessibilities = private, private_protected
+        dotnet_naming_style.prefixed.required_prefix = _
+        dotnet_naming_style.prefixed.capitalization = camel_case
+        dotnet_naming_rule.private_members_prefixed.severity = warning
+        dotnet_naming_rule.private_members_prefixed.symbols = private_members
+        dotnet_naming_rule.private_members_prefixed.style = prefixed
+        """;
+
+    // Altinn (trial 20): the repo's rule asks for '_format', and IDE1006 at error made 'Format' a build error.
+    [Theory]
+    [InlineData("dotnet_diagnostic.IDE1006.severity = error")]
+    [InlineData("")]
+    public Task NamesAnEnforcedNamingRuleAsksFor_AreKept(string ide1006) => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public C(int format) => _format = format;
+
+            private int _format { get; set; }
+
+            private int _twice => _format * 2;
+
+            private event System.EventHandler _changed;
+
+            public int Get() => _twice + (_changed is null ? 0 : 1);
+        }
+        """,
+        PrivateMembersRule + Environment.NewLine + ide1006);
+
+    // A rule nothing enforces doesn't count (IDE1006 off), nor one for other symbols (methods, public properties).
+    [Theory]
+    [InlineData("dotnet_diagnostic.IDE1006.severity = none", "private int {|BRO1309:_format|} { get; set; }", "private int Format { get; set; }")]
+    [InlineData("", "private int {|BRO1309:helper|}() => 1;", "private int Helper() => 1;")]
+    [InlineData("", "public int {|BRO1309:_format|} { get; set; }", "public int Format { get; set; }")]
+    public Task NamingRulesThatDoNotCoverTheRename_LeaveIt(string ide1006, string member, string fixedMember) => VerifyFixAsync(
+        $$"""
+        internal class C
+        {
+            {{member}}
+        }
+        """,
+        $$"""
+        internal class C
+        {
+            {{fixedMember}}
+        }
+        """,
+        PrivateMembersRule + Environment.NewLine + ide1006);
+
+    // Owner's choice 2026-10-14: where IDE1006 is suppressed, names stay (code copied from elsewhere keeps its naming).
+    [Fact]
+    public Task WhereIde1006IsSuppressed_NamesStay() => VerifyFixAsync(
+        """
+        using System.Diagnostics.CodeAnalysis;
+
+        internal class C
+        {
+        #pragma warning disable IDE1006 // Naming rule violation
+            private int helper() => 1;
+        #pragma warning restore IDE1006
+
+            private int {|BRO1309:other|}() => helper();
+
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Copied.")]
+            private int third() => 3;
+        }
+
+        [SuppressMessage("Style", "IDE1006")]
+        internal class D
+        {
+            private int helper() => 1;
+        }
+        """,
+        """
+        using System.Diagnostics.CodeAnalysis;
+
+        internal class C
+        {
+        #pragma warning disable IDE1006 // Naming rule violation
+            private int helper() => 1;
+        #pragma warning restore IDE1006
+
+            private int Other() => helper();
+
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Copied.")]
+            private int third() => 3;
+        }
+
+        [SuppressMessage("Style", "IDE1006")]
+        internal class D
+        {
+            private int helper() => 1;
+        }
+        """);
+
+    [Theory]
+    [InlineData("[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(\"Style\", \"IDE1006\")]")]
+    [InlineData("[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(\"Style\", \"IDE1006\", Scope = \"type\", Target = \"~T:Ns.C\")]")]
+    [InlineData("[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(\"Style\", \"IDE1006\", Scope = \"member\", Target = \"~M:Ns.C.helper\")]")]
+    [InlineData("[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(\"Style\", \"IDE1006\", Scope = \"namespaceanddescendants\", Target = \"~N:Ns\")]")]
+    public Task GlobalIde1006Suppressions_KeepNames(string attribute) => VerifyNoDiagnosticsAsync(
+        $$"""
+        {{attribute}}
+
+        namespace Ns
+        {
+            internal class C
+            {
+                private int helper() => 1;
+            }
+        }
+        """);
 }

@@ -56,7 +56,9 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             && PublicApi.CanRename(field, options)
             && (field.DeclaredAccessibility == Accessibility.Private || !DisabledCode.Mentions(context.Compilation, field.Name))
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
-            && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian))
+            && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian)
+            // Fields follow the naming rules already (FieldNames' styles): only IDE1006's suppressions are checked here.
+            && NamingRules.AllowsRename(context.Compilation, options, location, field, null, context.CancellationToken))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 rule switch
