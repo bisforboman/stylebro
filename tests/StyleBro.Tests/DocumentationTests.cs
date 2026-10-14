@@ -1063,6 +1063,16 @@ public class DocumentationTests
         """,
         editorConfig: "stylebro_inheritdoc_style = spaced");
 
+    // Trial 20: the blank lines BRO1506 reports below a '//' comment go with the insertion (it can't see them after it);
+    // with BRO1506 off they stay.
+    [Theory]
+    [InlineData("", "    // Explains it.\n    /// <inheritdoc/>\n")]
+    [InlineData("dotnet_diagnostic.BRO1506.severity = none", "    // Explains it.\n\n    /// <inheritdoc/>\n")]
+    public Task InheritDoc_BelowACommentAndABlankLine(string editorConfig, string expected) => VerifyFixAsync(
+        "/// <summary>A.</summary>\npublic class C\n{\n    // Explains it.\n\n    [System.Obsolete(\"x\")]\n    public override string {|BRO1601:ToString|}() => \"c\";\n}\n",
+        "/// <summary>A.</summary>\npublic class C\n{\n" + expected + "    [System.Obsolete(\"x\")]\n    public override string ToString() => \"c\";\n}\n",
+        editorConfig: editorConfig);
+
     // Stateless: 'Default constructor.' became '... the <see cref="Alarm"/> class. Default constructor.'.
     // After replaced filler, text that can't follow the standard sentence is left to a person; a finalizer summary that is
     // a 'Finalizes' sentence of its own is kept.
@@ -2178,6 +2188,26 @@ public class DocumentationTests
 
         Assert.Equal(malformed, DocumentationComments.IsMalformed(comment));
     }
+
+    // Only blank lines that reach the member go: a directive between them and the member stays where it is.
+    [Fact]
+    public Task InheritDoc_BelowACommentBlankLineAndDirective() => VerifyFixAsync(
+        "/// <summary>A.</summary>\npublic class C\n{\n    // Explains it.\n\n#pragma warning disable CS0618\n    public override string {|BRO1601:ToString|}() => \"c\";\n}\n",
+        "/// <summary>A.</summary>\npublic class C\n{\n    // Explains it.\n\n#pragma warning disable CS0618\n    /// <inheritdoc/>\n    public override string ToString() => \"c\";\n}\n");
+
+    // Trial 20: a top-level <placeholder> would leave its text outside any element once unwrapped: not reported.
+    [Fact]
+    public Task TopLevelPlaceholder_IsLeftAlone() => VerifyNoDiagnosticsAsync(
+        "/// <summary>A cache.</summary>\npublic class Cache\n{\n    /// <summary>Clears.</summary>\n    /// <placeholder>TODO</placeholder>\n    public void Clear() { }\n}\n");
+
+    // Trial 20: text ending in ',' or ';' is code or a list that goes on ('1033 => "en",' became '"en",.', MoreLINQ's
+    // 'value;.'); a bare '&' doesn't move any tag, so that comment still gets its period.
+    [Fact]
+    public Task TextEndingInACommaOrSemicolon_GetsNoPeriod() => VerifyFixAsync(
+        "/// <summary>\n/// 1033 => \"en\",\n/// </summary>\npublic class Codes\n{\n    /// <summary>Returns value;</summary>\n    public int M() => 1;\n\n"
+            + "    /// <summary>a stray & ampersand{|BRO1603:|}</summary>\n    public int N() => 1;\n}\n",
+        "/// <summary>\n/// 1033 => \"en\",\n/// </summary>\npublic class Codes\n{\n    /// <summary>Returns value;</summary>\n    public int M() => 1;\n\n"
+            + "    /// <summary>a stray & ampersand.</summary>\n    public int N() => 1;\n}\n");
 
     // GuardClauses: the period went before the line's trailing spaces ('<paramref name="input"/>. '): they go too.
     [Fact]

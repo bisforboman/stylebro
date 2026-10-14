@@ -215,12 +215,31 @@ internal static class Braces
             return result;
         }
 
-        string? Target(Wrap wrap) => NewIndent(wrap.OwnerLine) is { } owner ? owner + unit : null;
+        string? Target(Wrap wrap) => OwnerIndent(wrap) is { } owner ? owner + unit : null;
+
+        // The owner's new indentation: a wrapped owner moves to its own line (`for (...) if (a) b;` gives the 'if' a line
+        // one level deeper, and its braces go there too); an 'else' sharing a line follows its 'if', an 'else if' its 'else'.
+        string? OwnerIndent(Wrap wrap) => IndentOf(wrap.Statement.Parent!, wrap.OwnerLine);
+
+        string? IndentOf(SyntaxNode owner, int ownerLine)
+        {
+            if (wraps.FirstOrDefault(w => w.Statement == owner) is { } wrapped)
+            {
+                return Target(wrapped);
+            }
+
+            var line = text.Lines[ownerLine];
+            return text.ToString(TextSpan.FromBounds(line.Start, owner.SpanStart)).Trim().Length > 0
+                && owner is ElseClauseSyntax or IfStatementSyntax { Parent: ElseClauseSyntax }
+                && owner.Parent is { } parent
+                ? IndentOf(parent, text.Lines.GetLineFromPosition(parent.SpanStart).LineNumber)
+                : NewIndent(ownerLine);
+        }
 
         var changes = new List<TextChange>();
         foreach (var wrap in wraps)
         {
-            if (NewIndent(wrap.OwnerLine) is not { } owner || Target(wrap) is not { } target)
+            if (OwnerIndent(wrap) is not { } owner || Target(wrap) is not { } target)
             {
                 return null;
             }
@@ -256,13 +275,13 @@ internal static class Braces
         {
             var ordered = group.OrderBy(w => w.Statement.Span.Length).ToList();
             var eol = SingleLineBlocks.LineBreak(text, ordered[0].Statement.SpanStart);
-            var closing = string.Concat(ordered.Select(w => eol + NewIndent(w.OwnerLine) + "}"));
+            var closing = string.Concat(ordered.Select(w => eol + OwnerIndent(w) + "}"));
             var outer = ordered[ordered.Count - 1];
             var suffix = outer.Following switch
             {
                 SyntaxKind.WhileKeyword => " ",
                 SyntaxKind.ElseKeyword when !NewLineBeforeElse(options) => " ",
-                SyntaxKind.ElseKeyword => eol + NewIndent(outer.OwnerLine),
+                SyntaxKind.ElseKeyword => eol + OwnerIndent(outer),
 
                 // The new '}' followed by a statement: BRO1519's blank line now, so one run converges.
                 _ when isOn is not null && BlankLineRuns.WantsBlankLineAfter(outer.Statement.Parent!, default, outer.Statement.GetLastToken().GetNextToken(), isOn, switchSections: SwitchSectionBlankLines.ReadMode(options)) => eol,

@@ -591,6 +591,10 @@
             Name     = 'documentation-tags'
             Map      = @('SA1642=BRO1606', 'SA1643=BRO1607', 'SA1617=BRO1608', 'SA1651=BRO1609')
             Expected = @(
+                # A top-level <placeholder> isn't BRO1609's: unwrapping it leaves its text outside any element (trial 20).
+                'only StyleCop: BRO1609 Words.cs(110,13)'
+                'StyleBro output only: Words.cs: [        /// <placeholder>TODO</placeholder>]'
+                'StyleCop output only: Words.cs: [        /// TODO]'
                 # StyleBro puts a space after the standard sentence; StyleCop's fix doesn't ('class.Creates').
                 'StyleBro output only: Words.cs: [        /// <summary>Creates a words object.</summary>]'
                 'StyleBro output only: Words.cs: [        /// <summary>Finalizes an instance of the <see cref="Words"/> class. Cleans up.</summary>]'

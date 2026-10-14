@@ -91,6 +91,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
         var blankLineBefore = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineBeforeDocumentation, cancellationToken);
         var separate = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.ElementsSeparatedByBlankLine, cancellationToken);
+        var noBlankLineBelowComment = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineAfterComment, cancellationToken);
         var documented = new HashSet<SyntaxNode>(diagnostics.Where(d => d.Id == DiagnosticIds.InheritDocumentation)
             .Select(d => root.FindToken(d.Location.SourceSpan.Start).Parent?.AncestorsAndSelf().FirstOrDefault(n => n is MemberDeclarationSyntax))
             .Where(m => m is not null)!);
@@ -103,7 +104,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
                     .FirstOrDefault(n => n is MemberDeclarationSyntax);
                 if (member is not null && !DocumentationComments.HasDocumentation(member))
                 {
-                    changes.Add(DocumentationComments.GetInheritDocChange(member, text, options, blankLineBefore));
+                    changes.Add(DocumentationComments.GetInheritDocChange(member, text, options, blankLineBefore, noBlankLineBelowComment));
 
                     // Documented, a property needs a blank line before the property below it too (BRO1505), unless that
                     // one gets documented in this batch: its own edit brings the blank line (BRO1513).

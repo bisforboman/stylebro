@@ -1483,6 +1483,52 @@ public class FixOrderTests
         "BRO1514",
         "BRO1516");
 
+    // Trial 20: nested embedded statements and a switch in an expanded body come out as the formatter lays them out (with
+    // csharp_preserve_single_line_statements = false it expands them once the block is expanded), braced or not.
+    [Theory]
+    [InlineData("csharp_preserve_single_line_statements = false\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = when_multiline\n")]
+    public Task NestedEmbeddedStatements_InAnExpandedBody(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            private readonly object gate = new object();
+
+            public int F(int n) { for (int i = 0; i < n; i++) if (i % 2 == 0) n--; while (n > 0) if (n-- > 5) return n; return 0; }
+
+            public int U(System.IO.Stream s, System.IO.Stream t) { using (s) lock (gate) return 1; }
+
+            public int V(System.IO.Stream s, System.IO.Stream t) { using (s) using (t) return 1; }
+
+            public int I(bool a, bool b) { if (a) if (b) return 1; else return 2; return 3; }
+        }
+        """,
+        editorConfig,
+        "BRO1509",
+        "BRO1514",
+        "BRO1516",
+        SdkFormatter);
+
+    [Theory]
+    [InlineData("csharp_preserve_single_line_statements = false\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\nstylebro_blank_line_between_switch_sections = omit\ncsharp_indent_switch_labels = false\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\ncsharp_indent_case_contents = false\ncsharp_new_line_before_open_brace = methods, types\n")]
+    public Task Switch_InAnExpandedBody(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int S(int x) { switch (x) { case 1: case 2: x++; break; default: return 30; } return x; }
+
+            public void E(int x) { switch (x) { } }
+        }
+        """,
+        editorConfig,
+        "BRO1509",
+        "BRO1519",
+        "BRO1526",
+        SdkFormatter);
+
     // actions/runner's VssStringComparer: one-line properties with block accessors in a row. BRO1509 expands each, and
     // BRO1505 then wants blank lines between them (two one-line properties may sit together, multi-line ones not).
     [Fact]
@@ -1948,6 +1994,24 @@ public class FixOrderTests
         "BRO1105",
         "BRO1109",
         "BRO1110");
+
+    // Trial 20: a '//' comment, a blank line, then an attributed override without docs. BRO1506 first removed the blank line,
+    // BRO1601 first hid it behind the new '///' (BRO1506 then saw a comment below the comment): now both remove it.
+    [Fact]
+    public Task InheritDoc_BelowACommentAndABlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        /// <summary>A.</summary>
+        public class C
+        {
+            // Explains the override below.
+
+            [System.Obsolete("x")]
+            public override string ToString() => "c";
+        }
+        """,
+        "BRO1506",
+        "BRO1513",
+        "BRO1601");
 
     // Ocelot's FileAggregateRoute: BRO1601 inserting '<inheritdoc/>' before BRO1001's sort left the blank lines it added
     // with the positions, so the result depended on the order.

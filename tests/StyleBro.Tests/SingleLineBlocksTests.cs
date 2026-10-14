@@ -447,7 +447,7 @@ public class SingleLineBlocksTests
 
     // Trial 19: with csharp_preserve_single_line_statements = false the SDK's whitespace pass splits 'if (x) y;' once it's
     // no longer in a single-line block, but it ran before the fix: the expansion does it, so one run converges. Nested
-    // embedded statements and comments are left alone (the formatter doesn't indent 'if (a) if (b) c;').
+    // embedded statements go one level deeper each (trial 20), comments in a gap are left alone.
     [Fact]
     public Task EmbeddedStatements_GetTheirOwnLines_WhenSingleLineStatementsArentPreserved() => VerifyFixAsync(
         """
@@ -486,7 +486,9 @@ public class SingleLineBlocksTests
             }
             public void N(int x)
             {
-                if (x > 0) if (x > 1) x++;
+                if (x > 0)
+                    if (x > 1)
+                        x++;
                 if (x > 0) /* c */ x++;
                 for (; x < 3; x++)
                     x--;
@@ -531,6 +533,54 @@ public class SingleLineBlocksTests
         }
         """,
         editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\ndotnet_diagnostic.BRO1508.severity = none\n");
+
+    // Trial 20: a one-line switch in the expanded block is laid out like the formatter does, with BRO1526's blank line; one
+    // with a comment or a nested statement is left alone.
+    [Fact]
+    public Task Switch_GetsItsLines_WhenSingleLineStatementsArentPreserved() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int x) {|BRO1509:{|} switch (x) { case 1: case 2: x++; break; default: return 30; } return x; }
+            public void E(int x) {|BRO1509:{|} switch (x) { } }
+            public void N(int x) {|BRO1509:{|} switch (x) { case 1: /* c */ break; } switch (x) { case 1: if (x > 0) x++; break; } switch (x) { case 1: { break; } } }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int x)
+            {
+                switch (x)
+                {
+                    case 1:
+                    case 2:
+                        x++;
+                        break;
+
+                    default:
+                        return 30;
+                }
+
+                return x;
+            }
+            public void E(int x)
+            {
+                switch (x)
+                {
+                }
+            }
+            public void N(int x)
+            {
+                switch (x) { case 1: /* c */ break; }
+
+                switch (x) { case 1: if (x > 0) x++; break; }
+
+                switch (x) { case 1: { break; } }
+            }
+        }
+        """,
+        editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\n");
 
     // With K&R braces for control blocks and 'else' kept after '}', only the else's statement moves (as the formatter does).
     [Fact]

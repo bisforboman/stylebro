@@ -67,7 +67,8 @@ internal static class DocumentationPeriods
     /// <summary>
     /// The positions where a period is missing: after the last text of each top-level summary, remarks, param,
     /// typeparam, returns, value and exception element. Not reported: text that ends with '.', '?', '!' or ':' (a
-    /// question, an exclamation or an introduction is a finished sentence), with a block element such as a list or a
+    /// question, an exclamation or an introduction is a finished sentence) or with ',' or ';' (a line of code or a list
+    /// that goes on: '1033 => "en",' became '"en",.' in trial 20), with a block element such as a list or a
     /// code sample, or elements without text, or with a period followed only by closing punctuation ('(see above.)').
     /// Elements named in <see cref="ExcludeKey"/> aren't checked.
     /// </summary>
@@ -191,7 +192,7 @@ internal static class DocumentationPeriods
                     // A period may be followed by closing punctuation: '(see above.)', '"done."'.
                     var untrimmed = string.Concat(text.TextTokens.TakeWhile(t => t != last).Append(last).Select(t => t.ValueText)).TrimEnd();
                     var ending = untrimmed.TrimEnd(ClosingPunctuation);
-                    return (ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':') || EndsInCode(untrimmed) || IsNumberOnly(element) ? null
+                    return (ending.Length > 0 && ending[ending.Length - 1] is '.' or '?' or '!' or ':' or ',' or ';') || EndsInCode(untrimmed) || IsNumberOnly(element) ? null
                         : last.IsKind(SyntaxKind.XmlEntityLiteralToken) ? last.Span.End
                         : last.SpanStart + last.Text.TrimEnd().Length;
 

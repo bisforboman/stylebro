@@ -180,6 +180,63 @@ public class BracesTests
         }
         """);
 
+    // Trial 20: a nested statement on its owner's line gets its braces one level deeper too (they went at the owner's level).
+    [Fact]
+    public Task NestedOnOneLine_InOnePass() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private readonly object gate = new object();
+
+            public int M(int n, bool a, bool b, System.IO.Stream s)
+            {
+                for (var i = 0; i < n; i++) {|BRO1514:if (i > 1) {|BRO1514:n--;|}|}
+                using (s) {|BRO1514:lock (gate) {|BRO1514:n++;|}|}
+                if (a) {|BRO1514:if (b) {|BRO1514:return 1;|} else {|BRO1514:return 2;|}|}
+                return n;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            private readonly object gate = new object();
+
+            public int M(int n, bool a, bool b, System.IO.Stream s)
+            {
+                for (var i = 0; i < n; i++)
+                {
+                    if (i > 1)
+                    {
+                        n--;
+                    }
+                }
+
+                using (s)
+                {
+                    lock (gate)
+                    {
+                        n++;
+                    }
+                }
+
+                if (a)
+                {
+                    if (b)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 2;
+                    }
+                }
+
+                return n;
+            }
+        }
+        """);
+
     [Fact]
     public Task BraceOnTheSameLine_WhenControlBlocksAreLeftOut() => VerifyFixAsync(
         """
