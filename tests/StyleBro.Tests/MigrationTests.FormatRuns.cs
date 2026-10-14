@@ -100,6 +100,26 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Verify_KnowsTheFindingsTheLastCleanRunKept_OnTheSameState()
+    {
+        // splat: --verify-no-changes after a clean 'format' formatted a copy for 41 minutes to find the 9 kept findings again.
+        Write("src/A/A.csproj", "<Project />");
+        Write("src/A/X.cs", "class X { }");
+        var kept = new[] { new KeptFinding(Path.Combine(root, "src", "A", "X.cs"), 1, 7, "BRO1306", KeptReason.NameInString, "Rename 'a' to 'A'") };
+        string[] formatArgs = [root, "--no-restore", FormatCommand.CheckFirstOption];
+
+        FormatCommand.SaveKept(root, formatArgs, kept);
+
+        Assert.Equal(kept.Select(k => k.ToString()), FormatCommand.LoadKept(root, [root, "--verify-no-changes"])!.Select(k => k.ToString()));
+        Assert.Null(FormatCommand.LoadKept(root, [root, "--verify-no-changes", "--all"])); // other options
+        Write("src/A/.editorconfig", "[*.cs]\nstylebro_rename_public_api = true\n");
+        Assert.Null(FormatCommand.LoadKept(root, [root, "--verify-no-changes"])); // other settings
+        FormatCommand.SaveKept(root, formatArgs, kept);
+        Write("src/A/X.cs", "class X { int a; }");
+        Assert.Null(FormatCommand.LoadKept(root, [root, "--verify-no-changes"])); // other code
+    }
+
+    [Fact]
     public void Verify_FormatsOnlyTheFilesWithFindings_InTheCopy()
     {
         // splat: the copy was formatted whole (41 minutes) for 9 kept findings in 4 files.

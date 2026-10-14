@@ -738,8 +738,9 @@ Exit codes of `stylebro-migrate format`, for CI and agents:
 | other | `dotnet format` failed (load or build errors) | the same |
 
 `--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats the files
-with findings (for their rules) in a temporary copy of the repository to see whether any file would change and which findings the fixes
-keep, then deletes the copy.
+with findings (for their rules) in a temporary copy of the repository to see whether any file would change and which
+findings the fixes keep, then deletes the copy. After a clean `stylebro-migrate format` on the same code, settings and
+options, it already knows the findings that run kept (recorded in the temporary folder) and formats no copy.
 Plain `dotnet format --verify-no-changes` can't tell the two apart and fails on kept findings.
 
 ## Excluding vendored code

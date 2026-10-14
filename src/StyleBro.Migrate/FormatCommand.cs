@@ -1711,6 +1711,79 @@ internal static class FormatCommand
         return files.Count == 0 ? null : files.ToList();
     }
 
+    /// <summary>
+    /// Records the findings a clean 'format' run on <paramref name="root"/> kept, for a '--verify-no-changes' on the same
+    /// state (<see cref="StateKey"/>): it needn't format a copy to find them (in the temporary folder; a courtesy, never an error).
+    /// </summary>
+    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept)
+    {
+        try
+        {
+            var file = KeptRecord(root);
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+            File.WriteAllLines(file, kept.Select(k => k.ToString()).Prepend(StateKey(root, args)));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    /// <summary>The findings <see cref="SaveKept"/> recorded for this state of the repository and these options, else null.</summary>
+    public static List<KeptFinding>? LoadKept(string root, IEnumerable<string> args)
+    {
+        try
+        {
+            var lines = File.Exists(KeptRecord(root)) ? File.ReadAllLines(KeptRecord(root)) : [];
+            return lines.Length > 0 && lines[0] == StateKey(root, args) ? lines.Skip(1).Select(KeptFinding.Parse).OfType<KeptFinding>().ToList() : null;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// What the findings a run keeps depend on: every C# file, project, solution and settings file of the repository (its
+    /// content), the options (not those that only say how to run: --verify-no-changes, --no-restore, --report) and this
+    /// tool's version.
+    /// </summary>
+    public static string StateKey(string root, IEnumerable<string> args)
+    {
+        var source = RepositoryRoot(root) ?? root;
+        string[] settings = [".cs", ".csproj", ".props", ".targets", ".editorconfig", ".globalconfig", ".sln", ".slnx", ".slnf", ".baseline", ".json", ".config"];
+        var files = StyleCopSetup.EnumerateFiles(source)
+            .Where(f => settings.Any(e => f.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
+            .AsParallel()
+            .Select(f => Path.GetRelativePath(source, f).Replace('\\', '/') + "|" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(f))))
+            .Order(StringComparer.Ordinal);
+        var options = new List<string>();
+        var list = args.ToList();
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (list[i] == "--report")
+            {
+                i++;
+            }
+            else if (list[i] is not ("--verify-no-changes" or "--no-restore" or CheckFirstOption or OnceOption))
+            {
+                options.Add(i == 0 && !list[i].StartsWith("-", StringComparison.Ordinal) ? Path.GetFullPath(list[i]) : list[i]);
+            }
+        }
+
+        var version = typeof(FormatCommand).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion;
+        var text = string.Join("\n", files.Append(string.Join(" ", options)).Append(version ?? string.Empty));
+        return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
+    }
+
+    /// <summary>The rules of the finding lines in a check's output (not the whitespace pass's), in order.</summary>
+    public static List<string> FindingIds(IEnumerable<string> lines) =>
+        lines.Where(l => IsFindingLine(l) && !IsWhitespaceLine(l))
+            .Select(l => Regex.Match(l, @"\(\d+,\d+\): \w+ (?<id>\w+):").Groups["id"].Value)
+            .Where(id => id.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+
     /// <summary>Whether the file at <paramref name="path"/> exists and has <paramref name="text"/>, line endings aside.</summary>
     internal static bool SameButEndings(string text, string path) =>
         File.Exists(path) && File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal) == text.Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -1767,7 +1840,7 @@ internal static class FormatCommand
         var source = RepositoryRoot(root) ?? root;
         var copy = Path.Combine(Path.GetTempPath(), $"stylebro-verify-{Guid.NewGuid():N}");
         var keptFile = copy + ".kept.tsv";
-        try
+        (int Code, List<KeptFinding> Kept, List<string> Changed) FormatCopy()
         {
             PreviewCommand.Copy(source, copy);
 
@@ -1847,8 +1920,20 @@ internal static class FormatCommand
             var changedFiles = ChangedFiles(before, Snapshot(copy))
                 .Where(f => !File.Exists(f) || !SameButEndings(File.ReadAllText(f), Path.Combine(source, Path.GetRelativePath(copy, f))))
                 .ToList();
+            return (copyCode, kept, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))).ToList());
+        }
+
+        // The findings the last clean 'format' kept on this very state of the repository (SaveKept): known with their
+        // reasons, so there's nothing to format a copy for (splat: 41 minutes for 9 such findings).
+        var findings = lines.Where(IsFindingLine).ToList();
+        var recorded = LoadKept(root, args) is { } known && findings.Count > 0 && findings.All(l => !IsWhitespaceLine(l) && AsKept(l, known) is not null)
+            ? findings.Select(l => AsKept(l, known)!).GroupBy(k => (k.Path.ToUpperInvariant(), k.Line, k.Column, k.Id)).Select(g => g.First()).OrderBy(k => k.Path, StringComparer.OrdinalIgnoreCase).ThenBy(k => k.Line).ThenBy(k => k.Column).ToList()
+            : null;
+        try
+        {
+            var (copyCode, kept, changedFiles) = recorded is null ? FormatCopy() : (0, recorded, new List<string>());
             var changed = changedFiles.Count;
-            JsonReport.AddRun(1, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))), null);
+            JsonReport.AddRun(1, changedFiles, null);
             var keys = new HashSet<(string, int, string)>(kept.Select(k => (k.Path.ToUpperInvariant(), k.Line, k.Id)));
             if (copyCode != 0 || changed > 0)
             {
@@ -1898,15 +1983,6 @@ internal static class FormatCommand
             File.Delete(keptFile);
         }
     }
-
-    /// <summary>The rules of the finding lines in a check's output (not the whitespace pass's), in order.</summary>
-    public static List<string> FindingIds(IEnumerable<string> lines) =>
-        lines.Where(l => IsFindingLine(l) && !IsWhitespaceLine(l))
-            .Select(l => Regex.Match(l, @"\(\d+,\d+\): \w+ (?<id>\w+):").Groups["id"].Value)
-            .Where(id => id.Length > 0)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Order(StringComparer.Ordinal)
-            .ToList();
 
     /// <summary>
     /// Copies the build output of the projects a workspace (<paramref name="path"/>: a solution, project or folder in
@@ -2027,6 +2103,10 @@ internal static class FormatCommand
 
         return null;
     }
+
+    /// <summary>Where <see cref="SaveKept"/> records a repository's kept findings.</summary>
+    private static string KeptRecord(string root) =>
+        Path.Combine(Path.GetTempPath(), "stylebro-kept", Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)).ToUpperInvariant())))[..16] + ".tsv");
 
     /// <summary>
     /// Whether an 'X.Designer.cs' belongs to a designer: an 'X.resx' next to it (resource designer), or an 'X.cs' next to it and
@@ -2150,6 +2230,11 @@ internal static class FormatCommand
             if (changed.Count == 0 || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
+                if (changed.Count == 0)
+                {
+                    SaveKept(root, args, keptFindings);
+                }
+
                 JsonReport.AddKept(keptFindings);
                 KeptSummary(keptFindings, root, clean: changed.Count == 0).ForEach(log);
                 AfterNotes(root, allChanged).ForEach(log);
