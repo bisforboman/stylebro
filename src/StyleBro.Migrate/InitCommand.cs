@@ -502,7 +502,7 @@ internal static class InitCommand
         var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), csharpier.Lines is null ? own : own.Where(p => !Conventions.All.Any(c => Conventions.IsCSharpiers(c) && (c.Key == p.Key || c.AlsoKeys.Contains(p.Key)))).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase), unenforced.ToDictionary(k => k, k => settings[k]), spacing);
 
         // BRO1302 has no switch for primary-constructor parameters alone: say what turning it off covers.
-        if (detected.FindIndex(l => l.StartsWith("# init: primary-constructor parameters:", StringComparison.Ordinal)) is >= 0 and var primary)
+        if (detected.FindIndex(l => l.StartsWith("# init: primary-constructor parameter names:", StringComparison.Ordinal)) is >= 0 and var primary)
         {
             const string Whole = "BRO1302 has no switch for primary-constructor parameters alone, so it's off for every parameter";
             detected[primary] = detected[primary].Replace("so BRO1302 is off.", $"so BRO1302 is off ({Whole}).", StringComparison.Ordinal);
@@ -1131,7 +1131,7 @@ internal static class InitCommand
     {
         for (var i = lines.Count - 1; i > 0; i--)
         {
-            if (!lines[i].StartsWith('#') && lines.IndexOf(lines[i]) < i)
+            if (i < lines.Count && !lines[i].StartsWith('#') && lines.IndexOf(lines[i]) < i)
             {
                 lines.RemoveAt(i);
                 if (lines[i - 1].StartsWith("# init:", StringComparison.Ordinal) && (i == lines.Count || lines[i].StartsWith('#')))

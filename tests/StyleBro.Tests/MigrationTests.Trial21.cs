@@ -104,6 +104,24 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Init_RunAgain_KeepsBothAccessModifierVerdicts()
+    {
+        // Members mixed and types without 'internal' both turn BRO1404 off: one line, and a second init changes nothing.
+        for (var i = 0; i < 6; i++)
+        {
+            Write($"A{i}.cs", $"class A{i}\n{{\n    {(i % 2 == 0 ? "private " : string.Empty)}int x;\n}}\n");
+        }
+
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        var first = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+        Assert.Single(first.Replace("\r\n", "\n").Split('\n'), l => l == "dotnet_diagnostic.BRO1404.severity = none");
+        Assert.Contains("# init: private-by-default members:", first, StringComparison.Ordinal);
+
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+    }
+
+    [Fact]
     public void NotBuiltProjects_AreNamedWithHowToFormatThem()
     {
         // AngleSharp: build/_build.csproj gets StyleBro from build/Directory.Build.props, no solution configuration builds it,
