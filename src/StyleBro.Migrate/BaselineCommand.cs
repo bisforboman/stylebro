@@ -68,7 +68,7 @@ internal static class BaselineCommand
             // and analyzer passes run (EntityGraphQL: 156 whitespace changes against CSharpier's layout were reported).
             // Where it's off in some folders only (CSharpier formats one), the whitespace pass runs on its own without them.
             var exclusions = FormatCommand.WhitespaceExclusions(root);
-            var passes = FormatCommand.Passes(exclusions);
+            var passes = Passes(exclusions);
             Console.WriteLine($"Running 'dotnet format {(passes.Length > 1 ? string.Join("/", passes) + " " : string.Empty)}{project} --verify-no-changes' to find today's violations...");
             var reports = new List<string>();
             foreach (var pass in passes)
@@ -310,6 +310,15 @@ internal static class BaselineCommand
         }
     }
 
+    /// <summary>
+    /// The 'dotnet format' passes the baseline runs, each on its own: a run of all three reports the analyzers' findings at
+    /// their lines AFTER its whitespace pass, and where that pass splits a line ('if (x) y;' with
+    /// csharp_preserve_single_line_statements = false) every finding below was off by one: the baseline fingerprinted the
+    /// wrong lines (often a blank one) and the build still failed. On their own, style and analyzers report the file as it is.
+    /// </summary>
+    public static string[] Passes(IReadOnlyCollection<string>? whitespaceExclusions) =>
+        whitespaceExclusions is null ? ["whitespace", "style", "analyzers"] : FormatCommand.Passes(whitespaceExclusions);
+
     /// <summary>Several 'dotnet format' JSON reports (arrays of documents) as one.</summary>
     public static string MergeReports(IEnumerable<string> reports) =>
         new System.Text.Json.Nodes.JsonArray(reports.SelectMany(r => System.Text.Json.Nodes.JsonNode.Parse(r)!.AsArray().Select(d => d?.DeepClone())).ToArray()).ToJsonString();
@@ -318,7 +327,7 @@ internal static class BaselineCommand
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, RedirectStandardOutput = true, RedirectStandardError = true };
         var options = new List<string> { "--verify-no-changes", "--severity", "warn", "--report", reportDir };
-        options = pass == "whitespace" ? FormatCommand.WhitespaceOptions(options, exclusions!) : options;
+        options = pass == "whitespace" ? FormatCommand.WhitespaceOptions(options, exclusions ?? []) : options;
         foreach (var argument in new[] { "format", pass, project }.Where(a => a.Length > 0).Concat(options))
         {
             start.ArgumentList.Add(argument);

@@ -68,6 +68,9 @@ internal static class FormatCommand
     /// </summary>
     public const string WorkingFolderOption = "--working-folder";
 
+    /// <summary>The SDK's rule for unnecessary using directives.</summary>
+    public const string UnusedUsings = "IDE0005";
+
     /// <summary>The option for a single run (the preview counts its own runs).</summary>
     public const string OnceOption = "--once";
 
@@ -200,7 +203,15 @@ internal static class FormatCommand
         }
 
         var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
-        var root = File.Exists(path) ? Path.GetDirectoryName(path)! : path;
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            (output ?? Console.Error.WriteLine)($"Not found: {path}");
+            return 1;
+        }
+
+        // A solution in a folder of its own (solutions/App.slnx listing ../src/...): the runs work from the folder that holds
+        // all its projects, else '--include ../src/Lib/' matched nothing and the changed files weren't looked for there.
+        var root = File.Exists(path) ? WorkingRoot(path) : path;
         if (JsonReport.Current is { } json && json["path"] is null)
         {
             json["path"] = root;
@@ -707,7 +718,39 @@ internal static class FormatCommand
             ids.Add(match.Groups[1].Value.ToUpperInvariant());
         }
 
+        // Usings a fix leaves unused ('UInt32' -> 'uint' keeps 'using System;'): where the repository enforces IDE0005, the
+        // build failed on them (coverlet) while format neither removed nor reported them.
+        if (EnforcesUnusedUsings(root))
+        {
+            ids.Add(UnusedUsings);
+        }
+
         return ids.ToList();
+    }
+
+    /// <summary>
+    /// Whether the .editorconfig files at and above <paramref name="root"/> (nearer ones win) make IDE0005 (unnecessary
+    /// usings) a warning or error: by id, its category (Style) or the bulk severity.
+    /// </summary>
+    public static bool EnforcesUnusedUsings(string root)
+    {
+        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var folders = new List<string>();
+        for (var folder = new DirectoryInfo(root); folder is not null; folder = folder.Parent)
+        {
+            folders.Add(folder.FullName);
+        }
+
+        // ponytail: every .editorconfig up to the drive, 'root = true' isn't read; one above the repository rarely sets IDE0005.
+        foreach (var folder in Enumerable.Reverse(folders))
+        {
+            foreach (var (key, value) in Migration.OwnSettings(folder, withBlocks: true))
+            {
+                settings[key] = value;
+            }
+        }
+
+        return Severities.Configured(settings, UnusedUsings, "Style") is Microsoft.CodeAnalysis.ReportDiagnostic.Warn or Microsoft.CodeAnalysis.ReportDiagnostic.Error;
     }
 
     /// <summary>
@@ -853,6 +896,11 @@ internal static class FormatCommand
         }
 
         var exclude = result.IndexOf("--exclude");
+        if (exclusions.Count == 0)
+        {
+            return result;
+        }
+
         if (exclude < 0)
         {
             result.Add("--exclude");
@@ -1171,6 +1219,37 @@ internal static class FormatCommand
                 ? folder.Replace(Path.DirectorySeparatorChar, '/') + "/"
                 : f.Relative.Replace(Path.DirectorySeparatorChar, '/'));
         return folders.Concat(outside).Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// The folder a run on <paramref name="workspace"/> (a solution, filter, Traversal project or project) works from: the
+    /// deepest one holding it and every project it lists. A project is its own folder (what it references gets no run).
+    /// </summary>
+    public static string WorkingRoot(string workspace)
+    {
+        var folder = Path.GetDirectoryName(Path.GetFullPath(workspace))!;
+        if (workspace.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+        {
+            return folder;
+        }
+
+        // ponytail: the project paths are read from the text (quoted '*.csproj'), not evaluated; that's every format the
+        // workspace can have (.sln, .slnx, a Traversal project's Include="...") and a filter's JSON.
+        var (solution, projects) = IsSolutionFilter(workspace)
+            ? (SolutionFilterError(workspace) is null ? ReadSolutionFilter(workspace) : (null, []))
+            : (workspace, Regex.Matches(File.ReadAllText(workspace), "\"([^\"]+\\.csproj)\"", RegexOptions.IgnoreCase).Select(m => m.Groups[1].Value).ToArray());
+        var listedFrom = Path.GetDirectoryName(Path.GetFullPath(solution ?? workspace))!;
+        foreach (var project in projects)
+        {
+            var projectFolder = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(listedFrom, project.Replace('\\', Path.DirectorySeparatorChar))))!;
+            while (Path.GetRelativePath(folder, projectFolder) is var relative && (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative))
+                && Path.GetDirectoryName(folder) is { } parent)
+            {
+                folder = parent;
+            }
+        }
+
+        return folder;
     }
 
     /// <summary>Whether a workspace is a solution filter (.slnf).</summary>
@@ -1634,6 +1713,7 @@ internal static class FormatCommand
     {
         var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
         using var kept = new KeptVariable(keptFile);
+        var allChanged = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var run = 1; ; run++)
         {
             File.Delete(keptFile);
@@ -1672,11 +1752,13 @@ internal static class FormatCommand
 
             log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count == 0 ? ", clean." : ":")}");
             ListFiles(root, changed, 10).ForEach(log);
+            allChanged.UnionWith(changed);
             if (changed.Count == 0 || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
                 JsonReport.AddKept(keptFindings);
                 KeptSummary(keptFindings, root, clean: changed.Count == 0).ForEach(log);
+                AfterNotes(root, allChanged).ForEach(log);
                 return 0;
             }
 
@@ -1686,12 +1768,85 @@ internal static class FormatCommand
                 var keptFindings = ReadKept(keptFile, root, root);
                 JsonReport.AddKept(keptFindings);
                 KeptSummary(keptFindings, root, clean: false).ForEach(log);
+                AfterNotes(root, allChanged).ForEach(log);
                 log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
 
             args = NextRun(args);
         }
+    }
+
+    /// <summary>
+    /// What to say after runs that changed <paramref name="changed"/> (full paths): the generated files checked in next to
+    /// them (<see cref="CheckedInGenerated"/>), and that CSharpier comes next where it formats the repository (Altinn: 12
+    /// files failed 'csharpier check' after format).
+    /// </summary>
+    public static List<string> AfterNotes(string root, IReadOnlyCollection<string> changed)
+    {
+        var notes = new List<string>();
+        if (changed.Count == 0)
+        {
+            return notes;
+        }
+
+        var generated = CheckedInGenerated(root, changed);
+        notes.AddRange(generated.Take(10).Select(f => $"{f} is generated and checked in: rebuild and commit it."));
+        if (generated.Count > 10)
+        {
+            notes.Add($"... and {generated.Count - 10} more generated files checked in: rebuild and commit them.");
+        }
+
+        if (Conventions.CSharpier(root) is { } evidence)
+        {
+            notes.Add($"CSharpier formats this repository ({evidence}): run it now (e.g. 'dotnet csharpier format .'), it has the last word on layout.");
+        }
+
+        return notes;
+    }
+
+    /// <summary>
+    /// The generated files git tracks (relative to <paramref name="root"/>, '/'-separated) in the projects of the changed files:
+    /// '*.g.cs', '*.g.i.cs', '*.Designer.cs', a T4 template's output (a '.tt' of the same name next to it), or a file with an
+    /// '&lt;auto-generated' header. A build regenerates them from the code format changed (MoreLINQ's Extensions.g.cs from the
+    /// doc comments), and a CI's 'git diff --exit-code' failed. Format leaves them alone; the note says to rebuild.
+    /// </summary>
+    public static List<string> CheckedInGenerated(string root, IEnumerable<string> changed)
+    {
+        var repository = RepositoryRoot(root);
+        if (repository is null || PreviewCommand.Git(repository, "ls-files", "-z", "--", "*.cs") is not (0, var list))
+        {
+            return [];
+        }
+
+        var projects = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        string? ProjectOf(string file)
+        {
+            var folder = Path.GetDirectoryName(file)!;
+            return projects.TryGetValue(folder, out var known) ? known : projects[folder] = NearestProject(folder, repository);
+        }
+
+        var changedSet = new HashSet<string>(changed.Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase);
+        var changedProjects = new HashSet<string>(changedSet.Select(ProjectOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+        return list.Split('\0', StringSplitOptions.RemoveEmptyEntries)
+            .Select(f => Path.GetFullPath(Path.Combine(repository, f)))
+            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) && IsGenerated(f))
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>Whether a C# file is generated (see <see cref="CheckedInGenerated"/>).</summary>
+    public static bool IsGenerated(string file)
+    {
+        var name = Path.GetFileName(file);
+        if (name.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".g.i.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase)
+            || File.Exists(Path.Combine(Path.GetDirectoryName(file)!, name.Split('.')[0] + ".tt")))
+        {
+            return true;
+        }
+
+        return File.ReadLines(file).Take(10).Any(l => l.Contains("<auto-generated", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>The severity word of a line that reports a kept finding (its position in the line), or null.</summary>
@@ -1816,6 +1971,10 @@ internal static class FormatCommand
         {
             root = Path.GetFullPath(passThrough[workingAt + 1]);
             passThrough.RemoveRange(workingAt, 2);
+        }
+        else if (File.Exists(path))
+        {
+            root = WorkingRoot(workspacePath); // like Run's: the folder that holds all the projects
         }
 
         // By default only StyleBro's rules and the built-in ones init/migrate turn on: plain 'dotnet format' also applies

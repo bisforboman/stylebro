@@ -1,0 +1,7 @@
+# only the changed projects' generated files
+@{
+    File = 'src/StyleBro.Migrate/FormatCommand.cs'
+    Find = '.Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) && IsGenerated(f))'
+    Replace = '.Where(f => !changedSet.Contains(f) && File.Exists(f) && IsGenerated(f))'
+    Tests = 'FullyQualifiedName~MigrationTests.Format_SaysToRebuildCheckedInGeneratedFiles'
+}
