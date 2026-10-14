@@ -341,9 +341,9 @@ internal static class SingleLineBlocks
     /// With csharp_preserve_single_line_statements = false the SDK's formatter puts an embedded statement (<c>if (x) y;</c>)
     /// on its own line, one level deeper, but not inside a single-line block. Once the block is expanded it would, and
     /// 'dotnet format' runs its whitespace pass before the analyzers' fixes: a second run (trial 19). So the expansion
-    /// does it, where BRO1514-BRO1516 add no braces (their edits cover the gap then). Like the formatter, 'else' and a
-    /// do-while's 'while' start a line too, and 'else if' stays together. Skipped: comments in the gap, an embedded
-    /// statement holding statements (the formatter doesn't indent a nested 'if (a) if (b) c;').
+    /// does it, where BRO1514-BRO1516 add no braces (their edits come first and win the gap in the fix's merge). Like the
+    /// formatter, 'else' and a do-while's 'while' start a line too, and 'else if' stays together. Skipped: comments in the
+    /// gap, an embedded statement holding statements (the formatter doesn't indent a nested 'if (a) if (b) c;').
     /// </summary>
     private static void AddEmbeddedStatementLines(StatementSyntax statement, string indent, string unit, string lineBreak, SourceText text, List<TextChange> changes)
     {
@@ -387,7 +387,7 @@ internal static class SingleLineBlocks
         {
             var span = TextSpan.FromBounds(before.Span.End, after.SpanStart);
             if ((moved is not null && moved.DescendantNodes().OfType<StatementSyntax>().Any())
-                || Line(text, before.SpanStart) != Line(text, after.SpanStart) || changes.Any(c => c.Span.IntersectsWith(span))
+                || Line(text, before.SpanStart) != Line(text, after.SpanStart)
                 || !before.TrailingTrivia.Concat(after.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia)))
             {
                 return false;

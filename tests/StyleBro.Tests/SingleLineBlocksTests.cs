@@ -495,6 +495,13 @@ public class SingleLineBlocksTests
         """,
         editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = when_multiline\n");
 
+    // Where BRO1514-BRO1516 add braces, the line break is theirs.
+    [Fact]
+    public Task EmbeddedStatements_GetBraces_WhenTheBraceRulesWantThem() => VerifyFixAsync(
+        "public class C\n{\n    public void M(int x) {|BRO1509:{|} if (x > 0) x++; else x--; }\n}\n",
+        "public class C\n{\n    public void M(int x)\n    {\n        if (x > 0)\n        {\n            x++;\n        }\n        else\n        {\n            x--;\n        }\n    }\n}\n",
+        editorConfig: "csharp_preserve_single_line_statements = false\n");
+
     // The SDK's default keeps them, and so does the expansion.
     [Fact]
     public Task EmbeddedStatements_StayOnTheirLine_ByDefault() => VerifyFixAsync(
