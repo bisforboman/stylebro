@@ -13,7 +13,9 @@ stylebro-migrate baseline
 ```
 
 Run it in the folder with your solution (or name it, like `format`: `stylebro-migrate baseline src/MySolution.sln`, or
-`--project`). It runs `dotnet format --verify-no-changes` to find every violation `dotnet format` would fix today and
+`--project`). It runs `dotnet format whitespace`, `style` and `analyzers --verify-no-changes`, each on its own (in one
+run, the analyzers' lines would be counted after the whitespace pass split a line, and the baseline would point at the
+wrong lines), to find every violation `dotnet format` would fix today and
 writes them to `stylebro.baseline` in that folder (the current folder when you name a solution or project below it).
 Commit the file.
 

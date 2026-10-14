@@ -201,7 +201,13 @@ internal static class PreviewCommand
         var ok = false;
         try
         {
-            Step($"Copying the repository to {copy}", () => Copy(source, copy));
+            var ignoredTracked = new List<string>();
+            Step($"Copying the repository to {copy}", () => ignoredTracked = Copy(source, copy));
+            if (IgnoredNuGetConfigNote(source, copy) is { } nuGetConfig)
+            {
+                notes.Add(nuGetConfig);
+                Console.WriteLine(nuGetConfig);
+            }
 
             // An in-solution source generator runs from its project's build output, which git ignores: without it in the
             // copy, the preview applied renames the real run keeps back (as verify did, FormatCommand.CopyAnalyzerOutputs).
@@ -209,7 +215,7 @@ internal static class PreviewCommand
             var noRestore = rest.Contains("--no-restore");
             var restored = noRestore && CopyRestoreOutput(source, copy) > 0;
 
-            MakeRepository(copy);
+            MakeRepository(copy, ignoredTracked);
             var baseline = Head(copy);
 
             if (command != "format")
@@ -338,17 +344,28 @@ internal static class PreviewCommand
     }
 
     /// <summary>
+    /// What to say when the repository's root has a nuget.config the copy doesn't (git ignores it), or null. Coverlet's
+    /// ignored nuget.config named a local feed: the copy's restore couldn't find the package and the preview failed.
+    /// </summary>
+    public static string? IgnoredNuGetConfigNote(string source, string copy) =>
+        Directory.EnumerateFiles(source).Select(Path.GetFileName).FirstOrDefault(f => string.Equals(f, "nuget.config", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine(copy, f))) is { } name
+            ? $"Not copied: {name} (git ignores it). If the copy's restore fails (NU1101, NU1102), the package sources only it names are why: commit them in a nuget.config, or run 'init --write' and 'format' on the repository itself."
+            : null;
+
+    /// <summary>
     /// Copies a repository: git's tracked and untracked, not ignored files ('git ls-files -co --exclude-standard'), else
     /// (not a repository) everything outside bin, obj and .git. A submodule (or another repository inside) is copied the
-    /// same way and made a repository of its own, so 'stylebro-migrate format' leaves it alone in the copy too.
+    /// same way and made a repository of its own, so 'stylebro-migrate format' leaves it alone in the copy too. Returns the
+    /// tracked files a .gitignore ignores, for <see cref="MakeRepository"/>: MoreLINQ tracks bld/ExtensionsGenerator under an
+    /// ignored bld/, and the copy's repository left them out, so the preview showed none of their changes.
     /// </summary>
-    public static void Copy(string source, string target)
+    public static List<string> Copy(string source, string target)
     {
         Directory.CreateDirectory(target);
         if (Git(source, "ls-files", "-co", "--exclude-standard", "-z") is not (0, var list))
         {
             CopyFolder(source, target);
-            return;
+            return [];
         }
 
         foreach (var entry in list.Split('\0', StringSplitOptions.RemoveEmptyEntries).Select(e => e.TrimEnd('/')).Distinct(StringComparer.Ordinal))
@@ -361,14 +378,17 @@ internal static class PreviewCommand
             }
             else if (Directory.Exists(from) && StyleCopSetup.IsNestedRepository(from))
             {
-                Copy(from, to);
-                MakeRepository(to);
+                MakeRepository(to, Copy(from, to));
             }
             else if (Directory.Exists(from))
             {
                 CopyFolder(from, to);
             }
         }
+
+        return Git(source, "ls-files", "-c", "-i", "--exclude-standard", "-z") is (0, var ignored)
+            ? ignored.Split('\0', StringSplitOptions.RemoveEmptyEntries).ToList()
+            : [];
     }
 
     /// <summary>
@@ -879,9 +899,13 @@ internal static class PreviewCommand
     }
 
     /// <summary>Makes the folder a git repository with everything in it committed.</summary>
-    public static void MakeRepository(string folder)
+    public static void MakeRepository(string folder, IReadOnlyCollection<string>? ignoredTracked = null)
     {
         GitChecked(folder, "init", "-q");
+        foreach (var chunk in (ignoredTracked ?? []).Chunk(100))
+        {
+            GitChecked(folder, ["add", "-f", "--", .. chunk]);
+        }
 
         // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so.
         File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n");
