@@ -1,0 +1,35 @@
+# Minor and patch updates merge themselves once the required checks pass (dependabot-auto-merge.yml);
+# majors wait for a person. Decision: docs/decisions/2026-10-14-dependabot-with-auto-merge-for-minor-and-patch-updates.md
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # Pinned on purpose: the analyzers must load in older SDKs and Visual Studio (CLAUDE.md, "Roslyn pinned to 4.8.0").
+      - dependency-name: Microsoft.CodeAnalysis.CSharp
+      - dependency-name: Microsoft.CodeAnalysis.CSharp.Workspaces
+      # The StyleCop version the migration sample and parity runs compare against.
+      - dependency-name: StyleCop.Analyzers
+      # The self-check's version is StyleBroSelfVersion, bumped by hand after each release.
+      - dependency-name: StyleBro.Analyzers
+    groups:
+      nuget:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  - package-ecosystem: pip
+    directory: /.github
+    schedule:
+      interval: weekly
+    groups:
+      docs:
+        update-types: [minor, patch]
