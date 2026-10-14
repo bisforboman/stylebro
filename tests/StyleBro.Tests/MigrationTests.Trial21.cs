@@ -104,6 +104,46 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void NotBuiltProjects_AreNamedWithHowToFormatThem()
+    {
+        // AngleSharp: build/_build.csproj gets StyleBro from build/Directory.Build.props, no solution configuration builds it,
+        // and its ~25 warnings stayed after every format run.
+        Write("build/_build.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Assert.Equal(" Where a Directory.Build.props above brings StyleBro into its build, format it on its own: 'stylebro-migrate format build/_build.csproj'.", FormatCommand.NotBuiltHint(["build/"], root));
+        Assert.Equal(string.Empty, FormatCommand.NotBuiltHint([], root));
+    }
+
+    [Fact]
+    public void Format_RemovesUsingsItsFixesLeftUnused_InTheSameRun()
+    {
+        // ide5: 'Int32' -> 'int' left 'using System;' unused, and IDE0005 removed it only in a run of its own (3 runs).
+        Write(".editorconfig", "root = true\n\n[*.cs]\ndotnet_diagnostic.IDE0005.severity = warning\n");
+        Write("C.cs", "using System;\n\nclass C\n{\n    Int32 x;\n}\n");
+        var calls = new List<string[]>();
+        int Run(string[] args, Action<string>? output)
+        {
+            calls.Add(args);
+            if (calls.Count == 1)
+            {
+                Write("C.cs", "using System;\n\nclass C\n{\n    int x;\n}\n");
+            }
+            else if (args.Contains("IDE0005"))
+            {
+                Write("C.cs", "class C\n{\n    int x;\n}\n");
+            }
+
+            return 0;
+        }
+
+        var lines = new List<string>();
+        Assert.Equal(0, FormatCommand.Run(new[] { root }, lines.Add, Run));
+
+        Assert.Equal(3, calls.Count);
+        Assert.Contains("IDE0005", calls[1]);
+        Assert.Contains("Run 2: 0 files changed, clean.", lines);
+    }
+
+    [Fact]
     public void MSBuildEdits_FollowTheFilesIndentation_AndTheAnalyzersItemGroup()
     {
         Assert.Equal("<Project>\n\t<A />\n\t<ItemGroup>\n\t\t<X />\n\t</ItemGroup>\n</Project>", PreviewCommand.AddItem("<Project>\n\t<A />\n</Project>", "<X />"));

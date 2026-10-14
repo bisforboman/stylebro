@@ -1399,6 +1399,20 @@ internal static class FormatCommand
         return solution;
     }
 
+    /// <summary>
+    /// How to format the projects in <see cref="NotBuiltFolders"/> (<paramref name="folders"/>) on their own: a build of one
+    /// still runs StyleBro when a Directory.Build.props above it references it (AngleSharp's build/_build.csproj kept ~25 warnings).
+    /// </summary>
+    public static string NotBuiltHint(IReadOnlyList<string> folders, string root)
+    {
+        var projects = folders.SelectMany(f => Directory.EnumerateFiles(Path.Combine(root, f), "*.csproj"))
+            .Select(p => Path.GetRelativePath(root, p).Replace('\\', '/'))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        return projects.Count == 0 ? string.Empty
+            : $" Where a Directory.Build.props above brings StyleBro into {(projects.Count == 1 ? "its build" : "their builds")}, format {(projects.Count == 1 ? "it" : "each")} on {(projects.Count == 1 ? "its" : "their")} own: {string.Join(", ", projects.Select(p => $"'stylebro-migrate format {p}'"))}.";
+    }
+
     /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
     public static IEnumerable<(string FullPath, string[] Frameworks)> EvaluatedProjects(string workspacePath) =>
         ReadProjects(workspacePath).Values.Select(p => (p.FullPath, p.Frameworks));
@@ -1825,6 +1839,18 @@ internal static class FormatCommand
                     log(line);
                 }
             });
+            // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
+            // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
+            if (code == 0 && !args.Contains("--diagnostics") && !args.Contains("--all") && EnforcesUnusedUsings(root) && ChangedFiles(before, Snapshot(root)).Count > 0)
+            {
+                var usingsOutput = new List<string>();
+                code = runOnce([.. args, "--no-restore", "--diagnostics", UnusedUsings], usingsOutput.Add);
+                if (code != 0)
+                {
+                    usingsOutput.ForEach(log);
+                }
+            }
+
             var changed = ChangedFiles(before, Snapshot(root));
             if (report is not null)
             {
@@ -2137,7 +2163,7 @@ internal static class FormatCommand
         // "Without StyleBro"). They're left alone, like the build leaves them.
         if (NotBuiltFolders(solutionPath, projects.Values.Select(p => p.FullPath).ToList(), root) is { Count: > 0 } notBuilt)
         {
-            log($"{NotBuiltHeader} {string.Join(", ", notBuilt)}: no configuration of {Path.GetFileName(solutionPath)} builds {(notBuilt.Count == 1 ? "the project there" : "their projects")}, so 'dotnet restore' skips {(notBuilt.Count == 1 ? "it" : "them")} and 'format' leaves {(notBuilt.Count == 1 ? "it" : "them")} alone.");
+            log($"{NotBuiltHeader} {string.Join(", ", notBuilt)}: no configuration of {Path.GetFileName(solutionPath)} builds {(notBuilt.Count == 1 ? "the project there" : "their projects")}, so 'dotnet restore' skips {(notBuilt.Count == 1 ? "it" : "them")} and 'format' leaves {(notBuilt.Count == 1 ? "it" : "them")} alone.{NotBuiltHint(notBuilt, root)}");
             Exclude(notBuilt);
             excluded.AddRange(notBuilt);
         }
