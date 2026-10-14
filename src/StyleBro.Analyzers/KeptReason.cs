@@ -61,6 +61,12 @@ public enum KeptReason
 
     /// <summary>Code reads the type's members by position through reflection (<c>GetFields()[0]</c>), so sorting would change what it reads.</summary>
     MembersReadByPosition,
+
+    /// <summary>
+    /// The rename would end a clash between a tuple element and a name in scope, so IDE0042 (deconstruct variable
+    /// declaration), a warning or an error here, would report the tuple's variable.
+    /// </summary>
+    AddsDeconstruction,
 }
 
 /// <summary>
@@ -124,6 +130,7 @@ public sealed class KeptFinding
         KeptReason.DerivedTypeInAnotherProject => "a type in another project derives from the type",
         KeptReason.UsedInProjectNotLoaded => "code this format run doesn't load (another run's project, or a file outside the loaded projects) uses the name, so the rename would miss that use",
         KeptReason.MembersReadByPosition => "code reads the type's members by position through reflection (GetFields()[0]), so sorting them would change what it reads",
+        KeptReason.AddsDeconstruction => "a tuple element would no longer share its name with something in scope, so IDE0042 (deconstruct variable), a warning or an error here, would report the tuple's variable",
         _ => "no declaration can be renamed (public API, or names a library prescribes)",
     };
 

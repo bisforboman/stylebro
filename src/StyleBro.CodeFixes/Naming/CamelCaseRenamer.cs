@@ -84,34 +84,7 @@ internal static class CamelCaseRenamer
         }
 
         await NamespaceRenamer.AddChangesAsync(solution, namespaces, changes, cancellationToken).ConfigureAwait(false);
-        var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
-        var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
-        var paths = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var file in changes)
-        {
-            // Copies of one file whose text differs: every copy gets the first variant's text with its renames (see
-            // LinkedFileFixAllProvider); the other variants' edits don't fit that text.
-            var path = file.Key.Substring(0, file.Key.LastIndexOf('|'));
-            if (!paths.Add(path))
-            {
-                continue;
-            }
-
-            var documents = documentsByKey[file.Key].ToList();
-            if (documents.Count == 0)
-            {
-                continue;
-            }
-
-            var original = await documents[0].GetTextAsync(cancellationToken).ConfigureAwait(false);
-            var merged = original.WithChanges(LinkedFileFixAllProvider.Merge(file.Value));
-            foreach (var document in documentsByPath[path])
-            {
-                solution = solution.WithDocumentText(document.Id, merged);
-            }
-        }
-
-        return solution;
+        return await ApplyAsync(solution, changes, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -206,6 +179,39 @@ internal static class CamelCaseRenamer
         return current is not null;
     }
 
+    /// <summary>The solution with the edits, keyed by <see cref="GetFileKey"/>.</summary>
+    private static async Task<Solution> ApplyAsync(Solution solution, Dictionary<string, List<TextChange>> changes, CancellationToken cancellationToken)
+    {
+        var documentsByKey = solution.Projects.SelectMany(p => p.Documents).ToLookup(GetFileKey);
+        var documentsByPath = solution.Projects.SelectMany(p => p.Documents).ToLookup(d => d.FilePath ?? d.Id.Id.ToString());
+        var paths = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var file in changes)
+        {
+            // Copies of one file whose text differs: every copy gets the first variant's text with its renames (see
+            // LinkedFileFixAllProvider); the other variants' edits don't fit that text.
+            var path = file.Key.Substring(0, file.Key.LastIndexOf('|'));
+            if (!paths.Add(path))
+            {
+                continue;
+            }
+
+            var documents = documentsByKey[file.Key].ToList();
+            if (documents.Count == 0)
+            {
+                continue;
+            }
+
+            var original = await documents[0].GetTextAsync(cancellationToken).ConfigureAwait(false);
+            var merged = original.WithChanges(LinkedFileFixAllProvider.Merge(file.Value));
+            foreach (var document in documentsByPath[path])
+            {
+                solution = solution.WithDocumentText(document.Id, merged);
+            }
+        }
+
+        return solution;
+    }
+
     private static (string OldName, string NewName)? GetNamespaceRename(Diagnostic diagnostic) =>
         diagnostic.Properties.TryGetValue(NamespaceNames.NamespaceKey, out var oldNamespace) && oldNamespace is not null
         && diagnostic.Properties.TryGetValue(CamelCaseNamingAnalyzer.NewNameKey, out var newPart) && newPart is not null
@@ -271,6 +277,16 @@ internal static class CamelCaseRenamer
             }
 
             itemChanges.AddRange(symbolChanges);
+        }
+
+        // A rename can end a clash that kept IDE0042 quiet ('var r = Get(); int Count;' with '(int Count, ...)').
+        if (itemChanges.Count > 0)
+        {
+            var edits = itemChanges.GroupBy(c => c.File).ToDictionary(g => g.Key, g => g.Select(c => c.Change).ToList());
+            if (await Deconstruction.AddsReportsAsync(solution, await ApplyAsync(solution, edits, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
+            {
+                return (new List<(string File, TextChange Change)>(), KeptReason.AddsDeconstruction, null);
+            }
         }
 
         return (itemChanges, null, null);

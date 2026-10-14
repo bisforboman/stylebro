@@ -515,7 +515,10 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   declarations, solution-wide per name: all tuple type elements (not library-forced), literal names whose TARGET (from
   the operation parent: assignment/return/initializer/argument) is renamed, uses (`.x`, `?.x`, patterns) of elements
   declared at renamed places; a use that a tuple/anonymous object infers a name from gets the old name written out
-  (`(first: pair.First, 2)`). Safety net: a rename that adds compile errors or CS8123 warnings is dropped (warning stays).
+  (`(first: pair.First, 2)`). Safety net: a rename that adds compile errors or CS8123 warnings is dropped (warning stays). Since trial 18 (sharpcompress, IDE0042 at error) also a rename that lets IDE0042 report a tuple
+  variable where IDE0042 is a warning/error (`Naming/Deconstruction.cs` mirrors Roslyn's check: an element sharing its
+  name with something in scope keeps it quiet, the rename ended the clash); CamelCaseRenamer (BRO1301-BRO1309) checks
+  the same per rename (`KeptReason.AddsDeconstruction`).
 - Remaining naming: protected readonly casing, namespaces.
 
 ## BRO16xx: documentation

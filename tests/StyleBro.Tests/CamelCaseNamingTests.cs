@@ -31,6 +31,28 @@ public class CamelCaseNamingTests
     [InlineData("value_x", null)]
     public void NewName(string name, string? expected) => Assert.Equal(expected, CamelCaseNames.GetNewName(name));
 
+    // Renaming 'Pointer' would end its clash with the tuple element, and IDE0042 (a warning here) would report 'result'.
+    [Fact]
+    public Task RenamesThatLetIde0042Report_AreLeftWhereItIsEnforced() => VerifyNotFixedAsync(
+        new[]
+        {
+            """
+            public class C
+            {
+                private static (int Code, string Pointer) Decode() => (0, "x");
+
+                public string Run()
+                {
+                    string {|BRO1301:Pointer|};
+                    var result = Decode();
+                    Pointer = result.Pointer;
+                    return Pointer + result.Code;
+                }
+            }
+            """,
+        },
+        "dotnet_diagnostic.IDE0042.severity = warning");
+
     [Fact]
     public Task Variables_AreRenamedEverywhere() => VerifyFixAsync(
         """
