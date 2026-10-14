@@ -122,9 +122,11 @@ internal static class DocumentationComments
     /// <remarks>
     /// With <paramref name="blankLineBefore"/> (BRO1513 is on), a blank line goes above the new comment when the line
     /// above holds code: neighbouring single-line properties may sit together (BRO1505), but a documented one may not,
-    /// and without it 'dotnet format' needed a second run.
+    /// and without it 'dotnet format' needed a second run. With <paramref name="noBlankLineBelowComment"/> (BRO1506 is on),
+    /// the blank lines BRO1506 reports between a '//' comment and the member go too: with the new '///' below them BRO1506
+    /// no longer sees them, so the result depended on which fix ran first (trial 20).
     /// </remarks>
-    public static TextChange GetInheritDocChange(SyntaxNode member, SourceText text, AnalyzerConfigOptions options, bool blankLineBefore = false)
+    public static TextChange GetInheritDocChange(SyntaxNode member, SourceText text, AnalyzerConfigOptions options, bool blankLineBefore = false, bool noBlankLineBelowComment = false)
     {
         var tag = options.TryGetValue(InheritDocStyleKey, out var style) && style.Trim() == "spaced" ? "/// <inheritdoc />" : "/// <inheritdoc/>";
         var line = text.Lines.GetLineFromPosition(member.SpanStart);
@@ -133,6 +135,14 @@ internal static class DocumentationComments
         if (lineBreak.Length == 0)
         {
             lineBreak = "\n";
+        }
+
+        if (noBlankLineBelowComment && indentation.Trim().Length == 0
+            && member.GetLeadingTrivia().LastOrDefault(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia)) is { RawKind: not 0 } comment
+            && Layout.TrailingBlankLines.GetBlankLinesAfterComment(comment, text) is { Count: > 0 } blankLines
+            && blankLines[blankLines.Count - 1].LineNumber == line.LineNumber - 1)
+        {
+            return new TextChange(TextSpan.FromBounds(blankLines[0].Start, member.SpanStart), indentation + tag + lineBreak + indentation);
         }
 
         if (blankLineBefore && indentation.Trim().Length == 0 && Layout.DocumentationBlankLines.WantsBlankLineAbove(line, text))

@@ -33,7 +33,10 @@ internal static class DocumentationTags
             d.Content.Where(n => n is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "returns" } or XmlEmptyElementSyntax { Name.LocalName.ValueText: "returns" })));
     }
 
-    /// <summary>Every '&lt;placeholder&gt;' element in the tree's documentation comments.</summary>
+    /// <summary>
+    /// Every '&lt;placeholder&gt;' element inside another element in the tree's documentation comments. A top-level one is
+    /// left alone: unwrapping it would leave its text outside any element (trial 20).
+    /// </summary>
     public static IEnumerable<XmlElementSyntax> GetPlaceholders(IEnumerable<SyntaxTrivia> trivia)
     {
         return trivia
@@ -41,7 +44,7 @@ internal static class DocumentationTags
             .OfType<DocumentationCommentTriviaSyntax>()
             .SelectMany(d => DocumentationComments.UnlessMalformed(
                 d,
-                d.DescendantNodes().OfType<XmlElementSyntax>().Where(e => e.StartTag.Name.LocalName.ValueText == "placeholder")));
+                d.DescendantNodes().OfType<XmlElementSyntax>().Where(e => e.StartTag.Name.LocalName.ValueText == "placeholder" && e.Parent is XmlElementSyntax)));
     }
 
     /// <summary>

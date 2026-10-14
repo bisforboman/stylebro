@@ -108,6 +108,8 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1601](rules/BRO1601.md) (SA1600) | Everything except overrides and implicit interface implementations | See "Missing documentation" above; explicit implementations like StyleCop's `master`. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:`; a period followed by a closing quote or bracket (`"done."`) | Already ends a sentence; StyleCop's fix writes `question?.` and `"done.".`. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text whose last word is code: a bracket, brace, `=`, `;`, `:`, slash, `|`, `$`, `#`, `_` or backtick in it (`digraph {`, `Example: A1:B10`, a URL) | A period reads as part of the code; StyleCop's fix writes `digraph {.` (found in Stateless and spreadcheetah). |
+| [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `,` or `;` (`1033 => "en",`, `value;`) | Code or a list that goes on; a period there gives `"en",.`. |
+| [BRO1609](rules/BRO1609.md) (SA1651) | A `<placeholder>` at the top level of a comment, outside `<summary>` and the other elements | Unwrapping it leaves its text outside every element. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text that is only a number (`<summary>0</summary>` on an enum member) | A value, not a sentence. StyleCop 1.1.118 doesn't check enum members at all, so StyleCop-clean repositories have them (Soulseek.NET's message codes); 1.2 reports them. |
 | [BRO1603](rules/BRO1603.md) (SA1629) | Text ending with `?`, `!` or `:`; a period followed by a closing quote or bracket (`"done."`); a trailing `<c>"... ."</c>` | Already ends a sentence; StyleCop's fix writes `question?.`, `"done.".` and `</c>.` (StyleCop bug [#2784](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2784), open). |
 | [BRO1606](rules/BRO1606.md) (SA1642) | A summary whose first `<para>` starts with the standard sentence | StyleCop fixed this after 1.2.0-beta.556; beta.556's fix writes the sentence twice. |
@@ -182,7 +184,7 @@ Reports and fixes match StyleCop (checked with `scripts/stylecop-survey/Compare-
 [BRO1113](rules/BRO1113.md), [BRO1304](rules/BRO1304.md), [BRO1305](rules/BRO1305.md), [BRO1501](rules/BRO1501.md),
 [BRO1502](rules/BRO1502.md), [BRO1503](rules/BRO1503.md), [BRO1506](rules/BRO1506.md),
 [BRO1507](rules/BRO1507.md), [BRO1602](rules/BRO1602.md), [BRO1605](rules/BRO1605.md), [BRO1608](rules/BRO1608.md),
-[BRO1609](rules/BRO1609.md), [BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
+[BRO1129](rules/BRO1129.md), [BRO1130](rules/BRO1130.md). (BRO1304, BRO1305 and BRO1309 have working fixes under `dotnet format`; StyleCop's
 change nothing there.)
 
 ### Compared with StyleCop's unreleased `master`

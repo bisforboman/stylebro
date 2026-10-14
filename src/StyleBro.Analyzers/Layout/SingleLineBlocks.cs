@@ -162,7 +162,7 @@ internal static class SingleLineBlocks
             BlockSyntax { Parent: LocalFunctionStatementSyntax } => "local_functions",
             BlockSyntax { Parent: AccessorDeclarationSyntax } => "accessors",
             BlockSyntax { Parent: BaseMethodDeclarationSyntax } => "methods",
-            BlockSyntax => "control_blocks",
+            BlockSyntax or SwitchStatementSyntax => "control_blocks",
             AccessorListSyntax { Parent: IndexerDeclarationSyntax } => "indexers",
             AccessorListSyntax { Parent: EventDeclarationSyntax } => "events",
             AccessorListSyntax => "properties",
@@ -327,6 +327,7 @@ internal static class SingleLineBlocks
             foreach (var statement in statements.Statements)
             {
                 AddEmbeddedStatementLines(statement, inner, unit, lineBreak, text, options, changes);
+                AddSwitchLines(statement, inner, unit, lineBreak, options, isOn, changes);
             }
         }
 
@@ -335,7 +336,7 @@ internal static class SingleLineBlocks
 
     /// <summary>The SDK's csharp_preserve_single_line_statements (default true).</summary>
     private static bool PreservesSingleLineStatements(AnalyzerConfigOptions options) =>
-        !(options.TryGetValue("csharp_preserve_single_line_statements", out var value) && value.Trim().Equals("false", StringComparison.OrdinalIgnoreCase));
+        !IsFalse(options, "csharp_preserve_single_line_statements");
 
     /// <summary>
     /// With csharp_preserve_single_line_statements = false the SDK's formatter puts an embedded statement (<c>if (x) y;</c>)
@@ -344,9 +345,9 @@ internal static class SingleLineBlocks
     /// does it, where BRO1514-BRO1516 add no braces (their edits come first and win the gap in the fix's merge). Like the
     /// formatter, 'else' and a do-while's 'while' start a line too, and 'else if' stays together. An embedded block
     /// (<c>if (x) { a; } else b;</c>) stays on one line: its '{' starts one per csharp_new_line_before_open_brace, an 'else'
-    /// after its '}' per csharp_new_line_before_else, and the else's statement gets its own line either way. Skipped:
-    /// comments in the gap, an embedded statement holding statements (the formatter doesn't indent a nested
-    /// 'if (a) if (b) c;').
+    /// after its '}' per csharp_new_line_before_else, and the else's statement gets its own line either way. Nested embedded
+    /// statements (<c>for (...) if (a) b;</c>) go one level deeper each, like the formatter once the block is expanded
+    /// (trial 20; a 'using' in a 'using' stays at its level). Skipped: comments in the gap.
     /// </summary>
     private static void AddEmbeddedStatementLines(StatementSyntax statement, string indent, string unit, string lineBreak, SourceText text, AnalyzerConfigOptions options, List<TextChange> changes)
     {
@@ -387,17 +388,30 @@ internal static class SingleLineBlocks
                 break;
         }
 
-        // The embedded statement on its own line, one level deeper; a block stays on one line, its '{' on a line of its own
-        // at the statement's level when csharp_new_line_before_open_brace says so (or where it is: the rest still follows).
-        bool Embedded(SyntaxToken before, StatementSyntax body) => body is BlockSyntax block
-            ? !NewLineBeforeBrace(block, options) || Break(before, block.OpenBraceToken, indent)
-            : Break(before, body.GetFirstToken(), indent + unit, body);
+        // The embedded statement on its own line, one level deeper (a 'using' right in a 'using' stacks at the same level),
+        // and its own embedded statements the same way; a block stays on one line, its '{' on a line of its own at the
+        // statement's level when csharp_new_line_before_open_brace says so (or where it is: the rest still follows).
+        bool Embedded(SyntaxToken before, StatementSyntax body)
+        {
+            if (body is BlockSyntax block)
+            {
+                return !NewLineBeforeBrace(block, options) || Break(before, block.OpenBraceToken, indent);
+            }
 
-        bool Break(SyntaxToken before, SyntaxToken after, string newIndent, SyntaxNode? moved = null)
+            var bodyIndent = statement is UsingStatementSyntax && body is UsingStatementSyntax ? indent : indent + unit;
+            if (!Break(before, body.GetFirstToken(), bodyIndent))
+            {
+                return false;
+            }
+
+            AddEmbeddedStatementLines(body, bodyIndent, unit, lineBreak, text, options, changes);
+            return true;
+        }
+
+        bool Break(SyntaxToken before, SyntaxToken after, string newIndent)
         {
             var span = TextSpan.FromBounds(before.Span.End, after.SpanStart);
-            if ((moved is not null && moved.DescendantNodes().OfType<StatementSyntax>().Any())
-                || Line(text, before.SpanStart) != Line(text, after.SpanStart)
+            if (Line(text, before.SpanStart) != Line(text, after.SpanStart)
                 || !before.TrailingTrivia.Concat(after.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia)))
             {
                 return false;
@@ -407,6 +421,54 @@ internal static class SingleLineBlocks
             return true;
         }
     }
+
+    /// <summary>
+    /// With csharp_preserve_single_line_statements = false the formatter also expands a one-line switch statement once its
+    /// block is expanded (trial 20): '{' per csharp_new_line_before_open_brace, each label on its own line (one level deeper
+    /// with csharp_indent_switch_labels), each statement below it (one more with csharp_indent_case_contents), '}' at the
+    /// statement's level, and BRO1526's blank line between sections. Only a switch on one line with plain statements: no
+    /// comments, blocks or statements holding statements (those the brace rules or the formatter lay out otherwise).
+    /// </summary>
+    private static void AddSwitchLines(StatementSyntax statement, string indent, string unit, string lineBreak, AnalyzerConfigOptions options, Func<string, bool>? isOn, List<TextChange> changes)
+    {
+        if (statement is not SwitchStatementSyntax @switch || @switch.ContainsDiagnostics
+            || @switch.DescendantTrivia().Any(t => !t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia))
+            || @switch.Sections.SelectMany(s => s.Statements).Any(s => s is BlockSyntax || s.DescendantNodes().OfType<StatementSyntax>().Any()))
+        {
+            return;
+        }
+
+        var labelIndent = indent + (IsFalse(options, "csharp_indent_switch_labels") ? string.Empty : unit);
+        var statementIndent = labelIndent + (IsFalse(options, "csharp_indent_case_contents") ? string.Empty : unit);
+        var blank = isOn?.Invoke(DiagnosticIds.BlankLineBetweenSwitchSections) == true
+            && SwitchSectionBlankLines.ReadMode(options) != SwitchSectionBlankLines.Mode.Omit ? lineBreak : string.Empty;
+        if (NewLineBeforeBrace(@switch, options))
+        {
+            Add(@switch.OpenBraceToken, indent);
+        }
+
+        for (var i = 0; i < @switch.Sections.Count; i++)
+        {
+            var section = @switch.Sections[i];
+            foreach (var label in section.Labels)
+            {
+                Add(label.GetFirstToken(), labelIndent, i > 0 && label == section.Labels[0] ? blank : string.Empty);
+            }
+
+            foreach (var item in section.Statements)
+            {
+                Add(item.GetFirstToken(), statementIndent);
+            }
+        }
+
+        Add(@switch.CloseBraceToken, indent);
+
+        void Add(SyntaxToken token, string newIndent, string blankLine = "") =>
+            changes.Add(new TextChange(TextSpan.FromBounds(token.GetPreviousToken().Span.End, token.SpanStart), blankLine + lineBreak + newIndent));
+    }
+
+    private static bool IsFalse(AnalyzerConfigOptions options, string key) =>
+        options.TryGetValue(key, out var value) && value.Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>A property whose one-line accessor list BRO1509 expands in the same run (it then spans several lines).</summary>
     private static bool BecomesMultiLine(SyntaxNode member, SourceText text, AnalyzerConfigOptions options, Func<string, bool>? isOn) =>
