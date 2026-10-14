@@ -204,6 +204,7 @@ nav:
       - Settings: configuration.md
       - Baseline: baseline.md
       - CI: ci.md
+      - Pre-commit hook: pre-commit.md
       - Scripts and AI agents: agents.md
       - Modernizing: modernizing.md
       - Versioning: versioning.md

@@ -553,6 +553,7 @@ code 2) when formatting would change a file. Findings kept on purpose don't fail
 `dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
 there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md). `init` and the migration
 name the workflow lines (`.github/workflows`, `azure-pipelines.yml`) that still run plain `dotnet format --verify-no-changes`.
+To check the staged files before each commit: [Pre-commit hook](pre-commit.md).
 
 With `--agents-md`, `init --write` also puts a short StyleBro section into `AGENTS.md` for AI coding
 agents (opt-in). For scripts and agents there are `format --files` (just the files an edit touched) and `--json`:
