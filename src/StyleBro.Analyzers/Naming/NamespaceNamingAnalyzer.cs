@@ -53,7 +53,8 @@ public sealed class NamespaceNamingAnalyzer : DiagnosticAnalyzer
                 || !NamespaceNames.IsOnlyFrom(ns, a => SymbolEqualityComparer.Default.Equals(a, context.Compilation.Assembly))
                 || IsInRootNamespace(fullName, rootNamespace)
                 || !PublicApi.CanRename(ns, options)
-                || declared.Locations.Any(l => l.SourceTree is { } tree && NamespaceNames.IsGenerated(tree)))
+                || declared.Locations.Any(l => l.SourceTree is { } tree && NamespaceNames.IsGenerated(tree))
+                || !NamingRules.AllowsRename(context.Compilation, options, part.Identifier.GetLocation(), declared, newName, context.CancellationToken))
             {
                 continue;
             }

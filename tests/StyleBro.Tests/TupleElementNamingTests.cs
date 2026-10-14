@@ -226,6 +226,116 @@ public class TupleElementNamingTests
             : VerifyFixAsync(source, source.Replace("{|BRO1311:pointer|}", "Pointer").Replace(".pointer", ".Pointer"), EditorConfig);
     }
 
+    // Trial 20 (MeasureLower): 'pointer' is kept for IDE0042, so 'code' in the same tuple type keeps its name too, not '(int Code, string pointer)'.
+    [Fact]
+    public Task ElementsOfOneTupleType_AreRenamedAllOrNone() => VerifyNotFixedAsync(
+        new[]
+        {
+            """
+            public class C
+            {
+                private static (int {|BRO1311:code|}, string {|BRO1311:pointer|}) Decode() => (0, "x");
+
+                public string Run()
+                {
+                    string pointer;
+                    var result = Decode();
+                    pointer = result.pointer;
+                    return pointer + result.code;
+                }
+            }
+            """,
+        },
+        "dotnet_diagnostic.IDE0042.severity = error");
+
+    // 'Max' is left by the analyzer (disabled code mentions it), so 'total' next to it stays too.
+    [Fact]
+    public Task ElementsNextToANameInDisabledCode_KeepTheirNames() => VerifyNotFixedAsync(
+        new[]
+        {
+            """
+            public class C
+            {
+                private (int {|BRO1311:total|}, int max) M() => (1, 2);
+            #if NEVER
+                private int max;
+            #endif
+            }
+            """,
+        });
+
+    // A partner with nothing to rename (only in a public signature) doesn't hold the group back.
+    [Fact]
+    public Task PartnersOnlyInPublicSignatures_DoNotKeepTheGroup() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public (int total, int max) A() => (1, 2);
+
+            private (int {|BRO1311:total|}, string {|BRO1311:name|}) B() => (1, "");
+        }
+        """,
+        """
+        public class C
+        {
+            public (int total, int max) A() => (1, 2);
+
+            private (int Total, string Name) B() => (1, "");
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
+    // Coverlet (trial 20): a use inside a tuple literal converted to another tuple type ('return (false, x.documentName)')
+    // names nothing there, so writing the old name out ('documentName: ...') only added CS8123 and the rename was dropped.
+    [Fact]
+    public Task UsesInConvertedTupleLiterals_AreRenamedWithoutWritingTheNameOut() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+        using System.Linq;
+
+        internal class C
+        {
+            private IEnumerable<(string {|BRO1311:documentName|}, bool DocumentExists)> Map(string[] names) => names.Select(n => (n, n.Length > 0));
+
+            public (bool AllMatch, string NotFound) Check(string[] names)
+            {
+                var map = Map(names).ToList();
+                var natural = (true, map[0].documentName);
+                return (natural.documentName == Map(names).First().documentName, map.FirstOrDefault(x => !x.DocumentExists).documentName);
+            }
+        }
+        """,
+        """
+        using System.Collections.Generic;
+        using System.Linq;
+
+        internal class C
+        {
+            private IEnumerable<(string DocumentName, bool DocumentExists)> Map(string[] names) => names.Select(n => (n, n.Length > 0));
+
+            public (bool AllMatch, string NotFound) Check(string[] names)
+            {
+                var map = Map(names).ToList();
+                var natural = (true, documentName: map[0].DocumentName);
+                return (natural.documentName == Map(names).First().DocumentName, map.FirstOrDefault(x => !x.DocumentExists).DocumentName);
+            }
+        }
+        """);
+
+    // Owner's choice 2026-10-14: code that turns IDE1006 off keeps its names, tuple elements too.
+    [Fact]
+    public Task WhereIde1006IsSuppressed_ElementsKeepTheirNames() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006")]
+            private (int count, int total) M() => (1, 2);
+
+        #pragma warning disable IDE1006
+            private (int count, int total) N() => (1, 2);
+        }
+        """);
+
     [Fact]
     public Task NotReported() => VerifyNoDiagnosticsAsync("""
         using System;

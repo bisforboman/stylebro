@@ -1691,4 +1691,42 @@ public class FieldNamingTests
             #endif
             }
             """));
+
+    // MoreLINQ (trial 20): Lookup.cs is copied from dotnet/runtime and starts with the pragma; '_count' stays.
+    [Fact]
+    public Task FieldsWhereIde1006IsDisabled_KeepTheirNames() => VerifyFixAsync(
+        """
+        #pragma warning disable IDE1006 // Naming rule violation
+        public sealed class Counter
+        {
+            private int _count;
+
+            public int Next() => _count++;
+        }
+        #pragma warning restore IDE1006
+
+        public sealed class Other
+        {
+            private int {|BRO1303:_count|};
+
+            public int Next() => _count++;
+        }
+        """,
+        """
+        #pragma warning disable IDE1006 // Naming rule violation
+        public sealed class Counter
+        {
+            private int _count;
+
+            public int Next() => _count++;
+        }
+        #pragma warning restore IDE1006
+
+        public sealed class Other
+        {
+            private int count;
+
+            public int Next() => count++;
+        }
+        """);
 }

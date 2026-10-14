@@ -654,4 +654,40 @@ public class CamelCaseNamingTests
             }
         }
         """);
+
+    // Owner's choice 2026-10-14: an IDE1006 suppression on the member covers its parameters and locals.
+    [Fact]
+    public Task ParametersAndLocalsWhereIde1006IsSuppressed_KeepTheirNames() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles")]
+            public int M(int Value)
+            {
+                var Twice = Value * 2;
+                return Twice;
+            }
+
+        #pragma warning disable IDE1006
+            public int N(int Value) => Value;
+        }
+        """);
+
+    // A naming rule for parameters that asks for another style keeps the parameter's name.
+    [Fact]
+    public Task ParametersAnEnforcedNamingRuleCovers_KeepTheirNames() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public int M(int P_value) => P_value;
+        }
+        """,
+        """
+        dotnet_naming_symbols.parameters.applicable_kinds = parameter
+        dotnet_naming_style.prefixed.required_prefix = P_
+        dotnet_naming_style.prefixed.capitalization = camel_case
+        dotnet_naming_rule.parameters_prefixed.severity = warning
+        dotnet_naming_rule.parameters_prefixed.symbols = parameters
+        dotnet_naming_rule.parameters_prefixed.style = prefixed
+        """);
 }

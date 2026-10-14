@@ -47,7 +47,8 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
             && PublicApi.CanRename(symbol, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree))
             && !PrefixNames.IsTypeNameTaken(newName, context.SemanticModel.Compilation)
             && context.SemanticModel.LookupSymbols(node.SpanStart, name: newName).IsEmpty
-            && !DisabledCode.Mentions(context.Compilation, symbol.Name))
+            && !DisabledCode.Mentions(context.Compilation, symbol.Name)
+            && NamingRules.AllowsRename(context.Compilation, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree), node.Identifier.GetLocation(), symbol, newName, context.CancellationToken))
         {
             Report(context, Descriptors.InterfacePrefix, node.Identifier, newName);
         }
@@ -64,7 +65,8 @@ public sealed class PrefixNamingAnalyzer : DiagnosticAnalyzer
             && (symbol.DeclaringType is not { } owner || !NamespaceNames.HasGeneratedPart(owner))
             && !PrefixNames.IsTypeNameTaken(newName, context.SemanticModel.Compilation)
             && context.SemanticModel.LookupSymbols(node.SpanStart, name: newName).IsEmpty
-            && !DisabledCode.Mentions(symbol.ContainingSymbol, symbol.Name, context.CancellationToken))
+            && !DisabledCode.Mentions(symbol.ContainingSymbol, symbol.Name, context.CancellationToken)
+            && NamingRules.AllowsRename(context.Compilation, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree), node.Identifier.GetLocation(), symbol, newName, context.CancellationToken))
         {
             Report(context, Descriptors.TypeParameterPrefix, node.Identifier, newName);
         }

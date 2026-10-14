@@ -35,16 +35,17 @@ internal static class TupleElementRenamer
 {
     public static async Task<Solution> RenameAsync(Solution solution, IEnumerable<(string OldName, string NewName, Diagnostic Diagnostic)> renames, CancellationToken cancellationToken)
     {
-        foreach (var rename in renames.GroupBy(r => (r.OldName, r.NewName)))
+        var items = renames.ToList();
+        foreach (var group in await GroupAsync(solution, items.Select(r => (r.OldName, r.NewName)), cancellationToken).ConfigureAwait(false))
         {
-            var (renamed, reason) = await TryRenameAsync(solution, rename.Key.OldName, rename.Key.NewName, cancellationToken).ConfigureAwait(false);
+            var (renamed, reason) = await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false);
             if (renamed is not null)
             {
                 solution = renamed;
                 continue;
             }
 
-            foreach (var item in rename)
+            foreach (var item in items.Where(r => group.Any(g => g.OldName == r.OldName)))
             {
                 KeptFindings.Record(item.Diagnostic, reason?.Reason ?? KeptReason.NothingToRename, reason?.Where);
             }
@@ -54,8 +55,112 @@ internal static class TupleElementRenamer
     }
 
     /// <summary>Why the fix leaves a rename on purpose, or null when it makes it (the same checks as <see cref="RenameAsync"/>).</summary>
-    public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken) =>
-        (await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false)).Reason?.Reason;
+    public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    {
+        foreach (var group in await GroupAsync(solution, new[] { (oldName, newName) }, cancellationToken).ConfigureAwait(false))
+        {
+            if (group.Any(g => g.OldName == oldName))
+            {
+                return (await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false)).Reason?.Reason;
+            }
+        }
+
+        return KeptReason.NothingToRename;
+    }
+
+    /// <summary>
+    /// The renames in groups that are made all or none: names that share a tuple type go together, with every other name
+    /// in it that needs a new one ('(int total, int max)' with 'max' kept for IDE0042 became '(int Total, int max)',
+    /// trial 20). A name the analyzer leaves (it's in disabled '#if' code) keeps its whole group (a null new name).
+    /// </summary>
+    private static async Task<List<List<(string OldName, string? NewName)>>> GroupAsync(Solution solution, IEnumerable<(string OldName, string NewName)> renames, CancellationToken cancellationToken)
+    {
+        var newNames = new Dictionary<string, string?>();
+        foreach (var (oldName, newName) in renames)
+        {
+            newNames[oldName] = newName;
+        }
+
+        // Every tuple type's names (two or more), with the casing its file asks for.
+        var tuples = new List<(string[] Names, bool CamelCase)>();
+        foreach (var project in solution.Projects.Where(p => p.Language == LanguageNames.CSharp))
+        {
+            foreach (var document in project.Documents)
+            {
+                if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root)
+                {
+                    continue;
+                }
+
+                var camelCase = TupleElementNames.IsCamelCase(project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+                foreach (var tuple in root.DescendantNodes().OfType<TupleTypeSyntax>())
+                {
+                    var names = tuple.Elements.Select(e => e.Identifier.ValueText).Where(n => n.Length > 0).ToArray();
+                    if (names.Length > 1)
+                    {
+                        tuples.Add((names, camelCase));
+                    }
+                }
+            }
+        }
+
+        Compilation?[]? compilations = null;
+        var parents = newNames.Keys.ToDictionary(n => n, n => n);
+        string Find(string name) => parents[name] == name ? name : parents[name] = Find(parents[name]);
+        for (var changed = true; changed;)
+        {
+            changed = false;
+            foreach (var (names, camelCase) in tuples.Where(t => t.Names.Any(newNames.ContainsKey)))
+            {
+                foreach (var name in names.Where(n => !newNames.ContainsKey(n)))
+                {
+                    if (TupleElementNames.GetNewName(name, camelCase) is { } partner)
+                    {
+                        compilations ??= await Task.WhenAll(solution.Projects.Select(p => p.GetCompilationAsync(cancellationToken))).ConfigureAwait(false);
+                        newNames[name] = compilations.Any(c => c is not null && DisabledCode.Mentions(c, name)) ? null : partner;
+                        parents[name] = name;
+                        changed = true;
+                    }
+                }
+
+                var inGroup = names.Where(newNames.ContainsKey).ToList();
+                foreach (var name in inGroup.Skip(1))
+                {
+                    parents[Find(name)] = Find(inGroup[0]);
+                }
+            }
+        }
+
+        return newNames.GroupBy(n => Find(n.Key)).Select(g => g.Select(n => (n.Key, n.Value)).ToList()).ToList();
+    }
+
+    /// <summary>
+    /// Renames the whole group, or none of it and why. A name with nothing to rename (only in public signatures, say) is
+    /// skipped: its tuple types keep every name anyway, as the others are public there too.
+    /// </summary>
+    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAllAsync(Solution solution, List<(string OldName, string? NewName)> group, CancellationToken cancellationToken)
+    {
+        var any = false;
+        foreach (var (oldName, newName) in group)
+        {
+            if (newName is null)
+            {
+                return (null, (KeptReason.DisabledCode, null));
+            }
+
+            var (renamed, reason) = await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
+            if (renamed is not null)
+            {
+                (solution, any) = (renamed, true);
+            }
+            else if (reason?.Reason != KeptReason.NothingToRename)
+            {
+                return (null, reason);
+            }
+        }
+
+        return any ? (solution, null) : (null, (KeptReason.NothingToRename, null));
+    }
 
     private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
     {
@@ -237,8 +342,10 @@ internal static class TupleElementRenamer
                     && element.Locations.Any(l => l.IsInSource && renamed.Contains(Key(l))))
                 {
                     // '(pair.first, ...)' and 'new { pair.first }' infer a name from the use: it's written out, so the
-                    // inferred element (and every use of it) keeps the old name.
-                    if (InferredNameStart(name) is { } start)
+                    // inferred element (and every use of it) keeps the old name. Not in a literal converted to a tuple
+                    // type, whose names win: there the written-out name was only a CS8123 (coverlet's 'return (false,
+                    // map.First().documentName)', trial 20).
+                    if (InferredNameStart(name, model, cancellationToken) is { } start)
                     {
                         Edit(document, new TextChange(new TextSpan(start.Position, 0), oldName + start.Separator));
                     }
@@ -300,7 +407,7 @@ internal static class TupleElementRenamer
     /// Where a tuple argument or anonymous object member gets its name from this use ('(pair.first, ...)', 'new {
     /// pair.first }'), and what goes after the written-out name; null when the use doesn't name anything.
     /// </summary>
-    private static (int Position, string Separator)? InferredNameStart(IdentifierNameSyntax name)
+    private static (int Position, string Separator)? InferredNameStart(IdentifierNameSyntax name, SemanticModel model, CancellationToken cancellationToken)
     {
         SyntaxNode expression = name;
         while (expression.Parent is ExpressionSyntax parent and not TupleExpressionSyntax && parent.GetLastToken() == name.Identifier)
@@ -310,7 +417,8 @@ internal static class TupleElementRenamer
 
         return expression.Parent switch
         {
-            ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax } argument => (argument.SpanStart, ": "),
+            ArgumentSyntax { NameColon: null, Parent: TupleExpressionSyntax tuple } argument
+                when model.GetOperation(tuple, cancellationToken)?.Parent is not IConversionOperation { Type: INamedTypeSymbol { IsTupleType: true } } => (argument.SpanStart, ": "),
             AnonymousObjectMemberDeclaratorSyntax { NameEquals: null } member => (member.SpanStart, " = "),
             _ => null,
         };

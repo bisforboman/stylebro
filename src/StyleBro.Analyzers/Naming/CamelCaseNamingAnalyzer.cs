@@ -186,7 +186,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             || (symbol is IRangeVariableSymbol && !(context.Node.FirstAncestorOrSelf<QueryExpressionSyntax>() is { } query
                 && CamelCaseNames.IsInExpressionTree(query, context.SemanticModel, context.CancellationToken))))
         {
-            Report(context, Descriptors.VariableCasing, identifier);
+            Report(context, Descriptors.VariableCasing, identifier, symbol);
         }
     }
 
@@ -211,7 +211,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        Report(context, Descriptors.ParameterCasing, node.Identifier);
+        Report(context, Descriptors.ParameterCasing, node.Identifier, parameter);
     }
 
     /// <summary>
@@ -251,7 +251,8 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             || newName == oldName
             || !CamelCaseNames.IsUsableName(newName)
             || !CamelCaseNames.CanRename(node, oldName, newName, getNewName)
-            || CamelCaseNames.IsNameObservable(node.Parent!.Parent!, oldName, context.SemanticModel, context.CancellationToken))
+            || CamelCaseNames.IsNameObservable(node.Parent!.Parent!, oldName, context.SemanticModel, context.CancellationToken)
+            || !NamingRules.AllowsRename(context.Compilation, context.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree), node.Identifier.GetLocation(), parameter, newName, context.CancellationToken))
         {
             return false;
         }
@@ -279,7 +280,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             ? HungarianNames.Read(context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree))
             : null;
 
-    private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier)
+    private static void Report(SyntaxNodeAnalysisContext context, DiagnosticDescriptor descriptor, SyntaxToken identifier, ISymbol symbol)
     {
         var oldName = identifier.ValueText;
         var hungarian = GetHungarian(context);
@@ -289,7 +290,8 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
             descriptor = Descriptors.HungarianNotation;
         }
 
-        if (newName is not null && CamelCaseNames.CanRename(context.Node, oldName, newName, name => HungarianNames.GetVariableName(name, hungarian)))
+        if (newName is not null && CamelCaseNames.CanRename(context.Node, oldName, newName, name => HungarianNames.GetVariableName(name, hungarian))
+            && NamingRules.AllowsRename(context.Compilation, context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree), identifier.GetLocation(), symbol, newName, context.CancellationToken))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 descriptor,
