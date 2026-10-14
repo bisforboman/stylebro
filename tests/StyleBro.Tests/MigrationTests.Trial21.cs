@@ -78,6 +78,10 @@ public sealed partial class MigrationTests
                                     break;
                                 }
                             case 3: { break; }
+                            default:
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -91,7 +95,7 @@ public sealed partial class MigrationTests
             counts);
 
         Assert.Equal(new[] { 1, 2 }, counts["dotnet_diagnostic.BRO1404.severity"]);
-        Assert.Equal(new[] { 1, 1 }, counts["csharp_indent_case_contents_when_block"]);
+        Assert.Equal(new[] { 1, 2 }, counts["csharp_indent_case_contents_when_block"]);
 
         counts = Conventions.NewCounts();
         counts["dotnet_diagnostic.BRO1404.severity"] = [1, 20];
@@ -119,6 +123,17 @@ public sealed partial class MigrationTests
 
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
         Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
+
+        // Members with 'private', types without 'internal': the types' off line isn't the members' verdict on a second init.
+        for (var i = 0; i < 6; i++)
+        {
+            Write($"A{i}.cs", $"class A{i}\n{{\n    private int x;\n}}\n");
+        }
+
+        File.Delete(Path.Combine(root, ".editorconfig"));
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        var again = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Assert.Contains("  default  private-by-default members:", again, StringComparison.Ordinal);
     }
 
     [Fact]
