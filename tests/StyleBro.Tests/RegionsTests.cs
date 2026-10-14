@@ -251,7 +251,7 @@ public class RegionsTests
             }
         }
         """,
-        editorConfig: "dotnet_diagnostic.BRO1506.severity = none");
+        editorConfig: "dotnet_diagnostic.BRO1506.severity = none\nstylebro_blank_line_below_standalone_comments = remove");
 
     [Fact]
     public Task RegionsInCodeAnIfTurnsOff_AreNotReported() => VerifyFixAsync(

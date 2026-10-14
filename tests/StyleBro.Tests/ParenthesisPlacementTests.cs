@@ -596,8 +596,7 @@ public class ParenthesisPlacementTests
                 var z = M
                     {|BRO1109:(|}1, M(
                         2,
-                        3
-                    ){|BRO1110:)|};
+                        3{|BRO1110:)|}{|BRO1110:)|};
             }
         }
         """,
@@ -657,7 +656,23 @@ public class ParenthesisPlacementTests
 
     // BRO1105's same_line mode leaves ': base(' on the constructor's line.
     [Fact]
-    public Task OwnLine_ConstructorInitializerOnTheConstructorsLine() => VerifyNoDiagnosticsAsync(
+    public Task OwnLine_ConstructorInitializerOnTheConstructorsLine() => VerifyFixAsync(
+        """
+        class B
+        {
+            public B(int a)
+            {
+            }
+        }
+
+        class C : B
+        {
+            public C(int a) : base(
+                a{|BRO1110:)|}
+            {
+            }
+        }
+        """,
         """
         class B
         {
