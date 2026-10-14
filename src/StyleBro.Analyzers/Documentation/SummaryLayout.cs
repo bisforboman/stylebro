@@ -43,7 +43,8 @@ internal static class SummaryLayout
 
             foreach (var summary in documentation.Content.OfType<XmlElementSyntax>())
             {
-                if (summary.StartTag.Name.LocalName.ValueText == "summary" && GetFinding(summary, text, singleLine, maxLength) is { } finding)
+                if (summary.StartTag.Name.LocalName.ValueText == "summary" && GetFinding(summary, text, singleLine, maxLength) is { } finding
+                    && !DocumentationComments.IsMalformed(documentation))
                 {
                     yield return (summary.StartTag, finding.Join, finding.Changes);
                 }

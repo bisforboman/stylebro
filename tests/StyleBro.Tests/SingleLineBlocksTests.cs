@@ -495,6 +495,57 @@ public class SingleLineBlocksTests
         """,
         editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = when_multiline\n");
 
+    // A braced 'if' with an unbraced 'else' (and other embedded blocks): the formatter puts the block's '{' on its own line
+    // (csharp_new_line_before_open_brace), 'else' after the '}' too, and the else's statement on its own line; the block
+    // itself stays on one line (BRO1508 is off here).
+    [Fact]
+    public Task EmbeddedBlocks_StartTheirOwnLine_WhenSingleLineStatementsArentPreserved() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(int x, int[] a) {|BRO1509:{|} if (x > 0) { x++; } else x--; if (x > 0) { x++; } else if (x < 0) x--; else { x = 1; } while (x > 0) { x--; } do { x--; } while (x > 0); }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(int x, int[] a)
+            {
+                if (x > 0)
+                { x++; }
+                else
+                    x--;
+                if (x > 0)
+                { x++; }
+                else if (x < 0)
+                    x--;
+                else
+                { x = 1; }
+
+                while (x > 0)
+                { x--; }
+
+                do
+                { x--; } while (x > 0);
+            }
+        }
+        """,
+        editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\ndotnet_diagnostic.BRO1508.severity = none\n");
+
+    // With K&R braces for control blocks and 'else' kept after '}', only the else's statement moves (as the formatter does).
+    [Fact]
+    public Task EmbeddedBlocks_FollowTheBraceAndElseSettings() => VerifyFixAsync(
+        "public class C\n{\n    public void M(int x) {|BRO1509:{|} if (x > 0) { x++; } else x--; }\n}\n",
+        "public class C\n{\n    public void M(int x)\n    {\n        if (x > 0) { x++; } else\n            x--;\n    }\n}\n",
+        editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\ncsharp_new_line_before_open_brace = methods\ncsharp_new_line_before_else = false\ndotnet_diagnostic.BRO1508.severity = none\n");
+
+    // With BRO1508 on, the block is expanded as well.
+    [Fact]
+    public Task EmbeddedBlocks_AreExpanded_WhenBRO1508IsOn() => VerifyFixAsync(
+        "public class C\n{\n    public void M(int x) {|BRO1509:{|} if (x > 0) {|BRO1508:{|} x++; } else x--; }\n}\n",
+        "public class C\n{\n    public void M(int x)\n    {\n        if (x > 0)\n        {\n            x++;\n        }\n        else\n            x--;\n    }\n}\n",
+        editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\n");
+
     // Where BRO1514-BRO1516 add braces, the line break is theirs.
     [Fact]
     public Task EmbeddedStatements_GetBraces_WhenTheBraceRulesWantThem() => VerifyFixAsync(

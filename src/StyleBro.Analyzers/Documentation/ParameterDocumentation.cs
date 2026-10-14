@@ -52,18 +52,12 @@ internal static class ParameterDocumentation
     /// <summary>Empty '&lt;remarks&gt;' elements ('&lt;remarks&gt;&lt;/remarks&gt;', '&lt;remarks/&gt;' or only whitespace).</summary>
     public static IEnumerable<XmlNodeSyntax> GetEmptyRemarks(IEnumerable<SyntaxTrivia> trivia)
     {
-        foreach (var documentation in trivia.Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>())
-        {
-            foreach (var node in documentation.Content)
-            {
-                if (node is XmlEmptyElementSyntax { Name.LocalName.ValueText: "remarks" }
+        return trivia.Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>()
+            .SelectMany(d => DocumentationComments.UnlessMalformed(
+                d,
+                d.Content.Where(node => node is XmlEmptyElementSyntax { Name.LocalName.ValueText: "remarks" }
                     || (node is XmlElementSyntax { StartTag.Name.LocalName.ValueText: "remarks" } element
-                        && element.Content.All(c => c is XmlTextSyntax text && text.TextTokens.All(t => t.Text.Trim().Length == 0))))
-                {
-                    yield return node;
-                }
-            }
-        }
+                        && element.Content.All(c => c is XmlTextSyntax text && text.TextTokens.All(t => t.Text.Trim().Length == 0))))));
     }
 
     /// <summary>
@@ -83,9 +77,8 @@ internal static class ParameterDocumentation
         var noun = kind == TagKind.Parameter ? "parameter" : "type parameter";
         var matchId = kind == TagKind.Parameter ? DiagnosticIds.ParameterTagsMatch : DiagnosticIds.TypeParameterTagsMatch;
         var nameId = kind == TagKind.Parameter ? DiagnosticIds.ParameterTagHasName : DiagnosticIds.TypeParameterTagHasName;
-        var content = member.GetLeadingTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>()
-            .SelectMany(d => d.Content)
-            .ToList();
+        var documentation = member.GetLeadingTrivia().Select(t => t.GetStructure()).OfType<DocumentationCommentTriviaSyntax>().ToList();
+        var content = documentation.SelectMany(d => d.Content).ToList();
         var tags = content.OfType<XmlElementSyntax>()
             .Where(e => e.StartTag.Name.LocalName.ValueText == element)
             .ToList();
@@ -196,7 +189,8 @@ internal static class ParameterDocumentation
             }
         }
 
-        return problems.Count == 0 ? null : new Finding(problems, changes);
+        // Malformed XML is left to a person (checked last: most members have no problem).
+        return problems.Count == 0 || documentation.Any(DocumentationComments.IsMalformed) ? null : new Finding(problems, changes);
     }
 
     /// <summary>The name in the tag's 'name' attribute, where the diagnostic goes (like StyleCop).</summary>

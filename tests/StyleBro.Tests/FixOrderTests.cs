@@ -1465,6 +1465,24 @@ public class FixOrderTests
         "BRO1514",
         "BRO1516");
 
+    // A braced 'if' with an unbraced 'else' in the expanded body: BRO1516 braces the 'else' (or, with csharp_prefer_braces =
+    // false, the expansion puts it on its own line), BRO1508 expands the 'if' block.
+    [Theory]
+    [InlineData("csharp_preserve_single_line_statements = false\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = false\n")]
+    public Task EmbeddedBlockAndUnbracedElse_InAnExpandedBody(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void M(int x) { if (x > 0) { x++; } else x--; do { x--; } while (x > 0); }
+        }
+        """,
+        editorConfig,
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1516");
+
     // actions/runner's VssStringComparer: one-line properties with block accessors in a row. BRO1509 expands each, and
     // BRO1505 then wants blank lines between them (two one-line properties may sit together, multi-line ones not).
     [Fact]
