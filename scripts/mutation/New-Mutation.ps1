@@ -15,6 +15,8 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Mutations.Common.ps1')
 
 $File = $File.Replace('\', '/')
+# Invoke-Mutations.ps1 puts 'FullyQualifiedName~' in front itself; doubled, the filter matches no test.
+$Tests = $Tests -replace '^FullyQualifiedName~', ''
 $sha = [Security.Cryptography.SHA256]::Create()
 $bytes = $sha.ComputeHash([Text.Encoding]::UTF8.GetBytes("$File`n$Find`n$Replace`n$Tests"))
 $hash = -join ($bytes[0..3] | ForEach-Object { $_.ToString('x2') })
