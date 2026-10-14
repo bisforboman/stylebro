@@ -1729,4 +1729,158 @@ public class FieldNamingTests
             public int Next() => count++;
         }
         """);
+
+    // SSH.NET (trial 21, StyleCop-clean): SA1310 doesn't check a name starting with '_', and in the _camelCase style SA1309
+    // never removes it, so '_signature_size' stays. A name without the underscore still gets the whole style in one rename.
+    [Fact]
+    public Task UnderscoreStyle_LeavesUnderscoresInANameStartingWithOne() => VerifyFixAsync(
+        """
+        class C
+        {
+            private readonly int _signature_size;
+            private int _a_b;
+            private int {|BRO1308:sig_size|};
+
+            public C(int size) => _signature_size = size;
+
+            public int Use() => _signature_size + _a_b + sig_size;
+        }
+        """,
+        """
+        class C
+        {
+            private readonly int _signature_size;
+            private int _a_b;
+            private int _sigSize;
+
+            public C(int size) => _signature_size = size;
+
+            public int Use() => _signature_size + _a_b + _sigSize;
+        }
+        """,
+        editorConfig: Underscore);
+
+    // In the camelCase style the underscore goes (SA1309), and the rest in the same rename (SA1310).
+    [Fact]
+    public Task CamelCaseStyle_StillJoinsANameStartingWithAnUnderscore() => VerifyFixAsync(
+        "class C\n{\n    private int {|BRO1308:_signature_size|};\n\n    public int Use() => _signature_size;\n}\n",
+        "class C\n{\n    private int signatureSize;\n\n    public int Use() => signatureSize;\n}\n");
+
+    // AngleSharp (trial 21): a nested class's 'valid' was kept because the outer class has '_valid'. The renamed field hides
+    // it inside the nested class (lookup searches the type before the enclosing types).
+    [Fact]
+    public Task NestedField_IsRenamedPastAnOuterFieldWithTheNewName() => VerifyFixAsync(
+        """
+        public sealed class Outer
+        {
+            private bool _valid = true;
+
+            public bool IsValid => _valid;
+
+            private sealed class Inner
+            {
+                private bool {|BRO1303:valid|};
+
+                public Inner() => valid = true;
+
+                public bool Check() => valid;
+            }
+        }
+        """,
+        """
+        public sealed class Outer
+        {
+            private bool _valid = true;
+
+            public bool IsValid => _valid;
+
+            private sealed class Inner
+            {
+                private bool _valid;
+
+                public Inner() => _valid = true;
+
+                public bool Check() => _valid;
+            }
+        }
+        """,
+        editorConfig: Underscore);
+
+    // ... unless the nested class uses the outer member by that name: the rename would change what that use means.
+    [Fact]
+    public Task NestedField_IsKeptWhenTheNestedClassUsesTheOuterName() => VerifyNotFixedAsync(
+        new[]
+        {
+            """
+            public sealed class Outer
+            {
+                private static bool _valid = true;
+
+                private sealed class Inner
+                {
+                    private bool {|BRO1303:valid|};
+
+                    public bool Check() => valid && _valid;
+                }
+            }
+            """,
+        },
+        Underscore);
+
+    // AzureEventGridSimulator (trial 21): a field named like its own type ('Color Color') is legal, and the type's other
+    // uses still bind to the type.
+    [Fact]
+    public Task FieldNamedLikeItsType_IsRenamed() => VerifyFixAsync(
+        """
+        public sealed class SimulatorEvent
+        {
+            public static SimulatorEvent Create() => new();
+
+            public bool Accepts() => true;
+        }
+
+        public class FilterTests
+        {
+            private static readonly SimulatorEvent {|BRO1306:_simulatorEvent|} = SimulatorEvent.Create();
+
+            public bool Check(object o) => _simulatorEvent.Accepts() && SimulatorEvent.Create().Accepts() && o is SimulatorEvent && typeof(SimulatorEvent) != null;
+        }
+        """,
+        """
+        public sealed class SimulatorEvent
+        {
+            public static SimulatorEvent Create() => new();
+
+            public bool Accepts() => true;
+        }
+
+        public class FilterTests
+        {
+            private static readonly SimulatorEvent SimulatorEvent = SimulatorEvent.Create();
+
+            public bool Check(object o) => SimulatorEvent.Accepts() && SimulatorEvent.Create().Accepts() && o is SimulatorEvent && typeof(SimulatorEvent) != null;
+        }
+        """,
+        editorConfig: Underscore);
+
+    // A field of another type with that name stays: 'SimulatorEvent.Create()' would then mean the field.
+    [Fact]
+    public Task FieldNamedLikeAnotherType_IsKept() => VerifyNotFixedAsync(
+        new[]
+        {
+            """
+            public sealed class SimulatorEvent
+            {
+                public static SimulatorEvent Create() => new();
+            }
+
+            public class FilterTests
+            {
+                private static readonly object {|BRO1306:_simulatorEvent|} = SimulatorEvent.Create();
+
+                public object Check() => _simulatorEvent ?? SimulatorEvent.Create();
+            }
+            """,
+        },
+        Underscore);
 }

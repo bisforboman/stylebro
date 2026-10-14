@@ -45,17 +45,21 @@ internal static class DocumentationComments
         SyntaxKind.EventFieldDeclaration,
     ];
 
+    private static readonly System.Text.RegularExpressions.Regex Entity = new(@"^&(?:[A-Za-z_][\w.-]*|#[0-9]+|#x[0-9A-Fa-f]+);$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
     /// <summary>
     /// Whether the comment's XML is malformed: an element isn't closed by its own end tag. 'IComparable&lt;T&gt; can use it' in
     /// prose starts an element 'T' that takes the summary's end tag, so the rules that edit text would guess where it ends
     /// (BRO1603 wrote 'IComparable.&lt;T&gt;' in GuardClauses). The rules that edit text skip such a comment; a person fixes
     /// the XML. A bare '&lt;' ('when a &lt; b') starts an element too, one whose '/&gt;' is missing: BRO1603 wrote 'a. &lt; b'.
     /// A missing token inside an attribute isn't: <c>name=""</c> is well-formed XML (an empty name BRO1612 fills in).
-    /// Judged by the tags only (a missing token, an end tag that isn't the element's), not the parser's errors: those exist
-    /// only when the project generates documentation, and the same comment would be judged differently with and without it.
+    /// A bare '&amp;' that starts no entity ('a stray &amp; ampersand') is malformed too: the compiler reports CS1570 for it
+    /// (trial 21). Judged by the tags and tokens only (a missing token, an end tag that isn't the element's, an '&amp;' outside
+    /// an entity), not the parser's errors: those exist only when the project generates documentation, and the same comment
+    /// would be judged differently with and without it.
     /// </summary>
     public static bool IsMalformed(DocumentationCommentTriviaSyntax documentation) =>
-        documentation.DescendantTokens().Any(t => t.IsMissing && !t.Parent!.AncestorsAndSelf().Any(n => n is XmlAttributeSyntax))
+        documentation.DescendantTokens().Any(t => (t.IsMissing && !t.Parent!.AncestorsAndSelf().Any(n => n is XmlAttributeSyntax)) || IsBareAmpersand(t))
         || documentation.DescendantNodes().OfType<XmlElementSyntax>().Any(e => e.EndTag.Name.LocalName.ValueText != e.StartTag.Name.LocalName.ValueText);
 
     /// <summary>
@@ -201,6 +205,11 @@ internal static class DocumentationComments
             yield return new TextChange(new TextSpan(line.Start + start, 3), replacement);
         }
     }
+
+    private static bool IsBareAmpersand(SyntaxToken token) =>
+        token.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken
+        && token.Text.IndexOf('&') >= 0
+        && !(token.IsKind(SyntaxKind.XmlEntityLiteralToken) && Entity.IsMatch(token.Text));
 
     private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
     {

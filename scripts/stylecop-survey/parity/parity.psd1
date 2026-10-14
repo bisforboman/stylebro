@@ -387,6 +387,20 @@
             )
         }
         @{
+            Name     = 'naming-underscore-style'
+            Map      = @('SA1310=BRO1308')
+            # The _camelCase style (SA1309 off, SX1309 on): SA1310 doesn't check a name starting with '_' (trial 21, SSH.NET).
+            EditorConfig = "stylebro_private_field_naming = _camelCase`n"
+            Expected = @(
+                # 'sig_size' gets the whole style in one rename ('_sigSize'); StyleCop's fix writes 'sigSize', SX1309 then
+                # asks for the underscore on a second run.
+                'StyleBro output only: Underscores.cs: [        private int _sigSize;]'
+                'StyleBro output only: Underscores.cs: [        public int Use() => _signature_size + _a_b + _sigSize + _static_value + __two_under;]'
+                'StyleCop output only: Underscores.cs: [        private int sigSize;]'
+                'StyleCop output only: Underscores.cs: [        public int Use() => _signature_size + _a_b + sigSize + _static_value + __two_under;]'
+            )
+        }
+        @{
             Name     = 'naming-elements'
             Map      = @('SA1300=BRO1309')
             # Public names too (StyleBro skips them by default), so the rename logic is compared with StyleCop's.
@@ -492,6 +506,41 @@
                 'only StyleCop: BRO1601 Inherit.cs(67,20)'
                 # BRO1601: explicit interface implementations aren't reported, like StyleCop's master (2959cac8).
                 'only StyleCop: BRO1601 Inherit.cs(44,26)'
+            )
+        }
+        @{
+            Name     = 'qualified-usings-names'
+            Map      = @('SA1135=BRO1126')
+            Expected = @()
+        }
+        @{
+            Name     = 'documentation-periods-kinds'
+            Map      = @('SA1629=BRO1603')
+            # Which declarations SA1629 checks: not events (field-like, with accessors, in interfaces) or finalizers, and
+            # BRO1603 neither (trial 21: SSH.NET's 31 event summaries). Positions and output identical in Kinds.cs.
+            Expected = @(
+                # An inline element whose own text ends a sentence ('<paramref name="x">The name.</paramref>', SSH.NET) gets
+                # no period after it; StyleCop passes over an inline element with content and checks the text before it.
+                'only StyleCop: BRO1603 Inline.cs(18,22)'
+                'only StyleCop: BRO1603 Inline.cs(23,22)'
+                'only StyleCop: BRO1603 Inline.cs(28,64)'
+                'StyleBro output only: Inline.cs: [        /// Ends with <see cref="Inline">a sentence in a see.</see>]'
+                # '<c>' holds code: it gets its period after the element unless it's a quoted sentence; StyleCop puts it
+                # before the element.
+                'only StyleBro: BRO1603 Inline.cs(23,56)'
+                'StyleBro output only: Inline.cs: [        /// Ends with <c>code ending with a period.</c>.]'
+                'StyleBro output only: Inline.cs: [        /// Ends with <paramref name="x">a question?</paramref>]'
+                'StyleCop output only: Inline.cs: [        /// Ends with. <see cref="Inline">a sentence in a see.</see>]'
+                'StyleCop output only: Inline.cs: [        /// Ends with. <c>code ending with a period.</c>]'
+                'StyleCop output only: Inline.cs: [        /// Ends with <paramref name="x">a question?</paramref>.]'
+                # A word ending in a period and digits ('HTML 5.0', AngleSharp's 'it.0') reads as a number: a period after
+                # it would read as part of it.
+                'only StyleCop: BRO1603 Inline.cs(41,48)'
+                'only StyleCop: BRO1603 Inline.cs(46,30)'
+                'StyleBro output only: Inline.cs: [        /// Consumes a token and processes it.0]'
+                'StyleBro output only: Inline.cs: [        /// Supports HTML 5.0]'
+                'StyleCop output only: Inline.cs: [        /// Consumes a token and processes it.0.]'
+                'StyleCop output only: Inline.cs: [        /// Supports HTML 5.0.]'
             )
         }
         @{

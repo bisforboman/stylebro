@@ -38,16 +38,24 @@ internal static class TupleElementRenamer
         var items = renames.ToList();
         foreach (var group in await GroupAsync(solution, items.Select(r => (r.OldName, r.NewName)), cancellationToken).ConfigureAwait(false))
         {
-            var (renamed, reason) = await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false);
+            var (renamed, reason, blocker) = await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false);
             if (renamed is not null)
             {
                 solution = renamed;
                 continue;
             }
 
+            // The element that can't be renamed gives its reason; the others in its group say which one keeps them.
             foreach (var item in items.Where(r => group.Any(g => g.OldName == r.OldName)))
             {
-                KeptFindings.Record(item.Diagnostic, reason?.Reason ?? KeptReason.NothingToRename, reason?.Where);
+                if (blocker is not null && item.OldName != blocker)
+                {
+                    KeptFindings.Record(item.Diagnostic, KeptReason.KeptWithOtherElement, $"'{blocker}': {KeptFinding.Describe(reason?.Reason ?? KeptReason.NothingToRename)}");
+                }
+                else
+                {
+                    KeptFindings.Record(item.Diagnostic, reason?.Reason ?? KeptReason.NothingToRename, reason?.Where);
+                }
             }
         }
 
@@ -61,7 +69,8 @@ internal static class TupleElementRenamer
         {
             if (group.Any(g => g.OldName == oldName))
             {
-                return (await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false)).Reason?.Reason;
+                var (_, reason, blocker) = await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false);
+                return blocker is not null && blocker != oldName ? KeptReason.KeptWithOtherElement : reason?.Reason;
             }
         }
 
@@ -135,17 +144,18 @@ internal static class TupleElementRenamer
     }
 
     /// <summary>
-    /// Renames the whole group, or none of it and why. A name with nothing to rename (only in public signatures, say) is
-    /// skipped: its tuple types keep every name anyway, as the others are public there too.
+    /// Renames the whole group, or none of it, why, and the name that can't be renamed (null when none does). A name with
+    /// nothing to rename (only in public signatures, say) is skipped: its tuple types keep every name anyway, as the others
+    /// are public there too.
     /// </summary>
-    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAllAsync(Solution solution, List<(string OldName, string? NewName)> group, CancellationToken cancellationToken)
+    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason, string? Blocker)> TryRenameAllAsync(Solution solution, List<(string OldName, string? NewName)> group, CancellationToken cancellationToken)
     {
         var any = false;
         foreach (var (oldName, newName) in group)
         {
             if (newName is null)
             {
-                return (null, (KeptReason.DisabledCode, null));
+                return (null, (KeptReason.DisabledCode, null), oldName);
             }
 
             var (renamed, reason) = await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
@@ -155,11 +165,11 @@ internal static class TupleElementRenamer
             }
             else if (reason?.Reason != KeptReason.NothingToRename)
             {
-                return (null, reason);
+                return (null, reason, oldName);
             }
         }
 
-        return any ? (solution, null) : (null, (KeptReason.NothingToRename, null));
+        return any ? (solution, null, null) : (null, (KeptReason.NothingToRename, null), null);
     }
 
     private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)

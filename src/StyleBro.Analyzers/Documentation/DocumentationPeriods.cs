@@ -32,6 +32,8 @@ internal static class DocumentationPeriods
         @"(?:(?:'(?:[^'\\]|\\[^']{1,5})'|""[^""]*"");|'(?:[^'\\\w]|\\[^']{1,5})'|""[^""]*\\[^""]*"")$",
         System.Text.RegularExpressions.RegexOptions.CultureInvariant);
 
+    private static readonly System.Text.RegularExpressions.Regex VersionLike = new(@"[\p{L}\p{N}]\.[0-9]+$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
     private static readonly char[] CodeCharacters = ['{', '}', '[', ']', '(', ')', '=', ';', ':', '/', '\\', '|', '$', '#', '_', '`'];
 
     private static readonly HashSet<string> TextElements = new()
@@ -77,7 +79,7 @@ internal static class DocumentationPeriods
         var excluded = GetExcluded(options);
         foreach (var comment in trivia)
         {
-            if (comment.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
+            if (comment.GetStructure() is not DocumentationCommentTriviaSyntax documentation || IsUnchecked(comment))
             {
                 continue;
             }
@@ -126,18 +128,35 @@ internal static class DocumentationPeriods
     }
 
     /// <summary>
-    /// A trailing <c>&lt;c&gt;"User logged in."&lt;/c&gt;</c>: a quoted sentence whose period sits inside the quote, so
-    /// another one after the element would be doubled (StyleCop #2784).
+    /// Whether the comment documents an event or a finalizer: StyleCop's SA1629 doesn't check those (probed with
+    /// 1.2.0-beta.556; SSH.NET, StyleCop-clean, had 31 event summaries without a period).
     /// </summary>
-    private static bool IsQuotedSentence(XmlElementSyntax element)
+    private static bool IsUnchecked(SyntaxTrivia comment)
     {
-        if (element.StartTag.Name.LocalName.ValueText != "c")
+        var member = comment.Token.Parent?.FirstAncestorOrSelf<MemberDeclarationSyntax>();
+        return member is EventFieldDeclarationSyntax or EventDeclarationSyntax or DestructorDeclarationSyntax
+            && member.GetFirstToken() == comment.Token;
+    }
+
+    /// <summary>
+    /// An inline element whose own text ends a sentence: <c>&lt;paramref name="name"&gt;The name of the request.&lt;/paramref&gt;</c>
+    /// (SSH.NET, trial 21), or a quoted one in code: <c>&lt;c&gt;"User logged in."&lt;/c&gt;</c> (StyleCop #2784). Another
+    /// period after it would be doubled.
+    /// </summary>
+    private static bool EndsWithSentence(XmlElementSyntax element)
+    {
+        if (!InlineElements.Contains(element.StartTag.Name.LocalName.ValueText))
         {
             return false;
         }
 
-        var text = string.Concat(element.Content.OfType<XmlTextSyntax>().SelectMany(t => t.TextTokens).Select(t => t.ValueText)).TrimEnd();
-        return text.Length > 1 && text[text.Length - 1] is '"' or '\'' && text.TrimEnd(ClosingPunctuation).EndsWith(".", StringComparison.Ordinal);
+        // '<c>' holds code ('Calls <c>Done.</c>' still gets its period): only a quoted sentence in it counts.
+        var text = string.Concat(element.Content.SelectMany(c => c.DescendantTokens())
+            .Where(t => t.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken)
+            .Select(t => t.ValueText)).TrimEnd();
+        var sentence = text.TrimEnd(ClosingPunctuation);
+        return (element.StartTag.Name.LocalName.ValueText != "c" || (text.Length > sentence.Length && text[text.Length - 1] is '"' or '\''))
+            && sentence.Length > 0 && sentence[sentence.Length - 1] is '.' or '?' or '!';
     }
 
     /// <summary>
@@ -145,7 +164,9 @@ internal static class DocumentationPeriods
     /// '|', '$', '#', '_' or a backtick in it (Stateless: 'the prefix text would be digraph {', spreadcheetah: 'Example:
     /// A1:B10'). A period there reads as part of the code. A closing ')' or ']' whose opener isn't in the word ends a
     /// parenthetical ('(in ms)') and doesn't count, nor do a closing quote or a trailing ',' or ';'. A quoted char or
-    /// string literal at the end is code too (CsvHelper: 'Default is ',';'). StyleCop's SA1629 has no such exception: a deviation.
+    /// string literal at the end is code too (CsvHelper: 'Default is ',';'), and so is a word ending in a period and digits
+    /// ('HTML 5.0', AngleSharp's 'processes it.0': a period after it reads as another part of the number). StyleCop's SA1629
+    /// has no such exception: a deviation.
     /// </summary>
     private static bool EndsInCode(string text)
     {
@@ -161,7 +182,7 @@ internal static class DocumentationPeriods
             word = word.Substring(0, word.Length - 1);
         }
 
-        return word.IndexOfAny(CodeCharacters) >= 0;
+        return word.IndexOfAny(CodeCharacters) >= 0 || VersionLike.IsMatch(word);
     }
 
     /// <summary>
@@ -198,7 +219,7 @@ internal static class DocumentationPeriods
 
                 case XmlElementSyntax child:
                     var name = child.StartTag.Name.LocalName.ValueText;
-                    if (BlockElements.Contains(name) || excluded.Contains(name) || IsQuotedSentence(child))
+                    if (BlockElements.Contains(name) || excluded.Contains(name) || EndsWithSentence(child))
                     {
                         return null;
                     }

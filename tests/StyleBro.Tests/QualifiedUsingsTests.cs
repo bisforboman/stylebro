@@ -143,4 +143,40 @@ public class QualifiedUsingsTests
             using static Thing;
         }
         """);
+
+    // AngleSharp (trial 21): a type argument keeps the way it names a built-in type. 'System.Char' became 'char', which
+    // IDE0049 then reported under dotnet_style_predefined_type_* = false and dotnet format can't fix in an alias. Like
+    // StyleCop's SA1135 (parity 'qualified-usings-names'), which only asks for qualified names.
+    [Fact]
+    public Task BuiltInTypeArguments_KeepTheirSpelling() => Verify.VerifyFixAsync(
+        """
+        using System;
+
+        namespace Probe.Html
+        {
+            using Memory = System.ReadOnlyMemory<System.Char>;
+            using Pairs = System.Collections.Generic.Dictionary<System.String, int>;
+            {|BRO1126:using Texts = System.Collections.Generic.List<String>;|}
+            {|BRO1126:using Numbers = System.Collections.Generic.List<Int32>;|}
+
+            class C
+            {
+            }
+        }
+        """,
+        """
+        using System;
+
+        namespace Probe.Html
+        {
+            using Memory = System.ReadOnlyMemory<System.Char>;
+            using Pairs = System.Collections.Generic.Dictionary<System.String, int>;
+            using Texts = System.Collections.Generic.List<System.String>;
+            using Numbers = System.Collections.Generic.List<System.Int32>;
+
+            class C
+            {
+            }
+        }
+        """);
 }
