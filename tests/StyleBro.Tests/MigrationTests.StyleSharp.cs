@@ -60,6 +60,24 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Read_CodeWithoutAProjectOfItsOwn_GoesWithStyleCopsFolders()
+    {
+        // Splat's src/Polyfills: linked into its StyleSharp projects, no project of its own; outside the section, StyleBro's
+        // defaults reformatted its summaries.
+        Write("src/App/App.csproj", StyleSharpProject);
+        Write("src/App/A.cs", "class A { }\n");
+        Write("src/Bench/Bench.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("src/Bench/B.cs", "class B { }\n");
+        Write("src/Polyfills/P.cs", "class P { }\n");
+        Write("snippets/S.cs", "class S { }\n");
+
+        var setup = StyleCopSetup.Read(root, p => !p.Contains("Bench", StringComparison.Ordinal));
+
+        Assert.Equal(["snippets", "src/App", "src/Polyfills"], setup.Folders);
+        Assert.Equal(["src/Bench"], setup.FoldersWithout);
+    }
+
+    [Fact]
     public void StyleSharp_Options_AreStyleCopJsonsSettings()
     {
         Write("Directory.Packages.props", "<Project><ItemGroup><PackageVersion Include=\"StyleSharp.Analyzers\" Version=\"3.40.1\" /></ItemGroup></Project>\n");

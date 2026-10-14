@@ -453,6 +453,21 @@ internal sealed class StyleCopSetup
         var allScopes = new List<Scope>([.. projectScopes, .. scopes]);
         var folders = Cover(projects.Uses, true, root);
         var without = folders is null ? [] : Cover(projects.Uses, false, root) ?? [];
+
+        // Code in folders without a project of their own, compiled by projects elsewhere, goes with StyleCop's folders (Splat's
+        // src/Polyfills, linked into its StyleSharp projects, was left out of the section and got StyleBro's defaults).
+        // ponytail: not which projects compile it; a projectless folder below a folder without StyleCop stays out.
+        if (folders is not null)
+        {
+            var projectFolders = files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/')).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            bool Under(string path, string folder) => folder == "." || path.Equals(folder, StringComparison.OrdinalIgnoreCase) || path.StartsWith(folder + "/", StringComparison.OrdinalIgnoreCase);
+            var projectless = files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+                .Where(f => f != "." && !folders.Concat(without).Any(c => Under(f, c)) && !projectFolders.Any(p => p != "." && Under(f, p)))
+                .Select(f => f.Split('/')[0] is var top && !projectFolders.Any(p => Under(p, top)) ? top : f);
+            folders = Migration.Topmost([.. folders, .. projectless]);
+        }
+
         if (folders is not null)
         {
             allScopes = InStyleCopFolders(allScopes, folders, without, severities);
