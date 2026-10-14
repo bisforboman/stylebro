@@ -18,20 +18,26 @@ internal static class TrailingBlankLines
     /// comment, or for a comment below code (<see cref="BlankLines.IsCommentBelowCode"/>). The blank lines are whitespace
     /// inside trivia, never string contents.
     /// </summary>
-    public static IReadOnlyList<TextLine> GetBlankLinesAfterComment(SyntaxTrivia comment, SourceText text)
+    public static IReadOnlyList<TextLine> GetBlankLinesAfterComment(SyntaxTrivia comment, SourceText text) => GetCheckedBlankLines(comment, text) ?? [];
+
+    /// <summary>
+    /// The same, but null for a comment BRO1506 doesn't check at all (init counts the checked ones, with blank lines below
+    /// or without).
+    /// </summary>
+    public static IReadOnlyList<TextLine>? GetCheckedBlankLines(SyntaxTrivia comment, SourceText text)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia)
             || comment.ToString().StartsWith("///", StringComparison.Ordinal)
             || IsFileHeader(comment)
             || BlankLines.IsCommentBelowCode(comment, text))
         {
-            return [];
+            return null;
         }
 
         var line = text.Lines.GetLineFromPosition(comment.SpanStart);
         if (!IsBlank(text, TextSpan.FromBounds(line.Start, comment.SpanStart)))
         {
-            return [];
+            return null;
         }
 
         var lines = new List<TextLine>();
@@ -42,7 +48,7 @@ internal static class TrailingBlankLines
             {
                 var content = text.ToString(next.Span).TrimStart();
                 return content.StartsWith("//", StringComparison.Ordinal) || content.StartsWith("/*", StringComparison.Ordinal)
-                    ? []
+                    ? null
                     : lines;
             }
 

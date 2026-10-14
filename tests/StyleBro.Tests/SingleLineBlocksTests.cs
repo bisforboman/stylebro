@@ -445,6 +445,63 @@ public class SingleLineBlocksTests
         """,
         editorConfig: "indent_style = tab\ncsharp_new_line_before_open_brace = types, methods\ncsharp_new_line_before_else = false\n");
 
+    // Trial 19: with csharp_preserve_single_line_statements = false the SDK's whitespace pass splits 'if (x) y;' once it's
+    // no longer in a single-line block, but it ran before the fix: the expansion does it, so one run converges. Nested
+    // embedded statements and comments are left alone (the formatter doesn't indent 'if (a) if (b) c;').
+    [Fact]
+    public Task EmbeddedStatements_GetTheirOwnLines_WhenSingleLineStatementsArentPreserved() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public C(int x, int[] a) {|BRO1509:{|} if (x > 0) x++; }
+            public void M(int x, int[] a) {|BRO1509:{|} if (x > 0) x++; else if (x < 0) x--; else x = 1; while (x > 0) x--; foreach (var v in a) x += v; do x--; while (x > 0); lock (a) x++; }
+            public void N(int x) {|BRO1509:{|} if (x > 0) if (x > 1) x++; if (x > 0) /* c */ x++; for (; x < 3; x++) x--; }
+        }
+        """,
+        """
+        public class C
+        {
+            public C(int x, int[] a)
+            {
+                if (x > 0)
+                    x++;
+            }
+            public void M(int x, int[] a)
+            {
+                if (x > 0)
+                    x++;
+                else if (x < 0)
+                    x--;
+                else
+                    x = 1;
+                while (x > 0)
+                    x--;
+                foreach (var v in a)
+                    x += v;
+                do
+                    x--;
+                while (x > 0);
+                lock (a)
+                    x++;
+            }
+            public void N(int x)
+            {
+                if (x > 0) if (x > 1) x++;
+                if (x > 0) /* c */ x++;
+                for (; x < 3; x++)
+                    x--;
+            }
+        }
+        """,
+        editorConfig: "csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = when_multiline\n");
+
+    // The SDK's default keeps them, and so does the expansion.
+    [Fact]
+    public Task EmbeddedStatements_StayOnTheirLine_ByDefault() => VerifyFixAsync(
+        "public class C\n{\n    public void M(int x) {|BRO1509:{|} if (x > 0) x++; }\n}\n",
+        "public class C\n{\n    public void M(int x)\n    {\n        if (x > 0) x++;\n    }\n}\n",
+        editorConfig: "csharp_prefer_braces = when_multiline\n");
+
     [Fact]
     public Task LineEndings_AreKept() => VerifyFixAsync(
         "public class C\r\n{\r\n    public void M(bool b) {|BRO1509:{|} if (b) {|BRO1508:{|} return; } }\r\n}\r\n",

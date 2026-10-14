@@ -21,6 +21,12 @@ internal static class Suppressions
     /// <summary>Rules whose suppressions do nothing under 'dotnet format': its whitespace pass formats regardless (IDE0055).</summary>
     public static readonly IReadOnlySet<string> Ineffective = new HashSet<string>(StringComparer.Ordinal) { "IDE0055" };
 
+    /// <summary>StyleBro's own value of each option a Sonar 'option' row sets (sonar-mapping.tsv): what the code gets where the Sonar rule is suppressed.</summary>
+    public static readonly IReadOnlyDictionary<string, string> OptionDefaults = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["stylebro_keep_overloads_together"] = "false",
+    };
+
     private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|S\d{3,4})\b", RegexOptions.IgnoreCase);
 
     private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
@@ -39,7 +45,9 @@ internal static class Suppressions
             all[id] = new SortedSet<string>(ids, StringComparer.Ordinal);
         }
 
-        foreach (var row in SonarSetup.Mapping.Where(m => sonar?.IsOn(m.Sonar) ?? true))
+        // An 'option' row only sets an option of a rule that's on anyway: suppressing the Sonar rule turns the option back
+        // there (<see cref="OptionScopes"/>), not the whole rule off (bcrypt.net: S4136 in NoWarn suppressed all of BRO1001).
+        foreach (var row in SonarSetup.Mapping.Where(m => !m.OptionOnly && (sonar?.IsOn(m.Sonar) ?? true)))
         {
             if (!all.TryGetValue(row.Sonar, out var ids))
             {
@@ -50,6 +58,42 @@ internal static class Suppressions
         }
 
         return all;
+    }
+
+    /// <summary>
+    /// The sections for the folders whose MSBuild files suppress a Sonar 'option' row's rule in &lt;NoWarn&gt; (owner's choice
+    /// 2026-10-14): the options it set in <paramref name="lines"/> go back to StyleBro's own value there, and the rule stays on
+    /// (bcrypt.net's src/Directory.Build.props has S4136: BRO1001 sorts there, without keeping overloads together).
+    /// </summary>
+    public static List<(string Section, List<string> Lines)> OptionScopes(string root, SonarSetup sonar, IReadOnlyList<string> lines)
+    {
+        var result = new List<(string Section, List<string> Lines)>();
+        var rows = SonarSetup.Mapping.Where(m => m.OptionOnly && m.Setting is not null && sonar.IsOn(m.Sonar)).ToList();
+        if (rows.Count == 0)
+        {
+            return result;
+        }
+
+        foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).OrderBy(f => f, StringComparer.Ordinal))
+        {
+            var codes = NoWarn.Matches(System.IO.File.ReadAllText(file)).SelectMany(m => m.Groups[2].Value.Split(';', ',')).Select(c => c.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var reset = rows.Where(r => codes.Contains(r.Sonar))
+                .SelectMany(r => r.Setting!.Split("; ").Select(setting => (r.Sonar, Key: setting.Split('=')[0].Trim())))
+                .Where(p => OptionDefaults.ContainsKey(p.Key) && lines.Any(l => l.Split('=')[0].Trim() == p.Key))
+                .ToList();
+            if (reset.Count == 0)
+            {
+                continue;
+            }
+
+            var relative = System.IO.Path.GetRelativePath(root, file).Replace('\\', '/');
+            var folder = System.IO.Path.GetDirectoryName(relative)?.Replace('\\', '/') ?? string.Empty;
+            result.Add((folder.Length == 0 ? "*.cs" : StyleCopSetup.SectionFor([folder]),
+                [$"# {string.Join(", ", reset.Select(p => p.Sonar).Distinct())} in {relative}'s <NoWarn>: StyleBro's own value there, the rule stays on",
+                    .. reset.Select(p => $"{p.Key} = {OptionDefaults[p.Key]}").Distinct()]));
+        }
+
+        return result;
     }
 
     /// <summary>The rewritten text and the number of suppressions added (0: unchanged).</summary>
