@@ -477,6 +477,35 @@ public class KeptFindingsTests
         Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
     }
 
+    // Trial 21: the elements of a tuple type are renamed together; the one that blocks gives its reason, the other says so.
+    [Fact]
+    public async Task ATupleElementKeptWithAnother_SaysSo()
+    {
+        var (solution, _, _) = await FindAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "namespace ZqxApp\n{\n    class C\n    {\n        private int _zqxN;\n\n        public (int zqxFirst, int zqxSecond) Get() => (1, 0);\n\n        public int GetN() => _zqxN;\n    }\n}\n"));
+        var tests = ("Tests/T.cs", "namespace ZqxTests\n{\n    using ZqxApp;\n\n    class ZqxT\n    {\n        int zqxRead(C zqxC) => zqxC.Get().zqxFirst;\n    }\n}\n");
+
+        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
+        Assert.Equal(KeptReason.KeptWithOtherElement, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxSecond", "ZqxSecond", CancellationToken.None)));
+    }
+
+    // AngleSharp (trial 21): static properties aren't data a serializer writes, so only a reflection-shaped string keeps
+    // them; 'nbc' was kept for "https://www.nbc.com" and "Pages.nbc.html".
+    [Theory]
+    [InlineData("\"https://www.nbc.com\"", null)]
+    [InlineData("\"nbc\"", null)]
+    [InlineData("typeof(Assets).GetProperty(\"nbc\")", KeptReason.NameInString)]
+    public async Task AStaticProperty_IsKeptOnlyForAReflectionShapedString(string use, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.ElementPascalCase,
+            ("Assets.cs", "internal static class Assets\n{\n    public static string nbc => Read(\"Pages.nbc.html\");\n\n    private static string Read(string name) => name;\n}\n"),
+            ("Bench.cs", $"class Bench\n{{\n    object Use() => {use};\n}}\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
     // eShop: a tuple element in a private member's signature (or a body) can't be seen by code the run doesn't load; a
     // use of that name in another project (the MAUI app outside the solution filter) doesn't keep it.
     [Fact]
@@ -670,7 +699,7 @@ public class KeptFindingsTests
 
         var first = solution.GetDocument(ids[0])!;
         var compilation = (await first.Project.GetCompilationAsync())!;
-        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FieldNamingAnalyzer());
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FieldNamingAnalyzer(), new PascalCaseNamingAnalyzer());
         var tree = await first.GetSyntaxTreeAsync();
         var diagnostic = (await compilation.WithAnalyzers(analyzers).GetAnalyzerDiagnosticsAsync()).First(d => d.Id == id && d.Location.SourceTree == tree);
         return (solution, first, diagnostic);

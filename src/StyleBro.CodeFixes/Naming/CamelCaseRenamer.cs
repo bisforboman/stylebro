@@ -429,20 +429,19 @@ internal static class CamelCaseRenamer
     {
         var strings = names.Strings;
 
-        // Names that are also data (serializers write public instance fields, properties and enum members by name)
-        // are looked for inside strings too, like test JSON.
-        // Names that serializers write (public instance fields, properties, events, enum members) are looked for inside
-        // strings too, like test JSON. Private fields only by their exact name: other projects reach them only by
+        // Names that serializers write (public instance fields, instance properties and events, enum members) are looked
+        // for inside strings too, like test JSON. Private fields only by their exact name: other projects reach them only by
         // reflection ('GetField("_count")'), and a common word like 'count' in any message would block every rename.
         // (Inside the field's own type, the analyzer also matches it inside strings: 'DebuggerDisplay("{_count}")'.)
-        var isData = symbol is IPropertySymbol or IEventSymbol
+        var isData = (symbol is IPropertySymbol or IEventSymbol && !symbol.IsStatic)
             || (symbol is IFieldSymbol field && (FieldNames.IsDataMember(field) || field.ContainingType.TypeKind == TypeKind.Enum));
 
-        // Other fields (private ones, mostly) only by a string where code names a member to reach it ('GetField("_count")',
-        // RepositoryNames.IsReflectionShaped; owner's decision, docs/decisions.md): any string at all kept 692 of Orleans'
-        // renames for words like "options" in 'Assert.Equal("options", e.ParamName)', and Flow.Launcher's 'type' for a JSON
-        // key in another plugin.
-        if (symbol is IFieldSymbol && !isData)
+        // Other fields (private ones, mostly) and static properties and events (no serializer writes them) only by a string
+        // where code names a member to reach it ('GetField("_count")', RepositoryNames.IsReflectionShaped; owner's decision,
+        // docs/decisions.md): any string at all kept 692 of Orleans' renames for words like "options" in
+        // 'Assert.Equal("options", e.ParamName)', and Flow.Launcher's 'type' for a JSON key in another plugin. AngleSharp's
+        // test assets ('static string nbc => Read("Pages.nbc.html")') were kept for URLs and encoding names (trial 21).
+        if (symbol is IFieldSymbol or IPropertySymbol or IEventSymbol && !isData)
         {
             return names.Reflection.Contains(symbol.Name) ? symbol.Name : null;
         }
@@ -705,11 +704,16 @@ internal static class CamelCaseRenamer
             || root.FindToken(span.Start).Parent is not IdentifierNameSyntax name
             || !IsSimpleName(name)
             || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
-            || model.LookupSymbols(span.Start, name: newName) is not { IsEmpty: false } found)
+            || model.LookupSymbols(span.Start, name: newName)
+                .Where(s => !IsHiddenByTheRename(s, field, newName) && !SymbolEqualityComparer.Default.Equals(s, field.Type))
+                .ToList() is not { Count: > 0 } found)
         {
             return newName;
         }
 
+        // The field's own type by the new name ('SimulatorEvent _simulatorEvent' -> 'SimulatorEvent SimulatorEvent') is
+        // legal ('Color Color': 'SimulatorEvent.Create()' still binds to the type), and members of enclosing types are
+        // hidden by the renamed field (both filtered above; trial 21).
         // Only locals and parameters can be stepped around by qualifying; another member with the new name (for
         // example in a derived type, which would hide the field) means the rename is skipped.
         if (found.Any(s => s is not (ILocalSymbol or IParameterSymbol or IRangeVariableSymbol)))
@@ -745,6 +749,29 @@ internal static class CamelCaseRenamer
         }
 
         return access.Span;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="found"/> is a member of a type enclosing the field's type (or of its bases) that the field's
+    /// type never names: the renamed field hides it at the field's uses, since lookup searches the type and its bases before
+    /// the enclosing types, and no other use in the type means it (AngleSharp, trial 21: a nested state class's 'valid' was
+    /// kept for the outer class's '_valid').
+    /// </summary>
+    private static bool IsHiddenByTheRename(ISymbol found, IFieldSymbol field, string newName)
+    {
+        var type = field.ContainingType;
+        for (var outer = type.ContainingType; outer is not null; outer = outer.ContainingType)
+        {
+            for (var t = outer; t is not null; t = t.BaseType)
+            {
+                if (SymbolEqualityComparer.Default.Equals(found.ContainingType?.OriginalDefinition, t.OriginalDefinition))
+                {
+                    return !type.DeclaringSyntaxReferences.Any(r => r.GetSyntax().DescendantTokens().Any(token => token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == newName));
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>A name that is looked up in scope, as opposed to the member part of 'x.Name' or 'Name = ...'.</summary>

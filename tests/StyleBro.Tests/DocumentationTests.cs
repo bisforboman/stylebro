@@ -2184,7 +2184,10 @@ public class DocumentationTests
     [InlineData(DocumentationMode.Diagnose, "<summary>Sorts when a < b</summary>", true)]
     [InlineData(DocumentationMode.Parse, "<summary>x < 0 or y > 1</summary>", true)]
     [InlineData(DocumentationMode.Parse, "<summary>IList&lt;T&gt; <c>x</c> items</summary>", false)]
-    [InlineData(DocumentationMode.Parse, "<summary>a &amp; b <see cref=\"A\"/> & c</summary>", false)]
+    [InlineData(DocumentationMode.Parse, "<summary>a &amp; b <see cref=\"A\"/> &#38; c &#x26; d</summary>", false)]
+    [InlineData(DocumentationMode.Parse, "<summary>a &amp; b <see cref=\"A\"/> & c</summary>", true)]
+    [InlineData(DocumentationMode.Diagnose, "<summary>a stray & ampersand</summary>", true)]
+    [InlineData(DocumentationMode.Parse, "<summary>an unfinished &amp entity</summary>", true)]
     [InlineData(DocumentationMode.Parse, "<param name=\"\">The a.</param>", false)]
     [InlineData(DocumentationMode.Diagnose, "<param name=\"\">The a.</param><see cref=\"\"/>", false)]
     public void MalformedDocumentation_IsToldByTheEndTags(DocumentationMode mode, string documentation, bool malformed)
@@ -2207,13 +2210,61 @@ public class DocumentationTests
         "/// <summary>A cache.</summary>\npublic class Cache\n{\n    /// <summary>Clears.</summary>\n    /// <placeholder>TODO</placeholder>\n    public void Clear() { }\n}\n");
 
     // Trial 20: text ending in ',' or ';' is code or a list that goes on ('1033 => "en",' became '"en",.', MoreLINQ's
-    // 'value;.'); a bare '&' doesn't move any tag, so that comment still gets its period.
+    // 'value;.'). Trial 21: a bare '&' is malformed XML (the compiler reports CS1570), so that comment is left to a person.
     [Fact]
     public Task TextEndingInACommaOrSemicolon_GetsNoPeriod() => VerifyFixAsync(
         "/// <summary>\n/// 1033 => \"en\",\n/// </summary>\npublic class Codes\n{\n    /// <summary>Returns value;</summary>\n    public int M() => 1;\n\n"
-            + "    /// <summary>a stray & ampersand{|BRO1603:|}</summary>\n    public int N() => 1;\n}\n",
+            + "    /// <summary>a stray & ampersand</summary>\n    public int N() => 1;\n}\n",
         "/// <summary>\n/// 1033 => \"en\",\n/// </summary>\npublic class Codes\n{\n    /// <summary>Returns value;</summary>\n    public int M() => 1;\n\n"
-            + "    /// <summary>a stray & ampersand.</summary>\n    public int N() => 1;\n}\n");
+            + "    /// <summary>a stray & ampersand</summary>\n    public int N() => 1;\n}\n");
+
+    // SSH.NET (trial 21, StyleCop-clean): SA1629 doesn't check events (field-like, with accessors, in interfaces) or
+    // finalizers, and neither does BRO1603 (parity 'documentation-periods-kinds').
+    [Fact]
+    public Task EventsAndFinalizers_AreNotChecked() => VerifyNoDiagnosticsAsync(
+        """
+        /// <summary>A holder.</summary>
+        public class Holder
+        {
+            /// <summary>Occurs when a message is received</summary>
+            public event System.EventHandler Received;
+
+            /// <summary>Occurs with accessors</summary>
+            public event System.EventHandler WithAccessors { add { } remove { } }
+
+            /// <summary>Finalizes an instance of the <see cref="Holder"/> class</summary>
+            ~Holder()
+            {
+            }
+
+            /// <summary>Raises it.</summary>
+            public void Raise() => Received?.Invoke(this, System.EventArgs.Empty);
+        }
+
+        /// <summary>A contract.</summary>
+        public interface IContract
+        {
+            /// <summary>Occurs in an interface</summary>
+            event System.EventHandler Changed;
+        }
+        """);
+
+    // SSH.NET (trial 21): an inline element whose own text ends a sentence needs no period after it ('...request.</paramref>.').
+    [Fact]
+    public Task InlineElementEndingASentence_GetsNoPeriod() => VerifyFixAsync(
+        "/// <summary>A holder.</summary>\npublic class Holder\n{\n    /// <summary>\n    /// Starts. <paramref name=\"name\">The name of the request.</paramref>\n    /// </summary>\n"
+            + "    /// <param name=\"name\">The name.</param>\n    public void A(string name) { }\n\n"
+            + "    /// <summary>Asks <see cref=\"Holder\">is it done?</see></summary>\n    public void B() { }\n\n"
+            + "    /// <summary>Ends with <c>no period</c>{|BRO1603:|}</summary>\n    public void C() { }\n}\n",
+        "/// <summary>A holder.</summary>\npublic class Holder\n{\n    /// <summary>\n    /// Starts. <paramref name=\"name\">The name of the request.</paramref>\n    /// </summary>\n"
+            + "    /// <param name=\"name\">The name.</param>\n    public void A(string name) { }\n\n"
+            + "    /// <summary>Asks <see cref=\"Holder\">is it done?</see></summary>\n    public void B() { }\n\n"
+            + "    /// <summary>Ends with <c>no period</c>.</summary>\n    public void C() { }\n}\n");
+
+    // AngleSharp (trial 21): a word ending in a period and digits reads as a number ('processes it.0' became 'it.0.').
+    [Fact]
+    public Task TextEndingInAVersionNumber_GetsNoPeriod() => VerifyNoDiagnosticsAsync(
+        "/// <summary>Supports HTML 5.0</summary>\npublic class Parser\n{\n    /// <summary>Consumes a token and processes it.0</summary>\n    public void Consume() { }\n}\n");
 
     // GuardClauses: the period went before the line's trailing spaces ('<paramref name="input"/>. '): they go too.
     [Fact]

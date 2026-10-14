@@ -82,7 +82,10 @@ internal static class QualifiedUsings
             || arguments.Length != generic.TypeArgumentList.Arguments.Count
             || (!top && (type.IsTupleType || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)))
         {
-            return symbol.ToDisplayString(top && type is { SpecialType: not SpecialType.None } ? QualifiedNoKeywords : Qualified);
+            // A type argument keeps the way it names a built-in type: 'System.Char' stays (AngleSharp, trial 21: 'char' broke
+            // IDE0049 under dotnet_style_predefined_type_* = false, which dotnet format can't fix in an alias); 'int' stays too.
+            var keywords = top ? type is not { SpecialType: not SpecialType.None } : syntax.DescendantNodesAndSelf().OfType<PredefinedTypeSyntax>().Any();
+            return symbol.ToDisplayString(keywords ? Qualified : QualifiedNoKeywords);
         }
 
         var builder = new StringBuilder();

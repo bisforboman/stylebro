@@ -287,9 +287,15 @@ internal static class FieldNames
                 : ruled is not null ? (ruled == NamingCasing.UnderscoreCamel ? FieldCasing.UnderscoreCamel : FieldCasing.Camel)
                 : (camelStatic ?? (IsChecked(field) ? GetPrivateStyle(field, style) : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
                 : FieldCasing.Camel;
-            return GetJoinedName(core, casing) is { } joined && joined != name
-                ? (hasPrefix ? FieldRule.Prefix : FieldRule.Underscore, joined)
-                : null;
+
+            // SA1310 doesn't check a name starting with '_' (SA1309's): where the style keeps the underscore, SA1309 never
+            // removes it either, so '_signature_size' stays (SSH.NET, StyleCop-clean, trial 21). The casing check below still runs.
+            if (hasPrefix || casing != FieldCasing.UnderscoreCamel || !name.StartsWith("_", System.StringComparison.Ordinal))
+            {
+                return GetJoinedName(core, casing) is { } joined && joined != name
+                    ? (hasPrefix ? FieldRule.Prefix : FieldRule.Underscore, joined)
+                    : null;
+            }
         }
 
         var camelStyle = style.Private == FieldStyle.CamelCase;
