@@ -152,9 +152,9 @@ internal static class DocumentationPeriods
 
         // '<c>' holds code ('Calls <c>Done.</c>' still gets its period): only a quoted sentence in it counts.
         var text = string.Concat(element.Content.SelectMany(c => c.DescendantTokens())
-            .Where(t => t.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken)
+            .Where(t => t.IsKind(SyntaxKind.XmlTextLiteralToken) || t.IsKind(SyntaxKind.XmlEntityLiteralToken))
             .Select(t => t.ValueText)).TrimEnd();
-        var sentence = text.TrimEnd(ClosingPunctuation);
+        var sentence = text.TrimEnd(ClosingPunctuation).TrimEnd();
         return (element.StartTag.Name.LocalName.ValueText != "c" || (text.Length > sentence.Length && text[text.Length - 1] is '"' or '\''))
             && sentence.Length > 0 && sentence[sentence.Length - 1] is '.' or '?' or '!';
     }
