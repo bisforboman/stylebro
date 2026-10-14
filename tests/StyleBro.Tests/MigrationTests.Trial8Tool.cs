@@ -32,7 +32,7 @@ public sealed partial class MigrationTests
         Assert.Contains("Line endings: git converts 4 of 7 C# files on checkout, so end_of_line isn't set (each machine keeps its own ending; the 3 files committed with a fixed ending don't decide)", result.Notes);
 
         var output = Capture(() => InitCommand.Run(new[] { root })).Replace("\r\n", "\n");
-        Assert.Contains("  git      C# files' line endings: 3 of 3 CRLF -> git converts 4 of 7 C# files on checkout", output);
+        Assert.Contains("  git      C# files' line endings: git converts 4 of 7 C# files on checkout -> end_of_line isn't set (each machine keeps its own ending; the 3 files committed with a fixed ending don't decide)", output);
         Assert.DoesNotContain("end_of_line = ", output);
         Assert.DoesNotContain("note     line endings", output);
 

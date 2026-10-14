@@ -34,13 +34,20 @@ internal static class InitCommand
     public const string ModernizeEnd = "# END stylebro-modernize";
 
     /// <summary>
-    /// The start marker of the block init writes into an .editorconfig below the root that decides a whitespace key itself
-    /// (<see cref="NestedWhitespace"/>; its own marker, so 'format' and the migration don't take it for the main block).
+    /// The start marker of the block init writes into an .editorconfig below the root: the whitespace keys it decides itself
+    /// (<see cref="NestedWhitespace"/>) and rules set by id (<see cref="NestedHiddenFromFormat"/>); its own marker, so 'format'
+    /// and the migration don't take it for the main block. Called 'stylebro-whitespace' before trial 20 (<see cref="LegacyWhitespaceBegin"/>).
     /// </summary>
-    public const string WhitespaceBegin = "# BEGIN stylebro-whitespace";
+    public const string WhitespaceBegin = "# BEGIN stylebro-folder";
 
-    /// <summary>The end marker of the whitespace block.</summary>
-    public const string WhitespaceEnd = "# END stylebro-whitespace";
+    /// <summary>The end marker of the folder block.</summary>
+    public const string WhitespaceEnd = "# END stylebro-folder";
+
+    /// <summary>The folder block's old start marker: read and replaced.</summary>
+    public const string LegacyWhitespaceBegin = "# BEGIN stylebro-whitespace";
+
+    /// <summary>The folder block's old end marker.</summary>
+    public const string LegacyWhitespaceEnd = "# END stylebro-whitespace";
 
     /// <summary>The comment above the detected conventions in the block.</summary>
     public const string ConventionsHeader = "# Conventions in this repository's code (stylebro-migrate init counted them; delete a line to have it counted again)";
@@ -62,8 +69,19 @@ internal static class InitCommand
     /// <summary>The template's key that turns IDE0009 ('this.' required) off.</summary>
     public const string ThisQualificationSeverityKey = "dotnet_diagnostic.IDE0009.severity";
 
+    /// <summary>The comment above the lines that turn rules off in a folder that turns every analyzer off (<see cref="OptOutLines"/>).</summary>
+    public const string OptOutComment =
+        "# This folder turns every analyzer off (dotnet_analyzer_diagnostic.severity), but a rule's own entry wins over that (StyleBro's\n"
+        + "# preset in the build, the block above in 'dotnet format'): StyleBro's rules and the built-in ones init sets, off by id.";
+
+    /// <summary>What the header of <see cref="OptOutBlock"/> says.</summary>
+    private const string OptOutHeader = "stylebro-migrate init: rules off in a folder that turns every analyzer off";
+
+    /// <summary>IDE0055's severity key.</summary>
+    private const string IdeSeverityKey = "dotnet_diagnostic.IDE0055.severity";
+
     /// <summary>The line that turns IDE0055 off.</summary>
-    private const string IdeOff = "dotnet_diagnostic.IDE0055.severity = none";
+    private const string IdeOff = IdeSeverityKey + " = none";
 
     /// <summary>The IDE rule that enforces a convention's SDK key (its severity tells whether the key is enforced).</summary>
     private static readonly Dictionary<string, string> IdeRules = new(StringComparer.OrdinalIgnoreCase)
@@ -131,8 +149,10 @@ internal static class InitCommand
         var sonarScopes = new List<(string Section, List<string> Lines)>();
         if (sonar is not null && !migrated)
         {
-            sonar.Report(sonar.Apply(sonarLines, _ => true, own)).ForEach(Console.WriteLine);
-            sonarScopes = [.. SonarScopes(root, sonar, sonarLines, own), .. Suppressions.OptionScopes(root, sonar, sonarLines)];
+            var applied = sonar.Apply(sonarLines, _ => true, own);
+            var optionScopes = Suppressions.OptionScopes(root, sonar, sonarLines);
+            Suppressions.Annotate(sonar.Report(applied), optionScopes).ForEach(Console.WriteLine);
+            sonarScopes = [.. SonarScopes(root, sonar, sonarLines, own), .. optionScopes];
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
             var (added, files, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
@@ -169,7 +189,11 @@ internal static class InitCommand
         foreach (var folder in folders)
         {
             Console.WriteLine();
-            Console.WriteLine($"{folder}/.editorconfig says root = true, so the root's settings don't reach {folder}/: it gets a block of its own, from its own code.");
+            if (!OptsOut(Migration.OwnSettings(Path.Combine(root, folder))))
+            {
+                Console.WriteLine($"{folder}/.editorconfig says root = true, so the root's settings don't reach {folder}/: it gets a block of its own, from its own code.");
+            }
+
             targets.Add(Prepare(root, folder, sonarLines, multiTargeted, modernizing));
             if (targets.Count == 1)
             {
@@ -190,7 +214,7 @@ internal static class InitCommand
 
                 if (target.Block.Length == 0)
                 {
-                    Console.WriteLine($"== {target.Name}: its stylebro-whitespace block is no longer needed (run with --write to remove it)");
+                    Console.WriteLine($"== {target.Name}: its stylebro-folder block is no longer needed (run with --write to remove it)");
                 }
                 else if (!target.HasBlock || !target.HasModernize)
                 {
@@ -217,12 +241,12 @@ internal static class InitCommand
             else if (target.Block.Length == 0)
             {
                 text = RemoveWhitespaceBlock(text);
-                Console.WriteLine($"Removed the whitespace block from {target.Name}: it no longer decides those settings.");
+                Console.WriteLine($"Removed the stylebro-folder block from {target.Name}: nothing needs it any more.");
             }
             else
             {
-                text = Migration.Apply(text, target.Block, target.Begin, target.End);
-                Console.WriteLine(target.Begin == WhitespaceBegin ? $"Wrote the whitespace settings it decides to {target.Name}." : $"Wrote the built-in rule severities to {target.Name}.");
+                text = Migration.Apply(target.Begin == WhitespaceBegin ? RemoveWhitespaceBlock(text, legacyOnly: true) : text, target.Block, target.Begin, target.End);
+                Console.WriteLine(WroteLine(target.Name, target.Block, target.Begin == WhitespaceBegin));
             }
 
             if (!target.HasModernize)
@@ -323,6 +347,13 @@ internal static class InitCommand
         return Migration.BeginMarker + " (stylebro-migrate init: built-in .NET rules for StyleBro's preset; edits inside are replaced)\n"
             + template + "\n" + Migration.EndMarker + "\n";
     }
+
+    /// <summary>The block for a 'root = true' folder that turns every analyzer off (<see cref="OptOutLines"/>).</summary>
+    public static string OptOutBlock(IReadOnlyList<string> lines) =>
+        Migration.BeginMarker + " (" + OptOutHeader + "; edits inside are replaced)\n[*.cs]\n"
+        + "# This folder turns every analyzer off (dotnet_analyzer_diagnostic.severity), but StyleBro's preset sets its rules by id, which wins\n"
+        + "# in the build: StyleBro's rules and the built-in ones init sets, off by id, so the build and 'dotnet format' leave it alone.\n"
+        + string.Join("\n", lines) + "\n" + Migration.EndMarker + "\n";
 
     /// <summary>
     /// The conventions the repository's code follows (<see cref="Conventions"/>): the lines to write, and the report.
@@ -470,8 +501,17 @@ internal static class InitCommand
             : null;
         var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), csharpier.Lines is null ? own : own.Where(p => !Conventions.All.Any(c => Conventions.IsCSharpiers(c) && (c.Key == p.Key || c.AlsoKeys.Contains(p.Key)))).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase), unenforced.ToDictionary(k => k, k => settings[k]), spacing);
 
-        // 'always' asks for 'public' on interface members too: only when the code has them or the build enforces it (BaGetter).
-        if (Conventions.InterfaceAccess(counts, settings, EnforcesCodeStyleInBuild(root) && !unenforced.Contains("dotnet_style_require_accessibility_modifiers")) is var (interfaceLines, interfaceReport))
+        // BRO1302 has no switch for primary-constructor parameters alone: say what turning it off covers.
+        if (detected.FindIndex(l => l.StartsWith("# init: primary-constructor parameters:", StringComparison.Ordinal)) is >= 0 and var primary)
+        {
+            const string Whole = "BRO1302 has no switch for primary-constructor parameters alone, so it's off for every parameter";
+            detected[primary] = detected[primary].Replace("so BRO1302 is off.", $"so BRO1302 is off ({Whole}).", StringComparison.Ordinal);
+            report.Add($"  {"note",-8} {Whole}");
+        }
+
+        // 'always' asks for 'public' on interface members too: only when the code has them or the build enforces it (BaGetter):
+        // IDE0040 a warning or an error by id, category or bulk (trial 20: 'always' alone, or ':suggestion', reported nothing).
+        if (Conventions.InterfaceAccess(counts, settings, EnforcesCodeStyleInBuild(root) && IsEnforced(settings, "IDE0040")) is var (interfaceLines, interfaceReport))
         {
             detected.AddRange(interfaceLines);
             report.Insert(report.FindIndex(l => l.Contains(" private-by-default members: ", StringComparison.Ordinal)) + 1, interfaceReport);
@@ -633,12 +673,13 @@ internal static class InitCommand
         return result;
     }
 
-    /// <summary>The lines of the whitespace block (<see cref="WhitespaceBegin"/>) in a nested .editorconfig's text, or none.</summary>
+    /// <summary>The lines of the folder block (<see cref="WhitespaceBegin"/>, or the legacy one) in a nested .editorconfig's text, or none.</summary>
     public static List<string> PreviousWhitespace(string? editorConfig)
     {
         var text = editorConfig?.Replace("\r\n", "\n") ?? string.Empty;
-        var begin = text.IndexOf(WhitespaceBegin, StringComparison.Ordinal);
-        var end = begin < 0 ? -1 : text.IndexOf(WhitespaceEnd, begin, StringComparison.Ordinal);
+        var legacy = !text.Contains(WhitespaceBegin, StringComparison.Ordinal);
+        var begin = text.IndexOf(legacy ? LegacyWhitespaceBegin : WhitespaceBegin, StringComparison.Ordinal);
+        var end = begin < 0 ? -1 : text.IndexOf(legacy ? LegacyWhitespaceEnd : WhitespaceEnd, begin, StringComparison.Ordinal);
         return end < 0 ? [] : text.Substring(begin, end - begin).Split('\n').Skip(1).Where(l => l.Trim().Length > 0 && !l.TrimStart().StartsWith('[')).ToList();
     }
 
@@ -651,17 +692,32 @@ internal static class InitCommand
         StyleCopSetup.EnumerateFiles(root, ownRoot: true)
             .Where(f => Path.GetFileName(f) == ".editorconfig")
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
-            .Where(s => s != "." && !nested.ContainsKey(s) && File.ReadAllText(Path.Combine(root, s, ".editorconfig")).Contains(WhitespaceBegin, StringComparison.Ordinal))
+            .Where(s => s != "." && !nested.ContainsKey(s) && File.ReadAllText(Path.Combine(root, s, ".editorconfig"))is var text && (text.Contains(WhitespaceBegin, StringComparison.Ordinal) || text.Contains(LegacyWhitespaceBegin, StringComparison.Ordinal)))
             .Order(StringComparer.Ordinal)
             .ToList();
 
-    /// <summary>The .editorconfig text without its whitespace block (and the blank line above it).</summary>
-    public static string RemoveWhitespaceBlock(string text) =>
-        Regex.Replace(text.Replace("\r\n", "\n"), $@"\n*{Regex.Escape(WhitespaceBegin)}.*?{Regex.Escape(WhitespaceEnd)}[^\n]*\n?", "\n", RegexOptions.Singleline);
+    /// <summary>The .editorconfig text without its folder block (and the blank line above it); <paramref name="legacyOnly"/>: only an old 'stylebro-whitespace' one.</summary>
+    public static string RemoveWhitespaceBlock(string text, bool legacyOnly = false) =>
+        Regex.Replace(text.Replace("\r\n", "\n"), $@"\n*# BEGIN stylebro-({(legacyOnly ? string.Empty : "folder|")}whitespace)\b.*?# END stylebro-\1[^\n]*\n?", "\n", RegexOptions.Singleline);
 
-    /// <summary>The block for a nested .editorconfig's whitespace lines (<see cref="NestedWhitespace"/>).</summary>
+    /// <summary>
+    /// What init says after writing a block (<paramref name="nested"/>: a folder block): it holds whitespace settings, rule
+    /// severities by id, or both (trial 20: "Wrote the whitespace settings" for a block of 119 severities).
+    /// </summary>
+    public static string WroteLine(string name, string block, bool nested)
+    {
+        var keys = block.Replace("\r\n", "\n").Split('\n').Select(KeyOf).OfType<string>().ToList();
+        var ids = keys.Count(k => IdOf(k) is not null);
+        var whitespace = keys.Any(k => IdOf(k) is null);
+        return !nested ? (block.Contains(OptOutHeader, StringComparison.Ordinal) ? $"Turned StyleBro's rules and the built-in ones off by id in {name} ({ids} rules)." : $"Wrote the built-in rule severities to {name}.")
+            : !whitespace ? $"Wrote {ids} rule severities by id to {name}."
+            : ids == 0 ? $"Wrote the whitespace settings it decides to {name}."
+            : $"Wrote the whitespace settings it decides and {ids} rule severities by id to {name}.";
+    }
+
+    /// <summary>The block for a nested .editorconfig (<see cref="NestedWhitespace"/>, <see cref="NestedHiddenFromFormat"/>).</summary>
     public static string WhitespaceBlock(IEnumerable<string> lines) =>
-        WhitespaceBegin + " (stylebro-migrate init: whitespace settings this file decides for C# files; edits inside are replaced)\n[*.cs]\n"
+        WhitespaceBegin + " (stylebro-migrate init: settings for this folder's C# files; edits inside are replaced)\n[*.cs]\n"
         + string.Join("\n", lines) + "\n" + WhitespaceEnd + "\n";
 
     /// <summary>
@@ -691,20 +747,31 @@ internal static class InitCommand
     /// <summary>
     /// Whether the repository's .editorconfig enforces 'this.' (owner's choice 2026-10-14): IDE0009 at suggestion or above, or,
     /// without an IDE0009 severity, a dotnet_style_qualification_for_* key = true with a severity that isn't silent or none
-    /// ('true:warning'), like <see cref="Unenforced"/> judges a key. Then init keeps the repository's rule.
+    /// ('true:warning'), like <see cref="Unenforced"/> judges a key, or with IDE0009 shown through its category or the bulk
+    /// severity (trial 20, MoreLINQ: 'true' and 'dotnet_analyzer_diagnostic.category-Style.severity = warning'). Then init
+    /// keeps the repository's rule.
     /// </summary>
     public static bool RequiresThisQualification(IReadOnlyDictionary<string, string> settings)
     {
-        static bool Shown(string severity) => severity.Trim().ToLowerInvariant() is "suggestion" or "warning" or "error";
-        if (settings.TryGetValue(ThisQualificationSeverityKey, out var ide))
+        var effective = StyleBro.Analyzers.Severities.FromSettings(new Conventions.Options(settings), "IDE0009", "Style");
+        var shown = effective is Microsoft.CodeAnalysis.ReportDiagnostic.Info or Microsoft.CodeAnalysis.ReportDiagnostic.Warn or Microsoft.CodeAnalysis.ReportDiagnostic.Error;
+        if (settings.ContainsKey(ThisQualificationSeverityKey))
         {
-            return Shown(ide);
+            return shown;
         }
 
         return new[] { "field", "property", "method", "event" }.Any(kind =>
-            settings.TryGetValue($"dotnet_style_qualification_for_{kind}", out var value) && value.Split(':') is [var on, var severity]
-            && on.Trim().Equals("true", StringComparison.OrdinalIgnoreCase) && Shown(severity));
+            settings.TryGetValue($"dotnet_style_qualification_for_{kind}", out var value) && value.Split(':') is [var on, .. var rest]
+            && on.Trim().Equals("true", StringComparison.OrdinalIgnoreCase)
+            && (shown || (rest is [var severity] && severity.Trim().ToLowerInvariant() is "suggestion" or "warning" or "error")));
     }
+
+    /// <summary>
+    /// Whether <paramref name="settings"/> make a built-in rule a warning or an error: its own severity, else its category's
+    /// (Style), else the bulk one (the shared <see cref="StyleBro.Analyzers.Severities.FromSettings"/>). The build reports it then.
+    /// </summary>
+    public static bool IsEnforced(IReadOnlyDictionary<string, string> settings, string id) =>
+        StyleBro.Analyzers.Severities.FromSettings(new Conventions.Options(settings), id, "Style") is Microsoft.CodeAnalysis.ReportDiagnostic.Warn or Microsoft.CodeAnalysis.ReportDiagnostic.Error;
 
     /// <summary>The StyleBro rules the preset turns on, with their severity, from every layer in the package (init pins the latest).</summary>
     public static SortedDictionary<string, string> PresetSeverities()
@@ -757,37 +824,68 @@ internal static class InitCommand
     /// <summary>
     /// <see cref="HiddenFromFormat"/> for each .editorconfig below <paramref name="root"/> (folder relative to it, '/'-separated;
     /// not below a 'root = true' one), with the settings that reach it: <paramref name="rootSettings"/>, then each .editorconfig
-    /// on the way down (with <paramref name="withBlocks"/>, also their generated blocks). Trial 19: tests/.editorconfig with
-    /// 'dotnet_analyzer_diagnostic.severity = none' hid StyleBro's rules from 'dotnet format' there, and the build failed.
+    /// on the way down (with <paramref name="withBlocks"/>, also their generated blocks) and the lines found for the folders
+    /// above it. Trial 19: tests/.editorconfig with 'dotnet_analyzer_diagnostic.severity = silent' hid StyleBro's rules from
+    /// 'dotnet format' there, and the build failed. A folder that turns every analyzer off itself (<see cref="OptsOut"/>) gets
+    /// <see cref="OptOutLines"/> instead, with <paramref name="written"/>: the keys StyleBro's blocks set in <paramref name="rootSettings"/>.
     /// </summary>
-    public static SortedDictionary<string, List<string>> NestedHiddenFromFormat(string root, IReadOnlyDictionary<string, string> rootSettings, bool withBlocks)
+    public static SortedDictionary<string, List<string>> NestedHiddenFromFormat(string root, IReadOnlyDictionary<string, string> rootSettings, bool withBlocks, IReadOnlyCollection<string>? written = null)
     {
         var result = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
-        foreach (var file in StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(f => Path.GetFileName(f) == ".editorconfig"))
+        var sources = StyleCopSetup.EnumerateFiles(root, ownRoot: true)
+            .Where(f => Path.GetFileName(f) == ".editorconfig")
+            .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+            .Where(s => s != ".")
+            .OrderBy(s => s.Count(c => c == '/'))
+            .ThenBy(s => s, StringComparer.Ordinal)
+            .ToList();
+        foreach (var source in sources)
         {
-            var source = Path.GetRelativePath(root, Path.GetDirectoryName(file)!).Replace('\\', '/');
-            if (source == ".")
-            {
-                continue;
-            }
-
+            // The folder's own chain (its .editorconfig files and the lines found for the folders above) over the root's settings.
             var settings = new Dictionary<string, string>(rootSettings, StringComparer.OrdinalIgnoreCase);
+            var chain = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var parts = source.Split('/');
             for (var i = 1; i <= parts.Length; i++)
             {
-                foreach (var (key, value) in Migration.OwnSettings(Path.Combine(root, string.Join("/", parts.Take(i))), withBlocks))
+                var folder = string.Join("/", parts.Take(i));
+                var found = i < parts.Length && result.TryGetValue(folder, out var above) ? above.Where(l => KeyOf(l) is not null).Select(l => new KeyValuePair<string, string>(KeyOf(l)!, l.Substring(l.IndexOf('=') + 1).Trim())) : [];
+                foreach (var (key, value) in Migration.OwnSettings(Path.Combine(root, folder), withBlocks).Concat(found))
                 {
                     settings[key] = value;
+                    chain[key] = value;
                 }
             }
 
-            if (HiddenFromFormat(settings) is { Count: > 0 } hidden)
+            if ((OptsOut(chain) ? OptOutLines(settings.Where(p => written?.Contains(p.Key, StringComparer.OrdinalIgnoreCase) == true), chain) : HiddenFromFormat(settings)) is { Count: > 0 } hidden)
             {
                 result[source] = hidden;
             }
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="settings"/> (a folder's own .editorconfig files) turn every analyzer off: the bulk severity
+    /// 'none' or 'silent' (owner's choice 2026-10-14: coverlet's sample folders say "ensure no rules are enabled for these
+    /// asset source files"). Init then turns StyleBro's rules off there by id, so the build and 'format' leave it alone.
+    /// </summary>
+    public static bool OptsOut(IReadOnlyDictionary<string, string> settings) =>
+        settings.TryGetValue("dotnet_analyzer_diagnostic.severity", out var bulk) && bulk.Trim().ToLowerInvariant() is "none" or "silent" or "hidden";
+
+    /// <summary>
+    /// The lines for a folder that opts out (<see cref="OptsOut"/>): 'none' for every StyleBro rule the preset turns on, every
+    /// built-in rule init's block sets, and every other id <paramref name="settings"/> (what StyleBro's blocks above set)
+    /// turn on: a rule's own entry wins over the folder's bulk one (the preset's in the build, the root block's in 'format';
+    /// trial 20: 'format' re-indented coverlet's samples and 49 tests failed). IDE0055 'none' also keeps 'format''s
+    /// whitespace pass out. Ids <paramref name="own"/> (the folder's own files) set are the team's and stay.
+    /// </summary>
+    public static List<string> OptOutLines(IEnumerable<KeyValuePair<string, string>> settings, IReadOnlyDictionary<string, string> own)
+    {
+        var ids = new SortedSet<string>(PresetSeverities().Keys, StringComparer.Ordinal);
+        ids.UnionWith(Template().Replace("\r\n", "\n").Split('\n').Select(KeyOf).Select(IdOf).OfType<string>());
+        ids.UnionWith(settings.Where(p => !p.Value.Trim().Equals("none", StringComparison.OrdinalIgnoreCase)).Select(p => IdOf(p.Key)).OfType<string>());
+        return ids.Where(id => !own.ContainsKey($"dotnet_diagnostic.{id}.severity")).Select(id => $"dotnet_diagnostic.{id}.severity = none").ToList();
     }
 
     /// <summary>
@@ -1060,7 +1158,8 @@ internal static class InitCommand
     private static void PinPreset(string root, bool write)
     {
         var property = $"<StyleBroPreset>{StyleBro.Analyzers.PresetVersions.Latest}</StyleBroPreset>";
-        foreach (var props in Migration.PropsFiles(root))
+        var solutions = StyleCopSetup.EnumerateFiles(root).Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf").Select(File.ReadAllText).ToList();
+        foreach (var props in Migration.PropsFiles(root).Where(p => !IsOutsideTheBuild(root, p, solutions)))
         {
             var pinned = Migration.SetPreset(
                 File.Exists(props) ? File.ReadAllText(props) : null,
@@ -1085,6 +1184,24 @@ internal static class InitCommand
     }
 
     /// <summary>
+    /// Whether a nested Directory.Build.props serves only projects no solution lists and that don't get StyleBro (trial 20:
+    /// coverlet's Documentation/Examples and Altinn's test apps got a preset version nothing reads). Not the root's, and not
+    /// when the repository has no solution or StyleBro.Analyzers is mentioned under the props' folder.
+    /// </summary>
+    private static bool IsOutsideTheBuild(string root, string props, IReadOnlyList<string> solutions)
+    {
+        var folder = Path.GetDirectoryName(Path.GetFullPath(props))!;
+        if (solutions.Count == 0 || string.Equals(folder, Path.GetFullPath(root).TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase) || !Directory.Exists(folder))
+        {
+            return false;
+        }
+
+        var files = StyleCopSetup.EnumerateFiles(folder).Where(StyleCopSetup.IsMSBuild).ToList();
+        return !files.Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase))
+            && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => solutions.Any(s => s.Contains(Path.GetFileName(p), StringComparison.OrdinalIgnoreCase)));
+    }
+
+    /// <summary>
     /// One .editorconfig's block, with its convention report printed: the root's (<paramref name="folder"/> empty), or the
     /// one of a folder whose .editorconfig says 'root = true', judged from that folder's own code and settings (the root's
     /// don't reach it; CleanArchitecture's sample/ got CRLF lines in LF files and 'is null' against its '== null').
@@ -1097,6 +1214,29 @@ internal static class InitCommand
         var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
         var ownSettings = Migration.OwnSettings(root);
+        var plain = existing?.Replace("\r\n", "\n");
+        var name = prefix + ".editorconfig";
+
+        // A 'root = true' folder that turns every analyzer off (coverlet's samples; owner's choice 2026-10-14): its block only
+        // turns StyleBro's rules and the built-in ones off by id, which would win over the bulk 'none'. Nothing is counted.
+        if (folder.Length > 0 && !migrated && OptsOut(ownSettings))
+        {
+            var optOut = OptOutBlock(OptOutLines([], ownSettings));
+            Console.WriteLine($"{name} turns every analyzer off (dotnet_analyzer_diagnostic.severity = {ownSettings["dotnet_analyzer_diagnostic.severity"]}): its block turns StyleBro's rules and the built-in ones off there by id too, so the build and 'format' leave {folder}/ alone.");
+            JsonReport.AddSettings(name, optOut);
+            return new Target
+            {
+                Name = name,
+                Prefix = name + ": ",
+                Path = path,
+                Existing = existing,
+                Block = optOut,
+                ModernizeNotes = [],
+                HasBlock = plain is not null && Migration.Apply(plain, optOut) == plain,
+                HasModernize = true,
+                FormatsWhitespace = false,
+            };
+        }
 
         // The conventions the code follows: what the code already does stays (Ocelot: '=>' at the start of a line, '_field').
         var detected = new List<string>();
@@ -1145,10 +1285,19 @@ internal static class InitCommand
                 blockSettings[KeyOf(line)!] = line.Substring(line.IndexOf('=') + 1).Trim();
             }
 
-            foreach (var (source, hidden) in NestedHiddenFromFormat(root, blockSettings, withBlocks: false))
+            var written = detected.Concat(sonarLines).Concat(byId).Concat(modernizing ? ModernizeTemplate().Split('\n') : []).Select(KeyOf).OfType<string>().ToList();
+            foreach (var line in modernizing ? ModernizeTemplate().Replace("\r\n", "\n").Split('\n').Where(l => KeyOf(l) is not null) : [])
             {
-                Console.WriteLine($"{prefix}{source}/.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {hidden.Count} StyleBro rules the build reports. Its block sets them by id, so both agree.");
-                (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. ByIdComment.Split('\n'), .. hidden]);
+                blockSettings[KeyOf(line)!] = line.Substring(line.IndexOf('=') + 1).Trim();
+            }
+
+            foreach (var (source, hidden) in NestedHiddenFromFormat(root, blockSettings, withBlocks: false, written))
+            {
+                var optOut = hidden.All(l => l.EndsWith(" = none", StringComparison.Ordinal));
+                Console.WriteLine(optOut
+                    ? $"{prefix}{source}/.editorconfig turns every analyzer off: its block turns {hidden.Count} rules off by id too (StyleBro's and the built-in ones init sets), which would win over it, so the build and 'format' leave the folder alone."
+                    : $"{prefix}{source}/.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {hidden.Count} StyleBro rules the build reports. Its block sets them by id, so both agree.");
+                (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. (optOut ? OptOutComment : ByIdComment).Split('\n'), .. hidden]);
             }
 
             nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
@@ -1162,9 +1311,16 @@ internal static class InitCommand
             Console.WriteLine($"{prefix}.editorconfig requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off.");
         }
 
+        // The repository's own IDE0055 severity stays (MoreLINQ: 'suggestion'; the block's 'warning' overrode it while the report
+        // said it was kept). 'format' still runs its whitespace pass: it does whatever IDE0055's severity says.
+        if (!migrated && ownSettings.TryGetValue(IdeSeverityKey, out var ideSeverity) && !detected.Any(l => KeyOf(l) == IdeSeverityKey))
+        {
+            leftOut.Add(IdeSeverityKey);
+            Console.WriteLine($"{prefix}.editorconfig sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. 'stylebro-migrate format' still formats whitespace (its whitespace pass runs whatever IDE0055's severity is).");
+        }
+
         var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId, leftOut);
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
-        var name = prefix + ".editorconfig";
         if (!migrated)
         {
             JsonReport.AddSettings(name, block);
@@ -1177,7 +1333,6 @@ internal static class InitCommand
 
         // What --write would change: nothing when the settings are there (written by 'stylebro-migrate --write', or by an
         // earlier init). The dry run says the same as --write (mdx: it showed a block --write then said was there).
-        var plain = existing?.Replace("\r\n", "\n");
         return new Target
         {
             Name = name,
@@ -1234,6 +1389,12 @@ internal static class InitCommand
         var equals = line.IndexOf('=');
         return line.TrimStart().StartsWith('#') || equals <= 0 ? null : line.Substring(0, equals).Trim();
     }
+
+    /// <summary>The id of a 'dotnet_diagnostic.ID.severity' key, or null.</summary>
+    private static string? IdOf(string? key) =>
+        key is not null && key.StartsWith("dotnet_diagnostic.", StringComparison.OrdinalIgnoreCase) && key.EndsWith(".severity", StringComparison.OrdinalIgnoreCase)
+            ? key.Substring("dotnet_diagnostic.".Length, key.Length - "dotnet_diagnostic.".Length - ".severity".Length)
+            : null;
 
     private static string List(IReadOnlyList<string> items) => string.Join(", ", items.Take(3)) + (items.Count > 3 ? ", ..." : string.Empty);
 

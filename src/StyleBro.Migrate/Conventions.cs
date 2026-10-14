@@ -184,6 +184,9 @@ internal static class Conventions
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
+        new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
+        new(PrimaryParametersKey, "primary-constructor parameters", "warning", ("warning", "named 'logger'"), ("none", "named like fields ('_logger')"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
+        new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
     };
 
     /// <summary>
@@ -351,6 +354,19 @@ internal static class Conventions
     /// 2026-10-14: RecyclableMemoryStream keeps one below commented-out tests; BRO1506 removed it).
     /// </summary>
     private const string CommentBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterComment + ".severity";
+
+    /// <summary>
+    /// BRO1511's severity: doc comments right above their element, or with a blank line between (trial 20: MoreLINQ has one in
+    /// 324 of 491 places, and BRO1511 removed them in 115 files).
+    /// </summary>
+    private const string DocElementBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterDocumentation + ".severity";
+
+    /// <summary>
+    /// BRO1302's severity, judged on primary-constructor parameters of classes and structs: named like parameters ('logger') or
+    /// like the fields they replace ('_logger'; trial 20: BRO1302 renamed some of Altinn's, guards kept others). BRO1302 has no
+    /// switch for them alone, so the code's '_' turns it off for every parameter.
+    /// </summary>
+    private const string PrimaryParametersKey = "dotnet_diagnostic." + DiagnosticIds.ParameterCasing + ".severity";
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
@@ -827,11 +843,24 @@ internal static class Conventions
         && converted.Sum() >= (counts.TryGetValue(EndOfLineKey, out var fixedEndings) ? fixedEndings.Sum() : 0);
 
     /// <summary>What init and the migration say when <see cref="ConvertedOutnumber"/>.</summary>
-    public static string OutnumberedVerdict(IReadOnlyDictionary<string, int[]> counts)
+    public static string OutnumberedVerdict(IReadOnlyDictionary<string, int[]> counts) => OutnumberedFound(counts) + ", so " + OutnumberedResult(counts);
+
+    /// <summary>How many C# files git converts (the first half of <see cref="OutnumberedVerdict"/>).</summary>
+    public static string OutnumberedFound(IReadOnlyDictionary<string, int[]> counts)
     {
         var converted = counts[ConvertedKey].Sum();
         var others = counts.TryGetValue(EndOfLineKey, out var fixedEndings) ? fixedEndings.Sum() : 0;
-        return $"git converts {converted} of {converted + others} C# files on checkout, so end_of_line isn't set (each machine keeps its own ending; the {Plural(others, "file")} committed with a fixed ending don't decide)";
+        return $"git converts {converted} of {converted + others} C# files on checkout";
+    }
+
+    /// <summary>
+    /// What follows (the second half): trial 20's report said "1 of 1 CRLF -> git converts 258 of 259 ...", counting the one
+    /// committed file as the finding.
+    /// </summary>
+    public static string OutnumberedResult(IReadOnlyDictionary<string, int[]> counts)
+    {
+        var others = counts.TryGetValue(EndOfLineKey, out var fixedEndings) ? fixedEndings.Sum() : 0;
+        return $"end_of_line isn't set (each machine keeps its own ending; the {Plural(others, "file")} committed with a fixed ending {(others == 1 ? "doesn't" : "don't")} decide)";
     }
 
     /// <summary>
@@ -1210,8 +1239,11 @@ internal static class Conventions
                 Add(SuffixCaseKey, StyleBro.Analyzers.Readability.LiteralSuffixes.GetUpperCaseSuffix(token, StyleBro.Analyzers.Readability.SuffixScope.All) is not null);
             }
             else if ((token.IsKind(SyntaxKind.ElseKeyword) || token.IsKind(SyntaxKind.CatchKeyword) || token.IsKind(SyntaxKind.FinallyKeyword))
-                && token.GetPreviousToken().IsKind(SyntaxKind.CloseBraceToken))
+                && token.GetPreviousToken() is { RawKind: (int)SyntaxKind.CloseBraceToken, Parent: { } closed } closeBrace
+                && Line(closed.GetFirstToken().SpanStart) != Line(closeBrace.SpanStart))
             {
+                // Only after a block that spans lines: in a one-line block ('{ a(); } else b();') the layout isn't a choice
+                // (trial 20: one-line methods counted as 'else on the } line' and turned the code K&R).
                 Add("csharp_new_line_before_else", Line(token.GetPreviousToken().SpanStart) == Line(token.SpanStart));
             }
             else if (token.IsKind(SyntaxKind.OpenParenToken))
@@ -1232,6 +1264,19 @@ internal static class Conventions
                 && ((MemberDeclarationSyntax)node).Modifiers.All(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.NewKeyword))
             {
                 Add(InterfaceAccessKey, !((MemberDeclarationSyntax)node).Modifiers.Any(SyntaxKind.PublicKeyword));
+            }
+
+            // Primary-constructor parameters of classes and structs (not records': BRO1302 leaves those) named like a field or not.
+            if (node is ParameterSyntax { Parent: ParameterListSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax }, Identifier.ValueText: [var first, ..] }
+                && (first == '_' || char.IsLower(first)))
+            {
+                Add(PrimaryParametersKey, first == '_');
+            }
+
+            // Tuple type element names (BRO1311's: only the first letter counts, '_' is fine).
+            if (node is TupleElementSyntax { Identifier.ValueText: [var letter, ..] } && char.IsLetter(letter))
+            {
+                Add(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, char.IsLower(letter));
             }
 
             if (node is MemberDeclarationSyntax member && IsPrivateByDefault(member))
@@ -1663,6 +1708,16 @@ internal static class Conventions
                 {
                     Add(DocBlankLineKey, above == line - 1);
                 }
+
+                // BRO1511: a blank line between the doc comment and its element, or none (only whitespace and docs between).
+                if (StyleBro.Analyzers.Layout.DocumentationBlankLines.GetBlankLinesAfterDocumentation(member, text) is not null)
+                {
+                    Add(DocElementBlankLineKey, true);
+                }
+                else if (member.GetLeadingTrivia().SkipWhile(t => t != documentation).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia) || t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)))
+                {
+                    Add(DocElementBlankLineKey, false);
+                }
             }
         }
 
@@ -1861,7 +1916,8 @@ internal static class Conventions
             }
             else if (convention.Key == EndOfLineKey && ConvertedOutnumber(counts))
             {
-                (tag, verdict) = ("git", OutnumberedVerdict(counts));
+                (tag, verdict) = ("git", OutnumberedResult(counts));
+                found = OutnumberedFound(counts);
             }
             else if (total < MinimumAgreeing)
             {
