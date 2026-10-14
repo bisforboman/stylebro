@@ -166,7 +166,7 @@ public sealed partial class MigrationTests
         Assert.Contains("\ndotnet_diagnostic.BRO1302.severity = none\n", text, StringComparison.Ordinal);
         Assert.Contains("BRO1302 has no switch for primary-constructor parameters alone", text, StringComparison.Ordinal);
         Assert.Contains("\nstylebro_tuple_element_name_casing = camelCase\n", text, StringComparison.Ordinal);
-        Assert.Contains("primary-constructor parameters: 3 of 3 named like fields", output, StringComparison.Ordinal);
+        Assert.Contains("primary-constructor parameter names: 3 of 3 like '_logger'", output, StringComparison.Ordinal);
     }
 
     // The S4136 report line said 'same_access' while the root's NoWarn made the block write false.

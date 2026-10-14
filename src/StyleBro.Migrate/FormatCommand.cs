@@ -463,6 +463,9 @@ internal static class FormatCommand
     /// <summary>Whether a 'dotnet format' output line reports one of the kept findings ('path(line,column): warning ID: ...').</summary>
     public static bool IsKeptLine(string line, ISet<(string Path, int Line, string Id)> kept) => KeptLine(line, kept) is not null;
 
+    /// <summary>Whether a 'dotnet format' output line is a finding at warning or error ('path(1,2): error IDE0049: ...').</summary>
+    public static bool IsFindingLine(string line) => Regex.IsMatch(line, @"^\s*.+?\(\d+,\d+\): (?:error|warning) \w+:");
+
     /// <summary>
     /// A 'dotnet format' output line, with a kept finding's severity replaced by 'kept' ('path(1,2): kept BRO1303: ...'), so
     /// it doesn't read (or count in CI) as one to fix.
@@ -872,7 +875,31 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// The 'dotnet format' passes for <see cref="WhitespaceExclusions"/>: one run of all three (null), style and analyzers
+    /// What format says about the folders its whitespace pass leaves out (<see cref="WhitespaceExclusions"/>): another
+    /// formatter's code, where the rest still runs, or a folder whose .editorconfig turns every analyzer off, where nothing
+    /// runs (the opt-out spot was told "style and analyzer fixes still run there").
+    /// </summary>
+    public static string NoWhitespaceLine(string root, IReadOnlyCollection<string> exclusions)
+    {
+        var optOut = exclusions.Where(e => e.EndsWith('/') && InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, e.TrimEnd('/'))))).ToList();
+        var other = exclusions.Except(optOut).ToList();
+        string Them(int count) => count == 1 ? "it" : "them";
+        var parts = new List<string>();
+        if (other.Count > 0)
+        {
+            parts.Add($"{string.Join(", ", other)}: IDE0055 is off there in the stylebro settings (another formatter's code), so whitespace formatting leaves {Them(other.Count)} alone; style and analyzer fixes still run there.");
+        }
+
+        if (optOut.Count > 0)
+        {
+            parts.Add($"{string.Join(", ", optOut)}: {(optOut.Count == 1 ? "its" : "their")} .editorconfig turns every analyzer off, so 'format' leaves {Them(optOut.Count)} alone.");
+        }
+
+        return $"{NoWhitespaceHeader} {string.Join(" ", parts)}";
+    }
+
+    /// <summary>
+    /// The 'dotnet format' passes for <see cref="WhitespaceExclusions"/>:one run of all three (null), style and analyzers
     /// (empty: no whitespace pass), or the whitespace pass on its own (<see cref="WhitespaceOptions"/>) then the other two.
     /// </summary>
     public static string[] Passes(IReadOnlyCollection<string>? whitespaceExclusions) => whitespaceExclusions switch
@@ -1396,6 +1423,21 @@ internal static class FormatCommand
         return solution;
     }
 
+    /// <summary>
+    /// How to format the projects in <see cref="NotBuiltFolders"/> (<paramref name="folders"/>) on their own: a build of one
+    /// still runs StyleBro when a Directory.Build.props above it references it (AngleSharp's build/_build.csproj kept ~25 warnings).
+    /// </summary>
+    public static string NotBuiltHint(IReadOnlyList<string> folders, string root)
+    {
+        var projects = folders.SelectMany(f => Directory.EnumerateFiles(Path.Combine(root, f), "*.csproj"))
+            .Select(p => Path.GetRelativePath(root, p).Replace('\\', '/'))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        return projects.Count == 0
+            ? string.Empty
+            : $" Where a Directory.Build.props above brings StyleBro into {(projects.Count == 1 ? "its build" : "their builds")}, format {(projects.Count == 1 ? "it" : "each")} on {(projects.Count == 1 ? "its" : "their")} own: {string.Join(", ", projects.Select(p => $"'stylebro-migrate format {p}'"))}.";
+    }
+
     /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
     public static IEnumerable<(string FullPath, string[] Frameworks)> EvaluatedProjects(string workspacePath) =>
         ReadProjects(workspacePath).Values.Select(p => (p.FullPath, p.Frameworks));
@@ -1456,6 +1498,11 @@ internal static class FormatCommand
             notes.Add($"... and {generated.Count - 10} more generated files checked in: rebuild and commit them.");
         }
 
+        if (CheckedInGenerated(root, changed, otherProjects: true) is { Count: > 0 } others)
+        {
+            notes.Add($"Other projects have generated files checked in ({string.Join(", ", others.Take(3))}{(others.Count > 3 ? $" and {others.Count - 3} more" : string.Empty)}): a build may regenerate them from the changed code too, so rebuild and check.");
+        }
+
         if (Conventions.CSharpier(root) is { } evidence)
         {
             notes.Add($"CSharpier formats this repository ({evidence}): run it now (e.g. 'dotnet csharpier format .'), it has the last word on layout.");
@@ -1470,7 +1517,11 @@ internal static class FormatCommand
     /// '&lt;auto-generated' header. A build regenerates them from the code format changed (MoreLINQ's Extensions.g.cs from the
     /// doc comments), and a CI's 'git diff --exit-code' failed. Format leaves them alone; the note says to rebuild.
     /// </summary>
-    public static List<string> CheckedInGenerated(string root, IEnumerable<string> changed)
+    /// <remarks>
+    /// <paramref name="otherProjects"/>: those in the other projects instead (gencheck2: Lib2's build regenerates Docs2.g.cs from
+    /// Lib's sources, which no project reference shows), for a note that they may change too.
+    /// </remarks>
+    public static List<string> CheckedInGenerated(string root, IEnumerable<string> changed, bool otherProjects = false)
     {
         var repository = RepositoryRoot(root);
         if (repository is null || PreviewCommand.Git(repository, "ls-files", "-z", "--", "*.cs") is not (0, var list))
@@ -1489,7 +1540,7 @@ internal static class FormatCommand
         var changedProjects = new HashSet<string>(changedSet.Select(ProjectOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
         return list.Split('\0', StringSplitOptions.RemoveEmptyEntries)
             .Select(f => Path.GetFullPath(Path.Combine(repository, f)))
-            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) && IsGenerated(f))
+            .Where(f => !changedSet.Contains(f) && File.Exists(f) && ProjectOf(f) is { } project && changedProjects.Contains(project) != otherProjects && IsGenerated(f))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -1499,6 +1550,13 @@ internal static class FormatCommand
     public static bool IsGenerated(string file)
     {
         var name = Path.GetFileName(file);
+
+        // A resource or WinForms designer's file is written by the designer, never by a build (SSH.NET's Resources.Designer.cs).
+        if (name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase) && DesignerWritten(file))
+        {
+            return false;
+        }
+
         if (name.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".g.i.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase)
             || File.Exists(Path.Combine(Path.GetDirectoryName(file)!, name.Split('.')[0] + ".tt")))
         {
@@ -1639,6 +1697,16 @@ internal static class FormatCommand
             }
 
             KeptSummary(kept, root).ForEach(log);
+
+            // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
+            // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            if (unfixed > 0)
+            {
+                log($"Not clean: {unfixed} finding{(unfixed == 1 ? string.Empty : "s")} above no fix changes (the build reports {(unfixed == 1 ? "it" : "them")}): fix {(unfixed == 1 ? "it" : "them")} by hand, or suppress or baseline {(unfixed == 1 ? "it" : "them")}.");
+                return NotCleanExitCode;
+            }
+
             if (kept.Count == 0)
             {
                 log("Clean: formatting would change nothing.");
@@ -1739,6 +1807,31 @@ internal static class FormatCommand
         return output.Result;
     }
 
+    /// <summary>The git repository that holds the folder (the nearest folder above with a .git), or null.</summary>
+    internal static string? RepositoryRoot(string folder)
+    {
+        for (var current = new DirectoryInfo(folder); current is not null; current = current.Parent)
+        {
+            if (Directory.Exists(Path.Combine(current.FullName, ".git")) || File.Exists(Path.Combine(current.FullName, ".git")))
+            {
+                return current.FullName;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Whether an 'X.Designer.cs' belongs to a designer: an 'X.resx' next to it (resource designer), or an 'X.cs' next to it and
+    /// an InitializeComponent in it (WinForms/WPF form).
+    /// </summary>
+    private static bool DesignerWritten(string file)
+    {
+        var stem = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file)[..^".designer.cs".Length]);
+        return File.Exists(stem + ".resx")
+            || (File.Exists(stem + ".cs") && File.ReadAllText(file).Contains("InitializeComponent", StringComparison.Ordinal));
+    }
+
     /// <summary>
     /// '--files': the usual format (repeat until clean, kept findings, or --verify-no-changes) per workspace, only on the
     /// given files ('dotnet format --include'), with just the project(s) they belong to loaded: seconds instead of minutes.
@@ -1812,6 +1905,19 @@ internal static class FormatCommand
                     log(line);
                 }
             });
+
+            // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
+            // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
+            if (code == 0 && !args.Contains("--diagnostics") && !args.Contains("--all") && EnforcesUnusedUsings(root) && ChangedFiles(before, Snapshot(root)).Count > 0)
+            {
+                var usingsOutput = new List<string>();
+                code = runOnce([.. args, "--no-restore", "--diagnostics", UnusedUsings], usingsOutput.Add);
+                if (code != 0)
+                {
+                    usingsOutput.ForEach(log);
+                }
+            }
+
             var changed = ChangedFiles(before, Snapshot(root));
             if (report is not null)
             {
@@ -1873,20 +1979,6 @@ internal static class FormatCommand
     {
         var relative = Path.IsPathRooted(where) ? Path.GetRelativePath(root, where) : where;
         return (relative.StartsWith("..", StringComparison.Ordinal) ? where : relative).Replace('\\', '/');
-    }
-
-    /// <summary>The git repository that holds the folder (the nearest folder above with a .git), or null.</summary>
-    private static string? RepositoryRoot(string folder)
-    {
-        for (var current = new DirectoryInfo(folder); current is not null; current = current.Parent)
-        {
-            if (Directory.Exists(Path.Combine(current.FullName, ".git")) || File.Exists(Path.Combine(current.FullName, ".git")))
-            {
-                return current.FullName;
-            }
-        }
-
-        return null;
     }
 
     /// <summary>One run; afterwards, the projects 'dotnet format' skipped (<see cref="Incomplete"/>).</summary>
@@ -2045,7 +2137,7 @@ internal static class FormatCommand
         }
         else if (whitespaceExclusions is not null)
         {
-            log($"{NoWhitespaceHeader} {string.Join(", ", whitespaceExclusions)}: IDE0055 is off there in the stylebro settings (another formatter's code), so whitespace formatting leaves {(whitespaceExclusions.Count == 1 ? "it" : "them")} alone; style and analyzer fixes still run there.");
+            log(NoWhitespaceLine(root, whitespaceExclusions));
         }
 
         int Format(string target, List<string> options, Func<IEnumerable<string>, int> run)
@@ -2124,7 +2216,7 @@ internal static class FormatCommand
         // "Without StyleBro"). They're left alone, like the build leaves them.
         if (NotBuiltFolders(solutionPath, projects.Values.Select(p => p.FullPath).ToList(), root) is { Count: > 0 } notBuilt)
         {
-            log($"{NotBuiltHeader} {string.Join(", ", notBuilt)}: no configuration of {Path.GetFileName(solutionPath)} builds {(notBuilt.Count == 1 ? "the project there" : "their projects")}, so 'dotnet restore' skips {(notBuilt.Count == 1 ? "it" : "them")} and 'format' leaves {(notBuilt.Count == 1 ? "it" : "them")} alone.");
+            log($"{NotBuiltHeader} {string.Join(", ", notBuilt)}: no configuration of {Path.GetFileName(solutionPath)} builds {(notBuilt.Count == 1 ? "the project there" : "their projects")}, so 'dotnet restore' skips {(notBuilt.Count == 1 ? "it" : "them")} and 'format' leaves {(notBuilt.Count == 1 ? "it" : "them")} alone.{NotBuiltHint(notBuilt, root)}");
             Exclude(notBuilt);
             excluded.AddRange(notBuilt);
         }

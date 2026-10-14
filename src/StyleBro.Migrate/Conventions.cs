@@ -170,6 +170,8 @@ internal static class Conventions
         new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
         new(AccessModifiersKey, "private-by-default members", "for_non_interface_members", ("for_non_interface_members", "with 'private'"), ("omit_if_default", "without 'private'"), Off(DiagnosticIds.AccessModifier)) { Enforcer = DiagnosticIds.AccessModifier, EnforcedValues = new[] { "for_non_interface_members" }, Unit = "member" },
+        new(TypeAccessKey, "internal-by-default types", "warning", ("warning", "with 'internal'"), ("none", "without an access modifier"), Off(DiagnosticIds.AccessModifier)) { Unit = "type" },
+        new(IndentCaseBlockKey, "'case X:' blocks", "true", ("true", "indented"), ("false", "at the label's level"), null) { Unit = "block" },
         new(PropertySummaryKey, "property summaries", "warning", ("warning", "starting with 'Gets'/'Sets'"), ("none", "in their own words"), Off(DiagnosticIds.PropertySummaryWording)) { Unit = "summary" },
         new(ConstructorSummaryKey, "constructor summaries", "warning", ("warning", "with the standard sentence"), ("none", "in their own words"), Off(DiagnosticIds.ConstructorSummary)) { Unit = "summary" },
         new(CombinedLocalsKey, "adjacent locals of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedLocals)),
@@ -185,7 +187,7 @@ internal static class Conventions
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
-        new(PrimaryParametersKey, "primary-constructor parameters", "warning", ("warning", "named 'logger'"), ("none", "named like fields ('_logger')"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
+        new(PrimaryParametersKey, "primary-constructor parameter names", "warning", ("warning", "like 'logger'"), ("none", "like '_logger'"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
     };
 
@@ -371,6 +373,20 @@ internal static class Conventions
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
 
+    /// <summary>
+    /// BRO1404's severity for types that are internal by default (in a namespace or a file): with 'internal' or without an
+    /// access modifier. AngleSharp leaves it out on 273 types (26 say 'internal'), and BRO1404 added it to all; no setting
+    /// asks for it on types only, so the rule goes off (its members' 'private' then isn't added either).
+    /// </summary>
+    private const string TypeAccessKey = "dotnet_diagnostic." + DiagnosticIds.AccessModifier + ".severity";
+
+    /// <summary>
+    /// The SDK formatter's indentation of a block that is a switch section's content ('case X:' + '{' on the next line):
+    /// below the label (true, the default) or at its indentation. AngleSharp writes all 131 at the label's, and IDE0055
+    /// re-indented thousands of lines.
+    /// </summary>
+    private const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
+
     /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
     private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
 
@@ -386,7 +402,7 @@ internal static class Conventions
     private static readonly string[] CSharpierConfigs = { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" };
 
     /// <summary>The SDK formatter's options (IDE0055's): with CSharpier they don't apply.</summary>
-    private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey };
+    private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey, IndentCaseBlockKey };
 
     /// <summary>
     /// What shows that CSharpier formats the repository (a file, relative to the root), or null: a .csharpierrc(.json/.yaml/.yml)
@@ -406,15 +422,29 @@ internal static class Conventions
     /// <summary>
     /// Every folder CSharpier formats (<see cref="CSharpierScope"/>), one entry each: synth1 configures it in src/Pretty/ and
     /// src/Pretty2/, and with only the first recognised BRO1110 fought CSharpier in Pretty2 forever. One entry with an empty
-    /// folder when it covers every C# file; a folder inside another's is left out (the outer section reaches it).
+    /// folder when it covers every C# file; a folder inside another's is left out (the outer section reaches it). CSharpier set
+    /// up in a folder above <paramref name="root"/>, up to the git repository's root, covers all of it (its evidence then starts
+    /// with '../'): AzureEventGridSimulator has .config/dotnet-tools.json at the top and its code under src/, whose .editorconfig
+    /// says root = true, and src/'s block turned IDE0055 on.
     /// </summary>
     public static List<(string Evidence, string Folder)> CSharpierScopes(string root)
     {
         var files = StyleCopSetup.EnumerateFiles(root).ToList();
         string Relative(string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
+        var full = Path.GetFullPath(root).TrimEnd('\\', '/');
+        var above = new List<string>();
+        if (FormatCommand.RepositoryRoot(full) is { } repository)
+        {
+            for (var f = Path.GetDirectoryName(full); f is not null && f.Length >= repository.Length; f = Path.GetDirectoryName(f))
+            {
+                above.Add(f);
+            }
+        }
+
         var folders = files.Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf" or ".csproj")
             .SelectMany(f => Ancestors(Path.GetDirectoryName(f)!))
             .Prepend(root)
+            .Concat(above)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(f => f.Length);
         var evidences = new List<string>();
@@ -439,7 +469,7 @@ internal static class Conventions
         foreach (var evidence in evidences)
         {
             var scope = Relative(CSharpierFolder(evidence));
-            scope = scope == "." ? string.Empty : scope;
+            scope = scope == "." || scope.StartsWith("..", StringComparison.Ordinal) ? string.Empty : scope;
             if (scope.Length == 0 || cs.All(f => f.StartsWith(scope + "/", StringComparison.OrdinalIgnoreCase)))
             {
                 return [(Relative(evidence), string.Empty)];
@@ -470,11 +500,11 @@ internal static class Conventions
     /// </summary>
     public static (List<string> Lines, string Report) CSharpierLines(string evidence, string root, IReadOnlyDictionary<string, string>? settings, string folder = "")
     {
-        var what = folder.Length == 0 ? "this repository" : folder + "/";
+        var what = folder.Length > 0 ? folder + "/" : evidence.StartsWith("../", StringComparison.Ordinal) ? "this folder" : "this repository";
         var lines = new List<string> { $"# init: CSharpier formats {what} ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
         lines.AddRange(CSharpierRules.Select(Off));
         lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.Key} = csharpier");
-        lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.WidthKey} = {CSharpierPrintWidth(CSharpierFolder(Path.Combine(root, evidence)), settings, root)}");
+        lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.WidthKey} = {CSharpierPrintWidth(CSharpierFolder(Path.GetFullPath(Path.Combine(root, evidence))), settings, root)}");
         lines.AddRange(CSharpierUsingLines(settings));
         return (lines, $"  {"off",-8} CSharpier ({evidence}) -> IDE0055 and {CSharpierRules.Length - 1} layout rules are off: {string.Join(", ", CSharpierRules.Skip(1))}");
     }
@@ -511,8 +541,11 @@ internal static class Conventions
     {
         // CSharpier reads the nearest .csharpierrc above a file: from the folder it formats up to the root.
         root ??= folder;
+
+        // CSharpier set up above the root (CSharpierScopes): from the root up to that folder.
+        var (start, stop) = folder.StartsWith(root, StringComparison.OrdinalIgnoreCase) ? (folder, root) : (Path.GetFullPath(root), folder);
         var configs = new List<string>();
-        for (var f = folder; f is not null && f.StartsWith(root, StringComparison.OrdinalIgnoreCase); f = Path.GetDirectoryName(f))
+        for (var f = start; f is not null && f.StartsWith(stop, StringComparison.OrdinalIgnoreCase); f = Path.GetDirectoryName(f))
         {
             configs.AddRange(CSharpierConfigs.Select(c => Path.Combine(f, c)));
         }
@@ -1288,6 +1321,16 @@ internal static class Conventions
                 }
             }
 
+            // Types in a namespace or a file: 'internal' or nothing (not partial ones: BRO1007's).
+            if (node is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax && node.Parent is BaseNamespaceDeclarationSyntax or CompilationUnitSyntax)
+            {
+                var modifiers = ((MemberDeclarationSyntax)node).Modifiers;
+                if (!modifiers.Any(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.PrivateKeyword or SyntaxKind.PartialKeyword or SyntaxKind.FileKeyword))
+                {
+                    Add(TypeAccessKey, !modifiers.Any(SyntaxKind.InternalKeyword));
+                }
+            }
+
             // Attributes: once per declaration (at its first list) with 2+ in the lists of one target.
             if (node is AttributeListSyntax attributeList && attributeList.Parent is { } owner and not (ParameterSyntax or TypeParameterSyntax or CompilationUnitSyntax)
                 && owner.ChildNodes().OfType<AttributeListSyntax>().First() == attributeList)
@@ -1353,6 +1396,13 @@ internal static class Conventions
                     foreach (var statement in section.Statements.Where(s => s is not BlockSyntax))
                     {
                         Add(SingleLineStatementsKey, Line(section.Labels.Last().Span.End) == Line(statement.SpanStart));
+                    }
+
+                    // A block on the lines below the label: its '{' at the label's indentation or deeper.
+                    if (section.Statements.FirstOrDefault() is BlockSyntax caseBlock && StartsLine(caseBlock.OpenBraceToken) && StartsLine(section.Labels[0].GetFirstToken())
+                        && Line(caseBlock.SpanStart) > Line(section.Labels.Last().Span.End))
+                    {
+                        Add(IndentCaseBlockKey, text.Lines.GetLinePosition(caseBlock.SpanStart).Character <= text.Lines.GetLinePosition(section.SpanStart).Character);
                     }
 
                     break;
@@ -1998,7 +2048,7 @@ internal static class Conventions
         }
 
         report.AddRange(Summary(summary));
-        return (lines, report);
+        return (InitCommand.WithoutRepeats(lines), report);
     }
 
     /// <summary>
@@ -2075,7 +2125,7 @@ internal static class Conventions
     /// none of its 102 interface members has one, and BRO1404 added 'public' to all of them. A key the code contradicts
     /// that nothing enforces doesn't win: for_non_interface_members keeps the rest of 'always'. Null otherwise.
     /// </summary>
-    public static (List<string> Lines, string Report)? InterfaceAccess(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> repository, bool enforcedInBuild)
+    public static (List<string> Lines, string Report)? InterfaceAccess(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> repository, bool enforcedInBuild, bool codeStyleInBuild = false)
     {
         if (enforcedInBuild || !repository.TryGetValue(AccessModifiersKey, out var setting) || setting.Split(':')[0].Trim().ToLowerInvariant() != "always"
             || counts[InterfaceAccessKey] is not [var with, var without] || with + without < MinimumAgreeing || Winner(with, without) == 0)
@@ -2084,7 +2134,7 @@ internal static class Conventions
         }
 
         var found = Winner(with, without) < 0 ? $"mixes both forms ({with} with, {without} without)" : $"has {without} of {Plural(with + without, "interface member")} without one";
-        var note = $"interface members: your .editorconfig says {AccessModifiersKey} = {setting}, but your code {found}; nothing enforces it in the build, so {DiagnosticIds.AccessModifier} adds no access modifier to them ({AccessModifiersKey} = for_non_interface_members). To enforce it: change the code, then remove the next line.";
+        var note = $"interface members: your .editorconfig says {AccessModifiersKey} = {setting}, but your code {found}; {(codeStyleInBuild ? "IDE0040 is off in init's block (its fix breaks multi-targeted projects)" : "nothing enforces it in the build")}, so {DiagnosticIds.AccessModifier} adds no access modifier to them ({AccessModifiersKey} = for_non_interface_members). To enforce it: change the code, then remove the next line.";
         return ([$"# init: {note}", $"{AccessModifiersKey} = for_non_interface_members"], $"  {"off",-8} {note.Substring(0, note.IndexOf(" To enforce", StringComparison.Ordinal))}");
     }
 

@@ -287,6 +287,12 @@ A few settings work a little differently:
   for `public` on interface members too), the build doesn't enforce it (no `EnforceCodeStyleInBuild`), and the code's
   interface members are mostly without an access modifier or mixed, `init` writes `for_non_interface_members`, so
   BRO1404 adds no `public` there (BaGetter: none of its 102 interface members had one).
+- **Implicit `internal`** ([BRO1404](rules/BRO1404.md)) counts the types in a namespace or a file (not partial ones):
+  with `internal` or without an access modifier. No setting asks for modifiers on types only, so mostly without, or
+  mixed, turns BRO1404 off (AngleSharp: 273 types without, 26 with `internal`).
+- **`case` blocks** count blocks below a `case` label (`case X:`, then `{` on the next line): indented one level below
+  the label or at its level. Mostly at its level: `csharp_indent_case_contents_when_block = false`, so the SDK
+  formatter (IDE0055) keeps them (AngleSharp: all 131 at the label's level).
 - **Combined declarations** ([BRO1142](rules/BRO1142.md) for locals, [BRO1114](rules/BRO1114.md) for fields) count
   declarations of two or more (`int n = h.Length, i = 0;`) and one-variable declarations right after one of the same type
   and modifiers they could have been combined with (not `var`, not fields with attributes). Mostly one by one: the rule
@@ -465,6 +471,8 @@ A few settings work a little differently:
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
 | `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
 | Implicit `private` | members that are private by default, with or without `private` | [BRO1404](rules/BRO1404.md) | `dotnet_style_require_accessibility_modifiers` |
+| Implicit `internal` | types that are internal by default, with or without `internal` | [BRO1404](rules/BRO1404.md) | `dotnet_diagnostic.BRO1404.severity` |
+| `case` blocks | a block below a `case` label indented or at the label's level | SDK formatter (IDE0055) | `csharp_indent_case_contents_when_block` |
 | Combined attributes | `[A, B]` or one attribute per list | [BRO1102](rules/BRO1102.md) | `dotnet_diagnostic.BRO1102.severity` |
 | Combined locals | `int a, b;` or one local per declaration | [BRO1142](rules/BRO1142.md) | `dotnet_diagnostic.BRO1142.severity` |
 | Combined fields | `int _a, _b;` or one field per declaration | [BRO1114](rules/BRO1114.md) | `dotnet_diagnostic.BRO1114.severity` |

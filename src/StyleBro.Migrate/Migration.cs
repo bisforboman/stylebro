@@ -583,17 +583,33 @@ internal static class Migration
             return null;
         }
 
+        // In the file's indentation (AzureEventGridSimulator indents by 4, and CSharpier checks .props files too).
         var newLine = existing.Contains("\r\n") ? "\r\n" : "\n";
+        var (child, unit) = MSBuildIndentation(existing);
         var group = Regex.Match(existing, @"<PropertyGroup\s*>");
         if (group.Success)
         {
-            return existing.Insert(group.Index + group.Length, newLine + "    " + property);
+            var lineStart = existing.LastIndexOf('\n', group.Index) + 1;
+            var groupIndent = existing.Substring(lineStart, group.Index - lineStart);
+            return existing.Insert(group.Index + group.Length, newLine + (groupIndent.Trim().Length == 0 ? groupIndent : child) + unit + property);
         }
 
         var project = Regex.Match(existing, @"<Project\b[^>]*>");
         return project.Success
-            ? existing.Insert(project.Index + project.Length, newLine + "  <PropertyGroup>" + newLine + "    " + property + newLine + "  </PropertyGroup>")
+            ? existing.Insert(project.Index + project.Length, newLine + child + "<PropertyGroup>" + newLine + child + unit + property + newLine + child + "</PropertyGroup>")
             : null;
+    }
+
+    /// <summary>
+    /// An MSBuild file's indentation: <c>Child</c>, the whitespace before the first element inside &lt;Project&gt;, and
+    /// <c>Unit</c>, one level (tabs or the child's spaces); two spaces each when there's nothing to tell.
+    /// </summary>
+    public static (string Child, string Unit) MSBuildIndentation(string? text)
+    {
+        var project = text is null ? Match.Empty : Regex.Match(text, @"<Project\b[^>]*>");
+        var first = project.Success ? Regex.Match(text!.Substring(project.Index + project.Length), @"\n([ \t]+)<") : Match.Empty;
+        var child = first.Success ? first.Groups[1].Value : "  ";
+        return (child, child.Contains('\t') ? "\t" : child);
     }
 
     /// <summary>
