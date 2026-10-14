@@ -737,8 +737,9 @@ Exit codes of `stylebro-migrate format`, for CI and agents:
 | 1 | | a project no run loaded (`Incomplete:`): its files weren't checked |
 | other | `dotnet format` failed (load or build errors) | the same |
 
-`--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats a temporary
-copy of the repository to see whether any file would change and which findings the fixes keep, then deletes the copy.
+`--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats the files
+with findings in a temporary copy of the repository to see whether any file would change and which findings the fixes
+keep, then deletes the copy.
 Plain `dotnet format --verify-no-changes` can't tell the two apart and fails on kept findings.
 
 ## Excluding vendored code
@@ -791,11 +792,12 @@ framework, so the renaming fixes also check the names in every other C# file of 
 read with `GetField("count")` keeps its name in the library's run too, and a name a project outside the run uses
 (`UsedInProjectNotLoaded`) is left to a run that loads both, or kept. Files a project compiles from outside its own
 folder (`<Compile Include="..\Shared\*.cs" />`) are formatted in the runs of the projects that compile them, and
-`--files` finds such a file's project too. Projects that compile the same files (a library and its AOT variant
-compiling `..\Lib\*.cs` with other `DefineConstants`) run in separate parts of a framework's run (`== net8.0, part 1
-of 2`), each with what it references: loaded together, `dotnet format` crashes on their different edits of one file
-([dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)). This applies without multi-targeted projects
-too. Why:
+`--files` finds such a file's project too. Projects that compile the same files with other settings (a library and its AOT variant
+compiling `..\Lib\*.cs` with other `DefineConstants`, language version or nullable context for that framework) run in
+separate parts of a framework's run (`== net8.0, part 1 of 2`), each with what it references: loaded together, `dotnet
+format` crashes on their different edits of one file ([dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)).
+Projects that compile a shared file with the same settings (a polyfill every library links) share a run: they parse it
+the same, so its copies get the same edits. This applies without multi-targeted projects too. Why:
 [ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
 
 A project `dotnet format` can't load at all (F#, `.fsproj`) makes it skip the C# projects that reference it, for the
