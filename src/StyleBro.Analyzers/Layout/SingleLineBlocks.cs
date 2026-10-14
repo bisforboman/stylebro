@@ -322,7 +322,80 @@ internal static class SingleLineBlocks
             Braces.AddToExpansion(block, text, changes, options, isOn);
         }
 
+        if (node is BlockSyntax statements && items.Count > 0 && !PreservesSingleLineStatements(options))
+        {
+            foreach (var statement in statements.Statements)
+            {
+                AddEmbeddedStatementLines(statement, inner, unit, lineBreak, text, changes);
+            }
+        }
+
         return changes;
+    }
+
+    /// <summary>The SDK's csharp_preserve_single_line_statements (default true).</summary>
+    private static bool PreservesSingleLineStatements(AnalyzerConfigOptions options) =>
+        !(options.TryGetValue("csharp_preserve_single_line_statements", out var value) && value.Trim().Equals("false", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// With csharp_preserve_single_line_statements = false the SDK's formatter puts an embedded statement (<c>if (x) y;</c>)
+    /// on its own line, one level deeper, but not inside a single-line block. Once the block is expanded it would, and
+    /// 'dotnet format' runs its whitespace pass before the analyzers' fixes: a second run (trial 19). So the expansion
+    /// does it, where BRO1514-BRO1516 add no braces (their edits come first and win the gap in the fix's merge). Like the
+    /// formatter, 'else' and a do-while's 'while' start a line too, and 'else if' stays together. Skipped: comments in the
+    /// gap, an embedded statement holding statements (the formatter doesn't indent a nested 'if (a) if (b) c;').
+    /// </summary>
+    private static void AddEmbeddedStatementLines(StatementSyntax statement, string indent, string unit, string lineBreak, SourceText text, List<TextChange> changes)
+    {
+        var (header, embedded) = statement switch
+        {
+            IfStatementSyntax s => (s.CloseParenToken, s.Statement),
+            WhileStatementSyntax s => (s.CloseParenToken, s.Statement),
+            ForStatementSyntax s => (s.CloseParenToken, s.Statement),
+            CommonForEachStatementSyntax s => (s.CloseParenToken, s.Statement),
+            UsingStatementSyntax s => (s.CloseParenToken, s.Statement),
+            LockStatementSyntax s => (s.CloseParenToken, s.Statement),
+            FixedStatementSyntax s => (s.CloseParenToken, s.Statement),
+            DoStatementSyntax s => (s.DoKeyword, s.Statement),
+            _ => (default(SyntaxToken), null!),
+        };
+        if (embedded is null || embedded is BlockSyntax || !Break(header, embedded.GetFirstToken(), indent + unit, embedded))
+        {
+            return;
+        }
+
+        switch (statement)
+        {
+            case DoStatementSyntax @do:
+                Break(@do.Statement.GetLastToken(), @do.WhileKeyword, indent);
+                break;
+
+            case IfStatementSyntax { Else: { } @else } when Break(embedded.GetLastToken(), @else.ElseKeyword, indent):
+                if (@else.Statement is IfStatementSyntax elseIf)
+                {
+                    AddEmbeddedStatementLines(elseIf, indent, unit, lineBreak, text, changes);
+                }
+                else if (@else.Statement is not BlockSyntax)
+                {
+                    Break(@else.ElseKeyword, @else.Statement.GetFirstToken(), indent + unit, @else.Statement);
+                }
+
+                break;
+        }
+
+        bool Break(SyntaxToken before, SyntaxToken after, string newIndent, SyntaxNode? moved = null)
+        {
+            var span = TextSpan.FromBounds(before.Span.End, after.SpanStart);
+            if ((moved is not null && moved.DescendantNodes().OfType<StatementSyntax>().Any())
+                || Line(text, before.SpanStart) != Line(text, after.SpanStart)
+                || !before.TrailingTrivia.Concat(after.LeadingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia)))
+            {
+                return false;
+            }
+
+            changes.Add(new TextChange(span, lineBreak + newIndent));
+            return true;
+        }
     }
 
     /// <summary>A property whose one-line accessor list BRO1509 expands in the same run (it then spans several lines).</summary>

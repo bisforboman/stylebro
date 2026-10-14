@@ -59,6 +59,9 @@ internal static class InitCommand
         "# StyleBro's rules by id: this file's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) would hide them from\n"
         + "# 'dotnet format', while the build reports them (the preset's own entries win over a bulk one). Turn one off below this block.";
 
+    /// <summary>The template's key that turns IDE0009 ('this.' required) off.</summary>
+    public const string ThisQualificationSeverityKey = "dotnet_diagnostic.IDE0009.severity";
+
     /// <summary>The line that turns IDE0055 off.</summary>
     private const string IdeOff = "dotnet_diagnostic.IDE0055.severity = none";
 
@@ -129,7 +132,7 @@ internal static class InitCommand
         if (sonar is not null && !migrated)
         {
             sonar.Report(sonar.Apply(sonarLines, _ => true, own)).ForEach(Console.WriteLine);
-            sonarScopes = SonarScopes(root, sonar, sonarLines, own);
+            sonarScopes = [.. SonarScopes(root, sonar, sonarLines, own), .. Suppressions.OptionScopes(root, sonar, sonarLines)];
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
             var (added, files, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
@@ -257,12 +260,13 @@ internal static class InitCommand
     /// folders marked as generated code (EF Core migrations, <see cref="Migration.MigrationFolders"/>); <paramref name="vendored"/>:
     /// vendored folders, marked the same way (<see cref="Migration.VendoredFolders"/>); <paramref name="sonarScopes"/>: sections
     /// for the parts of the repository with their own Sonar severities (<see cref="SonarScopes"/>); <paramref name="byId"/>: StyleBro's
-    /// rules by id, where a bulk severity would hide them from 'dotnet format' (<see cref="HiddenFromFormat"/>).
+    /// rules by id, where a bulk severity would hide them from 'dotnet format' (<see cref="HiddenFromFormat"/>);
+    /// <paramref name="leftOut"/>: template keys the repository's own setting decides (<see cref="RequiresThisQualification"/>).
     /// </summary>
-    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null, IReadOnlyList<string>? byId = null)
+    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null, IReadOnlyList<string>? byId = null, IReadOnlyList<string>? leftOut = null)
     {
         // A detected line replaces the template's line for the same key (CSharpier: IDE0055 = none).
-        var keys = new HashSet<string>((detected ?? Array.Empty<string>()).Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
+        var keys = new HashSet<string>((detected ?? Array.Empty<string>()).Select(KeyOf).OfType<string>().Concat(leftOut ?? []), StringComparer.OrdinalIgnoreCase);
         var kept = new List<string>();
         foreach (var line in Template().Replace("\r\n", "\n").TrimEnd('\n').Split('\n'))
         {
@@ -682,6 +686,24 @@ internal static class InitCommand
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Whether the repository's .editorconfig enforces 'this.' (owner's choice 2026-10-14): IDE0009 at suggestion or above, or,
+    /// without an IDE0009 severity, a dotnet_style_qualification_for_* key = true with a severity that isn't silent or none
+    /// ('true:warning'), like <see cref="Unenforced"/> judges a key. Then init keeps the repository's rule.
+    /// </summary>
+    public static bool RequiresThisQualification(IReadOnlyDictionary<string, string> settings)
+    {
+        static bool Shown(string severity) => severity.Trim().ToLowerInvariant() is "suggestion" or "warning" or "error";
+        if (settings.TryGetValue(ThisQualificationSeverityKey, out var ide))
+        {
+            return Shown(ide);
+        }
+
+        return new[] { "field", "property", "method", "event" }.Any(kind =>
+            settings.TryGetValue($"dotnet_style_qualification_for_{kind}", out var value) && value.Split(':') is [var on, var severity]
+            && on.Trim().Equals("true", StringComparison.OrdinalIgnoreCase) && Shown(severity));
     }
 
     /// <summary>The StyleBro rules the preset turns on, with their severity, from every layer in the package (init pins the latest).</summary>
@@ -1132,7 +1154,15 @@ internal static class InitCommand
             nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
         }
 
-        var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId);
+        // The repository requires 'this.': the template's IDE0009 = none would turn its rule off (RecyclableMemoryStream).
+        var leftOut = new List<string>();
+        if (!migrated && RequiresThisQualification(ownSettings))
+        {
+            leftOut.Add(ThisQualificationSeverityKey);
+            Console.WriteLine($"{prefix}.editorconfig requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off.");
+        }
+
+        var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId, leftOut);
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
         var name = prefix + ".editorconfig";
         if (!migrated)

@@ -1447,6 +1447,24 @@ public class FixOrderTests
         "BRO1145",
         "BRO1509");
 
+    // Trial 19: BRO1509's expansion puts embedded statements on their own lines (csharp_preserve_single_line_statements =
+    // false), where the brace rules add no braces; with braces wanted they're the brace rules' edits.
+    [Theory]
+    [InlineData("csharp_preserve_single_line_statements = false\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = when_multiline\n")]
+    public Task EmbeddedStatements_InAnExpandedBody(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void M(int x) { if (x > 0) x++; else x--; while (x > 0) { x--; } }
+        }
+        """,
+        editorConfig,
+        "BRO1508",
+        "BRO1509",
+        "BRO1514",
+        "BRO1516");
+
     // actions/runner's VssStringComparer: one-line properties with block accessors in a row. BRO1509 expands each, and
     // BRO1505 then wants blank lines between them (two one-line properties may sit together, multi-line ones not).
     [Fact]

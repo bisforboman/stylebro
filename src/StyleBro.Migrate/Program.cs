@@ -178,6 +178,10 @@ internal static class Program
 
         var result = Migration.Generate(setup, root, sonar: sonar);
         var plan = Migration.Plan(setup, root, result);
+        if (sonar is not null)
+        {
+            plan[".editorconfig"].AddRange(Suppressions.OptionScopes(root, sonar, result.Lines));
+        }
 
         Console.WriteLine($"Read: {(setup.Sources.Count == 0 ? "no StyleCop settings (StyleCop's defaults)" : string.Join(", ", setup.Sources))}");
         if (setup.Version is { } version)

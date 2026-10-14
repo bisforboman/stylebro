@@ -2110,7 +2110,7 @@ public class DocumentationTests
         """);
 
     // GuardClauses: 'IComparable<T> can use OutOfRange' starts an element 'T' that takes the summary's end tag, and BRO1603
-    // wrote 'IComparable.<T>'. A comment whose XML is malformed is left to a person, by every rule that edits text.
+    // wrote 'IComparable.<T>'; a bare '<' ('a < b') starts an element without '/>', and BRO1603 wrote 'a. < b' (trial 19). A comment whose XML is malformed is left to a person, by every rule that edits text.
     [Fact]
     public Task MalformedDocumentation_IsLeftAlone() => VerifyNoDiagnosticsAsync(
         """
@@ -2130,6 +2130,18 @@ public class DocumentationTests
             public Range()
             {
             }
+
+            /// <summary>Sorts when a < b</summary>
+            public void Sort()
+            {
+            }
+
+            /// <summary>
+            /// Use when count < limit
+            /// </summary>
+            public void Use()
+            {
+            }
         }
         """);
 
@@ -2138,7 +2150,11 @@ public class DocumentationTests
     [InlineData(DocumentationMode.Parse, "<summary>IList<T> items</summary>", true)]
     [InlineData(DocumentationMode.Diagnose, "<summary>IList<T> items</summary>", true)]
     [InlineData(DocumentationMode.Parse, "<summary><T></summary></summary>", true)]
+    [InlineData(DocumentationMode.Parse, "<summary>Sorts when a < b</summary>", true)]
+    [InlineData(DocumentationMode.Diagnose, "<summary>Sorts when a < b</summary>", true)]
+    [InlineData(DocumentationMode.Parse, "<summary>x < 0 or y > 1</summary>", true)]
     [InlineData(DocumentationMode.Parse, "<summary>IList&lt;T&gt; <c>x</c> items</summary>", false)]
+    [InlineData(DocumentationMode.Parse, "<summary>a &amp; b <see cref=\"A\"/> & c</summary>", false)]
     public void MalformedDocumentation_IsToldByTheEndTags(DocumentationMode mode, string documentation, bool malformed)
     {
         var tree = CSharpSyntaxTree.ParseText($"/// {documentation}\nclass A {{ }}\n", new CSharpParseOptions(documentationMode: mode));

@@ -183,6 +183,7 @@ internal static class Conventions
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
+        new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
     };
 
     /// <summary>
@@ -344,6 +345,12 @@ internal static class Conventions
 
     /// <summary>BRO1513's severity: doc comments right below code, or after a blank line (Kavita: 312 files changed).</summary>
     private const string DocBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineBeforeDocumentation + ".severity";
+
+    /// <summary>
+    /// BRO1506's severity: a '//' comment right above the code it's about, or with a blank line below (owner's choice
+    /// 2026-10-14: RecyclableMemoryStream keeps one below commented-out tests; BRO1506 removed it).
+    /// </summary>
+    private const string CommentBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterComment + ".severity";
 
     /// <summary>The SDK option BRO1406 follows ('never_if_unnecessary' turns it off).</summary>
     private const string ArithmeticKey = "dotnet_style_parentheses_in_arithmetic_binary_operators";
@@ -1176,6 +1183,7 @@ internal static class Conventions
             Overloads();
             MemberOrder();
             Separation();
+            CommentBlankLines();
 
             // Unit = regions inside members (BRO1113's): only the uses count.
             counts[RegionsKey][1] += StyleBro.Analyzers.Readability.Regions.GetRegions(root).Count(r => r.InCodeElement);
@@ -1654,6 +1662,18 @@ internal static class Conventions
                     && StyleBro.Analyzers.Layout.DocumentationBlankLines.WantsBlankLineAbove(text.Lines[above + 1], text))
                 {
                     Add(DocBlankLineKey, above == line - 1);
+                }
+            }
+        }
+
+        // Unit = '//' comments (the last line of a group) BRO1506 checks: with a blank line below, or right above the code.
+        void CommentBlankLines()
+        {
+            foreach (var comment in root.DescendantTrivia().Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia)))
+            {
+                if (StyleBro.Analyzers.Layout.TrailingBlankLines.GetCheckedBlankLines(comment, text) is { } blank)
+                {
+                    Add(CommentBlankLineKey, blank.Count > 0);
                 }
             }
         }

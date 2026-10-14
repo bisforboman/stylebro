@@ -352,7 +352,8 @@ summary. `init` does the same in a repository without StyleCop, and prints it.
 Suppressions of Sonar ids are carried over like StyleCop's ([Suppressions](#suppressions)): `#pragma warning disable
 S1659` gets `BRO1142`, `[SuppressMessage("...", "S927:...")]` a sibling for `BRO1313`, `<NoWarn>` the replacing ids, so
 code where a team suppressed a Sonar rule doesn't get the fix (`init --write` does this too when it finds a Sonar
-setup). Limits: Sonar's rule parameters (`SonarLint.xml`) aren't read.
+setup). A Sonar rule that only sets an option is different: S4136 (overloads together) in a `<NoWarn>` gets a section
+for that folder with `stylebro_keep_overloads_together = false`, and BRO1001 stays on there. Limits: Sonar's rule parameters (`SonarLint.xml`) aren't read.
 
 ## Modernizing afterwards
 

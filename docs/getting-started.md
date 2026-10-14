@@ -370,6 +370,12 @@ A few settings work a little differently:
   comments** ([BRO1513](rules/BRO1513.md)) count doc comments right below code or after a blank line. Mostly with: the rule
   stays on; mostly without or mixed: it's turned off, so `format` doesn't add blank lines to compact code (Kavita: 392
   and 312 files).
+- **Blank lines below `//` comments** ([BRO1506](rules/BRO1506.md)) count the comments it checks (the last line of a
+  comment group; not the file header, trailing comments or comments below code) right above the code or with a blank line
+  below. Mostly right above: the rule stays on; mostly with a blank line or mixed: it's turned off (RecyclableMemoryStream
+  keeps one below commented-out tests).
+- **`this.`**: when your `.editorconfig` requires it (a `dotnet_style_qualification_for_*` key `= true:warning`, or
+  IDE0009 at `suggestion` or above), the block leaves IDE0009 alone instead of turning it off.
 - **Column alignment**: when your `.editorconfig` aligns code in columns for ReSharper or Rider
   (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
   the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
@@ -443,6 +449,7 @@ A few settings work a little differently:
 | Spacing | `if (x)` or `if(x)`; spaces inside parentheses, after casts, inside call and parameter lists (mixed: IDE0055 off) | SDK formatter (IDE0055) | `csharp_space_after_keywords_in_control_flow_statements`, `csharp_space_between_parentheses`, `csharp_space_after_cast`, `csharp_space_between_method_call_parameter_list_parentheses`, `csharp_space_between_method_declaration_parameter_list_parentheses` |
 | Member separation | neighbouring members that need a blank line, with or without one | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
+| Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |
 
 The keys are described in [Settings](configuration.md). `init` prints each verdict (`kept`, `default`, `off`, `both`,
 `mixed`, `too few`, or `set` when your configuration decides) with the value that applies, then a summary that names the keys
