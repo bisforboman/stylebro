@@ -474,7 +474,7 @@ public class KeptFindingsTests
 
         Assert.Null((await NamespaceRenamer.GetChangesAsync(solution, "ZqxApp.zqxData", "ZqxData", CancellationToken.None)).Reason);
         Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, async () => (await NamespaceRenamer.GetChangesAsync(solution, "ZqxApp.zqxData", "ZqxData", CancellationToken.None)).Reason));
-        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
+        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", "C.cs", CancellationToken.None)));
     }
 
     // Trial 21: the elements of a tuple type are renamed together; the one that blocks gives its reason, the other says so.
@@ -486,8 +486,8 @@ public class KeptFindingsTests
             ("C.cs", "namespace ZqxApp\n{\n    class C\n    {\n        private int _zqxN;\n\n        public (int zqxFirst, int zqxSecond) Get() => (1, 0);\n\n        public int GetN() => _zqxN;\n    }\n}\n"));
         var tests = ("Tests/T.cs", "namespace ZqxTests\n{\n    using ZqxApp;\n\n    class ZqxT\n    {\n        int zqxRead(C zqxC) => zqxC.Get().zqxFirst;\n    }\n}\n");
 
-        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", CancellationToken.None)));
-        Assert.Equal(KeptReason.KeptWithOtherElement, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxSecond", "ZqxSecond", CancellationToken.None)));
+        Assert.Equal(KeptReason.UsedInProjectNotLoaded, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxFirst", "ZqxFirst", "C.cs", CancellationToken.None)));
+        Assert.Equal(KeptReason.KeptWithOtherElement, await WithRepositoryNamesAsync(tests, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxSecond", "ZqxSecond", "C.cs", CancellationToken.None)));
     }
 
     // AngleSharp (trial 21): static properties aren't data a serializer writes, so only a reflection-shaped string keeps
@@ -516,7 +516,7 @@ public class KeptFindingsTests
             ("C.cs", "namespace ZqxApp\n{\n    public class C\n    {\n        private int _zqxN;\n\n        private (int zqxUser, int zqxClaims) Find() => (1, 0);\n\n        public int Get()\n        {\n            (int zqxUser, int zqxClaims) pair = Find();\n            return pair.zqxUser + pair.zqxClaims + _zqxN;\n        }\n    }\n}\n"));
         var app = ("ClientApp/T.cs", "namespace ZqxClient\n{\n    class ZqxT\n    {\n        int zqxRead((int zqxUser, int zqxId) zqxP) => zqxP.zqxUser;\n    }\n}\n");
 
-        Assert.Null(await WithRepositoryNamesAsync(app, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxUser", "ZqxUser", CancellationToken.None)));
+        Assert.Null(await WithRepositoryNamesAsync(app, () => TupleElementRenamer.GetKeptReasonAsync(solution, "zqxUser", "ZqxUser", "C.cs", CancellationToken.None)));
     }
 
     // EntityGraphQL: an internal method's '(bool IsSet, object? value)' was kept for a lambda's '(_, value) =>' in an example
@@ -566,7 +566,7 @@ public class KeptFindingsTests
         try
         {
             // A new solution each time: the names are collected once per solution.
-            async Task<KeptReason?> Reason() => await TupleElementRenamer.GetKeptReasonAsync((await FindAsync(DiagnosticIds.PrivateFieldNaming, files)).Solution, "zqxValue", "ZqxValue", CancellationToken.None);
+            async Task<KeptReason?> Reason() => await TupleElementRenamer.GetKeptReasonAsync((await FindAsync(DiagnosticIds.PrivateFieldNaming, files)).Solution, "zqxValue", "ZqxValue", "C.cs", CancellationToken.None);
 
             Assert.Null(await WithRepositoryNamesAsync(("Tests/T.cs", lambda), Reason));
             Assert.Null(await WithRepositoryNamesAsync((Path.Combine(folder, "Examples", "T.cs"), member), Reason));

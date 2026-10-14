@@ -123,6 +123,43 @@ public class TupleElementNamingTests
         """,
         editorConfig: "stylebro_tuple_element_name_casing = camelCase");
 
+    // splat (2026-10-14): Splat.Core's private '(Type ServiceType, string Contract)' keys were renamed when 'format' ran
+    // Splat.Core apart from Splat.SimpleInjector, whose own '(Type ServiceType, ...)' can't be renamed; loaded together,
+    // that one kept them all. Each project's elements are judged on their own once the whole name can't be renamed.
+    [Fact]
+    public async Task ElementsInAnotherProject_ThatCantBeRenamed_DontKeepTheseNames()
+    {
+        const string App = """
+            internal class Clash
+            {
+                private (int {|BRO1311:count|}, int Count) M() => (1, 2);
+            }
+            """;
+        var test = new CSharpCodeFixTest<TupleElementNamingAnalyzer, StyleBro.CodeFixes.Naming.TupleElementNamingCodeFixProvider, DefaultVerifier>
+        {
+            TestCode = """
+                internal class Totals
+                {
+                    private (int {|BRO1311:count|}, int {|BRO1311:total|}) last;
+
+                    public int Sum() => last.count + last.total;
+                }
+                """,
+            FixedCode = """
+                internal class Totals
+                {
+                    private (int Count, int Total) last;
+
+                    public int Sum() => last.Count + last.Total;
+                }
+                """,
+        };
+        test.TestState.AdditionalProjects["App"].Sources.Add(App);
+        test.FixedState.AdditionalProjects["App"].Sources.Add(App.Replace("{|BRO1311:count|}", "count", StringComparison.Ordinal));
+        test.FixedState.ExpectedDiagnostics.Add(new DiagnosticResult(StyleBro.Analyzers.DiagnosticIds.TupleElementCasing, DiagnosticSeverity.Warning).WithSpan("/App/Test0.cs", 3, 18, 3, 23).WithArguments("count", "Count"));
+        await test.RunAsync();
+    }
+
     [Fact]
     public Task RenamesThatWouldNotCompile_AreLeftWithTheirWarning() => VerifyNotFixedAsync(
         new[]

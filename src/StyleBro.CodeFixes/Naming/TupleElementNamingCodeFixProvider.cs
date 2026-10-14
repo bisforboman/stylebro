@@ -28,7 +28,7 @@ public sealed class TupleElementNamingCodeFixProvider : CodeFixProvider
         {
             // A rename the fix keeps on purpose offers no action: applying it would change nothing.
             if (Rename(diagnostic) is { } rename
-                && await TupleElementRenamer.GetKeptReasonAsync(context.Document.Project.Solution, rename.OldName, rename.NewName, context.CancellationToken).ConfigureAwait(false) is null)
+                && await TupleElementRenamer.GetKeptReasonAsync(context.Document.Project.Solution, rename.OldName, rename.NewName, diagnostic.Location.SourceTree?.FilePath ?? string.Empty, context.CancellationToken).ConfigureAwait(false) is null)
             {
                 context.RegisterCodeFix(
                     CodeAction.Create(

@@ -38,44 +38,94 @@ internal static class TupleElementRenamer
         var items = renames.ToList();
         foreach (var group in await GroupAsync(solution, items.Select(r => (r.OldName, r.NewName)), cancellationToken).ConfigureAwait(false))
         {
-            var (renamed, reason, blocker) = await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false);
+            var (renamed, reason, blocker) = await TryRenameAllAsync(solution, group, null, cancellationToken).ConfigureAwait(false);
             if (renamed is not null)
             {
                 solution = renamed;
                 continue;
             }
 
-            // The element that can't be renamed gives its reason; the others in its group say which one keeps them.
-            foreach (var item in items.Where(r => group.Any(g => g.OldName == r.OldName)))
+            // Unrelated tuple types in other projects can share the names (splat: Splat.Core's private '(Type ServiceType,
+            // string Contract)' keys, and Splat.SimpleInjector's, whose rename adds errors): each project's own elements
+            // on their own then, as a run that loads one of them alone does.
+            var open = items.Where(r => group.Any(g => g.OldName == r.OldName)).ToList();
+            foreach (var files in ProjectFiles(solution, open.Select(i => PathOf(i.Diagnostic))))
             {
-                if (blocker is not null && item.OldName != blocker)
+                var mine = open.Where(i => files.Contains(PathOf(i.Diagnostic))).ToList();
+                var attempt = await TryRenameAllAsync(solution, group, files, cancellationToken).ConfigureAwait(false);
+                if (attempt.Renamed is not null)
                 {
-                    KeptFindings.Record(item.Diagnostic, KeptReason.KeptWithOtherElement, $"'{blocker}': {KeptFinding.Describe(reason?.Reason ?? KeptReason.NothingToRename)}");
+                    solution = attempt.Renamed;
                 }
                 else
                 {
-                    KeptFindings.Record(item.Diagnostic, reason?.Reason ?? KeptReason.NothingToRename, reason?.Where);
+                    Keep(mine, attempt.Reason, attempt.Blocker);
                 }
+
+                open.RemoveAll(mine.Contains);
             }
+
+            Keep(open, reason, blocker);
         }
 
         return solution;
     }
 
-    /// <summary>Why the fix leaves a rename on purpose, or null when it makes it (the same checks as <see cref="RenameAsync"/>).</summary>
-    public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    /// <summary>
+    /// Why the fix leaves the rename of the element at <paramref name="path"/> on purpose, or null when it makes it (the same
+    /// checks as <see cref="RenameAsync"/>).
+    /// </summary>
+    public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, string oldName, string newName, string path, CancellationToken cancellationToken)
     {
         foreach (var group in await GroupAsync(solution, new[] { (oldName, newName) }, cancellationToken).ConfigureAwait(false))
         {
             if (group.Any(g => g.OldName == oldName))
             {
-                var (_, reason, blocker) = await TryRenameAllAsync(solution, group, cancellationToken).ConfigureAwait(false);
+                var (renamed, reason, blocker) = await TryRenameAllAsync(solution, group, null, cancellationToken).ConfigureAwait(false);
+                if (renamed is null && ProjectFiles(solution, new[] { path }).FirstOrDefault() is { } files)
+                {
+                    (_, reason, blocker) = await TryRenameAllAsync(solution, group, files, cancellationToken).ConfigureAwait(false);
+                }
+
                 return blocker is not null && blocker != oldName ? KeptReason.KeptWithOtherElement : reason?.Reason;
             }
         }
 
         return KeptReason.NothingToRename;
     }
+
+    /// <summary>The element that can't be renamed gives its reason; the others in its group say which one keeps them.</summary>
+    private static void Keep(IEnumerable<(string OldName, string NewName, Diagnostic Diagnostic)> items, (KeptReason Reason, string? Where)? reason, string? blocker)
+    {
+        foreach (var item in items)
+        {
+            if (blocker is not null && item.OldName != blocker)
+            {
+                KeptFindings.Record(item.Diagnostic, KeptReason.KeptWithOtherElement, $"'{blocker}': {KeptFinding.Describe(reason?.Reason ?? KeptReason.NothingToRename)}");
+            }
+            else
+            {
+                KeptFindings.Record(item.Diagnostic, reason?.Reason ?? KeptReason.NothingToRename, reason?.Where);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The files of each project (once per set: a multi-targeted project's copies are one) that has one of
+    /// <paramref name="paths"/>, in the solution's order; none when the solution has just one, which the whole rename was.
+    /// </summary>
+    private static List<HashSet<string>> ProjectFiles(Solution solution, IEnumerable<string> paths)
+    {
+        var wanted = paths.ToList();
+        var sets = solution.Projects.Where(p => p.Language == LanguageNames.CSharp)
+            .Select(p => new HashSet<string>(p.Documents.Select(d => d.FilePath ?? d.Name)))
+            .GroupBy(files => string.Join("|", files.OrderBy(f => f, System.StringComparer.Ordinal)))
+            .Select(g => g.First())
+            .ToList();
+        return sets.Count > 1 ? sets.Where(files => wanted.Any(files.Contains)).ToList() : new List<HashSet<string>>();
+    }
+
+    private static string PathOf(Diagnostic diagnostic) => diagnostic.Location.SourceTree?.FilePath ?? string.Empty;
 
     /// <summary>
     /// The renames in groups that are made all or none: names that share a tuple type go together, with every other name
@@ -148,7 +198,7 @@ internal static class TupleElementRenamer
     /// nothing to rename (only in public signatures, say) is skipped: its tuple types keep every name anyway, as the others
     /// are public there too.
     /// </summary>
-    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason, string? Blocker)> TryRenameAllAsync(Solution solution, List<(string OldName, string? NewName)> group, CancellationToken cancellationToken)
+    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason, string? Blocker)> TryRenameAllAsync(Solution solution, List<(string OldName, string? NewName)> group, ISet<string>? onlyIn, CancellationToken cancellationToken)
     {
         var any = false;
         foreach (var (oldName, newName) in group)
@@ -158,7 +208,7 @@ internal static class TupleElementRenamer
                 return (null, (KeptReason.DisabledCode, null), oldName);
             }
 
-            var (renamed, reason) = await TryRenameAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
+            var (renamed, reason) = await TryRenameAsync(solution, oldName, newName, onlyIn, cancellationToken).ConfigureAwait(false);
             if (renamed is not null)
             {
                 (solution, any) = (renamed, true);
@@ -172,9 +222,9 @@ internal static class TupleElementRenamer
         return any ? (solution, null, null) : (null, (KeptReason.NothingToRename, null), null);
     }
 
-    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
     {
-        var (renamed, visible) = await RenameOneAsync(solution, oldName, newName, cancellationToken).ConfigureAwait(false);
+        var (renamed, visible) = await RenameOneAsync(solution, oldName, newName, onlyIn, cancellationToken).ConfigureAwait(false);
         if (renamed is null)
         {
             return (null, (KeptReason.NothingToRename, null));
@@ -271,7 +321,8 @@ internal static class TupleElementRenamer
 #pragma warning restore RS1035
     }
 
-    private static async Task<(Solution? Renamed, List<ISymbol?> Visible)> RenameOneAsync(Solution solution, string oldName, string newName, CancellationToken cancellationToken)
+    /// <summary>The rename of every element named <paramref name="oldName"/> (only those declared in <paramref name="onlyIn"/>'s files when given), with every use.</summary>
+    private static async Task<(Solution? Renamed, List<ISymbol?> Visible)> RenameOneAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
     {
         var visible = new List<ISymbol?>();
         var documents = new List<(Document Document, SyntaxNode Root, SemanticModel Model)>();
@@ -302,7 +353,7 @@ internal static class TupleElementRenamer
         void Rename(Document document, SyntaxToken token) => Edit(document, new TextChange(token.Span, newName));
 
         // 1. Tuple type elements.
-        foreach (var (document, root, model) in documents)
+        foreach (var (document, root, model) in documents.Where(d => onlyIn is null || onlyIn.Contains(d.Document.FilePath ?? d.Document.Name)))
         {
             foreach (var element in root.DescendantNodes().OfType<TupleElementSyntax>().Where(e => e.Identifier.ValueText == oldName))
             {
