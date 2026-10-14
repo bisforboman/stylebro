@@ -206,14 +206,34 @@ public sealed partial class MigrationTests
         Write("Unsorted.cs", "using MyApp.Logging;\n\nusing log4net;\n\nclass U { }\n");
 
         var setup = StyleCopSetup.Read(root, _ => true);
-        var note = Migration.UnsortedUnderOwnKey(setup, root, Migration.OwnSettings(root));
+        var (note, kept) = Migration.UnsortedUnderOwnKey(setup, root, Migration.OwnSettings(root))!.Value;
 
-        Assert.NotNull(note);
-        Assert.StartsWith("using directives: your .editorconfig sets dotnet_sort_system_directives_first = true, and 'dotnet format' sorts usings whenever it is set (to any value): 1 file isn't in that order (Unsorted.cs)", note, StringComparison.Ordinal);
-        Assert.Contains("StyleSharp's SST1208/SST1210 (on here) keep another order", note, StringComparison.Ordinal);
-        Assert.Contains(note, Migration.Generate(setup, root).Notes);
+        Assert.StartsWith("using directives: your .editorconfig sets dotnet_sort_system_directives_first = true, and 'dotnet format' sorts usings whenever it is set (to any value): 1 file isn't in that order (Unsorted.cs), while SST1208/SST1210 (on here) accept their order", note, StringComparison.Ordinal);
+        Assert.Equal(["Unsorted.cs"], kept);
+
+        // The block names the file, and format leaves it out.
+        var result = Migration.Generate(setup, root);
+        Assert.Contains(note, result.Notes);
+        Write(".editorconfig", Migration.Apply(File.ReadAllText(Path.Combine(root, ".editorconfig")), Migration.Render(Migration.Plan(setup, root, result)[".editorconfig"])));
+        Assert.Equal(["Unsorted.cs"], Migration.KeptUsingsFiles(root));
+
+        // Without a rule that enforces another order, format sorts them: nothing kept.
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_sort_system_directives_first = true\ndotnet_diagnostic.SST1208.severity = none\ndotnet_diagnostic.SST1210.severity = none\n");
+        var (_, none) = Migration.UnsortedUnderOwnKey(StyleCopSetup.Read(root, _ => true), root, Migration.OwnSettings(root))!.Value;
+        Assert.Empty(none);
         File.Delete(Path.Combine(root, "Unsorted.cs"));
         Assert.Null(Migration.UnsortedUnderOwnKey(setup, root, Migration.OwnSettings(root)));
+    }
+
+    [Fact]
+    public void Suppressions_AreNotAddedForRulesTheSettingsTurnOff()
+    {
+        // Splat: '[SuppressMessage("StyleBro", "BRO1311")]' next to an SA1316 suppression with BRO1311 off; SST1462 reported it.
+        var replacements = new Dictionary<string, SortedSet<string>> { ["SA1316"] = new(["BRO1311"]), ["SA1309"] = new(["BRO1303"]) };
+        var kept = Suppressions.WithoutOff(replacements, ["dotnet_diagnostic.BRO1311.severity = none", "dotnet_diagnostic.BRO1303.severity = none", "dotnet_diagnostic.BRO1303.severity = warning"]);
+
+        Assert.Empty(kept["SA1316"]);
+        Assert.Equal(["BRO1303"], kept["SA1309"]);
     }
 
     [Fact]

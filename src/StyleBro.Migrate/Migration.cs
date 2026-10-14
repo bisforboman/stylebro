@@ -38,6 +38,9 @@ internal static class Migration
     /// <summary>How the block records StyleSharp.Analyzers' version: once the package is gone, the setup is still read as StyleSharp's.</summary>
     public const string StyleSharpVersionPrefix = "# StyleSharp.Analyzers version: ";
 
+    /// <summary>How the block names the files whose usings 'format' leaves alone (<see cref="KeptUsingsFiles"/>).</summary>
+    public const string KeptUsingsPrefix = "# Usings kept as they are (the ordering rule accepts them, the sort key doesn't): ";
+
     /// <summary>Why a StyleCop rule isn't enforced in a repository CSharpier formats (the report groups these).</summary>
     public const string CSharpierReason = "CSharpier decides it";
 
@@ -266,9 +269,10 @@ internal static class Migration
             result.Notes.Add($"Not kept, because nothing enforces them (severity silent or none): {string.Join(", ", unenforced.Select(k => $"{k} = {ownSettings[k]}"))}; StyleCop's setting is written instead.");
         }
 
-        if (fieldStyle is null && UnsortedUnderOwnKey(setup, root, ownSettings) is { } usingsNote)
+        if (fieldStyle is null && UnsortedUnderOwnKey(setup, root, ownSettings) is var (usingsNote, keptUsings))
         {
             result.Notes.Add(usingsNote);
+            result.KeptUsings.AddRange(keptUsings);
         }
 
         var kept = lines.Skip(sdkStart).Where(line => KeyOf(line) is { } key && own.Contains(key)).ToList();
@@ -495,6 +499,11 @@ internal static class Migration
 
         // Where StyleCop didn't run, nothing changes, whitespace included: 'format' reads the folders from this line.
         var mainLines = setup.Folders is null || setup.FoldersWithout.Count == 0 ? main.Lines : [UnformattedLine(setup.FoldersWithout), .. main.Lines];
+        if (main.KeptUsings.Count > 0)
+        {
+            mainLines = [KeptUsingsPrefix + string.Join(", ", main.KeptUsings), .. mainLines];
+        }
+
         if (setup.Version is { } version)
         {
             mainLines = [.. mainLines, string.Empty, VersionPrefix + version + " (rules it doesn't have stay off after the package is removed)"];
@@ -800,6 +809,25 @@ internal static class Migration
         XmlHeader(setup) ? new HashSet<string>() : new HashSet<string> { "SA1634", "SA1637", "SA1638", "SA1639", "SA1640", "SA1641" };
 
     /// <summary>
+    /// The files (relative to <paramref name="root"/>, '/'-separated) the stylebro-migrate block's <see cref="KeptUsingsPrefix"/>
+    /// line names: their usings follow the ordering rule the team enforces, which disagrees with the sort key, so 'format'
+    /// leaves them alone (<see cref="UnsortedUnderOwnKey"/>).
+    /// </summary>
+    public static List<string> KeptUsingsFiles(string root)
+    {
+        var blockFolder = BlockFolder(root);
+        var path = Path.Combine(blockFolder, ".editorconfig");
+        var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
+        var line = block.Value.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.StartsWith(KeptUsingsPrefix, StringComparison.Ordinal));
+        return line is null
+            ? []
+            : line.Substring(KeptUsingsPrefix.Length).Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Select(f => Path.GetRelativePath(root, Path.Combine(blockFolder, f)).Replace('\\', '/'))
+                .Where(f => !f.StartsWith("../", StringComparison.Ordinal))
+                .ToList();
+    }
+
+    /// <summary>
     /// Private instance and static fields (not constants, not static readonly), by whether they start with '_'. Generated
     /// code (an '&lt;auto-generated' header, *.g.cs, *.Designer.cs, EF Core migrations) and vendored folders don't count;
     /// submodules are skipped anyway.
@@ -948,9 +976,11 @@ internal static class Migration
     /// format' then sorts them into (it does whatever the value; an .editorconfig can't remove the key, and it's the team's, so
     /// it stays). Splat: dotnet_sort_system_directives_first = true, while StyleSharp's SST1210 keeps 'using Splat.Log4Net;'
     /// above 'using log4net;' (it compares case-sensitively); format's IMPORTS reordered 2 files, and SST1210 reported them.
-    /// Null when every file is in that order.
+    /// Null when every file is in that order. <c>Kept</c>: the files, when a StyleCop (or StyleSharp) ordering rule that is on
+    /// accepted their order: 'format' leaves them alone then (<see cref="KeptUsingsFiles"/>), else it would write what that
+    /// rule reports.
     /// </summary>
-    internal static string? UnsortedUnderOwnKey(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> ownSettings)
+    internal static (string Note, List<string> Kept)? UnsortedUnderOwnKey(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> ownSettings)
     {
         var key = new[] { Conventions.SortUsingsKey, "dotnet_separate_import_directive_groups" }.FirstOrDefault(ownSettings.ContainsKey);
         if (key is null)
@@ -972,11 +1002,18 @@ internal static class Migration
         }
 
         var enforcers = new[] { "SA1208", "SA1210" }.Where(setup.IsOn).ToList();
-        var enforcer = enforcers.Count == 0 ? string.Empty
-            : setup.StyleSharp is not null
-                ? $" StyleSharp's {string.Join("/", enforcers.Select(id => "SST" + id[2..]))} (on here) keep{(enforcers.Count == 1 ? "s" : string.Empty)} another order (case-sensitive: 'MyApp.Logging' above 'log4net') and report what 'format' writes for as long as StyleSharp runs."
-                : $" {string.Join("/", enforcers)} (on here) accept{(enforcers.Count == 1 ? "s" : string.Empty)} their order.";
-        return $"using directives: your .editorconfig sets {key} = {ownSettings[key]}, and 'dotnet format' sorts usings whenever it is set (to any value): {unsorted.Count} file{(unsorted.Count == 1 ? " isn't" : "s aren't")} in that order ({string.Join(", ", unsorted.Take(3))}{(unsorted.Count > 3 ? ", ..." : string.Empty)}), and 'format' will reorder {(unsorted.Count == 1 ? "it" : "them")}.{enforcer} The key is yours, so it stays: if your team doesn't want that order, remove {key} from .editorconfig ('unset' sorts them too).";
+        var files = $"{unsorted.Count} file{(unsorted.Count == 1 ? " isn't" : "s aren't")} in that order ({string.Join(", ", unsorted.Take(3))}{(unsorted.Count > 3 ? ", ..." : string.Empty)})";
+        var start = $"using directives: your .editorconfig sets {key} = {ownSettings[key]}, and 'dotnet format' sorts usings whenever it is set (to any value): {files}";
+        var end = $"The key is yours, so it stays: if your team doesn't want that order, remove {key} from .editorconfig ('unset' sorts them too).";
+        if (enforcers.Count == 0)
+        {
+            return ($"{start}, and 'format' will reorder {(unsorted.Count == 1 ? "it" : "them")}. {end}", []);
+        }
+
+        // The rule that enforces the order accepts these files (StyleSharp's SST1210 compares case-sensitively): format would
+        // write what it reports, and can't skip only the sorting, so it leaves the files alone.
+        var rules = setup.StyleSharp is not null ? string.Join("/", enforcers.Select(id => "SST" + id[2..])) : string.Join("/", enforcers);
+        return ($"{start}, while {rules} (on here) accept{(enforcers.Count == 1 ? "s" : string.Empty)} their order{(setup.StyleSharp is null ? string.Empty : " (StyleSharp compares case-sensitively: 'MyApp.Logging' above 'log4net')")}: 'format' leaves {(unsorted.Count == 1 ? "it" : "them")} alone (the block's '{KeptUsingsPrefix.TrimEnd()}' line), else it would write what {rules} reports. {end} Once {rules} is gone, remove that line to sort them.", unsorted);
     }
 
     /// <summary>Whether a C# file (path relative to the root) is generated or someone else's code.</summary>
@@ -1479,6 +1516,9 @@ internal static class Migration
 
         /// <summary>Gets or sets what the Sonar setup turned on, or null without one.</summary>
         public SonarSetup.Applied? Sonar { get; set; }
+
+        /// <summary>Gets the files whose usings 'format' leaves alone (<see cref="UnsortedUnderOwnKey"/>), relative to the root.</summary>
+        public List<string> KeptUsings { get; } = [];
 
         /// <summary>Gets keys left out because the repository sets them itself.</summary>
         public HashSet<string> OwnKeys { get; } = new(StringComparer.OrdinalIgnoreCase);

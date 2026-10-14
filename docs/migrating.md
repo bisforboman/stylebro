@@ -246,7 +246,8 @@ stays exempt:
 The StyleCop suppressions stay: they're harmless once StyleCop is gone, and needed while both run. Running the tool
 again adds nothing. A suppression gets every rule that replaces the StyleCop one, also one that can't report on the
 code it covers (SA1300 around a local function gets BRO1312, the namespace rule, too): an id that doesn't apply is
-harmless, and the suppression stays right if the code changes. The count the tool prints is of rule ids added (a
+harmless, and the suppression stays right if the code changes. Rules the generated settings turn off get none (an
+analyzer like StyleSharp's SST1462 reports a suppression of a rule that never reports). The count the tool prints is of rule ids added (a
 `disable`/`restore` pair counts twice), and the preview counts the same way. Sonar's suppressions get the same treatment ([Coming from SonarQube](#coming-from-sonarqube)).
 
 EF Core migrations are `dotnet ef`'s output: when the repository has them, the block marks their folders
@@ -296,6 +297,13 @@ referenced too, a StyleCop rule counts as on when either package enforces it, an
 
 Data: `scripts/stylecop-survey/data/inventory-stylesharp-3.40.1.csv` (StyleSharp's rules, `Get-Inventory.ps1 -Package
 StyleSharp.Analyzers`) and `stylesharp-mapping.csv` (written by `New-StyleSharpMapping.ps1`, which holds the exceptions).
+
+**Using order.** When your `.editorconfig` sets `dotnet_sort_system_directives_first` (or
+`dotnet_separate_import_directive_groups`), `dotnet format` sorts usings whatever the value. Files that aren't in that
+order while your ordering rule (SA1208/SA1210, or StyleSharp's SST1208/SST1210, which compares case-sensitively) is on
+and accepts them are named in the report and in the block (`# Usings kept as they are ...`), and `stylebro-migrate
+format` leaves them out, so it doesn't write what that rule reports. Remove the line once that rule is gone to have them
+sorted. The key itself is yours and stays.
 
 **Settings without a package.** StyleCop or StyleSharp settings (`stylecop.json`, `SA`/`SST` severities) that no project
 uses describe nothing the build enforces: the migration writes nothing and points to `stylebro-migrate init`, also when

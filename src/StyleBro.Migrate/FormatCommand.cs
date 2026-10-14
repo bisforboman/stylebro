@@ -2133,6 +2133,14 @@ internal static class FormatCommand
             excluded.AddRange(unformatted);
         }
 
+        // Files whose usings the team's ordering rule accepts and its own sort key doesn't (Splat: StyleSharp's SST1210): 'dotnet
+        // format' sorts them whenever the key is set and can't skip only that, so they're left out.
+        if (Migration.KeptUsingsFiles(root) is { Count: > 0 } keptUsings)
+        {
+            log($"{UnformattedHeader} {string.Join(", ", keptUsings)}: their usings follow the ordering rule your team enforces, not the sort key in .editorconfig, which 'dotnet format' would apply (the stylebro-migrate block names them).");
+            Exclude(keptUsings);
+        }
+
         // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles.
         if (OldMacLineEndings(root) is { Count: > 0 } oldMac)
         {

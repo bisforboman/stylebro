@@ -56,6 +56,22 @@ internal static class Suppressions
     }
 
     /// <summary>
+    /// <paramref name="replacements"/> without the rules the generated settings (<paramref name="lines"/>) only turn off: a
+    /// suppression of a rule that never reports is noise, and StyleSharp's SST1462 reports it (Splat: '[SuppressMessage("StyleBro",
+    /// "BRO1311")]' next to an SA1316 suppression, with BRO1311 off).
+    /// </summary>
+    public static SortedDictionary<string, SortedSet<string>> WithoutOff(IReadOnlyDictionary<string, SortedSet<string>> replacements, IEnumerable<string> lines)
+    {
+        var severities = lines.Select(l => Regex.Match(l, @"^dotnet_diagnostic\.(\w+)\.severity\s*=\s*(\w+)")).Where(m => m.Success).ToList();
+        var off = severities.Where(m => m.Groups[2].Value == "none").Select(m => m.Groups[1].Value)
+            .Except(severities.Where(m => m.Groups[2].Value != "none").Select(m => m.Groups[1].Value))
+            .ToHashSet(StringComparer.Ordinal);
+        return new SortedDictionary<string, SortedSet<string>>(
+            replacements.ToDictionary(r => r.Key, r => new SortedSet<string>(r.Value.Where(id => !off.Contains(id)), StringComparer.Ordinal)),
+            StringComparer.Ordinal);
+    }
+
+    /// <summary>
     /// <paramref name="replacements"/> (StyleCop's) plus Sonar's: each Sonar rule the mapping knows, to the rules that fix
     /// what it reports (a team that suppressed S2325 doesn't want CA1822's fix there either). With <paramref name="sonar"/>,
     /// only the Sonar rules that are on: an off one turns nothing on, so its suppressions need no replacing id (linkdotnet/Blog

@@ -349,8 +349,9 @@ public sealed partial class MigrationTests
         Assert.Equal(1, noWarn);
         Assert.Contains("<NoWarn>$(NoWarn);S1659;BRO1142</NoWarn>", props);
 
-        // The migration carries them over with --write.
+        // The migration carries them over with --write, for a rule its settings turn on (S1659 turns BRO1142 on).
         Write("C.cs", code);
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S1659.severity = warning\n");
         Capture(() => Assert.Equal(0, Program.Migrate(new[] { root, "--write" })));
         Assert.Contains("S1659, BRO1142", File.ReadAllText(Path.Combine(root, "C.cs")));
     }
