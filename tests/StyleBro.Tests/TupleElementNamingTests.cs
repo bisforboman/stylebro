@@ -282,7 +282,8 @@ public class TupleElementNamingTests
 
             private (int Total, string Name) B() => (1, "");
         }
-        """);
+        """,
+        "stylebro_rename_public_api = false");
 
     // Coverlet (trial 20): a use inside a tuple literal converted to another tuple type ('return (false, x.documentName)')
     // names nothing there, so writing the old name out ('documentName: ...') only added CS8123 and the rename was dropped.

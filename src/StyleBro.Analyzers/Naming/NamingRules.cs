@@ -180,6 +180,7 @@ internal static class NamingRules
             {
                 case IParameterSymbol or ITypeParameterSymbol:
                     continue;
+
                 case ILocalSymbol or IRangeVariableSymbol or IMethodSymbol { MethodKind: MethodKind.LocalFunction or MethodKind.AnonymousFunction }:
                     return "local";
             }
@@ -204,7 +205,8 @@ internal static class NamingRules
     {
         string? Get(string key) => options.TryGetValue(key, out var v) ? v.Split(':')[0].Trim() : null;
         static string[]? List(string? value) =>
-            value is null || value.Split(',').Any(p => p.Trim() == "*") ? null
+            value is null || value.Split(',').Any(p => p.Trim() == "*")
+            ? null
             : value.Split(',').Select(p => p.Trim() switch { "friend" => "internal", "protected_friend" => "protected_internal", var x => x }).Where(p => p.Length > 0).ToArray();
 
         var rules = new List<Rule>();
@@ -219,6 +221,7 @@ internal static class NamingRules
             var symbols = Get(key);
             var style = Get($"dotnet_naming_rule.{name}.style");
             var severity = Get($"dotnet_naming_rule.{name}.severity");
+
             // Roslyn ignores a rule without these, and a style without a capitalization.
             if (symbols is null || style is null || severity is null || Get($"dotnet_naming_style.{style}.capitalization") is null)
             {
