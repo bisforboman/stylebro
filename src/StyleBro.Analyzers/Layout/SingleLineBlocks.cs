@@ -316,21 +316,25 @@ internal static class SingleLineBlocks
             }
         }
 
-        // The statements' braces (BRO1514-BRO1516 leave statements of a single-line block to this expansion).
-        if (isOn is not null && node is BlockSyntax block)
-        {
-            Braces.AddToExpansion(block, text, changes, options, isOn);
-        }
-
+        var lines = new List<TextChange>();
         if (node is BlockSyntax statements && items.Count > 0 && !PreservesSingleLineStatements(options))
         {
             foreach (var statement in statements.Statements)
             {
-                AddEmbeddedStatementLines(statement, inner, unit, lineBreak, text, options, changes);
-                AddSwitchLines(statement, inner, unit, lineBreak, options, isOn, changes);
+                AddEmbeddedStatementLines(statement, inner, unit, lineBreak, text, options, lines);
+                AddSwitchLines(statement, inner, unit, lineBreak, options, isOn, lines);
             }
         }
 
+        // The statements' braces (BRO1514-BRO1516 leave statements of a single-line block to this expansion), judged with
+        // the statement lines in place: a statement they make multi-line is BRO1515's (trial 21). Added before the lines,
+        // so the braces win a gap both edit.
+        if (isOn is not null && node is BlockSyntax block)
+        {
+            Braces.AddToExpansion(block, text, changes, lines, options, isOn);
+        }
+
+        changes.AddRange(lines);
         return changes;
     }
 

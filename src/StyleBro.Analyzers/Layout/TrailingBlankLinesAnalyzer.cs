@@ -25,9 +25,10 @@ public sealed class TrailingBlankLinesAnalyzer : DiagnosticAnalyzer
         {
             var root = c.Tree.GetRoot(c.CancellationToken);
             var text = c.Tree.GetText(c.CancellationToken);
+            var removeStandalone = TrailingBlankLines.RemovesStandalone(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree));
             foreach (var trivia in TreeWalk.Trivia(root))
             {
-                if (TrailingBlankLines.GetBlankLinesAfterComment(trivia, text).Count > 0)
+                if (TrailingBlankLines.GetBlankLinesAfterComment(trivia, text, removeStandalone).Count > 0)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(Descriptors.BlankLineAfterComment, trivia.GetLocation()));
                 }

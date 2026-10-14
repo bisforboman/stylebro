@@ -1726,7 +1726,7 @@ internal static class Conventions
         {
             foreach (var comment in root.DescendantTrivia().Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia)))
             {
-                if (StyleBro.Analyzers.Layout.TrailingBlankLines.GetCheckedBlankLines(comment, text) is { } blank)
+                if (StyleBro.Analyzers.Layout.TrailingBlankLines.GetCheckedBlankLines(comment, text, removeStandalone: false) is { } blank)
                 {
                     Add(CommentBlankLineKey, blank.Count > 0);
                 }

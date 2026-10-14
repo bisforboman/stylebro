@@ -1,7 +1,7 @@
 # Hardening: BRO1112's sort (BRO1001) adds BRO1505's blank lines first, like BRO1001's own fix
 @{
     File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'
-    Find = 'Braces.AddToExpansion(block, text, changes, options, isOn);'
+    Find = 'Braces.AddToExpansion(block, text, changes, lines, options, isOn);'
     Replace = ''
     Tests = 'FixOrderTests'
 }

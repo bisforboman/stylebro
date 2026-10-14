@@ -26,5 +26,5 @@ public sealed class ParamsArrayCodeFixProvider : NodeCodeFixProvider<ExpressionS
 
     /// <inheritdoc/>
     private protected override IEnumerable<TextChange>? GetChanges(ExpressionSyntax node, SourceText text, SemanticModel? model, AnalyzerConfigOptions options, Func<string, bool> isOn, CancellationToken cancellationToken) =>
-        ParamsArrays.GetChanges(node, model!, cancellationToken);
+        ParamsArrays.GetChanges(node, model!, options, cancellationToken);
 }

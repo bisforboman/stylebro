@@ -59,11 +59,12 @@ public sealed class TrailingBlankLinesCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var blankLines = new List<TextLine>();
         TextSpan? ending = null;
+        var removeStandalone = TrailingBlankLines.RemovesStandalone(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
         foreach (var diagnostic in diagnostics)
         {
             if (diagnostic.Id == DiagnosticIds.BlankLineAfterComment)
             {
-                blankLines.AddRange(TrailingBlankLines.GetBlankLinesAfterComment(root.FindTrivia(diagnostic.Location.SourceSpan.Start), text));
+                blankLines.AddRange(TrailingBlankLines.GetBlankLinesAfterComment(root.FindTrivia(diagnostic.Location.SourceSpan.Start), text, removeStandalone));
             }
             else
             {

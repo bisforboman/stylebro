@@ -279,7 +279,7 @@ public class ParenthesisPlacementTests
                     2
                 );
                 Method(1, 2
-                    {|BRO1110:)|};
+                    );
                 Action a = () =>
                 {
                 };
@@ -303,7 +303,7 @@ public class ParenthesisPlacementTests
                 {
                     return true;
                 }
-                {|BRO1110:)|};
+                );
                 Run(x => x.StartsWith(
                     "a"{|BRO1110:)|});
                 Run(x => x.Length is 1
@@ -377,7 +377,8 @@ public class ParenthesisPlacementTests
                     1,
                     2
                 );
-                Method(1, 2);
+                Method(1, 2
+                    );
                 Action a = () =>
                 {
                 };
@@ -406,7 +407,8 @@ public class ParenthesisPlacementTests
                 Run(x =>
                 {
                     return true;
-                });
+                }
+                );
                 Run(x => x.StartsWith(
                     "a"
                 ));
@@ -456,9 +458,13 @@ public class ParenthesisPlacementTests
         """,
         editorConfig: "stylebro_closing_parenthesis_placement = own_line");
 
+    // Trial 21 (AzureEventGridSimulator, CSharpier): a closing token already below the last item stays where it is, at any
+    // indentation (CSharpier indents it deeper inside a wrapped expression), and isn't pulled up to a '}' either.
     [Fact]
-    public Task OwnLine_ReindentsAClosingTokenOnItsOwnLine() => VerifyFixAsync(
+    public Task OwnLine_LeavesAClosingTokenOnItsOwnLine() => VerifyFixAsync(
         """
+        using System;
+
         class C
         {
             public int M(int a, int b) => a;
@@ -466,24 +472,43 @@ public class ParenthesisPlacementTests
             public void Method
                 {|BRO1109:(|}int a,
                 int b
-                {|BRO1110:)|}
+                )
             {
                 M(
                     1,
                     2
-                        {|BRO1110:)|};
+                        );
                 M(
                     1,
                     2 // two
-        {|BRO1110:)|};
-                M(
-                    1,
-                    2
+        );
+            }
+
+            public static bool IsCloudEvents(string contentType)
+            {
+                return contentType.Contains(
+                        "application/cloudevents+json",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                    || contentType.Contains(
+                        "application/cloudevents-batch+json",
+                        StringComparison.OrdinalIgnoreCase
+                    );
+            }
+
+            public static void Configure(Action<Func<object>> configure)
+            {
+                configure(() =>
+                    new object
+                    {
+                    }
                 );
             }
         }
         """,
         """
+        using System;
+
         class C
         {
             public int M(int a, int b) => a;
@@ -491,19 +516,36 @@ public class ParenthesisPlacementTests
             public void Method(
                 int a,
                 int b
-            )
+                )
             {
                 M(
                     1,
                     2
-                );
+                        );
                 M(
                     1,
                     2 // two
-                );
-                M(
-                    1,
-                    2
+        );
+            }
+
+            public static bool IsCloudEvents(string contentType)
+            {
+                return contentType.Contains(
+                        "application/cloudevents+json",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                    || contentType.Contains(
+                        "application/cloudevents-batch+json",
+                        StringComparison.OrdinalIgnoreCase
+                    );
+            }
+
+            public static void Configure(Action<Func<object>> configure)
+            {
+                configure(() =>
+                    new object
+                    {
+                    }
                 );
             }
         }
@@ -511,8 +553,7 @@ public class ParenthesisPlacementTests
         editorConfig: "stylebro_closing_parenthesis_placement = own_line");
 
     // The indentation of the opening token's line as the other fixes leave it: BRO1105 moves ': base(' down, an inner list's
-    // ')' moved down or reindented starts the line, one moved up (not split) or an empty '()' joined to its name by
-    // BRO1109 takes the line up.
+    // ')' moved down starts the line, an empty '()' joined to its name by BRO1109 takes the line up.
     [Fact]
     public Task OwnLine_IndentsLikeTheOpeningLineAfterTheOtherFixes() => VerifyFixAsync(
         """
@@ -526,8 +567,7 @@ public class ParenthesisPlacementTests
         class C : B
         {
             public C(int a) : base(
-                a
-            {|BRO1110:)|}
+                a{|BRO1110:)|}
             {
             }
 
@@ -539,28 +579,24 @@ public class ParenthesisPlacementTests
             {
                 M(M(
                     1, 2{|BRO1110:)|}, M(
-                    3, 4
-                        {|BRO1110:)|}{|BRO1110:)|};
+                    3, 4{|BRO1110:)|}{|BRO1110:)|};
                 M(M(
                     1, 2
-                        {|BRO1110:)|}, M(
+                        ), M(
                     3, 4
-                        {|BRO1110:)|}{|BRO1110:)|};
+                        ){|BRO1110:)|};
                 var x = M(1, 2
-                    {|BRO1110:)|} + M(
+                    ) + M(
                     3,
-                    4
-                        {|BRO1110:)|};
+                    4{|BRO1110:)|};
                 var y = Get
                     {|BRO1109:(|}).M(
                     1,
-                    2
-                    {|BRO1110:)|};
+                    2{|BRO1110:)|};
                 var z = M
                     {|BRO1109:(|}1, M(
                         2,
-                        3
-                    ){|BRO1110:)|};
+                        3{|BRO1110:)|}{|BRO1110:)|};
             }
         }
         """,
@@ -594,14 +630,15 @@ public class ParenthesisPlacementTests
                 );
                 M(M(
                     1, 2
-                ), M(
+                        ), M(
                     3, 4
-                )
+                        )
                 );
-                var x = M(1, 2) + M(
+                var x = M(1, 2
+                    ) + M(
                     3,
                     4
-                );
+                    );
                 var y = Get().M(
                     1,
                     2
@@ -619,7 +656,23 @@ public class ParenthesisPlacementTests
 
     // BRO1105's same_line mode leaves ': base(' on the constructor's line.
     [Fact]
-    public Task OwnLine_ConstructorInitializerOnTheConstructorsLine() => VerifyNoDiagnosticsAsync(
+    public Task OwnLine_ConstructorInitializerOnTheConstructorsLine() => VerifyFixAsync(
+        """
+        class B
+        {
+            public B(int a)
+            {
+            }
+        }
+
+        class C : B
+        {
+            public C(int a) : base(
+                a{|BRO1110:)|}
+            {
+            }
+        }
+        """,
         """
         class B
         {

@@ -185,6 +185,40 @@ public class RegionsTests
                 return x;
             }
         }
+        """,
+        editorConfig: "stylebro_blank_line_below_standalone_comments = remove");
+
+    // Trial 21: by default the comment stands on its own once the region lines go (a blank line above and below), and BRO1506
+    // leaves it.
+    [Fact]
+    public Task ACommentAboveTheRemovedLines_KeepsTheBlankLine_WhenItStandsOnItsOwn() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M()
+            {
+                {|BRO1113:#region Usage|}
+                var x = 1;
+
+                // x is 1
+                #endregion
+
+                return x;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M()
+            {
+                var x = 1;
+
+                // x is 1
+
+                return x;
+            }
+        }
         """);
 
     [Fact]
@@ -217,7 +251,7 @@ public class RegionsTests
             }
         }
         """,
-        editorConfig: "dotnet_diagnostic.BRO1506.severity = none");
+        editorConfig: "dotnet_diagnostic.BRO1506.severity = none\nstylebro_blank_line_below_standalone_comments = remove");
 
     [Fact]
     public Task RegionsInCodeAnIfTurnsOff_AreNotReported() => VerifyFixAsync(

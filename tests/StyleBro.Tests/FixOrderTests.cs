@@ -1510,6 +1510,70 @@ public class FixOrderTests
         "BRO1516",
         SdkFormatter);
 
+    // Trial 21: standalone comments (a blank line above and below) keep their blank line by default, lose it with 'remove',
+    // the same in every order of the sort and the blank-line rules.
+    [Theory]
+    [InlineData("indent_size = 4\n")]
+    [InlineData("stylebro_blank_line_below_standalone_comments = remove\n")]
+    public Task StandaloneComments_WithTheSortAndBlankLineRules(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void B()
+            {
+            }
+
+            // Fields
+
+
+            private int a;
+
+            public int A;
+
+            // Helpers
+
+            /// <summary>Doc.</summary>
+            private void D()
+            {
+            }
+        }
+        """,
+        editorConfig,
+        "BRO1001",
+        "BRO1506",
+        "BRO1517",
+        "BRO1505",
+        "BRO1513");
+
+    // Trial 21: with BRO1514 off (init's choice for code without braces), the expansion's statement lines make 'for (...)
+    // if (x) y;' multi-line, which is BRO1515's (and a chain's BRO1516's): its braces come with the expansion.
+    [Theory]
+    [InlineData("csharp_preserve_single_line_statements = false\ndotnet_diagnostic.BRO1514.severity = none\n")]
+    [InlineData("csharp_preserve_single_line_statements = false\ncsharp_prefer_braces = when_multiline\ndotnet_diagnostic.BRO1514.severity = none\n")]
+    public Task NestedEmbeddedStatements_InAnExpandedBody_WithoutBro1514(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            private static readonly object Gate = new object();
+            private static int counter;
+
+            public static int H(int n) { for (int i = 0; i < n; i++) if (i % 2 == 0) counter++; return counter; }
+
+            public static int W(int n) { while (n > 0) if (n-- % 2 == 0) return n; return 0; }
+
+            public static int U(System.IO.Stream s) { using (s) lock (Gate) return 1; }
+
+            public static int Sw(int x) { switch (x) { case 1: return 10; default: return 30; } }
+
+            public static int N(bool a, bool b) { if (a) if (b) counter++; else counter--; return counter; }
+        }
+        """,
+        editorConfig,
+        "BRO1509",
+        "BRO1515",
+        "BRO1516",
+        SdkFormatter);
+
     [Theory]
     [InlineData("csharp_preserve_single_line_statements = false\n")]
     [InlineData("csharp_preserve_single_line_statements = false\nstylebro_blank_line_between_switch_sections = omit\ncsharp_indent_switch_labels = false\n")]

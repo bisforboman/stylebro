@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Layout;
@@ -13,23 +14,37 @@ namespace StyleBro.Analyzers.Layout;
 internal static class TrailingBlankLines
 {
     /// <summary>
+    /// <c>stylebro_blank_line_below_standalone_comments</c>: <c>allow</c> (default) keeps the blank line below a standalone
+    /// comment (<see cref="IsStandalone"/>), <c>remove</c> removes it like StyleCop's SA1512 (stylebro-migrate writes it
+    /// for StyleCop setups with SA1512 on).
+    /// </summary>
+    public const string StandaloneKey = "stylebro_blank_line_below_standalone_comments";
+
+    /// <summary>Whether <see cref="StandaloneKey"/> is <c>remove</c>.</summary>
+    public static bool RemovesStandalone(AnalyzerConfigOptions options) =>
+        options.TryGetValue(StandaloneKey, out var value) && value.Trim().Equals("remove", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
     /// The blank lines directly below a '//' comment that starts its line, like SA1512. Not for the file header (the
     /// comments before the file's first code), '///' and '////' comments, when the next non-blank line is another
-    /// comment, or for a comment below code (<see cref="BlankLines.IsCommentBelowCode"/>). The blank lines are whitespace
-    /// inside trivia, never string contents.
+    /// comment, for a comment below code (<see cref="BlankLines.IsCommentBelowCode"/>), or, unless
+    /// <paramref name="removeStandalone"/>, for a standalone comment (<see cref="IsStandalone"/>). The blank lines are
+    /// whitespace inside trivia, never string contents.
     /// </summary>
-    public static IReadOnlyList<TextLine> GetBlankLinesAfterComment(SyntaxTrivia comment, SourceText text) => GetCheckedBlankLines(comment, text) ?? [];
+    public static IReadOnlyList<TextLine> GetBlankLinesAfterComment(SyntaxTrivia comment, SourceText text, bool removeStandalone) =>
+        GetCheckedBlankLines(comment, text, removeStandalone) ?? [];
 
     /// <summary>
     /// The same, but null for a comment BRO1506 doesn't check at all (init counts the checked ones, with blank lines below
     /// or without).
     /// </summary>
-    public static IReadOnlyList<TextLine>? GetCheckedBlankLines(SyntaxTrivia comment, SourceText text)
+    public static IReadOnlyList<TextLine>? GetCheckedBlankLines(SyntaxTrivia comment, SourceText text, bool removeStandalone)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia)
             || comment.ToString().StartsWith("///", StringComparison.Ordinal)
             || IsFileHeader(comment)
-            || BlankLines.IsCommentBelowCode(comment, text))
+            || BlankLines.IsCommentBelowCode(comment, text)
+            || (!removeStandalone && IsStandalone(comment, text)))
         {
             return null;
         }
@@ -64,6 +79,46 @@ internal static class TrailingBlankLines
         }
 
         return lines;
+    }
+
+    /// <summary>
+    /// Whether the '//' comment is in a run of comment lines with a blank line right above it and one right below it: a
+    /// note or a section header that stands on its own (owner's choice, 2026-10-14; AzureEventGridSimulator: SA1512's fix
+    /// glued notes about the code above and section headers onto unrelated code below). '#region'/'#endregion' lines next
+    /// to the run don't count (BRO1112/BRO1113 may remove them in the same run). Not before a '}': those blank lines are
+    /// BRO1518's, which leaves them to BRO1506 below a comment.
+    /// </summary>
+    public static bool IsStandalone(SyntaxTrivia comment, SourceText text)
+    {
+        if (comment.Token.IsKind(SyntaxKind.CloseBraceToken))
+        {
+            return false;
+        }
+
+        bool StartsWith(int number, string prefix) => text.ToString(text.Lines[number].Span).TrimStart().StartsWith(prefix, StringComparison.Ordinal);
+        bool IsRegion(int number) => StartsWith(number, "#region") || StartsWith(number, "#endregion");
+        var above = text.Lines.GetLineFromPosition(comment.SpanStart).LineNumber;
+        var below = above;
+        while (above > 0 && StartsWith(above - 1, "//"))
+        {
+            above--;
+        }
+
+        while (below + 1 < text.Lines.Count && StartsWith(below + 1, "//"))
+        {
+            below++;
+        }
+
+        do
+        {
+            above--;
+        }
+        while (above >= 0 && IsRegion(above));
+
+        // Below: a region line there leaves no blank line below the comment for BRO1506 anyway.
+        below++;
+        return above >= 0 && IsBlank(text, text.Lines[above].Span)
+            && below < text.Lines.Count && text.Lines[below].End < text.Length && IsBlank(text, text.Lines[below].Span);
     }
 
     /// <summary>
