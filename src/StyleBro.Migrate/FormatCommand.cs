@@ -1684,7 +1684,7 @@ internal static class FormatCommand
         {
             var path = Regex.Match(line, @"^\s*(?<path>.+?)\(\d+,\d+\):").Groups["path"].Value;
             var relative = Path.IsPathRooted(path) ? Path.GetRelativePath(root, path) : path;
-            if (relative.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relative))
+            if (Path.IsPathRooted(relative) || relative.StartsWith("..", StringComparison.Ordinal))
             {
                 return null;
             }
