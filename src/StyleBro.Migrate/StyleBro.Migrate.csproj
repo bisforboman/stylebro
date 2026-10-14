@@ -35,6 +35,9 @@
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.1.118.csv" LogicalName="StyleCopRules-1.1.118.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.0.2.csv" LogicalName="StyleCopRules-1.0.2.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\mapping.csv" LogicalName="StyleCopMapping.csv" />
+    <!-- StyleSharp (a StyleCop successor, SST ids): its rules, and the StyleCop rules each stands for (New-StyleSharpMapping.ps1). -->
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-stylesharp-3.40.1.csv" LogicalName="StyleSharpRules.csv" />
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\stylesharp-mapping.csv" LogicalName="StyleSharpMapping.csv" />
     <EmbeddedResource Include="sdk-rules.editorconfig" LogicalName="SdkRules.editorconfig" />
     <EmbeddedResource Include="modernize-rules.editorconfig" LogicalName="ModernizeRules.editorconfig" />
     <!-- The preset's layers: init writes their severities by id where a bulk severity would hide them from 'dotnet format'. -->

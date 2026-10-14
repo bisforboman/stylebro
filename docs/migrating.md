@@ -246,7 +246,8 @@ stays exempt:
 The StyleCop suppressions stay: they're harmless once StyleCop is gone, and needed while both run. Running the tool
 again adds nothing. A suppression gets every rule that replaces the StyleCop one, also one that can't report on the
 code it covers (SA1300 around a local function gets BRO1312, the namespace rule, too): an id that doesn't apply is
-harmless, and the suppression stays right if the code changes. The count the tool prints is of rule ids added (a
+harmless, and the suppression stays right if the code changes. Rules the generated settings turn off get none (an
+analyzer like StyleSharp's SST1462 reports a suppression of a rule that never reports). The count the tool prints is of rule ids added (a
 `disable`/`restore` pair counts twice), and the preview counts the same way. Sonar's suppressions get the same treatment ([Coming from SonarQube](#coming-from-sonarqube)).
 
 EF Core migrations are `dotnet ef`'s output: when the repository has them, the block marks their folders
@@ -263,6 +264,50 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
 - **Dropped by design:** there's no safe automatic fix (the fix would be placeholder documentation, a file rename, or
   a changed public API).
 - **Not covered yet:** candidates for future StyleBro rules. See [stylecop-mapping.md](stylecop-mapping.md).
+
+## Coming from StyleSharp
+
+[StyleSharp.Analyzers](https://www.nuget.org/packages/StyleSharp.Analyzers) is a StyleCop successor with `SST` ids
+(`SST1309`) and `stylesharp.*` settings in `.editorconfig`. `stylebro-migrate` reads it the way it reads StyleCop: a
+project that references `StyleSharp.Analyzers` (a `PackageReference`, a central `PackageVersion`, an `<Analyzer>` item or
+`packages.config`) counts as running StyleCop, and each SST rule's severity (from `.editorconfig`, `.globalconfig` and
+rulesets, plus StyleSharp's own defaults) counts as the StyleCop rule it stands for. Most SST rules kept StyleCop's
+number (`SST1413` is SA1413); the exceptions:
+
+| StyleSharp | Read as |
+| --- | --- |
+| SST1117 (`this.` as `stylesharp.instance_member_qualification` says) | SA1101 with `require_this`, StyleCop's SX1101 (no `this.`) with `omit_this`, StyleSharp's default |
+| SST1309 (private fields are `_camelCase`) | StyleCop's SX1309 and SX1309S: BRO1303 keeps the `_` (`_camelCase`); SST1306 doesn't count then |
+| SST1150-SST1171 (one per kind of list) | SA1117, on when all of them are |
+| SST1214 and SST1215 (static and instance readonly fields first) | SA1214, on when both are |
+| SST1633 (a header from `file_header_template`) | SA1633 with a plain header (IDE0073); nothing without `file_header_template` |
+| SST1116, SST1119 (other rules at those numbers) | nothing; StyleCop's SA1116 and SA1119 count as off |
+
+StyleSharp doesn't read `stylecop.json`, so neither does the migration in a StyleSharp repository (a leftover one is
+named in the report). Its settings come from the `stylesharp.*` keys of the root `.editorconfig`'s sections for all C#
+and the global configs: `instance_member_qualification`, `tuple_element_naming`, `allowed_hungarian_prefixes`,
+`document_exposed_elements`/`document_internal_elements`/`document_private_elements`, and `file_header_template`; usings
+go outside the namespace (SST1200). Suppressions of SST ids (`#pragma`, `[SuppressMessage]`, `<NoWarn>`) are carried over
+to the rules that replace the StyleCop rules they stand for, like StyleCop's. The block records the StyleSharp version
+(`# StyleSharp.Analyzers version:`), so after the package swap a second `--write` still reads the setup as StyleSharp's.
+
+The report lists the StyleSharp rules that are on and stand for no StyleCop rule (digit separators, complexity limits,
+...): StyleBro doesn't replace them, so they stop when StyleSharp.Analyzers is removed. When StyleCop.Analyzers is
+referenced too, a StyleCop rule counts as on when either package enforces it, and `stylecop.json`'s settings are used.
+
+Data: `scripts/stylecop-survey/data/inventory-stylesharp-3.40.1.csv` (StyleSharp's rules, `Get-Inventory.ps1 -Package
+StyleSharp.Analyzers`) and `stylesharp-mapping.csv` (written by `New-StyleSharpMapping.ps1`, which holds the exceptions).
+
+**Using order.** When your `.editorconfig` sets `dotnet_sort_system_directives_first` (or
+`dotnet_separate_import_directive_groups`), `dotnet format` sorts usings whatever the value. Files that aren't in that
+order while your ordering rule (SA1208/SA1210, or StyleSharp's SST1208/SST1210, which compares case-sensitively) is on
+and accepts them are named in the report and in the block (`# Usings kept as they are ...`), and `stylebro-migrate
+format` leaves them out, so it doesn't write what that rule reports. Remove the line once that rule is gone to have them
+sorted. The key itself is yours and stays.
+
+**Settings without a package.** StyleCop or StyleSharp settings (`stylecop.json`, `SA`/`SST` severities) that no project
+uses describe nothing the build enforces: the migration writes nothing and points to `stylebro-migrate init`, also when
+the repository has a Sonar setup (init follows that too, and the code's own conventions).
 
 ## Coming from SonarQube
 

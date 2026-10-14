@@ -1516,7 +1516,7 @@ public sealed partial class MigrationTests : IDisposable
     [Fact]
     public void Sonar_TheReport_SaysWhatIsFixedAndWhatStaysSonars()
     {
-        Write("src/App/App.csproj", """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" /></ItemGroup></Project>""");
+        Write("src/App/App.csproj", """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" /><PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" /></ItemGroup></Project>""");
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SA1201.severity = none\n");
 
         var output = Capture(() => Assert.Equal(0, Program.Main(new[] { root })));

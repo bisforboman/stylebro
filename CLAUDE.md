@@ -738,6 +738,15 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   and an .editorconfig can't remove a key the preset's global config sets. The private app has SA1208/SA1210 off and
   unsorted usings: the block writing `true` changed ~95 files, `false` ~1,650. Now the sort keys are written only
   when SA1208 or SA1210 is on.
+- **StyleSharp.Analyzers** (SST ids, a StyleCop successor; owner 2026-10-14 "Read it like StyleCop"): a reference counts as
+  StyleCop running; SST severities (its defaults + configs, raw in `StyleCopSetup.Raw`) are translated to SA/SX ids
+  (`StyleCopSetup.Translate`, mapping `scripts/stylecop-survey/data/stylesharp-mapping.csv` from New-StyleSharpMapping.ps1
+  over `inventory-stylesharp-3.40.1.csv`; exceptions: SST1117 -> SA1101/SX1101 by `stylesharp.instance_member_qualification`
+  (default omit_this), SST1309 -> SX1309/SX1309S (BRO1303 `_camelCase`, SST1306 ignored), SST1150-1171 -> SA1117, SST1215 ->
+  SA1214, SST1633 only with file_header_template, SST1116/SST1119 nothing); `stylesharp.*` keys -> synthetic stylecop.json
+  (`StyleSharpUse.Settings`), stylecop.json NOT read (StyleSharp doesn't); SST suppressions carried over
+  (`Suppressions.WithStyleSharp`); the block records `# StyleSharp.Analyzers version:` for after the swap. Both packages:
+  a rule is on when either enforces it. Leftover StyleCop settings (no package) -> migrate points to init, Sonar or not.
 - SX ids are read too (the reader used to accept only SA ids, so SX settings were silently ignored): SX1101 -> IDE0003,
   SX1309 -> `_camelCase`; SA1412 on -> `charset = utf-8-bom`.
 - Also read: the StyleCop.Analyzers version (1.1.x: SA1141/SA1142/SA1316/SA1414 off) and whether any project sets

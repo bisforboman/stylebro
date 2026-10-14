@@ -10,6 +10,7 @@ when a project moves to StyleBro.
 | 3. Check which rules `dotnet format` already fixes with SDK settings alone | `Test-SdkCoverage.ps1` | `data/sdk-check.csv` |
 | 4. Generate the mapping and the skipped-rules list | `New-Mapping.ps1` | `docs/stylecop-mapping.md`, `docs/skipped-rules.md`, `data/mapping.csv` |
 | Check a migration changes (almost) nothing in a StyleCop-clean repo | `Measure-MigrationDelta.ps1` | commits in the target clone |
+| StyleSharp (a StyleCop successor, SST ids): its rules, and the StyleCop rule each stands for (exceptions in the script) | `Get-Inventory.ps1 -Package StyleSharp.Analyzers -Versions <v>`, then `New-StyleSharpMapping.ps1` | `data/inventory-stylesharp-<version>.csv`, `data/stylesharp-mapping.csv` |
 
 The measured data is committed, so step 4 works on its own. Hand-written parts live in three files:
 

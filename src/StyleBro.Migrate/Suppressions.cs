@@ -27,9 +27,49 @@ internal static class Suppressions
         ["stylebro_keep_overloads_together"] = "false",
     };
 
-    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|S\d{3,4})\b", RegexOptions.IgnoreCase);
+    private static readonly Regex CheckId = new(@"^(SA\d{4}|SX\d{4}|SST\d{4}|S\d{3,4})\b", RegexOptions.IgnoreCase);
 
     private static readonly Regex NoWarn = new(@"(<NoWarn(?:\s[^>]*)?>)([^<]*)(</NoWarn>)", RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// <paramref name="replacements"/> (StyleCop's) plus StyleSharp's: each SST rule gets the rules that replace the StyleCop
+    /// rules it stands for (<see cref="StyleCopSetup.StandsFor"/>), so '#pragma warning disable SST1309' keeps BRO1303 out too.
+    /// </summary>
+    public static SortedDictionary<string, SortedSet<string>> WithStyleSharp(IReadOnlyDictionary<string, SortedSet<string>> replacements, StyleCopSetup setup)
+    {
+        var all = new SortedDictionary<string, SortedSet<string>>(StringComparer.Ordinal);
+        foreach (var (id, ids) in replacements)
+        {
+            all[id] = new SortedSet<string>(ids, StringComparer.Ordinal);
+        }
+
+        foreach (var (sst, _, _, _, styleCop) in setup.StyleSharp is null ? [] : StyleCopSetup.StyleSharpRules)
+        {
+            var ids = StyleCopSetup.StandsFor(sst, styleCop, setup.StyleSharp!).Where(replacements.ContainsKey).SelectMany(id => replacements[id]).ToList();
+            if (ids.Count > 0)
+            {
+                all[sst] = new SortedSet<string>(ids, StringComparer.Ordinal);
+            }
+        }
+
+        return all;
+    }
+
+    /// <summary>
+    /// <paramref name="replacements"/> without the rules the generated settings (<paramref name="lines"/>) only turn off: a
+    /// suppression of a rule that never reports is noise, and StyleSharp's SST1462 reports it (Splat: '[SuppressMessage("StyleBro",
+    /// "BRO1311")]' next to an SA1316 suppression, with BRO1311 off).
+    /// </summary>
+    public static SortedDictionary<string, SortedSet<string>> WithoutOff(IReadOnlyDictionary<string, SortedSet<string>> replacements, IEnumerable<string> lines)
+    {
+        var severities = lines.Select(l => Regex.Match(l, @"^dotnet_diagnostic\.(\w+)\.severity\s*=\s*(\w+)")).Where(m => m.Success).ToList();
+        var off = severities.Where(m => m.Groups[2].Value == "none").Select(m => m.Groups[1].Value)
+            .Except(severities.Where(m => m.Groups[2].Value != "none").Select(m => m.Groups[1].Value))
+            .ToHashSet(StringComparer.Ordinal);
+        return new SortedDictionary<string, SortedSet<string>>(
+            replacements.ToDictionary(r => r.Key, r => new SortedSet<string>(r.Value.Where(id => !off.Contains(id)), StringComparer.Ordinal)),
+            StringComparer.Ordinal);
+    }
 
     /// <summary>
     /// <paramref name="replacements"/> (StyleCop's) plus Sonar's: each Sonar rule the mapping knows, to the rules that fix
