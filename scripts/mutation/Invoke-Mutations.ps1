@@ -73,7 +73,9 @@ $results = $stale + @(foreach ($m in $mine) {
     [IO.File]::WriteAllText($file, $text.Replace($m.Find, $m.Replace))
     try {
         $out = dotnet test $tests -nologo -v q --filter "FullyQualifiedName~$($m.Tests)" 2>&1
-        $result = if ($LASTEXITCODE -ne 0) { if ($out -match ' error CS') { 'KILLED (build)' } else { 'KILLED' } } else { 'SURVIVED' }
+        # A filter that matches no test passes too: report it instead of calling it SURVIVED.
+        $result = if ($LASTEXITCODE -ne 0) { if ($out -match ' error CS') { 'KILLED (build)' } else { 'KILLED' } }
+            elseif ($out -match 'No test matches the given testcase filter') { 'NO TESTS' } else { 'SURVIVED' }
     }
     finally {
         git -C $Root checkout -q -- $m.File
@@ -89,6 +91,6 @@ if ($env:GITHUB_STEP_SUMMARY) {
     $results | ForEach-Object { "| $($_.Result) | $($_.File) | ``$($_.Find)`` |" } | Add-Content $env:GITHUB_STEP_SUMMARY
 }
 
-$bad = @($results | Where-Object { $_.Result -in 'SURVIVED', 'STALE' })
-if ($bad.Count) { throw "$($bad.Count) mutation(s) survived or no longer apply." }
+$bad = @($results | Where-Object { $_.Result -in 'SURVIVED', 'STALE', 'NO TESTS' })
+if ($bad.Count) { throw "$($bad.Count) mutation(s) survived, no longer apply or ran no tests (Tests is a filter after 'FullyQualifiedName~')." }
 Write-Host "All $($results.Count) mutations were caught." -ForegroundColor Green
