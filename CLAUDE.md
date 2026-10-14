@@ -1106,6 +1106,20 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   (`NormalizeFramework`, NuGet's short names: `net6` = `net6.0`, `net10` is .NET Framework 1.0); the run's
   TargetFramework is the majority spelling, and the hook sets a kept project's own spelling (`StyleBroFormatAliases`).
 
+- **Speed on large multi-targeted repos** (2026-10-14, trial 21's splat: 41 projects, 12 frameworks; format 101 -> 11 min,
+  verify 56 -> 2 min, preview 111 -> 12 min, same files, content and kept findings). `Separate` groups projects that compile a shared
+  file with the same DefineConstants/LangVersion/Nullable for the run's framework (`CompileSettings`, one evaluation per
+  project and framework, in parallel, cached): same parse, same edits, which Roslyn's merge takes; other or unknown
+  settings still run apart (kubernetes-client's Aot). Per run: no whitespace pass when the whitespace exclusions cover its
+  `--include`, one plain call when they touch none (`Passes(exclusions, include)`); `--include` with named files runs only
+  the plan entries whose projects have them (`RunInclude`). The check after a run that changed files counts the kept
+  findings of the last run (`Remember`, matched by file + rule + message, `AsKept`) as clean. A clean `format` records its
+  kept findings with a hash of every C#/project/settings file + options + tool version (`SaveKept`, %TEMP%/stylebro-kept);
+  `--verify-no-changes` on that state needs no copy; otherwise its copy run gets `--include` the finding files and
+  `--diagnostics` their ids (`Relevant` drops passes none of them is in). Parallel checks: at most ProcessorCount, with
+  `Checked ...` progress. Found on the way: grouping changed BRO1311's result (a name blocked in Splat.SimpleInjector kept
+  Splat.Core's unrelated tuples); `TupleElementRenamer` now retries each project's elements on their own
+  (`ProjectFiles`), which gave the split runs' result again.
 - **Convergence: one run everywhere** (2026-10-04). `dotnet format` fixes one id at a time (one Fix All each, fresh
   diagnostics) in an order that changes between processes, so the same repo converged in one run or two. Causes found:
   (1) BRO1514-BRO1516: braces on one clause of an if/else chain make the others BRO1516's, which may already have run
