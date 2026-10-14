@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers;
 
@@ -22,14 +23,33 @@ internal static class Severities
         .GroupBy(d => d.Id)
         .ToDictionary(g => g.Key, g => g.First().IsEnabledByDefault);
 
-    /// <summary>The severity a file's settings give an id (also an SDK rule's, 'IDE1006'), or null when nothing sets it.</summary>
-    public static ReportDiagnostic? Configured(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken) =>
+    /// <summary>
+    /// The severity a file's settings give an id (also an SDK rule's, 'IDE1006'), or null when nothing sets it. With
+    /// <paramref name="options"/> (the file's) also a bulk one, the id's first: 'dotnet_analyzer_diagnostic.category-X.severity'
+    /// for <paramref name="category"/>, then 'dotnet_analyzer_diagnostic.severity' (trial 19: 'category-Style.severity =
+    /// warning' enforced IDE0042, which an id-only check missed). Bulk settings skip rules that are off by default.
+    /// </summary>
+    public static ReportDiagnostic? Configured(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, AnalyzerConfigOptions? options = null, string? category = null) =>
         compilationOptions?.SyntaxTreeOptionsProvider is { } provider
             && (provider.TryGetDiagnosticValue(tree, id, cancellationToken, out var severity) || provider.TryGetGlobalDiagnosticValue(id, cancellationToken, out severity))
             ? severity
             : compilationOptions is not null && compilationOptions.SpecificDiagnosticOptions.TryGetValue(id, out severity) && severity != ReportDiagnostic.Default
             ? severity
-            : null;
+            : options is null ? null
+            : Parse(category is null ? null : Get(options, $"dotnet_analyzer_diagnostic.category-{category}.severity"))
+                ?? Parse(Get(options, "dotnet_analyzer_diagnostic.severity"));
+
+    private static string? Get(AnalyzerConfigOptions options, string key) => options.TryGetValue(key, out var value) ? value : null;
+
+    private static ReportDiagnostic? Parse(string? severity) => severity?.Trim().ToLowerInvariant() switch
+    {
+        "none" => ReportDiagnostic.Suppress,
+        "silent" or "hidden" => ReportDiagnostic.Hidden,
+        "suggestion" or "info" => ReportDiagnostic.Info,
+        "warning" => ReportDiagnostic.Warn,
+        "error" => ReportDiagnostic.Error,
+        _ => null,
+    };
 
     public static bool IsOn(CompilationOptions? compilationOptions, SyntaxTree tree, string id, CancellationToken cancellationToken, bool? enabledByDefault = null)
     {

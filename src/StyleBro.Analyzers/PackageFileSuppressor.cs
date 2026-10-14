@@ -37,7 +37,7 @@ public sealed class PackageFileSuppressor : DiagnosticSuppressor
     public static bool IsPackageFile(string path, string? folders)
     {
         var roots = Roots(folders);
-        return roots.Count > 0 ? IsUnder(path, roots) : path.Replace('\\', '/').IndexOf("/contentFiles/", StringComparison.OrdinalIgnoreCase) >= 0;
+        return roots.Count > 0 ? IsUnder(path, roots) : Normalize(path).IndexOf("/contentFiles/", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     /// <summary>Whether <paramref name="path"/> is in one of the submodule folders ('|'-separated).</summary>
@@ -70,12 +70,47 @@ public sealed class PackageFileSuppressor : DiagnosticSuppressor
         }
     }
 
-    private static List<string> Roots(string? folders) =>
-        (folders ?? string.Empty).Split('|').Select(f => f.Trim().Replace('\\', '/').TrimEnd('/')).Where(f => f.Length > 0).ToList();
+    /// <summary>The '|'-separated folders, normalized (<see cref="Normalize"/>), without a trailing '/'.</summary>
+    internal static List<string> Roots(string? folders) =>
+        (folders ?? string.Empty).Split('|').Select(f => Normalize(f.Trim()).TrimEnd('/')).Where(f => f.Length > 0).ToList();
 
-    private static bool IsUnder(string path, List<string> roots)
+    /// <summary>Whether <paramref name="path"/>, normalized, is below one of <paramref name="roots"/>.</summary>
+    internal static bool IsUnder(string path, List<string> roots)
+    {
+        var file = Normalize(path);
+        return roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// <paramref name="path"/> with '/' separators and its '.' and '..' segments resolved: the compiler keeps a file's path as
+    /// MSBuild wrote it ('src/App/../../ext/lib/Helper.cs' for a Compile item '..\..\ext\lib\*.cs', trial 19), which didn't
+    /// start with the submodule's folder. Text only: an analyzer doesn't touch the file system.
+    /// </summary>
+    internal static string Normalize(string path)
     {
         var file = path.Replace('\\', '/');
-        return roots.Any(root => file.StartsWith(root + "/", StringComparison.OrdinalIgnoreCase));
+        if (file.IndexOf("/.", StringComparison.Ordinal) < 0)
+        {
+            return file;
+        }
+
+        var parts = new List<string>();
+        foreach (var part in file.Split('/'))
+        {
+            if (part == ".")
+            {
+                continue;
+            }
+
+            if (part == ".." && parts.Count > 1 && parts[parts.Count - 1] is not (".." or ""))
+            {
+                parts.RemoveAt(parts.Count - 1);
+                continue;
+            }
+
+            parts.Add(part);
+        }
+
+        return string.Join("/", parts);
     }
 }

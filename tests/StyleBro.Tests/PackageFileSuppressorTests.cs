@@ -32,6 +32,12 @@ public class PackageFileSuppressorTests
     [InlineData(@"C:\repo\shared-infrastructure-old\Guard.cs", @"C:\repo\shared-infrastructure\", false)]
     [InlineData(@"C:\repo\src\Guard.cs", null, false)]
     [InlineData(@"C:\repo\obj\x\contentFiles\Guard.cs", "", false)]
+
+    // Trial 19: a Compile item '..\..\ext\lib\*.cs' keeps the '..' in the compiler's path.
+    [InlineData(@"C:\repo\src\App\..\..\ext\lib\Helper.cs", @"C:\repo\ext\lib", true)]
+    [InlineData(@"C:\repo\src\App\.\..\..\ext\lib\Helper.cs", @"C:\repo\src\..\ext\lib\", true)]
+    [InlineData(@"C:\repo\ext\lib\..\..\src\App\Messy.cs", @"C:\repo\ext\lib", false)]
+    [InlineData("/home/me/repo/src/App/../../ext/lib/Helper.cs", "/home/me/repo/ext/lib", true)]
     public void IsSubmoduleFile(string path, string? folders, bool expected)
     {
         // Fonts compiles shared-infrastructure's code from a git submodule: 88 warnings 'format' can never fix.

@@ -244,13 +244,22 @@ internal static class FormatCommand
 
         folders.Reverse();
         folders.ForEach(f => Migration.OwnSettings(f, withBlocks: true).ToList().ForEach(p => settings[p.Key] = p.Value));
-        if ((props is not null && Regex.IsMatch(File.ReadAllText(props), @"<StyleBroPreset>\s*none\s*<", RegexOptions.IgnoreCase))
-            || InitCommand.HiddenFromFormat(settings) is not { Count: > 0 } hidden)
+        if (props is not null && Regex.IsMatch(File.ReadAllText(props), @"<StyleBroPreset>\s*none\s*<", RegexOptions.IgnoreCase))
         {
             return null;
         }
 
-        var ids = hidden.Select(l => l.Split('.')[1]).ToList();
+        // Also a nested .editorconfig's (trial 19: tests/.editorconfig with 'none').
+        var ids = InitCommand.HiddenFromFormat(settings)
+            .Concat(InitCommand.NestedHiddenFromFormat(Path.GetFullPath(root), settings, withBlocks: true).Values.SelectMany(l => l))
+            .Select(l => l.Split('.')[1])
+            .Distinct()
+            .ToList();
+        if (ids.Count == 0)
+        {
+            return null;
+        }
+
         return $"Not clean: .editorconfig's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) hides {ids.Count} StyleBro rules from 'dotnet format' "
             + $"({string.Join(", ", ids.Take(3))}{(ids.Count > 3 ? ", ..." : string.Empty)}), which the build reports. Run 'stylebro-migrate init --write': it sets them by id.";
     }

@@ -59,7 +59,7 @@ internal static class Deconstruction
             return false;
         }
 
-        return Severities.Configured(project.CompilationOptions, tree, Id, cancellationToken) is { } severity
+        return Severities.Configured(project.CompilationOptions, tree, Id, cancellationToken, options, "Style") is { } severity
             ? severity is ReportDiagnostic.Warn or ReportDiagnostic.Error
             : style is not null && (style.Contains(":warning") || style.Contains(":error"));
     }
