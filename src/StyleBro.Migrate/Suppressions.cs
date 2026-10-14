@@ -96,6 +96,37 @@ internal static class Suppressions
         return result;
     }
 
+    /// <summary>
+    /// <paramref name="report"/> (<see cref="SonarSetup.Report"/>) with the Sonar rules <paramref name="scopes"/> (<see cref="OptionScopes"/>)
+    /// reset: everywhere (a root MSBuild file's NoWarn) the option isn't applied at all, else it isn't in those folders (trial 20:
+    /// the report said "S4136 -> BRO1001 (stylebro_keep_overloads_together = same_access ...)" while the block wrote false).
+    /// </summary>
+    public static List<string> Annotate(List<string> report, IReadOnlyList<(string Section, List<string> Lines)> scopes)
+    {
+        foreach (var (section, lines) in scopes)
+        {
+            if (lines.Count < 2 || Regex.Match(lines[0], "^# (.+?) in (.+)'s <NoWarn>:") is not { Success: true } match)
+            {
+                continue;
+            }
+
+            var settings = string.Join(", ", lines.Skip(1));
+            foreach (var id in match.Groups[1].Value.Split(", "))
+            {
+                var at = report.FindIndex(l => l.StartsWith($"  {id} -> ", StringComparison.Ordinal));
+                if (at >= 0)
+                {
+                    var target = report[at].Substring($"  {id} -> ".Length).Split(' ')[0];
+                    report[at] = section == "*.cs"
+                        ? $"  {id} -> {target} keeps {settings} (StyleBro's own value): {match.Groups[2].Value}'s <NoWarn> has {id}"
+                        : $"{report[at]}; {settings} (StyleBro's own value) in {section}: {match.Groups[2].Value}'s <NoWarn> has {id}";
+                }
+            }
+        }
+
+        return report;
+    }
+
     /// <summary>The rewritten text and the number of suppressions added (0: unchanged).</summary>
     public static (string Text, int Added) Rewrite(string text, IReadOnlyDictionary<string, SortedSet<string>> replacements)
     {

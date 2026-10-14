@@ -68,7 +68,7 @@ public sealed partial class MigrationTests
 
         var output = Capture(() => Assert.Equal(0, Program.Main(new[] { root, "--write" })));
         Assert.Equal(Own, File.ReadAllText(Path.Combine(root, "Source", ".editorconfig")));
-        Assert.Contains("Removed the whitespace block from Source/.editorconfig", output, StringComparison.Ordinal);
+        Assert.Contains("Removed the stylebro-folder block from Source/.editorconfig", output, StringComparison.Ordinal);
 
         File.Delete(Path.Combine(root, ".editorconfig"));
         File.Delete(Path.Combine(root, "Source", "Lib.csproj"));

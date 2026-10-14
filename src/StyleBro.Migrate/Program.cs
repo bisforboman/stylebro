@@ -178,9 +178,11 @@ internal static class Program
 
         var result = Migration.Generate(setup, root, sonar: sonar);
         var plan = Migration.Plan(setup, root, result);
+        var optionScopes = new List<(string Section, List<string> Lines)>();
         if (sonar is not null)
         {
-            plan[".editorconfig"].AddRange(Suppressions.OptionScopes(root, sonar, result.Lines));
+            optionScopes = Suppressions.OptionScopes(root, sonar, result.Lines);
+            plan[".editorconfig"].AddRange(optionScopes);
         }
 
         Console.WriteLine($"Read: {(setup.Sources.Count == 0 ? "no StyleCop settings (StyleCop's defaults)" : string.Join(", ", setup.Sources))}");
@@ -201,7 +203,7 @@ internal static class Program
         Report(setup, result);
         if (result.Sonar is { } applied)
         {
-            sonar!.Report(applied).ForEach(Console.WriteLine);
+            Suppressions.Annotate(sonar!.Report(applied), optionScopes).ForEach(Console.WriteLine);
         }
 
         foreach (var note in result.Notes)
@@ -259,7 +261,7 @@ internal static class Program
                     PreviewCommand.EditFile(path, existing => InitCommand.RemoveWhitespaceBlock(existing ?? string.Empty));
                 }
 
-                Console.WriteLine(write ? $"Removed the whitespace block from {file}: it no longer decides those settings." : $"== {file}: its stylebro-whitespace block is no longer needed (--write removes it)");
+                Console.WriteLine(write ? $"Removed the stylebro-folder block from {file}: nothing needs it any more." : $"== {file}: its stylebro-folder block is no longer needed (--write removes it)");
                 continue;
             }
 
@@ -267,7 +269,7 @@ internal static class Program
             JsonReport.AddSettings(file, block);
             if (write)
             {
-                PreviewCommand.EditFile(path, existing => Migration.Apply(existing, block, InitCommand.WhitespaceBegin, InitCommand.WhitespaceEnd));
+                PreviewCommand.EditFile(path, existing => Migration.Apply(InitCommand.RemoveWhitespaceBlock(existing ?? string.Empty, legacyOnly: true), block, InitCommand.WhitespaceBegin, InitCommand.WhitespaceEnd));
                 Console.WriteLine($"Wrote the whitespace settings it decides to {file}.");
             }
             else
