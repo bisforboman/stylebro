@@ -37,6 +37,9 @@ each file is formatted in the nearest project file above it (files of several pr
 named, every file must be under its folder. A file a project includes from somewhere else (`<Compile Include="..\x.cs"
 />`) is looked up by folder only: name the project.
 
+In a git pre-commit hook (plain, Husky.Net or lefthook), `--files` checks or fixes just the staged files:
+[Pre-commit hook](pre-commit.md).
+
 Measured (2026-10-10) right after setting StyleBro up, each run until clean (two `dotnet format` runs):
 
 | Repository | Whole solution | `--files`, 2 files | `--files --verify-no-changes` |

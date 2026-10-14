@@ -45,6 +45,7 @@ public class GeneratedFileSuppressorTests
     [InlineData(@"C:\repo\src\RestSharp\RestClient.cs", null, false)]
     [InlineData(@"C:\repo\src\RestSharp\object\Rest.cs", null, false)]
     [InlineData(@"C:\repo\src\Other\obj\Debug\net8.0\G\T\Hint.cs", Folders, false)]
+    [InlineData(@"C:\repo\src\Other\..\RestSharp\obj\Debug\net8.0\G\T\Hint.cs", Folders, true)]
     public void IsGeneratedFile(string path, string? folders, bool expected)
     {
         Assert.Equal(expected, GeneratedFileSuppressor.IsGeneratedFile(path, folders));

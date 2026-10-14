@@ -136,8 +136,12 @@ public class TupleElementNamingTests
         });
 
     // sharpcompress (trial 18): the local 'pointer' kept IDE0042 (an error there) quiet; 'Pointer' would end the clash.
-    [Fact]
-    public Task RenamesThatLetIde0042Report_AreLeftWhereItIsEnforced() => VerifyNotFixedAsync(
+    [Theory]
+    [InlineData("dotnet_diagnostic.IDE0042.severity = error")]
+    [InlineData("dotnet_analyzer_diagnostic.category-Style.severity = warning")]
+    [InlineData("dotnet_analyzer_diagnostic.severity = warning")]
+    [InlineData("dotnet_analyzer_diagnostic.category-Style.severity = error\ndotnet_analyzer_diagnostic.severity = suggestion")]
+    public Task RenamesThatLetIde0042Report_AreLeftWhereItIsEnforced(string editorConfig) => VerifyNotFixedAsync(
         new[]
         {
             """
@@ -155,11 +159,14 @@ public class TupleElementNamingTests
             }
             """,
         },
-        "dotnet_diagnostic.IDE0042.severity = error");
+        editorConfig);
 
+    // The id wins over a category, a category over the bulk setting.
     [Theory]
     [InlineData("dotnet_diagnostic.IDE0042.severity = suggestion")]
     [InlineData("csharp_style_deconstructed_variable_declaration = false:error")]
+    [InlineData("dotnet_diagnostic.IDE0042.severity = suggestion\ndotnet_analyzer_diagnostic.category-Style.severity = error")]
+    [InlineData("dotnet_analyzer_diagnostic.category-Style.severity = suggestion\ndotnet_analyzer_diagnostic.severity = error")]
     public Task RenamesThatLetIde0042Report_AreMadeWhereItIsNotEnforced(string editorConfig) => VerifyFixAsync(
         """
         public class C

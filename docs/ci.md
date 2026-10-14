@@ -16,6 +16,8 @@ with their reasons), **2** formatting would change a file (the output says which
 format` itself failed. A script or an AI agent can loop "run `stylebro-migrate format`, then check" and stop on 0; with
 plain `dotnet format --verify-no-changes` such a loop never ends while kept findings exist.
 
+To catch problems before they're committed: [Pre-commit hook](pre-commit.md).
+
 Fixing a failure is the same everywhere: run `stylebro-migrate format` (or `dotnet format`, see
 [the notes](#notes) on other analyzers) locally and commit the result.
 

@@ -47,7 +47,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         }
 
         var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
-        var style = styles.GetOrAdd(tree, t => FieldNames.GetStyles(options, Severities.Configured(context.Compilation.Options, t, "IDE1006", context.CancellationToken)));
+        var style = styles.GetOrAdd(tree, t => FieldNames.GetStyles(options, Severities.Configured(context.Compilation.Options, t, "IDE1006", context.CancellationToken, options, "Style")));
         var hungarian = Severities.IsOn(context.Compilation.Options, tree, DiagnosticIds.HungarianNotation, context.CancellationToken, enabledByDefault: false)
             ? HungarianNames.Read(options)
             : null;

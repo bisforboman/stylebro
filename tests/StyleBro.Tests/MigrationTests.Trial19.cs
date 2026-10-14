@@ -1,116 +1,51 @@
-using Microsoft.CodeAnalysis.CSharp;
 using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What the 19th trial (RecyclableMemoryStream, bcrypt.net) found in init and the migration.</summary>
 public sealed partial class MigrationTests
 {
-    private const string CommentBlankLineKey = "dotnet_diagnostic.BRO1506.severity";
-
-    // RecyclableMemoryStream requires 'this.' (dotnet_style_qualification_for_* = true:warning); init's IDE0009 = none turned it off.
-    [Theory]
-    [InlineData("dotnet_style_qualification_for_field = true:warning\n", true)]
-    [InlineData("dotnet_style_qualification_for_method = true:error\n", true)]
-    [InlineData("dotnet_style_qualification_for_field = true:suggestion\n", true)]
-    [InlineData("dotnet_style_qualification_for_field = true\n", false)]
-    [InlineData("dotnet_style_qualification_for_field = true:silent\n", false)]
-    [InlineData("dotnet_style_qualification_for_field = false:warning\n", false)]
-    [InlineData("dotnet_diagnostic.IDE0009.severity = warning\n", true)]
-    [InlineData("dotnet_style_qualification_for_field = true:warning\ndotnet_diagnostic.IDE0009.severity = none\n", false)]
-    public void Init_KeepsAnEnforcedThisQualification(string settings, bool kept)
+    [Fact]
+    public void Init_SetsStyleBroRulesById_WhereANestedBulkSeverityHidesThemFromFormat()
     {
-        Write(".editorconfig", "root = true\n[*.cs]\n" + settings);
-        Write("A.cs", "class A\n{\n}\n");
+        // Trial 19: tests/.editorconfig with 'dotnet_analyzer_diagnostic.severity = none'; format said clean, the build failed.
+        Write(".editorconfig", "root = true\n\n[*.cs]\nindent_size = 4\n");
+        Write("tests/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = none\ndotnet_diagnostic.BRO1002.severity = none\n");
+        Write("tests/App.Tests/App.Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("tests/App.Tests/C.cs", "class C\n{\n}\n");
+        Assert.StartsWith("Not clean: .editorconfig's bulk severity", FormatCommand.HiddenLine(root), StringComparison.Ordinal);
 
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
 
-        // The template's IDE0009 = none comes with this comment.
-        Assert.Equal(!kept, File.ReadAllText(Path.Combine(root, ".editorconfig")).Contains("'this.' qualification isn't required", StringComparison.Ordinal));
-    }
+        var text = File.ReadAllText(Path.Combine(root, "tests", ".editorconfig")).Replace("\r\n", "\n");
+        Assert.Contains(InitCommand.ByIdComment, text, StringComparison.Ordinal);
+        Assert.Contains("dotnet_diagnostic.BRO1001.severity = warning\n", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet_diagnostic.BRO1002.severity = warning", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("BRO1001", File.ReadAllText(Path.Combine(root, ".editorconfig")), StringComparison.Ordinal);
+        Assert.Null(FormatCommand.HiddenLine(root));
 
-    // bcrypt.net: S4136 in src/Directory.Build.props' NoWarn became a suppression of all of BRO1001 there. It's an option row
-    // (same_access): suppressed, the option goes back to StyleBro's own value there and BRO1001 stays on.
-    [Fact]
-    public void Init_SonarOptionRuleInNoWarn_ResetsTheOptionThere_AndKeepsTheRule()
-    {
-        Write("Directory.Build.props", "<Project><ItemGroup><PackageReference Include=\"SonarAnalyzer.CSharp\" Version=\"10.35.0.4138\" /></ItemGroup></Project>");
-        Write("src/Directory.Build.props", "<Project><PropertyGroup><NoWarn>NU5105;S4136;S2971</NoWarn></PropertyGroup></Project>");
-        Write(".editorconfig", "root = true\n[*.cs]\nindent_style = space\n");
-        Write("src/A.cs", "class A\n{\n}\n");
-
+        // A second init changes nothing; without the bulk severity the block goes.
         Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
-
-        Assert.Contains("<NoWarn>NU5105;S4136;S2971;BRO1150</NoWarn>", File.ReadAllText(Path.Combine(root, "src", "Directory.Build.props")), StringComparison.Ordinal);
-        var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig")).Replace("\r\n", "\n");
-        Assert.Contains("stylebro_keep_overloads_together = same_access", editorConfig, StringComparison.Ordinal);
-        Assert.Contains("[src/**.cs]\n# S4136 in src/Directory.Build.props's <NoWarn>: StyleBro's own value there, the rule stays on\nstylebro_keep_overloads_together = false\n", editorConfig, StringComparison.Ordinal);
+        Assert.Equal(text, File.ReadAllText(Path.Combine(root, "tests", ".editorconfig")).Replace("\r\n", "\n"));
+        Write("tests/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = warning\n" + text.Substring(text.IndexOf(InitCommand.WhitespaceBegin, StringComparison.Ordinal)));
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Assert.DoesNotContain("BRO1001", File.ReadAllText(Path.Combine(root, "tests", ".editorconfig")), StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Migrate_SonarOptionRuleInNoWarn_ResetsTheOptionThere()
+    public void NestedHiddenFromFormat_TakesTheSettingsOnTheWayDown()
     {
-        Write("Directory.Build.props", SonarPackage);
-        Write("tests/Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><NoWarn>$(NoWarn);S4136</NoWarn></PropertyGroup></Project>");
-        Write(".editorconfig", "root = true\n[*.cs]\nindent_style = space\n");
+        Write(".editorconfig", "root = true\n");
+        Write("src/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = silent\n");
+        Write("src/Lib/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = warning\n");
+        Write("other/.editorconfig", "[*.cs]\nindent_size = 2\n");
 
-        var output = Capture(() => Assert.Equal(0, Program.Main(new[] { root, "--write" })));
+        var hidden = InitCommand.NestedHiddenFromFormat(root, new Dictionary<string, string>(), withBlocks: true);
 
-        Assert.DoesNotContain("BRO1001", File.ReadAllText(Path.Combine(root, "tests", "Tests.csproj")), StringComparison.Ordinal);
-        Assert.Contains("[tests/**.cs]\n# S4136 in tests/Tests.csproj's <NoWarn>", File.ReadAllText(Path.Combine(root, ".editorconfig")).Replace("\r\n", "\n"), StringComparison.Ordinal);
-        Assert.Empty(Suppressions.OptionDefaults.Keys.Except(SonarSetup.Mapping.Where(m => m.OptionOnly).SelectMany(m => m.Setting!.Split("; ")).Select(s => s.Split('=')[0].Trim())));
-        Assert.Empty(SonarSetup.Mapping.Where(m => m.OptionOnly).SelectMany(m => m.Setting!.Split("; ")).Select(s => s.Split('=')[0].Trim()).Except(Suppressions.OptionDefaults.Keys));
-        Assert.NotNull(output);
-    }
+        Assert.Equal(["src"], hidden.Keys);
 
-    // RecyclableMemoryStream's tests keep a blank line below commented-out tests: BRO1506 removed it. Only the last line of a
-    // comment group counts, not the file header, a trailing comment or one below code (BRO1506 leaves those alone).
-    [Fact]
-    public void Conventions_CountCommentsWithAndWithoutABlankLineBelow()
-    {
-        var counts = Conventions.NewCounts();
-
-        Conventions.Count(
-            CSharpSyntaxTree.ParseText("""
-            // Header
-
-            class A
-            {
-                // [Test]
-                // public void Old() { }
-
-                public void M()
-                {
-                    // right above
-                    M();
-                    M(); // trailing
-
-                    // blank below
-
-                    M();
-                    M();
-                    // below code, with a blank line
-
-                    M();
-                }
-            }
-            """),
-            counts);
-
-        Assert.Equal(new[] { 1, 2 }, counts[CommentBlankLineKey]);
-    }
-
-    [Theory]
-    [InlineData(3, 0, null)]
-    [InlineData(0, 3, "dotnet_diagnostic.BRO1506.severity = none")]
-    [InlineData(8, 4, "dotnet_diagnostic.BRO1506.severity = none")]
-    [InlineData(10, 2, null)]
-    public void Conventions_CommentBlankLines_TurnBRO1506OffUnlessTheCodeHasNone(int without, int with, string? line)
-    {
-        var lines = Conventions.Decide(new Dictionary<string, int[]> { [CommentBlankLineKey] = new[] { without, with } }, new Dictionary<string, string>()).Lines
-            .Where(l => !l.StartsWith('#'))
-            .ToList();
-
-        Assert.Equal(line is null ? [] : [line], lines);
+        // A bulk 'silent' in the root's settings reaches the nested files, an id there wins.
+        hidden = InitCommand.NestedHiddenFromFormat(root, new Dictionary<string, string> { ["dotnet_analyzer_diagnostic.severity"] = "silent", ["dotnet_diagnostic.BRO1001.severity"] = "none" }, withBlocks: true);
+        Assert.Equal(["other", "src"], hidden.Keys);
+        Assert.DoesNotContain(hidden["other"], l => l.Contains("BRO1001", StringComparison.Ordinal));
     }
 }

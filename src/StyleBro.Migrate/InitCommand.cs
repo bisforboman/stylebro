@@ -755,6 +755,42 @@ internal static class InitCommand
     }
 
     /// <summary>
+    /// <see cref="HiddenFromFormat"/> for each .editorconfig below <paramref name="root"/> (folder relative to it, '/'-separated;
+    /// not below a 'root = true' one), with the settings that reach it: <paramref name="rootSettings"/>, then each .editorconfig
+    /// on the way down (with <paramref name="withBlocks"/>, also their generated blocks). Trial 19: tests/.editorconfig with
+    /// 'dotnet_analyzer_diagnostic.severity = none' hid StyleBro's rules from 'dotnet format' there, and the build failed.
+    /// </summary>
+    public static SortedDictionary<string, List<string>> NestedHiddenFromFormat(string root, IReadOnlyDictionary<string, string> rootSettings, bool withBlocks)
+    {
+        var result = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var file in StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(f => Path.GetFileName(f) == ".editorconfig"))
+        {
+            var source = Path.GetRelativePath(root, Path.GetDirectoryName(file)!).Replace('\\', '/');
+            if (source == ".")
+            {
+                continue;
+            }
+
+            var settings = new Dictionary<string, string>(rootSettings, StringComparer.OrdinalIgnoreCase);
+            var parts = source.Split('/');
+            for (var i = 1; i <= parts.Length; i++)
+            {
+                foreach (var (key, value) in Migration.OwnSettings(Path.Combine(root, string.Join("/", parts.Take(i))), withBlocks))
+                {
+                    settings[key] = value;
+                }
+            }
+
+            if (HiddenFromFormat(settings) is { Count: > 0 } hidden)
+            {
+                result[source] = hidden;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// The convention lines (the part under <see cref="ConventionsHeader"/>) of the init block in an existing root
     /// .editorconfig, or none: without an init block, or one from 'stylebro-migrate --write'.
     /// </summary>
@@ -1064,13 +1100,12 @@ internal static class InitCommand
 
         // The conventions the code follows: what the code already does stays (Ocelot: '=>' at the start of a line, '_field').
         var detected = new List<string>();
-        var nested = new List<Target>();
+        var nestedLines = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         if (!migrated)
         {
-            var (lines, report, nestedLines, scopes) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
+            (var lines, var report, nestedLines, var scopes) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
             detected = lines;
             sonarScopes = [.. sonarScopes ?? [], .. scopes];
-            nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
             if (report.Count > 0)
             {
                 Console.WriteLine($"{DetectedHeader}{(prefix.Length == 0 ? string.Empty : " under " + prefix)} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
@@ -1098,6 +1133,25 @@ internal static class InitCommand
         if (byId.Count > 0)
         {
             Console.WriteLine($"{prefix}.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {byId.Count} StyleBro rules the build reports. The block sets them by id, so both agree.");
+        }
+
+        // The same for a nested .editorconfig's bulk severity (trial 19: tests/.editorconfig with 'none'), in its own block.
+        var nested = new List<Target>();
+        if (!migrated)
+        {
+            var blockSettings = new Dictionary<string, string>(ownSettings, StringComparer.OrdinalIgnoreCase);
+            foreach (var line in detected.Concat(sonarLines).Concat(byId).Where(l => KeyOf(l) is not null))
+            {
+                blockSettings[KeyOf(line)!] = line.Substring(line.IndexOf('=') + 1).Trim();
+            }
+
+            foreach (var (source, hidden) in NestedHiddenFromFormat(root, blockSettings, withBlocks: false))
+            {
+                Console.WriteLine($"{prefix}{source}/.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {hidden.Count} StyleBro rules the build reports. Its block sets them by id, so both agree.");
+                (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. ByIdComment.Split('\n'), .. hidden]);
+            }
+
+            nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
         }
 
         // The repository requires 'this.': the template's IDE0009 = none would turn its rule off (RecyclableMemoryStream).
