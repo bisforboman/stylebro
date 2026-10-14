@@ -43,6 +43,7 @@ internal static class SummaryLayout
 
             foreach (var summary in documentation.Content.OfType<XmlElementSyntax>())
             {
+                // Malformed XML (also a missing or misspelled end tag) is left to a person, like the other doc rules do.
                 if (summary.StartTag.Name.LocalName.ValueText == "summary" && GetFinding(summary, text, singleLine, maxLength) is { } finding
                     && !DocumentationComments.IsMalformed(documentation))
                 {
@@ -56,12 +57,6 @@ internal static class SummaryLayout
     {
         var start = summary.StartTag;
         var end = summary.EndTag;
-
-        // A missing end tag has an empty name: like a misspelled one, it's an XML error the rule leaves alone.
-        if (end.Name.LocalName.ValueText != "summary")
-        {
-            return null;
-        }
 
         // The tags' lines hold nothing else: '///' before the start tag, nothing after the end tag.
         var startLine = text.Lines.GetLineFromPosition(start.SpanStart);
