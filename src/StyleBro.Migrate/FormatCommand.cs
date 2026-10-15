@@ -3710,10 +3710,10 @@ internal static class FormatCommand
     {
         /// <summary>
         /// What decides how <paramref name="files"/> parse: each file with the symbols its '#if's test that are defined, the
-        /// language version and nullable context. Two views with the same key parse those files the same.
+        /// language version and nullable context. Two views with the same key parse those files the same. The symbols come
+        /// from the file's own path: upper-cased, it doesn't exist on Linux, and every file tested nothing there.
         /// </summary>
         public string Key(IEnumerable<string> files) =>
-            // The symbols from the file's own path: upper-cased, it doesn't exist on Linux, and every file tested nothing there.
             string.Join(";", files.Select(Path.GetFullPath).DistinctBy(f => f.ToUpperInvariant(), StringComparer.Ordinal).OrderBy(f => f.ToUpperInvariant(), StringComparer.Ordinal)
                 .Select(f => f.ToUpperInvariant() + ":" + string.Join(",", TestedSymbols(f).Where(Defines.Contains))))
             + "|" + LangVersion + "|" + Nullable;
