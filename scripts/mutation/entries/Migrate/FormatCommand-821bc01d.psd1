@@ -1,8 +1,7 @@
-# Trial of 0.5.0-alpha.1 (2026-10-10): settings only where StyleCop runs, sort keys, the package next to StyleCop's,
-# no whitespace pass with IDE0055 off, old Mac line endings, verify's own errors, kept findings marked as kept
+# Trial of 0.5.0-alpha.1 (2026-10-10): old Mac line endings: a CR followed by LF isn't one
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
-    Find = 'if (at + 1 == bytes.Length || bytes[at + 1] != ''\n'')'
-    Replace = 'if (at + 1 == bytes.Length)'
+    Find = 'if (at + 1 < text.Length && text[at + 1] == ''\n'')'
+    Replace = 'if (at + 1 < text.Length && text[at + 1] == ''x'')'
     Tests = 'MigrationTests.Format_NamesFilesWithOldMacLineEndings'
 }

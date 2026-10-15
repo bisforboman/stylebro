@@ -1,7 +1,7 @@
-# Trial 22: a string of either parse that spans a directive of the other (CommunityToolkit's raw strings in an inactive #if)
+# Trial 22/23: every combination of the symbols the file tests (an '#elif' branch is in neither 'none' nor 'all')
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
-    Find = 'return Clash(none, all).Concat(Clash(all, none))'
-    Replace = 'return Clash(none, all)'
+    Find = 'Enumerable.Range(0, 1 << tested.Length)'
+    Replace = 'new[] { 0, (1 << tested.Length) - 1 }'
     Tests = 'MigrationTests.Format_ProtectsStringLines'
 }

@@ -173,11 +173,14 @@ internal static class FormatCommand
     /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
     private const string GeneratorsHeader = "Generators:";
 
+    /// <summary>The start of the line that says later frameworks' runs format fewer files (printed for the first run only).</summary>
+    private const string LaterFrameworksHeader = "Later frameworks:";
+
     /// <summary>The source generator projects built or found up to date in this process (<see cref="BuildGenerators"/>).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, ProtectedHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, ProtectedHeader, VisualBasicHeader, GeneratorsHeader, LaterFrameworksHeader, CheckingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The findings the last run on a folder kept, per folder (<see cref="Remember"/>).</summary>
     private static readonly Dictionary<string, List<KeptFinding>> LastKept = new(StringComparer.OrdinalIgnoreCase);
@@ -1850,10 +1853,12 @@ internal static class FormatCommand
             .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList())
             .ToList();
 
-        // Visual Basic files' names too: format doesn't load their projects, and a C# member they use keeps its name.
+        // Visual Basic files' names too: format leaves them alone, so a C# member they use keeps its name. Not as the file's
+        // own path: a VB project a C# project references is loaded, and its files would count as seen by the run (c13: the
+        // rename went through and was put back in the .vb file, which then didn't build).
         // ponytail: as written there; VB ignores case, so 'Base_Rate' for a C# 'base_rate' isn't matched.
         var visualBasic = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".vb", StringComparison.OrdinalIgnoreCase))
-            .Select(f => RepositoryNames.IdentifierLine(f, Regex.Matches(File.ReadAllText(f), @"[A-Za-z_]\w*").Select(m => m.Value)));
+            .Select(f => RepositoryNames.IdentifierLine(f + " (Visual Basic, left alone)", Regex.Matches(File.ReadAllText(f), @"[A-Za-z_]\w*").Select(m => m.Value)));
         File.WriteAllLines(file, lines.Concat(visualBasic));
     }
 
@@ -2554,7 +2559,9 @@ internal static class FormatCommand
         foreach (var generator in stale)
         {
             var output = new List<string>();
-            if (Dotnet(root, null, ["build", generator, "-nologo", "-v", "q", .. RestoreOptions], output.Add) == 0)
+            // Without analyzers and warnings as errors: the generator's own code isn't formatted yet (jint: its StyleBro findings
+            // failed the build under TreatWarningsAsErrors), and only its output matters here.
+            if (Dotnet(root, null, ["build", generator, "-nologo", "-v", "q", "-p:RunAnalyzers=false", "-p:TreatWarningsAsErrors=false", .. RestoreOptions], output.Add) == 0)
             {
                 BuiltGenerators.TryAdd(generator, true);
             }
@@ -2946,6 +2953,13 @@ internal static class FormatCommand
             return 1;
         }
 
+        // Another run's swapped files (its 'dotnet format' may outlive a killed 'format'): they come back when it ends.
+        if (DirectiveMask.Busy(root) is { Count: > 0 } busy)
+        {
+            error($"Stopped: another 'stylebro-migrate format' (or the 'dotnet format' it started, still running after it was stopped) has swapped the '#' of protected lines in {string.Join(", ", busy.Take(5))}{(busy.Count > 5 ? $" and {busy.Count - 5} more" : string.Empty)}. Wait until it ends (the next command puts them back), then run again.");
+            return 1;
+        }
+
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
         if (IsSolutionFilter(workspacePath) && SolutionFilterError(workspacePath) is { } invalid)
         {
@@ -3136,6 +3150,7 @@ internal static class FormatCommand
         var solutionPath = IsSolutionFilter(workspacePath) ? ReadSolutionFilter(workspacePath).Solution! : workspacePath;
         var solutionDirectory = Path.GetDirectoryName(solutionPath)!;
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+        DeleteLeftoverFilters(solutionDirectory);
         var projects = ReadProjects(workspacePath);
         if (projects.Count == 0)
         {
@@ -3337,6 +3352,51 @@ internal static class FormatCommand
             includes = plan.Select(_ => requested).ToList();
         }
 
+        if (requested is null)
+        {
+            var narrowed = includes.Select((include, i) => OnlyNewToFramework(i, include)).ToList();
+            if (narrowed.Where((n, i) => !n.SequenceEqual(includes[i])).Any())
+            {
+                log($"{LaterFrameworksHeader} a multi-targeted project's files are fixed in the run of its first framework; the runs after it get only the files that compile differently there (another '#if' symbol, language version or nullable context).");
+            }
+
+            includes = narrowed;
+        }
+
+        // A multi-targeted project an earlier run formats for another framework: in this run only the files that parse
+        // differently here (another '#if' symbol they test is defined, another language version or nullable context). The rest
+        // got the same fixes in the earlier run (StyleBro's fixes make the same edits in every framework's copy of a file),
+        // and loading them again only cost time (trial 23: jint's core project was fixed once per framework, 5 times).
+        List<string> OnlyNewToFramework(int index, List<string> include)
+        {
+            var result = include.ToList();
+            foreach (var project in plan[index].Projects.Where(p => projects[p].Frameworks.Length > 1))
+            {
+                var fullPath = projects[project].FullPath;
+                var earlier = Enumerable.Range(0, index)
+                    .Where(j => plan[j].Framework != plan[index].Framework && plan[j].Projects.Contains(project))
+                    .Select(j => View(fullPath, plan[j].Framework))
+                    .ToList();
+                var folder = Include(root, solutionDirectory, [project]).First();
+                if (earlier.Count == 0 || earlier.Any(e => e is null) || View(fullPath, plan[index].Framework) is not { } view || !result.Contains(folder)
+                    || plan[index].Projects.Count(p => Include(root, solutionDirectory, [p]).First() == folder) > 1)
+                {
+                    continue;
+                }
+
+                var files = FilesNewToFramework(Path.GetDirectoryName(fullPath)!, root, view, earlier.OfType<CompileView>().ToList());
+
+                // ponytail: a long list stays the folder (the command line has a limit); a project that parses mostly differently gains little.
+                if (files.Sum(f => f.Length + 1) < 8000)
+                {
+                    result.Remove(folder);
+                    result.AddRange(files.Where(f => !result.Any(r => Covers(r, f))));
+                }
+            }
+
+            return result;
+        }
+
         var toRun = Enumerable.Range(0, plan.Count).Where(i => includes[i].Count > 0).ToList();
         int RunFramework(int index, bool verify, Action<string> output, IReadOnlyList<string>? only = null)
         {
@@ -3507,6 +3567,39 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The files in <paramref name="projectDirectory"/> (not bin/obj; relative to <paramref name="root"/>, '/'-separated) a
+    /// project compiles for a framework (<paramref name="view"/>) that no earlier run's framework (<paramref name="earlier"/>)
+    /// compiles the same way: not compiled there, or another key (<see cref="CompileView.Key"/>: the '#if' symbols the file
+    /// tests, language version, nullable context).
+    /// </summary>
+    public static List<string> FilesNewToFramework(string projectDirectory, string root, CompileView view, IReadOnlyCollection<CompileView> earlier)
+    {
+        var own = Path.TrimEndingDirectorySeparator(projectDirectory) + Path.DirectorySeparatorChar;
+        var compiled = earlier.Select(e => e.Compile.ToHashSet(StringComparer.OrdinalIgnoreCase)).ToList();
+        return view.Compile.Where(f => f.StartsWith(own, StringComparison.OrdinalIgnoreCase) && !f[own.Length..].Split('\\', '/').Any(s => s is "obj" or "bin"))
+            .Where(f => earlier.Zip(compiled).All(e => !e.Second.Contains(f) || e.First.Key([f]) != view.Key([f])))
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Deletes the temporary solution filters a killed run left next to the solution ('.stylebro-format-0.slnf', an
+    /// untracked file in the repository, trial 23): those written before this process started.
+    /// </summary>
+    internal static void DeleteLeftoverFilters(string folder)
+    {
+        using var current = Process.GetCurrentProcess();
+        var started = current.StartTime.ToUniversalTime();
+        foreach (var file in new[] { ".stylebro-format-*.slnf", ".stylebro-restore-*.slnf" }.SelectMany(p => Directory.EnumerateFiles(folder, p)))
+        {
+            if (File.GetLastWriteTimeUtc(file) < started)
+            {
+                File.Delete(file);
+            }
+        }
+    }
+
+    /// <summary>
     /// Merges the runs' format-report.json files into the one 'dotnet format --report' would write: a path with an
     /// extension is the file, otherwise a folder that gets format-report.json. The temporary folders are deleted.
     /// </summary>
@@ -3640,6 +3733,7 @@ internal static class FormatCommand
         }
 
         process.Start();
+        DirectiveMask.Active?.Track(process);
         if (output is not null)
         {
             process.BeginOutputReadLine();
@@ -3716,7 +3810,11 @@ internal static class FormatCommand
 
             Console.CancelKeyPress += OnCancel;
             AppDomain.CurrentDomain.ProcessExit += OnExit;
+            Active = this;
         }
+
+        /// <summary>The mask of the run in progress, whose record <see cref="Dotnet"/> adds the 'dotnet format' processes to.</summary>
+        public static DirectiveMask? Active { get; private set; }
 
         /// <summary>Where the records of swapped files are: '%TEMP%/stylebro-mask'.</summary>
         public static string RecordFolder => Path.Combine(Path.GetTempPath(), "stylebro-mask");
@@ -3767,6 +3865,26 @@ internal static class FormatCommand
         }
 
         /// <summary>
+        /// The files under <paramref name="root"/> (relative) another process's running format has swapped: a 'dotnet format'
+        /// still writes them (also one a killed 'format' left running), so they're neither restored nor formatted now.
+        /// </summary>
+        public static List<string> Busy(string root, string? recordFolder = null)
+        {
+            var folder = recordFolder ?? RecordFolder;
+            var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+            return Directory.Exists(folder)
+                ? Directory.EnumerateFiles(folder, "*.json").Select(ReadRecord)
+                    .Where(r => r is not null && r.Pid != Environment.ProcessId && IsRunning(r))
+                    .SelectMany(r => r!.Files.Select(f => f.Path))
+                    .Where(p => p.StartsWith(top, StringComparison.OrdinalIgnoreCase))
+                    .Select(p => Path.GetRelativePath(root, p).Replace('\\', '/'))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Order(StringComparer.Ordinal)
+                    .ToList()
+                : [];
+        }
+
+        /// <summary>
         /// The C# files under <paramref name="root"/> with a swapped '#' no running 'format' recorded: a damaged file
         /// (a record lost after a kill, or a hand edit) that formatting would only make worse.
         /// </summary>
@@ -3785,10 +3903,41 @@ internal static class FormatCommand
                 .ToList();
         }
 
+        /// <summary>
+        /// Adds a process this run started to the record: a 'dotnet format' left running after this process was killed
+        /// still writes the swapped files, so <see cref="Recover"/> waits for it too (trial 23: it put the '#' back, then the
+        /// orphan wrote the swapped text again, and the next command stopped on a "damaged" file).
+        /// </summary>
+        public void Track(Process process)
+        {
+            lock (masked)
+            {
+                if (record is null || masked.Count == 0 || ReadRecord(record) is not { } current)
+                {
+                    return;
+                }
+
+                try
+                {
+                    var child = new MaskProcess(process.Id, process.StartTime.ToUniversalTime().Ticks);
+                    File.WriteAllText(record, JsonSerializer.Serialize(current with { Children = [.. current.Children ?? [], child] }));
+                }
+                catch (Exception e) when (e is InvalidOperationException or System.ComponentModel.Win32Exception or IOException)
+                {
+                    // Already gone: nothing left to wait for.
+                }
+            }
+        }
+
         public void Dispose()
         {
             Console.CancelKeyPress -= OnCancel;
             AppDomain.CurrentDomain.ProcessExit -= OnExit;
+            if (Active == this)
+            {
+                Active = null;
+            }
+
             lock (masked)
             {
                 foreach (var (file, mark) in masked)
@@ -3825,13 +3974,17 @@ internal static class FormatCommand
             return offsets;
         }
 
-        // Whether the record's process still runs (same id and start time; an unreadable one counts as running).
-        private static bool IsRunning(MaskRecord record)
+        // Whether the record's process, or a 'dotnet format' it started, still runs.
+        private static bool IsRunning(MaskRecord record) =>
+            IsRunning(record.Pid, record.Started) || (record.Children ?? []).Any(c => IsRunning(c.Pid, c.Started));
+
+        // Whether a process still runs (same id and start time; an unreadable one counts as running).
+        private static bool IsRunning(int pid, long started)
         {
             try
             {
-                using var process = Process.GetProcessById(record.Pid);
-                return process.StartTime.ToUniversalTime().Ticks == record.Started;
+                using var process = Process.GetProcessById(pid);
+                return process.StartTime.ToUniversalTime().Ticks == started;
             }
             catch (ArgumentException)
             {
@@ -3879,7 +4032,10 @@ internal static class FormatCommand
         private void OnExit(object? sender, EventArgs e) => Dispose();
 
         /// <summary>What <see cref="DirectiveMask"/> swapped, while it runs: the process (id, start time in UTC ticks) and the files.</summary>
-        internal sealed record MaskRecord(string Root, int Pid, long Started, List<MaskedFile> Files);
+        internal sealed record MaskRecord(string Root, int Pid, long Started, List<MaskedFile> Files, List<MaskProcess>? Children = null);
+
+        /// <summary>A process the run started (<see cref="Track"/>): its id and start time in UTC ticks.</summary>
+        internal sealed record MaskProcess(int Pid, long Started);
 
         /// <summary>A swapped file: its full path, the character (as a number) and how many '#' it replaced.</summary>
         internal sealed record MaskedFile(string Path, int Mark, int Count);
