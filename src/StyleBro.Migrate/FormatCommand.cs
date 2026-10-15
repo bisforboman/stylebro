@@ -2273,6 +2273,22 @@ internal static class FormatCommand
             .Order(StringComparer.Ordinal)
             .ToList();
 
+    /// <summary>
+    /// The files in <paramref name="projectDirectory"/> (not bin/obj; relative to <paramref name="root"/>, '/'-separated) a
+    /// project compiles for a framework (<paramref name="view"/>) that no earlier run's framework (<paramref name="earlier"/>)
+    /// compiles the same way: not compiled there, or another key (<see cref="CompileView.Key"/>: the '#if' symbols the file
+    /// tests, language version, nullable context).
+    /// </summary>
+    public static List<string> FilesNewToFramework(string projectDirectory, string root, CompileView view, IReadOnlyCollection<CompileView> earlier)
+    {
+        var own = Path.TrimEndingDirectorySeparator(projectDirectory) + Path.DirectorySeparatorChar;
+        var compiled = earlier.Select(e => e.Compile.ToHashSet(StringComparer.OrdinalIgnoreCase)).ToList();
+        return view.Compile.Where(f => f.StartsWith(own, StringComparison.OrdinalIgnoreCase) && !f[own.Length..].Split('\\', '/').Any(s => s is "obj" or "bin"))
+            .Where(f => earlier.Zip(compiled).All(e => !e.Second.Contains(f) || e.First.Key([f]) != view.Key([f])))
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .ToList();
+    }
+
     /// <summary>Whether the file at <paramref name="path"/> exists and has <paramref name="text"/>, line endings aside.</summary>
     internal static bool SameButEndings(string text, string path) =>
         File.Exists(path) && File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal) == text.Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -2686,6 +2702,23 @@ internal static class FormatCommand
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Deletes the temporary solution filters a killed run left next to the solution ('.stylebro-format-0.slnf', an
+    /// untracked file in the repository, trial 23): those written before this process started.
+    /// </summary>
+    internal static void DeleteLeftoverFilters(string folder)
+    {
+        using var current = Process.GetCurrentProcess();
+        var started = current.StartTime.ToUniversalTime();
+        foreach (var file in new[] { ".stylebro-format-*.slnf", ".stylebro-restore-*.slnf" }.SelectMany(p => Directory.EnumerateFiles(folder, p)))
+        {
+            if (File.GetLastWriteTimeUtc(file) < started)
+            {
+                File.Delete(file);
+            }
+        }
     }
 
     /// <summary>Where <see cref="SaveKept"/> records a repository's kept findings.</summary>
@@ -3577,39 +3610,6 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// The files in <paramref name="projectDirectory"/> (not bin/obj; relative to <paramref name="root"/>, '/'-separated) a
-    /// project compiles for a framework (<paramref name="view"/>) that no earlier run's framework (<paramref name="earlier"/>)
-    /// compiles the same way: not compiled there, or another key (<see cref="CompileView.Key"/>: the '#if' symbols the file
-    /// tests, language version, nullable context).
-    /// </summary>
-    public static List<string> FilesNewToFramework(string projectDirectory, string root, CompileView view, IReadOnlyCollection<CompileView> earlier)
-    {
-        var own = Path.TrimEndingDirectorySeparator(projectDirectory) + Path.DirectorySeparatorChar;
-        var compiled = earlier.Select(e => e.Compile.ToHashSet(StringComparer.OrdinalIgnoreCase)).ToList();
-        return view.Compile.Where(f => f.StartsWith(own, StringComparison.OrdinalIgnoreCase) && !f[own.Length..].Split('\\', '/').Any(s => s is "obj" or "bin"))
-            .Where(f => earlier.Zip(compiled).All(e => !e.Second.Contains(f) || e.First.Key([f]) != view.Key([f])))
-            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
-            .ToList();
-    }
-
-    /// <summary>
-    /// Deletes the temporary solution filters a killed run left next to the solution ('.stylebro-format-0.slnf', an
-    /// untracked file in the repository, trial 23): those written before this process started.
-    /// </summary>
-    internal static void DeleteLeftoverFilters(string folder)
-    {
-        using var current = Process.GetCurrentProcess();
-        var started = current.StartTime.ToUniversalTime();
-        foreach (var file in new[] { ".stylebro-format-*.slnf", ".stylebro-restore-*.slnf" }.SelectMany(p => Directory.EnumerateFiles(folder, p)))
-        {
-            if (File.GetLastWriteTimeUtc(file) < started)
-            {
-                File.Delete(file);
-            }
-        }
-    }
-
-    /// <summary>
     /// Merges the runs' format-report.json files into the one 'dotnet format --report' would write: a path with an
     /// extension is the file, otherwise a folder that gets format-report.json. The temporary folders are deleted.
     /// </summary>
@@ -3823,7 +3823,7 @@ internal static class FormatCommand
             Active = this;
         }
 
-        /// <summary>The mask of the run in progress, whose record <see cref="Dotnet"/> adds the 'dotnet format' processes to.</summary>
+        /// <summary>Gets the mask of the run in progress, whose record <see cref="Dotnet"/> adds the 'dotnet format' processes to.</summary>
         public static DirectiveMask? Active { get; private set; }
 
         /// <summary>Where the records of swapped files are: '%TEMP%/stylebro-mask'.</summary>
