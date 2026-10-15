@@ -12,14 +12,14 @@ public class FormatLineEndingsTests
     [Fact]
     public void Format_KeepsEachFilesOwnLineEnding()
     {
-        var root = NewFolder(("Crlf.cs", "class A\r\n{\r\n}\r\n"), ("Lf.cs", "class B\n{\n}\n"), ("Converted.cs", "class C\r\n{\r\n}\r\n"), ("Untouched.cs", "class D\r\n{\r\n}\r\n"));
+        var root = NewFolder(("Crlf.cs", "class A\r\n{\r\n}\r\n"), ("Lf.cs", "class B\n{\n}\n"), ("Converted.cs", "class C\r\n{\r\n}\r\n"), ("Untouched.cs", "class D\r\n{\r\n}\r\n"), (".editorconfig", "root = true\n[Converted.cs]\nend_of_line = lf\n"));
         var untouched = Path.Combine(root, "Untouched.cs");
         var written = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         File.SetLastWriteTimeUtc(untouched, written);
 
         var code = FormatCommand.Run(new[] { root, FormatCommand.OnceOption }, _ => { }, (args, _) =>
         {
-            // The OS's ending in one rewritten line break each; one file converted completely (end_of_line set).
+            // The OS's ending in one rewritten line break each; one file converted completely (end_of_line set for it).
             File.WriteAllText(Path.Combine(root, "Crlf.cs"), "class A\r\n{\n}\r\n");
             File.WriteAllText(Path.Combine(root, "Lf.cs"), "class B\r\n{\n}\n");
             File.WriteAllText(Path.Combine(root, "Converted.cs"), "class C\n{\n}\n");

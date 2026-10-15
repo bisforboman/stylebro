@@ -110,8 +110,12 @@ public sealed partial class MigrationTests
         Write("src/Lib/Untracked.g.cs", "class U { }\n");
 
         var changed = new[] { Path.Combine(root, "src", "Lib", "Code.cs") };
-        Assert.Equal(["src/Lib/Extensions.g.cs", "src/Lib/Form.Designer.cs", "src/Lib/Header.cs", "src/Lib/Table.cs"], FormatCommand.CheckedInGenerated(root, changed));
+        Assert.Equal(["src/Lib/Extensions.g.cs", "src/Lib/Form.Designer.cs"], FormatCommand.CheckedInGenerated(root, changed));
         Assert.Equal("src/Lib/Extensions.g.cs is generated and checked in: rebuild and commit it.", FormatCommand.AfterNotes(root, changed)[0]);
+
+        // Trial 22: a T4 template's output only when the build runs templates, a header-only file only when a build step names it.
+        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TransformOnBuild>true</TransformOnBuild></PropertyGroup>\n  <Target Name=\"Gen\"><Exec Command=\"gen -o Header.cs\" /></Target>\n</Project>\n");
+        Assert.Equal(["src/Lib/Extensions.g.cs", "src/Lib/Form.Designer.cs", "src/Lib/Header.cs", "src/Lib/Table.cs"], FormatCommand.CheckedInGenerated(root, changed));
         Assert.Empty(FormatCommand.AfterNotes(root, []));
         Assert.DoesNotContain(FormatCommand.AfterNotes(root, changed), n => n.StartsWith("CSharpier", StringComparison.Ordinal));
 

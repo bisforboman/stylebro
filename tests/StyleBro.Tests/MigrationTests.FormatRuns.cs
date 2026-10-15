@@ -30,14 +30,14 @@ public sealed partial class MigrationTests
         IEnumerable<string> Refs(string p) => references.TryGetValue(p, out var r) ? r : Array.Empty<string>();
         var settings = new Dictionary<string, string?> { ["Core"] = "TRACE", ["A"] = "TRACE", ["B"] = "TRACE", ["A.Tests"] = "TRACE", ["B.Tests"] = "TRACE", ["Aot"] = "TRACE;AOT" };
 
-        var groups = FormatCommand.Separate(compile.Keys, Refs, p => compile[p], p => settings[p]);
+        var groups = FormatCommand.Separate(compile.Keys, Refs, p => compile[p], (p, _) => settings[p]);
 
         // The project that parses the shared file with other symbols still runs apart (kubernetes-client's Aot project).
         Assert.Equal(new List<List<string>> { new() { "Core", "A", "B", "A.Tests", "B.Tests" }, new() { "Aot" } }, groups);
 
         // Unknown settings (a project that doesn't target the run's framework, an evaluation that failed): apart, as before.
         settings["B"] = null;
-        Assert.Equal(new List<List<string>> { new() { "Core", "A", "A.Tests" }, new() { "B", "B.Tests" }, new() { "Aot" } }, FormatCommand.Separate(compile.Keys, Refs, p => compile[p], p => settings[p]));
+        Assert.Equal(new List<List<string>> { new() { "Core", "A", "A.Tests" }, new() { "B", "B.Tests" }, new() { "Aot" } }, FormatCommand.Separate(compile.Keys, Refs, p => compile[p], (p, _) => settings[p]));
         Assert.Equal(4, FormatCommand.Separate(compile.Keys, Refs, p => compile[p]).Count); // without settings: as before
     }
 

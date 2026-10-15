@@ -143,6 +143,12 @@ restore (NU1504, duplicate reference). A reference inside a conditional
 `Directory.Build.props` the projects use and names the projects whose restore output has no StyleBro.Analyzers (a
 code base that already follows every rule reports nothing, and that's fine).
 
+With lock files (`<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>`), the next restore adds StyleBro.Analyzers
+to every `packages.lock.json`: commit them with the reference. Where `<RestoreLockedMode>true</RestoreLockedMode>` is on
+(always, or in CI), that restore fails instead (NU1004, "the package references have changed"): update the lock files
+once with locked mode off, `dotnet restore -p:RestoreLockedMode=false`, and commit them. `--diff` does this in its copy
+by itself, and its patch shows the updated lock files.
+
 Two things that get in the way of a package from a local feed (trying a build before it's on nuget.org):
 
 - A `<RestoreSources>` property (often in `Directory.Build.props`) replaces the sources of every `nuget.config`: a feed
@@ -191,7 +197,8 @@ preset as in the root block), so the build reports nothing there and `format` do
 whitespace. A rule that folder's `.editorconfig` sets by id stays as you set it. These lines go into a block between
 `# BEGIN stylebro-folder` and `# END stylebro-folder` (in a `root = true` folder: its `stylebro-migrate` block, with
 nothing else in it). Your own IDE0055 severity (say `suggestion`) is kept everywhere: the block doesn't set it then, and
-`format` still formats whitespace.
+`format` still formats whitespace, except where your severity is `none` (by id, for the Style category or in bulk):
+`format` leaves the whitespace of those files alone, as it does where a block turns IDE0055 off.
 
 #### init also looks at your code
 
@@ -798,8 +805,24 @@ compiling `..\Lib\*.cs` with other `DefineConstants`, language version or nullab
 separate parts of a framework's run (`== net8.0, part 1 of 2`), each with what it references: loaded together, `dotnet
 format` crashes on their different edits of one file ([dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)).
 Projects that compile a shared file with the same settings (a polyfill every library links) share a run: they parse it
-the same, so its copies get the same edits. This applies without multi-targeted projects too. Why:
-[ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
+the same, so its copies get the same edits (`<LangVersion>latest</LangVersion>` counts as the version it means). This
+applies without multi-targeted projects too. Why: [ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
+
+A framework whose code compiles exactly like another's in a project gets no run of its own there: when no `#if` tests a
+symbol that tells them apart (say the code tests `NET8_0_OR_GREATER` but nothing newer), `net8.0`, `net9.0` and `net10.0`
+see the same files, settings and branches, and one run formats them all. Only frameworks of one kind share a run (.NET,
+.NET Standard or .NET Framework, and the same platform such as `-windows`), since their APIs differ more. The
+`Multi-targeted:` line names the frameworks that ran and those that didn't need to.
+
+After a run that changed files, the next one checks every framework at once first: a run whose check is clean isn't
+made again, and one whose check found something formats only the files with findings (all of its files when an earlier
+run of the same round changed a file it formats too).
+
+A multi-line string can hold lines starting with `#` (`#pragma warning disable` in a source generator's test input)
+inside an `#if` branch some framework leaves out: there those lines read as directives, and the SDK's formatter moves
+them to column 0, breaking the string where the branch is compiled (CS8999). `format` names such files (`Protected:
+...`) and, while `dotnet format` runs, swaps those lines' `#` for a character the file doesn't have, then puts it back,
+so the rest of the file is formatted as usual.
 
 A project `dotnet format` can't load at all (F#, `.fsproj`) makes it skip the C# projects that reference it, for the
 frameworks where the reference matters. `format` names them once, with that cause ("Partly incomplete: ... Likely
