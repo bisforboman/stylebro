@@ -46,6 +46,61 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Format_PutsBackWhatAKilledRunSwapped_AndStopsOnASwapWithoutRecord()
+    {
+        // A 'format' killed while 'dotnet format' ran left private-use characters where '#' was: the next command restores them.
+        var records = Path.Combine(root, ".records");
+        Write("src/Gen/C.cs", DirectiveString);
+        Write("src/Gen/Edited.cs", DirectiveString);
+        Write("src/Gen/Moved.cs", DirectiveString);
+        var file = Path.Combine(root, "src", "Gen", "C.cs");
+        var edited = Path.Combine(root, "src", "Gen", "Edited.cs");
+        var moved = Path.Combine(root, "src", "Gen", "Moved.cs");
+        using var mask = new FormatCommand.DirectiveMask(root, ["src/Gen/C.cs", "src/Gen/Edited.cs", "src/Gen/Moved.cs"], records);
+        var record = Assert.Single(Directory.GetFiles(records));
+
+        // A running format's record is left alone, and so are its files (not damaged).
+        var log = new List<string>();
+        FormatCommand.DirectiveMask.Recover(log.Add, records);
+        Assert.Empty(log);
+        Assert.Empty(FormatCommand.DirectiveMask.Damaged(root, records));
+        Assert.DoesNotContain("#pragma", File.ReadAllText(file), StringComparison.Ordinal);
+
+        // The process is gone (another one has its id now): restored where the swapped characters are still in place.
+        var text = File.ReadAllText(record);
+        File.WriteAllText(record, System.Text.RegularExpressions.Regex.Replace(text, "\"Started\":\\d+", "\"Started\":1"));
+        var masked = File.ReadAllText(edited);
+        var mark = masked[masked.IndexOf("pragma", StringComparison.Ordinal) - 1];
+        File.WriteAllText(edited, masked.Replace(mark + "nullable", "nullable", StringComparison.Ordinal));
+
+        // Moved off its line start: the same count, but not where a '#' was.
+        var movedText = File.ReadAllText(moved);
+        var movedMark = movedText[movedText.IndexOf("nullable", StringComparison.Ordinal) - 1];
+        File.WriteAllText(moved, movedText.Replace("            " + movedMark + "nullable", "            x " + movedMark + "nullable", StringComparison.Ordinal));
+        FormatCommand.DirectiveMask.Recover(log.Add, records);
+        Assert.Equal(DirectiveString, File.ReadAllText(file));
+        Assert.Equal(3, log.Count);
+        Assert.StartsWith("Restored: " + file, log[0], StringComparison.Ordinal);
+        Assert.StartsWith("Not restored: " + edited, log[1], StringComparison.Ordinal);
+        Assert.Contains(mark + "pragma", File.ReadAllText(edited), StringComparison.Ordinal);
+        Assert.StartsWith("Not restored: " + moved, log[2], StringComparison.Ordinal);
+        File.Delete(moved);
+        Assert.Empty(Directory.GetFiles(records));
+
+        // Without a record, format and verify stop on such a file.
+        Assert.Equal(["src/Gen/Edited.cs"], FormatCommand.DirectiveMask.Damaged(root, records));
+        Assert.StartsWith("Stopped: src/Gen/Edited.cs have a line starting with a private-use character", FormatCommand.DamagedLine(["src/Gen/Edited.cs"]), StringComparison.Ordinal);
+        Write("A.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        var lines = new List<string>();
+        Assert.Equal(1, FormatCommand.RunPlain([root], lines.Add));
+        Assert.Equal(FormatCommand.DamagedLine(["src/Gen/Edited.cs"]), Assert.Single(lines));
+
+        // A private-use character elsewhere (an icon font's glyph in a string) is fine.
+        Write("src/Gen/Edited.cs", "class E { string s = \"pragma\"; }\n");
+        Assert.Empty(FormatCommand.DirectiveMask.Damaged(root, records));
+    }
+
+    [Fact]
     public void Format_IsNotClean_WhenACodeFixFailed()
     {
         // akka: BRO1309's fix threw in every run ("Failed to apply code fix"), and the third run said "0 files changed, clean."

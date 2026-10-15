@@ -839,7 +839,10 @@ A multi-line string can hold lines starting with `#` (`#pragma warning disable` 
 inside an `#if` branch some framework leaves out: there those lines read as directives, and the SDK's formatter moves
 them to column 0, breaking the string where the branch is compiled (CS8999). `format` names such files (`Protected:
 ...`) and, while `dotnet format` runs, swaps those lines' `#` for a character the file doesn't have, then puts it back,
-so the rest of the file is formatted as usual.
+so the rest of the file is formatted as usual. If `format` is killed before it puts the `#` back (a closed terminal, a
+crash), the next `stylebro-migrate` command does: it keeps a record of the swap in `%TEMP%/stylebro-mask` (`$TMPDIR` on
+Linux and macOS) and says `Restored: <file>`. A file changed in a way that moved the swapped characters is left alone
+and named (`Not restored: ...`); `format` and `--verify-no-changes` then stop with `Stopped: ...` until the `#` is back.
 
 A project `dotnet format` can't load at all (F#, `.fsproj`) makes it skip the C# projects that reference it, for the
 frameworks where the reference matters. `format` names them once, with that cause ("Partly incomplete: ... Likely

@@ -655,6 +655,9 @@ internal static class Program
 
     private static int Dispatch(string[] args)
     {
+        // A 'format' killed while it ran leaves '#' swapped in the files it protected: every command puts them back first.
+        FormatCommand.DirectiveMask.Recover(Console.WriteLine);
+
         // 'format' passes unknown options on to 'dotnet format'.
         var (command, known) = args.FirstOrDefault() switch
         {
