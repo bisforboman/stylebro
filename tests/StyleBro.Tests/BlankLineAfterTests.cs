@@ -316,6 +316,10 @@ public class BlankLineAfterTests
                 var t = (a,
                     // b
                     b);
+                var d = M(a,
+                    b
+                    // last
+                    );
                 return a + b;
             }
         }

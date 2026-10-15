@@ -95,8 +95,8 @@ internal static class BlankLines
     /// <summary>
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
-    /// an opening brace, '=>' or a 'case'/'default' label, between the links of a call chain
-    /// (<see cref="IsBetweenChainLinks"/>) or the items of a list (<see cref="IsBetweenListItems"/>); and not for '///'
+    /// an opening brace, '=>' or a 'case'/'default' label, between the items of a list (<see cref="IsBetweenListItems"/>)
+    /// or two parts of one expression, a call chain's links too (<see cref="IsInsideExpression"/>); and not for '///'
     /// and '////' (commented-out code). Not for a comment
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
     /// behind. Not for a comment whose text starts with one of <paramref name="exemptPrefixes"/> (tool markers such as
@@ -143,7 +143,6 @@ internal static class BlankLines
             && !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
-            && !IsBetweenChainLinks(comment)
             && !IsBetweenListItems(comment)
             && !IsInsideExpression(comment)
             && !ContinuesTrailingComment(comment, text, aboveLine)
@@ -254,25 +253,14 @@ internal static class BlankLines
     /// <summary>
     /// Whether the code on both sides of the comment belongs to one expression (<c>ok ? value</c>, <c>// why</c>,
     /// <c>: throw ...</c>; Stryker): the comment explains a part of it, and a blank line would split the expression (a
-    /// deviation from SA1515, which only makes BRO1504 quieter).
+    /// deviation from SA1515, which only makes BRO1504 quieter). This covers the links of a call chain too
+    /// (<c>AddHealthChecks()</c>, <c>// liveness</c>, <c>.AddCheck(...)</c>; owner's decision 2026-10-11).
     /// </summary>
     private static bool IsInsideExpression(SyntaxTrivia comment)
     {
         var next = comment.Token.SpanStart >= comment.Span.End ? comment.Token : comment.Token.GetNextToken();
         var previous = next.GetPreviousToken();
         return previous.Parent?.AncestorsAndSelf().FirstOrDefault(n => n.Span.Contains(next.Span)) is ExpressionSyntax or PatternSyntax;
-    }
-
-    /// <summary>
-    /// Whether the token after the comment is the '.' or '?' of a member access chain's next link
-    /// ('AddHealthChecks()', '// liveness', '.AddCheck(...)'): the comment describes that link, and a blank line would split
-    /// the chain (a deviation from SA1515, which only makes BRO1504 quieter).
-    /// </summary>
-    private static bool IsBetweenChainLinks(SyntaxTrivia comment)
-    {
-        var next = comment.Token.SpanStart >= comment.Span.End ? comment.Token : comment.Token.GetNextToken();
-        return (next.IsKind(SyntaxKind.DotToken) && next.Parent is MemberAccessExpressionSyntax)
-            || (next.IsKind(SyntaxKind.QuestionToken) && next.Parent is ConditionalAccessExpressionSyntax);
     }
 
     /// <summary>

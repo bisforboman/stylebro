@@ -93,13 +93,14 @@ internal static class SingleLineBlocks
             return changes;
         }
 
-        // The edits assume every enclosing single-line block is expanded too: expand those (when their rule is on) in the
-        // same edit. Otherwise BRO1508 expanding an inner block first leaves 'void M() { if (x)' on a line, which no rule
-        // reports any more (the method body's braces are on different lines then).
+        // The edits assume every enclosing single-line block is expanded too: expand those in the same edit. Otherwise
+        // BRO1508 expanding an inner block first leaves 'void M() { if (x)' on a line, which no rule reports any more (the
+        // method body's braces are on different lines then). BRO1508/BRO1509 don't report a block inside one whose rule is
+        // off (IsReported); BRO1001's fix, expanding a one-line type for BRO1505, expands the type around it too, which
+        // could only stay on its line with broken indentation inside.
         foreach (var ancestor in node.Ancestors())
         {
-            if (GetBraces(ancestor) is { } braces
-                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
+            if (GetBraces(ancestor) is not null
                 && GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
             {
                 changes.AddRange(enclosing);

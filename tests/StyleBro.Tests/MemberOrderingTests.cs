@@ -1448,6 +1448,27 @@ public class MemberOrderingTests
         """,
         "dotnet_diagnostic.BRO1509.severity = none");
 
+    // The type around the one-line type is expanded with it: left on its line, the inner type's indentation was broken.
+    [Fact]
+    public Task NestedOneLineType_IsExpandedWithTheTypeAroundIt_WhenBro1505ReportsIt() => VerifyFixAsync(
+        """
+        public class O { public class C { public void B() { } private int {|BRO1001:x|}; private int y; } }
+        """,
+        """
+        public class O
+        {
+            public class C
+            {
+                private int x;
+
+                private int y;
+
+                public void B() { }
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1509.severity = none");
+
     // Serilog: the constructor would sort between the field and the comment below it, although neither of them moves.
     [Fact]
     public Task ACommentBelowAMember_KeepsTheContainerAsItIs_WhenTheyWouldBeSeparated() => VerifyNoDiagnosticsAsync(
