@@ -260,8 +260,8 @@ public sealed partial class MigrationTests
         Assert.False(FormatCommand.WhitespaceOff(root)); // nothing says so
 
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.IDE0055.severity = none\n");
-        Assert.False(FormatCommand.WhitespaceOff(root)); // not stylebro's settings
-        Assert.Null(FormatCommand.WhitespaceExclusions(root));
+        Assert.True(FormatCommand.WhitespaceOff(root)); // the repository's own settings count too (trial 22, splat)
+        Assert.Empty(FormatCommand.WhitespaceExclusions(root)!);
 
         Write(".editorconfig", Migration.Render(new[] { ("{src/A}/**.cs", new List<string> { "dotnet_diagnostic.IDE0055.severity = none" }) }));
         Assert.True(FormatCommand.WhitespaceOff(root));

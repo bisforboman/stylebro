@@ -243,7 +243,9 @@ internal static class PreviewCommand
 
             if (package is not null)
             {
-                Console.WriteLine($"  StyleBro.Analyzers wasn't referenced: added {package} for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says (the patch includes it).");
+                // The packages.config projects are left out of the patch (akka: it said "the patch includes it" for them too).
+                var included = packagesConfig.Count == 0 ? "the patch includes it" : "the patch includes it, except in the packages.config projects it leaves out";
+                Console.WriteLine($"  StyleBro.Analyzers wasn't referenced: added {package} for the preview, as https://bisforboman.github.io/stylebro/getting-started/ says ({included}).");
                 if (noRestore)
                 {
                     rest.Remove("--no-restore");
@@ -257,6 +259,10 @@ internal static class PreviewCommand
             }
 
             var formatArgs = new[] { project is null ? target : Path.Combine(target, project) }.Concat(rest.Where(o => o != "--modernize" && o != AgentsFile.Option)).ToList();
+
+            // The copy restores with NuGet's locked mode off: the reference the preview added changes the packages, and with
+            // RestoreLockedMode always on the restore failed (NU1004) and told the user to fix their repository.
+            formatArgs.Add(FormatCommand.UnlockedRestoreOption);
 
             // The first run's report says what format fixes (a '--verify-no-changes' run first reported the same, at the
             // cost of a whole run). Later runs are FormatCommand.NextRun's.
@@ -294,7 +300,9 @@ internal static class PreviewCommand
             // installed the package there, and the whitespace pass formatted their files).
             var leftOut = packagesConfig.Select(p => (prefix + Path.GetDirectoryName(p)!.Replace('\\', '/')).Trim('/')).Where(d => d.Length > 0).Distinct().ToList();
             bool IsLeftOut(string file) => leftOut.Any(d => file.StartsWith(d + "/", StringComparison.OrdinalIgnoreCase));
-            var files = Changed(copy, configured).Where(f => !IsLeftOut(f.Key)).ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal);
+
+            // Lock files the copy's unlocked restore updated aren't formatting (the patch has them, as the user's restore will).
+            var files = Changed(copy, configured).Where(f => !IsLeftOut(f.Key) && !f.Key.EndsWith("packages.lock.json", StringComparison.OrdinalIgnoreCase)).ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal);
             var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetFileName(temp) + "/" + Path.GetFileName(copy), files.Keys, f => WhitespaceOnly(copy, configured, f));
             JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));

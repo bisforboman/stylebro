@@ -239,9 +239,9 @@ public sealed partial class MigrationTests
     [Fact]
     public void Format_NamesNoFormatter_WhereIDE0055IsJustOff()
     {
-        Assert.Equal("No whitespace pass: src/: IDE0055 is off there in the stylebro settings, so whitespace formatting leaves it alone; style and analyzer fixes still run there.", FormatCommand.NoWhitespaceLine(root, ["src/"]));
+        Assert.Equal("No whitespace pass: src/: IDE0055 is off there in the settings, so whitespace formatting leaves it alone; style and analyzer fixes still run there.", FormatCommand.NoWhitespaceLine(root, ["src/"]));
         Write(".csharpierrc.json", "{}\n");
-        Assert.Contains("stylebro settings (CSharpier's code), so", FormatCommand.NoWhitespaceLine(root, ["src/"]), StringComparison.Ordinal);
+        Assert.Contains("in the settings (CSharpier's code), so", FormatCommand.NoWhitespaceLine(root, ["src/"]), StringComparison.Ordinal);
     }
 
     [Fact]
