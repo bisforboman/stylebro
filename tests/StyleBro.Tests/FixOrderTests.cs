@@ -345,6 +345,34 @@ public class FixOrderTests
         "BRO1110",
         "BRO1116");
 
+    // The leading multi-line lambda option (owner's choice 2026-10-15) next to BRO1110's own_line: the ')' goes to its own line
+    // and the shape stays, whichever fix runs first.
+    [Fact]
+    public Task LeadingMultiLineLambda_WithClosingParenthesisOnOwnLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void Register(System.Action<int> action, int kind, int order) { }
+
+            public void Run()
+            {
+                Register(x =>
+                {
+                    System.Console.WriteLine(x);
+                }, 1, 2);
+                Register(x =>
+                {
+                    System.Console.WriteLine(x);
+                }, 1,
+                    2);
+            }
+        }
+        """,
+        "stylebro_allow_leading_multiline_lambda = true\nstylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1110");
+
     [Fact]
     public Task ClosingParenthesisOnOwnLine_CallChains() => AssertConvergesInEveryOrderWithConfigAsync(
         """

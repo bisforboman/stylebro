@@ -62,6 +62,9 @@ internal static class Migration
         "BRO1604", "BRO1605", "BRO1606", "BRO1607",
     };
 
+    /// <summary>The cache of <see cref="SwitchExpressionsWithoutTrailingComma"/>, by root.</summary>
+    private static readonly Dictionary<string, int> SwitchCounts = new(StringComparer.OrdinalIgnoreCase);
+
     private static readonly Regex StyleCopIds = new(@"SA(\d{4})(?:-SA(\d{4}))?");
 
     private static readonly Regex EfMigrationMarker = new(@"\[(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\(\s*""|:\s*(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\b|:\s*(?:Microsoft\.EntityFrameworkCore\.Infrastructure\.)?ModelSnapshot\b");
@@ -143,6 +146,20 @@ internal static class Migration
                     {
                         result.Reasons[sa] = "stylecop.json sets no companyName, so StyleCop wanted 'PlaceholderCompany' in every header; BRO1615 needs the real one (stylebro_file_header_company)";
                     }
+                }
+
+                severity = Severity.None;
+                relevant = [];
+            }
+
+            // StyleCop 1.1.x's SA1413 doesn't check switch expressions (1.2 does), and BRO1401 has no switch to leave them out:
+            // kafkaflow got trailing commas in 6 StyleCop-clean files (trial 22). Off only where the code has such a switch.
+            if (id == StyleBro.Analyzers.DiagnosticIds.TrailingComma && severity > Severity.None && setup.Version?.StartsWith("1.1.", StringComparison.Ordinal) == true
+                && SwitchExpressionsWithoutTrailingComma(root) is > 0 and var switches)
+            {
+                foreach (var sa in relevant.Where(setup.IsOn))
+                {
+                    result.Reasons[sa] = $"StyleCop {setup.Version}'s SA1413 doesn't check switch expressions, and {id} would add the comma to {switches} multi-line one{(switches == 1 ? string.Empty : "s")} in your code (it has no setting to leave them out)";
                 }
 
                 severity = Severity.None;
@@ -273,6 +290,11 @@ internal static class Migration
         {
             result.Notes.Add(usingsNote);
             result.KeptUsings.AddRange(keptUsings);
+        }
+
+        if (fieldStyle is null)
+        {
+            AddSpacingOfRulesOff(setup, root, ownSettings, lines, result);
         }
 
         var kept = lines.Skip(sdkStart).Where(line => KeyOf(line) is { } key && own.Contains(key)).ToList();
@@ -447,6 +469,38 @@ internal static class Migration
         }
     }
 
+    /// <summary>
+    /// The settings of the root's .globalconfig (the SDK reads it for every project below; its keys outside a section, when it
+    /// says is_global = true) under <paramref name="own"/> (the root .editorconfig's, which win). Trial 22: init's block turned
+    /// off the IDE0009 a .globalconfig enforced and raised its IDE0055 'suggestion' to 'warning'.
+    /// </summary>
+    public static Dictionary<string, string> WithGlobalConfig(string root, IReadOnlyDictionary<string, string> own)
+    {
+        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var path = Path.Combine(root, ".globalconfig");
+        if (File.Exists(path))
+        {
+            var lines = File.ReadAllLines(path).Select(l => l.Trim()).TakeWhile(l => !l.StartsWith('[')).ToList();
+            if (lines.Any(l => Regex.IsMatch(l, @"^is_global\s*=\s*true\b", RegexOptions.IgnoreCase)))
+            {
+                foreach (var line in lines)
+                {
+                    if (KeyOf(line) is { } key && !key.Equals("is_global", StringComparison.OrdinalIgnoreCase) && !key.Equals("global_level", StringComparison.OrdinalIgnoreCase))
+                    {
+                        merged[key] = line.Substring(line.IndexOf('=') + 1).Split('#', ';')[0].Trim();
+                    }
+                }
+            }
+        }
+
+        foreach (var (key, value) in own)
+        {
+            merged[key] = value;
+        }
+
+        return merged;
+    }
+
     /// <summary>The keys the root .editorconfig sets for all C# files, outside the generated blocks (init/--write and --modernize).</summary>
     public static HashSet<string> OwnKeys(string root) => new(OwnSettings(root).Keys, StringComparer.OrdinalIgnoreCase);
 
@@ -535,7 +589,9 @@ internal static class Migration
         // differences after it. ponytail: the StyleCop severities are the repository's; a root .editorconfig section that set
         // StyleCop severities doesn't reach that folder either, but still counts there.
         var editorConfigRoots = StyleCopSetup.EditorConfigRoots(root);
-        foreach (var folder in editorConfigRoots)
+
+        // Not a folder without C# files (kafkaflow's npm ClientApp/ got a 188-line [*.cs] block, as init's root = true folders).
+        foreach (var folder in editorConfigRoots.Where(f => StyleCopSetup.EnumerateFiles(Path.Combine(root, f), ownRoot: true).Any(c => c.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))))
         {
             // Where StyleCop didn't run, nothing changes: DynamicData's benchmarks (root = true, no StyleCop) got the full block.
             if (setup.Folders is not null && setup.FoldersWithout.Any(w => IsUnder(folder.Replace('\\', '/') + "/", w)))
@@ -601,19 +657,22 @@ internal static class Migration
     /// and an .editorconfig can't take back a key the preset sets (any value of the using-sorting keys makes
     /// 'dotnet format' sort usings). Null when it's already there.
     /// </summary>
-    public static string? DisablePreset(string? existing) =>
-        SetPreset(existing, "none", "The settings come from stylebro-migrate's block in .editorconfig.");
+    public static string? DisablePreset(string? existing, bool importParent = false) =>
+        SetPreset(existing, "none", "The settings come from stylebro-migrate's block in .editorconfig.", importParent);
 
     /// <summary>
     /// Directory.Build.props with &lt;StyleBroPreset&gt;<paramref name="value"/>&lt;/StyleBroPreset&gt; (and
     /// <paramref name="comment"/> above it in a new file). Null when the file already sets StyleBroPreset: that's the team's.
+    /// <paramref name="importParent"/>: a new file imports the Directory.Build.props above it (<see cref="HasParentProps"/>),
+    /// which it would otherwise shadow.
     /// </summary>
-    public static string? SetPreset(string? existing, string value, string comment)
+    public static string? SetPreset(string? existing, string value, string comment, bool importParent = false)
     {
         var property = $"<StyleBroPreset>{value}</StyleBroPreset>";
         if (existing is null)
         {
-            return $"<Project>\n  <PropertyGroup>\n    <!-- {comment} -->\n    {property}\n  </PropertyGroup>\n</Project>\n";
+            var import = importParent ? "  <Import Project=\"$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))\" />\n" : string.Empty;
+            return $"<Project>\n{import}  <PropertyGroup>\n    <!-- {comment} -->\n    {property}\n  </PropertyGroup>\n</Project>\n";
         }
 
         if (existing.Contains("<StyleBroPreset>", StringComparison.Ordinal))
@@ -692,6 +751,23 @@ internal static class Migration
             .ToList();
     }
 
+    /// <summary>
+    /// Whether a Directory.Build.props above <paramref name="props"/>'s folder exists: MSBuild imports the nearest one only, so a
+    /// new file there must import it (trial 22: a new src/Directory.Build.props shadowed the root's).
+    /// </summary>
+    public static bool HasParentProps(string props)
+    {
+        for (var folder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetFullPath(props))); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            if (File.Exists(Path.Combine(folder, "Directory.Build.props")))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>The comment line naming the folders (relative, '/'-separated) 'format' leaves alone.</summary>
     public static string UnformattedLine(IEnumerable<string> folders) => UnformattedPrefix + string.Join(", ", folders) + UnformattedSuffix;
 
@@ -755,11 +831,13 @@ internal static class Migration
     }
 
     /// <summary>The block that goes into an .editorconfig.</summary>
-    public static string Render(IEnumerable<(string Section, List<string> Lines)> sections)
+    /// <param name="sections">The sections and their lines.</param>
+    /// <param name="settings">Whose settings the block comes from ('StyleSharp' in a repository with only StyleSharp.Analyzers).</param>
+    public static string Render(IEnumerable<(string Section, List<string> Lines)> sections, string settings = "StyleCop")
     {
         var text = new StringBuilder();
         text.Append(BeginMarker).Append('\n');
-        text.Append("# Generated from this repository's StyleCop settings by stylebro-migrate. Run it again to update; edits\n");
+        text.Append($"# Generated from this repository's {settings} settings by stylebro-migrate. Run it again to update; edits\n");
         text.Append("# between these markers are overwritten.\n");
         var first = true;
         foreach (var (section, lines) in sections)
@@ -1002,18 +1080,71 @@ internal static class Migration
         }
 
         var enforcers = new[] { "SA1208", "SA1210" }.Where(setup.IsOn).ToList();
-        var files = $"{unsorted.Count} file{(unsorted.Count == 1 ? " isn't" : "s aren't")} in that order ({string.Join(", ", unsorted.Take(3))}{(unsorted.Count > 3 ? ", ..." : string.Empty)})";
-        var start = $"using directives: your .editorconfig sets {key} = {ownSettings[key]}, and 'dotnet format' sorts usings whenever it is set (to any value): {files}";
+        string Files(List<string> list, string order) => $"{list.Count} file{(list.Count == 1 ? " isn't" : "s aren't")} in {order} ({string.Join(", ", list.Take(3))}{(list.Count > 3 ? ", ..." : string.Empty)})";
+        string Them(List<string> list) => list.Count == 1 ? "it" : "them";
+        var start = $"using directives: your .editorconfig sets {key} = {ownSettings[key]}, and 'dotnet format' sorts usings whenever it is set (to any value)";
         var end = $"The key is yours, so it stays: if your team doesn't want that order, remove {key} from .editorconfig ('unset' sorts them too).";
-        if (enforcers.Count == 0)
+        var rules = setup.StyleSharp is not null ? string.Join("/", enforcers.Select(id => "SST" + id[2..])) : string.Join("/", enforcers);
+
+        // Only files whose sorted usings the enforced rule would report stay as they are (spot a4: SA1210 alone, 'Microsoft.*'
+        // above 'System': format puts System first, which SA1210 accepts under systemUsingDirectivesFirst).
+        var held = unsorted.Where(f => !AcceptsSorted(setup, File.ReadAllText(Path.Combine(root, f)), systemFirst)).ToList();
+        var reordered = unsorted.Except(held).ToList();
+        var notes = new List<string>();
+        if (reordered.Count > 0)
         {
-            return ($"{start}, and 'format' will reorder {(unsorted.Count == 1 ? "it" : "them")}. {end}", []);
+            notes.Add($"{start}: {Files(reordered, "that order")}, and 'format' will reorder {Them(reordered)}{(enforcers.Count == 0 ? string.Empty : $" ({rules}, on here, accept{(enforcers.Count == 1 ? "s" : string.Empty)} the sorted order too)")}.");
         }
 
-        // The rule that enforces the order accepts these files (StyleSharp's SST1210 compares case-sensitively): format would
-        // write what it reports, and can't skip only the sorting, so it leaves the files alone.
-        var rules = setup.StyleSharp is not null ? string.Join("/", enforcers.Select(id => "SST" + id[2..])) : string.Join("/", enforcers);
-        return ($"{start}, while {rules} (on here) accept{(enforcers.Count == 1 ? "s" : string.Empty)} their order{(setup.StyleSharp is null ? string.Empty : " (StyleSharp compares case-sensitively: 'MyApp.Logging' above 'log4net')")}: 'format' leaves {(unsorted.Count == 1 ? "it" : "them")} alone (the block's '{KeptUsingsPrefix.TrimEnd()}' line), else it would write what {rules} reports. {end} Once {rules} is gone, remove that line to sort them.", unsorted);
+        if (held.Count > 0)
+        {
+            // The rule that enforces the order accepts these files but not their sorted order (StyleSharp's SST1210 compares
+            // case-sensitively): format would write what it reports, and can't skip only the sorting, so it leaves them alone.
+            notes.Add($"{(reordered.Count > 0 ? "Also" : start + ":")} {Files(held, "that order")}, while {rules} (on here) accept{(enforcers.Count == 1 ? "s" : string.Empty)} their order and would report the sorted one{(setup.StyleSharp is null ? string.Empty : " (StyleSharp compares case-sensitively: 'MyApp.Logging' above 'log4net')")}: 'format' leaves {Them(held)} alone (the block's '{KeptUsingsPrefix.TrimEnd()}' line). Once {rules} is gone, remove that line to sort them.");
+        }
+
+        return ($"{string.Join(" ", notes)} {end}", held);
+    }
+
+    /// <summary>
+    /// Whether StyleCop's (or StyleSharp's) using-order rules that are on accept the order 'dotnet format' sorts a file's usings
+    /// into: SA1208 (System first, with systemUsingDirectivesFirst) and SA1210/SA1211/SA1217 (alphabetical within a group, System
+    /// usings apart under systemUsingDirectivesFirst; StyleSharp compares case-sensitively).
+    /// </summary>
+    internal static bool AcceptsSorted(StyleCopSetup setup, string text, bool formatSystemFirst)
+    {
+        var systemApart = setup.Setting("orderingRules", "systemUsingDirectivesFirst") is not { ValueKind: JsonValueKind.False };
+        var comparison = setup.StyleSharp is not null ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        static bool IsSystem(UsingDirectiveSyntax u) => Conventions.UsingName(u) is var name && (name == "System" || name.StartsWith("System.", StringComparison.Ordinal));
+        foreach (var list in Conventions.ResortedUsingLists(CSharpSyntaxTree.ParseText(text).GetRoot(), formatSystemFirst))
+        {
+            for (var i = 1; i < list.Count; i++)
+            {
+                var (a, b) = (list[i - 1], list[i]);
+                if (Conventions.UsingGroup(a) != Conventions.UsingGroup(b))
+                {
+                    continue;
+                }
+
+                var namespaces = Conventions.UsingGroup(a) == 0;
+                if (namespaces && systemApart && IsSystem(a) != IsSystem(b))
+                {
+                    if (setup.IsOn("SA1208") && IsSystem(b))
+                    {
+                        return false;
+                    }
+
+                    continue;
+                }
+
+                if (setup.IsOn("SA1210") && string.Compare(Conventions.UsingName(a), Conventions.UsingName(b), comparison) > 0)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /// <summary>Whether a C# file (path relative to the root) is generated or someone else's code.</summary>
@@ -1044,8 +1175,43 @@ internal static class Migration
         return list.Where(f => !list.Any(p => f.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase))).ToList();
     }
 
-    private static bool IsUnder(string path, string folder) =>
+    internal static bool IsUnder(string path, string folder) =>
         folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The multi-line switch expressions without a trailing comma in the repository's own code (computed once per root: the
+    /// scopes' settings ask again).
+    /// </summary>
+    internal static int SwitchExpressionsWithoutTrailingComma(string root)
+    {
+        lock (SwitchCounts)
+        {
+            if (SwitchCounts.TryGetValue(root, out var known))
+            {
+                return known;
+            }
+        }
+
+        var count = OwnCSharpFiles(root).AsParallel().Sum(file =>
+        {
+            var text = File.ReadAllText(file);
+            if (!text.Contains("switch", StringComparison.Ordinal) || IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
+            {
+                return 0;
+            }
+
+            var tree = CSharpSyntaxTree.ParseText(text);
+            var lines = tree.GetText().Lines;
+            return tree.GetRoot().DescendantNodes().OfType<SwitchExpressionSyntax>().Count(s => s.Arms.Count > 0 && s.Arms.SeparatorCount < s.Arms.Count
+                && lines.GetLineFromPosition(s.OpenBraceToken.SpanStart).LineNumber != lines.GetLineFromPosition(s.CloseBraceToken.SpanStart).LineNumber);
+        });
+        lock (SwitchCounts)
+        {
+            SwitchCounts[root] = count;
+        }
+
+        return count;
+    }
 
     /// <summary>
     /// Whether the folders are EmitCompilerGeneratedFiles' layout: '&lt;output&gt;/&lt;generator assembly&gt;/&lt;generator type&gt;/',
@@ -1284,6 +1450,88 @@ internal static class Migration
         var style = !on && underscore > plain ? "_camelCase" : "camelCase";
         notes.Add($"Private fields{where}: {underscore} named '_field', {plain} named 'field'; {state}, so BRO1303 uses '{style}'.");
         return style;
+    }
+
+    /// <summary>
+    /// IDE0055 enforces every SDK spacing option, also where a StyleCop spacing rule was off (trial 22, kafkaflow: SA1000,
+    /// SA1003 and SA1009 off, and IDE0055 rewrote 'new ()' and 'catch('). For each such rule the code decides, as in init: a
+    /// clear other form gets the SDK option that keeps it (mixed operator spacing: 'ignore'); where no option expresses the
+    /// code, IDE0055 stays on and the notes name what 'format' changes. ponytail: counted over the whole repository, also where
+    /// StyleCop doesn't run.
+    /// </summary>
+    private static void AddSpacingOfRulesOff(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> own, List<string> lines, Result result)
+    {
+        var ide = lines.FindLast(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal));
+        if (ide is null || StyleCopSetup.ParseSeverity(ide.Substring(ide.IndexOf('=') + 1)) is null or Severity.None)
+        {
+            return;
+        }
+
+        string[] parentheses = ["SA1008", "SA1009"];
+        var spacing = Conventions.Spacing;
+        var aspects = new (string[] Rules, string CountKey, string? Key, string? Value, string What, string Default, string Other)[]
+        {
+            (["SA1000"], Conventions.SpacingCountKey(spacing[0]), spacing[0].Key, "false", spacing[0].What, spacing[0].Default, spacing[0].Other),
+            (["SA1000"], Conventions.ImplicitNewSpacingKey, null, null, "target-typed 'new'", "'new()'", "'new ()'"),
+            (["SA1003"], Conventions.BinaryOperatorSpacingKey, "csharp_space_around_binary_operators", "none", "binary operators", "'a + b'", "'a+b'"),
+            (["SA1003", "SA1009"], Conventions.SpacingCountKey(spacing[4]), spacing[4].Key, "true", spacing[4].What, spacing[4].Default, spacing[4].Other),
+            (parentheses, Conventions.SpacingCountKey(spacing[1]), spacing[1].Key, spacing[1].Flag, spacing[1].What, spacing[1].Default, spacing[1].Other),
+            (parentheses, Conventions.SpacingCountKey(spacing[2]), spacing[2].Key, spacing[2].Flag, spacing[2].What, spacing[2].Default, spacing[2].Other),
+            (parentheses, Conventions.SpacingCountKey(spacing[3]), spacing[3].Key, spacing[3].Flag, spacing[3].What, spacing[3].Default, spacing[3].Other),
+            (parentheses, Conventions.SpacingCountKey(spacing[5]), spacing[5].Key, "true", spacing[5].What, spacing[5].Default, spacing[5].Other),
+            (parentheses, Conventions.SpacingCountKey(spacing[6]), spacing[6].Key, "true", spacing[6].What, spacing[6].Default, spacing[6].Other),
+        };
+        var relevant = aspects.Where(a => a.Rules.Any(r => !setup.IsOn(r)) && (a.Key is null || !own.ContainsKey(a.Key))).ToList();
+        if (relevant.Count == 0)
+        {
+            return;
+        }
+
+        var counts = Conventions.Count(root, own);
+        var flags = new List<string>();
+        var changed = new List<string>();
+        foreach (var (rules, countKey, key, value, what, standard, other) in relevant)
+        {
+            var c = counts[countKey];
+            var others = c.Skip(1).Sum();
+            if (others == 0)
+            {
+                continue;
+            }
+
+            var off = string.Join(", ", rules.Where(r => !setup.IsOn(r)));
+            var allOff = rules.All(r => !setup.IsOn(r));
+            var winner = Conventions.Winner(c[0], others) == 0 ? 0 : Conventions.Winner(c[0] + c.Skip(2).Sum(), c[1]) == 1 ? 1 : -1;
+            var found = $"{c[0]} {standard}, {c[1]} {other}{(c.Length > 2 && c[2] > 0 ? $", {c[2]} one-sided" : string.Empty)}";
+            if (allOff && key is not null && value is not null && c.Sum() >= Conventions.MinimumAgreeing && (winner == 1 || (winner < 0 && key == "csharp_space_around_binary_operators")))
+            {
+                var setting = winner == 1 ? value : "ignore";
+                if (key == Conventions.SpaceBetweenParenthesesKey)
+                {
+                    flags.Add(setting);
+                }
+                else
+                {
+                    lines.Add($"{key} = {setting}");
+                }
+
+                result.Notes.Add($"Spacing of {what}: {off} {(rules.Length == 1 ? "is" : "are")} off, and your code has {found}: {(key == Conventions.SpaceBetweenParenthesesKey ? $"{key} includes {setting}" : $"{key} = {setting}")}, so IDE0055 keeps {(winner == 1 ? "it" : "them as they are")}.");
+            }
+            else
+            {
+                changed.Add($"{what} ({found}; {off} off)");
+            }
+        }
+
+        if (flags.Count > 0)
+        {
+            lines.Add($"{Conventions.SpaceBetweenParenthesesKey} = {string.Join(", ", flags)}");
+        }
+
+        if (changed.Count > 0)
+        {
+            result.Notes.Add($"IDE0055 also enforces spacing StyleCop didn't check here, and no SDK option keeps your code's: 'format' changes {string.Join("; ", changed)} to the SDK's spacing. To keep them, turn IDE0055 off (dotnet_diagnostic.IDE0055.severity = none) below the block; 'format' then formats no whitespace.");
+        }
     }
 
     private static void AddSdk(StyleCopSetup setup, List<string> lines, Result result)

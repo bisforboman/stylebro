@@ -250,6 +250,6 @@ public sealed partial class MigrationTests
         Assert.Contains("dotnet_diagnostic.BRO1514.severity = warning", result.Lines);
         Assert.Contains("csharp_prefer_braces = true", result.Lines);
         Assert.DoesNotContain("stylebro_braces_statements = if_and_loops", result.Lines);
-        Assert.Contains(result.Sonar!.Notes, n => n.StartsWith("stylebro_braces_statements not written for S121: the StyleCop setup turns BRO1514 on", StringComparison.Ordinal));
+        Assert.Contains(result.Sonar!.Notes, n => n.StartsWith("stylebro_braces_statements not written for S121: BRO1514 is already on", StringComparison.Ordinal));
     }
 }
