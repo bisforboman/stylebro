@@ -1,7 +1,7 @@
-# Trial 22: only directives the formatter moves, not the conditional ones
+# Trial 22/23: every directive counts, also a string's own '#if'/'#endif' lines
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
-    Find = 'CSharpExtensions.Kind(t) is not ('
-    Replace = 'CSharpExtensions.Kind(t) is ('
+    Find = '.Where(t => t.IsDirective).Select(t => text.IndexOf(''#'', t.Span.Start))'
+    Replace = '.Where(t => t.IsDirective && !t.ToString().Contains("if", StringComparison.Ordinal)).Select(t => text.IndexOf(''#'', t.Span.Start))'
     Tests = 'MigrationTests.Format_ProtectsStringLines'
 }

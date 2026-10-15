@@ -16,7 +16,9 @@ win over a category or bulk severity, and `format` re-indented the code. The fol
 
 ## Decision
 
-Choice 1 (agent's call in the trial 23 task, which asked for the folder handling at the root). A root bulk `none` or
+**Choice 1: Keep StyleBro on** (owner's choice 2026-10-15 (confirmed); first proposed by the agent in the trial 23 task,
+which asked for the folder handling at the root). StyleBro's own rules stay on by id, `init` stops turning the IDE
+formatting rules back on, and says so in its output. A root bulk `none` or
 `silent` next to an installed StyleBro is the sharpcompress case of 2026-10-13: the team installed StyleBro and turns the
 analyzers it wants on by id, so turning StyleBro off would make `init` do nothing. The built-in rules are the SDK's, which
 the bulk setting covers: their lines leave the block (IDE0055 too, so `format` skips the whitespace pass). A folder that

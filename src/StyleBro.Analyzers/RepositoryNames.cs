@@ -183,6 +183,13 @@ public static class RepositoryNames
     }
 
     /// <summary>
+    /// The identifier line for a file in another language (Visual Basic, which format doesn't load): its names, so a C#
+    /// member it uses keeps its name.
+    /// </summary>
+    public static string IdentifierLine(string path, IEnumerable<string> identifiers) =>
+        Line(IdentifierKind, path, string.Join(" ", new SortedSet<string>(identifiers, System.StringComparer.Ordinal)));
+
+    /// <summary>
     /// The names a tree declares with the type <see langword="dynamic"/> (locals, parameters, fields, properties), or null
     /// when it never says <see langword="dynamic"/>: then no member access in it is dynamic (cheap for the usual file).
     /// </summary>

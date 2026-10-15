@@ -167,8 +167,17 @@ internal static class FormatCommand
     /// <summary>The start of the line that names the files <see cref="DirectiveMask"/> protects (printed for the first run only).</summary>
     private const string ProtectedHeader = "Protected:";
 
+    /// <summary>The start of the line that names the Visual Basic projects format leaves alone (printed for the first run only).</summary>
+    private const string VisualBasicHeader = "Visual Basic:";
+
+    /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
+    private const string GeneratorsHeader = "Generators:";
+
+    /// <summary>The source generator projects built or found up to date in this process (<see cref="BuildGenerators"/>).</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, ProtectedHeader, CheckingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, ProtectedHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The findings the last run on a folder kept, per folder (<see cref="Remember"/>).</summary>
     private static readonly Dictionary<string, List<KeptFinding>> LastKept = new(StringComparer.OrdinalIgnoreCase);
@@ -687,9 +696,32 @@ internal static class FormatCommand
     }
 
     /// <summary>What to say when code fixes failed (<see cref="FixFailure"/>, distinct): their findings are left, so it isn't clean.</summary>
-    public static string FixFailuresLine(IReadOnlyCollection<string> failures) =>
-        $"Not clean: {(failures.Count == 1 ? "a code fix" : $"{failures.Count} code fixes")} failed, so {(failures.Count == 1 ? "its" : "their")} findings are left: "
-        + $"{string.Join("; ", failures)}. Please report it at https://github.com/bisforboman/stylebro/issues with this output.";
+    public static string FixFailuresLine(IReadOnlyCollection<string> failures)
+    {
+        // Where to report it: StyleBro's own rules here; another analyzer's fix (trial 23: a third-party XX0001 fix that threw
+        // was sent to StyleBro's tracker) to whoever ships it, the SDK's rules to Roslyn.
+        var ours = failures.Where(f => f.StartsWith("BRO", StringComparison.Ordinal)).ToList();
+        var sdk = failures.Where(f => Regex.IsMatch(f, @"^(IDE|CA|CS)\d")).ToList();
+        var others = failures.Except(ours).Except(sdk).ToList();
+        var where = new List<string>();
+        if (ours.Count > 0)
+        {
+            where.Add($"{(ours.Count == failures.Count ? "please" : "StyleBro's (" + string.Join(", ", ours.Select(f => f.Split(':', ' ')[0])) + "): please")} report it at https://github.com/bisforboman/stylebro/issues with this output");
+        }
+
+        if (sdk.Count > 0)
+        {
+            where.Add($"{string.Join(", ", sdk.Select(f => f.Split(':', ' ')[0]))} {(sdk.Count == 1 ? "is" : "are")} the .NET SDK's: https://github.com/dotnet/roslyn/issues");
+        }
+
+        if (others.Count > 0)
+        {
+            where.Add($"{string.Join(", ", others.Select(f => f.Split(':', ' ')[0]))} {(others.Count == 1 ? "is" : "are")} not StyleBro's: report it to the analyzer package or project that has {(others.Count == 1 ? "that rule" : "those rules")} (the fix's name is in parentheses)");
+        }
+
+        return $"Not clean: {(failures.Count == 1 ? "a code fix" : $"{failures.Count} code fixes")} failed, so {(failures.Count == 1 ? "its" : "their")} findings are left: "
+            + $"{string.Join("; ", failures)}. {char.ToUpperInvariant(where[0][0])}{where[0][1..]}{string.Concat(where.Skip(1).Select(w => "; " + w))}.";
+    }
 
     /// <summary>What to say after a run crashed: the run's projects, and the SDK bug when the crash is the linked-file merge's.</summary>
     public static string CrashMessage(IEnumerable<string> projects) =>
@@ -723,8 +755,13 @@ internal static class FormatCommand
     /// </summary>
     public static string? Explain(string line)
     {
+        // "Required references did not load ... Run `dotnet restore`" after a restore that worked (FluentAssertions, trial 23):
+        // MSBuild failed to evaluate the project or one it references for the run (there: a netstandard2.0 project loaded for
+        // net47, whose reference assemblies weren't there). The restore isn't the cause; MSBuild's message is in the diagnostic output.
         var (key, text) = UnsupportedProject(line) is { } name
             ? (name, $"Not formatted: {name}: 'dotnet format' formats C# and Visual Basic projects only, so it's left alone; the C# projects are formatted.")
+            : SkippedProject(line) is { } skipped
+            ? ("skipped:" + skipped, $"'dotnet format' skipped {skipped}: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; 'dotnet format <solution> --verbosity diagnostic' shows MSBuild's message (\"Msbuild failed when processing the file ...\").")
             : line.StartsWith(WorkspaceWarnings, StringComparison.Ordinal)
                 ? (WorkspaceWarnings, "'dotnet format' had warnings loading the workspace (a project or reference it couldn't load completely, e.g. one in another language); they don't stop the run. 'dotnet format <solution> --verbosity diagnostic' lists them.")
                 : (null, line);
@@ -1010,8 +1047,24 @@ internal static class FormatCommand
     /// </summary>
     public static string NoWhitespaceLine(string root, IReadOnlyCollection<string> exclusions)
     {
-        var optOut = exclusions.Where(e => e.EndsWith('/') && InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, e.TrimEnd('/'))))).ToList();
-        var other = exclusions.Except(optOut).ToList();
+        // The folder whose .editorconfig opts out may be above the excluded one (samples/.editorconfig, samples/Demo/ excluded:
+        // trial 23 said "style and analyzer fixes still run there").
+        string? OptOutFolder(string exclusion)
+        {
+            for (var folder = exclusion.TrimEnd('/'); folder.Length > 0; folder = folder.LastIndexOf('/') is var at && at < 0 ? string.Empty : folder[..at])
+            {
+                if (InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, folder))))
+                {
+                    return folder + "/";
+                }
+            }
+
+            return null;
+        }
+
+        var optOutOf = exclusions.ToDictionary(e => e, OptOutFolder);
+        var optOut = optOutOf.Values.OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        var other = exclusions.Where(e => optOutOf[e] is null).ToList();
         string Them(int count) => count == 1 ? "it" : "them";
         var parts = new List<string>();
         if (other.Count > 0)
@@ -1149,29 +1202,44 @@ internal static class FormatCommand
     }
 
     /// <summary>
-    /// The C# files under the root (relative, '/'-separated) with old Mac line endings: a CR without an LF after it. The
-    /// SDK's formatter adds a line break to them on every run.
+    /// The C# files under the root (relative, '/'-separated) with old Mac line endings: a CR without an LF after it that
+    /// ends a line of code, not one inside a string or character literal (jint: a verbatim regex with a CR character in
+    /// it, which converting the file's line endings would change). The SDK's formatter adds a line break to them on every run.
     /// </summary>
     public static List<string> OldMacLineEndings(string root)
     {
-        static bool HasLoneCr(byte[] bytes)
-        {
-            for (var at = Array.IndexOf(bytes, (byte)'\r'); at >= 0; at = Array.IndexOf(bytes, (byte)'\r', at + 1))
-            {
-                if (at + 1 == bytes.Length || bytes[at + 1] != '\n')
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         return StyleCopSetup.EnumerateFiles(root)
-            .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && HasLoneCr(File.ReadAllBytes(f)))
+            .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && HasLoneCr(File.ReadAllText(f)))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .Order(StringComparer.Ordinal)
             .ToList();
+    }
+
+    /// <summary>Whether a C# text has a CR without an LF after it outside its string and character literals (<see cref="OldMacLineEndings"/>).</summary>
+    public static bool HasLoneCr(string text)
+    {
+        List<Microsoft.CodeAnalysis.Text.TextSpan>? literals = null;
+        for (var at = text.IndexOf('\r', StringComparison.Ordinal); at >= 0; at = text.IndexOf('\r', at + 1))
+        {
+            if (at + 1 < text.Length && text[at + 1] == '\n')
+            {
+                continue;
+            }
+
+            literals ??= Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(text).GetRoot().DescendantTokens()
+                .Where(t => Microsoft.CodeAnalysis.CSharp.CSharpExtensions.Kind(t) is Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken
+                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.CharacterLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.InterpolatedStringTextToken
+                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.MultiLineRawStringLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.SingleLineRawStringLiteralToken
+                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.Utf8StringLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.Utf8MultiLineRawStringLiteralToken)
+                .Select(t => t.Span)
+                .ToList();
+            if (!literals.Any(s => s.Contains(at)))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -1509,36 +1577,43 @@ internal static class FormatCommand
 
     /// <summary>
     /// Where a C# text has a line in a multi-line string that another set of '#if' symbols reads as a directive
-    /// (<see cref="DirectiveStringFiles"/>): the offsets of those lines' '#'. Parsed with none of the symbols it tests and
-    /// with all of them, a string of one parse spans a directive of the other ('#pragma', '#nullable', anything but
-    /// '#if'/'#elif'/'#else'/'#endif').
+    /// (<see cref="DirectiveStringFiles"/>): the offsets of those lines' '#'. A line's '#' counts when one parse has it
+    /// starting a line of a multi-line string and another reads a directive there (any directive: a string's '#if DEBUG'
+    /// too). The parses cover every branch: each combination of the symbols the file tests (trial 23: a string in an
+    /// '#elif' branch, or under 'NET8_0_OR_GREATER &amp;&amp; !NET10_0_OR_GREATER', is compiled by neither "no symbol" nor
+    /// "every symbol", which were the only two parses before).
     /// </summary>
     public static List<int> DirectiveStringOffsets(string text)
     {
         if (!text.Contains("#if", StringComparison.Ordinal)
-            || !(text.Contains("\"\"\"", StringComparison.Ordinal) || text.Contains("@\"", StringComparison.Ordinal) || text.Contains("@$\"", StringComparison.Ordinal)))
+            || !(text.Contains("\"\"\"", StringComparison.Ordinal) || text.Contains("@\"", StringComparison.Ordinal) || text.Contains("@$\"", StringComparison.Ordinal) || text.Contains("$@\"", StringComparison.Ordinal)))
         {
             return [];
         }
 
-        Microsoft.CodeAnalysis.SyntaxTree Parse(IEnumerable<string> symbols) =>
-            Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(text, new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions(Microsoft.CodeAnalysis.CSharp.LanguageVersion.Preview, preprocessorSymbols: symbols));
-        IEnumerable<int> Clash(Microsoft.CodeAnalysis.SyntaxTree strings, Microsoft.CodeAnalysis.SyntaxTree directives)
+        // ponytail: every subset up to 8 symbols (256 parses of a rare file); beyond that each symbol alone and all but
+        // each one, which misses a branch that needs two symbols set and two unset. Evaluate the conditions if that matters.
+        var tested = TestedIn(text);
+        var sets = tested.Length <= 8
+            ? Enumerable.Range(0, 1 << tested.Length).Select(mask => tested.Where((_, i) => (mask & (1 << i)) != 0).ToArray())
+            : new[] { Array.Empty<string>(), tested }.Concat(tested.Select(s => new[] { s })).Concat(tested.Select(s => tested.Where(o => o != s).ToArray()));
+        var strings = new HashSet<int>();
+        var directives = new HashSet<int>();
+        foreach (var symbols in sets)
         {
-            var spans = strings.GetRoot().DescendantTokens()
-                .Where(t => t.Text.Contains('\n', StringComparison.Ordinal) && Regex.IsMatch(t.Text, @"\n[ \t]*#"))
-                .Select(t => t.Span)
-                .ToList();
-            return spans.Count == 0 ? [] : directives.GetRoot().DescendantTrivia()
-                .Where(t => t.IsDirective && Microsoft.CodeAnalysis.CSharp.CSharpExtensions.Kind(t) is not (Microsoft.CodeAnalysis.CSharp.SyntaxKind.IfDirectiveTrivia
-                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.ElifDirectiveTrivia or Microsoft.CodeAnalysis.CSharp.SyntaxKind.ElseDirectiveTrivia or Microsoft.CodeAnalysis.CSharp.SyntaxKind.EndIfDirectiveTrivia))
-                .Where(t => spans.Any(s => s.OverlapsWith(t.Span)))
-                .Select(t => text.IndexOf('#', t.Span.Start));
+            var root = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(text, new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions(Microsoft.CodeAnalysis.CSharp.LanguageVersion.Preview, preprocessorSymbols: symbols)).GetRoot();
+            foreach (var token in root.DescendantTokens().Where(t => t.Text.Contains('\n', StringComparison.Ordinal)))
+            {
+                foreach (Match line in Regex.Matches(token.Text, @"\n[ \t]*#"))
+                {
+                    strings.Add(token.SpanStart + line.Index + line.Length - 1);
+                }
+            }
+
+            directives.UnionWith(root.DescendantTrivia(descendIntoTrivia: true).Where(t => t.IsDirective).Select(t => text.IndexOf('#', t.Span.Start)));
         }
 
-        var none = Parse([]);
-        var all = Parse(TestedIn(text));
-        return Clash(none, all).Concat(Clash(all, none)).Where(o => o >= 0).Distinct().Order().ToList();
+        return strings.Intersect(directives).Where(o => o >= 0).Order().ToList();
     }
 
     /// <summary>What format says about the files <see cref="DirectiveStringFiles"/> found (<see cref="DirectiveMask"/>).</summary>
@@ -1793,8 +1868,31 @@ internal static class FormatCommand
         var lines = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             .AsParallel()
             .AsOrdered()
-            .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList());
-        File.WriteAllLines(file, lines);
+            .SelectMany(f => RepositoryNames.Lines(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f).GetRoot(), f).ToList())
+            .ToList();
+
+        // Visual Basic files' names too: format leaves them alone, so a C# member they use keeps its name. Not as the file's
+        // own path: a VB project a C# project references is loaded, and its files would count as seen by the run (c13: the
+        // rename went through and was put back in the .vb file, which then didn't build).
+        // ponytail: as written there; VB ignores case, so 'Base_Rate' for a C# 'base_rate' isn't matched.
+        var visualBasic = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".vb", StringComparison.OrdinalIgnoreCase))
+            .Select(f => RepositoryNames.IdentifierLine(f + " (Visual Basic, left alone)", Regex.Matches(File.ReadAllText(f), @"[A-Za-z_]\w*").Select(m => m.Value)));
+        File.WriteAllLines(file, lines.Concat(visualBasic));
+    }
+
+    /// <summary>
+    /// The Visual Basic projects a run would load (file names): the ones the solution (or filter) lists, and those the C#
+    /// projects reference (<paramref name="references"/>, full paths).
+    /// </summary>
+    public static List<string> VisualBasicProjects(string workspacePath, IEnumerable<string> references)
+    {
+        var listed = workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) || !File.Exists(workspacePath)
+            ? Enumerable.Empty<string>()
+            : Regex.Matches(File.ReadAllText(workspacePath), @"[^""\\/]+\.vbproj\b", RegexOptions.IgnoreCase).Select(m => m.Value.Trim());
+        return listed.Concat(references.Where(r => r.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase)).Select(Path.GetFileName).OfType<string>())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     /// <summary>Whether a file is a Traversal project (Microsoft.Build.Traversal: a .proj that only lists projects to build).</summary>
@@ -2034,6 +2132,102 @@ internal static class FormatCommand
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
         }
+    }
+
+    /// <summary>
+    /// Puts the findings a clean run kept into the baseline the build reads (owner's choice, trial 23: with warnings as
+    /// errors, jint's 227 kept findings failed the build 369 times after a "clean" format): <see cref="BaselineFile"/>, with
+    /// its other entries kept unless the line they fingerprint is gone. What to say about it, or null when nothing changed
+    /// (or the projects turn the baseline off). The build and '--verify-no-changes' skip them then; new violations still fail.
+    /// </summary>
+    public static string? BaselineKept(string root, IReadOnlyCollection<KeptFinding> kept)
+    {
+        if (BaselineFile(root) is not { } file)
+        {
+            return null;
+        }
+
+        var exists = File.Exists(file);
+        if (kept.Count == 0 && !exists)
+        {
+            return null;
+        }
+
+        var folder = Path.GetDirectoryName(file)!;
+        var lines = new Dictionary<string, HashSet<string>?>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string>? Fingerprints(string path) => lines.TryGetValue(path, out var known)
+            ? known
+            : lines[path] = File.Exists(path) ? File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n').Select(Analyzers.Baseline.Baseline.Fingerprint).ToHashSet(StringComparer.Ordinal) : null;
+
+        var counts = new Dictionary<Analyzers.Baseline.Baseline.Key, int>();
+        var removed = 0;
+        foreach (var (key, count) in exists ? Analyzers.Baseline.Baseline.Parse(File.ReadAllText(file)).Entries : new Dictionary<Analyzers.Baseline.Baseline.Key, int>())
+        {
+            if (Fingerprints(Path.Combine(folder, key.Path))?.Contains(key.Fingerprint) == true)
+            {
+                counts[key] = count;
+            }
+            else
+            {
+                removed += count;
+            }
+        }
+
+        var added = 0;
+        foreach (var group in kept.Select(k => (Finding: k, Relative: Analyzers.Baseline.Baseline.RelativePath(folder, Path.GetFullPath(k.Path))))
+            .Where(k => k.Relative is not null && File.Exists(k.Finding.Path))
+            .GroupBy(k => new Analyzers.Baseline.Baseline.Key(k.Finding.Id, k.Relative!, Analyzers.Baseline.Baseline.Fingerprint(File.ReadLines(k.Finding.Path).ElementAtOrDefault(k.Finding.Line - 1) ?? string.Empty))))
+        {
+            var had = counts.TryGetValue(group.Key, out var count) ? count : 0;
+            if (group.Count() > had)
+            {
+                added += group.Count() - had;
+                counts[group.Key] = group.Count();
+            }
+        }
+
+        if (added == 0 && removed == 0)
+        {
+            return null;
+        }
+
+        File.WriteAllText(file, new Analyzers.Baseline.Baseline(counts).Render());
+        var name = Relative(root, file);
+        var parts = new List<string>();
+        if (added > 0)
+        {
+            parts.Add($"added {added} kept finding{(added == 1 ? string.Empty : "s")}, so the build and 'format --verify-no-changes' skip {(added == 1 ? "it" : "them")} (new violations still fail; delete an entry to see it again)");
+        }
+
+        if (removed > 0)
+        {
+            parts.Add($"removed {removed} entr{(removed == 1 ? "y" : "ies")} whose line is gone");
+        }
+
+        return $"Baseline: {name}: {string.Join("; ", parts)} (https://bisforboman.github.io/stylebro/baseline/).";
+    }
+
+    /// <summary>
+    /// The baseline the projects under <paramref name="root"/> read: the file a Directory.Build.props above names with
+    /// &lt;StyleBroBaseline&gt;, else the nearest stylebro.baseline at or above the root (as the package's targets look for
+    /// it), else a new one at the root; null when the props turn it off ('none') or name it with other MSBuild properties.
+    /// </summary>
+    public static string? BaselineFile(string root)
+    {
+        string? found = null;
+        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            var props = Path.Combine(folder, "Directory.Build.props");
+            if (File.Exists(props) && Regex.Match(StyleCopSetup.WithoutComments(File.ReadAllText(props)), @"<StyleBroBaseline\b[^>]*>(?<value>[^<]*)<") is { Success: true } named)
+            {
+                var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+                return value.Equals("none", StringComparison.OrdinalIgnoreCase) || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value));
+            }
+
+            found ??= File.Exists(Path.Combine(folder, Analyzers.Baseline.Baseline.FileName)) ? Path.Combine(folder, Analyzers.Baseline.Baseline.FileName) : null;
+        }
+
+        return found ?? Path.Combine(Path.GetFullPath(root), Analyzers.Baseline.Baseline.FileName);
     }
 
     /// <summary>The findings <see cref="SaveKept"/> recorded for this state of the repository and these options, else null.</summary>
@@ -2303,6 +2497,12 @@ internal static class FormatCommand
         finally
         {
             File.Delete(keptFile);
+
+            // The copy too (trial 23: hundreds were left in the temp folder).
+            if (Directory.Exists(copy))
+            {
+                PreviewCommand.Delete(copy);
+            }
         }
     }
 
@@ -2322,17 +2522,7 @@ internal static class FormatCommand
             return;
         }
 
-        string[] generators;
-        try
-        {
-            generators = ReadProjects(Path.GetFullPath(workspace)).Values.SelectMany(p => p.Analyzers).Distinct(StringComparer.OrdinalIgnoreCase).Where(File.Exists).ToArray();
-        }
-        catch (ToolException)
-        {
-            // The run on the copy reports a workspace MSBuild can't evaluate itself.
-            return;
-        }
-
+        var generators = AnalyzerProjects(workspace);
         var sourceRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(source)) + Path.DirectorySeparatorChar;
         foreach (var project in generators)
         {
@@ -2358,8 +2548,82 @@ internal static class FormatCommand
                 var to = Path.Combine(copy, Path.GetRelativePath(source, file));
                 Directory.CreateDirectory(Path.GetDirectoryName(to)!);
                 File.Copy(file, to, overwrite: true);
+
+                // Newer than the copied sources (written just now), so the copy's run finds it built (BuildGenerators).
+                File.SetLastWriteTimeUtc(to, DateTime.UtcNow);
             }
         }
+    }
+
+    /// <summary>
+    /// Builds the projects the code takes as analyzers ('OutputItemType="Analyzer"': in-solution source generators) when
+    /// their output is missing or older than their files, once per process, saying so: without it 'dotnet format' runs
+    /// without the generator, its generated code is missing, and a rename of a member that code uses broke the build
+    /// (trial 23: CS0103 after a "clean" format and verify, owner's choice "Build generators first"). A failed build is said
+    /// and the runs go on (as before: without the generated code).
+    /// </summary>
+    internal static void BuildGenerators(IEnumerable<string> generators, string root, Action<string> log)
+    {
+        var stale = generators.Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(g => File.Exists(g) && !BuiltGenerators.ContainsKey(g))
+            .Where(g => !IsBuilt(g) || !BuiltGenerators.TryAdd(g, true))
+            .ToList();
+        if (stale.Count == 0)
+        {
+            return;
+        }
+
+        log($"{GeneratorsHeader} building {string.Join(", ", stale.Select(Path.GetFileNameWithoutExtension))} first: the code uses {(stale.Count == 1 ? "it" : "them")} as a source generator, and without {(stale.Count == 1 ? "its" : "their")} output the generated code would be missing from the checks.");
+        foreach (var generator in stale)
+        {
+            var output = new List<string>();
+
+            // Without analyzers and warnings as errors: the generator's own code isn't formatted yet (jint: its StyleBro findings
+            // failed the build under TreatWarningsAsErrors), and only its output matters here.
+            if (Dotnet(root, null, ["build", generator, "-nologo", "-v", "q", "-p:RunAnalyzers=false", "-p:TreatWarningsAsErrors=false", .. RestoreOptions], output.Add) == 0)
+            {
+                BuiltGenerators.TryAdd(generator, true);
+            }
+            else
+            {
+                output.Where(l => l.Contains(" error ", StringComparison.Ordinal)).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
+                log($"{GeneratorsHeader} building {Path.GetFileName(generator)} failed: formatting goes on without its generated code, so a rename it uses may break the build. Build it, then run again.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// The projects a workspace's C# projects take as analyzers (full paths of those that exist), or none when MSBuild can't
+    /// evaluate it (the run reports that itself).
+    /// </summary>
+    internal static string[] AnalyzerProjects(string workspacePath)
+    {
+        try
+        {
+            return ReadProjects(Path.GetFullPath(workspacePath)).Values.SelectMany(p => p.Analyzers).Distinct(StringComparer.OrdinalIgnoreCase).Where(File.Exists).ToArray();
+        }
+        catch (ToolException)
+        {
+            return [];
+        }
+    }
+
+    /// <summary>Whether a project's output (TargetPath) exists and is newer than its files (the project folder's, not bin/obj).</summary>
+    internal static bool IsBuilt(string project)
+    {
+        string target;
+        try
+        {
+            target = Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getProperty:TargetPath", "-nologo").Trim();
+        }
+        catch (ToolException)
+        {
+            return false;
+        }
+
+        // ponytail: the project folder's files only; a changed shared props or linked file doesn't count.
+        return target.Length > 0 && File.Exists(target)
+            && StyleCopSetup.EnumerateFiles(Path.GetDirectoryName(project)!).All(f => File.GetLastWriteTimeUtc(f) <= File.GetLastWriteTimeUtc(target));
     }
 
     /// <summary>
@@ -2435,6 +2699,23 @@ internal static class FormatCommand
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Deletes the temporary solution filters a killed run left next to the solution ('.stylebro-format-0.slnf', an
+    /// untracked file in the repository, trial 23): those written before this process started.
+    /// </summary>
+    internal static void DeleteLeftoverFilters(string folder)
+    {
+        using var current = Process.GetCurrentProcess();
+        var started = current.StartTime.ToUniversalTime();
+        foreach (var file in new[] { ".stylebro-format-*.slnf", ".stylebro-restore-*.slnf" }.SelectMany(p => Directory.EnumerateFiles(folder, p)))
+        {
+            if (File.GetLastWriteTimeUtc(file) < started)
+            {
+                File.Delete(file);
+            }
+        }
     }
 
     /// <summary>Where <see cref="SaveKept"/> records a repository's kept findings.</summary>
@@ -2579,6 +2860,7 @@ internal static class FormatCommand
             if (changed.Count == 0 || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
+                var baselined = changed.Count == 0 && failures.Count == 0 ? BaselineKept(root, keptFindings) : null;
                 if (changed.Count == 0 && failures.Count == 0)
                 {
                     SaveKept(root, args, keptFindings);
@@ -2586,6 +2868,11 @@ internal static class FormatCommand
 
                 JsonReport.AddKept(keptFindings);
                 KeptSummary(keptFindings, root, clean: changed.Count == 0 && failures.Count == 0).ForEach(log);
+                if (baselined is not null)
+                {
+                    log(baselined);
+                }
+
                 AfterNotes(root, allChanged).ForEach(log);
                 if (allFailures.Count > 0)
                 {
@@ -2699,6 +2986,13 @@ internal static class FormatCommand
         if (DirectiveMask.Damaged(root) is { Count: > 0 } damaged)
         {
             error(DamagedLine(damaged));
+            return 1;
+        }
+
+        // Another run's swapped files (its 'dotnet format' may outlive a killed 'format'): they come back when it ends.
+        if (DirectiveMask.Busy(root) is { Count: > 0 } busy)
+        {
+            error($"Stopped: another 'stylebro-migrate format' (or the 'dotnet format' it started, still running after it was stopped) has swapped the '#' of protected lines in {string.Join(", ", busy.Take(5))}{(busy.Count > 5 ? $" and {busy.Count - 5} more" : string.Empty)}. Wait until it ends (the next command puts them back), then run again.");
             return 1;
         }
 
@@ -2892,12 +3186,25 @@ internal static class FormatCommand
         var solutionPath = IsSolutionFilter(workspacePath) ? ReadSolutionFilter(workspacePath).Solution! : workspacePath;
         var solutionDirectory = Path.GetDirectoryName(solutionPath)!;
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+        DeleteLeftoverFilters(solutionDirectory);
         var projects = ReadProjects(workspacePath);
         if (projects.Count == 0)
         {
             error($"No C# project in {Path.GetFileName(workspacePath)}, so there's nothing to format. Name a solution or project with C# projects.");
             return 1;
         }
+
+        // Visual Basic is left alone (owner's choice, trial 23): the runs load the C# projects only (a solution filter, or what
+        // they reference), format their files only, and a .vb file a fix still reaches is put back. Before, the plain run
+        // reformatted and renamed in a .vb file without listing it, and verify reported VB findings as StyleBro's.
+        var visualBasic = VisualBasicProjects(workspacePath, projects.Values.SelectMany(p => p.References));
+        if (visualBasic.Count > 0)
+        {
+            log($"{VisualBasicHeader} {string.Join(", ", visualBasic.Take(3))}{(visualBasic.Count > 3 ? $" and {visualBasic.Count - 3} more" : string.Empty)}: Visual Basic projects are left alone, 'format' runs on the C# projects only.");
+            Exclude(["**/*.vb"]);
+        }
+
+        using var visualBasicFiles = visualBasic.Count > 0 ? new UntouchedFiles(root, ".vb", log) : null;
 
         // Projects the solution lists but no configuration builds: the restore skips them, so StyleBro wouldn't run there, and
         // only the whitespace pass and the SDK's rules would (Bogus's Nuke builder: its usings were sorted, and the run warned
@@ -2951,6 +3258,7 @@ internal static class FormatCommand
         }
 
         passThrough.Insert(0, "--no-restore");
+        BuildGenerators(projects.Values.SelectMany(p => p.Analyzers), root, log);
 
         // Without StyleBro's analyzers 'dotnet format' fixes whitespace and the built-in rules and says clean.
         var checkedProjects = projects.Values
@@ -3002,7 +3310,7 @@ internal static class FormatCommand
                 selected.Select(p => projects[p].FullPath),
                 r => byFullPath.TryGetValue(r, out var key) ? projects[key].References : Array.Empty<string>(),
                 c => byFullPath.TryGetValue(c, out var key) ? projects[key].Compile : Array.Empty<string>(),
-                (s, _) => View(s, framework) is { } view ? string.Join(";", view.Defines.Order(StringComparer.Ordinal)) + "|" + view.LangVersion + "|" + view.Nullable : null)
+                (s, file) => View(s, framework)?.Key([file]))
             .Select(g => g.Select(f => byFullPath[f]).ToList())
             .ToList();
 
@@ -3014,7 +3322,7 @@ internal static class FormatCommand
 
         // One run for everything: plain, unless it's the run after one that changed files, which checks first (and then formats
         // only the files with findings).
-        var whole = plan.Count <= 1 && allFrameworks.Count == 0;
+        var whole = plan.Count <= 1 && allFrameworks.Count == 0 && visualBasic.Count == 0;
         if (whole && !(checkFirst && !passThrough.Contains("--report")))
         {
             var single = Format(workspacePath, passThrough, a => Dotnet(root, null, a, Watch));
@@ -3383,6 +3691,7 @@ internal static class FormatCommand
         }
 
         process.Start();
+        DirectiveMask.Active?.Track(process);
         if (output is not null)
         {
             process.BeginOutputReadLine();
@@ -3401,11 +3710,12 @@ internal static class FormatCommand
     {
         /// <summary>
         /// What decides how <paramref name="files"/> parse: each file with the symbols its '#if's test that are defined, the
-        /// language version and nullable context. Two views with the same key parse those files the same.
+        /// language version and nullable context. Two views with the same key parse those files the same. The symbols come
+        /// from the file's own path: upper-cased, it doesn't exist on Linux, and every file tested nothing there.
         /// </summary>
         public string Key(IEnumerable<string> files) =>
-            string.Join(";", files.Select(f => Path.GetFullPath(f).ToUpperInvariant()).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)
-                .Select(f => f + ":" + string.Join(",", TestedSymbols(f).Where(Defines.Contains))))
+            string.Join(";", files.Select(Path.GetFullPath).DistinctBy(f => f.ToUpperInvariant(), StringComparer.Ordinal).OrderBy(f => f.ToUpperInvariant(), StringComparer.Ordinal)
+                .Select(f => f.ToUpperInvariant() + ":" + string.Join(",", TestedSymbols(f).Where(Defines.Contains))))
             + "|" + LangVersion + "|" + Nullable;
     }
 
@@ -3459,7 +3769,11 @@ internal static class FormatCommand
 
             Console.CancelKeyPress += OnCancel;
             AppDomain.CurrentDomain.ProcessExit += OnExit;
+            Active = this;
         }
+
+        /// <summary>Gets the mask of the run in progress, whose record <see cref="Dotnet"/> adds the 'dotnet format' processes to.</summary>
+        public static DirectiveMask? Active { get; private set; }
 
         /// <summary>Where the records of swapped files are: '%TEMP%/stylebro-mask'.</summary>
         public static string RecordFolder => Path.Combine(Path.GetTempPath(), "stylebro-mask");
@@ -3510,6 +3824,26 @@ internal static class FormatCommand
         }
 
         /// <summary>
+        /// The files under <paramref name="root"/> (relative) another process's running format has swapped: a 'dotnet format'
+        /// still writes them (also one a killed 'format' left running), so they're neither restored nor formatted now.
+        /// </summary>
+        public static List<string> Busy(string root, string? recordFolder = null)
+        {
+            var folder = recordFolder ?? RecordFolder;
+            var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+            return Directory.Exists(folder)
+                ? Directory.EnumerateFiles(folder, "*.json").Select(ReadRecord)
+                    .Where(r => r is not null && r.Pid != Environment.ProcessId && IsRunning(r))
+                    .SelectMany(r => r!.Files.Select(f => f.Path))
+                    .Where(p => p.StartsWith(top, StringComparison.OrdinalIgnoreCase))
+                    .Select(p => Path.GetRelativePath(root, p).Replace('\\', '/'))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Order(StringComparer.Ordinal)
+                    .ToList()
+                : [];
+        }
+
+        /// <summary>
         /// The C# files under <paramref name="root"/> with a swapped '#' no running 'format' recorded: a damaged file
         /// (a record lost after a kill, or a hand edit) that formatting would only make worse.
         /// </summary>
@@ -3528,10 +3862,41 @@ internal static class FormatCommand
                 .ToList();
         }
 
+        /// <summary>
+        /// Adds a process this run started to the record: a 'dotnet format' left running after this process was killed
+        /// still writes the swapped files, so <see cref="Recover"/> waits for it too (trial 23: it put the '#' back, then the
+        /// orphan wrote the swapped text again, and the next command stopped on a "damaged" file).
+        /// </summary>
+        public void Track(Process process)
+        {
+            lock (masked)
+            {
+                if (record is null || masked.Count == 0 || ReadRecord(record) is not { } current)
+                {
+                    return;
+                }
+
+                try
+                {
+                    var child = new MaskProcess(process.Id, process.StartTime.ToUniversalTime().Ticks);
+                    File.WriteAllText(record, JsonSerializer.Serialize(current with { Children = [.. current.Children ?? [], child] }));
+                }
+                catch (Exception e) when (e is InvalidOperationException or System.ComponentModel.Win32Exception or IOException)
+                {
+                    // Already gone: nothing left to wait for.
+                }
+            }
+        }
+
         public void Dispose()
         {
             Console.CancelKeyPress -= OnCancel;
             AppDomain.CurrentDomain.ProcessExit -= OnExit;
+            if (Active == this)
+            {
+                Active = null;
+            }
+
             lock (masked)
             {
                 foreach (var (file, mark) in masked)
@@ -3568,13 +3933,17 @@ internal static class FormatCommand
             return offsets;
         }
 
-        // Whether the record's process still runs (same id and start time; an unreadable one counts as running).
-        private static bool IsRunning(MaskRecord record)
+        // Whether the record's process, or a 'dotnet format' it started, still runs.
+        private static bool IsRunning(MaskRecord record) =>
+            IsRunning(record.Pid, record.Started) || (record.Children ?? []).Any(c => IsRunning(c.Pid, c.Started));
+
+        // Whether a process still runs (same id and start time; an unreadable one counts as running).
+        private static bool IsRunning(int pid, long started)
         {
             try
             {
-                using var process = Process.GetProcessById(record.Pid);
-                return process.StartTime.ToUniversalTime().Ticks == record.Started;
+                using var process = Process.GetProcessById(pid);
+                return process.StartTime.ToUniversalTime().Ticks == started;
             }
             catch (ArgumentException)
             {
@@ -3622,10 +3991,38 @@ internal static class FormatCommand
         private void OnExit(object? sender, EventArgs e) => Dispose();
 
         /// <summary>What <see cref="DirectiveMask"/> swapped, while it runs: the process (id, start time in UTC ticks) and the files.</summary>
-        internal sealed record MaskRecord(string Root, int Pid, long Started, List<MaskedFile> Files);
+        internal sealed record MaskRecord(string Root, int Pid, long Started, List<MaskedFile> Files, List<MaskProcess>? Children = null);
+
+        /// <summary>A process the run started (<see cref="Track"/>): its id and start time in UTC ticks.</summary>
+        internal sealed record MaskProcess(int Pid, long Started);
 
         /// <summary>A swapped file: its full path, the character (as a number) and how many '#' it replaced.</summary>
         internal sealed record MaskedFile(string Path, int Mark, int Count);
+    }
+
+    /// <summary>
+    /// The files of one extension under a root, as they are when this is made, put back when it's disposed if a run changed
+    /// them (said through the log): '.vb' files, which format leaves alone even where a fix reaches them.
+    /// </summary>
+    internal sealed class UntouchedFiles : IDisposable
+    {
+        private readonly Dictionary<string, byte[]> files;
+        private readonly Action<string> log;
+
+        public UntouchedFiles(string root, string extension, Action<string> log)
+        {
+            this.log = log;
+            files = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(extension, StringComparison.OrdinalIgnoreCase)).ToDictionary(f => f, File.ReadAllBytes, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void Dispose()
+        {
+            foreach (var (file, bytes) in files.Where(f => !File.Exists(f.Key) || !File.ReadAllBytes(f.Key).AsSpan().SequenceEqual(f.Value)))
+            {
+                File.WriteAllBytes(file, bytes);
+                log($"Put back: {file}: a fix changed it, and 'format' leaves Visual Basic alone. Check that the build still passes.");
+            }
+        }
     }
 
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>

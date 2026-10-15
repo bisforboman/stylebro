@@ -49,6 +49,12 @@ can see (the name read by reflection, used in generated code: see
 run. The baseline records it like any other violation, so warnings as errors don't fail the build over it.
 `stylebro-migrate format` lists these with their reasons; check them before you rename one by hand.
 
+`stylebro-migrate format` also adds them to the baseline itself: a run that ends clean with findings kept writes them
+into the baseline the build reads (the file `<StyleBroBaseline>` names, else the nearest `stylebro.baseline` above, else
+a new one in the folder it runs on) and says so (`Baseline: stylebro.baseline: added 3 kept findings, ...`). Entries
+already there stay, except those whose line no longer exists in its file. The build and `--verify-no-changes` then agree:
+both skip those findings and fail on new ones. `<StyleBroBaseline>none</StyleBroBaseline>` turns this off too.
+
 ## How entries match
 
 Each line of the file is a rule, a file (relative to the baseline), a fingerprint of the reported line's text, and how

@@ -7,8 +7,13 @@ namespace StyleBro.Tests;
 /// so a CRLF file got LF lines on Linux (and an LF file CRLF lines on Windows), and '--verify-no-changes' depended on the OS.
 /// 'stylebro-migrate format' gives a file that used one ending throughout its own ending back.
 /// </summary>
-public class FormatLineEndingsTests
+public sealed class FormatLineEndingsTests : IDisposable
 {
+    private readonly List<string> folders = [];
+
+    /// <summary>The folders <see cref="NewFolder"/> made, deleted after the test (hundreds were left in the temp folder).</summary>
+    public void Dispose() => folders.ForEach(f => Directory.Delete(f, recursive: true));
+
     [Fact]
     public void Format_KeepsEachFilesOwnLineEnding()
     {
@@ -82,10 +87,11 @@ public class FormatLineEndingsTests
     public void Ending_IsOneLineEndingThroughout(string text, bool? crlf) =>
         Assert.Equal(crlf, FormatCommand.Ending(System.Text.Encoding.UTF8.GetBytes(text)));
 
-    private static string NewFolder(params (string Name, string Text)[] files)
+    private string NewFolder(params (string Name, string Text)[] files)
     {
         var root = Path.Combine(Path.GetTempPath(), "stylebro-endings-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
+        folders.Add(root);
         foreach (var (name, text) in files)
         {
             File.WriteAllText(Path.Combine(root, name), text);

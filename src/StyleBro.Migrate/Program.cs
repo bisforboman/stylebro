@@ -664,6 +664,9 @@ internal static class Program
         // A 'format' killed while it ran leaves '#' swapped in the files it protected: every command puts them back first.
         FormatCommand.DirectiveMask.Recover(Console.WriteLine);
 
+        // Copies a killed preview or verify left behind (trial 23: hundreds in the temp folder).
+        PreviewCommand.DeleteStaleCopies(Path.GetTempPath(), TimeSpan.FromDays(1));
+
         // 'format' passes unknown options on to 'dotnet format'.
         var (command, known) = args.FirstOrDefault() switch
         {

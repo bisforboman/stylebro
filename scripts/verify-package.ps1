@@ -160,9 +160,17 @@ try {
     $formatted | Out-Host
     Check ($LASTEXITCODE -eq 0 -and $formatted -match "Counter\.cs\(5,17\): BRO1303 Rename '_count' to 'count'\. Kept: the name is in a string") 'format lists _count as kept on purpose, with the reason'
     Check ((Get-Content (Join-Path $keptRepo 'Counter.cs') -Raw) -match 'private int _count;\s+private int total;') 'format renamed _total and kept _count'
+    # The clean run baselined the kept finding: the build and verify skip it (trial 23, owner's choice).
+    $baselineFile = Join-Path $keptRepo 'stylebro.baseline'
+    Check ($formatted -match 'Baseline: stylebro\.baseline: added 1 kept finding' -and (Test-Path $baselineFile) -and (Get-Content $baselineFile -Raw) -match "BRO1303`tCounter\.cs`t") 'format baselines the kept finding'
     $verified = dotnet @migrate --verify-no-changes 2>&1 | Out-String
     $verified | Out-Host
-    Check ($LASTEXITCODE -eq 0 -and $verified -match '1 finding kept on purpose') 'format --verify-no-changes exits 0 with only the kept finding left'
+    Check ($LASTEXITCODE -eq 0 -and $verified -match 'Clean') 'format --verify-no-changes exits 0 with the kept finding baselined'
+    dotnet build $keptRepo -nologo -v q -p:TreatWarningsAsErrors=true -p:Nullable=enable 2>&1 | Out-Host
+    Check ($LASTEXITCODE -eq 0) 'the build with warnings as errors passes with the kept finding baselined'
+
+    # Without the baseline, verify lists the kept finding with its reason.
+    Remove-Item $baselineFile
     $json = dotnet @migrate --verify-no-changes --files (Join-Path $keptRepo 'Counter.cs') --json 2>$null | Out-String | ConvertFrom-Json
     Check ($LASTEXITCODE -eq 0 -and $json.clean -and $json.keptFindings[0].rule -eq 'BRO1303' -and $json.keptFindings[0].reason -eq 'NameInString') 'format --files --json reports the kept finding with its reason'
 

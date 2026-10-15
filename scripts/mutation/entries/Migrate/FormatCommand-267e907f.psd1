@@ -1,7 +1,7 @@
-# In a folder that turns every analyzer off, no fixes run either (optout spot).
+# In a folder that turns every analyzer off, no fixes run either (optout spot; trial 23: the opting-out folder may be above).
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
-    Find = 'var optOut = exclusions.Where(e => e.EndsWith(''/'') && InitCommand.OptsOut('
-    Replace = 'var optOut = exclusions.Where(e => false && InitCommand.OptsOut('
-    Tests = 'StyleBro.Tests.MigrationTests.Texts_SayWhatHappens_InOptOutFolders_AndWithCodeStyleInTheBuild'
+    Find = 'if (InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, folder))))'
+    Replace = 'if (false)'
+    Tests = 'MigrationTests.Texts_SayWhatHappens_InOptOutFolders_AndWithCodeStyleInTheBuild'
 }

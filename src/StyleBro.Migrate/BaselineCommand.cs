@@ -69,6 +69,9 @@ internal static class BaselineCommand
             // Where it's off in some folders only (CSharpier formats one), the whitespace pass runs on its own without them.
             var exclusions = FormatCommand.WhitespaceExclusions(root);
             var passes = Passes(exclusions);
+
+            // Like format: the generated code of an unbuilt in-solution generator would be missing from the findings.
+            FormatCommand.BuildGenerators(FormatCommand.AnalyzerProjects(Path.Combine(root, project)), root, Console.WriteLine);
             Console.WriteLine($"Running 'dotnet format {(passes.Length > 1 ? string.Join("/", passes) + " " : string.Empty)}{project} --verify-no-changes' to find today's violations...");
             var reports = new List<string>();
             foreach (var pass in passes)

@@ -1,7 +1,7 @@
-# Trial 22: only directives a string of the other parse spans
+# Trial 22: only string lines another parse reads as a directive
 @{
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
-    Find = '.Where(t => spans.Any(s => s.OverlapsWith(t.Span)))'
-    Replace = '.Where(t => true)'
+    Find = 'strings.Intersect(directives)'
+    Replace = 'strings'
     Tests = 'MigrationTests.Format_ProtectsStringLines'
 }

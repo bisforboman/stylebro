@@ -199,6 +199,21 @@ internal static class PreviewCommand
         }
 
         var ok = false;
+
+        // Ctrl+C ends the process without the finally below: the copy goes then too (unless --keep).
+        void Cancelled(object? sender, ConsoleCancelEventArgs e)
+        {
+            if (!keep)
+            {
+                lock (log)
+                {
+                    log.Dispose();
+                    Delete(temp);
+                }
+            }
+        }
+
+        Console.CancelKeyPress += Cancelled;
         try
         {
             var ignoredTracked = new List<string>();
@@ -338,6 +353,7 @@ internal static class PreviewCommand
         }
         finally
         {
+            Console.CancelKeyPress -= Cancelled;
             Console.WriteLine($"Done in {Elapsed(clock.Elapsed)}.");
             log.Dispose();
             if (keep || !ok)
@@ -356,7 +372,7 @@ internal static class PreviewCommand
     /// ignored nuget.config named a local feed: the copy's restore couldn't find the package and the preview failed.
     /// </summary>
     public static string? IgnoredNuGetConfigNote(string source, string copy) =>
-        Directory.EnumerateFiles(source).Select(Path.GetFileName).FirstOrDefault(f => string.Equals(f, "nuget.config", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine(copy, f))) is { } name
+        Directory.EnumerateFiles(source).Select(Path.GetFileName).OfType<string>().FirstOrDefault(f => string.Equals(f, "nuget.config", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine(copy, f))) is { } name
             ? $"Not copied: {name} (git ignores it). If the copy's restore fails (NU1101, NU1102), the package sources only it names are why: commit them in a nuget.config, or run 'init --write' and 'format' on the repository itself."
             : null;
 
@@ -1027,6 +1043,38 @@ internal static class PreviewCommand
         }
 
         throw new GitFailedException($"'git {string.Join(' ', arguments)}' failed (exit code {code}){(error.Trim().Length == 0 ? "." : ": " + error.Trim())}");
+    }
+
+    /// <summary>
+    /// Deletes the copies of previews and verify runs in <paramref name="temp"/> last written more than <paramref name="age"/>
+    /// ago: a killed run leaves its copy (a running one writes to its copy all the time). Quietly: one in use stays.
+    /// </summary>
+    internal static void DeleteStaleCopies(string temp, TimeSpan age)
+    {
+        try
+        {
+            foreach (var folder in new[] { "stylebro-preview-*", "stylebro-verify-*" }.SelectMany(p => Directory.EnumerateDirectories(temp, p)))
+            {
+                if (DateTime.UtcNow - Directory.GetLastWriteTimeUtc(folder) > age)
+                {
+                    try
+                    {
+                        foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+                        {
+                            File.SetAttributes(file, FileAttributes.Normal);
+                        }
+
+                        Directory.Delete(folder, recursive: true);
+                    }
+                    catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                    {
+                    }
+                }
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+        }
     }
 
     internal static void Delete(string folder)
