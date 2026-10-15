@@ -139,6 +139,15 @@ internal static class Conventions
     /// <summary>Counts of target-typed 'new': ['new()', 'new ()'] (StyleCop's SA1000; no SDK option of its own). Only the migration reads it.</summary>
     public const string ImplicitNewSpacingKey = "spacing: implicit new";
 
+    /// <summary>What the static casing's report and '# init:' comments call it (its kept lines are found by it).</summary>
+    public const string StaticCasingWhat = "private constants/static readonly fields";
+
+    /// <summary>The suffix of the counts of leading-lambda calls' list layouts (<see cref="FoldLeadingLambdas"/>).</summary>
+    public const string LeadingLambdaBucket = " (leading lambda)";
+
+    /// <summary>The list layout conventions a leading-lambda call is counted apart for (<see cref="FoldLeadingLambdas"/>).</summary>
+    public static readonly string[] LeadingLambdaKeys = { "stylebro_split_list_first_item", ItemsPerLineKey };
+
     /// <summary>The whitespace keys judged against the .editorconfig that decides each file's value (<see cref="FileSettings"/>).</summary>
     public static readonly string[] FileKeys = { EndOfLineKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey };
 
@@ -200,6 +209,10 @@ internal static class Conventions
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
+        new(CommentAboveKey, "'//' comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeComment)) { Unit = "comment" },
+        new(PeriodKey, "doc comment texts", "warning", ("warning", "ending with a period"), ("none", "without a period"), Off(DiagnosticIds.DocumentationEndsWithPeriod)) { Unit = "text" },
+        new(LangwordKey, "keywords in doc comments", "warning", ("warning", "'<see langword=\"null\"/>'"), ("none", "'<c>null</c>'"), Off(DiagnosticIds.LangwordElement)) { Unit = "keyword" },
+        new(NonPrivateNamingKey, "non-private fields your naming rule covers", "warning", ("warning", "named as it says"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
         new(PrimaryParametersKey, "primary-constructor parameter names", "warning", ("warning", "like 'logger'"), ("none", "like '_logger'"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
@@ -372,6 +385,32 @@ internal static class Conventions
     private const string CommentBlankLineKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterComment + ".severity";
 
     /// <summary>
+    /// BRO1504's severity: '//' comments right below a line of code, or after a blank line (trial 23, stryker: 73 % without,
+    /// and BRO1504 added 265 blank lines). Only where BRO1504 would want one (<see cref="StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove"/>),
+    /// or where a blank line sits in such a place.
+    /// </summary>
+    private const string CommentAboveKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineBeforeComment + ".severity";
+
+    /// <summary>
+    /// BRO1603's severity: doc comment texts (summary, param, returns, ...) ending with a period or not (trial 23, stryker: 78 %
+    /// of one-line param texts without one, and BRO1603 added them all).
+    /// </summary>
+    private const string PeriodKey = "dotnet_diagnostic." + DiagnosticIds.DocumentationEndsWithPeriod + ".severity";
+
+    /// <summary>
+    /// BRO1618's severity: a keyword in a doc comment as '&lt;see langword="null"/&gt;' or as '&lt;c&gt;null&lt;/c&gt;' (trial 23, jint:
+    /// 918 lines about JavaScript's null and undefined, which BRO1618 turned into C# keyword links).
+    /// </summary>
+    private const string LangwordKey = "dotnet_diagnostic." + DiagnosticIds.LangwordElement + ".severity";
+
+    /// <summary>
+    /// BRO1306's severity: the non-private fields an enforced SDK naming rule covers (BRO1306 follows it), named as it says or
+    /// not (trial 23, jint: a 'suggestion' rule asked for '_camelCase' on every instance field, the code had 827 PascalCase
+    /// public ones against 263, and BRO1306 renamed ~545). A rule the code doesn't follow mustn't win.
+    /// </summary>
+    private const string NonPrivateNamingKey = "dotnet_diagnostic." + DiagnosticIds.FieldPascalCase + ".severity";
+
+    /// <summary>
     /// BRO1511's severity: doc comments right above their element, or with a blank line between (trial 20: MoreLINQ has one in
     /// 324 of 491 places, and BRO1511 removed them in 115 files).
     /// </summary>
@@ -418,6 +457,9 @@ internal static class Conventions
     /// re-indented thousands of lines.
     /// </summary>
     private const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
+
+    /// <summary>The top-level doc elements BRO1603 checks (DocumentationPeriods' text elements).</summary>
+    private static readonly HashSet<string> PeriodElements = new(StringComparer.Ordinal) { "summary", "remarks", "param", "typeparam", "returns", "value", "exception" };
 
     /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
     private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
@@ -656,6 +698,8 @@ internal static class Conventions
 
         CountInheritDoc(trees, counts, settings, documented);
         CountRelativeUsings(trees, counts);
+        FoldLeadingLambdas(counts, settings);
+        CountNonPrivateNaming(trees, counts, settings);
         return counts;
     }
 
@@ -797,6 +841,62 @@ internal static class Conventions
         }
     }
 
+    /// <summary>
+    /// Folds the list layouts of leading-lambda calls (counted under <see cref="LeadingLambdaBucket"/>) into their conventions,
+    /// unless init allows those calls (<see cref="StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey"/> set to true, or
+    /// written: the code has them, mixed or mostly): then BRO1107/BRO1108 leave them alone, and they don't count against the
+    /// rules' conventions. The buckets are removed.
+    /// </summary>
+    public static void FoldLeadingLambdas(Dictionary<string, int[]> counts, IReadOnlyDictionary<string, string>? settings)
+    {
+        // ponytail: a 'true' kept from the last init (not in the settings) isn't seen here; the code's count decides again.
+        var lambdas = counts[StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey];
+        var allowed = settings?.TryGetValue(StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey, out var value) == true
+            ? value.Split(':')[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase)
+            : lambdas.Sum() >= MinimumAgreeing && Winner(lambdas[0], lambdas[1]) != 0;
+        foreach (var key in LeadingLambdaKeys)
+        {
+            if (counts.Remove(key + LeadingLambdaBucket, out var bucket) && !allowed)
+            {
+                counts[key][0] += bucket[0];
+                counts[key][1] += bucket[1];
+            }
+        }
+    }
+
+    /// <summary>
+    /// <see cref="NonPrivateNamingKey"/>'s places: the non-private fields an enforced naming rule covers (BRO1306 follows it,
+    /// <see cref="StyleBro.Analyzers.Naming.FieldNames.GetNonPrivateCasing"/>), named as it says or not. Needs symbols: one
+    /// compilation of the trees, without references (declarations bind without them); only when such a rule exists.
+    /// </summary>
+    public static void CountNonPrivateNaming(IReadOnlyList<SyntaxTree> trees, Dictionary<string, int[]> counts, IReadOnlyDictionary<string, string>? settings)
+    {
+        if (settings is null || trees.Count == 0)
+        {
+            return;
+        }
+
+        var styles = StyleBro.Analyzers.Naming.FieldNames.GetStyles(new Options(settings), StyleBro.Analyzers.Severities.Configured(settings, "IDE1006", "Style"));
+        if (styles.NonPrivate is null)
+        {
+            return;
+        }
+
+        var compilation = CSharpCompilation.Create("conventions", trees);
+        foreach (var tree in trees)
+        {
+            var model = compilation.GetSemanticModel(tree);
+            foreach (var variable in tree.GetRoot().DescendantNodes(n => n is not (BlockSyntax or ArrowExpressionClauseSyntax)).OfType<FieldDeclarationSyntax>().SelectMany(f => f.Declaration.Variables))
+            {
+                if (model.GetDeclaredSymbol(variable) is IFieldSymbol field
+                    && StyleBro.Analyzers.Naming.FieldNames.GetNonPrivateCasing(field, styles) is { } casing && casing != StyleBro.Analyzers.Naming.NamingCasing.Other)
+                {
+                    counts[NonPrivateNamingKey][StyleBro.Analyzers.Naming.FieldNames.GetRename(field, styles) is null ? 0 : 1]++;
+                }
+            }
+        }
+    }
+
     /// <summary>An empty count for every convention.</summary>
     public static Dictionary<string, int[]> NewCounts()
     {
@@ -811,6 +911,11 @@ internal static class Conventions
         counts[InterfaceAccessKey] = new int[2];
         counts[BinaryOperatorSpacingKey] = new int[3];
         counts[ImplicitNewSpacingKey] = new int[2];
+        foreach (var key in LeadingLambdaKeys)
+        {
+            counts[key + LeadingLambdaBucket] = new int[2];
+        }
+
         foreach (var aspect in Spacing)
         {
             counts[SpacingCountKey(aspect)] = new int[3];
@@ -1283,6 +1388,8 @@ internal static class Conventions
             MemberOrder();
             Separation();
             CommentBlankLines();
+            CommentsBelowCode();
+            Documentation();
 
             // Unit = regions inside members (BRO1113's): only the uses count.
             counts[RegionsKey][1] += StyleBro.Analyzers.Readability.Regions.GetRegions(root).Count(r => r.InCodeElement);
@@ -1535,6 +1642,9 @@ internal static class Conventions
                 case ArgumentListSyntax or ParameterListSyntax:
                     // A first argument that is a multi-line lambda (anonymous method, anonymous object): the other arguments on
                     // its last line, or the list laid out as BRO1107/BRO1108 want it.
+                    // A leading-lambda call's list layout counts apart (FoldLeadingLambdas): where the option allows it, it says
+                    // nothing about BRO1107/BRO1108's conventions (trial 23: both went off as well).
+                    var bucket = string.Empty;
                     if (node is ArgumentListSyntax { Arguments.Count: > 1 } callArguments
                         && callArguments.Arguments[0].Expression is AnonymousFunctionExpressionSyntax or AnonymousObjectCreationExpressionSyntax
                         && Line(callArguments.Arguments[0].SpanStart) != Line(callArguments.Arguments[0].Span.End))
@@ -1542,6 +1652,7 @@ internal static class Conventions
                         if (StyleBro.Analyzers.Readability.ParameterLayout.IsLeadingLambda(callArguments, text))
                         {
                             Add(StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey, true);
+                            bucket = LeadingLambdaBucket;
                         }
                         else if (StyleBro.Analyzers.Readability.ParameterLayout.GetFirstMisplacedItem(callArguments, text) is null
                             && StyleBro.Analyzers.Readability.ParameterLayout.GetFirstItemToMove(callArguments, text, null) is null)
@@ -1566,13 +1677,13 @@ internal static class Conventions
 
                         if (items.Count > 1 && Line(items[0].SpanStart) != Line(items[1].SpanStart))
                         {
-                            Add("stylebro_split_list_first_item", Line(items[0].SpanStart) == Line(open.SpanStart));
+                            Add("stylebro_split_list_first_item" + bucket, Line(items[0].SpanStart) == Line(open.SpanStart));
                         }
 
                         // Items on several lines: each on its own (BRO1108's layout) or grouped ('F(TagX, 1,' + '"a", "b")').
                         if (items.Count > 1 && Line(items[0].SpanStart) != Line(items[^1].SpanStart))
                         {
-                            Add(ItemsPerLineKey, Enumerable.Range(1, items.Count - 1).Any(i => Line(items[i].SpanStart) == Line(items[i - 1].Span.End)));
+                            Add(ItemsPerLineKey + bucket, Enumerable.Range(1, items.Count - 1).Any(i => Line(items[i].SpanStart) == Line(items[i - 1].Span.End)));
                         }
                     }
 
@@ -1871,6 +1982,74 @@ internal static class Conventions
                 {
                     Add(CommentBlankLineKey, blank.Count > 0);
                 }
+            }
+        }
+
+        // Unit = '//' comments BRO1504 judges: without a blank line above (what it reports), or with one it would want there.
+        // The second: the file once more without the blank lines right above each comment, where BRO1504 then reports it
+        // (trial 23, stryker: 73 % with one, and BRO1504 added 265; a guess from the line above counted 79 %).
+        void CommentsBelowCode()
+        {
+            var exempt = StyleBro.Analyzers.Layout.BlankLines.GetExemptPrefixes(new Options(settings));
+            static List<SyntaxTrivia> Comments(SyntaxNode node) =>
+                node.DescendantTrivia().Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) && !t.ToString().StartsWith("///", StringComparison.Ordinal)).ToList();
+            var comments = Comments(root);
+            var spaced = new List<int>();
+            var removals = new List<TextChange>();
+            for (var i = 0; i < comments.Count; i++)
+            {
+                var line = text.Lines.GetLineFromPosition(comments[i].SpanStart).LineNumber;
+                if (StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove(comments[i], text, _ => false, exempt))
+                {
+                    Add(CommentAboveKey, true);
+                }
+                else if (line > 0 && string.IsNullOrWhiteSpace(text.Lines[line - 1].ToString()) && string.IsNullOrWhiteSpace(text.ToString(TextSpan.FromBounds(text.Lines[line].Start, comments[i].SpanStart))))
+                {
+                    var top = line - 1;
+                    while (top > 0 && string.IsNullOrWhiteSpace(text.Lines[top - 1].ToString()))
+                    {
+                        top--;
+                    }
+
+                    if (top > 0)
+                    {
+                        spaced.Add(i);
+                        removals.Add(new TextChange(TextSpan.FromBounds(text.Lines[top].Start, text.Lines[line].Start), string.Empty));
+                    }
+                }
+            }
+
+            if (spaced.Count == 0)
+            {
+                return;
+            }
+
+            var compact = text.WithChanges(removals);
+            var compactComments = Comments(CSharpSyntaxTree.ParseText(compact, (CSharpParseOptions)tree.Options).GetRoot());
+            if (compactComments.Count == comments.Count)
+            {
+                counts[CommentAboveKey][0] += spaced.Count(i => StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove(compactComments[i], compact, _ => false, exempt));
+            }
+        }
+
+        // Unit = BRO1603's doc texts (a top-level summary, param, returns, ... with text): ending with a period, or one BRO1603
+        // reports. And BRO1618's keywords: '<see langword="null"/>', or '<c>null</c>' (what BRO1618 reports).
+        void Documentation()
+        {
+            var options = new Options(settings);
+            foreach (var comment in root.DescendantTrivia().Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)))
+            {
+                if (comment.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
+                {
+                    continue;
+                }
+
+                counts[PeriodKey][1] += StyleBro.Analyzers.Documentation.DocumentationPeriods.GetMissingPeriods([comment], options).Count();
+                counts[PeriodKey][0] += documentation.Content.OfType<XmlElementSyntax>().Count(e => PeriodElements.Contains(e.StartTag.Name.LocalName.ValueText)
+                    && e.Content.LastOrDefault(c => c is not XmlTextSyntax t || t.TextTokens.Any(token => token.Text.Trim().Length > 0)) is XmlTextSyntax last
+                    && string.Concat(last.TextTokens.Select(t => t.Text)).TrimEnd().EndsWith('.'));
+                counts[LangwordKey][1] += StyleBro.Analyzers.Documentation.DocumentationStyle.GetFindings(documentation, text).Count(f => f.Id == DiagnosticIds.LangwordElement);
+                counts[LangwordKey][0] += documentation.DescendantNodes().OfType<XmlEmptyElementSyntax>().Count(e => e.Name.LocalName.ValueText == "see" && e.Attributes.Any(a => a.Name.LocalName.ValueText == "langword"));
             }
         }
 
@@ -2467,7 +2646,7 @@ internal static class Conventions
     /// </summary>
     private static void DecideStaticCasing(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary)
     {
-        const string What = "private constants/static readonly fields";
+        const string What = StaticCasingWhat;
         string[] forms = ["PascalCase", "camelCase", "_camelCase"];
         if (!counts.TryGetValue(StaticCasingKey, out var c) || c.Sum() is not (> 0 and var total))
         {
@@ -2610,9 +2789,30 @@ internal static class Conventions
     private static List<List<UsingDirectiveSyntax>> UsingLists(SyntaxNode root) =>
         root.DescendantNodesAndSelf(n => n is CompilationUnitSyntax or BaseNamespaceDeclarationSyntax)
             .Select(n => n switch { CompilationUnitSyntax u => u.Usings, BaseNamespaceDeclarationSyntax ns => ns.Usings, _ => default })
-            .Select(l => l.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)).ToList())
+            .SelectMany(l => SplitAtDirectives(l.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None))))
             .Where(l => l.Count >= 2)
             .ToList();
+
+    /// <summary>
+    /// A list of usings in the runs between preprocessor directives: 'dotnet format' sorts each run on its own (a using inside
+    /// '#if' stays where it is; fluentassertions' note promised a reorder format never did).
+    /// </summary>
+    private static IEnumerable<List<UsingDirectiveSyntax>> SplitAtDirectives(IEnumerable<UsingDirectiveSyntax> usings)
+    {
+        var run = new List<UsingDirectiveSyntax>();
+        foreach (var u in usings)
+        {
+            if (run.Count > 0 && u.GetLeadingTrivia().Any(t => t.IsDirective))
+            {
+                yield return run;
+                run = [];
+            }
+
+            run.Add(u);
+        }
+
+        yield return run;
+    }
 
     /// <summary>Whether a list of usings is in the order 'dotnet format' sorts them into (Roslyn's: namespaces, static, aliases).</summary>
     private static bool IsSorted(List<UsingDirectiveSyntax> usings, bool systemFirst) =>
