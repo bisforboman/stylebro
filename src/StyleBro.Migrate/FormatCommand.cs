@@ -1547,6 +1547,12 @@ internal static class FormatCommand
         + "a multi-line string there has lines starting with '#' inside an '#if' branch some build leaves out, which the SDK's formatter would move to column 0 "
         + "as if they were directives, breaking the string where the branch is compiled (CS8999, a Roslyn bug). Their '#' is swapped for another character while 'dotnet format' runs, then put back.";
 
+    /// <summary>What format and verify say when <see cref="DirectiveMask.Damaged"/> finds files.</summary>
+    public static string DamagedLine(IReadOnlyList<string> files) =>
+        $"Stopped: {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)} "
+        + "have a line starting with a private-use character where a directive's '#' would be, the character 'format' swaps the '#' of protected lines for while it runs, "
+        + "but no record says a run did (a run killed and its record lost, or an edit by hand). Put the '#' back, then run again.";
+
     /// <summary>
     /// <see cref="CompileSettings"/>'s output read, or null: the defined symbols, the language version (<see cref="EffectiveLangVersion"/>),
     /// the nullable context and the compiled files.
@@ -2689,6 +2695,13 @@ internal static class FormatCommand
             return 1;
         }
 
+        // A '#' swapped for another character with no record of it (DirectiveMask): formatting would only make it worse.
+        if (DirectiveMask.Damaged(root) is { Count: > 0 } damaged)
+        {
+            error(DamagedLine(damaged));
+            return 1;
+        }
+
         var workspacePath = Path.GetFullPath(Path.Combine(root, workspace));
         if (IsSolutionFilter(workspacePath) && SolutionFilterError(workspacePath) is { } invalid)
         {
@@ -3401,33 +3414,118 @@ internal static class FormatCommand
     /// runs: each becomes a character the file doesn't have (a private-use one), which no parse reads as a directive and
     /// the formatter leaves alone (string content, or text of a branch left out), and comes back when this is disposed,
     /// also on Ctrl+C. Leaving the files out of the whitespace pass instead took two more 'dotnet format' runs (style and
-    /// analyzers, whose IDE0055 formats too) for each run that has them: CommunityToolkit 8 to 11.5 minutes.
+    /// analyzers, whose IDE0055 formats too) for each run that has them: CommunityToolkit 8 to 11.5 minutes. Before it
+    /// swaps anything it writes a record (<see cref="RecordFolder"/>), deleted once the files are back: a process killed
+    /// in between leaves it, and the next stylebro-migrate command puts the '#' back (<see cref="Recover"/>).
     /// </summary>
     internal sealed class DirectiveMask : IDisposable
     {
+        // A swapped '#' as the guard and the recovery recognize it: a private-use character where a directive's '#' would be.
+        private static readonly Regex MaskedLine = new(@"(?m)^[ \t]*[-][ \t]*(?:pragma|nullable|region|endregion|define|undef|error|warning|line|if|elif|else|endif)\b", RegexOptions.Compiled);
+
         private readonly List<(string Path, char Mark)> masked = [];
+        private readonly string? record;
 
-        public DirectiveMask(string root, IEnumerable<string> files)
+        public DirectiveMask(string root, IEnumerable<string> files, string? recordFolder = null)
         {
-            foreach (var file in files.Select(f => Path.Combine(root, f)))
+            var plan = new List<(string Path, string Text, List<int> Offsets, char Mark)>();
+            foreach (var file in files.Select(f => Path.GetFullPath(Path.Combine(root, f))))
             {
-                if (Read(file) is not { } text || DirectiveStringOffsets(text) is not { Count: > 0 } offsets
-                    || Enumerable.Range(0xE000, 0x1900).Select(c => (char)c).FirstOrDefault(c => !text.Contains(c, StringComparison.Ordinal)) is not (> '\0' and var mark))
+                if (Read(file) is { } text && DirectiveStringOffsets(text) is { Count: > 0 } offsets
+                    && Enumerable.Range(0xE000, 0x1900).Select(c => (char)c).FirstOrDefault(c => !text.Contains(c, StringComparison.Ordinal)) is > '\0' and var mark)
                 {
-                    continue;
+                    plan.Add((file, text, offsets, mark));
                 }
+            }
 
+            if (plan.Count == 0)
+            {
+                return;
+            }
+
+            // The record first: a kill right after the first swap must find it.
+            using var current = Process.GetCurrentProcess();
+            var folder = recordFolder ?? RecordFolder;
+            Directory.CreateDirectory(folder);
+            record = Path.Combine(folder, $"{Hash(root)}-{Environment.ProcessId}.json");
+            File.WriteAllText(record, JsonSerializer.Serialize(new MaskRecord(root, Environment.ProcessId, current.StartTime.ToUniversalTime().Ticks, plan.Select(p => new MaskedFile(p.Path, p.Mark, p.Offsets.Count)).ToList())));
+            foreach (var (file, text, offsets, mark) in plan)
+            {
                 var chars = text.ToCharArray();
                 offsets.ForEach(o => chars[o] = mark);
                 Write(file, new string(chars));
                 masked.Add((file, mark));
             }
 
-            if (masked.Count > 0)
+            Console.CancelKeyPress += OnCancel;
+            AppDomain.CurrentDomain.ProcessExit += OnExit;
+        }
+
+        /// <summary>Where the records of swapped files are: '%TEMP%/stylebro-mask'.</summary>
+        public static string RecordFolder => Path.Combine(Path.GetTempPath(), "stylebro-mask");
+
+        /// <summary>
+        /// Puts the '#' back in the files a killed run left swapped (a record whose process is gone), where each recorded
+        /// file still has exactly its swapped characters at directive positions; anything else is said and left alone.
+        /// The record is deleted either way. Says what it did through <paramref name="log"/>.
+        /// </summary>
+        public static void Recover(Action<string> log, string? recordFolder = null)
+        {
+            var folder = recordFolder ?? RecordFolder;
+            if (!Directory.Exists(folder))
             {
-                Console.CancelKeyPress += OnCancel;
-                AppDomain.CurrentDomain.ProcessExit += OnExit;
+                return;
             }
+
+            foreach (var file in Directory.EnumerateFiles(folder, "*.json"))
+            {
+                if (ReadRecord(file) is not { } leftover || IsRunning(leftover))
+                {
+                    continue;
+                }
+
+                foreach (var (path, mark, count) in leftover.Files)
+                {
+                    var found = Read(path) is { } text ? Masked(text, (char)mark) : null;
+                    if (found is { Count: 0 })
+                    {
+                        continue;
+                    }
+
+                    if (found?.Count == count)
+                    {
+                        var chars = Read(path)!.ToCharArray();
+                        found.ForEach(o => chars[o] = '#');
+                        Write(path, new string(chars));
+                        log($"Restored: {path}: {count} '#' an interrupted 'stylebro-migrate format' had swapped.");
+                    }
+                    else
+                    {
+                        log($"Not restored: {path}: an interrupted 'stylebro-migrate format' swapped the '#' of {count} line(s) for U+{mark:X4}, and the file has changed since. Put the '#' back by hand.");
+                    }
+                }
+
+                File.Delete(file);
+            }
+        }
+
+        /// <summary>
+        /// The C# files under <paramref name="root"/> with a swapped '#' no running 'format' recorded: a damaged file
+        /// (a record lost after a kill, or a hand edit) that formatting would only make worse.
+        /// </summary>
+        public static List<string> Damaged(string root, string? recordFolder = null)
+        {
+            var folder = recordFolder ?? RecordFolder;
+            var live = Directory.Exists(folder)
+                ? Directory.EnumerateFiles(folder, "*.json").Select(ReadRecord).Where(r => r is not null && IsRunning(r)).SelectMany(r => r!.Files.Select(f => f.Path)).ToHashSet(StringComparer.OrdinalIgnoreCase)
+                : [];
+            return StyleCopSetup.EnumerateFiles(root)
+                .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && !live.Contains(Path.GetFullPath(f)))
+                .AsParallel()
+                .Where(f => Read(f) is { } text && text.Any(c => c is >= '' and <= '') && MaskedLine.IsMatch(text))
+                .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+                .Order(StringComparer.Ordinal)
+                .ToList();
         }
 
         public void Dispose()
@@ -3445,8 +3543,63 @@ internal static class FormatCommand
                 }
 
                 masked.Clear();
+                if (record is not null)
+                {
+                    File.Delete(record);
+                }
             }
         }
+
+        // The offsets of mark in text, or null when one isn't where a directive's '#' would be.
+        private static List<int>? Masked(string text, char mark)
+        {
+            var offsets = new List<int>();
+            for (var i = text.IndexOf(mark, StringComparison.Ordinal); i >= 0; i = text.IndexOf(mark, i + 1))
+            {
+                var start = text.LastIndexOf('\n', Math.Max(i - 1, 0)) + 1;
+                if (i > 0 && text[start..i].Any(c => c is not (' ' or '\t')))
+                {
+                    return null;
+                }
+
+                offsets.Add(i);
+            }
+
+            return offsets;
+        }
+
+        // Whether the record's process still runs (same id and start time; an unreadable one counts as running).
+        private static bool IsRunning(MaskRecord record)
+        {
+            try
+            {
+                using var process = Process.GetProcessById(record.Pid);
+                return process.StartTime.ToUniversalTime().Ticks == record.Started;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+            catch (Exception e) when (e is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+            {
+                return true;
+            }
+        }
+
+        private static MaskRecord? ReadRecord(string file)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<MaskRecord>(File.ReadAllText(file));
+            }
+            catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException)
+            {
+                return null;
+            }
+        }
+
+        private static string Hash(string root) =>
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(root).ToUpperInvariant())))[..16];
 
         // UTF-8 only: other encodings are left alone. A BOM is read as a character, so writing the text back keeps it.
         // ponytail: a UTF-16 file isn't protected.
@@ -3467,6 +3620,12 @@ internal static class FormatCommand
         private void OnCancel(object? sender, ConsoleCancelEventArgs e) => Dispose();
 
         private void OnExit(object? sender, EventArgs e) => Dispose();
+
+        /// <summary>What <see cref="DirectiveMask"/> swapped, while it runs: the process (id, start time in UTC ticks) and the files.</summary>
+        internal sealed record MaskRecord(string Root, int Pid, long Started, List<MaskedFile> Files);
+
+        /// <summary>A swapped file: its full path, the character (as a number) and how many '#' it replaced.</summary>
+        internal sealed record MaskedFile(string Path, int Mark, int Count);
     }
 
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>
