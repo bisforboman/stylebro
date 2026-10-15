@@ -218,7 +218,7 @@ internal static class MemberOrdering
 
     /// <summary>A type member's sort key with the default options (null for an unknown member): init's overload count.</summary>
     public static MemberKey? GetDefaultKey(MemberDeclarationSyntax member, bool inInterface) =>
-        GetKey(member, GetAccess(member, inInterface, inNamespace: false), MemberOrderOptions.Default);
+        GetKey(member, GetAccess(member, inInterface, inNamespace: false), MemberOrderOptions.Default, member.Parent is RecordDeclarationSyntax);
 
     public static SyntaxToken GetNameToken(MemberDeclarationSyntax member)
     {
@@ -277,10 +277,11 @@ internal static class MemberOrdering
 
         var inInterface = container.IsKind(SyntaxKind.InterfaceDeclaration);
         var inNamespace = container is not TypeDeclarationSyntax;
+        var inRecord = container is RecordDeclarationSyntax;
         var keys = new MemberKey[members.Count];
         for (var i = 0; i < members.Count; i++)
         {
-            var key = GetKey(members[i], partialAccess?[i] ?? GetAccess(members[i], inInterface, inNamespace), options);
+            var key = GetKey(members[i], partialAccess?[i] ?? GetAccess(members[i], inInterface, inNamespace), options, inRecord);
             if (key is null)
             {
                 // Unknown member (e.g. incomplete code while typing): leave the type alone.
@@ -369,7 +370,11 @@ internal static class MemberOrdering
             : Enumerable.Range(0, keys.Length).OrderBy(i => segments[i]).ThenBy(i => keys[anchors[i]]).ThenBy(i => anchors[i]).ThenBy(i => keys[i]).ToArray();
     }
 
-    private static MemberKey? GetKey(MemberDeclarationSyntax member, MemberAccess access, MemberOrderOptions options)
+    /// <remarks>
+    /// In a record only kind and access count: StyleCop 1.2 checks SA1201/SA1202 in records but not SA1203/SA1204/SA1214
+    /// (parity set member-order-records-events), so constants, statics and readonly fields keep their place there.
+    /// </remarks>
+    private static MemberKey? GetKey(MemberDeclarationSyntax member, MemberAccess access, MemberOrderOptions options, bool inRecord)
     {
         var kind = GetKind(member);
         if (kind is null)
@@ -386,9 +391,9 @@ internal static class MemberOrdering
             access,
             kind.Value == MemberKind.Namespace ? -1 : options.KindRank(kind.Value),
             options.AccessRank(access),
-            constantRank: options.ConstantsFirst && !isConstant ? 1 : 0,
-            staticRank: options.StaticFirst && !isStatic ? 1 : 0,
-            readonlyRank: options.ReadonlyFirst && member is FieldDeclarationSyntax && !isReadonly ? 1 : 0);
+            constantRank: !inRecord && options.ConstantsFirst && !isConstant ? 1 : 0,
+            staticRank: !inRecord && options.StaticFirst && !isStatic ? 1 : 0,
+            readonlyRank: !inRecord && options.ReadonlyFirst && member is FieldDeclarationSyntax && !isReadonly ? 1 : 0);
     }
 
     private static MemberKind? GetKind(MemberDeclarationSyntax member)
@@ -420,6 +425,7 @@ internal static class MemberOrdering
     {
         // A static constructor has no access modifier. StyleCop treats it as public, so it comes before every instance
         // constructor (public ones too, since static comes first). Treating it as private moved it below them.
+        // Explicit implementations are public too, except events: StyleCop's SA1202 leaves them out (no modifier: private).
         if (IsExplicitInterfaceImplementation(member)
             || (member is ConstructorDeclarationSyntax && member.Modifiers.Any(SyntaxKind.StaticKeyword)))
         {
@@ -473,7 +479,6 @@ internal static class MemberOrdering
         {
             MethodDeclarationSyntax method => method.ExplicitInterfaceSpecifier is not null,
             PropertyDeclarationSyntax property => property.ExplicitInterfaceSpecifier is not null,
-            EventDeclarationSyntax evt => evt.ExplicitInterfaceSpecifier is not null,
             IndexerDeclarationSyntax indexer => indexer.ExplicitInterfaceSpecifier is not null,
             _ => false,
         };

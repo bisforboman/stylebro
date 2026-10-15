@@ -260,6 +260,49 @@ public class FixOrderTests
         "BRO1514",
         "BRO1519");
 
+    // jint (BRO1509 off): BRO1508 expanded the foreach block alone, assuming the method body was expanded too, and left
+    // 'return sum; }' behind its '}'; the second run put two statements on one line. A block inside a single-line block
+    // that stays is left alone.
+    [Fact]
+    public async Task SingleLineBlocks_InsideABlockWhoseRuleIsOff_StayAsTheyAre()
+    {
+        const string Source = """
+            using System.Collections.Generic;
+
+            public class ListTaker
+            {
+                public int SumList(List<int> values) { var sum = 0; foreach (var v in values) { sum += v; } return sum; }
+
+                public void M(bool x) { if (x) { M(!x); } }
+            }
+            """;
+        await AssertConvergesInEveryOrderWithConfigAsync(Source, "dotnet_diagnostic.BRO1509.severity = none\n", "BRO1508", "BRO1514", "BRO1519");
+        await StyleBro.Tests.Verifier<StyleBro.Analyzers.Layout.SingleLineBlocksAnalyzer, StyleBro.CodeFixes.Layout.SingleLineBlocksCodeFixProvider>.VerifyNoDiagnosticsAsync(Source, "dotnet_diagnostic.BRO1509.severity = none");
+    }
+
+    // jint: a comment right below a '}' with a blank line under it gave two results across identical runs.
+    [Fact]
+    public Task CommentBelowABlock_WithABlankLineUnderIt() => AssertConvergesInEveryOrderAsync(
+        """
+        public static class Fraction
+        {
+            public static string Format(int precision, int value)
+            {
+                var sb = new System.Text.StringBuilder();
+                if (precision > 0)
+                {
+                    sb.Append(value);
+                }
+                // precision == 0: no fractional part
+
+                return sb.ToString();
+            }
+        }
+        """,
+        "BRO1504",
+        "BRO1506",
+        "BRO1519");
+
     [Fact]
     public Task SingleLineBlocks_InsideOtherSingleLineBlocks() => AssertConvergesInEveryOrderAsync(
         """

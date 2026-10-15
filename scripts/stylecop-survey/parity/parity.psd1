@@ -28,6 +28,19 @@
             )
         }
         @{
+            Name     = 'member-order-records-events'
+            Map      = @('SA1201=BRO1001', 'SA1202=BRO1001', 'SA1203=BRO1001', 'SA1204=BRO1001', 'SA1214=BRO1001')
+            # Explicit event implementations count as private (SA1202 makes only methods, properties and indexers public);
+            # records are checked for kind and access only (StyleCop's SA1203/SA1204/SA1214 skip them). Output identical.
+            Expected = @(
+                # BRO1001 reports an event field at its name, StyleCop at its first modifier.
+                'only StyleBro: BRO1001 Cases.cs(30,35)'
+                'only StyleCop: BRO1001 Cases.cs(30,9)'
+                # BRO1001 reports once per type (the first out-of-place member); the fix sorts all of it.
+                'only StyleCop: BRO1001 Cases.cs(38,22)'
+            )
+        }
+        @{
             Name     = 'blank-line-runs'
             Map      = @('SA1507=BRO1517', 'SA1508=BRO1518', 'SA1513=BRO1519')
             Expected = @(
@@ -205,6 +218,8 @@
                 'StyleCop output only: Lists.cs: []'
                 'StyleCop output only: Lists.cs: []'
                 'StyleCop output only: Lists.cs: []'
+                # A comment between two parts of one expression, here switch expression arms, needs none either (trial 23).
+                'only StyleCop: BRO1504 More.cs(29,17)'
             )
         }
         @{
@@ -262,6 +277,11 @@
                 # BRO1002: a whitespace-only comment becomes '//'; StyleCop leaves a trailing space.
                 'StyleBro output only: CommentEdges.cs: [        //]'
                 'StyleCop output only: CommentEdges.cs: [        // ]'
+                # BRO1002 keeps tabs after '//' (commented-out code keeps its layout); StyleCop's fix makes them one space.
+                'StyleBro output only: Comments.cs: [        // <tab>tab]'
+                'StyleCop output only: Comments.cs: [        // tab]'
+                'StyleBro output only: CommentEdges.cs: [        // <tab><tab>x]'
+                'StyleCop output only: CommentEdges.cs: [        // x]'
             )
         }
         @{

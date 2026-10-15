@@ -51,7 +51,8 @@ public sealed class SingleLineBlocksAnalyzer : DiagnosticAnalyzer
 
         var text = node.SyntaxTree.GetText(c.CancellationToken);
         var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(node.SyntaxTree);
-        if (!SingleLineBlocks.IsReported(node, text, options))
+        var tree = node.SyntaxTree;
+        if (!SingleLineBlocks.IsReported(node, text, options, id => Severities.IsOn(c.Compilation.Options, tree, id, c.CancellationToken)))
         {
             return;
         }

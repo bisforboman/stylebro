@@ -73,6 +73,21 @@ public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
                 var above = text.Lines[line.LineNumber - 1];
                 var lineBreak = text.ToString(TextSpan.FromBounds(above.End, above.EndIncludingLineBreak));
                 insertions[line.Start] = new TextChange(new TextSpan(line.Start, 0), lineBreak.Length > 0 ? lineBreak : "\n");
+
+                // With the blank line above, a run with one below stands on its own, which BRO1506 leaves: its blank line
+                // below goes in this edit, as BRO1506's fix would have removed it before this one (jint: '}', '// note',
+                // blank line, 'return' gave two results).
+                if (Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.BlankLineAfterComment, cancellationToken))
+                {
+                    var last = line;
+                    while (last.LineNumber + 1 < text.Lines.Count && text.ToString(text.Lines[last.LineNumber + 1].Span).TrimStart().StartsWith("//", System.StringComparison.Ordinal))
+                    {
+                        last = text.Lines[last.LineNumber + 1];
+                    }
+
+                    var lastComment = root.FindTrivia(last.Start + (last.Span.Length - text.ToString(last.Span).TrimStart().Length));
+                    blankLines.AddRange(TrailingBlankLines.GetBlankLinesAfterComment(lastComment, text, TrailingBlankLines.RemovesStandalone(configOptions)));
+                }
             }
         }
 

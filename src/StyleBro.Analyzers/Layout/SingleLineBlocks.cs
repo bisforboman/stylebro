@@ -69,10 +69,14 @@ internal static class SingleLineBlocks
         }
     }
 
-    /// <summary>Whether the node is on a single line and the fix can expand it (BRO1508/BRO1509 report exactly these).</summary>
-    public static bool IsReported(SyntaxNode node, SourceText text, AnalyzerConfigOptions options)
+    /// <summary>
+    /// Whether the node is on a single line and the fix can expand it (BRO1508/BRO1509 report exactly these). With
+    /// <paramref name="isOn"/>, also not inside a single-line block that stays (see <see cref="IsInsideKeptBlock"/>).
+    /// </summary>
+    public static bool IsReported(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, Func<string, bool>? isOn = null)
     {
-        return GetChanges(node, text, options) is not null;
+        return GetOwnChanges(node, text, options, trailingComma: true, isOn: null) is not null
+            && (isOn is null || !IsInsideKeptBlock(node, text, options, isOn));
     }
 
     /// <summary>
@@ -89,13 +93,14 @@ internal static class SingleLineBlocks
             return changes;
         }
 
-        // The edits assume every enclosing single-line block is expanded too: expand those (when their rule is on) in the
-        // same edit. Otherwise BRO1508 expanding an inner block first leaves 'void M() { if (x)' on a line, which no rule
-        // reports any more (the method body's braces are on different lines then).
+        // The edits assume every enclosing single-line block is expanded too: expand those in the same edit. Otherwise
+        // BRO1508 expanding an inner block first leaves 'void M() { if (x)' on a line, which no rule reports any more (the
+        // method body's braces are on different lines then). BRO1508/BRO1509 don't report a block inside one whose rule is
+        // off (IsReported); BRO1001's fix, expanding a one-line type for BRO1505, expands the type around it too, which
+        // could only stay on its line with broken indentation inside.
         foreach (var ancestor in node.Ancestors())
         {
-            if (GetBraces(ancestor) is { } braces
-                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
+            if (GetBraces(ancestor) is not null
                 && GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
             {
                 changes.AddRange(enclosing);
@@ -185,6 +190,17 @@ internal static class SingleLineBlocks
 
         return "\n";
     }
+
+    /// <summary>
+    /// Whether the node sits in a single-line block whose rule is off, so it stays on its line: the node's edits assume
+    /// that block is expanded too (<see cref="StartIndent"/>). Expanding the node alone in <c>int M() { var s = 0; foreach
+    /// (var v in x) { s += v; } return s; }</c> (BRO1509 off, jint) left <c>return s; }</c> behind the inner '}' and
+    /// needed a second run, which put two statements on one line.
+    /// </summary>
+    private static bool IsInsideKeptBlock(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn) =>
+        node.Ancestors().Any(ancestor => GetBraces(ancestor) is { } braces
+            && !isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
+            && GetOwnChanges(ancestor, text, options, trailingComma: true, isOn: null) is not null);
 
     /// <summary>
     /// Whether a comment follows the block's '}' on its line: <c>catch (SocketException) { } // slopwatch-ignore: SW003 ...</c>

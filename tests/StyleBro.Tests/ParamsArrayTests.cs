@@ -287,4 +287,41 @@ public class ParamsArrayTests
             public static int M(object o, string s) => TakeAll(o!) + TakeAll(((s)));
         }
         """);
+
+    // Trial 23: in a netstandard2.0;net8.0;net10.0 project, net8.0's fix expanded string.Join/Task.WhenAll/string.Format
+    // calls in the shared file, which net10.0 then bound to .NET 9's 'params ReadOnlySpan' overloads; the same for a
+    // method of the project's own with such an overload behind '#if'.
+    [Theory]
+    [InlineData(null, true, true)]
+    [InlineData("net10.0", true, true)]
+    [InlineData("netstandard2.0,net8.0", true, false)]
+    [InlineData("net9.0,net10.0", true, false)]
+    [InlineData("net8.0,net10.0", false, false)]
+    [InlineData("netstandard2.0,net8.0,net10.0", false, false)]
+    public async Task MultiTargeted_CallsAnotherFrameworkMayBindElsewhere_AreNotReported(string? frameworks, bool library, bool own)
+    {
+        static string Arg(bool reported, bool fixedCode, string array, string elements) =>
+            !reported ? array : fixedCode ? elements : "{|BRO1151:" + array + "|}";
+        string Code(bool fixedCode) => $$"""
+            public static class Joiner
+            {
+                public static string Csv(string a, string b) => string.Join(",", {{Arg(library, fixedCode, "new[] { a, b }", "a, b")}});
+
+                public static string Own(string a) => Fmt({{Arg(own, fixedCode, "new[] { a, a }", "a, a")}});
+
+                private static string Fmt(params string[] parts) => string.Concat(parts);
+            #if NET9_0_OR_GREATER
+                private static string Fmt(params System.ReadOnlySpan<string> parts) => string.Concat(parts);
+            #endif
+            }
+            """;
+        var test = new Microsoft.CodeAnalysis.CSharp.Testing.CSharpCodeFixTest<StyleBro.Analyzers.Readability.ParamsArrayAnalyzer, StyleBro.CodeFixes.Readability.ParamsArrayCodeFixProvider, Microsoft.CodeAnalysis.Testing.DefaultVerifier>
+        {
+            TestCode = Code(false),
+            FixedCode = Code(true),
+        };
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", "is_global = true\n" + (frameworks is null ? string.Empty : $"build_property.StyleBroTargetFrameworks = {frameworks}\n")));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\ndotnet_diagnostic.BRO1151.severity = warning\n"));
+        await test.RunAsync();
+    }
 }

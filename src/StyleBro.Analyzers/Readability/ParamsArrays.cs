@@ -74,6 +74,7 @@ internal static class ParamsArrays
             || model.GetSymbolInfo(call, cancellationToken).Symbol is not IMethodSymbol { Parameters.Length: > 0 } method
             || method.Parameters[method.Parameters.Length - 1] is not { IsParams: true } parameter
             || (parameter.Type is not IArrayTypeSymbol && !Modernize.MultiTargetSuppressor.AllHave(options, ParamsCollections))
+            || MayBindElsewhere(method, options, cancellationToken)
             || list.Arguments.Count != method.Parameters.Length
             || !SymbolEqualityComparer.Default.Equals(GetType(model.GetTypeInfo(array, cancellationToken), array), parameter.Type)
             || elements.Any(e => IsTargetTyped(e, model, cancellationToken)))
@@ -88,6 +89,40 @@ internal static class ParamsArrays
             && BindsExpanded(bound.Model, bound.Node, list.Arguments.Count - 1, GetElementType(parameter.Type), cancellationToken)
                 ? changes
                 : null;
+    }
+
+    // Multi-targeted: the fix from one framework's findings goes into the file every framework compiles, and another
+    // framework can bind the elements to an overload this compilation doesn't see (trial 23: net8.0's expansions of
+    // string.Join, Task.WhenAll and string.Format bound to .NET 9's 'params ReadOnlySpan' overloads on net10.0). So with
+    // frameworks before and from .NET 9, a method from a library isn't expanded; and a method of the solution's own isn't
+    // when its type has '#if' in it (an overload behind it).
+    private static bool MayBindElsewhere(IMethodSymbol method, AnalyzerConfigOptions options, CancellationToken cancellationToken)
+    {
+        var frameworks = Modernize.MultiTargetSuppressor.GetFrameworks(options);
+        if (frameworks.Count < 2)
+        {
+            return false;
+        }
+
+        var declarations = method.ContainingType.OriginalDefinition.DeclaringSyntaxReferences;
+        return declarations.IsEmpty
+            ? frameworks.Any(f => Modernize.MultiTargetSuppressor.Has(f, ParamsCollections)) && !Modernize.MultiTargetSuppressor.AllHave(options, ParamsCollections)
+            : declarations.Any(d => HasConditionalDirective(d.GetSyntax(cancellationToken)));
+    }
+
+    private static bool HasConditionalDirective(SyntaxNode node)
+    {
+        for (var directive = node.ContainsDirectives ? node.GetFirstDirective() : null;
+            directive is not null && directive.SpanStart < node.FullSpan.End;
+            directive = directive.GetNextDirective())
+        {
+            if (directive.IsKind(SyntaxKind.IfDirectiveTrivia))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // The element type of a params array or a params collection (C# 13: 'params ReadOnlySpan<T>', 'params List<T>'; a

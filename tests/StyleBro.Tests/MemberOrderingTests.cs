@@ -1225,6 +1225,110 @@ public class MemberOrderingTests
         """);
 
     [Fact]
+    public Task ExplicitEventImplementation_CountsAsPrivate_LikeStyleCop() => VerifyNoDiagnosticsAsync("""
+        using System;
+
+        interface I
+        {
+            event EventHandler E;
+
+            void M();
+        }
+
+        class C : I
+        {
+            private static event EventHandler S;
+
+            event EventHandler I.E { add { } remove { } }
+
+            private event EventHandler P;
+
+            void I.M() { }
+        }
+        """);
+
+    [Fact]
+    public Task ExplicitMethodImplementation_StaysPublic() => VerifyFixAsync(
+        """
+        interface I
+        {
+            void M();
+        }
+
+        class C : I
+        {
+            private void P() { }
+
+            void I.{|BRO1001:M|}() { }
+        }
+        """,
+        """
+        interface I
+        {
+            void M();
+        }
+
+        class C : I
+        {
+            void I.M() { }
+
+            private void P() { }
+        }
+        """);
+
+    [Fact]
+    public Task Record_StaticConstantAndReadonlyNotChecked_LikeStyleCop() => VerifyNoDiagnosticsAsync("""
+        record struct S(int X)
+        {
+            public void Instance() { }
+
+            public static void Create() { }
+        }
+
+        record R(string Name)
+        {
+            private static int s;
+
+            private const int C = 1;
+
+            private int a;
+
+            private readonly int b;
+
+            internal void Instance() { }
+
+            internal static R Create() => new("x");
+        }
+        """);
+
+    [Fact]
+    public Task Record_AccessAndKindStillChecked() => VerifyFixAsync(
+        """
+        record R(string Name)
+        {
+            internal void Instance() { }
+
+            private void P() { }
+
+            internal static void {|BRO1001:Create|}() { }
+
+            public int Count { get; set; }
+        }
+        """,
+        """
+        record R(string Name)
+        {
+            public int Count { get; set; }
+
+            internal void Instance() { }
+
+            internal static void Create() { }
+
+            private void P() { }
+        }
+        """);
+
+    [Fact]
     public Task StaticConstructorFirst_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C
         {
@@ -1340,6 +1444,27 @@ public class MemberOrderingTests
             private int y;
 
             public void B() { }
+        }
+        """,
+        "dotnet_diagnostic.BRO1509.severity = none");
+
+    // The type around the one-line type is expanded with it: left on its line, the inner type's indentation was broken.
+    [Fact]
+    public Task NestedOneLineType_IsExpandedWithTheTypeAroundIt_WhenBro1505ReportsIt() => VerifyFixAsync(
+        """
+        public class O { public class C { public void B() { } private int {|BRO1001:x|}; private int y; } }
+        """,
+        """
+        public class O
+        {
+            public class C
+            {
+                private int x;
+
+                private int y;
+
+                public void B() { }
+            }
         }
         """,
         "dotnet_diagnostic.BRO1509.severity = none");
