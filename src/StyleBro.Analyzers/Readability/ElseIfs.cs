@@ -244,7 +244,7 @@ internal static class ElseIfs
             shift = inner.SpanStart - ifLine.Start - elseIndent;
         }
 
-        return shift < 0 ? null : new Part(elseClause, inner, close, shift, ifLine.LineNumber + 1, text.Lines.GetLineFromPosition(inner.Span.End).LineNumber);
+        return new Part(elseClause, inner, close, shift, ifLine.LineNumber + 1, text.Lines.GetLineFromPosition(inner.Span.End).LineNumber);
     }
 
     private sealed class Part

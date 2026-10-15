@@ -282,6 +282,40 @@ public class ElseIfTests
         "dotnet_diagnostic.BRO1143.severity = warning");
 
     [Fact]
+    public Task NestedIfLeftOfItsElse_IsJoinedWithTheOuterOne() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                if (x == 1)
+                    M(1);
+                {|BRO1139:else|}
+                        if (x == 10)
+                            M(10);
+                        {|BRO1139:else|}
+                      if (x == 11)
+                          M(11);
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(int x)
+            {
+                if (x == 1)
+                    M(1);
+                else if (x == 10)
+                    M(10);
+                else if (x == 11)
+                    M(11);
+            }
+        }
+        """,
+        NoBraceRules);
+
+    [Fact]
     public Task ElsesThatCantBeJoined_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
         """
         public class C
