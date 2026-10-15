@@ -15,6 +15,6 @@ build failed with CS0103 while verify said clean. What should format do?
 
 ## Decision
 
-**Choice 1** (owner's choice 2026-10-15). "Built" means the output (TargetPath) exists and is newer than the project
-folder's files. The build runs without analyzers and warnings as errors (the generator's own code isn't formatted yet);
+**Choice 1** (owner's choice 2026-10-15). "Built" means the output (TargetPath) exists (not "up to date": format's own fixes change the generator's code, and
+rebuilding it between runs changed the next run's results in Mediator). The build runs without analyzers and warnings as errors (the generator's own code isn't formatted yet);
 a failed build is said and the runs go on without it.

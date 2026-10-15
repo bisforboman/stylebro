@@ -173,7 +173,7 @@ internal static class FormatCommand
     /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
     private const string GeneratorsHeader = "Generators:";
 
-    /// <summary>The source generator projects built or found up to date in this process (<see cref="BuildGenerators"/>).</summary>
+    /// <summary>The source generator projects built or found built in this process (<see cref="BuildGenerators"/>).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
@@ -2557,7 +2557,7 @@ internal static class FormatCommand
 
     /// <summary>
     /// Builds the projects the code takes as analyzers ('OutputItemType="Analyzer"': in-solution source generators) when
-    /// their output is missing or older than their files, once per process, saying so: without it 'dotnet format' runs
+    /// their output is missing, once per process, saying so: without it 'dotnet format' runs
     /// without the generator, its generated code is missing, and a rename of a member that code uses broke the build
     /// (trial 23: CS0103 after a "clean" format and verify, owner's choice "Build generators first"). A failed build is said
     /// and the runs go on (as before: without the generated code).
@@ -2608,7 +2608,7 @@ internal static class FormatCommand
         }
     }
 
-    /// <summary>Whether a project's output (TargetPath) exists and is newer than its files (the project folder's, not bin/obj).</summary>
+    /// <summary>Whether a project's output (TargetPath) exists.</summary>
     internal static bool IsBuilt(string project)
     {
         string target;
@@ -2621,9 +2621,9 @@ internal static class FormatCommand
             return false;
         }
 
-        // ponytail: the project folder's files only; a changed shared props or linked file doesn't count.
-        return target.Length > 0 && File.Exists(target)
-            && StyleCopSetup.EnumerateFiles(Path.GetDirectoryName(project)!).All(f => File.GetLastWriteTimeUtc(f) <= File.GetLastWriteTimeUtc(target));
+        // Built at all, not up to date: format's own fixes change the generator's code, and rebuilding it for the next run
+        // changed that run's results (Mediator: a third run in the real-world check).
+        return target.Length > 0 && File.Exists(target);
     }
 
     /// <summary>
