@@ -189,6 +189,57 @@ public class FieldNamingTests
         }
         """);
 
+    // akka.net: a base's private member with the new name can't clash (the build, which sees the base through a reference
+    // assembly without private members, reported it; 'dotnet format', which loads the base's source, didn't). A type nested
+    // in the base sees it, so that one keeps its name.
+    [Fact]
+    public Task PrivateMemberOfABase_IsNoClash() => VerifyFixAsync(
+        """
+        public class Base
+        {
+            private readonly object _log = new object();
+
+            public override string ToString() => _log.ToString()!;
+
+            public class Nested : Base
+            {
+                private readonly object Log = new object();
+
+                public object Get() => Log;
+            }
+        }
+
+        public class Derived : Base
+        {
+            private readonly object {|BRO1303:Log|} = new object();
+
+            public object Get() => Log;
+        }
+        """,
+        """
+        public class Base
+        {
+            private readonly object _log = new object();
+
+            public override string ToString() => _log.ToString()!;
+
+            public class Nested : Base
+            {
+                private readonly object Log = new object();
+
+                public object Get() => Log;
+            }
+        }
+
+        public class Derived : Base
+        {
+            private readonly object _log = new object();
+
+            public object Get() => _log;
+        }
+        """,
+        editorConfig: Underscore);
+
     [Fact]
     public Task CamelCase_RenamesAndQualifiesHiddenReferences() => VerifyFixAsync(
         """

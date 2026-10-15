@@ -21,7 +21,7 @@ public class SingleLineBlocksTests
                 do {|BRO1508:{|} b = false; } while (b);
                 try {|BRO1508:{|} b = true; } catch {|BRO1508:{|} b = false; } finally {|BRO1508:{|} b = true; }
                 {|BRO1508:{|} b = true; }
-                if (b) {|BRO1508:{|} return; } // trailing
+                if (b) {|BRO1508:{|} return; }
             }
         }
         """,
@@ -85,8 +85,46 @@ public class SingleLineBlocksTests
                 if (b)
                 {
                     return;
-                } // trailing
+                }
             }
+        }
+        """);
+
+    // akka.net: expanded, the comment after '}' ended up on the '}' line, and slopwatch's line-based suppression no longer
+    // matched the empty catch (0 -> 30 errors). The block stays, and so does a one-line block inside it.
+    [Fact]
+    public Task BlocksWithACommentAfterTheirBrace_StayOnTheirLine() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public void M(IDisposable socket)
+            {
+                try {|BRO1508:{|} socket.Dispose(); }
+                catch (ObjectDisposedException) { } // slopwatch-ignore: SW003 socket may already be closed
+                if (socket is null) { if (socket is null) { return; } } // keep
+            }
+
+            public void Reset() { } // NOSONAR
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            public void M(IDisposable socket)
+            {
+                try
+                {
+                    socket.Dispose();
+                }
+                catch (ObjectDisposedException) { } // slopwatch-ignore: SW003 socket may already be closed
+                if (socket is null) { if (socket is null) { return; } } // keep
+            }
+
+            public void Reset() { } // NOSONAR
         }
         """);
 

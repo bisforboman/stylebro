@@ -43,6 +43,46 @@ public class FixOrderTests
         "BRO1515",
         "BRO1516");
 
+    // akka.net: a comment below a ';' with a blank line under it describes the code above (BRO1504 leaves it); once
+    // BRO1515's braces put a '}' there, BRO1504 wants the blank line, so the wrap adds it. BRO1602's '//' below a '}' too.
+    [Fact]
+    public Task Braces_AndTripleSlash_GiveBRO1504sBlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public int Ticks { get; }
+
+            public C(int ticks)
+            {
+                if (ticks > 1073741824)
+                    throw new ArgumentOutOfRangeException(nameof(ticks), ticks,
+                        "Cannot be greater than 2^30.");
+                // ReSharper restore NotResolvedInText
+
+                Ticks = ticks;
+            }
+
+            public string Join(bool windows)
+            {
+                if (windows)
+                {
+                    return "w";
+                }
+                /// On Unix: the rules are ignored.
+                else
+                {
+                    return "u";
+                }
+            }
+        }
+        """,
+        "BRO1504",
+        "BRO1515",
+        "BRO1519",
+        "BRO1602");
+
     // sourcegit: with when_multiline, BRO1515 wraps the multi-line 'else if' and makes the single-line 'if' BRO1516's,
     // which used to need a second run.
     [Fact]

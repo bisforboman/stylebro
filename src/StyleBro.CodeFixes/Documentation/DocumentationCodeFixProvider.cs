@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Documentation;
@@ -187,10 +189,38 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             }
             else if (misplaced.FirstOrDefault(t => DocumentationComments.GetReportSpan(t, text) == span) is { } comment && comment != default)
             {
-                changes.AddRange(DocumentationComments.GetSlashChanges(comment, text));
+                var slashes = DocumentationComments.GetSlashChanges(comment, text).ToList();
+                changes.AddRange(slashes);
+                if (GetBlankLineAbove(document, root, text, comment, slashes, options, cancellationToken) is { } blankLine)
+                {
+                    changes.Add(blankLine);
+                }
             }
         }
 
         return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+    }
+
+    /// <summary>
+    /// BRO1504's blank line above the comment once it's a '//' comment, when that rule is on and wants it there
+    /// (<c>}</c> + <c>/// note</c> + <see langword="else"/>, akka.net): otherwise 'dotnet format' needs a second run. Judged on the text
+    /// with the slashes replaced, so it's exactly BRO1504's answer.
+    /// </summary>
+    private static TextChange? GetBlankLineAbove(Document document, SyntaxNode root, SourceText text, SyntaxTrivia comment, List<TextChange> slashes, AnalyzerConfigOptions options, CancellationToken cancellationToken)
+    {
+        var tree = root.SyntaxTree;
+        bool IsOn(string id) => Severities.IsOn(document.Project.CompilationOptions, tree, id, cancellationToken);
+        if (slashes.Count == 0 || !IsOn(DiagnosticIds.BlankLineBeforeComment))
+        {
+            return null;
+        }
+
+        var start = comment.FullSpan.Start;
+        var newText = text.WithChanges(slashes);
+        var newRoot = CSharpSyntaxTree.ParseText(newText, (CSharpParseOptions)tree.Options, cancellationToken: cancellationToken).GetRoot(cancellationToken);
+        var converted = newRoot.FindTrivia(start);
+        return BlankLines.NeedsBlankLineAbove(converted, newText, IsOn, BlankLines.GetExemptPrefixes(options), SwitchSectionBlankLines.ReadMode(options))
+            ? new TextChange(new TextSpan(text.Lines.GetLineFromPosition(start).Start, 0), SingleLineBlocks.LineBreak(text, start))
+            : null;
     }
 }

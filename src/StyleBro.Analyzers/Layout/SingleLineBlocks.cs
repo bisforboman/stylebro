@@ -186,10 +186,20 @@ internal static class SingleLineBlocks
         return "\n";
     }
 
+    /// <summary>
+    /// Whether a comment follows the block's '}' on its line: <c>catch (SocketException) { } // slopwatch-ignore: SW003 ...</c>
+    /// (akka.net). Expanded, the comment would end up on the '}' line, away from the statement a line-based suppression
+    /// marks, so the block is left on its line. A one-line block inside it stays too: its indentation comes from the
+    /// enclosing block's expansion (<see cref="StartIndent"/>).
+    /// </summary>
+    private static bool HasTrailingComment(SyntaxToken close) =>
+        close.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia));
+
     private static List<TextChange>? GetOwnChanges(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, bool trailingComma, Func<string, bool>? isOn)
     {
         if (node.ContainsDiagnostics || GetBraces(node) is not { } braces || braces.Open.IsMissing || braces.Close.IsMissing
-            || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart))
+            || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart)
+            || HasTrailingComment(braces.Close))
         {
             return null;
         }

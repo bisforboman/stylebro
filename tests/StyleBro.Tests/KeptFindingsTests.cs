@@ -680,6 +680,23 @@ public class KeptFindingsTests
         return await CamelCaseRenamer.GetKeptReasonAsync(solution, document, diagnostic, CancellationToken.None);
     }
 
+    // akka.net: an analyzer ProjectReference that isn't built yet is an unresolved analyzer reference, and the SDK's Roslyn
+    // throws on it in every SymbolFinder call. The renames are computed without it and applied to the solution as it was
+    // ('dotnet format' can't apply a change to a project's analyzer references).
+    [Fact]
+    public async Task UnresolvedAnalyzerReference_RenamesAndStaysInTheSolution()
+    {
+        var (solution, document, diagnostic) = await FindAsync("BRO1309", ("C.cs", "internal class C\n{\n    private void doWork() { }\n\n    public void Run() => doWork();\n}\n"));
+        var unresolved = new UnresolvedAnalyzerReference(Path.Combine(Path.GetTempPath(), "missing", "Gen.dll"));
+        solution = solution.AddAnalyzerReference(document.Project.Id, unresolved);
+
+        var renamed = await CamelCaseRenamer.RenameAsync(solution, new[] { (solution.GetDocument(document.Id)!, diagnostic) }, CancellationToken.None);
+
+        Assert.Contains(unresolved, renamed.GetProject(document.Project.Id)!.AnalyzerReferences);
+        Assert.Contains("public void Run() => DoWork();", (await renamed.GetDocument(document.Id)!.GetTextAsync()).ToString(), StringComparison.Ordinal);
+        Assert.Null(await CamelCaseRenamer.GetKeptReasonAsync(solution, solution.GetDocument(document.Id)!, diagnostic, CancellationToken.None));
+    }
+
     /// <summary>A one-project solution of the files, and the first diagnostic of <paramref name="id"/> in the first file.</summary>
     private static async Task<(Solution Solution, Document Document, Diagnostic Diagnostic)> FindAsync(string id, params (string Path, string Text)[] files)
     {
