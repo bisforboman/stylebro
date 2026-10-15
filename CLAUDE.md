@@ -1424,8 +1424,8 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   other entries stay unless their line is gone; written before `SaveKept`, whose key hashes `.baseline`); Visual Basic
   left alone (`VisualBasicProjects`: no plain whole run, `--exclude **/*.vb`, `UntouchedFiles` puts back a .vb a fix
   reached, VB identifiers in the names file under `<path> (Visual Basic, left alone)` so a loaded VB project still counts
-  as outside); generators built first (`BuildGenerators`: `RunAnalyzers=false`, no TWAE; once per process; up to date =
-  TargetPath newer than the project folder's files; also baseline; verify/preview copies get outputs stamped now).
+  as outside); generators built first (`BuildGenerators`: `RunAnalyzers=false`, no TWAE; once per process; built =
+  TargetPath exists (a rebuild between runs, after format changed the generator's code, made Mediator need a 3rd run); also baseline; verify/preview copies get outputs stamped now).
 - `DirectiveStringOffsets`: every subset of the tested symbols (<= 8, else singles and all-but-one); any directive kind.
   The mask record lists the `dotnet format` children (`Track`): Recover waits for them, `Busy` stops another run.
 - Speed: `Separate` keys a shared file by the symbols IT tests (`CompileView.Key([file])`; jint net10.0: 4 parts -> 3).
