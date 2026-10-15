@@ -153,6 +153,8 @@ internal static class Program
             return 1;
         }
 
+        string? noWorkspace = null;
+        root = RepositoryFolder(root, ref noWorkspace);
         JsonReport.Set("path", root);
         JsonReport.Set("write", write);
         if (!ReadSonar(root, profile, out var sonar))
@@ -222,7 +224,7 @@ internal static class Program
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored)}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var suppressions = RewriteSuppressions(root, Suppressions.WithoutOff(Suppressions.WithSonar(Suppressions.WithStyleSharp(result.Replacements, setup), sonar), plan.Values.SelectMany(blocks => blocks).SelectMany(b => b.Lines)), write);
+        var suppressions = RewriteSuppressions(root, Suppressions.WithoutOff(Suppressions.WithSonar(Suppressions.WithStyleSharp(result.Replacements, setup), sonar), plan.Values.SelectMany(blocks => blocks).SelectMany(b => b.Lines)), write, sonar is null ? setup.Folders : null);
         Console.WriteLine(suppressions.Added == 0
             ? "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
@@ -242,7 +244,7 @@ internal static class Program
         foreach (var (file, sections) in plan)
         {
             var path = Path.Combine(root, file);
-            var block = Migration.Render(sections);
+            var block = Migration.Render(sections, setup.StyleSharp is { WithStyleCop: false } ? "StyleSharp" : "StyleCop");
             JsonReport.AddSettings(file, block);
             if (write)
             {
@@ -292,7 +294,7 @@ internal static class Program
         // settings are written, so the preset stays (vs-validation's tests).
         foreach (var props in Migration.PropsFiles(root, setup.Folders))
         {
-            var disabled = Migration.DisablePreset(File.Exists(props) ? File.ReadAllText(props) : null);
+            var disabled = Migration.DisablePreset(File.Exists(props) ? File.ReadAllText(props) : null, importParent: !File.Exists(props) && Migration.HasParentProps(props));
             var name = Path.GetRelativePath(root, props).Replace('\\', '/');
             if (disabled is null)
             {
@@ -338,6 +340,51 @@ internal static class Program
     internal static string LeftoverLine(IReadOnlyCollection<string> evidence) => evidence.Count == 0
         ? "StyleCop.Analyzers (or StyleSharp.Analyzers) isn't referenced by any project, and there are no StyleCop settings: StyleCop doesn't run here."
         : $"StyleCop.Analyzers (or StyleSharp.Analyzers) isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers ({string.Join(", ", evidence)}).";
+
+    /// <summary>
+    /// The folder init and the migration work on (trial 22): the given one, or the git repository's root when the build reaches
+    /// past the folder: a Directory.Build.props (one the folder's own doesn't shadow), Directory.Packages.props, .editorconfig
+    /// (one the folder's 'root = true' doesn't stop) or .globalconfig above it, or a solution in it that lists projects outside
+    /// it. From src/, init wrote a src/Directory.Build.props that shadowed the root's (every project lost StyleBro,
+    /// TreatWarningsAsErrors and Nullable); from build/, where only the solution was, it wrote settings no project read.
+    /// <paramref name="workspace"/> (relative to the folder) is made relative to the result.
+    /// </summary>
+    internal static string RepositoryFolder(string folder, ref string? workspace)
+    {
+        folder = Path.GetFullPath(folder).TrimEnd('\\', '/');
+        if (FormatCommand.RepositoryRoot(folder) is not { } top || string.Equals(top.TrimEnd('\\', '/'), folder, StringComparison.OrdinalIgnoreCase))
+        {
+            return folder;
+        }
+
+        top = top.TrimEnd('\\', '/');
+        var ownProps = Path.Combine(folder, "Directory.Build.props");
+        var propsShadowed = File.Exists(ownProps) && !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(ownProps)), @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase);
+        var editorConfigStops = StyleCopSetup.IsEditorConfigRoot(folder);
+        var reasons = new List<string>();
+        for (var above = Path.GetDirectoryName(folder); above is not null && above.Length >= top.Length; above = Path.GetDirectoryName(above))
+        {
+            reasons.AddRange(new[] { "Directory.Build.props", "Directory.Packages.props", ".editorconfig", ".globalconfig" }
+                .Where(name => File.Exists(Path.Combine(above, name)) && !(name == "Directory.Build.props" && propsShadowed) && !(name == ".editorconfig" && editorConfigStops))
+                .Select(name => Path.GetRelativePath(top, Path.Combine(above, name)).Replace('\\', '/')));
+        }
+
+        reasons.AddRange(Directory.EnumerateFiles(folder)
+            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf" && Regex.IsMatch(File.ReadAllText(f), @"""\.\.[\\/]"))
+            .Select(f => $"{Path.GetFileName(f)} (lists projects outside it)"));
+        if (reasons.Count == 0)
+        {
+            return folder;
+        }
+
+        if (workspace is { Length: > 0 })
+        {
+            workspace = Path.GetRelativePath(top, Path.Combine(folder, workspace));
+        }
+
+        Console.WriteLine($"Working on the repository's root {top}: the build of {Path.GetRelativePath(top, folder).Replace('\\', '/')}/ reaches past it ({string.Join(", ", reasons)}).");
+        return top;
+    }
 
     /// <summary>The next step after init: format, or first add the package when no MSBuild file references it.</summary>
     internal static string NextHint(string root) => PreviewCommand.ReferencesStyleBro(root) ? FormatHint : AddPackageHint;
@@ -527,7 +574,7 @@ internal static class Program
     /// Carries the suppressions in the code over (<see cref="Suppressions"/>): StyleCop's and Sonar's ids, to the rules that
     /// replace them. Returns how many were (or would be) added, in how many files, and how many weren't carried over (IDE0055).
     /// </summary>
-    internal static (int Added, int Files, int NotCarried) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write)
+    internal static (int Added, int Files, int NotCarried) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write, IReadOnlyList<string>? folders = null)
     {
         int added = 0;
         int files = 0;
@@ -547,6 +594,15 @@ internal static class Program
             var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
             var text = Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
             var relative = Path.GetRelativePath(root, file).Replace('\\', '/');
+
+            // Only where StyleCop ran (trial 22, kafkaflow: samples' 'NoWarn SA1600' got BRO1601 although nothing runs there): the
+            // block turns no rule on elsewhere. An MSBuild file above such a folder reaches it.
+            var folder = Path.GetDirectoryName(relative)!.Replace('\\', '/');
+            if (folders is not null && !folders.Any(f => Migration.IsUnder(relative, f) || (StyleCopSetup.IsMSBuild(file) && Migration.IsUnder(f.TrimEnd('/') + "/", folder))))
+            {
+                continue;
+            }
+
             if (!mentions.IsMatch(text)
                 || (!StyleCopSetup.IsMSBuild(file) && (Migration.IsGeneratedOrVendored(relative, text) || marked.Any(m => relative.StartsWith(m.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase)))))
             {

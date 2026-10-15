@@ -74,6 +74,11 @@ internal static class InitCommand
         "# This folder turns every analyzer off (dotnet_analyzer_diagnostic.severity), but a rule's own entry wins over that (StyleBro's\n"
         + "# preset in the build, the block above in 'dotnet format'): StyleBro's rules and the built-in ones init sets, off by id.";
 
+    /// <summary>The comment above the lines that turn the built-in rules off in a folder that turns the Style category off (<see cref="NestedStyleOff"/>).</summary>
+    public const string StyleOffComment =
+        "# This folder turns the Style category off (dotnet_analyzer_diagnostic.category-Style.severity), but a rule's own entry wins\n"
+        + "# over that: the built-in rules the block above turns on by id, off here by id too.";
+
     /// <summary>What the header of <see cref="OptOutBlock"/> says.</summary>
     private const string OptOutHeader = "stylebro-migrate init: rules off in a folder that turns every analyzer off";
 
@@ -112,6 +117,7 @@ internal static class InitCommand
             return 1;
         }
 
+        root = Program.RepositoryFolder(root, ref workspace);
         JsonReport.Set("path", root);
         JsonReport.Set("write", write);
 
@@ -1091,6 +1097,66 @@ internal static class InitCommand
         return false;
     }
 
+    /// <summary>
+    /// The folders below <paramref name="root"/> whose .editorconfig chain turns the Style category off (not every analyzer: that's
+    /// <see cref="OptsOut"/>), with a 'none' line for each built-in rule <paramref name="blockLines"/> turn on by id: a rule's own
+    /// entry wins over the category, so the block's IDE0055 = warning reformatted the folder (trial 22, spot 9e). Ids the
+    /// folder's own files set stay theirs.
+    /// </summary>
+    public static SortedDictionary<string, List<string>> NestedStyleOff(string root, IEnumerable<string> blockLines)
+    {
+        static bool Off(string? severity) => severity?.Trim().ToLowerInvariant() is "none" or "silent" or "hidden";
+        var last = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var line in blockLines)
+        {
+            if (IdOf(KeyOf(line)) is { } id && id.StartsWith("IDE", StringComparison.Ordinal))
+            {
+                last[id] = line.Substring(line.IndexOf('=') + 1);
+            }
+        }
+
+        var ids = last.Where(p => !Off(p.Value)).Select(p => p.Key).ToList();
+        var result = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var source in StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(f => Path.GetFileName(f) == ".editorconfig")
+            .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/')).Where(s => s != "."))
+        {
+            var chain = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var parts = source.Split('/');
+            for (var i = 1; i <= parts.Length; i++)
+            {
+                foreach (var (key, value) in Migration.OwnSettings(Path.Combine(root, string.Join("/", parts.Take(i)))))
+                {
+                    chain[key] = value;
+                }
+            }
+
+            if (!OptsOut(chain) && chain.TryGetValue("dotnet_analyzer_diagnostic.category-Style.severity", out var style) && Off(style)
+                && ids.Where(id => !chain.ContainsKey($"dotnet_diagnostic.{id}.severity")).Order(StringComparer.Ordinal).Select(id => $"dotnet_diagnostic.{id}.severity = none").ToList() is { Count: > 0 } offLines)
+            {
+                result[source] = offLines;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// <paramref name="settings"/> with the Style category at warning when an MSBuild file under the root sets AnalysisMode (or
+    /// AnalysisModeStyle) to All and EnforceCodeStyleInBuild to true: the build then reports every code-style rule as a warning,
+    /// IDE0009 too, unless the settings say otherwise.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> WithAnalysisModeAll(string root, IReadOnlyDictionary<string, string> settings)
+    {
+        const string Category = "dotnet_analyzer_diagnostic.category-Style.severity";
+        if (settings.ContainsKey(Category) || settings.ContainsKey("dotnet_analyzer_diagnostic.severity") || !EnforcesCodeStyleInBuild(root)
+            || !StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<AnalysisMode(?:Style)?>\s*All\s*<", RegexOptions.IgnoreCase)))
+        {
+            return settings;
+        }
+
+        return new Dictionary<string, string>(settings.ToDictionary(p => p.Key, p => p.Value), StringComparer.OrdinalIgnoreCase) { [Category] = "warning" };
+    }
+
     /// <summary>Whether an MSBuild file under the root sets EnforceCodeStyleInBuild to true (then init doesn't suggest it).</summary>
     public static bool EnforcesCodeStyleInBuild(string root) =>
         StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<EnforceCodeStyleInBuild>\s*true\s*<", RegexOptions.IgnoreCase));
@@ -1191,7 +1257,8 @@ internal static class InitCommand
             var pinned = Migration.SetPreset(
                 File.Exists(props) ? File.ReadAllText(props) : null,
                 StyleBro.Analyzers.PresetVersions.Latest,
-                "StyleBro's rules up to this preset version: raise it (or 'latest') for the rules of newer releases.");
+                "StyleBro's rules up to this preset version: raise it (or 'latest') for the rules of newer releases.",
+                importParent: !File.Exists(props) && Migration.HasParentProps(props));
             if (pinned is null)
             {
                 continue;
@@ -1242,6 +1309,11 @@ internal static class InitCommand
         var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
         var ownSettings = Migration.OwnSettings(root);
+
+        // The root's .globalconfig counts like its .editorconfig for what the team set and enforces (not for the bulk severities
+        // 'dotnet format' would skip: it reads none from a global config anyway).
+        var settings = folder.Length == 0 ? Migration.WithGlobalConfig(repository, ownSettings) : ownSettings;
+        string Source(params string[] keys) => keys.Any(ownSettings.ContainsKey) ? prefix + ".editorconfig" : ".globalconfig";
         var plain = existing?.Replace("\r\n", "\n");
         var name = prefix + ".editorconfig";
 
@@ -1271,7 +1343,7 @@ internal static class InitCommand
         var nestedLines = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         if (!migrated)
         {
-            (var lines, var report, nestedLines, var scopes) = Detect(root, ownSettings, sonarLines, PreviousConventions(existing));
+            (var lines, var report, nestedLines, var scopes) = Detect(root, settings, sonarLines, PreviousConventions(existing));
             detected = lines;
             sonarScopes = [.. sonarScopes ?? [], .. scopes];
             if (report.Count > 0)
@@ -1328,26 +1400,32 @@ internal static class InitCommand
                 (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. (optOut ? OptOutComment : ByIdComment).Split('\n'), .. hidden]);
             }
 
+            foreach (var (source, off) in NestedStyleOff(root, Template().Split('\n').Concat(detected).Concat(sonarLines)))
+            {
+                Console.WriteLine($"{prefix}{source}/.editorconfig turns the Style category off: its block turns {off.Count} built-in rules off by id too ({List(off.Select(l => IdOf(KeyOf(l))!).ToList())}), which the block above would otherwise turn on there.");
+                (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. StyleOffComment.Split('\n'), .. off]);
+            }
+
             nested = nestedLines.Select(p => NestedTarget(root, prefix, p.Key, p.Value)).Concat(StaleWhitespace(root, nestedLines).Select(s => NestedTarget(root, prefix, s, null))).ToList();
         }
 
         // The repository requires 'this.': the template's IDE0009 = none would turn its rule off (RecyclableMemoryStream).
         var leftOut = new List<string>();
-        if (!migrated && RequiresThisQualification(ownSettings))
+        if (!migrated && RequiresThisQualification(folder.Length == 0 ? WithAnalysisModeAll(repository, settings) : settings))
         {
             leftOut.Add(ThisQualificationSeverityKey);
-            Console.WriteLine($"{prefix}.editorconfig requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off.");
+            Console.WriteLine($"{Source(ThisQualificationSeverityKey, "dotnet_style_qualification_for_field", "dotnet_style_qualification_for_property", "dotnet_style_qualification_for_method", "dotnet_style_qualification_for_event")} requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off.");
         }
 
         // The repository's own IDE0055 severity stays (MoreLINQ: 'suggestion'; the block's 'warning' overrode it while the report
         // said it was kept). 'format' still runs its whitespace pass: it does whatever IDE0055's severity says.
-        if (!migrated && ownSettings.TryGetValue(IdeSeverityKey, out var ideSeverity) && !detected.Any(l => KeyOf(l) == IdeSeverityKey))
+        if (!migrated && settings.TryGetValue(IdeSeverityKey, out var ideSeverity) && !detected.Any(l => KeyOf(l) == IdeSeverityKey))
         {
             leftOut.Add(IdeSeverityKey);
-            Console.WriteLine($"{prefix}.editorconfig sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. 'stylebro-migrate format' still formats whitespace (its whitespace pass runs whatever IDE0055's severity is).");
+            Console.WriteLine($"{Source(IdeSeverityKey)} sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. 'stylebro-migrate format' still formats whitespace (its whitespace pass runs whatever IDE0055's severity is).");
         }
 
-        var block = Block(detected, plainHeader: ownSettings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId, leftOut);
+        var block = Block(detected, plainHeader: settings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId, leftOut);
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
         if (!migrated)
         {

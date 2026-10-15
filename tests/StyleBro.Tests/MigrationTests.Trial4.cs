@@ -47,7 +47,7 @@ public sealed partial class MigrationTests
         editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("# init: private fields: named '_field' in 3 of 3 places in your code\nstylebro_private_field_naming = _camelCase", editorConfig);
         Assert.Contains("  kept     private fields: 3 of 3 named '_field' -> _camelCase", output);
-        Assert.Contains("Kept your style for 2 settings (1 written, 1 already StyleBro's default): stylebro_private_field_naming.", output);
+        Assert.Contains("Kept your style for 2 settings: wrote stylebro_private_field_naming; 1 was already StyleBro's default.", output);
 
         // Three that disagree: the rule is off (a fresh init: a second one keeps what the first wrote).
         Write("A.cs", "class A { private int _logger; private int _mediator; private int clock; }");
@@ -104,7 +104,7 @@ public sealed partial class MigrationTests
 
         var report = Conventions.Decide(counts, new Dictionary<string, string>()).Report;
 
-        Assert.Contains("  Kept your style for 3 settings (1 written, 2 already StyleBro's default): stylebro_trailing_comma.", report);
+        Assert.Contains("  Kept your style for 3 settings: wrote stylebro_trailing_comma; 2 were already StyleBro's default.", report);
         Assert.Contains("  Turned 1 rule off because your code mixes both forms: BRO1133 (null checks).", report);
         Assert.Contains("  too few  operators where a line wraps: 1 place -> default stays (beginning_of_line)", report);
         Assert.Contains("  1 setting had fewer than 3 places to tell, StyleBro's defaults stay: dotnet_style_operator_placement_when_wrapping.", report);

@@ -416,6 +416,18 @@ A few settings work a little differently:
   writes `stylebro_tuple_element_name_casing = camelCase`; mixed turns the rule off.
 - **Preset version**: `init --write` sets `<StyleBroPreset>` in each `Directory.Build.props` your projects read, but not
   in one whose projects no solution lists and that doesn't mention StyleBro.Analyzers (example or test-fixture folders).
+  A `Directory.Build.props` it has to create below another one imports that one, so nothing the projects read gets lost.
+- **Run from a subfolder**: when the folder you run `init` (or `stylebro-migrate --write`) in is part of a git repository
+  whose build reaches past it (a `Directory.Build.props`, `Directory.Packages.props`, `.editorconfig` or `.globalconfig`
+  above it, or a solution in it that lists projects outside it, like `build/App.sln`), it works on the repository's root
+  and says so. A self-contained folder stays on its own.
+- **`.globalconfig`**: the root's `.globalconfig` counts like its `.editorconfig` for what your team set and enforces (a
+  `this.` it requires, its IDE0055 severity, the conventions' keys). With `AnalysisMode` `All` and
+  `EnforceCodeStyleInBuild`, every code-style rule is a warning in the build, so a `dotnet_style_qualification_for_* = true`
+  without a severity counts as enforced.
+- **A folder that turns the Style category off** (`dotnet_analyzer_diagnostic.category-Style.severity = none` in its
+  `.editorconfig`): a rule's own entry wins over a category, so `init` turns the built-in rules its block sets by id off
+  there too (in the folder's own block), and says so.
 - **Column alignment**: when your `.editorconfig` aligns code in columns for ReSharper or Rider
   (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
   the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
@@ -458,6 +470,7 @@ A few settings work a little differently:
 | `)` of split lists | after the last item or on its own line | [BRO1110](rules/BRO1110.md) | `stylebro_closing_parenthesis_placement` |
 | First item of split lists | on the next line or after `(` | [BRO1107](rules/BRO1107.md) | `stylebro_split_list_first_item` |
 | Items of split lists | one per line or grouped on lines | [BRO1108](rules/BRO1108.md) | `dotnet_diagnostic.BRO1108.severity` |
+| Leading multi-line lambdas | calls whose first argument is a multi-line lambda, anonymous method or anonymous object: the other arguments on its last line (`}, Kind);`) or one argument per line (mixed: both allowed) | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) | `stylebro_allow_leading_multiline_lambda` |
 | Constructor initializers | `: base(...)`/`: this(...)` on its own line or the constructor's | [BRO1105](rules/BRO1105.md) | `stylebro_constructor_initializer_placement` |
 | Constraints | `where` on its own line or the declaration's | [BRO1111](rules/BRO1111.md) | `stylebro_constraint_placement` |
 | `new T { ... }` | with or without `()` before an initializer | [BRO1141](rules/BRO1141.md) | `stylebro_object_creation_parentheses` |
@@ -472,6 +485,7 @@ A few settings work a little differently:
 | `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
 | Implicit `private` | members that are private by default, with or without `private` | [BRO1404](rules/BRO1404.md) | `dotnet_style_require_accessibility_modifiers` |
 | Implicit `internal` | types that are internal by default, with or without `internal` | [BRO1404](rules/BRO1404.md) | `dotnet_diagnostic.BRO1404.severity` |
+| Partial parts | `partial class X` parts with or without an access modifier | [BRO1007](rules/BRO1007.md) | `dotnet_diagnostic.BRO1007.severity` |
 | `case` blocks | a block below a `case` label indented or at the label's level | SDK formatter (IDE0055) | `csharp_indent_case_contents_when_block` |
 | Combined attributes | `[A, B]` or one attribute per list | [BRO1102](rules/BRO1102.md) | `dotnet_diagnostic.BRO1102.severity` |
 | Combined locals | `int a, b;` or one local per declaration | [BRO1142](rules/BRO1142.md) | `dotnet_diagnostic.BRO1142.severity` |
@@ -481,6 +495,9 @@ A few settings work a little differently:
 | Usings inside a namespace | fully qualified or relative to an enclosing namespace | [BRO1126](rules/BRO1126.md) | `dotnet_diagnostic.BRO1126.severity` |
 | File headers | headers with or without an empty `//` line at the top or bottom (or a `file_header_template` with one) | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
 | One-line jumps | `if (x) return;` on the `if` line, or a lone jump in braces | [BRO1514](rules/BRO1514.md) | `stylebro_allow_single_line_jump_statements` |
+| Empty blocks | `{ }` on one line or on two (mixed: both allowed) | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) | `stylebro_allow_empty_single_line_blocks` |
+| One-line properties | properties with a block-bodied accessor on one line (`X { get { return x; } }`) or on several | [BRO1509](rules/BRO1509.md) | `dotnet_diagnostic.BRO1509.severity` |
+| Accessor bodies | multi-line properties whose accessors all have block bodies: all one-line or all multi-line, or mixed | [BRO1510](rules/BRO1510.md) | `dotnet_diagnostic.BRO1510.severity` |
 | Auto-property accessors | `{ get; set; }` on the declaration's line or on several lines | [BRO1527](rules/BRO1527.md) | `dotnet_diagnostic.BRO1527.severity` |
 | `#region`s inside members | the `#region`s inside members (3 turn the rule off) | [BRO1113](rules/BRO1113.md) | `dotnet_diagnostic.BRO1113.severity` |
 | Column alignment | your `resharper_*int_align_*` keys set to `true` | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
@@ -513,7 +530,7 @@ Conventions in the code (judged from 3 places: all must agree below 10, 75% from
   off      split lists: 13 first item on the next line, 17 first item after '(' -> BRO1107 is off
   ...
 Summary:
-  Kept your style for 5 settings (1 written, 4 already StyleBro's default): stylebro_trailing_comma.
+  Kept your style for 5 settings: wrote stylebro_trailing_comma; 4 were already StyleBro's default.
   Turned 2 rules off because your code mixes both forms: BRO1133 (null checks), BRO1107 (split lists).
   To choose later: set the key in .editorconfig, remove its init line, run 'stylebro-migrate format'.
   4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,

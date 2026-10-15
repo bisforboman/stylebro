@@ -139,7 +139,8 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
 - Sub-directory `.editorconfig` files and path-specific sections (like `[tests/**.cs]`) are translated in place: they
   get the settings that differ from the repository-wide ones, in the same file and section. A folder that turns every
   analyzer off (`dotnet_analyzer_diagnostic.severity = none`, common for vendored code) gets every replacing rule as
-  `none`: a rule the root turns on by its id would win over the folder's bulk setting.
+  `none`: a rule the root turns on by its id would win over the folder's bulk setting. A folder whose `.editorconfig`
+  says `root = true` gets a block of its own, judged from its own code; one without C# files (an npm app) gets none.
 - Git submodules and other nested repositories (folders with their own `.git` file or folder) are otherwise skipped:
   their settings, code and project files belong to another repository, and nothing in them is changed
   (`stylebro-migrate format` excludes them too). Files a project
@@ -147,7 +148,15 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
 - The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
   off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
-  SA1139, SA1314 and SA1413.
+  SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: when the code has a multi-line switch
+  expression without a trailing comma, [BRO1401](rules/BRO1401.md) stays off (it has no setting to leave them out), and
+  the report says so.
+- StyleCop spacing rules that are off while others are on (kafkaflow: SA1000, SA1003, SA1009): IDE0055 enforces every
+  SDK spacing option, so the code decides, as in `init`. A clear other form gets the option that keeps it
+  (`csharp_space_after_keywords_in_control_flow_statements = false` for `if(x)`, `csharp_space_around_binary_operators`
+  `none`, or `ignore` when the operators are mixed, `csharp_space_after_cast`, the parentheses options); where no option
+  expresses the code (`new ()`, mixed `if(x)`/`if (x)`, a few outliers), IDE0055 stays on and the report names what
+  `format` changes.
 - Whether any project sets `GenerateDocumentationFile`. Without it the build doesn't parse XML documentation and
   StyleCop's rules that read it never run (it reports SA0001 instead), but `dotnet format` does parse it. So the
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.
@@ -244,7 +253,8 @@ stays exempt:
 ```
 
 The StyleCop suppressions stay: they're harmless once StyleCop is gone, and needed while both run. Running the tool
-again adds nothing. A suppression gets every rule that replaces the StyleCop one, also one that can't report on the
+again adds nothing. Only files where StyleCop ran get them (when only some projects reference it): elsewhere the
+generated settings turn no rule on. A suppression gets every rule that replaces the StyleCop one, also one that can't report on the
 code it covers (SA1300 around a local function gets BRO1312, the namespace rule, too): an id that doesn't apply is
 harmless, and the suppression stays right if the code changes. Rules the generated settings turn off get none (an
 analyzer like StyleSharp's SST1462 reports a suppression of a rule that never reports). The count the tool prints is of rule ids added (a
@@ -301,8 +311,10 @@ StyleSharp.Analyzers`) and `stylesharp-mapping.csv` (written by `New-StyleSharpM
 **Using order.** When your `.editorconfig` sets `dotnet_sort_system_directives_first` (or
 `dotnet_separate_import_directive_groups`), `dotnet format` sorts usings whatever the value. Files that aren't in that
 order while your ordering rule (SA1208/SA1210, or StyleSharp's SST1208/SST1210, which compares case-sensitively) is on
-and accepts them are named in the report and in the block (`# Usings kept as they are ...`), and `stylebro-migrate
-format` leaves them out, so it doesn't write what that rule reports. Remove the line once that rule is gone to have them
+and would report their sorted order are named in the report and in the block (`# Usings kept as they are ...`), and
+`stylebro-migrate format` leaves them out, so it doesn't write what that rule reports. Files whose sorted order the rule
+accepts (`Microsoft.*` above `System` under SA1210 alone: System first is fine with `systemUsingDirectivesFirst`) are
+sorted, and the report says how many. Remove the line once that rule is gone to have them
 sorted. The key itself is yours and stays.
 
 **Settings without a package.** StyleCop or StyleSharp settings (`stylecop.json`, `SA`/`SST` severities) that no project
