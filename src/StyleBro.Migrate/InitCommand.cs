@@ -82,6 +82,9 @@ internal static class InitCommand
     /// <summary>What the header of <see cref="OptOutBlock"/> says.</summary>
     private const string OptOutHeader = "stylebro-migrate init: rules off in a folder that turns every analyzer off";
 
+    /// <summary>The second key that makes 'dotnet format' sort usings.</summary>
+    private const string SeparateGroupsKey = "dotnet_separate_import_directive_groups";
+
     /// <summary>IDE0055's severity key.</summary>
     private const string IdeSeverityKey = "dotnet_diagnostic.IDE0055.severity";
 
@@ -124,21 +127,8 @@ internal static class InitCommand
         var path = Path.Combine(root, ".editorconfig");
         var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
-
-        // A StyleCop repository gets StyleBro's rules only where StyleCop enforced them: that's the migration, not init.
-        // Settings StyleCop.Analyzers no longer reads (Spectre.Console dropped the package, kept its 'sa1101 = none' lines)
-        // describe nothing: init proceeds and follows the code (docs/decisions/2026-10-13-stylecop-settings-without-the-stylecop-package-are-leftovers.md).
-        var evidence = migrated ? new List<string>() : StyleCopSetup.Evidence(root);
-        if (evidence.Count > 0 && !StyleCopSetup.IsInstalled(root))
+        if (SendsToMigration(root, migrated))
         {
-            Console.WriteLine(Program.LeftoverLine(evidence) + " init ignores them and follows the code's own conventions; delete them when convenient.");
-        }
-        else if (evidence.Count > 0)
-        {
-            Console.WriteLine("This repository has a StyleCop setup:");
-            evidence.ForEach(e => Console.WriteLine("  " + e));
-            Console.WriteLine("Run 'stylebro-migrate --write' instead (a dry run without --write first): it turns StyleBro's rules on only where StyleCop");
-            Console.WriteLine("enforced them, so code StyleCop was happy with stays as it is. 'init' would apply StyleBro's preset to all of it.");
             return 1;
         }
 
@@ -280,6 +270,37 @@ internal static class InitCommand
         Console.WriteLine(Program.NextHint(root));
         Program.PrintWorkspaceHint(root, workspace);
         return 0;
+    }
+
+    /// <summary>Whether the root .editorconfig has the block 'stylebro-migrate --write' wrote (then init leaves it alone).</summary>
+    public static bool IsMigrated(string root) =>
+        File.Exists(Path.Combine(root, ".editorconfig")) && File.ReadAllText(Path.Combine(root, ".editorconfig")) is var text
+        && text.Contains(Migration.BeginMarker, StringComparison.Ordinal) && !text.Contains("stylebro-migrate init", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Whether init sends the repository to the migration (printing why): a StyleCop repository gets StyleBro's rules only
+    /// where StyleCop enforced them. Settings StyleCop.Analyzers no longer reads (Spectre.Console dropped the package, kept
+    /// its 'sa1101 = none' lines) describe nothing: init proceeds and follows the code
+    /// (docs/decisions/2026-10-13-stylecop-settings-without-the-stylecop-package-are-leftovers.md). 'init --diff' asks first
+    /// too (trial 23: its preview ended with "The preview failed"). <paramref name="migrated"/>: <see cref="IsMigrated"/>.
+    /// </summary>
+    public static bool SendsToMigration(string root, bool migrated = false)
+    {
+        var evidence = migrated ? new List<string>() : StyleCopSetup.Evidence(root);
+        if (evidence.Count > 0 && !StyleCopSetup.IsInstalled(root))
+        {
+            Console.WriteLine(Program.LeftoverLine(evidence) + " init ignores them and follows the code's own conventions; delete them when convenient.");
+        }
+        else if (evidence.Count > 0)
+        {
+            Console.WriteLine("This repository has a StyleCop setup:");
+            evidence.ForEach(e => Console.WriteLine("  " + e));
+            Console.WriteLine("Run 'stylebro-migrate --write' instead (a dry run without --write first): it turns StyleBro's rules on only where StyleCop");
+            Console.WriteLine("enforced them, so code StyleCop was happy with stays as it is. 'init' would apply StyleBro's preset to all of it.");
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -465,7 +486,7 @@ internal static class InitCommand
         }
 
         // The casing of private constants and static readonly fields (three forms, decided apart from the list too).
-        var staticCasing = KeptLines(previous, [Conventions.StaticCasingKey, $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FieldPascalCase}.severity"]);
+        var staticCasing = KeptLines(previous, [Conventions.StaticCasingKey, $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FieldPascalCase}.severity"], Conventions.StaticCasingWhat);
         if (own.TryGetValue(Conventions.StaticCasingKey, out var staticValue))
         {
             decided[Conventions.StaticCasingKey] = $"set in .editorconfig ({staticValue})";
@@ -502,7 +523,7 @@ internal static class InitCommand
         var keptKeys = new HashSet<string>(kept.Select(KeyOf).OfType<string>(), StringComparer.OrdinalIgnoreCase);
         var spacing = csharpier.Lines is not null ? "CSharpier formats it"
             : alignment is not null ? "IDE0055 is off for column alignment"
-            : settings.TryGetValue("dotnet_diagnostic.IDE0055.severity", out var ideSeverity) ? $"your .editorconfig sets IDE0055 ({ideSeverity})"
+            : settings.TryGetValue("dotnet_diagnostic.IDE0055.severity", out var ideSeverity) ? $"your settings set IDE0055 ({ideSeverity})"
             : keptSpacing.Count > 0 ? "kept from the last init"
             : null;
         var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), csharpier.Lines is null ? own : own.Where(p => !Conventions.All.Any(c => Conventions.IsCSharpiers(c) && (c.Key == p.Key || c.AlsoKeys.Contains(p.Key)))).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase), unenforced.ToDictionary(k => k, k => settings[k]), spacing);
@@ -536,6 +557,31 @@ internal static class InitCommand
 
         // Whether IDE0055 formats whitespace at all (not with CSharpier, column alignment or mixed spacing).
         var formatsWhitespace = !(csharpier.Lines ?? []).Concat(alignment?.Lines ?? []).Concat(keptSpacing).Concat(detected).Contains(IdeOff);
+
+        // One-line empty blocks kept: IDE0055 still splits those after a statement's header ('else { }', 'lock (x) { }') unless
+        // csharp_preserve_single_line_statements is true (probed with the SDK's formatter; trial 23: 19 kept, 7 split).
+        // Written again each run, last (a second run kept them first: another block).
+        const string StatementsKey = "csharp_preserve_single_line_statements";
+        const string EmptyBlocksComment = "# init: empty blocks: IDE0055 keeps '{ }' after a statement ('else { }', 'lock (x) { }') on one line only with this";
+        if (kept.IndexOf(EmptyBlocksComment) is >= 0 and var keptAt)
+        {
+            kept.RemoveRange(keptAt, 2);
+        }
+
+        if (formatsWhitespace && kept.Concat(detected).Contains($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true")
+            && !kept.Concat(detected).Contains($"{StatementsKey} = true"))
+        {
+            if (settings.TryGetValue(StatementsKey, out var statements) && !statements.Split(':')[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase))
+            {
+                report.Add($"  {"note",-8} empty blocks: kept on one line by StyleBro, but your .editorconfig's {StatementsKey} = {statements} lets IDE0055 split those after a statement ('else {{ }}' -> two lines)");
+            }
+            else
+            {
+                detected.Add(EmptyBlocksComment);
+                detected.Add($"{StatementsKey} = true");
+            }
+        }
+
         report.InsertRange(0, unenforced.Select(k => k == Conventions.EndOfLineKey
             ? $"  {"note",-8} {contradictedEnding!.Value.Note}"
             : $"  {"note",-8} {k} = {settings[k]} in .editorconfig isn't enforced (its severity is silent or none), so your code decides"));
@@ -1105,17 +1151,7 @@ internal static class InitCommand
     /// </summary>
     public static SortedDictionary<string, List<string>> NestedStyleOff(string root, IEnumerable<string> blockLines)
     {
-        static bool Off(string? severity) => severity?.Trim().ToLowerInvariant() is "none" or "silent" or "hidden";
-        var last = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var line in blockLines)
-        {
-            if (IdOf(KeyOf(line)) is { } id && id.StartsWith("IDE", StringComparison.Ordinal))
-            {
-                last[id] = line.Substring(line.IndexOf('=') + 1);
-            }
-        }
-
-        var ids = last.Where(p => !Off(p.Value)).Select(p => p.Key).ToList();
+        var lines = blockLines.ToList();
         var result = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
         foreach (var source in StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(f => Path.GetFileName(f) == ".editorconfig")
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/')).Where(s => s != "."))
@@ -1130,14 +1166,118 @@ internal static class InitCommand
                 }
             }
 
-            if (!OptsOut(chain) && chain.TryGetValue("dotnet_analyzer_diagnostic.category-Style.severity", out var style) && Off(style)
-                && ids.Where(id => !chain.ContainsKey($"dotnet_diagnostic.{id}.severity")).Order(StringComparer.Ordinal).Select(id => $"dotnet_diagnostic.{id}.severity = none").ToList() is { Count: > 0 } offLines)
+            if (!OptsOut(chain) && StyleOffIds(chain, lines) is { Count: > 0 } ids)
             {
-                result[source] = offLines;
+                result[source] = ids.Select(id => $"dotnet_diagnostic.{id}.severity = none").ToList();
             }
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The built-in rules <paramref name="blockLines"/> turn on by id (sorted) when <paramref name="settings"/> turn them off
+    /// through the Style category, or the bulk severity without a Style category entry, and don't set them by id: a rule's own
+    /// entry wins over both, so the block would turn them back on. Empty otherwise.
+    /// </summary>
+    public static List<string> StyleOffIds(IReadOnlyDictionary<string, string> settings, IEnumerable<string> blockLines)
+    {
+        var style = settings.TryGetValue("dotnet_analyzer_diagnostic.category-Style.severity", out var category) ? category : settings.GetValueOrDefault("dotnet_analyzer_diagnostic.severity");
+        if (!OffSeverity(style))
+        {
+            return [];
+        }
+
+        var last = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var line in blockLines)
+        {
+            if (IdOf(KeyOf(line)) is { } id && id.StartsWith("IDE", StringComparison.Ordinal))
+            {
+                last[id] = line.Substring(line.IndexOf('=') + 1);
+            }
+        }
+
+        return last.Where(p => !OffSeverity(p.Value) && !settings.ContainsKey($"dotnet_diagnostic.{p.Key}.severity")).Select(p => p.Key).Order(StringComparer.Ordinal).ToList();
+    }
+
+    /// <summary>
+    /// The sections to add at the end of <paramref name="block"/> so the path sections of <paramref name="editorConfig"/> outside
+    /// the generated blocks (for some C# files: '[src/**/*.cs]', not '[*.cs]') keep the values they give keys the block's
+    /// '[*.cs]' part sets otherwise: a later line wins, and the block comes after them.
+    /// </summary>
+    public static List<(string Section, List<string> Lines)> PathSectionOverrides(string? editorConfig, string block)
+    {
+        var blockKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in block.Replace("\r\n", "\n").Split('\n').Skip(1).Select(l => l.Trim()).Where(l => l != "[*.cs]").TakeWhile(l => !l.StartsWith('[')))
+        {
+            if (KeyOf(line) is { } key)
+            {
+                blockKeys[key] = line.Substring(line.IndexOf('=') + 1).Trim();
+            }
+        }
+
+        var result = new List<(string Section, List<string> Lines)>();
+        string? section = null;
+        var inBlock = false;
+        foreach (var raw in (editorConfig ?? string.Empty).Replace("\r\n", "\n").Split('\n'))
+        {
+            var line = raw.Trim();
+            if (line.StartsWith("# BEGIN stylebro-", StringComparison.Ordinal) || line.StartsWith("# END stylebro-", StringComparison.Ordinal))
+            {
+                inBlock = line.StartsWith("# BEGIN", StringComparison.Ordinal);
+                section = null;
+            }
+            else if (inBlock)
+            {
+                continue;
+            }
+            else if (line.StartsWith('['))
+            {
+                var name = line.Trim('[', ']');
+                section = !StyleCopSetup.AppliesToCSharp(name) && Regex.IsMatch(name, @"\.cs$|[{,]\s*cs\s*[,}]|\*$") ? name : null;
+            }
+            else if (section is not null && KeyOf(line) is { } key && blockKeys.TryGetValue(key, out var blockValue)
+                && line.Substring(line.IndexOf('=') + 1).Split('#', ';')[0].Trim() is var value && !value.Equals(blockValue, StringComparison.OrdinalIgnoreCase))
+            {
+                if (result.FindIndex(r => r.Section == section) is var at && at < 0)
+                {
+                    result.Add((section, [$"# Your own [{section}] section sets these too: repeated here, so it still wins over the lines above"]));
+                    at = result.Count - 1;
+                }
+
+                result[at].Lines.RemoveAll(l => KeyOf(l) == key);
+                result[at].Lines.Add($"{key} = {value}");
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The section for the using order (the sort key lines of <paramref name="detected"/>, removed from it with their '# init:'
+    /// comment) that covers the C# files outside <paramref name="optOutFolders"/>: 'dotnet format' sorts usings wherever a sort
+    /// key is set, whatever its value, so an opt-out folder that inherits the block's key got its usings sorted (trial 23).
+    /// Null without opt-out folders or sort lines, or when no section can leave the folders out (C# files directly in the root).
+    /// </summary>
+    public static (string Section, List<string> Lines)? UsingsAround(string root, IReadOnlyList<string> optOutFolders, List<string> detected)
+    {
+        var sortAt = detected.FindIndex(l => KeyOf(l) is Conventions.SortUsingsKey or SeparateGroupsKey);
+        if (optOutFolders.Count == 0 || sortAt < 0)
+        {
+            return null;
+        }
+
+        bool InOptOut(string file) => Path.GetRelativePath(root, file).Replace('\\', '/') is var relative && optOutFolders.Any(f => relative.StartsWith(f + "/", StringComparison.OrdinalIgnoreCase));
+        var files = StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(IsCSharp).ToDictionary(f => f, f => !InOptOut(f), StringComparer.OrdinalIgnoreCase);
+        if (StyleCopSetup.Cover(files, true, root) is not { Count: > 0 } covered)
+        {
+            return null;
+        }
+
+        var first = sortAt > 0 && detected[sortAt - 1].StartsWith("# init:", StringComparison.Ordinal) ? sortAt - 1 : sortAt;
+        var lines = detected.Skip(first).TakeWhile((l, i) => i <= sortAt - first || KeyOf(l) is Conventions.SortUsingsKey or SeparateGroupsKey).ToList();
+        detected.RemoveRange(first, lines.Count);
+        return (StyleCopSetup.SectionFor(covered, optOutFolders), [$"# The using order, not for {string.Join(", ", optOutFolders.Select(f => f + "/"))} (every analyzer is off there, but 'dotnet format' sorts usings wherever a sort key is set)", .. lines]);
     }
 
     /// <summary>
@@ -1239,9 +1379,12 @@ internal static class InitCommand
         return result;
     }
 
+    private static bool OffSeverity(string? severity) => severity?.Trim().ToLowerInvariant() is "none" or "silent" or "hidden";
+
     /// <summary>Whether another convention turns the same rule off (BRO1404: members and types).</summary>
+    /// BRO1306's off line is also the static casing's (<see cref="Conventions.StaticCasingKey"/>), which isn't in the list.
     private static bool SharesOff(Conventions.Convention convention) =>
-        convention.Off is { } off && Conventions.All.Count(c => c.Off == off) > 1;
+        convention.Off is { } off && (Conventions.All.Count(c => c.Off == off) > 1 || off.StartsWith($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FieldPascalCase}.", StringComparison.Ordinal));
 
     /// <summary>
     /// Pins the preset version (docs/versioning.md) in every Directory.Build.props the projects import: a new setup takes
@@ -1251,8 +1394,18 @@ internal static class InitCommand
     private static void PinPreset(string root, bool write)
     {
         var property = $"<StyleBroPreset>{StyleBro.Analyzers.PresetVersions.Latest}</StyleBroPreset>";
-        var solutions = Directory.EnumerateFiles(root).Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf").Select(f => File.ReadAllText(f).Replace('\\', '/')).ToList();
-        foreach (var props in Migration.PropsFiles(root).Where(p => !IsOutsideTheBuild(root, p, solutions)))
+        var solutions = Solutions(Directory.EnumerateFiles(root));
+        var elsewhere = solutions.Count == 0;
+        if (elsewhere)
+        {
+            // The shallowest ones (stryker's src/Stryker.slnx, not integrationtest/TargetProjects/*.slnx, which lists fixtures).
+            solutions = Solutions(StyleCopSetup.EnumerateFiles(root));
+            var depth = solutions.Count == 0 ? 0 : solutions.Min(s => Depth(s.Folder));
+            solutions = solutions.Where(s => Depth(s.Folder) == depth).ToList();
+            int Depth(string folder) => Path.GetRelativePath(root, folder).Count(c => c is '\\' or '/');
+        }
+
+        foreach (var props in Migration.PropsFiles(root).Where(p => !IsOutsideTheBuild(root, p, solutions, elsewhere)))
         {
             var pinned = Migration.SetPreset(
                 File.Exists(props) ? File.ReadAllText(props) : null,
@@ -1281,20 +1434,38 @@ internal static class InitCommand
     /// Whether a nested Directory.Build.props serves only projects no solution lists and that don't get StyleBro (trial 20:
     /// coverlet's Documentation/Examples and Altinn's test apps got a preset version nothing reads). The solutions are the
     /// root's (an example's own solution doesn't count), a project matched by its path. Not the root's props, and not when
-    /// the root has no solution or StyleBro.Analyzers is mentioned under the props' folder.
+    /// no solution is left to tell or StyleBro.Analyzers is mentioned under the props' folder.
     /// </summary>
-    private static bool IsOutsideTheBuild(string root, string props, IReadOnlyList<string> solutions)
+    /// <remarks>
+    /// Without a solution in the root, the repository's other solutions count (trial 23, stryker: src/Stryker.slnx, and the
+    /// fixture projects under integrationtest/ with their own solution got a preset version), for a props file that doesn't
+    /// import the one above it (then it's part of the main build's chain).
+    /// </remarks>
+    private static bool IsOutsideTheBuild(string root, string props, IReadOnlyList<(string Folder, string Text)> solutions, bool elsewhere)
     {
         var folder = Path.GetDirectoryName(Path.GetFullPath(props))!;
-        if (solutions.Count == 0 || string.Equals(folder, Path.GetFullPath(root).TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase) || !Directory.Exists(folder))
+        if (string.Equals(folder, Path.GetFullPath(root).TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase) || !Directory.Exists(folder)
+            || (elsewhere && File.Exists(props) && Regex.IsMatch(File.ReadAllText(props), @"<Import\b|GetPathOfFileAbove", RegexOptions.IgnoreCase)))
+        {
+            return false;
+        }
+
+        var listing = solutions.Where(s => !elsewhere || !(s.Folder + Path.DirectorySeparatorChar).StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)).ToList();
+        if (listing.Count == 0)
         {
             return false;
         }
 
         var files = StyleCopSetup.EnumerateFiles(folder).Where(StyleCopSetup.IsMSBuild).ToList();
         return !files.Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase))
-            && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => solutions.Any(s => s.Contains(Path.GetRelativePath(root, p).Replace('\\', '/'), StringComparison.OrdinalIgnoreCase)));
+            && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => listing.Any(s => s.Text.Contains(Path.GetRelativePath(s.Folder, p).Replace('\\', '/'), StringComparison.OrdinalIgnoreCase)));
     }
+
+    /// <summary>The solutions (.sln, .slnx, .slnf) among <paramref name="files"/>: folder and text, '/'-separated.</summary>
+    private static List<(string Folder, string Text)> Solutions(IEnumerable<string> files) =>
+        files.Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf")
+            .Select(f => (Path.GetDirectoryName(Path.GetFullPath(f))!, File.ReadAllText(f).Replace('\\', '/')))
+            .ToList();
 
     /// <summary>
     /// One .editorconfig's block, with its convention report printed: the root's (<paramref name="folder"/> empty), or the
@@ -1377,6 +1548,7 @@ internal static class InitCommand
 
         // The same for a nested .editorconfig's bulk severity (trial 19: tests/.editorconfig with 'none'), in its own block.
         var nested = new List<Target>();
+        var optOutFolders = new List<string>();
         if (!migrated)
         {
             var blockSettings = new Dictionary<string, string>(ownSettings, StringComparer.OrdinalIgnoreCase);
@@ -1398,6 +1570,20 @@ internal static class InitCommand
                     ? $"{prefix}{source}/.editorconfig turns every analyzer off: its block turns {hidden.Count} rules off by id too (StyleBro's and the built-in ones init sets), which would win over it, so the build and 'format' leave the folder alone."
                     : $"{prefix}{source}/.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {hidden.Count} StyleBro rules the build reports. Its block sets them by id, so both agree.");
                 (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. (optOut ? OptOutComment : ByIdComment).Split('\n'), .. hidden]);
+                if (optOut)
+                {
+                    optOutFolders.Add(source);
+                }
+            }
+
+            if (UsingsAround(root, optOutFolders, detected) is { } usingsScope)
+            {
+                Console.WriteLine($"{prefix}{string.Join(", ", optOutFolders.Select(f => f + "/"))}: 'dotnet format' sorts usings wherever a sort key is set (any value), and the folder would inherit it: the block sets the using order for the other C# files only.");
+                sonarScopes = [.. sonarScopes ?? [], usingsScope];
+            }
+            else if (optOutFolders.Count > 0 && detected.Any(l => KeyOf(l) is Conventions.SortUsingsKey or SeparateGroupsKey))
+            {
+                Console.WriteLine($"{prefix}{string.Join(", ", optOutFolders.Select(f => f + "/"))}: 'format' sorts the usings there too (a sort key reaches the folder, and 'dotnet format' sorts wherever one is set): C# files directly in {(prefix.Length == 0 ? "the root" : prefix)} leave no section that skips the folder.");
             }
 
             foreach (var (source, off) in NestedStyleOff(root, Template().Split('\n').Concat(detected).Concat(sonarLines)))
@@ -1414,7 +1600,8 @@ internal static class InitCommand
         if (!migrated && RequiresThisQualification(folder.Length == 0 ? WithAnalysisModeAll(repository, settings) : settings))
         {
             leftOut.Add(ThisQualificationSeverityKey);
-            Console.WriteLine($"{Source(ThisQualificationSeverityKey, "dotnet_style_qualification_for_field", "dotnet_style_qualification_for_property", "dotnet_style_qualification_for_method", "dotnet_style_qualification_for_event")} requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off.");
+            Console.WriteLine($"{Source(ThisQualificationSeverityKey, "dotnet_style_qualification_for_field", "dotnet_style_qualification_for_property", "dotnet_style_qualification_for_method", "dotnet_style_qualification_for_event")} requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off."
+                + (IsEnforced(ownSettings, "IDE0009") || Source(ThisQualificationSeverityKey, "dotnet_style_qualification_for_field", "dotnet_style_qualification_for_property", "dotnet_style_qualification_for_method", "dotnet_style_qualification_for_event") != ".globalconfig" ? string.Empty : " The build enforces it, but 'format' doesn't fix it ('dotnet format' reads no severity from a .globalconfig or the project): code without 'this.' stays a build warning until IDE0009's severity is set in .editorconfig too."));
         }
 
         // The repository's own IDE0055 severity stays (MoreLINQ: 'suggestion'; the block's 'warning' overrode it while the report
@@ -1422,10 +1609,29 @@ internal static class InitCommand
         if (!migrated && settings.TryGetValue(IdeSeverityKey, out var ideSeverity) && !detected.Any(l => KeyOf(l) == IdeSeverityKey))
         {
             leftOut.Add(IdeSeverityKey);
-            Console.WriteLine($"{Source(IdeSeverityKey)} sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. 'stylebro-migrate format' still formats whitespace (its whitespace pass runs whatever IDE0055's severity is).");
+            Console.WriteLine($"{Source(IdeSeverityKey)} sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. {(OffSeverity(ideSeverity) ? "'stylebro-migrate format' leaves whitespace alone (no whitespace pass where IDE0055 is off)." : "'stylebro-migrate format' still formats whitespace (its whitespace pass runs unless IDE0055 is off).")}");
         }
 
-        var block = Block(detected, plainHeader: settings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase), sonarLines, generated, vendored, sonarScopes, byId, leftOut);
+        // This file turns the Style category (or every analyzer) off itself: the template's built-in rules by id would win over
+        // that (trial 23: IDE0055 = warning reformatted the code), so they're left out and the team's bulk setting decides.
+        var styleOff = migrated ? [] : StyleOffIds(ownSettings, Template().Split('\n').Where(l => !leftOut.Contains(KeyOf(l) ?? string.Empty)));
+        if (styleOff.Count > 0)
+        {
+            leftOut.AddRange(styleOff.Select(id => $"dotnet_diagnostic.{id}.severity"));
+            Console.WriteLine($"{name} turns {(OffSeverity(ownSettings.GetValueOrDefault("dotnet_analyzer_diagnostic.category-Style.severity")) ? "the Style category" : "every analyzer")} off: the block leaves out the built-in rules it would turn on by id ({string.Join(", ", styleOff)}), which would win over that. StyleBro's own rules stay on.");
+        }
+
+        var plainHeader = settings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase);
+        var block = Block(detected, plainHeader, sonarLines, generated, vendored, sonarScopes, byId, leftOut);
+
+        // The file's own path sections ('[src/**/*.cs]' with IDE0055 = none) come before the block, whose '[*.cs]' lines would
+        // win over them (trial 23): the keys they set otherwise are repeated in sections at the block's end.
+        if (!migrated && PathSectionOverrides(plain, block) is { Count: > 0 } overrides)
+        {
+            Console.WriteLine($"{name}'s own {string.Join(", ", overrides.Select(o => "[" + o.Section + "]"))} section{(overrides.Count == 1 ? " sets" : "s set")} keys the block sets too: repeated at the block's end, so {(overrides.Count == 1 ? "it" : "they")} still win{(overrides.Count == 1 ? "s" : string.Empty)} there.");
+            block = Block(detected, plainHeader, sonarLines, generated, vendored, [.. sonarScopes ?? [], .. overrides], byId, leftOut);
+        }
+
         var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
         if (!migrated)
         {
@@ -1452,7 +1658,7 @@ internal static class InitCommand
             HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
             HasModernize = modernize.Block is null || (plain is not null && Migration.Apply(plain, modernize.Block, ModernizeBegin, ModernizeEnd) == plain),
             Nested = nested,
-            FormatsWhitespace = !detected.Contains(IdeOff),
+            FormatsWhitespace = !detected.Contains(IdeOff) && !styleOff.Contains("IDE0055"),
         };
     }
 

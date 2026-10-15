@@ -1424,6 +1424,21 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 - GOTCHA: in this environment `\\n` inside a bash heredoc python script became a real newline; write such scripts with
   the Write tool (there `\\n` stays a backslash-n in the output).
 
+## Trial 23 init/migrate fixes (2026-10-15)
+
+- `StyleCopSetup.EvaluateStyleCop` evaluates a multi-targeted project per framework when the outer evaluation has no
+  StyleCop item (`UsesStyleCop`; fluentassertions: StyleCop under `'$(TargetFramework)' == 'net6.0'`, cached per process).
+- init at the root: Style category / bulk off -> the template's IDE rules on by id leave the block (`StyleOffIds`, shared
+  with `NestedStyleOff`); StyleBro's rules stay on (decision 2026-10-15). Own path sections are repeated at the block's
+  end (`PathSectionOverrides`). Opt-out folders (not root = true) get the sort keys moved into a section for the other
+  code (`UsingsAround`: format sorts usings wherever a key is set). Kept one-line empty blocks write
+  `csharp_preserve_single_line_statements = true` (probed: IDE0055 splits `else { }` otherwise).
+- New conventions: BRO1504 (comments below code, counted on a copy without the blank lines), BRO1603 periods, BRO1618
+  `<c>keyword</c>`, non-private fields vs an enforced naming rule (BRO1306 off; `CountNonPrivateNaming` compiles the
+  trees without references). BRO1306's off line is shared with the static casing: KeptLines takes a topic for both.
+  Leading-lambda calls count apart for BRO1107/BRO1108 (`FoldLeadingLambdas`). Usings are sorted per run between
+  directives. PinPreset without a root solution uses the shallowest solutions (stryker's src/).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
