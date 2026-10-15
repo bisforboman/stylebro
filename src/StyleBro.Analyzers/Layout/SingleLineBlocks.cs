@@ -95,17 +95,10 @@ internal static class SingleLineBlocks
         foreach (var ancestor in node.Ancestors())
         {
             if (GetBraces(ancestor) is { } braces
-                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock))
+                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
+                && GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
             {
-                if (GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
-                {
-                    changes.AddRange(enclosing);
-                }
-                else if (HasTrailingComment(braces.Close) && Line(text, braces.Open.SpanStart) == Line(text, braces.Close.SpanStart))
-                {
-                    // The enclosing block stays on its line (its comment), so this one must too.
-                    return null;
-                }
+                changes.AddRange(enclosing);
             }
         }
 
@@ -196,7 +189,8 @@ internal static class SingleLineBlocks
     /// <summary>
     /// Whether a comment follows the block's '}' on its line: <c>catch (SocketException) { } // slopwatch-ignore: SW003 ...</c>
     /// (akka.net). Expanded, the comment would end up on the '}' line, away from the statement a line-based suppression
-    /// marks, so the block is left on its line.
+    /// marks, so the block is left on its line. A one-line block inside it stays too: its indentation comes from the
+    /// enclosing block's expansion (<see cref="StartIndent"/>).
     /// </summary>
     private static bool HasTrailingComment(SyntaxToken close) =>
         close.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia));
