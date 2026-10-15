@@ -99,6 +99,9 @@ internal sealed class StyleCopSetup
     /// <summary>The key ReadConfig files a 'dotnet_analyzer_diagnostic.severity' (every rule) under, next to the categories.</summary>
     private const string AllRules = "*";
 
+    /// <summary>The per-framework evaluations <see cref="EvaluateStyleCop"/> ran (project|framework), once per process.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> FrameworkEvaluations = new(StringComparer.OrdinalIgnoreCase);
+
     private static readonly Regex DiagnosticKey = new(@"^dotnet_diagnostic\.(S[AX]\d{4}\w*|SST\d{4})\.severity$", RegexOptions.IgnoreCase);
     private static readonly Regex SonarKey = new(@"^dotnet_diagnostic\.(S\d+)\.severity$", RegexOptions.IgnoreCase);
 
@@ -907,22 +910,54 @@ internal sealed class StyleCopSetup
     }
 
     /// <summary>
-    /// Whether StyleCop.Analyzers is among a project's evaluated PackageReference, GlobalPackageReference or Analyzer items
-    /// ('dotnet msbuild -getItem', Conditions applied), or null when MSBuild can't evaluate it.
+    /// Whether StyleCop.Analyzers (or StyleSharp) is among a project's evaluated PackageReference, GlobalPackageReference or
+    /// Analyzer items ('dotnet msbuild -getItem', Conditions applied), or null when MSBuild can't evaluate it. A multi-targeted
+    /// project's outer evaluation has no TargetFramework, so a reference under a framework Condition is checked per framework
+    /// (<see cref="UsesStyleCop(string, Func{string, string})"/>).
     /// </summary>
     internal static bool? EvaluateStyleCop(string project)
     {
+        var fullPath = Path.GetFullPath(project);
         try
         {
-            using var document = JsonDocument.Parse(FormatCommand.EvaluateProject(Path.GetFullPath(project)));
-            return document.RootElement.TryGetProperty("Items", out var items)
-                && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
-                    .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
+            return UsesStyleCop(FormatCommand.EvaluateProject(fullPath), framework => FrameworkEvaluations.GetOrAdd(fullPath + "|" + framework, _ => new Lazy<string>(() => FormatCommand.Capture(
+                Path.GetDirectoryName(fullPath)!,
+                "msbuild",
+                fullPath,
+                $"-property:TargetFramework={framework}",
+                "-getItem:PackageReference",
+                "-getItem:GlobalPackageReference",
+                "-getItem:Analyzer",
+                "-nologo"))).Value);
         }
         catch (Exception e) when (e is ToolException or JsonException or System.ComponentModel.Win32Exception)
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Whether an evaluation ('dotnet msbuild -getItem' JSON) has StyleCop's items; when not and it lists several
+    /// TargetFrameworks, whether any framework's evaluation (<paramref name="evaluateFramework"/>, in parallel) has them
+    /// (fluentassertions: StyleCop.Analyzers under '$(TargetFramework)' == 'net6.0', so Src/ looked like it had no StyleCop,
+    /// format changed nothing and the build failed with 2,900 errors).
+    /// </summary>
+    internal static bool UsesStyleCop(string evaluation, Func<string, string> evaluateFramework)
+    {
+        using var document = JsonDocument.Parse(evaluation);
+        if (HasStyleCopItem(document.RootElement))
+        {
+            return true;
+        }
+
+        var frameworks = document.RootElement.TryGetProperty("Properties", out var properties) && properties.TryGetProperty("TargetFrameworks", out var value)
+            ? (value.GetString() ?? string.Empty).Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            : [];
+        return frameworks.Length > 1 && frameworks.AsParallel().Any(framework =>
+        {
+            using var inner = JsonDocument.Parse(evaluateFramework(framework));
+            return HasStyleCopItem(inner.RootElement);
+        });
     }
 
     /// <summary>Whether an evaluated item's Identity is StyleCop's (or StyleSharp's) package, or an analyzer DLL from it.</summary>
@@ -1126,6 +1161,11 @@ internal sealed class StyleCopSetup
         : version.StartsWith("1.0.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.0.2.csv")
         : version.StartsWith("1.1.", StringComparison.Ordinal) ? LoadIds("StyleCopRules-1.1.118.csv")
         : null;
+
+    private static bool HasStyleCopItem(JsonElement evaluation) =>
+        evaluation.TryGetProperty("Items", out var items)
+        && items.EnumerateObject().Where(i => i.Name is "PackageReference" or "GlobalPackageReference" or "Analyzer").SelectMany(i => i.Value.EnumerateArray())
+            .Any(i => i.TryGetProperty("Identity", out var identity) && IsStyleCopItem(identity.GetString() ?? string.Empty));
 
     /// <summary>
     /// A project's MSBuild files as the text reads them: the project, the Directory.Build.props/.targets and

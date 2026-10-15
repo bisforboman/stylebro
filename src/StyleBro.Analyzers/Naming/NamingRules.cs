@@ -29,8 +29,7 @@ internal static class NamingRules
 
     /// <summary>
     /// Whether a naming rule may rename <paramref name="symbol"/> (declared at <paramref name="location"/>) to
-    /// <paramref name="newName"/>; null checks only the suppressions (tuple elements, which IDE1006 doesn't name, and fields,
-    /// whose styles FieldNames reads from the naming rules already).
+    /// <paramref name="newName"/>; null checks only the suppressions (tuple elements, which IDE1006 doesn't name).
     /// </summary>
     public static bool AllowsRename(Compilation compilation, AnalyzerConfigOptions options, Location location, ISymbol symbol, string? newName, CancellationToken cancellationToken)
     {
@@ -243,7 +242,7 @@ internal static class NamingRules
 
         return rules
             .OrderBy(r => r.Priority)
-            .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Subset(b.Modifiers, a.Modifiers)))
+            .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Order(MatchesFewer(a, b), MatchesFewer(b, a))))
             .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Subset(a.Accessibilities, b.Accessibilities)))
             .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Subset(a.Kinds, b.Kinds)))
             .ThenBy(r => r.Name, System.StringComparer.OrdinalIgnoreCase)
@@ -255,8 +254,14 @@ internal static class NamingRules
         {
             var xInY = y is null || (x is not null && x.All(y.Contains));
             var yInX = x is null || (y is not null && y.All(x.Contains));
-            return xInY == yInX ? 0 : xInY ? -1 : 1;
+            return Order(xInY, yInX);
         }
+
+        static int Order(bool xInY, bool yInX) => xInY == yInX ? 0 : xInY ? -1 : 1;
+
+        // Roslyn's NamingRuleModifierListComparer: x requires every modifier y does, where 'const' implies 'static' and 'readonly'.
+        static bool MatchesFewer(Rule x, Rule y) =>
+            y.Modifiers.All(m => x.Modifiers.Contains(m) || (m is "static" or "shared" or "readonly" && x.Modifiers.Contains("const")));
     }
 
     private sealed class Rule

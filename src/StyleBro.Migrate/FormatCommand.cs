@@ -1047,8 +1047,24 @@ internal static class FormatCommand
     /// </summary>
     public static string NoWhitespaceLine(string root, IReadOnlyCollection<string> exclusions)
     {
-        var optOut = exclusions.Where(e => e.EndsWith('/') && InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, e.TrimEnd('/'))))).ToList();
-        var other = exclusions.Except(optOut).ToList();
+        // The folder whose .editorconfig opts out may be above the excluded one (samples/.editorconfig, samples/Demo/ excluded:
+        // trial 23 said "style and analyzer fixes still run there").
+        string? OptOutFolder(string exclusion)
+        {
+            for (var folder = exclusion.TrimEnd('/'); folder.Length > 0; folder = folder.LastIndexOf('/') is var at && at < 0 ? string.Empty : folder[..at])
+            {
+                if (InitCommand.OptsOut(Migration.OwnSettings(Path.Combine(root, folder))))
+                {
+                    return folder + "/";
+                }
+            }
+
+            return null;
+        }
+
+        var optOutOf = exclusions.ToDictionary(e => e, OptOutFolder);
+        var optOut = optOutOf.Values.OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        var other = exclusions.Where(e => optOutOf[e] is null).ToList();
         string Them(int count) => count == 1 ? "it" : "them";
         var parts = new List<string>();
         if (other.Count > 0)

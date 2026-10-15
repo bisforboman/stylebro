@@ -136,6 +136,16 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Format_NamesTheOptOutFolder_AboveTheProjectsItLeavesOut()
+    {
+        // c11b: samples/.editorconfig turns every analyzer off; the whitespace pass left out samples/Demo/, and format said
+        // "style and analyzer fixes still run there".
+        Write("samples/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = none\n");
+        Write("samples/Demo/Demo.cs", "class Demo { }\n");
+        Assert.Equal("No whitespace pass: samples/: its .editorconfig turns every analyzer off, so 'format' leaves it alone.", FormatCommand.NoWhitespaceLine(root, ["samples/Demo/"]));
+    }
+
+    [Fact]
     public void StaleCopies_OlderThanADay_AreDeleted()
     {
         var old = Directory.CreateDirectory(Path.Combine(root, "stylebro-preview-old")).FullName;

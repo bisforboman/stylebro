@@ -341,6 +341,7 @@ internal static class CamelCaseRenamer
         var where = new Dictionary<string, string>();
         var nameofs = new HashSet<string>();
         var positional = new Dictionary<string, string>(StringComparer.Ordinal);
+        var dynamic = new Dictionary<string, string>(StringComparer.Ordinal);
         var documents = new List<Document>();
         foreach (var project in solution.Projects)
         {
@@ -373,6 +374,10 @@ internal static class CamelCaseRenamer
                     {
                         AddReflection(text, $"{document.FilePath ?? document.Name}({line + 1})");
                     }
+                    else if (kind == RepositoryNames.DynamicKind)
+                    {
+                        AddDynamic(text, $"{document.FilePath ?? document.Name}({line + 1})");
+                    }
                     else if (strings.Add(text))
                     {
                         where[text] = $"{document.FilePath ?? document.Name}({line + 1})";
@@ -397,6 +402,10 @@ internal static class CamelCaseRenamer
             else if (entry.Kind == RepositoryNames.ReflectionKind)
             {
                 AddReflection(entry.Text, entry.Where);
+            }
+            else if (entry.Kind == RepositoryNames.DynamicKind)
+            {
+                AddDynamic(entry.Text, entry.Where);
             }
             else if (entry.Kind == RepositoryNames.StringKind && strings.Add(entry.Text))
             {
@@ -426,7 +435,20 @@ internal static class CamelCaseRenamer
             }
         }
 
-        return new NamesInCode(strings, nameofs, where, outside, positional, reflection) { OutsideMembers = outsideMembers };
+        return new NamesInCode(strings, nameofs, where, outside, positional, reflection)
+        {
+            OutsideMembers = outsideMembers,
+            Dynamic = dynamic,
+            Snapshots = SnapshotFiles.GetWords(solution),
+        };
+
+        void AddDynamic(string text, string at)
+        {
+            if (!dynamic.ContainsKey(text))
+            {
+                dynamic[text] = at;
+            }
+        }
 
         // The reflection read is where the finding points: a field is kept for it, not for the first string with its name.
         void AddReflection(string text, string at)
@@ -452,8 +474,31 @@ internal static class CamelCaseRenamer
     /// matched by name, any <c>nameof(args)</c> of a parameter kept every private field called 'args' (Stateless,
     /// spreadcheetah's 'length').
     /// </summary>
-    private static (KeptReason? Reason, string? Where) FindInCode(ISymbol symbol, NamesInCode names) =>
-        MatchInStrings(symbol, names) is { } match ? (KeptReason.NameInString, names.WhereIs(match)) : (null, null);
+    private static (KeptReason? Reason, string? Where) FindInCode(ISymbol symbol, NamesInCode names)
+    {
+        // Member access through 'dynamic' binds by name at run time (jint: '((dynamic)t).MemberKey.Field').
+        if (names.Dynamic.TryGetValue(symbol.Name, out var dynamicUse))
+        {
+            return (KeptReason.UsedThroughDynamic, dynamicUse);
+        }
+
+        if (MatchInStrings(symbol, names) is { } match)
+        {
+            return (KeptReason.NameInString, names.WhereIs(match));
+        }
+
+        // A snapshot or approval file holds what a serializer wrote: the names of data members.
+        return IsDataSymbol(symbol) && names.Snapshots.TryGetValue(symbol.Name, out var snapshot) ? (KeptReason.NameInSnapshotFile, snapshot) : (null, null);
+    }
+
+    /// <summary>
+    /// Names that serializers and script engines write and read: instance properties and events, public and internal
+    /// instance fields (whatever the containing type's accessibility: reflection doesn't care, jint's scripts read
+    /// 'host.ByteField' of a private class), and enum members.
+    /// </summary>
+    private static bool IsDataSymbol(ISymbol symbol) =>
+        (symbol is IPropertySymbol or IEventSymbol && !symbol.IsStatic)
+        || (symbol is IFieldSymbol field && (FieldNames.IsDataMember(field) || field.ContainingType.TypeKind == TypeKind.Enum));
 
     /// <summary>
     /// The first string code can refer to the symbol by, or null: a field by its name (GetField("_count")), a type by its name
@@ -467,8 +512,7 @@ internal static class CamelCaseRenamer
         // for inside strings too, like test JSON. Private fields only by their exact name: other projects reach them only by
         // reflection ('GetField("_count")'), and a common word like 'count' in any message would block every rename.
         // (Inside the field's own type, the analyzer also matches it inside strings: 'DebuggerDisplay("{_count}")'.)
-        var isData = (symbol is IPropertySymbol or IEventSymbol && !symbol.IsStatic)
-            || (symbol is IFieldSymbol field && (FieldNames.IsDataMember(field) || field.ContainingType.TypeKind == TypeKind.Enum));
+        var isData = IsDataSymbol(symbol);
 
         // Other fields (private ones, mostly) and static properties and events (no serializer writes them) only by a string
         // where code names a member to reach it ('GetField("_count")', RepositoryNames.IsReflectionShaped; owner's decision,
@@ -483,7 +527,7 @@ internal static class CamelCaseRenamer
         if (symbol is not INamedTypeSymbol)
         {
             var word = new System.Text.RegularExpressions.Regex(@"(?<![\w@])" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"(?!\w)");
-            return strings.Contains(symbol.Name) ? symbol.Name : isData ? strings.FirstOrDefault(s => word.IsMatch(s)) : null;
+            return strings.Contains(symbol.Name) ? symbol.Name : isData ? strings.FirstOrDefault(s => s.IndexOf(symbol.Name, StringComparison.Ordinal) >= 0 && word.IsMatch(s)) : null;
         }
 
         var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
@@ -494,10 +538,12 @@ internal static class CamelCaseRenamer
     /// Whether a property of the type that BRO1309 would rename keeps its name because it's in a string (test JSON, a wire
     /// format). Then the type's other properties keep theirs too: renaming only some mixes casings and changes only part
     /// of what a serializer reads and writes (Kavita's Koreader DTO: 'percentage' renamed, 'document' and 'progress' kept).
+    /// A snake_case property ('line_count') is never BRO1309's, so it keeps its name too, and so do the others (trial 23).
     /// </summary>
     private static bool HasKeptProperty(INamedTypeSymbol type, NamesInCode names, ConcurrentDictionary<ISymbol, bool> cache) =>
         cache.GetOrAdd(type, _ => type.GetMembers().OfType<IPropertySymbol>()
-            .Any(p => PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null));
+            .Any(p => p.Name.TrimStart('_').IndexOf('_') >= 0
+                || (PascalCaseNamingAnalyzer.GetNewName(p.Name) is not null && FindInCode(p, names).Reason is not null)));
 
     /// <summary>Symbols whose conflicts are checked by syntax over their member (<see cref="CamelCaseNames.CanRename"/>).</summary>
     private static bool IsMemberScoped(ISymbol symbol) =>
@@ -613,6 +659,13 @@ internal static class CamelCaseRenamer
 
                 foreach (var reference in referenced.Locations)
                 {
+                    // Owner's choice 2026-10-15, "Leave VB alone": StyleBro doesn't edit Visual Basic code (case-insensitive:
+                    // its lookups found the old name under the new one), so a name VB uses keeps it.
+                    if (reference.Document.Project.Language != LanguageNames.CSharp)
+                    {
+                        return (result, KeptReason.UsedFromVisualBasic);
+                    }
+
                     if (reference.IsImplicit
                         || (isConstructor
                             && (await reference.Document.GetTextAsync(cancellationToken).ConfigureAwait(false)).ToString(reference.Location.SourceSpan).TrimStart('@') != oldName))
@@ -944,6 +997,12 @@ internal static class CamelCaseRenamer
 
         /// <summary>Names used as members (<see cref="RepositoryNames.MemberNameKind"/>) in files of projects this run didn't load, with those files.</summary>
         public Dictionary<string, List<string>> OutsideMembers { get; set; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets or sets the names used as members through <see langword="dynamic"/> (<see cref="RepositoryNames.DynamicKind"/>), with where.</summary>
+        public Dictionary<string, string> Dynamic { get; set; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets or sets the words of the snapshot and approval files (<see cref="SnapshotFiles"/>), with where.</summary>
+        public Dictionary<string, string> Snapshots { get; set; } = new(StringComparer.Ordinal);
 
         public bool Contains(string name) => Strings.Contains(name) || Nameofs.Contains(name);
 

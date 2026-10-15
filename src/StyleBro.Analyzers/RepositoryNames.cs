@@ -48,6 +48,12 @@ public static class RepositoryNames
     /// </summary>
     public const char ReflectionKind = 'R';
 
+    /// <summary>
+    /// A name used as a member through <see langword="dynamic"/> (<c>((dynamic)t).Field</c>), bound at run time by name
+    /// (<see cref="Entry.Where"/>: 'path(line)'). Jint's test read a field that way: renaming it compiled and failed at run time.
+    /// </summary>
+    public const char DynamicKind = 'D';
+
     // Type's (and TypeInfo's) methods that take a member's name. Other types have methods of the same names
     // (JsonElement.GetProperty("count") in Orleans' tests), so only on a receiver that looks like a Type (TypeLike), or
     // without one (a helper of the same name).
@@ -81,8 +87,14 @@ public static class RepositoryNames
     /// </summary>
     public static IEnumerable<(char Kind, string Text, int Line)> Collect(SyntaxNode root)
     {
+        var dynamicNames = GetDynamicNames(root);
         foreach (var token in TreeWalk.Tokens(root))
         {
+            if (dynamicNames is not null && IsDynamicMemberName(token, dynamicNames))
+            {
+                yield return (DynamicKind, token.ValueText, token.GetLocation().GetLineSpan().StartLinePosition.Line);
+            }
+
             if (token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
             {
                 var line = token.GetLocation().GetLineSpan().StartLinePosition.Line;
@@ -109,7 +121,7 @@ public static class RepositoryNames
     {
         foreach (var (kind, text, line) in Collect(root))
         {
-            yield return kind is StringKind or PositionKind or ReflectionKind ? Line(kind, $"{path}({line + 1})", text) : Line(kind, string.Empty, text);
+            yield return kind is StringKind or PositionKind or ReflectionKind or DynamicKind ? Line(kind, $"{path}({line + 1})", text) : Line(kind, string.Empty, text);
         }
 
         var identifiers = new SortedSet<string>(TreeWalk.Tokens(root).Where(t => t.IsKind(SyntaxKind.IdentifierToken)).Select(t => t.ValueText), System.StringComparer.Ordinal);
@@ -176,6 +188,90 @@ public static class RepositoryNames
     /// </summary>
     public static string IdentifierLine(string path, IEnumerable<string> identifiers) =>
         Line(IdentifierKind, path, string.Join(" ", new SortedSet<string>(identifiers, System.StringComparer.Ordinal)));
+
+    /// <summary>
+    /// The names a tree declares with the type <see langword="dynamic"/> (locals, parameters, fields, properties), or null
+    /// when it never says <see langword="dynamic"/>: then no member access in it is dynamic (cheap for the usual file).
+    /// </summary>
+    private static HashSet<string>? GetDynamicNames(SyntaxNode root)
+    {
+        HashSet<string>? names = null;
+        foreach (var token in TreeWalk.Tokens(root))
+        {
+            if (!token.IsKind(SyntaxKind.IdentifierToken) || token.ValueText != "dynamic" || token.Parent is not IdentifierNameSyntax type)
+            {
+                continue;
+            }
+
+            names ??= new HashSet<string>(System.StringComparer.Ordinal);
+            switch (type.Parent)
+            {
+                case VariableDeclarationSyntax variables when variables.Type == type:
+                    names.UnionWith(variables.Variables.Select(v => v.Identifier.ValueText));
+                    break;
+
+                case ParameterSyntax parameter when parameter.Type == type:
+                    names.Add(parameter.Identifier.ValueText);
+                    break;
+
+                case PropertyDeclarationSyntax property when property.Type == type:
+                    names.Add(property.Identifier.ValueText);
+                    break;
+
+                case ForEachStatementSyntax loop when loop.Type == type:
+                    names.Add(loop.Identifier.ValueText);
+                    break;
+            }
+        }
+
+        return names;
+    }
+
+    /// <summary>
+    /// Whether the token is the member name of an access on a <see langword="dynamic"/> receiver, by syntax:
+    /// <c>((dynamic)x).Name</c>, <c>(x as dynamic).Name</c>, a name declared dynamic, and accesses chained on those.
+    /// </summary>
+    private static bool IsDynamicMemberName(SyntaxToken token, HashSet<string> dynamicNames)
+    {
+        if (!token.IsKind(SyntaxKind.IdentifierToken) || token.Parent is not SimpleNameSyntax { Parent: MemberAccessExpressionSyntax access } name || access.Name != name)
+        {
+            return false;
+        }
+
+        for (var receiver = access.Expression; ;)
+        {
+            switch (receiver)
+            {
+                case ParenthesizedExpressionSyntax parenthesized:
+                    receiver = parenthesized.Expression;
+                    break;
+
+                case MemberAccessExpressionSyntax member:
+                    receiver = member.Expression;
+                    break;
+
+                case InvocationExpressionSyntax invocation:
+                    receiver = invocation.Expression;
+                    break;
+
+                case ElementAccessExpressionSyntax element:
+                    receiver = element.Expression;
+                    break;
+
+                case CastExpressionSyntax cast:
+                    return cast.Type is IdentifierNameSyntax { Identifier.ValueText: "dynamic" };
+
+                case BinaryExpressionSyntax binary when binary.IsKind(SyntaxKind.AsExpression):
+                    return binary.Right is IdentifierNameSyntax { Identifier.ValueText: "dynamic" };
+
+                case IdentifierNameSyntax identifier:
+                    return dynamicNames.Contains(identifier.Identifier.ValueText);
+
+                default:
+                    return false;
+            }
+        }
+    }
 
     private static bool IsMemberName(SyntaxToken token) =>
         token.IsKind(SyntaxKind.IdentifierToken)

@@ -53,13 +53,14 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
             : null;
         var rename = FieldNames.GetRename(field, style, hungarian);
 
-        // Fields follow the naming rules already (FieldNames' styles): NamingRules only checks IDE1006's suppressions.
+        // FieldNames' styles follow the naming rules; NamingRules checks the new name against the rule Roslyn picks for the
+        // field too (stryker: a '_' rule for private static fields wins over one for static readonly, so '_lockObj' stays).
         if (rename is ({ } rule, { } newName)
             && PublicApi.CanRename(field, options)
             && (field.DeclaredAccessibility == Accessibility.Private || !DisabledCode.Mentions(context.Compilation, field.Name))
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
             && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian)
-            && NamingRules.AllowsRename(context.Compilation, options, location, field, null, context.CancellationToken))
+            && NamingRules.AllowsRename(context.Compilation, options, location, field, newName, context.CancellationToken))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 rule switch

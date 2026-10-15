@@ -519,6 +519,17 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   variable where IDE0042 is a warning/error (`Naming/Deconstruction.cs` mirrors Roslyn's check: an element sharing its
   name with something in scope keeps it quiet, the rename ended the clash); CamelCaseRenamer (BRO1301-BRO1309) checks
   the same per rename (`KeptReason.AddsDeconstruction`).
+- **Trial 23 guards** (2026-10-15): member names used through `dynamic` (`RepositoryNames.DynamicKind`, syntax: a chain on
+  `(dynamic)x`, `x as dynamic` or a name declared dynamic; `KeptReason.UsedThroughDynamic`); snapshot/approval files
+  (`*.verified.*`/`*.received.*`/`*.approved.*`, `SnapshotFiles.cs`: additional files + a disk scan from each project's
+  git root, cached 5 min; data members only; `NameInSnapshotFile`; owner's choice); a reference in a non-C# document keeps
+  the rename (`UsedFromVisualBasic`, owner: "Leave VB alone"); `FieldNames.IsDataMember` no longer exempts private types
+  (jint's scripts); a snake_case property keeps its type's other properties (`HasKeptProperty`); fields go through
+  `NamingRules.AllowsRename` with the new name (`const` implies static/readonly in its modifier comparer, like
+  Roslyn's; the comparers are partial, so key order decides ties, stryker's `_lockObj`). That makes FieldNames' own
+  naming-rule guards (`IsLeftByNamingRule`, `ruled == Other`, `IsPrefixRequiredByNamingRule`) redundant for enforced
+  rules: their mutation entries were dropped. Not done: two-run renames (a field whose new name a
+  method renamed in the same run frees).
 - Remaining naming: protected readonly casing, namespaces.
 
 ## BRO16xx: documentation
@@ -1242,7 +1253,10 @@ an editorconfig comment). verify-package check 5 tests it end to end.
 - Real-world `-Work` folders: OUTSIDE the repo tree (inside, the repo's Directory.Build.props/Packages.props leak into
   the clones, which then fail to build and the script reports 0 findings as "all good") and unique per agent (the
   default folder hit another agent's DLL lock; scratchpad clones lost `.git`). `Invoke-RealWorld.ps1 -Enable <ids>`
-  turns on off-by-default rules.
+  turns on off-by-default rules. Exception: `.trials/` (owner, 2026-10-15: one place to keep track of them) is
+  gitignored and holds stub `.editorconfig` (`root = true`), `Directory.Build.props/.targets` and
+  `Directory.Packages.props`, so clones there inherit nothing; first-run trials go to `.trials/trialNN/<repo>`, repros to
+  `.trials/trialNN/spot/`, logs to `.trials/trialNN/logs/` (checked: a project there sees no StyleBro property or CPM).
 - `$$` in unit-test markup is the caret position (raw `$$"""` strings are tested in samples/Messy only).
 - Parallel rule PRs conflict in the same list files. Since 2026-10-11 the append-only lists are one file per entry
   (decisions, backlog items, mutation entries) and the rest are `merge=union` in the committed `.gitattributes`
@@ -1440,6 +1454,21 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   BRO1510 mixed accessors, leading lambdas.
 - GOTCHA: in this environment `\\n` inside a bash heredoc python script became a real newline; write such scripts with
   the Write tool (there `\\n` stays a backslash-n in the output).
+
+## Trial 23 init/migrate fixes (2026-10-15)
+
+- `StyleCopSetup.EvaluateStyleCop` evaluates a multi-targeted project per framework when the outer evaluation has no
+  StyleCop item (`UsesStyleCop`; fluentassertions: StyleCop under `'$(TargetFramework)' == 'net6.0'`, cached per process).
+- init at the root: Style category / bulk off -> the template's IDE rules on by id leave the block (`StyleOffIds`, shared
+  with `NestedStyleOff`); StyleBro's rules stay on (decision 2026-10-15). Own path sections are repeated at the block's
+  end (`PathSectionOverrides`). Opt-out folders (not root = true) get the sort keys moved into a section for the other
+  code (`UsingsAround`: format sorts usings wherever a key is set). Kept one-line empty blocks write
+  `csharp_preserve_single_line_statements = true` (probed: IDE0055 splits `else { }` otherwise).
+- New conventions: BRO1504 (comments below code, counted on a copy without the blank lines), BRO1603 periods, BRO1618
+  `<c>keyword</c>`, non-private fields vs an enforced naming rule (BRO1306 off; `CountNonPrivateNaming` compiles the
+  trees without references). BRO1306's off line is shared with the static casing: KeptLines takes a topic for both.
+  Leading-lambda calls count apart for BRO1107/BRO1108 (`FoldLeadingLambdas`). Usings are sorted per run between
+  directives. PinPreset without a root solution uses the shallowest solutions (stryker's src/).
 
 ## Known open questions
 

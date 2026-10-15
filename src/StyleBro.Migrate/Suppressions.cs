@@ -204,7 +204,9 @@ internal static class Suppressions
 
             var list = (AttributeListSyntax)attribute.Parent!;
             var rest = attribute.ArgumentList!.Arguments.Skip(2).Select(a => a.ToString());
-            foreach (var id in ids.Where(id => existing.Add(Key(attribute, id))))
+
+            // On a type or member, SA1300's namespace part can't apply: no BRO1312 there (trial 23: noise StyleSharp reports).
+            foreach (var id in ids.Where(id => !(id == StyleBro.Analyzers.DiagnosticIds.NamespacePascalCase && list.Parent is MemberDeclarationSyntax)).Where(id => existing.Add(Key(attribute, id))))
             {
                 var arguments = new[] { $"\"{(id.StartsWith("BRO", StringComparison.Ordinal) ? "StyleBro" : "Style")}\"", $"\"{id}\"" }.Concat(rest);
                 var copy = $"[{(list.Target is null ? string.Empty : list.Target + " ")}{attribute.Name}({string.Join(", ", arguments)})]";

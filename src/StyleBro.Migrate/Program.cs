@@ -169,8 +169,14 @@ internal static class Program
         if (setup.NotInstalled)
         {
             setup.Warnings.ToList().ForEach(w => Console.WriteLine("Warning: " + w));
-            Console.WriteLine(LeftoverLine(StyleCopSetup.Evidence(root)));
-            Console.WriteLine($"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'stylebro-migrate init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")} and ignores those lines.");
+            var evidence = StyleCopSetup.Evidence(root);
+            Console.WriteLine(LeftoverLine(evidence));
+
+            // Without settings there's nothing to call leftovers (trial 23, tools/Gen: "no StyleCop settings" then "StyleCop's
+            // severities there don't describe the code").
+            Console.WriteLine(evidence.Count == 0
+                ? $"Nothing to migrate{(write ? ", nothing written" : string.Empty)}. Run 'stylebro-migrate init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")}."
+                : $"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'stylebro-migrate init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")} and ignores those lines.");
             return 1;
         }
 
@@ -682,6 +688,14 @@ internal static class Program
             if (options.Contains("--write"))
             {
                 Console.Error.WriteLine("--diff previews without writing anything: use --diff or --write, not both.");
+                return 1;
+            }
+
+            // 'init --diff' on a StyleCop repository: init's refusal, before the copy (trial 23: it ended "The preview failed").
+            if (command == "init" && Path.GetFullPath(TakeOption(TakeOption(options, "--project").Others, SonarProfileOption).Others.FirstOrDefault(a => !a.StartsWith('-')) ?? ".") is var folder
+                && Directory.Exists(folder) && !InitCommand.IsMigrated(folder)
+                && StyleCopSetup.Evidence(folder).Count > 0 && StyleCopSetup.IsInstalled(folder) && InitCommand.SendsToMigration(folder))
+            {
                 return 1;
             }
 

@@ -73,6 +73,15 @@ public enum KeptReason
     /// a tuple type's elements are renamed together, so this one keeps its own too.
     /// </summary>
     KeptWithOtherElement,
+
+    /// <summary>Code uses the name through <see langword="dynamic"/> (<c>((dynamic)x).Name</c>), which binds by name at run time.</summary>
+    UsedThroughDynamic,
+
+    /// <summary>The name is in a snapshot or approval file ('*.verified.*', '*.received.*', '*.approved.*'), which a serializer wrote.</summary>
+    NameInSnapshotFile,
+
+    /// <summary>Visual Basic code uses the name: StyleBro leaves VB code alone.</summary>
+    UsedFromVisualBasic,
 }
 
 /// <summary>
@@ -122,7 +131,10 @@ public sealed class KeptFinding
     {
         KeptReason.NameInString => "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
         KeptReason.NameInNameof => "the name is used in nameof(...), so the rename would change that string too",
-        KeptReason.OtherPropertyKept => "another property of the type keeps its name (it's in a string), so all of them keep theirs",
+        KeptReason.OtherPropertyKept => "another property of the type keeps its name (it's in a string or a snapshot file, or it's snake_case), so all of them keep theirs",
+        KeptReason.UsedThroughDynamic => "code uses the name through 'dynamic', which binds it by name at run time",
+        KeptReason.NameInSnapshotFile => "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+        KeptReason.UsedFromVisualBasic => "Visual Basic code uses the name, and StyleBro doesn't edit VB code",
         KeptReason.PublicApi => "a related override, implementation or parameter is public API (stylebro_rename_public_api)",
         KeptReason.ImplementsAnotherMember => "it also overrides or implements a member that isn't renamed",
         KeptReason.DerivedMemberHasNewName => "a derived type already has a member with the new name",
