@@ -29,6 +29,18 @@ public class BaselineTests
         Assert.Equal(new[] { "src/New.cs:1", "src/Old.cs:4", "src/Old.cs:4" }, reported);
     }
 
+    // jint: a test project linking '..\Jint.Browser\X.cs' gets the file as 'Tests/../Jint.Browser/X.cs': its baselined
+    // findings failed that project's build.
+    [Fact]
+    public async Task ALinkedFile_NamedThroughAnotherFolder_IsSuppressed()
+    {
+        var baseline = Entries(("src/Old.cs", "    string a = \"\";", 1));
+        var reported = await RunAsync(baseline, ("tests/../src/Old.cs", Old));
+
+        Assert.Equal(new[] { "src/Old.cs:4", "src/Old.cs:4" }, reported);
+        Assert.Equal("src/Old.cs", Baseline.RelativePath(Root + "/./x/..", Root + "/tests/../src/./Old.cs"));
+    }
+
     [Fact]
     public async Task Count_CoversThatManyViolationsOnTheLine()
     {

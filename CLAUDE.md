@@ -1414,9 +1414,13 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   TargetPath newer than the project folder's files; also baseline; verify/preview copies get outputs stamped now).
 - `DirectiveStringOffsets`: every subset of the tested symbols (<= 8, else singles and all-but-one); any directive kind.
   The mask record lists the `dotnet format` children (`Track`): Recover waits for them, `Busy` stops another run.
-- Speed: `Separate` keys a shared file by the symbols IT tests (`CompileView.Key([file])`); a multi-targeted project's
-  later framework runs get only `FilesNewToFramework` (jint run 1: 29 -> 20 min). Unset LangVersion differs per framework
-  (C# 12 vs 14), so those frameworks still don't share a run: by design.
+- Speed: `Separate` keys a shared file by the symbols IT tests (`CompileView.Key([file])`; jint net10.0: 4 parts -> 3).
+  Tried and dropped: later frameworks' runs on only the files that parse differently. It saved ~1-2 of 30 minutes (each
+  run's time is workspace load + compilation, not analysis) and changed results: a rename kept in the run that loads its
+  users was no longer done by a later run that doesn't, and a finding the net10 run never reported (build did) stayed.
+  jint's "40 minutes" was machine load: old and new tool side by side both take ~30. Unset LangVersion differs per
+  framework (C# 12 vs 14), so those frameworks still don't share a run: by design.
+- `Baseline.RelativePath` drops `x/..` segments: the compiler names a linked `..\Lib\A.cs` as `Tests\..\Lib\A.cs`.
 - Fix-order bug found (analyzer side): `}` + `// comment` + blank + code gives two outputs (BRO1504 vs BRO1506 first).
 
 ## Trial 22 init/migrate fixes (2026-10-15)

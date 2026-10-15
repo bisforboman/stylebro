@@ -173,14 +173,11 @@ internal static class FormatCommand
     /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
     private const string GeneratorsHeader = "Generators:";
 
-    /// <summary>The start of the line that says later frameworks' runs format fewer files (printed for the first run only).</summary>
-    private const string LaterFrameworksHeader = "Later frameworks:";
-
     /// <summary>The source generator projects built or found up to date in this process (<see cref="BuildGenerators"/>).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, ProtectedHeader, VisualBasicHeader, GeneratorsHeader, LaterFrameworksHeader, CheckingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, ProtectedHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The findings the last run on a folder kept, per folder (<see cref="Remember"/>).</summary>
     private static readonly Dictionary<string, List<KeptFinding>> LastKept = new(StringComparer.OrdinalIgnoreCase);
@@ -2273,22 +2270,6 @@ internal static class FormatCommand
             .Order(StringComparer.Ordinal)
             .ToList();
 
-    /// <summary>
-    /// The files in <paramref name="projectDirectory"/> (not bin/obj; relative to <paramref name="root"/>, '/'-separated) a
-    /// project compiles for a framework (<paramref name="view"/>) that no earlier run's framework (<paramref name="earlier"/>)
-    /// compiles the same way: not compiled there, or another key (<see cref="CompileView.Key"/>: the '#if' symbols the file
-    /// tests, language version, nullable context).
-    /// </summary>
-    public static List<string> FilesNewToFramework(string projectDirectory, string root, CompileView view, IReadOnlyCollection<CompileView> earlier)
-    {
-        var own = Path.TrimEndingDirectorySeparator(projectDirectory) + Path.DirectorySeparatorChar;
-        var compiled = earlier.Select(e => e.Compile.ToHashSet(StringComparer.OrdinalIgnoreCase)).ToList();
-        return view.Compile.Where(f => f.StartsWith(own, StringComparison.OrdinalIgnoreCase) && !f[own.Length..].Split('\\', '/').Any(s => s is "obj" or "bin"))
-            .Where(f => earlier.Zip(compiled).All(e => !e.Second.Contains(f) || e.First.Key([f]) != view.Key([f])))
-            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
-            .ToList();
-    }
-
     /// <summary>Whether the file at <paramref name="path"/> exists and has <paramref name="text"/>, line endings aside.</summary>
     internal static bool SameButEndings(string text, string path) =>
         File.Exists(path) && File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal) == text.Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -3391,55 +3372,6 @@ internal static class FormatCommand
             includes = plan.Select(_ => requested).ToList();
         }
 
-        var ownIncludes = includes;
-        if (requested is null)
-        {
-            var narrowed = includes.Select((include, i) => OnlyNewToFramework(i, include)).ToList();
-            if (narrowed.Where((n, i) => !n.SequenceEqual(includes[i])).Any())
-            {
-                log($"{LaterFrameworksHeader} a multi-targeted project's files are fixed in the run of its first framework; the runs after it get only the files that compile differently there (another '#if' symbol, language version or nullable context).");
-            }
-
-            includes = narrowed;
-        }
-
-        // A multi-targeted project an earlier run formats for another framework: in this run only the files that parse
-        // differently here (another '#if' symbol they test is defined, another language version or nullable context). The rest
-        // got the same fixes in the earlier run (StyleBro's fixes make the same edits in every framework's copy of a file),
-        // and loading them again only cost time (trial 23: jint's core project was fixed once per framework, 5 times).
-        List<string> OnlyNewToFramework(int index, List<string> include)
-        {
-            var result = include.ToList();
-            foreach (var project in plan[index].Projects.Where(p => projects[p].Frameworks.Length > 1))
-            {
-                var fullPath = projects[project].FullPath;
-
-                // Not a framework whose run skipped the project ('dotnet format' couldn't load it there): nothing was fixed.
-                var earlier = Enumerable.Range(0, index)
-                    .Where(j => plan[j].Framework != plan[index].Framework && plan[j].Projects.Contains(project)
-                        && !(skipped.TryGetValue(Path.GetFileNameWithoutExtension(project), out var skippedFor) && skippedFor.Contains(plan[j].Framework)))
-                    .Select(j => View(fullPath, plan[j].Framework))
-                    .ToList();
-                var folder = Include(root, solutionDirectory, [project]).First();
-                if (earlier.Count == 0 || earlier.Any(e => e is null) || View(fullPath, plan[index].Framework) is not { } view || !result.Contains(folder)
-                    || plan[index].Projects.Count(p => Include(root, solutionDirectory, [p]).First() == folder) > 1)
-                {
-                    continue;
-                }
-
-                var files = FilesNewToFramework(Path.GetDirectoryName(fullPath)!, root, view, earlier.OfType<CompileView>().ToList());
-
-                // ponytail: a long list stays the folder (the command line has a limit); a project that parses mostly differently gains little.
-                if (files.Sum(f => f.Length + 1) < 8000)
-                {
-                    result.Remove(folder);
-                    result.AddRange(files.Where(f => !result.Any(r => Covers(r, f))));
-                }
-            }
-
-            return result;
-        }
-
         var toRun = Enumerable.Range(0, plan.Count).Where(i => includes[i].Count > 0).ToList();
         int RunFramework(int index, bool verify, Action<string> output, IReadOnlyList<string>? only = null)
         {
@@ -3468,7 +3400,7 @@ internal static class FormatCommand
                     options.RemoveRange(options.IndexOf("--include"), requested.Count + 1);
                 }
 
-                var include = only ?? (requested is null ? OnlyNewToFramework(index, ownIncludes[index]) : includes[index]);
+                var include = only ?? includes[index];
                 options.Add("--include");
                 options.AddRange(include);
 

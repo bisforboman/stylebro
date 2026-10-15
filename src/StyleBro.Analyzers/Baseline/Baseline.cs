@@ -82,8 +82,8 @@ internal sealed class Baseline
             return null;
         }
 
-        var root = NormalizePath(baselineDirectory).TrimEnd('/') + "/";
-        var file = NormalizePath(filePath);
+        var root = WithoutDotSegments(NormalizePath(baselineDirectory)).TrimEnd('/') + "/";
+        var file = WithoutDotSegments(NormalizePath(filePath));
         return file.StartsWith(root, StringComparison.OrdinalIgnoreCase) ? file.Substring(root.Length) : null;
     }
 
@@ -106,6 +106,33 @@ internal sealed class Baseline
     public int Allowed(Key key) => counts.TryGetValue(key, out var count) ? count : 0;
 
     private static string NormalizePath(string path) => path.Replace('\\', '/');
+
+    /// <summary>
+    /// A '/'-separated path without '.' and 'x/..' segments: the compiler names a file a project links from another folder
+    /// ('&lt;Compile Include="..\Lib\A.cs" /&gt;') as 'Tests/../Lib/A.cs', which matched no entry (trial 23, jint: the
+    /// baselined findings of linked files still failed the test project's build).
+    /// </summary>
+    private static string WithoutDotSegments(string path)
+    {
+        var parts = new List<string>();
+        foreach (var part in path.Split('/'))
+        {
+            if (part == "." && parts.Count > 0)
+            {
+                continue;
+            }
+
+            if (part == ".." && parts.Count > 1 && parts[parts.Count - 1] != "..")
+            {
+                parts.RemoveAt(parts.Count - 1);
+                continue;
+            }
+
+            parts.Add(part);
+        }
+
+        return string.Join("/", parts);
+    }
 
     /// <summary>An entry's identity: rule, path ('/'-separated, relative to the baseline's folder), fingerprint.</summary>
     public readonly struct Key : IEquatable<Key>

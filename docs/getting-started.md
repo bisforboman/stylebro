@@ -838,10 +838,9 @@ A framework whose code compiles exactly like another's in a project gets no run 
 symbol that tells them apart (say the code tests `NET8_0_OR_GREATER` but nothing newer), `net8.0`, `net9.0` and `net10.0`
 see the same files, settings and branches, and one run formats them all. Only frameworks of one kind share a run (.NET,
 .NET Standard or .NET Framework, and the same platform such as `-windows`), since their APIs differ more. The
-`Multi-targeted:` line names the frameworks that ran and those that didn't need to. A multi-targeted project's files are
-fixed in the run of its first framework; the runs of its other frameworks get only the files that compile differently
-there (an `#if` symbol they test, the language version or the nullable context), since StyleBro's fixes make the same
-edits in every framework's copy of a file (`Later frameworks: ...`).
+`Multi-targeted:` line names the frameworks that ran and those that didn't need to. A file several projects compile
+(`<Compile Include="..\Tests\Helpers.cs" />`) doesn't split them into separate parts when they only define other
+symbols it doesn't test.
 
 After a run that changed files, the next one checks every framework at once first: a run whose check is clean isn't
 made again, and one whose check found something formats only the files with findings (all of its files when an earlier

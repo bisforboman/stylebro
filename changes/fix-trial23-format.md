@@ -10,9 +10,8 @@
 
 - `format` leaves Visual Basic alone: it runs on the C# projects only, never changes or reports `.vb` files, and keeps
   the name of a C# member that Visual Basic code uses.
-- Faster runs on multi-targeted repositories: a project's files are fixed once, and the runs for its other target
-  frameworks get only the files that compile differently there; projects that link a file now share a run when the
-  file's own `#if` symbols agree.
+- Projects that link a shared file now share a `format` run when the `#if` symbols that file tests agree (fewer runs
+  on multi-targeted repositories).
 
 ### Fixed
 
@@ -22,5 +21,7 @@
   temporary `.stylebro-format-*.slnf` it left is removed by the next run.
 - A CR inside a string literal (a verbatim regex) no longer counts as an old Mac line ending.
 - A code fix of another analyzer that fails is no longer reported as a StyleBro bug.
+- The baseline now also covers files a project compiles from another folder (`<Compile Include="..\Lib\A.cs" />`): their
+  baselined findings still failed that project's build.
 - `--verify-no-changes` deletes its temporary copy, and copies a killed preview or verify left behind are removed
   after a day.
