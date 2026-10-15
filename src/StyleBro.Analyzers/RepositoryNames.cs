@@ -220,6 +220,13 @@ public static class RepositoryNames
         return false;
     }
 
+    /// <summary>
+    /// The identifier line for a file in another language (Visual Basic, which format doesn't load): its names, so a C#
+    /// member it uses keeps its name.
+    /// </summary>
+    public static string IdentifierLine(string path, IEnumerable<string> identifiers) =>
+        Line(IdentifierKind, path, string.Join(" ", new SortedSet<string>(identifiers, System.StringComparer.Ordinal)));
+
     private static string Line(char kind, string where, string text) => kind + "\t" + Escape(where) + "\t" + Escape(text);
 
     /// <summary>

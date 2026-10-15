@@ -16,8 +16,10 @@ namespace StyleBro.Tests;
 /// them, and that they don't make it fail. The tests that set <see cref="KeptFinding.Variable"/> live in this class, so
 /// they don't run in parallel with each other.
 /// </summary>
-public class KeptFindingsTests
+public sealed class KeptFindingsTests : IDisposable
 {
+    private readonly List<string> folders = [];
+
     [Fact]
     public async Task AFieldReadByReflection_IsKept_TheNameIsInAString()
     {
@@ -660,10 +662,14 @@ public class KeptFindingsTests
         }
     }
 
-    private static string NewFolder()
+    /// <summary>The folders <see cref="NewFolder"/> made, deleted after the test (thousands were left in the temp folder).</summary>
+    public void Dispose() => folders.ForEach(f => PreviewCommand.Delete(f));
+
+    private string NewFolder()
     {
         var root = Path.Combine(Path.GetTempPath(), "stylebro-kept-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
+        folders.Add(root);
         File.WriteAllText(Path.Combine(root, "C.cs"), "class C { }\n");
         return root;
     }
