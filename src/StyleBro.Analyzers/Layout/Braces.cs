@@ -201,7 +201,9 @@ internal static class Braces
             }
             else if (wraps.Where(w => w.Governs(line)).OrderBy(w => w.Statement.Span.Length).FirstOrDefault() is { } inside)
             {
-                var prefix = inside.StartsLine ? LeadingWhitespace(text, text.Lines[inside.FirstLine]) : LeadingWhitespace(text, text.Lines[inside.OwnerLine]);
+                var prefix = inside.StartsLine ? LeadingWhitespace(text, text.Lines[inside.FirstLine])
+                    : BodyBraceLine(inside.Statement, text) is { } braceLine ? LeadingWhitespace(text, braceLine)
+                    : LeadingWhitespace(text, text.Lines[inside.OwnerLine]);
                 result = Target(inside) is { } target && old.StartsWith(prefix, StringComparison.Ordinal)
                     ? target + old.Substring(prefix.Length)
                     : null;
@@ -502,6 +504,28 @@ internal static class Braces
 
     private static bool IsMultiLine(SyntaxNode node, SourceText text) =>
         text.Lines.GetLineFromPosition(node.SpanStart).LineNumber != text.Lines.GetLineFromPosition(node.Span.End).LineNumber;
+
+    /// <summary>
+    /// The line of the statement's body '{' when it starts a line below the statement's first line: that brace goes to the
+    /// statement's new indentation, and the body's lines keep their indentation relative to it. 'dotnet format' indents
+    /// <c>else switch (x)</c>'s body one level deeper than the 'else' line (an embedded statement); shifting relative to
+    /// the 'else' line put the body a level too deep once the switch had its own line, and the next run's whitespace
+    /// formatting moved it back (akka.net).
+    /// </summary>
+    private static TextLine? BodyBraceLine(StatementSyntax statement, SourceText text)
+    {
+        var brace = statement is SwitchStatementSyntax @switch
+            ? @switch.OpenBraceToken
+            : statement.ChildNodes().OfType<BlockSyntax>().FirstOrDefault()?.OpenBraceToken ?? default;
+        if (brace.IsKind(SyntaxKind.None))
+        {
+            return null;
+        }
+
+        // Only a '{' that starts its line (the statement itself starts on the owner's line, so that's a later line).
+        var line = text.Lines.GetLineFromPosition(brace.SpanStart);
+        return LeadingWhitespace(text, line).Length == brace.SpanStart - line.Start ? line : null;
+    }
 
     private static string LeadingWhitespace(SourceText text, TextLine line)
     {

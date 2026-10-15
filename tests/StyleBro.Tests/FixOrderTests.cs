@@ -83,6 +83,85 @@ public class FixOrderTests
         "BRO1519",
         "BRO1602");
 
+    // akka.net: 'dotnet format' splits '};' (csharp_preserve_single_line_statements = false); BRO1519's blank line before
+    // the ';' stayed when BRO1101 removed it, and BRO1518 removed it on the next run. BRO1519 leaves that ';' to BRO1101.
+    [Fact]
+    public Task EmptyStatementAfterABlock_LeavesNoBlankLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System;
+        using System.Collections.Generic;
+        using System.Threading.Tasks;
+
+        public class C
+        {
+            public async Task Run(Func<Func<Task>, int, Task> assert, List<int> expected)
+            {
+                await assert(async () =>
+                {
+                    foreach (var v in expected)
+                    {
+                        await Task.Delay(v);
+                    }
+                    ;
+                }, 1);
+            }
+        }
+        """,
+        "csharp_preserve_single_line_statements = false\n",
+        "BRO1101",
+        "BRO1518",
+        "BRO1519",
+        SdkFormatter);
+
+    // akka.net: blank lines below a trailing comment and above a '}' were nobody's (BRO1518 left them to BRO1506, which
+    // skips trailing comments), until BRO1516's braces put a '}' there.
+    [Fact]
+    public Task Braces_BlankLinesBelowATrailingComment_AreRemoved() => AssertConvergesInEveryOrderAsync(
+        """
+        using System.Collections.Generic;
+        using System.Threading.Tasks;
+
+        public class C
+        {
+            public async Task Probe(IEnumerable<int> locs, int first)
+            {
+                foreach (var loc in locs)
+                {
+                    if (loc == first)
+                    {
+                        await Task.Delay(loc);
+                    }
+                    else
+                        await Task.Delay(1); // should not move
+
+                }
+            }
+        }
+        """,
+        "BRO1516",
+        "BRO1518",
+        "BRO1519");
+
+    // akka.net: BRO1504's blank line split a trailing comment from its continuation below, which the next run's whitespace
+    // formatting then moved to the code's indentation.
+    [Fact]
+    public Task TrailingCommentContinuedBelow_StaysTogether() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public void Serializer(int a)
+            {
+                Console.WriteLine(a); // This is because identifier is hardwired, so it could not be
+                                      // used to override other serializer identifier
+                Console.WriteLine(a);
+            }
+        }
+        """,
+        "BRO1504",
+        SdkFormatter);
+
     // sourcegit: with when_multiline, BRO1515 wraps the multi-line 'else if' and makes the single-line 'if' BRO1516's,
     // which used to need a second run.
     [Fact]

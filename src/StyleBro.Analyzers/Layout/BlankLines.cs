@@ -127,7 +127,8 @@ internal static class BlankLines
             return false;
         }
 
-        var above = text.ToString(text.Lines[line.LineNumber - 1].Span).Trim();
+        var aboveLine = text.Lines[line.LineNumber - 1];
+        var above = text.ToString(aboveLine.Span).Trim();
         if (above.Length == 0 || above.StartsWith("//", StringComparison.Ordinal) || above.StartsWith("/*", StringComparison.Ordinal)
             || above.StartsWith("*", StringComparison.Ordinal) || above.StartsWith("#", StringComparison.Ordinal))
         {
@@ -144,6 +145,7 @@ internal static class BlankLines
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenChainLinks(comment)
             && !IsBetweenListItems(comment)
+            && !ContinuesTrailingComment(comment, text, aboveLine)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
             && (belowCloseBrace || !IsCommentBelowCode(comment, text));
     }
@@ -232,6 +234,20 @@ internal static class BlankLines
             SyntaxKind.FinallyKeyword => token.Parent.IsKind(SyntaxKind.FinallyClause),
             _ => false,
         };
+    }
+
+    /// <summary>
+    /// Whether the comment continues a trailing comment on the line above, starting in the same column
+    /// (<c>x(); // because ...</c> + <c>         // ... the rest</c>; akka.net). A blank line between would split the
+    /// sentence, and the next 'dotnet format' run would move the separated half to the code's indentation. StyleCop's
+    /// SA1515 reports it; this only makes BRO1504 quieter.
+    /// </summary>
+    private static bool ContinuesTrailingComment(SyntaxTrivia comment, SourceText text, TextLine aboveLine)
+    {
+        var column = comment.SpanStart - text.Lines.GetLineFromPosition(comment.SpanStart).Start;
+        return column < aboveLine.Span.Length
+            && comment.Token.Parent?.SyntaxTree.GetRoot().FindTrivia(aboveLine.Start + column) is { RawKind: (int)SyntaxKind.SingleLineCommentTrivia } trailing
+            && trailing.SpanStart == aboveLine.Start + column;
     }
 
     /// <summary>

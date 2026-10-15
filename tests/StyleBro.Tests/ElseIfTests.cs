@@ -10,6 +10,63 @@ public class ElseIfTests
         dotnet_diagnostic.BRO1516.severity = none
         """;
 
+    // akka.net: before the fixes, 'dotnet format' had left the nested if's body at the if's column and its 'else' at the
+    // outer else's. Moved by the if's shift, they ended a level too far left, and the next run moved them back. Each line
+    // now goes where the joined chain wants it.
+    [Fact]
+    public Task IfLeftUnindentedByTheFormatter_LinesUpWithTheJoinedChain() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(bool a, bool b)
+            {
+                if (a)
+                    return 1;
+                {|BRO1139:else|}
+                    if (b)
+                    return 2;
+                else
+                    return 3;
+            }
+
+            public int N(bool a, bool b)
+            {
+                if (a)
+                    return 1;
+                {|BRO1139:else|}
+                    if (b)
+                        return 2;
+                    else
+                        return 3;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(bool a, bool b)
+            {
+                if (a)
+                    return 1;
+                else if (b)
+                    return 2;
+                else
+                    return 3;
+            }
+
+            public int N(bool a, bool b)
+            {
+                if (a)
+                    return 1;
+                else if (b)
+                    return 2;
+                else
+                    return 3;
+            }
+        }
+        """,
+        NoBraceRules);
+
     [Fact]
     public Task IfOnTheLineAfterElse_IsJoined() => Verify.VerifyFixAsync(
         """

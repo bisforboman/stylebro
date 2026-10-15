@@ -85,12 +85,20 @@ internal static class ElseIfs
                 continue;
             }
 
-            if (indent < shift)
+            if (parts.Count == 1)
+            {
+                shift = ShiftLaidOut(parts[0], line.Start + indent, indent, shift, text);
+            }
+
+            if (shift < 0 || indent < shift)
             {
                 return null;
             }
 
-            lineEdits.Add(new TextChange(new TextSpan(line.Start, shift), string.Empty));
+            if (shift > 0)
+            {
+                lineEdits.Add(new TextChange(new TextSpan(line.Start, shift), string.Empty));
+            }
         }
 
         if (lineEdits.Count > 0 && parts[0].If.DescendantTokens().Any(t => text.Lines.GetLineFromPosition(t.SpanStart).LineNumber != text.Lines.GetLineFromPosition(t.Span.End).LineNumber))
@@ -150,6 +158,45 @@ internal static class ElseIfs
         var braced = joined.WithChanges(wraps);
         var length = chain.Span.Length + braced.Length - text.Length;
         return new List<TextChange> { new(chain.Span, braced.ToString(new TextSpan(chain.SpanStart, length))) };
+    }
+
+    /// <summary>
+    /// How far a line of the joined if moves, judged by what starts it: an 'else' of its chain, or a brace of one of its
+    /// clauses' blocks, goes to the outer else's column (where 'else if' is now), any other line moves by the if's shift but stays right of that column. The same as
+    /// the plain shift for a laid-out if; it differs where the whitespace formatting already left the nested if's lines
+    /// unindented (akka.net: <see langword="else"/> + <c>if (a)</c> + a body at the if's column + <see langword="else"/> at the else's column),
+    /// which moved them a level too far and the next 'dotnet format' run moved them back. -1 when the line can't move so.
+    /// </summary>
+    private static int ShiftLaidOut(Part part, int position, int indent, int shift, SourceText text)
+    {
+        var elseLine = text.ToString(text.Lines.GetLineFromPosition(part.Else.ElseKeyword.SpanStart).Span);
+        var elseIndent = elseLine.Length - elseLine.TrimStart().Length;
+        var token = part.If.FindToken(position);
+        var clause = token.Kind() switch
+        {
+            SyntaxKind.ElseKeyword => token.Parent?.Parent,
+            SyntaxKind.OpenBraceToken or SyntaxKind.CloseBraceToken when token.Parent is BlockSyntax block => block.Parent is ElseClauseSyntax e ? e.Parent : block.Parent,
+            _ => null,
+        };
+        if (clause is IfStatementSyntax owner && IsInChain(owner, part.If))
+        {
+            return indent >= elseIndent ? indent - elseIndent : -1;
+        }
+
+        return indent - shift > elseIndent ? shift : indent > elseIndent ? 0 : -1;
+    }
+
+    private static bool IsInChain(IfStatementSyntax candidate, IfStatementSyntax first)
+    {
+        for (IfStatementSyntax? current = first; current is not null; current = current.Else?.Statement as IfStatementSyntax)
+        {
+            if (current == candidate)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static Part? GetPart(ElseClauseSyntax elseClause, SourceText text)
