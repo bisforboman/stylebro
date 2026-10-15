@@ -310,7 +310,7 @@ internal static class Braces
         child.Ancestors().OfType<BlockSyntax>().FirstOrDefault() is { } block
         && SingleLineBlocks.GetBraces(block) is { } braces
         && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
-        && SingleLineBlocks.IsReported(block, text, options);
+        && SingleLineBlocks.IsReported(block, text, options, isOn);
 
     /// <summary>
     /// Adds BRO1514-BRO1516's braces to the expansion of a single-line block (<paramref name="expansion"/>, BRO1508/

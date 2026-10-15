@@ -35,6 +35,67 @@ public class BlankLineAfterTests
         }
         """);
 
+    // jint: with the blank line above, the run would stand on its own and BRO1506 would leave the one below, while
+    // BRO1506 first removed it: BRO1504's fix removes it too. Not when BRO1506 is off.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task CommentBelowCode_LosesTheBlankLineBelowIt_WhenBRO1506IsOn(bool on) => VerifyFixAsync(
+        """
+        class C
+        {
+            int M(bool x)
+            {
+                if (x)
+                {
+                    return 1;
+                }
+                {|BRO1504:// a note|}
+                // and more
+
+                return 0;
+            }
+        }
+        """,
+        $$"""
+        class C
+        {
+            int M(bool x)
+            {
+                if (x)
+                {
+                    return 1;
+                }
+
+                // a note
+                // and more
+        {{(on ? string.Empty : "\n")}}        return 0;
+            }
+        }
+        """,
+        on ? null : "dotnet_diagnostic.BRO1506.severity = none\n");
+
+    // Stryker: a comment between the parts of one expression explains a part; a blank line would split the expression.
+    [Fact]
+    public Task CommentInsideAnExpression_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        public static class C
+        {
+            public static int Pick(bool ok, int value) =>
+                ok ? value
+                    // if this happens, something is wrong
+                    : throw new System.InvalidOperationException("no");
+
+            public static bool Small(int x) =>
+                x > 0
+                // and not too big
+                && x < 10;
+
+            public static bool Kind(object o) => o is int
+                // or text
+                or string;
+        }
+        """);
+
     [Fact]
     public Task BraceFollowedByCommentOrStringContent_NoDiagnostic() => VerifyNoDiagnosticsAsync(""""
         class C

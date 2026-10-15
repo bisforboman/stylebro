@@ -145,6 +145,7 @@ internal static class BlankLines
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenChainLinks(comment)
             && !IsBetweenListItems(comment)
+            && !IsInsideExpression(comment)
             && !ContinuesTrailingComment(comment, text, aboveLine)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
             && (belowCloseBrace || !IsCommentBelowCode(comment, text));
@@ -248,6 +249,18 @@ internal static class BlankLines
         return column < aboveLine.Span.Length
             && comment.Token.Parent?.SyntaxTree.GetRoot().FindTrivia(aboveLine.Start + column) is { RawKind: (int)SyntaxKind.SingleLineCommentTrivia } trailing
             && trailing.SpanStart == aboveLine.Start + column;
+    }
+
+    /// <summary>
+    /// Whether the code on both sides of the comment belongs to one expression (<c>ok ? value</c>, <c>// why</c>,
+    /// <c>: throw ...</c>; Stryker): the comment explains a part of it, and a blank line would split the expression (a
+    /// deviation from SA1515, which only makes BRO1504 quieter).
+    /// </summary>
+    private static bool IsInsideExpression(SyntaxTrivia comment)
+    {
+        var next = comment.Token.SpanStart >= comment.Span.End ? comment.Token : comment.Token.GetNextToken();
+        var previous = next.GetPreviousToken();
+        return previous.Parent?.AncestorsAndSelf().FirstOrDefault(n => n.Span.Contains(next.Span)) is ExpressionSyntax or PatternSyntax;
     }
 
     /// <summary>

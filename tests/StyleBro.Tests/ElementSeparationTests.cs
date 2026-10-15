@@ -338,6 +338,58 @@ public class ElementSeparationTests
         }
         """);
 
+    // Trial 23: the blank line went above '#else' / '#endif', into the conditional code (each framework's copy of a
+    // multi-targeted file would want it elsewhere). It goes below the '#endif', above the element; an element that starts
+    // an '#if' still gets it above the '#if' (the copy where G is active puts it there too).
+    [Fact]
+    public Task BlankLine_GoesBelowTheDirectivesThatEndConditionalCode() => VerifyFixAsync(
+        """
+        class C
+        {
+        #if !NEVER
+            void A() { }
+        {|BRO1505:|}#else
+            void A() { }
+        #endif
+            void B() { }
+        {|BRO1505:|}#if !NEVER
+            void D() { }
+        {|BRO1505:|}#endif
+            // B's neighbour.
+            void E() { }
+        {|BRO1505:|}#if !NEVER
+            void F() { }
+        #else
+            void G() { }
+        #endif
+        }
+        """,
+        """
+        class C
+        {
+        #if !NEVER
+            void A() { }
+        #else
+            void A() { }
+        #endif
+
+            void B() { }
+
+        #if !NEVER
+            void D() { }
+        #endif
+
+            // B's neighbour.
+            void E() { }
+
+        #if !NEVER
+            void F() { }
+        #else
+            void G() { }
+        #endif
+        }
+        """);
+
     [Fact]
     public Task FileScopedNamespace_IsSeparatedFromTheFirstType() => VerifyFixAsync(
         """

@@ -230,11 +230,26 @@ internal static class ElementSeparation
         return element is FileScopedNamespaceDeclarationSyntax fileScoped ? fileScoped.SemicolonToken.Span.End : element.Span.End;
     }
 
-    /// <summary>Where the element's first line starts: its first comment, directive, attribute or token.</summary>
+    /// <summary>
+    /// Where the element's first line starts: its first comment, directive, attribute or token after the last '#endif',
+    /// which ends the previous element's conditional code (trial 23: above an '#else' or '#endif', the blank line landed in
+    /// that code, and a multi-targeted project's copies, where another branch is active, wanted it elsewhere).
+    /// </summary>
     private static int GetFirstLineStart(SyntaxNode current, SourceText text)
     {
-        foreach (var trivia in current.GetLeadingTrivia())
+        var leading = current.GetLeadingTrivia();
+        var from = 0;
+        for (var i = 0; i < leading.Count; i++)
         {
+            if (leading[i].IsKind(SyntaxKind.EndIfDirectiveTrivia))
+            {
+                from = i + 1;
+            }
+        }
+
+        for (var i = from; i < leading.Count; i++)
+        {
+            var trivia = leading[i];
             if (!trivia.IsKind(SyntaxKind.WhitespaceTrivia) && !trivia.IsKind(SyntaxKind.EndOfLineTrivia))
             {
                 return trivia.SpanStart;

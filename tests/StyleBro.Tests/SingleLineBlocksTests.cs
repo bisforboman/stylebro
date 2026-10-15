@@ -273,21 +273,14 @@ public class SingleLineBlocksTests
         """,
         editorConfig: "dotnet_diagnostic.BRO1519.severity = none\n");
 
+    // The inner block's expansion assumes the body is expanded too; with BRO1509 off the body stays, so the block does
+    // (it left 'void M(bool x) { if (x)' and '} }' behind, and jint needed a second run).
     [Fact]
-    public Task InnerBlock_LeavesTheEnclosingBody_WhenBRO1509IsOff() => VerifyFixAsync(
+    public Task InnerBlock_StaysInsideABody_WhenBRO1509IsOff() => VerifyNoDiagnosticsAsync(
         """
         public class C
         {
-            public void M(bool x) { if (x) {|BRO1508:{|} M(x); } }
-        }
-        """,
-        """
-        public class C
-        {
-            public void M(bool x) { if (x)
-                {
-                    M(x);
-                } }
+            public void M(bool x) { if (x) { M(x); } }
         }
         """,
         editorConfig: "dotnet_diagnostic.BRO1509.severity = none\n");

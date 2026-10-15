@@ -34,10 +34,11 @@ public class CommentSpacingTests
         """);
 
     [Fact]
-    public Task TabsAfterSlashes_BecomeOneSpace()
+    public Task TabsAfterSlashes_AreKept()
     {
-        var source = "class C\n{\n    {|BRO1002://\t\tx|}\n    {|BRO1002://\t|}\n}\n";
-        var fixedSource = "class C\n{\n    // x\n    //\n}\n";
+        // Trial 23: commented-out code indented with tabs lost its layout when the tabs became one space.
+        var source = "class C\n{\n    {|BRO1002://\t\tx|}\n    {|BRO1002://\t\t\ty|}\n    {|BRO1002://\t|}\n}\n";
+        var fixedSource = "class C\n{\n    // \t\tx\n    // \t\t\ty\n    //\n}\n";
         return VerifyFixAsync(source, fixedSource);
     }
 
