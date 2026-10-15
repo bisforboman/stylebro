@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stops MSBuild from importing StyleBro's own Directory.Build.props into trial clones. -->
+</Project>
