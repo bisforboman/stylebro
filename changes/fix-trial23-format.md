@@ -19,6 +19,8 @@
   `NET8_0_OR_GREATER && !NET10_0_OR_GREATER`, and a string's own `#if`/`#endif` lines (CS8999 after formatting).
 - After a killed `format`, a `dotnet format` still running no longer leaves swapped `#` characters behind, and a
   temporary `.stylebro-format-*.slnf` it left is removed by the next run.
+- On Linux and macOS, `format` read no file's `#if` symbols, so frameworks whose code differs could share a run (code
+  only the other framework compiles wasn't formatted).
 - A CR inside a string literal (a verbatim regex) no longer counts as an old Mac line ending.
 - A code fix of another analyzer that fails is no longer reported as a StyleBro bug.
 - The baseline now also covers files a project compiles from another folder (`<Compile Include="..\Lib\A.cs" />`): their

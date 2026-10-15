@@ -3713,8 +3713,9 @@ internal static class FormatCommand
         /// language version and nullable context. Two views with the same key parse those files the same.
         /// </summary>
         public string Key(IEnumerable<string> files) =>
-            string.Join(";", files.Select(f => Path.GetFullPath(f).ToUpperInvariant()).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)
-                .Select(f => f + ":" + string.Join(",", TestedSymbols(f).Where(Defines.Contains))))
+            // The symbols from the file's own path: upper-cased, it doesn't exist on Linux, and every file tested nothing there.
+            string.Join(";", files.Select(Path.GetFullPath).DistinctBy(f => f.ToUpperInvariant(), StringComparer.Ordinal).OrderBy(f => f.ToUpperInvariant(), StringComparer.Ordinal)
+                .Select(f => f.ToUpperInvariant() + ":" + string.Join(",", TestedSymbols(f).Where(Defines.Contains))))
             + "|" + LangVersion + "|" + Nullable;
     }
 
