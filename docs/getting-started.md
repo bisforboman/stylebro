@@ -188,7 +188,13 @@ An `.editorconfig` that silences analyzers in bulk (`dotnet_analyzer_diagnostic.
 severity below warning) would hide StyleBro's rules from `dotnet format`, while the build still reports them at the
 preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules; a rule
 your `.editorconfig` sets by id stays as you set it. `stylebro-migrate format` never says clean while such a bulk setting
-hides rules from it.
+hides rules from it. The built-in rules are another matter: where your `.editorconfig` turns the Style category off (or
+every analyzer, without a Style entry), the block leaves out the ones it would turn on by id (IDE0055, IDE0036, IDE0049),
+so your setting decides them, and `format` skips the whitespace pass.
+
+Your own path sections (`[src/**/*.cs]` with `dotnet_diagnostic.IDE0055.severity = none`) come before the block, and the
+block's `[*.cs]` lines would win over them: `init` repeats the keys they set otherwise in the same sections at the end
+of the block, and says so.
 
 A folder whose own `.editorconfig` turns every analyzer off (`dotnet_analyzer_diagnostic.severity = none` or `silent`,
 with or without `root = true`; test samples, for example) is left alone instead: `init` writes StyleBro's rules, IDE0055
@@ -435,6 +441,10 @@ A few settings work a little differently:
 - **A folder that turns the Style category off** (`dotnet_analyzer_diagnostic.category-Style.severity = none` in its
   `.editorconfig`): a rule's own entry wins over a category, so `init` turns the built-in rules its block sets by id off
   there too (in the folder's own block), and says so.
+- **A folder that turns every analyzer off** without `root = true` inherits the block's using order key, and `dotnet
+  format` sorts usings wherever one is set: `init` writes the key into a section for the other C# files instead
+  (`[{src,tests}/**.cs]`), and says so. With C# files directly in the root no section can leave the folder out; the
+  report says its usings get sorted.
 - **Column alignment**: when your `.editorconfig` aligns code in columns for ReSharper or Rider
   (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
   the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
@@ -477,7 +487,7 @@ A few settings work a little differently:
 | `)` of split lists | after the last item or on its own line | [BRO1110](rules/BRO1110.md) | `stylebro_closing_parenthesis_placement` |
 | First item of split lists | on the next line or after `(` | [BRO1107](rules/BRO1107.md) | `stylebro_split_list_first_item` |
 | Items of split lists | one per line or grouped on lines | [BRO1108](rules/BRO1108.md) | `dotnet_diagnostic.BRO1108.severity` |
-| Leading multi-line lambdas | calls whose first argument is a multi-line lambda, anonymous method or anonymous object: the other arguments on its last line (`}, Kind);`) or one argument per line (mixed: both allowed) | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) | `stylebro_allow_leading_multiline_lambda` |
+| Leading multi-line lambdas | calls whose first argument is a multi-line lambda, anonymous method or anonymous object: the other arguments on its last line (`}, Kind);`) or one argument per line (mixed: both allowed; where they're allowed, those calls don't count for the split-list rows above) | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) | `stylebro_allow_leading_multiline_lambda` |
 | Constructor initializers | `: base(...)`/`: this(...)` on its own line or the constructor's | [BRO1105](rules/BRO1105.md) | `stylebro_constructor_initializer_placement` |
 | Constraints | `where` on its own line or the declaration's | [BRO1111](rules/BRO1111.md) | `stylebro_constraint_placement` |
 | `new T { ... }` | with or without `()` before an initializer | [BRO1141](rules/BRO1141.md) | `stylebro_object_creation_parentheses` |
@@ -502,7 +512,7 @@ A few settings work a little differently:
 | Usings inside a namespace | fully qualified or relative to an enclosing namespace | [BRO1126](rules/BRO1126.md) | `dotnet_diagnostic.BRO1126.severity` |
 | File headers | headers with or without an empty `//` line at the top or bottom (or a `file_header_template` with one) | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
 | One-line jumps | `if (x) return;` on the `if` line, or a lone jump in braces | [BRO1514](rules/BRO1514.md) | `stylebro_allow_single_line_jump_statements` |
-| Empty blocks | `{ }` on one line or on two (mixed: both allowed) | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) | `stylebro_allow_empty_single_line_blocks` |
+| Empty blocks | `{ }` on one line or on two (mixed: both allowed; on one line also writes `csharp_preserve_single_line_statements = true`, else IDE0055 splits `else { }`) | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) | `stylebro_allow_empty_single_line_blocks` |
 | One-line properties | properties with a block-bodied accessor on one line (`X { get { return x; } }`) or on several | [BRO1509](rules/BRO1509.md) | `dotnet_diagnostic.BRO1509.severity` |
 | Accessor bodies | multi-line properties whose accessors all have block bodies: all one-line or all multi-line, or mixed | [BRO1510](rules/BRO1510.md) | `dotnet_diagnostic.BRO1510.severity` |
 | Auto-property accessors | `{ get; set; }` on the declaration's line or on several lines | [BRO1527](rules/BRO1527.md) | `dotnet_diagnostic.BRO1527.severity` |
@@ -511,11 +521,15 @@ A few settings work a little differently:
 | Charset | files with or without a BOM, when the `charset` that applies to them doesn't match them | SDK formatter | `charset` |
 | Final line breaks | files with or without a last line break, when the `insert_final_newline` that applies to them doesn't match them | SDK formatter | `insert_final_newline` |
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
-| Using order | files with 2 or more usings: sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
+| Using order | files with 2 or more usings (each run between `#if`/`#endif` lines on its own): sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 | Spacing | `if (x)` or `if(x)`; spaces inside parentheses, after casts, inside call and parameter lists (mixed: IDE0055 off) | SDK formatter (IDE0055) | `csharp_space_after_keywords_in_control_flow_statements`, `csharp_space_between_parentheses`, `csharp_space_after_cast`, `csharp_space_between_method_call_parameter_list_parentheses`, `csharp_space_between_method_declaration_parameter_list_parentheses` |
 | Member separation | neighbouring members that need a blank line, with or without one | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 | Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |
+| Blank line above comments | `//` comments right below code or after a blank line | [BRO1504](rules/BRO1504.md) | `dotnet_diagnostic.BRO1504.severity` |
+| Doc comment periods | summary, param, returns, ... texts ending with a period or not | [BRO1603](rules/BRO1603.md) | `dotnet_diagnostic.BRO1603.severity` |
+| Keywords in doc comments | `<see langword="null"/>` or `<c>null</c>` | [BRO1618](rules/BRO1618.md) | `dotnet_diagnostic.BRO1618.severity` |
+| Non-private field names | public, internal and protected fields an enforced naming rule (`dotnet_naming_rule.*`) covers: named as it says or not (a rule your code doesn't follow turns BRO1306 off) | [BRO1306](rules/BRO1306.md) | `dotnet_diagnostic.BRO1306.severity` |
 | Blank line below doc comments | doc comments right above their element or with a blank line between | [BRO1511](rules/BRO1511.md) | `dotnet_diagnostic.BRO1511.severity` |
 | Primary-constructor parameters | named `logger` or `_logger` (classes and structs) | [BRO1302](rules/BRO1302.md) | `dotnet_diagnostic.BRO1302.severity` |
 | Tuple element names | `(int Count, ...)` or `(int count, ...)` | [BRO1311](rules/BRO1311.md) | `stylebro_tuple_element_name_casing` |
