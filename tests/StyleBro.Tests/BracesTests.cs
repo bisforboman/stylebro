@@ -83,6 +83,103 @@ public class BracesTests
         }
         """);
 
+    // akka.net: 'dotnet format' indents 'else switch (x)'s body one level deeper than the 'else' (an embedded statement)
+    // before the fixes run. Shifted relative to the 'else' line, the body ended a level too deep once the switch had its
+    // own line, and the next run's whitespace formatting moved it back. The body's '{' goes to the switch's indentation.
+    [Fact]
+    public Task SameLineStatement_BodyIndentedByTheFormatter_LinesUpWithTheStatement() => VerifyFixAsync(
+        """
+        public class P
+        {
+            public bool M(object message, bool a)
+            {
+                if (a)
+                {
+                    a = false;
+                }
+                else {|BRO1515:switch (message)
+                    {
+                        case int:
+                            break;
+                        default:
+                            {
+                                if (a)
+                                {
+                                    return a;
+                                }
+                                else {|BRO1516:M(message, a);|}
+
+                                break;
+                            }
+                    }|}
+
+                return true;
+            }
+
+            public void N(bool a, bool b)
+            {
+                if (a)
+                {
+                    a = false;
+                }
+                else {|BRO1515:while (a &&
+                    b) {
+                        a = false;
+                    }|}
+            }
+        }
+        """,
+        """
+        public class P
+        {
+            public bool M(object message, bool a)
+            {
+                if (a)
+                {
+                    a = false;
+                }
+                else
+                {
+                    switch (message)
+                    {
+                        case int:
+                            break;
+                        default:
+                            {
+                                if (a)
+                                {
+                                    return a;
+                                }
+                                else
+                                {
+                                    M(message, a);
+                                }
+
+                                break;
+                            }
+                    }
+                }
+
+                return true;
+            }
+
+            public void N(bool a, bool b)
+            {
+                if (a)
+                {
+                    a = false;
+                }
+                else
+                {
+                    while (a &&
+                        b) {
+                            a = false;
+                        }
+                }
+            }
+        }
+        """);
+
     [Fact]
     public Task SameLine_And_ElseChains() => VerifyFixAsync(
         """

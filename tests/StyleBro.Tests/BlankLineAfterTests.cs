@@ -49,6 +49,36 @@ public class BlankLineAfterTests
         """");
 
     [Fact]
+    public Task CommentContinuingATrailingComment_InItsColumn_NeedsNoBlankLine() => VerifyFixAsync(
+        """
+        class C
+        {
+            void M(int a)
+            {
+                System.Console.WriteLine(a); // This is because the identifier is hardwired, so it could not be
+                                             // used to override another one.
+                System.Console.WriteLine(a); // A comment that ends here.
+                                                 {|BRO1504:// Not in its column: a comment of its own.|}
+                System.Console.WriteLine(a);
+            }
+        }
+        """,
+        """
+        class C
+        {
+            void M(int a)
+            {
+                System.Console.WriteLine(a); // This is because the identifier is hardwired, so it could not be
+                                             // used to override another one.
+                System.Console.WriteLine(a); // A comment that ends here.
+
+                                                 // Not in its column: a comment of its own.
+                System.Console.WriteLine(a);
+            }
+        }
+        """);
+
+    [Fact]
     public Task CommentsAfterCode_GetABlankLineAbove() => VerifyFixAsync(
         """
         class C

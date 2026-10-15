@@ -90,6 +90,13 @@ internal static class BlankLineRuns
             return false;
         }
 
+        // An empty statement BRO1101 removes ('};', which the whitespace formatting may have split onto two lines): the
+        // blank line would be left before the next token, often a '}' (BRO1518's on the next run; akka.net).
+        if (next.Parent is EmptyStatementSyntax { Parent: BlockSyntax or SwitchSectionSyntax } && isOn(DiagnosticIds.EmptyStatement))
+        {
+            return false;
+        }
+
         if (next.Kind() is SyntaxKind.PrivateKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword && next.Parent is AccessorDeclarationSyntax)
         {
             return false;
@@ -255,9 +262,11 @@ internal static class BlankLineRuns
         }
 
         var stop = index >= 0 ? separating[index] : default;
-        if (stop.IsKind(SyntaxKind.SingleLineCommentTrivia) && isOn(DiagnosticIds.BlankLineAfterComment))
+        if (stop.IsKind(SyntaxKind.SingleLineCommentTrivia) && isOn(DiagnosticIds.BlankLineAfterComment)
+            && text.ToString(TextSpan.FromBounds(text.Lines.GetLineFromPosition(stop.SpanStart).Start, stop.SpanStart)).Trim().Length == 0)
         {
-            // Below a '//' comment: BRO1506's.
+            // Below a '//' comment on its own line: BRO1506's. A trailing comment ('x(); // note') isn't BRO1506's, so the
+            // blank lines below it are this rule's (akka.net: nobody removed them, until BRO1515's braces made them so).
             return null;
         }
 
