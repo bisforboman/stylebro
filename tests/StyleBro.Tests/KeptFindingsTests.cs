@@ -116,18 +116,19 @@ public class KeptFindingsTests
             {
                 dynamic field;
                 dynamic Prop => null;
-                object M(object o, dynamic p)
+                object M(object o, dynamic p, Other other)
                 {
                     dynamic local = o;
                     foreach (dynamic item in new object[0]) { _ = item.Each; }
-                    return ((dynamic)o).Cast.Chain + (o as dynamic).As + local.Local + p.Param + field.Field + Prop.Property + o.GetHashCode();
+                    return ((dynamic)o).Cast.Chain + (o as dynamic).As + local.Local + p.Param + field.Field + Prop.Property + o.GetHashCode() + other.Plain;
                 }
             }
             """).GetRoot();
 
-        var names = RepositoryNames.Lines(root, "T.cs").Where(l => l.StartsWith("D", StringComparison.Ordinal)).Select(l => l.Split('\t')[2]).ToList();
+        var lines = RepositoryNames.Lines(root, "T.cs").Where(l => l.StartsWith("D", StringComparison.Ordinal)).ToList();
 
-        Assert.Equal(new[] { "Each", "Cast", "Chain", "As", "Local", "Param", "Field", "Property" }, names);
+        Assert.Equal(new[] { "Each", "Cast", "Chain", "As", "Local", "Param", "Field", "Property" }, lines.Select(l => l.Split('\t')[2]));
+        Assert.Equal("D\tT.cs(8)\tEach", lines[0]);
     }
 
     // Trial 23 (xunit.v3 + Verify): snapshot files hold what a serializer wrote, so they count like strings (owner's choice

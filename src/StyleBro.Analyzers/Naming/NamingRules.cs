@@ -208,16 +208,16 @@ internal static class NamingRules
             ? null
             : value.Split(',').Select(p => p.Trim() switch { "friend" => "internal", "protected_friend" => "protected_internal", var x => x }).Where(p => p.Length > 0).ToArray();
 
-        // The rules in the order Roslyn's GetRuleTitles lists them (the first key of each, any of its parts): its comparers
-        // below don't order every pair, so the sort keeps that order for the rest (stryker, trial 23).
-        var titles = options.Keys
-            .Where(k => k.Trim().StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) && k.Split('.').Length == 3)
-            .Select(k => k.Split('.')[1])
-            .Distinct();
         var rules = new List<Rule>();
-        foreach (var name in titles)
+        foreach (var key in options.Keys)
         {
-            var symbols = Get($"dotnet_naming_rule.{name}.symbols");
+            if (!key.StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) || !key.EndsWith(".symbols", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var name = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
+            var symbols = Get(key);
             var style = Get($"dotnet_naming_rule.{name}.style");
             var severity = Get($"dotnet_naming_rule.{name}.severity");
 
