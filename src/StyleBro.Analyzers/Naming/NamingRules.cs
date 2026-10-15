@@ -29,8 +29,7 @@ internal static class NamingRules
 
     /// <summary>
     /// Whether a naming rule may rename <paramref name="symbol"/> (declared at <paramref name="location"/>) to
-    /// <paramref name="newName"/>; null checks only the suppressions (tuple elements, which IDE1006 doesn't name, and fields,
-    /// whose styles FieldNames reads from the naming rules already).
+    /// <paramref name="newName"/>; null checks only the suppressions (tuple elements, which IDE1006 doesn't name).
     /// </summary>
     public static bool AllowsRename(Compilation compilation, AnalyzerConfigOptions options, Location location, ISymbol symbol, string? newName, CancellationToken cancellationToken)
     {
@@ -209,16 +208,16 @@ internal static class NamingRules
             ? null
             : value.Split(',').Select(p => p.Trim() switch { "friend" => "internal", "protected_friend" => "protected_internal", var x => x }).Where(p => p.Length > 0).ToArray();
 
+        // The rules in the order Roslyn's GetRuleTitles lists them (the first key of each, any of its parts): its comparers
+        // below don't order every pair, so the sort keeps that order for the rest (stryker, trial 23).
+        var titles = options.Keys
+            .Where(k => k.Trim().StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) && k.Split('.').Length == 3)
+            .Select(k => k.Split('.')[1])
+            .Distinct();
         var rules = new List<Rule>();
-        foreach (var key in options.Keys)
+        foreach (var name in titles)
         {
-            if (!key.StartsWith("dotnet_naming_rule.", System.StringComparison.Ordinal) || !key.EndsWith(".symbols", System.StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            var name = key.Substring("dotnet_naming_rule.".Length, key.Length - "dotnet_naming_rule.".Length - ".symbols".Length);
-            var symbols = Get(key);
+            var symbols = Get($"dotnet_naming_rule.{name}.symbols");
             var style = Get($"dotnet_naming_rule.{name}.style");
             var severity = Get($"dotnet_naming_rule.{name}.severity");
 
@@ -243,7 +242,7 @@ internal static class NamingRules
 
         return rules
             .OrderBy(r => r.Priority)
-            .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Subset(b.Modifiers, a.Modifiers)))
+            .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Order(MatchesFewer(a, b), MatchesFewer(b, a))))
             .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Subset(a.Accessibilities, b.Accessibilities)))
             .ThenBy(r => r, Comparer<Rule>.Create((a, b) => Subset(a.Kinds, b.Kinds)))
             .ThenBy(r => r.Name, System.StringComparer.OrdinalIgnoreCase)
@@ -255,8 +254,14 @@ internal static class NamingRules
         {
             var xInY = y is null || (x is not null && x.All(y.Contains));
             var yInX = x is null || (y is not null && y.All(x.Contains));
-            return xInY == yInX ? 0 : xInY ? -1 : 1;
+            return Order(xInY, yInX);
         }
+
+        static int Order(bool xInY, bool yInX) => xInY == yInX ? 0 : xInY ? -1 : 1;
+
+        // Roslyn's NamingRuleModifierListComparer: x requires every modifier y does, where 'const' implies 'static' and 'readonly'.
+        static bool MatchesFewer(Rule x, Rule y) =>
+            y.Modifiers.All(m => x.Modifiers.Contains(m) || (m is "static" or "shared" or "readonly" && x.Modifiers.Contains("const")));
     }
 
     private sealed class Rule

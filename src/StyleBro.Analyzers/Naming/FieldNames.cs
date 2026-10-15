@@ -331,14 +331,13 @@ internal static class FieldNames
     /// Whether code outside the type may use the field's name as data: serializers write public instance fields under
     /// their name (Json.NET does by default), so their names are also looked for inside strings, not just as a whole
     /// string. Protected fields aren't written (and [Serializable] types are skipped anyway): they're guarded like
-    /// private ones, by their exact name. So are the public fields of a private nested type: they're private in effect,
-    /// code outside the type never sees them (sourcegit's TemplateEngine: 'name' and 'count' were kept for words in
-    /// another project's strings, next to a renamed 'Replacement').
+    /// private ones, by their exact name. The containing type's accessibility doesn't matter: reflection and script
+    /// engines read a private class's public fields too (jint, trial 23: a script's 'host.ByteField' broke when the field
+    /// of a private test class was renamed).
     /// </summary>
     public static bool IsDataMember(IFieldSymbol field) =>
         !field.IsConst && !field.IsStatic
-        && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal
-        && !IsInPrivateType(field);
+        && field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal;
 
     /// <summary>
     /// Whether a serializer may write the type's members by name: [Serializable] (binary serialization writes every
@@ -583,19 +582,6 @@ internal static class FieldNames
         for (var current = type.ContainingType; current is not null; current = current.ContainingType)
         {
             if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, outer.OriginalDefinition))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool IsInPrivateType(ISymbol symbol)
-    {
-        for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
-        {
-            if (type.DeclaredAccessibility is Accessibility.Private)
             {
                 return true;
             }
