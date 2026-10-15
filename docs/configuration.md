@@ -36,6 +36,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_constructor_initializer_placement` | `own_line`, `same_line` | `own_line` | [BRO1105](rules/BRO1105.md) |
 | `stylebro_empty_string_style` | `string_empty`, `literal` | `string_empty` | [BRO1106](rules/BRO1106.md) |
 | `stylebro_split_list_first_item` | `next_line`, `same_line` | `next_line` | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) |
+| `stylebro_allow_leading_multiline_lambda` | `true`, `false` (`true`: a first argument that is a multi-line lambda, anonymous method or anonymous object may keep the other arguments on its closing line) | `false` | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) |
 | `stylebro_closing_parenthesis_placement` | `last_item`, `own_line` | `last_item` | [BRO1110](rules/BRO1110.md) |
 | `stylebro_constraint_placement` | `own_line`, `same_line` | `own_line` | [BRO1111](rules/BRO1111.md) |
 | `stylebro_null_check_style` | `pattern_matching`, `equality_operator` | `pattern_matching` | [BRO1133](rules/BRO1133.md), [BRO1148](rules/BRO1148.md) |

@@ -193,7 +193,7 @@ internal sealed class SonarSetup
             var narrowing = settings.Where(s => onWithoutSonar && KeyOf(s)!.StartsWith("stylebro_", StringComparison.Ordinal)).ToList();
             if (narrowing.Count > 0)
             {
-                applied.Notes.Add($"{string.Join(", ", narrowing.Select(KeyOf))} not written for {string.Join(", ", ids)}: the StyleCop setup turns {rule} on for more than the Sonar rule reports, and that stays.");
+                applied.Notes.Add($"{string.Join(", ", narrowing.Select(KeyOf))} not written for {string.Join(", ", ids)}: {rule} is already on for more than the Sonar rule reports, and that stays.");
                 settings = settings.Except(narrowing).ToList();
             }
 

@@ -586,8 +586,9 @@
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets a value indicating whether is it closed.</summary>]'
                 # 'init' accessors, like StyleCop master (eb498962): 'Gets or initializes' (or 'Gets') for get+init, and
                 # 'Gets or initializes' is a wrong prefix on get+set; beta.556 ignores 'init' and its fix writes
-                # 'Gets or sets or initializes'.
-                'StyleBro output only: Properties.cs: [        /// <summary>Gets or initializes the init thing.</summary>]'
+                # 'Gets or sets or initializes'. 'Gets or sets' on get+init is fine in StyleBro (unlike master; trial 22).
+                'only StyleCop: BRO1604 Properties.cs(37,20)'
+                'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets the init thing.</summary>]'
                 'StyleBro output only: Properties.cs: [        /// <summary>Gets or sets the set thing.</summary>]'
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets the init thing.</summary>]'
                 'StyleCop output only: Properties.cs: [        /// <summary>Gets or sets or initializes the set thing.</summary>]'
@@ -698,6 +699,8 @@
             Expected = @(
                 # A comment inside the braces: skipped (the fix rewrites exactly those gaps).
                 'only StyleCop: BRO1508 Statements.cs(29,20)'
+                # A comment after the '}': skipped (expanded, it would leave the line a line-based suppression marks).
+                'only StyleCop: BRO1508 Statements.cs(28,20)'
                 # A block in a switch section that shares its line with 'switch (b) {': no line to indent it from.
                 'only StyleCop: BRO1508 Statements.cs(30,37)'
                 # Local functions: StyleCop reports SA1501 and SA1502 at the same brace, StyleBro one BRO1509.

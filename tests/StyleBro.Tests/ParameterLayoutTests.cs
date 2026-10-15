@@ -580,4 +580,132 @@ public class ParameterLayoutTests
             }
         }
         """");
+
+    // CommunityToolkit (owner's choice 2026-10-15): 'Register(c =>' / '{ ... }' / '}, Kind);' stays with the option on; a list
+    // of another shape, or a first argument that isn't a lambda, anonymous method or anonymous object, is still reported.
+    [Fact]
+    public Task LeadingMultiLineLambda_StaysWithTheOption() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            static void Register(Action<int> action, string kind, int order) { }
+
+            static void Show(object value, string kind) { }
+
+            void M()
+            {
+                Register(x =>
+                {
+                    Console.WriteLine(x);
+                }, "Field", 1);
+                Register(delegate (int x)
+                {
+                    Console.WriteLine(x);
+                }, "Method", 2);
+                Show(new
+                {
+                    Name = "a",
+                }, "Value");
+                Register({|BRO1107:x =>
+                {
+                    Console.WriteLine(x);
+                }|}, {|BRO1108:"Field"|},
+                    3);
+                Show({|BRO1107:Value()|},
+                    "Value");
+                Show(
+                    new
+                    {
+                        Name = "b",
+                    }, {|BRO1108:"Value"|});
+            }
+
+            static object Value() => 1;
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            static void Register(Action<int> action, string kind, int order) { }
+
+            static void Show(object value, string kind) { }
+
+            void M()
+            {
+                Register(x =>
+                {
+                    Console.WriteLine(x);
+                }, "Field", 1);
+                Register(delegate (int x)
+                {
+                    Console.WriteLine(x);
+                }, "Method", 2);
+                Show(new
+                {
+                    Name = "a",
+                }, "Value");
+                Register(
+                    x =>
+                    {
+                        Console.WriteLine(x);
+                    },
+                    "Field",
+                    3);
+                Show(
+                    Value(),
+                    "Value");
+                Show(
+                    new
+                    {
+                        Name = "b",
+                    },
+                    "Value");
+            }
+
+            static object Value() => 1;
+        }
+        """,
+        editorConfig: "stylebro_allow_leading_multiline_lambda = true");
+
+    // Without the option (StyleCop's SA1116/SA1117): the leading lambda gets the first item's line and the others theirs.
+    [Fact]
+    public Task LeadingMultiLineLambda_IsReportedByDefault() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            static void Register(Action<int> action, string kind) { }
+
+            void M()
+            {
+                Register({|BRO1107:x =>
+                {
+                    Console.WriteLine(x);
+                }|}, {|BRO1108:"Field"|});
+            }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            static void Register(Action<int> action, string kind) { }
+
+            void M()
+            {
+                Register(
+                    x =>
+                    {
+                        Console.WriteLine(x);
+                    },
+                    "Field");
+            }
+        }
+        """);
 }

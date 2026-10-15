@@ -14,8 +14,9 @@ internal static class RedundantJumps
     /// <c>return;</c> without a value, or a <c>yield break;</c>, as the last statement of the block that is the body of a
     /// method, constructor, destructor, operator, accessor, local function, lambda or anonymous method (a last statement of a
     /// nested block isn't: code after the block would run). Skipped: a <c>yield break;</c> that is the body's only yield
-    /// (it makes the method an iterator), and a comment or directive on the statement (a directive that could make another
-    /// statement last is always in its leading trivia). A labeled statement isn't directly in the block, so it's never reported.
+    /// (it makes the method an iterator), a lambda's statement unless <see cref="EndStaysReachable"/>, and a comment or
+    /// directive on the statement (a directive that could make another statement last is always in its leading trivia). A
+    /// labeled statement isn't directly in the block, so it's never reported.
     /// </summary>
     public static TextChange? GetChange(StatementSyntax statement, SourceText text)
     {
@@ -24,7 +25,8 @@ internal static class RedundantJumps
             || block.Statements.Last() != statement
             || block.Parent is not (BaseMethodDeclarationSyntax or AccessorDeclarationSyntax or LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax)
             || statement.DescendantTrivia().Any(t => !t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia))
-            || (statement is YieldStatementSyntax && !block.DescendantNodes(n => n == block || !IsFunction(n)).OfType<YieldStatementSyntax>().Skip(1).Any()))
+            || (statement is YieldStatementSyntax && !block.DescendantNodes(n => n == block || !IsFunction(n)).OfType<YieldStatementSyntax>().Skip(1).Any())
+            || (block.Parent is AnonymousFunctionExpressionSyntax && !EndStaysReachable(block, statement)))
         {
             return null;
         }
@@ -56,6 +58,18 @@ internal static class RedundantJumps
 
         return new TextChange(TextSpan.FromBounds(text.Lines[first].Start, line.EndIncludingLineBreak), string.Empty);
     }
+
+    /// <summary>
+    /// Whether a lambda's body still has a reachable end, or another <c>return;</c>, without the statement. If not
+    /// (<c>_ => { throw new X(); return; }</c>), the lambda would also convert to delegates that return a value, and a call
+    /// with overloads for both becomes ambiguous (akka.net: CS0121 with <c>Action&lt;T&gt;</c> and
+    /// <c>Predicate&lt;T&gt;</c>). Judged by syntax, conservatively: the statement before it must be one that always
+    /// completes (an expression or a declaration), or there is none.
+    /// </summary>
+    private static bool EndStaysReachable(BlockSyntax block, StatementSyntax statement) =>
+        block.Statements.Count == 1
+        || block.Statements[block.Statements.Count - 2] is ExpressionStatementSyntax or LocalDeclarationStatementSyntax
+        || block.DescendantNodes(n => n == block || !IsFunction(n)).OfType<ReturnStatementSyntax>().Any(r => r != statement);
 
     private static bool IsFunction(SyntaxNode node) => node is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax;
 

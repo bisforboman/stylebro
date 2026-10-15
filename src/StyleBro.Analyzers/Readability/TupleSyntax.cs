@@ -25,6 +25,7 @@ internal static class TupleSyntax
         // Not in doc comments: crefs have no tuple syntax ('Func{ValueTuple{int, string}}' is a type-only context there).
         var node = Outermost(name);
         if (!IsSupported(name) || !SyntaxFacts.IsInTypeOnlyContext(node) || node.IsPartOfStructuredTrivia() || node.Parent is ObjectCreationExpressionSyntax
+            || IsPatternType(node)
             || ToTuple(name, model, cancellationToken) is not { } replacement || !Trivia.IsBlank(node, node.Span))
         {
             return null;
@@ -36,7 +37,7 @@ internal static class TupleSyntax
             var outerNode = Outermost(outer);
             if (outerNode.Parent is ObjectCreationExpressionSyntax creation
                 ? GetCreation(creation, model, cancellationToken) is not null
-                : ToTuple(outer, model, cancellationToken) is not null && SyntaxFacts.IsInTypeOnlyContext(outerNode))
+                : ToTuple(outer, model, cancellationToken) is not null && SyntaxFacts.IsInTypeOnlyContext(outerNode) && !IsPatternType(outerNode))
             {
                 return null;
             }
@@ -120,6 +121,14 @@ internal static class TupleSyntax
             ? null
             : new Finding(expression, location, "(" + string.Join(", ", items) + ")");
     }
+
+    /// <summary>
+    /// The type a pattern tests for (<c>x is ValueTuple&lt;T, T&gt; pair</c>, <c>case ValueTuple&lt;A, B&gt; p:</c>): written
+    /// as <c>(T, T)</c> it is a positional pattern, which deconstructs instead (akka.net: CS8129, CS1061).
+    /// </summary>
+    private static bool IsPatternType(TypeSyntax node) =>
+        node.Parent is DeclarationPatternSyntax or TypePatternSyntax or RecursivePatternSyntax
+        || (node.Parent is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.IsExpression } isExpression && isExpression.Right == node);
 
     /// <summary>Tuple syntax needs C# 7.</summary>
     private static bool IsSupported(SyntaxNode node) =>

@@ -51,6 +51,76 @@ public class TupleSyntaxTests
         }
         """);
 
+    // akka.net: '(T, T)' after 'is' or 'case' is a positional pattern (deconstruction), not a type test: CS8129, CS1061.
+    [Fact]
+    public Task PatternTypes_StayValueTuple() => Verify.VerifyFixAsync(
+        """
+        using System;
+
+        class C<T>
+        {
+            int M(object message)
+            {
+                if (message is ValueTuple<T, T> pair)
+                {
+                    return 1;
+                }
+
+                if (message is ValueTuple<int, string> || message is ValueTuple<int, int> { Item1: 1 })
+                {
+                    return 2;
+                }
+
+                switch (message)
+                {
+                    case ValueTuple<string, int> props:
+                        return props.Item2;
+                    case ValueTuple<long, long>:
+                        return 3;
+                }
+
+                return message switch
+                {
+                    ValueTuple<{|BRO1123:ValueTuple<int, int>|}, int> nested => nested.Item2,
+                    _ => 0,
+                };
+            }
+        }
+        """,
+        """
+        using System;
+
+        class C<T>
+        {
+            int M(object message)
+            {
+                if (message is ValueTuple<T, T> pair)
+                {
+                    return 1;
+                }
+
+                if (message is ValueTuple<int, string> || message is ValueTuple<int, int> { Item1: 1 })
+                {
+                    return 2;
+                }
+
+                switch (message)
+                {
+                    case ValueTuple<string, int> props:
+                        return props.Item2;
+                    case ValueTuple<long, long>:
+                        return 3;
+                }
+
+                return message switch
+                {
+                    ValueTuple<(int, int), int> nested => nested.Item2,
+                    _ => 0,
+                };
+            }
+        }
+        """);
+
     [Fact]
     public Task Creations_BecomeTupleLiterals() => Verify.VerifyFixAsync(
         """

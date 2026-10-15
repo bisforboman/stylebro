@@ -93,7 +93,7 @@ public sealed class ParameterLayoutCodeFixProvider : CodeFixProvider
                 if (current.FindToken(open) is var token && token.SpanStart == open && token.Parent is { } node
                     && ParameterLayout.GetList(node).Open == token
                     && (list.All
-                        ? ParameterLayout.GetFirstMisplacedItem(node, currentText, JoinsEmptyLists) ?? ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)
+                        ? ParameterLayout.GetFirstMisplacedItem(node, currentText, JoinsEmptyLists, options) ?? ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)
                         : ParameterLayout.GetFirstItemToMove(node, currentText, options, JoinsEmptyLists)) is not null)
                 {
                     foreach (var change in ParameterLayout.GetChanges(node, currentText, indentUnit, firstOnly: !list.All, sameLine))

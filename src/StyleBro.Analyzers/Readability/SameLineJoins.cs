@@ -50,7 +50,7 @@ internal static class SameLineJoins
 
             // BRO1107 alone moves only the first item (not counted: it reaches the ')' line only when it spans lines up to it).
             if (isOn(DiagnosticIds.ParametersOnSameOrSeparateLines)
-                && ParameterLayout.GetFirstMisplacedItem(list, text, () => isOn(DiagnosticIds.EmptyListOnOneLine)) is not null)
+                && ParameterLayout.GetFirstMisplacedItem(list, text, () => isOn(DiagnosticIds.EmptyListOnOneLine), options) is not null)
             {
                 changes.AddRange(ParameterLayout.GetChanges(list, text, Indentation.GetUnit(options), sameLine: ParameterLayout.KeepsFirstItem(options, isOn)));
             }

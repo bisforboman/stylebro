@@ -130,6 +130,15 @@ internal static class Conventions
     /// <summary>What the using order's '# init:' comment is about ('# init: using directives: ...').</summary>
     public const string UsingsWhat = "using directives";
 
+    /// <summary>
+    /// Counts of binary operators on one line with their neighbours: [spaced on both sides, on neither, one-sided]
+    /// (csharp_space_around_binary_operators; StyleCop's SA1003). Only the migration reads it.
+    /// </summary>
+    public const string BinaryOperatorSpacingKey = "spacing: csharp_space_around_binary_operators";
+
+    /// <summary>Counts of target-typed 'new': ['new()', 'new ()'] (StyleCop's SA1000; no SDK option of its own). Only the migration reads it.</summary>
+    public const string ImplicitNewSpacingKey = "spacing: implicit new";
+
     /// <summary>The whitespace keys judged against the .editorconfig that decides each file's value (<see cref="FileSettings"/>).</summary>
     public static readonly string[] FileKeys = { EndOfLineKey, CharsetKey, FinalNewlineKey, TrailingWhitespaceKey };
 
@@ -167,9 +176,11 @@ internal static class Conventions
         new(InheritDocKey, "overrides/interface implementations", "warning", ("warning", "with a doc comment"), ("none", "without a doc comment"), Off(DiagnosticIds.InheritDocumentation)),
         new(MemberOrderKey, "types' members", "warning", ("warning", "in BRO1001's order"), ("none", "in another order"), Off(DiagnosticIds.MemberOrdering)) { Unit = "type" },
         new(OverloadsKey, "overloads BRO1001 could split", "false", ("false", "apart"), ("true", "next to each other"), null),
+        new(StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey, "lambda-first calls", "false", ("false", "one argument per line"), ("true", "rest on the lambda's last line"), $"{StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey} = true") { Unit = "call" },
         new(ItemsPerLineKey, "split lists' items", "warning", ("warning", "one per line"), ("none", "grouped on lines"), Off(DiagnosticIds.ParametersOnSameOrSeparateLines)),
         new(SuffixCaseKey, "unsigned literal suffixes", "warning", ("warning", "upper case ('0U', '1UL')"), ("none", "lower case ('0u', '1ul')"), Off(DiagnosticIds.LiteralSuffixCase)),
         new(AccessModifiersKey, "private-by-default members", "for_non_interface_members", ("for_non_interface_members", "with 'private'"), ("omit_if_default", "without 'private'"), Off(DiagnosticIds.AccessModifier)) { Enforcer = DiagnosticIds.AccessModifier, EnforcedValues = new[] { "for_non_interface_members" }, Unit = "member" },
+        new(PartialAccessKey, "partial type parts", "warning", ("warning", "with an access modifier"), ("none", "without one ('partial class X')"), Off(DiagnosticIds.PartialAccessModifier)) { Unit = "partial part" },
         new(TypeAccessKey, "internal-by-default types", "warning", ("warning", "with 'internal'"), ("none", "without an access modifier"), Off(DiagnosticIds.AccessModifier)) { Unit = "type" },
         new(IndentCaseBlockKey, "'case X:' blocks", "true", ("true", "indented"), ("false", "at the label's level"), null) { Unit = "block" },
         new(PropertySummaryKey, "property summaries", "warning", ("warning", "starting with 'Gets'/'Sets'"), ("none", "in their own words"), Off(DiagnosticIds.PropertySummaryWording)) { Unit = "summary" },
@@ -180,6 +191,9 @@ internal static class Conventions
         new(StaticPrefixKey, "private static fields", "warning", ("warning", "without a prefix"), ("none", "with an 's_'/'t_' prefix"), Off(DiagnosticIds.FieldPrefix)) { Unit = "field" },
         new(RelativeUsingsKey, "usings inside a namespace", "warning", ("warning", "fully qualified"), ("none", "relative ('using Common;')"), Off(DiagnosticIds.QualifiedUsing)) { Unit = "using" },
         new(TypeAliasKey, "built-in type names", "warning", ("warning", "only keywords ('int')"), ("none", "framework names ('Int32')"), Off("IDE0049"), "dotnet_style_predefined_type_for_locals_parameters_members", "dotnet_style_predefined_type_for_member_access") { Unit = "file" },
+        new(StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey, "empty blocks ('{ }')", "false", ("false", "on two lines"), ("true", "on one line"), $"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true") { Unit = "block" },
+        new(OneLinePropertiesKey, "block-bodied properties", "warning", ("warning", "on several lines"), ("none", "on one line"), Off(DiagnosticIds.SingleLineElement)) { Unit = "property" },
+        new(AccessorLayoutKey, "accessor bodies", "warning", ("warning", "laid out alike"), ("none", "one-line and multi-line mixed"), Off(DiagnosticIds.AccessorsConsistentLayout)) { Unit = "property" },
         new(AutoAccessorsKey, "auto-property accessors ('{ get; set; }')", "warning", ("warning", "on one line"), ("none", "on several lines"), Off(DiagnosticIds.AutoAccessorsOnOneLine)) { Unit = "property declaration" },
         new(RegionsKey, "'#region's inside members", "warning", ("warning", "without"), ("none", "'#region's"), Off(DiagnosticIds.NoRegionsInCodeElements)) { Unit = "region", KeepAny = true, Keeps = $"{DiagnosticIds.NoRegionsInCodeElements} would remove them" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
@@ -379,6 +393,24 @@ internal static class Conventions
     /// asks for it on types only, so the rule goes off (its members' 'private' then isn't added either).
     /// </summary>
     private const string TypeAccessKey = "dotnet_diagnostic." + DiagnosticIds.AccessModifier + ".severity";
+
+    /// <summary>
+    /// BRO1007's severity: partial type parts with or without an access modifier. CommunityToolkit writes 'partial class Guard'
+    /// in every part but one, and BRO1007 added 'public'/'private' to 74 declarations (trial 22).
+    /// </summary>
+    private const string PartialAccessKey = "dotnet_diagnostic." + DiagnosticIds.PartialAccessModifier + ".severity";
+
+    /// <summary>
+    /// BRO1509's severity, counted on properties (and indexers, events) with a block-bodied accessor: their accessor list on
+    /// several lines or on one ('Name { get { return name; } }': akka.net has 271, and BRO1509 expanded them all, trial 22).
+    /// </summary>
+    private const string OneLinePropertiesKey = "dotnet_diagnostic." + DiagnosticIds.SingleLineElement + ".severity";
+
+    /// <summary>
+    /// BRO1510's severity: multi-line accessor lists whose accessors all have block bodies, laid out alike (all one-line or all
+    /// multi-line) or mixed ('get { return x; }' above a multi-line 'set').
+    /// </summary>
+    private const string AccessorLayoutKey = "dotnet_diagnostic." + DiagnosticIds.AccessorsConsistentLayout + ".severity";
 
     /// <summary>
     /// The SDK formatter's indentation of a block that is a switch section's content ('case X:' + '{' on the next line):
@@ -777,6 +809,8 @@ internal static class Conventions
         counts[HeaderKey] = new int[2];
         counts[ConvertedKey] = new int[2];
         counts[InterfaceAccessKey] = new int[2];
+        counts[BinaryOperatorSpacingKey] = new int[3];
+        counts[ImplicitNewSpacingKey] = new int[2];
         foreach (var aspect in Spacing)
         {
             counts[SpacingCountKey(aspect)] = new int[3];
@@ -972,7 +1006,10 @@ internal static class Conventions
         }
 
         var line = $"{key} = {(winner < 0 ? "unset" : values[winner])}";
-        var keeps = winner < 0 ? $"'format' leaves {each} as it is" : "'format' leaves the files alone";
+        var (add, remove) = key == CharsetKey ? ("adds a BOM to", "removes the BOM from") : ("adds a last line break to", "removes the last line break from");
+        var keeps = winner < 0 ? $"'format' leaves {each} as it is"
+            : files[1 - winner] == 0 ? "'format' leaves the files alone"
+            : $"'format' {(winner == 1 ? add : remove)} the {Plural(files[1 - winner], "file")} that {(winner == 1 ? "lack" : "have")} one";
         return (line, $"{title}: {file ?? "your .editorconfig"} says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {key} = {value} everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'stylebro-migrate format' (it rewrites the files).");
     }
 
@@ -1321,6 +1358,12 @@ internal static class Conventions
                 }
             }
 
+            // Partial type parts (BRO1007's): with an access modifier or without one.
+            if (node is TypeDeclarationSyntax { Modifiers: var partialModifiers } && partialModifiers.Any(SyntaxKind.PartialKeyword))
+            {
+                Add(PartialAccessKey, !partialModifiers.Any(m => m.Kind() is SyntaxKind.PublicKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword or SyntaxKind.PrivateKeyword or SyntaxKind.FileKeyword));
+            }
+
             // Types in a namespace or a file: 'internal' or nothing (not partial ones: BRO1007's).
             if (node is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax && node.Parent is BaseNamespaceDeclarationSyntax or CompilationUnitSyntax)
             {
@@ -1409,6 +1452,14 @@ internal static class Conventions
 
                 case BinaryExpressionSyntax binary:
                     Wrap("dotnet_style_operator_placement_when_wrapping", binary.OperatorToken, beginningIsFirst: true);
+                    if (!binary.IsKind(SyntaxKind.AsExpression) && !binary.IsKind(SyntaxKind.IsExpression)
+                        && Line(binary.Left.Span.End) == Line(binary.Right.SpanStart))
+                    {
+                        var before = binary.OperatorToken.LeadingTrivia.Any(SyntaxKind.WhitespaceTrivia) || binary.OperatorToken.GetPreviousToken().TrailingTrivia.Any(SyntaxKind.WhitespaceTrivia);
+                        var after = binary.OperatorToken.TrailingTrivia.Any(SyntaxKind.WhitespaceTrivia);
+                        counts[BinaryOperatorSpacingKey][before == after ? (before ? 0 : 1) : 2]++;
+                    }
+
                     if ((binary.IsKind(SyntaxKind.EqualsExpression) || binary.IsKind(SyntaxKind.NotEqualsExpression))
                         && (binary.Left.IsKind(SyntaxKind.NullLiteralExpression) || binary.Right.IsKind(SyntaxKind.NullLiteralExpression)))
                     {
@@ -1469,6 +1520,10 @@ internal static class Conventions
                     Add("stylebro_null_check_style", false);
                     break;
 
+                case ImplicitObjectCreationExpressionSyntax { ArgumentList: { } implicitArguments } implicitNew:
+                    counts[ImplicitNewSpacingKey][implicitNew.NewKeyword.TrailingTrivia.Any(SyntaxKind.WhitespaceTrivia) && Line(implicitNew.NewKeyword.SpanStart) == Line(implicitArguments.SpanStart) ? 1 : 0]++;
+                    break;
+
                 case DefaultExpressionSyntax:
                     Add("csharp_prefer_simple_default_expression", false);
                     break;
@@ -1478,6 +1533,23 @@ internal static class Conventions
                     break;
 
                 case ArgumentListSyntax or ParameterListSyntax:
+                    // A first argument that is a multi-line lambda (anonymous method, anonymous object): the other arguments on
+                    // its last line, or the list laid out as BRO1107/BRO1108 want it.
+                    if (node is ArgumentListSyntax { Arguments.Count: > 1 } callArguments
+                        && callArguments.Arguments[0].Expression is AnonymousFunctionExpressionSyntax or AnonymousObjectCreationExpressionSyntax
+                        && Line(callArguments.Arguments[0].SpanStart) != Line(callArguments.Arguments[0].Span.End))
+                    {
+                        if (StyleBro.Analyzers.Readability.ParameterLayout.IsLeadingLambda(callArguments, text))
+                        {
+                            Add(StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey, true);
+                        }
+                        else if (StyleBro.Analyzers.Readability.ParameterLayout.GetFirstMisplacedItem(callArguments, text) is null
+                            && StyleBro.Analyzers.Readability.ParameterLayout.GetFirstItemToMove(callArguments, text, null) is null)
+                        {
+                            Add(StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey, false);
+                        }
+                    }
+
                     var (open, items, closeToken) = node is ArgumentListSyntax a
                         ? (a.OpenParenToken, a.Arguments.Cast<SyntaxNode>().ToList(), a.CloseParenToken)
                         : (((ParameterListSyntax)node).OpenParenToken, ((ParameterListSyntax)node).Parameters.Cast<SyntaxNode>().ToList(), ((ParameterListSyntax)node).CloseParenToken);
@@ -1525,6 +1597,25 @@ internal static class Conventions
                         Add("stylebro_blank_line_between_switch_sections", line < 1 || !string.IsNullOrWhiteSpace(text.Lines[line - 1].ToString()));
                     }
 
+                    break;
+
+                case BasePropertyDeclarationSyntax { AccessorList: { Accessors.Count: > 0 } blockList }
+                    when blockList.Accessors.Any(a => a.Body is { Statements.Count: > 0 }):
+                    // BRO1509's one-line properties ('X { get { return x; } }') and BRO1510's mixed accessor layouts.
+                    Add(OneLinePropertiesKey, Line(blockList.OpenBraceToken.SpanStart) == Line(blockList.CloseBraceToken.SpanStart));
+                    if (Line(blockList.OpenBraceToken.SpanStart) != Line(blockList.CloseBraceToken.SpanStart) && blockList.Accessors.Count > 1
+                        && blockList.Accessors.All(a => a.Body is not null))
+                    {
+                        Add(AccessorLayoutKey, blockList.Accessors.Select(a => Line(a.Body!.OpenBraceToken.SpanStart) == Line(a.Body.CloseBraceToken.SpanStart)).Distinct().Count() > 1);
+                    }
+
+                    break;
+
+                case BlockSyntax { Statements.Count: 0 } emptyBlock when emptyBlock.Parent is not AnonymousFunctionExpressionSyntax
+                    && emptyBlock.CloseBraceToken.LeadingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia))
+                    && emptyBlock.OpenBraceToken.TrailingTrivia.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia) || t.IsKind(SyntaxKind.EndOfLineTrivia)):
+                    // stylebro_allow_empty_single_line_blocks: '{ }' on one line (akka.net: 1,004 that BRO1508/BRO1509 expanded).
+                    Add(StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey, Line(emptyBlock.OpenBraceToken.SpanStart) == Line(emptyBlock.CloseBraceToken.SpanStart));
                     break;
 
                 case BasePropertyDeclarationSyntax { AccessorList: { Accessors.Count: > 0 } list } property
@@ -2137,6 +2228,22 @@ internal static class Conventions
     /// <summary>Whether a file's using lists are in the order 'dotnet format' sorts them into (<see cref="IsSorted"/>).</summary>
     public static bool UsingsSorted(SyntaxNode root, bool systemFirst) => UsingLists(root).All(l => IsSorted(l, systemFirst));
 
+    /// <summary>
+    /// A file's lists of usings (<see cref="UsingLists"/>) in the order 'dotnet format' sorts them into, when that differs from
+    /// theirs.
+    /// </summary>
+    public static List<List<UsingDirectiveSyntax>> ResortedUsingLists(SyntaxNode root, bool systemFirst) =>
+        UsingLists(root).Where(l => !IsSorted(l, systemFirst))
+            .Select(l => l.OrderBy(u => u, Comparer<UsingDirectiveSyntax>.Create((a, b) => CompareUsings(a, b, systemFirst))).ToList())
+            .ToList();
+
+    /// <summary>A using's group in the order 'dotnet format' (and StyleCop) sorts them: namespaces, static, aliases.</summary>
+    public static int UsingGroup(UsingDirectiveSyntax u) => u.Alias is not null ? 2 : u.StaticKeyword.IsKind(SyntaxKind.None) ? 0 : 1;
+
+    /// <summary>The name a using is sorted by: the alias, or the namespace or type ('global::' and spaces removed).</summary>
+    public static string UsingName(UsingDirectiveSyntax u) =>
+        (u.Alias?.Name.Identifier.ValueText ?? u.NamespaceOrType.ToString()).Replace("global::", string.Empty).Replace(" ", string.Empty);
+
     /// <summary>The folder a piece of <see cref="CSharpier"/>'s evidence applies to: its own, or the one above '.config'.</summary>
     private static string CSharpierFolder(string evidence)
     {
@@ -2467,7 +2574,7 @@ internal static class Conventions
             var kept = $"  Kept your style for {Plural(written.Count + matched, "setting")}";
             yield return matched == 0 ? $"{kept}: {string.Join(", ", written)}."
                 : written.Count == 0 ? $"{kept}, all already StyleBro's default."
-                : $"{kept} ({written.Count} written, {matched} already StyleBro's default): {string.Join(", ", written)}.";
+                : $"{kept}: wrote {string.Join(", ", written)}; {matched} {(matched == 1 ? "was" : "were")} already StyleBro's default.";
         }
 
         if (lists.BothAllowed.Count > 0)
@@ -2508,38 +2615,32 @@ internal static class Conventions
             .ToList();
 
     /// <summary>Whether a list of usings is in the order 'dotnet format' sorts them into (Roslyn's: namespaces, static, aliases).</summary>
-    private static bool IsSorted(List<UsingDirectiveSyntax> usings, bool systemFirst)
+    private static bool IsSorted(List<UsingDirectiveSyntax> usings, bool systemFirst) =>
+        Enumerable.Range(1, usings.Count - 1).All(i => CompareUsings(usings[i - 1], usings[i], systemFirst) <= 0);
+
+    private static int CompareUsings(UsingDirectiveSyntax a, UsingDirectiveSyntax b, bool systemFirst)
     {
-        static int Group(UsingDirectiveSyntax u) => u.Alias is not null ? 2 : u.StaticKeyword.IsKind(SyntaxKind.None) ? 0 : 1;
-        static string[] Segments(UsingDirectiveSyntax u) =>
-            (u.Alias?.Name.Identifier.ValueText ?? u.NamespaceOrType.ToString()).Replace("global::", string.Empty).Replace(" ", string.Empty).Split('.');
-
-        int Compare(UsingDirectiveSyntax a, UsingDirectiveSyntax b)
+        var (group, sa, sb) = (UsingGroup(a), UsingName(a).Split('.'), UsingName(b).Split('.'));
+        if (group != UsingGroup(b))
         {
-            var (group, sa, sb) = (Group(a), Segments(a), Segments(b));
-            if (group != Group(b))
-            {
-                return group.CompareTo(Group(b));
-            }
-
-            if (systemFirst && group < 2 && (sa[0] == "System") != (sb[0] == "System"))
-            {
-                return sa[0] == "System" ? -1 : 1;
-            }
-
-            for (var i = 0; i < Math.Min(sa.Length, sb.Length); i++)
-            {
-                var c = string.Compare(sa[i], sb[i], StringComparison.OrdinalIgnoreCase);
-                if (c != 0)
-                {
-                    return c;
-                }
-            }
-
-            return sa.Length.CompareTo(sb.Length);
+            return group.CompareTo(UsingGroup(b));
         }
 
-        return Enumerable.Range(1, usings.Count - 1).All(i => Compare(usings[i - 1], usings[i]) <= 0);
+        if (systemFirst && group < 2 && (sa[0] == "System") != (sb[0] == "System"))
+        {
+            return sa[0] == "System" ? -1 : 1;
+        }
+
+        for (var i = 0; i < Math.Min(sa.Length, sb.Length); i++)
+        {
+            var c = string.Compare(sa[i], sb[i], StringComparison.OrdinalIgnoreCase);
+            if (c != 0)
+            {
+                return c;
+            }
+        }
+
+        return sa.Length.CompareTo(sb.Length);
     }
 
     /// <summary>Whether an empty string literal has to stay a literal (BRO1106 leaves constant contexts alone).</summary>

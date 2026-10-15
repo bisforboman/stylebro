@@ -39,7 +39,7 @@ internal static class ConstructorSummaries
         }
 
         var cref = type.Identifier.ValueText + (type.TypeParameterList is { } typeParameters
-            ? "{" + string.Join(",", typeParameters.Parameters.Select(p => p.Identifier.ValueText)) + "}"
+            ? "{" + string.Join(", ", typeParameters.Parameters.Select(p => p.Identifier.ValueText)) + "}"
             : string.Empty);
         var tail = "<see cref=\"" + cref + "\"/> " + (type is StructDeclarationSyntax ? "struct" : "class");
         var standard = member is DestructorDeclarationSyntax ? "Finalizes an instance of the " + tail + "."
@@ -61,7 +61,7 @@ internal static class ConstructorSummaries
         // representing ...' is fine.
         var line = text.Lines.GetLineFromPosition(start);
         var rest = text.ToString(TextSpan.FromBounds(start, line.End));
-        if (accepted.Any(a => StartsWithWords(Normalize(rest), a.TrimEnd('.'))))
+        if (accepted.Any(a => StartsWithWords(Normalize(rest), Normalize(a.TrimEnd('.')))))
         {
             return null;
         }

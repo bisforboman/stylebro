@@ -102,9 +102,10 @@ internal static class BlankLines
     /// behind. Not for a comment whose text starts with one of <paramref name="exemptPrefixes"/> (tool markers such as
     /// '// ReSharper disable once ...', from <see cref="ExemptPrefixesKey"/>). Not for a comment below code
     /// (<see cref="IsCommentBelowCode"/>). Not for a comment above a switch section when
-    /// <paramref name="switchSections"/> (BRO1526's setting) wants no blank line there.
+    /// <paramref name="switchSections"/> (BRO1526's setting) wants no blank line there. With <paramref name="belowCloseBrace"/>,
+    /// the answer once a fix has wrapped the statement above in braces (a '}' ends the line above instead of a ';').
     /// </summary>
-    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include)
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include, bool belowCloseBrace = false)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
         {
@@ -144,7 +145,7 @@ internal static class BlankLines
             && !IsBetweenChainLinks(comment)
             && !IsBetweenListItems(comment)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
-            && !IsCommentBelowCode(comment, text);
+            && (belowCloseBrace || !IsCommentBelowCode(comment, text));
     }
 
     /// <summary>

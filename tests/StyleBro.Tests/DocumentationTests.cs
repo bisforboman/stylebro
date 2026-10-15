@@ -281,6 +281,7 @@ public class DocumentationTests
             {
                 // Explains the next line.
                 var x = 1;
+
                 // tight
                 var y = 2;
                 //// Commented-out code stays.
@@ -849,7 +850,7 @@ public class DocumentationTests
         """);
 
     // Like StyleCop master (eb498962): 'init' counts as a setter that says 'initializes'; 'Gets' alone is fine for
-    // get+init; 'Gets or initializes' is a wrong prefix elsewhere (beta.556's fix wrote 'Gets or sets or initializes').
+    // get+init, and so is 'Gets or sets' (unlike master: trial 22, attribute properties); 'Gets or initializes' is a wrong prefix elsewhere (beta.556's fix wrote 'Gets or sets or initializes').
     [Fact]
     public Task InitAccessors_SayInitializes() => VerifyFixAsync(
         """
@@ -857,7 +858,7 @@ public class DocumentationTests
         public class Words
         {
             /// <summary>Gets or sets the id.</summary>
-            public int {|BRO1604:Id|} { get; init; }
+            public int Id { get; init; }
 
             /// <summary>The name.</summary>
             public string {|BRO1604:Name|} { get; init; }
@@ -889,7 +890,7 @@ public class DocumentationTests
         /// <summary>Words.</summary>
         public class Words
         {
-            /// <summary>Gets or initializes the id.</summary>
+            /// <summary>Gets or sets the id.</summary>
             public int Id { get; init; }
 
             /// <summary>Gets or initializes the name.</summary>
@@ -1101,6 +1102,34 @@ public class DocumentationTests
 
             /// <summary>Finalizes the handle.</summary>
             ~Bag()
+            {
+            }
+        }
+        """);
+
+    // Trial 22: the generic link is written like a person writes it, with a space after the comma.
+    [Fact]
+    public Task ConstructorSummaries_GenericLinkHasSpaces() => VerifyFixAsync(
+        """
+        /// <summary>A lookup.</summary>
+        /// <typeparam name="TKey">The key.</typeparam>
+        /// <typeparam name="TElement">The element.</typeparam>
+        public class Lookup<TKey, TElement>
+        {
+            /// {|BRO1606:<summary>|}Default constructor.</summary>
+            public Lookup()
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>A lookup.</summary>
+        /// <typeparam name="TKey">The key.</typeparam>
+        /// <typeparam name="TElement">The element.</typeparam>
+        public class Lookup<TKey, TElement>
+        {
+            /// <summary>Initializes a new instance of the <see cref="Lookup{TKey, TElement}"/> class.</summary>
+            public Lookup()
             {
             }
         }

@@ -18,6 +18,13 @@ internal static class ParameterLayout
     /// <summary>The .editorconfig key for where the first item of a split list goes (BRO1107, and BRO1108's fix).</summary>
     public const string FirstItemKey = "stylebro_split_list_first_item";
 
+    /// <summary>
+    /// The .editorconfig key that allows a call whose first argument is a multi-line lambda, anonymous method or anonymous
+    /// object with the other arguments on its closing line (<c>Register(c =&gt;</c> / <c>{ ... }</c> / <c>}, Kind.Field);</c>;
+    /// owner's choice 2026-10-15: CommunityToolkit has ~50). Default false, like StyleCop (SA1116/SA1117 report it).
+    /// </summary>
+    public const string LeadingLambdaKey = "stylebro_allow_leading_multiline_lambda";
+
     /// <summary>The lists both rules look at: parameters, arguments, attribute arguments and array sizes.</summary>
     public static readonly SyntaxKind[] ListKinds =
     [
@@ -47,15 +54,17 @@ internal static class ParameterLayout
         var line = GetLines(list, text, joinsEmptyLists);
         var openLine = line(open.SpanStart);
         return line(items[0].SpanStart) == openLine && line(items[1].SpanStart) > openLine
-            && !(options is not null && IsSameLine(options)) && CanRewrite(list, items, text) ? items[0] : null;
+            && !(options is not null && IsSameLine(options)) && !(AllowsLeadingLambda(options) && IsLeadingLambda(list, line))
+            && CanRewrite(list, items, text) ? items[0] : null;
     }
 
     /// <summary>
     /// BRO1108: the items are neither all on one line nor each on their own line; the first two decide which one was
     /// intended, like StyleCop. Returns the first item that breaks it. When the first two start on the same line,
-    /// every item has to start on that line; otherwise no item may start on the line where the previous one ends.
+    /// every item has to start on that line; otherwise no item may start on the line where the previous one ends. Not with
+    /// <see cref="LeadingLambdaKey"/> on a list of that shape (<see cref="IsLeadingLambda"/>).
     /// </summary>
-    public static SyntaxNode? GetFirstMisplacedItem(SyntaxNode list, SourceText text, Func<bool>? joinsEmptyLists = null)
+    public static SyntaxNode? GetFirstMisplacedItem(SyntaxNode list, SourceText text, Func<bool>? joinsEmptyLists = null, AnalyzerConfigOptions? options = null)
     {
         var (_, items) = GetList(list);
         if (items.Count < 2)
@@ -63,9 +72,21 @@ internal static class ParameterLayout
             return null;
         }
 
-        var misplaced = GetMisplacedItem(items, GetLines(list, text, joinsEmptyLists));
-        return misplaced is not null && CanRewrite(list, items, text) ? misplaced : null;
+        var line = GetLines(list, text, joinsEmptyLists);
+        var misplaced = GetMisplacedItem(items, line);
+        return misplaced is not null && !(AllowsLeadingLambda(options) && IsLeadingLambda(list, line)) && CanRewrite(list, items, text) ? misplaced : null;
     }
+
+    /// <summary>Whether <see cref="LeadingLambdaKey"/> is <see langword="true"/>.</summary>
+    public static bool AllowsLeadingLambda(AnalyzerConfigOptions? options) =>
+        options is not null && options.TryGetValue(LeadingLambdaKey, out var value) && value.Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Whether an argument list has the leading multi-line lambda shape <see cref="LeadingLambdaKey"/> allows: its first
+    /// argument is a lambda, anonymous method or anonymous object that starts on the '(' line and ends on a later one, and
+    /// every other argument starts on that last line (<c>}, SymbolKind.Field);</c>).
+    /// </summary>
+    public static bool IsLeadingLambda(SyntaxNode list, SourceText text) => IsLeadingLambda(list, position => Line(text, position));
 
     /// <summary>
     /// The edits that put every item on its own line (with <paramref name="firstOnly"/>, only the first item: BRO1107),
@@ -136,6 +157,19 @@ internal static class ParameterLayout
             ArrayRankSpecifierSyntax rank => (rank.OpenBracketToken, rank.Sizes),
             _ => (default, []),
         };
+    }
+
+    private static bool IsLeadingLambda(SyntaxNode list, Func<int, int> line)
+    {
+        if (list is not ArgumentListSyntax arguments || arguments.Arguments.Count < 2
+            || arguments.Arguments[0] is not { Expression: AnonymousFunctionExpressionSyntax or AnonymousObjectCreationExpressionSyntax } first)
+        {
+            return false;
+        }
+
+        var end = line(first.Span.End);
+        return line(first.SpanStart) == line(arguments.OpenParenToken.SpanStart)
+            && arguments.Arguments.Skip(1).All(a => line(a.SpanStart) == end);
     }
 
     private static SyntaxNode? GetMisplacedItem(IReadOnlyList<SyntaxNode> items, Func<int, int> line)

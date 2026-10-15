@@ -126,6 +126,95 @@ public class RedundantJumpTests
         }
         """);
 
+    // akka.net: without its 'return;' the lambda's end is unreachable, so it also converts to Predicate<T> and the call is
+    // ambiguous (CS0121). With a reachable end or another 'return;', the statement goes.
+    [Fact]
+    public Task LambdaWhoseEndWouldBeUnreachable_KeepsItsReturn() => Verify.VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public void Receive<T>(Action<T> handler) { }
+
+            public void Receive<T>(Predicate<T> handler) { }
+
+            public void Setup(bool b)
+            {
+                Receive<string>(_ => { throw new InvalidOperationException(); return; });
+                Receive<string>(_ =>
+                {
+                    if (b)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
+
+                    return;
+                });
+                Receive<string>(_ => { Console.WriteLine(); {|BRO1137:return;|} });
+                Receive<string>(_ => { {|BRO1137:return;|} });
+                Receive<string>(_ =>
+                {
+                    if (b)
+                    {
+                        return;
+                    }
+
+                    while (true)
+                    {
+                    }
+
+                    {|BRO1137:return;|}
+                });
+            }
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            public void Receive<T>(Action<T> handler) { }
+
+            public void Receive<T>(Predicate<T> handler) { }
+
+            public void Setup(bool b)
+            {
+                Receive<string>(_ => { throw new InvalidOperationException(); return; });
+                Receive<string>(_ =>
+                {
+                    if (b)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
+
+                    return;
+                });
+                Receive<string>(_ => { Console.WriteLine(); });
+                Receive<string>(_ => { });
+                Receive<string>(_ =>
+                {
+                    if (b)
+                    {
+                        return;
+                    }
+
+                    while (true)
+                    {
+                    }
+                });
+            }
+        }
+        """);
+
     [Fact]
     public Task StatementsThatMatter_AreNotReported() => Verify.VerifyNoDiagnosticsAsync(
         """

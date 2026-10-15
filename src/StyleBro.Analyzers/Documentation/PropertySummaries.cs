@@ -61,7 +61,7 @@ internal static class PropertySummaries
     /// accessors other code can use: 'Gets or sets', 'Gets' (no setter, or a private or internal setter; a protected
     /// one counts, like in StyleCop), 'Sets' (write-only); a bool gets 'a value indicating whether' after them. An
     /// 'init' accessor counts like a setter with 'initializes', and like StyleCop master a property with 'get' and
-    /// 'init' may also say just 'Gets'. Not checked: indexers, summaries that don't start with text, and summaries
+    /// 'init' may also say just 'Gets' (or, unlike StyleCop master, 'Gets or sets'). Not checked: indexers, summaries that don't start with text, and summaries
     /// without a known prefix that don't start like a noun phrase (an article or a lower-case word): 'This is the hash',
     /// 'Device id of the user', 'Returns ...' have no fix that makes a sentence (owner's decision, 2026-10-09); nor
     /// lower-case conditions or verbs ('if true, ...', 'returns ...').
@@ -89,7 +89,10 @@ internal static class PropertySummaries
             return null;
         }
 
-        string[] accepted = initOnly && visibleGetter && visibleSetter ? [verb, "Gets"] : [verb];
+        // '{ get; init; }' may also say 'Gets or sets' (unlike StyleCop master): a common wording, also for attribute
+        // properties ('[Command(AllowConcurrent = true)]' sets them), and rewriting it to 'Gets or initializes' is churn
+        // (trial 22: CommunityToolkit's attributes).
+        string[] accepted = initOnly && visibleGetter && visibleSetter ? [verb, "Gets", "Gets or sets"] : [verb];
 
         // Only 'bool', like StyleCop's SA1623: a 'bool?' summary takes the plain verb ('Gets whether' stays; tfplan2md's
         // became 'Gets a value indicating whether').

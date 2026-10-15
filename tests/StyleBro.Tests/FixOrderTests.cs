@@ -43,6 +43,46 @@ public class FixOrderTests
         "BRO1515",
         "BRO1516");
 
+    // akka.net: a comment below a ';' with a blank line under it describes the code above (BRO1504 leaves it); once
+    // BRO1515's braces put a '}' there, BRO1504 wants the blank line, so the wrap adds it. BRO1602's '//' below a '}' too.
+    [Fact]
+    public Task Braces_AndTripleSlash_GiveBRO1504sBlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public int Ticks { get; }
+
+            public C(int ticks)
+            {
+                if (ticks > 1073741824)
+                    throw new ArgumentOutOfRangeException(nameof(ticks), ticks,
+                        "Cannot be greater than 2^30.");
+                // ReSharper restore NotResolvedInText
+
+                Ticks = ticks;
+            }
+
+            public string Join(bool windows)
+            {
+                if (windows)
+                {
+                    return "w";
+                }
+                /// On Unix: the rules are ignored.
+                else
+                {
+                    return "u";
+                }
+            }
+        }
+        """,
+        "BRO1504",
+        "BRO1515",
+        "BRO1519",
+        "BRO1602");
+
     // sourcegit: with when_multiline, BRO1515 wraps the multi-line 'else if' and makes the single-line 'if' BRO1516's,
     // which used to need a second run.
     [Fact]
@@ -344,6 +384,34 @@ public class FixOrderTests
         "BRO1108",
         "BRO1110",
         "BRO1116");
+
+    // The leading multi-line lambda option (owner's choice 2026-10-15) next to BRO1110's own_line: the ')' goes to its own line
+    // and the shape stays, whichever fix runs first.
+    [Fact]
+    public Task LeadingMultiLineLambda_WithClosingParenthesisOnOwnLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void Register(System.Action<int> action, int kind, int order) { }
+
+            public void Run()
+            {
+                Register(x =>
+                {
+                    System.Console.WriteLine(x);
+                }, 1, 2);
+                Register(x =>
+                {
+                    System.Console.WriteLine(x);
+                }, 1,
+                    2);
+            }
+        }
+        """,
+        "stylebro_allow_leading_multiline_lambda = true\nstylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1110");
 
     [Fact]
     public Task ClosingParenthesisOnOwnLine_CallChains() => AssertConvergesInEveryOrderWithConfigAsync(

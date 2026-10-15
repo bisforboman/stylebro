@@ -1403,6 +1403,24 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 - A "conflict" right after a push is often GitHub recomputing: watchers should require DIRTY several times.
 - Agents squashing onto a moved main can revert other PRs' changes: check a PR's file list before trusting it.
 
+## Trial 22 init/migrate fixes (2026-10-15)
+
+- `Program.RepositoryFolder`: init and `--write` run from a subfolder move to the git root when the build reaches past the
+  folder (props/Packages.props/.editorconfig/.globalconfig above it, unless the folder's own props or `root = true`
+  shadows them; a solution in it listing `..` projects). `Migration.SetPreset(importParent)`: a new props below another
+  imports it. init reads the root `.globalconfig` under the root `.editorconfig` (`Migration.WithGlobalConfig`; not for
+  bulk severities: format ignores a global config's); `AnalysisMode` All + EnforceCodeStyleInBuild = Style at warning
+  for the `this.` check. A nested `category-Style` none gets the block's IDE ids `none` (`InitCommand.NestedStyleOff`).
+- Owner's choices (docs/decisions/2026-10-15-*): `stylebro_allow_leading_multiline_lambda` (ParameterLayout, default
+  false; init counts it); migrate maps StyleCop spacing rules that are off to SDK options from the code
+  (`Migration.AddSpacingOfRulesOff`, probed: control-flow keyword option covers `catch`; `new ()` has no own option).
+- Migrate: 1.1.x + switch expressions without comma -> BRO1401 off; no block in `root = true` folders without C#;
+  suppressions only under `setup.Folders` (no Sonar); usings held back only when the sorted order breaks the enforced rule
+  (`Migration.AcceptsSorted`). init conventions: BRO1007 partial parts, empty `{ }` knob, BRO1509 one-line properties,
+  BRO1510 mixed accessors, leading lambdas.
+- GOTCHA: in this environment `\\n` inside a bash heredoc python script became a real newline; write such scripts with
+  the Write tool (there `\\n` stays a backslash-n in the output).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as
