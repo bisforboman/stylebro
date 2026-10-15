@@ -1417,6 +1417,88 @@ public class FieldNamingTests
         """,
         YamlDotNetNamingRules + "\ndotnet_diagnostic.IDE1006.severity = none");
 
+    // Stryker (trial 23): Roslyn picks the '_' rule for private static fields over the PascalCase rule for static readonly
+    // ones (its comparers don't order those two, so the rule order decides), and 'LockA' got IDE1006. The constant's rule
+    // ('const' implies static and readonly) does win, so '_constC' -> 'ConstC' is what IDE1006 asks for too.
+    [Fact]
+    public Task StaticReadonlyField_FollowsTheRuleRoslynPicks() => VerifyFixAsync(
+        """
+        public class C
+        {
+            private static readonly object _lockA = new object();
+            private const int {|BRO1306:_constC|} = 1;
+
+            public int Use() => _lockA.GetHashCode() + _constC;
+        }
+        """,
+        """
+        public class C
+        {
+            private static readonly object _lockA = new object();
+            private const int ConstC = 1;
+
+            public int Use() => _lockA.GetHashCode() + ConstC;
+        }
+        """,
+        """
+        dotnet_diagnostic.IDE1006.severity = warning
+        dotnet_naming_rule.async_members_should_be_pascal_case_suffixed_with_async.severity = warning
+        dotnet_naming_rule.async_members_should_be_pascal_case_suffixed_with_async.style = pascal_case_suffixed_with_async
+        dotnet_naming_rule.async_members_should_be_pascal_case_suffixed_with_async.symbols = async_members
+        dotnet_naming_rule.const_declarations_should_be_pascal_case.severity = warning
+        dotnet_naming_rule.const_declarations_should_be_pascal_case.style = pascal_case
+        dotnet_naming_rule.const_declarations_should_be_pascal_case.symbols = const_declarations
+        dotnet_naming_rule.interfaces_should_be_pascal_case_prefixed_with_i.severity = warning
+        dotnet_naming_rule.interfaces_should_be_pascal_case_prefixed_with_i.style = pascal_case_prefixed_with_i
+        dotnet_naming_rule.interfaces_should_be_pascal_case_prefixed_with_i.symbols = interfaces
+        dotnet_naming_rule.parameters_should_be_camel_case.severity = warning
+        dotnet_naming_rule.parameters_should_be_camel_case.style = camel_case
+        dotnet_naming_rule.parameters_should_be_camel_case.symbols = parameters
+        dotnet_naming_rule.private_and_internal_static_fields_should_be_camel_case.severity = warning
+        dotnet_naming_rule.private_and_internal_static_fields_should_be_camel_case.style = prefix_underscore
+        dotnet_naming_rule.private_and_internal_static_fields_should_be_camel_case.symbols = private_and_internal_static_fields
+        dotnet_naming_rule.private_and_internal_fields_should_be_camel_case.severity = warning
+        dotnet_naming_rule.private_and_internal_fields_should_be_camel_case.style = prefix_underscore
+        dotnet_naming_rule.private_and_internal_fields_should_be_camel_case.symbols = private_and_internal_fields
+        dotnet_naming_rule.public_and_protected_declarations_should_be_pascal_case.severity = warning
+        dotnet_naming_rule.public_and_protected_declarations_should_be_pascal_case.style = pascal_case
+        dotnet_naming_rule.public_and_protected_declarations_should_be_pascal_case.symbols = public_and_protected_declarations
+        dotnet_naming_rule.static_readonly_declarations_should_be_pascal_case.severity = warning
+        dotnet_naming_rule.static_readonly_declarations_should_be_pascal_case.style = pascal_case
+        dotnet_naming_rule.static_readonly_declarations_should_be_pascal_case.symbols = static_readonly_declarations
+        dotnet_naming_rule.type_parameters_should_be_pascal_case_prefixed_with_t.severity = warning
+        dotnet_naming_rule.type_parameters_should_be_pascal_case_prefixed_with_t.style = pascal_case_prefixed_with_t
+        dotnet_naming_rule.type_parameters_should_be_pascal_case_prefixed_with_t.symbols = type_parameters
+        dotnet_naming_style.camel_case.capitalization = camel_case
+        dotnet_naming_style.pascal_case.capitalization = pascal_case
+        dotnet_naming_style.pascal_case_suffixed_with_async.capitalization = pascal_case
+        dotnet_naming_style.pascal_case_suffixed_with_async.required_suffix = Async
+        dotnet_naming_style.pascal_case_prefixed_with_i.capitalization = pascal_case
+        dotnet_naming_style.pascal_case_prefixed_with_i.required_prefix = I
+        dotnet_naming_style.pascal_case_prefixed_with_t.capitalization = pascal_case
+        dotnet_naming_style.pascal_case_prefixed_with_t.required_prefix = T
+        dotnet_naming_symbols.async_members.required_modifiers = async
+        dotnet_naming_symbols.const_declarations.required_modifiers = const
+        dotnet_naming_symbols.interfaces.applicable_kinds = interface
+        dotnet_naming_symbols.parameters.applicable_kinds = parameter
+        dotnet_naming_symbols.public_and_protected_declarations.applicable_accessibilities = public, protected
+        dotnet_naming_symbols.public_and_protected_declarations.applicable_kinds = method, field, event, property
+        dotnet_naming_symbols.private_and_internal_fields.applicable_accessibilities = private, internal
+        dotnet_naming_symbols.private_and_internal_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_and_internal_static_fields.applicable_accessibilities = private, internal
+        dotnet_naming_symbols.private_and_internal_static_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_and_internal_static_fields.required_modifiers = static
+        dotnet_naming_symbols.static_readonly_declarations.required_modifiers = static, readonly
+        dotnet_naming_symbols.type_parameters.applicable_kinds = type_parameter
+        dotnet_naming_rule.private_members_with_underscore.symbols = private_members
+        dotnet_naming_rule.private_members_with_underscore.style = prefix_underscore
+        dotnet_naming_rule.private_members_with_underscore.severity = warning
+        dotnet_naming_symbols.private_members.applicable_kinds = field
+        dotnet_naming_symbols.private_members.applicable_accessibilities = private
+        dotnet_naming_style.prefix_underscore.capitalization = camel_case
+        dotnet_naming_style.prefix_underscore.required_prefix = _
+        """);
+
     // IDE1006's own severity enforces a rule whose severity is silent; without it the silent rule doesn't count.
     [Theory]
     [InlineData("dotnet_diagnostic.IDE1006.severity = warning", "{|BRO1303:Value|}", "Value", "value")]

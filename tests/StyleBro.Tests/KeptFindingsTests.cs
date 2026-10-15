@@ -61,19 +61,159 @@ public class KeptFindingsTests
         Assert.Null(reason);
     }
 
-    // sourcegit: a public field of a private nested class is private in effect, so a word in another project's strings
-    // doesn't keep it (only a reflection-shaped string would); an internal type's field is data a serializer writes.
+    // Jint (trial 23): a script reads 'host.ByteField' of a private test class, so a public field is data whatever its type's
+    // accessibility (this reverses sourcegit's exception for private types); a protected one is guarded like a private one.
     [Theory]
-    [InlineData("private", false)]
-    [InlineData("internal", true)]
-    public async Task APublicFieldOfAPrivateType_IsGuardedLikeAPrivateField(string access, bool kept)
+    [InlineData("private", "public", true)]
+    [InlineData("internal", "public", true)]
+    [InlineData("private", "internal", true)]
+    [InlineData("internal", "protected internal", true)]
+    public async Task APublicFieldOfAnyType_IsMatchedInsideStrings(string access, string fieldAccess, bool kept)
     {
         var reason = await GetReasonAsync(
             DiagnosticIds.FieldPascalCase,
-            ("Engine.cs", $"public class Engine {{ {access} class Variable {{ public string name = string.Empty; }} }}"),
-            ("Xshd.cs", "class Xshd { string Write() => \"<Color name='x' />\"; }"));
+            ("Engine.cs", $"public class Engine {{ {access} class Host {{ {fieldAccess} byte byteField; }} }}"),
+            ("Script.cs", "class Script { string Run() => \"host.byteField\"; }"));
 
         Assert.Equal(kept ? KeptReason.NameInString : null, reason);
+    }
+
+    // Jint (trial 23): '((dynamic)t).MemberKey.Field' binds by name at run time; renaming 'Field' compiled and broke the test.
+    [Theory]
+    [InlineData("((dynamic)t).Key.byteField")]
+    [InlineData("(t as dynamic).byteField")]
+    [InlineData("d.byteField", "dynamic d")]
+    [InlineData("d.Get().byteField", "dynamic d")]
+    [InlineData("d[0].byteField", "dynamic d")]
+    public async Task AFieldUsedThroughDynamic_IsKept(string use, string parameter = "object t")
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.FieldPascalCase,
+            ("Host.cs", "public class Engine { private class Host { public byte byteField; } }"),
+            ("Use.cs", $"class Use {{ object Read({parameter}) => {use}; }}"));
+
+        Assert.Equal(KeptReason.UsedThroughDynamic, reason);
+    }
+
+    [Theory]
+    [InlineData("((object)t).ToString()")]
+    [InlineData("t.byteField", "Engine.Host t")]
+    public async Task AFieldWithoutADynamicUse_IsRenamed(string use, string parameter = "object t")
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.FieldPascalCase,
+            ("Host.cs", "public class Engine { internal class Host { public byte byteField; } }"),
+            ("Use.cs", $"class Use {{ object Read({parameter}) => {use}; }}"));
+
+        Assert.Null(reason);
+    }
+
+    [Fact]
+    public void RepositoryNames_ListDynamicMemberNames()
+    {
+        var root = CSharpSyntaxTree.ParseText("""
+            class T
+            {
+                dynamic field;
+                dynamic Prop => null;
+                object M(object o, dynamic p, Other other)
+                {
+                    dynamic local = o;
+                    foreach (dynamic item in new object[0]) { _ = item.Each; }
+                    return ((dynamic)o).Cast.Chain + (o as dynamic).As + local.Local + p.Param + field.Field + Prop.Property + o.GetHashCode() + other.Plain;
+                }
+            }
+            """).GetRoot();
+
+        var lines = RepositoryNames.Lines(root, "T.cs").Where(l => l.StartsWith("D", StringComparison.Ordinal)).ToList();
+
+        Assert.Equal(new[] { "Each", "Cast", "Chain", "As", "Local", "Param", "Field", "Property" }, lines.Select(l => l.Split('\t')[2]));
+        Assert.Equal("D\tT.cs(8)\tEach", lines[0]);
+    }
+
+    // Trial 23 (xunit.v3 + Verify): snapshot files hold what a serializer wrote, so they count like strings (owner's choice
+    // 2026-10-15); renaming 'customerName' broke the snapshot test.
+    [Theory]
+    [InlineData("Tests.Summary.verified.txt", KeptReason.NameInSnapshotFile)]
+    [InlineData("Tests.Summary.received.json", KeptReason.NameInSnapshotFile)]
+    [InlineData("Approvals.Run.approved.txt", KeptReason.NameInSnapshotFile)]
+    [InlineData("notes.txt", null)]
+    public async Task APropertyInASnapshotFile_IsKept(string file, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.ElementPascalCase,
+            ("Summary.cs", "internal sealed class Summary\n{\n    public string customerName { get; set; } = string.Empty;\n}\n"),
+            (file, "{\n  customerName: Ada\n}\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
+    // A private field isn't serialized: a word in a snapshot doesn't keep it.
+    [Fact]
+    public async Task APrivateFieldInASnapshotFile_IsRenamed()
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "class C\n{\n    private int _total;\n\n    public int Get() => _total;\n}\n"),
+            ("C.Run.verified.txt", "{ _total: 1 }"));
+
+        Assert.Null(reason);
+    }
+
+    [Fact]
+    public async Task ASnapshotFileOnDisk_IsReadFromTheProjectsRepository()
+    {
+        // The tests' snapshot sits beside the library, under the same git root; one in obj/ doesn't count.
+        Assert.Equal(KeptReason.NameInSnapshotFile, await GetReasonOnDiskAsync(Path.Combine("tests", "SnapshotTests.Summary.verified.txt")));
+        Assert.Null(await GetReasonOnDiskAsync(Path.Combine("tests", "obj", "SnapshotTests.Summary.verified.txt")));
+
+        // Binary and huge files aren't read.
+        Assert.Null(await GetReasonOnDiskAsync(Path.Combine("tests", "SnapshotTests.Image.verified.png"), "\0totalAmount"));
+        Assert.Null(await GetReasonOnDiskAsync(Path.Combine("tests", "SnapshotTests.Big.verified.txt"), new string(' ', 1 << 20) + "totalAmount"));
+
+        static async Task<KeptReason?> GetReasonOnDiskAsync(string snapshot, string text = "{\n  totalAmount: 2.50\n}\n")
+        {
+            var root = Path.Combine(Path.GetTempPath(), "stylebro-snapshot-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(Path.Combine(root, ".git"));
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(root, snapshot))!);
+            try
+            {
+                File.WriteAllText(Path.Combine(root, snapshot), text);
+                var (solution, document, diagnostic) = await FindAsync(DiagnosticIds.ElementPascalCase, ("Summary.cs", "internal sealed class Summary\n{\n    public decimal totalAmount { get; set; }\n}\n"));
+                solution = solution.WithProjectFilePath(document.Project.Id, Path.Combine(root, "src", "App", "App.csproj"));
+                return await CamelCaseRenamer.GetKeptReasonAsync(solution, solution.GetDocument(document.Id)!, diagnostic, CancellationToken.None);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    // Trial 23: a snake_case property ('line_count', a wire name) isn't BRO1309's, so its renamed siblings mixed the DTO's casing.
+    [Fact]
+    public async Task APropertyNextToASnakeCaseOne_IsKept()
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.ElementPascalCase,
+            ("Summary.cs", "internal sealed class Summary\n{\n    public string customerName { get; set; } = string.Empty;\n\n    public int line_count { get; set; }\n}\n"));
+
+        Assert.Equal(KeptReason.OtherPropertyKept, reason);
+    }
+
+    // Owner (trial 23): "Leave VB alone". VB is case-insensitive, so the reference check said the new name meant something else.
+    [Fact]
+    public async Task ATypeVisualBasicUses_IsKept_UsedFromVisualBasic()
+    {
+        var (solution, document, diagnostic) = await FindAsync(DiagnosticIds.ElementPascalCase, ("Tariff.cs", "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"Legacy\")]\n\nnamespace Billing\n{\n    internal static class tariffHelper\n    {\n        public static string Describe() => \"x\";\n    }\n}\n"));
+        var vb = ProjectId.CreateNewId();
+        solution = solution
+            .AddProject(vb, "Legacy", "Legacy", LanguageNames.VisualBasic)
+            .AddMetadataReference(vb, MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+            .AddProjectReference(vb, new ProjectReference(document.Project.Id))
+            .AddDocument(DocumentId.CreateNewId(vb), "Invoice.vb", SourceText.From("Public Class Invoice\n    Public Function Total() As String\n        Return Billing.tariffHelper.Describe()\n    End Function\nEnd Class\n"));
+
+        Assert.Equal(KeptReason.UsedFromVisualBasic, await CamelCaseRenamer.GetKeptReasonAsync(solution, solution.GetDocument(document.Id)!, diagnostic, CancellationToken.None));
     }
 
     [Fact]
@@ -709,6 +849,12 @@ public class KeptFindingsTests
         var ids = new List<DocumentId>();
         foreach (var (path, text) in files)
         {
+            if (!path.EndsWith(".cs", StringComparison.Ordinal))
+            {
+                solution = solution.AddAdditionalDocument(DocumentId.CreateNewId(project), path, SourceText.From(text), filePath: Path.Combine(Path.GetTempPath(), path));
+                continue;
+            }
+
             var document = DocumentId.CreateNewId(project);
             solution = solution.AddDocument(document, path, SourceText.From(text), filePath: Path.Combine(Path.GetTempPath(), path));
             ids.Add(document);
