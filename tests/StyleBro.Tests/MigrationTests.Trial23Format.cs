@@ -125,6 +125,17 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Format_ExplainsASkippedProject_WithoutBlamingTheRestore()
+    {
+        // FluentAssertions: after a restore that worked, "Run `dotnet restore`": the net47 run had loaded a netstandard2.0
+        // project for net47, whose reference assemblies weren't there.
+        FormatCommand.ResetExplained();
+        var line = FormatCommand.Explain("Required references did not load for Specs or referenced project. Run `dotnet restore` prior to formatting.");
+        Assert.StartsWith("'dotnet format' skipped Specs: MSBuild couldn't load it or a project it references for this run", line, StringComparison.Ordinal);
+        Assert.Contains("The restore isn't the cause", line, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void StaleCopies_OlderThanADay_AreDeleted()
     {
         var old = Directory.CreateDirectory(Path.Combine(root, "stylebro-preview-old")).FullName;

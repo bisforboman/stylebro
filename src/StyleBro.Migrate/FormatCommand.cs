@@ -758,8 +758,13 @@ internal static class FormatCommand
     /// </summary>
     public static string? Explain(string line)
     {
+        // "Required references did not load ... Run `dotnet restore`" after a restore that worked (FluentAssertions, trial 23):
+        // MSBuild failed to evaluate the project or one it references for the run (there: a netstandard2.0 project loaded for
+        // net47, whose reference assemblies weren't there). The restore isn't the cause; MSBuild's message is in the diagnostic output.
         var (key, text) = UnsupportedProject(line) is { } name
             ? (name, $"Not formatted: {name}: 'dotnet format' formats C# and Visual Basic projects only, so it's left alone; the C# projects are formatted.")
+            : SkippedProject(line) is { } skipped
+            ? ("skipped:" + skipped, $"'dotnet format' skipped {skipped}: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; 'dotnet format <solution> --verbosity diagnostic' shows MSBuild's message (\"Msbuild failed when processing the file ...\").")
             : line.StartsWith(WorkspaceWarnings, StringComparison.Ordinal)
                 ? (WorkspaceWarnings, "'dotnet format' had warnings loading the workspace (a project or reference it couldn't load completely, e.g. one in another language); they don't stop the run. 'dotnet format <solution> --verbosity diagnostic' lists them.")
                 : (null, line);
@@ -2559,6 +2564,7 @@ internal static class FormatCommand
         foreach (var generator in stale)
         {
             var output = new List<string>();
+
             // Without analyzers and warnings as errors: the generator's own code isn't formatted yet (jint: its StyleBro findings
             // failed the build under TreatWarningsAsErrors), and only its output matters here.
             if (Dotnet(root, null, ["build", generator, "-nologo", "-v", "q", "-p:RunAnalyzers=false", "-p:TreatWarningsAsErrors=false", .. RestoreOptions], output.Add) == 0)
@@ -3352,6 +3358,7 @@ internal static class FormatCommand
             includes = plan.Select(_ => requested).ToList();
         }
 
+        var ownIncludes = includes;
         if (requested is null)
         {
             var narrowed = includes.Select((include, i) => OnlyNewToFramework(i, include)).ToList();
@@ -3373,8 +3380,11 @@ internal static class FormatCommand
             foreach (var project in plan[index].Projects.Where(p => projects[p].Frameworks.Length > 1))
             {
                 var fullPath = projects[project].FullPath;
+
+                // Not a framework whose run skipped the project ('dotnet format' couldn't load it there): nothing was fixed.
                 var earlier = Enumerable.Range(0, index)
-                    .Where(j => plan[j].Framework != plan[index].Framework && plan[j].Projects.Contains(project))
+                    .Where(j => plan[j].Framework != plan[index].Framework && plan[j].Projects.Contains(project)
+                        && !(skipped.TryGetValue(Path.GetFileNameWithoutExtension(project), out var skippedFor) && skippedFor.Contains(plan[j].Framework)))
                     .Select(j => View(fullPath, plan[j].Framework))
                     .ToList();
                 var folder = Include(root, solutionDirectory, [project]).First();
@@ -3425,7 +3435,7 @@ internal static class FormatCommand
                     options.RemoveRange(options.IndexOf("--include"), requested.Count + 1);
                 }
 
-                var include = only ?? includes[index];
+                var include = only ?? (requested is null ? OnlyNewToFramework(index, ownIncludes[index]) : includes[index]);
                 options.Add("--include");
                 options.AddRange(include);
 

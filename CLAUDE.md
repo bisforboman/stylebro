@@ -1403,6 +1403,22 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 - A "conflict" right after a push is often GitHub recomputing: watchers should require DIRTY several times.
 - Agents squashing onto a moved main can revert other PRs' changes: check a PR's file list before trusting it.
 
+## Trial 23 format fixes (2026-10-15)
+
+- Owner's choices (docs/decisions/2026-10-15-format-*): a clean `format` writes its kept findings into the baseline the
+  build reads (`BaselineKept`/`BaselineFile`: `<StyleBroBaseline>` > nearest `stylebro.baseline` above > new at the root;
+  other entries stay unless their line is gone; written before `SaveKept`, whose key hashes `.baseline`); Visual Basic
+  left alone (`VisualBasicProjects`: no plain whole run, `--exclude **/*.vb`, `UntouchedFiles` puts back a .vb a fix
+  reached, VB identifiers in the names file under `<path> (Visual Basic, left alone)` so a loaded VB project still counts
+  as outside); generators built first (`BuildGenerators`: `RunAnalyzers=false`, no TWAE; once per process; up to date =
+  TargetPath newer than the project folder's files; also baseline; verify/preview copies get outputs stamped now).
+- `DirectiveStringOffsets`: every subset of the tested symbols (<= 8, else singles and all-but-one); any directive kind.
+  The mask record lists the `dotnet format` children (`Track`): Recover waits for them, `Busy` stops another run.
+- Speed: `Separate` keys a shared file by the symbols IT tests (`CompileView.Key([file])`); a multi-targeted project's
+  later framework runs get only `FilesNewToFramework` (jint run 1: 29 -> 20 min). Unset LangVersion differs per framework
+  (C# 12 vs 14), so those frameworks still don't share a run: by design.
+- Fix-order bug found (analyzer side): `}` + `// comment` + blank + code gives two outputs (BRO1504 vs BRO1506 first).
+
 ## Trial 22 init/migrate fixes (2026-10-15)
 
 - `Program.RepositoryFolder`: init and `--write` run from a subfolder move to the git root when the build reaches past the
