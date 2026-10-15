@@ -519,6 +519,16 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   variable where IDE0042 is a warning/error (`Naming/Deconstruction.cs` mirrors Roslyn's check: an element sharing its
   name with something in scope keeps it quiet, the rename ended the clash); CamelCaseRenamer (BRO1301-BRO1309) checks
   the same per rename (`KeptReason.AddsDeconstruction`).
+- **Trial 23 guards** (2026-10-15): member names used through `dynamic` (`RepositoryNames.DynamicKind`, syntax: a chain on
+  `(dynamic)x`, `x as dynamic` or a name declared dynamic; `KeptReason.UsedThroughDynamic`); snapshot/approval files
+  (`*.verified.*`/`*.received.*`/`*.approved.*`, `SnapshotFiles.cs`: additional files + a disk scan from each project's
+  git root, cached 5 min; data members only; `NameInSnapshotFile`; owner's choice); a reference in a non-C# document keeps
+  the rename (`UsedFromVisualBasic`, owner: "Leave VB alone"); `FieldNames.IsDataMember` no longer exempts private types
+  (jint's scripts); a snake_case property keeps its type's other properties (`HasKeptProperty`); fields go through
+  `NamingRules.AllowsRename` with the new name, whose order now copies Roslyn exactly (titles from any
+  `dotnet_naming_rule.X.Y` key in key order; `const` implies static/readonly in the modifier comparer: its comparers are
+  partial, so the input order decides ties, stryker's `_lockObj`). Not done: two-run renames (a field whose new name a
+  method renamed in the same run frees).
 - Remaining naming: protected readonly casing, namespaces.
 
 ## BRO16xx: documentation
