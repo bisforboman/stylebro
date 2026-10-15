@@ -285,6 +285,11 @@ internal static class Braces
 
                 // The new '}' followed by a statement: BRO1519's blank line now, so one run converges.
                 _ when isOn is not null && BlankLineRuns.WantsBlankLineAfter(outer.Statement.Parent!, default, outer.Statement.GetLastToken().GetNextToken(), isOn, switchSections: SwitchSectionBlankLines.ReadMode(options)) => eol,
+
+                // A '//' comment below the new '}': BRO1504's blank line, which a comment below a ';' may not want
+                // (BlankLines.IsCommentBelowCode; akka.net's '// ReSharper restore ...' below a wrapped 'throw').
+                _ when isOn is not null && isOn(DiagnosticIds.BlankLineBeforeComment) && outer.Statement.GetLastToken().GetNextToken().LeadingTrivia.FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia)) is var comment
+                    && BlankLines.NeedsBlankLineAbove(comment, text, isOn, BlankLines.GetExemptPrefixes(options), SwitchSectionBlankLines.ReadMode(options), belowCloseBrace: true) => eol,
                 _ => string.Empty,
             };
             changes.Add(new TextChange(outer.Close, closing + suffix));

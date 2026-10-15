@@ -95,10 +95,17 @@ internal static class SingleLineBlocks
         foreach (var ancestor in node.Ancestors())
         {
             if (GetBraces(ancestor) is { } braces
-                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock)
-                && GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
+                && isOn(braces.IsElement ? DiagnosticIds.SingleLineElement : DiagnosticIds.SingleLineStatementBlock))
             {
-                changes.AddRange(enclosing);
+                if (GetOwnChanges(ancestor, text, options, trailingComma, isOn) is { } enclosing)
+                {
+                    changes.AddRange(enclosing);
+                }
+                else if (HasTrailingComment(braces.Close) && Line(text, braces.Open.SpanStart) == Line(text, braces.Close.SpanStart))
+                {
+                    // The enclosing block stays on its line (its comment), so this one must too.
+                    return null;
+                }
             }
         }
 
@@ -186,10 +193,19 @@ internal static class SingleLineBlocks
         return "\n";
     }
 
+    /// <summary>
+    /// Whether a comment follows the block's '}' on its line: <c>catch (SocketException) { } // slopwatch-ignore: SW003 ...</c>
+    /// (akka.net). Expanded, the comment would end up on the '}' line, away from the statement a line-based suppression
+    /// marks, so the block is left on its line.
+    /// </summary>
+    private static bool HasTrailingComment(SyntaxToken close) =>
+        close.TrailingTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia));
+
     private static List<TextChange>? GetOwnChanges(SyntaxNode node, SourceText text, AnalyzerConfigOptions options, bool trailingComma, Func<string, bool>? isOn)
     {
         if (node.ContainsDiagnostics || GetBraces(node) is not { } braces || braces.Open.IsMissing || braces.Close.IsMissing
-            || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart))
+            || Line(text, braces.Open.SpanStart) != Line(text, braces.Close.SpanStart)
+            || HasTrailingComment(braces.Close))
         {
             return null;
         }

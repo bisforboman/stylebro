@@ -60,6 +60,16 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
     /// </summary>
     internal static async Task<KeptReason?> GetKeptReasonAsync(Document document, MethodDeclarationSyntax method, SemanticModel model, CancellationToken cancellationToken)
     {
+        // SymbolFinder throws on an analyzer reference that isn't built yet (CamelCaseRenamer.WithoutUnresolvedAnalyzers).
+        if (CamelCaseRenamer.WithoutUnresolvedAnalyzers(document.Project.Solution) is var solution && solution != document.Project.Solution
+            && solution.GetDocument(document.Id) is { } work
+            && await work.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is { } root
+            && root.FindNode(method.Span) is MethodDeclarationSyntax workMethod
+            && await work.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is { } workModel)
+        {
+            (document, method, model) = (work, workMethod, workModel);
+        }
+
         var names = await CamelCaseRenamer.GetNamesInCodeAsync(document.Project.Solution).ConfigureAwait(false);
         var name = method.Identifier.ValueText;
         var symbol = model.GetDeclaredSymbol(method, cancellationToken);

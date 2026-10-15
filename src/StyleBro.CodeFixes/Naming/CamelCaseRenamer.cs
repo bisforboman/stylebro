@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
@@ -27,6 +28,8 @@ internal static class CamelCaseRenamer
 {
     private static readonly ConditionalWeakTable<Solution, Task<NamesInCode>> NamesCache = new();
 
+    private static readonly ConditionalWeakTable<Solution, Solution> StrippedCache = new();
+
     private static readonly object RepositoryNamesGate = new();
 
     private static (string? File, List<RepositoryNames.Entry> Entries) repositoryNames = (null, new List<RepositoryNames.Entry>());
@@ -36,6 +39,8 @@ internal static class CamelCaseRenamer
         IEnumerable<(Document Document, Diagnostic Diagnostic)> items,
         CancellationToken cancellationToken)
     {
+        var original = solution;
+        solution = WithoutUnresolvedAnalyzers(solution);
         var changes = new Dictionary<string, List<TextChange>>();
         var done = new HashSet<(string File, int Start)>();
         var namespaces = new List<(string, string, Diagnostic)>();
@@ -53,9 +58,10 @@ internal static class CamelCaseRenamer
             }
 
             if (diagnostic.Properties.ContainsKey(CamelCaseNamingAnalyzer.NewNameKey)
-                && done.Add((GetFileKey(document), diagnostic.Location.SourceSpan.Start)))
+                && done.Add((GetFileKey(document), diagnostic.Location.SourceSpan.Start))
+                && solution.GetDocument(document.Id) is { } work)
             {
-                renames.Add((document, diagnostic));
+                renames.Add((work, diagnostic));
             }
         }
 
@@ -84,7 +90,7 @@ internal static class CamelCaseRenamer
         }
 
         await NamespaceRenamer.AddChangesAsync(solution, namespaces, changes, cancellationToken).ConfigureAwait(false);
-        return await ApplyAsync(solution, changes, cancellationToken).ConfigureAwait(false);
+        return await ApplyAsync(original, changes, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -94,6 +100,8 @@ internal static class CamelCaseRenamer
     /// </summary>
     public static async Task<KeptReason?> GetKeptReasonAsync(Solution solution, Document document, Diagnostic diagnostic, CancellationToken cancellationToken)
     {
+        solution = WithoutUnresolvedAnalyzers(solution);
+        document = solution.GetDocument(document.Id) ?? document;
         if (diagnostic.Id == DiagnosticIds.NamespacePascalCase)
         {
             return GetNamespaceRename(diagnostic) is { } rename
@@ -105,13 +113,39 @@ internal static class CamelCaseRenamer
         return (await GetItemChangesAsync(solution, document, diagnostic, keptTypes, cancellationToken).ConfigureAwait(false)).Reason;
     }
 
+    /// <summary>
+    /// The solution without analyzer references that couldn't be loaded, cached per solution. An analyzer
+    /// <c>ProjectReference</c> that isn't built yet (akka.net's source generators before a build) is an
+    /// <c>UnresolvedAnalyzerReference</c>, and the SDK's Roslyn throws on it in every SymbolFinder call ("Unexpected
+    /// value", while computing the project's checksum), so no rename was possible. It contributes nothing to the
+    /// compilation, so the renames are computed without it and applied to the original solution as text.
+    /// </summary>
+    internal static Solution WithoutUnresolvedAnalyzers(Solution solution)
+    {
+        lock (StrippedCache)
+        {
+            return StrippedCache.GetValue(solution, s =>
+            {
+                foreach (var project in s.Projects)
+                {
+                    if (project.AnalyzerReferences.Any(r => r is UnresolvedAnalyzerReference))
+                    {
+                        s = s.WithProjectAnalyzerReferences(project.Id, project.AnalyzerReferences.Where(r => r is not UnresolvedAnalyzerReference));
+                    }
+                }
+
+                return s;
+            });
+        }
+    }
+
     /// <summary>The string literals, nameof names and reads by position in the solution, collected once per solution.</summary>
     internal static Task<NamesInCode> GetNamesInCodeAsync(Solution solution)
     {
         // Locked: the table may run the factory once per thread that asks at the same time (parallel renames).
         lock (NamesCache)
         {
-            return NamesCache.GetValue(solution, s => CollectNamesAsync(s, CancellationToken.None));
+            return NamesCache.GetValue(WithoutUnresolvedAnalyzers(solution), s => CollectNamesAsync(s, CancellationToken.None));
         }
     }
 

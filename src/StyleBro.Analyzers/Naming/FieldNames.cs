@@ -432,9 +432,12 @@ internal static class FieldNames
             return false;
         }
 
+        // A base's private member can't clash, unless the type is nested in that base (it sees the private member). Only
+        // when the base is in source: a reference assembly has no private members, so the build and 'dotnet format' (which
+        // loads the base's project) disagreed (akka.net's FSM base with a private '_log').
         for (var current = type; current is not null; current = current.BaseType)
         {
-            if (!current.GetMembers(newName).IsEmpty)
+            if (current.GetMembers(newName).Any(m => SymbolEqualityComparer.Default.Equals(current, type) || m.DeclaredAccessibility != Accessibility.Private || IsNestedIn(type, current)))
             {
                 return false;
             }
@@ -573,6 +576,19 @@ internal static class FieldNames
                 'o' => NamingCasing.Other,
                 _ => null,
             };
+    }
+
+    private static bool IsNestedIn(INamedTypeSymbol type, INamedTypeSymbol outer)
+    {
+        for (var current = type.ContainingType; current is not null; current = current.ContainingType)
+        {
+            if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, outer.OriginalDefinition))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsInPrivateType(ISymbol symbol)
