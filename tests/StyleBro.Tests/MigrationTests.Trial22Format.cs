@@ -78,8 +78,8 @@ public sealed partial class MigrationTests
         {
             if (args.Contains("--verify-no-changes"))
             {
-                output?.Invoke("Checked part 1 of 1 (1 of 1)");
                 output?.Invoke("Checking StyleBro's rules and the built-in rules stylebro-migrate turns on (1 ids), changing nothing.");
+                output?.Invoke("Checked part 1 of 1 (1 of 1)");
                 output?.Invoke(finding);
                 return FormatCommand.NotCleanExitCode;
             }
@@ -90,8 +90,8 @@ public sealed partial class MigrationTests
 
         var lines = new List<string>();
         Assert.Equal(FormatCommand.NotCleanExitCode, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, Run));
-        Assert.StartsWith("Checked part", lines[0], StringComparison.Ordinal);
-        Assert.StartsWith("Checking StyleBro's rules", lines[1], StringComparison.Ordinal); // as it comes, not after the findings
+        Assert.StartsWith("Checking StyleBro's rules", lines[0], StringComparison.Ordinal); // as it comes, not after the progress
+        Assert.StartsWith("Checked part", lines[1], StringComparison.Ordinal);
         Assert.StartsWith("Not clean: a code fix failed", lines[^1], StringComparison.Ordinal);
         Assert.DoesNotContain(lines, l => l.Contains("no fix changes", StringComparison.Ordinal));
     }

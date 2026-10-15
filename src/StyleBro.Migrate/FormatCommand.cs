@@ -3411,7 +3411,7 @@ internal static class FormatCommand
         {
             foreach (var file in files.Select(f => Path.Combine(root, f)))
             {
-                if (Read(file) is not var (text, bom) || DirectiveStringOffsets(text) is not { Count: > 0 } offsets
+                if (Read(file) is not { } text || DirectiveStringOffsets(text) is not { Count: > 0 } offsets
                     || Enumerable.Range(0xE000, 0x1900).Select(c => (char)c).FirstOrDefault(c => !text.Contains(c, StringComparison.Ordinal)) is not (> '\0' and var mark))
                 {
                     continue;
@@ -3419,7 +3419,7 @@ internal static class FormatCommand
 
                 var chars = text.ToCharArray();
                 offsets.ForEach(o => chars[o] = mark);
-                Write(file, new string(chars), bom);
+                Write(file, new string(chars));
                 masked.Add((file, mark));
             }
 
@@ -3438,9 +3438,9 @@ internal static class FormatCommand
             {
                 foreach (var (file, mark) in masked)
                 {
-                    if (Read(file) is var (text, bom) && text.Contains(mark, StringComparison.Ordinal))
+                    if (Read(file) is { } text && text.Contains(mark, StringComparison.Ordinal))
                     {
-                        Write(file, text.Replace(mark, '#'), bom);
+                        Write(file, text.Replace(mark, '#'));
                     }
                 }
 
@@ -3448,19 +3448,13 @@ internal static class FormatCommand
             }
         }
 
-        // UTF-8 only (with or without a BOM): other encodings are left alone. ponytail: a UTF-16 file isn't protected.
-        private static (string Text, bool Bom)? Read(string file)
+        // UTF-8 only: other encodings are left alone. A BOM is read as a character, so writing the text back keeps it.
+        // ponytail: a UTF-16 file isn't protected.
+        private static string? Read(string file)
         {
-            if (!File.Exists(file))
-            {
-                return null;
-            }
-
-            var bytes = File.ReadAllBytes(file);
-            var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
             try
             {
-                return (new System.Text.UTF8Encoding(false, throwOnInvalidBytes: true).GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0)), bom);
+                return File.Exists(file) ? new System.Text.UTF8Encoding(false, throwOnInvalidBytes: true).GetString(File.ReadAllBytes(file)) : null;
             }
             catch (ArgumentException)
             {
@@ -3468,7 +3462,7 @@ internal static class FormatCommand
             }
         }
 
-        private static void Write(string file, string text, bool bom) => File.WriteAllText(file, text, new System.Text.UTF8Encoding(bom));
+        private static void Write(string file, string text) => File.WriteAllText(file, text, new System.Text.UTF8Encoding(false));
 
         private void OnCancel(object? sender, ConsoleCancelEventArgs e) => Dispose();
 
