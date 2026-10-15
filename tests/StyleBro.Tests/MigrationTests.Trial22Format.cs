@@ -52,9 +52,11 @@ public sealed partial class MigrationTests
         var records = Path.Combine(root, ".records");
         Write("src/Gen/C.cs", DirectiveString);
         Write("src/Gen/Edited.cs", DirectiveString);
+        Write("src/Gen/Moved.cs", DirectiveString);
         var file = Path.Combine(root, "src", "Gen", "C.cs");
         var edited = Path.Combine(root, "src", "Gen", "Edited.cs");
-        using var mask = new FormatCommand.DirectiveMask(root, ["src/Gen/C.cs", "src/Gen/Edited.cs"], records);
+        var moved = Path.Combine(root, "src", "Gen", "Moved.cs");
+        using var mask = new FormatCommand.DirectiveMask(root, ["src/Gen/C.cs", "src/Gen/Edited.cs", "src/Gen/Moved.cs"], records);
         var record = Assert.Single(Directory.GetFiles(records));
 
         // A running format's record is left alone, and so are its files (not damaged).
@@ -70,12 +72,19 @@ public sealed partial class MigrationTests
         var masked = File.ReadAllText(edited);
         var mark = masked[masked.IndexOf("pragma", StringComparison.Ordinal) - 1];
         File.WriteAllText(edited, masked.Replace(mark + "nullable", "nullable", StringComparison.Ordinal));
+
+        // Moved off its line start: the same count, but not where a '#' was.
+        var movedText = File.ReadAllText(moved);
+        var movedMark = movedText[movedText.IndexOf("nullable", StringComparison.Ordinal) - 1];
+        File.WriteAllText(moved, movedText.Replace("            " + movedMark + "nullable", "            x " + movedMark + "nullable", StringComparison.Ordinal));
         FormatCommand.DirectiveMask.Recover(log.Add, records);
         Assert.Equal(DirectiveString, File.ReadAllText(file));
-        Assert.Equal(2, log.Count);
+        Assert.Equal(3, log.Count);
         Assert.StartsWith("Restored: " + file, log[0], StringComparison.Ordinal);
         Assert.StartsWith("Not restored: " + edited, log[1], StringComparison.Ordinal);
         Assert.Contains(mark + "pragma", File.ReadAllText(edited), StringComparison.Ordinal);
+        Assert.StartsWith("Not restored: " + moved, log[2], StringComparison.Ordinal);
+        File.Delete(moved);
         Assert.Empty(Directory.GetFiles(records));
 
         // Without a record, format and verify stop on such a file.
