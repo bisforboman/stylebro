@@ -3,12 +3,13 @@
 - **Release code is fixed and checked too**: where a project's code tests `DEBUG`, `RELEASE`, `TRACE` or its own
   configuration symbols, `stylebro-migrate format`, `--verify-no-changes`, the preview and `baseline` also run its other
   configurations (Release), only where the code compiles differently there. Before, code under `#if !DEBUG` was never
-  checked and a Release build with warnings as errors failed after a clean check.
+  checked and a Release build with warnings as errors failed after a clean check. A project that runs an in-solution
+  source generator stays in its default configuration, and `format` says so.
 
 ### Changed
 
-- `format --files` with files in several projects runs once for all of them, and runs only the target frameworks whose
-  check found something (two edited files: 22-27 s instead of 32-39 s). `--verify-no-changes --files` formats a
+- `format --files` with files in several projects runs once for all of them (two edited files in two of 11 projects:
+  27 s instead of 39 s), and a framework whose check found something formats just those files. `--verify-no-changes --files` formats a
   copy of just the files with findings.
 - CSharpier after `format` and in `--verify-no-changes` gets whole folders where it would change nothing else, and says
   when it runs: a check of 612 files took 2 s instead of 85 s.

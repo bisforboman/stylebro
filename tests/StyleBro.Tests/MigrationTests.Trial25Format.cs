@@ -74,6 +74,23 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Format_FindsTheConfigurationsWhoseCodeDiffers_AndLeavesGeneratorProjectsInTheirDefault()
+    {
+        // MimeKit's Benchmarks: one framework in <TargetFrameworks> (an outer evaluation without Compile items) and '#if DEBUG'.
+        Write("App.slnx", "<Solution>\n  <Project Path=\"Bench/Bench.csproj\" />\n</Solution>\n");
+        Write("Bench/Bench.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFrameworks>net8.0</TargetFrameworks></PropertyGroup>\n</Project>\n");
+        Write("Bench/Program.cs", "class P\n{\n#if DEBUG\n    int a;\n#else\n    int b;\n#endif\n}\n");
+        Assert.Equal(["Release"], FormatCommand.WorkspaceConfigurations(Path.Combine(root, "App.slnx")));
+
+        // A project that runs an in-solution source generator stays in its default configuration (it's built for that one only).
+        Write("Gen/Gen.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>netstandard2.0</TargetFramework></PropertyGroup>\n</Project>\n");
+        Write("Bench2/Bench2.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFrameworks>net8.0</TargetFrameworks></PropertyGroup>\n  <ItemGroup><ProjectReference Include=\"../Gen/Gen.csproj\" OutputItemType=\"Analyzer\" ReferenceOutputAssembly=\"false\" /></ItemGroup>\n</Project>\n");
+        Write("Bench2/Program.cs", "class P\n{\n#if DEBUG\n    int a;\n#endif\n}\n");
+        Write("App2.slnx", "<Solution>\n  <Project Path=\"Bench2/Bench2.csproj\" />\n  <Project Path=\"Gen/Gen.csproj\" />\n</Solution>\n");
+        Assert.Empty(FormatCommand.WorkspaceConfigurations(Path.Combine(root, "App2.slnx")));
+    }
+
+    [Fact]
     public void Format_RunsTheFilesOfSeveralProjectsTogether_FromTheirCommonFolder()
     {
         var a = Path.Combine(root, "src", "Company.Module5");
@@ -152,6 +169,13 @@ public sealed partial class MigrationTests
         Assert.False(FormatCommand.IsGenerated(Path.Combine(root, "Utils", "Table.g.cs"), "<Compile Update=\"Utils\\Table.g.cs\">"));
         Assert.True(FormatCommand.IsGenerated(Path.Combine(root, "Utils", "Table.g.cs"), "<Exec Command=\"gen > Utils/Table.g.cs\" />"));
         Assert.True(FormatCommand.IsGenerated(Path.Combine(root, "Utils", "Table.g.cs"), "dotnet run --project tools/Gen > Utils\\Table.g.cs"));
+
+        // A source generator's output the build writes into the repository (EmitCompilerGeneratedFiles): no build file names it.
+        Write("Lib/Generated/Gen/Gen.Generator/Model.g.cs", "class M { }\n");
+        PreviewCommand.MakeRepository(root);
+        const string Emit = "<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>\n<CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)/Generated</CompilerGeneratedFilesOutputPath>";
+        Assert.True(FormatCommand.IsGenerated(Path.Combine(root, "Lib", "Generated", "Gen", "Gen.Generator", "Model.g.cs"), Emit));
+        Assert.False(FormatCommand.IsGenerated(Path.Combine(root, "Utils", "Table.g.cs"), Emit));
     }
 
     [Fact]

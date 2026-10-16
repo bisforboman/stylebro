@@ -877,9 +877,8 @@ see the same files, settings and branches, and one run formats them all. Only fr
 symbols it doesn't test.
 
 After a run that changed files, the next one checks every framework at once first: a run whose check is clean isn't
-made again, and one whose check found something formats only the files with findings. When an earlier run of the same
-round already changed those files, it isn't made either (the next round's check finds anything left), and with other
-findings it formats those files and the changed ones.
+made again, and one whose check found something formats only the files with findings, plus those an earlier run of
+the same round changed.
 
 A multi-line string can hold lines starting with `#` (`#pragma warning disable` in a source generator's test input)
 inside an `#if` branch some framework leaves out: there those lines read as directives, and the SDK's formatter moves
@@ -907,7 +906,8 @@ Where a project's code tests a symbol a configuration may set (`DEBUG`, `RELEASE
 `Configurations` lists that the solution builds (Release; at most four), for that project only, and only where its
 code compiles differently than in a run already made: the comparison that lets frameworks share a run. The
 `Configurations:` line names them; their runs show up as `== Release` (or `== net8.0, Release`). A repository whose
-code tests only framework symbols (`NET8_0_OR_GREATER`) gets no extra run.
+code tests only framework symbols (`NET8_0_OR_GREATER`) gets no extra run. A project that runs an in-solution source
+generator stays in its default configuration (`format` builds the generator for that one only) and is named so.
 
 ## Old-style (non-SDK) projects
 
