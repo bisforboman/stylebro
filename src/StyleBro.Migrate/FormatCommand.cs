@@ -3078,7 +3078,10 @@ internal static class FormatCommand
         {
             if (line is null)
             {
-                text?.Invoke(stream.ReadToEnd());
+                // Read even when nobody wants the text: 'text?.Invoke(stream.ReadToEnd())' skips the read when text is null,
+                // and the child then blocks on a full pipe (trial 26: 'baseline' hung for hours on NLog's whitespace report).
+                var all = stream.ReadToEnd();
+                text?.Invoke(all);
                 return;
             }
 
