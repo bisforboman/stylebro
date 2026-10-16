@@ -2862,6 +2862,48 @@ public class FixOrderTests
         "BRO1505",
         "BRO1615");
 
+    // Trial 24 (BRO1505 off): a one-line property BRO1509 expands gets BRO1519's blank line after its '}'; sorted after
+    // that, the blank line stayed with the slot (between two fields) and the property's new neighbour had none.
+    [Fact]
+    public Task Sort_ExpandedBlocks_BRO1519sBlankLineFollowsTheBrace() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        namespace Lib
+        {
+            public class Store
+            {
+                private int count;
+                public int Value { get { return count; } }
+                private int other;
+                public int Add() { other++; return count++; }
+            }
+        }
+        """,
+        "csharp_prefer_braces = when_multiline\ncsharp_preserve_single_line_statements = true\ndotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1001",
+        "BRO1509",
+        "BRO1519");
+
+    // Trial 24 (Dawnshard, CSharpier mode: BRO1505 off): the sort put a property right below a constructor's '}' with no
+    // blank line, which BRO1519 added on the next run.
+    [Fact]
+    public Task Sort_AMemberBelowAConstructor_GetsBRO1519sBlankLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class Controller
+        {
+            private readonly int a;
+            private int Doubled => this.a * 2;
+            public Controller(int a)
+            {
+                this.a = a;
+            }
+
+            public int Sum() => this.Doubled;
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1001",
+        "BRO1519");
+
     /// <summary>
     /// Stands for the SDK's formatter (IDE0055, the whitespace pass of 'dotnet format') among a case's ids: a fix whose
     /// result the formatter changes back makes every run change the file.
@@ -2915,7 +2957,7 @@ public class FixOrderTests
             // Every order gives the same text, not only a clean one.
             var final = (await document.GetTextAsync()).ToString();
             first ??= final;
-            Assert.True(!sameText || first == final, $"Order {string.Join(", ", order)} gives other text:\n{final}\nthan the first order:\n{first}");
+            Assert.True(!sameText || first == final, $"Order {string.Join(", ", order)} gives other text:\n{final.Replace("\r", "<CR>").Replace(" ", "·")}\nthan the first order:\n{first.Replace("\r", "<CR>").Replace(" ", "·")}");
         }
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -123,7 +124,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         var outermost = partialAccess.Keys.Where(t => !t.Ancestors().Any(partialAccess.ContainsKey)).ToList();
         var (laidOut, newRoot, moved) = await ApplyLayoutAsync(document, root, new HashSet<SyntaxNode>(partialAccess.Keys), cancellationToken).ConfigureAwait(false);
         var movedAccess = moved.ToDictionary(p => p.Value, p => partialAccess[p.Key]);
-        var rewriter = new SortingRewriter(new HashSet<SyntaxNode>(movedAccess.Keys), options, movedAccess, GetAutoAccessorLines(laidOut, newRoot.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(laidOut, newRoot.SyntaxTree));
+        var rewriter = new SortingRewriter(new HashSet<SyntaxNode>(movedAccess.Keys), options, movedAccess, GetAutoAccessorLines(laidOut, newRoot.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(laidOut, newRoot.SyntaxTree), IsOn(laidOut, newRoot.SyntaxTree, cancellationToken));
         return outermost.Where(moved.ContainsKey)
             .Select(t => new TextChange(t.Span, rewriter.Visit(moved[t])!.ToString()))
             .ToList();
@@ -179,7 +180,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         partialAccess = moved.ToDictionary(p => p.Value, p => partialAccess[p.Key]);
         targets = new HashSet<SyntaxNode>(moved.Values);
 
-        var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree)).Visit(root)!;
+        var newRoot = new SortingRewriter(targets, options, partialAccess, GetAutoAccessorLines(document, root.SyntaxTree, cancellationToken), AllowsAdjacentSingleLine(document, root.SyntaxTree), IsOn(document, root.SyntaxTree, cancellationToken)).Visit(root)!;
         return document.WithSyntaxRoot(newRoot);
     }
 
@@ -254,6 +255,10 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
     private static bool AllowsAdjacentSingleLine(Document document, SyntaxTree tree) =>
         StyleBro.Analyzers.Layout.ElementSeparation.AllowsAdjacentSingleLineMembers(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(tree));
 
+    /// <summary>The rules' severities in this file (the sort adds the blank lines BRO1519 wants).</summary>
+    private static Func<string, bool> IsOn(Document document, SyntaxTree tree, CancellationToken cancellationToken) =>
+        id => Severities.IsOn(document.Project.CompilationOptions, tree, id, cancellationToken);
+
     /// <summary>Sorts the targeted types bottom-up, so nested types are sorted before their parents.</summary>
     private sealed class SortingRewriter : CSharpSyntaxRewriter
     {
@@ -262,9 +267,11 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
         private readonly Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess;
         private readonly AnalyzerConfigOptions? autoAccessorLines;
         private readonly bool allowAdjacentSingleLine;
+        private readonly Func<string, bool> isOn;
 
-        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine)
+        public SortingRewriter(HashSet<SyntaxNode> targets, MemberOrderOptions options, Dictionary<SyntaxNode, MemberAccess?[]?> partialAccess, AnalyzerConfigOptions? autoAccessorLines, bool allowAdjacentSingleLine, Func<string, bool> isOn)
         {
+            this.isOn = isOn;
             this.allowAdjacentSingleLine = allowAdjacentSingleLine;
             this.targets = targets;
             this.options = options;
@@ -281,7 +288,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             // 'original' is the node from the unmodified tree, so reference equality with the targets holds.
             // Sorting nested types doesn't move this container's own members, so the indexes still match.
             return targets.Contains(original) && visited is not null
-                ? MemberOrdering.Sort(visited, options, partialAccess[original], autoAccessorLines, allowAdjacentSingleLine)
+                ? MemberOrdering.Sort(visited, options, partialAccess[original], autoAccessorLines, allowAdjacentSingleLine, isOn)
                 : visited;
         }
     }
