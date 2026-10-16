@@ -181,6 +181,7 @@ internal static class MemberOrdering
                 // A doc comment arriving where a member without one sat (field below field: no blank line needed before)
                 // wants one too (BRO1513, SA1514; found in Jellyfin). Below a region line the next check adds it.
                 var createsDoc = !EndsWithDirective(layout) && StartsWithDocComment(split[source].Content) && !StartsWithDocComment(split[slot].Content);
+
                 // A member below a '}' that BRO1519 wants a blank line after (BRO1505 off; with it on that's BRO1505's).
                 var createsBrace = WantsBlankLineAfterBrace(members[order[slot - 1]], members[source]);
                 if (createsSeparation || createsComment || createsDoc || createsBrace)

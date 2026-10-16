@@ -229,6 +229,7 @@ internal static class NestedIfs
                 var appendedAt = topColumn + builder.Length + " && ".Length + (parenthesized ? 1 : 0);
                 condition = Dedent(current.Condition, text, column - appendedAt) ?? condition;
             }
+
             if (condition is null)
             {
                 return null;

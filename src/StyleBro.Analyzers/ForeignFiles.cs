@@ -172,7 +172,10 @@ internal static class ForeignFiles
         }
     }
 
+    // RS1012 reads 'inner' as a start context nothing registers on: it's the wrapped one, every action goes to it.
+#pragma warning disable RS1012
     private sealed class SkippingStartContext(CompilationStartAnalysisContext inner)
+#pragma warning restore RS1012
         : CompilationStartAnalysisContext(inner.Compilation, inner.Options, inner.CancellationToken)
     {
         public override void RegisterCompilationEndAction(Action<CompilationAnalysisContext> action) => inner.RegisterCompilationEndAction(action);
