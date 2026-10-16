@@ -140,10 +140,10 @@ internal static class ParameterLayout
         }
 
         // Splitting the list: items that already started a line move to the same indentation as the moved ones, with
-        // their later lines (Spectre.Console's TextPrompt: one item two levels deeper stayed there, a staircase). With
-        // same_line the indentation comes from such an item already. Not when the '(' starts its line: BRO1109 moves it up
+        // their later lines (Spectre.Console's TextPrompt: one item two levels deeper stayed there, a staircase); with
+        // same_line, the first such item's indentation. Not when the '(' starts its line: BRO1109 moves it up
         // to the name, which changes the indentation the items get (BRO1105 measures the line as the fixes leave it).
-        if (!sameLine && lineStarts is not null && openLine.Start + LeadingWhitespace(text, openLine).Length != open.SpanStart)
+        if (lineStarts is not null && openLine.Start + LeadingWhitespace(text, openLine).Length != open.SpanStart)
         {
             foreach (var item in lineStarts)
             {

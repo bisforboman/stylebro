@@ -110,6 +110,21 @@ public class GeneratedFileSuppressorTests
         Assert.Equal(reported, diagnostics.Where(d => d.Id == DiagnosticIds.EmptyString && !d.IsSuppressed).Select(d => d.Location.GetLineSpan().StartLinePosition.Line).Order());
     }
 
+    // StyleBro's analyzers skip those files; the suppressor still hides a finding a rule reports there.
+    [Theory]
+    [InlineData(Generated, true)]
+    [InlineData(@"C:\repo\src\RestSharp\RestClient.cs", false)]
+    public async Task SuppressesFindingsInGeneratedFiles(string path, bool suppressed)
+    {
+        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText("class C { }", path: path) }, Array.Empty<MetadataReference>());
+        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new Provider(ImmutableDictionary<string, string>.Empty.Add(GeneratedFileSuppressor.Property, Folders)));
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new PackageFileSuppressorTests.FakeRule("BRO1306"), new GeneratedFileSuppressor());
+        var diagnostics = await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
+            .GetAnalyzerDiagnosticsAsync();
+
+        Assert.Equal(suppressed, Assert.Single(diagnostics).IsSuppressed);
+    }
+
     // The files of a repository's submodules aren't analyzed either.
     [Fact]
     public async Task EveryAnalyzer_IsQuietInSubmoduleFiles()
