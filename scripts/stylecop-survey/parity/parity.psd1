@@ -197,6 +197,9 @@
                 # 1.2.0-beta.556, #3766).
                 'only StyleCop: BRO1504 More.cs(39,13)'
                 'StyleCop output only: More.cs: []'
+                # A comment right below an element's attribute list stays attached to it (BRO1525 wants no blank line
+                # there; trial 26).
+                'only StyleCop: BRO1504 More.cs(6,9)'
                 # A comment right after '=>' is like one after '{' (StyleCop #3392/#3550, owner's decision 2026-10-04).
                 'only StyleCop: BRO1504 Arrows.cs(11,17)'
                 'only StyleCop: BRO1504 Arrows.cs(17,13)'
