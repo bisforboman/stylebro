@@ -18,6 +18,7 @@ internal static class PropertySummaries
     /// <c>stylesharp</c> (StyleSharp's SST rules at those numbers, which stylebro-migrate writes for a StyleSharp repository).
     /// </summary>
     public const string WordingKey = "stylebro_summary_wording";
+
     /// <summary>
     /// Words that can't follow other words of a sentence: a condition ('If true, the text is checked', 'True if ...').
     /// BRO1604 doesn't put 'Gets' in front of them (written in lower case: a capitalized word isn't reported anyway), nor

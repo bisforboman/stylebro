@@ -14,14 +14,14 @@ internal static class TrailingCommas
     public const string OptionKey = "stylebro_trailing_comma";
 
     /// <summary>
-    /// The .editorconfig key <c>stylebro_trailing_comma_switch_expressions</c>: <c>true</c> (default, StyleCop 1.2's SA1413)
-    /// or <c>false</c>, switch expressions aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
+    /// The .editorconfig key <c>stylebro_trailing_comma_switch_expressions</c>: <see langword="true"/> (default, StyleCop 1.2's SA1413)
+    /// or <see langword="false"/>, switch expressions aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
     /// </summary>
     public const string SwitchExpressionsKey = "stylebro_trailing_comma_switch_expressions";
 
     /// <summary>
-    /// The .editorconfig key <c>stylebro_trailing_comma_with_expressions</c>: <c>true</c> (default, StyleCop 1.2's SA1413) or
-    /// <c>false</c>, 'with' initializers aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
+    /// The .editorconfig key <c>stylebro_trailing_comma_with_expressions</c>: <see langword="true"/> (default, StyleCop 1.2's SA1413) or
+    /// <see langword="false"/>, 'with' initializers aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
     /// </summary>
     public const string WithExpressionsKey = "stylebro_trailing_comma_with_expressions";
 
@@ -75,10 +75,6 @@ internal static class TrailingCommas
         return (l.Last.GetLocation(), new TextChange(new TextSpan(l.Last.Span.End, 0), GetInsertion(l.Last, text)));
     }
 
-    /// <summary>Whether the key is <c>false</c>: those lists aren't checked.</summary>
-    private static bool IsFalse(AnalyzerConfigOptions options, string key) =>
-        options.TryGetValue(key, out var value) && value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
-
     /// <summary>
     /// The edit removing a trailing comma. Spaces right before the comma go too ('A ,' at a line end would leave trailing
     /// whitespace); a trailing comment stays where it is ('A, // x' and 'A,// x' become 'A // x').
@@ -104,6 +100,10 @@ internal static class TrailingCommas
         var end = lastItem.Span.End;
         return end < text.Length && text[end] is not (' ' or '\t' or '\r' or '\n') ? ", " : ",";
     }
+
+    /// <summary>Whether the key is <see langword="false"/>: those lists aren't checked.</summary>
+    private static bool IsFalse(AnalyzerConfigOptions options, string key) =>
+        options.TryGetValue(key, out var value) && value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
 

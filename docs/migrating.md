@@ -326,7 +326,11 @@ child (BRO1514/BRO1515 brace it); SST1516 doesn't check usings, accessors or a m
 does); SST1201 skips explicit interface implementations (BRO1001 ranks them public); SST1600 doesn't ask for
 documentation on overrides (BRO1601 adds `<inheritdoc/>`); SST1150-SST1171 let an item start where the previous
 multi-line item ends (BRO1108 doesn't); SST1518 requires a final newline (BRO1507 allows none: set
-`insert_final_newline = true`).
+`insert_final_newline = true`); SST1514 accepts a doc comment right after `#endif` or a region line (BRO1513 adds a blank
+line); SST1502 doesn't check accessor lists, event accessors or namespaces on one line (BRO1509 expands them);
+SST1612/SST1620 accept tags out of parameter order (BRO1611/BRO1613 reorder them); a few rarer cases in
+SST1139/SST1141/SST1142/SST1135/SST1103/SST1004/SST1617/SST1642 that the probe lists. SST1310 (off by default) also reports a leading `_`, so it contradicts SST1309;
+with both on, BRO1303 follows SST1309.
 
 The report lists the StyleSharp rules that are on and stand for no StyleCop rule (digit separators, complexity limits,
 ...): StyleBro doesn't replace them, so they stop when StyleSharp.Analyzers is removed. When StyleCop.Analyzers is

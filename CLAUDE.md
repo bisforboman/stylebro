@@ -758,6 +758,14 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   (`StyleSharpUse.Settings`), stylecop.json NOT read (StyleSharp doesn't); SST suppressions carried over
   (`Suppressions.WithStyleSharp`); the block records `# StyleSharp.Analyzers version:` for after the swap. Both packages:
   a rule is on when either enforces it. Leftover StyleCop settings (no package) -> migrate points to init, Sonar or not.
+  **Match StyleSharp's behaviour** (owner 2026-10-16, trial 24 Refit: SST1624 build errors after BRO1604's fix): for
+  StyleSharp alone (`Migration.StyleSharpOnly`) migrate writes `stylebro_summary_wording = stylesharp` (BRO1604-BRO1607),
+  `stylebro_member_order` with `conversion|operator|extension|method` (`|` = shared rank) and `record` (records rank with
+  classes unless listed), `stylebro_member_order_namespaces = false`, `stylebro_trailing_comma_switch_expressions`/
+  `_with_expressions = false` (also StyleCop 1.1.x), empty blocks and `};` allowed, SST1305's word list and SST1629's
+  exclusions via `StyleSharpUse.Settings`, BRO1312 off (`StyleSharpLeavesAlone`). Probe: `Compare-WithStyleCop.ps1
+  -StyleSharp` (new SST findings after BRO's fix = build breaks; BRO findings on StyleSharp-fixed code = churn); the
+  remaining churn is listed in docs/migrating.md.
 - SX ids are read too (the reader used to accept only SA ids, so SX settings were silently ignored): SX1101 -> IDE0003,
   SX1309 -> `_camelCase`; SA1412 on -> `charset = utf-8-bom`.
 - Also read: the StyleCop.Analyzers version (1.1.x: SA1141/SA1142/SA1316/SA1414 off) and whether any project sets

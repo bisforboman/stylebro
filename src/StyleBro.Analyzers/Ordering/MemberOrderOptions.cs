@@ -26,7 +26,7 @@ internal enum MemberKind
     Class,
 
     /// <summary>
-    /// A record class: ranked with classes unless <c>record</c> is in <c>stylebro_member_order</c> (StyleCop counts records
+    /// A record class: ranked with classes unless <see langword="record"/> is in <c>stylebro_member_order</c> (StyleCop counts records
     /// as classes; StyleSharp's SST1201 puts them after classes). A record struct is a struct.
     /// </summary>
     Record,
@@ -59,7 +59,7 @@ internal enum MemberAccess
 /// </code>
 /// Kinds or accessibilities left out of a configured list keep their default relative order, after the listed ones.
 /// Entries joined by <c>|</c> share a rank (<c>method|operator|conversion</c>: StyleSharp's SST1201 orders them as one
-/// kind, by access and static only). A record class ranks with classes unless <c>record</c> is listed.
+/// kind, by access and static only). A record class ranks with classes unless <see langword="record"/> is listed.
 /// </summary>
 internal sealed class MemberOrderOptions
 {
@@ -70,9 +70,7 @@ internal sealed class MemberOrderOptions
     public const string ReadonlyFirstKey = "stylebro_member_readonly_first";
     public const string KeepOverloadsTogetherKey = "stylebro_keep_overloads_together";
 
-    /// <summary>
-    /// <c>false</c>: the types of a namespace or file aren't ordered, only the members of a type (StyleSharp's SST1201-SST1204).
-    /// </summary>
+    /// <summary><see langword="false"/>: the types of a namespace or file aren't ordered, only the members of a type (StyleSharp's SST1201-SST1204).</summary>
     public const string NamespacesKey = "stylebro_member_order_namespaces";
 
     private const int KindCount = (int)MemberKind.Namespace + 1;

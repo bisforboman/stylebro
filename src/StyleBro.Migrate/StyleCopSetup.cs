@@ -82,7 +82,7 @@ internal sealed record StyleSharpUse(string? Version, IReadOnlyDictionary<string
 
         // SST1305 allows more words than SA1305 (HungarianWords), plus its own setting (a list split by commas, semicolons or
         // spaces, either case: lower-cased here, BRO1310 compares exactly).
-        var prefixes = (Option("allowed_hungarian_prefixes", "SST1305") ?? string.Empty).Split([',', ';', ' ', '\t'],StringSplitOptions.RemoveEmptyEntries).Select(p => p.ToLowerInvariant());
+        var prefixes = (Option("allowed_hungarian_prefixes", "SST1305") ?? string.Empty).Split([',', ';', ' ', '\t'], StringSplitOptions.RemoveEmptyEntries).Select(p => p.ToLowerInvariant());
         naming["allowedHungarianPrefixes"] = new System.Text.Json.Nodes.JsonArray(HungarianWords.Concat(prefixes).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(p => (System.Text.Json.Nodes.JsonNode?)p).ToArray());
 
         var settings = new System.Text.Json.Nodes.JsonObject

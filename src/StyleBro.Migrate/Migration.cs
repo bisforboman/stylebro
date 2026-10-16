@@ -68,7 +68,7 @@ internal static class Migration
         StyleBro.Analyzers.DiagnosticIds.NamespacePascalCase,
     };
 
-    private static readonly Regex StyleCopIds =new(@"SA(\d{4})(?:-SA(\d{4}))?");
+    private static readonly Regex StyleCopIds = new(@"SA(\d{4})(?:-SA(\d{4}))?");
 
     private static readonly Regex EfMigrationMarker = new(@"\[(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\(\s*""|:\s*(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\b|:\s*(?:Microsoft\.EntityFrameworkCore\.Infrastructure\.)?ModelSnapshot\b");
 

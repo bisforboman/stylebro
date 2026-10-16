@@ -21,8 +21,9 @@ should migrate do where StyleSharp and StyleCop differ?
 ## Decision
 
 **Choice 1** (owner: "Match StyleSharp's behaviour"). New settings: `stylebro_summary_wording = stylesharp`
-(BRO1604/BRO1605), a `record` kind and `a|b` groups in `stylebro_member_order` (BRO1001), and
-`stylebro_trailing_comma_switch_expressions` (BRO1401; also written for StyleCop 1.1.x instead of turning BRO1401 off).
-Migrate writes StyleSharp's Hungarian word list (BRO1310) and `stylebro_allow_empty_single_line_blocks = true`
-(BRO1508/BRO1509). SST1108 (commented-out code files) no longer maps to SA1108. The mapping was re-audited against
-StyleSharp 5.1.2 with `Compare-WithStyleCop.ps1 -StyleSharp`.
+(BRO1604-BRO1607), a `record` kind, `a|b` groups and `stylebro_member_order_namespaces` (BRO1001), and
+`stylebro_trailing_comma_switch_expressions`/`stylebro_trailing_comma_with_expressions` (BRO1401; also written for
+StyleCop 1.1.x instead of turning BRO1401 off). Migrate also writes StyleSharp's Hungarian word list (BRO1310), one-line
+empty blocks (BRO1508/BRO1509), `};` (BRO1101), SST1629's period exclusions (BRO1603) and turns BRO1312 off. SST1108
+(commented-out code files) no longer maps to SA1108. The mapping was re-audited against StyleSharp 5.1.2 with
+`Compare-WithStyleCop.ps1 -StyleSharp`; the differences left are listed in docs/migrating.md.
