@@ -1176,6 +1176,29 @@ public class MemberOrderingTests
         }
         """);
 
+    // A record ranks with the classes, so a comment above a class followed by a record introduces their group.
+    [Fact]
+    public Task GroupComments_CountRecordsWithClasses() => VerifyNoDiagnosticsAsync(
+        """
+        namespace N
+        {
+            public class Tests
+            {
+            }
+
+            // Models
+            public class Order
+            {
+            }
+
+            public record Line(int Count);
+
+            public interface IService
+            {
+            }
+        }
+        """);
+
     // A comment above a region line stays where it is, so it doesn't count as the first member's group comment.
     [Fact]
     public Task ACommentAboveARegion_IsNotAGroupComment() => VerifyFixAsync(

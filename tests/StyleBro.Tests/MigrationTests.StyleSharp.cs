@@ -12,6 +12,33 @@ public sealed partial class MigrationTests
     private const string StyleSharpProject = "<Project Sdk=\"Microsoft.NET.Sdk\"><ItemGroup><PackageReference Include=\"StyleSharp.Analyzers\" Version=\"3.40.1\" PrivateAssets=\"all\" /></ItemGroup></Project>\n";
 
     [Fact]
+    public void ScopeReport_NamesStyleSharp_AndTheShorterList()
+    {
+        // Trial 24 (Refit): StyleSharp ran everywhere but one folder; the report said "StyleCop runs only in" 19 folders.
+        Write("Directory.Packages.props", "<Project><ItemGroup><GlobalPackageReference Include=\"StyleSharp.Analyzers\" Version=\"5.1.2\" /></ItemGroup></Project>");
+        Write("a/A.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("b/B.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("smoke/S/S.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+
+        var report = Program.ScopeReport(StyleCopSetup.Read(root, project => !project.Contains("smoke", StringComparison.Ordinal)));
+
+        Assert.Contains(report, l => l.StartsWith("StyleSharp runs everywhere except smoke: ", StringComparison.Ordinal));
+        Assert.Contains(report, l => l.StartsWith("No StyleSharp in smoke: ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Sonar_AllOffWithoutThePackage_IsNoSonarSetup()
+    {
+        // Trial 24 (Refit): the .editorconfig turned 459 Sonar ids off after the package was removed: "Sonar rules on: 0".
+        Write("A.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S100.severity = none\ndotnet_diagnostic.S101.severity = none\n");
+        Assert.Null(SonarSetup.Read(root));
+
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S100.severity = none\ndotnet_diagnostic.S1066.severity = warning\n");
+        Assert.NotNull(SonarSetup.Read(root));
+    }
+
+    [Fact]
     public void StyleSharp_WritesItsOwnMeaning_WhereItsRuleDiffersFromStyleCops()
     {
         // Trial 24 (Refit, StyleSharp 5.1.2): read as StyleCop, BRO1604/BRO1605 rewrote summaries StyleSharp then reported

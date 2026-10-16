@@ -272,6 +272,7 @@ internal static class Migration
             lines.Add($"{StyleBro.Analyzers.Documentation.PropertySummaries.WordingKey} = stylesharp");
             lines.Add($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true");
         }
+
         AddTupleElementCasing(setup, lines, result);
         if (setup.Setting("namingRules", "allowedNamespaceComponents") is { ValueKind: JsonValueKind.Array } components && components.GetArrayLength() > 0)
         {

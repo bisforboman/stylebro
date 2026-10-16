@@ -181,20 +181,15 @@ internal sealed class MemberOrderOptions
         {
             foreach (var group in configured)
             {
-                var any = false;
                 foreach (var value in group)
                 {
                     if (ranks[value] == -1)
                     {
                         ranks[value] = next;
-                        any = true;
                     }
                 }
 
-                if (any)
-                {
-                    next++;
-                }
+                next++;
             }
         }
 

@@ -141,7 +141,7 @@ foreach ($s in $config.Sets) {
         function Get-Keyed([string]$dir, [string[]]$ids) {
             @(Get-CompileErrors $dir $ids | Where-Object { $_ -match '^(?<file>\w+\.cs)\((?<line>\d+),\d+\) (?<id>[A-Z]+\d+)$' -and $Matches.id -notlike 'CS*' } | ForEach-Object {
                 $null = $_ -match '^(?<file>\w+\.cs)\((?<line>\d+),\d+\) (?<id>\w+)$'
-                '{0} {1}: {2}' -f $Matches.id, $Matches.file, (Get-Content (Join-Path $dir $Matches.file))[[int]$Matches.line - 1].Trim()
+                '{0} {1}: {2}' -f $Matches.id, $Matches.file, @(Get-Content (Join-Path $dir $Matches.file))[[int]$Matches.line - 1].Trim()
             })
         }
         $clean = Join-Path $work "$($s.Name)/clean"
