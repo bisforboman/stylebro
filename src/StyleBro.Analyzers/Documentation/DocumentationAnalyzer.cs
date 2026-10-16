@@ -41,6 +41,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxNodeAction(AnalyzeMember, DocumentationComments.MemberKinds);
         context.RegisterSyntaxNodeAction(
             c =>

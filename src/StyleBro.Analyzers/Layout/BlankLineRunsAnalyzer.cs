@@ -17,6 +17,7 @@ public sealed class BlankLineRunsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterCompilationStartAction(start =>
         {
             var options = start.Compilation.Options;

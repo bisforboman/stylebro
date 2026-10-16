@@ -17,6 +17,7 @@ public sealed class WrappingPlacementAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             var options = c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree);

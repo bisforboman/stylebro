@@ -20,6 +20,7 @@ public sealed class RegionsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             foreach (var (region, _, inCodeElement) in Regions.GetRegions(c.Tree.GetRoot(c.CancellationToken)))

@@ -122,7 +122,7 @@ internal static class MemberOrdering
     /// Returns the type with its members sorted. Blank-line layout stays with the position ("slot"),
     /// while comments, doc comments and attributes travel with the member.
     /// </summary>
-    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null, AnalyzerConfigOptions? autoAccessorLines = null, bool allowAdjacentSingleLine = false)
+    public static SyntaxNode Sort(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null, AnalyzerConfigOptions? autoAccessorLines = null, bool allowAdjacentSingleLine = false, System.Func<string, bool>? isOn = null)
     {
         var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
         if (keys is null)
@@ -145,10 +145,28 @@ internal static class MemberOrdering
         var split = members.Select(m => SplitLeadingTrivia(m.GetLeadingTrivia())).ToArray();
         var result = new MemberDeclarationSyntax[count];
 
+        var text = container.SyntaxTree.GetText();
+        bool WantsBlankLineAfterBrace(MemberDeclarationSyntax previous, MemberDeclarationSyntax next) =>
+            isOn is not null && previous.GetLastToken() is { RawKind: (int)SyntaxKind.CloseBraceToken } brace
+            && !(autoAccessorLines is not null && previous is PropertyDeclarationSyntax property && Layout.AutoAccessorLines.BecomesOneLine(property, text, autoAccessorLines))
+            && Layout.BlankLineRuns.JudgesGapAfter(brace, next.GetFirstToken(), text, isOn, gapIsReplaced: true);
+
         for (var slot = 0; slot < count; slot++)
         {
             var source = order[slot];
             var layout = split[slot].Layout;
+
+            // A blank line BRO1519 put below a member's '}' (BRO1505 off: CSharpier mode) belongs to that '}', not to the
+            // slot: sorted below a member without one it goes, so sorting before or after BRO1519 (or BRO1509's
+            // expansion, which adds it) gives the same text. The check below adds it where the new neighbour wants it.
+            if (slot > 0 && !oneLine && order[slot - 1] != slot - 1 && layout.Count > 0
+                && layout.All(t => t.Kind() is SyntaxKind.EndOfLineTrivia or SyntaxKind.WhitespaceTrivia)
+                && split[source].Content.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
+                && WantsBlankLineAfterBrace(members[slot - 1], members[slot])
+                && !WantsBlankLineAfterBrace(members[order[slot - 1]], members[source]))
+            {
+                layout = SyntaxFactory.TriviaList();
+            }
 
             // Blank lines stay with the slot, so a slot without one can end up between members that need one: a method
             // below a field where two fields sat before (BRO1505, SA1516), or a '//' comment below code (BRO1504,
@@ -163,7 +181,10 @@ internal static class MemberOrdering
                 // A doc comment arriving where a member without one sat (field below field: no blank line needed before)
                 // wants one too (BRO1513, SA1514; found in Jellyfin). Below a region line the next check adds it.
                 var createsDoc = !EndsWithDirective(layout) && StartsWithDocComment(split[source].Content) && !StartsWithDocComment(split[slot].Content);
-                if (createsSeparation || createsComment || createsDoc)
+
+                // A member below a '}' that BRO1519 wants a blank line after (BRO1505 off; with it on that's BRO1505's).
+                var createsBrace = WantsBlankLineAfterBrace(members[order[slot - 1]], members[source]);
+                if (createsSeparation || createsComment || createsDoc || createsBrace)
                 {
                     layout = layout.Insert(0, SyntaxFactory.EndOfLine(newLine));
                 }

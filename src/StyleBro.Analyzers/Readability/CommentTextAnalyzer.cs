@@ -21,6 +21,7 @@ public sealed class CommentTextAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             var trivia = CommentText.GetComments(c.Tree.GetRoot(c.CancellationToken));

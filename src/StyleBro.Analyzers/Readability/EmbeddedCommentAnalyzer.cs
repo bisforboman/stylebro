@@ -22,6 +22,7 @@ public sealed class EmbeddedCommentAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
 
         // A tree action: the comment after the header lies outside the block's span (a node action's diagnostic must not).
         context.RegisterSyntaxTreeAction(

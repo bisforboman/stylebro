@@ -17,6 +17,7 @@ public sealed class AttributeBlankLinesAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             var text = c.Tree.GetText(c.CancellationToken);

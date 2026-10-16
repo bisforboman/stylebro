@@ -51,37 +51,109 @@ public class GeneratedFileSuppressorTests
         Assert.Equal(expected, GeneratedFileSuppressor.IsGeneratedFile(path, folders));
     }
 
-    // Every analyzer, every rule on: nothing StyleBro reports in generator output gets through, the same code in a
+    // Every analyzer, every rule on: StyleBro doesn't analyze generator output or a package's files at all (trial 24:
+    // Spectre.Console's Polyfill files took half of a 'format' run, their findings hidden afterwards), the same code in a
     // source file is reported.
     [Theory]
     [InlineData(Generated, Folders)]
     [InlineData(Emitted, Folders)]
     [InlineData(Generated, null)]
+    [InlineData(@"C:\Users\me\.nuget\packages\polyfill\11.4.1\contentFiles\cs\netstandard2.0\Polyfill.cs", null)]
     public async Task EveryAnalyzer_IsQuietInGeneratedFiles(string path, string? folders)
     {
         var generated = await RunAsync(Code, path, folders);
         var source = await RunAsync(Code, @"C:\repo\src\RestSharp\RestClient.cs", folders);
 
-        Assert.NotEmpty(generated);
-        Assert.All(generated, d => Assert.True(d.IsSuppressed, d.ToString()));
+        Assert.Empty(generated);
         Assert.Contains(source, d => !d.IsSuppressed);
     }
 
+    // CommunityToolkit.Mvvm (trial 24): the generator declares 'partial void OnTitleChanged(string value);' with
+    // [GeneratedCode], which the merged partial method carries into the hand-written body, so the compiler's driver
+    // skipped that body for syntax node actions ('""' and 'new Guid()' weren't reported there; tree actions were). A
+    // hand-written partial method is reported once.
+    [Fact]
+    public async Task PartialMethodBody_IsAnalyzedWhenItsDeclarationIsGenerated()
+    {
+        const string Declaration = """
+            public partial class ViewModel
+            {
+                [System.CodeDom.Compiler.GeneratedCode("CommunityToolkit.Mvvm.SourceGenerators", "8.4.0")]
+                partial void OnTitleChanged(string value);
+            }
+            """;
+        const string Implementation = """
+            public partial class ViewModel
+            {
+                private string title = string.Empty;
+
+                partial void OnTitleChanged(string value)
+                {
+                    title = value == "" ? string.Empty : value; // reported
+                }
+            }
+
+            public partial class Hand
+            {
+                partial void OnChanged(string value);
+
+                partial void OnChanged(string value)
+                {
+                    _ = value == ""; // reported
+                }
+            }
+            """;
+
+        var diagnostics = await RunAsync(Implementation, @"C:\repo\App\ViewModel.cs", Folders, other: (Declaration, Generated));
+
+        var reported = Implementation.Split('\n').Select((line, i) => (line, i)).Where(l => l.line.Contains("// reported")).Select(l => l.i);
+        Assert.Equal(reported, diagnostics.Where(d => d.Id == DiagnosticIds.EmptyString && !d.IsSuppressed).Select(d => d.Location.GetLineSpan().StartLinePosition.Line).Order());
+    }
+
+    // StyleBro's analyzers skip those files; the suppressor still hides a finding a rule reports there.
+    [Theory]
+    [InlineData(Generated, true)]
+    [InlineData(@"C:\repo\src\RestSharp\RestClient.cs", false)]
+    public async Task SuppressesFindingsInGeneratedFiles(string path, bool suppressed)
+    {
+        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText("class C { }", path: path) }, Array.Empty<MetadataReference>());
+        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new Provider(ImmutableDictionary<string, string>.Empty.Add(GeneratedFileSuppressor.Property, Folders)));
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new PackageFileSuppressorTests.FakeRule("BRO1306"), new GeneratedFileSuppressor());
+        var diagnostics = await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
+            .GetAnalyzerDiagnosticsAsync();
+
+        Assert.Equal(suppressed, Assert.Single(diagnostics).IsSuppressed);
+    }
+
+    // The files of a repository's submodules aren't analyzed either.
+    [Fact]
+    public async Task EveryAnalyzer_IsQuietInSubmoduleFiles()
+    {
+        Assert.Empty(await RunAsync(Code, @"C:\repo\shared\Guard.cs", submodules: @"C:\repo\shared\"));
+        Assert.NotEmpty(await RunAsync(Code, @"C:\repo\src\Guard.cs", submodules: @"C:\repo\shared\"));
+    }
+
     /// <summary>Every StyleBro analyzer with every BRO rule on, over <paramref name="code"/>: its BRO diagnostics.</summary>
-    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null)
+    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null, (string Code, string Path)? other = null, string? submodules = null)
     {
         var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        var tree = CSharpSyntaxTree.ParseText(code, parse, path);
+        var trees = new[] { (code, path) }.Concat(other is { } more ? [more] : Array.Empty<(string, string)>())
+            .Select(f => CSharpSyntaxTree.ParseText(f.Item1, parse, f.Item2));
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator)
             .Where(p => Path.GetFileName(p) is "System.Runtime.dll" or "System.Private.CoreLib.dll")
             .Select(p => MetadataReference.CreateFromFile(p));
         var everyRule = BaselineSuppressor.BroIds().ToDictionary(id => id, _ => ReportDiagnostic.Warn);
         var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, specificDiagnosticOptions: everyRule);
-        var compilation = CSharpCompilation.Create("Test", new[] { tree }, references, compilationOptions);
+        var compilation = CSharpCompilation.Create("Test", trees, references, compilationOptions);
         var global = ImmutableDictionary<string, string>.Empty;
         if (folders is not null)
         {
             global = global.Add(GeneratedFileSuppressor.Property, folders);
+        }
+
+        if (submodules is not null)
+        {
+            global = global.Add(PackageFileSuppressor.SubmoduleProperty, submodules);
         }
 
         var analyzers = typeof(DiagnosticIds).Assembly.GetTypes()

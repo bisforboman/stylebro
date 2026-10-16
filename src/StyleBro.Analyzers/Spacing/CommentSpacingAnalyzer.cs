@@ -21,6 +21,7 @@ public sealed class CommentSpacingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             foreach (var trivia in TreeWalk.Trivia(c.Tree.GetRoot(c.CancellationToken)))

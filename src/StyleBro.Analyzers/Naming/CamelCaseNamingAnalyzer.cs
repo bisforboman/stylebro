@@ -75,6 +75,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxNodeAction(
             AnalyzeVariable,
             SyntaxKind.VariableDeclarator,

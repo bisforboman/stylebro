@@ -188,7 +188,8 @@ internal static class NestedIfs
     /// the condition so far spans lines, the next one starts a line of its own, aligned with the top condition, with
     /// '&amp;&amp;' where <paramref name="beginning"/> says (dotnet_style_operator_placement_when_wrapping), and its other
     /// lines keep their indentation relative to it (Flow.Launcher's 'HandleMenuMsg(' went to the end of the wrapped
-    /// condition's last line, its arguments below at the old place).
+    /// condition's last line, its arguments below at the old place); appended to a one-line condition, a condition's other
+    /// lines keep their place relative to its start.
     /// </summary>
     private static Rendered? Render(IfStatementSyntax top, SourceText text, bool beginning, (int Width, string Unit)? csharpier)
     {
@@ -217,6 +218,18 @@ internal static class NestedIfs
             var parenthesized = NeedsParentheses(current.Condition);
             var ownLine = current != top && builder.ToString().IndexOf('\n') >= 0;
             var condition = Dedent(current.Condition, text, current == top ? 0 : IndentOf(text, current.SpanStart) - (ownLine ? topColumn : topIndent));
+
+            // Appended to the line above, a condition whose other lines are aligned under its '(' keeps them aligned: moved by
+            // the 'if's depth only, they ended far left of where it now starts (Spectre.Console's ColorSystemDetector, trial
+            // 24). Lines indented from the 'if' instead (one level deeper is also the condition's column) move by the depth.
+            // A tab-indented line can't move right by columns: the depth then too.
+            if (current != top && !ownLine && IsAlignedUnderParenthesis(current, text))
+            {
+                var column = current.Condition.SpanStart - text.Lines.GetLineFromPosition(current.Condition.SpanStart).Start;
+                var appendedAt = topColumn + builder.Length + " && ".Length + (parenthesized ? 1 : 0);
+                condition = Dedent(current.Condition, text, column - appendedAt) ?? condition;
+            }
+
             if (condition is null)
             {
                 return null;
@@ -406,6 +419,16 @@ internal static class NestedIfs
         }
 
         return indent;
+    }
+
+    /// <summary>Whether the 'if's condition spans lines and its other lines start right under the '(' (the least indented).</summary>
+    private static bool IsAlignedUnderParenthesis(IfStatementSyntax statement, SourceText text)
+    {
+        var first = text.Lines.GetLineFromPosition(statement.Condition.SpanStart).LineNumber;
+        var last = text.Lines.GetLineFromPosition(statement.Condition.Span.End).LineNumber;
+        var paren = statement.OpenParenToken.SpanStart - text.Lines[first].Start;
+        var lines = Enumerable.Range(first + 1, last - first).Select(n => text.Lines[n]).Where(l => text.ToString(l.Span).Trim().Length > 0).ToList();
+        return lines.Count > 0 && lines.Min(l => IndentOf(text, l.Start)) == paren;
     }
 
     private static string? Dedent(SyntaxNode node, SourceText text, int shift) =>

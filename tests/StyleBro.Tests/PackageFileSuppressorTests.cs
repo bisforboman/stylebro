@@ -74,7 +74,7 @@ public class PackageFileSuppressorTests
     }
 
 #pragma warning disable RS1001 // A stand-in for a rule, never loaded as an analyzer.
-    private sealed class FakeRule : DiagnosticAnalyzer
+    internal sealed class FakeRule : DiagnosticAnalyzer
     {
         private readonly DiagnosticDescriptor descriptor;
 

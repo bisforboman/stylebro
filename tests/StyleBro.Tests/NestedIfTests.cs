@@ -735,6 +735,44 @@ public class NestedIfTests
         }
         """);
 
+    // Spectre.Console (trial 24): appended to the outer condition, the inner one's later lines moved by the 'if's depth
+    // only, far left of where the condition now starts. Aligned under its '(', they stay aligned.
+    [Fact]
+    public Task MultiLineInnerCondition_KeepsItsAlignment() => Verify.VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(string s)
+            {
+                if (s.Length > 0)
+                {
+                    {|BRO1149:if|} (s == "truecolor" ||
+                       s == "24bit")
+                    {
+                        return 1;
+                    }
+                }
+
+                return 0;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(string s)
+            {
+                if (s.Length > 0 && (s == "truecolor" ||
+                                    s == "24bit"))
+                {
+                    return 1;
+                }
+
+                return 0;
+            }
+        }
+        """);
+
     [Fact]
     public Task KAndRBraces_AreKept() => Verify.VerifyFixAsync(
         """
