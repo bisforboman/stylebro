@@ -151,7 +151,7 @@ internal static class InitCommand
             sonarScopes = [.. SonarScopes(root, sonar, sonarLines, own), .. optionScopes];
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
-            var (added, files, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
+            var (added, files, _, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
             if (added > 0)
             {
                 Console.WriteLine($"Suppressions: {added} {(write ? "added" : "to add")} for the rules that fix Sonar's in {files} files (the Sonar ones stay).");
@@ -559,25 +559,33 @@ internal static class InitCommand
         var formatsWhitespace = !(csharpier.Lines ?? []).Concat(alignment?.Lines ?? []).Concat(keptSpacing).Concat(detected).Contains(IdeOff);
 
         // One-line empty blocks kept: IDE0055 still splits those after a statement's header ('else { }', 'lock (x) { }') unless
-        // csharp_preserve_single_line_statements is true (probed with the SDK's formatter; trial 23: 19 kept, 7 split).
+        // csharp_preserve_single_line_statements is true (probed with the SDK's formatter; trial 23: 19 kept, 7 split). The same
+        // for one-line blocks with code when BRO1508 is off for them ('if (x) { return; }' became two lines, trial 24).
         // Written again each run, last (a second run kept them first: another block).
         const string StatementsKey = "csharp_preserve_single_line_statements";
         const string EmptyBlocksComment = "# init: empty blocks: IDE0055 keeps '{ }' after a statement ('else { }', 'lock (x) { }') on one line only with this";
-        if (kept.IndexOf(EmptyBlocksComment) is >= 0 and var keptAt)
+        const string BlocksComment = "# init: one-line blocks: IDE0055 keeps them after a statement ('if (x) { return; }') on one line only with this";
+        foreach (var comment in new[] { EmptyBlocksComment, BlocksComment })
         {
-            kept.RemoveRange(keptAt, 2);
+            if (kept.IndexOf(comment) is >= 0 and var keptAt)
+            {
+                kept.RemoveRange(keptAt, 2);
+            }
         }
 
-        if (formatsWhitespace && kept.Concat(detected).Contains($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true")
-            && !kept.Concat(detected).Contains($"{StatementsKey} = true"))
+        var oneLine = kept.Concat(detected).ToList();
+        var blocksComment = oneLine.Contains($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true") ? EmptyBlocksComment
+            : oneLine.Contains($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.SingleLineStatementBlock}.severity = none") ? BlocksComment
+            : null;
+        if (formatsWhitespace && blocksComment is not null && !oneLine.Contains($"{StatementsKey} = true"))
         {
             if (settings.TryGetValue(StatementsKey, out var statements) && !statements.Split(':')[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase))
             {
-                report.Add($"  {"note",-8} empty blocks: kept on one line by StyleBro, but your .editorconfig's {StatementsKey} = {statements} lets IDE0055 split those after a statement ('else {{ }}' -> two lines)");
+                report.Add($"  {"note",-8} {(blocksComment == EmptyBlocksComment ? "empty blocks" : "one-line blocks")}: kept on one line by StyleBro, but your .editorconfig's {StatementsKey} = {statements} lets IDE0055 split those after a statement ('else {{ }}' -> two lines)");
             }
             else
             {
-                detected.Add(EmptyBlocksComment);
+                detected.Add(blocksComment);
                 detected.Add($"{StatementsKey} = true");
             }
         }
@@ -603,8 +611,10 @@ internal static class InitCommand
         var endings = new List<string>();
         if (gitEndings is ({ } endingLines, { } endingReport))
         {
-            report.Add($"  {"note",-8} {endingReport}");
-            endings.AddRange(endingLines.Take(formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity") ? 3 : 2));
+            // Without the IDE0055 line (CSharpier: it's off) the note doesn't say it's lowered (trial 24).
+            var lowersIde = formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity");
+            report.Add($"  {"note",-8} {(lowersIde ? endingReport : endingReport.Replace(Conventions.IdeSuggestion, string.Empty, StringComparison.Ordinal))}");
+            endings.AddRange(endingLines.Take(lowersIde ? 3 : 2));
         }
 
         if (Conventions.EmptyHeaderLines(counts, own) is { } headerLines)
@@ -678,7 +688,7 @@ internal static class InitCommand
             }
             else if (group.Key == Conventions.EndOfLineKey && Conventions.EndingContradiction(group.Value!, group.PickedPerMachine, file) is var (endingLines, endingReport))
             {
-                (lines, note) = (endingLines.Take(ideSeverity ? 3 : 2).ToList(), endingReport);
+                (lines, note) = (endingLines.Take(ideSeverity ? 3 : 2).ToList(), ideSeverity ? endingReport : endingReport.Replace(Conventions.IdeSuggestion, string.Empty, StringComparison.Ordinal));
             }
             else if (group.Key == Conventions.EndOfLineKey && Conventions.ContradictedEnding(group.Counts, own, file) is var (ending, endingNote))
             {

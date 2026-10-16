@@ -148,7 +148,7 @@ public sealed partial class MigrationTests
         var replacements = new Dictionary<string, SortedSet<string>> { ["SA1623"] = new(StringComparer.Ordinal) { "BRO1604" } };
         Write("App/B.cs", "#pragma warning disable sa1623\nclass B { }\n");
         Write("App/App2.csproj", "<Project><PropertyGroup><NoWarn>sa1623</NoWarn></PropertyGroup></Project>");
-        Assert.Equal((2, 2, 0), Program.RewriteSuppressions(root, replacements, write: true));
+        Assert.Equal((2, 2, 0, 0), Program.RewriteSuppressions(root, replacements, write: true));
         Assert.Contains("#pragma warning disable sa1623, BRO1604", File.ReadAllText(Path.Combine(root, "App", "B.cs")), StringComparison.Ordinal);
     }
 
@@ -170,7 +170,7 @@ public sealed partial class MigrationTests
         Write("src/App/Spaces.cs", "#pragma warning disable SA1028\nclass S { }\n");
         Write("src/App/Native.cs", "using System.Diagnostics.CodeAnalysis;\nclass N\n{\n    [SuppressMessage(\"StyleCop.CSharp.NamingRules\", \"SA1310:Field names should not contain underscore\")]\n    private const int STD_OUTPUT_HANDLE = -11;\n}\n");
 
-        Assert.Equal((2, 2, 1), Program.RewriteSuppressions(root, replacements, write: true));
+        Assert.Equal((2, 2, 1, 0), Program.RewriteSuppressions(root, replacements, write: true));
         Assert.Equal(Pragma, File.ReadAllText(Path.Combine(root, "src/App/Generated/Gen.Lock/Gen.Lock.Generator/Lock.cs")));
         Assert.Equal(Pragma, File.ReadAllText(Path.Combine(root, "src/App/C.g.cs")));
         Assert.Contains("SA1623, BRO1604", File.ReadAllText(Path.Combine(root, "src/App/Mine.cs")), StringComparison.Ordinal);
