@@ -84,8 +84,7 @@ internal static class BlankLineRuns
         if (next.Kind() is SyntaxKind.DotToken or SyntaxKind.CloseBraceToken or SyntaxKind.CatchKeyword or SyntaxKind.FinallyKeyword
             or SyntaxKind.ElseKeyword or SyntaxKind.CommaToken or SyntaxKind.CloseParenToken or SyntaxKind.ColonToken
             or SyntaxKind.EqualsGreaterThanToken or SyntaxKind.AmpersandAmpersandToken or SyntaxKind.BarBarToken
-            or SyntaxKind.CloseBracketToken or SyntaxKind.AddKeyword or SyntaxKind.RemoveKeyword or SyntaxKind.GetKeyword
-            or SyntaxKind.SetKeyword or SyntaxKind.InitKeyword)
+            or SyntaxKind.CloseBracketToken)
         {
             return false;
         }
@@ -97,7 +96,10 @@ internal static class BlankLineRuns
             return false;
         }
 
-        if (next.Kind() is SyntaxKind.PrivateKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword && next.Parent is AccessorDeclarationSyntax)
+        // The next accessor, whatever it starts with: its keyword, a modifier or an attribute list ('[MethodImpl(...)] set';
+        // CSharpier removes the blank line there, Lua-CSharp).
+        if ((next.Parent is AccessorDeclarationSyntax accessor && accessor.GetFirstToken() == next)
+            || next.Parent is AttributeListSyntax { Parent: AccessorDeclarationSyntax })
         {
             return false;
         }

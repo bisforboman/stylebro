@@ -95,7 +95,7 @@ internal static class BlankLines
     /// <summary>
     /// Whether a '//' comment needs a blank line above it (BRO1504), like StyleCop's SA1515: the comment starts its
     /// line and the line above is code. Not when the line above is blank, a comment or a directive; not directly after
-    /// an opening brace, '=>' or a 'case'/'default' label, between the items of a list (<see cref="IsBetweenListItems"/>)
+    /// an opening brace, '=>', an attribute list (<see cref="IsBelowAttributes"/>) or a 'case'/'default' label, between the items of a list (<see cref="IsBetweenListItems"/>)
     /// or two parts of one expression, a call chain's links too (<see cref="IsInsideExpression"/>); and not for '///'
     /// and '////' (commented-out code). Not for a comment
     /// BRO1132 or BRO1134 moves into a block when that rule is on (<paramref name="isOn"/>): the blank line would stay
@@ -141,6 +141,7 @@ internal static class BlankLines
         var previous = comment.Token.SpanStart >= comment.Span.End ? comment.Token.GetPreviousToken() : comment.Token;
         return !previous.IsKind(SyntaxKind.OpenBraceToken)
             && !previous.IsKind(SyntaxKind.EqualsGreaterThanToken)
+            && !IsBelowAttributes(previous)
             && !(previous.IsKind(SyntaxKind.ColonToken) && previous.Parent is SwitchLabelSyntax)
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenListItems(comment)
@@ -236,6 +237,16 @@ internal static class BlankLines
             _ => false,
         };
     }
+
+    /// <summary>
+    /// Whether the token ends an attribute list of the element below (not an assembly or module attribute): a comment between
+    /// the attributes and the element stays attached to them, which BRO1525 wants too (NLog: a '///' after '[InlineData]'
+    /// that BRO1602 turned into '//' got a blank line above it that nothing removed again).
+    /// </summary>
+    private static bool IsBelowAttributes(SyntaxToken previous) =>
+        previous.IsKind(SyntaxKind.CloseBracketToken)
+        && previous.Parent is AttributeListSyntax list
+        && list.Target?.Identifier.Kind() is not (SyntaxKind.AssemblyKeyword or SyntaxKind.ModuleKeyword);
 
     /// <summary>
     /// Whether the comment leads a statement embedded in an 'if', 'else', loop, 'using', 'lock' or 'fixed' without

@@ -63,7 +63,11 @@ public sealed class MemberOrderingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var violation = MemberOrdering.FindFirstViolation(container, options, MemberOrdering.GetPartialAccess(container, context.SemanticModel, context.CancellationToken));
+        var violation = MemberOrdering.FindFirstViolation(
+            container,
+            options,
+            MemberOrdering.GetPartialAccess(container, context.SemanticModel, context.CancellationToken),
+            MemberOrdering.HasGeneratedPart(container, context.SemanticModel, context.CancellationToken));
         if (violation is null)
         {
             return;

@@ -960,6 +960,28 @@ public class FixOrderTests
         "BRO1143",
         "BRO1519");
 
+    // NLog (trial 26): BRO1602's '//' below '[InlineData]' got BRO1504's blank line, which BRO1525 (comment in the gap) left.
+    [Fact]
+    public Task TripleSlashBelowAnAttribute_StaysAttached() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public class C
+        {
+            [Obsolete]
+
+            /// <summary>
+            /// https://example.com/issues/3194
+            /// </summary>
+            public void M()
+            {
+            }
+        }
+        """,
+        "BRO1504",
+        "BRO1525",
+        "BRO1602");
+
     [Fact]
     public Task Attributes_TheOnlyBlankLineBeforeAnElementIsBelowItsAttribute() => AssertConvergesInEveryOrderAsync(
         """

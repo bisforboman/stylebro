@@ -380,6 +380,15 @@ internal static class FieldNames
     }
 
     /// <summary>
+    /// Whether the field is never renamed whatever its new name: it has attributes (serializers, '[ThreadStatic]'), or another
+    /// member is paired with it by name (<see cref="HasRelatedMemberName"/>). It keeps its current name, so its new name
+    /// doesn't count as taken (<see cref="TypeFacts.CountNewName"/>): a '[ThreadStatic] t_depth' kept a 'Depth' field from
+    /// becoming 'depth' (trial 26).
+    /// </summary>
+    public static bool KeepsItsName(INamedTypeSymbol type, IFieldSymbol field) =>
+        field.GetAttributes().Length > 0 || HasRelatedMemberName(type, field);
+
+    /// <summary>
     /// Whether a member of the type or a base type is paired with this one by name, in the conventions serializers and
     /// data binding use: 'ShouldSerializeitems' and 'Resetitems' (Json.NET, XML serialization, designers),
     /// 'itemsSpecified' (XML serialization), 'itemsChanged'/'itemsChanging' and 'OnitemsChanged'/'OnitemsChanging'
@@ -467,7 +476,7 @@ internal static class FieldNames
 
         // A member can't have its type's name (CS0542; sourcegit's 'class Text' with a field 'text').
         if (newName == type.Name
-            || field.GetAttributes().Length > 0 || IsSerialized(type) || HasRelatedMemberName(type, field) || NamespaceNames.HasGeneratedPart(type))
+            || KeepsItsName(type, field) || IsSerialized(type) || NamespaceNames.HasGeneratedPart(type))
         {
             return false;
         }
@@ -1007,6 +1016,12 @@ internal static class FieldNames
                 {
                     if (GetNewName(f, key.Item1, hungarian) is { } name)
                     {
+                        // A field that keeps its name keeps it: its current name is checked as a member of the type.
+                        if (KeepsItsName(type, f))
+                        {
+                            continue;
+                        }
+
                         map[name] = map.TryGetValue(name, out var n) ? n + 1 : 1;
                     }
                 }

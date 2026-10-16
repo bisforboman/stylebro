@@ -44,6 +44,10 @@
             Name     = 'blank-line-runs'
             Map      = @('SA1507=BRO1517', 'SA1508=BRO1518', 'SA1513=BRO1519')
             Expected = @(
+                # The next accessor starting with an attribute is an accessor like any other (CSharpier removes the line;
+                # Lua-CSharp, trial 26).
+                'only StyleCop: BRO1519 Accessors.cs(15,14)'
+                'StyleCop output only: Accessors.cs: []'
                 # BRO1519 leaves a comment after '}' to BRO1504 and the next member to BRO1505 (they add the same line).
                 'only StyleCop: BRO1519 Blank.cs(45,14)'
                 'only StyleCop: BRO1519 Blank.cs(49,10)'
@@ -197,6 +201,9 @@
                 # 1.2.0-beta.556, #3766).
                 'only StyleCop: BRO1504 More.cs(39,13)'
                 'StyleCop output only: More.cs: []'
+                # A comment right below an element's attribute list stays attached to it (BRO1525 wants no blank line
+                # there; trial 26).
+                'only StyleCop: BRO1504 More.cs(6,9)'
                 # A comment right after '=>' is like one after '{' (StyleCop #3392/#3550, owner's decision 2026-10-04).
                 'only StyleCop: BRO1504 Arrows.cs(11,17)'
                 'only StyleCop: BRO1504 Arrows.cs(17,13)'

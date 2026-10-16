@@ -381,6 +381,52 @@ public class BlankLineAfterTests
         }
         """);
 
+    // A comment between an element's attributes and the element stays with them (BRO1525 removes blank lines there).
+    // An assembly attribute isn't the element's: the comment below it is reported like one below code.
+    [Fact]
+    public Task CommentBelowAnAttribute_NoDiagnostic_UnlessAnAssemblyAttribute() => VerifyFixAsync(
+        """
+        using System;
+
+        [assembly: CLSCompliant(true)]
+        {|BRO1504:// The class.|}
+        class C
+        {
+            [Obsolete]
+            // Kept for old callers.
+            void M([In]
+                // The value.
+                int x)
+            {
+            }
+        }
+
+        class InAttribute : Attribute
+        {
+        }
+        """,
+        """
+        using System;
+
+        [assembly: CLSCompliant(true)]
+
+        // The class.
+        class C
+        {
+            [Obsolete]
+            // Kept for old callers.
+            void M([In]
+                // The value.
+                int x)
+            {
+            }
+        }
+
+        class InAttribute : Attribute
+        {
+        }
+        """);
+
     [Fact]
     public Task CommentBeforeOpenBrace_IsLeftToBro1132() => VerifyNoDiagnosticsAsync("""
         class C

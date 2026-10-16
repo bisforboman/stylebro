@@ -439,7 +439,7 @@ internal static class CamelCaseRenamer
         {
             OutsideMembers = outsideMembers,
             Dynamic = dynamic,
-            Snapshots = SnapshotFiles.GetWords(solution),
+            Files = SnapshotFiles.GetWords(solution),
         };
 
         void AddDynamic(string text, string at)
@@ -488,7 +488,17 @@ internal static class CamelCaseRenamer
         }
 
         // A snapshot or approval file holds what a serializer wrote: the names of data members.
-        return IsDataSymbol(symbol) && names.Snapshots.TryGetValue(symbol.Name, out var snapshot) ? (KeptReason.NameInSnapshotFile, snapshot) : (null, null);
+        if (IsDataSymbol(symbol) && names.Files.Snapshots.TryGetValue(symbol.Name, out var snapshot))
+        {
+            return (KeptReason.NameInSnapshotFile, snapshot);
+        }
+
+        // XAML binds members by name at run time: properties and events (bindings), methods (event handlers), static fields
+        // and types ('x:Static', 'x:Class'). Not private fields: XAML can't reach them, and a word in a 'Text="..."' value
+        // would keep a common name like 'name'.
+        return symbol is not IFieldSymbol { DeclaredAccessibility: Accessibility.Private } && names.Files.Xaml.TryGetValue(symbol.Name, out var xaml)
+            ? (KeptReason.NameInXamlFile, xaml)
+            : (null, null);
     }
 
     /// <summary>
@@ -1001,8 +1011,8 @@ internal static class CamelCaseRenamer
         /// <summary>Gets or sets the names used as members through <see langword="dynamic"/> (<see cref="RepositoryNames.DynamicKind"/>), with where.</summary>
         public Dictionary<string, string> Dynamic { get; set; } = new(StringComparer.Ordinal);
 
-        /// <summary>Gets or sets the words of the snapshot and approval files (<see cref="SnapshotFiles"/>), with where.</summary>
-        public Dictionary<string, string> Snapshots { get; set; } = new(StringComparer.Ordinal);
+        /// <summary>Gets or sets the words of the snapshot, approval and XAML files (<see cref="SnapshotFiles"/>), with where.</summary>
+        public SnapshotFiles.Words Files { get; set; } = new();
 
         public bool Contains(string name) => Strings.Contains(name) || Nameofs.Contains(name);
 

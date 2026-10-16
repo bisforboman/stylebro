@@ -192,6 +192,59 @@ public sealed class KeptFindingsTests : IDisposable
         }
     }
 
+    // Trial 26: BRO1309 renamed a view model's 'title' while MainWindow.xaml bound '{Binding title}': the binding went empty
+    // at run time. Identifiers in XAML attribute values count like strings (owner's choice 2026-10-16); element and
+    // attribute names and namespace declarations don't.
+    [Theory]
+    [InlineData("MainWindow.xaml", "<Window Title=\"{Binding title}\" />", KeptReason.NameInXamlFile)]
+    [InlineData("Views/Main.axaml", "<ListBox DisplayMemberPath='title' />", KeptReason.NameInXamlFile)]
+    [InlineData("Page.xaml", "<TextBlock\n    Text=\"{Binding Path=Model.title, Mode=OneWay}\" />", KeptReason.NameInXamlFile)]
+    [InlineData("Page.xaml", "<title xmlns:x=\"clr-namespace:title\" title=\"Title\" />", null)]
+    [InlineData("Page.xaml.txt", "<Window Title=\"{Binding title}\" />", null)]
+    public async Task APropertyInAXamlFile_IsKept(string file, string xaml, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.ElementPascalCase,
+            ("ShellModel.cs", "internal sealed class ShellModel\n{\n    public string title { get; set; } = string.Empty;\n}\n"),
+            (file, xaml));
+
+        Assert.Equal(expected, reason);
+    }
+
+    // An event handler is a method XAML names; a private field isn't reachable from XAML, so a word there doesn't keep it.
+    [Fact]
+    public async Task AnEventHandlerInAXamlFile_IsKept_APrivateFieldIsNot()
+    {
+        const string Xaml = "<Button Click=\"onSave\" Content=\"total\" />";
+        Assert.Equal(KeptReason.NameInXamlFile, await GetReasonAsync(
+            DiagnosticIds.ElementPascalCase,
+            ("Window.cs", "internal partial class Window\n{\n    private void onSave(object sender, System.EventArgs e) { }\n}\n"),
+            ("Window.xaml", Xaml)));
+        Assert.Null(await GetReasonAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("Window.cs", "internal class Window\n{\n    private int _total;\n\n    public int Get() => _total;\n}\n"),
+            ("Window.xaml", Xaml.Replace("total", "_total"))));
+    }
+
+    [Fact]
+    public async Task AXamlFileOnDisk_IsReadFromTheProjectsRepository()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "stylebro-xaml-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(root, ".git"));
+        Directory.CreateDirectory(Path.Combine(root, "src", "App.Wpf"));
+        try
+        {
+            File.WriteAllText(Path.Combine(root, "src", "App.Wpf", "MainWindow.xaml"), "<Window>\n    <TextBlock Text=\"{Binding totalAmount}\" />\n</Window>\n");
+            var (solution, document, diagnostic) = await FindAsync(DiagnosticIds.ElementPascalCase, ("Summary.cs", "internal sealed class Summary\n{\n    public decimal totalAmount { get; set; }\n}\n"));
+            solution = solution.WithProjectFilePath(document.Project.Id, Path.Combine(root, "src", "App", "App.csproj"));
+            Assert.Equal(KeptReason.NameInXamlFile, await CamelCaseRenamer.GetKeptReasonAsync(solution, solution.GetDocument(document.Id)!, diagnostic, CancellationToken.None));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     // Trial 23: a snake_case property ('line_count', a wire name) isn't BRO1309's, so its renamed siblings mixed the DTO's casing.
     [Fact]
     public async Task APropertyNextToASnakeCaseOne_IsKept()

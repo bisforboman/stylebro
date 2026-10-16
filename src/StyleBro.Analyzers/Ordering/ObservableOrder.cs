@@ -20,11 +20,16 @@ namespace StyleBro.Analyzers.Ordering;
 /// </summary>
 internal static class ObservableOrder
 {
-    public static bool ReordersObservableMembers(TypeDeclarationSyntax type, int[] order)
+    /// <summary>
+    /// Whether the sort changes the relative order of the type's observable members. <paramref name="generatedPart"/>: the
+    /// type has a generated part (<see cref="MemberOrdering.HasGeneratedPart"/>), whose generator may write its fields and
+    /// properties in declaration order (Serde's JSON, trial 26; owner's decision), so they count like a serialized type's.
+    /// </summary>
+    public static bool ReordersObservableMembers(TypeDeclarationSyntax type, int[] order, bool generatedPart = false)
     {
         var members = type.Members;
         var layout = type is StructDeclarationSyntax || type.IsKind(SyntaxKind.RecordStructDeclaration) || HasAttribute(type.AttributeLists, "StructLayout");
-        var serialized = HasSerializerAttribute(type.AttributeLists) || members.Any(m => HasSerializerAttribute(m.AttributeLists));
+        var serialized = generatedPart || HasSerializerAttribute(type.AttributeLists) || members.Any(m => HasSerializerAttribute(m.AttributeLists));
         if (!layout && !serialized)
         {
             return false;

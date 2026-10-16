@@ -77,6 +77,16 @@ public class ElementSeparationTests
                     a = value;
                 }
             }
+
+            int R
+            {
+                get
+                {
+                    return a;
+                }
+        {|BRO1505:|}        [System.Obsolete]
+                set { a = value; }
+            }
         }
         """,
         """
@@ -98,6 +108,17 @@ public class ElementSeparationTests
                 {
                     a = value;
                 }
+            }
+
+            int R
+            {
+                get
+                {
+                    return a;
+                }
+
+                [System.Obsolete]
+                set { a = value; }
             }
         }
         """);
@@ -123,6 +144,16 @@ public class ElementSeparationTests
                 {
                     return a;
                 }
+                set => a = value;
+            }
+
+            int R
+            {
+                get
+                {
+                    return a;
+                }
+                [System.Obsolete]
                 set => a = value;
             }
         }
