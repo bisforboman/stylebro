@@ -247,10 +247,10 @@ public sealed partial class MigrationTests
         Assert.Equal(["src/A.cs"], FormatCommand.AfterCheck([], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
         Assert.Equal((false, null), FormatCommand.AfterCheck([], 1, ["Unhandled exception"], [], root)); // the check itself failed
 
-        // An earlier run changed files it formats (trial 25): a clean check still replays; findings only there run nothing
-        // (the earlier run fixed the same code; the next run checks again); others run with the changed files too.
+        // An earlier run changed files it formats (trial 25): a clean check still replays; with findings it runs on those files
+        // and the changed ones, not all of its own ('#if !DEBUG' code is no other run's to fix, so findings never skip it).
         Assert.Equal((true, null), FormatCommand.AfterCheck(["src/A.cs"], 0, [], [], root));
-        Assert.Equal([], FormatCommand.AfterCheck(["src/A.cs"], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
+        Assert.Equal(["src/A.cs"], FormatCommand.AfterCheck(["src/A.cs"], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
         Assert.Equal(["src/A.cs", "src/B.cs"], FormatCommand.AfterCheck(["src/B.cs"], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
     }
 

@@ -48,9 +48,9 @@ Measured (2026-10-10) right after setting StyleBro up, each run until clean (two
 | Jellyfin (41 projects, one target framework) | 169 s | 20 s | 10 s |
 | Serilog (the library targets 7 frameworks: one `dotnet format` per framework) | 153 s | 83 s | |
 
-Trial 25 (2026-10-16), two edited files: files in two of 11 projects take one run that loads both projects (27 s, was
-97 s one project after another; the whole solution: 70 s); a library with three target frameworks checks all three at
-once and formats only those with findings (22 s, was 58 s; `--verify-no-changes` 23 s, was 72 s).
+Trial 25 (2026-10-16), two edited files: files in two of 11 projects take one run that loads both projects (27 s here,
+was 39 s one project after another); in a library with three target frameworks, the runs after the checks format just
+the files with findings (34 s), and `--verify-no-changes` formats a copy of only those files (33 s, was 72 s in the trial).
 
 Most of the time is loading projects: a file of a project with many target frameworks costs one load per framework.
 

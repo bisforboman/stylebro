@@ -7,8 +7,8 @@
 
 ### Changed
 
-- `format --files` with files in several projects runs once for all of them, and runs only the target frameworks whose
-  check found something (two edited files: 22-27 s instead of 32-39 s). `--verify-no-changes --files` formats a
+- `format --files` with files in several projects runs once for all of them (two edited files in two of 11 projects:
+  27 s instead of 39 s), and a framework whose check found something formats just those files. `--verify-no-changes --files` formats a
   copy of just the files with findings.
 - CSharpier after `format` and in `--verify-no-changes` gets whole folders where it would change nothing else, and says
   when it runs: a check of 612 files took 2 s instead of 85 s.
