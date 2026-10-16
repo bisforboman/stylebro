@@ -490,12 +490,19 @@ internal static class InitCommand
                 var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
                 decided[convention.Key] = $"set by the Sonar setup ({line.Substring(line.IndexOf('=') + 1).Trim()})";
             }
-            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>()], SharesOff(convention) ? convention.What : null) is { Count: > 0 } lines)
+            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>(), .. convention.Key == Conventions.StaticPrefixKey ? StaticPrefixKeys : []], SharesOff(convention) || convention.Key == Conventions.StaticPrefixKey ? convention.What : null) is { Count: > 0 } lines)
             {
                 var setting = lines.Last();
                 decided[convention.Key] = $"kept from the last init ({setting.Substring(setting.IndexOf('=') + 1).Trim()})";
                 kept.AddRange(lines);
             }
+        }
+
+        // Braces the team enforces (IDE0011 at warning or error with csharp_prefer_braces = true) leave no one-line jumps to
+        // allow: the few the code has are its warnings (trial 26: init allowed them, and BRO1514 never reported them).
+        if (!decided.ContainsKey(Conventions.SingleLineJumpsKey) && BracesEnforced(settings) is { } braces)
+        {
+            decided[Conventions.SingleLineJumpsKey] = $"your .editorconfig enforces braces ({braces})";
         }
 
         if (!decided.ContainsKey(StyleBro.Analyzers.Naming.FieldNames.StyleKey) && FieldNamingRule(own) is { } rule)
@@ -1016,6 +1023,19 @@ internal static class InitCommand
     }
 
     /// <summary>
+    /// The settings that enforce braces on every one-line body (IDE0011 at warning or error, csharp_prefer_braces true or
+    /// unset), as the report names them, or null.
+    /// </summary>
+    public static string? BracesEnforced(IReadOnlyDictionary<string, string> settings)
+    {
+        var prefer = settings.TryGetValue("csharp_prefer_braces", out var p) ? p.Split(':') : ["true"];
+        var severity = settings.TryGetValue("dotnet_diagnostic.IDE0011.severity", out var s) ? s.Trim() : prefer.ElementAtOrDefault(1)?.Trim();
+        return prefer[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase) && severity?.ToLowerInvariant() is "warning" or "error"
+            ? $"IDE0011 = {severity}"
+            : null;
+    }
+
+    /// <summary>
     /// The SDK naming rule BRO1303 follows (like the analyzer): one whose symbols are fields (or '*'), private (or '*') with
     /// no required modifiers, not turned off, with a camel case style without a prefix or with '_'. Null without one: rules
     /// for interfaces, constants or static fields don't decide the private field style. Nor does any rule while IDE1006 is
@@ -1474,6 +1494,9 @@ internal static class InitCommand
     }
 
     private static bool OffSeverity(string? severity) => severity?.Trim().ToLowerInvariant() is "none" or "silent" or "hidden";
+
+    /// <summary>The keys init writes for 's_' private static fields (<see cref="Conventions.StaticPrefixLines"/>), kept with BRO1307's convention.</summary>
+    private static readonly string[] StaticPrefixKeys = [StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey];
 
     /// <summary>Whether another convention turns the same rule off (BRO1404: members and types).</summary>
     /// BRO1306's off line is also the static casing's (<see cref="Conventions.StaticCasingKey"/>), which isn't in the list.

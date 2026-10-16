@@ -295,6 +295,7 @@ number (`SST1413` is SA1413); the exceptions:
 | SST1150-SST1171 (one per kind of list) | SA1117, on when all of them are |
 | SST1214 and SST1215 (static and instance readonly fields first) | SA1214, on when both are |
 | SST1633 (a header from `file_header_template`) | SA1633 with a plain header (IDE0073); nothing without `file_header_template` |
+| SST1149 (`is null` for null checks) | no StyleCop rule: [BRO1133](rules/BRO1133.md) on, with `stylebro_null_check_style = pattern_matching` |
 | SST1653 (short summaries on one line) | no StyleCop rule: [BRO1616](rules/BRO1616.md) on, with `stylebro_summary_layout = single_line_when_fits` |
 | SST1108, SST1116, SST1119 (other rules at those numbers) | nothing; StyleCop's SA1108, SA1116 and SA1119 count as off |
 

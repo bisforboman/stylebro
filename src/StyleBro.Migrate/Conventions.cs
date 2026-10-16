@@ -226,14 +226,14 @@ internal static class Conventions
         new(AutoAccessorsKey, "auto-property accessors ('{ get; set; }')", "warning", ("warning", "on one line"), ("none", "on several lines"), Off(DiagnosticIds.AutoAccessorsOnOneLine)) { Unit = "property declaration" },
         new(RegionsKey, "'#region's inside members", "warning", ("warning", "without"), ("none", "'#region's"), Off(DiagnosticIds.NoRegionsInCodeElements)) { Unit = "region", KeepAny = true, Keeps = $"{DiagnosticIds.NoRegionsInCodeElements} would remove them" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
-        new(AfterBlockKey, "statements after a block's '}'", "warning", ("warning", "after a blank line"), ("none", "right below the '}'"), null) { Unit = "statement" },
+        new(AfterBlockKey, "statements after a block's '}'", "warning", ("warning", "after a blank line"), ("none", "right below the '}'"), Off(DiagnosticIds.BlankLineAfterCloseBrace)) { Unit = "statement" },
         new(NestedIfKey, "nested ifs BRO1149 would merge", "warning", ("warning", "merged ('if (a && b)')"), ("none", "nested"), Off(DiagnosticIds.NestedIf)) { Unit = "nested if", KeepAny = true, Keeps = $"{DiagnosticIds.NestedIf} would merge each" },
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
         new(CommentAboveKey, "'//' comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeComment)) { Unit = "comment" },
         new(PeriodKey, "doc comment texts", "warning", ("warning", "ending with a period"), ("none", "without a period"), Off(DiagnosticIds.DocumentationEndsWithPeriod)) { Unit = "text" },
-        new(DocOrderKey, "doc element order (param, remarks)", "warning", ("warning", "in BRO1619's order"), ("none", "in another order"), Off(DiagnosticIds.DocumentationElementOrder)) { Unit = "doc comment" },
+        new(DocOrderKey, "doc element order", "warning", ("warning", "in BRO1619's order"), ("none", "in another order"), Off(DiagnosticIds.DocumentationElementOrder)) { Unit = "doc comment" },
         new(LangwordKey, "keywords in doc comments", "warning", ("warning", "'<see langword=\"null\"/>'"), ("none", "'<c>null</c>'"), Off(DiagnosticIds.LangwordElement)) { Unit = "keyword" },
         new(NonPrivateNamingKey, "non-private fields your naming rule covers", "warning", ("warning", "named as it says"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
@@ -484,7 +484,7 @@ internal static class Conventions
     /// </summary>
     private const string DocOrderKey = "dotnet_diagnostic." + DiagnosticIds.DocumentationElementOrder + ".severity";
 
-    /// <summary>BRO1519's severity: statements right after a statement block's '}', after a blank line or not (trial 25: Speckle's 81 % went unsaid).</summary>
+    /// <summary>BRO1519's severity: statements right after a statement block's '}', after a blank line or not (trial 25: Speckle's 81 % went unsaid); mixed turns it off (owner's decision 2026-10-16: it added hundreds of blank lines to Serde and NLog).</summary>
     private const string AfterBlockKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterCloseBrace + ".severity";
 
     /// <summary>BRO1149's severity: nested ifs it would merge; any few keep them (trial 25: MimeKit's ~30 were merged).</summary>
@@ -492,6 +492,12 @@ internal static class Conventions
 
     /// <summary>Doc comments with only the stub's elements (typeparam, param, returns), in BRO1619's order or not (<see cref="FoldDocOrder"/>).</summary>
     private const string DocOrderStubKey = "doc element order (stub elements only)";
+
+    /// <summary>The private static readonly fields among <see cref="StaticPrefixKey"/>'s: without or with an 's_'/'t_' prefix.</summary>
+    private const string StaticReadOnlyPrefixKey = "private static readonly fields' prefix";
+
+    /// <summary>The start of the keys counting, per doc element, the comments BRO1619 reports with it out of order (<see cref="DocOrderWhat"/>).</summary>
+    private const string DocOrderTagPrefix = "doc element order: ";
 
     /// <summary>
     /// BRO1510's severity: multi-line accessor lists whose accessors all have block bodies, laid out alike (all one-line or all
@@ -707,8 +713,8 @@ internal static class Conventions
             .AsOrdered()
             .Select(file =>
             {
-                var text = File.ReadAllText(file);
-                if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
+                var text = Migration.ReadOrNull(file);
+                if (text is null || Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
                 {
                     return default;
                 }
@@ -994,6 +1000,12 @@ internal static class Conventions
         counts[OneLineBodiesKey] = new int[2];
         counts[NamespaceBracesKey] = new int[2];
         counts[DocOrderStubKey] = new int[2];
+        counts[StaticReadOnlyPrefixKey] = new int[2];
+        foreach (var element in StyleBro.Analyzers.Documentation.DocumentationStyle.ElementOrder)
+        {
+            counts[DocOrderTagPrefix + element] = new int[1];
+        }
+
         foreach (var key in LeadingLambdaKeys)
         {
             counts[key + LeadingLambdaBucket] = new int[2];
@@ -1068,9 +1080,9 @@ internal static class Conventions
         var converted = ConvertedByGit(root);
         foreach (var file in Migration.OwnCSharpFiles(root))
         {
-            var text = File.ReadAllText(file);
+            var text = Migration.ReadOrNull(file);
             var relative = Path.GetRelativePath(root, file);
-            if (Migration.IsGeneratedOrVendored(relative, text))
+            if (text is null || Migration.IsGeneratedOrVendored(relative, text))
             {
                 continue;
             }
@@ -1227,8 +1239,8 @@ internal static class Conventions
         var groups = new Dictionary<(string Key, string? Source, string? Value), FileSettingGroup>();
         foreach (var file in Migration.OwnCSharpFiles(root).Select(Path.GetFullPath))
         {
-            var text = File.ReadAllText(file);
-            if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(top, file), text))
+            var text = Migration.ReadOrNull(file);
+            if (text is null || Migration.IsGeneratedOrVendored(Path.GetRelativePath(top, file), text))
             {
                 continue;
             }
@@ -1372,9 +1384,11 @@ internal static class Conventions
         }
 
         string why;
+        var fromTemplate = false;
         if (own.TryGetValue("file_header_template", out var template) && (template.StartsWith(@"\n", StringComparison.Ordinal) || template.EndsWith(@"\n", StringComparison.Ordinal)))
         {
             why = "your file_header_template starts or ends with an empty line, which IDE0073 writes as an empty '//' line";
+            fromTemplate = true;
         }
         else if (counts.TryGetValue(HeaderKey, out var headers) && headers.Sum() >= MinimumAgreeing && Winner(headers[0], headers[1]) == 1)
         {
@@ -1385,7 +1399,7 @@ internal static class Conventions
             return null;
         }
 
-        return [$"# init: file headers: {why}; {rule} would remove those lines, so it is off. To turn it on: remove the next line (and the empty lines from the template).", Off(rule)];
+        return [$"# init: file headers: {why}; {rule} would remove those lines, so it is off. To turn it on: remove the next line{(fromTemplate ? " (and the empty lines from the template)" : string.Empty)}.", Off(rule)];
     }
 
     /// <summary>Whether a file starts with the UTF-8 byte order mark.</summary>
@@ -1923,6 +1937,10 @@ internal static class Conventions
                 foreach (var variable in field.Declaration.Variables)
                 {
                     Add(StaticPrefixKey, variable.Identifier.ValueText is ['s' or 't', '_', _, ..]);
+                    if (field.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
+                    {
+                        counts[StaticReadOnlyPrefixKey][variable.Identifier.ValueText is ['s' or 't', '_', _, ..] ? 1 : 0]++;
+                    }
                 }
             }
         }
@@ -2231,6 +2249,17 @@ internal static class Conventions
                     if (findings.Any(f => f.Id == DiagnosticIds.DocumentationElementOrder))
                     {
                         counts[key][1]++;
+
+                        // The elements out of place: each one after an element that sorts later, and the one it follows.
+                        var order = StyleBro.Analyzers.Documentation.DocumentationStyle.ElementOrder;
+                        for (var i = 1; i < ranks.Count; i++)
+                        {
+                            if (ranks.Take(i).Max() is var before && before > ranks[i])
+                            {
+                                counts[DocOrderTagPrefix + order[ranks[i]]][0]++;
+                                counts[DocOrderTagPrefix + order[before]][0]++;
+                            }
+                        }
                     }
                     else if (ranks.SequenceEqual(ranks.Order()))
                     {
@@ -2386,11 +2415,13 @@ internal static class Conventions
                 continue;
             }
 
+            var what = convention.Key == DocOrderKey ? DocOrderWhat(counts) : convention.What;
+
             // A style (init --style) moves the defaults to its values; a rule it turns off has nothing to keep or turn off.
             var @default = style is not null && style.TryGetValue(convention.Key, out var styled) ? styled : convention.Default;
             if (style is not null && convention.Key != StaticPrefixKey && TurnsOff(style, convention))
             {
-                report.Add($"  {"style",-8} {convention.What}: {Plural(total, convention.Unit)} -> its rule is off in the style");
+                report.Add($"  {"style",-8} {what}: {Plural(total, convention.Unit)} -> its rule is off in the style");
                 continue;
             }
 
@@ -2399,11 +2430,23 @@ internal static class Conventions
                 && style.TryGetValue(StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, out var staticStyle) && staticStyle == "s_camelCase")
             {
                 var privateStyle = lines.Contains($"{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = camelCase") ? "camelCase" : style.GetValueOrDefault(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "camelCase");
-                report.Add($"  {"kept",-8} {convention.What}: {count[0]} of {total} without a prefix -> no 's_'");
+                report.Add($"  {"kept",-8} {what}: {count[0]} of {total} without a prefix -> no 's_'");
                 summary.Written.Add(StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey);
-                lines.Add($"# init: {convention.What}: without a prefix in {count[0]} of {Plural(total, convention.Unit)} in your code (the style says 's_')");
+                lines.Add($"# init: {what}: without a prefix in {count[0]} of {Plural(total, convention.Unit)} in your code (the style says 's_')");
                 lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey} = PascalCase");
                 lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey} = {privateStyle}");
+                continue;
+            }
+
+            // Private static fields that clearly have the runtime's 's_': BRO1307 keeps it under s_camelCase, for static readonly
+            // fields too when they have it (trial 26: Serde's 19 of 22 turned BRO1307 off instead).
+            if (style is null && convention.Key == StaticPrefixKey && !decided.ContainsKey(convention.Key) && !IsSet(convention.Off!) && total >= MinimumAgreeing && Winner(count[0], count[1]) == 1
+                && counts.TryGetValue(StaticReadOnlyPrefixKey, out var readOnly) && StaticPrefixLines(count, readOnly) is { Count: > 0 } prefixLines)
+            {
+                report.Add($"  {"kept",-8} {what}: {count[1]} of {total} with an 's_' prefix -> s_camelCase");
+                summary.Written.Add(StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey);
+                lines.Add($"# init: {what}: with an 's_' prefix in {count[1]} of {Plural(total, convention.Unit)} in your code");
+                lines.AddRange(prefixLines);
                 continue;
             }
 
@@ -2420,16 +2463,16 @@ internal static class Conventions
                     // the line, and BRO1520 moved 285): the key was never the code's, so the rule goes off as for mixed code.
                     var rule = convention.Enforcer!;
                     (tag, verdict) = ("off", $".editorconfig says {setting}, unenforced, code mixed: {rule} is off");
-                    summary.TurnedOff.Add($"{rule} ({convention.What}: your .editorconfig says {setting})");
-                    lines.Add($"# init: {convention.What}: your .editorconfig says {convention.Key} = {setting}, but your code mixes both forms ({mixed}); nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
+                    summary.TurnedOff.Add($"{rule} ({what}: your .editorconfig says {setting})");
+                    lines.Add($"# init: {what}: your .editorconfig says {convention.Key} = {setting}, but your code mixes both forms ({mixed}); nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
                     lines.Add(Off(rule));
                 }
                 else if (total >= MinimumAgreeing && winner >= 0 && Contradicted(convention, convention.Values[winner].Value, repository) is { } value && !IsSet(Off(convention.Enforcer!)))
                 {
                     var rule = convention.Enforcer!;
                     (tag, verdict) = ("off", $".editorconfig says {value}, unenforced: {rule} is off");
-                    summary.Unfollowed.Add($"{rule} ({convention.What}: your .editorconfig says {value})");
-                    lines.Add($"# init: {convention.What}: your .editorconfig says {convention.Key} = {value}, but {count[winner]} of {Plural(total, convention.Unit)} in your code are {convention.Values[winner].Label}; nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
+                    summary.Unfollowed.Add($"{rule} ({what}: your .editorconfig says {value})");
+                    lines.Add($"# init: {what}: your .editorconfig says {convention.Key} = {value}, but {count[winner]} of {Plural(total, convention.Unit)} in your code are {convention.Values[winner].Label}; nothing enforced it, so {rule} is off. To enforce it: change the code, then remove the next line.");
                     lines.Add(Off(rule));
                 }
                 else
@@ -2455,14 +2498,14 @@ internal static class Conventions
                 if (rule is null)
                 {
                     (tag, verdict) = ("both", "both allowed");
-                    summary.BothAllowed.Add($"{off} ({convention.What})");
-                    lines.Add($"# init: {convention.What}: your code mixes both forms ({mixed}), so both are allowed. To choose {convention.Values[0].Label}: change the next line to {convention.Key} = {convention.Values[0].Value}.");
+                    summary.BothAllowed.Add($"{off} ({what})");
+                    lines.Add($"# init: {what}: your code mixes both forms ({mixed}), so both are allowed. To choose {convention.Values[0].Label}: change the next line to {convention.Key} = {convention.Values[0].Value}.");
                 }
                 else
                 {
                     (tag, verdict) = ("off", $"{rule} is off");
-                    summary.TurnedOff.Add($"{rule} ({convention.What})");
-                    lines.Add($"# init: {convention.What}: your code mixes both forms ({mixed}), so {rule} is off. To choose one: set {convention.Key} and remove the next line.");
+                    summary.TurnedOff.Add($"{rule} ({what})");
+                    lines.Add($"# init: {what}: your code mixes both forms ({mixed}), so {rule} is off. To choose one: set {convention.Key} and remove the next line.");
                 }
 
                 lines.Add(off);
@@ -2481,10 +2524,10 @@ internal static class Conventions
                 // A rule-only convention (BRO1601): the code's form is "the rule's fix isn't wanted".
                 var rule = RuleOf(offLine)!;
                 (tag, verdict) = ("off", $"{rule} is off");
-                summary.Unfollowed.Add($"{rule} ({convention.What}: {found})");
+                summary.Unfollowed.Add($"{rule} ({what}: {found})");
                 lines.Add(convention.KeepAny
-                    ? $"# init: {convention.What}: kept, because your code has some ({Plural(count[winner], convention.Unit)}; any {MinimumAgreeing} keep them: {convention.Keeps}), so {rule} is off. To turn it on: remove the next line."
-                    : $"# init: {convention.What}: {count[winner]} of {total} in your code are {convention.Values[winner].Label}, so {rule} is off. To turn it on: remove the next line.");
+                    ? $"# init: {what}: kept, because your code has some ({Plural(count[winner], convention.Unit)}; any {MinimumAgreeing} keep them: {convention.Keeps}), so {rule} is off. To turn it on: remove the next line."
+                    : $"# init: {what}: {count[winner]} of {total} in your code are {convention.Values[winner].Label}, so {rule} is off. To turn it on: remove the next line.");
                 lines.Add(offLine);
             }
             else
@@ -2493,20 +2536,20 @@ internal static class Conventions
                 (tag, verdict) = ("kept", convention.KeepAny ? $"{value} ({MinimumAgreeing} are enough)" : value);
                 summary.Written.Add(convention.Key);
                 lines.Add((convention.KeepAny
-                        ? $"# init: {convention.What}: allowed, because your code has some ({count[winner]} of {Plural(total, convention.Unit)} {convention.Values[winner].Label}; any {MinimumAgreeing} keep them allowed: {convention.Keeps})"
-                        : $"# init: {convention.What}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code")
+                        ? $"# init: {what}: allowed, because your code has some ({count[winner]} of {Plural(total, convention.Unit)} {convention.Values[winner].Label}; any {MinimumAgreeing} keep them allowed: {convention.Keeps})"
+                        : $"# init: {what}: {convention.Values[winner].Label} in {count[winner]} of {Plural(total, convention.Unit)} in your code")
                     + (unenforced?.TryGetValue(convention.Key, out var ignored) == true ? $" (your .editorconfig's {convention.Key} = {ignored} isn't enforced; to keep it, set it again below this block)" : string.Empty));
                 lines.AddRange(new[] { convention.Key }.Concat(convention.AlsoKeys).Select(k => $"{k} = {value}"));
             }
 
-            report.Add($"  {tag,-8} {convention.What}: {found} -> {verdict}");
+            report.Add($"  {tag,-8} {what}: {found} -> {verdict}");
 
             // BRO1519 leaves the blank line after a member's '}' to BRO1505 only while BRO1505 is on: with it off for compact
             // members, BRO1519 added one after every method body anyway (trial 24). No switch for those alone: it goes off too.
             var afterBrace = Off(DiagnosticIds.BlankLineAfterCloseBrace);
-            if (convention.Key == SeparationKey && tag == "off" && !IsSet(afterBrace))
+            if (convention.Key == SeparationKey && tag == "off" && !IsSet(afterBrace) && !lines.Contains(afterBrace))
             {
-                lines.Add($"# init: {convention.What}: with {DiagnosticIds.ElementsSeparatedByBlankLine} off, {DiagnosticIds.BlankLineAfterCloseBrace} would still add a blank line after a member's '}}', so it is off too. To turn it on: remove the next line.");
+                lines.Add($"# init: {what}: with {DiagnosticIds.ElementsSeparatedByBlankLine} off, {DiagnosticIds.BlankLineAfterCloseBrace} would still add a blank line after a member's '}}', so it is off too. To turn it on: remove the next line.");
                 lines.Add(afterBrace);
                 report.Add($"  {"off",-8} '}}' followed by a member: {DiagnosticIds.BlankLineAfterCloseBrace} is off too (it would add the blank line {DiagnosticIds.ElementsSeparatedByBlankLine} no longer asks for)");
             }
@@ -2514,7 +2557,7 @@ internal static class Conventions
             JsonReport.Add("conventions", new JsonObject
             {
                 ["key"] = convention.Key,
-                ["what"] = convention.What,
+                ["what"] = what,
                 ["counts"] = new JsonObject { [convention.Values[0].Value] = count[0], [convention.Values[1].Value] = count[1] },
                 ["verdict"] = tag == "too few" ? "tooFew" : tag,
                 ["result"] = verdict,
@@ -2554,6 +2597,43 @@ internal static class Conventions
         return Clear(StyleBro.Analyzers.Naming.FieldNames.StyleKey) == 1 && Clear(StaticPrefixKey) == 1 && !contradicted
             ? "  note     your code looks like the Microsoft style (dotnet/runtime's: '_' fields, 's_' statics, no 'this.'): try 'stylebro-migrate init --style microsoft' (https://bisforboman.github.io/stylebro/styles/)"
             : null;
+    }
+
+    /// <summary>
+    /// The lines for private static fields with an 's_' prefix (<paramref name="all"/>: without and with one, of which
+    /// <paramref name="readOnly"/> are static readonly): s_camelCase for each kind that has it, or none when a kind is mixed.
+    /// </summary>
+    public static List<string> StaticPrefixLines(int[] all, int[] readOnly)
+    {
+        var lines = new List<string>();
+
+        // Static readonly first: right below the comment, so the static casing (the same key) never takes it for its own on a second init.
+        foreach (var (key, group) in new[] { (StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, readOnly), (StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey, new[] { all[0] - readOnly[0], all[1] - readOnly[1] }) })
+        {
+            if (group[1] == 0)
+            {
+                continue;
+            }
+
+            if (Winner(group[0], group[1]) != 1)
+            {
+                return [];
+            }
+
+            lines.Add($"{key} = s_camelCase");
+        }
+
+        return lines;
+    }
+
+    /// <summary>
+    /// What the doc element order convention is called in the report: with the elements found out of order (trial 26: it said
+    /// "(param, remarks)" whatever they were).
+    /// </summary>
+    public static string DocOrderWhat(IReadOnlyDictionary<string, int[]> counts)
+    {
+        var found = StyleBro.Analyzers.Documentation.DocumentationStyle.ElementOrder.Where(e => counts.TryGetValue(DocOrderTagPrefix + e, out var c) && c[0] > 0).ToList();
+        return found.Count == 0 ? "doc element order" : $"doc element order ({string.Join(", ", found)})";
     }
 
     /// <summary>
@@ -2938,6 +3018,11 @@ internal static class Conventions
         if (decided.TryGetValue(StaticCasingKey, out var reason) || isSet?.Invoke(KeyOf(off)) == true)
         {
             (tag, verdict, found) = ("set", reason ?? $"{DiagnosticIds.FieldPascalCase}'s severity is set", Plural(total, "field"));
+        }
+        else if (lines.Any(l => l.StartsWith(StaticCasingKey + " =", StringComparison.Ordinal)) || isSet?.Invoke(StaticCasingKey) == true)
+        {
+            // The 's_' of private static fields set it (StaticPrefixLines): constants stay PascalCase.
+            (tag, verdict, found) = ("set", "s_camelCase (private static fields)", Plural(total, "field"));
         }
         else if (tooFew)
         {
