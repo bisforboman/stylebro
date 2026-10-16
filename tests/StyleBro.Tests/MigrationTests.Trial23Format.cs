@@ -88,7 +88,7 @@ public sealed partial class MigrationTests
         // Another tool's entries stay while their line is there; the ones whose line is gone go.
         File.AppendAllText(file, "BRO1505\tsrc/Old.cs\t" + Analyzers.Baseline.Baseline.Fingerprint("class Old") + "\t1\nBRO1505\tsrc/Gone.cs\t0000000000000000\t2\n");
         Write("src/C.cs", "class C\n{\n    private int Count;\n    private int Sum;\n}\n");
-        Assert.Equal("Baseline: stylebro.baseline: removed 3 entries whose line is gone (https://bisforboman.github.io/stylebro/baseline/).", FormatCommand.BaselineKept(root, []));
+        Assert.Equal("Baseline: stylebro.baseline: removed 2 entries whose line is gone (3 findings) (https://bisforboman.github.io/stylebro/baseline/).", FormatCommand.BaselineKept(root, []));
         Assert.Equal(["src/C.cs", "src/Old.cs"], Analyzers.Baseline.Baseline.Parse(File.ReadAllText(file)).Entries.Keys.Select(k => k.Path).Order(StringComparer.Ordinal));
 
         // The props name another file, or turn it off.
