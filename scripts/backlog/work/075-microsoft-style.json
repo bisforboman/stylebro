@@ -1,6 +1,6 @@
 {
   "area": "Adoption",
   "item": "Microsoft style",
-  "notes": "Owner's decisions 2026-10-16 (docs/decisions/2026-10-16-microsoft-style-*.md): a style layer for dotnet/runtime's coding style (coding-style.md + root .editorconfig), selected with `<StyleBroStyle>microsoft</StyleBroStyle>` on top of the preset and written by `stylebro-migrate init --style microsoft`; init's conventions still win where the code clearly differs. Design and open questions: docs/proposals/microsoft-style.md. Needs before shipping: `s_`/internal `_` field naming values, BRO1001 fields-first mode; nothing built yet.",
+  "notes": "Owner's decisions 2026-10-16 (docs/decisions/2026-10-16-microsoft-style-*.md): a style layer for dotnet/runtime's coding style (coding-style.md + root .editorconfig), selected with `<StyleBroStyle>microsoft</StyleBroStyle>` on top of the preset and written by `stylebro-migrate init --style microsoft`; init's conventions still win where the code clearly differs. Design: docs/proposals/microsoft-style.md; all seven questions answered A: rules the sources don't mention follow runtime's build (eng/CodeAnalysis.src.globalconfig via migrate's mapping, rules beyond StyleCop off), runtime's build severities, init only suggests the style, value `microsoft`, pinned per major, no Microsoft Learn variant. Next: gaps G1 (`s_` static fields), G2 (`_` internal fields), G3 (BRO1001 fields-first), then the layer and a trial on runtime-style repos; independent of 1.0; starts after the trial 24 fix PRs merge.",
   "status": "Planned"
 }

@@ -3,8 +3,9 @@
 Status: **design, nothing built** (owner's decisions of 2026-10-16:
 [source](../decisions/2026-10-16-microsoft-style-the-source-is-dotnetruntimes-coding-style.md),
 [selection](../decisions/2026-10-16-microsoft-style-selected-with-stylebrostyle-and-init-style.md),
-[design first](../decisions/2026-10-16-microsoft-style-a-design-document-first.md)). The open questions at the end need
-the owner's answers before any code.
+[design first](../decisions/2026-10-16-microsoft-style-a-design-document-first.md)). All seven questions at the end are
+answered (A each, [answers](../decisions/2026-10-16-microsoft-style-open-questions-answered.md)); work starts after the
+trial 24 fix PRs merge, with G1-G3 first.
 
 StyleBro's preset follows StyleCop's defaults. A large share of .NET code follows Microsoft's own style instead: the one
 dotnet/runtime writes down. This proposal adds that style as a layer on top of the preset:
@@ -279,7 +280,7 @@ says X, your code clearly uses Y: kept Y".
 G1 and G2 are needed before the style can ship: without them the style renames runtime-shaped static and internal
 fields the wrong way. G3 is wanted (otherwise rule 15 isn't checked at all). The rest can follow.
 
-## 5. Open questions
+## 5. Questions (all answered A on 2026-10-16)
 
 ### 1. Which value do StyleBro rules get that the guide and `.editorconfig` don't mention?
 
@@ -289,7 +290,7 @@ fields the wrong way. G3 is wanted (otherwise rule 15 isn't checked at all). The
 | B. The preset's value stays | All three on: runtime-style code gets StyleCop's layout on top |
 | C. Everything not named in the two sources off | All three off, but also BRO1121/BRO1608/... that runtime's build has on |
 
-**Recommended: A.** It is what runtime's own code is checked against, so a runtime-shaped repository gets few
+**Answered 2026-10-16: A** (the owner; it was the recommendation). It is what runtime's own code is checked against, so a runtime-shaped repository gets few
 surprises, and it is mechanical (`migrate`'s mapping over runtime's file, section 1c).
 
 ### 2. Which severities does `init --style microsoft` write for the IDE options?
@@ -300,7 +301,7 @@ surprises, and it is mechanical (`migrate`'s mapping over runtime's file, sectio
 | B. `warning` for everything | applied by `dotnet format`: more churn, more ids to bisect for multi-targeting |
 | C. Only the guide's numbered rules at `warning`, nothing else | IDE0044 not written |
 
-**Recommended: A.** It mirrors what Microsoft enforces; StyleBro's "everything reported is fixed" holds because
+**Answered 2026-10-16: A** (the owner; it was the recommendation). It mirrors what Microsoft enforces; StyleBro's "everything reported is fixed" holds because
 `suggestion` isn't reported by `dotnet format --severity warn`.
 
 ### 3. Should `init` without `--style` detect a runtime-style repository and suggest the style?
@@ -311,8 +312,8 @@ surprises, and it is mechanical (`migrate`'s mapping over runtime's file, sectio
 | B. Apply it automatically | `StyleBroStyle` written without being asked |
 | C. No | nothing |
 
-**Recommended: A.** The signals are cheap (init already counts both conventions) and choosing a style stays the team's
-decision.
+**Answered 2026-10-16: A** (the owner; it was the recommendation). The signals are cheap (init already counts both conventions) and choosing a style stays the team's
+decision. The owner: `init` only suggests the style in its report, it never applies it.
 
 ### 4. How should the property value be named?
 
@@ -321,7 +322,7 @@ decision.
 | **A. `microsoft`** | `<StyleBroStyle>microsoft</StyleBroStyle>` |
 | B. `dotnet-runtime` | `<StyleBroStyle>dotnet-runtime</StyleBroStyle>` |
 
-**Recommended: A** (the owner's working name, and what people call it), with the docs saying it is dotnet/runtime's
+**Answered 2026-10-16: A** (the owner; it was the recommendation): the owner's working name, and what people call it, with the docs saying it is dotnet/runtime's
 coding style. A later variant gets its own name (question 6).
 
 ### 5. How does the style follow changes to runtime's guide?
@@ -332,7 +333,7 @@ coding style. A later variant gets its own name (question 6).
 | B. Each minor's style layer may change values, behind the preset version | Changes when the team raises `StyleBroPreset` (needs a `global_level` per minor: more machinery) |
 | C. Follow in any release | Upgrading the package changes a build: breaks the versioning promise |
 
-**Recommended: A.** It matches docs/versioning.md (changing defaults is a major) with no new machinery.
+**Answered 2026-10-16: A** (the owner; it was the recommendation). It matches docs/versioning.md (changing defaults is a major) with no new machinery.
 
 ### 6. Should a "Microsoft Learn conventions" variant exist later?
 
@@ -341,7 +342,7 @@ coding style. A later variant gets its own name (question 6).
 | **A. Not now; revisit when someone asks** | `microsoft` only |
 | B. Plan it now as `<StyleBroStyle>microsoft-learn</StyleBroStyle>` | A second style to map and maintain from prose without an `.editorconfig` |
 
-**Recommended: A.** Most of what the Learn pages say matches runtime's guide; a second style can reuse the layer
+**Answered 2026-10-16: A** (the owner; it was the recommendation). Most of what the Learn pages say matches runtime's guide; a second style can reuse the layer
 mechanism when there is demand.
 
 ### 7. Ship before or after 1.0?
@@ -351,5 +352,5 @@ mechanism when there is demand.
 | **A. After G1-G3, independent of 1.0** (before 1.0: one `microsoft.1.0` layer; after: per-minor layers) | |
 | B. Only after 1.0 | |
 
-**Recommended: A.** The mechanism is the preset's, already shipped; a trial on runtime-style repositories (dotnet/aspire,
-dotnet/aspnetcore-shaped code) belongs in the "two clean trials" before it ships.
+**Answered 2026-10-16: A** (the owner; it was the recommendation). The mechanism is the preset's, already shipped; a trial on runtime-style repositories (dotnet/aspire,
+dotnet/aspnetcore-shaped code) belongs in the "two clean trials" before it ships. The owner: the work starts after the trial 24 fix PRs merge.
