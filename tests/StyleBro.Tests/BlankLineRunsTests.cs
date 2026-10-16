@@ -249,6 +249,51 @@ public class BlankLineRunsTests
         """,
         "dotnet_diagnostic.BRO1505.severity = none");
 
+    // Lua-CSharp (trial 26): the next accessor starting with an attribute list got a blank line that the same accessor
+    // without the attribute didn't, and CSharpier removed it again.
+    [Fact]
+    public Task NextAccessorWithAttributeOrModifier_NotReported() => VerifyNoDiagnosticsAsync(
+        """
+        using System.Runtime.CompilerServices;
+
+        public class C
+        {
+            private int f;
+
+            public int WithAttribute
+            {
+                get
+                {
+                    var x = f;
+                    return x;
+                }
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => f = value;
+            }
+
+            public int WithModifier
+            {
+                get
+                {
+                    var x = f;
+                    return x;
+                }
+                private set => f = value;
+            }
+
+            public event System.Action E
+            {
+                add
+                {
+                    f++;
+                }
+                [MethodImpl(MethodImplOptions.NoInlining)]
+                remove => f--;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
+
     [Fact]
     public Task OtherRulesPlaces_AreLeftToThem() => VerifyNoDiagnosticsAsync(
         """
