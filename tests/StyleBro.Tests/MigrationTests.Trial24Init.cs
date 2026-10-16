@@ -97,6 +97,11 @@ public sealed partial class MigrationTests
         counts[Conventions.OneLineBodiesKey] = new[] { 3000, 0 };
         Conventions.FoldOneLineBodies(counts);
         Assert.Equal(new[] { 0, 271 }, counts["dotnet_diagnostic.BRO1509.severity"]);
+
+        // Both keep one-line bodies: the properties' count stays.
+        counts[Conventions.OneLineBodiesKey] = new[] { 5, 5 };
+        Conventions.FoldOneLineBodies(counts);
+        Assert.Equal(new[] { 0, 271 }, counts["dotnet_diagnostic.BRO1509.severity"]);
     }
 
     [Fact]
