@@ -1501,6 +1501,15 @@ public class MemberOrderingTests
         """,
         editorConfig: "stylebro_allow_adjacent_single_line_members = " + allowed + "\n");
 
+    // Without the rules' severities (isOn), the sort adds BRO1505's blank lines, but never into a type on one line.
+    [Fact]
+    public void OneLineType_StaysOnOneLine_WithoutSeverities()
+    {
+        var type = Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseCompilationUnit("public class C { public void B() { } private int x; private int y; }").Members[0];
+        var sorted = StyleBro.Analyzers.Ordering.MemberOrdering.Sort(type, StyleBro.Analyzers.Ordering.MemberOrderOptions.Default);
+        Assert.Equal("public class C { private int x; private int y; public void B() { } }", sorted.ToFullString());
+    }
+
     [Fact]
     public Task OneLineType_StaysOnOneLine_WhenNotExpanded() => VerifyFixAsync(
         """
