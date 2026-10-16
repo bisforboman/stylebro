@@ -2942,6 +2942,26 @@ public class FixOrderTests
         "BRO1509",
         "BRO1519");
 
+    // The .NET runtime's style (Microsoft style gaps G1-G3): fields first, 's_' statics, internal fields named like private
+    // ones. The sort and the renames converge in every order.
+    [Fact]
+    public Task MicrosoftStyle_FieldsFirstAndStaticPrefixes() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int Get() => count + m_old + Total;
+            private static int count;
+            private static int m_old;
+
+            internal int Total;
+        }
+        """,
+        "stylebro_member_order_scope = fields_first\nstylebro_private_field_naming = _camelCase\nstylebro_private_static_field_naming = s_camelCase\nstylebro_private_mutable_static_field_naming = s_camelCase\nstylebro_internal_field_naming = like_private\n",
+        "BRO1001",
+        "BRO1303",
+        "BRO1307",
+        "BRO1505");
+
     /// <summary>
     /// Stands for the SDK's formatter (IDE0055, the whitespace pass of 'dotnet format') among a case's ids: a fix whose
     /// result the formatter changes back makes every run change the file.

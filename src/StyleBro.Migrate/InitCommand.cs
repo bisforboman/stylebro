@@ -484,6 +484,11 @@ internal static class InitCommand
         {
             decided[Conventions.StaticPrefixKey] = $"a naming rule requires '{prefix}', which BRO1307 keeps";
         }
+        else if (!decided.ContainsKey(Conventions.StaticPrefixKey)
+            && new[] { StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey, StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey }.FirstOrDefault(k => own.TryGetValue(k, out var v) && v.Trim() == "s_camelCase") is { } staticKey)
+        {
+            decided[Conventions.StaticPrefixKey] = $"set in .editorconfig ({staticKey} = s_camelCase)";
+        }
 
         // The casing of private constants and static readonly fields (three forms, decided apart from the list too).
         var staticCasing = KeptLines(previous, [Conventions.StaticCasingKey, $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.FieldPascalCase}.severity"], Conventions.StaticCasingWhat);
