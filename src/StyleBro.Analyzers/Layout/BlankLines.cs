@@ -153,16 +153,6 @@ internal static class BlankLines
     }
 
     /// <summary>
-    /// Whether the token ends an attribute list of the element below (not an assembly or module attribute): a comment between
-    /// the attributes and the element stays attached to them, which BRO1525 wants too (NLog: a '///' after '[InlineData]'
-    /// that BRO1602 turned into '//' got a blank line above it that nothing removed again).
-    /// </summary>
-    private static bool IsBelowAttributes(SyntaxToken previous) =>
-        previous.IsKind(SyntaxKind.CloseBracketToken)
-        && previous.Parent is AttributeListSyntax list
-        && list.Target?.Identifier.Kind() is not (SyntaxKind.AssemblyKeyword or SyntaxKind.ModuleKeyword);
-
-    /// <summary>
     /// Whether the '//' comment is in a run of comment lines directly below a line that ends a statement or a member
     /// with ';' (not a using directive or a file-scoped namespace), with a blank line after the run: it describes the code above it (eShop: a field, '// note on UTF8 here:
     /// ...', a blank line, a method). StyleCop's SA1515 and SA1512 want the blank line moved above the comment, which
@@ -247,6 +237,16 @@ internal static class BlankLines
             _ => false,
         };
     }
+
+    /// <summary>
+    /// Whether the token ends an attribute list of the element below (not an assembly or module attribute): a comment between
+    /// the attributes and the element stays attached to them, which BRO1525 wants too (NLog: a '///' after '[InlineData]'
+    /// that BRO1602 turned into '//' got a blank line above it that nothing removed again).
+    /// </summary>
+    private static bool IsBelowAttributes(SyntaxToken previous) =>
+        previous.IsKind(SyntaxKind.CloseBracketToken)
+        && previous.Parent is AttributeListSyntax list
+        && list.Target?.Identifier.Kind() is not (SyntaxKind.AssemblyKeyword or SyntaxKind.ModuleKeyword);
 
     /// <summary>
     /// Whether the comment leads a statement embedded in an 'if', 'else', loop, 'using', 'lock' or 'fixed' without
