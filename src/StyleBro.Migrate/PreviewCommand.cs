@@ -717,7 +717,7 @@ internal static class PreviewCommand
             // ItemGroup's Condition holds for both (DynamicData's '!$(IsTestProject) AND !$(IsBenchmarkProject)').
             if (File.Exists(file) && GlobalStyleCop.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(file))))
             {
-                EditFile(file, text => AddNextToStyleCop(text, $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />"));
+                EditFile(file, text => AddNextToStyleCop(text, $"<GlobalPackageReference Include=\"StyleBro.Analyzers\" Version=\"{version}\" />", always: true));
                 continue;
             }
 
@@ -846,11 +846,13 @@ internal static class PreviewCommand
     /// <see cref="AddItem"/>, except when the file's StyleCop.Analyzers reference depends on a Condition
     /// (<see cref="StyleCopSetup.ConditionalReference"/>): then the item goes right after it, in its ItemGroup, under the same
     /// Condition. DynamicData's '&lt;ItemGroup Condition="!$(IsTestProject) AND !$(IsBenchmarkProject)"&gt;' kept StyleCop
-    /// out of its tests, and StyleBro's reference in a new unconditional ItemGroup brought StyleBro into them.
+    /// out of its tests, and StyleBro's reference in a new unconditional ItemGroup brought StyleBro into them. With
+    /// <paramref name="always"/>, next to it in any case (a GlobalPackageReference: Nerdbank.Streams' list of global analyzers
+    /// got StyleBro's in a new ItemGroup at the end, trial 24).
     /// </summary>
-    public static string AddNextToStyleCop(string? text, string item)
+    public static string AddNextToStyleCop(string? text, string item, bool always = false)
     {
-        if (text is null || !StyleCopSetup.ConditionalReference(text))
+        if (text is null || (!always && !StyleCopSetup.ConditionalReference(text)))
         {
             return AddItem(text, item);
         }
@@ -957,7 +959,16 @@ internal static class PreviewCommand
         var bytes = File.Exists(file) ? File.ReadAllBytes(file) : null;
         var bom = bytes is [0xEF, 0xBB, 0xBF, ..];
         var text = bytes is null ? null : Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
-        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edit(text)), new UTF8Encoding(bom));
+        var edited = edit(text);
+
+        // Never an empty MSBuild file: one with only whitespace breaks every build below it (an untracked src/Directory.Build.props
+        // of a BOM and a line break turned up in StyleBro's own checkout during trial 24, from an unknown source).
+        if (string.IsNullOrWhiteSpace(edited) && StyleCopSetup.IsMSBuild(file))
+        {
+            return;
+        }
+
+        File.WriteAllText(file, KeepLineEndings(text ?? FolderLineEnding(file), edited), new UTF8Encoding(bom));
     }
 
     /// <summary>

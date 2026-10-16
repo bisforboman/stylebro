@@ -757,7 +757,11 @@ internal static class Migration
     /// </summary>
     public static bool HasParentProps(string props)
     {
-        for (var folder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetFullPath(props))); folder is not null; folder = Path.GetDirectoryName(folder))
+        // Not above the repository (trial 24: a clone under a folder with its own Directory.Build.props got an import of it):
+        // the build on another checkout doesn't have that file.
+        var start = Path.GetDirectoryName(Path.GetFullPath(props))!;
+        var top = FormatCommand.RepositoryRoot(start)?.TrimEnd('\\', '/');
+        for (var folder = Path.GetDirectoryName(start); folder is not null && (top is null || folder.Length >= top.Length); folder = Path.GetDirectoryName(folder))
         {
             if (File.Exists(Path.Combine(folder, "Directory.Build.props")))
             {
@@ -1012,10 +1016,25 @@ internal static class Migration
     /// </summary>
     internal static IEnumerable<string> OwnCSharpFiles(string root)
     {
-        var marked = MarkedGeneratedFolders(root);
-        return StyleCopSetup.EnumerateFiles(root, ownRoot: true).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
+        var files = StyleCopSetup.EnumerateFiles(root, ownRoot: true).ToList();
+        var marked = MarkedGeneratedFolders(root).Concat(OptOutFolders(root, files)).ToList();
+        return files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
             && (marked.Count == 0 || !marked.Any(m => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), m))));
     }
+
+    /// <summary>
+    /// The folders below the root (relative, '/'-separated) whose own .editorconfig turns every analyzer off
+    /// (<see cref="InitCommand.OptsOut"/>) or says 'generated_code = true' for its C# files: the team keeps StyleBro out of
+    /// them, so they don't vote on its conventions either (trial 24: samples/ decided "4 of 6 files sorted").
+    /// </summary>
+    internal static IEnumerable<string> OptOutFolders(string root, IEnumerable<string> files) =>
+        files.Where(f => Path.GetFileName(f) == ".editorconfig")
+            .Select(Path.GetDirectoryName)
+            .OfType<string>()
+            .Where(folder => !string.Equals(Path.GetFullPath(folder).TrimEnd('\\', '/'), Path.GetFullPath(root).TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase)
+                && OwnSettings(folder) is var own
+                && (InitCommand.OptsOut(own) || (own.TryGetValue("generated_code", out var generated) && generated.Equals("true", StringComparison.OrdinalIgnoreCase))))
+            .Select(folder => Path.GetRelativePath(root, folder).Replace('\\', '/'));
 
     /// <summary>
     /// The folders (relative, '/'-separated) the root .editorconfig marks 'generated_code = true' outside the stylebro blocks,

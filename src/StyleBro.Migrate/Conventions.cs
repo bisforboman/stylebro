@@ -139,6 +139,16 @@ internal static class Conventions
     /// <summary>Counts of target-typed 'new': ['new()', 'new ()'] (StyleCop's SA1000; no SDK option of its own). Only the migration reads it.</summary>
     public const string ImplicitNewSpacingKey = "spacing: implicit new";
 
+    /// <summary>
+    /// Method, constructor, operator and local function bodies with code, on several lines or on one ('public int Next() {
+    /// return ++count; }', trial 24: BRO1509 expanded every one). Judged apart from the properties and folded into
+    /// <see cref="OneLinePropertiesKey"/> (<see cref="FoldOneLineBodies"/>): one key can't hold two conventions.
+    /// </summary>
+    public const string OneLineBodiesKey = "one-line method bodies";
+
+    /// <summary>The part of the line-endings note about IDE0055, left out where init doesn't lower it (IDE0055 off under CSharpier).</summary>
+    public const string IdeSuggestion = " and IDE0055 to suggestion";
+
     /// <summary>What the static casing's report and '# init:' comments call it (its kept lines are found by it).</summary>
     public const string StaticCasingWhat = "private constants/static readonly fields";
 
@@ -201,7 +211,8 @@ internal static class Conventions
         new(RelativeUsingsKey, "usings inside a namespace", "warning", ("warning", "fully qualified"), ("none", "relative ('using Common;')"), Off(DiagnosticIds.QualifiedUsing)) { Unit = "using" },
         new(TypeAliasKey, "built-in type names", "warning", ("warning", "only keywords ('int')"), ("none", "framework names ('Int32')"), Off("IDE0049"), "dotnet_style_predefined_type_for_locals_parameters_members", "dotnet_style_predefined_type_for_member_access") { Unit = "file" },
         new(StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey, "empty blocks ('{ }')", "false", ("false", "on two lines"), ("true", "on one line"), $"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true") { Unit = "block" },
-        new(OneLinePropertiesKey, "block-bodied properties", "warning", ("warning", "on several lines"), ("none", "on one line"), Off(DiagnosticIds.SingleLineElement)) { Unit = "property" },
+        new(OneLinePropertiesKey, "block-bodied properties/methods", "warning", ("warning", "on several lines"), ("none", "on one line"), Off(DiagnosticIds.SingleLineElement)) { Unit = "member" },
+        new(StatementBlocksKey, "statement blocks ('if (x) { y(); }')", "warning", ("warning", "on several lines"), ("none", "on one line"), Off(DiagnosticIds.SingleLineStatementBlock)) { Unit = "block" },
         new(AccessorLayoutKey, "accessor bodies", "warning", ("warning", "laid out alike"), ("none", "one-line and multi-line mixed"), Off(DiagnosticIds.AccessorsConsistentLayout)) { Unit = "property" },
         new(AutoAccessorsKey, "auto-property accessors ('{ get; set; }')", "warning", ("warning", "on one line"), ("none", "on several lines"), Off(DiagnosticIds.AutoAccessorsOnOneLine)) { Unit = "property declaration" },
         new(RegionsKey, "'#region's inside members", "warning", ("warning", "without"), ("none", "'#region's"), Off(DiagnosticIds.NoRegionsInCodeElements)) { Unit = "region", KeepAny = true, Keeps = $"{DiagnosticIds.NoRegionsInCodeElements} would remove them" },
@@ -211,6 +222,7 @@ internal static class Conventions
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
         new(CommentAboveKey, "'//' comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeComment)) { Unit = "comment" },
         new(PeriodKey, "doc comment texts", "warning", ("warning", "ending with a period"), ("none", "without a period"), Off(DiagnosticIds.DocumentationEndsWithPeriod)) { Unit = "text" },
+        new(DocOrderKey, "doc element order (param, remarks)", "warning", ("warning", "in BRO1619's order"), ("none", "in another order"), Off(DiagnosticIds.DocumentationElementOrder)) { Unit = "doc comment" },
         new(LangwordKey, "keywords in doc comments", "warning", ("warning", "'<see langword=\"null\"/>'"), ("none", "'<c>null</c>'"), Off(DiagnosticIds.LangwordElement)) { Unit = "keyword" },
         new(NonPrivateNamingKey, "non-private fields your naming rule covers", "warning", ("warning", "named as it says"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
@@ -281,6 +293,10 @@ internal static class Conventions
         DiagnosticIds.CallChainLayout,
         DiagnosticIds.ConditionalLayout,
         DiagnosticIds.AutoAccessorsOnOneLine,
+
+        // CSharpier sorts modifiers too, in its own order: with IDE0036 on, Dawnshard's 'file static class' and 'static file
+        // class' went back and forth between the two (trial 24), and its CSharpier check failed after every 'format'.
+        "IDE0036",
     };
 
     /// <summary>
@@ -445,6 +461,17 @@ internal static class Conventions
     /// </summary>
     private const string OneLinePropertiesKey = "dotnet_diagnostic." + DiagnosticIds.SingleLineElement + ".severity";
 
+    /// <summary>BRO1508's severity: statement blocks with code ('if (x) { return; }'), on several lines or on one (trial 24).</summary>
+    private const string StatementBlocksKey = "dotnet_diagnostic." + DiagnosticIds.SingleLineStatementBlock + ".severity";
+
+    /// <summary>
+    /// BRO1619's severity: doc comments that mix the elements Visual Studio's '///' stub writes (typeparam, param, returns)
+    /// with ones that go after them (value, exception, remarks, example, seealso), in BRO1619's order or not. Spectre.Console
+    /// puts '&lt;remarks&gt;' right below the summary, and BRO1619 moved it below the params in ~40 places (trial 24). Comments with
+    /// only the stub's elements are left out: they're in its order anyway, and would outvote the habit.
+    /// </summary>
+    private const string DocOrderKey = "dotnet_diagnostic." + DiagnosticIds.DocumentationElementOrder + ".severity";
+
     /// <summary>
     /// BRO1510's severity: multi-line accessor lists whose accessors all have block bodies, laid out alike (all one-line or all
     /// multi-line) or mixed ('get { return x; }' above a multi-line 'set').
@@ -575,12 +602,13 @@ internal static class Conventions
     public static (List<string> Lines, string Report) CSharpierLines(string evidence, string root, IReadOnlyDictionary<string, string>? settings, string folder = "")
     {
         var what = folder.Length > 0 ? folder + "/" : evidence.StartsWith("../", StringComparison.Ordinal) ? "this folder" : "this repository";
-        var lines = new List<string> { $"# init: CSharpier formats {what} ({evidence}): IDE0055 and the {CSharpierRules.Length - 1} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
+        var rules = CSharpierRules.Where(r => r.StartsWith("BRO", StringComparison.Ordinal)).ToList();
+        var lines = new List<string> { $"# init: CSharpier formats {what} ({evidence}): IDE0055, IDE0036 (modifier order) and the {rules.Count} StyleBro rules for what it decides (layout, line breaks, blank lines it normalizes) are off, so the two formatters don't undo each other. To have StyleBro format instead: remove CSharpier, then these lines." };
         lines.AddRange(CSharpierRules.Select(Off));
         lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.Key} = csharpier");
         lines.Add($"{StyleBro.Analyzers.Layout.CSharpierLayout.WidthKey} = {CSharpierPrintWidth(CSharpierFolder(Path.GetFullPath(Path.Combine(root, evidence))), settings, root)}");
         lines.AddRange(CSharpierUsingLines(settings));
-        return (lines, $"  {"off",-8} CSharpier ({evidence}) -> IDE0055 and {CSharpierRules.Length - 1} layout rules are off: {string.Join(", ", CSharpierRules.Skip(1))}");
+        return (lines, $"  {"off",-8} CSharpier ({evidence}) -> IDE0055 and {rules.Count} layout rules are off: {string.Join(", ", rules)}; IDE0036 too (CSharpier orders modifiers itself)");
     }
 
     /// <summary>
@@ -699,6 +727,7 @@ internal static class Conventions
         CountInheritDoc(trees, counts, settings, documented);
         CountRelativeUsings(trees, counts);
         FoldLeadingLambdas(counts, settings);
+        FoldOneLineBodies(counts);
         CountNonPrivateNaming(trees, counts, settings);
         return counts;
     }
@@ -841,6 +870,21 @@ internal static class Conventions
         }
     }
 
+    /// <summary>BRO1509's two counts in one: see <see cref="OneLineBodiesKey"/>. The bucket is removed.</summary>
+    public static void FoldOneLineBodies(Dictionary<string, int[]> counts)
+    {
+        // BRO1509's properties and method bodies, judged apart: akka.net's 271 one-line properties sit among thousands of
+        // multi-line methods (trial 22), and a repository can write its short methods on one line and its properties not. The
+        // kind that keeps one-line bodies (clearly, or mixed) decides; otherwise the properties' count stays.
+        static bool KeepsOneLine(int[] c) => c.Sum() >= MinimumAgreeing && Winner(c[0], c[1]) != 0;
+        if (KeepsOneLine(counts[OneLineBodiesKey]) && !KeepsOneLine(counts[OneLinePropertiesKey]))
+        {
+            counts[OneLinePropertiesKey] = counts[OneLineBodiesKey];
+        }
+
+        counts.Remove(OneLineBodiesKey);
+    }
+
     /// <summary>
     /// Folds the list layouts of leading-lambda calls (counted under <see cref="LeadingLambdaBucket"/>) into their conventions,
     /// unless init allows those calls (<see cref="StyleBro.Analyzers.Readability.ParameterLayout.LeadingLambdaKey"/> set to true, or
@@ -911,6 +955,7 @@ internal static class Conventions
         counts[InterfaceAccessKey] = new int[2];
         counts[BinaryOperatorSpacingKey] = new int[3];
         counts[ImplicitNewSpacingKey] = new int[2];
+        counts[OneLineBodiesKey] = new int[2];
         foreach (var key in LeadingLambdaKeys)
         {
             counts[key + LeadingLambdaBucket] = new int[2];
@@ -1216,7 +1261,7 @@ internal static class Conventions
                 $"{EndOfLineKey} = unset",
                 "dotnet_diagnostic.IDE0055.severity = suggestion",
             ],
-            $"Line endings: {why}. Set end_of_line = unset for C# files{(file is null ? string.Empty : $" in {file}")} and IDE0055 to suggestion, so neither 'format' nor the build touches endings. To settle it: {settle}.");
+            $"Line endings: {why}. Set end_of_line = unset for C# files{(file is null ? string.Empty : $" in {file}")}{IdeSuggestion}, so neither 'format' nor the build touches endings. To settle it: {settle}.");
     }
 
     /// <summary>
@@ -1729,6 +1774,13 @@ internal static class Conventions
                     Add(StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey, Line(emptyBlock.OpenBraceToken.SpanStart) == Line(emptyBlock.CloseBraceToken.SpanStart));
                     break;
 
+                case BlockSyntax { Statements: [var lone] } oneStatement when oneStatement.Parent is not (AnonymousFunctionExpressionSyntax or AccessorDeclarationSyntax)
+                    && Line(lone.SpanStart) == Line(lone.Span.End):
+                    // One statement that fits a line, in a body ('int Next() { return ++count; }', BRO1509's) or a statement's
+                    // block ('if (x) { return; }', BRO1508's): on the braces' line or not. Longer blocks can't be one-line.
+                    Add(oneStatement.Parent is BaseMethodDeclarationSyntax or LocalFunctionStatementSyntax ? OneLineBodiesKey : StatementBlocksKey, Line(oneStatement.OpenBraceToken.SpanStart) == Line(oneStatement.CloseBraceToken.SpanStart));
+                    break;
+
                 case BasePropertyDeclarationSyntax { AccessorList: { Accessors.Count: > 0 } list } property
                     when list.Accessors.All(a => a.Body is null && a.ExpressionBody is null && a.AttributeLists.Count == 0):
                     // BRO1527's places: what it would put on one line, or what already is (from the name to the '}').
@@ -2048,8 +2100,27 @@ internal static class Conventions
                 counts[PeriodKey][0] += documentation.Content.OfType<XmlElementSyntax>().Count(e => PeriodElements.Contains(e.StartTag.Name.LocalName.ValueText)
                     && e.Content.LastOrDefault(c => c is not XmlTextSyntax t || t.TextTokens.Any(token => token.Text.Trim().Length > 0)) is XmlTextSyntax last
                     && string.Concat(last.TextTokens.Select(t => t.Text)).TrimEnd().EndsWith('.'));
-                counts[LangwordKey][1] += StyleBro.Analyzers.Documentation.DocumentationStyle.GetFindings(documentation, text).Count(f => f.Id == DiagnosticIds.LangwordElement);
+                var findings = StyleBro.Analyzers.Documentation.DocumentationStyle.GetFindings(documentation, text).ToList();
+                counts[LangwordKey][1] += findings.Count(f => f.Id == DiagnosticIds.LangwordElement);
                 counts[LangwordKey][0] += documentation.DescendantNodes().OfType<XmlEmptyElementSyntax>().Count(e => e.Name.LocalName.ValueText == "see" && e.Attributes.Any(a => a.Name.LocalName.ValueText == "langword"));
+
+                // BRO1619's places (DocOrderKey): the stub's elements (ranks 1-3) next to later ones (4 on), in its order or reported.
+                var ranks = documentation.Content
+                    .Select(n => n switch { XmlElementSyntax e => e.StartTag.Name.LocalName.ValueText, XmlEmptyElementSyntax e => e.Name.LocalName.ValueText, _ => null })
+                    .Select(n => n is null ? -1 : Array.IndexOf(StyleBro.Analyzers.Documentation.DocumentationStyle.ElementOrder, n))
+                    .Where(r => r > 0)
+                    .ToList();
+                if (ranks.Any(r => r <= 3) && ranks.Any(r => r >= 4))
+                {
+                    if (findings.Any(f => f.Id == DiagnosticIds.DocumentationElementOrder))
+                    {
+                        counts[DocOrderKey][1]++;
+                    }
+                    else if (ranks.SequenceEqual(ranks.Order()))
+                    {
+                        counts[DocOrderKey][0]++;
+                    }
+                }
             }
         }
 
@@ -2292,6 +2363,17 @@ internal static class Conventions
             }
 
             report.Add($"  {tag,-8} {convention.What}: {found} -> {verdict}");
+
+            // BRO1519 leaves the blank line after a member's '}' to BRO1505 only while BRO1505 is on: with it off for compact
+            // members, BRO1519 added one after every method body anyway (trial 24). No switch for those alone: it goes off too.
+            var afterBrace = Off(DiagnosticIds.BlankLineAfterCloseBrace);
+            if (convention.Key == SeparationKey && tag == "off" && !IsSet(afterBrace))
+            {
+                lines.Add($"# init: {convention.What}: with {DiagnosticIds.ElementsSeparatedByBlankLine} off, {DiagnosticIds.BlankLineAfterCloseBrace} would still add a blank line after a member's '}}', so it is off too. To turn it on: remove the next line.");
+                lines.Add(afterBrace);
+                report.Add($"  {"off",-8} '}}' followed by a member: {DiagnosticIds.BlankLineAfterCloseBrace} is off too (it would add the blank line {DiagnosticIds.ElementsSeparatedByBlankLine} no longer asks for)");
+            }
+
             JsonReport.Add("conventions", new JsonObject
             {
                 ["key"] = convention.Key,
