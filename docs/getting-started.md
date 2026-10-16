@@ -531,12 +531,15 @@ A few settings work a little differently:
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings (each run between `#if`/`#endif` lines on its own): sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 | Spacing | `if (x)` or `if(x)`; spaces inside parentheses, after casts, inside call and parameter lists (mixed: IDE0055 off) | SDK formatter (IDE0055) | `csharp_space_after_keywords_in_control_flow_statements`, `csharp_space_between_parentheses`, `csharp_space_after_cast`, `csharp_space_between_method_call_parameter_list_parentheses`, `csharp_space_between_method_declaration_parameter_list_parentheses` |
+| Statements after blocks | statements right after a block's `}` with or without a blank line above (only `without` is written; mixed: the default stays) | [BRO1519](rules/BRO1519.md) | `dotnet_diagnostic.BRO1519.severity` |
+| Nested `if`s | `if`s nested alone in another `if` that BRO1149 would merge (3 turn the rule off) | [BRO1149](rules/BRO1149.md) | `dotnet_diagnostic.BRO1149.severity` |
+| Namespace braces | files whose block namespace has its `{` where `csharp_new_line_before_open_brace` doesn't put it (`types` covers namespaces): when most do, IDE0055 is off until you decide (the report says how many files would change) | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
 | Member separation | neighbouring members that need a blank line, with or without one (without: [BRO1519](rules/BRO1519.md) goes off too, else it adds the blank line after a member's `}`) | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 | Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |
 | Blank line above comments | `//` comments right below code or after a blank line | [BRO1504](rules/BRO1504.md) | `dotnet_diagnostic.BRO1504.severity` |
 | Doc comment periods | summary, param, returns, ... texts ending with a period or not | [BRO1603](rules/BRO1603.md) | `dotnet_diagnostic.BRO1603.severity` |
-| Doc element order | doc comments with `<typeparam>`/`<param>`/`<returns>` and later elements (`<exception>`, `<remarks>`, ...): in BRO1619's order or another | [BRO1619](rules/BRO1619.md) | `dotnet_diagnostic.BRO1619.severity` |
+| Doc element order | doc comments with `<typeparam>`/`<param>`/`<returns>` and later elements (`<exception>`, `<remarks>`, ...): in BRO1619's order or another; with fewer than 3 of those, the comments with only `<typeparam>`/`<param>`/`<returns>` decide | [BRO1619](rules/BRO1619.md) | `dotnet_diagnostic.BRO1619.severity` |
 | Keywords in doc comments | `<see langword="null"/>` or `<c>null</c>` | [BRO1618](rules/BRO1618.md) | `dotnet_diagnostic.BRO1618.severity` |
 | Non-private field names | public, internal and protected fields an enforced naming rule (`dotnet_naming_rule.*`) covers: named as it says or not (a rule your code doesn't follow turns BRO1306 off) | [BRO1306](rules/BRO1306.md) | `dotnet_diagnostic.BRO1306.severity` |
 | Blank line below doc comments | doc comments right above their element or with a blank line between | [BRO1511](rules/BRO1511.md) | `dotnet_diagnostic.BRO1511.severity` |
@@ -548,7 +551,7 @@ The keys are described in [Settings](configuration.md). `init` prints each verdi
 (RealWorld):
 
 ```
-Conventions in the code (judged from 3 places: all must agree below 10, 75% from 10 on).
+Conventions in the code (a convention needs 3 places or more: below 10 they must all agree, from 10 on 75% of them).
   off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;
   mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):
   too few  private fields: 2 places -> default stays (camelCase)
@@ -705,7 +708,8 @@ Remove the StyleCop reference and add `StyleBro.Analyzers` instead, as in [path 
 for both package ids, `StyleCop.Analyzers` and the prerelease `StyleCop.Analyzers.Unstable`, and for a
 `GlobalPackageReference` in `Directory.Packages.props` (central package management): replace it with
 `<GlobalPackageReference Include="StyleBro.Analyzers" Version="..." />`. `stylecop.json` and the StyleCop suppressions
-can stay; StyleBro ignores them.
+can stay; StyleBro ignores them. `stylecop.json` can also go, with its `<AdditionalFiles>` item: the block
+records its settings for later runs.
 
 ### 4. Run stylebro-migrate format
 

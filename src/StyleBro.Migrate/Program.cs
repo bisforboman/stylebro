@@ -238,7 +238,10 @@ internal static class Program
         // SSH.NET kept its stylecop.json without a word: StyleBro never reads it, the settings are in the block now.
         if (setup.Sources.Where(s => Path.GetFileName(s).Equals("stylecop.json", StringComparison.OrdinalIgnoreCase)).ToList() is { Count: > 0 } styleCopJson)
         {
-            Console.WriteLine($"{string.Join(", ", styleCopJson.Select(s => s.Replace('\\', '/')))}: StyleBro doesn't read {(styleCopJson.Count == 1 ? "it" : "them")} (the settings are in the block now). Once StyleCop.Analyzers is gone, remove {(styleCopJson.Count == 1 ? "it" : "them")} and the <AdditionalFiles> item{(styleCopJson.Count == 1 ? string.Empty : "s")} naming {(styleCopJson.Count == 1 ? "it" : "them")}.");
+            // Trial 25: after the swap the report still said "once StyleCop.Analyzers is gone, remove it", and the stylecop.json
+            // settings were lost when it was; the block records them now, so the file can go.
+            var it = styleCopJson.Count == 1 ? "it" : "them";
+            Console.WriteLine($"{string.Join(", ", styleCopJson.Select(s => s.Replace('\\', '/')))}: StyleBro doesn't read {it}; the settings are in the block now, which also records them for later runs. {(setup.VersionRecorded ? "StyleCop.Analyzers is gone, so" : "Once StyleCop.Analyzers is gone,")} {it} can go, with the <AdditionalFiles> item{(styleCopJson.Count == 1 ? string.Empty : "s")} naming {it}.");
         }
 
         if (suppressions.NotCarried > 0)
@@ -307,6 +310,7 @@ internal static class Program
                 continue;
             }
 
+            var hidden = Migration.HiddenPropsNote(props);
             if (write)
             {
                 PreviewCommand.EditFile(props, _ => disabled);
@@ -315,6 +319,11 @@ internal static class Program
             else
             {
                 Console.WriteLine($"--write also turns the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings replace it.");
+            }
+
+            if (hidden is not null)
+            {
+                Console.WriteLine(hidden);
             }
         }
 
@@ -410,7 +419,7 @@ internal static class Program
                 folders.Count > setup.FoldersWithout.Count
                     ? $"{tool} runs everywhere except {Names(setup.FoldersWithout)}: the settings apply where it runs, with the rules {tool} has on there."
                     : $"{tool} runs only in {Names(folders)}: the settings apply there, with the rules {tool} has on there.",
-                $"No {tool} in {Names(setup.FoldersWithout)}: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
+                $"No {tool} in {Names(setup.FoldersWithout)}: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'stylebro-migrate format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.",
             }
             : new List<string>();
         lines.AddRange(setup.Warnings.Select(w => "Warning: " + w));
