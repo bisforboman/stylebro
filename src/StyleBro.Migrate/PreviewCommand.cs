@@ -147,7 +147,8 @@ internal static class PreviewCommand
         var prefix = source == folder ? string.Empty : Git(folder, "rev-parse", "--show-prefix").Output.Trim();
         patch ??= DefaultPatchPath(folder);
         var temp = Directory.CreateTempSubdirectory("stylebro-preview-").FullName;
-        var copy = Path.Combine(temp, Path.GetFileName(source.TrimEnd('\\', '/')));
+        var outside = FormatCommand.OutsideCompile(source);
+        var copy = CopyLocation(temp, source, outside);
         var target = Path.GetFullPath(Path.Combine(copy, prefix, File.Exists(path) ? Path.GetFileName(path) : string.Empty));
         using var log = new StreamWriter(Path.Combine(temp, "preview.log")) { AutoFlush = true };
         var tail = new Queue<string>();
@@ -199,6 +200,8 @@ internal static class PreviewCommand
         }
 
         var ok = false;
+        var keptFile = Path.Combine(temp, "kept.tsv");
+        var keptVariable = Environment.GetEnvironmentVariable(StyleBro.Analyzers.KeptFinding.Variable);
 
         // Ctrl+C ends the process without the finally below: the copy goes then too (unless --keep).
         void Cancelled(object? sender, ConsoleCancelEventArgs e)
@@ -218,6 +221,7 @@ internal static class PreviewCommand
         {
             var ignoredTracked = new List<string>();
             Step($"Copying the repository to {copy}", () => ignoredTracked = Copy(source, copy));
+            CopyOutside(source, copy, temp, outside);
             if (IgnoredNuGetConfigNote(source, copy) is { } nuGetConfig)
             {
                 notes.Add(nuGetConfig);
@@ -285,10 +289,19 @@ internal static class PreviewCommand
             var reportFile = Path.Combine(reportFolder, "format-report.json");
             var changed = new List<bool>();
             var tree = Tree(copy);
+
+            // CSharpier where the repository uses it, as 'stylebro-migrate format' runs it (whole folders where it changes nothing else).
+            var formatRoot = File.Exists(target) ? FormatCommand.WorkingRoot(target) : target;
+            var csharpier = CSharpierStep.Find(formatRoot);
+            var unformatted = csharpier is null ? null : CSharpierStep.Unformatted(csharpier, formatRoot);
+
+            // The findings the last run's fixes kept: 'format' baselines them after a clean run, so the patch does too (trial 25).
+            Environment.SetEnvironmentVariable(StyleBro.Analyzers.KeptFinding.Variable, keptFile);
             for (var run = 1; run <= MaxRuns; run++)
             {
                 var code = 0;
                 var runArgs = run == 1 ? formatArgs.Concat(new[] { "--report", reportFolder }) : FormatCommand.NextRun(formatArgs.ToArray());
+                File.Delete(keptFile);
                 Step($"Format run {run}", () => code = format(runArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
 
                 if (code != 0)
@@ -303,12 +316,11 @@ internal static class PreviewCommand
 
                 var next = Tree(copy);
 
-                // CSharpier on the files the run changed, as 'stylebro-migrate format' runs it where the repository uses it.
-                var formatRoot = File.Exists(target) ? FormatCommand.WorkingRoot(target) : target;
-                if (next != tree && CSharpierStep.Find(formatRoot) is { } csharpier
+                // CSharpier on the files the run changed.
+                if (next != tree && csharpier is not null
                     && CSharpierStep.InScope(csharpier, formatRoot, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.GetFullPath(Path.Combine(copy, f.Trim())))) is { Count: > 0 } pretty)
                 {
-                    Step($"CSharpier on {pretty.Count} file{(pretty.Count == 1 ? string.Empty : "s")}", () => CSharpierStep.Run(csharpier, "format", pretty).Output.ForEach(Log));
+                    Step($"CSharpier on {pretty.Count} file{(pretty.Count == 1 ? string.Empty : "s")}", () => CSharpierStep.Run(csharpier, "format", CSharpierStep.Arguments(csharpier, formatRoot, pretty, unformatted)).Output.ForEach(Log));
                     next = Tree(copy);
                 }
 
@@ -321,14 +333,23 @@ internal static class PreviewCommand
                 }
             }
 
+            // After a clean last run, its kept findings go into the baseline the build reads, as 'format' puts them.
+            var kept = FormatCommand.ReadKept(keptFile, copy, copy);
+            var keptLines = changed[^1] ? [] : FormatCommand.KeptSummary(kept, formatRoot);
+            if (!changed[^1] && FormatCommand.BaselineKept(formatRoot, kept) is { } baselined)
+            {
+                keptLines.Add(baselined.Replace("Baseline: ", "Baseline (in the patch): ", StringComparison.Ordinal));
+                Tree(copy);
+            }
+
             // The packages.config projects the note says are left out stay out: no changes in their folders (the settings step
             // installed the package there, and the whitespace pass formatted their files).
             var leftOut = packagesConfig.Select(p => (prefix + Path.GetDirectoryName(p)!.Replace('\\', '/')).Trim('/')).Where(d => d.Length > 0).Distinct().ToList();
             bool IsLeftOut(string file) => leftOut.Any(d => file.StartsWith(d + "/", StringComparison.OrdinalIgnoreCase));
 
             // Lock files the copy's unlocked restore updated aren't formatting (the patch has them, as the user's restore will).
-            var files = Changed(copy, configured).Where(f => !IsLeftOut(f.Key) && !f.Key.EndsWith("packages.lock.json", StringComparison.OrdinalIgnoreCase)).ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal);
-            var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetFileName(temp) + "/" + Path.GetFileName(copy), files.Keys, f => WhitespaceOnly(copy, configured, f));
+            var files = Changed(copy, configured).Where(f => !IsLeftOut(f.Key) && !f.Key.EndsWith("packages.lock.json", StringComparison.OrdinalIgnoreCase) && !f.Key.EndsWith(Analyzers.Baseline.Baseline.FileName, StringComparison.OrdinalIgnoreCase)).ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal);
+            var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetRelativePath(Path.GetDirectoryName(temp)!, copy).Replace('\\', '/'), files.Keys, f => WhitespaceOnly(copy, configured, f));
             JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
             JsonReport.Set("clean", !changed[^1]);
@@ -338,6 +359,7 @@ internal static class PreviewCommand
                 Console.WriteLine(line);
             }
 
+            keptLines.ForEach(Console.WriteLine);
             GitChecked(copy, ["diff", "--cached", "--ignore-submodules", "--output=" + patch, baseline, "--", ".", .. leftOut.Select(d => $":(exclude){d}/")]);
             JsonReport.Set("patch", patch);
             var lines = File.Exists(patch) ? File.ReadLines(patch).Count() : 0;
@@ -363,6 +385,7 @@ internal static class PreviewCommand
         }
         finally
         {
+            Environment.SetEnvironmentVariable(StyleBro.Analyzers.KeptFinding.Variable, keptVariable);
             Console.CancelKeyPress -= Cancelled;
             Console.WriteLine($"Done in {Elapsed(clock.Elapsed)}.");
             log.Dispose();
@@ -385,6 +408,39 @@ internal static class PreviewCommand
         Directory.EnumerateFiles(source).Select(Path.GetFileName).OfType<string>().FirstOrDefault(f => string.Equals(f, "nuget.config", StringComparison.OrdinalIgnoreCase) && !File.Exists(Path.Combine(copy, f))) is { } name
             ? $"Not copied: {name} (git ignores it). If the copy's restore fails (NU1101, NU1102), the package sources only it names are why: commit them in a nuget.config, or run 'init --write' and 'format' on the repository itself."
             : null;
+
+    /// <summary>
+    /// Where the copy of <paramref name="source"/> goes in <paramref name="temp"/>: below as many folders (named like the
+    /// source's parents) as the files its projects compile from outside it go up (<paramref name="outside"/>,
+    /// <see cref="FormatCommand.OutsideCompile"/>), so <see cref="CopyOutside"/> puts those at the same relative place.
+    /// Speckle compiles a sibling repository's files: without them the copy didn't compile, and IDE0005 removed usings.
+    /// </summary>
+    public static string CopyLocation(string temp, string source, IReadOnlyCollection<string> outside)
+    {
+        var name = Path.GetFileName(Path.TrimEndingDirectorySeparator(source));
+        var up = outside.Select(f => Path.GetRelativePath(source, f).Split('\\', '/').TakeWhile(p => p == "..").Count()).DefaultIfEmpty(0).Max();
+        var parents = new List<string>();
+        for (var folder = Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(source)); parents.Count < up && folder is not null && Path.GetFileName(folder) is { Length: > 0 } parent; folder = Path.GetDirectoryName(folder))
+        {
+            parents.Insert(0, parent);
+        }
+
+        return Path.Combine([temp, .. parents, name]);
+    }
+
+    /// <summary>Copies the files the projects compile from outside <paramref name="source"/> next to its <paramref name="copy"/>, where they land inside <paramref name="temp"/>.</summary>
+    public static void CopyOutside(string source, string copy, string temp, IEnumerable<string> outside)
+    {
+        var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(temp)) + Path.DirectorySeparatorChar;
+        foreach (var file in outside)
+        {
+            var to = Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(source, file)));
+            if (to.StartsWith(top, StringComparison.OrdinalIgnoreCase) && File.Exists(file))
+            {
+                CopyFile(file, to);
+            }
+        }
+    }
 
     /// <summary>
     /// Copies a repository: git's tracked and untracked, not ignored files ('git ls-files -co --exclude-standard'), else

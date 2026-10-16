@@ -243,10 +243,15 @@ public sealed partial class MigrationTests
     {
         // CommunityToolkit: 2 of 21 checks found something after the first run, and all 21 runs were made again.
         var finding = Path.Combine(root, "src", "A.cs") + "(1,7): warning BRO1001: Sort [" + Path.Combine(root, "A.csproj") + "]";
-        Assert.Equal((true, null), FormatCommand.AfterCheck(false, 0, [], [], root));
-        Assert.Equal(["src/A.cs"], FormatCommand.AfterCheck(false, FormatCommand.NotCleanExitCode, [finding], [], root).Only);
-        Assert.Equal((false, null), FormatCommand.AfterCheck(true, 0, [], [], root)); // an earlier run changed its files
-        Assert.Equal((false, null), FormatCommand.AfterCheck(false, 1, ["Unhandled exception"], [], root)); // the check itself failed
+        Assert.Equal((true, null), FormatCommand.AfterCheck([], 0, [], [], root));
+        Assert.Equal(["src/A.cs"], FormatCommand.AfterCheck([], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
+        Assert.Equal((false, null), FormatCommand.AfterCheck([], 1, ["Unhandled exception"], [], root)); // the check itself failed
+
+        // An earlier run changed files it formats (trial 25): a clean check still replays; findings only there run nothing
+        // (the earlier run fixed the same code; the next run checks again); others run with the changed files too.
+        Assert.Equal((true, null), FormatCommand.AfterCheck(["src/A.cs"], 0, [], [], root));
+        Assert.Equal([], FormatCommand.AfterCheck(["src/A.cs"], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
+        Assert.Equal(["src/A.cs", "src/B.cs"], FormatCommand.AfterCheck(["src/B.cs"], FormatCommand.NotCleanExitCode, [finding], [], root).Only);
     }
 
     [Fact]

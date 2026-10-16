@@ -142,7 +142,7 @@ public sealed partial class MigrationTests
         // "style and analyzer fixes still run there".
         Write("samples/.editorconfig", "[*.cs]\ndotnet_analyzer_diagnostic.severity = none\n");
         Write("samples/Demo/Demo.cs", "class Demo { }\n");
-        Assert.Equal("No whitespace pass: samples/: its .editorconfig turns every analyzer off, so 'format' leaves it alone.", FormatCommand.NoWhitespaceLine(root, ["samples/Demo/"]));
+        Assert.Equal("Whitespace pass leaves out: samples/: its .editorconfig turns every analyzer off, so 'format' leaves it alone.", FormatCommand.NoWhitespaceLine(root, ["samples/Demo/"]));
     }
 
     [Fact]

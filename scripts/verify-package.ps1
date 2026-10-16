@@ -102,6 +102,12 @@ try {
     Migrate @('baseline', $repo, '--project', 'src/App/App.csproj')
     Check (Test-Path (Join-Path $repo 'stylebro.baseline')) 'stylebro-migrate baseline wrote stylebro.baseline'
     Check (-not ((Build) -contains 'BRO1106 Old.cs')) 'the baselined violation is not reported'
+    # A relative <StyleBroBaseline> (docs/baseline.md's form, eng/ next to src/) is found above the project too (trial 25).
+    $eng = Join-Path $repo 'eng'
+    New-Item -ItemType Directory -Force $eng | Out-Null
+    Move-Item (Join-Path $repo 'stylebro.baseline') (Join-Path $eng 'stylebro.baseline')
+    Check (-not ((Build @('-p:StyleBroBaseline=eng/stylebro.baseline')) -contains 'BRO1106 Old.cs')) 'a relative StyleBroBaseline is found in a folder above the project'
+    Move-Item (Join-Path $eng 'stylebro.baseline') (Join-Path $repo 'stylebro.baseline')
     Add-Content (Join-Path $app 'Old.cs') "`ninternal class Newer`n{`n    public string Name = `"`";`n}`n"
     Check ((Build) -contains 'BRO1106 Old.cs') 'a new violation in the same file is reported'
 

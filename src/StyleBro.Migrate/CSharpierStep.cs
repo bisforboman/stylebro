@@ -140,8 +140,63 @@ internal static class CSharpierStep
         + "e.g. IDE0036's modifier order), or set the rule that changes those lines to none.";
 
     /// <summary>
-    /// Runs CSharpier's <paramref name="verb"/> on <paramref name="files"/> (full paths, already <see cref="InScope"/>); the exit
-    /// code (the first that isn't 0) and the output. Restores the tool first, once per process.
+    /// The files (full paths, any kind CSharpier checks) under the tool's folders that CSharpier would change now, from one
+    /// 'check' of the folders (fast: a file named on the command line costs ~80 ms, a folder's ~1 s for hundreds of files), or
+    /// null when the check failed otherwise. <see cref="Arguments"/> leaves their folders to explicit file names.
+    /// </summary>
+    public static HashSet<string>? Unformatted(Tool tool, string root)
+    {
+        var (code, output) = Run(tool, "check", Folders(tool, root));
+        var failed = Failures(output).Select(f => Path.GetFullPath(Path.Combine(tool.Folder, f))).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return code == 0 || failed.Count > 0 ? failed : null;
+    }
+
+    /// <summary>
+    /// What to give CSharpier for <paramref name="files"/> (full paths) when <paramref name="unformatted"/> (<see cref="Unformatted"/>)
+    /// is known: for each file the highest folder up to its scope's that holds no unformatted file (all CSharpier would
+    /// change there is ours), else the file itself; folders and files under another one given once. Without it, the files.
+    /// </summary>
+    public static List<string> Arguments(Tool tool, string root, IReadOnlyList<string> files, IReadOnlySet<string>? unformatted)
+    {
+        if (unformatted is null)
+        {
+            return files.ToList();
+        }
+
+        bool Clean(string folder) => !unformatted.Any(u => u.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        var chosen = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in files)
+        {
+            var relative = Path.GetRelativePath(top, file).Replace('\\', '/');
+            var scope = tool.Scopes.Where(s => s.Length == 0 || relative.StartsWith(s + "/", StringComparison.OrdinalIgnoreCase)).OrderBy(s => s.Length).FirstOrDefault();
+            var limit = scope is null ? Path.GetDirectoryName(file)! : scope.Length == 0 ? top : Path.Combine(top, scope.Replace('/', Path.DirectorySeparatorChar));
+            var best = unformatted.Contains(file) ? file : null;
+            for (var folder = Path.GetDirectoryName(file); best != file && folder is not null && folder.Length >= limit.Length; folder = Path.GetDirectoryName(folder))
+            {
+                if (Clean(folder))
+                {
+                    best = folder;
+                }
+            }
+
+            chosen.Add(best ?? file);
+        }
+
+        return chosen.Where(c => !chosen.Any(o => o != c && c.StartsWith(o + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))).ToList();
+    }
+
+    /// <summary>The paths CSharpier's output says it would change ('Error ./src/A.cs - Was not formatted.'), as it prints them.</summary>
+    public static List<string> Failures(IEnumerable<string> output) =>
+        output.Select(l => Regex.Match(l, "^Error (?<file>.+?) - Was not formatted")).Where(m => m.Success).Select(m => m.Groups["file"].Value).Distinct().ToList();
+
+    /// <summary>The folders the tool formats under <paramref name="root"/> (full paths).</summary>
+    private static List<string> Folders(Tool tool, string root) =>
+        tool.Scopes.Select(s => Path.GetFullPath(Path.Combine(root, s))).Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+    /// <summary>
+    /// Runs CSharpier's <paramref name="verb"/> on <paramref name="files"/> (full paths of files or folders, files already
+    /// <see cref="InScope"/>); the exit code (the first that isn't 0) and the output. Restores the tool first, once per process.
     /// </summary>
     public static (int Code, List<string> Output) Run(Tool tool, string verb, IReadOnlyList<string> files)
     {
@@ -172,26 +227,30 @@ internal static class CSharpierStep
     /// --verify-no-changes: what CSharpier's check says about the C# files it formats under <paramref name="root"/> (or
     /// <paramref name="files"/> only), or null when they're as it formats them (or it doesn't format the repository).
     /// </summary>
-    public static string? CheckLine(string root, IEnumerable<string>? files = null)
+    public static string? CheckLine(string root, IEnumerable<string>? files = null, Action<string>? log = null)
     {
         if (Find(root) is not { } tool)
         {
             return null;
         }
 
-        var checkedFiles = InScope(tool, root, files ?? StyleCopSetup.EnumerateFiles(root).Select(Path.GetFullPath));
+        // The whole repository: its folders, one options lookup each (Speckle: 612 files named one by one took 85 s, the
+        // folder 1.7 s). Only C# files count: CSharpier 1.x checks XML files too (a nuget.config's line endings).
+        var checkedFiles = files is null ? Folders(tool, root) : InScope(tool, root, files);
         if (checkedFiles.Count == 0)
         {
             return null;
         }
 
+        log?.Invoke($"CSharpier: checking {(files is null ? "the C# files it formats" : $"{checkedFiles.Count} file{(checkedFiles.Count == 1 ? string.Empty : "s")}")}...");
         var (code, output) = Run(tool, "check", checkedFiles);
-        if (code == 0)
+        var all = Failures(output);
+        var failed = all.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(f => f.Replace('\\', '/').TrimStart('.', '/')).ToList();
+        if (code == 0 || (failed.Count == 0 && all.Count > 0))
         {
             return null;
         }
 
-        var failed = output.Select(l => Regex.Match(l, "^Error (?<file>.+?) - Was not formatted")).Where(m => m.Success).Select(m => m.Groups["file"].Value.Replace('\\', '/').TrimStart('.', '/')).Distinct().ToList();
         return failed.Count == 0
             ? $"Not clean: CSharpier's check failed (exit code {code}): {string.Join(" ", output.Where(l => l.Trim().Length > 0).Take(3).Select(l => l.Trim()))}"
             : $"Not clean: CSharpier would change {failed.Count} file{(failed.Count == 1 ? string.Empty : "s")} ({string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}). "

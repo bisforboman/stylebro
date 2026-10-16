@@ -154,8 +154,7 @@ public sealed partial class MigrationTests
         Assert.Equal(
             new[]
             {
-                $"{Path.Combine(root, "App", "App.csproj")} {FormatCommand.WorkingFolderOption} {root} --include Shared/S.cs",
-                $"{Path.Combine(root, "App", "App.csproj")} --include A.cs",
+                $"{Path.Combine(root, "App", "App.csproj")} {FormatCommand.WorkingFolderOption} {root} --include Shared/S.cs App/A.cs",
             },
             calls.Select(c => string.Join(" ", c)));
     }
