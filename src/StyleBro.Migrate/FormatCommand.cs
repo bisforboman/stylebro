@@ -2370,7 +2370,7 @@ internal static class FormatCommand
         // CompilerGeneratedFilesOutputPath there): in that folder, the build rewrites it.
         if (Regex.IsMatch(build, @"<EmitCompilerGeneratedFiles>\s*true\s*<", RegexOptions.IgnoreCase))
         {
-            var emitted = Regex.Matches(build, @"<CompilerGeneratedFilesOutputPath>(?<path>[^<]*)<", RegexOptions.IgnoreCase)
+            var emitted = Regex.Matches(build, "<CompilerGeneratedFilesOutputPath>(?<path>[^<]*)<", RegexOptions.IgnoreCase)
                 .Select(m => Regex.Replace(m.Groups["path"].Value, @"\$\([^)]*\)", string.Empty).Trim().TrimEnd('/', '\\'))
                 .Select(p => p[(p.LastIndexOfAny(['/', '\\']) + 1)..])
                 .Where(p => p.Length > 0)
