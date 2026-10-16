@@ -171,6 +171,7 @@ internal static class CSharpierStep
             var relative = Path.GetRelativePath(top, file).Replace('\\', '/');
             var scope = tool.Scopes.Where(s => s.Length == 0 || relative.StartsWith(s + "/", StringComparison.OrdinalIgnoreCase)).OrderBy(s => s.Length).FirstOrDefault();
             var limit = scope is null ? Path.GetDirectoryName(file)! : scope.Length == 0 ? top : Path.Combine(top, scope.Replace('/', Path.DirectorySeparatorChar));
+
             // An unformatted file's own folders aren't clean: it goes alone.
             string? best = null;
             for (var folder = Path.GetDirectoryName(file); folder is not null && folder.Length >= limit.Length; folder = Path.GetDirectoryName(folder))
@@ -202,10 +203,6 @@ internal static class CSharpierStep
     /// <summary>The paths CSharpier's output says it would change ('Error ./src/A.cs - Was not formatted.'), as it prints them.</summary>
     public static List<string> Failures(IEnumerable<string> output) =>
         output.Select(l => Regex.Match(l, "^Error (?<file>.+?) - Was not formatted")).Where(m => m.Success).Select(m => m.Groups["file"].Value).Distinct().ToList();
-
-    /// <summary>The folders the tool formats under <paramref name="root"/> (full paths).</summary>
-    private static List<string> Folders(Tool tool, string root) =>
-        tool.Scopes.Select(s => Path.GetFullPath(Path.Combine(root, s))).Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
     /// <summary>
     /// Runs CSharpier's <paramref name="verb"/> on <paramref name="files"/> (full paths of files or folders, files already
@@ -267,6 +264,10 @@ internal static class CSharpierStep
             : $"Not clean: CSharpier would change {failed.Count} file{(failed.Count == 1 ? string.Empty : "s")} ({string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}). "
                 + "'stylebro-migrate format' runs it on the files it changes; for the others run 'dotnet csharpier format' on them.";
     }
+
+    /// <summary>The folders the tool formats under <paramref name="root"/> (full paths).</summary>
+    private static List<string> Folders(Tool tool, string root) =>
+        tool.Scopes.Select(s => Path.GetFullPath(Path.Combine(root, s))).Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
     private static IEnumerable<string> Above(string root)
     {
