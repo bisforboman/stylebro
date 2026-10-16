@@ -418,6 +418,7 @@ internal static class FormatCommand
             }
 
             var target = workspace is null ? NearestProject(Path.GetDirectoryName(full)!, repository) : Path.GetFullPath(workspace, currentDirectory);
+
             // A solution's files: the folder that holds all its projects (trial 26: 'src/NLog.sln --files tests/...' said the
             // test file "isn't under src").
             var folder = target is null ? null : Directory.Exists(target) ? target : WorkingRoot(target);
@@ -3305,6 +3306,38 @@ internal static class FormatCommand
     internal static int RunDotnet(string directory, IEnumerable<string> arguments, Action<string> output) => Dotnet(directory, null, arguments, output);
 
     /// <summary>
+    /// The lines of the candidate C# files under <paramref name="root"/> (<see cref="IfBodies.IsCandidate"/>) whose if/else body
+    /// changes between the <paramref name="runs"/> that compile them: <paramref name="compile"/> gives a run's project (full
+    /// path), the files it compiles and its defined symbols (null when unknown: that run isn't counted).
+    /// </summary>
+    internal static Dictionary<string, (string Text, List<int> Lines)> IfBodyLines(
+        string root,
+        IEnumerable<(string Framework, string Configuration, List<string> Projects)> runs,
+        Func<string, string, string, (string FullPath, string[] Compile, HashSet<string>? Defines)> compile)
+    {
+        var candidates = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .AsParallel()
+            .Where(f => IfBodies.IsCandidate(File.ReadAllText(f)))
+            .Select(Path.GetFullPath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (candidates.Count == 0)
+        {
+            return [];
+        }
+
+        var sets = runs.SelectMany(r => r.Projects.Select(p => (Project: p, r.Framework, r.Configuration)))
+            .Distinct()
+            .AsParallel()
+            .Select(x => compile(x.Project, x.Framework, x.Configuration))
+            .Where(c => c.Defines is not null)
+            .SelectMany(c => c.Compile.Select(Path.GetFullPath).Where(candidates.Contains).Select(f => (File: f, Set: (IReadOnlyCollection<string>)TestedSymbols(f).Where(c.Defines!.Contains).ToList())))
+            .ToList()
+            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Set).ToList(), StringComparer.OrdinalIgnoreCase);
+        return IfBodies.Find(sets);
+    }
+
+    /// <summary>
     /// The baseline a Directory.Build.props at or above <paramref name="root"/> names with &lt;StyleBroBaseline&gt; (Named: true),
     /// null as its value when that turns it off ('none') or uses other MSBuild properties; Named false when none names one.
     /// </summary>
@@ -4402,38 +4435,6 @@ internal static class FormatCommand
             .ToDictionary(g => g.Key, g => g.Select(x => x.Framework).ToList(), StringComparer.OrdinalIgnoreCase);
         Incomplete(skipped, runFor, unsupported).ForEach(log);
         return Done(exit);
-    }
-
-    /// <summary>
-    /// The lines of the candidate C# files under <paramref name="root"/> (<see cref="IfBodies.IsCandidate"/>) whose if/else body
-    /// changes between the <paramref name="runs"/> that compile them: <paramref name="compile"/> gives a run's project (full
-    /// path), the files it compiles and its defined symbols (null when unknown: that run isn't counted).
-    /// </summary>
-    internal static Dictionary<string, (string Text, List<int> Lines)> IfBodyLines(
-        string root,
-        IEnumerable<(string Framework, string Configuration, List<string> Projects)> runs,
-        Func<string, string, string, (string FullPath, string[] Compile, HashSet<string>? Defines)> compile)
-    {
-        var candidates = StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            .AsParallel()
-            .Where(f => IfBodies.IsCandidate(File.ReadAllText(f)))
-            .Select(Path.GetFullPath)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (candidates.Count == 0)
-        {
-            return [];
-        }
-
-        var sets = runs.SelectMany(r => r.Projects.Select(p => (Project: p, r.Framework, r.Configuration)))
-            .Distinct()
-            .AsParallel()
-            .Select(x => compile(x.Project, x.Framework, x.Configuration))
-            .Where(c => c.Defines is not null)
-            .SelectMany(c => c.Compile.Select(Path.GetFullPath).Where(candidates.Contains).Select(f => (File: f, Set: (IReadOnlyCollection<string>)TestedSymbols(f).Where(c.Defines!.Contains).ToList())))
-            .ToList()
-            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.Set).ToList(), StringComparer.OrdinalIgnoreCase);
-        return IfBodies.Find(sets);
     }
 
     /// <summary>
