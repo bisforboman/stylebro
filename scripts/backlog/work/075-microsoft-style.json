@@ -1,0 +1,6 @@
+{
+  "area": "Adoption",
+  "item": "Microsoft style",
+  "notes": "Owner's decisions 2026-10-16 (docs/decisions/2026-10-16-microsoft-style-*.md): a style layer for dotnet/runtime's coding style (coding-style.md + root .editorconfig), selected with `<StyleBroStyle>microsoft</StyleBroStyle>` on top of the preset and written by `stylebro-migrate init --style microsoft`; init's conventions still win where the code clearly differs. Design and open questions: docs/proposals/microsoft-style.md. Needs before shipping: `s_`/internal `_` field naming values, BRO1001 fields-first mode; nothing built yet.",
+  "status": "Planned"
+}
