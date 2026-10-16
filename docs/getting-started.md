@@ -729,6 +729,13 @@ missed, or a rule where StyleBro deliberately differs ([differences-from-styleco
 Then check the report from step 1 for rules your team relied on that nothing enforces any more. Details:
 [migrating.md](migrating.md). CI: [ci.md](ci.md).
 
+## The Microsoft style (optional)
+
+For code written like dotnet/runtime's (`_camelCase` and `s_camelCase` fields, no `this.`, braces optional on one-line
+bodies), `stylebro-migrate init --style microsoft --write` puts that style on top of the preset instead of StyleCop's
+defaults; your code's own conventions still win. Plain `init` suggests it when your code looks like that. What it sets:
+[styles.md](styles.md).
+
 ## Newer C# and APIs (optional)
 
 To also rewrite code into newer C# and newer APIs (target-typed `new()`, collection expressions, file-scoped

@@ -2390,7 +2390,7 @@ internal static class Conventions
             var @default = style is not null && style.TryGetValue(convention.Key, out var styled) ? styled : convention.Default;
             if (style is not null && convention.Key != StaticPrefixKey && TurnsOff(style, convention))
             {
-                report.Add($"  {"style",-8} {convention.What}: -> off in the style");
+                report.Add($"  {"style",-8} {convention.What}: {Plural(total, convention.Unit)} -> its rule is off in the style");
                 continue;
             }
 

@@ -1,11 +1,13 @@
 # Proposal: the Microsoft style
 
-Status: **design; gaps G1-G3 built, the layer not yet** (owner's decisions of 2026-10-16:
+Status: **built** (2026-10-16; user docs: [styles.md](../styles.md)) (owner's decisions of 2026-10-16:
 [source](../decisions/2026-10-16-microsoft-style-the-source-is-dotnetruntimes-coding-style.md),
 [selection](../decisions/2026-10-16-microsoft-style-selected-with-stylebrostyle-and-init-style.md),
 [design first](../decisions/2026-10-16-microsoft-style-a-design-document-first.md)). All seven questions at the end are
 answered (A each, [answers](../decisions/2026-10-16-microsoft-style-open-questions-answered.md)). Gaps G1-G3 are built
-(section 4); the layer and `init --style microsoft` are next.
+(section 4); the layer and `init --style microsoft` are built. Where the build differs from this design: CA1852 is a
+suggestion (the SDK's fix seals types with `virtual` members: CS0549 in Newtonsoft.Json's tests), CA1052 checks only
+private and internal types, and a code base that uses `this.` gets IDE0003 off (IDE0009 isn't turned on).
 
 StyleBro's preset follows StyleCop's defaults. A large share of .NET code follows Microsoft's own style instead: the one
 dotnet/runtime writes down. This proposal adds that style as a layer on top of the preset:

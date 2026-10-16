@@ -202,6 +202,7 @@ nav:
           - rules/BRO1619.md
   - Configuration:
       - Settings: configuration.md
+      - Styles: styles.md
       - Baseline: baseline.md
       - CI: ci.md
       - Pre-commit hook: pre-commit.md
