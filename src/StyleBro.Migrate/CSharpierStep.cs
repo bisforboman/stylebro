@@ -154,7 +154,8 @@ internal static class CSharpierStep
     /// <summary>
     /// What to give CSharpier for <paramref name="files"/> (full paths) when <paramref name="unformatted"/> (<see cref="Unformatted"/>)
     /// is known: for each file the highest folder up to its scope's that holds no unformatted file (all CSharpier would
-    /// change there is ours), else the file itself; folders and files under another one given once. Without it, the files.
+    /// change there is ours), else the file itself; each once (two files' folders never nest: both reach the same highest clean
+    /// one). Without it, the files.
     /// </summary>
     public static List<string> Arguments(Tool tool, string root, IReadOnlyList<string> files, IReadOnlySet<string>? unformatted)
     {
@@ -185,7 +186,7 @@ internal static class CSharpierStep
             chosen.Add(best ?? file);
         }
 
-        return chosen.Where(c => !chosen.Any(o => o != c && c.StartsWith(o + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))).ToList();
+        return chosen.ToList();
     }
 
     /// <summary>
