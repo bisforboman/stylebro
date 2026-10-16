@@ -46,6 +46,15 @@ rules (each release's notes list them).
 
 Before 1.0 every rule counts as a 1.0 rule: `1.0`, `latest` and unset are the same.
 
+### Styles
+
+A [style](styles.md) (`<StyleBroStyle>microsoft</StyleBroStyle>`) counts as part of the preset's defaults:
+
+- **Patch**: a style setting that contradicts its source and makes a rule report more is corrected (turned off).
+- **Minor**: the style's values for that minor's new rules and settings, behind the preset version like the preset's.
+- **Major**: the style's value for an existing rule or setting changes, also to follow a change in its source (runtime's
+  guide). Until then such a change is listed as a known difference on the style's page.
+
 ## When 1.0 ships
 
 After two clean trials in a row: first runs on new kinds of repositories with no high-severity bugs.

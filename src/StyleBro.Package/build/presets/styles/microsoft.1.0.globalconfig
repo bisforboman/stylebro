@@ -1,0 +1,159 @@
+is_global = true
+global_level = -1
+
+# The Microsoft style (<StyleBroStyle>microsoft</StyleBroStyle>, docs/styles.md): dotnet/runtime's coding style
+# (docs/coding-guidelines/coding-style.md and the root .editorconfig, read at commit 24543ddd), on top of the preset
+# layers (global_level -2), so these lines win over the preset's. Rules neither source names follow runtime's build
+# (eng/CodeAnalysis.src.globalconfig) through stylebro-migrate's StyleCop mapping; StyleBro's rules beyond StyleCop are
+# off. Only what differs from the preset is here. The severities of the built-in rules go into .editorconfig with
+# 'stylebro-migrate init --style microsoft' ('dotnet format' ignores severities in a package's global config).
+# Using order (dotnet_sort_system_directives_first) isn't set here: init writes it when the code sorts its usings.
+
+# ---------------------------------------------------------------------------
+# StyleBro rules
+# ---------------------------------------------------------------------------
+
+# Fields at the top of the type, nothing else ordered (guide rule 15)
+stylebro_member_order_scope = fields_first
+
+# '_camelCase' private and internal fields, 's_camelCase' private and internal static fields (guide rule 3)
+stylebro_private_field_naming = _camelCase
+stylebro_internal_field_naming = like_private
+stylebro_private_static_field_naming = s_camelCase
+stylebro_private_mutable_static_field_naming = s_camelCase
+
+# Off: 'none' in runtime's build (the StyleCop rules they replace)
+dotnet_diagnostic.BRO1002.severity = none
+dotnet_diagnostic.BRO1005.severity = none
+dotnet_diagnostic.BRO1101.severity = none
+dotnet_diagnostic.BRO1102.severity = none
+dotnet_diagnostic.BRO1103.severity = none
+dotnet_diagnostic.BRO1105.severity = none
+dotnet_diagnostic.BRO1106.severity = none
+dotnet_diagnostic.BRO1107.severity = none
+dotnet_diagnostic.BRO1108.severity = none
+dotnet_diagnostic.BRO1109.severity = none
+dotnet_diagnostic.BRO1110.severity = none
+dotnet_diagnostic.BRO1111.severity = none
+dotnet_diagnostic.BRO1113.severity = none
+dotnet_diagnostic.BRO1114.severity = none
+dotnet_diagnostic.BRO1115.severity = none
+dotnet_diagnostic.BRO1118.severity = none
+dotnet_diagnostic.BRO1120.severity = none
+dotnet_diagnostic.BRO1122.severity = none
+dotnet_diagnostic.BRO1125.severity = none
+dotnet_diagnostic.BRO1126.severity = none
+dotnet_diagnostic.BRO1131.severity = none
+dotnet_diagnostic.BRO1132.severity = none
+dotnet_diagnostic.BRO1301.severity = none
+dotnet_diagnostic.BRO1305.severity = none
+dotnet_diagnostic.BRO1307.severity = none
+dotnet_diagnostic.BRO1308.severity = none
+dotnet_diagnostic.BRO1311.severity = none
+dotnet_diagnostic.BRO1401.severity = none
+dotnet_diagnostic.BRO1405.severity = none
+dotnet_diagnostic.BRO1406.severity = none
+dotnet_diagnostic.BRO1407.severity = none
+dotnet_diagnostic.BRO1501.severity = none
+dotnet_diagnostic.BRO1502.severity = none
+dotnet_diagnostic.BRO1503.severity = none
+dotnet_diagnostic.BRO1504.severity = none
+dotnet_diagnostic.BRO1505.severity = none
+dotnet_diagnostic.BRO1506.severity = none
+dotnet_diagnostic.BRO1508.severity = none
+dotnet_diagnostic.BRO1509.severity = none
+dotnet_diagnostic.BRO1510.severity = none
+dotnet_diagnostic.BRO1511.severity = none
+dotnet_diagnostic.BRO1513.severity = none
+dotnet_diagnostic.BRO1518.severity = none
+dotnet_diagnostic.BRO1519.severity = none
+dotnet_diagnostic.BRO1601.severity = none
+dotnet_diagnostic.BRO1602.severity = none
+dotnet_diagnostic.BRO1603.severity = none
+dotnet_diagnostic.BRO1604.severity = none
+dotnet_diagnostic.BRO1605.severity = none
+dotnet_diagnostic.BRO1606.severity = none
+dotnet_diagnostic.BRO1607.severity = none
+dotnet_diagnostic.BRO1610.severity = none
+dotnet_diagnostic.BRO1611.severity = none
+
+# Off: not StyleCop rules, so runtime's build says nothing about them (BRO1133 would also turn the guide's
+# 'if (items == null)' into 'is null')
+dotnet_diagnostic.BRO1133.severity = none
+dotnet_diagnostic.BRO1134.severity = none
+dotnet_diagnostic.BRO1135.severity = none
+dotnet_diagnostic.BRO1136.severity = none
+dotnet_diagnostic.BRO1137.severity = none
+dotnet_diagnostic.BRO1138.severity = none
+dotnet_diagnostic.BRO1139.severity = none
+dotnet_diagnostic.BRO1140.severity = none
+dotnet_diagnostic.BRO1141.severity = none
+dotnet_diagnostic.BRO1142.severity = none
+dotnet_diagnostic.BRO1144.severity = none
+dotnet_diagnostic.BRO1146.severity = none
+dotnet_diagnostic.BRO1149.severity = none
+dotnet_diagnostic.BRO1150.severity = none
+dotnet_diagnostic.BRO1151.severity = none
+dotnet_diagnostic.BRO1408.severity = none
+dotnet_diagnostic.BRO1410.severity = none
+dotnet_diagnostic.BRO1520.severity = none
+dotnet_diagnostic.BRO1521.severity = none
+dotnet_diagnostic.BRO1522.severity = none
+dotnet_diagnostic.BRO1523.severity = none
+dotnet_diagnostic.BRO1524.severity = none
+dotnet_diagnostic.BRO1525.severity = none
+dotnet_diagnostic.BRO1526.severity = none
+dotnet_diagnostic.BRO1527.severity = none
+dotnet_diagnostic.BRO1616.severity = none
+dotnet_diagnostic.BRO1617.severity = none
+dotnet_diagnostic.BRO1618.severity = none
+dotnet_diagnostic.BRO1619.severity = none
+
+# ---------------------------------------------------------------------------
+# Options for the built-in .NET rules (runtime's .editorconfig, without its ':suggestion'-style severities)
+# ---------------------------------------------------------------------------
+
+# Braces may be left out of a one-line body (guide rule 18): BRO1514 then reports nothing, BRO1515 (multi-line body)
+# and BRO1516 (inconsistent if/else chain) stay
+csharp_prefer_braces = when_multiline
+csharp_indent_case_contents_when_block = false
+dotnet_style_readonly_field = true
+csharp_style_var_for_built_in_types = false
+csharp_style_var_when_type_is_apparent = false
+csharp_style_var_elsewhere = false
+csharp_prefer_static_local_function = true
+csharp_prefer_simple_using_statement = false
+csharp_style_prefer_switch_expression = true
+dotnet_style_object_initializer = true
+dotnet_style_collection_initializer = true
+dotnet_style_prefer_collection_expression = when_types_exactly_match
+dotnet_style_explicit_tuple_names = true
+dotnet_style_coalesce_expression = true
+dotnet_style_null_propagation = true
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true
+dotnet_style_prefer_inferred_tuple_names = true
+dotnet_style_prefer_inferred_anonymous_type_member_names = true
+dotnet_style_prefer_auto_properties = true
+dotnet_style_prefer_conditional_expression_over_assignment = true
+dotnet_style_prefer_conditional_expression_over_return = true
+csharp_prefer_simple_default_expression = true
+csharp_style_expression_bodied_methods = true
+csharp_style_expression_bodied_constructors = true
+csharp_style_expression_bodied_operators = true
+csharp_style_expression_bodied_properties = true
+csharp_style_expression_bodied_indexers = true
+csharp_style_expression_bodied_accessors = true
+csharp_style_expression_bodied_lambdas = true
+csharp_style_expression_bodied_local_functions = true
+csharp_style_pattern_matching_over_is_with_cast_check = true
+csharp_style_pattern_matching_over_as_with_null_check = true
+csharp_style_inlined_variable_declaration = true
+csharp_style_throw_expression = true
+csharp_style_conditional_delegate_call = true
+csharp_style_prefer_index_operator = false
+csharp_style_prefer_range_operator = false
+csharp_style_pattern_local_over_anonymous_function = false
+
+# Internal and private types static where they can be (guide rule 19, CA1052): not public ones, whose callers could
+# construct them
+dotnet_code_quality.CA1052.api_surface = private, internal

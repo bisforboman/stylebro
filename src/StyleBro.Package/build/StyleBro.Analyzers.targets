@@ -26,9 +26,23 @@
   <ItemGroup Condition="'$(_StyleBroPresetValid)' == 'true'">
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)presets/stylebro.1.0.globalconfig" />
   </ItemGroup>
-  <Target Name="_StyleBroCheckPreset" BeforeTargets="CoreCompile" Condition="'$(_StyleBroPresetLevel)' != 'none'">
-    <Error Condition="'$(_StyleBroPresetValid)' != 'true'" Code="STYLEBRO001" Text="StyleBroPreset is '$(StyleBroPreset)': use a preset version ($(_StyleBroPresetDefault) up to $(_StyleBroPresetLatest)), 'latest' or 'none'. See https://bisforboman.github.io/stylebro/versioning/#new-rules" />
+  <!--
+    A style (docs/styles.md): <StyleBroStyle>microsoft</StyleBroStyle> adds that style's layers on top of the preset's, one
+    per preset minor up to the same level (a style never turns on a rule the chosen preset doesn't have). The preset layers
+    are at global_level -2 and the style's at -1, so the style's keys win over the preset's; the project's own .editorconfig
+    and .globalconfig still win over both. A new minor's style layer: a line below with the same condition as its preset layer.
+  -->
+  <PropertyGroup>
+    <_StyleBroStyle>$(StyleBroStyle.Trim().ToLowerInvariant())</_StyleBroStyle>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(_StyleBroPresetValid)' == 'true' and '$(_StyleBroStyle)' == 'microsoft'">
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)presets/styles/microsoft.1.0.globalconfig" />
+  </ItemGroup>
+  <Target Name="_StyleBroCheckPreset" BeforeTargets="CoreCompile">
+    <Error Condition="'$(_StyleBroPresetLevel)' != 'none' and '$(_StyleBroPresetValid)' != 'true'" Code="STYLEBRO001" Text="StyleBroPreset is '$(StyleBroPreset)': use a preset version ($(_StyleBroPresetDefault) up to $(_StyleBroPresetLatest)), 'latest' or 'none'. See https://bisforboman.github.io/stylebro/versioning/#new-rules" />
     <Warning Condition="'$(_StyleBroPresetValid)' == 'true' and $([MSBuild]::VersionGreaterThan('$(_StyleBroPresetLevel)', '$(_StyleBroPresetLatest)'))" Code="STYLEBRO002" Text="StyleBroPreset is $(StyleBroPreset), but this StyleBro.Analyzers package's newest preset is $(_StyleBroPresetLatest): using $(_StyleBroPresetLatest). Upgrade the package or lower the setting." />
+    <Error Condition="'$(_StyleBroStyle)' != '' and '$(_StyleBroStyle)' != 'none' and '$(_StyleBroStyle)' != 'microsoft'" Code="STYLEBRO003" Text="StyleBroStyle is '$(StyleBroStyle)': use 'microsoft' or 'none'. See https://bisforboman.github.io/stylebro/styles/" />
+    <Warning Condition="'$(_StyleBroStyle)' == 'microsoft' and '$(_StyleBroPresetLevel)' == 'none'" Code="STYLEBRO004" Text="StyleBroStyle is ignored with StyleBroPreset none: a style sits on top of the preset. Set a preset version, or remove StyleBroStyle." />
   </Target>
 
   <!--

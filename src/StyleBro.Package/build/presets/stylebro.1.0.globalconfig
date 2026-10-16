@@ -1,5 +1,5 @@
 is_global = true
-global_level = -1
+global_level = -2
 
 # Follows StyleCop's defaults except where docs/differences-from-stylecop.md says otherwise (test-enforced).
 

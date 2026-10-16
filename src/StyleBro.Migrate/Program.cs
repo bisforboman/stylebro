@@ -32,9 +32,10 @@ internal static class Program
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
+          stylebro-migrate init [path] [--write] [--modernize] [--style microsoft] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
-              --modernize adds the SDK's rules for newer C# and APIs. A repository with a StyleCop setup is told to
+              --modernize adds the SDK's rules for newer C# and APIs. --style microsoft sets the Microsoft style
+              (dotnet/runtime's; <StyleBroStyle>) and the built-in rules it needs; your code's own conventions still win. A repository with a StyleCop setup is told to
               use 'stylebro-migrate --write' instead. --project names what 'format' will run on (relative to 'path').
 
               --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
@@ -60,7 +61,7 @@ internal static class Program
               just the projects they belong to: a fraction of a whole run. With --verify-no-changes too.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
-          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--sonar-profile <file>]
+          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft] [--sonar-profile <file>]
           stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
@@ -303,9 +304,13 @@ internal static class Program
         // settings are written, so the preset stays (vs-validation's tests).
         foreach (var props in Migration.PropsFiles(root, setup.Folders))
         {
-            var disabled = Migration.DisablePreset(File.Exists(props) ? File.ReadAllText(props) : null, importParent: !File.Exists(props) && Migration.HasParentProps(props));
+            var text = File.Exists(props) ? File.ReadAllText(props) : null;
+            var disabled = Migration.DisablePreset(text, importParent: !File.Exists(props) && Migration.HasParentProps(props));
             var name = Path.GetRelativePath(root, props).Replace('\\', '/');
-            if (disabled is null)
+
+            // A style sits on the preset (STYLEBRO004 without it): the migrated block replaces both.
+            var unstyled = Migration.RemoveStyle(disabled ?? text);
+            if (disabled is null && unstyled is null)
             {
                 continue;
             }
@@ -313,12 +318,19 @@ internal static class Program
             var hidden = Migration.HiddenPropsNote(props);
             if (write)
             {
-                PreviewCommand.EditFile(props, _ => disabled);
-                Console.WriteLine($"Turned the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.");
+                PreviewCommand.EditFile(props, _ => unstyled ?? disabled!);
             }
-            else
+
+            if (disabled is not null)
             {
-                Console.WriteLine($"--write also turns the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings replace it.");
+                Console.WriteLine(write
+                    ? $"Turned the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it."
+                    : $"--write also turns the preset off in {name} (<StyleBroPreset>none</StyleBroPreset>): the settings replace it.");
+            }
+
+            if (unstyled is not null)
+            {
+                Console.WriteLine($"{(write ? "Removed" : "--write also removes")} <StyleBroStyle> from {name}: the settings from StyleCop replace the style.");
             }
 
             if (hidden is not null)
@@ -690,11 +702,18 @@ internal static class Program
         var (command, known) = args.FirstOrDefault() switch
         {
             "baseline" => ("baseline", new[] { "--project" }),
-            "init" => ("init", new[] { "--write", "--modernize", AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
+            "init" => ("init", new[] { "--write", "--modernize", InitCommand.StyleOption, AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
             "format" => ("format", null),
             _ => (null, new[] { "--write", AgentsFile.Option, SonarProfileOption }.Concat(PreviewCommand.Options).ToArray()),
         };
         var options = args.Skip(command is null ? 0 : 1).ToArray();
+        if (command is null && options.Any(a => a.Split('=')[0] == InitCommand.StyleOption))
+        {
+            // A migrated repository follows its own StyleCop settings (docs/proposals/microsoft-style.md).
+            Console.Error.WriteLine($"{InitCommand.StyleOption} is for 'stylebro-migrate init': the migration writes settings that match your StyleCop setup instead, and turns the preset (which a style sits on) off.");
+            return 1;
+        }
+
         if (known is not null && options.FirstOrDefault(a => a.StartsWith('-') && !known.Contains(a.Split('=')[0])) is { } unknown)
         {
             Console.Error.WriteLine($"Unknown option: {unknown}");

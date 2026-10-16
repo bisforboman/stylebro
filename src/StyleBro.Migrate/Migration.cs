@@ -760,6 +760,36 @@ internal static class Migration
     }
 
     /// <summary>
+    /// Directory.Build.props with &lt;StyleBroStyle&gt;<paramref name="style"/>&lt;/StyleBroStyle&gt; (docs/styles.md): on the
+    /// line after &lt;StyleBroPreset&gt; (else where <see cref="SetPreset"/> would put it), or its value replaced. Null when it's
+    /// already there, or the file has nowhere to put it.
+    /// </summary>
+    public static string? SetStyle(string existing, string style)
+    {
+        var property = $"<StyleBroStyle>{style}</StyleBroStyle>";
+        var set = Regex.Match(existing, "<StyleBroStyle>[^<]*</StyleBroStyle>");
+        if (set.Success)
+        {
+            return set.Value == property ? null : existing.Remove(set.Index, set.Length).Insert(set.Index, property);
+        }
+
+        var preset = Regex.Match(existing, @"^([ \t]*)<StyleBroPreset>[^<]*</StyleBroPreset>", RegexOptions.Multiline);
+        return preset.Success
+            ? existing.Insert(preset.Index + preset.Length, (existing.Contains("\r\n") ? "\r\n" : "\n") + preset.Groups[1].Value + property)
+            : SetPreset(existing, style, string.Empty)?.Replace($"<StyleBroPreset>{style}</StyleBroPreset>", property, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Directory.Build.props without &lt;StyleBroStyle&gt; (its whole line when it has one to itself): 'stylebro-migrate --write'
+    /// turns the preset off for its own block, and a style needs the preset (STYLEBRO004). Null when there's none.
+    /// </summary>
+    public static string? RemoveStyle(string? existing)
+    {
+        var style = existing is null ? Match.Empty : Regex.Match(existing, @"(\r?\n[ \t]*)?<StyleBroStyle>[^<]*</StyleBroStyle>");
+        return style.Success ? existing!.Remove(style.Index, style.Length) : null;
+    }
+
+    /// <summary>
     /// An MSBuild file's indentation: <c>Child</c>, the whitespace before the first element inside &lt;Project&gt;, and
     /// <c>Unit</c>, one level (tabs or the child's spaces); two spaces each when there's nothing to tell.
     /// </summary>

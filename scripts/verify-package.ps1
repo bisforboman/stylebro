@@ -15,7 +15,10 @@
 #      with --files and --json, the JSON on stdout has it with its reason;
 #   9. preset versions: 'init --write' pinned <StyleBroPreset>; unset, the newest version and 'latest' give the same
 #      findings while the package has one layer; a version newer than the package warns (STYLEBRO002), an invalid one
-#      fails the build (STYLEBRO001). Once a minor adds a layer: also check that its rule is off by default and on with it.
+#      fails the build (STYLEBRO001). Once a minor adds a layer: also check that its rule is off by default and on with it;
+#  10. the Microsoft style: <StyleBroStyle>microsoft</StyleBroStyle> accepts '_'/'s_' fields, orders fields first and keeps
+#      rules runtime has off off; an unknown style fails (STYLEBRO003), one with StyleBroPreset none warns (STYLEBRO004);
+#      after 'init --write --style microsoft', 'dotnet format' removes 'this.' (IDE0003) and a second run changes nothing.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -198,6 +201,30 @@ try {
     Check ($LASTEXITCODE -eq 0 -and $newer -match 'warning STYLEBRO002') 'a version newer than the package warns (STYLEBRO002) and builds'
     $invalid = dotnet build $project --nologo --no-incremental -p:StyleBroPreset=bogus 2>&1 | Out-String
     Check ($LASTEXITCODE -ne 0 -and $invalid -match 'error STYLEBRO001') 'an invalid value fails the build (STYLEBRO001)'
+
+    Write-Host '== 10. The Microsoft style'
+    $styleRepo = Join-Path $work 'style'
+    $styleProject = Join-Path $styleRepo 'src/StyleApp/StyleApp.csproj'
+    New-Item -ItemType Directory -Force (Split-Path $styleProject) | Out-Null
+    Copy-Item (Join-Path $repo 'nuget.config') $styleRepo
+    Set-Content $styleProject (Get-Content $project -Raw) -NoNewline
+    $holder = Join-Path (Split-Path $styleProject) 'Holder.cs'
+    Set-Content $holder "namespace StyleApp;`n`ninternal sealed class Holder`n{`n    public int Count => _count + s_total;`n`n    private static int s_total;`n    private int _count;`n    public int Next()`n    {`n        return this._count + 1;`n    }`n}`n" -NoNewline
+    $plain = Build @() $styleProject
+    $styled = Build @('-p:StyleBroStyle=microsoft') $styleProject
+    Check (($plain -contains 'BRO1303 Holder.cs') -and -not ($styled -match '^BRO130[367] ')) "the style's '_' and 's_' fields are accepted (BRO1303/BRO1306/BRO1307 without it)"
+    Check (($styled -contains 'BRO1001 Holder.cs') -and ($plain -contains 'BRO1505 Holder.cs') -and -not ($styled -match '^BRO1505 ')) 'fields first (BRO1001), and rules runtime has off stay off (BRO1505)'
+    $unknown = dotnet build $styleProject --nologo --no-incremental -p:StyleBroStyle=google 2>&1 | Out-String
+    Check ($LASTEXITCODE -ne 0 -and $unknown -match 'error STYLEBRO003') 'an unknown style fails the build (STYLEBRO003)'
+    $ignored = dotnet build $styleProject --nologo --no-incremental -p:TreatWarningsAsErrors=false -p:StyleBroStyle=microsoft -p:StyleBroPreset=none 2>&1 | Out-String
+    Check ($LASTEXITCODE -eq 0 -and $ignored -match 'warning STYLEBRO004') 'the style with StyleBroPreset none warns (STYLEBRO004)'
+    Migrate @('init', $styleRepo, '--write', '--style', 'microsoft')
+    Check ((Get-Content (Join-Path $styleRepo 'Directory.Build.props') -Raw) -match '<StyleBroStyle>microsoft</StyleBroStyle>') 'init --style microsoft pins the style'
+    dotnet format $styleProject | Out-Host
+    $fixed = Get-Content $holder -Raw
+    Check ($fixed -match 'return _count \+ 1;' -and $fixed -match '(?s)private int _count;.*public int Count') "format removes 'this.' (IDE0003) and puts the fields first"
+    dotnet format $styleProject --verify-no-changes | Out-Host
+    Check ($LASTEXITCODE -eq 0) 'a second format run changes nothing'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue

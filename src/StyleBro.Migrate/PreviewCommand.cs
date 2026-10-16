@@ -97,6 +97,7 @@ internal static class PreviewCommand
         var patch = named is null ? null : Path.GetFullPath(named);
         var keep = options.Contains("--keep");
         var (profile, others) = command == "format" ? (null, options) : Program.TakeOption(options, Program.SonarProfileOption);
+        (var style, others) = command == "init" ? Program.TakeOption(others, InitCommand.StyleOption) : (null, others);
         var rest = others.Where(o => !Wants(new[] { o }) && o != "--keep").ToList();
 
         // --project names what format runs on (relative to the path) when the folder has several; format takes it too
@@ -241,7 +242,7 @@ internal static class PreviewCommand
             {
                 // Its output goes to the log file only: on a failure Settings prints it, and the end of the log shown then is
                 // format's (the init report came twice before).
-                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), profile, LogFile);
+                var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), profile, LogFile, style);
                 if (settings != 0)
                 {
                     return Fail(tail, settings, $"{(command == "init" ? "'stylebro-migrate init --write'" : "'stylebro-migrate --write'")} failed (exit code {settings}, see above).");
@@ -1248,7 +1249,7 @@ internal static class PreviewCommand
     /// Init's or the migration's '--write' on the copy; their output goes to the log (the dry run prints it), except the
     /// Sonar part of the report: which Sonar rules turned on which rules.
     /// </summary>
-    private static int Settings(string? command, string target, bool modernize, bool agentsMd, string? profile, Action<string> log)
+    private static int Settings(string? command, string target, bool modernize, bool agentsMd, string? profile, Action<string> log, string? style = null)
     {
         var original = Console.Out;
         using var writer = new StringWriter();
@@ -1258,6 +1259,7 @@ internal static class PreviewCommand
         {
             var sonar = (profile is null ? Array.Empty<string>() : new[] { Program.SonarProfileOption, Path.GetFullPath(profile) })
                 .Concat(agentsMd ? new[] { AgentsFile.Option } : Array.Empty<string>())
+                .Concat(style is null ? Array.Empty<string>() : new[] { InitCommand.StyleOption, style })
                 .ToArray();
             code = command == "init"
                 ? InitCommand.Run(new[] { target, "--write" }.Concat(modernize ? new[] { "--modernize" } : Array.Empty<string>()).Concat(sonar).ToArray())
