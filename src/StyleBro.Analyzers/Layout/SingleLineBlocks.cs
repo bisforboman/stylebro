@@ -273,15 +273,12 @@ internal static class SingleLineBlocks
                 // Enum values: one per line (StyleCop's SA1136, BRO1121), no blank lines; the comma stays where it is.
                 // A statement after one ending in '}' (a local function, a nested block) gets BRO1519's blank line.
                 var previous = items[i].GetFirstToken().GetPreviousToken();
-                var blankLine = node is BlockSyntax
+                var blankLine = node is BlockSyntax || isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false
                     ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
                         && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
-                    : node is not EnumDeclarationSyntax && (isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false
-                        ? previous.IsKind(SyntaxKind.CloseBraceToken)
-                            && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
-                        : ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))
-                            || (items[i - 1] is PropertyDeclarationSyntax && items[i] is PropertyDeclarationSyntax
-                                && (BecomesMultiLine(items[i - 1], text, options, isOn) || BecomesMultiLine(items[i], text, options, isOn))));
+                    : node is not EnumDeclarationSyntax && (ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))
+                        || (items[i - 1] is PropertyDeclarationSyntax && items[i] is PropertyDeclarationSyntax
+                            && (BecomesMultiLine(items[i - 1], text, options, isOn) || BecomesMultiLine(items[i], text, options, isOn))));
                 var separator = blankLine ? lineBreak + lineBreak : lineBreak;
                 if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
                 {

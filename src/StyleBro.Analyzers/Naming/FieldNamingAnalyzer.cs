@@ -55,6 +55,11 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         return scope;
     }
 
+    /// <summary>Whether the field's name is a word in disabled code where the field can be used (<see cref="GetPrivateScope"/>).</summary>
+    private static bool IsInDisabledCode(IFieldSymbol field, SymbolAnalysisContext context) => GetPrivateScope(field) is { } scope
+        ? DisabledCode.Mentions(scope, field.Name, context.CancellationToken)
+        : DisabledCode.Mentions(context.Compilation, field.Name);
+
     private static void AnalyzeField(
         SymbolAnalysisContext context,
         ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>> cache,
@@ -77,8 +82,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         // field too (stryker: a '_' rule for private static fields wins over one for static readonly, so '_lockObj' stays).
         if (rename is ({ } rule, { } newName)
             && PublicApi.CanRename(field, options)
-            && (field.DeclaredAccessibility == Accessibility.Private
-                || !(GetPrivateScope(field) is { } scope ? DisabledCode.Mentions(scope, field.Name, context.CancellationToken) : DisabledCode.Mentions(context.Compilation, field.Name)))
+            && (field.DeclaredAccessibility == Accessibility.Private || !IsInDisabledCode(field, context))
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
             && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian)
             && NamingRules.AllowsRename(context.Compilation, options, location, field, newName, context.CancellationToken))
