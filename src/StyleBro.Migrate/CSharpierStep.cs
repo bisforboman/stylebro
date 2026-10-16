@@ -171,8 +171,9 @@ internal static class CSharpierStep
             var relative = Path.GetRelativePath(top, file).Replace('\\', '/');
             var scope = tool.Scopes.Where(s => s.Length == 0 || relative.StartsWith(s + "/", StringComparison.OrdinalIgnoreCase)).OrderBy(s => s.Length).FirstOrDefault();
             var limit = scope is null ? Path.GetDirectoryName(file)! : scope.Length == 0 ? top : Path.Combine(top, scope.Replace('/', Path.DirectorySeparatorChar));
-            var best = unformatted.Contains(file) ? file : null;
-            for (var folder = Path.GetDirectoryName(file); best != file && folder is not null && folder.Length >= limit.Length; folder = Path.GetDirectoryName(folder))
+            // An unformatted file's own folders aren't clean: it goes alone.
+            string? best = null;
+            for (var folder = Path.GetDirectoryName(file); folder is not null && folder.Length >= limit.Length; folder = Path.GetDirectoryName(folder))
             {
                 if (Clean(folder))
                 {
@@ -184,6 +185,18 @@ internal static class CSharpierStep
         }
 
         return chosen.Where(c => !chosen.Any(o => o != c && c.StartsWith(o + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))).ToList();
+    }
+
+    /// <summary>
+    /// What a 'check' says about C# files: null when they're as CSharpier formats them (exit code 0, or only other files it
+    /// would change: CSharpier 1.x checks XML files too, Speckle's nuget.config line endings), else the C# files it would
+    /// change ('/'-separated, as it prints them), empty when it failed otherwise.
+    /// </summary>
+    public static List<string>? FailedCSharp(int code, IReadOnlyList<string> output)
+    {
+        var all = Failures(output);
+        var failed = all.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(f => f.Replace('\\', '/').TrimStart('.', '/')).ToList();
+        return code == 0 || (failed.Count == 0 && all.Count > 0) ? null : failed;
     }
 
     /// <summary>The paths CSharpier's output says it would change ('Error ./src/A.cs - Was not formatted.'), as it prints them.</summary>
@@ -244,9 +257,7 @@ internal static class CSharpierStep
 
         log?.Invoke($"CSharpier: checking {(files is null ? "the C# files it formats" : $"{checkedFiles.Count} file{(checkedFiles.Count == 1 ? string.Empty : "s")}")}...");
         var (code, output) = Run(tool, "check", checkedFiles);
-        var all = Failures(output);
-        var failed = all.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(f => f.Replace('\\', '/').TrimStart('.', '/')).ToList();
-        if (code == 0 || (failed.Count == 0 && all.Count > 0))
+        if (FailedCSharp(code, output) is not { } failed)
         {
             return null;
         }

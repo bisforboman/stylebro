@@ -488,6 +488,26 @@ internal static class FormatCommand
         + $"Get what provides {(missing.Count == 1 ? "it" : "them")} (another repository next to this one, a generated file), then run again.";
 
     /// <summary>
+    /// The options without IDE0005 (<see cref="MissingCompileLine"/>): taken out of '--diagnostics' when others are left there,
+    /// else '--exclude-diagnostics IDE0005' added when no '--diagnostics' names the rules (an emptied list would mean all of them).
+    /// </summary>
+    public static List<string> WithoutUnusedUsings(IReadOnlyList<string> options)
+    {
+        var result = options.ToList();
+        var diagnostics = result.IndexOf("--diagnostics");
+        if (diagnostics < 0)
+        {
+            result.AddRange(["--exclude-diagnostics", UnusedUsings]);
+        }
+        else if (OptionValues(result, "--diagnostics") is { Count: > 1 } ids && ids.FindIndex(i => i.Equals(UnusedUsings, StringComparison.OrdinalIgnoreCase)) is var at and >= 0)
+        {
+            result.RemoveAt(diagnostics + 1 + at);
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// The nearest project file at or above the folder, up to <paramref name="top"/> (the first by name when a folder has
     /// several), or null.
     /// </summary>
@@ -3755,15 +3775,7 @@ internal static class FormatCommand
         {
             log(MissingCompileLine(root, missing));
             MissingCompileRoots[root] = true;
-            var diagnostics = passThrough.IndexOf("--diagnostics");
-            if (diagnostics < 0)
-            {
-                passThrough.AddRange(["--exclude-diagnostics", UnusedUsings]);
-            }
-            else if (OptionValues(passThrough, "--diagnostics") is { Count: > 1 } ids && ids.FindIndex(i => i.Equals(UnusedUsings, StringComparison.OrdinalIgnoreCase)) is var at and >= 0)
-            {
-                passThrough.RemoveAt(diagnostics + 1 + at);
-            }
+            passThrough = WithoutUnusedUsings(passThrough);
         }
 
         // Visual Basic is left alone (owner's choice, trial 23): the runs load the C# projects only (a solution filter, or what

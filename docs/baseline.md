@@ -27,8 +27,12 @@ Wrote stylebro.baseline: 820 violations on 759 lines.
 ```
 
 The StyleBro.Analyzers package picks up the nearest `stylebro.baseline` above each project, like `.editorconfig`.
-Another location: `<StyleBroBaseline>path/to/stylebro.baseline</StyleBroBaseline>` in a `Directory.Build.props` (the
-file must be called `stylebro.baseline`); `<StyleBroBaseline>none</StyleBroBaseline>` turns it off. A baseline outside
+Another location: `<StyleBroBaseline>$(MSBuildThisFileDirectory)eng/stylebro.baseline</StyleBroBaseline>` in a
+`Directory.Build.props` (the file must be called `stylebro.baseline`); `<StyleBroBaseline>none</StyleBroBaseline>` turns
+it off. Start the path with `$(MSBuildThisFileDirectory)` so it's relative to the props file: MSBuild reads a plain
+relative path (`eng/stylebro.baseline`) from each project's folder. The package then looks for it in the project's
+folder and the folders above (the first that has it), like `stylebro-migrate format` does from the props file's folder,
+which agrees unless a folder in between has its own. A baseline outside
 the code (`eng/stylebro.baseline` next to `src/`) covers files in other folders through `../` paths
 (`../src/App/Program.cs`); `stylebro-migrate format` writes them that way. `stylebro-migrate baseline` writes the file at
 the folder it runs on.

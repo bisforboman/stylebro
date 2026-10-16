@@ -135,6 +135,10 @@ steps:
 - **Kept findings and `TreatWarningsAsErrors`:** the findings StyleBro's fixes keep on purpose don't fail
   `stylebro-migrate format --verify-no-changes`, but they are warnings, so they fail a build that treats warnings as
   errors. Suppress or baseline them in the first run ([getting-started.md](getting-started.md#findings-kept-on-purpose)).
+- **CI builds Release:** plain `dotnet format` checks the Debug configuration only, so code under `#if !DEBUG` isn't
+  checked while a Release build with warnings as errors reports it. `stylebro-migrate format --verify-no-changes` also
+  checks the other configurations where a project's code compiles differently there
+  ([getting-started.md](getting-started.md#debug-and-release)).
 - **Old-style (non-SDK) projects:** restore with Visual Studio's MSBuild before the check
   (`msbuild -t:restore -p:RestorePackagesConfig=true`) and keep the .NET Framework reference assemblies available:
   [getting-started.md](getting-started.md#old-style-non-sdk-projects).

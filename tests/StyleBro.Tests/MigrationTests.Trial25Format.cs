@@ -104,6 +104,11 @@ public sealed partial class MigrationTests
         var line = FormatCommand.MissingCompileLine(root, missing.Select(Path.GetFullPath).ToList());
         Assert.StartsWith("Missing: 1 file the projects compile isn't there (../outside/Gen.cs): the code that uses it doesn't compile", line, StringComparison.Ordinal);
         Assert.Contains("IDE0005 (unused usings) is left out", line, StringComparison.Ordinal);
+
+        // IDE0005 leaves the rules a run fixes; without a list of them it's excluded (an empty list would mean every rule).
+        Assert.Equal(["--diagnostics", "BRO1001", "--severity", "warn"], FormatCommand.WithoutUnusedUsings(["--diagnostics", "BRO1001", "IDE0005", "--severity", "warn"]));
+        Assert.Equal(["--severity", "warn", "--exclude-diagnostics", "IDE0005"], FormatCommand.WithoutUnusedUsings(["--severity", "warn"]));
+        Assert.Equal(["--diagnostics", "IDE0005"], FormatCommand.WithoutUnusedUsings(["--diagnostics", "IDE0005"]));
     }
 
     [Fact]
@@ -119,8 +124,11 @@ public sealed partial class MigrationTests
         PreviewCommand.CopyOutside(source, copy, temp, outside);
         Assert.True(File.Exists(Path.Combine(temp, "speckle", "outside", "Gen.cs")));
 
-        // Nothing from outside: the copy is the repository's folder in the temporary one.
+        // Nothing from outside: the copy is the repository's folder in the temporary one, and a file that would land outside
+        // the temporary folder isn't copied.
         Assert.Equal(Path.Combine(temp, "repo"), PreviewCommand.CopyLocation(temp, source, []));
+        PreviewCommand.CopyOutside(source, temp, temp, outside);
+        Assert.False(File.Exists(Path.Combine(root, "outside", "Gen.cs")));
     }
 
     [Fact]
@@ -164,6 +172,12 @@ public sealed partial class MigrationTests
         // Unknown (the check failed): the files.
         Assert.Equal(changed, CSharpierStep.Arguments(tool, root, changed, null));
         Assert.Equal(["./src/A.cs", "./nuget.config"], CSharpierStep.Failures(["Error ./src/A.cs - Was not formatted.", "  The file contained different line endings", "Error ./nuget.config - Was not formatted.", "Checked 2 files in 10ms."]));
+
+        // The check: only C# files count (Speckle's nuget.config line endings made verify fail).
+        Assert.Null(CSharpierStep.FailedCSharp(0, []));
+        Assert.Null(CSharpierStep.FailedCSharp(1, ["Error ./nuget.config - Was not formatted."]));
+        Assert.Equal(["src/A.cs"], CSharpierStep.FailedCSharp(1, ["Error ./nuget.config - Was not formatted.", "Error ./src/A.cs - Was not formatted."]));
+        Assert.Equal([], CSharpierStep.FailedCSharp(1, ["Unhandled exception"]));
     }
 
     [Fact]
