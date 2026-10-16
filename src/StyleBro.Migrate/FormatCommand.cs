@@ -2883,7 +2883,8 @@ internal static class FormatCommand
             var props = Path.Combine(folder, "Directory.Build.props");
             if (File.Exists(props) && Regex.Match(StyleCopSetup.WithoutComments(File.ReadAllText(props)), @"<StyleBroBaseline\b[^>]*>(?<value>[^<]*)<") is { Success: true } named)
             {
-                var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+                // MSBuild reads '\' as a folder separator on every OS ('eng\stylebro.baseline' on Linux too).
+                var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase).Replace('\\', Path.DirectorySeparatorChar);
                 return (true, value.Equals("none", StringComparison.OrdinalIgnoreCase) || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)));
             }
         }
