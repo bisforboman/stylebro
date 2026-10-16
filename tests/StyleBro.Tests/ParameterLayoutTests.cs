@@ -669,6 +669,14 @@ public class ParameterLayoutTests
                 {
                     Name = "a",
                 }, "Value");
+                Register((x =>
+                {
+                    Console.WriteLine(x);
+                }), "Parenthesized", 4);
+                Register(new Action<int>(x =>
+                {
+                    Console.WriteLine(x);
+                }), "Created", 5);
                 Register({|BRO1107:x =>
                 {
                     Console.WriteLine(x);
@@ -709,6 +717,14 @@ public class ParameterLayoutTests
                 {
                     Name = "a",
                 }, "Value");
+                Register((x =>
+                {
+                    Console.WriteLine(x);
+                }), "Parenthesized", 4);
+                Register(new Action<int>(x =>
+                {
+                    Console.WriteLine(x);
+                }), "Created", 5);
                 Register(
                     x =>
                     {

@@ -1825,6 +1825,61 @@ public class FieldNamingTests
             }
             """));
 
+    // Speckle (trial 25): a public field of a private struct can only be used inside the type around the struct, so
+    // another file's '#if' code doesn't count; that type's does.
+    [Fact]
+    public Task FieldsOfAPrivateType_OnlyTheirScopesDisabledCodeCounts() => VerifyFixAsync(
+        new[]
+        {
+            """
+            public class Mesh
+            {
+                private struct Vector
+                {
+                    public double {|BRO1306:x|};
+                    public double y;
+                }
+
+            #if NEVER
+                int M(Vector v) => v.y;
+            #endif
+            }
+            """,
+            """
+            internal class Other
+            {
+            #if NEVER
+                int x;
+            #endif
+            }
+            """,
+        },
+        new[]
+        {
+            """
+            public class Mesh
+            {
+                private struct Vector
+                {
+                    public double X;
+                    public double y;
+                }
+
+            #if NEVER
+                int M(Vector v) => v.y;
+            #endif
+            }
+            """,
+            """
+            internal class Other
+            {
+            #if NEVER
+                int x;
+            #endif
+            }
+            """,
+        });
+
     // MoreLINQ (trial 20): Lookup.cs is copied from dotnet/runtime and starts with the pragma; '_count' stays.
     [Fact]
     public Task FieldsWhereIde1006IsDisabled_KeepTheirNames() => VerifyFixAsync(

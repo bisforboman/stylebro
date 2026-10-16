@@ -151,6 +151,13 @@ internal static class MemberOrdering
             && !(autoAccessorLines is not null && previous is PropertyDeclarationSyntax property && Layout.AutoAccessorLines.BecomesOneLine(property, text, autoAccessorLines))
             && Layout.BlankLineRuns.JudgesGapAfter(brace, next.GetFirstToken(), text, isOn, gapIsReplaced: true);
 
+        // The same, also for a body's '}' on one line ('void A() { }'): BRO1509's expansion of the type gave it BRO1519's
+        // blank line (trial 25).
+        bool MayHaveBlankLineAfterBrace(MemberDeclarationSyntax previous, MemberDeclarationSyntax next) =>
+            WantsBlankLineAfterBrace(previous, next)
+            || (isOn is not null && previous.GetLastToken() is { RawKind: (int)SyntaxKind.CloseBraceToken, Parent: BlockSyntax } brace
+                && Layout.BlankLineRuns.WantsBlankLineAfter(brace.Parent!, brace, next.GetFirstToken(), isOn, gapIsReplaced: true));
+
         for (var slot = 0; slot < count; slot++)
         {
             var source = order[slot];
@@ -162,7 +169,7 @@ internal static class MemberOrdering
             if (slot > 0 && !oneLine && order[slot - 1] != slot - 1 && layout.Count > 0
                 && layout.All(t => t.Kind() is SyntaxKind.EndOfLineTrivia or SyntaxKind.WhitespaceTrivia)
                 && split[source].Content.All(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
-                && WantsBlankLineAfterBrace(members[slot - 1], members[slot])
+                && MayHaveBlankLineAfterBrace(members[slot - 1], members[slot])
                 && !WantsBlankLineAfterBrace(members[order[slot - 1]], members[source]))
             {
                 layout = SyntaxFactory.TriviaList();
@@ -174,7 +181,8 @@ internal static class MemberOrdering
             // the blank line in exactly those cases; violations that already existed are left to those rules.
             if (slot > 0 && !oneLine && !layout.Any(SyntaxKind.EndOfLineTrivia))
             {
-                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines, allowAdjacentSingleLine)
+                var createsSeparation = isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) != false
+                    && NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines, allowAdjacentSingleLine)
                     && !NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines, allowAdjacentSingleLine);
                 var createsComment = StartsWithLineComment(split[source].Content) && !StartsWithLineComment(split[slot].Content);
 

@@ -1691,7 +1691,7 @@ internal static class Conventions
                     // nothing about BRO1107/BRO1108's conventions (trial 23: both went off as well).
                     var bucket = string.Empty;
                     if (node is ArgumentListSyntax { Arguments.Count: > 1 } callArguments
-                        && callArguments.Arguments[0].Expression is AnonymousFunctionExpressionSyntax or AnonymousObjectCreationExpressionSyntax
+                        && StyleBro.Analyzers.Readability.ParameterLayout.IsLambdaLike(callArguments.Arguments[0].Expression)
                         && Line(callArguments.Arguments[0].SpanStart) != Line(callArguments.Arguments[0].Span.End))
                     {
                         if (StyleBro.Analyzers.Readability.ParameterLayout.IsLeadingLambda(callArguments, text))

@@ -185,10 +185,26 @@ internal static class ParameterLayout
         };
     }
 
+    /// <summary>
+    /// Whether the expression counts as the lambda of <see cref="LeadingLambdaKey"/>'s shape: a lambda, anonymous method
+    /// or anonymous object, also in parentheses (BRO1405 removes them, and BRO1108 must judge the list the same before and
+    /// after; trial 25) or as the only argument of an object creation without initializer (<c>new Action(() =&gt;</c>).
+    /// </summary>
+    public static bool IsLambdaLike(ExpressionSyntax expression)
+    {
+        while (expression is ParenthesizedExpressionSyntax parenthesized)
+        {
+            expression = parenthesized.Expression;
+        }
+
+        return expression is AnonymousFunctionExpressionSyntax or AnonymousObjectCreationExpressionSyntax
+            || (expression is ObjectCreationExpressionSyntax { Initializer: null, ArgumentList.Arguments: { Count: 1 } arguments } && IsLambdaLike(arguments[0].Expression));
+    }
+
     private static bool IsLeadingLambda(SyntaxNode list, Func<int, int> line)
     {
         if (list is not ArgumentListSyntax arguments || arguments.Arguments.Count < 2
-            || arguments.Arguments[0] is not { Expression: AnonymousFunctionExpressionSyntax or AnonymousObjectCreationExpressionSyntax } first)
+            || arguments.Arguments[0] is not { } first || !IsLambdaLike(first.Expression))
         {
             return false;
         }

@@ -561,6 +561,29 @@ public class TupleElementNamingTests
         """,
         "stylebro_rename_public_api = false");
 
+    // Trial 25 (Flow Launcher): a public conversion operator's tuple was renamed.
+    [Fact]
+    public Task PublicOperatorSignatures_AreLeftAloneByDefault() => VerifyNoDiagnosticsAsync(
+        """
+        public class Pair
+        {
+            public static implicit operator (string key, string value)(Pair pair) => ("a", "b");
+
+            public static explicit operator Pair((int key, int value) pair) => new Pair();
+
+            public static (int low, int high) operator +(Pair a, Pair b) => (1, 2);
+
+            public static bool operator ==(Pair a, (int low, int high) b) => true;
+
+            public static bool operator !=(Pair a, (int low, int high) b) => false;
+
+            public override bool Equals(object obj) => false;
+
+            public override int GetHashCode() => 0;
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
     // A use in code excluded by '#if' isn't bound, so the rename can't follow it.
     [Fact]
     public Task NamesInDisabledCode_AreSkipped() => VerifyNoDiagnosticsAsync(

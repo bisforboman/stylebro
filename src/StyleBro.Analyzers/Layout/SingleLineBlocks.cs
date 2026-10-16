@@ -266,7 +266,8 @@ internal static class SingleLineBlocks
                 return null;
             }
 
-            // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges.
+            // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges; with
+            // BRO1505 off, only a member after a '}' gets one, BRO1519's (trial 25).
             for (var i = 1; i < items.Count; i++)
             {
                 // Enum values: one per line (StyleCop's SA1136, BRO1121), no blank lines; the comma stays where it is.
@@ -275,9 +276,12 @@ internal static class SingleLineBlocks
                 var blankLine = node is BlockSyntax
                     ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
                         && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
-                    : node is not EnumDeclarationSyntax && (ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))
-                        || (items[i - 1] is PropertyDeclarationSyntax && items[i] is PropertyDeclarationSyntax
-                            && (BecomesMultiLine(items[i - 1], text, options, isOn) || BecomesMultiLine(items[i], text, options, isOn))));
+                    : node is not EnumDeclarationSyntax && (isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false
+                        ? previous.IsKind(SyntaxKind.CloseBraceToken)
+                            && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
+                        : ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))
+                            || (items[i - 1] is PropertyDeclarationSyntax && items[i] is PropertyDeclarationSyntax
+                                && (BecomesMultiLine(items[i - 1], text, options, isOn) || BecomesMultiLine(items[i], text, options, isOn))));
                 var separator = blankLine ? lineBreak + lineBreak : lineBreak;
                 if (!Gap(items[i].GetFirstToken().GetPreviousToken(), items[i].GetFirstToken(), separator + inner, text, changes))
                 {

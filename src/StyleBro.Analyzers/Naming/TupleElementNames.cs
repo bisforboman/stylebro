@@ -53,8 +53,8 @@ internal static class TupleElementNames
 
     /// <summary>
     /// Whether the element is in the signature of a member other assemblies see (<see cref="PublicApi.IsVisible"/>): a
-    /// method's, property's, indexer's or delegate's return or parameter types, or a field's or event's type. Such an
-    /// element is renamed only when <see cref="PublicApi.RenameKey"/> is true.
+    /// method's, operator's, property's, indexer's or delegate's return or parameter types, or a field's or event's type.
+    /// Such an element is renamed only when <see cref="PublicApi.RenameKey"/> is true.
     /// </summary>
     public static bool IsInPublicSignature(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken)
     {
@@ -78,6 +78,8 @@ internal static class TupleElementNames
         TypeSyntax? type = member switch
         {
             MethodDeclarationSyntax m => m.ReturnType,
+            OperatorDeclarationSyntax o => o.ReturnType,
+            ConversionOperatorDeclarationSyntax c => c.Type,
             BasePropertyDeclarationSyntax p => p.Type,
             _ => null,
         };

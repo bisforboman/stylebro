@@ -1,0 +1,7 @@
+# BRO1509: the expansion adds BRO1505's blank lines only when BRO1505 is on (trial 25)
+@{
+    File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'
+    Find = 'node is not EnumDeclarationSyntax && (isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false'
+    Replace = 'node is not EnumDeclarationSyntax && (false'
+    Tests = 'FixOrderTests.Sort_ExpandedOneLineType_WithoutBro1505'
+}

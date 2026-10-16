@@ -395,6 +395,27 @@ public class BlankLineAfterTests
         }
         """);
 
+    // Trial 25 (Flow Launcher): the line above is the statement's own header.
+    [Fact]
+    public Task CommentLeadingAnEmbeddedStatement_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
+        class C
+        {
+            string M(string path, bool folder, int[] items)
+            {
+                if (folder)
+                    // the separator is needed for folders
+                    path += "/";
+                else
+                    // files keep it
+                    path += "";
+                foreach (var item in items)
+                    // one by one
+                    path += item;
+                return path;
+            }
+        }
+        """);
+
     [Fact]
     public Task CommentBeforeOpenBrace_WithBro1132Off_GetsTheBlankLine() => VerifyFixAsync(
         """

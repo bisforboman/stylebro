@@ -14,6 +14,14 @@ internal static class Indentation
         return options.TryGetValue("max_line_length", out var value) && int.TryParse(value.Trim(), out var length) && length > 0 ? length : int.MaxValue;
     }
 
+    /// <summary>
+    /// What a fix writes between a call's name (or 'default', 'typeof') and its '(': a space with the SDK's
+    /// csharp_space_between_method_call_name_and_opening_parenthesis = true (MimeKit, trial 25), else nothing.
+    /// </summary>
+    public static string GetCallParenthesis(AnalyzerConfigOptions options) =>
+        options.TryGetValue("csharp_space_between_method_call_name_and_opening_parenthesis", out var value)
+            && value.Trim().Equals("true", System.StringComparison.OrdinalIgnoreCase) ? " (" : "(";
+
     /// <summary>One level of indentation.</summary>
     public static string GetUnit(AnalyzerConfigOptions options)
     {

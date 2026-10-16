@@ -349,6 +349,27 @@ public class DefaultValueConstructorTests
         return test.RunAsync();
     }
 
+    // Trial 25 (MimeKit): the SDK's formatter puts the space there too, so 'default(S)' changed again on the next run.
+    [Fact]
+    public Task SpaceBeforeCallParentheses_IsFollowed() => VerifyFixAsync(
+        """
+        struct S { }
+
+        class C
+        {
+            S field = {|BRO1104:new S ()|};
+        }
+        """,
+        """
+        struct S { }
+
+        class C
+        {
+            S field = default (S);
+        }
+        """,
+        "csharp_space_between_method_call_name_and_opening_parenthesis = true\n");
+
     private static string Fixed(string nint, string nuint) => NativeIntegers
         .Replace("{|BRO1104:new nint()|}", nint, StringComparison.Ordinal)
         .Replace("{|BRO1104:new nuint()|}", nuint, StringComparison.Ordinal)
