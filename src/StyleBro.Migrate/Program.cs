@@ -459,7 +459,14 @@ internal static class Program
                 how.Add($"{(global ? "otherwise " : string.Empty)}its version in {string.Join(", ", central)} (central package management)");
             }
 
-            lines.Add($"{setup.PackageName} {(setup.StyleSharp is { WithStyleCop: true } ? "are" : "is")} referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
+            // Every project references it: one reference in the root Directory.Build.props reaches them all (trial 26: the report
+            // named each project file).
+            var everyProject = setup.ReferencedIn.Count > 1 && setup.ReferencedIn.All(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                && setup.ReferencedIn.Count == StyleCopSetup.EnumerateFiles(root).Count(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
+            var once = !everyProject
+                ? string.Empty
+                : $" (or once in {(File.Exists(Path.Combine(root, "Directory.Build.props")) ? "Directory.Build.props" : "a Directory.Build.props at the root")}, which every project imports)";
+            lines.Add($"{setup.PackageName} {(setup.StyleSharp is { WithStyleCop: true } ? "are" : "is")} referenced in {string.Join(", ", setup.ReferencedIn)}: StyleBro.Analyzers goes there{once}{(how.Count == 0 ? string.Empty : ": " + string.Join("; ", how))}.");
         }
 
         // A submodule's file can't be edited here (SixLabors' shared-infrastructure): the repository's own props swap it.
@@ -671,7 +678,7 @@ internal static class Program
     internal static List<string> StyleSharpOnly(StyleCopSetup setup) => setup.StyleSharp is not { } styleSharp || setup.Raw is not { } raw
         ? []
         : StyleCopSetup.StyleSharpRules
-            .Where(r => raw.TryGetValue(r.Id, out var s) && s >= Severity.Suggestion && StyleCopSetup.StandsFor(r.Id, r.StyleCop, styleSharp).Count == 0)
+            .Where(r => raw.TryGetValue(r.Id, out var s) && s >= Severity.Suggestion && StyleCopSetup.StandsFor(r.Id, r.StyleCop, styleSharp).Count == 0 && !Migration.StyleSharpReplaced.Contains(r.Id))
             .Select(r => r.Id)
             .ToList();
 

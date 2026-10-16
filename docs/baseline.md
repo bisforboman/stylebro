@@ -16,8 +16,10 @@ Run it in the folder with your solution (or name it, like `format`: `stylebro-mi
 `--project`). It runs `dotnet format whitespace`, `style` and `analyzers --verify-no-changes`, each on its own (in one
 run, the analyzers' lines would be counted after the whitespace pass split a line, and the baseline would point at the
 wrong lines), to find every violation `dotnet format` would fix today and
-writes them to `stylebro.baseline` in that folder (the current folder when you name a solution or project below it).
-Commit the file.
+writes them to the baseline the build reads: the file `<StyleBroBaseline>` names (see below), else the nearest
+`stylebro.baseline` in that folder or above, else a new one in that folder (the current folder when you name a solution
+or project below it). It says where it wrote; with `<StyleBroBaseline>none</StyleBroBaseline>` it writes nothing.
+Entries of an existing baseline for files outside that folder stay. Commit the file.
 
 ```text
 Wrote stylebro.baseline: 820 violations on 759 lines.
@@ -34,8 +36,7 @@ relative path (`eng/stylebro.baseline`) from each project's folder. The package 
 folder and the folders above (the first that has it), like `stylebro-migrate format` does from the props file's folder,
 which agrees unless a folder in between has its own. A baseline outside
 the code (`eng/stylebro.baseline` next to `src/`) covers files in other folders through `../` paths
-(`../src/App/Program.cs`); `stylebro-migrate format` writes them that way. `stylebro-migrate baseline` writes the file at
-the folder it runs on.
+(`../src/App/Program.cs`); `stylebro-migrate format` and `stylebro-migrate baseline` write them that way.
 
 ## What it covers
 

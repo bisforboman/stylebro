@@ -74,7 +74,7 @@ Id,StyleCop,Note
 "SST1146","",""
 "SST1147","",""
 "SST1148","",""
-"SST1149","",""
+"SST1149","","no StyleCop rule: migrate turns on BRO1133 with stylebro_null_check_style = pattern_matching"
 "SST1150","SA1117","one list kind of SA1117"
 "SST1151","SA1117","one list kind of SA1117"
 "SST1152","SA1117","one list kind of SA1117"

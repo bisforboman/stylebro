@@ -279,9 +279,11 @@ A few settings work a little differently:
   nothing ever enforced it: `init` writes the files' ending for C# files, so `format` doesn't flip every file it touches,
   and the report says how to switch to the key's ending instead.
 - **`s_`/`t_` prefixes** count private static fields (constants aside) with and without the .NET runtime's `s_` (or `t_`)
-  prefix. Mostly without: [BRO1307](rules/BRO1307.md) stays on; mostly with or mixed: it's turned off, so `format` doesn't
-  rename them (there is no switch for static fields alone, so `m_` fields keep their prefix too). A `dotnet_naming_rule`
-  of yours that requires `s_` decides instead.
+  prefix. Mostly without: [BRO1307](rules/BRO1307.md) stays on; mostly with: `init` writes `s_camelCase` for the kinds
+  that have it (`stylebro_private_static_field_naming` for `static readonly` fields,
+  `stylebro_private_mutable_static_field_naming` for the others), so BRO1307 keeps the `s_`; mixed (or one kind mixed):
+  it's turned off, so `format` doesn't rename them (there is no switch for static fields alone, so `m_` fields keep their
+  prefix too). A `dotnet_naming_rule` of yours that requires `s_` decides instead.
 - **Type names** count files: files that name built-in types only with keywords (`string`, `int`), and files with a
   framework name IDE0049 would rewrite (`String`, `System.Int32`). Mostly keywords: IDE0049 stays on; mostly framework
   names or mixed: it's turned off. Your own `dotnet_style_predefined_type_*` keys decide instead.
@@ -470,7 +472,8 @@ A few settings work a little differently:
 - **One-line jumps** (`if (x) return;`, also `break`, `continue`, `throw`, `goto`, `yield break` on the `if` line): from
   3 of them on, `init` writes `stylebro_allow_single_line_jump_statements = true`, majority or not, so
   [BRO1514](rules/BRO1514.md) doesn't brace them (the starter kit: 878 of 1,130 bodies with braces, and BRO1514 braced
-  194 one-line jumps).
+  194 one-line jumps). Not when your .editorconfig enforces braces (IDE0011 at warning or error, with
+  `csharp_prefer_braces = true` or unset): those jumps are your build's warnings, and BRO1514 braces them.
 - **`#region`s inside members** ([BRO1113](rules/BRO1113.md), the starter kit's `#region Arrange` / `Act` / `Assert` in
   its tests): from 3 of them on, the rule is turned off, so `format` doesn't remove them. [BRO1112](rules/BRO1112.md)
   (regions between members) is off in the preset already.
@@ -515,7 +518,7 @@ A few settings work a little differently:
 | Member order | types whose members BRO1001 sorts apart: already in its order or not | [BRO1001](rules/BRO1001.md) | `dotnet_diagnostic.BRO1001.severity` |
 | Overloads | overload groups whose members BRO1001 sorts to different places (by access, `static`, ...): next to each other or apart | [BRO1001](rules/BRO1001.md) | `stylebro_keep_overloads_together` |
 | Unsigned literal suffixes | `u`/`ul` suffixes in upper or lower case (`0U` or `0u`) | [BRO1135](rules/BRO1135.md) | `dotnet_diagnostic.BRO1135.severity` |
-| `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity` |
+| `s_`/`t_` prefixes | private static fields with or without the `s_`/`t_` prefix (mostly with: `s_camelCase`) | [BRO1307](rules/BRO1307.md) | `dotnet_diagnostic.BRO1307.severity`, `stylebro_private_static_field_naming`, `stylebro_private_mutable_static_field_naming` |
 | Implicit `private` | members that are private by default, with or without `private` | [BRO1404](rules/BRO1404.md) | `dotnet_style_require_accessibility_modifiers` |
 | Implicit `internal` | types that are internal by default, with or without `internal` | [BRO1404](rules/BRO1404.md) | `dotnet_diagnostic.BRO1404.severity` |
 | Partial parts | `partial class X` parts with or without an access modifier | [BRO1007](rules/BRO1007.md) | `dotnet_diagnostic.BRO1007.severity` |
@@ -540,7 +543,7 @@ A few settings work a little differently:
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings (each run between `#if`/`#endif` lines on its own): sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 | Spacing | `if (x)` or `if(x)`; spaces inside parentheses, after casts, inside call and parameter lists (mixed: IDE0055 off) | SDK formatter (IDE0055) | `csharp_space_after_keywords_in_control_flow_statements`, `csharp_space_between_parentheses`, `csharp_space_after_cast`, `csharp_space_between_method_call_parameter_list_parentheses`, `csharp_space_between_method_declaration_parameter_list_parentheses` |
-| Statements after blocks | statements right after a block's `}` with or without a blank line above (only `without` is written; mixed: the default stays) | [BRO1519](rules/BRO1519.md) | `dotnet_diagnostic.BRO1519.severity` |
+| Statements after blocks | statements right after a block's `}` with or without a blank line above (mixed or mostly without: BRO1519 is off) | [BRO1519](rules/BRO1519.md) | `dotnet_diagnostic.BRO1519.severity` |
 | Nested `if`s | `if`s nested alone in another `if` that BRO1149 would merge (3 turn the rule off) | [BRO1149](rules/BRO1149.md) | `dotnet_diagnostic.BRO1149.severity` |
 | Namespace braces | files whose block namespace has its `{` where `csharp_new_line_before_open_brace` doesn't put it (`types` covers namespaces): when most do, IDE0055 is off until you decide (the report says how many files would change) | SDK formatter (IDE0055) | `dotnet_diagnostic.IDE0055.severity` |
 | Member separation | neighbouring members that need a blank line, with or without one (without: [BRO1519](rules/BRO1519.md) goes off too, else it adds the blank line after a member's `}`) | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |

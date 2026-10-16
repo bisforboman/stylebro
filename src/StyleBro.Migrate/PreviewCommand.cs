@@ -924,8 +924,21 @@ internal static class PreviewCommand
         var newLine = project?.Contains("\r\n", StringComparison.Ordinal) == true ? "\r\n" : "\n";
         var (child, unit) = Migration.MSBuildIndentation(project);
         var group = $"{child}<ItemGroup>{newLine}{string.Concat(items.Select(item => $"{child}{unit}{item}{newLine}"))}{child}</ItemGroup>{newLine}";
+        if (project is not null && Regex.Match(project, @"<Project\b[^>]*?/>") is { Success: true } closed)
+        {
+            // A self-closing '<Project Sdk="..." />' keeps its attributes.
+            project = project.Remove(closed.Index, closed.Length).Insert(closed.Index, closed.Value[..^2].TrimEnd() + ">" + newLine + "</Project>");
+        }
+
         var end = project?.LastIndexOf("</Project>", StringComparison.OrdinalIgnoreCase) ?? -1;
-        return end < 0 ? $"<Project>{newLine}{group}</Project>{newLine}" : project!.Substring(0, end) + group + project.Substring(end);
+        if (end < 0)
+        {
+            return $"<Project>{newLine}{group}</Project>{newLine}";
+        }
+
+        // '</Project>' after other content on its line ('<Project Sdk="..."></Project>') moves to a line of its own.
+        var lineStart = project!.LastIndexOf('\n', Math.Max(end - 1, 0)) + 1;
+        return project.Substring(0, end) + (project[lineStart..end].Trim().Length == 0 ? string.Empty : newLine) + group + project.Substring(end);
     }
 
     /// <summary>
@@ -1080,7 +1093,11 @@ internal static class PreviewCommand
             var (crlf, lf) = (0, 0);
             foreach (var other in (Directory.Exists(folder) ? Directory.EnumerateFiles(folder) : []).Where(f => new FileInfo(f).Length < 1_000_000).Take(50))
             {
-                var text = File.ReadAllText(other);
+                if (Migration.ReadOrNull(other) is not { } text)
+                {
+                    continue;
+                }
+
                 var pairs = Regex.Count(text, "\r\n");
                 var bare = text.Count(c => c == '\n') - pairs;
                 if (text.Contains('\0'))

@@ -51,6 +51,12 @@ internal static class Migration
     /// <summary>Why a StyleCop rule isn't enforced in a repository CSharpier formats (the report groups these).</summary>
     public const string CSharpierReason = "CSharpier decides it";
 
+    /// <summary>
+    /// The SST rules without a StyleCop rule that StyleBro still replaces, each with a rule of its own and an option
+    /// (SST1149: BRO1133 with pattern_matching; SST1653: BRO1616 with single_line_when_fits): not listed as going with StyleSharp.
+    /// </summary>
+    internal static readonly string[] StyleSharpReplaced = ["SST1149", "SST1653"];
+
     private const string UnformattedSuffix = "; 'stylebro-migrate format' leaves them alone (remove this line to format them)";
 
     /// <summary>The StyleBro rules that read documentation as XML, like the StyleCop rules they replace.</summary>
@@ -76,6 +82,12 @@ internal static class Migration
     };
 
     private static readonly Regex StyleCopIds = new(@"SA(\d{4})(?:-SA(\d{4}))?");
+
+    /// <summary>A project that lists its own Compile items: EnableDefaultItems or EnableDefaultCompileItems false (<see cref="Uncompiled"/>).</summary>
+    private static readonly Regex ExplicitCompileItems = new(@"<EnableDefault(?:Compile)?Items>\s*false\s*<", RegexOptions.IgnoreCase);
+
+    /// <summary><see cref="CompileItems"/>' evaluations, per project.</summary>
+    private static readonly Dictionary<string, HashSet<string>?> CompileItemsCache = new(StringComparer.OrdinalIgnoreCase);
 
     private static readonly Regex EfMigrationMarker = new(@"\[(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\(\s*""|:\s*(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\b|:\s*(?:Microsoft\.EntityFrameworkCore\.Infrastructure\.)?ModelSnapshot\b");
 
@@ -281,6 +293,19 @@ internal static class Migration
             lines.Add($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true");
             lines.Add($"{StyleBro.Analyzers.Readability.EmptyStatementAnalyzer.AllowAfterClosingBraceKey} = true");
             lines.Add($"{StyleBro.Analyzers.Ordering.MemberOrderOptions.NamespacesKey} = false");
+        }
+
+        // StyleSharp's SST1149 ('is null' for null checks) is BRO1133 with pattern_matching: off, BRO1103 turned 'null == x'
+        // into 'x == null', which SST1149 (on by default: the raw severities include StyleSharp's defaults) then reported (trial 26).
+        if (setup.Raw?.TryGetValue("SST1149", out var isNull) == true && isNull >= Severity.Suggestion)
+        {
+            var nullChecks = lines.IndexOf($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.NullCheckStyle}.severity = none");
+            if (nullChecks >= 0)
+            {
+                lines[nullChecks] = $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.NullCheckStyle}.severity = warning";
+            }
+
+            lines.Add($"{StyleBro.Analyzers.Readability.NullChecks.StyleKey} = pattern_matching");
         }
 
         // StyleSharp's SST1653 (short summaries on one line) is BRO1616 with single_line_when_fits (trial 25).
@@ -750,13 +775,24 @@ internal static class Migration
         {
             var lineStart = existing.LastIndexOf('\n', group.Index) + 1;
             var groupIndent = existing.Substring(lineStart, group.Index - lineStart);
-            return existing.Insert(group.Index + group.Length, newLine + (groupIndent.Trim().Length == 0 ? groupIndent : child) + unit + property);
+            var indent = groupIndent.Trim().Length == 0 ? groupIndent : child;
+            var at = group.Index + group.Length;
+
+            // What follows the tag on its line ('<PropertyGroup></PropertyGroup>') moves to a line of its own: Serde's empty group
+            // got '<StyleBroPreset>1.0</StyleBroPreset></PropertyGroup>', which CSharpier's check rejected.
+            var end = existing.IndexOf('\n', at) is >= 0 and var lineEnd ? lineEnd : existing.Length;
+            var rest = existing[at..end].TrimEnd('\r');
+            var gap = rest.Length - rest.TrimStart().Length;
+            var after = rest.Trim().Length == 0 ? string.Empty : newLine + (rest.TrimStart().StartsWith("</", StringComparison.Ordinal) ? indent : indent + unit);
+            return existing.Remove(at, after.Length == 0 ? 0 : gap).Insert(at, newLine + indent + unit + property + after);
         }
 
-        var project = Regex.Match(existing, @"<Project\b[^>]*>");
-        return project.Success
-            ? existing.Insert(project.Index + project.Length, newLine + child + "<PropertyGroup>" + newLine + child + unit + property + newLine + child + "</PropertyGroup>")
-            : null;
+        // A self-closing '<Project Sdk="..." />' gets a body first.
+        var project = Regex.Match(existing, @"<Project\b[^>]*?(/?)>");
+        var body = newLine + child + "<PropertyGroup>" + newLine + child + unit + property + newLine + child + "</PropertyGroup>";
+        return !project.Success ? null
+            : project.Groups[1].Length > 0 ? existing.Remove(project.Index, project.Length).Insert(project.Index, existing[project.Index..project.Groups[1].Index].TrimEnd() + ">" + body + newLine + "</Project>")
+            : existing.Insert(project.Index + project.Length, body);
     }
 
     /// <summary>
@@ -1016,10 +1052,14 @@ internal static class Migration
 
     /// <summary>
     /// StyleCop rules that are on but can never fire with this setup, so the report doesn't list them: without the XML
-    /// header (xmlHeader false) StyleCop only checks that a header exists and its text (SA1633, SA1635, SA1636).
+    /// header (xmlHeader false) StyleCop only checks that a header exists and its text (SA1633, SA1635, SA1636); with SA1633
+    /// off it checks no header at all (probed with 1.2.0-beta.435: a wrong file name and company gave SA1636 and SA1638 with
+    /// SA1633 on, nothing with it off; trial 26 listed SA1634-SA1641 as not enforced).
     /// </summary>
     public static HashSet<string> CannotFire(StyleCopSetup setup) =>
-        XmlHeader(setup) ? new HashSet<string>() : new HashSet<string> { "SA1634", "SA1637", "SA1638", "SA1639", "SA1640", "SA1641" };
+        !setup.IsOn("SA1633") ? new HashSet<string> { "SA1634", "SA1635", "SA1636", "SA1637", "SA1638", "SA1639", "SA1640", "SA1641" }
+        : XmlHeader(setup) ? new HashSet<string>()
+        : new HashSet<string> { "SA1634", "SA1637", "SA1638", "SA1639", "SA1640", "SA1641" };
 
     /// <summary>
     /// The files (relative to <paramref name="root"/>, '/'-separated) the stylebro-migrate block's <see cref="KeptUsingsPrefix"/>
@@ -1057,8 +1097,8 @@ internal static class Migration
                 continue;
             }
 
-            var text = File.ReadAllText(file);
-            if (IsGeneratedOrVendored(relative, text))
+            var text = ReadOrNull(file);
+            if (text is null || IsGeneratedOrVendored(relative, text))
             {
                 continue;
             }
@@ -1149,8 +1189,57 @@ internal static class Migration
     {
         var files = StyleCopSetup.EnumerateFiles(root, ownRoot: true).ToList();
         var marked = MarkedGeneratedFolders(root).Concat(OptOutFolders(root, files)).ToList();
+        var uncompiled = Uncompiled(files);
         return files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
-            && (marked.Count == 0 || !marked.Any(m => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), m))));
+            && (marked.Count == 0 || !marked.Any(m => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), m)))
+            && !uncompiled(f));
+    }
+
+    /// <summary>
+    /// A file's text, or null when it can't be read (trial 26: 'init --write *> init.log' inside the repository locked the log,
+    /// and init stopped between writing .editorconfig and the props file). Such a file isn't counted.
+    /// </summary>
+    internal static string? ReadOrNull(string file)
+    {
+        try
+        {
+            return File.ReadAllText(file);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Whether a file name is a snapshot test's ('*.verified.cs', '*.received.cs', '*.approved.cs'): Verify's expected output,
+    /// never compiled (trial 26: Serde's 441 snapshots in test_output/ turned BRO1401, BRO1141 and BRO1007 off).
+    /// </summary>
+    internal static bool IsSnapshot(string name) =>
+        name.Contains(".verified.", StringComparison.OrdinalIgnoreCase) || name.Contains(".received.", StringComparison.OrdinalIgnoreCase) || name.Contains(".approved.", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Whether a C# file under a project that lists its own Compile items (EnableDefaultItems or EnableDefaultCompileItems
+    /// false) isn't one of them: those projects are evaluated ('dotnet msbuild -getItem:Compile', once per process), the
+    /// others compile every file below them. A file belongs to the nearest project above it.
+    /// </summary>
+    internal static Func<string, bool> Uncompiled(IReadOnlyCollection<string> files)
+    {
+        var projects = files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Select(Path.GetFullPath).ToList();
+        var explicitItems = projects.Where(p => ExplicitCompileItems.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(p)))).ToList();
+        if (explicitItems.Count == 0)
+        {
+            return _ => false;
+        }
+
+        var compiled = explicitItems.AsParallel().ToDictionary(p => p, CompileItems, StringComparer.OrdinalIgnoreCase);
+        var folders = projects.Select(p => (Folder: Path.GetDirectoryName(p)! + Path.DirectorySeparatorChar, Project: p)).OrderByDescending(p => p.Folder.Length).ToList();
+        return file =>
+        {
+            var full = Path.GetFullPath(file);
+            var owner = folders.FirstOrDefault(p => full.StartsWith(p.Folder, StringComparison.OrdinalIgnoreCase)).Project;
+            return owner is not null && compiled.TryGetValue(owner, out var items) && items is not null && !items.Contains(full);
+        };
     }
 
     /// <summary>
@@ -1304,6 +1393,7 @@ internal static class Migration
         var folders = relativePath.Split('/', '\\').SkipLast(1).ToList();
         return name.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".g.i.cs", StringComparison.OrdinalIgnoreCase)
             || name.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".generated.cs", StringComparison.OrdinalIgnoreCase)
+            || IsSnapshot(name)
             || folders.Any(IsVendorFolder)
             || IsGeneratorOutput(folders)
             || IsEfMigration(text)
@@ -1327,6 +1417,37 @@ internal static class Migration
 
     internal static bool IsUnder(string path, string folder) =>
         folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>A project's Compile items (full paths), evaluated once per process; null when MSBuild can't evaluate it.</summary>
+    private static HashSet<string>? CompileItems(string project)
+    {
+        lock (CompileItemsCache)
+        {
+            if (CompileItemsCache.TryGetValue(project, out var cached))
+            {
+                return cached;
+            }
+        }
+
+        HashSet<string>? items;
+        try
+        {
+            items = FormatCommand.ParseProject(FormatCommand.Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getItem:Compile", "-nologo")).Compile
+                .Select(Path.GetFullPath)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception e) when (e is ToolException or System.Text.Json.JsonException)
+        {
+            items = null;
+        }
+
+        lock (CompileItemsCache)
+        {
+            CompileItemsCache[project] = items;
+        }
+
+        return items;
+    }
 
     /// <summary>
     /// Whether the folders are EmitCompilerGeneratedFiles' layout: '&lt;output&gt;/&lt;generator assembly&gt;/&lt;generator type&gt;/',
