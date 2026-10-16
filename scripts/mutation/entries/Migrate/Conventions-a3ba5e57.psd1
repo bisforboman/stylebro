@@ -2,7 +2,7 @@
 # folder rulesets, init's field style
 @{
     File = 'src/StyleBro.Migrate/Conventions.cs'
-    Find = 'if (Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'
-    Replace = 'if (false)'
+    Find = 'if (text is null || Migration.IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))'
+    Replace = 'if (text is null)'
     Tests = 'MigrationTests'
 }
