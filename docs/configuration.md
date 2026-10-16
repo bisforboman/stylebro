@@ -28,6 +28,7 @@ stylebro_null_check_style = equality_operator
 |-----|--------|---------|-------|
 | `stylebro_member_order` | kinds, comma-separated: `field`, `constructor`, `finalizer`, `delegate`, `event`, `enum`, `interface`, `property`, `indexer`, `conversion`, `operator`, `extension`, `method`, `struct`, `class`, `record`; `a\|b` shares a place | that list (StyleCop's order; records count as classes unless `record` is listed) | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_order_namespaces` | `true`, `false` (only a type's members are ordered) | `true` | [BRO1001](rules/BRO1001.md) |
+| `stylebro_member_order_scope` | `all`, `fields_first` (only fields first in a type, nothing else ordered; the other order keys are ignored) | `all` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_access_order` | accessibilities, comma-separated: `public`, `internal`, `protected_internal`, `protected`, `private_protected`, `private` | that list | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_constants_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_static_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
@@ -47,9 +48,10 @@ stylebro_null_check_style = equality_operator
 | `stylebro_params_arrays` | `all`, `except_object_and_jagged` (Sonar's S3878: not for `params object[]`, `params Array[]` or jagged arrays) | `all` | [BRO1151](rules/BRO1151.md) |
 | `stylebro_object_creation_parentheses` | `omit`, `include` | `omit` | [BRO1141](rules/BRO1141.md) |
 | `stylebro_private_field_naming` | `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `camelCase` | [BRO1303](rules/BRO1303.md), [BRO1307](rules/BRO1307.md), [BRO1310](rules/BRO1310.md) |
-| `stylebro_private_mutable_static_field_naming` | `camelCase`, `_camelCase` | not set: a naming rule requiring just `static` decides, else `stylebro_private_field_naming`'s style | [BRO1303](rules/BRO1303.md) |
+| `stylebro_private_mutable_static_field_naming` | `camelCase`, `_camelCase`, `s_camelCase` | not set: a naming rule requiring just `static` decides, else `stylebro_private_field_naming`'s style | [BRO1303](rules/BRO1303.md) |
 | `stylebro_allow_leading_underscore_in_pascal_fields` | `true`, `false` | `false` | [BRO1306](rules/BRO1306.md) |
-| `stylebro_private_static_field_naming` | `PascalCase`, `camelCase`, `_camelCase` | not set: the SDK's naming rules decide, else `PascalCase` | [BRO1306](rules/BRO1306.md) |
+| `stylebro_private_static_field_naming` | `PascalCase`, `camelCase`, `_camelCase`, `s_camelCase` (static readonly fields; constants stay PascalCase) | not set: the SDK's naming rules decide, else `PascalCase` | [BRO1306](rules/BRO1306.md) |
+| `stylebro_internal_field_naming` | `PascalCase`, `like_private` (internal and private protected fields named like private ones) | `PascalCase` | [BRO1303](rules/BRO1303.md), [BRO1306](rules/BRO1306.md) |
 | `stylebro_allowed_hungarian_prefixes` | prefixes, comma-separated | none | [BRO1310](rules/BRO1310.md) |
 | `stylebro_allow_common_hungarian_prefixes` | `true`, `false` | `true` | [BRO1310](rules/BRO1310.md) |
 | `stylebro_rename_public_api` | `true`, `false` | `false` | [BRO1302](rules/BRO1302.md)-[BRO1314](rules/BRO1314.md): names other assemblies see |

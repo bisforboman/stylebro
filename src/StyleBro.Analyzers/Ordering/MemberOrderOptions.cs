@@ -56,6 +56,7 @@ internal enum MemberAccess
 /// stylebro_member_readonly_first   = true
 /// stylebro_keep_overloads_together = false | true | same_access
 /// stylebro_member_order_namespaces = true
+/// stylebro_member_order_scope      = all | fields_first
 /// </code>
 /// Kinds or accessibilities left out of a configured list keep their default relative order, after the listed ones.
 /// Entries joined by <c>|</c> share a rank (<c>method|operator|conversion</c>: StyleSharp's SST1201 orders them as one
@@ -72,6 +73,12 @@ internal sealed class MemberOrderOptions
 
     /// <summary><see langword="false"/>: the types of a namespace or file aren't ordered, only the members of a type (StyleSharp's SST1201-SST1204).</summary>
     public const string NamespacesKey = "stylebro_member_order_namespaces";
+
+    /// <summary>
+    /// <c>fields_first</c>: only fields go first in a type, everything else keeps its order (the .NET runtime's coding style,
+    /// rule 15); the other keys are ignored then. Default <c>all</c>: the order the other keys describe.
+    /// </summary>
+    public const string ScopeKey = "stylebro_member_order_scope";
 
     private const int KindCount = (int)MemberKind.Namespace + 1;
     private const int AccessCount = (int)MemberAccess.Private + 1;
@@ -107,6 +114,19 @@ internal sealed class MemberOrderOptions
     };
 
     public static readonly MemberOrderOptions Default = new(null, null, true, true, true, false);
+
+    /// <summary>
+    /// Fields first, every other kind and every accessibility sharing one place (<see cref="ScopeKey"/>). A namespace holds
+    /// no fields, so nothing there could move: it is skipped without computing keys.
+    /// </summary>
+    private static readonly MemberOrderOptions FieldsFirst = new(
+        new List<int[]> { new[] { (int)MemberKind.Field }, AllBut(KindCount, (int)MemberKind.Field) },
+        new List<int[]> { AllBut(AccessCount, -1) },
+        constantsFirst: false,
+        staticFirst: false,
+        readonlyFirst: false,
+        keepOverloadsTogether: false,
+        orderNamespaces: false);
 
     private readonly int[] kindRanks;
     private readonly int[] accessRanks;
@@ -160,6 +180,11 @@ internal sealed class MemberOrderOptions
 
     public static MemberOrderOptions Read(AnalyzerConfigOptions options)
     {
+        if (options.TryGetValue(ScopeKey, out var scope) && scope?.Trim().Equals("fields_first", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return FieldsFirst;
+        }
+
         var kindOrder = ParseList(options, KindOrderKey, KindNames);
         var accessOrder = ParseList(options, AccessOrderKey, AccessNames);
         var constantsFirst = ReadBool(options, ConstantsFirstKey, true);
@@ -175,6 +200,20 @@ internal sealed class MemberOrderOptions
         }
 
         return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether, sameAccess, orderNamespaces);
+    }
+
+    private static int[] AllBut(int count, int except)
+    {
+        var values = new List<int>();
+        for (var i = 0; i < count; i++)
+        {
+            if (i != except)
+            {
+                values.Add(i);
+            }
+        }
+
+        return values.ToArray();
     }
 
     /// <summary>Configured entries rank first (in configured order, a group sharing one rank); the rest follow in default order.</summary>

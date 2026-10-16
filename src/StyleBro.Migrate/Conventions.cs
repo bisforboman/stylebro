@@ -2840,7 +2840,7 @@ internal static class Conventions
         {
             (tag, verdict) = ("off", $"{DiagnosticIds.FieldPascalCase} is off");
             summary.TurnedOff.Add($"{DiagnosticIds.FieldPascalCase} ({What})");
-            lines.Add($"# init: {What}: your code mixes their casing ({mixed}), so {DiagnosticIds.FieldPascalCase} is off (it checks constants, static readonly and non-private fields). To choose one: set {StaticCasingKey} (PascalCase, camelCase or _camelCase) and remove the next line.");
+            lines.Add($"# init: {What}: your code mixes their casing ({mixed}), so {DiagnosticIds.FieldPascalCase} is off (it checks constants, static readonly and non-private fields). To choose one: set {StaticCasingKey} (PascalCase, camelCase, _camelCase or s_camelCase) and remove the next line.");
             lines.Add(off);
         }
         else if (winner == 0)
