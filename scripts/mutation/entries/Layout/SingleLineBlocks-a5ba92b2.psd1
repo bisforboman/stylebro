@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Layout/SingleLineBlocks.cs'
     Find = 'node is not EnumDeclarationSyntax && (isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false'
     Replace = 'node is not EnumDeclarationSyntax && (false'
-    Tests = 'FixOrderTests.Sort_ExpandedOneLineType_WithoutBro1505'
+    Tests = 'SingleLineBlocksTests.OneLineType_WithoutBro1505'
 }
