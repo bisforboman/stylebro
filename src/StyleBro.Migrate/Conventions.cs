@@ -158,6 +158,12 @@ internal static class Conventions
     /// <summary>The suffix of the counts of leading-lambda calls' list layouts (<see cref="FoldLeadingLambdas"/>).</summary>
     public const string LeadingLambdaBucket = " (leading lambda)";
 
+    /// <summary>
+    /// IDE0003's severity: uses of a type's own instance members without or with 'this.' (only judged for a style: the
+    /// Microsoft style writes IDE0003 at warning, which removes 'this.'; a repository that writes it keeps it).
+    /// </summary>
+    public const string ThisQualificationKey = "dotnet_diagnostic.IDE0003.severity";
+
     /// <summary>The list layout conventions a leading-lambda call is counted apart for (<see cref="FoldLeadingLambdas"/>).</summary>
     public static readonly string[] LeadingLambdaKeys = { "stylebro_split_list_first_item", ItemsPerLineKey };
 
@@ -235,12 +241,6 @@ internal static class Conventions
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
         new(ThisQualificationKey, "uses of a type's own members", "warning", ("warning", "without 'this.'"), ("none", "with 'this.'"), Off("IDE0003")) { Unit = "use", StyleOnly = true },
     };
-
-    /// <summary>
-    /// IDE0003's severity: uses of a type's own instance members without or with 'this.' (only judged for a style: the
-    /// Microsoft style writes IDE0003 at warning, which removes 'this.'; a repository that writes it keeps it).
-    /// </summary>
-    public const string ThisQualificationKey = "dotnet_diagnostic.IDE0003.severity";
 
     /// <summary>
     /// The spacing options IDE0055 enforces that real code varies on (Bogus writes 'foreach( var x in y )' in 341 places and
