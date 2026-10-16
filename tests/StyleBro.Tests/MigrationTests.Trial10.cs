@@ -222,7 +222,7 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
-    public void Init_StaticPrefixesAndFrameworkNames_TurnBro1307AndIde0049Off()
+    public void Init_StaticPrefixesAndFrameworkNames_KeepSCamelCaseAndTurnIde0049Off()
     {
         // actions/runner: ~541 's_' statics renamed by BRO1307, and 'String' -> 'string' 6,424 times in 501 files.
         for (var i = 0; i < 3; i++)
@@ -232,8 +232,10 @@ public sealed partial class MigrationTests
 
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root }))).Replace("\r\n", "\n");
 
-        Assert.Contains("  off      private static fields: 3 of 3 with an 's_'/'t_' prefix -> BRO1307 is off", output, StringComparison.Ordinal);
-        Assert.Contains("\ndotnet_diagnostic.BRO1307.severity = none\n", output, StringComparison.Ordinal);
+        // Since trial 26 the 's_' is kept with s_camelCase instead of turning BRO1307 off.
+        Assert.Contains("  kept     private static fields: 3 of 3 with an 's_' prefix -> s_camelCase", output, StringComparison.Ordinal);
+        Assert.Contains("\nstylebro_private_mutable_static_field_naming = s_camelCase\n", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet_diagnostic.BRO1307.severity = none", output, StringComparison.Ordinal);
         Assert.Contains("  off      built-in type names: 3 of 3 framework names ('Int32') -> IDE0049 is off", output, StringComparison.Ordinal);
         Assert.Contains("\ndotnet_diagnostic.IDE0049.severity = none\n", output, StringComparison.Ordinal);
         Assert.DoesNotContain("dotnet_diagnostic.IDE0049.severity = warning", output, StringComparison.Ordinal);

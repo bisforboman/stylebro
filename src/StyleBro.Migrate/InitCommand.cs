@@ -113,6 +113,9 @@ internal static class InitCommand
         ["dotnet_style_predefined_type_for_member_access"] = "IDE0049",
     };
 
+    /// <summary>The keys init writes for 's_' private static fields (<see cref="Conventions.StaticPrefixLines"/>), kept with BRO1307's convention.</summary>
+    private static readonly string[] StaticPrefixKeys = [StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey];
+
     public static int Run(string[] args)
     {
         var (profile, rest) = Program.TakeOption(args, Program.SonarProfileOption);
@@ -485,12 +488,19 @@ internal static class InitCommand
                     decided[convention.Key] = $"set in .editorconfig ({own[key]})";
                 }
             }
+            else if (convention.Key == Conventions.SingleLineJumpsKey && BracesEnforced(settings) is { } braces)
+            {
+                // Braces the team enforces (IDE0011 at warning or error with csharp_prefer_braces = true) leave no one-line jumps
+                // to allow, also over an earlier init's 'true': the few the code has are its warnings (trial 26: init allowed
+                // them, and BRO1514 never reported them).
+                decided[convention.Key] = $"your .editorconfig enforces braces ({braces})";
+            }
             else if (sonarLines.Any(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal)))
             {
                 var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
                 decided[convention.Key] = $"set by the Sonar setup ({line.Substring(line.IndexOf('=') + 1).Trim()})";
             }
-            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>()], SharesOff(convention) ? convention.What : null) is { Count: > 0 } lines)
+            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>(), .. convention.Key == Conventions.StaticPrefixKey ? StaticPrefixKeys : []], SharesOff(convention) || convention.Key == Conventions.StaticPrefixKey ? convention.What : null) is { Count: > 0 } lines)
             {
                 var setting = lines.Last();
                 decided[convention.Key] = $"kept from the last init ({setting.Substring(setting.IndexOf('=') + 1).Trim()})";
@@ -1013,6 +1023,19 @@ internal static class InitCommand
         return header < 0
             ? []
             : text.Substring(header, end - header).Split('\n').Skip(1).TakeWhile(l => l.Trim().Length > 0 && !l.TrimStart().StartsWith('[')).ToList();
+    }
+
+    /// <summary>
+    /// The settings that enforce braces on every one-line body (IDE0011 at warning or error, csharp_prefer_braces true or
+    /// unset), as the report names them, or null.
+    /// </summary>
+    public static string? BracesEnforced(IReadOnlyDictionary<string, string> settings)
+    {
+        var prefer = settings.TryGetValue("csharp_prefer_braces", out var p) ? p.Split(':') : ["true"];
+        var severity = settings.TryGetValue("dotnet_diagnostic.IDE0011.severity", out var s) ? s.Trim() : prefer.ElementAtOrDefault(1)?.Trim();
+        return prefer[0].Trim().Equals("true", StringComparison.OrdinalIgnoreCase) && severity?.ToLowerInvariant() is "warning" or "error"
+            ? $"IDE0011 = {severity}"
+            : null;
     }
 
     /// <summary>

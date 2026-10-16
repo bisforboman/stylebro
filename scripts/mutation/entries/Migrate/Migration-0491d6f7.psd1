@@ -2,7 +2,7 @@
 # folder rulesets, init's field style
 @{
     File = 'src/StyleBro.Migrate/Migration.cs'
-    Find = 'if (IsGeneratedOrVendored(relative, text))'
-    Replace = 'if (false)'
+    Find = 'if (text is null || IsGeneratedOrVendored(relative, text))'
+    Replace = 'if (text is null)'
     Tests = 'MigrationTests'
 }

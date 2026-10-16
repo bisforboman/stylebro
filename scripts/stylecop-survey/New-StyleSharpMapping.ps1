@@ -23,6 +23,8 @@ $exceptions = [ordered]@{
     SST1117 = @('SA1101 SX1101', "'this.' as stylesharp.instance_member_qualification says: require_this = SA1101, omit_this (default) = SX1101")
     # 'Digit separators should group digits regularly'; SA1119's unnecessary parentheses are wider than SST1459's.
     SST1119 = @('', 'not SA1119: digit separators')
+    # 'Prefer the is null pattern': no StyleCop rule; migrate turns on BRO1133 with pattern_matching for it (Migration.cs).
+    SST1149 = @('', "no StyleCop rule: migrate turns on BRO1133 with stylebro_null_check_style = pattern_matching")
     # SA1214 is static and instance readonly fields; StyleSharp splits it.
     SST1215 = @('SA1214', 'instance half of SA1214 (SST1214 is the static half)')
     # 'Private fields should be _camelCase': StyleCop's SX1309 (instance) and SX1309S (static), the opposite of SA1309.
