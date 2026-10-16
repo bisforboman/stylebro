@@ -3053,7 +3053,7 @@ internal static class FormatCommand
 
                 formatted.UnionWith(pretty);
                 var after = Snapshot(root);
-                putBack = CSharpierStep.PutBack(before, fixedState, after).Select(f => Path.GetRelativePath(root, f).Replace('\\', '/')).ToList();
+                putBack = CSharpierStep.PutBack(before, fixedState, after).Select(f => Path.GetRelativePath(shown, f).Replace('\\', '/')).ToList();
                 changed = ChangedFiles(before, after);
             }
 
