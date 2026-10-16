@@ -1026,7 +1026,7 @@ public class DocumentationTests
         /// <summary>Key.</summary>
         public struct Key
         {
-            /// <summary>Initializes static members.</summary>
+            /// <summary>Constructor.</summary>
             static Key()
             {
             }
@@ -1048,7 +1048,7 @@ public class DocumentationTests
         /// <summary>Key.</summary>
         public struct Key
         {
-            /// <summary>Initializes static members.</summary>
+            /// <summary>Constructor.</summary>
             static Key()
             {
             }
