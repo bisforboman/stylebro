@@ -388,7 +388,10 @@ internal static class PreviewCommand
             // As format: not clean (exit code 2) when CSharpier puts back what the fixes changed, or a run still changed files.
             if (putBack.Count > 0)
             {
-                Console.WriteLine(CSharpierStep.PutBackLine(putBack));
+                // Which rules' fixes it undoes, as format says: a check of those files (they're as before the fixes again).
+                var check = new List<string>();
+                format([.. FormatCommand.WithInclude(FormatCommand.NoRestore(formatArgs.ToArray()), putBack.Select(f => Path.GetRelativePath(formatRoot, Path.Combine(copy, f)).Replace('\\', '/'))), "--verify-no-changes"], check.Add);
+                Console.WriteLine(CSharpierStep.PutBackLine(putBack, FormatCommand.FindingIds(check.Where(l => FormatCommand.FindingPath(l) is { } path && putBack.Contains(Path.GetRelativePath(copy, path).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase)))));
             }
 
             ok = true;

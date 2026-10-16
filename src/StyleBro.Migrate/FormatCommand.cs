@@ -636,10 +636,31 @@ internal static class FormatCommand
     /// The C# files under the root (not bin/obj, not submodules) with a hash of their content, to tell which a run changed: by
     /// size and time, a file 'dotnet format' wrote back unchanged counted as changed.
     /// </summary>
-    public static Dictionary<string, string> Snapshot(string root) =>
+    public static Dictionary<string, string> Snapshot(string root, bool endingsAside = false) =>
         StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             .AsParallel()
-            .ToDictionary(f => f, f => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(f))), StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(f => f, f => Hash(File.ReadAllBytes(f), endingsAside), StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>A file's hash for <see cref="Snapshot"/>; <paramref name="endingsAside"/>: without a UTF-8 byte order mark, CRLF read as LF.</summary>
+    public static string Hash(byte[] bytes, bool endingsAside = false)
+    {
+        if (endingsAside)
+        {
+            var start = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF ? 3 : 0;
+            var plain = new List<byte>(bytes.Length);
+            for (var i = start; i < bytes.Length; i++)
+            {
+                if (bytes[i] != '\r' || i + 1 >= bytes.Length || bytes[i + 1] != '\n')
+                {
+                    plain.Add(bytes[i]);
+                }
+            }
+
+            bytes = plain.ToArray();
+        }
+
+        return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes));
+    }
 
     /// <summary>
     /// <paramref name="runOnce"/>, after which a C# file that used one line ending throughout and now mixes them gets its own
@@ -3448,6 +3469,7 @@ internal static class FormatCommand
         {
             File.Delete(keptFile);
             var before = Directory.Exists(root) ? Snapshot(root) : new Dictionary<string, string>();
+            var beforeText = Directory.Exists(root) ? Snapshot(root, endingsAside: true) : new Dictionary<string, string>();
 
             // --json: each run's changes per rule come from its own report.
             var report = JsonReport.Current is null ? null : Path.Combine(Path.GetTempPath(), $"stylebro-format-json-{Guid.NewGuid():N}");
@@ -3534,21 +3556,27 @@ internal static class FormatCommand
                 return code;
             }
 
+            // A run that changed only line endings or byte order marks (end_of_line, charset) is the last: no fix has anything new
+            // to do (bencodex: a second run checked every framework again for 28 s to say clean).
+            var endingsOnly = changed.Count > 0 && failures.Count == 0 && putBack.Count == 0
+                && changed.All(f => File.Exists(f) && beforeText.TryGetValue(f, out var was) && was == Hash(File.ReadAllBytes(f), endingsAside: true));
+
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
-            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : ", clean.")}");
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : ", clean.")}");
             ListFiles(shown, changed, 10).ForEach(log);
             allChanged.UnionWith(changed);
-            if (changed.Count == 0 || maxRuns == 1)
+            if (changed.Count == 0 || endingsOnly || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
-                var baselined = changed.Count == 0 && failures.Count == 0 ? BaselineKept(root, keptFindings, shown) : null;
-                if (changed.Count == 0 && failures.Count == 0)
+                var settled = (changed.Count == 0 || endingsOnly) && failures.Count == 0;
+                var baselined = settled ? BaselineKept(root, keptFindings, shown) : null;
+                if (settled)
                 {
                     SaveKept(root, args, keptFindings);
                 }
 
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, shown, clean: changed.Count == 0 && failures.Count == 0).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: settled).ForEach(log);
                 if (baselined is not null)
                 {
                     log(baselined);
