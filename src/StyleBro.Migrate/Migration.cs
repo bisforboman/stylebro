@@ -62,10 +62,13 @@ internal static class Migration
         "BRO1604", "BRO1605", "BRO1606", "BRO1607",
     };
 
-    /// <summary>The cache of <see cref="SwitchExpressionsWithoutTrailingComma"/>, by root.</summary>
-    private static readonly Dictionary<string, int> SwitchCounts = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>The StyleBro rules for what StyleSharp's rule at the StyleCop number doesn't check (docs/migrating.md, "Coming from StyleSharp").</summary>
+    private static readonly HashSet<string> StyleSharpLeavesAlone = new(StringComparer.Ordinal)
+    {
+        StyleBro.Analyzers.DiagnosticIds.NamespacePascalCase,
+    };
 
-    private static readonly Regex StyleCopIds = new(@"SA(\d{4})(?:-SA(\d{4}))?");
+    private static readonly Regex StyleCopIds =new(@"SA(\d{4})(?:-SA(\d{4}))?");
 
     private static readonly Regex EfMigrationMarker = new(@"\[(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\(\s*""|:\s*(?:Microsoft\.EntityFrameworkCore\.Migrations\.)?Migration\b|:\s*(?:Microsoft\.EntityFrameworkCore\.Infrastructure\.)?ModelSnapshot\b");
 
@@ -136,6 +139,14 @@ internal static class Migration
                 relevant = [];
             }
 
+            // A StyleBro rule for a part of a StyleCop rule StyleSharp's rule at that number doesn't check (BRO1312: SST1300
+            // leaves namespaces alone): off, the rest of the StyleCop rule stays covered by its other rule.
+            if (StyleSharpOnly(setup) && StyleSharpLeavesAlone.Contains(id))
+            {
+                severity = Severity.None;
+                relevant = [];
+            }
+
             // The XML header rule only stands in for StyleCop's XML header; a plain header is IDE0073's (below). Without a
             // companyName StyleCop wanted 'PlaceholderCompany' in every header: nobody's real header, so BRO1615 stays off.
             if (id == StyleBro.Analyzers.DiagnosticIds.FileHeader && (!XmlHeader(setup) || CompanyName(setup) is null))
@@ -146,20 +157,6 @@ internal static class Migration
                     {
                         result.Reasons[sa] = "stylecop.json sets no companyName, so StyleCop wanted 'PlaceholderCompany' in every header; BRO1615 needs the real one (stylebro_file_header_company)";
                     }
-                }
-
-                severity = Severity.None;
-                relevant = [];
-            }
-
-            // StyleCop 1.1.x's SA1413 doesn't check switch expressions (1.2 does), and BRO1401 has no switch to leave them out:
-            // kafkaflow got trailing commas in 6 StyleCop-clean files (trial 22). Off only where the code has such a switch.
-            if (id == StyleBro.Analyzers.DiagnosticIds.TrailingComma && severity > Severity.None && setup.Version?.StartsWith("1.1.", StringComparison.Ordinal) == true
-                && SwitchExpressionsWithoutTrailingComma(root) is > 0 and var switches)
-            {
-                foreach (var sa in relevant.Where(setup.IsOn))
-                {
-                    result.Reasons[sa] = $"StyleCop {setup.Version}'s SA1413 doesn't check switch expressions, and {id} would add the comma to {switches} multi-line one{(switches == 1 ? string.Empty : "s")} in your code (it has no setting to leave them out)";
                 }
 
                 severity = Severity.None;
@@ -258,6 +255,23 @@ internal static class Migration
         }
 
         AddHungarianPrefixes(setup, lines);
+
+        // StyleCop 1.1.x's SA1413 and StyleSharp's SST1413 don't check switch expressions (trial 22: kafkaflow got commas in 6
+        // StyleCop-clean files; trial 24: Refit in 30 StyleSharp-clean ones).
+        if (setup.Version?.StartsWith("1.1.", StringComparison.Ordinal) == true || StyleSharpOnly(setup))
+        {
+            lines.Add($"{StyleBro.Analyzers.Maintainability.TrailingCommas.SwitchExpressionsKey} = false");
+        }
+
+        // Where StyleSharp's SST rule means something else than the StyleCop rule at its number, its meaning (owner's decision
+        // 2026-10-16): SST1623/SST1624 count a protected setter as restricted and any getter as usable, SST1642/SST1643 only
+        // the standard words before the type, SST1501/SST1502 accept empty braces on one line (trial 24: Refit's
+        // 'catch (TaskCanceledException) { }').
+        if (StyleSharpOnly(setup))
+        {
+            lines.Add($"{StyleBro.Analyzers.Documentation.PropertySummaries.WordingKey} = stylesharp");
+            lines.Add($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true");
+        }
         AddTupleElementCasing(setup, lines, result);
         if (setup.Setting("namingRules", "allowedNamespaceComponents") is { ValueKind: JsonValueKind.Array } components && components.GetArrayLength() > 0)
         {
@@ -1179,41 +1193,6 @@ internal static class Migration
         folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
-    /// The multi-line switch expressions without a trailing comma in the repository's own code (computed once per root: the
-    /// scopes' settings ask again).
-    /// </summary>
-    internal static int SwitchExpressionsWithoutTrailingComma(string root)
-    {
-        lock (SwitchCounts)
-        {
-            if (SwitchCounts.TryGetValue(root, out var known))
-            {
-                return known;
-            }
-        }
-
-        var count = OwnCSharpFiles(root).AsParallel().Sum(file =>
-        {
-            var text = File.ReadAllText(file);
-            if (!text.Contains("switch", StringComparison.Ordinal) || IsGeneratedOrVendored(Path.GetRelativePath(root, file), text))
-            {
-                return 0;
-            }
-
-            var tree = CSharpSyntaxTree.ParseText(text);
-            var lines = tree.GetText().Lines;
-            return tree.GetRoot().DescendantNodes().OfType<SwitchExpressionSyntax>().Count(s => s.Arms.Count > 0 && s.Arms.SeparatorCount < s.Arms.Count
-                && lines.GetLineFromPosition(s.OpenBraceToken.SpanStart).LineNumber != lines.GetLineFromPosition(s.CloseBraceToken.SpanStart).LineNumber);
-        });
-        lock (SwitchCounts)
-        {
-            SwitchCounts[root] = count;
-        }
-
-        return count;
-    }
-
-    /// <summary>
     /// Whether the folders are EmitCompilerGeneratedFiles' layout: '&lt;output&gt;/&lt;generator assembly&gt;/&lt;generator type&gt;/',
     /// the type named after its assembly, under a folder called 'generated' (Spectre.Console checks its
     /// Backport.System.Threading.Lock output in under Generated/, without an '&lt;auto-generated&gt;' header).
@@ -1392,11 +1371,18 @@ internal static class Migration
         }
     }
 
+    /// <summary>Whether the setup is StyleSharp's alone: with StyleCop next to it, StyleCop's meaning of a rule applies.</summary>
+    private static bool StyleSharpOnly(StyleCopSetup setup) => setup.StyleSharp is { WithStyleCop: false };
+
     private static void AddMemberOrder(StyleCopSetup setup, List<string> lines)
     {
         // StyleCop's kind and access order (BRO1001's defaults); stylecop.json's elementOrder decides which of
-        // constant/static/readonly order members within an accessibility.
-        lines.Add("stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class");
+        // constant/static/readonly order members within an accessibility. StyleSharp's SST1201 has methods, operators and
+        // conversions as one kind and nested records after classes (trial 24: Refit's build failed after BRO1001 moved a
+        // public record above a private class).
+        lines.Add(StyleSharpOnly(setup)
+            ? "stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion|operator|extension|method, struct, class, record"
+            : "stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class");
         lines.Add("stylebro_member_access_order = public, internal, protected_internal, protected, private_protected, private");
         var items = setup.Setting("orderingRules", "elementOrder") is { ValueKind: JsonValueKind.Array } order
             ? order.EnumerateArray().Select(e => e.GetString()).ToHashSet()

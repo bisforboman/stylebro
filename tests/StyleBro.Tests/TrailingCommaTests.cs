@@ -6,6 +6,57 @@ public class TrailingCommaTests
 {
     private const string Omit = "stylebro_trailing_comma = omit\n";
 
+    // StyleCop 1.1.x's SA1413 and StyleSharp's SST1413 don't check switch expressions (trials 22 and 24).
+    [Theory]
+    [InlineData("")]
+    [InlineData(Omit)]
+    public Task SwitchExpressions_AreLeftAlone_WhenTurnedOff(string mode) => VerifyFixAsync(
+        """
+        enum E
+        {
+            A,
+            {|BRO1401:B|}
+        }
+
+        class C
+        {
+            string M(int x) => x switch
+            {
+                1 => "a",
+                _ => "b"
+            };
+
+            string N(int x) => x switch
+            {
+                1 => "a",
+                _ => "b",
+            };
+        }
+        """.Replace("{|BRO1401:B|}", mode.Length == 0 ? "{|BRO1401:B|}" : "B"),
+        """
+        enum E
+        {
+            A,
+            B,
+        }
+
+        class C
+        {
+            string M(int x) => x switch
+            {
+                1 => "a",
+                _ => "b"
+            };
+
+            string N(int x) => x switch
+            {
+                1 => "a",
+                _ => "b",
+            };
+        }
+        """.Replace("B,\n", mode.Length == 0 ? "B,\n" : "B\n"),
+        mode + "stylebro_trailing_comma_switch_expressions = false\n");
+
     [Fact]
     public Task MultiLineLists_GetATrailingComma() => VerifyFixAsync(
         """

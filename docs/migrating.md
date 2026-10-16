@@ -305,7 +305,7 @@ The report lists the StyleSharp rules that are on and stand for no StyleCop rule
 ...): StyleBro doesn't replace them, so they stop when StyleSharp.Analyzers is removed. When StyleCop.Analyzers is
 referenced too, a StyleCop rule counts as on when either package enforces it, and `stylecop.json`'s settings are used.
 
-Data: `scripts/stylecop-survey/data/inventory-stylesharp-3.40.1.csv` (StyleSharp's rules, `Get-Inventory.ps1 -Package
+Data: `scripts/stylecop-survey/data/inventory-stylesharp-5.1.2.csv` (StyleSharp's rules, `Get-Inventory.ps1 -Package
 StyleSharp.Analyzers`) and `stylesharp-mapping.csv` (written by `New-StyleSharpMapping.ps1`, which holds the exceptions).
 
 **Using order.** When your `.editorconfig` sets `dotnet_sort_system_directives_first` (or

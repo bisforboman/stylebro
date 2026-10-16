@@ -667,6 +667,92 @@ public class MemberOrderingTests
         """,
         editorConfig: "stylebro_member_order = method, field\n");
 
+    // StyleSharp's SST1201 (trial 24, Refit): methods, operators and conversions are one kind, nested records come after classes.
+    private const string StyleSharpOrder = "stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion|operator|extension|method, struct, class, record\n";
+
+    [Fact]
+    public Task Records_RankWithClasses_ByDefault() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public sealed record Item(string Id);
+
+            private sealed class Counter
+            {
+            }
+        }
+        """);
+
+    [Fact]
+    public Task Records_ComeAfterClasses_WhenListed() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public sealed record Item(string Id);
+
+            public record struct {|BRO1001:Point|}(int X);
+
+            private sealed class Counter
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public record struct Point(int X);
+
+            private sealed class Counter
+            {
+            }
+
+            public sealed record Item(string Id);
+        }
+        """,
+        StyleSharpOrder);
+
+    [Fact]
+    public Task GroupedKinds_ShareARank() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public static C Parse(string s) => new C();
+
+            public static C operator +(C a, C b) => a;
+
+            public static implicit operator int(C c) => 0;
+
+            public void Run()
+            {
+            }
+        }
+        """,
+        StyleSharpOrder);
+
+    [Fact]
+    public Task GroupedKinds_AreOrderedByAccessAndStatic() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void Run()
+            {
+            }
+
+            public static C operator {|BRO1001:+|}(C a, C b) => a;
+        }
+        """,
+        """
+        public class C
+        {
+            public static C operator +(C a, C b) => a;
+
+            public void Run()
+            {
+            }
+        }
+        """,
+        StyleSharpOrder);
+
     [Fact]
     public Task Overloads_StayTogether_AtTheFirstOverloadsPlace() => VerifyFixAsync(
         """

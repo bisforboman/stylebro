@@ -752,7 +752,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - **StyleSharp.Analyzers** (SST ids, a StyleCop successor; owner 2026-10-14 "Read it like StyleCop"): a reference counts as
   StyleCop running; SST severities (its defaults + configs, raw in `StyleCopSetup.Raw`) are translated to SA/SX ids
   (`StyleCopSetup.Translate`, mapping `scripts/stylecop-survey/data/stylesharp-mapping.csv` from New-StyleSharpMapping.ps1
-  over `inventory-stylesharp-3.40.1.csv`; exceptions: SST1117 -> SA1101/SX1101 by `stylesharp.instance_member_qualification`
+  over `inventory-stylesharp-5.1.2.csv`; exceptions: SST1117 -> SA1101/SX1101 by `stylesharp.instance_member_qualification`
   (default omit_this), SST1309 -> SX1309/SX1309S (BRO1303 `_camelCase`, SST1306 ignored), SST1150-1171 -> SA1117, SST1215 ->
   SA1214, SST1633 only with file_header_template, SST1116/SST1119 nothing); `stylesharp.*` keys -> synthetic stylecop.json
   (`StyleSharpUse.Settings`), stylecop.json NOT read (StyleSharp doesn't); SST suppressions carried over

@@ -36,7 +36,7 @@
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-1.0.2.csv" LogicalName="StyleCopRules-1.0.2.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\mapping.csv" LogicalName="StyleCopMapping.csv" />
     <!-- StyleSharp (a StyleCop successor, SST ids): its rules, and the StyleCop rules each stands for (New-StyleSharpMapping.ps1). -->
-    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-stylesharp-3.40.1.csv" LogicalName="StyleSharpRules.csv" />
+    <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\inventory-stylesharp-5.1.2.csv" LogicalName="StyleSharpRules.csv" />
     <EmbeddedResource Include="..\..\scripts\stylecop-survey\data\stylesharp-mapping.csv" LogicalName="StyleSharpMapping.csv" />
     <EmbeddedResource Include="sdk-rules.editorconfig" LogicalName="SdkRules.editorconfig" />
     <EmbeddedResource Include="modernize-rules.editorconfig" LogicalName="ModernizeRules.editorconfig" />

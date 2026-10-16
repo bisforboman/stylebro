@@ -5,29 +5,19 @@ namespace StyleBro.Tests;
 public sealed partial class MigrationTests
 {
     [Theory]
-    [InlineData("1.1.118", "none")]
-    [InlineData("1.2.0-beta.556", "warning")]
-    public void Migrate_StyleCop11_LeavesSwitchExpressionsWithoutTrailingCommas(string version, string severity)
+    [InlineData("1.1.118", true)]
+    [InlineData("1.2.0-beta.556", false)]
+    public void Migrate_StyleCop11_LeavesSwitchExpressionsWithoutTrailingCommas(string version, bool skipped)
     {
         // kafkaflow (StyleCop 1.1.118): BRO1401 added trailing commas to switch expressions in 6 StyleCop-clean files; 1.1.x's
-        // SA1413 never checked them.
+        // SA1413 never checked them. BRO1401 stays on for the other lists.
         Write("Lib.csproj", $"""<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="{version}" /></ItemGroup></Project>""");
         Write("C.cs", "public static class C\n{\n    public static string Name(int x) => x switch\n    {\n        0 => \"zero\",\n        _ => \"other\"\n    };\n}\n");
 
         var result = Migration.Generate(StyleCopSetup.Read(root), root);
 
-        Assert.Contains($"dotnet_diagnostic.BRO1401.severity = {severity}", result.Lines);
-        Assert.Equal(severity == "none", result.Reasons.TryGetValue("SA1413", out var reason) && reason.Contains("switch expressions", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public void Migrate_StyleCop11_KeepsTrailingCommas_WhenTheSwitchesHaveThem()
-    {
-        // Only a switch expression BRO1401 would change counts: with the comma (or on one line), BRO1401 stays on.
-        Write("Lib.csproj", """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="1.1.118" /></ItemGroup></Project>""");
-        Write("C.cs", "public static class C\n{\n    public static string Name(int x) => x switch\n    {\n        0 => \"zero\",\n        _ => \"other\",\n    };\n\n    public static int One(int x) => x switch { 0 => 1, _ => 2 };\n}\n");
-
-        Assert.Contains("dotnet_diagnostic.BRO1401.severity = warning", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+        Assert.Contains("dotnet_diagnostic.BRO1401.severity = warning", result.Lines);
+        Assert.Equal(skipped, result.Lines.Contains("stylebro_trailing_comma_switch_expressions = false"));
     }
 
     [Fact]

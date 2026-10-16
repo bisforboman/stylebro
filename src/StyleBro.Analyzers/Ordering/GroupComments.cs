@@ -35,7 +35,7 @@ internal static class GroupComments
 
         for (var i = 0; i + 1 < members.Count; i++)
         {
-            if (keys[i + 1].Kind == keys[i].Kind && Moves(position, i) && HasComment(members[i]))
+            if (keys[i + 1].KindRank == keys[i].KindRank && Moves(position, i) && HasComment(members[i]))
             {
                 return true;
             }

@@ -25,6 +25,12 @@ internal enum MemberKind
     Struct,
     Class,
 
+    /// <summary>
+    /// A record class: ranked with classes unless <c>record</c> is in <c>stylebro_member_order</c> (StyleCop counts records
+    /// as classes; StyleSharp's SST1201 puts them after classes). A record struct is a struct.
+    /// </summary>
+    Record,
+
     /// <summary>A namespace inside a namespace or file: always first there, like StyleCop (not configurable).</summary>
     Namespace,
 }
@@ -51,6 +57,8 @@ internal enum MemberAccess
 /// stylebro_keep_overloads_together = false | true | same_access
 /// </code>
 /// Kinds or accessibilities left out of a configured list keep their default relative order, after the listed ones.
+/// Entries joined by <c>|</c> share a rank (<c>method|operator|conversion</c>: StyleSharp's SST1201 orders them as one
+/// kind, by access and static only). A record class ranks with classes unless <c>record</c> is listed.
 /// </summary>
 internal sealed class MemberOrderOptions
 {
@@ -81,6 +89,7 @@ internal sealed class MemberOrderOptions
         ["method"] = (int)MemberKind.Method,
         ["struct"] = (int)MemberKind.Struct,
         ["class"] = (int)MemberKind.Class,
+        ["record"] = (int)MemberKind.Record,
     };
 
     private static readonly Dictionary<string, int> AccessNames = new(StringComparer.OrdinalIgnoreCase)
@@ -99,8 +108,8 @@ internal sealed class MemberOrderOptions
     private readonly int[] accessRanks;
 
     private MemberOrderOptions(
-        List<int>? kindOrder,
-        List<int>? accessOrder,
+        List<int[]>? kindOrder,
+        List<int[]>? accessOrder,
         bool constantsFirst,
         bool staticFirst,
         bool readonlyFirst,
@@ -109,6 +118,11 @@ internal sealed class MemberOrderOptions
     {
         OverloadsSameAccessOnly = overloadsSameAccessOnly;
         kindRanks = BuildRanks(kindOrder, KindCount);
+        if (kindOrder?.Exists(group => Array.IndexOf(group, (int)MemberKind.Record) >= 0) != true)
+        {
+            kindRanks[(int)MemberKind.Record] = kindRanks[(int)MemberKind.Class];
+        }
+
         accessRanks = BuildRanks(accessOrder, AccessCount);
         ConstantsFirst = constantsFirst;
         StaticFirst = staticFirst;
@@ -153,8 +167,8 @@ internal sealed class MemberOrderOptions
         return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether, sameAccess);
     }
 
-    /// <summary>Configured entries rank first (in configured order); the rest follow in default order.</summary>
-    private static int[] BuildRanks(List<int>? configured, int count)
+    /// <summary>Configured entries rank first (in configured order, a group sharing one rank); the rest follow in default order.</summary>
+    private static int[] BuildRanks(List<int[]>? configured, int count)
     {
         var ranks = new int[count];
         for (var i = 0; i < count; i++)
@@ -165,11 +179,21 @@ internal sealed class MemberOrderOptions
         var next = 0;
         if (configured is not null)
         {
-            foreach (var value in configured)
+            foreach (var group in configured)
             {
-                if (ranks[value] == -1)
+                var any = false;
+                foreach (var value in group)
                 {
-                    ranks[value] = next++;
+                    if (ranks[value] == -1)
+                    {
+                        ranks[value] = next;
+                        any = true;
+                    }
+                }
+
+                if (any)
+                {
+                    next++;
                 }
             }
         }
@@ -185,19 +209,28 @@ internal sealed class MemberOrderOptions
         return ranks;
     }
 
-    private static List<int>? ParseList(AnalyzerConfigOptions options, string key, Dictionary<string, int> names)
+    private static List<int[]>? ParseList(AnalyzerConfigOptions options, string key, Dictionary<string, int> names)
     {
         if (!options.TryGetValue(key, out var value) || value is null)
         {
             return null;
         }
 
-        var result = new List<int>();
+        var result = new List<int[]>();
         foreach (var part in value.Split(','))
         {
-            if (names.TryGetValue(part.Trim(), out var parsed))
+            var group = new List<int>();
+            foreach (var name in part.Split('|'))
             {
-                result.Add(parsed);
+                if (names.TryGetValue(name.Trim(), out var parsed))
+                {
+                    group.Add(parsed);
+                }
+            }
+
+            if (group.Count > 0)
+            {
+                result.Add(group.ToArray());
             }
         }
 

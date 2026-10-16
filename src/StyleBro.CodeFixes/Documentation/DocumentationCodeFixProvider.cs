@@ -125,7 +125,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             else if (diagnostic.Id is DiagnosticIds.PropertySummaryWording or DiagnosticIds.PropertySummaryRestrictedSetter)
             {
                 if (root.FindToken(span.Start).Parent is PropertyDeclarationSyntax property
-                    && PropertySummaries.GetFinding(property, text) is { } finding)
+                    && PropertySummaries.GetFinding(property, text, PropertySummaries.FollowsStyleSharp(options)) is { } finding)
                 {
                     changes.Add(new TextChange(finding.Replace, finding.NewText));
                 }
@@ -133,7 +133,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             else if (diagnostic.Id is DiagnosticIds.ConstructorSummary or DiagnosticIds.DestructorSummary)
             {
                 if (root.FindToken(span.Start).Parent?.AncestorsAndSelf().OfType<BaseMethodDeclarationSyntax>().FirstOrDefault() is { } member
-                    && ConstructorSummaries.GetFinding(member, text) is { } finding)
+                    && ConstructorSummaries.GetFinding(member, text, PropertySummaries.FollowsStyleSharp(options)) is { } finding)
                 {
                     changes.Add(new TextChange(finding.Replace, finding.NewText));
                 }

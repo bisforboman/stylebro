@@ -31,9 +31,15 @@ internal static class ConstructorSummaries
     /// The finding for a constructor or destructor whose summary doesn't begin with the standard text, or null. Not
     /// reported: members without a summary (missing documentation isn't reported; '&lt;inheritdoc/&gt;' has none), records.
     /// </summary>
-    public static Finding? GetFinding(BaseMethodDeclarationSyntax member, SourceText text)
+    /// <remarks>
+    /// With <paramref name="styleSharp"/> (<c>stylebro_summary_wording = stylesharp</c>, StyleSharp's SST1642/SST1643) only
+    /// the standard words before the type count ('Initializes a new instance of the <c>Key</c> struct.' is fine), and static
+    /// constructors aren't checked.
+    /// </remarks>
+    public static Finding? GetFinding(BaseMethodDeclarationSyntax member, SourceText text, bool styleSharp = false)
     {
-        if (member.Parent is not TypeDeclarationSyntax type || type is RecordDeclarationSyntax || GetSummary(member) is not { } summary)
+        if (member.Parent is not TypeDeclarationSyntax type || type is RecordDeclarationSyntax || GetSummary(member) is not { } summary
+            || (styleSharp && member is ConstructorDeclarationSyntax && member.Modifiers.Any(SyntaxKind.StaticKeyword)))
         {
             return null;
         }
@@ -61,7 +67,8 @@ internal static class ConstructorSummaries
         // representing ...' is fine.
         var line = text.Lines.GetLineFromPosition(start);
         var rest = text.ToString(TextSpan.FromBounds(start, line.End));
-        if (accepted.Any(a => StartsWithWords(Normalize(rest), Normalize(a.TrimEnd('.')))))
+        if (accepted.Any(a => StartsWithWords(Normalize(rest), Normalize(a.TrimEnd('.'))))
+            || (styleSharp && accepted.Any(a => rest.StartsWith(a.Substring(0, a.IndexOf("<see", StringComparison.Ordinal)), StringComparison.Ordinal))))
         {
             return null;
         }
