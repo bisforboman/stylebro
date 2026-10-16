@@ -82,11 +82,13 @@ public sealed partial class MigrationTests
         // The field style is judged where StyleCop runs, with its settings there (the trial: "SA1309 is on").
         Assert.Contains("Private fields where StyleCop runs: 2 named '_field', 0 named 'field'; SA1309 is off where StyleCop runs, so BRO1303 uses '_camelCase'.", result.Notes);
 
-        // One block, in a section for those folders only.
+        // One block, in a section for those folders only, and one that turns the rules off in the others (trial 25).
         var file = Assert.Single(plan);
         Assert.Equal(".editorconfig", file.Key);
-        Assert.Equal("src/{LiteBus.Core,LiteBus.Events}/**.cs", Assert.Single(file.Value).Section);
-        var block = Migration.Render(file.Value);
+        Assert.Equal(["src/{LiteBus.Core,LiteBus.Events}/**.cs", "{samples,src/LiteBus.Analyzers,tests}/**.cs"], file.Value.Select(s => s.Section));
+        Assert.Contains("dotnet_diagnostic.BRO1001.severity = none", file.Value[1].Lines);
+        Assert.Contains("dotnet_diagnostic.IDE0055.severity = none", file.Value[1].Lines);
+        var block = Migration.Render([file.Value[0]]);
         Assert.True(Applies(block, "src/LiteBus.Core/Bus.cs"));
         Assert.True(Applies(block, "src/LiteBus.Events/Deep/Handler.cs"));
         Assert.False(Applies(block, "src/LiteBus.Analyzers/Analyzer.cs"));
@@ -98,7 +100,7 @@ public sealed partial class MigrationTests
             new[]
             {
                 "StyleCop runs only in src/LiteBus.Core, src/LiteBus.Events: the settings apply there, with the rules StyleCop has on there.",
-                "No StyleCop in samples, src/LiteBus.Analyzers, tests: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
+                "No StyleCop in samples, src/LiteBus.Analyzers, tests: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'stylebro-migrate format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.",
             },
             Program.ScopeReport(setup));
         var hints = Program.PackageHints(setup, root);

@@ -32,6 +32,13 @@ internal static class Migration
     /// <summary>The comment above a vendored folder's generated_code section.</summary>
     public const string VendoredComment = "# Vendored code (someone else's): formatting and StyleBro leave it alone, like generated code";
 
+    /// <summary>How the block records stylecop.json's settings, read back once the file is gone (<see cref="RecordedSettings"/>).</summary>
+    public const string SettingsPrefix = "# stylecop.json settings (used once the file is gone): ";
+
+    /// <summary>The comment above the lines that turn rules off where StyleCop didn't run.</summary>
+    public const string WithoutStyleCopComment =
+        "# No StyleCop ran here: StyleBro's rules and the built-in ones the block sets are off by id, so the build and 'format' leave it alone.";
+
     /// <summary>How the block records the StyleCop.Analyzers version, read back once the package is gone (<see cref="RecordedVersion"/>).</summary>
     public const string VersionPrefix = "# StyleCop.Analyzers version: ";
 
@@ -276,6 +283,18 @@ internal static class Migration
             lines.Add($"{StyleBro.Analyzers.Ordering.MemberOrderOptions.NamespacesKey} = false");
         }
 
+        // StyleSharp's SST1653 (short summaries on one line) is BRO1616 with single_line_when_fits (trial 25).
+        if (setup.Raw?.TryGetValue("SST1653", out var shortSummaries) == true && shortSummaries >= Severity.Suggestion)
+        {
+            var summaryOff = lines.IndexOf($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.SummaryLayout}.severity = none");
+            if (summaryOff >= 0)
+            {
+                lines[summaryOff] = $"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.SummaryLayout}.severity = warning";
+            }
+
+            lines.Add($"{StyleBro.Analyzers.Documentation.SummaryLayout.LayoutKey} = single_line_when_fits");
+        }
+
         AddTupleElementCasing(setup, lines, result);
         if (setup.Setting("namingRules", "allowedNamespaceComponents") is { ValueKind: JsonValueKind.Array } components && components.GetArrayLength() > 0)
         {
@@ -302,6 +321,14 @@ internal static class Migration
         if (unenforced.Count > 0)
         {
             result.Notes.Add($"Not kept, because nothing enforces them (severity silent or none): {string.Join(", ", unenforced.Select(k => $"{k} = {ownSettings[k]}"))}; StyleCop's setting is written instead.");
+        }
+
+        // Nor one weaker than SA1503 while it's on: with Autofac's 'when_multiline:warning', braceless one-line statements that
+        // SA1503 reported weren't reported any more (trial 25). BRO1514's page says 'true' is SA1503's.
+        else if (setup.IsOn("SA1503") && ownSettings.TryGetValue("csharp_prefer_braces", out var braces) && braces.Split(':')[0].Trim() is not ("true" or ""))
+        {
+            own.Remove("csharp_prefer_braces");
+            result.Notes.Add($"Not kept: csharp_prefer_braces = {braces}, because SA1503 is on and wants braces on every statement; the block writes csharp_prefer_braces = true (it comes after your line, so it wins).");
         }
 
         if (fieldStyle is null && UnsortedUnderOwnKey(setup, root, ownSettings) is var (usingsNote, keptUsings))
@@ -579,6 +606,12 @@ internal static class Migration
         if (setup.Version is { } version)
         {
             mainLines = [.. mainLines, string.Empty, VersionPrefix + version + " (rules it doesn't have stay off after the package is removed)"];
+
+            // stylecop.json's settings, read back once it's gone (StyleSharp's come from its stylesharp.* keys, which stay).
+            if (setup.Settings is { } settings && setup.StyleSharp is not { WithStyleCop: false })
+            {
+                mainLines = [.. mainLines, SettingsPrefix + System.Text.Json.JsonSerializer.Serialize(settings)];
+            }
         }
 
         if (setup.StyleSharp is { } styleSharp)
@@ -590,6 +623,17 @@ internal static class Migration
         {
             [".editorconfig"] = [(setup.Folders is { } folders ? StyleCopSetup.SectionFor(folders, setup.FoldersWithout) : MainSection, mainLines)],
         };
+
+        // Where StyleCop didn't run, StyleBro's rules and the built-in ones the block sets are off by id, like init's opt-out block:
+        // with the preset off ('none' in a Directory.Build.props they share) they reported there at their default severities, and
+        // a Release build failed while 'format' (which leaves those folders alone) said Clean (trial 25, Autofac's AOT tests).
+        // ponytail: a 'root = true' folder among them doesn't see this section; it keeps whatever its own files say.
+        if (setup.Folders is not null && setup.FoldersWithout.Count > 0)
+        {
+            var settings = main.Lines.Select(l => KeyOf(l) is { } k ? new KeyValuePair<string, string>(k, l.Substring(l.IndexOf('=') + 1).Trim()) : default).Where(p => p.Key is not null);
+            plan[".editorconfig"].Add((StyleCopSetup.SectionFor(setup.FoldersWithout, setup.Folders), [WithoutStyleCopComment, .. InitCommand.OptOutLines(settings, OwnSettings(root))]));
+        }
+
         plan[".editorconfig"].AddRange(main.CSharpierSections);
 
         foreach (var folder in MigrationFolders(root))
@@ -790,6 +834,29 @@ internal static class Migration
         return false;
     }
 
+    /// <summary>
+    /// What to say when a new Directory.Build.props at <paramref name="props"/> hides one above the repository, which it doesn't
+    /// import (<see cref="HasParentProps"/>; trial 25: unsaid), or null.
+    /// </summary>
+    public static string? HiddenPropsNote(string props)
+    {
+        var start = Path.GetDirectoryName(Path.GetFullPath(props))!;
+        if (File.Exists(props) || FormatCommand.RepositoryRoot(start) is not { } top)
+        {
+            return null;
+        }
+
+        for (var folder = Path.GetDirectoryName(top.TrimEnd('\\', '/')); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            if (File.Exists(Path.Combine(folder, "Directory.Build.props")))
+            {
+                return $"Note: {Path.Combine(folder, "Directory.Build.props")} is above the repository, and MSBuild reads only the nearest Directory.Build.props: the new one hides it (it isn't imported, since another checkout doesn't have it). If your build needs it, import it from the new file.";
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>The comment line naming the folders (relative, '/'-separated) 'format' leaves alone.</summary>
     public static string UnformattedLine(IEnumerable<string> folders) => UnformattedPrefix + string.Join(", ", folders) + UnformattedSuffix;
 
@@ -850,6 +917,22 @@ internal static class Migration
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var version = Regex.Match(block.Value, "^" + Regex.Escape(prefix) + @"(\S+)", RegexOptions.Multiline);
         return version.Success && !version.Groups[1].Value.Contains("$(", StringComparison.Ordinal) ? version.Groups[1].Value : null; // an earlier run recorded the property itself
+    }
+
+    /// <summary>The stylecop.json settings the stylebro-migrate block (<see cref="BlockFolder"/>) records, or null.</summary>
+    public static System.Text.Json.JsonElement? RecordedSettings(string root)
+    {
+        var path = Path.Combine(BlockFolder(root), ".editorconfig");
+        var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
+        var line = Regex.Match(block.Value, "^" + Regex.Escape(SettingsPrefix) + "(.+)$", RegexOptions.Multiline);
+        try
+        {
+            return line.Success ? System.Text.Json.JsonDocument.Parse(line.Groups[1].Value.Trim()).RootElement.Clone() : null;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
+        }
     }
 
     /// <summary>The block that goes into an .editorconfig.</summary>

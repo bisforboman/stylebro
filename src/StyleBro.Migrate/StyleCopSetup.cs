@@ -197,6 +197,9 @@ internal sealed class StyleCopSetup
     /// <summary>Gets a value indicating whether <see cref="Version"/> comes from the block an earlier --write wrote (no reference left).</summary>
     public bool VersionRecorded { get; init; }
 
+    /// <summary>Gets a value indicating whether <see cref="Settings"/> are the ones the last --write recorded (stylecop.json is gone).</summary>
+    public bool SettingsRecorded { get; init; }
+
     /// <summary>Gets the version text of the StyleCop.Analyzers reference when it names a property no MSBuild file defines ('$(X)'), else null.</summary>
     public string? UnresolvedVersion { get; init; }
 
@@ -425,7 +428,16 @@ internal sealed class StyleCopSetup
             configs = configs.Select(c => c with { Config = c.Config with { Json = null } }).ToList();
         }
 
+        // After the swap, stylecop.json may be gone too (the report says it can go): the settings the last --write recorded count
+        // (trial 25: a second --write turned stylebro_document_internal_elements back on and moved the usings inside).
         var settings = json is null ? null : ReadSettings(json);
+        var settingsRecorded = json is null && !styleSharpOnly && recordedVersion is not null && Migration.RecordedSettings(root) is not null;
+        if (settingsRecorded)
+        {
+            settings = Migration.RecordedSettings(root);
+            sources.Add("stylecop.json's settings recorded by the last --write");
+        }
+
         foreach (var file in new[] { json }.Concat(linked).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase))
         {
             sources.Add(Path.GetRelativePath(root, file));
@@ -525,6 +537,7 @@ internal sealed class StyleCopSetup
             FoldersWithout = without,
             ReferencedIn = projects.ReferencedIn.Select(Relative).ToList(),
             VersionRecorded = recorded is not null,
+            SettingsRecorded = settingsRecorded,
             UnresolvedVersion = recorded is null ? unresolved : null,
             RemovedIn = projects.RemovedIn.Select(Relative).ToList(),
             ReferencedOutside = projects.ReferencedOutside.Select(Relative).ToList(),

@@ -57,14 +57,19 @@ internal static class AgentsFile
     public static List<string> Update(string root, bool write, bool requested)
     {
         var lines = new List<string>();
+        var path = Path.Combine(root, FileName);
+        var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         if (!requested)
         {
-            lines.Add(Tip);
+            // Trial 25: the tip read as if there were no AGENTS.md. With the section there, nothing to say.
+            if (existing?.Contains(Begin, StringComparison.Ordinal) != true)
+            {
+                lines.Add(existing is null ? Tip : $"Tip: --agents-md adds a StyleBro section to your {FileName} for AI coding agents.");
+            }
+
             return lines;
         }
 
-        var path = Path.Combine(root, FileName);
-        var existing = File.Exists(path) ? File.ReadAllText(path) : null;
         var text = Apply(existing);
         var changed = text != existing?.Replace("\r\n", "\n");
         JsonReport.Set("agentsMd", new JsonObject { ["file"] = FileName, ["created"] = existing is null, ["changed"] = changed, ["written"] = write && changed });

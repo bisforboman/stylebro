@@ -95,7 +95,9 @@ the block. It doesn't treat the setup as leftovers. Code that a project compiles
 StyleBro can't fix it there, and `format` skips submodules. The package's build targets read the submodule paths from
 `.gitmodules`.
 
-`stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. The steps in order:
+`stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. `stylecop.json` can also go once the
+package is gone: the block records its settings (`# stylecop.json settings ...`), and a later `--write` reads them from
+there. The steps in order:
 [getting-started.md](getting-started.md#b-coming-from-stylecop). A small StyleCop project migrated step by step, with
 real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).
 
@@ -108,11 +110,12 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   topmost folders with no project without StyleCop below, and sibling folders sharing a name start no such project has
   as one wildcard, `src/{LiteBus,LiteBus.Inbox*}`), a
   sub-directory `.editorconfig` that covers all of them counts as the base (a `src/.editorconfig` that turns everything
-  but documentation off), and folders without StyleCop get no settings at all; the report lists them, and so does a
+  but documentation off), and folders without StyleCop get none of its settings (their rules are off, see below); the report lists them, and so does a
   comment line at the top of the block (`# No StyleCop ran in: examples; ...`), which tells `stylebro-migrate format` to
   leave those folders alone: its whitespace pass would reformat them whatever the rule severities say. Remove that line
-  to have them formatted. StyleBro's rules still report there in the build (at the preset's or their default
-  severities), since no settings turn them off. Whether StyleCop runs in a project is MSBuild's answer: with several
+  to have them formatted. The block also has a section for those folders that turns StyleBro's rules and the
+  built-in ones it sets off by id (`dotnet_diagnostic.BRO1401.severity = none`, ...), so the build doesn't report
+  there what `format` leaves alone (remove it too to have them checked). Whether StyleCop runs in a project is MSBuild's answer: with several
   projects, each one is evaluated (`dotnet msbuild -getItem`, in parallel, a few seconds in all); only a project MSBuild
   can't evaluate falls back to reading the files' text, with a warning. When every project or none
   references StyleCop, the settings apply to the whole repository.
@@ -231,7 +234,9 @@ can't take a key back from the preset. Using order is the clearest case: `dotnet
 `dotnet_sort_system_directives_first` is set, even to `false` (so the preset doesn't set it), and the block sets it only when StyleCop sorted usings
 (SA1208 or SA1210 on), and where a sub-directory or path section has both off, the keys go only into the sections that
 sort (a scope can't unset the main block's keys). SDK settings your root
-`.editorconfig` already sets for C# files are left out: your code is already formatted with them.
+`.editorconfig` already sets for C# files are left out: your code is already formatted with them. Except
+`csharp_prefer_braces` while SA1503 is on: a `when_multiline` or `false` there would stop braceless one-line statements
+being reported, so the block writes `true` (it comes later and wins), and the report says so.
 
 ## Suppressions
 
@@ -290,6 +295,7 @@ number (`SST1413` is SA1413); the exceptions:
 | SST1150-SST1171 (one per kind of list) | SA1117, on when all of them are |
 | SST1214 and SST1215 (static and instance readonly fields first) | SA1214, on when both are |
 | SST1633 (a header from `file_header_template`) | SA1633 with a plain header (IDE0073); nothing without `file_header_template` |
+| SST1653 (short summaries on one line) | no StyleCop rule: [BRO1616](rules/BRO1616.md) on, with `stylebro_summary_layout = single_line_when_fits` |
 | SST1108, SST1116, SST1119 (other rules at those numbers) | nothing; StyleCop's SA1108, SA1116 and SA1119 count as off |
 
 StyleSharp doesn't read `stylecop.json`, so neither does the migration in a StyleSharp repository (a leftover one is

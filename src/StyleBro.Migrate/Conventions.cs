@@ -146,6 +146,9 @@ internal static class Conventions
     /// </summary>
     public const string OneLineBodiesKey = "one-line method bodies";
 
+    /// <summary>Files whose first block namespace has its '{' on its own line, or at the end of the line (<see cref="NamespaceBraces"/>).</summary>
+    public const string NamespaceBracesKey = "namespace braces";
+
     /// <summary>The part of the line-endings note about IDE0055, left out where init doesn't lower it (IDE0055 off under CSharpier).</summary>
     public const string IdeSuggestion = " and IDE0055 to suggestion";
 
@@ -217,6 +220,8 @@ internal static class Conventions
         new(AutoAccessorsKey, "auto-property accessors ('{ get; set; }')", "warning", ("warning", "on one line"), ("none", "on several lines"), Off(DiagnosticIds.AutoAccessorsOnOneLine)) { Unit = "property declaration" },
         new(RegionsKey, "'#region's inside members", "warning", ("warning", "without"), ("none", "'#region's"), Off(DiagnosticIds.NoRegionsInCodeElements)) { Unit = "region", KeepAny = true, Keeps = $"{DiagnosticIds.NoRegionsInCodeElements} would remove them" },
         new(EndOfLineKey, "C# files' line endings", "unset", ("lf", "LF"), ("crlf", "CRLF"), null) { Unit = "file" },
+        new(AfterBlockKey, "statements after a block's '}'", "warning", ("warning", "after a blank line"), ("none", "right below the '}'"), null) { Unit = "statement" },
+        new(NestedIfKey, "nested ifs BRO1149 would merge", "warning", ("warning", "merged ('if (a && b)')"), ("none", "nested"), Off(DiagnosticIds.NestedIf)) { Unit = "nested if", KeepAny = true, Keeps = $"{DiagnosticIds.NestedIf} would merge each" },
         new(SeparationKey, "neighbouring members", "warning", ("warning", "with a blank line between"), ("none", "without one"), Off(DiagnosticIds.ElementsSeparatedByBlankLine)) { Unit = "member pair" },
         new(DocBlankLineKey, "doc comments below code", "warning", ("warning", "after a blank line"), ("none", "right below the code"), Off(DiagnosticIds.BlankLineBeforeDocumentation)) { Unit = "doc comment" },
         new(CommentBlankLineKey, "'//' comments above code", "warning", ("warning", "right above the code"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterComment)) { Unit = "comment" },
@@ -468,9 +473,18 @@ internal static class Conventions
     /// BRO1619's severity: doc comments that mix the elements Visual Studio's '///' stub writes (typeparam, param, returns)
     /// with ones that go after them (value, exception, remarks, example, seealso), in BRO1619's order or not. Spectre.Console
     /// puts '&lt;remarks&gt;' right below the summary, and BRO1619 moved it below the params in ~40 places (trial 24). Comments with
-    /// only the stub's elements are left out: they're in its order anyway, and would outvote the habit.
+    /// only the stub's elements are counted apart: mostly in its order anyway, they'd outvote the habit (<see cref="FoldDocOrder"/>).
     /// </summary>
     private const string DocOrderKey = "dotnet_diagnostic." + DiagnosticIds.DocumentationElementOrder + ".severity";
+
+    /// <summary>BRO1519's severity: statements right after a statement block's '}', after a blank line or not (trial 25: Speckle's 81 % went unsaid).</summary>
+    private const string AfterBlockKey = "dotnet_diagnostic." + DiagnosticIds.BlankLineAfterCloseBrace + ".severity";
+
+    /// <summary>BRO1149's severity: nested ifs it would merge; any few keep them (trial 25: MimeKit's ~30 were merged).</summary>
+    private const string NestedIfKey = "dotnet_diagnostic." + DiagnosticIds.NestedIf + ".severity";
+
+    /// <summary>Doc comments with only the stub's elements (typeparam, param, returns), in BRO1619's order or not (<see cref="FoldDocOrder"/>).</summary>
+    private const string DocOrderStubKey = "doc element order (stub elements only)";
 
     /// <summary>
     /// BRO1510's severity: multi-line accessor lists whose accessors all have block bodies, laid out alike (all one-line or all
@@ -728,6 +742,7 @@ internal static class Conventions
         CountRelativeUsings(trees, counts);
         FoldLeadingLambdas(counts, settings);
         FoldOneLineBodies(counts);
+        FoldDocOrder(counts);
         CountNonPrivateNaming(trees, counts, settings);
         return counts;
     }
@@ -870,6 +885,20 @@ internal static class Conventions
         }
     }
 
+    /// <summary>
+    /// BRO1619's stub-only comments (<see cref="DocOrderStubKey"/>) decide when the mixed ones are too few to tell: '&lt;returns&gt;'
+    /// above '&lt;param&gt;' in 12 of 12 comments was left to BRO1619, which reordered all of them (trial 25). The bucket is removed.
+    /// </summary>
+    public static void FoldDocOrder(Dictionary<string, int[]> counts)
+    {
+        if (counts[DocOrderKey].Sum() < MinimumAgreeing)
+        {
+            counts[DocOrderKey] = [counts[DocOrderKey][0] + counts[DocOrderStubKey][0], counts[DocOrderKey][1] + counts[DocOrderStubKey][1]];
+        }
+
+        counts.Remove(DocOrderStubKey);
+    }
+
     /// <summary>BRO1509's two counts in one: see <see cref="OneLineBodiesKey"/>. The bucket is removed.</summary>
     public static void FoldOneLineBodies(Dictionary<string, int[]> counts)
     {
@@ -956,6 +985,8 @@ internal static class Conventions
         counts[BinaryOperatorSpacingKey] = new int[3];
         counts[ImplicitNewSpacingKey] = new int[2];
         counts[OneLineBodiesKey] = new int[2];
+        counts[NamespaceBracesKey] = new int[2];
+        counts[DocOrderStubKey] = new int[2];
         foreach (var key in LeadingLambdaKeys)
         {
             counts[key + LeadingLambdaBucket] = new int[2];
@@ -1435,6 +1466,28 @@ internal static class Conventions
             CommentBlankLines();
             CommentsBelowCode();
             Documentation();
+
+            // One per file: its first block namespace whose braces span lines.
+            if (root.DescendantNodes(n => n is CompilationUnitSyntax or NamespaceDeclarationSyntax).OfType<NamespaceDeclarationSyntax>()
+                .FirstOrDefault(n => !Skip(n.OpenBraceToken.SpanStart) && Line(n.OpenBraceToken.SpanStart) != Line(n.CloseBraceToken.SpanStart)) is { } block)
+            {
+                counts[NamespaceBracesKey][Line(block.OpenBraceToken.GetPreviousToken().SpanStart) == Line(block.OpenBraceToken.SpanStart) ? 1 : 0]++;
+            }
+
+            // Statements right after a statement block's '}' that BRO1519 judges: after a blank line, or not.
+            static bool AfterBlockOn(string id) => id == DiagnosticIds.BlankLineAfterCloseBrace;
+            foreach (var brace in root.DescendantTokens().Where(t => t.IsKind(SyntaxKind.CloseBraceToken) && t.Parent is BlockSyntax { Parent: StatementSyntax or ElseClauseSyntax or CatchClauseSyntax or FinallyClauseSyntax }))
+            {
+                var next = brace.GetNextToken();
+                if (next.Parent?.AncestorsAndSelf().OfType<StatementSyntax>().FirstOrDefault() is { } statement && statement.GetFirstToken() == next
+                    && StyleBro.Analyzers.Layout.BlankLineRuns.JudgesGapAfter(brace, next, text, AfterBlockOn, gapIsReplaced: true))
+                {
+                    Add(AfterBlockKey, !next.LeadingTrivia.Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia)));
+                }
+            }
+
+            // Unit = nested ifs BRO1149 would merge: only those count.
+            counts[NestedIfKey][1] += root.DescendantNodes().OfType<IfStatementSyntax>().Count(i => StyleBro.Analyzers.Readability.NestedIfs.GetInner(i) is not null);
 
             // Unit = regions inside members (BRO1113's): only the uses count.
             counts[RegionsKey][1] += StyleBro.Analyzers.Readability.Regions.GetRegions(root).Count(r => r.InCodeElement);
@@ -2110,15 +2163,18 @@ internal static class Conventions
                     .Select(n => n is null ? -1 : Array.IndexOf(StyleBro.Analyzers.Documentation.DocumentationStyle.ElementOrder, n))
                     .Where(r => r > 0)
                     .ToList();
-                if (ranks.Any(r => r <= 3) && ranks.Any(r => r >= 4))
+
+                // Only the stub's elements (2 or more): their own count, used when the mixed comments are too few (FoldDocOrder).
+                var key = ranks.Any(r => r <= 3) && ranks.Any(r => r >= 4) ? DocOrderKey : ranks.Count(r => r <= 3) >= 2 && ranks.All(r => r <= 3) ? DocOrderStubKey : null;
+                if (key is not null)
                 {
                     if (findings.Any(f => f.Id == DiagnosticIds.DocumentationElementOrder))
                     {
-                        counts[DocOrderKey][1]++;
+                        counts[key][1]++;
                     }
                     else if (ranks.SequenceEqual(ranks.Order()))
                     {
-                        counts[DocOrderKey][0]++;
+                        counts[key][0]++;
                     }
                 }
             }
@@ -2505,6 +2561,35 @@ internal static class Conventions
     public static string UsingName(UsingDirectiveSyntax u) =>
         (u.Alias?.Name.Identifier.ValueText ?? u.NamespaceOrType.ToString()).Replace("global::", string.Empty).Replace(" ", string.Empty);
 
+    /// <summary>
+    /// Namespace braces against csharp_new_line_before_open_brace (owner's choice 2026-10-16, "Count namespace braces and say
+    /// so"): Roslyn has no value of its own for namespaces, 'types' covers them, so MimeKit's 'methods,types' with 'namespace X {'
+    /// in 670 files had IDE0055 move 614 braces. <paramref name="value"/>: the key's value in effect. Null when every counted file
+    /// agrees; else the report line, and, when most files disagree, the lines that turn IDE0055 off until the team decides.
+    /// </summary>
+    public static (List<string> Lines, string Report)? NamespaceBraces(IReadOnlyDictionary<string, int[]> counts, string value)
+    {
+        var count = counts.TryGetValue(NamespaceBracesKey, out var c) ? c : new int[2];
+        value = value.Split(':')[0].Trim().ToLowerInvariant();
+        var ownLine = value.Split(',').Any(v => v.Trim() is "all" or "types");
+        var (changing, total) = (count[ownLine ? 1 : 0], count.Sum());
+        if (changing == 0)
+        {
+            return null;
+        }
+
+        var found = $"csharp_new_line_before_open_brace = {value} puts a namespace's '{{' {(ownLine ? "on its own line (Roslyn's 'types' covers namespaces)" : "at the end of the line")}, but {changing} of {Plural(total, "file")} have it {(ownLine ? "at the end of the line" : "on its own line")}";
+        if (changing * 2 <= total)
+        {
+            return ([], $"namespace braces: {found}: 'format' moves them");
+        }
+
+        // ponytail: a key set by a team below the block wins over this line; init then only reports (the IDE0055 severity is theirs).
+        var change = $"with IDE0055 on, {Plural(changing, "file")} will change. Set csharp_new_line_before_open_brace accordingly (Roslyn has no value for namespaces alone: 'types' is for types and namespaces alike), or accept the change: put 'dotnet_diagnostic.IDE0055.severity = warning' below the stylebro-migrate block in a [*.cs] section (a later line wins)";
+        return ([$"# init: namespace braces: {found}. IDE0055 is off until you decide, so 'format' leaves whitespace alone; {change}.", "dotnet_diagnostic.IDE0055.severity = none"],
+            $"namespace braces: {found}: IDE0055 is off until you decide; {change}");
+    }
+
     /// <summary>The folder a piece of <see cref="CSharpier"/>'s evidence applies to: its own, or the one above '.config'.</summary>
     private static string CSharpierFolder(string evidence)
     {
@@ -2790,7 +2875,9 @@ internal static class Conventions
     /// </summary>
     private static string? Contradicted(Convention convention, string? code, IReadOnlyDictionary<string, string>? repository)
     {
-        if (convention.Enforcer is null || repository is null || !repository.TryGetValue(convention.Key, out var setting))
+        // A key the team enforces through its IDE rule by id ('dotnet_diagnostic.IDE0011.severity = warning') is theirs, whatever
+        // the code does: it stays, with the StyleBro rule enforcing it (trial 25: "nothing enforced it" turned BRO1514 off).
+        if (convention.Enforcer is null || repository is null || !repository.TryGetValue(convention.Key, out var setting) || InitCommand.EnforcedByIdeRule(convention.Key, repository))
         {
             return null;
         }
