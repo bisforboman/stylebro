@@ -232,7 +232,7 @@ internal static class Program
 
         var suppressions = RewriteSuppressions(root, Suppressions.WithoutOff(Suppressions.WithSonar(Suppressions.WithStyleSharp(result.Replacements, setup), sonar), plan.Values.SelectMany(blocks => blocks).SelectMany(b => b.Lines)), write, sonar is null ? setup.Folders : null);
         Console.WriteLine(suppressions.Added == 0
-            ? "Suppressions: none in the code to carry over."
+            ? suppressions.Already > 0 ? $"Suppressions: already carried over ({suppressions.Already} files suppress the replacing rules too)." : "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
 
         // SSH.NET kept its stylecop.json without a word: StyleBro never reads it, the settings are in the block now.
@@ -243,7 +243,7 @@ internal static class Program
 
         if (suppressions.NotCarried > 0)
         {
-            Console.WriteLine($"Suppressions not carried over: {suppressions.NotCarried} for rules IDE0055 replaces (whitespace, like SA1028): 'dotnet format' formats whitespace whatever a suppression says. To keep such code as it is, exclude its files from formatting (generated_code = true in an .editorconfig section for them).");
+            Console.WriteLine($"Suppressions not carried over: {suppressions.NotCarried} of whitespace rules (like SA1028) that IDE0055 covers, because 'dotnet format' formats whitespace whatever a suppression says. Usually nothing to do: format changes such a line only where its whitespace breaks your formatting settings. To keep that code exactly as it is, exclude its files from formatting (generated_code = true in an .editorconfig section for them).");
         }
 
         Console.WriteLine();
@@ -580,17 +580,20 @@ internal static class Program
     /// Carries the suppressions in the code over (<see cref="Suppressions"/>): StyleCop's and Sonar's ids, to the rules that
     /// replace them. Returns how many were (or would be) added, in how many files, and how many weren't carried over (IDE0055).
     /// </summary>
-    internal static (int Added, int Files, int NotCarried) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write, IReadOnlyList<string>? folders = null)
+    internal static (int Added, int Files, int NotCarried, int Already) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write, IReadOnlyList<string>? folders = null)
     {
         int added = 0;
         int files = 0;
         int notCarried = 0;
+        int already = 0;
         var mentions = new Regex(@"\bS(?:[AX]|ST)?\d{3,4}\b", RegexOptions.IgnoreCase);
 
         // Suppressions of a rule 'dotnet format' ignores can't take effect: its whitespace pass ignores
         // '#pragma warning disable IDE0055' (Spectre.Console's SA1028 pragmas got one), so none is added; the report says so.
         var all = replacements.ToDictionary(r => r.Key, r => r.Value, StringComparer.OrdinalIgnoreCase);
         var effective = replacements.ToDictionary(r => r.Key, r => new SortedSet<string>(r.Value.Where(id => !Suppressions.Ineffective.Contains(id)), StringComparer.Ordinal), StringComparer.OrdinalIgnoreCase);
+        var ids = effective.Values.SelectMany(v => v).Distinct().ToList();
+        var replacing = new Regex(ids.Count == 0 ? "(?!)" : $@"\b(?:{string.Join("|", ids.Select(Regex.Escape))})\b");
 
         // Generated code isn't the team's: checked-in source generator output (Spectre.Console's Generated/ folders) stays as is.
         var marked = Migration.MarkedGeneratedFolders(root);
@@ -622,6 +625,8 @@ internal static class Program
             notCarried += Rewrite(all).Added - count;
             if (count == 0)
             {
+                // A second run: the replacing ids are there already (the report said "none to carry over", trial 24).
+                already += replacing.IsMatch(text) ? 1 : 0;
                 continue;
             }
 
@@ -633,7 +638,7 @@ internal static class Program
             }
         }
 
-        return (added, files, notCarried);
+        return (added, files, notCarried, already);
     }
 
     /// <summary>The StyleSharp rules that are on and stand for no StyleCop rule (<see cref="StyleCopSetup.StandsFor"/>), or none without StyleSharp.</summary>

@@ -209,7 +209,8 @@ nothing else in it). Your own IDE0055 severity (say `suggestion`) is kept everyw
 #### init also looks at your code
 
 `init` looks at your code first and keeps the conventions it clearly follows. For each setting below it counts both
-forms in your C# (generated code, EF Core migrations, vendored folders and submodules don't count; code inside `#if`
+forms in your C# (generated code, EF Core migrations, vendored folders, submodules and folders whose own `.editorconfig`
+turns every analyzer off or says `generated_code = true` don't count; code inside `#if`
 counts too, as `format` sees it in the target framework that defines the symbol):
 
 Vendored folders are recognized by their name (`vendor`, `third_party`, ...). Code copied in under another name (a
@@ -325,7 +326,8 @@ A few settings work a little differently:
   package reference), the two formatters would undo each other's layout
   (StabilityMatrix's pre-commit check rejected 161 files StyleBro had formatted). `init` then turns off IDE0055 (so
   `stylebro-migrate format` skips the whitespace pass; when CSharpier formats only some folders, IDE0055 is off in those
-  folders' sections, one section per folder CSharpier formats, and the whitespace pass leaves just them out) and every StyleBro rule for something CSharpier decides, and the
+  folders' sections, one section per folder CSharpier formats, and the whitespace pass leaves just them out), IDE0036
+  (CSharpier orders modifiers itself, and the two orders differ: `file static` against `static file`) and every StyleBro rule for something CSharpier decides, and the
   layout conventions in the table are reported as `set` (`CSharpier formats it`). Off:
   - line breaks in lists: [BRO1107](rules/BRO1107.md)-[BRO1110](rules/BRO1110.md),
     [BRO1116](rules/BRO1116.md)-[BRO1119](rules/BRO1119.md); constraints [BRO1111](rules/BRO1111.md), constructor
@@ -513,7 +515,8 @@ A few settings work a little differently:
 | File headers | headers with or without an empty `//` line at the top or bottom (or a `file_header_template` with one) | [BRO1120](rules/BRO1120.md) | `dotnet_diagnostic.BRO1120.severity` |
 | One-line jumps | `if (x) return;` on the `if` line, or a lone jump in braces | [BRO1514](rules/BRO1514.md) | `stylebro_allow_single_line_jump_statements` |
 | Empty blocks | `{ }` on one line or on two (mixed: both allowed; on one line also writes `csharp_preserve_single_line_statements = true`, else IDE0055 splits `else { }`) | [BRO1508](rules/BRO1508.md), [BRO1509](rules/BRO1509.md) | `stylebro_allow_empty_single_line_blocks` |
-| One-line properties | properties with a block-bodied accessor on one line (`X { get { return x; } }`) or on several | [BRO1509](rules/BRO1509.md) | `dotnet_diagnostic.BRO1509.severity` |
+| One-line properties and methods | properties with a block-bodied accessor on one line (`X { get { return x; } }`) or on several; method bodies with one statement that fits a line (`int Next() { return ++count; }`), counted apart: the one that keeps one-line bodies decides | [BRO1509](rules/BRO1509.md) | `dotnet_diagnostic.BRO1509.severity` |
+| One-line statement blocks | blocks with one statement that fits a line (`if (x) { return; }`) on one line or on several (on one line also writes `csharp_preserve_single_line_statements = true`, else IDE0055 splits them) | [BRO1508](rules/BRO1508.md) | `dotnet_diagnostic.BRO1508.severity` |
 | Accessor bodies | multi-line properties whose accessors all have block bodies: all one-line or all multi-line, or mixed | [BRO1510](rules/BRO1510.md) | `dotnet_diagnostic.BRO1510.severity` |
 | Auto-property accessors | `{ get; set; }` on the declaration's line or on several lines | [BRO1527](rules/BRO1527.md) | `dotnet_diagnostic.BRO1527.severity` |
 | `#region`s inside members | the `#region`s inside members (3 turn the rule off) | [BRO1113](rules/BRO1113.md) | `dotnet_diagnostic.BRO1113.severity` |
@@ -523,11 +526,12 @@ A few settings work a little differently:
 | Line endings | files with LF or CRLF line endings (not files git converts on checkout) | SDK formatter | `end_of_line` |
 | Using order | files with 2 or more usings (each run between `#if`/`#endif` lines on its own): sorted with System first, sorted without, or not sorted | `dotnet format` | `dotnet_sort_system_directives_first` |
 | Spacing | `if (x)` or `if(x)`; spaces inside parentheses, after casts, inside call and parameter lists (mixed: IDE0055 off) | SDK formatter (IDE0055) | `csharp_space_after_keywords_in_control_flow_statements`, `csharp_space_between_parentheses`, `csharp_space_after_cast`, `csharp_space_between_method_call_parameter_list_parentheses`, `csharp_space_between_method_declaration_parameter_list_parentheses` |
-| Member separation | neighbouring members that need a blank line, with or without one | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
+| Member separation | neighbouring members that need a blank line, with or without one (without: [BRO1519](rules/BRO1519.md) goes off too, else it adds the blank line after a member's `}`) | [BRO1505](rules/BRO1505.md) | `dotnet_diagnostic.BRO1505.severity` |
 | Blank line above doc comments | doc comments right below code or after a blank line | [BRO1513](rules/BRO1513.md) | `dotnet_diagnostic.BRO1513.severity` |
 | Blank line below comments | `//` comments right above code or with a blank line below | [BRO1506](rules/BRO1506.md) | `dotnet_diagnostic.BRO1506.severity` |
 | Blank line above comments | `//` comments right below code or after a blank line | [BRO1504](rules/BRO1504.md) | `dotnet_diagnostic.BRO1504.severity` |
 | Doc comment periods | summary, param, returns, ... texts ending with a period or not | [BRO1603](rules/BRO1603.md) | `dotnet_diagnostic.BRO1603.severity` |
+| Doc element order | doc comments with `<typeparam>`/`<param>`/`<returns>` and later elements (`<exception>`, `<remarks>`, ...): in BRO1619's order or another | [BRO1619](rules/BRO1619.md) | `dotnet_diagnostic.BRO1619.severity` |
 | Keywords in doc comments | `<see langword="null"/>` or `<c>null</c>` | [BRO1618](rules/BRO1618.md) | `dotnet_diagnostic.BRO1618.severity` |
 | Non-private field names | public, internal and protected fields an enforced naming rule (`dotnet_naming_rule.*`) covers: named as it says or not (a rule your code doesn't follow turns BRO1306 off) | [BRO1306](rules/BRO1306.md) | `dotnet_diagnostic.BRO1306.severity` |
 | Blank line below doc comments | doc comments right above their element or with a blank line between | [BRO1511](rules/BRO1511.md) | `dotnet_diagnostic.BRO1511.severity` |
