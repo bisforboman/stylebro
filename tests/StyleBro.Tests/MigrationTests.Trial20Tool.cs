@@ -106,7 +106,7 @@ public sealed partial class MigrationTests
         Write("src/Lib/Plain.cs", "class P { }\n");
         Write("src/Other/Other.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
         Write("src/Other/Other.g.cs", "class O { }\n");
-        Write("build.cmd", "dotnet run --project bld/ExtensionsGenerator > src\\Lib\\Extensions.g.cs\n");
+        Write("build.cmd", "dotnet run --project bld/ExtensionsGenerator > src\\Lib\\Extensions.g.cs\ngen > src\\Other\\Other.g.cs\n");
         PreviewCommand.MakeRepository(root);
         Write("src/Lib/Untracked.g.cs", "class U { }\n");
 
