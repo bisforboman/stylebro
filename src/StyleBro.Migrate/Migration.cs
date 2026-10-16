@@ -51,6 +51,12 @@ internal static class Migration
     /// <summary>Why a StyleCop rule isn't enforced in a repository CSharpier formats (the report groups these).</summary>
     public const string CSharpierReason = "CSharpier decides it";
 
+    /// <summary>
+    /// The SST rules without a StyleCop rule that StyleBro still replaces, each with a rule of its own and an option
+    /// (SST1149: BRO1133 with pattern_matching; SST1653: BRO1616 with single_line_when_fits): not listed as going with StyleSharp.
+    /// </summary>
+    internal static readonly string[] StyleSharpReplaced = ["SST1149", "SST1653"];
+
     private const string UnformattedSuffix = "; 'stylebro-migrate format' leaves them alone (remove this line to format them)";
 
     /// <summary>The StyleBro rules that read documentation as XML, like the StyleCop rules they replace.</summary>
@@ -1236,37 +1242,6 @@ internal static class Migration
         };
     }
 
-    /// <summary>A project's Compile items (full paths), evaluated once per process; null when MSBuild can't evaluate it.</summary>
-    private static HashSet<string>? CompileItems(string project)
-    {
-        lock (CompileItemsCache)
-        {
-            if (CompileItemsCache.TryGetValue(project, out var cached))
-            {
-                return cached;
-            }
-        }
-
-        HashSet<string>? items;
-        try
-        {
-            items = FormatCommand.ParseProject(FormatCommand.Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getItem:Compile", "-nologo")).Compile
-                .Select(Path.GetFullPath)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        }
-        catch (Exception e) when (e is ToolException or System.Text.Json.JsonException)
-        {
-            items = null;
-        }
-
-        lock (CompileItemsCache)
-        {
-            CompileItemsCache[project] = items;
-        }
-
-        return items;
-    }
-
     /// <summary>
     /// The folders below the root (relative, '/'-separated) whose own .editorconfig turns every analyzer off
     /// (<see cref="InitCommand.OptsOut"/>) or says 'generated_code = true' for its C# files: the team keeps StyleBro out of
@@ -1442,6 +1417,43 @@ internal static class Migration
 
     internal static bool IsUnder(string path, string folder) =>
         folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>An SST rule's severity in a StyleSharp setup: the one it sets, else the rule's default (None without StyleSharp).</summary>
+    internal static Severity StyleSharpSeverity(StyleCopSetup setup, string id) =>
+        setup.StyleSharp is null ? Severity.None
+        : setup.Raw?.TryGetValue(id, out var set) == true ? set
+        : StyleCopSetup.StyleSharpRules.FirstOrDefault(r => r.Id == id).Default;
+
+    /// <summary>A project's Compile items (full paths), evaluated once per process; null when MSBuild can't evaluate it.</summary>
+    private static HashSet<string>? CompileItems(string project)
+    {
+        lock (CompileItemsCache)
+        {
+            if (CompileItemsCache.TryGetValue(project, out var cached))
+            {
+                return cached;
+            }
+        }
+
+        HashSet<string>? items;
+        try
+        {
+            items = FormatCommand.ParseProject(FormatCommand.Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getItem:Compile", "-nologo")).Compile
+                .Select(Path.GetFullPath)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception e) when (e is ToolException or System.Text.Json.JsonException)
+        {
+            items = null;
+        }
+
+        lock (CompileItemsCache)
+        {
+            CompileItemsCache[project] = items;
+        }
+
+        return items;
+    }
 
     /// <summary>
     /// Whether the folders are EmitCompilerGeneratedFiles' layout: '&lt;output&gt;/&lt;generator assembly&gt;/&lt;generator type&gt;/',
@@ -1624,18 +1636,6 @@ internal static class Migration
 
     /// <summary>Whether the setup is StyleSharp's alone: with StyleCop next to it, StyleCop's meaning of a rule applies.</summary>
     private static bool StyleSharpOnly(StyleCopSetup setup) => setup.StyleSharp is { WithStyleCop: false };
-
-    /// <summary>
-    /// The SST rules without a StyleCop rule that StyleBro still replaces, each with a rule of its own and an option
-    /// (SST1149: BRO1133 with pattern_matching; SST1653: BRO1616 with single_line_when_fits): not listed as going with StyleSharp.
-    /// </summary>
-    internal static readonly string[] StyleSharpReplaced = ["SST1149", "SST1653"];
-
-    /// <summary>An SST rule's severity in a StyleSharp setup: the one it sets, else the rule's default (None without StyleSharp).</summary>
-    internal static Severity StyleSharpSeverity(StyleCopSetup setup, string id) =>
-        setup.StyleSharp is null ? Severity.None
-        : setup.Raw?.TryGetValue(id, out var set) == true ? set
-        : StyleCopSetup.StyleSharpRules.FirstOrDefault(r => r.Id == id).Default;
 
     private static void AddMemberOrder(StyleCopSetup setup, List<string> lines)
     {

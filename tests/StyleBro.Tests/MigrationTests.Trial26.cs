@@ -112,7 +112,7 @@ public sealed partial class MigrationTests
         var counts = Conventions.NewCounts();
         counts[Conventions.StaticPrefixKey] = [3, 19];
         counts["private static readonly fields' prefix"] = [3, 19];
-        counts[Conventions.StaticCasingKey] = [10, 0, 0];
+        counts[Conventions.StaticCasingKey] = [0, 10, 0];
         var (lines, report) = Conventions.Decide(counts, new Dictionary<string, string>());
         Assert.Contains("stylebro_private_static_field_naming = s_camelCase", lines);
         Assert.DoesNotContain(lines, l => l.StartsWith("stylebro_private_mutable_static_field_naming", StringComparison.Ordinal));

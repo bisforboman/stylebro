@@ -113,6 +113,9 @@ internal static class InitCommand
         ["dotnet_style_predefined_type_for_member_access"] = "IDE0049",
     };
 
+    /// <summary>The keys init writes for 's_' private static fields (<see cref="Conventions.StaticPrefixLines"/>), kept with BRO1307's convention.</summary>
+    private static readonly string[] StaticPrefixKeys = [StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey];
+
     public static int Run(string[] args)
     {
         var (profile, rest) = Program.TakeOption(args, Program.SonarProfileOption);
@@ -1494,9 +1497,6 @@ internal static class InitCommand
     }
 
     private static bool OffSeverity(string? severity) => severity?.Trim().ToLowerInvariant() is "none" or "silent" or "hidden";
-
-    /// <summary>The keys init writes for 's_' private static fields (<see cref="Conventions.StaticPrefixLines"/>), kept with BRO1307's convention.</summary>
-    private static readonly string[] StaticPrefixKeys = [StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey];
 
     /// <summary>Whether another convention turns the same rule off (BRO1404: members and types).</summary>
     /// BRO1306's off line is also the static casing's (<see cref="Conventions.StaticCasingKey"/>), which isn't in the list.
