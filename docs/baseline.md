@@ -28,7 +28,10 @@ Wrote stylebro.baseline: 820 violations on 759 lines.
 
 The StyleBro.Analyzers package picks up the nearest `stylebro.baseline` above each project, like `.editorconfig`.
 Another location: `<StyleBroBaseline>path/to/stylebro.baseline</StyleBroBaseline>` in a `Directory.Build.props` (the
-file must be called `stylebro.baseline`); `<StyleBroBaseline>none</StyleBroBaseline>` turns it off.
+file must be called `stylebro.baseline`); `<StyleBroBaseline>none</StyleBroBaseline>` turns it off. A baseline outside
+the code (`eng/stylebro.baseline` next to `src/`) covers files in other folders through `../` paths
+(`../src/App/Program.cs`); `stylebro-migrate format` writes them that way. `stylebro-migrate baseline` writes the file at
+the folder it runs on.
 
 ## What it covers
 
@@ -53,7 +56,9 @@ run. The baseline records it like any other violation, so warnings as errors don
 into the baseline the build reads (the file `<StyleBroBaseline>` names, else the nearest `stylebro.baseline` above, else
 a new one in the folder it runs on) and says so (`Baseline: stylebro.baseline: added 3 kept findings, ...`). Entries
 already there stay, except those whose line no longer exists in its file. The build and `--verify-no-changes` then agree:
-both skip those findings and fail on new ones. `<StyleBroBaseline>none</StyleBroBaseline>` turns this off too.
+both skip those findings and fail on new ones. `<StyleBroBaseline>none</StyleBroBaseline>` turns this off too: then
+`format` and `--verify-no-changes` say that the build still reports the kept findings (an error with
+`TreatWarningsAsErrors`).
 
 ## How entries match
 

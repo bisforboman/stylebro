@@ -2272,7 +2272,7 @@ internal static class FormatCommand
             return null;
         }
 
-        Directory.CreateDirectory(folder);
+        Directory.CreateDirectory(Path.GetDirectoryName(file)!); // a baseline <StyleBroBaseline> names in a folder not made yet
         File.WriteAllText(file, new Analyzers.Baseline.Baseline(counts).Render());
         var name = Relative(root, file);
         var parts = new List<string>();
@@ -2703,7 +2703,7 @@ internal static class FormatCommand
             return;
         }
 
-        log($"{GeneratorsHeader} building {string.Join(", ", stale.Select(Path.GetFileNameWithoutExtension))} first: the code uses {(stale.Count == 1 ? "it" : "them")} as a source generator, and without {(stale.Count == 1 ? "its" : "their")} output the generated code would be missing from the checks.");
+        log($"{GeneratorsHeader} building {string.Join(", ", stale.Select(Path.GetFileNameWithoutExtension))} first (in Debug, the configuration 'dotnet format' loads, so a Release build doesn't count): the code uses {(stale.Count == 1 ? "it" : "them")} as a source generator, and without {(stale.Count == 1 ? "its" : "their")} output the generated code would be missing from the checks.");
         foreach (var generator in stale)
         {
             var output = new List<string>();
@@ -2959,7 +2959,7 @@ internal static class FormatCommand
                 .Append("--include")
                 .Concat(include)
                 .ToArray();
-            var code = arguments.Contains("--verify-no-changes") ? Verify(arguments, root, log, runOnce) : Repeat(arguments, root, log, output, runOnce, maxRuns);
+            var code = arguments.Contains("--verify-no-changes") ? Verify(arguments, root, log, runOnce) : Repeat(arguments, root, log, output, runOnce, maxRuns, RepositoryRoot(root) ?? root);
             if (arguments.Contains("--verify-no-changes") && CSharpierStep.CheckLine(root, include.Select(f => Path.GetFullPath(Path.Combine(root, f)))) is { } csharpierLine)
             {
                 log(csharpierLine);
@@ -2977,8 +2977,10 @@ internal static class FormatCommand
     /// Runs 'dotnet format' until a run changes no file (at most <paramref name="maxRuns"/>), then lists the kept findings.
     /// One run (--once) lists them after it, whether it changed files or not, and exits 0 when it succeeded.
     /// </summary>
-    private static int Repeat(string[] args, string root, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce, int maxRuns = MaxRuns)
+    private static int Repeat(string[] args, string root, Action<string> log, Action<string>? output, Func<string[], Action<string>?, int> runOnce, int maxRuns = MaxRuns, string? shown = null)
     {
+        // The paths it lists are relative to this (--files: the repository's root, not the files' project folder).
+        shown ??= root;
         var keptFile = Path.Combine(Path.GetTempPath(), $"stylebro-kept-{Guid.NewGuid():N}.tsv");
         using var kept = new KeptVariable(keptFile);
         var allChanged = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -3063,14 +3065,14 @@ internal static class FormatCommand
                 if (changed.Count > 0)
                 {
                     log($"Run {run} failed after changing {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")}:");
-                    ListFiles(root, changed, int.MaxValue).ForEach(log);
+                    ListFiles(shown, changed, int.MaxValue).ForEach(log);
                 }
 
                 return code;
             }
 
             log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : ", clean.")}");
-            ListFiles(root, changed, 10).ForEach(log);
+            ListFiles(shown, changed, 10).ForEach(log);
             allChanged.UnionWith(changed);
             if (changed.Count == 0 || maxRuns == 1)
             {
@@ -3082,7 +3084,7 @@ internal static class FormatCommand
                 }
 
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, root, clean: changed.Count == 0 && failures.Count == 0).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: changed.Count == 0 && failures.Count == 0).ForEach(log);
                 if (baselined is not null)
                 {
                     log(baselined);
@@ -3114,7 +3116,7 @@ internal static class FormatCommand
                 // The kept findings too: with TreatWarningsAsErrors they fail the build whether or not the rest settles.
                 var keptFindings = ReadKept(keptFile, root, root);
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, root, clean: false).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: false).ForEach(log);
                 AfterNotes(root, allChanged, formatted.Count).ForEach(log);
                 if (allFailures.Count > 0)
                 {
@@ -3654,6 +3656,10 @@ internal static class FormatCommand
         }
 
         var toRun = Enumerable.Range(0, plan.Count).Where(i => includes[i].Count > 0).ToList();
+
+        // Several runs check at once first, the first run too: then only the runs with findings format, on those files (trial
+        // 24: Nerdbank.Streams' five frameworks took 355 s for a run that changed nothing, one 'dotnet format' after another).
+        checkFirst |= toRun.Count > 1;
         int RunFramework(int index, bool verify, Action<string> output, IReadOnlyList<string>? only = null)
         {
             var (framework, selected, _, _) = plan[index];
@@ -3884,10 +3890,11 @@ internal static class FormatCommand
 
             // A multi-targeted project's outer evaluation has only its explicit Compile items, not the SDK's default
             // ones (kubernetes-client's KubernetesClient: none, so its files didn't look shared with KubernetesClient.Aot's).
-            // ponytail: the first framework's files only; a file only another framework compiles isn't seen as shared.
+            // ponytail: the first framework's files only; a file only another framework compiles isn't seen as shared. The
+            // evaluation is CompileSettings', which the runs' plan reuses (one 'dotnet msbuild' less per multi-targeted project).
             if (frameworks.Length > 1)
             {
-                compile = compile.Union(ParseProject(Capture(directory, "msbuild", fullPath, $"-property:TargetFramework={frameworks[0]}", "-getItem:Compile", "-nologo")).Compile, StringComparer.OrdinalIgnoreCase).ToArray();
+                compile = compile.Union(ReadView(CompileSettings(fullPath, frameworks[0]))?.Compile ?? [], StringComparer.OrdinalIgnoreCase).ToArray();
             }
 
             return (fullPath, frameworks, references, linked, compile, assets, analyzers);

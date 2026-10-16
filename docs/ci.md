@@ -42,8 +42,14 @@ built-in rules' severities into `.editorconfig`. They can't come from the packag
 severities in a package's global config, so without them in `.editorconfig` the build would report rules
 `dotnet format` doesn't fix.
 
-Prefer `TreatWarningsAsErrors` alone. Don't list StyleBro rules in `<WarningsNotAsErrors>`: `dotnet format` then skips
-those rules entirely (see [BRO1001](rules/BRO1001.md)).
+Prefer `TreatWarningsAsErrors` alone. Don't list StyleBro rules in `<WarningsNotAsErrors>`: plain `dotnet format` then
+skips those rules entirely (see [BRO1001](rules/BRO1001.md)). `stylebro-migrate format` and its `--verify-no-changes`
+take StyleBro's rules out of that list for their own runs (and say so), so they fix and check them like the build
+reports them.
+
+Where the repository formats with CSharpier, `stylebro-migrate format` runs it on the files it changed, and
+`stylebro-migrate format --verify-no-changes` runs CSharpier's check on the C# files it formats too: a separate
+`dotnet csharpier check` step stays useful for the other files CSharpier formats (project files, JSON).
 
 ## GitHub Actions
 

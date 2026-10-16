@@ -191,7 +191,7 @@ internal static class CSharpierStep
             return null;
         }
 
-        var failed = output.Select(l => Regex.Match(l, @"^Error (?<file>.+?) - Was not formatted")).Where(m => m.Success).Select(m => m.Groups["file"].Value.Replace('\\', '/').TrimStart('.', '/')).Distinct().ToList();
+        var failed = output.Select(l => Regex.Match(l, "^Error (?<file>.+?) - Was not formatted")).Where(m => m.Success).Select(m => m.Groups["file"].Value.Replace('\\', '/').TrimStart('.', '/')).Distinct().ToList();
         return failed.Count == 0
             ? $"Not clean: CSharpier's check failed (exit code {code}): {string.Join(" ", output.Where(l => l.Trim().Length > 0).Take(3).Select(l => l.Trim()))}"
             : $"Not clean: CSharpier would change {failed.Count} file{(failed.Count == 1 ? string.Empty : "s")} ({string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}). "

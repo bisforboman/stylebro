@@ -352,11 +352,16 @@ A few settings work a little differently:
   sorts using directives itself (System first), so `init` writes no sort key (`dotnet format` sorts usings whenever
   `dotnet_sort_system_directives_first` or `dotnet_separate_import_directive_groups` is set, and its order differs from
   CSharpier's in places: `App3._0` against `App3_0`). Where your `.editorconfig` sets one (`false`, or `true` for the
-  groups), `init` writes the closer value in its block: a key can't be unset. Run
-  CSharpier after `format`: other fixes that rewrite code (attributes split, parentheses added) leave lines in StyleBro's
-  layout, which CSharpier then lays out its way, and StyleBro leaves that alone: after CSharpier, `stylebro-migrate
-  format` changes nothing more. `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro
-  format instead, remove CSharpier and run `init` again.
+  groups), `init` writes the closer value in its block: a key can't be unset. `stylebro-migrate format` runs
+  CSharpier itself on the C# files each run changed (the repository's `csharpier` tool, restored first, or the copy the
+  CSharpier.MsBuild package brings): other fixes that rewrite code (attributes split, parentheses added, `if`s merged)
+  leave lines in StyleBro's layout, which CSharpier then lays out its way, and StyleBro leaves that alone, so one
+  `format` leaves a tree `dotnet csharpier check` accepts. `--verify-no-changes` checks both: StyleBro's rules, and
+  CSharpier's check on the C# files it formats. Where CSharpier puts back what a fix changed (IDE0036's `static file`
+  against CSharpier's `file static`), no run can settle it: both say so and name the files (`init` turns IDE0036 off
+  with CSharpier). With only a `.csharpierrc` and no tool or package, `format` says to run CSharpier.
+  `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro format instead, remove CSharpier and run
+  `init` again.
 - **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
   repository's code`, with their `# init:` comments), and the report says `kept from the last init`. They describe your
   code as it was before StyleBro formatted it: counted again after a `format` run, StyleBro's own output would decide
@@ -772,8 +777,9 @@ Check the uses the reason names; if they can change too, rename both by hand. Ot
 runs on) and says so (`Baseline: stylebro.baseline: added 3 kept findings, ...`). The build, the IDE and
 `--verify-no-changes` then skip them, also with `TreatWarningsAsErrors`, while new violations still fail; commit the
 file with the formatting. Its other entries stay, except those whose line is gone. Delete an entry to see its finding
-again; `<StyleBroBaseline>none</StyleBroBaseline>` turns this off. The list of kept findings is printed after every
-run, also when `format` ends "Not clean" (then nothing is baselined).
+again; `<StyleBroBaseline>none</StyleBroBaseline>` turns this off, and `format` and `--verify-no-changes` then say
+that the build still reports them (an error with `TreatWarningsAsErrors`). The list of kept findings is printed after
+every run, also when `format` ends "Not clean" (then nothing is baselined).
 
 Exit codes of `stylebro-migrate format`, for CI and agents:
 
