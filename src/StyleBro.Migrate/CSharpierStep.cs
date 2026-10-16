@@ -170,7 +170,7 @@ internal static class CSharpierStep
         foreach (var file in files)
         {
             var relative = Path.GetRelativePath(top, file).Replace('\\', '/');
-            var scope = tool.Scopes.Where(s => s.Length == 0 || relative.StartsWith(s + "/", StringComparison.OrdinalIgnoreCase)).OrderBy(s => s.Length).FirstOrDefault();
+            var scope = tool.Scopes.Where(s => s.Length == 0 || relative.StartsWith(s + '/', StringComparison.OrdinalIgnoreCase)).OrderBy(s => s.Length).FirstOrDefault();
             var limit = scope is null ? Path.GetDirectoryName(file)! : scope.Length == 0 ? top : Path.Combine(top, scope.Replace('/', Path.DirectorySeparatorChar));
 
             // An unformatted file's own folders aren't clean: it goes alone.
