@@ -233,7 +233,14 @@ internal static class Conventions
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
         new(PrimaryParametersKey, "primary-constructor parameter names", "warning", ("warning", "like 'logger'"), ("none", "like '_logger'"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
+        new(ThisQualificationKey, "uses of a type's own members", "warning", ("warning", "without 'this.'"), ("none", "with 'this.'"), Off("IDE0003")) { Unit = "use", StyleOnly = true },
     };
+
+    /// <summary>
+    /// IDE0003's severity: uses of a type's own instance members without or with 'this.' (only judged for a style: the
+    /// Microsoft style writes IDE0003 at warning, which removes 'this.'; a repository that writes it keeps it).
+    /// </summary>
+    public const string ThisQualificationKey = "dotnet_diagnostic.IDE0003.severity";
 
     /// <summary>
     /// The spacing options IDE0055 enforces that real code varies on (Bogus writes 'foreach( var x in y )' in 341 places and
@@ -1457,6 +1464,7 @@ internal static class Conventions
             UsingPlacement();
             UsingOrder();
             StaticPrefixes();
+            ThisQualification();
             StaticFieldCasing();
             HeaderEmptyLines();
             TypeAliases();
@@ -1919,6 +1927,58 @@ internal static class Conventions
             }
         }
 
+        // Unit = uses of a type's own instance fields, properties, methods and events (declared in that type declaration):
+        // 'this.x' or a plain 'x'. Not 'other.x', object initializer names, or a name a parameter or local of the member also
+        // has ('this.x = x': IDE0003 keeps that 'this.'). ponytail: syntax only, by name; base and other partial parts' members
+        // aren't seen.
+        void ThisQualification()
+        {
+            foreach (var type in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
+            {
+                var names = type.Members.Where(m => !m.Modifiers.Any(SyntaxKind.StaticKeyword) && !m.Modifiers.Any(SyntaxKind.ConstKeyword)).SelectMany(m => m switch
+                {
+                    BaseFieldDeclarationSyntax field => field.Declaration.Variables.Select(v => v.Identifier.ValueText),
+                    PropertyDeclarationSyntax property => [property.Identifier.ValueText],
+                    MethodDeclarationSyntax method => [method.Identifier.ValueText],
+                    EventDeclarationSyntax @event => [@event.Identifier.ValueText],
+                    _ => [],
+                }).ToHashSet(StringComparer.Ordinal);
+                if (names.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var member in type.Members.Where(m => m is not BaseTypeDeclarationSyntax && !m.Modifiers.Any(SyntaxKind.StaticKeyword)))
+                {
+                    var shadowing = member.DescendantNodesAndSelf().SelectMany(n => n switch
+                    {
+                        ParameterSyntax parameter => [parameter.Identifier.ValueText],
+                        VariableDeclaratorSyntax variable when n.Parent?.Parent is not BaseFieldDeclarationSyntax => [variable.Identifier.ValueText],
+                        SingleVariableDesignationSyntax designation => [designation.Identifier.ValueText],
+                        ForEachStatementSyntax loop => [loop.Identifier.ValueText],
+                        CatchDeclarationSyntax @catch => [@catch.Identifier.ValueText],
+                        LocalFunctionStatementSyntax function => [function.Identifier.ValueText],
+                        _ => Array.Empty<string>(),
+                    }).ToHashSet(StringComparer.Ordinal);
+                    foreach (var name in member.DescendantNodes().OfType<SimpleNameSyntax>().Where(n => names.Contains(n.Identifier.ValueText) && !shadowing.Contains(n.Identifier.ValueText)))
+                    {
+                        if (name.Parent is MemberAccessExpressionSyntax access && access.Name == name)
+                        {
+                            if (access.Expression is ThisExpressionSyntax)
+                            {
+                                Add(ThisQualificationKey, true);
+                            }
+                        }
+                        else if (name.Parent is not (QualifiedNameSyntax or MemberBindingExpressionSyntax or NameColonSyntax or NameEqualsSyntax)
+                            && !(name.Parent is AssignmentExpressionSyntax { Parent: InitializerExpressionSyntax } assignment && assignment.Left == name))
+                        {
+                            Add(ThisQualificationKey, false);
+                        }
+                    }
+                }
+            }
+        }
+
         // Unit = files starting with a '//' comment group (a file header): with an empty '//' line at its top or bottom (what
         // BRO1120 removes, and what a file_header_template starting with '\n' writes) or without.
         void HeaderEmptyLines()
@@ -2310,7 +2370,7 @@ internal static class Conventions
     /// <paramref name="unenforced"/>: keys the repository sets at severity silent (<see cref="InitCommand.Unenforced"/>), with
     /// their values: the code decides, and a default the key contradicts is written too (the block comes later and wins).
     /// </summary>
-    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null, IReadOnlyDictionary<string, string>? repository = null, IReadOnlyDictionary<string, string>? unenforced = null, string? spacing = null)
+    public static (List<string> Lines, List<string> Report) Decide(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet = null, IReadOnlyDictionary<string, string>? repository = null, IReadOnlyDictionary<string, string>? unenforced = null, string? spacing = null, IReadOnlyDictionary<string, string>? style = null)
     {
         static string Value(string setting) => setting.Split(':')[0].Trim().ToLowerInvariant();
         var lines = new List<string>();
@@ -2321,8 +2381,29 @@ internal static class Conventions
         {
             var count = counts.TryGetValue(convention.Key, out var c) ? c : new int[2];
             var total = count[0] + count[1];
-            if (total == 0)
+            if (total == 0 || (convention.StyleOnly && style is null))
             {
+                continue;
+            }
+
+            // A style (init --style) moves the defaults to its values; a rule it turns off has nothing to keep or turn off.
+            var @default = style is not null && style.TryGetValue(convention.Key, out var styled) ? styled : convention.Default;
+            if (style is not null && convention.Key != StaticPrefixKey && TurnsOff(style, convention))
+            {
+                report.Add($"  {"style",-8} {convention.What}: -> off in the style");
+                continue;
+            }
+
+            // The Microsoft style's 's_' for private static fields, where the code clearly has no prefix: the unprefixed names.
+            if (style is not null && convention.Key == StaticPrefixKey && !decided.ContainsKey(convention.Key) && total >= MinimumAgreeing && Winner(count[0], count[1]) == 0
+                && style.TryGetValue(StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, out var staticStyle) && staticStyle == "s_camelCase")
+            {
+                var privateStyle = lines.Contains($"{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = camelCase") ? "camelCase" : style.GetValueOrDefault(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "camelCase");
+                report.Add($"  {"kept",-8} {convention.What}: {count[0]} of {total} without a prefix -> no 's_'");
+                summary.Written.Add(StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey);
+                lines.Add($"# init: {convention.What}: without a prefix in {count[0]} of {Plural(total, convention.Unit)} in your code (the style says 's_')");
+                lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey} = PascalCase");
+                lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey} = {privateStyle}");
                 continue;
             }
 
@@ -2364,7 +2445,7 @@ internal static class Conventions
             }
             else if (total < MinimumAgreeing)
             {
-                (tag, verdict) = ("too few", $"default stays ({convention.Default})");
+                (tag, verdict) = ("too few", $"default stays ({@default})");
                 found = Plural(total, convention.Unit);
                 summary.TooFew.Add(convention.Key);
             }
@@ -2388,11 +2469,11 @@ internal static class Conventions
             }
             else if (winner < 0)
             {
-                (tag, verdict) = ("mixed", $"default stays ({convention.Default})");
+                (tag, verdict) = ("mixed", $"default stays ({@default})");
             }
-            else if (convention.Values[winner].Value == convention.Default && (unenforced is null || !unenforced.TryGetValue(convention.Key, out var silent) || Value(silent) == convention.Default))
+            else if (convention.Values[winner].Value == @default && (unenforced is null || !unenforced.TryGetValue(convention.Key, out var silent) || Value(silent) == @default))
             {
-                (tag, verdict) = ("default", convention.Default);
+                (tag, verdict) = ("default", @default);
                 summary.Matched++;
             }
             else if (convention.Off is { } offLine && RuleOf(offLine) is not null && offLine == $"{convention.Key} = {convention.Values[winner].Value}")
@@ -2440,7 +2521,7 @@ internal static class Conventions
             });
         }
 
-        DecideUsings(counts, decided, isSet, lines, report, summary, repository);
+        DecideUsings(counts, decided, isSet, lines, report, summary, repository, style is not null);
         DecideStaticCasing(counts, decided, isSet, lines, report, summary);
         DecideSpacing(counts, spacing, repository, lines, report, summary);
 
@@ -2451,8 +2532,28 @@ internal static class Conventions
             report.Add($"  note     line endings: {note}");
         }
 
+        if (style is null && StyleSuggestion(counts) is { } suggestion)
+        {
+            report.Add(suggestion);
+        }
+
         report.AddRange(Summary(summary));
         return (InitCommand.WithoutRepeats(lines), report);
+    }
+
+    /// <summary>
+    /// The report line that suggests the Microsoft style (owner's decision 2026-10-16: init suggests it, never applies it), or
+    /// null: the code clearly has '_' private fields and 's_' private static fields, and nothing it clearly does contradicts the
+    /// rest of the style ('this.', usings inside the namespace, '{' at the end of the line).
+    /// </summary>
+    public static string? StyleSuggestion(IReadOnlyDictionary<string, int[]> counts)
+    {
+        // The winning form (0 or 1), -1 for mixed, -2 for too few to tell.
+        int Clear(string key) => counts.TryGetValue(key, out var c) && c[0] + c[1] >= MinimumAgreeing ? Winner(c[0], c[1]) : -2;
+        var contradicted = new[] { ThisQualificationKey, "csharp_using_directive_placement", "csharp_new_line_before_open_brace" }.Any(k => Clear(k) is 1 or -1);
+        return Clear(StyleBro.Analyzers.Naming.FieldNames.StyleKey) == 1 && Clear(StaticPrefixKey) == 1 && !contradicted
+            ? "  note     your code looks like the Microsoft style (dotnet/runtime's: '_' fields, 's_' statics, no 'this.'): try 'stylebro-migrate init --style microsoft' (https://bisforboman.github.io/stylebro/styles/)"
+            : null;
     }
 
     /// <summary>
@@ -2602,7 +2703,7 @@ internal static class Conventions
     /// two apart clearly don't), unsorted or mixed -> no key, so 'dotnet format' leaves them alone; too few files -> StyleBro's
     /// default (sorted, System first). A key the repository sets wins.
     /// </summary>
-    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary, IReadOnlyDictionary<string, string>? repository = null)
+    private static void DecideUsings(IReadOnlyDictionary<string, int[]> counts, IReadOnlyDictionary<string, string> decided, Func<string, bool>? isSet, List<string> lines, List<string> report, SummaryLists summary, IReadOnlyDictionary<string, string>? repository = null, bool style = false)
     {
         const string What = UsingsWhat;
         if (!counts.TryGetValue(UsingsKey, out var c))
@@ -2653,6 +2754,13 @@ internal static class Conventions
             {
                 summary.TooFew.Add(SortUsingsKey);
             }
+        }
+        else if (style && (sort < 0 || (sort == 0 && system < 0)))
+        {
+            // The style sorts them, System first, unless the code clearly doesn't (proposal: "true unless the code clearly
+            // doesn't sort").
+            (tag, verdict, value) = ("style", "sorted, System first (the style's)", "true");
+            comment = $"{found}; the style sorts them, System first";
         }
         else if (sort == 0 && system >= 0)
         {
@@ -2889,6 +2997,11 @@ internal static class Conventions
     /// <summary>The rule id of a 'dotnet_diagnostic.X.severity' line, or null for an option line.</summary>
     private static string? RuleOf(string line) => line.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal) ? line.Split('.')[1] : null;
 
+    /// <summary>Whether <paramref name="style"/> turns off the rule a convention is about (its key's or its off line's).</summary>
+    private static bool TurnsOff(IReadOnlyDictionary<string, string> style, Convention convention) =>
+        new[] { RuleOf(convention.Key), convention.Off is { } off ? RuleOf(off) : null }.OfType<string>()
+            .Any(rule => style.TryGetValue($"dotnet_diagnostic.{rule}.severity", out var severity) && severity == "none");
+
     /// <summary>Splits a line longer than <see cref="Width"/> after the last ', ' that fits (else a space); later parts are indented.</summary>
     private static IEnumerable<string> Wrap(string line)
     {
@@ -3109,6 +3222,9 @@ internal static class Conventions
 
         /// <summary>Gets what <see cref="Default"/> would do to the second form, for the '# init:' comment of a <see cref="KeepAny"/> convention.</summary>
         public string? Keeps { get; init; }
+
+        /// <summary>Gets a value indicating whether init judges it only with a style (<c>--style</c>): its rule is the style's.</summary>
+        public bool StyleOnly { get; init; }
     }
 
     /// <summary>The root .editorconfig's settings as analyzer options (BRO1601's stylebro_document_* keys).</summary>

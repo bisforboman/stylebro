@@ -58,6 +58,62 @@ public sealed class PresetVersionTests
         Assert.Contains($"<_StyleBroPresetDefault>{Base}</_StyleBroPresetDefault>", targets, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void TheStyleLayers_AreAboveThePresetLayers()
+    {
+        // Same-level global configs that set one key conflict (the key is dropped): a style overrides preset keys, so the
+        // preset sits at -2 and the styles at -1; the repository's own files (level 0 and up, .editorconfig) win over both.
+        Assert.All(Presets.Layers, layer => Assert.Contains("global_level = -2", layer.Lines));
+        Assert.NotEmpty(Presets.Styles);
+        Assert.All(Presets.Styles, layer => Assert.Contains("global_level = -1", layer.Lines));
+        Assert.All(Presets.Styles, layer => Assert.Contains("is_global = true", layer.Lines));
+    }
+
+    [Fact]
+    public void EveryStyleLayer_BelongsToAPresetLayer_AndNamesOnlyItsRulesAndKnownKeys()
+    {
+        var configuration = File.ReadAllText(Path.Combine(Presets.Root, "docs", "configuration.md"));
+        foreach (var style in Presets.Styles.GroupBy(s => s.Name))
+        {
+            var keys = style.SelectMany(layer => Presets.Keys(layer.Lines)).ToList();
+            Assert.Empty(keys.GroupBy(k => k).Where(g => g.Count() > 1).Select(g => g.Key));
+            foreach (var layer in style)
+            {
+                Assert.Contains(Presets.Layers, p => p.Version == layer.Version);
+
+                // A style decides only rules the preset versions up to its own have (they turn them on or off).
+                var known = Presets.Layers.Where(p => p.Version <= layer.Version).SelectMany(p => Presets.Severities(p.Lines)).Select(p => p.Key).ToHashSet();
+                Assert.All(Presets.Severities(layer.Lines), p => Assert.Contains(p.Key, known));
+
+                // Severities of built-in rules belong in init's .editorconfig block ('dotnet format' ignores them here).
+                Assert.DoesNotContain(layer.Lines, l => l.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal) && !l.StartsWith("dotnet_diagnostic.BRO", StringComparison.Ordinal));
+
+                // Options: StyleBro's (documented) or the SDK's; never the using sort key, which can't be unset.
+                foreach (var key in Presets.Keys(layer.Lines).Where(k => !k.StartsWith("dotnet_diagnostic.", StringComparison.Ordinal)))
+                {
+                    Assert.True(key.StartsWith("stylebro_", StringComparison.Ordinal) ? configuration.Contains($"`{key}`", StringComparison.Ordinal) : key.StartsWith("csharp_", StringComparison.Ordinal) || key.StartsWith("dotnet_", StringComparison.Ordinal), key);
+                    Assert.NotEqual("dotnet_sort_system_directives_first", key);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TheTargets_AddEveryStyleLayer_UpToThePresetLevel()
+    {
+        var targets = File.ReadAllText(Path.Combine(Presets.Root, "src", "StyleBro.Package", "build", "StyleBro.Analyzers.targets"));
+        Assert.Equal(
+            Presets.Styles.Select(s => $"{s.Name}.{s.Version}").Order(StringComparer.Ordinal),
+            Regex.Matches(targets, @"<EditorConfigFiles Include=""[^""]*presets/styles/(\w+\.\d+\.\d+)\.globalconfig""").Select(m => m.Groups[1].Value).Order(StringComparer.Ordinal));
+        foreach (var layer in Presets.Styles.Where(s => s.Version > Base))
+        {
+            Assert.Contains($"presets/styles/{layer.Name}.{layer.Version}.globalconfig\" Condition=\"$([MSBuild]::VersionGreaterThanOrEquals('$(_StyleBroPresetLevel)', '{layer.Version}'))\"", targets, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Code=\"STYLEBRO003\"", targets, StringComparison.Ordinal);
+        Assert.Contains("Code=\"STYLEBRO004\"", targets, StringComparison.Ordinal);
+    }
+
     /// <summary>
     /// The version each rule was added in, from AnalyzerReleases.Shipped.md's release headers (major.minor; everything before
     /// 1.0 is the base layer). AnalyzerReleases.Unshipped.md's rules go into the next release: the newest layer.
@@ -120,6 +176,15 @@ internal static class Presets
         .OrderBy(layer => layer.Version)
         .ToList();
 
+    /// <summary>Gets the styles' layers (presets/styles/name.X.Y.globalconfig): (style, major.minor, lines).</summary>
+    public static IReadOnlyList<(string Name, Version Version, string[] Lines)> Styles { get; } = Directory
+        .GetFiles(Path.Combine(Root, "src", "StyleBro.Package", "build", "presets", "styles"), "*.globalconfig")
+        .Select(file => (Match: Regex.Match(Path.GetFileName(file), @"^(\w+)\.(\d+\.\d+)\.globalconfig$"), Lines: File.ReadAllLines(file)))
+        .Select(p => (Name: p.Match.Groups[1].Value, Version: Version.Parse(p.Match.Groups[2].Value), p.Lines))
+        .OrderBy(layer => layer.Name, StringComparer.Ordinal)
+        .ThenBy(layer => layer.Version)
+        .ToList();
+
     /// <summary>Gets the ids the latest preset turns on (severity other than none).</summary>
     public static IReadOnlySet<string> TurnedOn { get; } = Severities(AllLines())
         .Where(p => p.Value != "none")
@@ -138,6 +203,12 @@ internal static class Presets
         .Select(l => Regex.Match(l, @"^dotnet_diagnostic\.(BRO\d{4})\.severity\s*=\s*(\w+)"))
         .Where(m => m.Success)
         .Select(m => KeyValuePair.Create(m.Groups[1].Value, m.Groups[2].Value));
+
+    /// <summary>The keys a global config sets (not is_global/global_level).</summary>
+    public static IEnumerable<string> Keys(IEnumerable<string> lines) => lines
+        .Where(l => l.Contains('=') && !l.TrimStart().StartsWith('#'))
+        .Select(l => l[..l.IndexOf('=')].Trim())
+        .Where(k => k is not "is_global" and not "global_level");
 
     private static string FindRoot()
     {

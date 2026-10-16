@@ -42,6 +42,9 @@
     <EmbeddedResource Include="modernize-rules.editorconfig" LogicalName="ModernizeRules.editorconfig" />
     <!-- The preset's layers: init writes their severities by id where a bulk severity would hide them from 'dotnet format'. -->
     <EmbeddedResource Include="..\StyleBro.Package\build\presets\*.globalconfig" LogicalName="Preset.%(Filename)%(Extension)" />
+    <!-- The Microsoft style (init with the microsoft style): its layers set the conventions' defaults, its template the severities. -->
+    <EmbeddedResource Include="..\StyleBro.Package\build\presets\styles\*.globalconfig" LogicalName="Style.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="microsoft-rules.editorconfig" LogicalName="MicrosoftRules.editorconfig" />
     <!-- Sonar's C# rules and defaults (public metadata of SonarAnalyzer.CSharp), and the rules that fix what they report. -->
     <EmbeddedResource Include="data\sonar-rules-10.35.0.4138.tsv" LogicalName="SonarRules.tsv" />
     <EmbeddedResource Include="data\sonar-mapping.tsv" LogicalName="SonarMapping.tsv" />

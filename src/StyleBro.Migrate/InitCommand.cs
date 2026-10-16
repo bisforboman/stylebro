@@ -66,6 +66,16 @@ internal static class InitCommand
         "# StyleBro's rules by id: this file's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) would hide them from\n"
         + "# 'dotnet format', while the build reports them (the preset's own entries win over a bulk one). Turn one off below this block.";
 
+    /// <summary>The option that picks a style (docs/styles.md): <c>--style microsoft</c>.</summary>
+    public const string StyleOption = "--style";
+
+    /// <summary>
+    /// The Microsoft style's built-in rule init writes as a suggestion where a multi-targeted project doesn't set LangVersion
+    /// ('static' local functions need C# 8; netstandard2.0 and .NET Framework get C# 7.3 then), like <see cref="Modernize"/>'s
+    /// newer-C# rules.
+    /// </summary>
+    public const string NeedsLangVersion = "IDE0062";
+
     /// <summary>The template's key that turns IDE0009 ('this.' required) off.</summary>
     public const string ThisQualificationSeverityKey = "dotnet_diagnostic.IDE0009.severity";
 
@@ -109,6 +119,14 @@ internal static class InitCommand
 
         // --project names the solution or project format will run on (relative to the path), as for the preview and format.
         (var workspace, args) = Program.TakeOption(rest, "--project");
+        (var style, args) = Program.TakeOption(args, StyleOption);
+        style = style?.Trim().ToLowerInvariant();
+        if (style is not null && StyleSettings(style) is null)
+        {
+            Console.Error.WriteLine($"Unknown style: '{style}'. Styles: microsoft (https://bisforboman.github.io/stylebro/styles/).");
+            return 1;
+        }
+
         var write = args.Contains("--write");
         var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
         if (!Directory.Exists(root))
@@ -167,7 +185,7 @@ internal static class InitCommand
         var modernizing = args.Contains("--modernize");
         var folders = StyleCopSetup.EditorConfigRoots(root).Where(f => StyleCopSetup.EnumerateFiles(Path.Combine(root, f), ownRoot: true).Any(IsCSharp)).ToList();
         var skipRoot = existing is null && folders.Count > 0 && !StyleCopSetup.EnumerateFiles(root, ownRoot: true).Any(IsCSharp);
-        var targets = skipRoot ? new List<Target>() : [Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing, sonarScopes)];
+        var targets = skipRoot ? new List<Target>() : [Prepare(root, string.Empty, sonarLines, multiTargeted, modernizing, sonarScopes, style)];
         if (skipRoot)
         {
             Console.WriteLine($"No C# code outside {string.Join(", ", folders.Select(f => f + "/"))}, whose .editorconfig says root = true: no root .editorconfig is written.");
@@ -193,7 +211,7 @@ internal static class InitCommand
                 Console.WriteLine($"{folder}/.editorconfig says root = true, so the root's settings don't reach {folder}/: it gets a block of its own, from its own code.");
             }
 
-            targets.Add(Prepare(root, folder, sonarLines, multiTargeted, modernizing));
+            targets.Add(Prepare(root, folder, sonarLines, multiTargeted, modernizing, style: style));
             if (targets.Count == 1)
             {
                 targets[0].ModernizeNotes.ForEach(Console.WriteLine);
@@ -224,7 +242,7 @@ internal static class InitCommand
                 Console.Write(target.HasModernize ? null : target.Modernize);
             }
 
-            PinPreset(root, write: false);
+            PinPreset(root, write: false, style);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
         }
@@ -261,7 +279,7 @@ internal static class InitCommand
             }
         }
 
-        PinPreset(root, write: true);
+        PinPreset(root, write: true, style);
         if (changed && !EnforcesCodeStyleInBuild(root))
         {
             // The file the projects import (Moonglade has only src/Directory.Build.props).
@@ -317,12 +335,12 @@ internal static class InitCommand
     /// rules by id, where a bulk severity would hide them from 'dotnet format' (<see cref="HiddenFromFormat"/>);
     /// <paramref name="leftOut"/>: template keys the repository's own setting decides (<see cref="RequiresThisQualification"/>).
     /// </summary>
-    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null, IReadOnlyList<string>? byId = null, IReadOnlyList<string>? leftOut = null)
+    public static string Block(IReadOnlyList<string>? detected = null, bool plainHeader = false, IReadOnlyList<string>? sonar = null, IReadOnlyList<string>? generated = null, IReadOnlyList<string>? vendored = null, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null, IReadOnlyList<string>? byId = null, IReadOnlyList<string>? leftOut = null, string? template = null)
     {
         // A detected line replaces the template's line for the same key (CSharpier: IDE0055 = none).
         var keys = new HashSet<string>((detected ?? Array.Empty<string>()).Select(KeyOf).OfType<string>().Concat(leftOut ?? []), StringComparer.OrdinalIgnoreCase);
         var kept = new List<string>();
-        foreach (var line in Template().Replace("\r\n", "\n").TrimEnd('\n').Split('\n'))
+        foreach (var line in (template ?? Template()).Replace("\r\n", "\n").TrimEnd('\n').Split('\n'))
         {
             if (KeyOf(line) is { } key && keys.Contains(key))
             {
@@ -338,7 +356,7 @@ internal static class InitCommand
             }
         }
 
-        var template = string.Join("\n", kept);
+        template = string.Join("\n", kept);
         if (sonar is { Count: > 0 })
         {
             template += "\n" + string.Join("\n", sonar);
@@ -394,11 +412,13 @@ internal static class InitCommand
     /// 'omit'; after a format run a second init found them mixed and turned BRO1526 off). Scopes: the section for the folder
     /// CSharpier formats when it formats only part of the code.
     /// </summary>
-    public static (List<string> Lines, List<string> Report, Dictionary<string, List<string>> Nested, List<(string Section, List<string> Lines)> Scopes) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null)
+    public static (List<string> Lines, List<string> Report, Dictionary<string, List<string>> Nested, List<(string Section, List<string> Lines)> Scopes) Detect(string root, IReadOnlyDictionary<string, string> own, IReadOnlyList<string> sonarLines, IReadOnlyList<string>? previous = null, IReadOnlyDictionary<string, string>? style = null)
     {
         var settings = own;
         var unenforced = Unenforced(own);
-        var counts = Conventions.Count(root, settings);
+
+        // With a style, the code is counted against its settings (BRO1001's fields_first), the repository's own winning.
+        var counts = Conventions.Count(root, style is null ? settings : Overlay(style, settings));
 
         // The whitespace keys per file, from the .editorconfig that decides each (the nearest that sets it): this block only
         // reaches the files nothing nearer decides (Bogus's Source/.editorconfig says insert_final_newline = false).
@@ -534,7 +554,7 @@ internal static class InitCommand
             : settings.TryGetValue("dotnet_diagnostic.IDE0055.severity", out var ideSeverity) ? $"your settings set IDE0055 ({ideSeverity})"
             : keptSpacing.Count > 0 ? "kept from the last init"
             : null;
-        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), csharpier.Lines is null ? own : own.Where(p => !Conventions.All.Any(c => Conventions.IsCSharpiers(c) && (c.Key == p.Key || c.AlsoKeys.Contains(p.Key)))).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase), unenforced.ToDictionary(k => k, k => settings[k]), spacing);
+        var (detected, report) = Conventions.Decide(counts, decided, key => own.ContainsKey(key) || keptKeys.Contains(key) || sonarLines.Any(l => l.StartsWith(key + " ", StringComparison.Ordinal)) || (usings.Count > 0 && key is Conventions.SortUsingsKey or "dotnet_separate_import_directive_groups"), csharpier.Lines is null ? own : own.Where(p => !Conventions.All.Any(c => Conventions.IsCSharpiers(c) && (c.Key == p.Key || c.AlsoKeys.Contains(p.Key)))).ToDictionary(p => p.Key, p => p.Value, StringComparer.OrdinalIgnoreCase), unenforced.ToDictionary(k => k, k => settings[k]), spacing, style);
 
         // BRO1302 has no switch for primary-constructor parameters alone: say what turning it off covers.
         if (detected.FindIndex(l => l.StartsWith("# init: primary-constructor parameter names:", StringComparison.Ordinal)) is >= 0 and var primary)
@@ -889,7 +909,7 @@ internal static class InitCommand
     /// rule and said clean, while the build takes the preset's own entries (a rule's own entry wins over a bulk one) and
     /// failed with ~40,000 warnings as errors. Rules the settings set by id are the team's. Empty when nothing is hidden.
     /// </summary>
-    public static List<string> HiddenFromFormat(IReadOnlyDictionary<string, string> settings)
+    public static List<string> HiddenFromFormat(IReadOnlyDictionary<string, string> settings, IReadOnlyDictionary<string, string>? style = null)
     {
         static bool Below(string? severity) => severity?.Trim().ToLowerInvariant() is "silent" or "none" or "suggestion" or "hidden" or "info";
         settings.TryGetValue("dotnet_analyzer_diagnostic.severity", out var bulk);
@@ -897,7 +917,8 @@ internal static class InitCommand
         var result = new List<string>();
         foreach (var (id, severity) in PresetSeverities())
         {
-            if (settings.ContainsKey($"dotnet_diagnostic.{id}.severity"))
+            // A rule the style turns off isn't hidden: it's off.
+            if (settings.ContainsKey($"dotnet_diagnostic.{id}.severity") || style?.GetValueOrDefault($"dotnet_diagnostic.{id}.severity") == "none")
             {
                 continue;
             }
@@ -920,7 +941,7 @@ internal static class InitCommand
     /// 'dotnet format' there, and the build failed. A folder that turns every analyzer off itself (<see cref="OptsOut"/>) gets
     /// <see cref="OptOutLines"/> instead, with <paramref name="written"/>: the keys StyleBro's blocks set in <paramref name="rootSettings"/>.
     /// </summary>
-    public static SortedDictionary<string, List<string>> NestedHiddenFromFormat(string root, IReadOnlyDictionary<string, string> rootSettings, bool withBlocks, IReadOnlyCollection<string>? written = null)
+    public static SortedDictionary<string, List<string>> NestedHiddenFromFormat(string root, IReadOnlyDictionary<string, string> rootSettings, bool withBlocks, IReadOnlyCollection<string>? written = null, IReadOnlyDictionary<string, string>? style = null)
     {
         var result = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
         var sources = StyleCopSetup.EnumerateFiles(root, ownRoot: true)
@@ -947,7 +968,7 @@ internal static class InitCommand
                 }
             }
 
-            if ((OptsOut(chain) ? OptOutLines(settings.Where(p => written?.Contains(p.Key, StringComparer.OrdinalIgnoreCase) == true), chain) : HiddenFromFormat(settings)) is { Count: > 0 } hidden)
+            if ((OptsOut(chain) ? OptOutLines(settings.Where(p => written?.Contains(p.Key, StringComparer.OrdinalIgnoreCase) == true), chain) : HiddenFromFormat(settings, style)) is { Count: > 0 } hidden)
             {
                 result[source] = hidden;
             }
@@ -1044,7 +1065,7 @@ internal static class InitCommand
     /// too, but StyleBro's MultiTargetSuppressor hides them there, so they are always warnings. Keys the root .editorconfig
     /// (or the one in <paramref name="keysFrom"/>, a folder whose .editorconfig says root = true) sets itself are left out.
     /// </summary>
-    public static (string? Block, List<string> Notes) Modernize(string root, IReadOnlyList<string> multiTargeted, string? keysFrom = null)
+    public static (string? Block, List<string> Notes) Modernize(string root, IReadOnlyList<string> multiTargeted, string? keysFrom = null, IReadOnlyCollection<string>? styleKeys = null)
     {
         var withoutLangVersion = multiTargeted.Where(p => !SetsLangVersion(root, p)).ToList();
         var notes = new List<string>();
@@ -1061,7 +1082,8 @@ internal static class InitCommand
                 + "  (e.g. ArgumentNullException.ThrowIfNull in a net48;net8.0 project). The guard comes with the StyleBro.Analyzers package: projects without it would get fixes that break their older framework.");
         }
 
-        var own = Migration.OwnKeys(keysFrom ?? root);
+        // A style's own severities win too (the Microsoft style: no index or range operators, IDE0056/IDE0057).
+        var own = Migration.OwnKeys(keysFrom ?? root).Concat(styleKeys ?? []).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var lines = ModernizeTemplate().Replace("\r\n", "\n").TrimEnd('\n').Split('\n')
             .Select(l => l.Replace("{lang}", withoutLangVersion.Count == 0 ? "warning" : "suggestion"))
             .Where(l => l.StartsWith('#') || !l.Contains('=') || !own.Contains(l.Substring(0, l.IndexOf('=')).Trim()));
@@ -1072,6 +1094,39 @@ internal static class InitCommand
 
     /// <summary>The template (sdk-rules.editorconfig, embedded).</summary>
     public static string Template() => Read("SdkRules.editorconfig");
+
+    /// <summary>
+    /// The template with a style's built-in rules (<paramref name="style"/> null: <see cref="Template()"/>), the ids in
+    /// <paramref name="suggestions"/> at suggestion instead of warning (multi-targeted repositories).
+    /// </summary>
+    public static string Template(string? style, IReadOnlyCollection<string>? suggestions = null) => style is null
+        ? Template()
+        : Template().Replace("\r\n", "\n").TrimEnd('\n') + "\n" + string.Join("\n", Read("MicrosoftRules.editorconfig").Replace("\r\n", "\n").TrimEnd('\n').Split('\n')
+            .Select(l => IdOf(KeyOf(l)) is { } id && suggestions?.Contains(id) == true ? l.Replace("= warning", "= suggestion", StringComparison.Ordinal) : l)) + "\n";
+
+    /// <summary>
+    /// The settings a style's layers set (presets/styles/&lt;style&gt;.X.Y.globalconfig in the package, every layer: init pins
+    /// the latest preset), or null for a style the package doesn't have.
+    /// </summary>
+    public static Dictionary<string, string>? StyleSettings(string style)
+    {
+        var names = Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(n => n.StartsWith($"Style.{style}.", StringComparison.Ordinal)).ToList();
+        if (names.Count == 0)
+        {
+            return null;
+        }
+
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in names.SelectMany(n => Read(n).Replace("\r\n", "\n").Split('\n')))
+        {
+            if (KeyOf(line) is { } key && key is not "is_global" and not "global_level")
+            {
+                result[key] = line.Substring(line.IndexOf('=') + 1).Trim();
+            }
+        }
+
+        return result;
+    }
 
     /// <summary>The modernization template (modernize-rules.editorconfig, embedded), with {lang}/{api} severities.</summary>
     public static string ModernizeTemplate() => Read("ModernizeRules.editorconfig");
@@ -1430,7 +1485,7 @@ internal static class InitCommand
     /// every rule this version knows, and later package upgrades add none by themselves. A file that already sets
     /// StyleBroPreset (a migration's 'none', the team's own) is left alone.
     /// </summary>
-    private static void PinPreset(string root, bool write)
+    private static void PinPreset(string root, bool write, string? style = null)
     {
         var property = $"<StyleBroPreset>{StyleBro.Analyzers.PresetVersions.Latest}</StyleBroPreset>";
         var solutions = Solutions(Directory.EnumerateFiles(root));
@@ -1446,12 +1501,16 @@ internal static class InitCommand
 
         foreach (var props in Migration.PropsFiles(root).Where(p => !IsOutsideTheBuild(root, p, solutions, elsewhere)))
         {
+            var text = File.Exists(props) ? File.ReadAllText(props) : null;
             var pinned = Migration.SetPreset(
-                File.Exists(props) ? File.ReadAllText(props) : null,
+                text,
                 StyleBro.Analyzers.PresetVersions.Latest,
                 "StyleBro's rules up to this preset version: raise it (or 'latest') for the rules of newer releases.",
                 importParent: !File.Exists(props) && Migration.HasParentProps(props));
-            if (pinned is null)
+
+            // The style goes next to the preset version (docs/styles.md).
+            var styled = style is null ? null : Migration.SetStyle(pinned ?? text!, style);
+            if (pinned is null && styled is null)
             {
                 continue;
             }
@@ -1460,12 +1519,23 @@ internal static class InitCommand
             var hidden = Migration.HiddenPropsNote(props);
             if (write)
             {
-                PreviewCommand.EditFile(props, _ => pinned);
-                Console.WriteLine($"Set the preset version in {name} ({property}): rules of newer releases stay off until you raise it.");
+                PreviewCommand.EditFile(props, _ => styled ?? pinned!);
             }
-            else
+
+            if (pinned is not null)
             {
-                Console.WriteLine($"--write also sets the preset version in {name} ({property}).");
+                Console.WriteLine(write
+                    ? $"Set the preset version in {name} ({property}): rules of newer releases stay off until you raise it."
+                    : $"--write also sets the preset version in {name} ({property}).");
+            }
+
+            if (styled is not null)
+            {
+                Console.WriteLine($"{(write ? "Set" : "--write also sets")} the style in {name} (<StyleBroStyle>{style}</StyleBroStyle>).");
+                if (Regex.IsMatch(styled, @"<StyleBroPreset>\s*none\s*<", RegexOptions.IgnoreCase))
+                {
+                    Console.WriteLine($"{name} says <StyleBroPreset>none</StyleBroPreset>: a style sits on the preset, so the build ignores it (STYLEBRO004) until you set a preset version.");
+                }
             }
 
             if (hidden is not null)
@@ -1517,9 +1587,20 @@ internal static class InitCommand
     /// one of a folder whose .editorconfig says 'root = true', judged from that folder's own code and settings (the root's
     /// don't reach it; CleanArchitecture's sample/ got CRLF lines in LF files and 'is null' against its '== null').
     /// </summary>
-    private static Target Prepare(string repository, string folder, IReadOnlyList<string> sonarLines, IReadOnlyList<string> multiTargeted, bool modernizing, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null)
+    private static Target Prepare(string repository, string folder, IReadOnlyList<string> sonarLines, IReadOnlyList<string> multiTargeted, bool modernizing, IReadOnlyList<(string Section, List<string> Lines)>? sonarScopes = null, string? style = null)
     {
         var root = folder.Length == 0 ? repository : Path.Combine(repository, folder);
+
+        // A style (--style): its settings are the conventions' defaults, its built-in rules join the template; where a
+        // multi-targeted project doesn't set LangVersion, IDE0062's fix would break its older frameworks (suggestion there).
+        var styleSettings = style is null ? null : StyleSettings(style);
+        var suggestions = style is not null && multiTargeted.Any(p => !SetsLangVersion(repository, p)) ? new[] { NeedsLangVersion } : [];
+        if (suggestions.Length > 0 && folder.Length == 0)
+        {
+            Console.WriteLine($"The style's {NeedsLangVersion} ('static' local functions, C# 8) is a suggestion: {MultiTargetedLine(multiTargeted)} Without LangVersion each target framework gets its own C# version, and the fix breaks the older ones.");
+        }
+
+        var template = Template(style, suggestions);
         var prefix = folder.Length == 0 ? string.Empty : folder + "/";
         var path = Path.Combine(root, ".editorconfig");
         var existing = File.Exists(path) ? File.ReadAllText(path) : null;
@@ -1559,7 +1640,7 @@ internal static class InitCommand
         var nestedLines = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         if (!migrated)
         {
-            (var lines, var report, nestedLines, var scopes) = Detect(root, settings, sonarLines, PreviousConventions(existing));
+            (var lines, var report, nestedLines, var scopes) = Detect(root, settings, sonarLines, PreviousConventions(existing), styleSettings);
             detected = lines;
             sonarScopes = [.. sonarScopes ?? [], .. scopes];
             if (report.Count > 0)
@@ -1585,7 +1666,7 @@ internal static class InitCommand
         }
 
         // A bulk 'silent' hides StyleBro from 'dotnet format' but not from the build: set by id, they agree (docs/decisions).
-        var byId = migrated ? [] : HiddenFromFormat(ownSettings).Where(l => !detected.Concat(sonarLines).Any(d => KeyOf(d) == KeyOf(l))).ToList();
+        var byId = migrated ? [] : HiddenFromFormat(ownSettings, styleSettings).Where(l => !detected.Concat(sonarLines).Any(d => KeyOf(d) == KeyOf(l))).ToList();
         if (byId.Count > 0)
         {
             Console.WriteLine($"{prefix}.editorconfig sets a bulk severity below warning: 'dotnet format' would skip {byId.Count} StyleBro rules the build reports. The block sets them by id, so both agree.");
@@ -1608,7 +1689,7 @@ internal static class InitCommand
                 blockSettings[KeyOf(line)!] = line.Substring(line.IndexOf('=') + 1).Trim();
             }
 
-            foreach (var (source, hidden) in NestedHiddenFromFormat(root, blockSettings, withBlocks: false, written))
+            foreach (var (source, hidden) in NestedHiddenFromFormat(root, blockSettings, withBlocks: false, written, styleSettings))
             {
                 var optOut = hidden.All(l => l.EndsWith(" = none", StringComparison.Ordinal));
                 Console.WriteLine(optOut
@@ -1631,7 +1712,7 @@ internal static class InitCommand
                 Console.WriteLine($"{prefix}{string.Join(", ", optOutFolders.Select(f => f + "/"))}: 'format' sorts the usings there too (a sort key reaches the folder, and 'dotnet format' sorts wherever one is set): C# files directly in {(prefix.Length == 0 ? "the root" : prefix)} leave no section that skips the folder.");
             }
 
-            foreach (var (source, off) in NestedStyleOff(root, Template().Split('\n').Concat(detected).Concat(sonarLines)))
+            foreach (var (source, off) in NestedStyleOff(root, template.Split('\n').Concat(detected).Concat(sonarLines)))
             {
                 Console.WriteLine($"{prefix}{source}/.editorconfig turns the Style category off: its block turns {off.Count} built-in rules off by id too ({List(off.Select(l => IdOf(KeyOf(l))!).ToList())}), which the block above would otherwise turn on there.");
                 (nestedLines.TryGetValue(source, out var list) ? list : nestedLines[source] = []).AddRange([.. StyleOffComment.Split('\n'), .. off]);
@@ -1645,6 +1726,7 @@ internal static class InitCommand
         if (!migrated && RequiresThisQualification(folder.Length == 0 ? WithAnalysisModeAll(repository, settings) : settings))
         {
             leftOut.Add(ThisQualificationSeverityKey);
+            leftOut.Add(Conventions.ThisQualificationKey);
             Console.WriteLine($"{Source(ThisQualificationSeverityKey, "dotnet_style_qualification_for_field", "dotnet_style_qualification_for_property", "dotnet_style_qualification_for_method", "dotnet_style_qualification_for_event")} requires 'this.' (dotnet_style_qualification_for_*, IDE0009): kept, the block doesn't turn IDE0009 off."
                 + (IsEnforced(ownSettings, "IDE0009") || Source(ThisQualificationSeverityKey, "dotnet_style_qualification_for_field", "dotnet_style_qualification_for_property", "dotnet_style_qualification_for_method", "dotnet_style_qualification_for_event") != ".globalconfig" ? string.Empty : " The build enforces it, but 'format' doesn't fix it ('dotnet format' reads no severity from a .globalconfig or the project): code without 'this.' stays a build warning until IDE0009's severity is set in .editorconfig too."));
         }
@@ -1659,7 +1741,7 @@ internal static class InitCommand
 
         // This file turns the Style category (or every analyzer) off itself: the template's built-in rules by id would win over
         // that (trial 23: IDE0055 = warning reformatted the code), so they're left out and the team's bulk setting decides.
-        var styleOff = migrated ? [] : StyleOffIds(ownSettings, Template().Split('\n').Where(l => !leftOut.Contains(KeyOf(l) ?? string.Empty)));
+        var styleOff = migrated ? [] : StyleOffIds(ownSettings, template.Split('\n').Where(l => !leftOut.Contains(KeyOf(l) ?? string.Empty)));
         if (styleOff.Count > 0)
         {
             leftOut.AddRange(styleOff.Select(id => $"dotnet_diagnostic.{id}.severity"));
@@ -1668,7 +1750,7 @@ internal static class InitCommand
 
         // The team turns on a built-in rule the block turns off for StyleBro's (trial 25: IDE0040 = warning, silently 'none'): said,
         // with the rules that enforce its setting instead.
-        var templateLines = Template().Replace("\r\n", "\n").Split('\n');
+        var templateLines = template.Replace("\r\n", "\n").Split('\n');
         for (var i = 1; !migrated && i < templateLines.Length; i++)
         {
             if (KeyOf(templateLines[i]) is { } key && !leftOut.Contains(key) && templateLines[i].EndsWith("= none", StringComparison.Ordinal) && templateLines[i - 1].StartsWith('#')
@@ -1678,18 +1760,18 @@ internal static class InitCommand
             }
         }
 
-        var plainHeader = settings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase);
-        var block = Block(detected, plainHeader, sonarLines, generated, vendored, sonarScopes, byId, leftOut);
+        var plainHeader = settings.TryGetValue("file_header_template", out var headerTemplate) && !headerTemplate.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase);
+        var block = Block(detected, plainHeader, sonarLines, generated, vendored, sonarScopes, byId, leftOut, template);
 
         // The file's own path sections ('[src/**/*.cs]' with IDE0055 = none) come before the block, whose '[*.cs]' lines would
         // win over them (trial 23): the keys they set otherwise are repeated in sections at the block's end.
         if (!migrated && PathSectionOverrides(plain, block) is { Count: > 0 } overrides)
         {
             Console.WriteLine($"{name}'s own {string.Join(", ", overrides.Select(o => "[" + o.Section + "]"))} section{(overrides.Count == 1 ? " sets" : "s set")} keys the block sets too: repeated at the block's end, so {(overrides.Count == 1 ? "it" : "they")} still win{(overrides.Count == 1 ? "s" : string.Empty)} there.");
-            block = Block(detected, plainHeader, sonarLines, generated, vendored, [.. sonarScopes ?? [], .. overrides], byId, leftOut);
+            block = Block(detected, plainHeader, sonarLines, generated, vendored, [.. sonarScopes ?? [], .. overrides], byId, leftOut, template);
         }
 
-        var modernize = modernizing ? Modernize(repository, multiTargeted, root) : (Block: null, Notes: new List<string>());
+        var modernize = modernizing ? Modernize(repository, multiTargeted, root, style is null ? null : Read("MicrosoftRules.editorconfig").Replace("\r\n", "\n").Split('\n').Select(KeyOf).OfType<string>().ToList()) : (Block: null, Notes: new List<string>());
         if (!migrated)
         {
             JsonReport.AddSettings(name, block);
@@ -1766,6 +1848,18 @@ internal static class InitCommand
             : null;
 
     private static string List(IReadOnlyList<string> items) => string.Join(", ", items.Take(3)) + (items.Count > 3 ? ", ..." : string.Empty);
+
+    /// <summary><paramref name="under"/>'s settings with <paramref name="over"/>'s on top.</summary>
+    private static Dictionary<string, string> Overlay(IReadOnlyDictionary<string, string> under, IReadOnlyDictionary<string, string> over)
+    {
+        var result = new Dictionary<string, string>(under, StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, value) in over)
+        {
+            result[key] = value;
+        }
+
+        return result;
+    }
 
     private static string Read(string resource)
     {
