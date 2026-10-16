@@ -337,10 +337,8 @@ internal static class BaselineCommand
         }
 
         using var process = Process.Start(start)!;
-        process.OutputDataReceived += (_, _) => { };
-        process.ErrorDataReceived += (_, _) => { };
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
+        var readers = new[] { FormatCommand.ReadOnThread(process.StandardOutput), FormatCommand.ReadOnThread(process.StandardError) };
+        Array.ForEach(readers, r => r.Join());
         process.WaitForExit();
         return process.ExitCode;
     }

@@ -74,7 +74,7 @@ internal sealed class Baseline
     /// <summary>The fingerprint of the line a position is on.</summary>
     public static string Fingerprint(SourceText text, int position) => Fingerprint(text.ToString(text.Lines.GetLineFromPosition(position).Span));
 
-    /// <summary>A file's path relative to the baseline's folder, '/'-separated; null when it's outside that folder.</summary>
+    /// <summary>A file's path relative to the baseline's folder, '/'-separated (with '../' when it's outside it); null on another drive.</summary>
     public static string? RelativePath(string baselineDirectory, string filePath)
     {
         if (string.IsNullOrEmpty(filePath) || !System.IO.Path.IsPathRooted(filePath))
@@ -84,7 +84,24 @@ internal sealed class Baseline
 
         var root = WithoutDotSegments(NormalizePath(baselineDirectory)).TrimEnd('/') + "/";
         var file = WithoutDotSegments(NormalizePath(filePath));
-        return file.StartsWith(root, StringComparison.OrdinalIgnoreCase) ? file.Substring(root.Length) : null;
+        if (file.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+        {
+            return file.Substring(root.Length);
+        }
+
+        // Outside the folder: '../'-relative, on the same drive (a baseline in eng/ next to src/, trial 24: its entries for
+        // src/ were never written, and the build failed on the findings 'format' kept). Only entries written that way match.
+        var rootParts = root.TrimEnd('/').Split('/');
+        var fileParts = file.Split('/');
+        var common = 0;
+        while (common < rootParts.Length && common < fileParts.Length - 1 && string.Equals(rootParts[common], fileParts[common], StringComparison.OrdinalIgnoreCase))
+        {
+            common++;
+        }
+
+        return common == 0
+            ? null
+            : string.Concat(Enumerable.Repeat("../", rootParts.Length - common)) + string.Join("/", fileParts.Skip(common));
     }
 
     /// <summary>The file's text: the header, then the entries sorted so regenerating gives small diffs.</summary>

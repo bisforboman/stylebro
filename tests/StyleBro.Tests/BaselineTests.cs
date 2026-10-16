@@ -61,6 +61,20 @@ public class BaselineTests
         Assert.Equal(new[] { "src/Old.cs:6", "src/Old.cs:6" }, reported);
     }
 
+    // Trial 24: <StyleBroBaseline> names eng/stylebro.baseline, the code is in src/: its entries go up a folder ('format'
+    // wrote none before, and the build failed on the findings it kept).
+    [Fact]
+    public async Task ABaselineInAnotherFolder_CoversTheFilesItNamesThroughParentFolders()
+    {
+        var baseline = Entries(("../src/Old.cs", "    string a = \"\";", 1));
+        var reported = await RunInAsync(baseline, "eng", ("src/Old.cs", Old), ("other/Old.cs", Old));
+
+        Assert.Equal(new[] { "other/Old.cs:3", "other/Old.cs:4", "other/Old.cs:4", "src/Old.cs:4", "src/Old.cs:4" }, reported);
+        Assert.Equal("../src/Old.cs", Baseline.RelativePath(Root + "/eng", Root + "/src/Old.cs"));
+        Assert.Equal("../../a/Old.cs", Baseline.RelativePath(Root + "/eng/x", Root + "/a/Old.cs"));
+        Assert.Equal("src/Old.cs", Baseline.RelativePath(Root, Root + "/src/Old.cs"));
+    }
+
     [Fact]
     public async Task OtherRulesAndFilesOutsideTheFolder_AreNotAffected()
     {
@@ -123,14 +137,17 @@ public class BaselineTests
         Baseline.Header + string.Concat(entries.Select(e => $"BRO1106\t{e.Path}\t{Baseline.Fingerprint(e.Line)}\t{e.Count}\n"));
 
     /// <summary>Runs BRO1106 with the suppressor; returns the reported (not suppressed) diagnostics as "path:line".</summary>
-    private static async Task<string[]> RunAsync(string baseline, params (string Path, string Code)[] files)
+    private static Task<string[]> RunAsync(string baseline, params (string Path, string Code)[] files) => RunInAsync(baseline, string.Empty, files);
+
+    /// <summary>The same with the baseline in a folder below the root (<paramref name="folder"/>).</summary>
+    private static async Task<string[]> RunInAsync(string baseline, string folder, params (string Path, string Code)[] files)
     {
         var trees = files.Select(f => CSharpSyntaxTree.ParseText(f.Code, path: Path.Combine(Root, f.Path.Replace('/', Path.DirectorySeparatorChar)))).ToList();
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator)
             .Where(p => Path.GetFileName(p) is "System.Runtime.dll" or "System.Private.CoreLib.dll")
             .Select(p => MetadataReference.CreateFromFile(p));
         var compilation = CSharpCompilation.Create("Test", trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-        var options = new AnalyzerOptions(ImmutableArray.Create<AdditionalText>(new Text(Path.Combine(Root, Baseline.FileName), baseline)));
+        var options = new AnalyzerOptions(ImmutableArray.Create<AdditionalText>(new Text(Path.Combine(Root, folder, Baseline.FileName), baseline)));
         var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new EmptyStringAnalyzer(), new BaselineSuppressor());
         var diagnostics = await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
             .GetAnalyzerDiagnosticsAsync();

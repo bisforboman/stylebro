@@ -702,8 +702,9 @@ internal static class Program
             }
 
             // 'init --diff' on a StyleCop repository: init's refusal, before the copy (trial 23: it ended "The preview failed").
+            // Not before the preview's own check of what format runs on (trial 24: 42 s of evaluations, then "several solutions").
             if (command == "init" && Path.GetFullPath(TakeOption(TakeOption(options, "--project").Others, SonarProfileOption).Others.FirstOrDefault(a => !a.StartsWith('-')) ?? ".") is var folder
-                && Directory.Exists(folder) && !InitCommand.IsMigrated(folder)
+                && Directory.Exists(folder) && (TakeOption(options, "--project").Value is not null || BaselineCommand.FindWorkspace(folder) is not null) && !InitCommand.IsMigrated(folder)
                 && StyleCopSetup.Evidence(folder).Count > 0 && StyleCopSetup.IsInstalled(folder) && InitCommand.SendsToMigration(folder))
             {
                 return 1;

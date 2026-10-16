@@ -302,6 +302,16 @@ internal static class PreviewCommand
                 }
 
                 var next = Tree(copy);
+
+                // CSharpier on the files the run changed, as 'stylebro-migrate format' runs it where the repository uses it.
+                var formatRoot = File.Exists(target) ? FormatCommand.WorkingRoot(target) : target;
+                if (next != tree && CSharpierStep.Find(formatRoot) is { } csharpier
+                    && CSharpierStep.InScope(csharpier, formatRoot, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.GetFullPath(Path.Combine(copy, f.Trim())))) is { Count: > 0 } pretty)
+                {
+                    Step($"CSharpier on {pretty.Count} file{(pretty.Count == 1 ? string.Empty : "s")}", () => CSharpierStep.Run(csharpier, "format", pretty).Output.ForEach(Log));
+                    next = Tree(copy);
+                }
+
                 changed.Add(next != tree);
                 JsonReport.AddRun(run, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.Combine(source, f.Trim())), null);
                 tree = next;
@@ -1146,10 +1156,12 @@ internal static class PreviewCommand
         try
         {
             using var process = Process.Start(start)!;
-            var error = process.StandardError.ReadToEndAsync();
+            var error = string.Empty;
+            var reader = FormatCommand.ReadOnThread(process.StandardError, text => error = text);
             var output = process.StandardOutput.ReadToEnd();
+            reader.Join();
             process.WaitForExit();
-            return (process.ExitCode, output, error.Result);
+            return (process.ExitCode, output, error);
         }
         catch (System.ComponentModel.Win32Exception e)
         {
