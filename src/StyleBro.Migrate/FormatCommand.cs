@@ -503,7 +503,7 @@ internal static class FormatCommand
     {
         var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(repository)) + Path.DirectorySeparatorChar;
         return compile.Select(Path.GetFullPath)
-            .Where(f => !f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && File.Exists(f))
+            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
