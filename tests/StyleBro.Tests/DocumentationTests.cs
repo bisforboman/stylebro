@@ -289,6 +289,38 @@ public class DocumentationTests
         }
         """);
 
+    // NLog (trial 26): a '///' between the attributes and the method got a blank line above it once it was '//'.
+    [Fact]
+    public Task TripleSlashComment_BelowAnAttribute_GetsNoBlankLine() => VerifyFixAsync(
+        """
+        using System;
+
+        class C
+        {
+            [Obsolete]
+            {|BRO1602:/// <summary>|}
+            /// https://example.com/issues/3194
+            /// </summary>
+            void M()
+            {
+            }
+        }
+        """,
+        """
+        using System;
+
+        class C
+        {
+            [Obsolete]
+            // <summary>
+            // https://example.com/issues/3194
+            // </summary>
+            void M()
+            {
+            }
+        }
+        """);
+
     // Mapster: '///' trailing code was reported but not fixed (the fix only looked at '///' starting a line), so
     // 'dotnet format' said clean while the build still warned. Every shape that's reported must be fixed.
     [Fact]
