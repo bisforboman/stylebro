@@ -132,24 +132,12 @@ internal static class ForeignFiles
     }
 
     /// <summary>
-    /// Whether the method has [GeneratedCode] and no containing type has it (then the driver skips the whole type,
-    /// hand-written members too, and StyleBro leaves it so).
+    /// Whether the method has [GeneratedCode], from its generated declaration. (A file that has the attribute itself, a
+    /// generated type's, is the driver's generated code: it drops what's reported there.)
     /// </summary>
-    private static bool IsGeneratedByAttribute(ISymbol method)
-    {
-        static bool Has(ISymbol symbol) => symbol.GetAttributes().Any(a => a.AttributeClass is { Name: "GeneratedCodeAttribute" } type
+    private static bool IsGeneratedByAttribute(ISymbol method) =>
+        method.GetAttributes().Any(a => a.AttributeClass is { Name: "GeneratedCodeAttribute" } type
             && type.ContainingNamespace.ToDisplayString() == "System.CodeDom.Compiler");
-
-        for (var type = method.ContainingType; type is not null; type = type.ContainingType)
-        {
-            if (Has(type))
-            {
-                return false;
-            }
-        }
-
-        return Has(method);
-    }
 
     private sealed class SkippingContext(AnalysisContext inner) : AnalysisContext
     {

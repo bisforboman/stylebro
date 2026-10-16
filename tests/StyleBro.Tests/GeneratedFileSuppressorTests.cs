@@ -70,7 +70,8 @@ public class GeneratedFileSuppressorTests
 
     // CommunityToolkit.Mvvm (trial 24): the generator declares 'partial void OnTitleChanged(string value);' with
     // [GeneratedCode], which the merged partial method carries into the hand-written body, so the compiler's driver
-    // skipped that body for syntax node actions ('""' and 'new Guid()' weren't reported there; tree actions were).
+    // skipped that body for syntax node actions ('""' and 'new Guid()' weren't reported there; tree actions were). A
+    // hand-written partial method is reported once.
     [Fact]
     public async Task PartialMethodBody_IsAnalyzedWhenItsDeclarationIsGenerated()
     {
@@ -88,18 +89,37 @@ public class GeneratedFileSuppressorTests
 
                 partial void OnTitleChanged(string value)
                 {
-                    title = value == "" ? string.Empty : value;
+                    title = value == "" ? string.Empty : value; // reported
+                }
+            }
+
+            public partial class Hand
+            {
+                partial void OnChanged(string value);
+
+                partial void OnChanged(string value)
+                {
+                    _ = value == ""; // reported
                 }
             }
             """;
 
-        var diagnostics = await RunAsync(Implementation, @"C:\repo\App\ViewModel.cs", Folders, (Declaration, Generated));
+        var diagnostics = await RunAsync(Implementation, @"C:\repo\App\ViewModel.cs", Folders, other: (Declaration, Generated));
 
-        Assert.Single(diagnostics, d => d.Id == DiagnosticIds.EmptyString && !d.IsSuppressed);
+        var reported = Implementation.Split('\n').Select((line, i) => (line, i)).Where(l => l.line.Contains("// reported")).Select(l => l.i);
+        Assert.Equal(reported, diagnostics.Where(d => d.Id == DiagnosticIds.EmptyString && !d.IsSuppressed).Select(d => d.Location.GetLineSpan().StartLinePosition.Line).Order());
+    }
+
+    // The files of a repository's submodules aren't analyzed either.
+    [Fact]
+    public async Task EveryAnalyzer_IsQuietInSubmoduleFiles()
+    {
+        Assert.Empty(await RunAsync(Code, @"C:\repo\shared\Guard.cs", submodules: @"C:\repo\shared\"));
+        Assert.NotEmpty(await RunAsync(Code, @"C:\repo\src\Guard.cs", submodules: @"C:\repo\shared\"));
     }
 
     /// <summary>Every StyleBro analyzer with every BRO rule on, over <paramref name="code"/>: its BRO diagnostics.</summary>
-    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null, (string Code, string Path)? other = null)
+    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null, (string Code, string Path)? other = null, string? submodules = null)
     {
         var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         var trees = new[] { (code, path) }.Concat(other is { } more ? [more] : Array.Empty<(string, string)>())
@@ -114,6 +134,11 @@ public class GeneratedFileSuppressorTests
         if (folders is not null)
         {
             global = global.Add(GeneratedFileSuppressor.Property, folders);
+        }
+
+        if (submodules is not null)
+        {
+            global = global.Add(PackageFileSuppressor.SubmoduleProperty, submodules);
         }
 
         var analyzers = typeof(DiagnosticIds).Assembly.GetTypes()
