@@ -115,7 +115,10 @@ internal sealed class MemberOrderOptions
 
     public static readonly MemberOrderOptions Default = new(null, null, true, true, true, false);
 
-    /// <summary>Fields first, every other kind and every accessibility sharing one place (<see cref="ScopeKey"/>).</summary>
+    /// <summary>
+    /// Fields first, every other kind and every accessibility sharing one place (<see cref="ScopeKey"/>). A namespace holds
+    /// no fields, so nothing there could move: it is skipped without computing keys.
+    /// </summary>
     private static readonly MemberOrderOptions FieldsFirst = new(
         new List<int[]> { new[] { (int)MemberKind.Field }, AllBut(KindCount, (int)MemberKind.Field) },
         new List<int[]> { AllBut(AccessCount, -1) },
