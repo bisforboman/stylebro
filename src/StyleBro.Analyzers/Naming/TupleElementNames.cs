@@ -41,14 +41,17 @@ internal static class TupleElementNames
     /// Whether the element is in the signature of a member that overrides or implements a library member whose own
     /// declaration names the tuple elements: the names have to match (CS8139), and the library can't be renamed (StyleCop's
     /// CanTupleElementNameBeChanged). 'IComparer&lt;(int a, int b)&gt;.Compare' takes its names from the type argument,
-    /// which is in the solution, so that one can be renamed.
+    /// which is in the solution, so that one can be renamed. A base member in the solution counts too when it is public API
+    /// and <see cref="PublicApi.RenameKey"/> is false: its names aren't renamed, so an internal implementer's can't be either
+    /// (Serde's 'ITypeDeserializer', trial 26: reported, then kept for the compile errors every time).
     /// </summary>
-    public static bool InheritsNames(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken)
+    public static bool InheritsNames(TupleElementSyntax element, SemanticModel model, AnalyzerConfigOptions options, CancellationToken cancellationToken)
     {
         return element.FirstAncestorOrSelf<MemberDeclarationSyntax>() is { } member
             && IsInSignature(element, member)
             && model.GetDeclaredSymbol(member, cancellationToken) is { } symbol
-            && CamelCaseNamingAnalyzer.GetBaseMembers(symbol).Any(b => !b.Locations.Any(l => l.IsInSource) && HasTupleNames(b.OriginalDefinition));
+            && CamelCaseNamingAnalyzer.GetBaseMembers(symbol).Any(b =>
+                (!b.Locations.Any(l => l.IsInSource) || !PublicApi.CanRename(b, options)) && HasTupleNames(b.OriginalDefinition));
     }
 
     /// <summary>

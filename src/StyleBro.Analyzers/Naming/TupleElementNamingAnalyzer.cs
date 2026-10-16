@@ -33,7 +33,7 @@ public sealed class TupleElementNamingAnalyzer : DiagnosticAnalyzer
         var name = element.Identifier.ValueText;
         var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(element.SyntaxTree);
         if (TupleElementNames.GetNewName(name, TupleElementNames.IsCamelCase(options)) is not { } newName
-            || TupleElementNames.InheritsNames(element, context.SemanticModel, context.CancellationToken)
+            || TupleElementNames.InheritsNames(element, context.SemanticModel, options, context.CancellationToken)
             || DisabledCode.Mentions(context.Compilation, name)
             || (!PublicApi.IsRenameAllowed(options) && TupleElementNames.IsInPublicSignature(element, context.SemanticModel, context.CancellationToken))
             || (context.ContainingSymbol is { } owner

@@ -561,6 +561,23 @@ public class TupleElementNamingTests
         """,
         "stylebro_rename_public_api = false");
 
+    // Trial 26 (Serde): a public interface keeps its names by default, so an internal implementer has to keep them too;
+    // it was reported, and the fix then kept it every time ("would add compile errors").
+    [Fact]
+    public Task NamesForcedByAPublicInterface_AreNotReportedByDefault() => VerifyNoDiagnosticsAsync(
+        """
+        public interface IReader
+        {
+            (int, string? errorName) TryRead();
+        }
+
+        internal sealed class Reader : IReader
+        {
+            public (int, string? errorName) TryRead() => (0, null);
+        }
+        """,
+        "stylebro_rename_public_api = false");
+
     // Trial 25 (Flow Launcher): a public conversion operator's tuple was renamed.
     [Fact]
     public Task PublicOperatorSignatures_AreLeftAloneByDefault() => VerifyNoDiagnosticsAsync(

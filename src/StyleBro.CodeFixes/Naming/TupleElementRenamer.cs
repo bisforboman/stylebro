@@ -357,9 +357,9 @@ internal static class TupleElementRenamer
         {
             foreach (var element in root.DescendantNodes().OfType<TupleElementSyntax>().Where(e => e.Identifier.ValueText == oldName))
             {
-                if (!TupleElementNames.InheritsNames(element, model, cancellationToken)
-                    && (PublicApi.IsRenameAllowed(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree))
-                        || !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))
+                var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+                if (!TupleElementNames.InheritsNames(element, model, options, cancellationToken)
+                    && (PublicApi.IsRenameAllowed(options) || !TupleElementNames.IsInPublicSignature(element, model, cancellationToken)))
                 {
                     renamed.Add(Key(element.Identifier.GetLocation()));
                     if (IsVisibleToOtherProjects(element, model, cancellationToken, out var member))
