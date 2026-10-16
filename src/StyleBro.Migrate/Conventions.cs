@@ -2561,6 +2561,35 @@ internal static class Conventions
     public static string UsingName(UsingDirectiveSyntax u) =>
         (u.Alias?.Name.Identifier.ValueText ?? u.NamespaceOrType.ToString()).Replace("global::", string.Empty).Replace(" ", string.Empty);
 
+    /// <summary>
+    /// Namespace braces against csharp_new_line_before_open_brace (owner's choice 2026-10-16, "Count namespace braces and say
+    /// so"): Roslyn has no value of its own for namespaces, 'types' covers them, so MimeKit's 'methods,types' with 'namespace X {'
+    /// in 670 files had IDE0055 move 614 braces. <paramref name="value"/>: the key's value in effect. Null when every counted file
+    /// agrees; else the report line, and, when most files disagree, the lines that turn IDE0055 off until the team decides.
+    /// </summary>
+    public static (List<string> Lines, string Report)? NamespaceBraces(IReadOnlyDictionary<string, int[]> counts, string value)
+    {
+        var count = counts.TryGetValue(NamespaceBracesKey, out var c) ? c : new int[2];
+        value = value.Split(':')[0].Trim().ToLowerInvariant();
+        var ownLine = value.Split(',').Any(v => v.Trim() is "all" or "types");
+        var (changing, total) = (count[ownLine ? 1 : 0], count.Sum());
+        if (changing == 0)
+        {
+            return null;
+        }
+
+        var found = $"csharp_new_line_before_open_brace = {value} puts a namespace's '{{' {(ownLine ? "on its own line (Roslyn's 'types' covers namespaces)" : "at the end of the line")}, but {changing} of {Plural(total, "file")} have it {(ownLine ? "at the end of the line" : "on its own line")}";
+        if (changing * 2 <= total)
+        {
+            return ([], $"namespace braces: {found}: 'format' moves them");
+        }
+
+        // ponytail: a key set by a team below the block wins over this line; init then only reports (the IDE0055 severity is theirs).
+        var change = $"with IDE0055 on, {Plural(changing, "file")} will change. Set csharp_new_line_before_open_brace accordingly (Roslyn has no value for namespaces alone: 'types' is for types and namespaces alike), or accept the change: put 'dotnet_diagnostic.IDE0055.severity = warning' below the stylebro-migrate block in a [*.cs] section (a later line wins)";
+        return ([$"# init: namespace braces: {found}. IDE0055 is off until you decide, so 'format' leaves whitespace alone; {change}.", "dotnet_diagnostic.IDE0055.severity = none"],
+            $"namespace braces: {found}: IDE0055 is off until you decide; {change}");
+    }
+
     /// <summary>The folder a piece of <see cref="CSharpier"/>'s evidence applies to: its own, or the one above '.config'.</summary>
     private static string CSharpierFolder(string evidence)
     {
@@ -2838,35 +2867,6 @@ internal static class Conventions
         });
 
         static string KeyOf(string line) => line.Substring(0, line.IndexOf('=')).Trim();
-    }
-
-    /// <summary>
-    /// Namespace braces against csharp_new_line_before_open_brace (owner's choice 2026-10-16, "Count namespace braces and say
-    /// so"): Roslyn has no value of its own for namespaces, 'types' covers them, so MimeKit's 'methods,types' with 'namespace X {'
-    /// in 670 files had IDE0055 move 614 braces. <paramref name="value"/>: the key's value in effect. Null when every counted file
-    /// agrees; else the report line, and, when most files disagree, the lines that turn IDE0055 off until the team decides.
-    /// </summary>
-    public static (List<string> Lines, string Report)? NamespaceBraces(IReadOnlyDictionary<string, int[]> counts, string value)
-    {
-        var count = counts.TryGetValue(NamespaceBracesKey, out var c) ? c : new int[2];
-        value = value.Split(':')[0].Trim().ToLowerInvariant();
-        var ownLine = value.Split(',').Any(v => v.Trim() is "all" or "types");
-        var (changing, total) = (count[ownLine ? 1 : 0], count.Sum());
-        if (changing == 0)
-        {
-            return null;
-        }
-
-        var found = $"csharp_new_line_before_open_brace = {value} puts a namespace's '{{' {(ownLine ? "on its own line (Roslyn's 'types' covers namespaces)" : "at the end of the line")}, but {changing} of {Plural(total, "file")} have it {(ownLine ? "at the end of the line" : "on its own line")}";
-        if (changing * 2 <= total)
-        {
-            return ([], $"namespace braces: {found}: 'format' moves them");
-        }
-
-        // ponytail: a key set by a team below the block wins over this line; init then only reports (the IDE0055 severity is theirs).
-        var change = $"with IDE0055 on, {Plural(changing, "file")} will change. Set csharp_new_line_before_open_brace accordingly (Roslyn has no value for namespaces alone: 'types' is for types and namespaces alike), or accept the change: put 'dotnet_diagnostic.IDE0055.severity = warning' below the stylebro-migrate block in a [*.cs] section (a later line wins)";
-        return ([$"# init: namespace braces: {found}. IDE0055 is off until you decide, so 'format' leaves whitespace alone; {change}.", "dotnet_diagnostic.IDE0055.severity = none"],
-            $"namespace braces: {found}: IDE0055 is off until you decide; {change}");
     }
 
     /// <summary>
