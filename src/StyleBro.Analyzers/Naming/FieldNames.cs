@@ -1014,14 +1014,14 @@ internal static class FieldNames
                 var map = new System.Collections.Generic.Dictionary<string, int>(System.StringComparer.Ordinal);
                 foreach (var f in type.GetMembers().OfType<IFieldSymbol>())
                 {
-                    // A field that keeps its name keeps it: its current name is checked as a member of the type.
-                    if (KeepsItsName(type, f))
-                    {
-                        continue;
-                    }
-
                     if (GetNewName(f, key.Item1, hungarian) is { } name)
                     {
+                        // A field that keeps its name keeps it: its current name is checked as a member of the type.
+                        if (KeepsItsName(type, f))
+                        {
+                            continue;
+                        }
+
                         map[name] = map.TryGetValue(name, out var n) ? n + 1 : 1;
                     }
                 }
