@@ -77,6 +77,11 @@ public sealed partial class MigrationTests
         Assert.False(IfBodies.IsKeptFinding(Line(10, 17, @"Replace 15 characters with '\r\n\s\s\s\s\s\s\s\s\s\s\s\s'."), protectedLines));
         Assert.True(IfBodies.IsKeptFinding(Line(9, 15, @"Replace 13 characters with '\r\n\s\s\s\s\s\s\s\s\s\s\s\s'."), protectedLines));
 
+        // NLog's tests: a blank line between the code and the '#if', rewritten with the line break above it.
+        var blank = Path.Combine(root, "Blank.cs");
+        var withBlank = new Dictionary<string, (string Text, List<int> Lines)>(StringComparer.OrdinalIgnoreCase) { [blank] = (IfDebugBody.Replace("    {\n#if DEBUG", "    {\n        Log();\n\n#if DEBUG", StringComparison.Ordinal), [9]) };
+        Assert.True(IfBodies.IsKeptFinding($"{blank}(5,15): error WHITESPACE: Fix whitespace formatting. Replace 4 characters with '\\r\\n\\r\\n'.", withBlank));
+
         // Other lines, files and rules count.
         Assert.False(IfBodies.IsKeptFinding(Line(3, 5, "Delete 4 characters."), protectedLines));
         Assert.False(IfBodies.IsKeptFinding(Line(4, 6, "Delete 4 characters."), protectedLines));

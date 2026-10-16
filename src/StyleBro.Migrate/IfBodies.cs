@@ -27,7 +27,7 @@ internal static class IfBodies
 
     // A whitespace finding that only rewrites a line break ("Replace 1 characters with '\r\n'"), which the whitespace pass
     // writes on the line above such a body when it re-indents the body.
-    private static readonly Regex LineBreakOnly = new(@" WHITESPACE: Fix whitespace formatting\. Replace \d+ characters with '(?:\\r)?\\n'\.", RegexOptions.Compiled);
+    private static readonly Regex LineBreakOnly = new(@" WHITESPACE: Fix whitespace formatting\. Replace \d+ characters with '(?:(?:\\r)?\\n)+'\.", RegexOptions.Compiled);
 
     // A whitespace finding whose new text has a line break: its edit runs from the end of its line into the next.
     private static readonly Regex WritesLineBreak = new(@" WHITESPACE: Fix whitespace formatting\. (?:Replace \d+ characters with|Insert) '[^']*\\n", RegexOptions.Compiled);
@@ -282,8 +282,8 @@ internal static class IfBodies
             + "Their indentation is left as it is.";
     }
 
-    // The lines from the code line above a protected line down to it: past directive lines and the '#if' blocks they close
-    // (code some parses leave out), so the line every parse has above it.
+    // The lines from the code line above a protected line down to it: past directive lines, blank lines and the '#if' blocks
+    // they close (code some parses leave out), so the line every parse has above it.
     private static IEnumerable<int> Range(List<(string Text, string Break)> lines, int line)
     {
         var start = line - 1;
@@ -292,7 +292,7 @@ internal static class IfBodies
             var text = lines[start].Text.TrimStart();
             if (!text.StartsWith('#'))
             {
-                if (open == 0)
+                if (open == 0 && text.Length > 0)
                 {
                     break;
                 }
