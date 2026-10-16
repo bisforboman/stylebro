@@ -36,6 +36,30 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         });
     }
 
+    /// <summary>
+    /// The type a field of a private nested type is visible in (the outermost private type's container), whose disabled
+    /// code is the only place it can be used besides its own type; null when no containing type is private. Speckle's
+    /// 'public double x' in a private struct was skipped for an 'x' in another file's '#if' (trial 25).
+    /// </summary>
+    private static INamedTypeSymbol? GetPrivateScope(IFieldSymbol field)
+    {
+        INamedTypeSymbol? scope = null;
+        for (var type = field.ContainingType; type is not null; type = type.ContainingType)
+        {
+            if (type.DeclaredAccessibility == Accessibility.Private)
+            {
+                scope = type.ContainingType;
+            }
+        }
+
+        return scope;
+    }
+
+    /// <summary>Whether the field's name is a word in disabled code where the field can be used (<see cref="GetPrivateScope"/>).</summary>
+    private static bool IsInDisabledCode(IFieldSymbol field, SymbolAnalysisContext context) => GetPrivateScope(field) is { } scope
+        ? DisabledCode.Mentions(scope, field.Name, context.CancellationToken)
+        : DisabledCode.Mentions(context.Compilation, field.Name);
+
     private static void AnalyzeField(
         SymbolAnalysisContext context,
         ConcurrentDictionary<INamedTypeSymbol, Lazy<FieldNames.TypeFacts>> cache,
@@ -58,7 +82,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         // field too (stryker: a '_' rule for private static fields wins over one for static readonly, so '_lockObj' stays).
         if (rename is ({ } rule, { } newName)
             && PublicApi.CanRename(field, options)
-            && (field.DeclaredAccessibility == Accessibility.Private || !DisabledCode.Mentions(context.Compilation, field.Name))
+            && (field.DeclaredAccessibility == Accessibility.Private || !IsInDisabledCode(field, context))
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
             && FieldNames.CanRename(field, newName, style, cache.GetOrAdd(field.ContainingType, t => new Lazy<FieldNames.TypeFacts>(() => FieldNames.TypeFacts.For(t, context.CancellationToken))).Value, hungarian)
             && NamingRules.AllowsRename(context.Compilation, options, location, field, newName, context.CancellationToken))

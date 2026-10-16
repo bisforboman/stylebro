@@ -65,7 +65,9 @@ public sealed class DefaultValueConstructorCodeFixProvider : CodeFixProvider
             if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true) is BaseObjectCreationExpressionSyntax creation
                 && DefaultValueConstructors.GetReplacement(creation, model, options, cancellationToken, version) is { } replacement)
             {
-                replacements[creation] = replacement;
+                replacements[creation] = replacement.StartsWith("default(", System.StringComparison.Ordinal)
+                    ? "default" + Indentation.GetCallParenthesis(options) + replacement.Substring("default(".Length)
+                    : replacement;
             }
         }
 

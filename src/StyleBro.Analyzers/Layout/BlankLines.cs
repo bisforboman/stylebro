@@ -145,6 +145,7 @@ internal static class BlankLines
             && !(comment.Token.SpanStart >= comment.Span.End && SwitchSectionBlankLines.OmitsBlankLineBefore(comment.Token, switchSections))
             && !IsBetweenListItems(comment)
             && !IsInsideExpression(comment)
+            && !LeadsEmbeddedStatement(comment)
             && !ContinuesTrailingComment(comment, text, aboveLine)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
             && (belowCloseBrace || !IsCommentBelowCode(comment, text));
@@ -234,6 +235,21 @@ internal static class BlankLines
             SyntaxKind.FinallyKeyword => token.Parent.IsKind(SyntaxKind.FinallyClause),
             _ => false,
         };
+    }
+
+    /// <summary>
+    /// Whether the comment leads a statement embedded in an 'if', 'else', loop, 'using', 'lock' or 'fixed' without
+    /// braces (<c>if (folder)</c>, <c>// why</c>, <c>x = y;</c>; trial 25, Flow Launcher): the line above is the
+    /// statement's own header, and a blank line would separate the two. A comment above a block's '{' is BRO1132's.
+    /// </summary>
+    private static bool LeadsEmbeddedStatement(SyntaxTrivia comment)
+    {
+        var token = comment.Token;
+        return token.SpanStart >= comment.Span.End
+            && token.Parent?.FirstAncestorOrSelf<StatementSyntax>() is { } statement and not BlockSyntax
+            && statement.GetFirstToken() == token
+            && statement.Parent is IfStatementSyntax or ElseClauseSyntax or WhileStatementSyntax or DoStatementSyntax or ForStatementSyntax
+                or CommonForEachStatementSyntax or UsingStatementSyntax or LockStatementSyntax or FixedStatementSyntax;
     }
 
     /// <summary>

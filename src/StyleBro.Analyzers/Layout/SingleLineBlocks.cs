@@ -266,13 +266,14 @@ internal static class SingleLineBlocks
                 return null;
             }
 
-            // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges.
+            // Members that BRO1505 wants separated get the blank line right away, so one 'dotnet format' run converges; with
+            // BRO1505 off, only a member after a '}' gets one, BRO1519's (trial 25).
             for (var i = 1; i < items.Count; i++)
             {
                 // Enum values: one per line (StyleCop's SA1136, BRO1121), no blank lines; the comma stays where it is.
                 // A statement after one ending in '}' (a local function, a nested block) gets BRO1519's blank line.
                 var previous = items[i].GetFirstToken().GetPreviousToken();
-                var blankLine = node is BlockSyntax
+                var blankLine = node is BlockSyntax || isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false
                     ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
                         && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
                     : node is not EnumDeclarationSyntax && (ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))

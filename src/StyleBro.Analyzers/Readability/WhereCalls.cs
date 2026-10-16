@@ -121,7 +121,7 @@ internal static class WhereCalls
         // 'Where' goes too (a comment there would be lost).
         var gap = TextSpan.FromBounds(receiver.Span.End, argument.SpanStart);
         return Trivia.IsBlank(terminal, TextSpan.FromBounds(receiver.Span.End, access.Name.SpanStart))
-            ? ("Array." + method, new[] { new TextChange(new TextSpan(receiver.SpanStart, 0), "Array." + method + "("), new TextChange(gap, ", "), tail })
+            ? ("Array." + method, new[] { new TextChange(new TextSpan(receiver.SpanStart, 0), "Array." + method + Indentation.GetCallParenthesis(options)), new TextChange(gap, ", "), tail })
             : null;
     }
 

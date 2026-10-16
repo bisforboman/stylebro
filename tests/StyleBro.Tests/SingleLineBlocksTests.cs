@@ -740,4 +740,24 @@ public class SingleLineBlocksTests
         }
         """,
         editorConfig: "stylebro_allow_empty_single_line_blocks = true\n");
+
+    // Trial 25: with BRO1505 off, the expansion adds only BRO1519's blank line after a '}', not BRO1505's.
+    [Fact]
+    public Task OneLineType_WithoutBro1505_GetsOnlyBro1519sBlankLines() => VerifyFixAsync(
+        """
+        public class Tiny {|BRO1509:{|} private int x; public int X => x; public void A() {|BRO1509:{|} } private int y; }
+        """,
+        """
+        public class Tiny
+        {
+            private int x;
+            public int X => x;
+            public void A()
+            {
+            }
+
+            private int y;
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1505.severity = none\n");
 }

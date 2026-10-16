@@ -1478,7 +1478,7 @@ public class MemberOrderingTests
         editorConfig: "stylebro_member_static_first = false\n");
 
     // The sort adds a blank line only where BRO1505 wants one: with stylebro_allow_adjacent_single_line_members, a
-    // single-line method moved below a single-line property needs none.
+    // single-line method moved below a single-line property needs none (without it, BRO1505 separates them all).
     [Theory]
     [InlineData("true", "")]
     [InlineData("false", "\n")]
@@ -1495,11 +1495,20 @@ public class MemberOrderingTests
         public class C
         {
             public int P { get; set; }
-            public int R { get; set; }
+        {{blankLine}}    public int R { get; set; }
         {{blankLine}}    public int M() => P;
         }
         """,
-        editorConfig: "stylebro_allow_adjacent_single_line_members = " + allowed + "\ndotnet_diagnostic.BRO1505.severity = none");
+        editorConfig: "stylebro_allow_adjacent_single_line_members = " + allowed + "\n");
+
+    // Without the rules' severities (isOn), the sort adds BRO1505's blank lines, but never into a type on one line.
+    [Fact]
+    public void OneLineType_StaysOnOneLine_WithoutSeverities()
+    {
+        var type = Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseCompilationUnit("public class C { public void B() { } private int x; private int y; }").Members[0];
+        var sorted = StyleBro.Analyzers.Ordering.MemberOrdering.Sort(type, StyleBro.Analyzers.Ordering.MemberOrderOptions.Default);
+        Assert.Equal("public class C { private int x; private int y; public void B() { } }", sorted.ToFullString());
+    }
 
     [Fact]
     public Task OneLineType_StaysOnOneLine_WhenNotExpanded() => VerifyFixAsync(
@@ -1549,9 +1558,7 @@ public class MemberOrderingTests
         public class C
         {
             private int x;
-
             private int y;
-
             public void B() { }
         }
         """,

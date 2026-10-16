@@ -535,6 +535,33 @@ public class FixOrderTests
         "BRO1108",
         "BRO1110");
 
+    // Trial 25 (Flow Launcher): a parenthesized leading lambda ('BeginInvoke((() => { ... }), X)') kept '}, X);' when
+    // BRO1405 removed the parentheses first, and was split when BRO1108 ran first.
+    [Fact]
+    public Task LeadingMultiLineLambda_InParentheses() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public void Invoke(System.Action action, int priority) { }
+
+            public void Run()
+            {
+                Invoke((() =>
+                {
+                    System.Console.WriteLine();
+                }), 1);
+                Invoke(new System.Action(() =>
+                {
+                    System.Console.WriteLine();
+                }), 1);
+            }
+        }
+        """,
+        "stylebro_allow_leading_multiline_lambda = true\n",
+        "BRO1107",
+        "BRO1108",
+        "BRO1405");
+
     [Fact]
     public Task ClosingParenthesisOnOwnLine_CallChains() => AssertConvergesInEveryOrderWithConfigAsync(
         """
@@ -2902,6 +2929,17 @@ public class FixOrderTests
         """,
         "dotnet_diagnostic.BRO1505.severity = none\n",
         "BRO1001",
+        "BRO1519");
+
+    // Trial 25: with BRO1505 off, BRO1509's expansion added BRO1505's blank lines anyway, and the sort then moved one.
+    [Fact]
+    public Task Sort_ExpandedOneLineType_WithoutBro1505() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class Tiny { public void A() { } private int x; public int X => x; }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1001",
+        "BRO1509",
         "BRO1519");
 
     // The .NET runtime's style (Microsoft style gaps G1-G3): fields first, 's_' statics, internal fields named like private
