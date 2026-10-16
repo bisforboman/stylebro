@@ -826,8 +826,13 @@ public sealed class KeptFindingsTests : IDisposable
         var lines = new List<string>();
         Directory.CreateDirectory(Path.Combine(root, "Missing"));
 
-        // What a run with a generator project records (RunOnce); one left from an earlier command doesn't count.
+        // One left from an earlier command doesn't count.
         FormatCommand.RecordUnchecked(root, [(Path.Combine(root, "Other", "Other.csproj"), "Release")]);
+        FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (_, _) => 0);
+        Assert.DoesNotContain(lines, l => l.Contains("Other in Release", StringComparison.Ordinal));
+        lines.Clear();
+
+        // What a run with a generator project records (RunOnce).
         var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (_, output) =>
         {
             output!("Checking StyleBro's rules (1 ids), changing nothing.");
@@ -840,7 +845,6 @@ public sealed class KeptFindingsTests : IDisposable
         var build = lines.FindIndex(l => l.StartsWith("Not checked by format: Missing in Release", StringComparison.Ordinal));
         Assert.True(header >= 0 && build > header, string.Join("\n", lines));
         Assert.Equal("Clean.", lines[^1]);
-        Assert.DoesNotContain(lines, l => l.Contains("Other in Release", StringComparison.Ordinal));
     }
 
     [Fact]

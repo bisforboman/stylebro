@@ -2,6 +2,6 @@
 @{
     File = 'src/StyleBro.Migrate/IfBodies.cs'
     Find = 'if (Unique(-side, 0) is >= 0 and var before)'
-    Replace = 'if (false)'
+    Replace = 'if (Unique(-side - 1000, 0) is >= 0 and var before)'
     Tests = 'MigrationTests.IfBodies_AreFoundAgainByTheLinesAroundThem'
 }
