@@ -13,6 +13,9 @@ internal enum FieldStyle
     CamelCase,
     UnderscoreCamelCase,
 
+    /// <summary>'s_count': the .NET runtime's prefix for static fields (only as a static style, set by a <c>stylebro_*</c> key).</summary>
+    StaticCamelCase,
+
     /// <summary>A naming rule asks for a style StyleBro doesn't write (sourcegit's 's_' for static fields): the name stays.</summary>
     Other,
 }
@@ -52,8 +55,9 @@ internal enum FieldRule
 /// </summary>
 internal readonly struct FieldStyles
 {
-    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null, bool pascalAllowsUnderscore = false, string? nonPrivate = null)
+    public FieldStyles(FieldStyle @private, FieldStyle? constant, FieldStyle? staticReadOnly, FieldStyle? mutableStatic = null, bool pascalAllowsUnderscore = false, string? nonPrivate = null, bool internalLikePrivate = false)
     {
+        InternalLikePrivate = internalLikePrivate;
         NonPrivate = nonPrivate;
         Private = @private;
         Constant = constant;
@@ -69,6 +73,12 @@ internal readonly struct FieldStyles
     public bool PascalAllowsUnderscore { get; }
 
     public FieldStyle Private { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether internal and private protected fields are named like private ones
+    /// (<see cref="FieldNames.InternalStyleKey"/> = like_private, the .NET runtime's naming rule) instead of StyleCop's way.
+    /// </summary>
+    public bool InternalLikePrivate { get; }
 
     public FieldStyle? MutableStatic { get; }
 
@@ -113,6 +123,12 @@ internal static class FieldNames
     /// </summary>
     public const string AllowUnderscoreKey = "stylebro_allow_leading_underscore_in_pascal_fields";
 
+    /// <summary>
+    /// 'like_private': internal and private protected fields follow the private field keys (the .NET runtime's '_count' and
+    /// 's_count'), not StyleCop's PascalCase (SA1307) and camelCase (SA1306). Default 'PascalCase': StyleCop's way.
+    /// </summary>
+    public const string InternalStyleKey = "stylebro_internal_field_naming";
+
     private static readonly Accessibility[] NonPrivateAccessibilities =
     {
         Accessibility.Public, Accessibility.Internal, Accessibility.Protected, Accessibility.ProtectedOrInternal, Accessibility.ProtectedAndInternal,
@@ -130,6 +146,7 @@ internal static class FieldNames
         Camel,
         UnderscoreCamel,
         Pascal,
+        StaticCamel,
     }
 
     /// <summary>
@@ -166,10 +183,12 @@ internal static class FieldNames
             ? ToCamelStyle(mutableValue)
             : GetStaticStyleFromNamingRules(options, m => m.Length == 1 && m[0] == "static");
         var allowUnderscore = options.TryGetValue(AllowUnderscoreKey, out var allowValue) && allowValue.Trim().Equals("true", System.StringComparison.OrdinalIgnoreCase);
+        var internalLikePrivate = options.TryGetValue(InternalStyleKey, out var internalValue) && internalValue.Trim() == "like_private";
         if (options.TryGetValue(StaticStyleKey, out var value))
         {
+            // 's_' is for static fields: constants stay PascalCase, like the .NET runtime's naming rules.
             var style = ToCamelStyle(value);
-            return new(GetStyle(options), style, style, mutableStatic, allowUnderscore, GetNonPrivateStyles(options, namingRuleSeverity));
+            return new(GetStyle(options), style == FieldStyle.StaticCamelCase ? null : style, style, mutableStatic, allowUnderscore, GetNonPrivateStyles(options, namingRuleSeverity), internalLikePrivate);
         }
 
         return new(
@@ -178,24 +197,26 @@ internal static class FieldNames
             GetStaticStyleFromNamingRules(options, m => m.Length > 0 && m.All(x => x is "static" or "readonly")),
             mutableStatic,
             allowUnderscore,
-            GetNonPrivateStyles(options, namingRuleSeverity));
+            GetNonPrivateStyles(options, namingRuleSeverity),
+            internalLikePrivate);
 
         static FieldStyle? ToCamelStyle(string value) => value.Split(':')[0].Trim() switch
         {
             "camelCase" => FieldStyle.CamelCase,
             "_camelCase" => FieldStyle.UnderscoreCamelCase,
+            "s_camelCase" => FieldStyle.StaticCamelCase,
             _ => null,
         };
     }
 
     /// <summary>
     /// Private fields that StyleCop's SA1306 checks (BRO1303): not constants and not static readonly (those are
-    /// PascalCase).
+    /// PascalCase). With <see cref="FieldStyles.InternalLikePrivate"/> also internal and private protected ones.
     /// </summary>
-    public static bool IsChecked(IFieldSymbol field)
+    public static bool IsChecked(IFieldSymbol field, FieldStyles style)
     {
         return IsSourceField(field)
-            && field.DeclaredAccessibility == Accessibility.Private
+            && IsPrivateLike(field, style)
             && !field.IsConst
             && !(field.IsStatic && field.IsReadOnly);
     }
@@ -203,15 +224,16 @@ internal static class FieldNames
     /// <summary>
     /// Fields that are PascalCase (BRO1306): constants (SA1303) and static readonly fields (SA1311) of any
     /// accessibility, and public, internal and protected internal fields (SA1307, SA1304). Protected fields are
-    /// camelCase in StyleCop (SA1306) and are left out of both rules; so are enum members (SA1300).
+    /// camelCase in StyleCop (SA1306) and are left out of both rules; so are enum members (SA1300). Internal fields named
+    /// like private ones (<see cref="FieldStyles.InternalLikePrivate"/>) only as constants and static readonly fields.
     /// </summary>
-    public static bool IsPascalChecked(IFieldSymbol field)
+    public static bool IsPascalChecked(IFieldSymbol field, FieldStyles style)
     {
         return IsSourceField(field)
             && field.ContainingType.TypeKind != TypeKind.Enum
             && (field.IsConst
                 || (field.IsStatic && field.IsReadOnly)
-                || field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal);
+                || (field.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal && !IsPrivateLike(field, style)));
     }
 
     /// <summary>The field's new name under whichever rule applies, or null when it already fits.</summary>
@@ -235,16 +257,16 @@ internal static class FieldNames
             || IsLeftByNamingRule(field, style)
             || HungarianNames.IsInNativeMethods(field)
             || IsInteropName(field)
-            || hungarian.GetNewName((rename?.NewName ?? field.Name).TrimStart('_')) is not { } stripped)
+            || hungarian.GetNewName(WithoutStaticPrefix(rename?.NewName ?? field.Name, field, style).TrimStart('_')) is not { } stripped)
         {
             return rename;
         }
 
-        var underscore = GetCamelStaticStyle(field, style) is { } camelStatic
-            ? camelStatic == FieldStyle.UnderscoreCamelCase
-            : IsChecked(field) ? GetPrivateStyle(field, style) == FieldStyle.UnderscoreCamelCase
-            : style.Private == FieldStyle.UnderscoreCamelCase && field.Name.StartsWith("_", System.StringComparison.Ordinal);
-        return (FieldRule.Hungarian, underscore ? "_" + stripped : stripped);
+        var target = GetCamelStaticStyle(field, style)
+            ?? (IsChecked(field, style) ? GetPrivateStyle(field, style)
+            : style.Private == FieldStyle.UnderscoreCamelCase && field.Name.StartsWith("_", System.StringComparison.Ordinal) ? FieldStyle.UnderscoreCamelCase
+            : FieldStyle.CamelCase);
+        return (FieldRule.Hungarian, target switch { FieldStyle.UnderscoreCamelCase => "_", FieldStyle.StaticCamelCase => "s_", _ => string.Empty } + stripped);
     }
 
     /// <summary>Like the other overload, without BRO1310.</summary>
@@ -261,7 +283,7 @@ internal static class FieldNames
         // internal ones only). A leading underscore is SA1309's: removed in the camelCase style, kept in the _camelCase
         // style (where SA1309 is off), which doesn't add one either (SX1309 is about private fields).
         // A private constant or static readonly field that a naming rule wants in camel case is BRO1306's too.
-        var isProtected = IsProtectedChecked(field);
+        var isProtected = IsProtectedChecked(field, style);
         var camelStatic = GetCamelStaticStyle(field, style);
         var ruled = GetNonPrivateCasing(field, style);
         if (IsLeftByNamingRule(field, style) || ruled == NamingCasing.Other)
@@ -269,7 +291,7 @@ internal static class FieldNames
             return null;
         }
 
-        var pascal = ruled is { } r ? r == NamingCasing.Pascal : camelStatic is null && IsPascalChecked(field);
+        var pascal = ruled is { } r ? r == NamingCasing.Pascal : camelStatic is null && IsPascalChecked(field, style);
 
         // StyleCop's PascalCase rules and SA1310 skip a name starting with '_' (it's SA1309's): with SA1309 off, so does BRO1306.
         if (pascal && style.PascalAllowsUnderscore && name.StartsWith("_", System.StringComparison.Ordinal))
@@ -277,17 +299,23 @@ internal static class FieldNames
             return null;
         }
 
-        var hasPrefix = name.Length >= 2 && name[0] is 'm' or 's' or 't' && name[1] == '_';
-        var core = hasPrefix ? name.Substring(2) : name;
+        var casing = pascal ? FieldCasing.Pascal
+            : ruled is not null ? (ruled == NamingCasing.UnderscoreCamel ? FieldCasing.UnderscoreCamel : FieldCasing.Camel)
+            : (camelStatic ?? (IsChecked(field, style) ? GetPrivateStyle(field, style) : FieldStyle.CamelCase)) switch
+            {
+                FieldStyle.UnderscoreCamelCase => FieldCasing.UnderscoreCamel,
+                FieldStyle.StaticCamelCase => FieldCasing.StaticCamel,
+                _ => FieldCasing.Camel,
+            };
+
+        // 's_' is the prefix the s_camelCase style asks for: not BRO1307's, the rest of the name is checked as usual.
+        var keepsPrefix = casing == FieldCasing.StaticCamel && name.StartsWith("s_", System.StringComparison.Ordinal);
+        var hasPrefix = !keepsPrefix && name.Length >= 2 && name[0] is 'm' or 's' or 't' && name[1] == '_';
+        var core = hasPrefix || keepsPrefix ? name.Substring(2) : name;
 
         // In a '*NativeMethods' class only SA1311's casing is left (IsNativeMethodsName): SA1308/SA1310 skip it.
         if ((hasPrefix || core.TrimStart('_').Contains('_')) && !HungarianNames.IsInNativeMethods(field))
         {
-            var casing = pascal ? FieldCasing.Pascal
-                : ruled is not null ? (ruled == NamingCasing.UnderscoreCamel ? FieldCasing.UnderscoreCamel : FieldCasing.Camel)
-                : (camelStatic ?? (IsChecked(field) ? GetPrivateStyle(field, style) : FieldStyle.CamelCase)) == FieldStyle.UnderscoreCamelCase ? FieldCasing.UnderscoreCamel
-                : FieldCasing.Camel;
-
             // SA1310 doesn't check a name starting with '_' (SA1309's): where the style keeps the underscore, SA1309 never
             // removes it either, so '_signature_size' stays (SSH.NET, StyleCop-clean, trial 21). The casing check below still runs.
             if (hasPrefix || casing != FieldCasing.UnderscoreCamel || !name.StartsWith("_", System.StringComparison.Ordinal))
@@ -304,7 +332,7 @@ internal static class FieldNames
             : isProtected ? (camelStyle ? CamelCaseNames.GetNewName(name) : LowerAfterUnderscores(name))
             : pascal ? GetPascalName(name)
             : camelStatic is { } staticStyle ? GetNewName(name, staticStyle)
-            : IsChecked(field) ? GetNewName(name, GetPrivateStyle(field, style))
+            : IsChecked(field, style) ? GetNewName(name, GetPrivateStyle(field, style))
             : null;
         return newName is null ? null : (pascal || camelStatic is not null ? FieldRule.PascalCasing : FieldRule.PrivateCasing, newName);
     }
@@ -383,6 +411,19 @@ internal static class FieldNames
     /// </summary>
     public static string? GetNewName(string name, FieldStyle style)
     {
+        // s_camelCase: 'count', '_count' and 's_Count' -> 's_count'. Other prefixes and inner underscores are BRO1307's and BRO1308's.
+        if (style == FieldStyle.StaticCamelCase)
+        {
+            var rest = name.StartsWith("s_", System.StringComparison.Ordinal) ? name.Substring(2) : name.TrimStart('_');
+            if (rest.Length == 0 || !char.IsLetter(rest[0]) || rest.Contains('_'))
+            {
+                return null;
+            }
+
+            var prefixed = "s_" + (char.IsLower(rest[0]) ? rest : CamelCaseNames.ToCamelCase(rest));
+            return prefixed != name && CamelCaseNames.IsUsableName(prefixed) ? prefixed : null;
+        }
+
         // 'm_count', 's_count', 't_count': a one-letter prefix is StyleCop's SA1308, and 's_' is the .NET runtime's
         // convention for static fields. Left alone in both styles.
         if (name.Length > 2 && char.IsLetter(name[0]) && name[1] == '_')
@@ -553,6 +594,10 @@ internal static class FieldNames
         {
             result = "_" + result;
         }
+        else if (casing == FieldCasing.StaticCamel)
+        {
+            result = "s_" + result;
+        }
 
         return CamelCaseNames.IsUsableName(result) ? result : null;
     }
@@ -565,7 +610,7 @@ internal static class FieldNames
     internal static NamingCasing? GetNonPrivateCasing(IFieldSymbol field, FieldStyles style)
     {
         var index = System.Array.IndexOf(NonPrivateAccessibilities, field.DeclaredAccessibility);
-        return style.NonPrivate is not { } table || index < 0
+        return style.NonPrivate is not { } table || index < 0 || IsPrivateLike(field, style)
             ? null
             : table[(index * 5) + (field.IsConst ? 4 : (field.IsStatic ? 2 : 0) + (field.IsReadOnly ? 1 : 0))] switch
             {
@@ -797,27 +842,40 @@ internal static class FieldNames
         }
     }
 
+    /// <summary>Private fields, and internal and private protected ones when they are named like private ones.</summary>
+    private static bool IsPrivateLike(IFieldSymbol field, FieldStyles style) =>
+        field.DeclaredAccessibility == Accessibility.Private
+        || (style.InternalLikePrivate && field.DeclaredAccessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal);
+
+    /// <summary>'s_iCount' -> 'iCount' when the field's style is s_camelCase (BRO1310 then strips the Hungarian prefix behind it).</summary>
+    private static string WithoutStaticPrefix(string name, IFieldSymbol field, FieldStyles style) =>
+        name.StartsWith("s_", System.StringComparison.Ordinal)
+        && (GetCamelStaticStyle(field, style) ?? (IsChecked(field, style) ? GetPrivateStyle(field, style) : null)) == FieldStyle.StaticCamelCase
+            ? name.Substring(2)
+            : name;
+
     /// <summary>The style of a field <see cref="IsChecked"/> checks: its own for static fields when one is configured.</summary>
     private static FieldStyle GetPrivateStyle(IFieldSymbol field, FieldStyles style) =>
         field.IsStatic && style.MutableStatic is { } mutableStatic ? mutableStatic : style.Private;
 
     /// <summary>A static field whose naming rule asks for a style StyleBro doesn't write ('s_'): its name stays.</summary>
     private static bool IsLeftByNamingRule(IFieldSymbol field, FieldStyles style) =>
-        GetCamelStaticStyle(field, style) == FieldStyle.Other || (IsChecked(field) && GetPrivateStyle(field, style) == FieldStyle.Other);
+        GetCamelStaticStyle(field, style) == FieldStyle.Other || (IsChecked(field, style) && GetPrivateStyle(field, style) == FieldStyle.Other);
 
     /// <summary>The camel style a naming rule asks for when <paramref name="field"/> is a private constant or static readonly field.</summary>
     private static FieldStyle? GetCamelStaticStyle(IFieldSymbol field, FieldStyles style) =>
-        field.DeclaredAccessibility != Accessibility.Private || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum ? null
+        !IsPrivateLike(field, style) || !IsSourceField(field) || field.ContainingType.TypeKind == TypeKind.Enum ? null
         : field.IsConst ? style.Constant
         : field.IsStatic && field.IsReadOnly ? style.StaticReadOnly
         : null;
 
-    /// <summary>Protected and private protected fields that aren't constants or static readonly.</summary>
-    private static bool IsProtectedChecked(IFieldSymbol field) =>
+    /// <summary>Protected and private protected fields that aren't constants or static readonly (and not named like private ones).</summary>
+    private static bool IsProtectedChecked(IFieldSymbol field, FieldStyles style) =>
         IsSourceField(field)
         && field.DeclaredAccessibility is Accessibility.Protected or Accessibility.ProtectedAndInternal
         && !field.IsConst
-        && !(field.IsStatic && field.IsReadOnly);
+        && !(field.IsStatic && field.IsReadOnly)
+        && !IsPrivateLike(field, style);
 
     /// <summary>'_size' -> 'size', '_Size' -> 'Size'; null without a leading underscore or a valid result.</summary>
     private static string? WithoutLeadingUnderscores(string name)
