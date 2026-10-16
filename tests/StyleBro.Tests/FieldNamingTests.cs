@@ -2016,4 +2016,217 @@ public class FieldNamingTests
             """,
         },
         Underscore);
+
+    private const string RuntimeStatics = """
+        stylebro_private_static_field_naming = s_camelCase
+        stylebro_private_mutable_static_field_naming = s_camelCase
+        """;
+
+    [Theory]
+    [InlineData("count", "s_count")]
+    [InlineData("_count", "s_count")]
+    [InlineData("Count", "s_count")]
+    [InlineData("s_Count", "s_count")]
+    [InlineData("s_count", null)]
+    [InlineData("s_", null)]
+    [InlineData("_1", null)]
+    [InlineData("max_value", null)]
+    [InlineData("s_field", null)]
+    [InlineData("field", "s_field")]
+    public void NewName_StaticPrefix(string name, string? expected) =>
+        Assert.Equal(expected, FieldNames.GetNewName(name, FieldStyle.StaticCamelCase));
+
+    // The .NET runtime's static fields: 's_' on static and static readonly fields, constants stay PascalCase, other one-letter
+    // prefixes become 's_' (BRO1307), words after 's_' are joined (BRO1308), instance fields lose 's_'.
+    [Fact]
+    public Task StaticKeys_SCamelCase_PrefixStaticFields() => VerifyFixAsync(
+        """
+        class C
+        {
+            private const int Max = 1;
+            private static readonly int {|BRO1306:Limit|} = 1;
+            private static readonly int s_fine = 2;
+            private static int {|BRO1303:count|};
+            private static int {|BRO1303:_total|};
+            private static int {|BRO1307:m_old|};
+            private static int {|BRO1303:s_Upper|};
+            private static int {|BRO1308:s_two_words|};
+            private static int s_kept;
+            private int {|BRO1307:s_instance|};
+            private int _done;
+
+            public int Sum() => Max + Limit + s_fine + count + _total + m_old + s_Upper + s_two_words + s_kept + s_instance + _done;
+        }
+        """,
+        """
+        class C
+        {
+            private const int Max = 1;
+            private static readonly int s_limit = 1;
+            private static readonly int s_fine = 2;
+            private static int s_count;
+            private static int s_total;
+            private static int s_old;
+            private static int s_upper;
+            private static int s_twoWords;
+            private static int s_kept;
+            private int _instance;
+            private int _done;
+
+            public int Sum() => Max + s_limit + s_fine + s_count + s_total + s_old + s_upper + s_twoWords + s_kept + _instance + _done;
+        }
+        """,
+        Underscore + "\n" + RuntimeStatics);
+
+    // Two fields that would both become 's_count' keep their names.
+    [Fact]
+    public Task StaticKeys_SCamelCase_CollisionsKeepTheirNames() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            private static int count;
+            private static int _count;
+
+            public int Sum() => count + _count;
+        }
+        """,
+        RuntimeStatics);
+
+    // The .NET runtime's naming rule: internal and private protected fields are named like private ones.
+    [Fact]
+    public Task InternalLikePrivate_NamesInternalFieldsLikePrivateOnes() => VerifyFixAsync(
+        """
+        class C
+        {
+            internal int {|BRO1303:Count|};
+            internal int _fine;
+            private protected int {|BRO1303:total|};
+            internal static int {|BRO1303:Instances|};
+            internal static readonly int {|BRO1306:Limit|} = 1;
+            internal const int Max = 1;
+            public int Open;
+            protected int shared;
+            protected internal int Both;
+
+            public int Sum() => Count + _fine + total + Instances + Limit + Max + Open + shared + Both;
+        }
+        """,
+        """
+        class C
+        {
+            internal int _count;
+            internal int _fine;
+            private protected int _total;
+            internal static int s_instances;
+            internal static readonly int s_limit = 1;
+            internal const int Max = 1;
+            public int Open;
+            protected int shared;
+            protected internal int Both;
+
+            public int Sum() => _count + _fine + _total + s_instances + s_limit + Max + Open + shared + Both;
+        }
+        """,
+        Underscore + "\n" + RuntimeStatics + "\nstylebro_internal_field_naming = like_private");
+
+    // The .NET runtime's own setup: its naming rules at suggestion with IDE1006 silent (not enforced, so BRO1306 would make
+    // '_count' PascalCase); the key keeps internal fields '_camelCase'.
+    [Fact]
+    public Task InternalLikePrivate_RuntimesUnenforcedNamingRules() => VerifyFixAsync(
+        """
+        class C
+        {
+            internal int _fine;
+            internal int {|BRO1303:Count|};
+
+            public int Get() => _fine + Count;
+        }
+        """,
+        """
+        class C
+        {
+            internal int _fine;
+            internal int _count;
+
+            public int Get() => _fine + _count;
+        }
+        """,
+        """
+        stylebro_private_field_naming = _camelCase
+        stylebro_internal_field_naming = like_private
+        dotnet_diagnostic.IDE1006.severity = silent
+        dotnet_naming_rule.private_internal_fields.severity = suggestion
+        dotnet_naming_rule.private_internal_fields.symbols = private_internal_fields
+        dotnet_naming_rule.private_internal_fields.style = underscore
+        dotnet_naming_symbols.private_internal_fields.applicable_kinds = field
+        dotnet_naming_symbols.private_internal_fields.applicable_accessibilities = private, internal
+        dotnet_naming_style.underscore.capitalization = camel_case
+        dotnet_naming_style.underscore.required_prefix = _
+        """);
+
+    // An enforced naming rule that asks for something else wins: no rename IDE1006 would report.
+    [Fact]
+    public Task InternalLikePrivate_EnforcedNamingRuleWins() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            internal int Count;
+
+            public int Get() => Count;
+        }
+        """,
+        """
+        stylebro_internal_field_naming = like_private
+        dotnet_naming_rule.internal_fields.severity = warning
+        dotnet_naming_rule.internal_fields.symbols = internal_fields
+        dotnet_naming_rule.internal_fields.style = pascal
+        dotnet_naming_symbols.internal_fields.applicable_kinds = field
+        dotnet_naming_symbols.internal_fields.applicable_accessibilities = internal
+        dotnet_naming_style.pascal.capitalization = pascal_case
+        """);
+
+    // The key decides the name, not an enforced naming rule for internal fields ('count' here): '_count' stays.
+    [Fact]
+    public Task InternalLikePrivate_KeyDecidesTheName() => VerifyNoDiagnosticsAsync(
+        """
+        class C
+        {
+            internal int _count;
+
+            public int Get() => _count;
+        }
+        """,
+        """
+        stylebro_private_field_naming = _camelCase
+        stylebro_internal_field_naming = like_private
+        dotnet_naming_rule.internal_fields.severity = warning
+        dotnet_naming_rule.internal_fields.symbols = internal_fields
+        dotnet_naming_rule.internal_fields.style = camel
+        dotnet_naming_symbols.internal_fields.applicable_kinds = field
+        dotnet_naming_symbols.internal_fields.applicable_accessibilities = internal
+        dotnet_naming_style.camel.capitalization = camel_case
+        """);
+
+    // Without the key (StyleCop's way): internal fields PascalCase, private protected ones camelCase.
+    [Fact]
+    public Task InternalFields_PascalCaseByDefault() => VerifyFixAsync(
+        """
+        class C
+        {
+            internal int {|BRO1306:_count|};
+            private protected int {|BRO1303:_total|};
+
+            public int Sum() => _count + _total;
+        }
+        """,
+        """
+        class C
+        {
+            internal int Count;
+            private protected int total;
+
+            public int Sum() => Count + total;
+        }
+        """,
+        "stylebro_internal_field_naming = PascalCase");
 }

@@ -1631,4 +1631,77 @@ public class MemberOrderingTests
             private static int Key() => prefix;
         }
         """);
+
+    private const string FieldsFirst = "stylebro_member_order_scope = fields_first\n";
+
+    // The .NET runtime's rule 15: fields at the top, in their own order; everything else keeps its order too.
+    [Fact]
+    public Task FieldsFirst_MovesOnlyFields() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void Run() { }
+
+            private int {|BRO1001:_count|};
+
+            public C() { }
+
+            public int Count => _count;
+
+            private static int s_total;
+
+            private const int Max = 1;
+
+            private class Nested { }
+        }
+        """,
+        """
+        public class C
+        {
+            private int _count;
+
+            private static int s_total;
+
+            private const int Max = 1;
+
+            public void Run() { }
+
+            public C() { }
+
+            public int Count => _count;
+
+            private class Nested { }
+        }
+        """,
+        FieldsFirst);
+
+    // Fields first, the rest in any order: nothing to do, whatever the kinds, accessibilities and other order keys.
+    [Fact]
+    public Task FieldsFirst_LeavesTheRestAlone() => VerifyNoDiagnosticsAsync(
+        """
+        namespace N
+        {
+            public class C
+            {
+                private int _count;
+                public static int Shared;
+                private readonly int _limit = 1;
+
+                private void Run() { }
+
+                public C() { }
+
+                public event System.Action Changed { add { } remove { } }
+
+                public int Count => _count;
+
+                public void Run(int times) { }
+            }
+
+            public interface I
+            {
+            }
+        }
+        """,
+        FieldsFirst + "stylebro_member_order = method, field\nstylebro_keep_overloads_together = true\n");
 }

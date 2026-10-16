@@ -1,11 +1,11 @@
 # Proposal: the Microsoft style
 
-Status: **design, nothing built** (owner's decisions of 2026-10-16:
+Status: **design; gaps G1-G3 built, the layer not yet** (owner's decisions of 2026-10-16:
 [source](../decisions/2026-10-16-microsoft-style-the-source-is-dotnetruntimes-coding-style.md),
 [selection](../decisions/2026-10-16-microsoft-style-selected-with-stylebrostyle-and-init-style.md),
 [design first](../decisions/2026-10-16-microsoft-style-a-design-document-first.md)). All seven questions at the end are
-answered (A each, [answers](../decisions/2026-10-16-microsoft-style-open-questions-answered.md)); work starts after the
-trial 24 fix PRs merge, with G1-G3 first.
+answered (A each, [answers](../decisions/2026-10-16-microsoft-style-open-questions-answered.md)). Gaps G1-G3 are built
+(section 4); the layer and `init --style microsoft` are next.
 
 StyleBro's preset follows StyleCop's defaults. A large share of .NET code follows Microsoft's own style instead: the one
 dotnet/runtime writes down. This proposal adds that style as a layer on top of the preset:
@@ -57,8 +57,8 @@ Categories:
 | 1, 18 | A one-line body may go without braces; braces when the body spans lines or another block of the chain has them | StyleBro | `csharp_prefer_braces = when_multiline` | BRO1514 then reports nothing, BRO1515 (multi-line body) and BRO1516 (inconsistent chain) stay on: exactly rule 18's two "required" cases |
 | 1 | `using` nested in `using` at the same indentation | default | (`stylebro_allow_consecutive_usings = true`) | |
 | 2 | Four spaces, no tabs | default | - | `indent_style`/`indent_size` are per-file keys; `init` writes them from the code |
-| 3 | Private and internal instance fields `_camelCase` | StyleBro + gap | `stylebro_private_field_naming = _camelCase` | Private: BRO1303. Internal: BRO1306 makes them PascalCase (StyleCop's SA1307) unless an *enforced* naming rule says otherwise, and runtime's naming rules are `suggestion` under `IDE1006 = silent`, which StyleBro counts as not enforced. Needs gap G2 |
-| 3 | Private and internal static fields `s_camelCase` (also `static readonly`) | gap | (G1: `stylebro_private_static_field_naming = s_camelCase`, `stylebro_private_mutable_static_field_naming = s_camelCase`) | Today BRO1303/BRO1306 leave `s_` names alone but rename an unprefixed static field to `_count`/`Count`: a conflict until G1 exists |
+| 3 | Private and internal instance fields `_camelCase` | StyleBro + gap | `stylebro_private_field_naming = _camelCase`, `stylebro_internal_field_naming = like_private` (G2) | Private: BRO1303. Internal: BRO1306 makes them PascalCase (StyleCop's SA1307) unless an *enforced* naming rule says otherwise, and runtime's naming rules are `suggestion` under `IDE1006 = silent`, which StyleBro counts as not enforced. Needs gap G2 |
+| 3 | Private and internal static fields `s_camelCase` (also `static readonly`) | gap | `stylebro_private_static_field_naming = s_camelCase`, `stylebro_private_mutable_static_field_naming = s_camelCase` (G1) | Today BRO1303/BRO1306 leave `s_` names alone but rename an unprefixed static field to `_count`/`Count`: a conflict until G1 exists |
 | 3 | Thread-static fields `t_` | gap (G8) | - | `[ThreadStatic]` fields are attributed, so BRO1303/BRO1306 already leave them alone; nothing adds `t_` |
 | 3 | `readonly` where possible | SDK | `dotnet_style_readonly_field = true`; IDE0044 `suggestion` | |
 | 3 | `static readonly`, not `readonly static` | default | (preset modifier order) | IDE0036 |
@@ -78,7 +78,7 @@ Categories:
 | 12 | Constant locals PascalCase | gap (G4) | - | BRO1301 leaves local constants alone; nothing renames them |
 | 13 | Methods and local functions PascalCase | default | - | BRO1309 |
 | 14 | `nameof(...)` instead of `"..."` | SDK | CA1507 `warning` | As in runtime's build |
-| 15 | Fields at the top of the type | conflict + gap (G3) | `dotnet_diagnostic.BRO1001.severity = none` | BRO1001 sorts every kind and accessibility; runtime's build has SA1201-SA1204 off. A fields-first-only mode would cover rule 15 exactly |
+| 15 | Fields at the top of the type | gap (G3) | `stylebro_member_order_scope = fields_first` | BRO1001 sorts every kind and accessibility; runtime's build has SA1201-SA1204 off. A fields-first-only mode would cover rule 15 exactly |
 | 16 | Non-ASCII characters as `\uXXXX` | gap (G6) | - | |
 | 17 | Labels one level less | default | (`csharp_indent_labels = one_less_than_current`, the SDK default) | IDE0055 |
 | 18 | Never `if (x) return;` on one line | gap (G5) | - | `csharp_preserve_single_line_statements = false` is about two statements on a line; to be probed whether IDE0055 moves an embedded statement. `stylebro_allow_single_line_jump_statements` only matters where braces are required |
@@ -267,9 +267,9 @@ says X, your code clearly uses Y: kept Y".
 
 | Id | Runtime rule | What would close it | Estimate |
 |---|---|---|---|
-| G1 | `s_` on private/internal static fields (guide 3, naming rule) | `s_camelCase` as a value of `stylebro_private_static_field_naming` and `stylebro_private_mutable_static_field_naming`, also for internal static fields; the renamers already produce complete names, BRO1307 must keep `s_` when this style asks for it | 1 PR, medium (renames are the riskiest fixes: guards and trials as for BRO1303) |
-| G2 | `_camelCase` internal instance fields (guide 3) | `stylebro_internal_field_naming = PascalCase \| _camelCase \| camelCase` (BRO1306/BRO1303), or count unenforced naming rules when a style says so | small; can share G1's PR |
-| G3 | Fields first, nothing else ordered (guide 15) | BRO1001 option `stylebro_member_order_scope = fields_first` (move fields above other members, keep the rest's order) | small-medium |
+| G1 | `s_` on private/internal static fields (guide 3, naming rule) | **Done** (2026-10-16): `s_camelCase` as a value of `stylebro_private_static_field_naming` (static readonly; constants stay PascalCase) and `stylebro_private_mutable_static_field_naming`; internal static fields through G2's key; BRO1307 keeps `s_` and turns other one-letter prefixes into it; init counts a set `s_camelCase` as the team's decision (writing it as the style's default is the `init --style` work) | - |
+| G2 | `_camelCase` internal instance fields (guide 3) | **Done** (2026-10-16): `stylebro_internal_field_naming = PascalCase \| like_private`; `like_private` names internal and private protected fields by the private keys (BRO1303 for instance and mutable static fields, BRO1306 for constants and static readonly) and wins over unenforced naming rules | - |
+| G3 | Fields first, nothing else ordered (guide 15) | **Done** (2026-10-16): BRO1001 option `stylebro_member_order_scope = all \| fields_first` (fields above other members, both groups keep their order; the other order keys are ignored) | - |
 | G4 | PascalCase constant locals (guide 12) | BRO1301 checks local constants against a casing option | small |
 | G5 | No `if (x) return;` on one line (guide 18) | probe IDE0055 first; else a layout rule moving an embedded statement to its own line | small |
 | G6 | Non-ASCII as `\uXXXX` (guide 16) | new rule escaping non-ASCII characters in regular string and char literals (skip verbatim/raw strings and comments) | small-medium |

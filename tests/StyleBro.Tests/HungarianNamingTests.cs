@@ -283,4 +283,27 @@ public class HungarianAbstractTests
         }
         """,
         "dotnet_diagnostic.BRO1310.severity = warning");
+
+    // With 's_' static fields (stylebro_private_mutable_static_field_naming = s_camelCase) the prefix goes behind 's_'.
+    [Fact]
+    public Task StaticPrefix_StaysInFrontOfTheStrippedName() => Fields.VerifyFixAsync(
+        """
+        class C
+        {
+            private static int {|BRO1310:iCount|};
+            private static int {|BRO1310:s_iTotal|};
+
+            public int Sum() => iCount + s_iTotal;
+        }
+        """,
+        """
+        class C
+        {
+            private static int s_count;
+            private static int s_total;
+
+            public int Sum() => s_count + s_total;
+        }
+        """,
+        "dotnet_diagnostic.BRO1310.severity = warning\nstylebro_private_mutable_static_field_naming = s_camelCase");
 }
