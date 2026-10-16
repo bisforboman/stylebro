@@ -819,7 +819,7 @@ every replacing rule as `none` into such a folder's `.editorconfig`, and it neve
 **Files linked from a submodule.** A project can compile files from another folder (`<Compile Include="..\..\ext\Lib\Code.cs" />`,
 or a shared `.projitems`). `stylebro-migrate format` never formats anything inside a git submodule (it passes `--exclude`
 with every submodule folder), so StyleBro doesn't report findings there either: the package's build targets read the
-submodule paths from the `.gitmodules` above the project and hide StyleBro's findings in those folders. A folder that
+submodule paths from the `.gitmodules` above the project, and StyleBro doesn't analyze the files in those folders. A folder that
 is not a submodule (a copied library) still needs the `generated_code = true` section above.
 
 ## Multi-targeted repositories

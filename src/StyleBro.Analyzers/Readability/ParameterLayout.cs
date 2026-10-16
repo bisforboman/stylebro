@@ -152,9 +152,9 @@ internal static class ParameterLayout
                 if (old != indentation)
                 {
                     yield return new TextChange(new TextSpan(line.Start, old.Length), indentation);
-                    foreach (var change in Reindent(item, text, indentation))
+                    foreach (var laterLine in Reindent(item, text, indentation))
                     {
-                        yield return change;
+                        yield return laterLine;
                     }
                 }
             }
