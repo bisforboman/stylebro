@@ -10,7 +10,7 @@ public class TrailingCommaTests
     [Theory]
     [InlineData("")]
     [InlineData(Omit)]
-    public Task SwitchExpressions_AreLeftAlone_WhenTurnedOff(string mode) => VerifyFixAsync(
+    public Task SwitchAndWithExpressions_AreLeftAlone_WhenTurnedOff(string mode) => VerifyFixAsync(
         """
         enum E
         {
@@ -31,6 +31,20 @@ public class TrailingCommaTests
                 1 => "a",
                 _ => "b",
             };
+
+            R W(R r) => r with
+            {
+                P = 1
+            };
+        }
+
+        record R(int P);
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
         }
         """.Replace("{|BRO1401:B|}", mode.Length == 0 ? "{|BRO1401:B|}" : "B"),
         """
@@ -53,9 +67,23 @@ public class TrailingCommaTests
                 1 => "a",
                 _ => "b",
             };
+
+            R W(R r) => r with
+            {
+                P = 1
+            };
+        }
+
+        record R(int P);
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
         }
         """.Replace("B,\n", mode.Length == 0 ? "B,\n" : "B\n"),
-        mode + "stylebro_trailing_comma_switch_expressions = false\n");
+        mode + "stylebro_trailing_comma_switch_expressions = false\nstylebro_trailing_comma_with_expressions = false\n");
 
     [Fact]
     public Task MultiLineLists_GetATrailingComma() => VerifyFixAsync(

@@ -711,6 +711,23 @@ public class MemberOrderingTests
         """,
         StyleSharpOrder);
 
+    // StyleSharp's SST1201-SST1204 order a type's members only (trial 24 audit).
+    [Fact]
+    public Task NamespaceMembers_AreLeftAlone_WhenTurnedOff() => VerifyNoDiagnosticsAsync(
+        """
+        namespace N
+        {
+            public class C
+            {
+            }
+
+            public interface I
+            {
+            }
+        }
+        """,
+        "stylebro_member_order_namespaces = false\n");
+
     [Fact]
     public Task GroupedKinds_ShareARank() => VerifyNoDiagnosticsAsync(
         """

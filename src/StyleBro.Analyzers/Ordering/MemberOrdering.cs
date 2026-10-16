@@ -260,7 +260,8 @@ internal static class MemberOrdering
     {
         segments = System.Array.Empty<int>();
         anchors = null;
-        if (GetMembers(container) is not { } members || members.Count < 2 || GetSegments(members) is not { } found)
+        if ((!options.OrderNamespaces && container is not TypeDeclarationSyntax)
+            || GetMembers(container) is not { } members || members.Count < 2 || GetSegments(members) is not { } found)
         {
             return null;
         }

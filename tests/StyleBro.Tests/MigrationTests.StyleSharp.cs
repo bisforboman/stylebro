@@ -54,7 +54,10 @@ public sealed partial class MigrationTests
         Assert.Contains("stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion|operator|extension|method, struct, class, record", lines);
         Assert.Contains("stylebro_allowed_hungarian_prefixes = db, ef, gc, id, io, js, ms, my, ok, qa, so, ui, up, us, xy", lines);
         Assert.Contains("stylebro_trailing_comma_switch_expressions = false", lines);
+        Assert.Contains("stylebro_trailing_comma_with_expressions = false", lines);
         Assert.Contains("stylebro_allow_empty_single_line_blocks = true", lines);
+        Assert.Contains("stylebro_allow_semicolon_after_closing_brace = true", lines);
+        Assert.Contains("stylebro_member_order_namespaces = false", lines);
         Assert.Contains("dotnet_diagnostic.BRO1310.severity = warning", lines);
         Assert.Contains("dotnet_diagnostic.BRO1132.severity = none", lines); // SST1108 is about files of commented-out code
         Assert.Contains("dotnet_diagnostic.BRO1309.severity = warning", lines);

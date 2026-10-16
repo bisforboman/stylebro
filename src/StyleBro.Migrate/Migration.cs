@@ -256,21 +256,24 @@ internal static class Migration
 
         AddHungarianPrefixes(setup, lines);
 
-        // StyleCop 1.1.x's SA1413 and StyleSharp's SST1413 don't check switch expressions (trial 22: kafkaflow got commas in 6
-        // StyleCop-clean files; trial 24: Refit in 30 StyleSharp-clean ones).
+        // StyleCop 1.1.x's SA1413 and StyleSharp's SST1413 don't check switch expressions or 'with' initializers (trial 22:
+        // kafkaflow got commas in 6 StyleCop-clean files; trial 24: Refit in 23 StyleSharp-clean ones).
         if (setup.Version?.StartsWith("1.1.", StringComparison.Ordinal) == true || StyleSharpOnly(setup))
         {
             lines.Add($"{StyleBro.Analyzers.Maintainability.TrailingCommas.SwitchExpressionsKey} = false");
+            lines.Add($"{StyleBro.Analyzers.Maintainability.TrailingCommas.WithExpressionsKey} = false");
         }
 
         // Where StyleSharp's SST rule means something else than the StyleCop rule at its number, its meaning (owner's decision
         // 2026-10-16): SST1623/SST1624 count a protected setter as restricted and any getter as usable, SST1642/SST1643 only
         // the standard words before the type, SST1501/SST1502 accept empty braces on one line (trial 24: Refit's
-        // 'catch (TaskCanceledException) { }').
+        // 'catch (TaskCanceledException) { }'), SST1106 a ';' after a type's '}', SST1201-SST1204 order a type's members only.
         if (StyleSharpOnly(setup))
         {
             lines.Add($"{StyleBro.Analyzers.Documentation.PropertySummaries.WordingKey} = stylesharp");
             lines.Add($"{StyleBro.Analyzers.Layout.SingleLineBlocks.AllowEmptyKey} = true");
+            lines.Add($"{StyleBro.Analyzers.Readability.EmptyStatementAnalyzer.AllowAfterClosingBraceKey} = true");
+            lines.Add($"{StyleBro.Analyzers.Ordering.MemberOrderOptions.NamespacesKey} = false");
         }
 
         AddTupleElementCasing(setup, lines, result);

@@ -55,6 +55,7 @@ internal enum MemberAccess
 /// stylebro_member_static_first     = true
 /// stylebro_member_readonly_first   = true
 /// stylebro_keep_overloads_together = false | true | same_access
+/// stylebro_member_order_namespaces = true
 /// </code>
 /// Kinds or accessibilities left out of a configured list keep their default relative order, after the listed ones.
 /// Entries joined by <c>|</c> share a rank (<c>method|operator|conversion</c>: StyleSharp's SST1201 orders them as one
@@ -68,6 +69,11 @@ internal sealed class MemberOrderOptions
     public const string StaticFirstKey = "stylebro_member_static_first";
     public const string ReadonlyFirstKey = "stylebro_member_readonly_first";
     public const string KeepOverloadsTogetherKey = "stylebro_keep_overloads_together";
+
+    /// <summary>
+    /// <c>false</c>: the types of a namespace or file aren't ordered, only the members of a type (StyleSharp's SST1201-SST1204).
+    /// </summary>
+    public const string NamespacesKey = "stylebro_member_order_namespaces";
 
     private const int KindCount = (int)MemberKind.Namespace + 1;
     private const int AccessCount = (int)MemberAccess.Private + 1;
@@ -114,8 +120,10 @@ internal sealed class MemberOrderOptions
         bool staticFirst,
         bool readonlyFirst,
         bool keepOverloadsTogether,
-        bool overloadsSameAccessOnly = false)
+        bool overloadsSameAccessOnly = false,
+        bool orderNamespaces = true)
     {
+        OrderNamespaces = orderNamespaces;
         OverloadsSameAccessOnly = overloadsSameAccessOnly;
         kindRanks = BuildRanks(kindOrder, KindCount);
         if (kindOrder?.Exists(group => Array.IndexOf(group, (int)MemberKind.Record) >= 0) != true)
@@ -131,6 +139,9 @@ internal sealed class MemberOrderOptions
     }
 
     public bool ConstantsFirst { get; }
+
+    /// <summary>Gets a value indicating whether the types of a namespace or file are ordered too.</summary>
+    public bool OrderNamespaces { get; }
 
     public bool StaticFirst { get; }
 
@@ -159,12 +170,13 @@ internal sealed class MemberOrderOptions
         var sameAccess = options.TryGetValue(KeepOverloadsTogetherKey, out var overloads) && overloads?.Trim().Equals("same_access", StringComparison.OrdinalIgnoreCase) == true;
         var keepOverloadsTogether = sameAccess || ReadBool(options, KeepOverloadsTogetherKey, false);
 
-        if (kindOrder is null && accessOrder is null && constantsFirst && staticFirst && readonlyFirst && !keepOverloadsTogether)
+        var orderNamespaces = ReadBool(options, NamespacesKey, true);
+        if (kindOrder is null && accessOrder is null && constantsFirst && staticFirst && readonlyFirst && !keepOverloadsTogether && orderNamespaces)
         {
             return Default;
         }
 
-        return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether, sameAccess);
+        return new MemberOrderOptions(kindOrder, accessOrder, constantsFirst, staticFirst, readonlyFirst, keepOverloadsTogether, sameAccess, orderNamespaces);
     }
 
     /// <summary>Configured entries rank first (in configured order, a group sharing one rank); the rest follow in default order.</summary>

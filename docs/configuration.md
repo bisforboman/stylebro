@@ -27,6 +27,7 @@ stylebro_null_check_style = equality_operator
 | Key | Values | Default | Rules |
 |-----|--------|---------|-------|
 | `stylebro_member_order` | kinds, comma-separated: `field`, `constructor`, `finalizer`, `delegate`, `event`, `enum`, `interface`, `property`, `indexer`, `conversion`, `operator`, `extension`, `method`, `struct`, `class`, `record`; `a\|b` shares a place | that list (StyleCop's order; records count as classes unless `record` is listed) | [BRO1001](rules/BRO1001.md) |
+| `stylebro_member_order_namespaces` | `true`, `false` (only a type's members are ordered) | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_access_order` | accessibilities, comma-separated: `public`, `internal`, `protected_internal`, `protected`, `private_protected`, `private` | that list | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_constants_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_static_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
@@ -57,6 +58,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_allowed_namespace_components` | names, comma-separated | none | [BRO1312](rules/BRO1312.md) |
 | `stylebro_trailing_comma` | `include`, `omit` | `include` | [BRO1401](rules/BRO1401.md), [BRO1509](rules/BRO1509.md) |
 | `stylebro_trailing_comma_switch_expressions` | `true`, `false` (switch expressions not checked) | `true` | [BRO1401](rules/BRO1401.md) |
+| `stylebro_trailing_comma_with_expressions` | `true`, `false` (`with` initializers not checked) | `true` | [BRO1401](rules/BRO1401.md) |
 | `stylebro_comment_blank_line_exempt_prefixes` | prefixes, comma-separated, case-sensitive | none | [BRO1504](rules/BRO1504.md) |
 | `stylebro_allow_adjacent_single_line_members` | `true`, `false` | `false` | [BRO1505](rules/BRO1505.md) |
 | `stylebro_blank_line_below_standalone_comments` | `allow`, `remove` (like StyleCop's SA1512) | `allow` | [BRO1506](rules/BRO1506.md) |

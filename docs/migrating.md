@@ -148,9 +148,8 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
 - The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
   off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,
-  SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: when the code has a multi-line switch
-  expression without a trailing comma, [BRO1401](rules/BRO1401.md) stays off (it has no setting to leave them out), and
-  the report says so.
+  SA1139, SA1314 and SA1413. 1.1.x's SA1413 doesn't check switch expressions yet: the migration writes
+  `stylebro_trailing_comma_switch_expressions = false`, so [BRO1401](rules/BRO1401.md) leaves them alone too.
 - StyleCop spacing rules that are off while others are on (kafkaflow: SA1000, SA1003, SA1009): IDE0055 enforces every
   SDK spacing option, so the code decides, as in `init`. A clear other form gets the option that keeps it
   (`csharp_space_after_keywords_in_control_flow_statements = false` for `if(x)`, `csharp_space_around_binary_operators`
@@ -291,7 +290,7 @@ number (`SST1413` is SA1413); the exceptions:
 | SST1150-SST1171 (one per kind of list) | SA1117, on when all of them are |
 | SST1214 and SST1215 (static and instance readonly fields first) | SA1214, on when both are |
 | SST1633 (a header from `file_header_template`) | SA1633 with a plain header (IDE0073); nothing without `file_header_template` |
-| SST1116, SST1119 (other rules at those numbers) | nothing; StyleCop's SA1116 and SA1119 count as off |
+| SST1108, SST1116, SST1119 (other rules at those numbers) | nothing; StyleCop's SA1108, SA1116 and SA1119 count as off |
 
 StyleSharp doesn't read `stylecop.json`, so neither does the migration in a StyleSharp repository (a leftover one is
 named in the report). Its settings come from the `stylesharp.*` keys of the root `.editorconfig`'s sections for all C#

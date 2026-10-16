@@ -19,6 +19,12 @@ internal static class TrailingCommas
     /// </summary>
     public const string SwitchExpressionsKey = "stylebro_trailing_comma_switch_expressions";
 
+    /// <summary>
+    /// The .editorconfig key <c>stylebro_trailing_comma_with_expressions</c>: <c>true</c> (default, StyleCop 1.2's SA1413) or
+    /// <c>false</c>, 'with' initializers aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
+    /// </summary>
+    public const string WithExpressionsKey = "stylebro_trailing_comma_with_expressions";
+
     /// <summary>Whether the file's setting is <c>omit</c>: no trailing comma after the last item of any list.</summary>
     public static bool Omits(AnalyzerConfigOptions options) =>
         options.TryGetValue(OptionKey, out var value) && value.Split(':')[0].Trim().Equals("omit", StringComparison.OrdinalIgnoreCase);
@@ -54,7 +60,8 @@ internal static class TrailingCommas
             || Omits(getOptions()) != hasComma
             || node.ContainsDiagnostics
             || HasDirectiveBetween(node, l.OpenBrace, l.CloseBrace)
-            || (node.IsKind(SyntaxKind.SwitchExpression) && SkipsSwitchExpressions(getOptions())))
+            || (node.IsKind(SyntaxKind.SwitchExpression) && IsFalse(getOptions(), SwitchExpressionsKey))
+            || (node.IsKind(SyntaxKind.WithInitializerExpression) && IsFalse(getOptions(), WithExpressionsKey)))
         {
             return null;
         }
@@ -68,9 +75,9 @@ internal static class TrailingCommas
         return (l.Last.GetLocation(), new TextChange(new TextSpan(l.Last.Span.End, 0), GetInsertion(l.Last, text)));
     }
 
-    /// <summary>Whether <c>stylebro_trailing_comma_switch_expressions = false</c>: switch expressions aren't checked.</summary>
-    public static bool SkipsSwitchExpressions(AnalyzerConfigOptions options) =>
-        options.TryGetValue(SwitchExpressionsKey, out var value) && value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
+    /// <summary>Whether the key is <c>false</c>: those lists aren't checked.</summary>
+    private static bool IsFalse(AnalyzerConfigOptions options, string key) =>
+        options.TryGetValue(key, out var value) && value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The edit removing a trailing comma. Spaces right before the comma go too ('A ,' at a line end would leave trailing
