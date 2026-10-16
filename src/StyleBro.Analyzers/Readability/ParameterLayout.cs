@@ -92,8 +92,8 @@ internal static class ParameterLayout
     /// The edits that put every item on its own line (with <paramref name="firstOnly"/>, only the first item: BRO1107),
     /// starting on the line after the opening parenthesis, one indentation level deeper than the line with the
     /// parenthesis. A moved item's later lines (a lambda's block body) move by the same amount, unlike StyleCop's fix
-    /// (StyleCop #1620, #3183). Items already at the start of a line keep their indentation; everything else in the
-    /// list stays as it is. With <paramref name="sameLine"/>, a first item on the opening parenthesis's line stays there,
+    /// (StyleCop #1620, #3183). Items already at the start of a line get the same indentation (BRO1108's split; BRO1107
+    /// alone moves only the first item); everything else in the list stays as it is. With <paramref name="sameLine"/>, a first item on the opening parenthesis's line stays there,
     /// and moved items are indented like the first item that already starts a line (aligned under the first item, or
     /// one level deeper: whatever the list does), else one level deeper than the line with the parenthesis.
     /// </summary>
@@ -114,16 +114,23 @@ internal static class ParameterLayout
         }
 
         var previousEnd = open.Span.End;
+        var moved = false;
+        List<SyntaxNode>? lineStarts = null;
         foreach (var item in items)
         {
             if (Line(text, item.SpanStart) == Line(text, previousEnd) && !(sameLine && previousEnd == open.Span.End))
             {
                 // Replace the spaces between the previous token ('(' or ',') and the item with a line break.
+                moved = true;
                 yield return new TextChange(TextSpan.FromBounds(previousEnd, item.SpanStart), lineBreak + indentation);
                 foreach (var change in Reindent(item, text, indentation))
                 {
                     yield return change;
                 }
+            }
+            else if (Line(text, item.SpanStart) > Line(text, previousEnd))
+            {
+                (lineStarts ??= []).Add(item);
             }
 
             if (firstOnly)
@@ -132,6 +139,27 @@ internal static class ParameterLayout
             }
 
             previousEnd = item.GetLastToken().GetNextToken().Span.End; // the ',' after the item
+        }
+
+        // Splitting the list: items that already started a line move to the same indentation as the moved ones, with
+        // their later lines (Spectre.Console's TextPrompt: one item two levels deeper stayed there, a staircase). With
+        // same_line the indentation comes from such an item already. Not when the '(' starts its line: BRO1109 moves it up
+        // to the name, which changes the indentation the items get (BRO1105 measures the line as the fixes leave it).
+        if (moved && !sameLine && lineStarts is not null && openLine.Start + LeadingWhitespace(text, openLine).Length != open.SpanStart)
+        {
+            foreach (var item in lineStarts)
+            {
+                var line = text.Lines.GetLineFromPosition(item.SpanStart);
+                var old = LeadingWhitespace(text, line);
+                if (old != indentation && line.Start + old.Length == item.SpanStart)
+                {
+                    yield return new TextChange(new TextSpan(line.Start, old.Length), indentation);
+                    foreach (var change in Reindent(item, text, indentation))
+                    {
+                        yield return change;
+                    }
+                }
+            }
         }
     }
 

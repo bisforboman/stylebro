@@ -17,6 +17,7 @@ public sealed class CallChainAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             foreach (var (link, _) in CallChains.GetFindings(c.Tree.GetRoot(c.CancellationToken), c.Tree.GetText(c.CancellationToken)))

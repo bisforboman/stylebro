@@ -34,6 +34,12 @@ internal static class DocumentationPeriods
 
     private static readonly System.Text.RegularExpressions.Regex VersionLike = new(@"[\p{L}\p{N}]\.[0-9]+$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
 
+    // An operator right before the last word: the line is code ('=> 0', 'x == null', Dawnshard's SQL '=> 0' below a query).
+    private static readonly HashSet<string> Operators = new(StringComparer.Ordinal)
+    {
+        "=>", "=", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "+", "*", "%", "??", "+=", "-=", "*=", "/=", "??=",
+    };
+
     private static readonly char[] CodeCharacters = ['{', '}', '[', ']', '(', ')', '=', ';', ':', '/', '\\', '|', '$', '#', '_', '`'];
 
     private static readonly HashSet<string> TextElements = new()
@@ -165,13 +171,15 @@ internal static class DocumentationPeriods
     /// A1:B10'). A period there reads as part of the code. A closing ')' or ']' whose opener isn't in the word ends a
     /// parenthetical ('(in ms)') and doesn't count, nor do a closing quote or a trailing ',' or ';'. A quoted char or
     /// string literal at the end is code too (CsvHelper: 'Default is ',';'), and so is a word ending in a period and digits
-    /// ('HTML 5.0', AngleSharp's 'processes it.0': a period after it reads as another part of the number). StyleCop's SA1629
+    /// ('HTML 5.0', AngleSharp's 'processes it.0': a period after it reads as another part of the number), and so is a last
+    /// word that follows an operator on its line ('=> 0', 'x == null': Dawnshard, trial 24). StyleCop's SA1629
     /// has no such exception: a deviation.
     /// </summary>
     private static bool EndsInCode(string text)
     {
-        var word = text.Substring(text.LastIndexOfAny([' ', '\t', '\n', '\r']) + 1);
-        if (QuotedLiteral.IsMatch(word))
+        var start = text.LastIndexOfAny([' ', '\t', '\n', '\r']);
+        var word = text.Substring(start + 1);
+        if (QuotedLiteral.IsMatch(word) || Operators.Contains(PreviousWord(text, start)))
         {
             return true;
         }
@@ -183,6 +191,23 @@ internal static class DocumentationPeriods
         }
 
         return word.IndexOfAny(CodeCharacters) >= 0 || VersionLike.IsMatch(word);
+    }
+
+    /// <summary>The word before the one ending at <paramref name="end"/>, on the same line (empty when there is none).</summary>
+    private static string PreviousWord(string text, int end)
+    {
+        while (end >= 0 && text[end] is ' ' or '\t')
+        {
+            end--;
+        }
+
+        var start = end;
+        while (start >= 0 && text[start] is not (' ' or '\t' or '\n' or '\r'))
+        {
+            start--;
+        }
+
+        return end < 0 ? string.Empty : text.Substring(start + 1, end - start);
     }
 
     /// <summary>

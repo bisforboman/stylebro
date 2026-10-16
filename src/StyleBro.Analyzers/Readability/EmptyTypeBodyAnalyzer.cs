@@ -20,6 +20,7 @@ public sealed class EmptyTypeBodyAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterCompilationStartAction(start =>
         {
             if (!EmptyRecordBodies.AllFrameworksAllowTypeBodySemicolon(start.Options.AnalyzerConfigOptionsProvider.GlobalOptions))

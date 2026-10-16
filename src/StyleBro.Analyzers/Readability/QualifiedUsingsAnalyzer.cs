@@ -19,6 +19,7 @@ public sealed class QualifiedUsingsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxNodeAction(
             c =>
             {

@@ -17,6 +17,7 @@ public sealed class FileHeaderAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             if (FileHeaderOptions.Read(c.Options.AnalyzerConfigOptionsProvider.GetOptions(c.Tree)) is not { } options)

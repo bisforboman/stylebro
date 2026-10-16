@@ -51,33 +51,65 @@ public class GeneratedFileSuppressorTests
         Assert.Equal(expected, GeneratedFileSuppressor.IsGeneratedFile(path, folders));
     }
 
-    // Every analyzer, every rule on: nothing StyleBro reports in generator output gets through, the same code in a
+    // Every analyzer, every rule on: StyleBro doesn't analyze generator output or a package's files at all (trial 24:
+    // Spectre.Console's Polyfill files took half of a 'format' run, their findings hidden afterwards), the same code in a
     // source file is reported.
     [Theory]
     [InlineData(Generated, Folders)]
     [InlineData(Emitted, Folders)]
     [InlineData(Generated, null)]
+    [InlineData(@"C:\Users\me\.nuget\packages\polyfill\11.4.1\contentFiles\cs\netstandard2.0\Polyfill.cs", null)]
     public async Task EveryAnalyzer_IsQuietInGeneratedFiles(string path, string? folders)
     {
         var generated = await RunAsync(Code, path, folders);
         var source = await RunAsync(Code, @"C:\repo\src\RestSharp\RestClient.cs", folders);
 
-        Assert.NotEmpty(generated);
-        Assert.All(generated, d => Assert.True(d.IsSuppressed, d.ToString()));
+        Assert.Empty(generated);
         Assert.Contains(source, d => !d.IsSuppressed);
     }
 
+    // CommunityToolkit.Mvvm (trial 24): the generator declares 'partial void OnTitleChanged(string value);' with
+    // [GeneratedCode], which the merged partial method carries into the hand-written body, so the compiler's driver
+    // skipped that body for syntax node actions ('""' and 'new Guid()' weren't reported there; tree actions were).
+    [Fact]
+    public async Task PartialMethodBody_IsAnalyzedWhenItsDeclarationIsGenerated()
+    {
+        const string Declaration = """
+            public partial class ViewModel
+            {
+                [System.CodeDom.Compiler.GeneratedCode("CommunityToolkit.Mvvm.SourceGenerators", "8.4.0")]
+                partial void OnTitleChanged(string value);
+            }
+            """;
+        const string Implementation = """
+            public partial class ViewModel
+            {
+                private string title = string.Empty;
+
+                partial void OnTitleChanged(string value)
+                {
+                    title = value == "" ? string.Empty : value;
+                }
+            }
+            """;
+
+        var diagnostics = await RunAsync(Implementation, @"C:\repo\App\ViewModel.cs", Folders, (Declaration, Generated));
+
+        Assert.Single(diagnostics, d => d.Id == DiagnosticIds.EmptyString && !d.IsSuppressed);
+    }
+
     /// <summary>Every StyleBro analyzer with every BRO rule on, over <paramref name="code"/>: its BRO diagnostics.</summary>
-    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null)
+    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null, (string Code, string Path)? other = null)
     {
         var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
-        var tree = CSharpSyntaxTree.ParseText(code, parse, path);
+        var trees = new[] { (code, path) }.Concat(other is { } more ? [more] : Array.Empty<(string, string)>())
+            .Select(f => CSharpSyntaxTree.ParseText(f.Item1, parse, f.Item2));
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator)
             .Where(p => Path.GetFileName(p) is "System.Runtime.dll" or "System.Private.CoreLib.dll")
             .Select(p => MetadataReference.CreateFromFile(p));
         var everyRule = BaselineSuppressor.BroIds().ToDictionary(id => id, _ => ReportDiagnostic.Warn);
         var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, specificDiagnosticOptions: everyRule);
-        var compilation = CSharpCompilation.Create("Test", new[] { tree }, references, compilationOptions);
+        var compilation = CSharpCompilation.Create("Test", trees, references, compilationOptions);
         var global = ImmutableDictionary<string, string>.Empty;
         if (folders is not null)
         {

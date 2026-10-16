@@ -2295,6 +2295,17 @@ public class DocumentationTests
     public Task TextEndingInAVersionNumber_GetsNoPeriod() => VerifyNoDiagnosticsAsync(
         "/// <summary>Supports HTML 5.0</summary>\npublic class Parser\n{\n    /// <summary>Consumes a token and processes it.0</summary>\n    public void Consume() { }\n}\n");
 
+    // Dawnshard (trial 24): a code line ending in a plain word after an operator ('=> 0' below a SQL query) became '=> 0.'.
+    // A word after a dash is prose.
+    [Fact]
+    public Task TextEndingInCodeAfterAnOperator_GetsNoPeriod() => VerifyFixAsync(
+        "/// <summary>A query.</summary>\n/// <remarks>\n/// SELECT COUNT(*) FROM Quest WHERE Type = 2;\n/// => 0\n/// </remarks>\npublic class Query\n{\n"
+            + "    /// <summary>Is true when x == null</summary>\n    public bool A() => true;\n\n"
+            + "    /// <summary>Gets the value - always{|BRO1603:|}</summary>\n    public int B() => 1;\n}\n",
+        "/// <summary>A query.</summary>\n/// <remarks>\n/// SELECT COUNT(*) FROM Quest WHERE Type = 2;\n/// => 0\n/// </remarks>\npublic class Query\n{\n"
+            + "    /// <summary>Is true when x == null</summary>\n    public bool A() => true;\n\n"
+            + "    /// <summary>Gets the value - always.</summary>\n    public int B() => 1;\n}\n");
+
     // GuardClauses: the period went before the line's trailing spaces ('<paramref name="input"/>. '): they go too.
     [Fact]
     public Task PeriodAtTheEndOfALine_TakesThePlaceOfTrailingSpaces() => VerifyFixAsync(

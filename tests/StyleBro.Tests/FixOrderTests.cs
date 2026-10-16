@@ -2957,7 +2957,7 @@ public class FixOrderTests
             // Every order gives the same text, not only a clean one.
             var final = (await document.GetTextAsync()).ToString();
             first ??= final;
-            Assert.True(!sameText || first == final, $"Order {string.Join(", ", order)} gives other text:\n{final.Replace("\r", "<CR>").Replace(" ", "·")}\nthan the first order:\n{first.Replace("\r", "<CR>").Replace(" ", "·")}");
+            Assert.True(!sameText || first == final, $"Order {string.Join(", ", order)} gives other text:\n{final}\nthan the first order:\n{first}");
         }
     }
 

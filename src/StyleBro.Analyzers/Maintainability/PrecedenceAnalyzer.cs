@@ -17,6 +17,7 @@ public sealed class PrecedenceAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterNodeAction(
             c =>
             {

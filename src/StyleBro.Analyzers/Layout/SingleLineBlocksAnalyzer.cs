@@ -22,6 +22,7 @@ public sealed class SingleLineBlocksAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterNodeAction(
             c =>
             {

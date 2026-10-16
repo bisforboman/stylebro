@@ -21,6 +21,7 @@ public sealed class TrailingBlankLinesAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             var root = c.Tree.GetRoot(c.CancellationToken);

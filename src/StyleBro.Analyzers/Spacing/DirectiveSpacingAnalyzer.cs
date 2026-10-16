@@ -20,6 +20,7 @@ public sealed class DirectiveSpacingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterSyntaxTreeAction(c =>
         {
             foreach (var (keyword, _) in GetSpaces(c.Tree.GetRoot(c.CancellationToken)))

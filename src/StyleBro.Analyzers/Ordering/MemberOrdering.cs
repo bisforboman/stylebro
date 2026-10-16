@@ -148,6 +148,7 @@ internal static class MemberOrdering
         var text = container.SyntaxTree.GetText();
         bool WantsBlankLineAfterBrace(MemberDeclarationSyntax previous, MemberDeclarationSyntax next) =>
             isOn is not null && previous.GetLastToken() is { RawKind: (int)SyntaxKind.CloseBraceToken } brace
+            && !(autoAccessorLines is not null && previous is PropertyDeclarationSyntax property && Layout.AutoAccessorLines.BecomesOneLine(property, text, autoAccessorLines))
             && Layout.BlankLineRuns.JudgesGapAfter(brace, next.GetFirstToken(), text, isOn, gapIsReplaced: true);
 
         for (var slot = 0; slot < count; slot++)

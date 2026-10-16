@@ -22,6 +22,7 @@ public sealed class ParenthesisPlacementAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterCompilationStartAction(start =>
         {
             var compilationOptions = start.Compilation.Options;

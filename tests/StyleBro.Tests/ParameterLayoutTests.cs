@@ -118,6 +118,53 @@ public class ParameterLayoutTests
         }
         """);
 
+    // Spectre.Console (trial 24): an item that already started a line kept its indentation (two levels deeper, or level
+    // with the call) while the moved items got one level deeper: a staircase. It gets their indentation, its later lines too.
+    [Fact]
+    public Task SplitList_ItemsStartingALine_GetTheSameIndentation() => VerifyFixAsync(
+        """
+        class C
+        {
+            int M(int a, int b, int c) => a;
+
+            int[] N(params int[] items) => items;
+
+            void P()
+            {
+                M(1, 2,
+                        {|BRO1108:3|});
+                M(
+                N(new[]
+                {
+                    1,
+                }).Length, {|BRO1108:2|}, 3);
+            }
+        }
+        """,
+        """
+        class C
+        {
+            int M(int a, int b, int c) => a;
+
+            int[] N(params int[] items) => items;
+
+            void P()
+            {
+                M(
+                    1,
+                    2,
+                    3);
+                M(
+                    N(new[]
+                    {
+                        1,
+                    }).Length,
+                    2,
+                    3);
+            }
+        }
+        """);
+
     [Fact]
     public Task MultiLineItems_FollowStyleCop() => VerifyFixAsync(
         """
@@ -364,12 +411,18 @@ public class ParameterLayoutTests
         """);
 
     [Fact]
-    public Task ItemsAtTheStartOfALine_KeepTheirIndentation() => VerifyFixAsync(
+    public Task ItemsAtTheStartOfALine_GetTheMovedItemsIndentation() => VerifyFixAsync(
         """
         class C
         {
             void M(int a, int b,
                     {|BRO1108:int c|})
+            {
+            }
+
+            void N
+                (int a, int b,
+                        {|BRO1108:int c|})
             {
             }
         }
@@ -380,7 +433,15 @@ public class ParameterLayoutTests
             void M(
                 int a,
                 int b,
-                    int c)
+                int c)
+            {
+            }
+
+            void N
+                (
+                    int a,
+                    int b,
+                        int c)
             {
             }
         }

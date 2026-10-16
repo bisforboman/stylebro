@@ -26,6 +26,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context = context.SkipForeignFiles();
         context.RegisterCompilationStartAction(start =>
         {
             // Each type's strings and names are read once for all its fields (they were read per field before).
