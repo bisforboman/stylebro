@@ -2308,37 +2308,6 @@ internal static class FormatCommand
                 + $"the build still reports {(kept == 1 ? "it" : "them")} (an error with warnings as errors). Suppress {(kept == 1 ? "it" : "them")}, or remove that setting so 'format' baselines {(kept == 1 ? "it" : "them")} (https://bisforboman.github.io/stylebro/baseline/)."
             : null;
 
-    /// <summary>
-    /// The baseline a Directory.Build.props at or above <paramref name="root"/> names with &lt;StyleBroBaseline&gt; (Named: true),
-    /// null as its value when that turns it off ('none') or uses other MSBuild properties; Named false when none names one.
-    /// </summary>
-    private static (bool Named, string? Value) NamedBaseline(string root)
-    {
-        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
-        {
-            var props = Path.Combine(folder, "Directory.Build.props");
-            if (File.Exists(props) && Regex.Match(StyleCopSetup.WithoutComments(File.ReadAllText(props)), @"<StyleBroBaseline\b[^>]*>(?<value>[^<]*)<") is { Success: true } named)
-            {
-                var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-                return (true, value.Equals("none", StringComparison.OrdinalIgnoreCase) || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)));
-            }
-        }
-
-        return (false, null);
-    }
-
-    /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one at the root.</summary>
-    private static string FoundBaseline(string root)
-    {
-        string? found = null;
-        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
-        {
-            found ??= File.Exists(Path.Combine(folder, Analyzers.Baseline.Baseline.FileName)) ? Path.Combine(folder, Analyzers.Baseline.Baseline.FileName) : null;
-        }
-
-        return found ?? Path.Combine(Path.GetFullPath(root), Analyzers.Baseline.Baseline.FileName);
-    }
-
     /// <summary>The findings <see cref="SaveKept"/> recorded for this state of the repository and these options, else null.</summary>
     public static List<KeptFinding>? LoadKept(string root, IEnumerable<string> args)
     {
@@ -2394,6 +2363,15 @@ internal static class FormatCommand
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.Ordinal)
             .ToList();
+
+    /// <summary>The StyleBro rules of WarningsNotAsErrors values (upper case, sorted, once each).</summary>
+    public static List<string> NotAsErrors(IEnumerable<string> values) =>
+        values.SelectMany(v => Regex.Matches(v, @"\bBRO\d+\b", RegexOptions.IgnoreCase).Select(m => m.Value.ToUpperInvariant())).Distinct().Order(StringComparer.Ordinal).ToList();
+
+    /// <summary>What format says about the StyleBro rules in WarningsNotAsErrors (<see cref="NotAsErrors"/>).</summary>
+    public static string NotAsErrorsLine(IReadOnlyList<string> ids) =>
+        $"{NotAsErrorsHeader} {string.Join(", ", ids)} {(ids.Count == 1 ? "is" : "are")} in <WarningsNotAsErrors>, which 'dotnet format' reads as \"skip\" while the build reports {(ids.Count == 1 ? "it" : "them")} as warnings: "
+        + "'format' takes StyleBro's rules out of that list for its runs, so they're fixed and checked like the build reports them.";
 
     /// <summary>Whether the file at <paramref name="path"/> exists and has <paramref name="text"/>, line endings aside.</summary>
     internal static bool SameButEndings(string text, string path) =>
@@ -2860,15 +2838,6 @@ internal static class FormatCommand
         }
     }
 
-    /// <summary>The StyleBro rules of WarningsNotAsErrors values (upper case, sorted, once each).</summary>
-    public static List<string> NotAsErrors(IEnumerable<string> values) =>
-        values.SelectMany(v => Regex.Matches(v, @"\bBRO\d+\b", RegexOptions.IgnoreCase).Select(m => m.Value.ToUpperInvariant())).Distinct().Order(StringComparer.Ordinal).ToList();
-
-    /// <summary>What format says about the StyleBro rules in WarningsNotAsErrors (<see cref="NotAsErrors"/>).</summary>
-    public static string NotAsErrorsLine(IReadOnlyList<string> ids) =>
-        $"{NotAsErrorsHeader} {string.Join(", ", ids)} {(ids.Count == 1 ? "is" : "are")} in <WarningsNotAsErrors>, which 'dotnet format' reads as \"skip\" while the build reports {(ids.Count == 1 ? "it" : "them")} as warnings: "
-        + "'format' takes StyleBro's rules out of that list for its runs, so they're fixed and checked like the build reports them.";
-
     /// <summary>The git repository that holds the folder (the nearest folder above with a .git), or null.</summary>
     internal static string? RepositoryRoot(string folder)
     {
@@ -2898,6 +2867,40 @@ internal static class FormatCommand
                 File.Delete(file);
             }
         }
+    }
+
+    /// <summary>Runs dotnet in <paramref name="directory"/>, its output (stdout and stderr) line by line to <paramref name="output"/>.</summary>
+    internal static int RunDotnet(string directory, IEnumerable<string> arguments, Action<string> output) => Dotnet(directory, null, arguments, output);
+
+    /// <summary>
+    /// The baseline a Directory.Build.props at or above <paramref name="root"/> names with &lt;StyleBroBaseline&gt; (Named: true),
+    /// null as its value when that turns it off ('none') or uses other MSBuild properties; Named false when none names one.
+    /// </summary>
+    private static (bool Named, string? Value) NamedBaseline(string root)
+    {
+        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            var props = Path.Combine(folder, "Directory.Build.props");
+            if (File.Exists(props) && Regex.Match(StyleCopSetup.WithoutComments(File.ReadAllText(props)), @"<StyleBroBaseline\b[^>]*>(?<value>[^<]*)<") is { Success: true } named)
+            {
+                var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+                return (true, value.Equals("none", StringComparison.OrdinalIgnoreCase) || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)));
+            }
+        }
+
+        return (false, null);
+    }
+
+    /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one at the root.</summary>
+    private static string FoundBaseline(string root)
+    {
+        string? found = null;
+        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            found ??= File.Exists(Path.Combine(folder, Analyzers.Baseline.Baseline.FileName)) ? Path.Combine(folder, Analyzers.Baseline.Baseline.FileName) : null;
+        }
+
+        return found ?? Path.Combine(Path.GetFullPath(root), Analyzers.Baseline.Baseline.FileName);
     }
 
     /// <summary>Where <see cref="SaveKept"/> records a repository's kept findings.</summary>
@@ -3918,9 +3921,6 @@ internal static class FormatCommand
 
         return read;
     }
-
-    /// <summary>Runs dotnet in <paramref name="directory"/>, its output (stdout and stderr) line by line to <paramref name="output"/>.</summary>
-    internal static int RunDotnet(string directory, IEnumerable<string> arguments, Action<string> output) => Dotnet(directory, null, arguments, output);
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
     private static int Dotnet(string directory, RunEnvironment? framework, IEnumerable<string> arguments, Action<string>? output = null)
