@@ -105,14 +105,13 @@ public sealed partial class MigrationTests
                 return 0;
             });
 
+        // One run for both projects (trial 25: one after another took longer than the whole repository): a temporary solution
+        // of the two at their common folder, deleted afterwards.
         Assert.Equal(0, code);
-        Assert.Equal(
-            new[]
-            {
-                $"{Path.Combine(root, "src", "A", "A.csproj")} --severity warn --include Sub/X.cs Y.cs",
-                $"{Path.Combine(root, "src", "B", "B.csproj")} --severity warn --include Z.cs",
-            },
-            calls.Select(c => string.Join(" ", c)));
+        var call = Assert.Single(calls);
+        Assert.Matches(@"[\\/]src[\\/]\.stylebro-files-[0-9a-f]{32}\.slnx$", call[0]);
+        Assert.Equal("--severity warn --include A/Sub/X.cs A/Y.cs B/Z.cs", string.Join(" ", call.Skip(1)));
+        Assert.False(File.Exists(call[0]));
     }
 
     [Fact]

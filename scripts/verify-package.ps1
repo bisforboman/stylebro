@@ -102,6 +102,20 @@ try {
     Migrate @('baseline', $repo, '--project', 'src/App/App.csproj')
     Check (Test-Path (Join-Path $repo 'stylebro.baseline')) 'stylebro-migrate baseline wrote stylebro.baseline'
     Check (-not ((Build) -contains 'BRO1106 Old.cs')) 'the baselined violation is not reported'
+    # A relative <StyleBroBaseline> (docs/baseline.md's form, eng/ next to src/) is found above the project too (trial 25).
+    $eng = Join-Path $repo 'eng'
+    New-Item -ItemType Directory -Force $eng | Out-Null
+    $baselineText = Get-Content (Join-Path $repo 'stylebro.baseline') -Raw
+    Remove-Item (Join-Path $repo 'stylebro.baseline')
+    Set-Content (Join-Path $eng 'stylebro.baseline') $baselineText.Replace("`tsrc/", "`t../src/") -NoNewline
+    # In a props file, as the docs show (a global -p: property can't be changed by the targets).
+    $props = Join-Path $repo 'Directory.Build.props'
+    $propsText = Get-Content $props -Raw
+    Set-Content $props $propsText.Replace('</Project>', "  <PropertyGroup><StyleBroBaseline>eng/stylebro.baseline</StyleBroBaseline></PropertyGroup>`n</Project>") -NoNewline
+    Check (-not ((Build) -contains 'BRO1106 Old.cs')) 'a relative StyleBroBaseline is found in a folder above the project'
+    Set-Content $props $propsText -NoNewline
+    Remove-Item (Join-Path $eng 'stylebro.baseline')
+    Set-Content (Join-Path $repo 'stylebro.baseline') $baselineText -NoNewline
     Add-Content (Join-Path $app 'Old.cs') "`ninternal class Newer`n{`n    public string Name = `"`";`n}`n"
     Check ((Build) -contains 'BRO1106 Old.cs') 'a new violation in the same file is reported'
 

@@ -9,7 +9,7 @@ repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site
 ## The loop for an agent
 
 ```
-stylebro-migrate format --files src/Orders/OrderService.cs src/Orders/Order.cs   # after an edit: seconds
+stylebro-migrate format --files src/Orders/OrderService.cs src/Orders/Order.cs   # after an edit: a fraction of a whole run
 stylebro-migrate format --verify-no-changes                                      # before finishing: exit 0 = clean
 ```
 
@@ -33,7 +33,8 @@ stylebro-migrate format <folder, solution or project> --files <file> [<file> ...
 ```
 
 Paths are relative to the current folder, or else to the git repository's root. Without a solution or project named,
-each file is formatted in the nearest project file above it (files of several projects: one run per project); with one
+each file is formatted in the nearest project file above it (files of several projects: one run that loads those projects
+together); with one
 named, every file must be under its folder. A file a project includes from somewhere else (`<Compile Include="..\x.cs"
 />`) is looked up by folder only: name the project.
 
@@ -46,6 +47,10 @@ Measured (2026-10-10) right after setting StyleBro up, each run until clean (two
 |---|---|---|---|
 | Jellyfin (41 projects, one target framework) | 169 s | 20 s | 10 s |
 | Serilog (the library targets 7 frameworks: one `dotnet format` per framework) | 153 s | 83 s | |
+
+Trial 25 (2026-10-16), two edited files: files in two of 11 projects take one run that loads both projects (27 s, was
+97 s one project after another; the whole solution: 70 s); a library with three target frameworks checks all three at
+once and formats only those with findings (22 s, was 58 s; `--verify-no-changes` 23 s, was 72 s).
 
 Most of the time is loading projects: a file of a project with many target frameworks costs one load per framework.
 
@@ -142,7 +147,7 @@ The section:
 
 This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyzers whose fixes `dotnet format` applies.
 
-- After editing C# files, run `stylebro-migrate format --files <the .cs files you changed>` (seconds; the tool is the
+- After editing C# files, run `stylebro-migrate format --files <the .cs files you changed>` (faster than a whole run; the tool is the
   StyleBro.Migrate package: `dotnet tool install -g StyleBro.Migrate`).
 - Before finishing, `stylebro-migrate format --verify-no-changes` must exit 0. It does when only findings kept on
   purpose are left.

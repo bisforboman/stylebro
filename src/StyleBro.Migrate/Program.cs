@@ -57,7 +57,7 @@ internal static class Program
               Exit codes: 0 clean (only kept findings left, if any); 2 a run still changed files after 3 runs, or with
               --verify-no-changes, formatting would change a file; other: 'dotnet format' failed.
               --files formats only those files (paths relative to the current folder or the repository root), loading
-              just the project each belongs to: seconds after a small edit. With --verify-no-changes too.
+              just the projects they belong to: a fraction of a whole run. With --verify-no-changes too.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
           stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--sonar-profile <file>]

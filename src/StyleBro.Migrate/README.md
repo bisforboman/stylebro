@@ -77,7 +77,7 @@ file: the check for CI and AI agents (plain `dotnet format --verify-no-changes` 
 
 ## Scripts and AI agents
 
-`format --files a.cs b.cs` formats only those files, loading just the project each belongs to (seconds after a small
+`format --files a.cs b.cs` formats only those files, loading just the projects they belong to (a fraction of a whole run after a small
 edit). Every command takes `--json`: one JSON object on stdout (settings, conventions, runs, changes per rule, kept
 findings with reasons, clean, exit code), the text on stderr. With `--agents-md`, `init --write` and
 `--write` also put a StyleBro section into `AGENTS.md` (opt-in). Details and the JSON fields:

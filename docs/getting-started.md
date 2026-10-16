@@ -93,6 +93,11 @@ Done in 1m 2s.
 Files are counted under every rule `dotnet format --verify-no-changes` reported in them before the fixes; a file with
 only whitespace changes counts as IDE0055, one with nothing reported (another fix's side effect) as `other`. The patch
 is what the real commands write (byte for byte on FFMpegCore); `git apply .git/stylebro-preview.patch` applies it.
+That includes the [baseline](#findings-kept-on-purpose) with the findings the fixes keep on purpose, which the summary
+lists (`Baseline (in the patch): ...`). Files a project compiles from outside the repository (a sibling repository's
+`..\..\other\*.cs`) are copied next to the copy, so its code compiles there as it does in yours. Where such files are
+missing (the other repository isn't checked out), `format` says so (`Missing: ...`) and leaves out IDE0005, which would
+remove the `using` directives the missing code needs.
 
 ## A. A new project, or no StyleCop
 
@@ -356,7 +361,8 @@ A few settings work a little differently:
   CSharpier's in places: `App3._0` against `App3_0`). Where your `.editorconfig` sets one (`false`, or `true` for the
   groups), `init` writes the closer value in its block: a key can't be unset. `stylebro-migrate format` runs
   CSharpier itself on the C# files each run changed (the repository's `csharpier` tool, restored first, or the copy the
-  CSharpier.MsBuild package brings): other fixes that rewrite code (attributes split, parentheses added, `if`s merged)
+  CSharpier.MsBuild package brings; whole folders where CSharpier would change nothing else, since each file named on
+  its command line costs it ~80 ms): other fixes that rewrite code (attributes split, parentheses added, `if`s merged)
   leave lines in StyleBro's layout, which CSharpier then lays out its way, and StyleBro leaves that alone, so one
   `format` leaves a tree `dotnet csharpier check` accepts. `--verify-no-changes` checks both: StyleBro's rules, and
   CSharpier's check on the C# files it formats. Where CSharpier puts back what a fix changed (IDE0036's `static file`
@@ -871,8 +877,9 @@ see the same files, settings and branches, and one run formats them all. Only fr
 symbols it doesn't test.
 
 After a run that changed files, the next one checks every framework at once first: a run whose check is clean isn't
-made again, and one whose check found something formats only the files with findings (all of its files when an earlier
-run of the same round changed a file it formats too).
+made again, and one whose check found something formats only the files with findings. When an earlier run of the same
+round already changed those files, it isn't made either (the next round's check finds anything left), and with other
+findings it formats those files and the changed ones.
 
 A multi-line string can hold lines starting with `#` (`#pragma warning disable` in a source generator's test input)
 inside an `#if` branch some framework leaves out: there those lines read as directives, and the SDK's formatter moves
@@ -890,6 +897,17 @@ protected too.
 A project `dotnet format` can't load at all (F#, `.fsproj`) makes it skip the C# projects that reference it, for the
 frameworks where the reference matters. `format` names them once, with that cause ("Partly incomplete: ... Likely
 cause: they reference TestFSharp.fsproj"); a restore doesn't change it, and the rest of the repository is formatted.
+
+## Debug and Release
+
+`dotnet format` loads every project in its default configuration, usually Debug, so code under `#if !DEBUG` (or the
+`#else` of `#if DEBUG`) was never fixed or checked, while a CI that builds Release with warnings as errors reports it.
+Where a project's code tests a symbol a configuration may set (`DEBUG`, `RELEASE`, `TRACE`, or one of its own
+`DefineConstants`), `format`, `--verify-no-changes`, the preview and `baseline` also run the other configurations its
+`Configurations` lists that the solution builds (Release; at most four), for that project only, and only where its
+code compiles differently than in a run already made: the comparison that lets frameworks share a run. The
+`Configurations:` line names them; their runs show up as `== Release` (or `== net8.0, Release`). A repository whose
+code tests only framework symbols (`NET8_0_OR_GREATER`) gets no extra run.
 
 ## Old-style (non-SDK) projects
 

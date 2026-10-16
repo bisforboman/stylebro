@@ -35,7 +35,7 @@ internal static class AgentsFile
         + "\n"
         + "This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyzers whose fixes `dotnet format` applies.\n"
         + "\n"
-        + "- After editing C# files, run `stylebro-migrate format --files <the .cs files you changed>` (seconds; the tool is the\n"
+        + "- After editing C# files, run `stylebro-migrate format --files <the .cs files you changed>` (faster than a whole run; the tool is the\n"
         + "  StyleBro.Migrate package: `dotnet tool install -g StyleBro.Migrate`).\n"
         + "- Before finishing, `stylebro-migrate format --verify-no-changes` must exit 0. It does when only findings kept on\n"
         + "  purpose are left.\n"

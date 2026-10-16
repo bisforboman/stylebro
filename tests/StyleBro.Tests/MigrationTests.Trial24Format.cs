@@ -42,7 +42,7 @@ public sealed partial class MigrationTests
         Assert.Equal(["src/Regex.cs"], FormatCommand.LoneCrStringFiles(root));
         Assert.Equal((false, true), FormatCommand.LoneCrs("class R { const string S = @\"a\rb\"; }"));
         Assert.Equal((true, false), FormatCommand.LoneCrs("class M\r{\r}\r"));
-        Assert.StartsWith("No whitespace pass: src/Regex.cs: a string there holds a CR without an LF", FormatCommand.LoneCrStringLine(["src/Regex.cs"]), StringComparison.Ordinal);
+        Assert.StartsWith("Whitespace pass leaves out: src/Regex.cs: a string there holds a CR without an LF", FormatCommand.LoneCrStringLine(["src/Regex.cs"]), StringComparison.Ordinal);
 
         // Without end_of_line the passes leave the CR alone.
         Write(".editorconfig", "root = true\n\n[*.cs]\nindent_size = 4\n");

@@ -38,6 +38,15 @@
   <PropertyGroup>
     <StyleBroBaseline Condition="'$(StyleBroBaseline)' == ''">$([MSBuild]::GetPathOfFileAbove('stylebro.baseline', '$(MSBuildProjectDirectory)'))</StyleBroBaseline>
   </PropertyGroup>
+  <!--
+    A relative path ('eng/stylebro.baseline' in a Directory.Build.props) is relative to the project as MSBuild reads it, not
+    to the file that set it: then it's the nearest folder at or above the project that has it, the way stylebro-migrate
+    format finds it next to the Directory.Build.props (trial 25: format and its check said clean, the build failed).
+  -->
+  <PropertyGroup Condition="'$(StyleBroBaseline)' != '' and '$(StyleBroBaseline)' != 'none' and !$([System.IO.Path]::IsPathRooted('$(StyleBroBaseline)')) and !Exists('$(StyleBroBaseline)')">
+    <_StyleBroBaselineFolder>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', '$(StyleBroBaseline)'))</_StyleBroBaselineFolder>
+    <StyleBroBaseline Condition="'$(_StyleBroBaselineFolder)' != ''">$([System.IO.Path]::Combine('$(_StyleBroBaselineFolder)', '$(StyleBroBaseline)'))</StyleBroBaseline>
+  </PropertyGroup>
   <ItemGroup Condition="'$(StyleBroBaseline)' != '' and '$(StyleBroBaseline)' != 'none' and Exists('$(StyleBroBaseline)')">
     <AdditionalFiles Include="$(StyleBroBaseline)" />
   </ItemGroup>

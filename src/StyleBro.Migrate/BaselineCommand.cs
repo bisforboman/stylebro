@@ -90,6 +90,28 @@ internal static class BaselineCommand
                 reports.Add(File.ReadAllText(report));
             }
 
+            // Code only another configuration compiles ('#if !DEBUG'): its findings too, which the Release build reports (owner's
+            // decision 2026-10-16). Whitespace can't be baselined, so the style and analyzer passes only.
+            foreach (var configuration in FormatCommand.WorkspaceConfigurations(Path.Combine(root, project)))
+            {
+                Console.WriteLine($"Running the style and analyzer passes for {configuration} too: code there compiles differently.");
+                foreach (var pass in new[] { "style", "analyzers" })
+                {
+                    var folder = Path.Combine(reportDir, configuration + "-" + pass);
+                    Directory.CreateDirectory(folder);
+                    var exit = RunDotnetFormat(root, project, folder, pass, exclusions, configuration);
+                    var report = Path.Combine(folder, "format-report.json");
+                    if (!File.Exists(report))
+                    {
+                        Console.Error.WriteLine($"'dotnet format' wrote no report for {configuration} (exit code {exit}).");
+                        RestoreAside(path, aside);
+                        return 1;
+                    }
+
+                    reports.Add(File.ReadAllText(report));
+                }
+            }
+
             var result = Build(root, MergeReports(reports));
             File.WriteAllText(path, result.Baseline.Render());
             File.Delete(aside);
@@ -326,9 +348,14 @@ internal static class BaselineCommand
     public static string MergeReports(IEnumerable<string> reports) =>
         new System.Text.Json.Nodes.JsonArray(reports.SelectMany(r => System.Text.Json.Nodes.JsonNode.Parse(r)!.AsArray().Select(d => d?.DeepClone())).ToArray()).ToJsonString();
 
-    private static int RunDotnetFormat(string root, string project, string reportDir, string pass, IReadOnlyCollection<string>? exclusions)
+    private static int RunDotnetFormat(string root, string project, string reportDir, string pass, IReadOnlyCollection<string>? exclusions, string configuration = "")
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, RedirectStandardOutput = true, RedirectStandardError = true };
+        if (configuration.Length > 0)
+        {
+            start.Environment["Configuration"] = configuration;
+        }
+
         var options = new List<string> { "--verify-no-changes", "--severity", "warn", "--report", reportDir };
         options = pass == "whitespace" ? FormatCommand.WhitespaceOptions(options, exclusions ?? []) : options;
         foreach (var argument in new[] { "format", pass, project }.Where(a => a.Length > 0).Concat(options))
@@ -337,6 +364,7 @@ internal static class BaselineCommand
         }
 
         using var process = Process.Start(start)!;
+        ChildProcesses.Track(process);
         var readers = new[] { FormatCommand.ReadOnThread(process.StandardOutput), FormatCommand.ReadOnThread(process.StandardError) };
         Array.ForEach(readers, r => r.Join());
         process.WaitForExit();
