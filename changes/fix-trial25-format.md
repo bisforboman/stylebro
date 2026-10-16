@@ -3,7 +3,8 @@
 - **Release code is fixed and checked too**: where a project's code tests `DEBUG`, `RELEASE`, `TRACE` or its own
   configuration symbols, `stylebro-migrate format`, `--verify-no-changes`, the preview and `baseline` also run its other
   configurations (Release), only where the code compiles differently there. Before, code under `#if !DEBUG` was never
-  checked and a Release build with warnings as errors failed after a clean check.
+  checked and a Release build with warnings as errors failed after a clean check. A project that runs an in-solution
+  source generator stays in its default configuration, and `format` says so.
 
 ### Changed
 
