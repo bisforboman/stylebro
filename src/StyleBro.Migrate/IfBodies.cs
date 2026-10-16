@@ -178,6 +178,7 @@ internal static class IfBodies
             {
                 case >= 0 and var at:
                     return at;
+
                 case -1:
                     for (var side = 1; side <= k; side++)
                     {

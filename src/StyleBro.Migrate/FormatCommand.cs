@@ -281,6 +281,7 @@ internal static class FormatCommand
         var verify = args.Contains("--verify-no-changes");
         Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out _);
         var hidden = HiddenLine(root);
+
         // The verdict and everything after it (the kept findings it lists, the baseline line) wait as one block.
         var verdicts = new List<string>();
         Action<string> runLog = hidden is null && !verify ? log : line =>
