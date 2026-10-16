@@ -113,7 +113,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
             }
 
             var access = MemberOrdering.GetPartialAccess(container, model, cancellationToken);
-            if (MemberOrdering.FindFirstViolation(container, options, access) is not null
+            if (MemberOrdering.FindFirstViolation(container, options, access, MemberOrdering.HasGeneratedPart(container, model, cancellationToken)) is not null
                 && await GetReadByPositionAsync(document, container, access, cancellationToken).ConfigureAwait(false) is null)
             {
                 partialAccess[container] = access;

@@ -62,6 +62,17 @@ internal static class MemberOrdering
     }
 
     /// <summary>
+    /// Whether the container is a partial type that generated code extends (a source generator's or designer's part,
+    /// <see cref="Naming.NamespaceNames.HasGeneratedPart"/>): the generator may write its fields and properties in declaration
+    /// order (Serde's JSON, trial 26), so <see cref="ObservableOrder"/> keeps their order. Partial types only, so the symbol is
+    /// looked up for few containers.
+    /// </summary>
+    public static bool HasGeneratedPart(SyntaxNode container, SemanticModel model, CancellationToken cancellationToken) =>
+        container is TypeDeclarationSyntax type && type.Modifiers.Any(SyntaxKind.PartialKeyword)
+        && model.GetDeclaredSymbol(type, cancellationToken) is { DeclaringSyntaxReferences.Length: > 1 } symbol
+        && Naming.NamespaceNames.HasGeneratedPart(symbol);
+
+    /// <summary>
     /// Whether a '#region' or '#endregion' line that BRO1112 removes sits between the members. With BRO1112 on, its fix
     /// removes them and sorts across them, so BRO1001 leaves the container to it: sorting within the regions first can end
     /// elsewhere (a commented member moved next to one of its kind makes the comment a group comment, which then blocks
@@ -73,9 +84,9 @@ internal static class MemberOrdering
             && directive.Kind() is SyntaxKind.RegionDirectiveTrivia or SyntaxKind.EndRegionDirectiveTrivia
             && directive.GetRelatedDirectives().Count > 1));
 
-    public static OrderingViolation? FindFirstViolation(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null)
+    public static OrderingViolation? FindFirstViolation(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess = null, bool generatedPart = false)
     {
-        var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors);
+        var keys = GetKeys(container, options, partialAccess, out var segments, out var anchors, generatedPart);
         if (keys is null)
         {
             return null;
@@ -285,7 +296,7 @@ internal static class MemberOrdering
         };
     }
 
-    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess, out int[] segments, out int[]? anchors)
+    private static MemberKey[]? GetKeys(SyntaxNode container, MemberOrderOptions options, MemberAccess?[]? partialAccess, out int[] segments, out int[]? anchors, bool generatedPart = false)
     {
         segments = System.Array.Empty<int>();
         anchors = null;
@@ -330,7 +341,7 @@ internal static class MemberOrdering
         // serialized members), nor move a comment away from the group it introduces; skip the container if it could.
         var order = SortedOrder(keys, segments, anchors);
         return (container is TypeDeclarationSyntax type
-                && (InitializerOrder.ReordersDependentInitializers(type, order) || ObservableOrder.ReordersObservableMembers(type, order)))
+                && (InitializerOrder.ReordersDependentInitializers(type, order) || ObservableOrder.ReordersObservableMembers(type, order, generatedPart)))
             || GroupComments.MovesGroupComment(members, keys, order)
             ? null
             : keys;
