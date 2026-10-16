@@ -36,10 +36,27 @@ public sealed partial class MigrationTests
         var after = before.Replace("        Log();\r\n        Log();", "            Log();\n        Log();", StringComparison.Ordinal).Replace("    void M(bool x)\r\n", "    // added\r\n    void M(bool x)\r\n", StringComparison.Ordinal);
         Assert.Equal(before.Replace("    void M(bool x)\r\n", "    // added\r\n    void M(bool x)\r\n", StringComparison.Ordinal), IfBodies.Keep(before, [7], after));
 
-        // A run that changed its text, or the number of such lines, leaves it.
+        // A run that changed its text leaves it.
         var renamed = before.Replace("        Log();\r\n        Log();", "            Write();\r\n        Log();", StringComparison.Ordinal);
         Assert.Equal(renamed, IfBodies.Keep(before, [7], renamed));
-        Assert.Equal(after.Replace("        Log();\r\n    }", "    }", StringComparison.Ordinal), IfBodies.Keep(before, [7], after.Replace("        Log();\r\n    }", "    }", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public void IfBodies_AreFoundAgainByTheLinesAroundThem()
+    {
+        // NLog: a fix elsewhere added '{' and '}' lines; counting them found the wrong '{'.
+        string[] old = ["void A()", "{", "#if X", "if (a)", "#endif", "{", "B();", "}", "}"];
+        string[] now = ["void Z()", "{", "if (q)", "{", "Q();", "}", "}", "void A()", "{", "#if X", "if (a)", "#endif", "{", "B();", "}", "}"];
+        Assert.Equal(12, IfBodies.Locate(old, 5, now));
+        Assert.Equal(7, IfBodies.Locate(old, 0, now));
+
+        // A line changed right next to it: the other side tells.
+        string[] edited = ["void A()", "{", "#if X", "if (a)", "#endif", "{", "C();", "}", "}"];
+        Assert.Equal(5, IfBodies.Locate(old, 5, edited));
+
+        // Gone, or not told apart within the context: not found.
+        Assert.Equal(-1, IfBodies.Locate(old, 6, edited));
+        Assert.Equal(-1, IfBodies.Locate(["{"], 0, ["x", "{", "{", "x"]));
     }
 
     [Fact]
@@ -153,7 +170,8 @@ public sealed partial class MigrationTests
         Write("outside/Shared.cs", "class Shared { }\n");
         var shared = Path.Combine(root, "outside", "Shared.cs");
 
-        var outside = FormatCommand.OutsideRepository([Path.Combine(repository, "src", "A", "A.cs"), shared, Path.Combine(root, "outside", "Missing.cs")], repository);
+        Write("packages/benchmark/contentFiles/cs/any/Config.g.cs", "class Config { }\n");
+        var outside = FormatCommand.OutsideRepository([Path.Combine(repository, "src", "A", "A.cs"), shared, Path.Combine(root, "outside", "Missing.cs"), Path.Combine(root, "packages", "benchmark", "contentFiles", "cs", "any", "Config.g.cs")], repository, Path.Combine(root, "packages"));
         Assert.Equal([shared], outside);
         Assert.Equal("Leaving alone: ../outside/Shared.cs (outside the repository): a project compiles it, but it's someone else's code, like a git submodule's, so 'format' doesn't change it and its findings don't count here.", FormatCommand.OutsideRepositoryLine(repository, outside));
         Assert.Equal(Path.GetFullPath(shared), FormatCommand.FindingPath($"{shared}(1,1): warning BRO1509: Put 'X' on separate lines"));

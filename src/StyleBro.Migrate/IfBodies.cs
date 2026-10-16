@@ -102,24 +102,22 @@ internal static class IfBodies
     /// <summary>
     /// <paramref name="after"/> with the protected <paramref name="lines"/> of <paramref name="before"/> given their indentation and
     /// line break back, and the line breaks of the lines from the code above each one down to it. A line is found again by its
-    /// text without the indentation, the n-th of that text when the run kept their number, else it's left as it is.
+    /// text without the indentation and the lines around it (<see cref="Locate"/>), else it's left as it is.
     /// </summary>
     public static string Keep(string before, IReadOnlyCollection<int> lines, string after)
     {
         var old = Split(before);
         var now = Split(after);
+        var oldText = old.Select(l => l.Text.Trim()).ToArray();
+        var nowText = now.Select(l => l.Text.Trim()).ToArray();
         var changed = false;
         foreach (var index in lines.Where(l => l < old.Count).SelectMany(l => Range(old, l).Select(i => (Line: i, Indent: i == l))).DistinctBy(x => x.Line))
         {
-            var key = old[index.Line].Text.Trim();
-            var occurrence = Enumerable.Range(0, index.Line).Count(i => old[i].Text.Trim() == key);
-            var matches = Enumerable.Range(0, now.Count).Where(i => now[i].Text.Trim() == key).ToList();
-            if (matches.Count != old.Count(l => l.Text.Trim() == key))
+            if (Locate(oldText, index.Line, nowText) is not (>= 0 and var at))
             {
                 continue;
             }
 
-            var at = matches[occurrence];
             var text = index.Indent ? Indentation(old[index.Line].Text) + now[at].Text.TrimStart() : now[at].Text;
             if (text != now[at].Text || old[index.Line].Break != now[at].Break)
             {
@@ -129,6 +127,76 @@ internal static class IfBodies
         }
 
         return changed ? string.Concat(now.Select(l => l.Text + l.Break)) : after;
+    }
+
+    /// <summary>
+    /// Where line <paramref name="line"/> of <paramref name="old"/> (lines without indentation) is in <paramref name="now"/>, or -1:
+    /// the one line with its text and the lines around it, as few of them as tell it apart (a fix elsewhere in the file can add
+    /// or remove a '{' or 'else' line: counting such lines found the wrong one, NLog). With a change right next to it, the
+    /// lines on its other side only.
+    /// </summary>
+    public static int Locate(string[] old, int line, string[] now)
+    {
+        const int MaxContext = 40;
+        bool Same(int at, int from, int to)
+        {
+            for (var d = from; d <= to; d++)
+            {
+                var (o, n) = (line + d, at + d);
+                var (oldIn, nowIn) = (o >= 0 && o < old.Length, n >= 0 && n < now.Length);
+                if (oldIn != nowIn || (oldIn && old[o] != now[n]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        int Unique(int from, int to)
+        {
+            var found = -1;
+            for (var at = 0; at < now.Length; at++)
+            {
+                if (now[at] == old[line] && Same(at, from, to))
+                {
+                    if (found >= 0)
+                    {
+                        return -2;
+                    }
+
+                    found = at;
+                }
+            }
+
+            return found;
+        }
+
+        for (var k = 0; k <= MaxContext; k++)
+        {
+            switch (Unique(-k, k))
+            {
+                case >= 0 and var at:
+                    return at;
+                case -1:
+                    for (var side = 1; side <= k; side++)
+                    {
+                        if (Unique(-side, 0) is >= 0 and var before)
+                        {
+                            return before;
+                        }
+
+                        if (Unique(0, side) is >= 0 and var after)
+                        {
+                            return after;
+                        }
+                    }
+
+                    return -1;
+            }
+        }
+
+        return -1;
     }
 
     /// <summary>

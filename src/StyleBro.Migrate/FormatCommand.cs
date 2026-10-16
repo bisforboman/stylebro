@@ -501,12 +501,17 @@ internal static class FormatCommand
             .ToList();
     }
 
-    /// <summary>The files of <paramref name="compile"/> (full paths) that exist outside <paramref name="repository"/>, sorted.</summary>
-    public static List<string> OutsideRepository(IEnumerable<string> compile, string repository)
+    /// <summary>
+    /// The files of <paramref name="compile"/> (full paths) that exist outside <paramref name="repository"/>, sorted. Not a
+    /// package's (NuGet's folder, <paramref name="packages"/>: a package's contentFiles, NLog's benchmark diagnoser config).
+    /// </summary>
+    public static List<string> OutsideRepository(IEnumerable<string> compile, string repository, string? packages = null)
     {
         var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(repository)) + Path.DirectorySeparatorChar;
+        packages ??= Environment.GetEnvironmentVariable("NUGET_PACKAGES") is { Length: > 0 } set ? set : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
+        var nuget = Path.TrimEndingDirectorySeparator(Path.GetFullPath(packages)) + Path.DirectorySeparatorChar;
         return compile.Select(Path.GetFullPath)
-            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase))
+            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && !f.StartsWith(nuget, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
