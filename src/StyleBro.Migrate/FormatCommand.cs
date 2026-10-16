@@ -279,11 +279,13 @@ internal static class FormatCommand
         // CSharpier's check comes after StyleBro's (trial 26: its "checking..." line came before the header), so the verdict that
         // says clean waits for it.
         var verify = args.Contains("--verify-no-changes");
+        Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out _);
         var hidden = HiddenLine(root);
+        // The verdict and everything after it (the kept findings it lists, the baseline line) wait as one block.
         var verdicts = new List<string>();
         Action<string> runLog = hidden is null && !verify ? log : line =>
         {
-            if (line.StartsWith("Clean", StringComparison.Ordinal))
+            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal))
             {
                 verdicts.Add(line);
             }
@@ -294,7 +296,7 @@ internal static class FormatCommand
         };
         var exit = verify ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
         var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null }.OfType<string>().ToList();
-        verdicts.ForEach(line => log(buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : line));
+        verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
         foreach (var line in buts)
         {
             log(line);
@@ -4008,7 +4010,8 @@ internal static class FormatCommand
             log(OutsideRepositoryLine(root, outside));
         }
 
-        using var outsideFiles = outside.Count > 0 ? new UntouchedFiles(outside, "files outside the repository", log) : null;
+        // Quietly: the whitespace pass touches them on every run, and the line above already says they're left alone.
+        using var outsideFiles = outside.Count > 0 ? new UntouchedFiles(outside, null, log) : null;
         var outsideSet = outside.ToHashSet(StringComparer.OrdinalIgnoreCase);
         bool Ignored(string line) => outsideSet.Count > 0 && IsFindingLine(line) && FindingPath(line) is { } findingPath && outsideSet.Contains(findingPath);
 
@@ -4958,15 +4961,15 @@ internal static class FormatCommand
     {
         private readonly Dictionary<string, byte[]> files;
         private readonly Action<string> log;
-        private readonly string what;
+        private readonly string? what;
 
         public UntouchedFiles(string root, string extension, Action<string> log)
             : this(StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(extension, StringComparison.OrdinalIgnoreCase)), "Visual Basic", log)
         {
         }
 
-        /// <summary>Keeps <paramref name="files"/> as they are; <paramref name="what"/> names them in what's said when one is put back.</summary>
-        public UntouchedFiles(IEnumerable<string> files, string what, Action<string> log)
+        /// <summary>Keeps <paramref name="files"/> as they are; <paramref name="what"/> names them in what's said when one is put back (null: nothing is said).</summary>
+        public UntouchedFiles(IEnumerable<string> files, string? what, Action<string> log)
         {
             this.log = log;
             this.what = what;
@@ -4978,7 +4981,10 @@ internal static class FormatCommand
             foreach (var (file, bytes) in files.Where(f => !File.Exists(f.Key) || !File.ReadAllBytes(f.Key).AsSpan().SequenceEqual(f.Value)))
             {
                 File.WriteAllBytes(file, bytes);
-                log($"Put back: {file}: a fix changed it, and 'format' leaves {what} alone. Check that the build still passes.");
+                if (what is not null)
+                {
+                    log($"Put back: {file}: a fix changed it, and 'format' leaves {what} alone. Check that the build still passes.");
+                }
             }
         }
     }

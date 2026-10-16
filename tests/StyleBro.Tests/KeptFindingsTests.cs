@@ -825,11 +825,13 @@ public sealed class KeptFindingsTests : IDisposable
         var root = NewFolder();
         var lines = new List<string>();
         Directory.CreateDirectory(Path.Combine(root, "Missing"));
-        FormatCommand.RecordUnchecked(root, [(Path.Combine(root, "Missing", "Missing.csproj"), "Release")]);
 
+        // What a run with a generator project records (RunOnce); one left from an earlier command doesn't count.
+        FormatCommand.RecordUnchecked(root, [(Path.Combine(root, "Other", "Other.csproj"), "Release")]);
         var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (_, output) =>
         {
             output!("Checking StyleBro's rules (1 ids), changing nothing.");
+            FormatCommand.RecordUnchecked(root, [(Path.Combine(root, "Missing", "Missing.csproj"), "Release")]);
             return 0;
         });
 
@@ -838,6 +840,27 @@ public sealed class KeptFindingsTests : IDisposable
         var build = lines.FindIndex(l => l.StartsWith("Not checked by format: Missing in Release", StringComparison.Ordinal));
         Assert.True(header >= 0 && build > header, string.Join("\n", lines));
         Assert.Equal("Clean.", lines[^1]);
+        Assert.DoesNotContain(lines, l => l.Contains("Other in Release", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Format_WithAVerdictThatWaits_KeepsTheKeptFindingsBelowIt()
+    {
+        // The verdict waits for the checks at the end, and the kept findings it lists wait with it (not above it).
+        var root = NewFolder();
+        File.WriteAllText(Path.Combine(root, ".editorconfig"), "root = true\n\n[*.cs]\ndotnet_analyzer_diagnostic.severity = silent\n");
+        var lines = new List<string>();
+
+        FormatCommand.Run(new[] { root, FormatCommand.OnceOption }, lines.Add, (_, _) =>
+        {
+            WriteKept(Path.Combine(root, "C.cs"));
+            return 0;
+        });
+
+        var verdict = lines.FindIndex(l => l.StartsWith("Formatting is clean: 1 finding kept on purpose", StringComparison.Ordinal));
+        var finding = lines.FindIndex(l => l.StartsWith("  C.cs(3,17): BRO1303", StringComparison.Ordinal));
+        var but = lines.FindIndex(l => l.StartsWith("Not clean: .editorconfig's bulk severity", StringComparison.Ordinal));
+        Assert.True(verdict >= 0 && finding > verdict && but > finding, string.Join("\n", lines));
     }
 
     /// <summary>Runs <paramref name="action"/> with a repository-names file of one more file, as 'stylebro-migrate format' writes it.</summary>
