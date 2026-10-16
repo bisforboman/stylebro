@@ -126,11 +126,53 @@ public class BaselineTests
             Assert.Equal(1, result.Whitespace);
             Assert.Equal(1, result.NotCovered["CA1050"]);
             Assert.Equal(2, result.Baseline.Allowed(new Baseline.Key("BRO1106", "src/A.cs", Baseline.Fingerprint("string a = \"\", b = \"\";"))));
+
+            // A baseline <StyleBroBaseline> puts in eng/ (trial 26): paths relative to its folder, as the build reads them.
+            var eng = StyleBro.Migrate.BaselineCommand.Build(dir, "[" + document + "]", Path.Combine(dir, "eng"));
+            Assert.Equal(["../src/A.cs"], eng.Baseline.Entries.Keys.Select(k => k.Path).Distinct());
         }
         finally
         {
             Directory.Delete(dir, recursive: true);
         }
+    }
+
+    [Fact]
+    public void Generator_KeepsThePreviousEntriesOutsideTheFolderItRanOn()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "repo");
+        var fresh = new Baseline(new Dictionary<Baseline.Key, int> { [new Baseline.Key("BRO1106", "src/A.cs", "1")] = 1 });
+        var previous = Entries(("src/Old.cs", "x", 1), ("tests/T.cs", "y", 2));
+        var kept = StyleBro.Migrate.BaselineCommand.KeepOutside(fresh, previous, root, Path.Combine(root, "src"));
+        Assert.Equal(["src/A.cs", "tests/T.cs"], kept.Entries.Keys.Select(k => k.Path).Order(StringComparer.Ordinal));
+        Assert.Equal(fresh.Entries, StyleBro.Migrate.BaselineCommand.KeepOutside(fresh, null, root, root).Entries);
+    }
+
+    [Fact]
+    public void Generator_WritesNothingWhenThePropsTurnTheBaselineOff()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "stylebro-baseline-off-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            File.WriteAllText(Path.Combine(dir, "App.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+            File.WriteAllText(Path.Combine(dir, "Directory.Build.props"), "<Project>\n  <PropertyGroup>\n    <StyleBroBaseline>none</StyleBroBaseline>\n  </PropertyGroup>\n</Project>\n");
+            Assert.Equal(0, StyleBro.Migrate.BaselineCommand.Run([dir]));
+            Assert.False(File.Exists(Path.Combine(dir, Baseline.FileName)));
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void ReadOnThread_ReadsTheStreamWithoutACallback()
+    {
+        // 'baseline' passed no callback and nothing was read: 'dotnet format' blocked on a full pipe for hours (trial 26, NLog).
+        using var reader = new StreamReader(new MemoryStream(new byte[100_000]));
+        StyleBro.Migrate.FormatCommand.ReadOnThread(reader).Join();
+        Assert.True(reader.EndOfStream);
     }
 
     private static string Entries(params (string Path, string Line, int Count)[] entries) =>

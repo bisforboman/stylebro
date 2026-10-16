@@ -9,8 +9,9 @@ using StyleBro.Analyzers.Baseline;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// stylebro-migrate baseline [path] [--project &lt;solution or project&gt;]: writes stylebro.baseline at 'path' (default:
-/// the current directory) with every violation 'dotnet format' would fix today, so the build and 'dotnet format' only
+/// stylebro-migrate baseline [path] [--project &lt;solution or project&gt;]: writes the baseline the build reads for 'path'
+/// (default: the current directory): the file &lt;StyleBroBaseline&gt; names, else the nearest stylebro.baseline at or above,
+/// else a new one there. It holds every violation 'dotnet format' would fix today, so the build and 'dotnet format' only
 /// report new ones. Runs 'dotnet format --verify-no-changes --report' (with an existing baseline moved aside, so it
 /// starts over) and fingerprints each reported line. Whitespace formatting isn't a diagnostic in 'dotnet format' and
 /// can't be baselined; the summary counts it.
@@ -54,7 +55,14 @@ internal static class BaselineCommand
         var traversal = FormatCommand.IsTraversal(Path.Combine(root, project)) ? FormatCommand.TraversalSolution(Path.GetFullPath(Path.Combine(root, project))) : null;
         project = traversal ?? project;
 
-        var path = Path.Combine(root, Baseline.FileName);
+        // The file the build reads: the one <StyleBroBaseline> names, else the nearest above, else a new one at the root (like format).
+        if (FormatCommand.BaselineFile(root) is not { } path)
+        {
+            Console.WriteLine("Nothing written: <StyleBroBaseline> in Directory.Build.props turns the baseline off ('none') or names it with MSBuild "
+                + "properties other than $(MSBuildThisFileDirectory), which stylebro-migrate can't resolve.");
+            return 0;
+        }
+
         var aside = path + ".previous";
         var reportDir = Path.Combine(Path.GetTempPath(), "stylebro-baseline-" + Guid.NewGuid().ToString("N"));
         if (File.Exists(path))
@@ -112,10 +120,11 @@ internal static class BaselineCommand
                 }
             }
 
-            var result = Build(root, MergeReports(reports));
-            File.WriteAllText(path, result.Baseline.Render());
+            var result = Build(root, MergeReports(reports), Path.GetDirectoryName(path));
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, KeepOutside(result.Baseline, File.Exists(aside) ? File.ReadAllText(aside) : null, Path.GetDirectoryName(path)!, root).Render());
             File.Delete(aside);
-            Report(result);
+            Report(result, Path.GetRelativePath(root, path).Replace('\\', '/'));
             return 0;
         }
         catch
@@ -160,9 +169,10 @@ internal static class BaselineCommand
 
     /// <summary>
     /// Turns a report into a baseline. A diagnostic reported for several target frameworks' copies of a file counts
-    /// once (the suppressor checks each compilation on its own).
+    /// once (the suppressor checks each compilation on its own). Paths are relative to <paramref name="baselineFolder"/>
+    /// (default: the root), the baseline file's folder ('../src/A.cs' for a baseline in eng/).
     /// </summary>
-    public static Result Build(string root, string reportJson)
+    public static Result Build(string root, string reportJson, string? baselineFolder = null)
     {
         var covered = new HashSet<string>(new Analyzers.Baseline.BaselineSuppressor().SupportedSuppressions.Select(s => s.SuppressedDiagnosticId), StringComparer.Ordinal);
         var seen = new HashSet<(string Id, string File, int Line, int Char)>();
@@ -197,7 +207,7 @@ internal static class BaselineCommand
                     continue;
                 }
 
-                if (!covered.Contains(id) || Baseline.RelativePath(root, file) is not { } relative)
+                if (!covered.Contains(id) || Baseline.RelativePath(baselineFolder ?? root, file) is not { } relative)
                 {
                     notCovered[id] = notCovered.TryGetValue(id, out var n) ? n + 1 : 1;
                     continue;
@@ -215,6 +225,25 @@ internal static class BaselineCommand
         }
 
         return new Result(new Baseline(counts), perRule, whitespace, notCovered);
+    }
+
+    /// <summary>
+    /// The new baseline plus the previous file's entries for code outside <paramref name="root"/>: a run on src/ with the
+    /// repository's baseline above it covers only src/, and the other folders' entries stay.
+    /// </summary>
+    public static Baseline KeepOutside(Baseline fresh, string? previous, string baselineFolder, string root)
+    {
+        var counts = fresh.Entries.ToDictionary(e => e.Key, e => e.Value);
+        var inside = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+        foreach (var (key, count) in previous is null ? new Dictionary<Baseline.Key, int>() : Baseline.Parse(previous).Entries)
+        {
+            if (!Path.GetFullPath(Path.Combine(baselineFolder, key.Path)).StartsWith(inside, StringComparison.OrdinalIgnoreCase))
+            {
+                counts[key] = count;
+            }
+        }
+
+        return new Baseline(counts);
     }
 
     /// <summary>The solution or project the commands run on when none is named: the only candidate in the folder, else null.</summary>
@@ -313,10 +342,10 @@ internal static class BaselineCommand
             : $"Several solutions or projects in {root}: {string.Join(", ", candidates)}. None is picked for you (a solution filter may leave projects out on purpose): name one, e.g. {string.Join(" or ", candidates.Take(3).Select(c => how.Replace("<file>", c)))}{(how.Contains("--project", StringComparison.Ordinal) ? string.Empty : " (--project <file> works too)")}.";
     }
 
-    private static void Report(Result result)
+    private static void Report(Result result, string path)
     {
         var total = result.PerRule.Values.Sum();
-        Console.WriteLine($"Wrote {Baseline.FileName}: {total} violations on {result.Baseline.Count} lines.");
+        Console.WriteLine($"Wrote {path}: {total} violations on {result.Baseline.Count} lines.");
         foreach (var (id, count) in result.PerRule.OrderByDescending(r => r.Value).ThenBy(r => r.Key, StringComparer.Ordinal))
         {
             Console.WriteLine($"  {id,-8} {count}");
