@@ -289,6 +289,7 @@ internal static class PreviewCommand
             var reportFolder = Path.Combine(temp, "report");
             var reportFile = Path.Combine(reportFolder, "format-report.json");
             var changed = new List<bool>();
+            var putBack = new List<string>();
             var tree = Tree(copy);
 
             // CSharpier where the repository uses it, as 'stylebro-migrate format' runs it (whole folders where it changes nothing else).
@@ -316,13 +317,21 @@ internal static class PreviewCommand
                 }
 
                 var next = Tree(copy);
+                List<string> Between(string from, string to) => from == to ? [] : GitChecked(copy, "diff", "--name-only", from, to).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).ToList();
 
-                // CSharpier on the files the run changed.
-                if (next != tree && csharpier is not null
-                    && CSharpierStep.InScope(csharpier, formatRoot, GitChecked(copy, "diff", "--name-only", tree, next).Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(f => Path.GetFullPath(Path.Combine(copy, f.Trim())))) is { Count: > 0 } pretty)
+                // CSharpier on the files the run changed, and on those whose line endings aren't end_of_line's (as format runs it).
+                putBack = [];
+                if (csharpier is not null
+                    && CSharpierStep.InScope(csharpier, formatRoot, Between(tree, next).Select(f => Path.GetFullPath(Path.Combine(copy, f)))
+                        .Union(CSharpierStep.WrongEndings(formatRoot, CSharpierStep.InScope(csharpier, formatRoot, StyleCopSetup.EnumerateFiles(formatRoot))), StringComparer.OrdinalIgnoreCase)) is { Count: > 0 } pretty)
                 {
                     Step($"CSharpier on {pretty.Count} file{(pretty.Count == 1 ? string.Empty : "s")}", () => CSharpierStep.Run(csharpier, "format", CSharpierStep.Arguments(csharpier, formatRoot, pretty, unformatted)).Output.ForEach(Log));
+                    var fixedTree = next;
                     next = Tree(copy);
+
+                    // What CSharpier put back as it was before the run: no run settles those files, as format says (trial 26:
+                    // the preview said "clean after 1 run" and exited 0 where format exits 2).
+                    putBack = Between(tree, fixedTree).Except(Between(tree, next), StringComparer.Ordinal).ToList();
                 }
 
                 changed.Add(next != tree);
@@ -353,8 +362,8 @@ internal static class PreviewCommand
             var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetRelativePath(Path.GetDirectoryName(temp)!, copy).Replace('\\', '/'), files.Keys, f => WhitespaceOnly(copy, configured, f));
             JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
-            JsonReport.Set("clean", !changed[^1]);
-            Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed));
+            JsonReport.Set("clean", !changed[^1] && putBack.Count == 0);
+            Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed, putBack.Count));
             foreach (var line in SampleLines(Samples(attribution, 3), (file, line) => Hunk(GitChecked(copy, "diff", "--cached", "-U0", configured, "--", file), line, 12)))
             {
                 Console.WriteLine(line);
@@ -376,8 +385,17 @@ internal static class PreviewCommand
                 Console.WriteLine("  The preview has no changes for them. To include them: run 'dotnet restore' (or 'dotnet build') in the repository, fix what it reports, then preview again.");
             }
 
+            // As format: not clean (exit code 2) when CSharpier puts back what the fixes changed, or a run still changed files.
+            if (putBack.Count > 0)
+            {
+                // Which rules' fixes it undoes, as format says: a check of those files (they're as before the fixes again).
+                var check = new List<string>();
+                format([.. FormatCommand.WithInclude(FormatCommand.NoRestore(formatArgs.ToArray()), putBack.Select(f => Path.GetRelativePath(formatRoot, Path.Combine(copy, f)).Replace('\\', '/'))), "--verify-no-changes"], check.Add);
+                Console.WriteLine(CSharpierStep.PutBackLine(putBack, FormatCommand.FindingIds(check.Where(l => FormatCommand.FindingPath(l) is { } path && putBack.Contains(Path.GetRelativePath(copy, path).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase)))));
+            }
+
             ok = true;
-            return 0;
+            return putBack.Count > 0 || changed[^1] ? FormatCommand.NotCleanExitCode : 0;
         }
         catch (GitFailedException e)
         {
@@ -539,12 +557,13 @@ internal static class PreviewCommand
     }
 
     /// <summary>The format part of the summary: files, reported changes, runs, and the rules by the number of files they changed.</summary>
-    public static string FormatSummary(int files, int changes, Dictionary<string, SortedDictionary<string, int>> attribution, IReadOnlyList<bool> changedRuns)
+    public static string FormatSummary(int files, int changes, Dictionary<string, SortedDictionary<string, int>> attribution, IReadOnlyList<bool> changedRuns, int putBack = 0)
     {
         var text = new StringBuilder();
         var runs = changedRuns.Count(c => c);
-        var convergence = runs == 0 ? "nothing to change"
-            : changedRuns[^1] ? $"still changing after {changedRuns.Count} runs (the diff has all of them)"
+        var convergence = changedRuns.Count > 0 && changedRuns[^1] ? $"still changing after {changedRuns.Count} runs (the diff has all of them)"
+            : putBack > 0 ? $"not clean: CSharpier puts back what the fixes change in {putBack} file{(putBack == 1 ? string.Empty : "s")} (below)"
+            : runs == 0 ? "nothing to change"
             : $"clean after {runs} run{(runs == 1 ? string.Empty : "s")}";
         text.Append(string.Create(CultureInfo.InvariantCulture, $"Format: {files:N0} file{(files == 1 ? string.Empty : "s")}, {changes:N0} reported change{(changes == 1 ? string.Empty : "s")}, {convergence}"));
         var titles = Titles();

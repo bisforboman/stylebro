@@ -367,9 +367,12 @@ A few settings work a little differently:
   its command line costs it ~80 ms): other fixes that rewrite code (attributes split, parentheses added, `if`s merged)
   leave lines in StyleBro's layout, which CSharpier then lays out its way, and StyleBro leaves that alone, so one
   `format` leaves a tree `dotnet csharpier check` accepts. `--verify-no-changes` checks both: StyleBro's rules, and
-  CSharpier's check on the C# files it formats. Where CSharpier puts back what a fix changed (IDE0036's `static file`
-  against CSharpier's `file static`), no run can settle it: both say so and name the files (`init` turns IDE0036 off
-  with CSharpier). With only a `.csharpierrc` and no tool or package, `format` says to run CSharpier.
+  CSharpier's check on the C# files it formats (and on the Directory.Build.props and Directory.Packages.props files
+  `init` edits). Where `end_of_line` is `lf` or `crlf`, `format` also runs CSharpier on the C# files whose line endings
+  differ from it, since CSharpier's check fails on those too. Where CSharpier puts back what a fix changed (IDE0036's
+  `static file` against CSharpier's `file static`), no run can settle it: `format`, `--verify-no-changes` and the
+  preview say so (the preview exits 2 like `format`), name the files and the rules whose edits CSharpier undoes, and
+  say how to turn those off (`init` turns IDE0036 off with CSharpier). With only a `.csharpierrc` and no tool or package, `format` says to run CSharpier.
   `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro format instead, remove CSharpier and run
   `init` again.
 - **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
@@ -850,7 +853,10 @@ every replacing rule as `none` into such a folder's `.editorconfig`, and it neve
 or a shared `.projitems`). `stylebro-migrate format` never formats anything inside a git submodule (it passes `--exclude`
 with every submodule folder), so StyleBro doesn't report findings there either: the package's build targets read the
 submodule paths from the `.gitmodules` above the project, and StyleBro doesn't analyze the files in those folders. A folder that
-is not a submodule (a copied library) still needs the `generated_code = true` section above.
+is not a submodule (a copied library) still needs the `generated_code = true` section above. A file a project compiles
+from outside the repository (`<Compile Include="..\..\..\outside\Shared.cs" Link="..." />`) is left alone the same way:
+`format` names it (`Leaving alone: ../outside/Shared.cs (outside the repository)`), puts it back if a fix reached it, and
+its findings don't count in `--verify-no-changes`.
 
 ## Multi-targeted repositories
 
@@ -888,7 +894,12 @@ symbols it doesn't test.
 
 After a run that changed files, the next one checks every framework at once first: a run whose check is clean isn't
 made again, and one whose check found something formats only the files with findings, plus those an earlier run of
-the same round changed.
+the same round changed. A run that changed only line endings or byte order marks (`end_of_line`, `charset`) is the
+last one: nothing is left for another to fix.
+
+`dotnet format` may warn that it couldn't load part of the workspace in one framework's run (`'dotnet format' had
+warnings loading the workspace in its net6.0 run`). To see the warnings, add `--verbosity diagnostic` to the same
+`stylebro-migrate format` command: a plain `dotnet format` loads the projects differently and may not show them.
 
 A multi-line string can hold lines starting with `#` (`#pragma warning disable` in a source generator's test input)
 inside an `#if` branch some framework leaves out: there those lines read as directives, and the SDK's formatter moves
@@ -917,7 +928,30 @@ Where a project's code tests a symbol a configuration may set (`DEBUG`, `RELEASE
 code compiles differently than in a run already made: the comparison that lets frameworks share a run. The
 `Configurations:` line names them; their runs show up as `== Release` (or `== net8.0, Release`). A repository whose
 code tests only framework symbols (`NET8_0_OR_GREATER`) gets no extra run. A project that runs an in-solution source
-generator stays in its default configuration (`format` builds the generator for that one only) and is named so.
+generator stays in its default configuration (`format` builds the generator for that one only) and is named so;
+`--verify-no-changes` then builds it in its other configurations (`Not checked by format: UsesGen in Release ...:
+building it...`) and is not clean when that build reports one of the rules `format` fixes (`Release build of UsesGen: 2
+findings`), which you fix by hand there.
+
+### Lines whose if/else body `#if` decides
+
+In code like this, `#if` decides whether a line is the body of an `if`, `else` or loop:
+
+```csharp
+#if NETFRAMEWORK
+            if (v < int.MaxValue)
+                builder.AppendInvariant((int)v);
+            else
+#endif
+            builder.Append(v);
+```
+
+Where the symbol is defined the last line is the `else` body, and the formatter indents it; where it isn't, it's a
+statement of its own, and the formatter un-indents it. Each framework's or configuration's run undid the other's, so
+`format` never settled. It leaves the indentation of such lines as it is (`Indentation kept: ...` names them; it compares
+the parses of the symbols its runs define), formats the rest of the file, and their whitespace findings don't count in
+`--verify-no-changes`. A build with IDE0055 as an error still reports one of them in the configuration whose indentation
+the line doesn't have: braces (`else { ... }` around both branches' bodies) settle it for every build.
 
 ## Old-style (non-SDK) projects
 
