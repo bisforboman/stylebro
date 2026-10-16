@@ -264,6 +264,22 @@ public sealed partial class MigrationTests
         Assert.Contains("\ndotnet_diagnostic.IDE0049.severity = warning\n", output, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Init_StaticPrefixStyleSet_KeepsBro1307On()
+    {
+        // The team asks for 's_' statics itself (stylebro_private_mutable_static_field_naming = s_camelCase): BRO1307 keeps 's_'.
+        for (var i = 0; i < 3; i++)
+        {
+            Write($"A{i}.cs", $"class A{i}\n{{\n    private static int s_count{i};\n}}\n");
+        }
+
+        Write(".editorconfig", "root = true\n[*.cs]\nstylebro_private_mutable_static_field_naming = s_camelCase\n");
+        var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root }))).Replace("\r\n", "\n");
+
+        Assert.Contains("  set      private static fields: 3 of 3 with an 's_'/'t_' prefix -> set in .editorconfig (stylebro_private_mutable_static_field_naming = s_camelCase)", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("BRO1307.severity = none", output, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("[src/Sdk/**]\ngenerated_code = true\n", "src/Sdk")]
     [InlineData("[/src/Sdk/**.cs]\ngenerated_code = true\n", "src/Sdk")]
