@@ -742,6 +742,25 @@ public class DocumentationTests
         """,
         "stylebro_exclude_from_punctuation_check = summary, para\n");
 
+    // StyleSharp's SST1629 doesn't check text that ends with an element: migrate excludes the inline ones (trial 24, Refit).
+    [Fact]
+    public Task ExcludedEmptyElements_AtTheEnd_AreNotCheckedForPeriods() => VerifyFixAsync(
+        """
+        /// <summary>The current <see cref="Texts"/></summary>
+        /// <remarks>Uses <c>x</c>{|BRO1603:|}</remarks>
+        public class Texts
+        {
+        }
+        """,
+        """
+        /// <summary>The current <see cref="Texts"/></summary>
+        /// <remarks>Uses <c>x</c>.</remarks>
+        public class Texts
+        {
+        }
+        """,
+        "stylebro_exclude_from_punctuation_check = see\n");
+
     [Fact]
     public Task PropertySummaries_MatchTheAccessors() => VerifyFixAsync(
         """

@@ -300,6 +300,34 @@ go outside the namespace (SST1200). Suppressions of SST ids (`#pragma`, `[Suppre
 to the rules that replace the StyleCop rules they stand for, like StyleCop's. The block records the StyleSharp version
 (`# StyleSharp.Analyzers version:`), so after the package swap a second `--write` still reads the setup as StyleSharp's.
 
+**Where StyleSharp's rule means something else.** Several SST rules kept StyleCop's number but check less, or check
+differently (owner's decision 2026-10-16: match StyleSharp's behaviour). For a StyleSharp repository (without StyleCop
+next to it) the migration writes StyleSharp's meaning:
+
+| StyleSharp | StyleCop | Written |
+| --- | --- | --- |
+| SST1623/SST1624: a `protected` setter is restricted, a getter counts whatever its modifier, `Gets or sets` on a read-only property is fine | SA1623/SA1624 | `stylebro_summary_wording = stylesharp` ([BRO1604](rules/BRO1604.md)-[BRO1607](rules/BRO1607.md)) |
+| SST1642/SST1643: only the words before the type count; static constructors aren't checked | SA1642/SA1643 | the same key |
+| SST1201: methods, operators and conversions are one kind; nested records come after classes; a namespace's types aren't ordered | SA1201 | `stylebro_member_order = ..., conversion\|operator\|extension\|method, struct, class, record`, `stylebro_member_order_namespaces = false` ([BRO1001](rules/BRO1001.md)) |
+| SST1305: also allows `db`, `ef`, `gc`, `id`, `io`, `js`, `ms`, `my`, `ok`, `so`, `ui`, `up`, `us` | SA1305 | `stylebro_allowed_hungarian_prefixes` ([BRO1310](rules/BRO1310.md)) |
+| SST1413: no switch expressions, no `with` initializers | SA1413 | `stylebro_trailing_comma_switch_expressions = false`, `stylebro_trailing_comma_with_expressions = false` ([BRO1401](rules/BRO1401.md)) |
+| SST1501/SST1502: empty `{ }` may stay on one line | SA1501/SA1502 | `stylebro_allow_empty_single_line_blocks = true` |
+| SST1106: a `;` after a type's `}` is fine | SA1106 | `stylebro_allow_semicolon_after_closing_brace = true` |
+| SST1629: the period only in summary, remarks, returns and value, and not after an element at the end | SA1629 | `stylebro_exclude_from_punctuation_check` with `param`, `typeparam`, `exception` and the inline elements (`see`, `c`, `paramref`, ...) |
+| SST1300: no namespaces | SA1300 | [BRO1312](rules/BRO1312.md) off |
+
+Known differences left (StyleBro changes code StyleSharp accepts; nothing StyleSharp then reports, checked with
+`scripts/stylecop-survey/Compare-WithStyleCop.ps1 -StyleSharp` on every parity set): SST1131 only counts literals as
+constants (BRO1103 also swaps `Max == x`, `string.Empty == s`); SST1129 skips target-typed `new()` (BRO1104 doesn't);
+SST1312 and SST1305 check local declarations, `foreach` variables and parameters only (BRO1301/BRO1310 also `out var`,
+patterns, `catch` and query variables); SST1300 doesn't check local functions (BRO1309 does); SST1407 counts `%` with
+`*` and `/`, SST1408 doesn't check `and`/`or` patterns (BRO1406/BRO1407 do); SST1503/SST1519 accept an unbraced `if`
+child (BRO1514/BRO1515 brace it); SST1516 doesn't check usings, accessors or a member after an `#if` line (BRO1505
+does); SST1201 skips explicit interface implementations (BRO1001 ranks them public); SST1600 doesn't ask for
+documentation on overrides (BRO1601 adds `<inheritdoc/>`); SST1150-SST1171 let an item start where the previous
+multi-line item ends (BRO1108 doesn't); SST1518 requires a final newline (BRO1507 allows none: set
+`insert_final_newline = true`).
+
 The report lists the StyleSharp rules that are on and stand for no StyleCop rule (digit separators, complexity limits,
 ...): StyleBro doesn't replace them, so they stop when StyleSharp.Analyzers is removed. When StyleCop.Analyzers is
 referenced too, a StyleCop rule counts as on when either package enforces it, and `stylecop.json`'s settings are used.

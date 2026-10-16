@@ -62,7 +62,7 @@ public sealed partial class MigrationTests
         Assert.Contains("dotnet_diagnostic.BRO1132.severity = none", lines); // SST1108 is about files of commented-out code
         Assert.Contains("dotnet_diagnostic.BRO1309.severity = warning", lines);
         Assert.Contains("dotnet_diagnostic.BRO1312.severity = none", lines); // SST1300 doesn't check namespaces
-        Assert.Contains("stylebro_exclude_from_punctuation_check = seealso, param, typeparam, exception", lines); // SST1629
+        Assert.Contains("stylebro_exclude_from_punctuation_check = seealso, param, typeparam, exception, see, paramref, typeparamref, c, a, b, i, u, em, strong, sub, sup, span, tt", lines); // SST1629
 
         // With StyleCop next to it, StyleCop's meaning applies.
         Write("Repro.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><ItemGroup><PackageReference Include=\"StyleSharp.Analyzers\" Version=\"3.40.1\" /><PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.2.0-beta.556\" /></ItemGroup></Project>\n");

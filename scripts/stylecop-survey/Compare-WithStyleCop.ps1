@@ -45,7 +45,7 @@ stylebro_trailing_comma_with_expressions = false
 stylebro_allow_semicolon_after_closing_brace = true
 stylebro_member_order_namespaces = false
 stylebro_allow_empty_single_line_blocks = true
-stylebro_exclude_from_punctuation_check = seealso, param, typeparam, exception
+stylebro_exclude_from_punctuation_check = seealso, param, typeparam, exception, see, paramref, typeparamref, c, a, b, i, u, em, strong, sub, sup, span, tt
 dotnet_diagnostic.BRO1312.severity = none
 '@
 $fromStyleCop = @{}

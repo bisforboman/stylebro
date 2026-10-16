@@ -54,12 +54,12 @@ internal sealed record StyleSharpUse(string? Version, IReadOnlyDictionary<string
     /// </summary>
     public JsonElement Settings()
     {
-        // SST1629 checks the period in summary, remarks, returns and value only (trial 24: BRO1603 put one after Refit's
-        // '<exception cref="ArgumentNullException">value</exception>').
+        // SST1629 checks the period in summary, remarks, returns and value only, and not after an element at the end (trial 24:
+        // BRO1603 put one after Refit's '<exception cref="ArgumentNullException">value</exception>' and '... <see cref="T"/>').
         var documentation = new System.Text.Json.Nodes.JsonObject
         {
             ["xmlHeader"] = false,
-            ["excludeFromPunctuationCheck"] = new System.Text.Json.Nodes.JsonArray("seealso", "param", "typeparam", "exception"),
+            ["excludeFromPunctuationCheck"] = new System.Text.Json.Nodes.JsonArray("seealso", "param", "typeparam", "exception", "see", "paramref", "typeparamref", "c", "a", "b", "i", "u", "em", "strong", "sub", "sup", "span", "tt"),
         };
         if (Options.TryGetValue("file_header_template", out var template) && template.Length > 0)
         {
