@@ -134,10 +134,14 @@ internal static class CSharpierStep
             .ToList();
 
     /// <summary>What format and verify say about <see cref="PutBack"/>'s files (relative paths).</summary>
-    public static string PutBackLine(IReadOnlyList<string> files) =>
-        $"Not clean: CSharpier puts back what the fixes changed in {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}, "
-        + "so the two formatters undo each other there and no run settles it. Run 'stylebro-migrate init' again (with CSharpier it turns off the built-in rules CSharpier decides, "
-        + "e.g. IDE0036's modifier order), or set the rule that changes those lines to none.";
+    public static string PutBackLine(IReadOnlyList<string> files, IReadOnlyList<string>? ids = null) =>
+        ids is { Count: > 0 }
+            ? $"Not clean: CSharpier puts back what {string.Join(", ", ids)} change{(ids.Count == 1 ? "s" : string.Empty)} in {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}, "
+                + $"so the two formatters undo each other there and no run settles it. Set {(ids.Count == 1 ? "it" : "them")} to none where CSharpier formats "
+                + $"({string.Join(", ", ids.Select(id => $"dotnet_diagnostic.{id}.severity = none"))} in .editorconfig), and please report it: https://github.com/bisforboman/stylebro/issues."
+            : $"Not clean: CSharpier puts back what the fixes changed in {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}, "
+                + "so the two formatters undo each other there and no run settles it. Run 'stylebro-migrate init' again (with CSharpier it turns off the built-in rules CSharpier decides, "
+                + "e.g. IDE0036's modifier order), or set the rule that changes those lines to none.";
 
     /// <summary>
     /// The files (full paths, any kind CSharpier checks) under the tool's folders that CSharpier would change now, from one
@@ -196,9 +200,57 @@ internal static class CSharpierStep
     /// </summary>
     public static List<string>? FailedCSharp(int code, IReadOnlyList<string> output)
     {
+        // And the MSBuild files init edits (Directory.Build.props, Directory.Packages.props): CSharpier 1.x checks them too (trial 26).
         var all = Failures(output);
-        var failed = all.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(f => f.Replace('\\', '/').TrimStart('.', '/')).ToList();
+        var failed = all.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || IsInitProps(f)).Select(f => f.Replace('\\', '/').TrimStart('.', '/')).ToList();
         return code == 0 || (failed.Count == 0 && all.Count > 0) ? null : failed;
+    }
+
+    /// <summary>Whether a path is one of the MSBuild files 'stylebro-migrate init' edits (<see cref="FailedCSharp"/>).</summary>
+    public static bool IsInitProps(string path) =>
+        Path.GetFileName(path.Replace('\\', '/')) is var name
+        && (name.Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase) || name.Equals("Directory.Packages.props", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// The C# files of <paramref name="files"/> (full paths) whose line endings aren't the ones end_of_line asks for (lf or crlf;
+    /// mixed counts): CSharpier writes end_of_line's ending, so its check fails on them while 'format' (no whitespace pass where
+    /// CSharpier formats) left them (owner's decision 2026-10-16: the CSharpier step takes them too).
+    /// </summary>
+    public static List<string> WrongEndings(string root, IEnumerable<string> files)
+    {
+        var list = files.ToList();
+        if (list.Count == 0)
+        {
+            return [];
+        }
+
+        var set = FormatCommand.ConfigSet(root);
+        return list.AsParallel()
+            .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(f)
+                && set.GetOptionsForSourcePath(Path.GetFullPath(f)).AnalyzerOptions.TryGetValue("end_of_line", out var value)
+                && value.Trim().ToLowerInvariant() is "lf" or "crlf"
+                && HasOtherEnding(File.ReadAllText(f), value.Trim().Equals("crlf", StringComparison.OrdinalIgnoreCase)))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>Whether a text has a line break that isn't CRLF (<paramref name="crlf"/>) or LF.</summary>
+    public static bool HasOtherEnding(string text, bool crlf)
+    {
+        for (var i = 0; i < text.Length; i++)
+        {
+            if (text[i] == '\r' && (!crlf || i + 1 >= text.Length || text[i + 1] != '\n'))
+            {
+                return true;
+            }
+
+            if (crlf && text[i] == '\n' && (i == 0 || text[i - 1] != '\r'))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>The paths CSharpier's output says it would change ('Error ./src/A.cs - Was not formatted.'), as it prints them.</summary>
