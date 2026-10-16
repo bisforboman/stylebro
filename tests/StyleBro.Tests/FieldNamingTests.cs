@@ -882,6 +882,35 @@ public class FieldNamingTests
         }
         """);
 
+    // Trial 26: the '[ThreadStatic]' field keeps its name, so its would-be name 'depth' isn't taken; 'Depth' was neither
+    // reported nor renamed.
+    [Fact]
+    public Task AFieldThatKeepsItsName_DoesNotTakeItsNewName() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            [ThreadStatic]
+            private static int t_depth;
+            private protected int {|BRO1303:Depth|};
+
+            public int Use() => t_depth + Depth;
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            [ThreadStatic]
+            private static int t_depth;
+            private protected int depth;
+
+            public int Use() => t_depth + depth;
+        }
+        """);
+
     [Fact]
     public Task PrefixesAndUnderscores_FollowTheUnderscoreStyle() => VerifyFixAsync(
         """
