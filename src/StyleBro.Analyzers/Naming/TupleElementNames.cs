@@ -53,8 +53,9 @@ internal static class TupleElementNames
 
     /// <summary>
     /// Whether the element is in the signature of a member other assemblies see (<see cref="PublicApi.IsVisible"/>): a
-    /// method's, operator's, property's, indexer's or delegate's return or parameter types, or a field's or event's type.
-    /// Such an element is renamed only when <see cref="PublicApi.RenameKey"/> is true.
+    /// method's, operator's, property's, indexer's or delegate's return or parameter types, a field's or event's type, or
+    /// a type's header (record and primary constructor parameters, base types, constraints). Such an element is renamed
+    /// only when <see cref="PublicApi.RenameKey"/> is true.
     /// </summary>
     public static bool IsInPublicSignature(TupleElementSyntax element, SemanticModel model, CancellationToken cancellationToken)
     {
@@ -67,6 +68,9 @@ internal static class TupleElementNames
         {
             BaseFieldDeclarationSyntax field => field.Declaration.Type.Span.Contains(element.Span) ? field.Declaration.Variables.FirstOrDefault() : null,
             DelegateDeclarationSyntax @delegate => @delegate.ReturnType.Span.Contains(element.Span) || @delegate.ParameterList.Span.Contains(element.Span) ? @delegate : null,
+
+            // The type's own header: a record's or primary constructor's parameters, base types, constraints (trial 25).
+            TypeDeclarationSyntax type => type,
             _ => IsInSignature(element, member) ? member : null,
         };
         return declared is not null && model.GetDeclaredSymbol(declared, cancellationToken) is { } symbol && PublicApi.IsVisible(symbol);

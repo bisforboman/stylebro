@@ -111,6 +111,20 @@ internal static class SingleLineBlocks
     }
 
     /// <summary>
+    /// Whether a member's closing brace ends up on its own line, where BRO1519 judges the gap after it: its block spans
+    /// lines already, or BRO1509 expands it (not an auto-property's '{ get; set; }', not an empty body
+    /// stylebro_allow_empty_single_line_blocks keeps on one line).
+    /// </summary>
+    private static bool EndsOnItsOwnLine(SyntaxToken close, SourceText text, AnalyzerConfigOptions options, Func<string, bool> isOn)
+    {
+        var owner = close.Parent!;
+        var open = owner.ChildTokens().FirstOrDefault(t => t.IsKind(SyntaxKind.OpenBraceToken));
+        return open.RawKind != 0
+            && (text.Lines.GetLineFromPosition(open.SpanStart).LineNumber != text.Lines.GetLineFromPosition(close.SpanStart).LineNumber
+                || (GetBraces(owner) is not null && isOn(DiagnosticIds.SingleLineElement) && IsReported(owner, text, options, isOn)));
+    }
+
+    /// <summary>
     /// Whether BRO1401 (trailing comma in multi-line lists) is on for the file. Severities aren't in the analyzer
     /// options (the compiler takes the dotnet_diagnostic keys out), so they're read from the compilation's options.
     /// </summary>
@@ -275,6 +289,7 @@ internal static class SingleLineBlocks
                 var previous = items[i].GetFirstToken().GetPreviousToken();
                 var blankLine = node is BlockSyntax || isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) == false
                     ? isOn is not null && previous.IsKind(SyntaxKind.CloseBraceToken)
+                        && (node is BlockSyntax || EndsOnItsOwnLine(previous, text, options, isOn))
                         && BlankLineRuns.WantsBlankLineAfter(previous.Parent!, previous, items[i].GetFirstToken(), isOn, gapIsReplaced: true)
                     : node is not EnumDeclarationSyntax && (ElementSeparation.NeedsBlankLine(items[i - 1], items[i], text, allowAdjacentSingleLine: ElementSeparation.AllowsAdjacentSingleLineMembers(options))
                         || (items[i - 1] is PropertyDeclarationSyntax && items[i] is PropertyDeclarationSyntax

@@ -7,8 +7,11 @@
 
 ### Fixed
 
-- **BRO1311** no longer renames tuple element names in the signature of a public operator or conversion operator when
+- **BRO1311** no longer renames tuple element names in the signature of a public operator or conversion operator, or in
+  a public type's header (record and primary constructor parameters, base types, constraints), when
   `stylebro_rename_public_api` is false.
+- **BRO1306** now also renames the public fields of a private nested type when their name only appears in another
+  type's `#if`-excluded code (that code can't use them).
 - **BRO1509** and **BRO1001** with BRO1505 off no longer add BRO1505's blank lines when they expand a type written on one
   line, so the result no longer depends on the order the fixes run in.
 - **BRO1405** and **BRO1108** give the same result in any order on a leading lambda in parentheses.

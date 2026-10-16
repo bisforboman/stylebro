@@ -581,6 +581,25 @@ public class TupleElementNamingTests
 
             public override int GetHashCode() => 0;
         }
+
+        public record Entry((int key, int value) Pair);
+
+        public class Holder((int key, int value) pair) : System.IEquatable<(int key, int value)>
+        {
+            public bool Equals((int key, int value) other) => other.key == pair.key;
+        }
+
+        public class Store<T>
+            where T : System.IEquatable<(int key, int value)>
+        {
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            internal static class IsExternalInit
+            {
+            }
+        }
         """,
         "stylebro_rename_public_api = false");
 

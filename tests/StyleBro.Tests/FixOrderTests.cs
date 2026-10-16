@@ -2942,6 +2942,34 @@ public class FixOrderTests
         "BRO1509",
         "BRO1519");
 
+    // Trial 25 (MimeKit): the formatter keeps 'default (S)' with the space option, so one run is enough.
+    [Fact]
+    public Task DefaultValue_WithASpaceBeforeCallParentheses() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        struct S { }
+
+        class C
+        {
+            S field = new S ();
+        }
+        """,
+        "csharp_space_between_method_call_name_and_opening_parenthesis = true\n",
+        "BRO1104",
+        SdkFormatter);
+
+    // The same with braces that stay on their line (an auto-property's, an empty body kept by the option): no blank line.
+    [Theory]
+    [InlineData("dotnet_diagnostic.BRO1505.severity = none\n")]
+    [InlineData("dotnet_diagnostic.BRO1505.severity = none\nstylebro_allow_empty_single_line_blocks = true\n")]
+    public Task Sort_ExpandedOneLineType_WithoutBro1505_OneLineBraces(string editorConfig) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class Tiny { public int A { get; set; } public void M() { } private int x; public int B { get; set; } }
+        """,
+        editorConfig,
+        "BRO1001",
+        "BRO1509",
+        "BRO1519");
+
     // The .NET runtime's style (Microsoft style gaps G1-G3): fields first, 's_' statics, internal fields named like private
     // ones. The sort and the renames converge in every order.
     [Fact]

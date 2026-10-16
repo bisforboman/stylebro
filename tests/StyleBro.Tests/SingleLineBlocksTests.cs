@@ -760,4 +760,36 @@ public class SingleLineBlocksTests
         }
         """,
         editorConfig: "dotnet_diagnostic.BRO1505.severity = none\n");
+
+    // BRO1519 judges only a '}' that ends up on its own line: not an auto-property's, not an empty body that stays.
+    [Fact]
+    public Task OneLineType_WithoutBro1505_NoBlankLineAfterAOneLineBrace() => VerifyFixAsync(
+        """
+        public class C {|BRO1509:{|} public int A { get; set; } public int B { get; set; } public void M() {|BRO1509:{|} } }
+        """,
+        """
+        public class C
+        {
+            public int A { get; set; }
+            public int B { get; set; }
+            public void M()
+            {
+            }
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1505.severity = none\n");
+
+    [Fact]
+    public Task OneLineType_WithoutBro1505_NoBlankLineAfterAnEmptyBodyThatStays() => VerifyFixAsync(
+        """
+        public class C {|BRO1509:{|} public void A() { } private int x; }
+        """,
+        """
+        public class C
+        {
+            public void A() { }
+            private int x;
+        }
+        """,
+        editorConfig: "dotnet_diagnostic.BRO1505.severity = none\nstylebro_allow_empty_single_line_blocks = true\n");
 }
