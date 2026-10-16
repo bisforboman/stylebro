@@ -61,7 +61,7 @@ public sealed partial class MigrationTests
         Write("test/Lib.Tests/Lib.Tests.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
 
         var report = Program.ScopeReport(StyleCopSetup.Read(root, project => !project.Contains("Tests", StringComparison.Ordinal)));
-        Assert.Contains(report, l => l.StartsWith("No StyleCop in test: no settings are written there", StringComparison.Ordinal) && l.Contains("remove the block's '# No StyleCop ran in' line", StringComparison.Ordinal));
+        Assert.Contains(report, l => l.StartsWith("No StyleCop in test: StyleBro's rules and the built-in ones the block sets are off there by id", StringComparison.Ordinal) && l.Contains("remove the block's '# No StyleCop ran in' line", StringComparison.Ordinal));
         Assert.DoesNotContain(report, l => l.Contains("init' can set those up", StringComparison.Ordinal));
     }
 

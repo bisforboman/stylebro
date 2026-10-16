@@ -234,7 +234,7 @@ public sealed partial class MigrationTests
     {
         Write("stylecop.json", """{ "settings": { "documentationRules": { "xmlHeader": false } } }""");
         var output = Capture(() => Assert.Equal(0, Program.Migrate(new[] { root })));
-        Assert.Contains("stylecop.json: StyleBro doesn't read it (the settings are in the block now). Once StyleCop.Analyzers is gone, remove it", output, StringComparison.Ordinal);
+        Assert.Contains("stylecop.json: StyleBro doesn't read it; the settings are in the block now, which also records them for later runs. Once StyleCop.Analyzers is gone, it can go", output, StringComparison.Ordinal);
     }
 
     [Fact]

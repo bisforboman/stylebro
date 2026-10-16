@@ -98,6 +98,9 @@ internal static class InitCommand
         ["csharp_using_directive_placement"] = "IDE0065",
         ["dotnet_style_parentheses_in_arithmetic_binary_operators"] = "IDE0048",
         ["csharp_prefer_simple_default_expression"] = "IDE0034",
+        ["dotnet_style_require_accessibility_modifiers"] = "IDE0040",
+        ["dotnet_style_predefined_type_for_locals_parameters_members"] = "IDE0049",
+        ["dotnet_style_predefined_type_for_member_access"] = "IDE0049",
     };
 
     public static int Run(string[] args)
@@ -555,6 +558,18 @@ internal static class InitCommand
             detected.RemoveAt(at);
         }
 
+        // Namespace braces the brace key in effect would move (owner's choice 2026-10-16): said, and IDE0055 off until the team
+        // decides when most files would change, unless the team sets IDE0055 itself (its severity stays: only said then).
+        const string BraceKey = "csharp_new_line_before_open_brace";
+        var braceValue = kept.Concat(detected).LastOrDefault(l => KeyOf(l) == BraceKey) is { } braceLine ? braceLine.Substring(braceLine.IndexOf('=') + 1) : settings.GetValueOrDefault(BraceKey, "all");
+        if (!(csharpier.Lines ?? []).Concat(alignment?.Lines ?? []).Concat(keptSpacing).Concat(detected).Contains(IdeOff)
+            && Conventions.NamespaceBraces(counts, braceValue) is var (namespaceLines, namespaceReport))
+        {
+            var teams = settings.ContainsKey(IdeSeverityKey);
+            report.Add($"  {(namespaceLines.Count > 0 && !teams ? "off" : "note"),-8} {(teams && namespaceLines.Count > 0 ? namespaceReport.Substring(0, namespaceReport.IndexOf(": IDE0055 is off", StringComparison.Ordinal)) + ": your .editorconfig sets IDE0055, so 'format' moves them" : namespaceReport)}");
+            detected.AddRange(teams ? [] : namespaceLines);
+        }
+
         // Whether IDE0055 formats whitespace at all (not with CSharpier, column alignment or mixed spacing).
         var formatsWhitespace = !(csharpier.Lines ?? []).Concat(alignment?.Lines ?? []).Concat(keptSpacing).Concat(detected).Contains(IdeOff);
 
@@ -794,10 +809,11 @@ internal static class InitCommand
         var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var key in Conventions.All.SelectMany(c => new[] { c.Key }.Concat(c.AlsoKeys)).Where(own.ContainsKey))
         {
+            // The IDE rule's own severity wins over the value's suffix, as in Roslyn: 'dotnet new editorconfig' writes
+            // 'csharp_prefer_braces = true:silent', and a team adding 'dotnet_diagnostic.IDE0011.severity = warning' enforces it (trial 25).
             var value = own[key];
             var colon = value.IndexOf(':');
-            if ((colon >= 0 && Silent(value.Substring(colon + 1)))
-                || (IdeRules.TryGetValue(key, out var ide) && own.TryGetValue($"dotnet_diagnostic.{ide}.severity", out var severity) && Silent(severity)))
+            if (IdeSeverity(key, own) is { } severity ? Silent(severity) : colon >= 0 && Silent(value.Substring(colon + 1)))
             {
                 result.Add(key);
             }
@@ -805,6 +821,14 @@ internal static class InitCommand
 
         return result;
     }
+
+    /// <summary>The severity <paramref name="settings"/> set for the IDE rule that enforces <paramref name="key"/> by id, or null.</summary>
+    public static string? IdeSeverity(string key, IReadOnlyDictionary<string, string> settings) =>
+        IdeRules.TryGetValue(key, out var ide) && settings.TryGetValue($"dotnet_diagnostic.{ide}.severity", out var severity) ? severity.Trim() : null;
+
+    /// <summary>Whether <paramref name="settings"/> turn the IDE rule that enforces <paramref name="key"/> on by id (above silent).</summary>
+    public static bool EnforcedByIdeRule(string key, IReadOnlyDictionary<string, string> settings) =>
+        IdeSeverity(key, settings)?.ToLowerInvariant() is "suggestion" or "warning" or "error";
 
     /// <summary>
     /// Whether the repository's .editorconfig enforces 'this.' (owner's choice 2026-10-14): IDE0009 at suggestion or above, or,
@@ -1428,6 +1452,7 @@ internal static class InitCommand
             }
 
             var name = Path.GetRelativePath(root, props).Replace('\\', '/');
+            var hidden = Migration.HiddenPropsNote(props);
             if (write)
             {
                 PreviewCommand.EditFile(props, _ => pinned);
@@ -1436,6 +1461,11 @@ internal static class InitCommand
             else
             {
                 Console.WriteLine($"--write also sets the preset version in {name} ({property}).");
+            }
+
+            if (hidden is not null)
+            {
+                Console.WriteLine(hidden);
             }
         }
     }
@@ -1529,7 +1559,7 @@ internal static class InitCommand
             sonarScopes = [.. sonarScopes ?? [], .. scopes];
             if (report.Count > 0)
             {
-                Console.WriteLine($"{DetectedHeader}{(prefix.Length == 0 ? string.Empty : " under " + prefix)} (judged from {Conventions.MinimumAgreeing} places: all must agree below {Conventions.MinimumSample}, {Conventions.Share * 100:0}% from {Conventions.MinimumSample} on).");
+                Console.WriteLine($"{DetectedHeader}{(prefix.Length == 0 ? string.Empty : " under " + prefix)} (a convention needs {Conventions.MinimumAgreeing} places or more: below {Conventions.MinimumSample} they must all agree, from {Conventions.MinimumSample} on {Conventions.Share * 100:0}% of them).");
                 Console.WriteLine("  off: mixed, or not what your setting says, so the rule that enforces it is turned off; both: mixed, both allowed;");
                 Console.WriteLine("  mixed: the default stays, nothing is turned off (no StyleBro rule enforces it, or your .editorconfig sets the rule):");
                 report.ForEach(Console.WriteLine);
@@ -1629,6 +1659,18 @@ internal static class InitCommand
         {
             leftOut.AddRange(styleOff.Select(id => $"dotnet_diagnostic.{id}.severity"));
             Console.WriteLine($"{name} turns {(OffSeverity(ownSettings.GetValueOrDefault("dotnet_analyzer_diagnostic.category-Style.severity")) ? "the Style category" : "every analyzer")} off: the block leaves out the built-in rules it would turn on by id ({string.Join(", ", styleOff)}), which would win over that. StyleBro's own rules stay on.");
+        }
+
+        // The team turns on a built-in rule the block turns off for StyleBro's (trial 25: IDE0040 = warning, silently 'none'): said,
+        // with the rules that enforce its setting instead.
+        var templateLines = Template().Replace("\r\n", "\n").Split('\n');
+        for (var i = 1; !migrated && i < templateLines.Length; i++)
+        {
+            if (KeyOf(templateLines[i]) is { } key && !leftOut.Contains(key) && templateLines[i].EndsWith("= none", StringComparison.Ordinal) && templateLines[i - 1].StartsWith('#')
+                && ownSettings.TryGetValue(key, out var teams) && teams.ToLowerInvariant() is "suggestion" or "warning" or "error")
+            {
+                Console.WriteLine($"{Source(key)} sets {IdOf(key)} ({teams}): the block turns it off. {templateLines[i - 1].TrimStart('#', ' ')}; they enforce its setting instead.");
+            }
         }
 
         var plainHeader = settings.TryGetValue("file_header_template", out var template) && !template.Trim().Equals("unset", StringComparison.OrdinalIgnoreCase);

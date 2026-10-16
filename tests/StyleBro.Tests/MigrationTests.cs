@@ -1062,7 +1062,7 @@ public sealed partial class MigrationTests : IDisposable
         Assert.False(setup.IsOn("SA1101"));  // off in every ruleset of a StyleCop project
         Assert.Contains("dotnet_diagnostic.IDE0009.severity = none", main.Lines);
         var sections = plan[".editorconfig"].ToDictionary(s => s.Section, s => s.Lines);
-        Assert.Equal(["{src,tests}/**.cs", "src/**.cs", "tests/**.cs"], sections.Keys);
+        Assert.Equal(["{src,tests}/**.cs", "examples/**.cs", "src/**.cs", "tests/**.cs"], sections.Keys);
         Assert.Contains("dotnet_diagnostic.BRO1107.severity = none", sections["src/**.cs"]);    // SA1116 off in src only
         Assert.Contains("dotnet_diagnostic.BRO1001.severity = none", sections["tests/**.cs"]);  // SA1201 off in tests only
 
