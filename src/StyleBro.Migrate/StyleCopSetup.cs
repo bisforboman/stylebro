@@ -35,6 +35,12 @@ internal sealed record Scope(string File, string Section, IReadOnlyDictionary<st
 /// </summary>
 internal sealed record StyleSharpUse(string? Version, IReadOnlyDictionary<string, string> Options, bool WithStyleCop = false)
 {
+    /// <summary>
+    /// The words SST1305 accepts as a name's start that StyleCop's SA1305 list (BRO1310's 'common' prefixes) doesn't have:
+    /// two-letter words and technology names ('idText', 'okResponse', 'dbContext'; StyleSharp 5.1.2's list).
+    /// </summary>
+    public static readonly string[] HungarianWords = ["db", "ef", "gc", "id", "io", "js", "ms", "my", "ok", "so", "ui", "up", "us"];
+
     /// <summary>An option's value: the rule's own key ('stylesharp.SST1316.tuple_element_naming') over the shared one, or null.</summary>
     public string? Option(string name, string? rule = null) =>
         (rule is not null && Options.TryGetValue($"stylesharp.{rule}.{name}", out var own) ? own : null)
@@ -43,11 +49,18 @@ internal sealed record StyleSharpUse(string? Version, IReadOnlyDictionary<string
     /// <summary>
     /// The options as stylecop.json's 'settings' (what <see cref="Migration"/> reads): no XML header (StyleSharp's header is
     /// file_header_template's plain one), usings outside the namespace (SST1200), which members need documentation, the
-    /// tuple element casing and the Hungarian prefixes allowed.
+    /// tuple element casing, the Hungarian prefixes allowed (StyleSharp's words and its setting's) and the documentation
+    /// elements whose text needs no period.
     /// </summary>
     public JsonElement Settings()
     {
-        var documentation = new System.Text.Json.Nodes.JsonObject { ["xmlHeader"] = false };
+        // SST1629 checks the period in summary, remarks, returns and value only, and not after an element at the end (trial 24:
+        // BRO1603 put one after Refit's '<exception cref="ArgumentNullException">value</exception>' and '... <see cref="T"/>').
+        var documentation = new System.Text.Json.Nodes.JsonObject
+        {
+            ["xmlHeader"] = false,
+            ["excludeFromPunctuationCheck"] = new System.Text.Json.Nodes.JsonArray("seealso", "param", "typeparam", "exception", "see", "paramref", "typeparamref", "c", "a", "b", "i", "u", "em", "strong", "sub", "sup", "span", "tt"),
+        };
         if (Options.TryGetValue("file_header_template", out var template) && template.Length > 0)
         {
             documentation["copyrightText"] = template.Replace("\\n", "\n", StringComparison.Ordinal);
@@ -67,10 +80,10 @@ internal sealed record StyleSharpUse(string? Version, IReadOnlyDictionary<string
             naming["tupleElementNameCasing"] = casing.Replace("_", string.Empty, StringComparison.Ordinal).Equals("camelcase", StringComparison.OrdinalIgnoreCase) ? "camelCase" : "PascalCase";
         }
 
-        if (Option("allowed_hungarian_prefixes", "SST1305") is { Length: > 0 } prefixes)
-        {
-            naming["allowedHungarianPrefixes"] = new System.Text.Json.Nodes.JsonArray(prefixes.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(p => (System.Text.Json.Nodes.JsonNode?)p).ToArray());
-        }
+        // SST1305 allows more words than SA1305 (HungarianWords), plus its own setting (a list split by commas, semicolons or
+        // spaces, either case: lower-cased here, BRO1310 compares exactly).
+        var prefixes = (Option("allowed_hungarian_prefixes", "SST1305") ?? string.Empty).Split([',', ';', ' ', '\t'], StringSplitOptions.RemoveEmptyEntries).Select(p => p.ToLowerInvariant());
+        naming["allowedHungarianPrefixes"] = new System.Text.Json.Nodes.JsonArray(HungarianWords.Concat(prefixes).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(p => (System.Text.Json.Nodes.JsonNode?)p).ToArray());
 
         var settings = new System.Text.Json.Nodes.JsonObject
         {

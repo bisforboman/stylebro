@@ -26,7 +26,8 @@ stylebro_null_check_style = equality_operator
 
 | Key | Values | Default | Rules |
 |-----|--------|---------|-------|
-| `stylebro_member_order` | kinds, comma-separated: `field`, `constructor`, `finalizer`, `delegate`, `event`, `enum`, `interface`, `property`, `indexer`, `conversion`, `operator`, `extension`, `method`, `struct`, `class` | that list (StyleCop's order) | [BRO1001](rules/BRO1001.md) |
+| `stylebro_member_order` | kinds, comma-separated: `field`, `constructor`, `finalizer`, `delegate`, `event`, `enum`, `interface`, `property`, `indexer`, `conversion`, `operator`, `extension`, `method`, `struct`, `class`, `record`; `a\|b` shares a place | that list (StyleCop's order; records count as classes unless `record` is listed) | [BRO1001](rules/BRO1001.md) |
+| `stylebro_member_order_namespaces` | `true`, `false` (only a type's members are ordered) | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_access_order` | accessibilities, comma-separated: `public`, `internal`, `protected_internal`, `protected`, `private_protected`, `private` | that list | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_constants_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
 | `stylebro_member_static_first` | `true`, `false` | `true` | [BRO1001](rules/BRO1001.md) |
@@ -56,6 +57,8 @@ stylebro_null_check_style = equality_operator
 | `stylebro_match_base_parameter_names` | `all`, `non_generic_methods` (Sonar's S927: methods only, not where the base's parameter type is a type parameter the member fills in) | `all` | [BRO1313](rules/BRO1313.md) |
 | `stylebro_allowed_namespace_components` | names, comma-separated | none | [BRO1312](rules/BRO1312.md) |
 | `stylebro_trailing_comma` | `include`, `omit` | `include` | [BRO1401](rules/BRO1401.md), [BRO1509](rules/BRO1509.md) |
+| `stylebro_trailing_comma_switch_expressions` | `true`, `false` (switch expressions not checked) | `true` | [BRO1401](rules/BRO1401.md) |
+| `stylebro_trailing_comma_with_expressions` | `true`, `false` (`with` initializers not checked) | `true` | [BRO1401](rules/BRO1401.md) |
 | `stylebro_comment_blank_line_exempt_prefixes` | prefixes, comma-separated, case-sensitive | none | [BRO1504](rules/BRO1504.md) |
 | `stylebro_allow_adjacent_single_line_members` | `true`, `false` | `false` | [BRO1505](rules/BRO1505.md) |
 | `stylebro_blank_line_below_standalone_comments` | `allow`, `remove` (like StyleCop's SA1512) | `allow` | [BRO1506](rules/BRO1506.md) |
@@ -69,6 +72,7 @@ stylebro_null_check_style = equality_operator
 | `stylebro_document_exposed_elements` | `true`, `false` | `true` | [BRO1601](rules/BRO1601.md) |
 | `stylebro_document_internal_elements` | `true`, `false` | `true` | [BRO1601](rules/BRO1601.md) |
 | `stylebro_document_private_elements` | `true`, `false` | `false` | [BRO1601](rules/BRO1601.md) |
+| `stylebro_summary_wording` | `stylecop`, `stylesharp` | `stylecop` | [BRO1604](rules/BRO1604.md), [BRO1605](rules/BRO1605.md), [BRO1606](rules/BRO1606.md), [BRO1607](rules/BRO1607.md) |
 | `stylebro_inheritdoc_style` | `compact`, `spaced` | `compact` | [BRO1601](rules/BRO1601.md) |
 | `stylebro_exclude_from_punctuation_check` | tag names, comma-separated | `seealso` | [BRO1603](rules/BRO1603.md) |
 | `stylebro_file_header_company` | text | not set: the rule does nothing | [BRO1615](rules/BRO1615.md) |

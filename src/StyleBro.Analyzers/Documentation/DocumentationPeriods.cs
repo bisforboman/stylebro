@@ -238,7 +238,7 @@ internal static class DocumentationPeriods
 
                 case XmlEmptyElementSyntax empty:
                     var emptyName = empty.Name.LocalName.ValueText;
-                    if (BlockElements.Contains(emptyName))
+                    if (BlockElements.Contains(emptyName) || excluded.Contains(emptyName))
                     {
                         return null;
                     }

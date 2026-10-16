@@ -742,6 +742,25 @@ public class DocumentationTests
         """,
         "stylebro_exclude_from_punctuation_check = summary, para\n");
 
+    // StyleSharp's SST1629 doesn't check text that ends with an element: migrate excludes the inline ones (trial 24, Refit).
+    [Fact]
+    public Task ExcludedEmptyElements_AtTheEnd_AreNotCheckedForPeriods() => VerifyFixAsync(
+        """
+        /// <summary>The current <see cref="Texts"/></summary>
+        /// <remarks>Uses <c>x</c>{|BRO1603:|}</remarks>
+        public class Texts
+        {
+        }
+        """,
+        """
+        /// <summary>The current <see cref="Texts"/></summary>
+        /// <remarks>Uses <c>x</c>.</remarks>
+        public class Texts
+        {
+        }
+        """,
+        "stylebro_exclude_from_punctuation_check = see\n");
+
     [Fact]
     public Task PropertySummaries_MatchTheAccessors() => VerifyFixAsync(
         """
@@ -919,6 +938,135 @@ public class DocumentationTests
             }
         }
         """);
+
+    // stylebro_summary_wording = stylesharp (trial 24, Refit): StyleSharp's SST1623/SST1624 count any modifier
+    // on the setter as restricted (protected too), any getter as usable, 'init' as 'Gets', and a summary starting with the
+    // words and a space as right ('Gets or sets' also starts with 'Gets ').
+    [Fact]
+    public Task PropertySummaries_FollowStyleSharp() => VerifyFixAsync(
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary>Gets or sets the first name.</summary>
+            public string FirstName { private get; set; }
+
+            /// <summary>Gets the path.</summary>
+            public string Path { get; protected set; }
+
+            /// <summary>Gets or sets the id.</summary>
+            public int Id { get; }
+
+            /// <summary>Gets whether it is open.</summary>
+            public bool IsOpen { get; init; }
+
+            /// <summary>Gets or sets the size.</summary>
+            public int {|BRO1605:Size|} { get; protected set; }
+
+            /// <summary>Sets the last name.</summary>
+            public string {|BRO1604:LastName|} { private get; set; }
+
+            /// <summary>Gets or initializes the code.</summary>
+            public int Code { get; init; }
+
+            /// <summary>Initializes the seed.</summary>
+            public int {|BRO1604:Seed|} { get; init; }
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Words.</summary>
+        public class Words
+        {
+            /// <summary>Gets or sets the first name.</summary>
+            public string FirstName { private get; set; }
+
+            /// <summary>Gets the path.</summary>
+            public string Path { get; protected set; }
+
+            /// <summary>Gets or sets the id.</summary>
+            public int Id { get; }
+
+            /// <summary>Gets whether it is open.</summary>
+            public bool IsOpen { get; init; }
+
+            /// <summary>Gets the size.</summary>
+            public int Size { get; protected set; }
+
+            /// <summary>Gets or sets the last name.</summary>
+            public string LastName { private get; set; }
+
+            /// <summary>Gets or initializes the code.</summary>
+            public int Code { get; init; }
+
+            /// <summary>Gets the seed.</summary>
+            public int Seed { get; init; }
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            class IsExternalInit
+            {
+            }
+        }
+        """,
+        "stylebro_summary_wording = stylesharp\n");
+
+    // StyleSharp's SST1642/SST1643 check the standard words before the type only, and not static constructors (trial 24:
+    // BRO1606 turned Refit's '<c>CloseGenericMethodKey</c> struct' into a cref).
+    [Fact]
+    public Task ConstructorSummaries_FollowStyleSharp() => VerifyFixAsync(
+        """
+        /// <summary>Key.</summary>
+        public struct Key
+        {
+            /// <summary>Constructor.</summary>
+            static Key()
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <c>Key</c> struct.</summary>
+            /// <param name="a">The a.</param>
+            public Key(int a)
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Default constructor.</summary>
+            /// <param name="b">The b.</param>
+            public Key(string b)
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>Key.</summary>
+        public struct Key
+        {
+            /// <summary>Constructor.</summary>
+            static Key()
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <c>Key</c> struct.</summary>
+            /// <param name="a">The a.</param>
+            public Key(int a)
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="Key"/> struct.</summary>
+            /// <param name="b">The b.</param>
+            public Key(string b)
+            {
+            }
+        }
+        """,
+        "stylebro_summary_wording = stylesharp\n");
 
     [Fact]
     public Task RightPropertySummaries_AreNotReported() => VerifyNoDiagnosticsAsync("""

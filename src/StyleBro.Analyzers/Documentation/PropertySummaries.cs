@@ -14,6 +14,12 @@ namespace StyleBro.Analyzers.Documentation;
 internal static class PropertySummaries
 {
     /// <summary>
+    /// The .editorconfig key for BRO1604-BRO1607: <c>stylecop</c> (default, StyleCop's SA1623/SA1624/SA1642/SA1643) or
+    /// <c>stylesharp</c> (StyleSharp's SST rules at those numbers, which stylebro-migrate writes for a StyleSharp repository).
+    /// </summary>
+    public const string WordingKey = "stylebro_summary_wording";
+
+    /// <summary>
     /// Words that can't follow other words of a sentence: a condition ('If true, the text is checked', 'True if ...').
     /// BRO1604 doesn't put 'Gets' in front of them (written in lower case: a capitalized word isn't reported anyway), nor
     /// BRO1606 its sentence.
@@ -66,7 +72,14 @@ internal static class PropertySummaries
     /// 'Device id of the user', 'Returns ...' have no fix that makes a sentence (owner's decision, 2026-10-09); nor
     /// lower-case conditions or verbs ('if true, ...', 'returns ...').
     /// </summary>
-    public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text)
+    /// <remarks>
+    /// With <paramref name="styleSharp"/> (<c>stylebro_summary_wording = stylesharp</c>) the words follow
+    /// StyleSharp's SST1623/SST1624: a set or init accessor with any access modifier (protected too) is restricted and asks
+    /// for 'Gets', a getter counts whatever its modifier ('{ private get; set; }' says 'Gets or sets'), an 'init' accessor
+    /// without one reads as 'Gets', and a summary is right when it starts with the words and a space ('Gets or sets' also
+    /// starts with 'Gets '), except 'Gets or sets' for a restricted setter.
+    /// </remarks>
+    public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text, bool styleSharp = false)
     {
         var getter = property.ExpressionBody is not null || property.AccessorList?.Accessors.Any(a => a.IsKind(SyntaxKind.GetAccessorDeclaration)) == true;
         var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration) || a.IsKind(SyntaxKind.InitAccessorDeclaration));
@@ -75,9 +88,9 @@ internal static class PropertySummaries
         // Like StyleCop, a protected accessor is usable (by derived types); a private or internal one isn't. That goes for the
         // getter too: '{ private get; set; }' says 'Sets' (FakeItEasy's BuildableCallRule, SA1623 accepts it).
         var getAccessor = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration));
-        var restrictedSetter = setter is not null && IsRestricted(setter);
-        var restrictedGetter = setter is not null && getAccessor is not null && IsRestricted(getAccessor);
-        var visibleSetter = setter is not null && !restrictedSetter;
+        var restrictedSetter = setter is not null && (styleSharp ? setter.Modifiers.Count > 0 : IsRestricted(setter));
+        var restrictedGetter = !styleSharp && setter is not null && getAccessor is not null && IsRestricted(getAccessor);
+        var visibleSetter = setter is not null && !restrictedSetter && !(styleSharp && initOnly);
         var visibleGetter = getter && !restrictedGetter;
 
         var verb = visibleGetter && visibleSetter ? (initOnly ? "Gets or initializes" : "Gets or sets")
@@ -105,6 +118,10 @@ internal static class PropertySummaries
 
         var line = text.Lines.GetLineFromPosition(start);
         var rest = text.ToString(TextSpan.FromBounds(start, line.End));
+        if (styleSharp && rest.StartsWith(verb + " ", StringComparison.Ordinal) && !(restrictedSetter && rest.StartsWith("Gets or sets ", StringComparison.Ordinal)))
+        {
+            return null;
+        }
 
         // The longest known prefix the summary starts with: 'Gets or sets' also starts with 'Gets'.
         var old = KnownPrefixes.FirstOrDefault(p => StartsWithWord(rest, p) && (isBool || !p.EndsWith("whether", StringComparison.OrdinalIgnoreCase))) ?? string.Empty;
@@ -161,6 +178,10 @@ internal static class PropertySummaries
             new TextSpan(start, afterOld + 1),
             prefix + " " + lowered);
     }
+
+    /// <summary>Whether the file's <c>stylebro_summary_wording</c> is <c>stylesharp</c>.</summary>
+    public static bool FollowsStyleSharp(Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions options) =>
+        options.TryGetValue(WordingKey, out var value) && value.Split(':')[0].Trim().Equals("stylesharp", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Whether <paramref name="text"/> starts with one of <paramref name="words"/> as a whole word, ignoring case.</summary>
     public static bool StartsWithAnyWord(string text, string[] words)

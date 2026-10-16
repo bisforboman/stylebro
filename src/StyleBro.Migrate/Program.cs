@@ -401,11 +401,16 @@ internal static class Program
         static string Names(IReadOnlyList<string> folders) =>
             string.Join(", ", folders.Take(5)) + (folders.Count > 5 ? $" and {folders.Count - 5} more" : string.Empty);
 
+        // Named after the package that runs, and by the shorter list (trial 24: Refit's StyleSharp ran everywhere but one
+        // folder, and the report said "StyleCop runs only in" 19 of them).
+        var tool = setup.StyleSharp is { WithStyleCop: false } ? "StyleSharp" : "StyleCop";
         var lines = setup.Folders is { } folders
             ? new List<string>
             {
-                $"StyleCop runs only in {Names(folders)}: the settings apply there, with the rules StyleCop has on there.",
-                $"No StyleCop in {Names(setup.FoldersWithout)}: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
+                folders.Count > setup.FoldersWithout.Count
+                    ? $"{tool} runs everywhere except {Names(setup.FoldersWithout)}: the settings apply where it runs, with the rules {tool} has on there."
+                    : $"{tool} runs only in {Names(folders)}: the settings apply there, with the rules {tool} has on there.",
+                $"No {tool} in {Names(setup.FoldersWithout)}: no settings are written there, and 'stylebro-migrate format' leaves them alone; StyleBro's rules still report there in the build, at the preset's or their default severities. To format them too, remove the block's '# No StyleCop ran in' line.",
             }
             : new List<string>();
         lines.AddRange(setup.Warnings.Select(w => "Warning: " + w));

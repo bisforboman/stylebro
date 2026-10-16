@@ -12,6 +12,67 @@ public sealed partial class MigrationTests
     private const string StyleSharpProject = "<Project Sdk=\"Microsoft.NET.Sdk\"><ItemGroup><PackageReference Include=\"StyleSharp.Analyzers\" Version=\"3.40.1\" PrivateAssets=\"all\" /></ItemGroup></Project>\n";
 
     [Fact]
+    public void ScopeReport_NamesStyleSharp_AndTheShorterList()
+    {
+        // Trial 24 (Refit): StyleSharp ran everywhere but one folder; the report said "StyleCop runs only in" 19 folders.
+        Write("Directory.Packages.props", "<Project><ItemGroup><GlobalPackageReference Include=\"StyleSharp.Analyzers\" Version=\"5.1.2\" /></ItemGroup></Project>");
+        Write("a/A.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("b/B.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write("smoke/S/S.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+
+        var report = Program.ScopeReport(StyleCopSetup.Read(root, project => !project.Contains("smoke", StringComparison.Ordinal)));
+
+        Assert.Contains(report, l => l.StartsWith("StyleSharp runs everywhere except smoke: ", StringComparison.Ordinal));
+        Assert.Contains(report, l => l.StartsWith("No StyleSharp in smoke: ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Sonar_AllOffWithoutThePackage_IsNoSonarSetup()
+    {
+        // Trial 24 (Refit): the .editorconfig turned 459 Sonar ids off after the package was removed: "Sonar rules on: 0".
+        Write("A.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S100.severity = none\ndotnet_diagnostic.S101.severity = none\n");
+        Assert.Null(SonarSetup.Read(root));
+
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.S100.severity = none\ndotnet_diagnostic.S1066.severity = warning\n");
+        Assert.NotNull(SonarSetup.Read(root));
+    }
+
+    [Fact]
+    public void StyleSharp_WritesItsOwnMeaning_WhereItsRuleDiffersFromStyleCops()
+    {
+        // Trial 24 (Refit, StyleSharp 5.1.2): read as StyleCop, BRO1604/BRO1605 rewrote summaries StyleSharp then reported
+        // (SST1624 errors), BRO1001 moved a record above a class (SST1201), BRO1310 renamed 'okResponse' and 'idText', BRO1401
+        // and BRO1508 changed switch expressions and empty blocks StyleSharp accepts.
+        Write("Repro.csproj", StyleSharpProject);
+        Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.SST1305.severity = warning\nstylesharp.allowed_hungarian_prefixes = XY qa\n");
+        Write("C.cs", "public class C\n{\n}\n");
+
+        var lines = Migration.Generate(StyleCopSetup.Read(root, _ => true), root).Lines;
+
+        Assert.Contains("stylebro_summary_wording = stylesharp", lines);
+        Assert.Contains("stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion|operator|extension|method, struct, class, record", lines);
+        Assert.Contains("stylebro_allowed_hungarian_prefixes = db, ef, gc, id, io, js, ms, my, ok, qa, so, ui, up, us, xy", lines);
+        Assert.Contains("stylebro_trailing_comma_switch_expressions = false", lines);
+        Assert.Contains("stylebro_trailing_comma_with_expressions = false", lines);
+        Assert.Contains("stylebro_allow_empty_single_line_blocks = true", lines);
+        Assert.Contains("stylebro_allow_semicolon_after_closing_brace = true", lines);
+        Assert.Contains("stylebro_member_order_namespaces = false", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1310.severity = warning", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1132.severity = none", lines); // SST1108 is about files of commented-out code
+        Assert.Contains("dotnet_diagnostic.BRO1309.severity = warning", lines);
+        Assert.Contains("dotnet_diagnostic.BRO1312.severity = none", lines); // SST1300 doesn't check namespaces
+        Assert.Contains("stylebro_exclude_from_punctuation_check = seealso, param, typeparam, exception, see, paramref, typeparamref, c, a, b, i, u, em, strong, sub, sup, span, tt", lines); // SST1629
+
+        // With StyleCop next to it, StyleCop's meaning applies.
+        Write("Repro.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><ItemGroup><PackageReference Include=\"StyleSharp.Analyzers\" Version=\"3.40.1\" /><PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.2.0-beta.556\" /></ItemGroup></Project>\n");
+        var both = Migration.Generate(StyleCopSetup.Read(root, _ => true), root).Lines;
+        Assert.DoesNotContain("stylebro_summary_wording = stylesharp", both);
+        Assert.Contains("stylebro_member_order = field, constructor, finalizer, delegate, event, enum, interface, property, indexer, conversion, operator, extension, method, struct, class", both);
+        Assert.DoesNotContain(both, l => l.StartsWith("stylebro_trailing_comma_switch_expressions", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void StyleSharp_IsReadLikeStyleCop_AndItsStyleCopJsonLeftoverIsNot()
     {
         Write("Repro.csproj", StyleSharpProject);
@@ -97,7 +158,7 @@ public sealed partial class MigrationTests
         Assert.Contains("dotnet_diagnostic.IDE0009.severity = warning", result.Lines);
         Assert.Contains("dotnet_style_qualification_for_field = true", result.Lines);
         Assert.Contains($"{StyleBro.Analyzers.Naming.TupleElementNames.CasingKey} = camelCase", result.Lines);
-        Assert.Contains($"{StyleBro.Analyzers.Naming.HungarianNames.AllowedKey} = rx, db", result.Lines);
+        Assert.Contains($"{StyleBro.Analyzers.Naming.HungarianNames.AllowedKey} = db, ef, gc, id, io, js, ms, my, ok, rx, so, ui, up, us", result.Lines); // StyleSharp's words too
         Assert.Contains("stylebro_document_internal_elements = false", result.Lines);
         Assert.Contains("dotnet_diagnostic.IDE0073.severity = warning", result.Lines);
         Assert.Contains("dotnet_diagnostic.BRO1108.severity = none", result.Lines);
@@ -143,7 +204,7 @@ public sealed partial class MigrationTests
     public void StyleSharp_Mapping_NamesOnlyStyleCopRules()
     {
         var styleCop = StyleCopSetup.Rules.Select(r => r.Id).ToHashSet();
-        Assert.Equal(625, StyleCopSetup.StyleSharpRules.Count);
+        Assert.Equal(653, StyleCopSetup.StyleSharpRules.Count);
         Assert.All(StyleCopSetup.StyleSharpRules.SelectMany(r => r.StyleCop), id => Assert.Contains(id, styleCop));
         Assert.Equal(["SX1309", "SX1309S"], StyleCopSetup.StyleSharpRules.Single(r => r.Id == "SST1309").StyleCop);
         Assert.Empty(StyleCopSetup.StyleSharpRules.Single(r => r.Id == "SST1119").StyleCop);

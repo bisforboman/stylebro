@@ -5,8 +5,8 @@
 # meaning: the exceptions are below, checked against each rule's title and description. An SST rule without a StyleCop
 # equivalent maps to nothing (migrate reports it as a rule that goes with StyleSharp).
 #
-#   ./scripts/stylecop-survey/New-StyleSharpMapping.ps1 [-Version 3.40.1]
-param([string]$Version = '3.40.1')
+#   ./scripts/stylecop-survey/New-StyleSharpMapping.ps1 [-Version 5.1.2]
+param([string]$Version = '5.1.2')
 $ErrorActionPreference = 'Stop'
 
 $data = Join-Path $PSScriptRoot 'data'
@@ -15,6 +15,8 @@ $styleSharp = Import-Csv (Join-Path $data "inventory-stylesharp-$Version.csv")
 
 # The SST rules whose number means something else in StyleCop, or that stand for other StyleCop rules.
 $exceptions = [ordered]@{
+    # 'Remove files that contain only commented-out code'; SA1108 (embedded comments in block statements) has no SST rule.
+    SST1108 = @('', 'not SA1108: files of commented-out code')
     # 'Prefer the shortest symbol-equivalent name'; SA1116 (split parameters start on the next line) has no SST rule.
     SST1116 = @('', 'not SA1116: shortens qualified names')
     # stylesharp.instance_member_qualification: require_this is SA1101, omit_this (the default) StyleCop's SX1101.

@@ -45,7 +45,8 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                if (PropertySummaries.GetFinding((PropertyDeclarationSyntax)c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)) is { } finding)
+                var tree = c.Node.SyntaxTree;
+                if (PropertySummaries.GetFinding((PropertyDeclarationSyntax)c.Node, tree.GetText(c.CancellationToken), PropertySummaries.FollowsStyleSharp(c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree))) is { } finding)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(
                         finding.RestrictedSetter ? Descriptors.PropertySummaryRestrictedSetter : Descriptors.PropertySummaryWording,
@@ -58,7 +59,8 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(
             c =>
             {
-                if (ConstructorSummaries.GetFinding((BaseMethodDeclarationSyntax)c.Node, c.Node.SyntaxTree.GetText(c.CancellationToken)) is { } finding)
+                var tree = c.Node.SyntaxTree;
+                if (ConstructorSummaries.GetFinding((BaseMethodDeclarationSyntax)c.Node, tree.GetText(c.CancellationToken), PropertySummaries.FollowsStyleSharp(c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree))) is { } finding)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(
                         finding.IsDestructor ? Descriptors.DestructorSummary : Descriptors.ConstructorSummary,

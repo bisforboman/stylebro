@@ -13,6 +13,18 @@ internal static class TrailingCommas
     /// <summary>The .editorconfig key: <c>include</c> (default, StyleCop's SA1413) or <c>omit</c>.</summary>
     public const string OptionKey = "stylebro_trailing_comma";
 
+    /// <summary>
+    /// The .editorconfig key <c>stylebro_trailing_comma_switch_expressions</c>: <see langword="true"/> (default, StyleCop 1.2's SA1413)
+    /// or <see langword="false"/>, switch expressions aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
+    /// </summary>
+    public const string SwitchExpressionsKey = "stylebro_trailing_comma_switch_expressions";
+
+    /// <summary>
+    /// The .editorconfig key <c>stylebro_trailing_comma_with_expressions</c>: <see langword="true"/> (default, StyleCop 1.2's SA1413) or
+    /// <see langword="false"/>, 'with' initializers aren't checked (StyleCop 1.1.x and StyleSharp's SST1413 don't).
+    /// </summary>
+    public const string WithExpressionsKey = "stylebro_trailing_comma_with_expressions";
+
     /// <summary>Whether the file's setting is <c>omit</c>: no trailing comma after the last item of any list.</summary>
     public static bool Omits(AnalyzerConfigOptions options) =>
         options.TryGetValue(OptionKey, out var value) && value.Split(':')[0].Trim().Equals("omit", StringComparison.OrdinalIgnoreCase);
@@ -47,7 +59,9 @@ internal static class TrailingCommas
         if ((!hasComma && Line(text, l.OpenBrace.SpanStart) == Line(text, l.CloseBrace.SpanStart))
             || Omits(getOptions()) != hasComma
             || node.ContainsDiagnostics
-            || HasDirectiveBetween(node, l.OpenBrace, l.CloseBrace))
+            || HasDirectiveBetween(node, l.OpenBrace, l.CloseBrace)
+            || (node.IsKind(SyntaxKind.SwitchExpression) && IsFalse(getOptions(), SwitchExpressionsKey))
+            || (node.IsKind(SyntaxKind.WithInitializerExpression) && IsFalse(getOptions(), WithExpressionsKey)))
         {
             return null;
         }
@@ -86,6 +100,10 @@ internal static class TrailingCommas
         var end = lastItem.Span.End;
         return end < text.Length && text[end] is not (' ' or '\t' or '\r' or '\n') ? ", " : ",";
     }
+
+    /// <summary>Whether the key is <see langword="false"/>: those lists aren't checked.</summary>
+    private static bool IsFalse(AnalyzerConfigOptions options, string key) =>
+        options.TryGetValue(key, out var value) && value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
 
     private static int Line(SourceText text, int position) => text.Lines.GetLineFromPosition(position).LineNumber;
 

@@ -260,7 +260,8 @@ internal static class MemberOrdering
     {
         segments = System.Array.Empty<int>();
         anchors = null;
-        if (GetMembers(container) is not { } members || members.Count < 2 || GetSegments(members) is not { } found)
+        if ((!options.OrderNamespaces && container is not TypeDeclarationSyntax)
+            || GetMembers(container) is not { } members || members.Count < 2 || GetSegments(members) is not { } found)
         {
             return null;
         }
@@ -413,7 +414,7 @@ internal static class MemberOrdering
             ConversionOperatorDeclarationSyntax => MemberKind.Conversion,
             OperatorDeclarationSyntax => MemberKind.Operator,
             StructDeclarationSyntax => MemberKind.Struct,
-            RecordDeclarationSyntax record => record.IsKind(SyntaxKind.RecordStructDeclaration) ? MemberKind.Struct : MemberKind.Class,
+            RecordDeclarationSyntax record => record.IsKind(SyntaxKind.RecordStructDeclaration) ? MemberKind.Struct : MemberKind.Record,
             ClassDeclarationSyntax => MemberKind.Class,
             BaseNamespaceDeclarationSyntax => MemberKind.Namespace,
             _ when CSharp14.IsExtensionBlock(member) => MemberKind.Extension,
@@ -639,6 +640,7 @@ internal static class MemberOrdering
             MemberKind.Method => "methods",
             MemberKind.Struct => "structs",
             MemberKind.Namespace => "namespaces",
+            MemberKind.Record => "records",
             _ => "classes",
         };
     }

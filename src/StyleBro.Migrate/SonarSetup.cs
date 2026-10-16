@@ -132,6 +132,13 @@ internal sealed class SonarSetup
             severities.Remove(id);
         }
 
+        // Sonar ids in a config with no package and no profile, all off: nothing runs Sonar (trial 24: Refit's .editorconfig
+        // set S* ids to none after removing the package, and the report showed 'Sonar rules on: 0').
+        if (profile is null && version is null && !severities.Values.Any(s => s > Severity.None))
+        {
+            return null;
+        }
+
         return sources.Count > 0 ? new SonarSetup(severities, sources, known is null ? null : version) : null;
     }
 
