@@ -30,9 +30,10 @@ public sealed partial class MigrationTests
 
         // With BRO1505 off too, the off line and its comment come once.
         clear[Conventions.All.Single(c => c.Off == "dotnet_diagnostic.BRO1505.severity = none").Key] = [10, 10];
-        var both = Conventions.Decide(clear, new Dictionary<string, string>()).Lines;
-        Assert.Single(both, l => l == "dotnet_diagnostic.BRO1519.severity = none");
-        Assert.DoesNotContain(both, l => l.Contains("would still add a blank line after a member's '}'", StringComparison.Ordinal));
+        var both = Conventions.Decide(clear, new Dictionary<string, string>());
+        Assert.Single(both.Lines, l => l == "dotnet_diagnostic.BRO1519.severity = none");
+        Assert.DoesNotContain(both.Lines, l => l.Contains("would still add a blank line after a member's '}'", StringComparison.Ordinal));
+        Assert.DoesNotContain(both.Report, l => l.Contains("is off too", StringComparison.Ordinal));
     }
 
     [Theory]
@@ -102,7 +103,11 @@ public sealed partial class MigrationTests
         var (lines, report, _, _) = InitCommand.Detect(root, own, []);
         Assert.DoesNotContain(lines, l => l.StartsWith(Conventions.SingleLineJumpsKey, StringComparison.Ordinal));
         Assert.Contains(report, l => l.Contains("one-line jumps", StringComparison.Ordinal) && l.Contains("your .editorconfig enforces braces (IDE0011 = warning)", StringComparison.Ordinal));
-        Assert.Contains($"{Conventions.SingleLineJumpsKey} = true", InitCommand.Detect(root, new Dictionary<string, string>(), []).Lines);
+        var allowed = InitCommand.Detect(root, new Dictionary<string, string>(), []).Lines;
+        Assert.Contains($"{Conventions.SingleLineJumpsKey} = true", allowed);
+
+        // An earlier init's 'true' goes too.
+        Assert.DoesNotContain(InitCommand.Detect(root, own, [], allowed).Lines, l => l.StartsWith(Conventions.SingleLineJumpsKey, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -123,7 +128,8 @@ public sealed partial class MigrationTests
         // Mutable ones too; a kind that is mixed keeps the old answer: BRO1307 off.
         counts[Conventions.StaticPrefixKey] = [3, 29];
         Assert.Contains("stylebro_private_mutable_static_field_naming = s_camelCase", Conventions.Decide(counts, new Dictionary<string, string>()).Lines);
-        counts[Conventions.StaticPrefixKey] = [13, 29];
+        counts[Conventions.StaticPrefixKey] = [6, 30];
+        counts["private static readonly fields' prefix"] = [0, 24];
         lines = Conventions.Decide(counts, new Dictionary<string, string>()).Lines;
         Assert.Contains("dotnet_diagnostic.BRO1307.severity = none", lines);
         Assert.DoesNotContain(lines, l => l.Contains("s_camelCase", StringComparison.Ordinal) && !l.StartsWith('#'));

@@ -488,6 +488,13 @@ internal static class InitCommand
                     decided[convention.Key] = $"set in .editorconfig ({own[key]})";
                 }
             }
+            else if (convention.Key == Conventions.SingleLineJumpsKey && BracesEnforced(settings) is { } braces)
+            {
+                // Braces the team enforces (IDE0011 at warning or error with csharp_prefer_braces = true) leave no one-line jumps
+                // to allow, also over an earlier init's 'true': the few the code has are its warnings (trial 26: init allowed
+                // them, and BRO1514 never reported them).
+                decided[convention.Key] = $"your .editorconfig enforces braces ({braces})";
+            }
             else if (sonarLines.Any(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal)))
             {
                 var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
@@ -499,13 +506,6 @@ internal static class InitCommand
                 decided[convention.Key] = $"kept from the last init ({setting.Substring(setting.IndexOf('=') + 1).Trim()})";
                 kept.AddRange(lines);
             }
-        }
-
-        // Braces the team enforces (IDE0011 at warning or error with csharp_prefer_braces = true) leave no one-line jumps to
-        // allow: the few the code has are its warnings (trial 26: init allowed them, and BRO1514 never reported them).
-        if (!decided.ContainsKey(Conventions.SingleLineJumpsKey) && BracesEnforced(settings) is { } braces)
-        {
-            decided[Conventions.SingleLineJumpsKey] = $"your .editorconfig enforces braces ({braces})";
         }
 
         if (!decided.ContainsKey(StyleBro.Analyzers.Naming.FieldNames.StyleKey) && FieldNamingRule(own) is { } rule)

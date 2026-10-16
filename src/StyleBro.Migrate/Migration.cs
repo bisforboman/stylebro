@@ -296,8 +296,8 @@ internal static class Migration
         }
 
         // StyleSharp's SST1149 ('is null' for null checks) is BRO1133 with pattern_matching: off, BRO1103 turned 'null == x'
-        // into 'x == null', which SST1149 then reported (trial 26).
-        if (StyleSharpSeverity(setup, "SST1149") >= Severity.Suggestion)
+        // into 'x == null', which SST1149 (on by default: the raw severities include StyleSharp's defaults) then reported (trial 26).
+        if (setup.Raw?.TryGetValue("SST1149", out var isNull) == true && isNull >= Severity.Suggestion)
         {
             var nullChecks = lines.IndexOf($"dotnet_diagnostic.{StyleBro.Analyzers.DiagnosticIds.NullCheckStyle}.severity = none");
             if (nullChecks >= 0)
@@ -1417,12 +1417,6 @@ internal static class Migration
 
     internal static bool IsUnder(string path, string folder) =>
         folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>An SST rule's severity in a StyleSharp setup: the one it sets, else the rule's default (None without StyleSharp).</summary>
-    internal static Severity StyleSharpSeverity(StyleCopSetup setup, string id) =>
-        setup.StyleSharp is null ? Severity.None
-        : setup.Raw?.TryGetValue(id, out var set) == true ? set
-        : StyleCopSetup.StyleSharpRules.FirstOrDefault(r => r.Id == id).Default;
 
     /// <summary>A project's Compile items (full paths), evaluated once per process; null when MSBuild can't evaluate it.</summary>
     private static HashSet<string>? CompileItems(string project)
