@@ -927,6 +927,10 @@ protected too.
 A project `dotnet format` can't load at all (F#, `.fsproj`) makes it skip the C# projects that reference it, for the
 frameworks where the reference matters. `format` names them once, with that cause ("Partly incomplete: ... Likely
 cause: they reference TestFSharp.fsproj"); a restore doesn't change it, and the rest of the repository is formatted.
+Any other project skipped for some frameworks leaves the code only those frameworks compile unchecked: when another
+framework compiles the same code (one `format` merged into the skipped one's run, e.g. netstandard2.0 into
+netstandard1.3), that one runs instead (`== netstandard2.0, instead of netstandard1.3`); otherwise
+`--verify-no-changes` says `Not verified` rather than clean.
 
 ## Debug and Release
 
@@ -940,12 +944,14 @@ platform other than Any CPU counts as a configuration of its own (`Release|x64`,
 only x64), so a project's `'$(Configuration)|$(Platform)' == 'Release|x64'` code is run too. The `Configurations:` line
 names them; their runs show up as `== Release` (or `== net8.0, Release`). A repository whose code tests only framework
 symbols (`NET8_0_OR_GREATER`) gets no extra run, and neither do the files of a NuGet package a project compiles (a
-source package's `#if DEBUG`): `format` never changes them. A project that runs an in-solution source
-generator stays in its default configuration (`format` builds the generator for that one only) and is named so;
-`--verify-no-changes` then builds it in its other configurations (`Not checked by format: UsesGen in Release ...:
-building it...`) and is not clean when that build reports one of the rules `format` fixes (`Release build of UsesGen: 2
-findings`), which you fix by hand there, or when that build fails (`Release build of UsesGen failed`, with its first
-errors): then it checked nothing.
+source package's `#if DEBUG`): `format` never changes them. A project whose project file (or a
+`Directory.Build.props`/`.targets` above it) picks its `Compile` items by `$(Configuration)` gets those runs too, `#if`
+or not: a file only Release compiles is formatted in the Release run. A project that runs an in-solution source
+generator gets them as well: `format` builds the generator in that configuration first (`Generators: building Gen
+first (in Release, ...)`). `--verify-no-changes` also builds such a project in its other configurations at the end
+(`Building UsesGen in Release to check it ...`) and is not clean when that build reports one of the rules `format`
+fixes (`Release build of UsesGen: 2 findings`), or when that build fails (`Release build of UsesGen failed`, with its
+first errors, also next to findings: baselining them doesn't fix the build): then it checked nothing.
 
 ### Lines whose if/else body `#if` decides
 
@@ -974,7 +980,9 @@ settle it for every build.
 indented with tabs where the first `///` line has spaces (or the other way around) and reach the same column, while the
 build's IDE0055 (`EnforceCodeStyleInBuild`) reports them. `format` rewrites the indentation of exactly those lines as
 `indent_style` and `tab_width` ask, and `--verify-no-changes` reports them (`IDE0055: Fix formatting: indent this line
-with spaces, like the first line of the documentation comment above it`). Nothing else on those lines changes.
+with spaces, like the first line of the documentation comment above it`) in projects without
+`GenerateDocumentationFile`: with documentation generated the build parses the comments and reports none or only some
+of those lines, so verify leaves them to `format` there. Nothing else on those lines changes.
 
 ## Old-style (non-SDK) projects
 
@@ -1034,6 +1042,9 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   unrestored, so the preview has no StyleBro changes for them, and it says which. To see the changes in the
   `packages.config` projects, on a clean working tree: run the command without `--diff`, restore with MSBuild as above,
   run `stylebro-migrate format`, and review `git diff` (`git checkout .` undoes it).
+- **Next to multi-targeted projects**, the old-style ones get a `dotnet format` run of their own (`== old-style
+  projects`): they have no target framework for the per-framework runs. When `dotnet format` can't load them there, it
+  says so, and `--verify-no-changes` says `Not verified` instead of clean.
 - If StyleCop came in through `packages.config` or an `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`
   hint path, `stylebro-migrate` reads its version there: rules that version doesn't have stay off.
 

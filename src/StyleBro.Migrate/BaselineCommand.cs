@@ -395,7 +395,8 @@ internal static class BaselineCommand
         if (result.Whitespace > 0)
         {
             Console.WriteLine($"Not in the baseline: {result.Whitespace} formatting changes (whitespace, line endings, charset, final newline or using order: "
-                + "'dotnet format' makes them without diagnostics, so nothing can hide them). Run 'stylebro-migrate format' once, or check only "
+                + "'dotnet format' makes them without diagnostics, so nothing can hide them; and the baselined findings on the lines they "
+                + "change show up again, since the baseline matches a line's text). Run 'stylebro-migrate format' once, or check only "
                 + "'dotnet format style' and 'dotnet format analyzers' in CI.");
         }
 

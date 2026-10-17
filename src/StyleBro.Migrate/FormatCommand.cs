@@ -105,6 +105,9 @@ internal static class FormatCommand
     /// <summary>The start of the line that says a project wasn't formatted at all (<see cref="Incomplete"/>).</summary>
     public const string IncompleteMarker = "Incomplete:";
 
+    /// <summary>The start of the line that says a project was skipped for some frameworks only (<see cref="Incomplete"/>).</summary>
+    public const string PartlyIncompleteMarker = "Partly incomplete:";
+
     /// <summary>The option that formats only the files named after it (for agents: seconds on a small change).</summary>
     public const string FilesOption = "--files";
 
@@ -158,6 +161,9 @@ internal static class FormatCommand
 
     /// <summary>The start of the line that lists the target frameworks (printed for the first run only).</summary>
     private const string MultiTargetedHeader = "Multi-targeted: ";
+
+    /// <summary>How format names the run of the projects without a target framework (old-style), see <see cref="Plan"/>.</summary>
+    private const string NoFrameworkLabel = "old-style projects";
 
     /// <summary>The start of the line that names the runs for other configurations (printed for the first run only).</summary>
     private const string ConfigurationsHeader = "Configurations:";
@@ -217,7 +223,7 @@ internal static class FormatCommand
     private static readonly string[] ProjectQuery =
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
-        "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline",
+        "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline", "-getProperty:GenerateDocumentationFile",
         "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo",
     ];
 
@@ -912,10 +918,21 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The first warning a restore that worked printed for a C# project ('Text-Grab/Text-Grab.csproj: NU1603: ...'), or null:
+    /// what <see cref="Explain"/> names for 'dotnet format''s workspace warnings, which it doesn't show (trial 28, Text-Grab:
+    /// "e.g. one in another language" was a guess, the cause NU1603).
+    /// </summary>
+    public static string? RestoreWarning(string root, IEnumerable<string> output) =>
+        output.Select(l => Regex.Match(l, @"^\s*(?<path>.+?\.csproj)\s*:\s*warning (?<id>\w+):\s*(?<message>.*?)(?:\s*\[[^\]]*\])?\s*$"))
+            .Where(m => m.Success)
+            .Select(m => $"{Relative(root, m.Groups["path"].Value)}: {m.Groups["id"].Value}: {m.Groups["message"].Value.TrimEnd('.')}.")
+            .FirstOrDefault();
+
+    /// <summary>
     /// 'dotnet format''s notes said in plain words, once per command (every run and framework printed them again, unexplained:
     /// FakeItEasy's F# test helper, "Warnings were encountered while loading the workspace"); null: already said.
     /// </summary>
-    public static string? Explain(string line, string run = "")
+    public static string? Explain(string line, string run = "", string? restoreWarning = null)
     {
         // The per-framework runs load the projects their own way: a plain 'dotnet format' may not show what they saw (trial 26).
         var see = "add '--verbosity diagnostic' to this 'stylebro-migrate format' command";
@@ -929,7 +946,9 @@ internal static class FormatCommand
             : SkippedProject(line) is { } skipped
             ? ("skipped:" + skipped, $"'dotnet format' skipped {skipped}: MSBuild couldn't load it or a project it references for this run (often reference assemblies missing for its target framework). The restore isn't the cause; {see} to see MSBuild's message (\"Msbuild failed when processing the file ...\"){where}.")
             : line.StartsWith(WorkspaceWarnings, StringComparison.Ordinal)
-                ? (WorkspaceWarnings, $"'dotnet format' had warnings loading the workspace{where} (a project or reference it couldn't load completely, e.g. one in another language); they don't stop the run. To see them, {see}.")
+                ? (WorkspaceWarnings, restoreWarning is null
+                    ? $"'dotnet format' had warnings loading the workspace{where}; they don't stop the run. To see them, {see}."
+                    : $"'dotnet format' had warnings loading the workspace{where}; they don't stop the run. The restore warned too, likely the same: {restoreWarning} To see them all, {see}.")
                 : (null, line);
         if (key is null)
         {
@@ -973,7 +992,7 @@ internal static class FormatCommand
         {
             var names = group.Select(s => s.Key).Order(StringComparer.OrdinalIgnoreCase).ToList();
             var shown = names.Count > 5 ? $"{string.Join(", ", names.Take(5))} and {names.Count - 5} more" : string.Join(", ", names);
-            lines.Add($"Partly incomplete: 'dotnet format' skipped {shown} for {group.Key} (references didn't load): code only that framework compiles (inside #if) wasn't formatted.");
+            lines.Add($"{PartlyIncompleteMarker} 'dotnet format' skipped {shown} for {group.Key} (references didn't load): code only that framework compiles (inside #if) wasn't formatted.");
         }
 
         // Orleans: the test projects reference F# projects, which 'dotnet format' can't load; a restore doesn't help.
@@ -984,6 +1003,16 @@ internal static class FormatCommand
 
         return lines;
     }
+
+    /// <summary>
+    /// Whether a --verify-no-changes run's output says code went unchecked: a project no run loaded (Autofac's tests), or one
+    /// skipped for some frameworks with no other framework of the same code loading in their place (trial 28: "Partly
+    /// incomplete" said clean, the code only those frameworks compile unchecked). Not when the cause is a project 'dotnet
+    /// format' can never load (an F# reference, "Likely cause"), which a restore doesn't change.
+    /// </summary>
+    public static bool Unverified(IReadOnlyCollection<string> lines) =>
+        lines.Any(l => l.StartsWith(IncompleteMarker, StringComparison.Ordinal) || l.StartsWith(PartlyIncompleteMarker, StringComparison.Ordinal))
+        && !lines.Any(l => l.StartsWith(LikelyCause, StringComparison.Ordinal));
 
     /// <summary>
     /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
@@ -1105,11 +1134,10 @@ internal static class FormatCommand
         return (false, files.Union(touched, StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList());
     }
 
-    /// <summary>What format says about the projects that stay in their default configuration (an in-solution source generator).</summary>
-    public static string GeneratorConfigurationsLine(IReadOnlyList<string> names, bool verify) =>
+    /// <summary>What --verify-no-changes says about the projects that take an in-solution source generator: a build checks their other configurations too.</summary>
+    public static string GeneratorConfigurationsLine(IReadOnlyList<string> names) =>
         $"{ConfigurationsHeader} {string.Join(", ", names.Take(4))}{(names.Count > 4 ? $" and {names.Count - 4} more" : string.Empty)}: "
-        + $"{(names.Count == 1 ? "its" : "their")} default configuration only (an in-solution source generator is built for it only), so code only another configuration compiles ('#if !DEBUG') isn't "
-        + (verify ? "checked by 'dotnet format' there: a build checks it at the end." : "checked there; '--verify-no-changes' builds it to check.");
+        + $"{(names.Count == 1 ? "it takes" : "they take")} an in-solution source generator, so a build of {(names.Count == 1 ? "its" : "their")} other configurations checks the code only those compile ('#if !DEBUG') at the end too.";
 
     /// <summary>Keeps what a --verify-no-changes run on <paramref name="root"/> couldn't check (project full path, configuration), for <see cref="UncheckedLine"/>.</summary>
     public static void RecordUnchecked(string root, List<(string Project, string Configuration)> projects) =>
@@ -1134,7 +1162,7 @@ internal static class FormatCommand
         foreach (var (project, configuration) in projects)
         {
             var name = Path.GetFileNameWithoutExtension(project);
-            log($"Not checked by format: {name} in {configuration} (it takes an in-solution source generator): building it...");
+            log($"Building {name} in {configuration} to check it (it takes an in-solution source generator)...");
             var (exitCode, output) = (build ?? BuildOutput)(project, configuration);
             var lines = output.Select(l => Regex.Match(l, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): (?<kind>warning|error) (?<id>\w+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$"))
                 .Where(m => m.Success)
@@ -1147,25 +1175,32 @@ internal static class FormatCommand
                 .Select(Shown)
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
-            log($"{configuration} build of {name}: {(found.Count == 0 ? "no findings." : $"{found.Count} finding{(found.Count == 1 ? string.Empty : "s")}:")}");
+
+            // A build that failed on more than the findings (an error in a referenced project, a compile error) checked nothing
+            // past it, with findings or not (trial 28, ZLogger: 18 findings shown, the failed Release build not).
+            var errors = lines.Where(m => m.Groups["kind"].Value == "error" && !ids.Contains(m.Groups["id"].Value)).Select(Shown).Distinct(StringComparer.Ordinal).ToList();
+            var buildFailed = exitCode != 0 && (found.Count == 0 || errors.Count > 0);
+            if (found.Count > 0 || !buildFailed)
+            {
+                log($"{configuration} build of {name}: {(found.Count == 0 ? "no findings." : $"{found.Count} finding{(found.Count == 1 ? string.Empty : "s")}:")}");
+            }
+
             found.ForEach(log);
             findings.AddRange(found);
-
-            // A build that failed without findings of its own checked nothing (an error in a referenced project, a compile error).
-            if (exitCode != 0 && found.Count == 0)
+            if (buildFailed)
             {
-                var errors = lines.Where(m => m.Groups["kind"].Value == "error").Select(Shown).Distinct(StringComparer.Ordinal).ToList();
                 log($"{configuration} build of {name} failed{(errors.Count == 0 ? $" (exit code {exitCode})." : $", first error{(errors.Count == 1 ? string.Empty : "s")}:")}");
                 errors.Take(5).ToList().ForEach(log);
                 failed.Add($"{name} in {configuration}");
             }
         }
 
-        return findings.Count > 0
-            ? $"Not clean: {findings.Count} finding{(findings.Count == 1 ? string.Empty : "s")} in code only another configuration compiles (above), which 'format' can't fix there: fix {(findings.Count == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings.Count == 1 ? "it" : "them")}."
-            : failed.Count > 0
-                ? $"Not clean: the build of {string.Join(", ", failed)} failed (above), so the code only that configuration compiles wasn't checked: fix the build, then run again."
-                : null;
+        var findingsLine = $"{findings.Count} finding{(findings.Count == 1 ? string.Empty : "s")} in code only another configuration compiles (above), which 'format' can't fix there: fix {(findings.Count == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings.Count == 1 ? "it" : "them")}.";
+        var failedLine = $"the build of {string.Join(", ", failed)} failed (above), so the code only that configuration compiles wasn't checked";
+        return findings.Count > 0 && failed.Count > 0 ? $"Not clean: {findingsLine} And {failedLine}: baselining doesn't fix that, fix the build, then run again."
+            : findings.Count > 0 ? $"Not clean: {findingsLine}"
+            : failed.Count > 0 ? $"Not clean: {failedLine}: fix the build, then run again."
+            : null;
     }
 
     /// <summary>The project file of a build line's '[...]' tag, without what a multi-targeted build adds ('::TargetFramework=net8.0').</summary>
@@ -1348,9 +1383,10 @@ internal static class FormatCommand
     /// The documentation comment lines the whitespace pass leaves and IDE0055 reports (<see cref="DocIndentation"/>) in the
     /// files a run on <paramref name="root"/> with <paramref name="args"/> formats: what the workspace's projects compile under
     /// the root ('format' evaluated them), the whitespace pass's (not <see cref="WhitespaceExclusions"/>, '--include' only,
-    /// not '--exclude', submodules or the folders a migration left alone), not generated code.
+    /// not '--exclude', submodules or the folders a migration left alone), not generated code. <paramref name="reported"/>:
+    /// only in the files of projects whose build reports them (<see cref="BuildReportsDocIndentation"/>), what verify counts.
     /// </summary>
-    public static List<(string File, List<int> Lines, bool UseTabs, int TabWidth)> DocIndentationFindings(string root, IReadOnlyList<string> args)
+    public static List<(string File, List<int> Lines, bool UseTabs, int TabWidth)> DocIndentationFindings(string root, IReadOnlyList<string> args, bool reported = false)
     {
         var exclusions = WhitespaceExclusions(root);
         if (exclusions is { Count: 0 })
@@ -1358,11 +1394,16 @@ internal static class FormatCommand
             return [];
         }
 
-        HashSet<string> compiled;
+        List<(string FullPath, string[] Compile)> evaluated;
         lock (ProjectCache)
         {
-            compiled = ProjectCache.Values.SelectMany(d => d.Values).SelectMany(p => p.Compile).Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            evaluated = ProjectCache.Values.SelectMany(d => d.Values).Select(p => (p.FullPath, p.Compile)).ToList();
         }
+
+        var compiled = evaluated.Where(p => !reported || BuildReportsDocIndentation(EvaluatedProperty(p.FullPath, "GenerateDocumentationFile")))
+            .SelectMany(p => p.Compile)
+            .Select(Path.GetFullPath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
         var include = OptionValues(args, "--include");
@@ -1374,6 +1415,15 @@ internal static class FormatCommand
             .Select(f => f.File);
         return DocIndentation.Find(root, files).Where(f => !IsGeneratedCode(f.File)).ToList();
     }
+
+    /// <summary>
+    /// Whether the build of a project with this GenerateDocumentationFile value reports the lines <see cref="DocIndentation"/>
+    /// rewrites (owner's decision 2026-10-17, "count them only when the build would"): with documentation generated the
+    /// compiler parses the comments, and the build's IDE0055 reported none of them (space indentation) or only some (tabs:
+    /// two lines of three, the closing tag's not), so verify counts them only where it isn't.
+    /// </summary>
+    public static bool BuildReportsDocIndentation(string generateDocumentationFile) =>
+        !generateDocumentationFile.Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>The paths of <paramref name="paths"/> ('--include'/'--exclude' style) no folder of <paramref name="excluded"/> holds.</summary>
     public static List<string> NotExcluded(IEnumerable<string> paths, IReadOnlyCollection<string> excluded) =>
@@ -1704,7 +1754,8 @@ internal static class FormatCommand
 
     /// <summary>
     /// The runs: every target framework with the projects that target it, in a stable order. One entry (or none) means a
-    /// plain run is enough: no project targets several frameworks.
+    /// plain run is enough: no project targets several frameworks. Projects without a target framework (old-style, with
+    /// TargetFrameworkVersion) get a run of their own, framework "" (trial 28, EpubReader's WpfDemo: no run, and verify said clean).
     /// </summary>
     public static List<(string Framework, List<string> Projects)> Plan(IReadOnlyDictionary<string, string[]> frameworks)
     {
@@ -1714,7 +1765,7 @@ internal static class FormatCommand
         }
 
         return frameworks
-            .SelectMany(p => p.Value.Select(f => (Framework: NormalizeFramework(f), Project: p.Key)))
+            .SelectMany(p => p.Value.Length == 0 ? [(Framework: string.Empty, Project: p.Key)] : p.Value.Select(f => (Framework: NormalizeFramework(f), Project: p.Key)))
             .Distinct()
             .GroupBy(x => x.Framework, StringComparer.OrdinalIgnoreCase)
             .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
@@ -1867,6 +1918,44 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The runs to make for the projects 'dotnet format' skipped (<paramref name="skipped"/>: project -> the frameworks of the
+    /// runs that skipped it) in a framework <see cref="MergeFrameworks"/> chose for frameworks with the same <paramref name="key"/>
+    /// (<paramref name="all"/>: the plan before merging, <paramref name="chosen"/>: after it): another of those frameworks,
+    /// one it didn't run (Framework), for the project, with the skipped one it stands in for (Instead). <paramref name="tried"/>
+    /// (project, framework) collects what was given, so each is tried once.
+    /// </summary>
+    public static List<(string Framework, string Project, string Instead)> StandIns(
+        IReadOnlyList<(string Framework, List<string> Projects)> all,
+        IReadOnlyList<(string Framework, List<string> Projects)> chosen,
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> skipped,
+        Func<string, string, string?> key,
+        ISet<(string Project, string Framework)> tried)
+    {
+        bool Ran(string project, string framework) => chosen.Any(c => c.Framework.Equals(framework, StringComparison.OrdinalIgnoreCase) && c.Projects.Contains(project, StringComparer.OrdinalIgnoreCase));
+        var result = new List<(string, string, string)>();
+        foreach (var (project, frameworks) in skipped.OrderBy(s => s.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (var instead in frameworks.Where(f => Ran(project, f)).Order(StringComparer.OrdinalIgnoreCase))
+            {
+                if (key(project, instead) is not { } wanted)
+                {
+                    continue;
+                }
+
+                var other = all.Where(a => a.Projects.Contains(project, StringComparer.OrdinalIgnoreCase) && !Ran(project, a.Framework) && key(project, a.Framework) == wanted)
+                    .Select(a => a.Framework)
+                    .FirstOrDefault(f => tried.Add((project, f)));
+                if (other is not null)
+                {
+                    result.Add((other, project, instead));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// What a framework's references are like, for <see cref="MergeFrameworks"/>: .NET (5 and on, and .NET Core), .NET Standard
     /// or .NET Framework, with its platform ('-windows10.0.17763.0'). Only frameworks of one kind share a run: their APIs
     /// differ less (netstandard2.0 and net472 test the same symbols in CommunityToolkit, but their APIs don't match).
@@ -1883,6 +1972,33 @@ internal static class FormatCommand
             : name;
         return family + platform;
     }
+
+    /// <summary>
+    /// Whether a project's file, or a Directory.Build.props/.targets above it in its repository, picks Compile items by
+    /// configuration (a Compile item, or an ItemGroup/When around one, with a '$(Configuration)' condition): its files then
+    /// differ between configurations even without an '#if' (trial 28: a Release-only file was never formatted or checked).
+    /// ponytail: the text of those files only, not other imports; one there is missed.
+    /// </summary>
+    public static bool CompileByConfiguration(string projectPath)
+    {
+        var top = RepositoryRoot(Path.GetDirectoryName(projectPath)!);
+        var files = new List<string> { projectPath };
+        for (var folder = Path.GetDirectoryName(projectPath); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            files.Add(Path.Combine(folder, "Directory.Build.props"));
+            files.Add(Path.Combine(folder, "Directory.Build.targets"));
+            if (top is null || string.Equals(Path.TrimEndingDirectorySeparator(folder), Path.TrimEndingDirectorySeparator(top), StringComparison.OrdinalIgnoreCase))
+            {
+                break;
+            }
+        }
+
+        return files.Any(f => File.Exists(f) && PicksCompileByConfiguration(File.ReadAllText(f)));
+    }
+
+    /// <summary>Whether MSBuild text has a Compile item, or an ItemGroup/When around one, with a '$(Configuration)' condition.</summary>
+    public static bool PicksCompileByConfiguration(string text) =>
+        Regex.IsMatch(text, @"<Compile\b[^>]*\bCondition\s*=\s*""[^""]*\$\(Configuration\)|<(?<tag>ItemGroup|When)\b[^>]*\bCondition\s*=\s*""[^""]*\$\(Configuration\)[^""]*""[^>]*>(?:(?!</\k<tag>>).)*?<Compile\b", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Whether an '#if' symbol is one the SDK defines for a target framework or platform (NET8_0_OR_GREATER, NETSTANDARD,
@@ -2159,7 +2275,7 @@ internal static class FormatCommand
     /// </summary>
     public static string MultiTargetedLine(IReadOnlyList<(string Framework, List<string> Projects)> all, IReadOnlyList<(string Framework, List<string> Projects)> merged)
     {
-        var line = $"{MultiTargetedHeader}one 'dotnet format' run per target framework ({string.Join(", ", merged.Select(p => p.Framework))}).";
+        var line = $"{MultiTargetedHeader}one 'dotnet format' run per target framework ({string.Join(", ", merged.Select(p => p.Framework.Length > 0 ? p.Framework : NoFrameworkLabel))}).";
         var gone = all.Select(p => p.Framework).Except(merged.Select(p => p.Framework), StringComparer.OrdinalIgnoreCase).ToList();
         var fewer = all.Where(p => merged.Any(m => m.Framework == p.Framework && m.Projects.Count < p.Projects.Count)).Select(p => p.Framework).ToList();
         if (gone.Count > 0)
@@ -2937,8 +3053,9 @@ internal static class FormatCommand
             }
         });
 
-        // What the whitespace pass leaves and the build's IDE0055 reports: 'format' fixes it (DocIndentation).
-        if ((code == 0 || code == NotCleanExitCode) && DocIndentation.FindingLines(DocIndentationFindings(root, args)) is { Count: > 0 } docLines)
+        // What the whitespace pass leaves and the build's IDE0055 reports: 'format' fixes it (DocIndentation). Only where the
+        // build reports it (documentation not generated).
+        if ((code == 0 || code == NotCleanExitCode) && DocIndentation.FindingLines(DocIndentationFindings(root, args, reported: true)) is { Count: > 0 } docLines)
         {
             lines.AddRange(docLines);
             code = NotCleanExitCode;
@@ -2948,10 +3065,7 @@ internal static class FormatCommand
         {
             lines.ForEach(log);
 
-            // A project no run loaded wasn't checked at all: not "Clean." (Autofac's tests). One skipped for some frameworks
-            // only ("Partly incomplete") was checked in the others' runs, all but code only those frameworks compile; one that
-            // references an F# project ("Likely cause") can never load, which a restore doesn't change: both stay warnings.
-            if (lines.Any(l => l.StartsWith(IncompleteMarker, StringComparison.Ordinal)) && !lines.Any(l => l.StartsWith(LikelyCause, StringComparison.Ordinal)))
+            if (Unverified(lines))
             {
                 log(NotVerified);
                 return 1;
@@ -3082,9 +3196,12 @@ internal static class FormatCommand
             }
 
             // Not a file whose only change is a line ending (a mixed file the whitespace pass wrote this OS's ending into):
-            // like the whitespace findings below, it's no reason to fail.
-            var changedFiles = ChangedFiles(before, Snapshot(copy))
-                .Where(f => !File.Exists(f) || !SameButEndings(File.ReadAllText(f), Path.Combine(source, Path.GetRelativePath(copy, f))))
+            // like the whitespace findings below, it's no reason to fail. Unless end_of_line asks for the new ending (trial 28:
+            // 'end_of_line = crlf', LF files, "Clean" while 'format' converted them).
+            var changedInCopy = ChangedFiles(before, Snapshot(copy));
+            var endOfLine = EndOfLineSet(copy, changedInCopy);
+            var changedFiles = changedInCopy
+                .Where(f => !File.Exists(f) || endOfLine.Contains(f) || !SameButEndings(File.ReadAllText(f), Path.Combine(source, Path.GetRelativePath(copy, f))))
                 .ToList();
             return (copyCode, kept, changedFiles.Select(f => Path.Combine(source, Path.GetRelativePath(copy, f))).ToList());
         }
@@ -3155,6 +3272,12 @@ internal static class FormatCommand
                 return NotCleanExitCode;
             }
 
+            if (Unverified(lines))
+            {
+                log(NotVerified);
+                return 1;
+            }
+
             if (kept.Count == 0)
             {
                 log("Clean: formatting would change nothing.");
@@ -3192,13 +3315,18 @@ internal static class FormatCommand
 
         var generators = AnalyzerProjects(workspace);
         var sourceRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(source)) + Path.DirectorySeparatorChar;
-        foreach (var project in generators)
+
+        // Each configuration's output: the runs of other configurations load the generator built in theirs (BuildGenerators).
+        var configurations = (SolutionConfigurations(workspace) ?? ["Debug", "Release"]).Prepend(string.Empty).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        foreach (var (project, configuration) in generators.SelectMany(g => configurations.Select(c => (g, c))))
         {
             // A multi-targeted project's outer TargetDir has no framework folder: every framework's output goes along.
             string output;
             try
             {
-                output = Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getProperty:TargetDir", "-nologo").Trim();
+                var (name, platform) = SplitConfiguration(configuration);
+                string[] chosen = configuration.Length == 0 ? [] : [$"-property:Configuration={name}", .. PlatformProperty(platform)];
+                output = Capture(Path.GetDirectoryName(project)!, ["msbuild", project, "-getProperty:TargetDir", .. chosen, "-nologo"]).Trim();
             }
             catch (ToolException)
             {
@@ -3228,29 +3356,33 @@ internal static class FormatCommand
     /// their output is missing, once per process, saying so: without it 'dotnet format' runs
     /// without the generator, its generated code is missing, and a rename of a member that code uses broke the build
     /// (trial 23: CS0103 after a "clean" format and verify, owner's choice "Build generators first"). A failed build is said
-    /// and the runs go on (as before: without the generated code).
+    /// and the runs go on (as before: without the generated code). <paramref name="configuration"/>: the configuration of the
+    /// runs that load it ("": the default; <see cref="SplitConfiguration"/>), whose output those runs use.
     /// </summary>
-    internal static void BuildGenerators(IEnumerable<string> generators, string root, Action<string> log)
+    internal static void BuildGenerators(IEnumerable<string> generators, string root, Action<string> log, string configuration = "")
     {
         var stale = generators.Distinct(StringComparer.OrdinalIgnoreCase)
-            .Where(g => File.Exists(g) && !BuiltGenerators.ContainsKey(g))
-            .Where(g => !IsBuilt(g) || !BuiltGenerators.TryAdd(g, true))
+            .Where(g => File.Exists(g) && !BuiltGenerators.ContainsKey(g + "|" + configuration))
+            .Where(g => !IsBuilt(g, configuration) || !BuiltGenerators.TryAdd(g + "|" + configuration, true))
             .ToList();
         if (stale.Count == 0)
         {
             return;
         }
 
-        log($"{GeneratorsHeader} building {string.Join(", ", stale.Select(Path.GetFileNameWithoutExtension))} first (in Debug, the configuration 'dotnet format' loads, so a Release build doesn't count): the code uses {(stale.Count == 1 ? "it" : "them")} as a source generator, and without {(stale.Count == 1 ? "its" : "their")} output the generated code would be missing from the checks.");
+        var (name, platform) = SplitConfiguration(configuration);
+        var where = configuration.Length == 0 ? "in the default configuration, the one 'dotnet format' loads" : $"in {configuration}, for the runs of that configuration";
+        log($"{GeneratorsHeader} building {string.Join(", ", stale.Select(Path.GetFileNameWithoutExtension))} first ({where}): the code uses {(stale.Count == 1 ? "it" : "them")} as a source generator, and without {(stale.Count == 1 ? "its" : "their")} output the generated code would be missing from the checks.");
         foreach (var generator in stale)
         {
             var output = new List<string>();
 
             // Without analyzers and warnings as errors: the generator's own code isn't formatted yet (jint: its StyleBro findings
             // failed the build under TreatWarningsAsErrors), and only its output matters here.
-            if (Dotnet(root, null, ["build", generator, "-nologo", "-v", "q", "-p:RunAnalyzers=false", "-p:TreatWarningsAsErrors=false", .. RestoreOptions], output.Add) == 0)
+            string[] chosen = configuration.Length == 0 ? [] : ["-c", name, .. PlatformProperty(platform)];
+            if (Dotnet(root, null, ["build", generator, .. chosen, "-nologo", "-v", "q", "-p:RunAnalyzers=false", "-p:TreatWarningsAsErrors=false", .. RestoreOptions], output.Add) == 0)
             {
-                BuiltGenerators.TryAdd(generator, true);
+                BuiltGenerators.TryAdd(generator + "|" + configuration, true);
             }
             else
             {
@@ -3276,13 +3408,15 @@ internal static class FormatCommand
         }
     }
 
-    /// <summary>Whether a project's output (TargetPath) exists.</summary>
-    internal static bool IsBuilt(string project)
+    /// <summary>Whether a project's output (TargetPath) in a configuration ("": its default) exists.</summary>
+    internal static bool IsBuilt(string project, string configuration = "")
     {
         string target;
         try
         {
-            target = Capture(Path.GetDirectoryName(project)!, "msbuild", project, "-getProperty:TargetPath", "-nologo").Trim();
+            var (name, platform) = SplitConfiguration(configuration);
+            string[] chosen = configuration.Length == 0 ? [] : [$"-property:Configuration={name}", .. PlatformProperty(platform)];
+            target = Capture(Path.GetDirectoryName(project)!, ["msbuild", project, "-getProperty:TargetPath", .. chosen, "-nologo"]).Trim();
         }
         catch (ToolException)
         {
@@ -3597,17 +3731,29 @@ internal static class FormatCommand
         return $"Baseline: {name}: {string.Join("; ", parts)} (https://bisforboman.github.io/stylebro/baseline/).";
     }
 
-    /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one at the root.</summary>
+    /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one in <see cref="NewBaselineFolder"/>.</summary>
     private static string FoundBaseline(string root, string? newAt = null)
     {
+        var at = Path.GetFullPath(newAt ?? NewBaselineFolder(root));
+        var below = Path.GetRelativePath(Path.GetFullPath(root), at) is var relative && !relative.StartsWith("..", StringComparison.Ordinal) && !Path.IsPathRooted(relative);
         string? found = null;
-        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
+        for (var folder = below ? at : Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
         {
             found ??= File.Exists(Path.Combine(folder, Analyzers.Baseline.Baseline.FileName)) ? Path.Combine(folder, Analyzers.Baseline.Baseline.FileName) : null;
         }
 
-        return found ?? Path.Combine(Path.GetFullPath(newAt ?? root), Analyzers.Baseline.Baseline.FileName);
+        return found ?? Path.Combine(at, Analyzers.Baseline.Baseline.FileName);
     }
+
+    /// <summary>
+    /// Where a new baseline goes for a run on <paramref name="root"/>: the folder that holds the projects of the solution it
+    /// finds there (<see cref="WorkingRoot"/>), as for a run on that solution, else the root. Trial 28, Jackett: the preview
+    /// (on the repository) wrote stylebro.baseline, 'format src/Jackett.sln' src/stylebro.baseline.
+    /// </summary>
+    public static string NewBaselineFolder(string root) =>
+        Directory.Exists(root) && BaselineCommand.FindWorkspace(root) is { } workspace && File.Exists(Path.Combine(root, workspace))
+            ? WorkingRoot(Path.Combine(root, workspace))
+            : root;
 
     /// <summary>Where <see cref="SaveKept"/> records a repository's kept findings.</summary>
     private static string KeptRecord(string root) =>
@@ -3934,6 +4080,7 @@ internal static class FormatCommand
         var crashed = false;
         var usageError = false;
         var nuGetErrors = new List<string>();
+        string? restoreWarning = null;
         void Record(string line)
         {
             restoreFailed |= IsRestoreFailure(line);
@@ -3969,7 +4116,7 @@ internal static class FormatCommand
 
             findingsShown += IsFindingLine(line) ? 1 : 0;
             Record(line);
-            if ((FixFailure(line) is not { } failure || failuresShown.Add(failure)) && Explain(line, current) is { } shownLine)
+            if ((FixFailure(line) is not { } failure || failuresShown.Add(failure)) && Explain(line, current, restoreWarning) is { } shownLine)
             {
                 log(shownLine);
             }
@@ -4304,6 +4451,8 @@ internal static class FormatCommand
                     restoreFailed = true;
                     return Done(restore);
                 }
+
+                restoreWarning = RestoreWarning(root, restoreOutput);
             }
             finally
             {
@@ -4366,8 +4515,9 @@ internal static class FormatCommand
 
         // A framework whose code compiles the same as another's in a project (CommunityToolkit: no '#if' tests a NET9_0 or
         // NET10_0 symbol, so net8.0, net9.0 and net10.0 parse every file the same) doesn't need a run of its own there.
-        var frameworkPlan = MergeFrameworks(allFrameworks, (key, framework) =>
-            projects[key].Frameworks.Length <= 1 ? framework : View(projects[key].FullPath, framework) is { } view ? FrameworkFamily(framework) + "|" + view.Key(view.Compile) : null);
+        string? MergeKey(string key, string framework) =>
+            projects[key].Frameworks.Length <= 1 ? framework : View(projects[key].FullPath, framework) is { } view ? FrameworkFamily(framework) + "|" + view.Key(view.Compile) : null;
+        var frameworkPlan = MergeFrameworks(allFrameworks, MergeKey);
 
         // The files a project compiles for a run's framework: a multi-targeted project's outer evaluation misses those only some
         // frameworks compile (refit: src/Polyfills/*.cs linked for net4* only were never formatted, and verify said clean).
@@ -4392,7 +4542,7 @@ internal static class FormatCommand
             .Select(g => g.Select(f => byFullPath[f]).ToList())
             .ToList();
 
-        static string RunLabel(string framework, string configuration) => string.Join(", ", new[] { framework, configuration }.Where(l => l.Length > 0));
+        string RunLabel(string framework, string configuration) => string.Join(", ", new[] { framework.Length == 0 && allFrameworks.Count > 0 ? NoFrameworkLabel : framework, configuration }.Where(l => l.Length > 0));
         var plan = runs
             .SelectMany(p => Apart(p.Framework, p.Configuration, p.Projects) is var parts && parts.Count > 1
                 ? parts.Select((part, i) => (p.Framework, p.Configuration, Projects: part, Label: $"{(RunLabel(p.Framework, p.Configuration) is { Length: > 0 } label ? label + ", " : string.Empty)}part {i + 1} of {parts.Count}", Parts: i == 0 ? parts : null))
@@ -4413,14 +4563,20 @@ internal static class FormatCommand
 
         // One run for everything: plain, unless it's the run after one that changed files, which checks first (and then formats
         // only the files with findings).
+        // The generators the other configurations' runs load, built in those configurations first (owner's decision 2026-10-17).
+        foreach (var configuration in configurationRuns.Select(r => r.Configuration).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            BuildGenerators(configurationRuns.Where(r => r.Configuration.Equals(configuration, StringComparison.OrdinalIgnoreCase)).SelectMany(r => r.Projects).SelectMany(p => projects[p].Analyzers), root, log, configuration);
+        }
+
         if (withGenerator.Count > 0)
         {
+            // --verify-no-changes still builds them in the others afterwards (UncheckedLine): verify said clean while that build
+            // failed, and the build is the check of the generated code's configuration.
             var verifying = passThrough.Contains("--verify-no-changes");
-            log(GeneratorConfigurationsLine(withGenerator.Select(k => Path.GetFileNameWithoutExtension(k)).ToList(), verifying));
-
-            // --verify-no-changes builds them in the others afterwards (UncheckedLine): verify said clean while that build failed.
             if (verifying)
             {
+                log(GeneratorConfigurationsLine(withGenerator.Select(k => Path.GetFileNameWithoutExtension(k)).ToList()));
                 var solutionConfigurations = SolutionConfigurations(workspacePath);
                 RecordUnchecked(root, withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations, EvaluatedProperty(projects[k].FullPath, "Platforms"))
                     .Select(c => (projects[k].FullPath, c))).ToList());
@@ -4482,7 +4638,7 @@ internal static class FormatCommand
         void Show(string line)
         {
             Record(line);
-            if (IsNewLine(shown, line) && Explain(line, current) is { } shownLine)
+            if (IsNewLine(shown, line) && Explain(line, current, restoreWarning) is { } shownLine)
             {
                 log(shownLine);
             }
@@ -4657,6 +4813,42 @@ internal static class FormatCommand
                 }
             }
 
+            // A run 'dotnet format' skipped a project in stands in for the frameworks merged into it: another of them runs
+            // instead (trial 28, EpubReader: netstandard2.0 merged into netstandard1.3, which didn't load, so neither was checked).
+            var tried = new HashSet<(string, string)>();
+            Dictionary<string, IReadOnlyCollection<string>> SkippedByKey() => projects.Keys
+                .Where(k => skipped.ContainsKey(Path.GetFileNameWithoutExtension(k)))
+                .ToDictionary(k => k, k => (IReadOnlyCollection<string>)skipped[Path.GetFileNameWithoutExtension(k)], StringComparer.OrdinalIgnoreCase);
+            for (var standIns = StandIns(allFrameworks, frameworkPlan, SkippedByKey(), MergeKey, tried); standIns.Count > 0 && !usageError; standIns = StandIns(allFrameworks, frameworkPlan, SkippedByKey(), MergeKey, tried))
+            {
+                foreach (var group in standIns.GroupBy(s => s.Framework, StringComparer.OrdinalIgnoreCase))
+                {
+                    var selected = group.Select(s => s.Project).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+                    plan.Add((group.Key, string.Empty, selected, $"{group.Key}, instead of {string.Join(", ", group.Select(s => s.Instead).Distinct(StringComparer.OrdinalIgnoreCase))}", null));
+                    includes.Add(RunInclude(requested, Include(root, solutionDirectory, selected, selected.SelectMany(x => LinkedFor(x, group.Key, string.Empty))).ToList()));
+                    if (report is not null)
+                    {
+                        reportFolders.Add(Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}"));
+                    }
+
+                    frameworkPlan.Add((group.Key, selected));
+                    RunOrReplay(plan.Count - 1, null);
+                }
+
+                // The skipped framework's code is covered once its stand-in loaded.
+                foreach (var (framework, project, instead) in standIns)
+                {
+                    if (skipped.TryGetValue(Path.GetFileNameWithoutExtension(project), out var set) && !set.Contains(framework))
+                    {
+                        set.Remove(instead);
+                        if (set.Count == 0)
+                        {
+                            skipped.Remove(Path.GetFileNameWithoutExtension(project));
+                        }
+                    }
+                }
+            }
+
             if (keptFile is not null && !verifying)
             {
                 if (keptNow.Count > 0)
@@ -4784,9 +4976,10 @@ internal static class FormatCommand
     /// <summary>
     /// The runs for other configurations of a workspace's projects (<see cref="ConfigurationRuns"/>): only projects whose files
     /// test a symbol that isn't a framework's (<see cref="IsFrameworkSymbol"/>) are evaluated, for each framework and
-    /// configuration at once. <paramref name="view"/>: how a project (full path) compiles for a framework and configuration.
-    /// A project that takes an in-solution source generator stays in its default configuration (<paramref name="withGenerator"/>
-    /// names them): format builds the generator for that one only, and without its output the code wouldn't compile.
+    /// configuration at once, and projects whose project file picks Compile items by configuration (<see cref="CompileByConfiguration"/>).
+    /// <paramref name="view"/>: how a project (full path) compiles for a framework and configuration. A project that takes an
+    /// in-solution source generator gets those runs too (owner's decision 2026-10-17, "Fix it in a Release run"): format builds
+    /// the generator in each configuration first (<paramref name="withGenerator"/> names them, for verify's build check).
     /// </summary>
     private static List<(string Framework, string Configuration, List<string> Projects)> ConfigurationRuns(
         IReadOnlyDictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)> projects,
@@ -4797,11 +4990,10 @@ internal static class FormatCommand
     {
         var solution = SolutionConfigurations(workspacePath);
         var tests = projects.AsParallel()
-            .Where(p => p.Value.Compile.Any(f => TestedSymbols(f).Any(s => !IsFrameworkSymbol(s))))
+            .Where(p => p.Value.Compile.Any(f => TestedSymbols(f).Any(s => !IsFrameworkSymbol(s))) || CompileByConfiguration(p.Value.FullPath))
             .ToList();
         withGenerator?.AddRange(tests.Where(p => p.Value.Analyzers.Length > 0).Select(p => p.Key).OrderBy(Path.GetFileNameWithoutExtension, StringComparer.OrdinalIgnoreCase));
         var others = tests.AsParallel()
-            .Where(p => p.Value.Analyzers.Length == 0)
             .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution, EvaluatedProperty(p.Value.FullPath, "Platforms"))))
             .Where(p => p.Others.Count > 0)
             .ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Others, StringComparer.OrdinalIgnoreCase);
