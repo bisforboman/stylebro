@@ -19,6 +19,8 @@
 #  10. the Microsoft style: <StyleBroStyle>microsoft</StyleBroStyle> accepts '_'/'s_' fields, orders fields first and keeps
 #      rules runtime has off off; an unknown style fails (STYLEBRO003), one with StyleBroPreset none warns (STYLEBRO004);
 #      after 'init --write --style microsoft', 'dotnet format' removes 'this.' (IDE0003) and a second run changes nothing.
+#  11. a file a project compiles from outside its git repository ('..\..\..\outside\Shared.cs') isn't checked, with a
+#      '.git' folder or a '.git' file (a worktree) above the project; <StyleBroRepositoryRoot>none</StyleBroRepositoryRoot> checks it.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -225,6 +227,31 @@ try {
     Check ($fixed -match 'return _count \+ 1;' -and $fixed -match '(?s)private int _count;.*public int Count') "format removes 'this.' (IDE0003) and puts the fields first"
     dotnet format $styleProject --verify-no-changes | Out-Host
     Check ($LASTEXITCODE -eq 0) 'a second format run changes nothing'
+
+    Write-Host '== 11. Files outside the repository are not checked'
+    # A repository (a '.git' folder with HEAD; and a worktree's '.git' file) whose project compiles a file from a sibling folder.
+    $outside = Join-Path $work 'outside'
+    New-Item -ItemType Directory -Force $outside | Out-Null
+    Set-Content (Join-Path $outside 'Shared.cs') "namespace App;`n`npublic class Shared`n{`n    public string Name = `"`";`n}`n" -NoNewline
+    foreach ($kind in 'folder', 'file') {
+        $linkRepo = Join-Path $work "linked-$kind"
+        $linkApp = Join-Path $linkRepo 'src/Linked'
+        New-Item -ItemType Directory -Force $linkApp | Out-Null
+        if ($kind -eq 'folder') {
+            New-Item -ItemType Directory -Force (Join-Path $linkRepo '.git') | Out-Null
+            Set-Content (Join-Path $linkRepo '.git/HEAD') 'ref: refs/heads/main'
+        }
+        else {
+            Set-Content (Join-Path $linkRepo '.git') 'gitdir: ../elsewhere/.git/worktrees/linked'
+        }
+        Copy-Item (Join-Path $repo 'nuget.config') $linkRepo
+        Set-Content (Join-Path $linkApp 'Own.cs') "namespace App;`n`npublic class Own`n{`n    public string Name = `"`";`n}`n" -NoNewline
+        $linkProject = Join-Path $linkApp 'Linked.csproj'
+        Set-Content $linkProject ((Get-Content $project -Raw).Replace('</Project>', "  <ItemGroup><Compile Include=`"..\..\..\outside\Shared.cs`" Link=`"Shared.cs`" /></ItemGroup>`n</Project>"))
+        $linked = Build @() $linkProject
+        Check (($linked -contains 'BRO1106 Own.cs') -and -not ($linked -contains 'BRO1106 Shared.cs')) "with a '.git' $kind, BRO1106 is reported in the project's file and not in the file outside the repository"
+    }
+    Check ((Build @('-p:StyleBroRepositoryRoot=none') $linkProject) -contains 'BRO1106 Shared.cs') 'with StyleBroRepositoryRoot none, it is reported there'
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
