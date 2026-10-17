@@ -224,6 +224,9 @@ internal static class FormatCommand
     /// <summary>What <see cref="TestedSymbols"/> found, per file (full path).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string[]> TestedSymbolsCache = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Whether a folder holds a NuGet package (<see cref="IsPackageFile"/>), per folder.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> PackageFolders = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>The projects <see cref="EvaluateProject"/> evaluated (full path), once per process.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> Evaluations = new(StringComparer.OrdinalIgnoreCase);
 
@@ -504,7 +507,7 @@ internal static class FormatCommand
 
     /// <summary>
     /// The files of <paramref name="compile"/> (full paths) that exist outside <paramref name="repository"/>, sorted. Not a
-    /// package's (NuGet's folder, <paramref name="packages"/>: a package's contentFiles, NLog's benchmark diagnoser config).
+    /// package's (NuGet's folder, <paramref name="packages"/>, or any other with the package's files, <see cref="IsPackageFile"/>: a package's contentFiles, NLog's benchmark diagnoser config).
     /// </summary>
     public static List<string> OutsideRepository(IEnumerable<string> compile, string repository, string? packages = null)
     {
@@ -512,7 +515,7 @@ internal static class FormatCommand
         packages ??= Environment.GetEnvironmentVariable("NUGET_PACKAGES") is { Length: > 0 } set ? set : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
         var nuget = Path.TrimEndingDirectorySeparator(Path.GetFullPath(packages)) + Path.DirectorySeparatorChar;
         return compile.Select(Path.GetFullPath)
-            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && !f.StartsWith(nuget, StringComparison.OrdinalIgnoreCase))
+            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && !f.StartsWith(nuget, StringComparison.OrdinalIgnoreCase) && !IsPackageFile(f))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -2022,9 +2025,25 @@ internal static class FormatCommand
 
     /// <summary>
     /// The identifiers a C# file's '#if' and '#elif' lines test (comments aside), once per file and process: what
-    /// <see cref="CompileView.Key"/> compares.
+    /// <see cref="CompileView.Key"/> compares. None for a package's file (<see cref="IsPackageFile"/>), which 'format' never
+    /// changes: its '#if DEBUG' (Nullable's, PolyShim's) made runs for Release and parts for shared files, and only where the
+    /// restore had put the package's files into the build (trial 27).
     /// </summary>
-    public static string[] TestedSymbols(string file) => TestedSymbolsCache.GetOrAdd(Path.GetFullPath(file), path => File.Exists(path) ? TestedIn(File.ReadAllText(path)) : []);
+    public static string[] TestedSymbols(string file) => TestedSymbolsCache.GetOrAdd(Path.GetFullPath(file), path => File.Exists(path) && !IsPackageFile(path) ? TestedIn(File.ReadAllText(path)) : []);
+
+    /// <summary>Whether a file is in a NuGet package's folder (any packages folder: a folder above it has the package's '.nupkg.metadata').</summary>
+    public static bool IsPackageFile(string file)
+    {
+        for (var folder = Path.GetDirectoryName(Path.GetFullPath(file)); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            if (PackageFolders.GetOrAdd(folder, f => File.Exists(Path.Combine(f, ".nupkg.metadata"))))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>The identifiers the '#if' and '#elif' lines of a C# text test (<see cref="TestedSymbols"/>).</summary>
     public static string[] TestedIn(string text) =>
@@ -4229,6 +4248,10 @@ internal static class FormatCommand
         // Quietly: the whitespace pass touches them on every run, and the line above already says they're left alone.
         using var outsideFiles = outside.Count > 0 ? new UntouchedFiles(outside, null, log) : null;
         var outsideSet = outside.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Nor do their '#if's or a package's files plan runs (trial 27): format leaves them alone. ponytail: for this process.
+        outside.ForEach(f => TestedSymbolsCache[Path.GetFullPath(f)] = []);
+        bool Planned(string file) => !outsideSet.Contains(file) && !IsPackageFile(file);
         bool Ignored(string line) => outsideSet.Count > 0 && IsFindingLine(line) && FindingPath(line) is { } findingPath && outsideSet.Contains(findingPath);
 
         // Projects the solution lists but no configuration builds: the restore skips them, so StyleBro wouldn't run there, and
@@ -4319,7 +4342,7 @@ internal static class FormatCommand
 
         // The projects that share files, and the multi-targeted ones: their settings for each run's framework, evaluated at
         // once (one 'dotnet msbuild' each).
-        var sharing = SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile)), byName: false).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var sharing = SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile.Where(Planned).ToArray())), byName: false).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var multiTargeted = projects.Values.Where(p => p.Frameworks.Length > 1).Select(p => p.FullPath).ToList();
         allFrameworks.Select(r => r.Framework).DefaultIfEmpty(string.Empty)
             .SelectMany(f => sharing.Union(multiTargeted, StringComparer.OrdinalIgnoreCase).Select(s => (Project: s, Spelling: Spelling(s, f))))
@@ -4341,7 +4364,7 @@ internal static class FormatCommand
         // frameworks compile (refit: src/Polyfills/*.cs linked for net4* only were never formatted, and verify said clean).
         string[] CompileFor(string fullPath, string framework, string configuration = "") =>
             byFullPath.TryGetValue(fullPath, out var key)
-                ? FrameworkCompile(projects[key].Compile, projects[key].Frameworks.Length > 1 || configuration.Length > 0 ? View(fullPath, framework, configuration)?.Compile : null)
+                ? FrameworkCompile(projects[key].Compile, projects[key].Frameworks.Length > 1 || configuration.Length > 0 ? View(fullPath, framework, configuration)?.Compile : null).Where(Planned).ToArray()
                 : [];
         IEnumerable<string> LinkedFor(string key, string framework, string configuration) => Linked(projects[key].FullPath, projects[key].Linked, CompileFor(projects[key].FullPath, framework, configuration));
 
