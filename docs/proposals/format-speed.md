@@ -62,7 +62,7 @@ Everything around the child processes reads their console output: finding lines 
 Setup: `stylebro-migrate` and StyleBro.Analyzers `0.8.0-trial27` (the trial's packages, main 12961da1), SDK 10.0.402,
 Windows 11, 16 logical processors. Each repository is a copy of its trial clone under `.trials/speed/`, reset to the
 trial's step-4 commit (after `init --write` and the package, before the first `format`). Every `dotnet` call the tool
-made went through a logging shim on `PATH` (start, duration, arguments; `scratchpad/shim`), and `format` ran with
+made went through a logging shim on `PATH` (start, duration, arguments; a 30-line console app named `dotnet.exe` that runs the real one, not committed), and `format` ran with
 `--verbosity diagnostic`, which passes dotnet format's own timers through ("Loading workspace ... Complete in N ms",
 "Running N analyzers on <project>"). **Single runs on a shared machine:** other agents ran trials at the same time
 (CPU at 100 % with ~60 `dotnet` processes during the io-abstractions run, ~33 % at the start); two identical CliFx
@@ -72,9 +72,13 @@ runs took 155 s and 133 s. Compare within a table, not across days; absolute tim
 
 | Repository | Projects / frameworks / configurations | Plan entries | `format` first run (runs) | Plain `dotnet format`, same state | Plain verify, clean state | `format --verify-no-changes`, clean state | Build (incremental / `--no-incremental`), clean state |
 |---|---|---|---|---|---|---|---|
-| CliFx | 6 / 5 / 1 | 6 | 133-155 s (2) | 26.6 s | IO_CLIFX_PV | IO_CLIFX_V | IO_CLIFX_B |
+| CliFx | 6 / 5 / 1 | 6 | 133-155 s (2) | 26.6 s | 49 s | 160 s | 29 s / 53 s |
 | PalCalc | 15 / 1 / 3 | 3 | 644 s (3) | 173 s | 75 s | 191 s | 66 s / 118 s |
-| System.IO.Abstractions | IO_PROJ | 15 | IO_FORMAT | IO_PLAIN | IO_PV | IO_V | IO_B |
+| System.IO.Abstractions | 11 / 7 / 2 | 15 | 574 s (2) | 271 s | 159 s | 174 s | 193 s / 113 s |
+
+The builds ran under the heaviest load (the incremental build slower than the full one shows how much); the trials'
+own build times, on a quieter machine, are in the next paragraph. Plain verify exits 2 on CliFx (it reports the
+whitespace and other analyzers' findings `format` leaves alone on purpose), 0 elsewhere.
 
 Trials 26-27 for comparison (their own reports, other days): PalCalc 447 s (build 8-22 s, plain `dotnet format` 29 s,
 on the formatted code), NLog 13 min (now ~6 min; build 10 s), Lua-CSharp 8.5 min (build 16 s, plain fix 1m40), Serde
@@ -117,9 +121,24 @@ The default configuration's fix process (162 s) costs about what plain `dotnet f
 (173 s): dotnet format's own pipeline is the floor of today's design, and everything else (planning, three checks,
 the other configurations, a second fix run) comes on top, 4x in all.
 
-System.IO.Abstractions (7 frameworks, a Release configuration, shared-file parts: 15 entries):
+System.IO.Abstractions (574 s; 7 frameworks, a Release configuration, shared-file parts: 15 entries; machine at 100 %
+CPU throughout, so every number here is inflated, the shape is what counts):
 
-IO_SECTION
+| Phase | Wall | What |
+|---|---|---|
+| Planning | 41 s | 99 `dotnet msbuild` evaluations (376 s of process time, 32 s wall), restore 6.7 s |
+| Run 1 check | 80 s | 15 entries at once (14-78 s each) |
+| Run 1 fixes | 318 s | 8 entries with findings, one after another: net10.0 87 s, net472 40 s, net6.0 22 s, net8.0 86 s, net9.0 19 s, netstandard2.0 19 s, netstandard2.1 21 s, net8.0 Release 24 s; mostly the **same library files** fixed again for each framework (113, 110, 55, 113, 8, 55, 55, 3 files with findings) |
+| Run 2 check (clean) | 127 s | 15 entries at once |
+
+Over both runs: 30 `dotnet format` processes; their workspace loads add up to 448 s (15 s each under this load), the
+analysis and fixes to 556 s. The plain `dotnet format` of the whole solution, same state, same load: one load of 40 s,
+271 s in all.
+
+`--verify-no-changes` on the clean state, for comparison: CliFx 160 s, of which planning 19 s, checks 38 s, and then
+**99 s of two `dotnet build -c Release --no-incremental`** (`UncheckedLine`: the configurations an in-solution generator
+keeps `format` from checking are built, one after another); io-abstractions 174 s (planning 81 s, of which evaluations
+58 s wall and restore 21 s; checks 90 s); PalCalc 191 s (planning 95 s, checks 90 s).
 
 ### dotnet format's fix loop
 
@@ -210,6 +229,7 @@ Expected gain, from the measurements:
 | PalCalc first run | 644 s | ~250-330 s: planning ~40 s, 3 loads ~60 s, analysis ~45 s, fixes ~90 s (dotnet format's loop, b halves it), re-checks incremental ~20 s |
 | PalCalc re-check run (2 files) | 162 s | ~10-20 s (no load, re-analysis of the changed documents) |
 | PalCalc verify, other state | 191 s | ~90-100 s (planning ~40 s, loads ~60 s, analysis) |
+| System.IO.Abstractions first run | 574 s (machine fully loaded) | ~200-280 s: 2 loads (default, Release) ~80 s instead of 30 (448 s summed), analysis of 15 entries, fixes ~the plain run's loop, incremental re-check |
 
 Risks:
 
@@ -327,6 +347,10 @@ vs semantic). Effort: medium; needs (a).
 
 - `dotnet format --verbosity diagnostic` output in `format` is deduplicated (`Show`), which hides per-process timings:
   a `--timings` option (phase durations per entry and run) would make these measurements repeatable for everyone.
+- Verify's builds of the configurations a generator keeps from being checked (`UncheckedLine`) run one after another
+  with `--no-incremental`: CliFx 99 s of a 160 s verify. One `dotnet build` of those projects in that configuration
+  (MSBuild builds them in parallel, a shared reference once) and incremental where the output is newer than the sources
+  would be a quick win of its own (Q6); the host doesn't change it, since the build is the check.
 - The IDE0005 follow-up run (`EnforcesUnusedUsings`) is a whole extra pass over every entry; with the host it is one
   more id in the loop, last.
 
@@ -347,8 +371,9 @@ vs semantic). Effort: medium; needs (a).
 ## Recommendation
 
 1. **Phase 0, quick wins** (one PR each, low risk): Q1 planning in one wave, Q3 verify from the clean record (key with
-   SDK and package versions), Q2 restore skip if the owner agrees, and a `--timings` option. Expected: PalCalc's verify
-   on the same state from 191 s to seconds, first runs 5-10 % faster.
+   SDK and package versions), Q6 verify's generator-configuration builds at once and incremental, Q2 restore skip if
+   the owner agrees, and a `--timings` option. Expected: verify on the state a clean `format` left from 160-191 s to
+   seconds, CliFx's verify on another state ~100 s faster, first runs 5-10 % faster.
 2. **Phase 1, the host for checks**: the in-process workspace, solution views and finding lines, used for the check
    phase and `--verify-no-changes` only (no fixes yet), with the parity harness comparing the findings. This proves
    loading, the views and the SDK's Roslyn with no risk to the code.
