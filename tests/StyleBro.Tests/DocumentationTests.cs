@@ -2527,6 +2527,106 @@ public class DocumentationTests
         }
         """);
 
+    // Trial 27 (TheAlgorithms): StyleCop's SA1623 compares the words ignoring case, so 'Gets or Sets key' is right (it
+    // became 'Gets or sets or Sets key'), and a wrong prefix in lower case is replaced, not prefixed.
+    [Fact]
+    public Task PropertySummaryWords_IgnoreCase() => VerifyFixAsync(
+        """
+        /// <summary>A node.</summary>
+        public class Node
+        {
+            /// <summary>Gets or Sets key for this node.</summary>
+            public int Key { get; set; }
+
+            /// <summary>gets the value.</summary>
+            public int Value { get; }
+
+            /// <summary>gets the count.</summary>
+            public int {|BRO1604:Count|} { get; set; }
+        }
+        """,
+        """
+        /// <summary>A node.</summary>
+        public class Node
+        {
+            /// <summary>Gets or Sets key for this node.</summary>
+            public int Key { get; set; }
+
+            /// <summary>gets the value.</summary>
+            public int Value { get; }
+
+            /// <summary>Gets or sets the count.</summary>
+            public int Count { get; set; }
+        }
+        """);
+
+    // Trial 27 (TheAlgorithms): like SA1623, an 'internal' accessor of a property only the assembly sees is as visible as
+    // the property, so it says 'Gets or sets'; a 'private' one stays restricted, and so does 'internal' in a public class.
+    [Fact]
+    public Task InternalAccessor_OfAnInternalProperty_IsNotRestricted() => VerifyFixAsync(
+        """
+        /// <summary>A node.</summary>
+        internal class BTreeNode
+        {
+            /// <summary>Gets or sets the key count.</summary>
+            public int KeyCount { get; internal set; }
+
+            /// <summary>Gets the size.</summary>
+            public int {|BRO1604:Size|} { get; internal set; }
+
+            /// <summary>Gets or sets the name.</summary>
+            public string {|BRO1605:Name|} { get; private set; }
+
+            /// <summary>Gets or sets the depth.</summary>
+            public int Depth { internal get; set; }
+
+            /// <summary>A tree.</summary>
+            public class Tree
+            {
+                /// <summary>Gets or sets the root.</summary>
+                public int Root { get; internal set; }
+            }
+        }
+
+        /// <summary>A tree.</summary>
+        public class Tree
+        {
+            /// <summary>Gets or sets the root.</summary>
+            public int {|BRO1605:Root|} { get; internal set; }
+        }
+        """,
+        """
+        /// <summary>A node.</summary>
+        internal class BTreeNode
+        {
+            /// <summary>Gets or sets the key count.</summary>
+            public int KeyCount { get; internal set; }
+
+            /// <summary>Gets or sets the size.</summary>
+            public int Size { get; internal set; }
+
+            /// <summary>Gets the name.</summary>
+            public string Name { get; private set; }
+
+            /// <summary>Gets or sets the depth.</summary>
+            public int Depth { internal get; set; }
+
+            /// <summary>A tree.</summary>
+            public class Tree
+            {
+                /// <summary>Gets or sets the root.</summary>
+                public int Root { get; internal set; }
+            }
+        }
+
+        /// <summary>A tree.</summary>
+        public class Tree
+        {
+            /// <summary>Gets the root.</summary>
+            public int Root { get; internal set; }
+        }
+        """);
+
     // FakeItEasy: StyleCop accepts '<see cref = "ArgumentCollection" />' in the standard sentence; it isn't rewritten.
     [Fact]
     public Task ConstructorSentence_WithSpacedCref_IsAccepted() => VerifyNoDiagnosticsAsync(

@@ -47,5 +47,27 @@ namespace Probe
 
         /// <summary>Gets the internal-get thing.</summary>
         public int InternalGet { internal get; set; }
+
+        /// <summary>Gets or Sets key for this node.</summary>
+        public int Key { get; set; }
+
+        /// <summary>gets the lower-case count.</summary>
+        public int LowerCount { get; set; }
+    }
+
+    /// <summary>A node.</summary>
+    internal class BTreeNode
+    {
+        /// <summary>Gets or sets the key count.</summary>
+        public int KeyCount { get; internal set; }
+
+        /// <summary>Gets the size.</summary>
+        public int Size { get; internal set; }
+
+        /// <summary>Gets or sets the name.</summary>
+        public string Name { get; private set; }
+
+        /// <summary>Gets or sets the depth.</summary>
+        public int Depth { internal get; set; }
     }
 }

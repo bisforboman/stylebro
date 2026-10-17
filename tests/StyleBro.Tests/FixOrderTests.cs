@@ -20,6 +20,25 @@ public class FixOrderTests
 
         """;
 
+    // Trial 27: a summary below an attribute documents nothing (BRO1602 makes it '//'); BRO1616 laid it out on three lines
+    // first in some orders. It leaves such comments to BRO1602 now.
+    [Fact]
+    public Task MisplacedSummary_IsLeftToBRO1602() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public sealed class Tests
+        {
+            [Obsolete("x")]
+            /// <summary>Checks the value.</summary>
+            public void Theory(int value)
+            {
+            }
+        }
+        """,
+        "BRO1602",
+        "BRO1616");
+
     [Fact]
     public Task Braces_AnElseChainThatBecomesInconsistent() => AssertConvergesInEveryOrderAsync(
         """

@@ -125,7 +125,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             else if (diagnostic.Id is DiagnosticIds.PropertySummaryWording or DiagnosticIds.PropertySummaryRestrictedSetter)
             {
                 if (root.FindToken(span.Start).Parent is PropertyDeclarationSyntax property
-                    && PropertySummaries.GetFinding(property, text, PropertySummaries.FollowsStyleSharp(options)) is { } finding)
+                    && PropertySummaries.GetFinding(property, text, await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false), PropertySummaries.FollowsStyleSharp(options)) is { } finding)
                 {
                     changes.Add(new TextChange(finding.Replace, finding.NewText));
                 }
