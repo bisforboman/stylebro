@@ -256,6 +256,11 @@
                 # A comment right below code with a blank line after it describes that code (eShop): the blank line stays.
                 'only StyleCop: BRO1506 More.cs(13,13)'
                 'StyleBro output only: More.cs: []'
+                # A comment right after '{' with a blank line below it is standalone (trial 27; the default 'allow' of
+                # stylebro_blank_line_below_standalone_comments): the blank line stays.
+                'only StyleCop: BRO1506 Header.cs(8,9)'
+                'only StyleCop: BRO1506 Header.cs(12,13)'
+                'StyleBro output only: Header.cs: []'
             )
         }
         @{
