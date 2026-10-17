@@ -116,7 +116,7 @@ internal static class Suppressions
 
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).OrderBy(f => f, StringComparer.Ordinal))
         {
-            var codes = NoWarn.Matches(System.IO.File.ReadAllText(file)).SelectMany(m => m.Groups[2].Value.Split(';', ',')).Select(c => c.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var codes = NoWarn.Matches(Migration.ReadOrNull(file) ?? string.Empty).SelectMany(m => m.Groups[2].Value.Split(';', ',')).Select(c => c.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
             var reset = rows.Where(r => codes.Contains(r.Sonar))
                 .SelectMany(r => r.Setting!.Split("; ").Select(setting => (r.Sonar, Key: setting.Split('=')[0].Trim())))
                 .Where(p => OptionDefaults.ContainsKey(p.Key) && lines.Any(l => l.Split('=')[0].Trim() == p.Key))

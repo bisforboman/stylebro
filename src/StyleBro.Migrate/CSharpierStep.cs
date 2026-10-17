@@ -50,7 +50,7 @@ internal static class CSharpierStep
         }
 
         // The CSharpier.MsBuild package carries CSharpier itself (its build runs 'dotnet exec .../CSharpier.dll').
-        var build = string.Join("\n", StyleCopSetup.EnumerateFiles(FormatCommand.RepositoryRoot(root) ?? root).Where(StyleCopSetup.IsMSBuild).Select(File.ReadAllText));
+        var build = string.Join("\n", StyleCopSetup.EnumerateFiles(FormatCommand.RepositoryRoot(root) ?? root).Where(StyleCopSetup.IsMSBuild).Select(f => Migration.ReadOrNull(f) ?? string.Empty));
         if (PackageVersion(build) is { } package && PackageDll(package) is { } dll)
         {
             return new Tool(Path.GetFullPath(root), ["exec", dll], Major(package) >= 1, folders, null);
@@ -229,7 +229,7 @@ internal static class CSharpierStep
             .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(f)
                 && set.GetOptionsForSourcePath(Path.GetFullPath(f)).AnalyzerOptions.TryGetValue("end_of_line", out var value)
                 && value.Trim().ToLowerInvariant() is "lf" or "crlf"
-                && HasOtherEnding(File.ReadAllText(f), value.Trim().Equals("crlf", StringComparison.OrdinalIgnoreCase)))
+                && HasOtherEnding(Migration.ReadOrNull(f) ?? string.Empty, value.Trim().Equals("crlf", StringComparison.OrdinalIgnoreCase)))
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
     }

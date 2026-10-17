@@ -324,7 +324,7 @@ internal sealed class SonarSetup
     {
         var found = new List<string>();
         var named = false;
-        var texts = msbuild.Distinct(StringComparer.OrdinalIgnoreCase).Select(f => StyleCopSetup.WithoutComments(File.ReadAllText(f))).ToList();
+        var texts = msbuild.Distinct(StringComparer.OrdinalIgnoreCase).Select(f => StyleCopSetup.WithoutComments(Migration.ReadOrNull(f) ?? string.Empty)).ToList();
         foreach (var text in texts)
         {
             foreach (Match match in Package.Matches(text))
@@ -345,7 +345,7 @@ internal sealed class SonarSetup
 
         foreach (var config in files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)))
         {
-            found.AddRange(OldStylePackage.Matches(File.ReadAllText(config)).Select(m => m.Groups["v"].Value));
+            found.AddRange(OldStylePackage.Matches(Migration.ReadOrNull(config) ?? string.Empty).Select(m => m.Groups["v"].Value));
         }
 
         return found.OrderBy(v => ParseVersion(v) ?? new System.Version(int.MaxValue, 0)).FirstOrDefault() ?? (named ? "?" : null);

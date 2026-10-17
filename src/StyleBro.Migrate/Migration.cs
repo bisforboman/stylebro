@@ -248,8 +248,9 @@ internal static class Migration
         AddMemberOrder(setup, lines);
         lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = {result.FieldStyle}");
 
-        // Pinned like the static style below: a naming rule for static fields StyleCop never enforced doesn't apply.
-        lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey} = {result.FieldStyle}");
+        // Pinned like the static style below: a naming rule for static fields StyleCop never enforced doesn't apply. One the
+        // code doesn't contradict does (MutableStaticStyle).
+        lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey} = {MutableStaticStyle(setup, root, result)}");
 
         // StyleCop wants private constants and static readonly fields in PascalCase (SA1303, SA1311), whatever the SDK's
         // naming rules say: pinned, so BRO1306 doesn't follow a naming rule StyleCop never enforced.
@@ -1111,6 +1112,43 @@ internal static class Migration
         return (underscore, plain);
     }
 
+    /// <summary>
+    /// The style of private static fields that aren't readonly: BRO1303's (<see cref="Result.FieldStyle"/>, from SA1309), or
+    /// the one the root .editorconfig's naming rule for them asks for, when IDE1006 isn't off and no such field in the code
+    /// breaks it (trial 27, TheAlgorithms: the rule asked for '_camelCase', SA1309 for 'camelCase', and there was no such
+    /// field; after the swap the naming rule is what's left). A StyleCop-clean repository with such fields keeps SA1309's.
+    /// </summary>
+    internal static string MutableStaticStyle(StyleCopSetup setup, string root, Result result)
+    {
+        var own = OwnSettings(root);
+        var style = InitCommand.NamingRulesOff(own) ? null : StyleBro.Analyzers.Naming.FieldNames.GetStyles(new Conventions.Options(own)).MutableStatic switch
+        {
+            StyleBro.Analyzers.Naming.FieldStyle.CamelCase => "camelCase",
+            StyleBro.Analyzers.Naming.FieldStyle.UnderscoreCamelCase => "_camelCase",
+            _ => null,
+        };
+        if (style is null || style == result.FieldStyle)
+        {
+            return result.FieldStyle;
+        }
+
+        var breaking = OwnCSharpFiles(root)
+            .Where(f => setup.Folders is null || setup.Folders.Any(folder => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), folder)))
+            .Select(f => (Relative: Path.GetRelativePath(root, f), Text: ReadOrNull(f)))
+            .Where(f => f.Text is not null && !IsGeneratedOrVendored(f.Relative, f.Text))
+            .SelectMany(f => CSharpSyntaxTree.ParseText(f.Text!).GetRoot().DescendantNodes().OfType<FieldDeclarationSyntax>())
+            .Where(f => f.Modifiers.Any(SyntaxKind.StaticKeyword) && !f.Modifiers.Any(m => m.Kind() is SyntaxKind.ReadOnlyKeyword or SyntaxKind.ConstKeyword or SyntaxKind.PublicKeyword or SyntaxKind.InternalKeyword or SyntaxKind.ProtectedKeyword))
+            .SelectMany(f => f.Declaration.Variables)
+            .Count(v => v.Identifier.ValueText.StartsWith('_') != (style == "_camelCase"));
+        if (breaking > 0)
+        {
+            return result.FieldStyle;
+        }
+
+        result.Notes.Add($"Private static fields: your naming rule asks for '{style}', and none in the code says otherwise, so BRO1303 follows it there (SA1309 gives the other private fields '{result.FieldStyle}').");
+        return style;
+    }
+
     /// <summary>One file's private instance and static fields, by whether they start with '_'.</summary>
     internal static (int Underscore, int Plain) CountPrivateFields(SyntaxTree tree)
     {
@@ -1157,7 +1195,7 @@ internal static class Migration
 
         return Topmost(StyleCopSetup.EnumerateFiles(root, ownRoot: true)
             .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && Path.GetDirectoryName(f) != root.TrimEnd('\\', '/'))
-            .Where(f => IsEfMigration(File.ReadAllText(f)))
+            .Where(f => IsEfMigration(ReadOrNull(f) ?? string.Empty))
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/')));
     }
 
@@ -1173,11 +1211,41 @@ internal static class Migration
             return new List<string>();
         }
 
-        return Topmost(StyleCopSetup.EnumerateFiles(root, ownRoot: true)
+        var files = StyleCopSetup.EnumerateFiles(root, ownRoot: true).ToList();
+        return Topmost(files
             .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/').Split('/'))
             .Where(parts => parts.Any(IsVendorFolder))
-            .Select(parts => string.Join("/", parts.Take(Array.FindIndex(parts, IsVendorFolder) + 1))));
+            .Select(parts => string.Join("/", parts.Take(Array.FindIndex(parts, IsVendorFolder) + 1)))
+            .Concat(LicensedFolders(root, files)));
+    }
+
+    /// <summary>
+    /// The folders below the root (relative, '/'-separated) with C# files and a license file of their own whose copyright
+    /// holder isn't the root license's, neither name containing the other: another project's code copied in (trial 27:
+    /// PalCalc's adonis-ui/ and its AutoCompleteComboBox fork, tab-indented, took 194 of 476 formatted files). Nothing without
+    /// a root license or a copyright line to compare. ponytail: a vendored folder without a license of its own (PalCalc's
+    /// GraphSharp/) isn't recognized; the docs say how to mark it.
+    /// </summary>
+    internal static IEnumerable<string> LicensedFolders(string root, IReadOnlyList<string> files)
+    {
+        var top = Path.GetFullPath(root).TrimEnd('\\', '/');
+        static bool IsLicense(string file) => Path.GetFileName(file).ToUpperInvariant() is var name && (name.StartsWith("LICENSE", StringComparison.Ordinal) || name.StartsWith("LICENCE", StringComparison.Ordinal) || name.StartsWith("COPYING", StringComparison.Ordinal));
+        var licenses = files.Where(IsLicense).ToList();
+        if (licenses.FirstOrDefault(f => string.Equals(Path.GetDirectoryName(Path.GetFullPath(f)), top, StringComparison.OrdinalIgnoreCase)) is not { } own
+            || CopyrightHolder(ReadOrNull(own)) is not { } holder)
+        {
+            return [];
+        }
+
+        var csharpFolders = files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/')).Distinct().ToList();
+        return licenses
+            .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
+            .Where(folder => csharpFolders.Any(c => c == folder || IsUnder(c, folder)))
+            .Where(folder => licenses.Where(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/') == folder).Select(f => CopyrightHolder(ReadOrNull(f))).OfType<string>()
+                .Any(other => !other.Contains(holder, StringComparison.Ordinal) && !holder.Contains(other, StringComparison.Ordinal)))
+            .Distinct()
+            .ToList();
     }
 
     /// <summary>
@@ -1188,7 +1256,7 @@ internal static class Migration
     internal static IEnumerable<string> OwnCSharpFiles(string root)
     {
         var files = StyleCopSetup.EnumerateFiles(root, ownRoot: true).ToList();
-        var marked = MarkedGeneratedFolders(root).Concat(OptOutFolders(root, files)).ToList();
+        var marked = MarkedGeneratedFolders(root).Concat(OptOutFolders(root, files)).Concat(MarksGeneratedCode(root) ? [] : LicensedFolders(root, files)).ToList();
         var uncompiled = Uncompiled(files);
         return files.Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
             && (marked.Count == 0 || !marked.Any(m => IsUnder(Path.GetRelativePath(root, f).Replace('\\', '/'), m)))
@@ -1226,7 +1294,7 @@ internal static class Migration
     internal static Func<string, bool> Uncompiled(IReadOnlyCollection<string> files)
     {
         var projects = files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Select(Path.GetFullPath).ToList();
-        var explicitItems = projects.Where(p => ExplicitCompileItems.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(p)))).ToList();
+        var explicitItems = projects.Where(p => ExplicitCompileItems.IsMatch(StyleCopSetup.WithoutComments(ReadOrNull(p) ?? string.Empty))).ToList();
         if (explicitItems.Count == 0)
         {
             return _ => false;
@@ -1307,7 +1375,7 @@ internal static class Migration
 
         var systemFirst = !ownSettings.TryGetValue(Conventions.SortUsingsKey, out var value) || !value.Split(':')[0].Trim().Equals("false", StringComparison.OrdinalIgnoreCase);
         var unsorted = OwnCSharpFiles(root)
-            .Select(f => (Relative: Path.GetRelativePath(root, f).Replace('\\', '/'), Text: File.ReadAllText(f)))
+            .Select(f => (Relative: Path.GetRelativePath(root, f).Replace('\\', '/'), Text: ReadOrNull(f) ?? string.Empty))
             .Where(f => (setup.Folders is null || setup.Folders.Any(folder => IsUnder(f.Relative, folder))) && !IsGeneratedOrVendored(f.Relative, f.Text)
                 && !Conventions.UsingsSorted(CSharpSyntaxTree.ParseText(f.Text).GetRoot(), systemFirst))
             .Select(f => f.Relative)
@@ -1327,7 +1395,7 @@ internal static class Migration
 
         // Only files whose sorted usings the enforced rule would report stay as they are (spot a4: SA1210 alone, 'Microsoft.*'
         // above 'System': format puts System first, which SA1210 accepts under systemUsingDirectivesFirst).
-        var held = unsorted.Where(f => !AcceptsSorted(setup, File.ReadAllText(Path.Combine(root, f)), systemFirst)).ToList();
+        var held = unsorted.Where(f => !AcceptsSorted(setup, ReadOrNull(Path.Combine(root, f)) ?? string.Empty, systemFirst)).ToList();
         var reordered = unsorted.Except(held).ToList();
         var notes = new List<string>();
         if (reordered.Count > 0)
@@ -1417,6 +1485,13 @@ internal static class Migration
 
     internal static bool IsUnder(string path, string folder) =>
         folder is "" or "." || path.StartsWith(folder.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>The first copyright line's holder, lower-case, without '(c)', '©', years and punctuation; null without one.</summary>
+    private static string? CopyrightHolder(string? license) =>
+        license is not null && Regex.Match(license, @"^\s*Copyright\b(.*)$", RegexOptions.Multiline | RegexOptions.IgnoreCase) is { Success: true } line
+        && Regex.Replace(line.Groups[1].Value.ToLowerInvariant(), @"\(c\)|©|\d|[^\p{L}\s]", " ").Trim() is { Length: > 0 } text
+            ? Regex.Replace(text, @"\s+", " ")
+            : null;
 
     /// <summary>A project's Compile items (full paths), evaluated once per process; null when MSBuild can't evaluate it.</summary>
     private static HashSet<string>? CompileItems(string project)

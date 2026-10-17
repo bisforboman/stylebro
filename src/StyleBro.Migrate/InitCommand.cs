@@ -500,7 +500,8 @@ internal static class InitCommand
                 var line = sonarLines.First(l => l.StartsWith(convention.Key + " ", StringComparison.Ordinal));
                 decided[convention.Key] = $"set by the Sonar setup ({line.Substring(line.IndexOf('=') + 1).Trim()})";
             }
-            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>(), .. convention.Key == Conventions.StaticPrefixKey ? StaticPrefixKeys : []], SharesOff(convention) || convention.Key == Conventions.StaticPrefixKey ? convention.What : null) is { Count: > 0 } lines)
+            else if (KeptLines(previous, [convention.Key, .. convention.AlsoKeys, .. convention.Off is { } off ? [KeyOf(off)!] : Array.Empty<string>(), .. convention.Key == Conventions.StaticPrefixKey ? StaticPrefixKeys : []], SharesOff(convention) || convention.Key == Conventions.StaticPrefixKey ? convention.What : null) is { Count: > 0 } lines
+                && !SaysTheSame(lines, style))
             {
                 var setting = lines.Last();
                 decided[convention.Key] = $"kept from the last init ({setting.Substring(setting.IndexOf('=') + 1).Trim()})";
@@ -1188,7 +1189,7 @@ internal static class InitCommand
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             || f.EndsWith(".props", StringComparison.OrdinalIgnoreCase)))
         {
-            if (several.IsMatch(File.ReadAllText(file)))
+            if (several.IsMatch(Migration.ReadOrNull(file) ?? string.Empty))
             {
                 yield return Path.GetRelativePath(root, file);
             }
@@ -1229,7 +1230,7 @@ internal static class InitCommand
         var directory = Path.GetDirectoryName(file);
         while (file is not null)
         {
-            var text = File.ReadAllText(file);
+            var text = Migration.ReadOrNull(file) ?? string.Empty;
             if (langVersion.IsMatch(text))
             {
                 return true;
@@ -1406,7 +1407,7 @@ internal static class InitCommand
     {
         const string Category = "dotnet_analyzer_diagnostic.category-Style.severity";
         if (settings.ContainsKey(Category) || settings.ContainsKey("dotnet_analyzer_diagnostic.severity") || !EnforcesCodeStyleInBuild(root)
-            || !StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<AnalysisMode(?:Style)?>\s*All\s*<", RegexOptions.IgnoreCase)))
+            || !StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(Migration.ReadOrNull(f) ?? string.Empty, @"<AnalysisMode(?:Style)?>\s*All\s*<", RegexOptions.IgnoreCase)))
         {
             return settings;
         }
@@ -1416,7 +1417,15 @@ internal static class InitCommand
 
     /// <summary>Whether an MSBuild file under the root sets EnforceCodeStyleInBuild to true (then init doesn't suggest it).</summary>
     public static bool EnforcesCodeStyleInBuild(string root) =>
-        StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(File.ReadAllText(f), @"<EnforceCodeStyleInBuild>\s*true\s*<", RegexOptions.IgnoreCase));
+        StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => Regex.IsMatch(Migration.ReadOrNull(f) ?? string.Empty, @"<EnforceCodeStyleInBuild>\s*true\s*<", RegexOptions.IgnoreCase));
+
+    /// <summary>
+    /// Whether a style sets every key of an earlier init's lines to the same value: the lines are redundant, and the code is
+    /// counted again (trial 27: after a plain init, 'init --style microsoft' kept 'stylebro_private_field_naming = _camelCase').
+    /// </summary>
+    internal static bool SaysTheSame(IReadOnlyList<string> lines, IReadOnlyDictionary<string, string>? style) =>
+        style is not null && lines.Where(l => KeyOf(l) is not null).ToList() is { Count: > 0 } settings
+        && settings.All(l => style.TryGetValue(KeyOf(l)!, out var value) && value.Equals(l.Substring(l.IndexOf('=') + 1).Trim(), StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// The sections for the parts of the repository with their own Sonar severities (a path section of the root
@@ -1595,14 +1604,14 @@ internal static class InitCommand
         }
 
         var files = StyleCopSetup.EnumerateFiles(folder).Where(StyleCopSetup.IsMSBuild).ToList();
-        return !files.Any(f => File.ReadAllText(f).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase))
+        return !files.Any(f => (Migration.ReadOrNull(f) ?? string.Empty).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase))
             && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => listing.Any(s => s.Text.Contains(Path.GetRelativePath(s.Folder, p).Replace('\\', '/'), StringComparison.OrdinalIgnoreCase)));
     }
 
     /// <summary>The solutions (.sln, .slnx, .slnf) among <paramref name="files"/>: folder and text, '/'-separated.</summary>
     private static List<(string Folder, string Text)> Solutions(IEnumerable<string> files) =>
         files.Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf")
-            .Select(f => (Path.GetDirectoryName(Path.GetFullPath(f))!, File.ReadAllText(f).Replace('\\', '/')))
+            .Select(f => (Path.GetDirectoryName(Path.GetFullPath(f))!, (Migration.ReadOrNull(f) ?? string.Empty).Replace('\\', '/')))
             .ToList();
 
     /// <summary>

@@ -218,8 +218,9 @@ forms in your C# (generated code, EF Core migrations, vendored folders, submodul
 turns every analyzer off or says `generated_code = true` don't count; code inside `#if`
 counts too, as `format` sees it in the target framework that defines the symbol):
 
-Vendored folders are recognized by their name (`vendor`, `third_party`, ...). Code copied in under another name (a
-`src/Sdk` from another product) counts as yours and can decide a convention; mark its folder `generated_code = true` in
+Vendored folders are recognized by their name (`vendor`, `third_party`, ...), or by a license file of their own whose
+copyright holder isn't your root license's (a fork copied in with its `LICENSE`). Code copied in under another name
+without a license of its own (a `src/Sdk` from another product) counts as yours and can decide a convention; mark its folder `generated_code = true` in
 your root `.editorconfig` (`[src/Sdk/**]`, see [excluding vendored code](#excluding-vendored-code)) and run `init` again:
 folders marked that way don't count.
 
@@ -389,8 +390,9 @@ A few settings work a little differently:
 - **Usings inside a namespace** ([BRO1126](rules/BRO1126.md)) count fully qualified ones (`using Company.App.Common;`)
   and ones relative to an enclosing namespace (`using Common;` inside `namespace Company.App.Orders`). Mostly qualified:
   the rule stays on; mostly relative or mixed: it's turned off (Fitnet: 91 qualified, 92 relative). A name is relative
-  when an enclosing namespace has a namespace your code declares with its first part; a namespace from a package doesn't
-  count.
+  when an enclosing namespace has a namespace or type your code declares with its first part (`using H = Helper;` next
+  to a class `App.Helper`), or, inside a `System` or `Microsoft` namespace, one of the runtime's (`using Text;` inside
+  `namespace System.IO.Abstractions`); a namespace from a package doesn't count.
 - **File headers with empty `//` lines**: when your `file_header_template` starts or ends with a line break (IDE0073
   writes an empty `//` line there), or most files' headers start or end with an empty `//` line, `init` turns
   [BRO1120](rules/BRO1120.md) off: it would remove those lines, and every new file from the template would bring them
@@ -450,8 +452,10 @@ A few settings work a little differently:
   A `Directory.Build.props` it has to create below another one imports that one, so nothing the projects read gets lost.
 - **Run from a subfolder**: when the folder you run `init` (or `stylebro-migrate --write`) in is part of a git repository
   whose build reaches past it (a `Directory.Build.props`, `Directory.Packages.props`, `.editorconfig` or `.globalconfig`
-  above it, or a solution in it that lists projects outside it, like `build/App.sln`), it works on the repository's root
-  and says so. A self-contained folder stays on its own.
+  above it, a solution in it that lists projects outside it, like `build/App.sln`, a solution above it that lists its
+  projects, a project in it that references one outside it, or no project in it at all), it works on the repository's
+  root and says so. A folder with its own `Directory.Build.props` or `root = true` `.editorconfig`, or a self-contained
+  folder no solution above lists, stays on its own.
 - **`.globalconfig`**: the root's `.globalconfig` counts like its `.editorconfig` for what your team set and enforces (a
   `this.` it requires, its IDE0055 severity, the conventions' keys). With `AnalysisMode` `All` and
   `EnforceCodeStyleInBuild`, every code-style rule is a warning in the build, so a `dotnet_style_qualification_for_* = true`
@@ -600,7 +604,8 @@ then writes neither the setting nor the `severity = none` line.
 
 EF Core migrations (files with `[Migration(...)]`, a `Migration` base class or a `ModelSnapshot`) are written by
 `dotnet ef`, so `init` marks their folders `generated_code = true`: formatting and StyleBro leave them alone. Vendored
-folders (`vendor`, `vendored`, `third_party`, `thirdparty`, `external`) get the same section.
+folders (`vendor`, `vendored`, `third_party`, `thirdparty`, `external`, or a folder with a license of another copyright
+holder than the root's) get the same section.
 
 When it finds a StyleCop setup (`stylecop.json`, StyleCop rule ids in `.editorconfig`, rulesets or
 global configs, a StyleCop.Analyzers reference), it stops without writing and tells you to run
@@ -739,7 +744,9 @@ Then check the report from step 1 for rules your team relied on that nothing enf
 
 For code written like dotnet/runtime's (`_camelCase` and `s_camelCase` fields, no `this.`, braces optional on one-line
 bodies), `stylebro-migrate init --style microsoft --write` puts that style on top of the preset instead of StyleCop's
-defaults; your code's own conventions still win. Plain `init` suggests it when your code looks like that. What it sets:
+defaults; your code's own conventions still win, apart from private static fields: they get the style's `s_` unless
+your code clearly has none (the report says how many get it). Lines an earlier `init` wrote that the style says too
+are dropped. Plain `init` suggests it when your code looks like that. What it sets:
 [styles.md](styles.md).
 
 ## Newer C# and APIs (optional)
