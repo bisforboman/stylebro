@@ -2407,11 +2407,12 @@ public class DocumentationTests
         Assert.Equal(malformed, DocumentationComments.IsMalformed(comment));
     }
 
-    // Only blank lines that reach the member go: a directive between them and the member stays where it is.
+    // Only blank lines that reach the member go: a directive between them and the member stays where it is. The comment
+    // follows a '}' (right after '{' it stands on its own, trial 27).
     [Fact]
     public Task InheritDoc_BelowACommentBlankLineAndDirective() => VerifyFixAsync(
-        "/// <summary>A.</summary>\npublic class C\n{\n    // Explains it.\n\n#pragma warning disable CS0618\n    public override string {|BRO1601:ToString|}() => \"c\";\n}\n",
-        "/// <summary>A.</summary>\npublic class C\n{\n    // Explains it.\n\n#pragma warning disable CS0618\n    /// <inheritdoc/>\n    public override string ToString() => \"c\";\n}\n");
+        "/// <summary>A.</summary>\npublic class C\n{\n    /// <summary>B.</summary>\n    public void B()\n    {\n    }\n    // Explains it.\n\n#pragma warning disable CS0618\n    public override string {|BRO1601:ToString|}() => \"c\";\n}\n",
+        "/// <summary>A.</summary>\npublic class C\n{\n    /// <summary>B.</summary>\n    public void B()\n    {\n    }\n    // Explains it.\n\n#pragma warning disable CS0618\n    /// <inheritdoc/>\n    public override string ToString() => \"c\";\n}\n");
 
     // Trial 20: a top-level <placeholder> would leave its text outside any element once unwrapped: not reported.
     [Fact]

@@ -2294,6 +2294,33 @@ public class FixOrderTests
         "BRO1112",
         "BRO1505");
 
+    // The blank line BRO1505 wants below a method's '}' lands in the slot of a field sorted below another field: the regions
+    // fix makes BRO1505's blank lines before it sorts, as BRO1505 does when it runs first (members that stay neighbours
+    // keep their gap since trial 27, so the case above no longer needs it).
+    [Fact]
+    public Task Regions_RemovedAroundAFieldMissingItsBlankLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            #region All
+            public void M()
+            {
+            }
+            private int b;
+
+            public void N()
+            {
+            }
+
+            private int c;
+            #endregion
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "BRO1001",
+        "BRO1112",
+        "BRO1505");
+
     [Fact]
     public Task EmptyParentheses_InsideASplitListWithTheFirstItemOnTheSameLine() => AssertConvergesInEveryOrderWithConfigAsync(
         """
