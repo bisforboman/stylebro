@@ -97,18 +97,25 @@
   <!--
     The folders source generators write to, for GeneratedFileSuppressor: the compiler puts generated files under the
     intermediate output folder (obj/), or under CompilerGeneratedFilesOutputPath when EmitCompilerGeneratedFiles is on.
-    A target, so both paths are final. '|'-separated.
+    Also the files a T4 template writes (a Compile item with DependentUpon '*.tt' or AutoGen True): generated code too
+    (trial 28). A target, so both paths are final. '|'-separated.
   -->
   <Target Name="_StyleBroFindGeneratedFolders" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroGeneratedFolders)' == ''">
+    <ItemGroup>
+      <_StyleBroTemplateOutput Include="@(Compile)" Condition="'%(Compile.AutoGen)' == 'true' or $([System.String]::Copy('%(Compile.DependentUpon)').ToLowerInvariant().EndsWith('.tt'))" />
+    </ItemGroup>
     <PropertyGroup>
       <StyleBroGeneratedFolders Condition="'$(BaseIntermediateOutputPath)' != ''">$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(BaseIntermediateOutputPath)'))))</StyleBroGeneratedFolders>
       <StyleBroGeneratedFolders Condition="'$(EmitCompilerGeneratedFiles)' == 'true' and '$(CompilerGeneratedFilesOutputPath)' != ''">$(StyleBroGeneratedFolders)|$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(CompilerGeneratedFilesOutputPath)'))))</StyleBroGeneratedFolders>
+      <StyleBroGeneratedFolders Condition="'@(_StyleBroTemplateOutput)' != ''">$(StyleBroGeneratedFolders)|@(_StyleBroTemplateOutput->'%(FullPath)', '|')</StyleBroGeneratedFolders>
     </PropertyGroup>
   </Target>
   <!--
     The repository's git submodules, for PackageFileSuppressor: another repository's code a project compiles (SixLabors'
     shared-infrastructure) can't be fixed here, and 'dotnet format' skips it. Their paths come from the .gitmodules
-    nearest above the project. '|'-separated.
+    nearest above the project, without the ones at or above StyleBroRepositoryRoot: in a submodule's own checkout that's
+    the superproject's .gitmodules, which names the submodule itself (trial 28: all of its own findings were hidden).
+    '|'-separated.
   -->
   <Target Name="_StyleBroFindSubmodules" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroSubmoduleFolders)' == ''">
     <PropertyGroup>
@@ -119,6 +126,12 @@
     </ReadLinesFromFile>
     <ItemGroup>
       <_StyleBroSubmodule Include="$([MSBuild]::NormalizeDirectory('$(_StyleBroGitRoot)', $([System.Text.RegularExpressions.Regex]::Replace('%(_StyleBroGitModulesLine.Identity)', '^\s*path\s*=\s*', '').Trim())))" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(_StyleBroGitModulesLine.Identity)', '^\s*path\s*='))" />
+    </ItemGroup>
+    <PropertyGroup Condition="'$(StyleBroRepositoryRoot)' != '' and '$(StyleBroRepositoryRoot)' != 'none'">
+      <_StyleBroRepositoryFolder>$([MSBuild]::NormalizeDirectory('$(StyleBroRepositoryRoot)').ToUpperInvariant())</_StyleBroRepositoryFolder>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(_StyleBroRepositoryFolder)' != ''">
+      <_StyleBroSubmodule Remove="@(_StyleBroSubmodule)" Condition="$(_StyleBroRepositoryFolder.StartsWith($([System.String]::Copy('%(_StyleBroSubmodule.Identity)').ToUpperInvariant())))" />
     </ItemGroup>
     <PropertyGroup>
       <StyleBroSubmoduleFolders>@(_StyleBroSubmodule, '|')</StyleBroSubmoduleFolders>

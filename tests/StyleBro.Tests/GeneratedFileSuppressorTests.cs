@@ -46,6 +46,10 @@ public class GeneratedFileSuppressorTests
     [InlineData(@"C:\repo\src\RestSharp\object\Rest.cs", null, false)]
     [InlineData(@"C:\repo\src\Other\obj\Debug\net8.0\G\T\Hint.cs", Folders, false)]
     [InlineData(@"C:\repo\src\Other\..\RestSharp\obj\Debug\net8.0\G\T\Hint.cs", Folders, true)]
+
+    // Trial 28 (ZLogger): a file a T4 template writes is listed by itself.
+    [InlineData(@"C:\repo\src\ZLogger\MessageTemplate.Format.cs", @"C:\repo\src\ZLogger\obj\|C:\repo\src\ZLogger\MessageTemplate.Format.cs", true)]
+    [InlineData(@"C:\repo\src\ZLogger\ZLogger.cs", @"C:\repo\src\ZLogger\obj\|C:\repo\src\ZLogger\MessageTemplate.Format.cs", false)]
     public void IsGeneratedFile(string path, string? folders, bool expected)
     {
         Assert.Equal(expected, GeneratedFileSuppressor.IsGeneratedFile(path, folders));

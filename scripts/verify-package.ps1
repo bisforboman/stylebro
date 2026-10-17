@@ -21,6 +21,8 @@
 #      after 'init --write --style microsoft', 'dotnet format' removes 'this.' (IDE0003) and a second run changes nothing.
 #  11. a file a project compiles from outside its git repository ('..\..\..\outside\Shared.cs') isn't checked, with a
 #      '.git' folder or a '.git' file (a worktree) above the project; <StyleBroRepositoryRoot>none</StyleBroRepositoryRoot> checks it.
+#  12. a submodule's own checkout (the superproject's .gitmodules names its folder) is checked; the superproject hides it;
+#  13. a file a T4 template writes (DependentUpon '*.tt') isn't checked.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -252,6 +254,35 @@ try {
         Check (($linked -contains 'BRO1106 Own.cs') -and -not ($linked -contains 'BRO1106 Shared.cs')) "with a '.git' $kind, BRO1106 is reported in the project's file and not in the file outside the repository"
     }
     Check ((Build @('-p:StyleBroRepositoryRoot=none') $linkProject) -contains 'BRO1106 Shared.cs') 'with StyleBroRepositoryRoot none, it is reported there'
+
+    Write-Host "== 12. A submodule's own checkout is checked; the superproject's build hides it"
+    $sup = Join-Path $work 'sup'
+    $subApp = Join-Path $sup 'ext/lib/src/Lib'
+    $supApp = Join-Path $sup 'src/App'
+    New-Item -ItemType Directory -Force (Join-Path $sup '.git'), $subApp, $supApp | Out-Null
+    Set-Content (Join-Path $sup '.git/HEAD') 'ref: refs/heads/main'
+    Set-Content (Join-Path $sup '.gitmodules') "[submodule `"ext/lib`"]`n`tpath = ext/lib`n`turl = ../lib`n"
+    Set-Content (Join-Path $sup 'ext/lib/.git') 'gitdir: ../../.git/modules/ext/lib'
+    Copy-Item (Join-Path $repo 'nuget.config') $sup
+    Set-Content (Join-Path $subApp 'Util.cs') "namespace Lib;`n`npublic class Util`n{`n    public string Name = `"`";`n}`n" -NoNewline
+    $subProject = Join-Path $subApp 'Lib.csproj'
+    Set-Content $subProject (Get-Content $project -Raw)
+    Check ((Build @() $subProject) -contains 'BRO1106 Util.cs') "in the submodule's own checkout, its findings are reported"
+    $supProject = Join-Path $supApp 'App.csproj'
+    Set-Content $supProject ((Get-Content $project -Raw).Replace('</Project>', "  <ItemGroup><Compile Include=`"..\..\ext\lib\src\Lib\Util.cs`" Link=`"Util.cs`" /></ItemGroup>`n</Project>"))
+    Check (-not ((Build @() $supProject) -contains 'BRO1106 Util.cs')) "the superproject's build hides the submodule file's findings"
+
+    Write-Host '== 13. Files a T4 template writes are generated code'
+    $t4App = Join-Path $work 't4/src/T4'
+    New-Item -ItemType Directory -Force $t4App | Out-Null
+    Copy-Item (Join-Path $repo 'nuget.config') (Join-Path $work 't4')
+    Set-Content (Join-Path $t4App 'Format.tt') '<#@ template language="C#" #>'
+    Set-Content (Join-Path $t4App 'Format.cs') "namespace T4;`n`npublic class Format`n{`n    public string Name = `"`";`n}`n" -NoNewline
+    Set-Content (Join-Path $t4App 'Own.cs') "namespace T4;`n`npublic class Own`n{`n    public string Name = `"`";`n}`n" -NoNewline
+    $t4Project = Join-Path $t4App 'T4.csproj'
+    Set-Content $t4Project ((Get-Content $project -Raw).Replace('</Project>', "  <ItemGroup><Compile Update=`"Format.cs`"><AutoGen>True</AutoGen><DependentUpon>Format.tt</DependentUpon></Compile></ItemGroup>`n</Project>"))
+    $t4 = Build @() $t4Project
+    Check (($t4 -contains 'BRO1106 Own.cs') -and -not ($t4 -contains 'BRO1106 Format.cs')) "BRO1106 is reported in the project's file and not in the template's"
 }
 finally {
     Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue

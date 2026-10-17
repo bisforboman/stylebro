@@ -1063,6 +1063,18 @@ internal static class Migration
         : new HashSet<string> { "SA1634", "SA1637", "SA1638", "SA1639", "SA1640", "SA1641" };
 
     /// <summary>
+    /// The C# files a T4 template beside them writes ('Format.tt' writes 'Format.cs'), relative to <paramref name="root"/>
+    /// with '/': generated code that 'format' leaves alone (the build's GeneratedFileSuppressor knows them by DependentUpon).
+    /// </summary>
+    public static List<string> TextTemplateOutputs(string root) =>
+        StyleCopSetup.EnumerateFiles(root)
+            .Where(f => f.EndsWith(".tt", StringComparison.OrdinalIgnoreCase))
+            .Select(f => Path.ChangeExtension(f, ".cs"))
+            .Where(File.Exists)
+            .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
+            .ToList();
+
+    /// <summary>
     /// The files (relative to <paramref name="root"/>, '/'-separated) the stylebro-migrate block's <see cref="KeptUsingsPrefix"/>
     /// line names: their usings follow the ordering rule the team enforces, which disagrees with the sort key, so 'format'
     /// leaves them alone (<see cref="UnsortedUnderOwnKey"/>).

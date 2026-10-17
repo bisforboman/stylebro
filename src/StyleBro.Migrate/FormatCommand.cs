@@ -4095,6 +4095,13 @@ internal static class FormatCommand
             Exclude(keptUsings);
         }
 
+        // Files a T4 template writes (owner's choice 2026-10-17, trial 28: ZLogger): the template writes them again, so they
+        // are generated code; the package's build targets hide StyleBro's findings there too (GeneratedFileSuppressor).
+        if (Migration.TextTemplateOutputs(root) is { Count: > 0 } templates)
+        {
+            Exclude(templates);
+        }
+
         // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles.
         if (OldMacLineEndings(root) is { Count: > 0 } oldMac)
         {
