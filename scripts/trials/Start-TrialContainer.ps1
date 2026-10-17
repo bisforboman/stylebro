@@ -24,7 +24,7 @@ param(
     [switch]$Remove)
 $ErrorActionPreference = 'Stop'
 
-function Docker {
+function Invoke-Docker {
     & docker @args
     if ($LASTEXITCODE -ne 0) { throw "docker $($args -join ' ') failed ($LASTEXITCODE)" }
 }
@@ -33,14 +33,14 @@ $label = "stylebro-trial=$Trial"
 if ($Remove) {
     $filter = if ($Name) { "name=^stylebro-trial$Trial-$Name$" } else { "label=$label" }
     $ids = docker ps -aq --filter $filter --filter "label=$label"
-    if ($ids) { Docker rm -f @ids | Out-Null }
+    if ($ids) { Invoke-Docker rm -f @ids | Out-Null }
     "Removed $(@($ids).Count) container(s)."
     return
 }
 if (-not $Name) { throw '-Name is required (except with -Remove).' }
 $container = "stylebro-trial$Trial-$Name"
 if ($Stop) {
-    Docker stop $container | Out-Null
+    Invoke-Docker stop $container | Out-Null
     "Stopped $container."
     return
 }
@@ -68,17 +68,17 @@ if ($Windows) {
 }
 
 # The context is this folder only: the repository root would send every trial clone to the daemon.
-Docker build -q -t $image -f (Join-Path $here $dockerfile) $here | Out-Null
+Invoke-Docker build -q -t $image -f (Join-Path $here $dockerfile) $here | Out-Null
 
 $state = docker ps -a --filter "name=^$container$" --format '{{.State}}'
 if (-not $state) {
-    Docker run -d --name $container --label $label --hostname $container `
+    Invoke-Docker run -d --name $container --label $label --hostname $container `
         --cpus $Cpus --memory $Memory `
         -v "${work}:$($c.work)" -v "${logs}:$($c.logs)" -v "${Feed}:$($c.feed):ro" -v "${volume}:$($c.nuget)" `
         $image | Out-Null
-    Docker exec $container dotnet tool install --tool-path $tools StyleBro.Migrate --version $Version --add-source $c.feed | Out-Null
+    Invoke-Docker exec $container dotnet tool install --tool-path $tools StyleBro.Migrate --version $Version --add-source $c.feed | Out-Null
 } elseif ($state -ne 'running') {
-    Docker start $container | Out-Null
+    Invoke-Docker start $container | Out-Null
 }
 
 $shell = if ($Windows) { 'pwsh' } else { 'bash' }

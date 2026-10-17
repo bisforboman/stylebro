@@ -19,7 +19,7 @@ RUN curl -fsSL https://builds.dotnet.microsoft.com/dotnet/scripts/v1/dotnet-inst
 
 # Non-root user. /nuget is the mount point of the shared NuGet volume: a new named volume takes this folder's owner, so the
 # user can write it. Bind mounts from Windows show up root-owned, hence safe.directory.
-RUN useradd -m -u 1000 trial \
+RUN useradd -m trial \
     && mkdir /nuget /work /logs \
     && chown trial:trial /nuget /work /logs
 USER trial
