@@ -45,7 +45,7 @@ internal static class Program
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
               takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
 
-          stylebro-migrate format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [dotnet format options]
+          stylebro-migrate format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [--restore] [--timings] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
               run changes nothing (at most 3 runs) and prints the files each run changed (the first 10); --once runs once. --all also
@@ -59,6 +59,8 @@ internal static class Program
               --verify-no-changes, formatting would change a file; other: 'dotnet format' failed.
               --files formats only those files (paths relative to the current folder or the repository root), loading
               just the projects they belong to: a fraction of a whole run. With --verify-no-changes too.
+              The restore is skipped when its output is current; --restore restores anyway, --no-restore never.
+              --timings prints how long each phase took.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
           stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft] [--sonar-profile <file>]

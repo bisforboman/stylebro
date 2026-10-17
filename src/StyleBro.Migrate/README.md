@@ -73,7 +73,11 @@ because Roslyn can't merge the frameworks' copies of a file. Other options pass 
 It ends by listing the findings StyleBro's fixes keep on purpose, each with its reason (a name read by reflection, used
 in generated code, ...): don't change those by hand without checking the uses; suppress or baseline them.
 `--verify-no-changes` changes nothing and exits 0 when only such findings are left, 2 when formatting would change a
-file: the check for CI and AI agents (plain `dotnet format --verify-no-changes` fails on kept findings too).
+file: the check for CI and AI agents (plain `dotnet format --verify-no-changes` fails on kept findings too). Right after a
+clean `format` on the same code it answers from that run's record in seconds.
+
+The restore is skipped when its output is current (`--restore` restores anyway, `--no-restore` never), and `--timings`
+prints how long each phase took.
 
 ## Scripts and AI agents
 
