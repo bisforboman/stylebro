@@ -103,8 +103,9 @@ internal static class PropertySummaries
 
             if (DocumentationComments.GetVisibility(symbol) != Accessibility.Public)
             {
-                restrictedSetter = restrictedSetter && HasPrivate(setter!);
-                restrictedGetter = restrictedGetter && HasPrivate(getAccessor!);
+                // Only one accessor can have a modifier, and it isn't 'private' here.
+                restrictedSetter = false;
+                restrictedGetter = false;
             }
         }
         var visibleSetter = setter is not null && !restrictedSetter && !(styleSharp && initOnly);
