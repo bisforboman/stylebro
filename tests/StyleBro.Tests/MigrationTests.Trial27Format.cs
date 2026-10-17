@@ -71,6 +71,62 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Baseline_GoesWhereEachProjectsBuildReadsIt()
+    {
+        // <StyleBroBaseline> in src/Directory.Build.props (evaluated: the package's targets resolve it) named eng/'s, and
+        // 'baseline' and format's kept findings wrote the root's.
+        var app = Path.Combine(root, "src", "App");
+        Assert.Equal((true, Path.Combine(root, "eng", "stylebro.baseline")), FormatCommand.BaselineOf(Path.Combine(root, "src") + "\\..\\eng\\stylebro.baseline", app));
+        Assert.Equal((true, Path.Combine(app, "eng", "stylebro.baseline")), FormatCommand.BaselineOf("eng/stylebro.baseline", app));
+        Assert.Equal((true, (string?)null), FormatCommand.BaselineOf(" none ", app));
+        Assert.Equal((false, (string?)null), FormatCommand.BaselineOf(string.Empty, app));
+
+        var eng = Path.Combine(root, "eng", "stylebro.baseline");
+        var top = Path.Combine(root, "stylebro.baseline");
+        var file = Path.Combine(app, "A.cs");
+        var shared = Path.Combine(root, "Shared.cs");
+        var projects = new Dictionary<string, (string? File, bool Off, HashSet<string> Compile)>
+        {
+            [Path.Combine(app, "App.csproj")] = (eng, false, [file, shared]),
+            [Path.Combine(root, "tests", "Tests.csproj")] = (top, false, [Path.Combine(root, "tests", "T.cs"), shared]),
+            [Path.Combine(root, "tools", "Tool.csproj")] = (null, true, [Path.Combine(root, "tools", "X.cs")]),
+        };
+        var groups = FormatCommand.BaselineGroups(projects, new[] { "A", "S", "X", "N" }.Zip([file, shared, Path.Combine(root, "tools", "X.cs"), Path.Combine(root, "None.cs")]), top);
+        Assert.Equal([(eng, "A,S"), (top, "S,N")], groups.Select(g => (g.File, string.Join(",", g.Items))));
+        Assert.Equal([eng, top], FormatCommand.BaselinesOf(projects, shared, null));
+
+        var different = FormatCommand.DifferentBaselinesLine(root, projects);
+        Assert.Equal("Baseline: the projects read different baselines (none: Tool; eng/stylebro.baseline: App; stylebro.baseline: Tests): each gets the findings in the files its projects compile.", different);
+        Assert.Null(FormatCommand.DifferentBaselinesLine(root, new Dictionary<string, (string? File, bool Off, HashSet<string> Compile)> { ["A"] = (eng, false, []), ["B"] = (eng, false, []) }));
+
+        // The 'none' message names the cause that applies.
+        Assert.Equal("Nothing written: <StyleBroBaseline>none</StyleBroBaseline> turns the baseline off.", BaselineCommand.OffLine(off: true));
+        Assert.Contains("MSBuild properties", BaselineCommand.OffLine(off: false), StringComparison.Ordinal);
+        Write("props/Directory.Build.props", "<Project><PropertyGroup><StyleBroBaseline>none</StyleBroBaseline></PropertyGroup></Project>");
+        Assert.True(FormatCommand.NamedBaseline(Path.Combine(root, "props")).Off);
+        Write("props/Directory.Build.props", "<Project><PropertyGroup><StyleBroBaseline>$(Eng)\\stylebro.baseline</StyleBroBaseline></PropertyGroup></Project>");
+        Assert.Equal((true, (string?)null, false), FormatCommand.NamedBaseline(Path.Combine(root, "props")));
+    }
+
+    [Fact]
+    public void Baseline_AddsOnlyTheFilesInItsFolder_AndItsProjectsFiles()
+    {
+        // 'baseline Tests.slnx' from tests/ added entries for the src/ files the tests compile.
+        Write("tests/T.cs", "class T { string s = \"\"; }\n");
+        Write("src/A.cs", "class A { string s = \"\"; }\n");
+        string Document(string path) => $$"""{ "FilePath": {{System.Text.Json.JsonSerializer.Serialize(path)}}, "FileChanges": [ { "LineNumber": 1, "CharNumber": 22, "DiagnosticId": "BRO1106" } ] }""";
+        var report = "[" + Document(Path.Combine(root, "tests", "T.cs")) + "," + Document(Path.Combine(root, "src", "A.cs")) + "]";
+
+        var result = BaselineCommand.Build(Path.Combine(root, "tests"), report, root);
+        Assert.Equal(["tests/T.cs"], result.Baseline.Entries.Keys.Select(k => k.Path));
+        Assert.Equal(1, result.Outside);
+
+        // Only the files a baseline's projects compile.
+        Assert.Empty(BaselineCommand.Build(root, report, root, f => false).Baseline.Entries);
+        Assert.Equal(2, BaselineCommand.Build(root, report, root).Baseline.Count);
+    }
+
+    [Fact]
     public void DocIndentation_RewritesTheLinesTheWhitespacePassLeaves()
     {
         // PalCalc: the first '///' line has spaces, the others and the member's line tabs at the same column (tab_width 4).

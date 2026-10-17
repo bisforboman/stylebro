@@ -55,21 +55,39 @@ internal static class BaselineCommand
         var traversal = FormatCommand.IsTraversal(Path.Combine(root, project)) ? FormatCommand.TraversalSolution(Path.GetFullPath(Path.Combine(root, project))) : null;
         project = traversal ?? project;
 
-        // The file the build reads: the one <StyleBroBaseline> names, else the nearest above, else a new one at the root (like format).
-        if (FormatCommand.BaselineFile(root) is not { } path)
+        // The files the builds read: each project's <StyleBroBaseline> as the package's targets resolve it (trial 27: one in
+        // src/Directory.Build.props named eng/'s, and the root's was written), else the one a Directory.Build.props above names,
+        // else the nearest above, else a new one at the root (like format).
+        try
         {
-            Console.WriteLine("Nothing written: <StyleBroBaseline> in Directory.Build.props turns the baseline off ('none') or names it with MSBuild "
-                + "properties other than $(MSBuildThisFileDirectory), which stylebro-migrate can't resolve.");
+            _ = FormatCommand.EvaluatedProjects(Path.Combine(root, project)).Count();
+        }
+        catch (ToolException)
+        {
+            // the run below reports it
+        }
+
+        var projects = FormatCommand.ProjectBaselines(root);
+        var fallback = FormatCommand.BaselineFile(root);
+        var paths = projects.Count > 0 ? projects.Values.Select(p => p.File).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList() : fallback is null ? [] : [fallback];
+        if (paths.Count == 0)
+        {
+            Console.WriteLine(OffLine(projects.Count > 0 ? projects.Values.Any(p => p.Off) : FormatCommand.NamedBaseline(root).Off));
             return 0;
         }
 
-        var aside = path + ".previous";
-        var reportDir = Path.Combine(Path.GetTempPath(), "stylebro-baseline-" + Guid.NewGuid().ToString("N"));
-        if (File.Exists(path))
+        if (FormatCommand.DifferentBaselinesLine(root, projects) is { } different)
         {
-            File.Move(path, aside, overwrite: true);
+            Console.WriteLine(different);
         }
 
+        var reportDir = Path.Combine(Path.GetTempPath(), "stylebro-baseline-" + Guid.NewGuid().ToString("N"));
+        foreach (var path in paths.Where(File.Exists))
+        {
+            File.Move(path, path + ".previous", overwrite: true);
+        }
+
+        void RestoreAll() => paths.ForEach(p => RestoreAside(p, p + ".previous"));
         try
         {
             // Where IDE0055 is off (CSharpier, column alignment), whitespace isn't StyleBro's: like 'format', only the style
@@ -91,7 +109,7 @@ internal static class BaselineCommand
                 if (!File.Exists(report))
                 {
                     Console.Error.WriteLine($"'dotnet format' wrote no report (exit code {exit}).");
-                    RestoreAside(path, aside);
+                    RestoreAll();
                     return 1;
                 }
 
@@ -112,7 +130,7 @@ internal static class BaselineCommand
                     if (!File.Exists(report))
                     {
                         Console.Error.WriteLine($"'dotnet format' wrote no report for {configuration} (exit code {exit}).");
-                        RestoreAside(path, aside);
+                        RestoreAll();
                         return 1;
                     }
 
@@ -120,16 +138,23 @@ internal static class BaselineCommand
                 }
             }
 
-            var result = Build(root, MergeReports(reports), Path.GetDirectoryName(path));
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            File.WriteAllText(path, KeepOutside(result.Baseline, File.Exists(aside) ? File.ReadAllText(aside) : null, Path.GetDirectoryName(path)!, root).Render());
-            File.Delete(aside);
-            Report(result, Path.GetRelativePath(root, path).Replace('\\', '/'));
+            var merged = MergeReports(reports);
+            foreach (var path in paths)
+            {
+                // Each file gets the findings in the files its projects compile.
+                var aside = path + ".previous";
+                var result = Build(root, merged, Path.GetDirectoryName(path), projects.Count == 0 ? null : file => FormatCommand.BaselinesOf(projects, file, fallback).Contains(path, StringComparer.OrdinalIgnoreCase));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, KeepOutside(result.Baseline, File.Exists(aside) ? File.ReadAllText(aside) : null, Path.GetDirectoryName(path)!, root).Render());
+                File.Delete(aside);
+                Report(result, Path.GetRelativePath(root, path).Replace('\\', '/'));
+            }
+
             return 0;
         }
         catch
         {
-            RestoreAside(path, aside);
+            RestoreAll();
             throw;
         }
         finally
@@ -170,10 +195,14 @@ internal static class BaselineCommand
     /// <summary>
     /// Turns a report into a baseline. A diagnostic reported for several target frameworks' copies of a file counts
     /// once (the suppressor checks each compilation on its own). Paths are relative to <paramref name="baselineFolder"/>
-    /// (default: the root), the baseline file's folder ('../src/A.cs' for a baseline in eng/).
+    /// (default: the root), the baseline file's folder ('../src/A.cs' for a baseline in eng/); <paramref name="owns"/>: the
+    /// files whose findings go into it (the files its projects compile). Findings in files outside the root aren't added (a run
+    /// of tests/Tests.slnx added src/ files the tests compile): the entries a baseline had for them stay (<see cref="KeepOutside"/>).
     /// </summary>
-    public static Result Build(string root, string reportJson, string? baselineFolder = null)
+    public static Result Build(string root, string reportJson, string? baselineFolder = null, Func<string, bool>? owns = null)
     {
+        var inside = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+        var outside = 0;
         var covered = new HashSet<string>(new Analyzers.Baseline.BaselineSuppressor().SupportedSuppressions.Select(s => s.SuppressedDiagnosticId), StringComparer.Ordinal);
         var seen = new HashSet<(string Id, string File, int Line, int Char)>();
         var counts = new Dictionary<Baseline.Key, int>();
@@ -192,6 +221,12 @@ internal static class BaselineCommand
                 continue;
             }
 
+            if (owns is not null && !owns(file))
+            {
+                continue;
+            }
+
+            var isOutside = !Path.GetFullPath(file).StartsWith(inside, StringComparison.OrdinalIgnoreCase);
             foreach (var change in document.GetProperty("FileChanges").EnumerateArray())
             {
                 var id = change.GetProperty("DiagnosticId").GetString() ?? string.Empty;
@@ -204,6 +239,12 @@ internal static class BaselineCommand
                 if (FormattingIds.Contains(id))
                 {
                     whitespace++;
+                    continue;
+                }
+
+                if (isOutside)
+                {
+                    outside++;
                     continue;
                 }
 
@@ -224,7 +265,7 @@ internal static class BaselineCommand
             }
         }
 
-        return new Result(new Baseline(counts), perRule, whitespace, notCovered);
+        return new Result(new Baseline(counts), perRule, whitespace, notCovered, outside);
     }
 
     /// <summary>
@@ -362,7 +403,17 @@ internal static class BaselineCommand
         {
             Console.WriteLine($"Not in the baseline: {count} {id} (not a StyleBro rule or one of the SDK rules 'stylebro-migrate init' turns on).");
         }
+
+        if (result.Outside > 0)
+        {
+            Console.WriteLine($"Not added: {result.Outside} finding{(result.Outside == 1 ? string.Empty : "s")} in files outside this folder (a project here compiles them): the baseline's entries for them stay as they were. Run 'baseline' from a folder that holds them to update those.");
+        }
     }
+
+    /// <summary>Why nothing is written: the props turn the baseline off ('none'), or name it with MSBuild properties stylebro-migrate can't resolve.</summary>
+    public static string OffLine(bool off) => off
+        ? "Nothing written: <StyleBroBaseline>none</StyleBroBaseline> turns the baseline off."
+        : "Nothing written: <StyleBroBaseline> in Directory.Build.props names the baseline with MSBuild properties other than $(MSBuildThisFileDirectory), which stylebro-migrate can't resolve.";
 
     /// <summary>
     /// The 'dotnet format' passes the baseline runs, each on its own: a run of all three reports the analyzers' findings at
@@ -411,12 +462,13 @@ internal static class BaselineCommand
     /// <summary>The baseline for a 'dotnet format' JSON report, and what it couldn't include.</summary>
     public sealed class Result
     {
-        public Result(Baseline baseline, Dictionary<string, int> perRule, int whitespace, Dictionary<string, int> notCovered)
+        public Result(Baseline baseline, Dictionary<string, int> perRule, int whitespace, Dictionary<string, int> notCovered, int outside = 0)
         {
             Baseline = baseline;
             PerRule = perRule;
             Whitespace = whitespace;
             NotCovered = notCovered;
+            Outside = outside;
         }
 
         public Baseline Baseline { get; }
@@ -426,5 +478,8 @@ internal static class BaselineCommand
         public int Whitespace { get; }
 
         public Dictionary<string, int> NotCovered { get; }
+
+        /// <summary>The findings in files outside the run's folder, not added (<see cref="Build"/>).</summary>
+        public int Outside { get; }
     }
 }

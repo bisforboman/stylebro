@@ -217,7 +217,7 @@ internal static class FormatCommand
     private static readonly string[] ProjectQuery =
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
-        "-getProperty:Configuration", "-getProperty:Configurations",
+        "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:StyleBroBaseline",
         "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo",
     ];
 
@@ -2664,11 +2664,111 @@ internal static class FormatCommand
     /// </summary>
     public static string? BaselineKept(string root, IReadOnlyCollection<KeptFinding> kept, string? newAt = null)
     {
-        if (BaselineFile(root, newAt) is not { } file)
+        // Each project's own (trial 27: <StyleBroBaseline> in src/Directory.Build.props named eng/'s, and the root's was written).
+        var projects = ProjectBaselines(root, newAt);
+        if (projects.Count == 0)
         {
-            return null;
+            return BaselineFile(root, newAt) is { } file ? BaselineKeptInto(root, file, kept) : null;
         }
 
+        var lines = BaselineGroups(projects, kept.Select(k => (Finding: k, k.Path)), BaselineFile(root, newAt))
+            .Select(g => BaselineKeptInto(root, g.File, g.Items))
+            .OfType<string>()
+            .ToList();
+        if (kept.Count > 0 && DifferentBaselinesLine(root, projects) is { } different)
+        {
+            lines.Insert(0, different);
+        }
+
+        return lines.Count == 0 ? null : string.Join("\n", lines);
+    }
+
+    /// <summary>
+    /// The baseline file each project under <paramref name="root"/> that a run evaluated reads (full path to it, null when it's
+    /// off or can't be resolved, with the files the project compiles): its evaluated &lt;StyleBroBaseline&gt;, which the package's
+    /// targets resolve as the build does, else <see cref="BaselineFile"/>.
+    /// </summary>
+    public static Dictionary<string, (string? File, bool Off, HashSet<string> Compile)> ProjectBaselines(string root, string? newAt = null)
+    {
+        var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+        List<(string FullPath, string[] Compile)> projects;
+        lock (ProjectCache)
+        {
+            projects = ProjectCache.Values.SelectMany(d => d.Values).Select(p => (FullPath: Path.GetFullPath(p.FullPath), p.Compile))
+                .Where(p => p.FullPath.StartsWith(top, StringComparison.OrdinalIgnoreCase))
+                .DistinctBy(p => p.FullPath, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        string? fallback = null;
+        var fallbackOff = false;
+        var fell = false;
+        return projects.ToDictionary(
+            p => p.FullPath,
+            p =>
+            {
+                var (known, file) = BaselineOf(EvaluatedProperty(p.FullPath, "StyleBroBaseline"), Path.GetDirectoryName(p.FullPath)!);
+                if (!known && !fell)
+                {
+                    (fell, fallback, fallbackOff) = (true, BaselineFile(root, newAt), NamedBaseline(root).Off);
+                }
+
+                return (known ? file : fallback, known ? file is null : fallbackOff, p.Compile.Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase));
+            },
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// A project's evaluated &lt;StyleBroBaseline&gt; (<paramref name="evaluated"/>) as a file: (false, null) when it's empty (no
+    /// package targets, no baseline found), (true, null) for 'none', else the full path (relative to the project, like MSBuild).
+    /// </summary>
+    public static (bool Known, string? File) BaselineOf(string evaluated, string projectDirectory) => evaluated.Trim() switch
+    {
+        "" => (false, null),
+        var none when none.Equals("none", StringComparison.OrdinalIgnoreCase) => (true, null),
+        var value => (true, Path.GetFullPath(Path.Combine(projectDirectory, value.Replace('\\', Path.DirectorySeparatorChar)))),
+    };
+
+    /// <summary>
+    /// <paramref name="items"/> (each with its file) grouped by the baseline the projects compiling the file read (<see cref="ProjectBaselines"/>;
+    /// <paramref name="fallback"/> for a file none compiles), every project's baseline listed even without items; not the ones that are off.
+    /// </summary>
+    public static List<(string File, List<T> Items)> BaselineGroups<T>(IReadOnlyDictionary<string, (string? File, bool Off, HashSet<string> Compile)> projects, IEnumerable<(T Item, string Path)> items, string? fallback)
+    {
+        var groups = projects.Values.Select(p => p.File).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToDictionary(f => f, _ => new List<T>(), StringComparer.OrdinalIgnoreCase);
+        foreach (var (item, path) in items)
+        {
+            foreach (var file in BaselinesOf(projects, path, fallback))
+            {
+                (groups.TryGetValue(file, out var list) ? list : groups[file] = []).Add(item);
+            }
+        }
+
+        return groups.OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => (g.Key, g.Value)).ToList();
+    }
+
+    /// <summary>The baselines a file's findings go into: those of the projects compiling it (<see cref="ProjectBaselines"/>), else <paramref name="fallback"/>.</summary>
+    public static List<string> BaselinesOf(IReadOnlyDictionary<string, (string? File, bool Off, HashSet<string> Compile)> projects, string path, string? fallback)
+    {
+        var full = Path.GetFullPath(path);
+        var owners = projects.Values.Where(p => p.Compile.Contains(full)).ToList();
+        return (owners.Count > 0 ? owners.Select(p => p.File) : [fallback]).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    /// <summary>What to say when the projects read different baselines (<see cref="ProjectBaselines"/>), or null.</summary>
+    public static string? DifferentBaselinesLine(string root, IReadOnlyDictionary<string, (string? File, bool Off, HashSet<string> Compile)> projects)
+    {
+        var files = projects.GroupBy(p => p.Value.File ?? string.Empty, StringComparer.OrdinalIgnoreCase).OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase).ToList();
+        return files.Count < 2
+            ? null
+            : "Baseline: the projects read different baselines ("
+                + string.Join("; ", files.Select(g => $"{(g.Key.Length == 0 ? "none" : Relative(root, g.Key))}: {string.Join(", ", g.Select(p => Path.GetFileNameWithoutExtension(p.Key)).Order(StringComparer.OrdinalIgnoreCase).Take(4))}{(g.Count() > 4 ? $" and {g.Count() - 4} more" : string.Empty)}"))
+                + "): each gets the findings in the files its projects compile.";
+    }
+
+    /// <summary>Puts <paramref name="kept"/> into the baseline <paramref name="file"/> (<see cref="BaselineKept"/>).</summary>
+    private static string? BaselineKeptInto(string root, string file, IReadOnlyCollection<KeptFinding> kept)
+    {
         var exists = File.Exists(file);
         if (kept.Count == 0 && !exists)
         {
@@ -2737,7 +2837,7 @@ internal static class FormatCommand
     /// it), else a new one at <paramref name="newAt"/> (the root by default; --files gives the repository's, where a whole run
     /// puts it); null when the props turn it off ('none') or name it with other MSBuild properties.
     /// </summary>
-    public static string? BaselineFile(string root, string? newAt = null) => NamedBaseline(root) is var (named, value) && named
+    public static string? BaselineFile(string root, string? newAt = null) => NamedBaseline(root) is var (named, value, _) && named
         ? value
         : FoundBaseline(root, newAt);
 
@@ -2746,7 +2846,7 @@ internal static class FormatCommand
     /// them from the build, which fails on them with warnings as errors, while 'format' and its check call them clean (trial 24).
     /// </summary>
     public static string? BaselineOffLine(string root, int kept) =>
-        kept > 0 && NamedBaseline(root) is (true, null)
+        kept > 0 && (ProjectBaselines(root) is { Count: > 0 } projects ? projects.Values.Any(p => p.Off) : NamedBaseline(root).Off)
             ? $"Baseline off: <StyleBroBaseline>none</StyleBroBaseline> in Directory.Build.props, so the {(kept == 1 ? "kept finding isn't" : $"{kept} kept findings aren't")} baselined: "
                 + $"the build still reports {(kept == 1 ? "it" : "them")} (an error with warnings as errors). Suppress {(kept == 1 ? "it" : "them")}, or remove that setting so 'format' baselines {(kept == 1 ? "it" : "them")} (https://bisforboman.github.io/stylebro/baseline/)."
             : null;
@@ -3452,7 +3552,7 @@ internal static class FormatCommand
     /// The baseline a Directory.Build.props at or above <paramref name="root"/> names with &lt;StyleBroBaseline&gt; (Named: true),
     /// null as its value when that turns it off ('none') or uses other MSBuild properties; Named false when none names one.
     /// </summary>
-    private static (bool Named, string? Value) NamedBaseline(string root)
+    internal static (bool Named, string? Value, bool Off) NamedBaseline(string root)
     {
         for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
         {
@@ -3461,11 +3561,12 @@ internal static class FormatCommand
             {
                 // MSBuild reads '\' as a folder separator on every OS ('eng\stylebro.baseline' on Linux too).
                 var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase).Replace('\\', Path.DirectorySeparatorChar);
-                return (true, value.Equals("none", StringComparison.OrdinalIgnoreCase) || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)));
+                var off = value.Equals("none", StringComparison.OrdinalIgnoreCase);
+                return (true, off || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)), off);
             }
         }
 
-        return (false, null);
+        return (false, null, false);
     }
 
     /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one at the root.</summary>
