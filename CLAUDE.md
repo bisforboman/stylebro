@@ -121,6 +121,11 @@ when we can do that"): don't suggest releases at all; the user says when.
   edits inserting CRLF, which then made exact-text replacements fail). Keep new edits LF.
 - `.github/workflows/ci.yml`: ubuntu-26.04, .NET 10; runs test, verify-format, pack, uploads the nupkg; a `parity` job
   runs every StyleCop parity set (`Compare-WithStyleCop.ps1`).
+- **Advisor**: when an advisor tool is available, call it before design decisions or recommendations, before splitting
+  work across agents or sessions, and before declaring a larger task done.
+- **Where work runs**: long work (multi-step tasks, PRs, CI waits, releases) runs as cloud sessions; the owner's
+  computer must stay free to restart or turn off. Work that needs it (local timings, Windows-only checks) is asked for,
+  never started unasked; a cloud session that needs such a step says so in its PR.
 - **PR pipeline (2026-10-03, user's request: "verify new changes before merging to main")**: `main` is protected; changes
   land through pull requests whose checks pass. Work on a branch, push it, open a PR (`gh pr create`), let the checks
   run, merge when green. Checks: `build` + `parity` (ci.yml), `Real world (<repo>)` (realworld.yml: one
