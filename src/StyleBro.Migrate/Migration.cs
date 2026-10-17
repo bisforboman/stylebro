@@ -1092,17 +1092,20 @@ internal static class Migration
     public static List<string> TextTemplateOutputs(string root) =>
         StyleCopSetup.EnumerateFiles(root)
             .Where(f => f.EndsWith(".tt", StringComparison.OrdinalIgnoreCase))
-            .Select(f => Path.ChangeExtension(f, TextTemplateExtension(f)))
+            .Select(TextTemplateOutput)
             .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(f))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .ToList();
 
-    // T4's output extension: the template's 'output' directive, else '.cs' (what Visual Studio's generator writes for C#).
-    private static string TextTemplateExtension(string template)
+    /// <summary>
+    /// The file a T4 template writes: its name with the extension of its 'output' directive, else '.cs' (what Visual
+    /// Studio's generator writes for C#).
+    /// </summary>
+    public static string TextTemplateOutput(string template)
     {
         var text = File.Exists(template) ? File.ReadAllText(template) : string.Empty;
         var directive = Regex.Match(text, @"<#@\s*output\b[^#]*?\bextension\s*=\s*""(?<extension>[^""]+)""", RegexOptions.IgnoreCase);
-        return directive.Success ? directive.Groups["extension"].Value.Trim() : ".cs";
+        return Path.ChangeExtension(template, directive.Success ? directive.Groups["extension"].Value.Trim() : ".cs");
     }
 
     /// <summary>

@@ -1513,6 +1513,27 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 - Submodules: entries at or above `StyleBroRepositoryRoot` are dropped from `StyleBroSubmoduleFolders` (a submodule's own
   checkout read the superproject's .gitmodules and hid everything). verify-package checks 12 and 13.
 
+## Trial 29 fixes (2026-10-17, first trial run as a cloud session)
+
+- Repos: Moq (`v4` branch), Ulid, error-or (StyleCop, migrate), Harmony (random, seed 29). error-or and Ulid clean.
+- Harmony (owner: "Both"): BRO1302/BRO1310/BRO1313 never report a `__x` parameter or any parameter of a Harmony patch
+  method (`BoundParameterNames.IsBound`, syntax: a `Harmony*` attribute on the method or a parameter, or
+  Prefix/Postfix/Transpiler/Finalizer/Prepare/Cleanup/TargetMethod(s) in a `Harmony*`-attributed type). Renamed
+  `__result`/`__instance` compiled and Harmony's injection failed at run time.
+- Harmony (owner: "Underscore names anywhere"): a private field whose name only a field has (`_x`, `m_x`/`s_x`/`t_x`) is
+  kept by ANY string equal to it in the solution, not only a reflection-shaped one (`CamelCaseRenamer.LooksLikeFieldName`;
+  tests listed `"_root", "_type"` and read them in a loop). Cost: a private `_id` next to Mongo-style `"_id"` strings stays.
+- Harmony (owner: "Count it, BRO1306 off"): `init` counts public/internal non-const, non-static-readonly fields' casing
+  when no enforced naming rule covers them (`Conventions.CountNonPrivateNaming`, shares BRO1306's severity convention).
+- Moq: `format` excluded the `.cs` next to each `.tt`, but `<#@ output extension=".Generated.cs" #>` writes another file;
+  the hand-written `ReturnsExtensions.cs` was left unformatted and the TWAE build failed (1,216 errors after a clean
+  verify). `Migration.TextTemplateOutput` reads the directive; `FormatCommand.IsGenerated` uses it too.
+- Environment (cloud container): the .NET SDK comes from Ubuntu's packages (builds.dotnet.microsoft.com is blocked by the
+  proxy; `apt-get install dotnet-sdk-10.0 dotnet-sdk-8.0`), pwsh via `dotnet tool install -g PowerShell`. The container
+  runs as root, which ignores read-only files: `Migrate_WithALockedFile_WritesNothing` fails there (and on main).
+  Untouched-code build failures seen with TWAE: NuGet audit (NU1902) in Ulid and Harmony (`-p:NuGetAudit=false`),
+  Ulid's CS0618/CS8002, Harmony's own IDE0054 and a compiler crash ("PromiseNotToEnqueue") with EnforceCodeStyleInBuild.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

@@ -19,6 +19,12 @@ public sealed partial class MigrationTests
         Write("Page.cs", "class Hand { }");
 
         Assert.Equal(["Format.cs", "ReturnsExtensions.Generated.cs"], Migration.TextTemplateOutputs(root).Order(StringComparer.Ordinal));
+
+        // A build that runs the templates rewrites only their outputs, not the hand-written file beside one.
+        const string Build = "<TransformOnBuild>true</TransformOnBuild>";
+        Assert.True(FormatCommand.IsGenerated(Path.Combine(root, "ReturnsExtensions.Generated.cs"), Build));
+        Assert.False(FormatCommand.IsGenerated(Path.Combine(root, "ReturnsExtensions.cs"), Build));
+        Assert.True(FormatCommand.IsGenerated(Path.Combine(root, "Format.cs"), Build));
     }
 
     [Fact]

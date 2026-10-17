@@ -2707,7 +2707,10 @@ internal static class FormatCommand
 
         var folder = Path.GetDirectoryName(file)!;
         var stems = new[] { name.Split('.')[0], Path.GetFileNameWithoutExtension(name), name.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) ? name[..^".g.cs".Length] : null }.OfType<string>();
-        if (stems.Any(s => File.Exists(Path.Combine(folder, s + ".tt")) || File.Exists(Path.Combine(folder, s + ".ttinclude"))))
+        // A template's own output only (trial 29, Moq: 'ReturnsExtensions.tt' writes 'ReturnsExtensions.Generated.cs', and the
+        // 'ReturnsExtensions.cs' beside it is hand-written).
+        if (stems.Any(s => File.Exists(Path.Combine(folder, s + ".tt")) && string.Equals(Migration.TextTemplateOutput(Path.Combine(folder, s + ".tt")), file, StringComparison.OrdinalIgnoreCase))
+            || stems.Any(s => File.Exists(Path.Combine(folder, s + ".ttinclude"))))
         {
             return Regex.IsMatch(build, @"TransformOnBuild\s*>\s*true|TextTransform|dotnet[- ]t4", RegexOptions.IgnoreCase);
         }
