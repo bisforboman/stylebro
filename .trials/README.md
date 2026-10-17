@@ -34,3 +34,72 @@ Procedure:
    `.trials/trialNN/logs/`. Only if the pick fails the practical criteria above, take the next entry down the list
    (wrapping around) and write down why.
 3. Record each repository's commit, and why it was chosen, in the trial's logs.
+
+## Where trials run (owner's decision, 2026-10-17)
+
+"Hybrid: cloud sessions for Linux repos, host for Windows-only, Docker as fallback"
+([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-17-where-trials-run.md)):
+
+| Repository | Where |
+| --- | --- |
+| Libraries, console/web apps, anything that builds on Linux (net6.0-net10.0, netstandard); spot checks | Cloud sessions (Linux) |
+| WPF, WinForms, .NET Framework / net4x targets, old-style csproj, Windows-only tests | The host, under the no-desktop rule |
+
+Nothing a trial does may touch the owner's desktop: no GUI apps, no window, clipboard, screen or hotkey tests, no diff
+tools (`DiffEngine_Disabled=true`, `CI=true` for Verify suites), even on the host. Host runs keep the old rules: own tool
+path, `NUGET_PACKAGES` per trial, never `dotnet build-server shutdown`, don't kill processes you didn't start.
+
+## Docker fallback (local reruns, a future Windows container)
+
+`scripts/trials/` is the fallback for local reruns and a future Windows container: one container per agent, made by
+`scripts/trials/Start-TrialContainer.ps1`, so nothing is left on the host (processes, locked files, stray props).
+`Dockerfile` is the Linux image; `Dockerfile.windows` (Windows-only repos) needs Docker in Windows-containers mode, the
+owner's setting, and is untested until then (`-Windows` refuses otherwise).
+
+Tested 2026-10-17 with CliFx at 10cbf9b6 (StyleBro main 12f01ef0, 4 CPUs/12 GB): init, format (clean on run 2), verify
+clean, Debug/Release TreatWarningsAsErrors builds with and without EnforceCodeStyleInBuild green, 122/122 tests before and
+after, no AD0001; the same as trial 27 on the host apart from that trial's own fixes. Restore 40 s with an empty NuGet
+volume, 5 s warm. The bind mount is slow: a Debug build took 25 s on `/work` and 11 s on the container's own file system,
+and format ~6.5 minutes. For speed, clone under `/home/trial` and copy logs to `/logs`. Image ~2.3 GB.
+
+The Linux image: .NET SDK 10.0.402 (the base), SDKs 9.0.319 and 8.0.426, runtimes (and ASP.NET Core runtimes) 7.0.20
+and 6.0.36, git, pwsh, python3, user `trial`, nothing GUI. Raise the pinned versions together with the trial machine's.
+
+### Commands (on the host, from the repository root)
+
+```powershell
+# The feed, as for every trial: pack StyleBro.Package and StyleBro.Migrate with -p:Version=0.8.0-trialNN -o $env:TEMP\stylebro-trialNN\feed
+./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx          # build the image, start stylebro-trial29-clifx
+docker exec -w /work stylebro-trial29-clifx git clone https://github.com/Tyrrrz/CliFx .
+docker exec -w /work stylebro-trial29-clifx stylebro-migrate init --write
+docker exec -w /work stylebro-trial29-clifx pwsh -c '...'               # anything longer: a script under /work or /logs
+./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx -Stop    # rerun the first line to resume
+./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Remove              # every container of the trial, when it's done
+```
+
+Run `docker exec` from PowerShell; from Git Bash set `MSYS_NO_PATHCONV=1` first, or it rewrites `/work/...` into
+`C:/Program Files/Git/work/...`.
+
+Inside the container:
+
+- `/work` = `.trials/trialNN/<Name>` (or `-Folder <path>`, e.g. `spot` for spot agents), `/logs` = `.trials/trialNN/logs/<Name>`,
+  both read-write and visible on the host;
+- `/feed` = the package feed (read-only): the repo's `nuget.config` gets `<add key="stylebro" value="/feed" />`;
+- `/nuget` = `NUGET_PACKAGES`, the named volume `stylebro-nuget` shared by all containers (warm restores);
+- `stylebro-migrate` (the trial's version) is on the PATH; `DOTNET_CLI_TELEMETRY_OPTOUT`, `DiffEngine_Disabled` are set.
+- Limits: 4 CPUs and 12 GB per container by default (`-Cpus`, `-Memory`); the machine has 16 logical CPUs and 64 GB, so
+  four agents at a time leave room for the owner's work. Docker Desktop's own VM limit (Settings > Resources) caps them all.
+- Inside a container, `dotnet build-server shutdown` and killing processes only affect that agent; on the host the old
+  rules still hold (never shut down build servers, don't kill what you didn't start).
+
+Clone INSIDE the container (`git clone` into `/work`), not on the host: the repository's `.gitattributes` then apply as on
+Linux (LF checkouts unless it says otherwise), so results reflect a Linux checkout. The real-world CI already runs several
+repositories on Linux with the same results as on Windows; a finding that depends on CRLF needs a host or Windows run.
+The mount is case-insensitive (it's an NTFS folder): a repository with paths differing only in case can't be cloned there.
+
+Each repro and scratch copy still needs its own `.git` (`git init` + a commit, or a clone) before StyleBro runs: init climbs
+to the git root, and a repro inside the agent's clone without its own `.git` would be judged as part of that clone.
+
+A brief for a container run (written per trial, not committed) must give the agent its container name and the
+Start/Remove lines, say that every command runs through `docker exec` (paths `/work`, `/logs`, `/feed`), to clone inside
+the container, and the no-desktop rule.
