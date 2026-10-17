@@ -367,7 +367,7 @@ public sealed class KeptFindingsTests : IDisposable
     [Fact]
     public async Task AnEventHandlerInAXamlFile_IsKept_APrivateFieldIsNot()
     {
-        const string Xaml = "<Button Click=\"onSave\" Content=\"total\" />";
+        const string Xaml = "<Button Click=\"onSave\" Tag=\"{Binding total}\" />";
         Assert.Equal(KeptReason.NameInXamlFile, await GetReasonAsync(
             DiagnosticIds.ElementPascalCase,
             ("Window.cs", "internal partial class Window\n{\n    private void onSave(object sender, System.EventArgs e) { }\n}\n"),
