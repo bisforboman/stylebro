@@ -260,7 +260,7 @@ public sealed class KeptFindingsTests : IDisposable
 
             public void AppendLiteral(string s) { }
 
-            public void AppendFormatted<T>(T value, string? format = null) { }
+            public void AppendFormatted<T>(T value, [System.Diagnostics.CodeAnalysis.NotNullIfNotNull("value")] string? format = null) { }
         }
 
         """;
