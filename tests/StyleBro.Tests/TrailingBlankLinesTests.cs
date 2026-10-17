@@ -14,12 +14,11 @@ public class TrailingBlankLinesTests
         {
             class C
             {
-                {|BRO1506:// Before a member.|}
-
+                // Before a member: right after '{', standalone.
 
                 void M()
                 {
-                    {|BRO1506:// Before a directive.|}
+                    // Before a directive, right after '{': standalone.
 
         #if !NEVER
                     M();
@@ -37,10 +36,12 @@ public class TrailingBlankLinesTests
         {
             class C
             {
-                // Before a member.
+                // Before a member: right after '{', standalone.
+
                 void M()
                 {
-                    // Before a directive.
+                    // Before a directive, right after '{': standalone.
+
         #if !NEVER
                     M();
         #endif
@@ -121,7 +122,7 @@ public class TrailingBlankLinesTests
 
             void M()
             {
-                {|BRO1506:// a comment above code|}
+                // a comment right after '{': standalone
 
                 M();
             }
@@ -152,7 +153,8 @@ public class TrailingBlankLinesTests
 
             void M()
             {
-                // a comment above code
+                // a comment right after '{': standalone
+
                 M();
             }
 
@@ -171,8 +173,9 @@ public class TrailingBlankLinesTests
         """);
 
     // Trial 21 (AzureEventGridSimulator; owner's choice 2026-10-14): a comment with a blank line above and below stands on
-    // its own (a note on the code above, a section header), so its blank line stays. Below '{' or before '}' it's still
-    // reported; stylebro_blank_line_below_standalone_comments = remove reports it too, like SA1512.
+    // its own (a note on the code above, a section header), so its blank line stays. Right below '{' too (trial 27: a
+    // block's first section header lost its blank line, the others kept theirs); before '}' it's still reported;
+    // stylebro_blank_line_below_standalone_comments = remove reports it too, like SA1512.
     [Fact]
     public Task StandaloneComments_KeepTheirBlankLine() => VerifyFixAsync(
         """
@@ -191,7 +194,7 @@ public class TrailingBlankLinesTests
             #endregion
             void M()
             {
-                {|BRO1506:// below a brace|}
+                // below a brace
 
                 M();
 
@@ -217,6 +220,7 @@ public class TrailingBlankLinesTests
             void M()
             {
                 // below a brace
+
                 M();
 
                 // before a brace

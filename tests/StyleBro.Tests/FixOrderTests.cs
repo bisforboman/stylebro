@@ -2950,6 +2950,68 @@ public class FixOrderTests
         "BRO1509",
         "BRO1519");
 
+    // Trial 27 (PalCalc): BRO1405 removing the parentheses around a chain's start merged two chains, and only the next
+    // run's BRO1523 put '.Distinct()' on its own line. BRO1523 looks through parentheses BRO1405 removes.
+    [Fact]
+    public Task Parentheses_AroundAChainStart_MergeTheChainInOneRun() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public static class C
+        {
+            public static IEnumerable<int> N(List<int> a, List<int> b)
+            {
+                return ( ( from e in a select e )
+                    .Concat(
+                    ( from e in b select e ) ) ).Distinct();
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1405",
+        "BRO1110",
+        "BRO1523");
+
+    // Trial 27 (PalCalc): '((x * y))' lost one pair per run: the inner pair is BRO1405's only once the outer one is gone.
+    [Fact]
+    public Task Parentheses_Nested_AreRemovedInOneRun() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            public static double P(double x, double y)
+            {
+                return System.Math.Max(
+                    (
+                        (x * y)
+                    ),
+                    1.0);
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1405",
+        "BRO1110");
+
+    // Trial 27 (io-abstractions): an embedded empty statement is left to the compiler's CS0642 by both rules; wrapped in
+    // braces, BRO1101 removed the ';' only on the next run.
+    [Fact]
+    public Task Braces_LeaveAnEmbeddedEmptyStatement() => AssertConvergesInEveryOrderAsync(
+        """
+        public static class C
+        {
+            public static void M(int[] xs)
+            {
+                foreach (var x in xs) ;
+                while (xs.Length > 3)
+                    ;
+            }
+        }
+        """,
+        "BRO1514",
+        "BRO1515",
+        "BRO1101");
+
     // Trial 27 (fields_first): the fields moved up stay together and the moved members keep their blank lines, with
     // BRO1505 off (the Microsoft style) and on.
     [Theory]

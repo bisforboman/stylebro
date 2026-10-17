@@ -18,15 +18,20 @@ public sealed class CallChainAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context = context.SkipForeignFiles();
-        context.RegisterSyntaxTreeAction(c =>
+        context.RegisterCompilationStartAction(start =>
         {
-            foreach (var (link, _) in CallChains.GetFindings(c.Tree.GetRoot(c.CancellationToken), c.Tree.GetText(c.CancellationToken)))
+            var compilationOptions = start.Compilation.Options;
+            start.RegisterSyntaxTreeAction(c =>
             {
-                // '.Name', or '?.Name' (the '?' token, then the '.' token)
-                var next = link.GetNextToken();
-                var member = next.IsKind(SyntaxKind.DotToken) ? "?." + next.GetNextToken().Text : "." + next.Text;
-                c.ReportDiagnostic(Diagnostic.Create(Descriptors.CallChainLayout, link.GetLocation(), member));
-            }
+                var parenthesesRemoved = Severities.IsOn(compilationOptions, c.Tree, DiagnosticIds.UnnecessaryParentheses, c.CancellationToken);
+                foreach (var (link, _) in CallChains.GetFindings(c.Tree.GetRoot(c.CancellationToken), c.Tree.GetText(c.CancellationToken), parenthesesRemoved))
+                {
+                    // '.Name', or '?.Name' (the '?' token, then the '.' token)
+                    var next = link.GetNextToken();
+                    var member = next.IsKind(SyntaxKind.DotToken) ? "?." + next.GetNextToken().Text : "." + next.Text;
+                    c.ReportDiagnostic(Diagnostic.Create(Descriptors.CallChainLayout, link.GetLocation(), member));
+                }
+            });
         });
     }
 }

@@ -188,4 +188,24 @@ public class ParenthesesTests
             }
         }
         """);
+
+    // Trial 27 (PalCalc): the inner pair of '((x * y))' is SA1119's only once the outer pair is gone; the fix removes both.
+    [Fact]
+    public Task NestedPairs_AreRemovedTogether() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public double P(double x, double y) => System.Math.Max({|BRO1405:((x * y))|}, 1.0);
+
+            public int Q(int x) => System.Math.Abs({|BRO1405:({|BRO1405:((x + 1))|})|});
+        }
+        """,
+        """
+        public class C
+        {
+            public double P(double x, double y) => System.Math.Max(x * y, 1.0);
+
+            public int Q(int x) => System.Math.Abs(x + 1);
+        }
+        """);
 }

@@ -82,7 +82,7 @@ internal static class TrailingBlankLines
     }
 
     /// <summary>
-    /// Whether the '//' comment is in a run of comment lines with a blank line right above it and one right below it: a
+    /// Whether the '//' comment is in a run of comment lines with a blank line (or a '{' line) right above it and one right below it: a
     /// note or a section header that stands on its own (owner's choice, 2026-10-14; AzureEventGridSimulator: SA1512's fix
     /// glued notes about the code above and section headers onto unrelated code below). '#region'/'#endregion' lines next
     /// to the run don't count (BRO1112/BRO1113 may remove them in the same run). Not before a '}': those blank lines are
@@ -115,9 +115,11 @@ internal static class TrailingBlankLines
         }
         while (above >= 0 && IsRegion(above));
 
-        // Below: a region line there leaves no blank line below the comment for BRO1506 anyway.
+        // Above: a blank line, or the '{' line the comments start a block after (a block's first section header is
+        // standalone like the others, trial 27). Below: a region line there leaves no blank line below the comment for
+        // BRO1506 anyway.
         below++;
-        return above >= 0 && IsBlank(text, text.Lines[above].Span)
+        return above >= 0 && (IsBlank(text, text.Lines[above].Span) || text.ToString(text.Lines[above].Span).TrimEnd().EndsWith("{", StringComparison.Ordinal))
             && below < text.Lines.Count && text.Lines[below].End < text.Length && IsBlank(text, text.Lines[below].Span);
     }
 

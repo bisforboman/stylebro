@@ -63,6 +63,10 @@ public sealed class ParenthesesCodeFixProvider : CodeFixProvider
                 || (node is ParenthesizedPatternSyntax pattern && Parentheses.IsUnnecessary(pattern, text, KeepPrecedence)))
             {
                 nodes.Add(node);
+                if (node is ParenthesizedExpressionSyntax outer)
+                {
+                    nodes.AddRange(Parentheses.GetNested(outer));
+                }
             }
         }
 
