@@ -258,12 +258,12 @@ internal sealed class StyleCopSetup
         var scopes = new List<Scope>();
 
         // Rules added in StyleCop 1.2 (SA1651, SA1141, ...) don't exist in 1.1.x: off, whatever the configs say.
-        var msbuild = files.Where(IsMSBuild).Concat(references.MSBuild).Select(f => (File: f, Text: File.ReadAllText(f))).ToList();
+        var msbuild = files.Where(IsMSBuild).Concat(references.MSBuild).Select(f => (File: f, Text: Migration.ReadOrNull(f) ?? string.Empty)).ToList();
         var documentationParsed = msbuild.Any(m => DocumentationFile.IsMatch(m.Text));
 
         // A version from a property ('$(StyleCopVersion)', Steeltoe's versions.props) is resolved from the MSBuild files.
         var properties = msbuild.Select(m => WithoutComments(m.Text)).ToList();
-        var packagesConfigs = files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)).Select(File.ReadAllText).ToList();
+        var packagesConfigs = files.Where(f => Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase)).Select(f => Migration.ReadOrNull(f) ?? string.Empty).ToList();
         List<(string Raw, string? Value)> Versions(Regex pattern) => msbuild.Select(m => m.Text)
             .Concat(packagesConfigs)
             .SelectMany(text => pattern.Matches(text))
@@ -561,29 +561,29 @@ internal sealed class StyleCopSetup
             {
                 evidence.Add(relative);
             }
-            else if (Kind(file) == "ruleset" && Regex.IsMatch(File.ReadAllText(file), @"\bId\s*=\s*""S[AX]\d{4}""", RegexOptions.IgnoreCase))
+            else if (Kind(file) == "ruleset" && Regex.IsMatch(Migration.ReadOrNull(file) ?? string.Empty, @"\bId\s*=\s*""S[AX]\d{4}""", RegexOptions.IgnoreCase))
             {
                 evidence.Add($"{relative} (StyleCop rules)");
             }
-            else if (Kind(file) == "ruleset" && Regex.IsMatch(File.ReadAllText(file), @"\bId\s*=\s*""SST\d{4}""", RegexOptions.IgnoreCase))
+            else if (Kind(file) == "ruleset" && Regex.IsMatch(Migration.ReadOrNull(file) ?? string.Empty, @"\bId\s*=\s*""SST\d{4}""", RegexOptions.IgnoreCase))
             {
                 evidence.Add($"{relative} (StyleSharp rules)");
             }
             else if (Kind(file) is "editorconfig" or "globalconfig"
-                && File.ReadLines(file).Any(l => Regex.IsMatch(l, @"^\s*(dotnet_diagnostic\.S[AX]\d{4}\b|dotnet_analyzer_diagnostic\.category-StyleCop)", RegexOptions.IgnoreCase)))
+                && (Migration.ReadOrNull(file) ?? string.Empty).Split('\n').Any(l => Regex.IsMatch(l, @"^\s*(dotnet_diagnostic\.S[AX]\d{4}\b|dotnet_analyzer_diagnostic\.category-StyleCop)", RegexOptions.IgnoreCase)))
             {
                 evidence.Add($"{relative} (StyleCop rule severities)");
             }
             else if (Kind(file) is "editorconfig" or "globalconfig"
-                && File.ReadLines(file).Any(l => Regex.IsMatch(l, @"^\s*(dotnet_diagnostic\.SST\d{4}\b|stylesharp[._])", RegexOptions.IgnoreCase)))
+                && (Migration.ReadOrNull(file) ?? string.Empty).Split('\n').Any(l => Regex.IsMatch(l, @"^\s*(dotnet_diagnostic\.SST\d{4}\b|stylesharp[._])", RegexOptions.IgnoreCase)))
             {
                 evidence.Add($"{relative} (StyleSharp rule severities or settings)");
             }
-            else if (IsMSBuild(file) && StyleCopPackage.IsMatch(WithoutComments(File.ReadAllText(file))))
+            else if (IsMSBuild(file) && StyleCopPackage.IsMatch(WithoutComments(Migration.ReadOrNull(file) ?? string.Empty)))
             {
                 evidence.Add($"{relative} (StyleCop.Analyzers package)");
             }
-            else if (IsMSBuild(file) && StyleSharpReference.IsMatch(WithoutComments(File.ReadAllText(file))))
+            else if (IsMSBuild(file) && StyleSharpReference.IsMatch(WithoutComments(Migration.ReadOrNull(file) ?? string.Empty)))
             {
                 evidence.Add($"{relative} (StyleSharp.Analyzers package)");
             }
@@ -883,8 +883,8 @@ internal sealed class StyleCopSetup
         foreach (var project in files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)))
         {
             var chain = Chain(project, root);
-            var references = chain.Where(f => StyleCopReference.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
-            var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(File.ReadAllText(f)))).ToList();
+            var references = chain.Where(f => StyleCopReference.IsMatch(WithoutComments(Migration.ReadOrNull(f) ?? string.Empty))).ToList();
+            var removes = chain.Where(f => StyleCopRemove.IsMatch(WithoutComments(Migration.ReadOrNull(f) ?? string.Empty))).ToList();
             uses[project] = references.Count > 0 && removes.Count == 0;
             referenced.UnionWith(references.Where(own.Contains));
             outside.UnionWith(references.Where(f => !own.Contains(f)));
@@ -916,7 +916,7 @@ internal sealed class StyleCopSetup
         // format reuses it (FormatCommand.EvaluateProject). One project: only where the text can't tell.
         var check = uses.Count > 1 || !uses.Values.Contains(true)
             ? uses.Keys.ToList()
-            : uses.Where(p => p.Value && Chain(p.Key, root).Any(f => ConditionalReference(File.ReadAllText(f)))).Select(p => p.Key).ToList();
+            : uses.Where(p => p.Value && Chain(p.Key, root).Any(f => ConditionalReference(Migration.ReadOrNull(f) ?? string.Empty))).Select(p => p.Key).ToList();
         var results = check.AsParallel().Select(p => (Project: p, Uses: evaluate(p))).ToList();
         foreach (var (project, value) in results)
         {
@@ -1059,7 +1059,7 @@ internal sealed class StyleCopSetup
         while (pending.Count > 0)
         {
             var file = pending.Dequeue();
-            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(file))))
+            foreach (Match match in Reference.Matches(WithoutComments(Migration.ReadOrNull(file) ?? string.Empty)))
             {
                 var group = new[] { "import", "ruleset", "additional" }.First(g => match.Groups[g].Success);
                 if (Resolve(match.Groups[group].Value, file, root) is not { } target)
@@ -1090,7 +1090,7 @@ internal sealed class StyleCopSetup
 
     /// <summary>The MSBuild files an MSBuild file imports that can be found (<see cref="Resolve"/>).</summary>
     internal static IEnumerable<string> Imports(string file, string root) =>
-        Reference.Matches(WithoutComments(File.ReadAllText(file)))
+        Reference.Matches(WithoutComments(Migration.ReadOrNull(file) ?? string.Empty))
             .Where(m => m.Groups["import"].Success)
             .Select(m => Resolve(m.Groups["import"].Value, file, root))
             .OfType<string>()
@@ -1140,7 +1140,7 @@ internal sealed class StyleCopSetup
                 return;
             }
 
-            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(file))))
+            foreach (Match match in Reference.Matches(WithoutComments(Migration.ReadOrNull(file) ?? string.Empty)))
             {
                 if (match.Groups["import"].Success)
                 {
@@ -1215,7 +1215,7 @@ internal sealed class StyleCopSetup
 
         for (var i = 0; i < chain.Count && i < 64; i++)
         {
-            foreach (Match match in Reference.Matches(WithoutComments(File.ReadAllText(chain[i]))))
+            foreach (Match match in Reference.Matches(WithoutComments(Migration.ReadOrNull(chain[i]) ?? string.Empty)))
             {
                 if (match.Groups["import"].Success && Resolve(match.Groups["import"].Value, chain[i], root) is { } imported && IsMSBuild(imported)
                     && !chain.Contains(imported, StringComparer.OrdinalIgnoreCase))
