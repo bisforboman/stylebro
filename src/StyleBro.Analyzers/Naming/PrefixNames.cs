@@ -13,7 +13,7 @@ internal static class PrefixNames
     /// <summary>'Shape' -> 'IShape', 'iShape' -> 'IShape', '_Shape' -> 'IShape'; null when it already begins with I.</summary>
     public static string? GetInterfaceName(string name) => GetName(name, 'I');
 
-    /// <summary>'Item' -> 'TItem', 't' -> 'T', 'tKey' -> 'TKey', '_x' -> 'TX'; null when it already begins with T.</summary>
+    /// <summary>'Item' -> 'TItem', 't' -> 'T', 'tKey' -> 'TKey', '_x' -> 'TX', '_TKey' -> 'TKey'; null when it already begins with T.</summary>
     public static string? GetTypeParameterName(string name) => GetName(name, 'T');
 
     /// <summary>
@@ -31,16 +31,22 @@ internal static class PrefixNames
             return null;
         }
 
-        // A lower-case prefix letter that starts a word ('t', 'tKey', 'iShape') just gets capitalized.
-        if (name.Length > 0 && name[0] == char.ToLowerInvariant(prefix) && (name.Length == 1 || char.IsUpper(name[1])))
-        {
-            return Valid(prefix + name.Substring(1));
-        }
-
+        // Leading underscores go first: '_TVertex' -> 'TVertex', not 'TTVertex' (trial 27, GraphSharp).
         var core = name.TrimStart('_');
         if (core.Length == 0 || !char.IsLetter(core[0]))
         {
             return null;
+        }
+
+        if (core[0] == prefix)
+        {
+            return Valid(core);
+        }
+
+        // A lower-case prefix letter that starts a word ('t', 'tKey', 'iShape') just gets capitalized.
+        if (core[0] == char.ToLowerInvariant(prefix) && (core.Length == 1 || char.IsUpper(core[1])))
+        {
+            return Valid(prefix + core.Substring(1));
         }
 
         return Valid(prefix + char.ToUpperInvariant(core[0]).ToString() + core.Substring(1));

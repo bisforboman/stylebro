@@ -165,12 +165,15 @@ internal static class DocumentationComments
     {
         foreach (var comment in trivia)
         {
-            if (IsTripleSlashComment(comment) && !DocumentsAMember(comment))
+            if (IsMisplaced(comment))
             {
                 yield return comment;
             }
         }
     }
+
+    /// <summary>Whether the comment is BRO1602's: a '///' comment that documents nothing.</summary>
+    public static bool IsMisplaced(SyntaxTrivia comment) => IsTripleSlashComment(comment) && !DocumentsAMember(comment);
 
     /// <summary>Where BRO1602 is reported: the comment's first line, from its '///'.</summary>
     public static TextSpan GetReportSpan(SyntaxTrivia comment, SourceText text)
@@ -206,27 +209,11 @@ internal static class DocumentationComments
         }
     }
 
-    private static bool IsBareAmpersand(SyntaxToken token) =>
-        token.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken
-        && token.Text.IndexOf('&') >= 0
-        && !(token.IsKind(SyntaxKind.XmlEntityLiteralToken) && Entity.IsMatch(token.Text));
-
-    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
-    {
-        var (key, defaultValue) = GetVisibility(symbol) switch
-        {
-            Accessibility.Public => (ExposedElementsKey, true),
-            Accessibility.Internal => (InternalElementsKey, true),
-            _ => (PrivateElementsKey, false),
-        };
-        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
-    }
-
     /// <summary>
     /// Public (visible outside the assembly, including protected), Internal or Private, from the member and every type
     /// around it. Explicit interface implementations count as public.
     /// </summary>
-    private static Accessibility GetVisibility(ISymbol symbol)
+    internal static Accessibility GetVisibility(ISymbol symbol)
     {
         var result = Accessibility.Public;
         for (var current = symbol; current is not null; current = current.ContainingType)
@@ -249,6 +236,22 @@ internal static class DocumentationComments
         }
 
         return result;
+    }
+
+    private static bool IsBareAmpersand(SyntaxToken token) =>
+        token.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken
+        && token.Text.IndexOf('&') >= 0
+        && !(token.IsKind(SyntaxKind.XmlEntityLiteralToken) && Entity.IsMatch(token.Text));
+
+    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
+    {
+        var (key, defaultValue) = GetVisibility(symbol) switch
+        {
+            Accessibility.Public => (ExposedElementsKey, true),
+            Accessibility.Internal => (InternalElementsKey, true),
+            _ => (PrivateElementsKey, false),
+        };
+        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
     }
 
     private static bool IsDocumentationComment(SyntaxTrivia trivia)

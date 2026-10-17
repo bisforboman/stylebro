@@ -98,6 +98,10 @@ internal static class Program
     /// <summary>What to do after --write when StyleBro.Analyzers is already in and StyleCop.Analyzers still is.</summary>
     internal const string RemoveStyleCopStep = "Next: remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
 
+    private static readonly Regex SolutionProject = new(@"""([^""$]*?\.(?:cs|vb|fs)proj)""", RegexOptions.IgnoreCase);
+
+    private static readonly Regex ProjectReference = new(@"<ProjectReference\b[^>]*?\bInclude\s*=\s*""([^""$]+)""", RegexOptions.IgnoreCase);
+
     /// <summary>Gets the tool's version ('0.6.0-alpha.1', without the commit the SDK appends).</summary>
     internal static string Version =>
         (typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown").Split('+')[0];
@@ -386,7 +390,7 @@ internal static class Program
 
         top = top.TrimEnd('\\', '/');
         var ownProps = Path.Combine(folder, "Directory.Build.props");
-        var propsShadowed = File.Exists(ownProps) && !Regex.IsMatch(StyleCopSetup.WithoutComments(File.ReadAllText(ownProps)), @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase);
+        var propsShadowed = File.Exists(ownProps) && !Regex.IsMatch(StyleCopSetup.WithoutComments(Migration.ReadOrNull(ownProps) ?? string.Empty), @"<Import\b[^>]*Directory\.Build\.props", RegexOptions.IgnoreCase);
         var editorConfigStops = StyleCopSetup.IsEditorConfigRoot(folder);
         var reasons = new List<string>();
         for (var above = Path.GetDirectoryName(folder); above is not null && above.Length >= top.Length; above = Path.GetDirectoryName(above))
@@ -397,8 +401,32 @@ internal static class Program
         }
 
         reasons.AddRange(Directory.EnumerateFiles(folder)
-            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf" && Regex.IsMatch(File.ReadAllText(f), @"""\.\.[\\/]"))
+            .Where(f => IsSolution(f) && Regex.IsMatch(Migration.ReadOrNull(f) ?? string.Empty, @"""\.\.[\\/]"))
             .Select(f => $"{Path.GetFileName(f)} (lists projects outside it)"));
+
+        // Trial 27 (PalCalc): the root had only its solution, so init from PalCalc.UI/ wrote a 'root = true' .editorconfig and a
+        // props file there (15 settings other than the root run's), and from docres/, with no C# at all, too. A folder with its
+        // own props or 'root = true' stays its own (trial 22).
+        if (!propsShadowed && !editorConfigStops)
+        {
+            var projects = StyleCopSetup.EnumerateFiles(folder).Where(IsProject).ToList();
+            if (projects.Count == 0)
+            {
+                reasons.Add("it has no project of its own");
+            }
+            else if (projects.FirstOrDefault(p => ListedProjects(p, ProjectReference).Any(r => !IsUnder(r, folder))) is { } referencing)
+            {
+                reasons.Add($"{Path.GetRelativePath(top, referencing).Replace('\\', '/')} references projects outside it");
+            }
+
+            for (var above = Path.GetDirectoryName(folder); above is not null && above.Length >= top.Length; above = Path.GetDirectoryName(above))
+            {
+                reasons.AddRange(Directory.EnumerateFiles(above)
+                    .Where(f => IsSolution(f) && ListedProjects(f, SolutionProject).Any(p => IsUnder(p, folder)))
+                    .Select(f => $"{Path.GetRelativePath(top, f).Replace('\\', '/')} lists its projects"));
+            }
+        }
+
         if (reasons.Count == 0)
         {
             return folder;
@@ -681,6 +709,17 @@ internal static class Program
             .Where(r => raw.TryGetValue(r.Id, out var s) && s >= Severity.Suggestion && StyleCopSetup.StandsFor(r.Id, r.StyleCop, styleSharp).Count == 0 && !Migration.StyleSharpReplaced.Contains(r.Id))
             .Select(r => r.Id)
             .ToList();
+
+    private static bool IsSolution(string file) => Path.GetExtension(file).ToLowerInvariant() is ".sln" or ".slnx" or ".slnf";
+
+    private static bool IsProject(string file) => Path.GetExtension(file).ToLowerInvariant() is ".csproj" or ".vbproj" or ".fsproj";
+
+    /// <summary>The full paths a solution or project file names with <paramref name="pattern"/>, relative to its folder.</summary>
+    private static IEnumerable<string> ListedProjects(string file, Regex pattern) =>
+        pattern.Matches(StyleCopSetup.WithoutComments(Migration.ReadOrNull(file) ?? string.Empty))
+            .Select(m => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file)!, m.Groups[1].Value.Replace("\\\\", "/").Replace('\\', '/'))));
+
+    private static bool IsUnder(string path, string folder) => path.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Runs the command the arguments name.</summary>
     /// <summary>The command; a dotnet command it depends on that failed (MSBuild couldn't evaluate a project) ends it with that command's output, not a stack trace.</summary>

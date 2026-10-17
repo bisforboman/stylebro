@@ -529,6 +529,16 @@ internal static class Conventions
     /// <summary>CSharpier's configuration files.</summary>
     private static readonly string[] CSharpierConfigs = { ".csharpierrc", ".csharpierrc.json", ".csharpierrc.yaml", ".csharpierrc.yml" };
 
+    /// <summary>
+    /// The runtime's namespaces below 'System' and 'Microsoft' that a using inside such a namespace can name relatively
+    /// (<see cref="CountRelativeUsings"/>). ponytail: a fixed list of the common ones, not read from the reference assemblies.
+    /// </summary>
+    private static readonly HashSet<string> RuntimeNamespaces = new(
+        new[] { "Buffers", "CodeDom", "Collections", "ComponentModel", "Configuration", "Data", "Diagnostics", "Drawing", "Dynamic", "Formats", "Globalization", "IO", "Linq", "Management", "Media", "Net", "Numerics", "Reflection", "Resources", "Runtime", "Security", "Text", "Threading", "Timers", "Transactions", "Web", "Windows", "Xml" }
+            .Select(n => "System." + n)
+            .Concat(new[] { "CSharp", "Extensions", "VisualBasic", "Win32" }.Select(n => "Microsoft." + n)),
+        StringComparer.Ordinal);
+
     /// <summary>The SDK formatter's options (IDE0055's): with CSharpier they don't apply.</summary>
     private static readonly string[] FormatterKeys = { "csharp_new_line_before_open_brace", "csharp_new_line_before_else", SingleLineStatementsKey, IndentCaseBlockKey };
 
@@ -580,14 +590,14 @@ internal static class Conventions
         {
             var evidence = CSharpierConfigs.Select(f => Path.Combine(folder, f)).FirstOrDefault(File.Exists)
                 ?? new[] { Path.Combine(folder, ".config", "dotnet-tools.json"), Path.Combine(folder, "dotnet-tools.json") }
-                    .FirstOrDefault(f => File.Exists(f) && System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(f), @"""csharpier""", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+                    .FirstOrDefault(f => File.Exists(f) && System.Text.RegularExpressions.Regex.IsMatch(Migration.ReadOrNull(f) ?? string.Empty, @"""csharpier""", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
             if (evidence is not null)
             {
                 evidences.Add(evidence);
             }
         }
 
-        if (evidences.Count == 0 && files.Where(StyleCopSetup.IsMSBuild).FirstOrDefault(f => File.ReadAllText(f).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase)) is { } msbuild)
+        if (evidences.Count == 0 && files.Where(StyleCopSetup.IsMSBuild).FirstOrDefault(f => (Migration.ReadOrNull(f) ?? string.Empty).Contains("CSharpier.MsBuild", StringComparison.OrdinalIgnoreCase)) is { } msbuild)
         {
             evidences.Add(msbuild);
         }
@@ -762,13 +772,16 @@ internal static class Conventions
 
     /// <summary>
     /// BRO1126's places: usings inside a namespace (not global, not 'global::' or alias-qualified), relative when an
-    /// enclosing namespace has a namespace the code declares named like their first part ('using Common;' inside
-    /// 'namespace App.Contracts' with an 'App.Common'), else fully qualified. Across files: the declared namespaces are
-    /// the repository's (ponytail: syntax only, so a name relative to a package's namespace counts as qualified).
+    /// enclosing namespace has a namespace or type the code declares named like their first part ('using Common;' inside
+    /// 'namespace App.Contracts' with an 'App.Common', 'using H = Helper;' with a class 'App.Helper'), or, inside a 'System'
+    /// or 'Microsoft' namespace, one of the runtime's ('using Text;' inside 'System.IO.Abstractions'; trial 27: 60 of 89
+    /// usings there counted as qualified, and BRO1126 rewrote 31 files), else fully qualified. Across files: the declared
+    /// names are the repository's (ponytail: syntax only, so a name relative to a package's namespace counts as qualified).
     /// </summary>
     public static void CountRelativeUsings(IReadOnlyList<SyntaxTree> trees, Dictionary<string, int[]> counts)
     {
         var declared = new HashSet<string>(StringComparer.Ordinal);
+        var types = new HashSet<string>(StringComparer.Ordinal);
         var usings = new List<(string[] Namespace, string First)>();
         foreach (var tree in trees)
         {
@@ -780,6 +793,14 @@ internal static class Conventions
                 for (var i = 1; i <= parts.Length; i++)
                 {
                     declared.Add(string.Join(".", parts.Take(i)));
+                }
+
+                foreach (var member in ns.Members)
+                {
+                    if (member switch { BaseTypeDeclarationSyntax t => t.Identifier.ValueText, DelegateDeclarationSyntax d => d.Identifier.ValueText, _ => null } is { } type)
+                    {
+                        types.Add(string.Join(".", parts) + "." + type);
+                    }
                 }
 
                 foreach (var directive in ns.Usings.Where(u => u.GlobalKeyword.IsKind(SyntaxKind.None)))
@@ -795,7 +816,8 @@ internal static class Conventions
 
         foreach (var (parts, first) in usings)
         {
-            var relative = Enumerable.Range(1, parts.Length).Any(i => declared.Contains(string.Join(".", parts.Take(i)) + "." + first));
+            var relative = Enumerable.Range(1, parts.Length).Select(i => string.Join(".", parts.Take(i)) + "." + first)
+                .Any(name => declared.Contains(name) || types.Contains(name) || RuntimeNamespaces.Contains(name));
             counts[RelativeUsingsKey][relative ? 1 : 0]++;
         }
     }
@@ -827,7 +849,7 @@ internal static class Conventions
             files.Add(Path.Combine(current, "Directory.Build.props"));
         }
 
-        var result = files.Where(File.Exists).Any(f => System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(f), @"<GenerateDocumentationFile>\s*true\s*<|<DocumentationFile>", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+        var result = files.Where(File.Exists).Any(f => System.Text.RegularExpressions.Regex.IsMatch(Migration.ReadOrNull(f) ?? string.Empty, @"<GenerateDocumentationFile>\s*true\s*<|<DocumentationFile>", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
         cache[directory] = result;
         return result;
     }
@@ -2431,10 +2453,19 @@ internal static class Conventions
             {
                 var privateStyle = lines.Contains($"{StyleBro.Analyzers.Naming.FieldNames.StyleKey} = camelCase") ? "camelCase" : style.GetValueOrDefault(StyleBro.Analyzers.Naming.FieldNames.StyleKey, "camelCase");
                 report.Add($"  {"kept",-8} {what}: {count[0]} of {total} without a prefix -> no 's_'");
-                summary.Written.Add(StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey);
+                summary.Written.AddRange(new[] { StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey });
                 lines.Add($"# init: {what}: without a prefix in {count[0]} of {Plural(total, convention.Unit)} in your code (the style says 's_')");
                 lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey} = PascalCase");
                 lines.Add($"{StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey} = {privateStyle}");
+                continue;
+            }
+
+            // Otherwise the style's 's_' applies (its BRO1307 is off anyway; trial 27: "BRO1307 is off" for 2 unprefixed and 3
+            // prefixed fields, then format gave the 2 their 's_').
+            if (style is not null && convention.Key == StaticPrefixKey && !decided.ContainsKey(convention.Key)
+                && style.TryGetValue(StyleBro.Analyzers.Naming.FieldNames.StaticStyleKey, out var styleStatic) && styleStatic == "s_camelCase")
+            {
+                report.Add($"  {"style",-8} {what}: {(count[0] == 0 ? $"{count[1]} with an 's_' prefix -> the style's s_camelCase" : $"{count[0]} without a prefix, {count[1]} with one -> the style's s_camelCase applies: the {Plural(count[0], convention.Unit)} without one get 's_'")}");
                 continue;
             }
 
@@ -2444,7 +2475,7 @@ internal static class Conventions
                 && counts.TryGetValue(StaticReadOnlyPrefixKey, out var readOnly) && StaticPrefixLines(count, readOnly) is { Count: > 0 } prefixLines)
             {
                 report.Add($"  {"kept",-8} {what}: {count[1]} of {total} with an 's_' prefix -> s_camelCase");
-                summary.Written.Add(StyleBro.Analyzers.Naming.FieldNames.MutableStaticStyleKey);
+                summary.Written.AddRange(prefixLines.Select(l => l.Substring(0, l.IndexOf('=')).Trim()));
                 lines.Add($"# init: {what}: with an 's_' prefix in {count[1]} of {Plural(total, convention.Unit)} in your code");
                 lines.AddRange(prefixLines);
                 continue;

@@ -13,6 +13,7 @@ public class PrefixNamingTests
     [InlineData("IShape", null)]
     [InlineData("Item", null)]
     [InlineData("_", null)]
+    [InlineData("_IShape", "IShape")]
     public void InterfaceName(string name, string? expected) => Assert.Equal(expected, PrefixNames.GetInterfaceName(name));
 
     [Theory]
@@ -20,10 +21,29 @@ public class PrefixNamingTests
     [InlineData("t", "T")]
     [InlineData("tKey", "TKey")]
     [InlineData("_x", "TX")]
+    [InlineData("_TVertex", "TVertex")]
+    [InlineData("_tKey", "TKey")]
+    [InlineData("_T", "T")]
     [InlineData("key", "TKey")]
     [InlineData("T1", null)]
     [InlineData("Type", null)]
     public void TypeParameterName(string name, string? expected) => Assert.Equal(expected, PrefixNames.GetTypeParameterName(name));
+
+    // Trial 27 (GraphSharp): 'RemovedTreeNodeData<_TVertex, _TEdge>' became '<TTVertex, TTEdge>'.
+    [Fact]
+    public Task UnderscoreBeforeT_IsDropped() => VerifyFixAsync(
+        """
+        public class Data<{|BRO1305:_TVertex|}>
+        {
+            public _TVertex Vertex;
+        }
+        """,
+        """
+        public class Data<TVertex>
+        {
+            public TVertex Vertex;
+        }
+        """);
 
     [Fact]
     public Task Interfaces_AreRenamedEverywhere() => VerifyFixAsync(

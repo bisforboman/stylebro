@@ -195,6 +195,20 @@ internal static class CamelCaseRenamer
 #pragma warning restore RS1035
     }
 
+    /// <summary>'obj/Debug/net8.0/App.AssemblyInfo.cs' and the like: assembly attributes MSBuild writes.</summary>
+    internal static bool IsBuildMetadataFile(string? path)
+    {
+        if (path is null)
+        {
+            return false;
+        }
+
+        var name = System.IO.Path.GetFileName(path);
+        return (name.EndsWith(".AssemblyInfo.cs", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".AssemblyAttributes.cs", StringComparison.OrdinalIgnoreCase)
+                || name.EndsWith(".GlobalUsings.g.cs", StringComparison.OrdinalIgnoreCase))
+            && path.Replace('\\', '/').IndexOf("/obj/", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
     /// <summary>
     /// Whether code in another project can use the symbol by name: not private (internal counts, InternalsVisibleTo), nor
     /// in a private type; a parameter by its member (named arguments). Locals and local functions can't.
@@ -346,7 +360,9 @@ internal static class CamelCaseRenamer
         foreach (var project in solution.Projects)
         {
             // Source generators' output too: Mapperly reaches private fields by name ('UnsafeAccessor(..., Name = "intValue")').
-            documents.AddRange(project.Documents);
+            // Not the assembly attributes MSBuild writes under obj/ (company, version): their strings name no member, and as
+            // the first string a word was found in they made a misleading reason (trial 27: 'c' kept "first: ...AssemblyInfo.cs").
+            documents.AddRange(project.Documents.Where(d => !IsBuildMetadataFile(d.FilePath)));
             documents.AddRange(await project.GetSourceGeneratedDocumentsAsync(cancellationToken).ConfigureAwait(false));
         }
 
