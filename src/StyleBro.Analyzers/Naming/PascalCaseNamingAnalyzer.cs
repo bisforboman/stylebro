@@ -45,8 +45,42 @@ public sealed class PascalCaseNamingAnalyzer : DiagnosticAnalyzer
             IPropertySymbol { ExplicitInterfaceImplementations.Length: > 0 } => true,
             IEventSymbol { ExplicitInterfaceImplementations.Length: > 0 } => true,
             _ => CamelCaseNamingAnalyzer.GetBaseMembers(member).Any(b => b.Name == member.Name)
-                || (member is IEventSymbol { OverriddenEvent: { } overridden } && overridden.Name == member.Name),
+                || (member is IEventSymbol { OverriddenEvent: { } overridden } && overridden.Name == member.Name)
+                || HidesBaseMember(member),
         };
+    }
+
+    /// <summary>
+    /// Whether a member declared with 'new' hides a base member by its name: it exists to hide that member, so its name
+    /// is the base's. Renamed, it hides nothing and its 'new' is CS0109 (an error with TreatWarningsAsErrors: Jackett's
+    /// <c>private new ConfigurationDataX configData =&gt; (ConfigurationDataX)base.configData;</c>, 152 errors in trial 28).
+    /// </summary>
+    public static bool HidesBaseMember(ISymbol member)
+    {
+        if (member.ContainingType is not { } type
+            || !member.DeclaringSyntaxReferences.Any(r => r.GetSyntax() switch
+            {
+                MemberDeclarationSyntax declaration => declaration.Modifiers.Any(SyntaxKind.NewKeyword),
+                VariableDeclaratorSyntax { Parent.Parent: BaseFieldDeclarationSyntax field } => field.Modifiers.Any(SyntaxKind.NewKeyword),
+                _ => false,
+            }))
+        {
+            return false;
+        }
+
+        var bases = type.TypeKind == TypeKind.Interface ? type.AllInterfaces : Bases(type);
+        return bases.Any(b => !b.GetMembers(member.Name).IsEmpty);
+
+        static ImmutableArray<INamedTypeSymbol> Bases(INamedTypeSymbol type)
+        {
+            var list = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
+            for (var current = type.BaseType; current is not null; current = current.BaseType)
+            {
+                list.Add(current);
+            }
+
+            return list.ToImmutable();
+        }
     }
 
     /// <summary>

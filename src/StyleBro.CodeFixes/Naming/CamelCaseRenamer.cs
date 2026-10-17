@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.FindSymbols;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Naming;
@@ -227,6 +228,47 @@ internal static class CamelCaseRenamer
         return current is not null;
     }
 
+    /// <summary>
+    /// The interpolated string handler type when the span is inside an interpolation hole whose handler's AppendFormatted
+    /// takes the hole's text as a <c>[CallerArgumentExpression]</c> argument (owner's choice 2026-10-17, trial 28: ZLogger
+    /// logs <c>$"{userId}"</c> under the key "userId", so a rename changes the logged data); else null. Syntax first: only
+    /// spans inside an interpolation are bound, once per hole.
+    /// </summary>
+    internal static async Task<string?> GetLogKeyHandlerAsync(Document document, TextSpan span, CancellationToken cancellationToken)
+    {
+        if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root)
+        {
+            return null;
+        }
+
+        var node = root.FindToken(span.Start).Parent;
+        return node?.FirstAncestorOrSelf<InterpolationSyntax>() is null
+            || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
+            ? null
+            : GetLogKeyHandler(node, span, model, cancellationToken);
+    }
+
+    /// <summary><see cref="GetLogKeyHandlerAsync"/> from the node at the span, with its semantic model.</summary>
+    internal static string? GetLogKeyHandler(SyntaxNode node, TextSpan span, SemanticModel model, CancellationToken cancellationToken)
+    {
+        for (var current = node; current is not null and not MemberDeclarationSyntax; current = current.Parent)
+        {
+            if (current is InterpolationSyntax interpolation
+                && interpolation.Expression.Span.Contains(span)
+                && model.GetOperation(interpolation.Parent!, cancellationToken) is IInterpolatedStringOperation content
+                && content.Parts.FirstOrDefault(p => p.Syntax == interpolation) is IInterpolatedStringAppendOperation { AppendCall: IInvocationOperation { TargetMethod: { Parameters: { Length: > 1 } parameters } method } }
+                && parameters.Any(p => p.GetAttributes().Any(a =>
+                    a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
+                    && a.ConstructorArguments.Length == 1
+                    && a.ConstructorArguments[0].Value as string == parameters[0].Name)))
+            {
+                return method.ContainingType.Name;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>The solution with the edits, keyed by <see cref="GetFileKey"/>.</summary>
     private static async Task<Solution> ApplyAsync(Solution solution, Dictionary<string, List<TextChange>> changes, CancellationToken cancellationToken)
     {
@@ -318,10 +360,10 @@ internal static class CamelCaseRenamer
                 return (itemChanges, reason, where);
             }
 
-            var (symbolChanges, kept) = await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, PublicApi.IsRenameAllowed(copy.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), cancellationToken).ConfigureAwait(false);
+            var (symbolChanges, kept, keptWhere) = await GetChangesAsync(solution, symbol, newName, diagnostic.Id == DiagnosticIds.ParameterMatchesBase, PublicApi.IsRenameAllowed(copy.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)), cancellationToken).ConfigureAwait(false);
             if (kept is not null)
             {
-                return (itemChanges, kept, null);
+                return (itemChanges, kept, keptWhere);
             }
 
             itemChanges.AddRange(symbolChanges);
@@ -511,9 +553,14 @@ internal static class CamelCaseRenamer
 
         // XAML binds members by name at run time: properties and events (bindings), methods (event handlers), static fields
         // and types ('x:Static', 'x:Class'). Not private fields: XAML can't reach them, and a word in a 'Text="..."' value
-        // would keep a common name like 'name'.
-        return symbol is not IFieldSymbol { DeclaredAccessibility: Accessibility.Private } && names.Files.Xaml.TryGetValue(symbol.Name, out var xaml)
-            ? (KeptReason.NameInXamlFile, xaml)
+        // would keep a common name like 'name'. An element or attribute name is the XAML build's (MC3074, MC3072).
+        if (symbol is IFieldSymbol { DeclaredAccessibility: Accessibility.Private })
+        {
+            return (null, null);
+        }
+
+        return names.Files.XamlMarkup.TryGetValue(symbol.Name, out var markup) ? (KeptReason.NameInXamlMarkup, markup)
+            : names.Files.Xaml.TryGetValue(symbol.Name, out var xaml) ? (KeptReason.NameInXamlFile, xaml)
             : (null, null);
     }
 
@@ -593,7 +640,7 @@ internal static class CamelCaseRenamer
     /// <paramref name="renamePublicApi"/>, a related member other assemblies see (a public class's implementation of an
     /// internal interface's method) makes the rename unsafe, and a related parameter they see keeps its name.
     /// </summary>
-    private static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason)> GetChangesAsync(
+    private static async Task<(List<(string File, TextChange Change)> Changes, KeptReason? Reason, string? Where)> GetChangesAsync(
         Solution solution,
         ISymbol symbol,
         string newName,
@@ -622,17 +669,17 @@ internal static class CamelCaseRenamer
             var renamed = new HashSet<string>(symbols.Select(s => s.OriginalDefinition.ToDisplayString()));
             if (!renamePublicApi && symbols.Any(PublicApi.IsVisible))
             {
-                return (result, KeptReason.PublicApi);
+                return (result, KeptReason.PublicApi, null);
             }
 
             if (symbols.Any(s => CamelCaseNamingAnalyzer.GetBaseMembers(s).Any(b => !renamed.Contains(b.OriginalDefinition.ToDisplayString()))))
             {
-                return (result, KeptReason.ImplementsAnotherMember);
+                return (result, KeptReason.ImplementsAnotherMember, null);
             }
 
             if (await HasDerivedMemberAsync(solution, symbols, newName, cancellationToken).ConfigureAwait(false))
             {
-                return (result, KeptReason.DerivedMemberHasNewName);
+                return (result, KeptReason.DerivedMemberHasNewName, null);
             }
         }
         else if (symbol is INamedTypeSymbol type)
@@ -641,6 +688,11 @@ internal static class CamelCaseRenamer
             symbols.AddRange(type.InstanceConstructors.Concat(type.StaticConstructors)
                 .Concat(type.GetMembers().OfType<IMethodSymbol>().Where(m => m.MethodKind == MethodKind.Destructor))
                 .Where(m => !m.IsImplicitlyDeclared));
+        }
+
+        if ((IsTypeMember(symbol) || symbol is IFieldSymbol || symbol is INamedTypeSymbol { ContainingType: not null }) && await IsHiddenByNewMemberAsync(solution, symbol, cancellationToken).ConfigureAwait(false))
+        {
+            return (result, KeptReason.HiddenByNewMember, null);
         }
 
         foreach (var current in symbols)
@@ -665,12 +717,17 @@ internal static class CamelCaseRenamer
                 // Fields, types and type parameters were checked by their analyzers; references are checked below.
                 if (declaration is null || (IsMemberScoped(current) && !CamelCaseNames.CanRename(declaration, oldName, newName)))
                 {
-                    return (result, KeptReason.NewNameTaken);
+                    return (result, KeptReason.NewNameTaken, null);
                 }
 
                 if (await TryAddAsync(solution.GetDocument(tree), location.SourceSpan, newName).ConfigureAwait(false) is { } declarationKept)
                 {
-                    return (result, declarationKept);
+                    return (result, declarationKept, null);
+                }
+
+                if (current is ILocalSymbol or IParameterSymbol && solution.GetDocument(tree) is { } scopeDocument)
+                {
+                    result.AddRange(await GetUnneededMemberThisAsync(scopeDocument, declaration, location.SourceSpan, current, oldName, cancellationToken).ConfigureAwait(false));
                 }
             }
 
@@ -689,7 +746,7 @@ internal static class CamelCaseRenamer
                     // its lookups found the old name under the new one), so a name VB uses keeps it.
                     if (reference.Document.Project.Language != LanguageNames.CSharp)
                     {
-                        return (result, KeptReason.UsedFromVisualBasic);
+                        return (result, KeptReason.UsedFromVisualBasic, null);
                     }
 
                     if (reference.IsImplicit
@@ -704,25 +761,43 @@ internal static class CamelCaseRenamer
                         && (await reference.Document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))?.FindToken(reference.Location.SourceSpan.Start) is { } token
                         && CamelCaseNames.IsNameofName(token))
                     {
-                        return (result, KeptReason.NameInNameof);
+                        return (result, KeptReason.NameInNameof, null);
+                    }
+
+                    if (await GetLogKeyHandlerAsync(reference.Document, reference.Location.SourceSpan, cancellationToken).ConfigureAwait(false) is { } handler)
+                    {
+                        var line = (await reference.Document.GetTextAsync(cancellationToken).ConfigureAwait(false)).Lines.GetLineFromPosition(reference.Location.SourceSpan.Start).LineNumber;
+                        return (result, KeptReason.NameIsLogKey, $"{reference.Document.FilePath ?? reference.Document.Name}({line + 1}) in {handler}");
                     }
 
                     var replacement = await GetReplacementAsync(current, reference.Document, reference.Location.SourceSpan, newName, cancellationToken).ConfigureAwait(false);
                     if (replacement is null)
                     {
-                        return (result, KeptReason.NewNameMeansSomethingElse);
+                        return (result, KeptReason.NewNameMeansSomethingElse, null);
                     }
 
                     var editSpan = await GetUnneededThisAsync(current, reference.Document, reference.Location.SourceSpan, oldName, newName, cancellationToken).ConfigureAwait(false);
                     if (await TryAddAsync(reference.Document, reference.Location.SourceSpan, replacement, editSpan).ConfigureAwait(false) is { } referenceKept)
                     {
-                        return (result, referenceKept);
+                        return (result, referenceKept, null);
                     }
                 }
             }
         }
 
-        return (result, null);
+        if (symbol is ITypeParameterSymbol renamedTypeParameter)
+        {
+            foreach (var (document, span) in await GetCrefTypeParametersAsync(solution, renamedTypeParameter, newName, cancellationToken).ConfigureAwait(false))
+            {
+                var key = GetFileKey(document);
+                if (!result.Any(r => r.File == key && r.Change.Span == span))
+                {
+                    result.Add((key, new TextChange(span, newName)));
+                }
+            }
+        }
+
+        return (result, null, null);
 
         async Task<bool> CanRenameAsync(ISymbol related)
         {
@@ -865,6 +940,90 @@ internal static class CamelCaseRenamer
     }
 
     /// <summary>
+    /// The old name in the doc comment crefs of the type parameter's own type or method that spell its type parameters
+    /// (<c>&lt;see cref="Node{_TVertex}"/&gt;</c>): a cref declares type parameters of its own there, so references don't
+    /// find them, and BRO1606 ("Initializes a new instance of the <see cref="Node{TVertex}"/> class") fixed them a run later
+    /// (trial 28). Every use of the old name in such a cref is renamed with it; a cref that already uses the new name is left.
+    /// </summary>
+    private static async Task<List<(Document Document, TextSpan Span)>> GetCrefTypeParametersAsync(Solution solution, ITypeParameterSymbol typeParameter, string newName, CancellationToken cancellationToken)
+    {
+        var found = new List<(Document Document, TextSpan Span)>();
+        ISymbol owner = (ISymbol?)typeParameter.DeclaringMethod ?? typeParameter.DeclaringType!;
+        var arity = owner is IMethodSymbol method ? method.Arity : ((INamedTypeSymbol)owner).Arity;
+        foreach (var reference in (owner.ContainingType ?? owner).DeclaringSyntaxReferences)
+        {
+            if (solution.GetDocument(reference.SyntaxTree) is not { } document)
+            {
+                continue;
+            }
+
+            var crefs = (await reference.GetSyntaxAsync(cancellationToken).ConfigureAwait(false))
+                .DescendantNodes(descendIntoTrivia: true)
+                .OfType<XmlCrefAttributeSyntax>()
+                .Select(a => a.Cref)
+                .Where(cref => cref.DescendantNodes().OfType<GenericNameSyntax>().Any(g =>
+                    g.Identifier.ValueText == owner.Name
+                    && g.TypeArgumentList.Arguments.Count == arity
+                    && g.TypeArgumentList.Arguments[typeParameter.Ordinal] is IdentifierNameSyntax { Identifier.ValueText: var name }
+                    && name == typeParameter.Name));
+            foreach (var cref in crefs)
+            {
+                var names = cref.DescendantNodes().OfType<IdentifierNameSyntax>().ToList();
+                if (names.All(n => n.Identifier.ValueText != newName))
+                {
+                    found.AddRange(names.Where(n => n.Identifier.ValueText == typeParameter.Name).Select(n => (document, n.Identifier.Span)));
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    /// The edits that drop a 'this.' that only the renamed local or parameter made necessary ('var Download = ...;' next to
+    /// 'this.Download(...)'), where the repository asks for no qualifier (dotnet_style_qualification_for_* false, like
+    /// BRO1131's fix): BRO1131 writes 'this.' there while the local shadows the method, and without this the result
+    /// depended on whether BRO1131 or BRO1301 ran first (trial 28, Jackett). Only where the old name means the renamed
+    /// symbol and nothing else in its scope declares it, so the plain name then binds the member; not for extension methods.
+    /// </summary>
+    private static async Task<List<(string File, TextChange Change)>> GetUnneededMemberThisAsync(Document document, SyntaxNode declaration, TextSpan declared, ISymbol renamed, string oldName, CancellationToken cancellationToken)
+    {
+        var edits = new List<(string File, TextChange Change)>();
+        var scope = CamelCaseNames.GetScope(declaration);
+        var accesses = scope.DescendantNodes()
+            .OfType<MemberAccessExpressionSyntax>()
+            .Where(a => a.Expression is ThisExpressionSyntax && a.Name.Identifier.ValueText == oldName)
+            .ToList();
+        if (accesses.Count == 0
+            || scope.DescendantTokens().Any(t => t.ValueText == oldName && t.Span != declared && IsDeclaration(t))
+            || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model)
+        {
+            return edits;
+        }
+
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(declaration.SyntaxTree);
+        foreach (var access in accesses)
+        {
+            ExpressionSyntax target = access.Parent is InvocationExpressionSyntax invocation && invocation.Expression == access ? invocation : access;
+            if (access.Expression.GetTrailingTrivia().Concat(access.OperatorToken.LeadingTrivia).Concat(access.OperatorToken.TrailingTrivia).All(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
+                && model.GetSymbolInfo(target, cancellationToken).Symbol is { } member
+                && member is not IMethodSymbol { ReducedFrom: not null }
+                && Analyzers.Readability.BaseCalls.PrefersNoQualifier(member, options)
+                && model.LookupSymbols(access.SpanStart, name: oldName) is { Length: > 0 } found
+                && found.All(s => SymbolEqualityComparer.Default.Equals(s, renamed)))
+            {
+                edits.Add((GetFileKey(document), new TextChange(TextSpan.FromBounds(access.SpanStart, access.Name.SpanStart), string.Empty)));
+            }
+        }
+
+        return edits;
+
+        static bool IsDeclaration(SyntaxToken token) => token.Parent is VariableDeclaratorSyntax or ParameterSyntax or SingleVariableDesignationSyntax
+            or ForEachStatementSyntax or CatchDeclarationSyntax or LocalFunctionStatementSyntax or TypeParameterSyntax
+            or FromClauseSyntax or LetClauseSyntax or JoinClauseSyntax or JoinIntoClauseSyntax or QueryContinuationSyntax;
+    }
+
+    /// <summary>
     /// Whether <paramref name="found"/> is a member of a type enclosing the field's type (or of its bases) that the field's
     /// type never names: the renamed field hides it at the field's uses, since lookup searches the type and its bases before
     /// the enclosing types, and no other use in the type means it (AngleSharp, trial 21: a nested state class's 'valid' was
@@ -943,6 +1102,23 @@ internal static class CamelCaseRenamer
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Whether a derived type hides the member with a 'new' member of its name (<see cref="PascalCaseNamingAnalyzer.HidesBaseMember"/>):
+    /// renamed, the member would no longer be hidden, and that 'new' would be CS0109. A private member isn't hidden.
+    /// </summary>
+    private static async Task<bool> IsHiddenByNewMemberAsync(Solution solution, ISymbol member, CancellationToken cancellationToken)
+    {
+        if (member.DeclaredAccessibility == Accessibility.Private || member.ContainingType is not { IsSealed: false } type)
+        {
+            return false;
+        }
+
+        var derived = type.TypeKind == TypeKind.Interface
+            ? await SymbolFinder.FindDerivedInterfacesAsync(type, solution, cancellationToken: cancellationToken).ConfigureAwait(false)
+            : await SymbolFinder.FindDerivedClassesAsync(type, solution, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return derived.Any(d => d.GetMembers(member.Name).Any(PascalCaseNamingAnalyzer.HidesBaseMember));
     }
 
     /// <summary>

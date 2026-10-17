@@ -224,7 +224,12 @@ internal static class TupleElementRenamer
 
     private static async Task<(Solution? Renamed, (KeptReason Reason, string? Where)? Reason)> TryRenameAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
     {
-        var (renamed, visible) = await RenameOneAsync(solution, oldName, newName, onlyIn, cancellationToken).ConfigureAwait(false);
+        var (renamed, visible, logKey) = await RenameOneAsync(solution, oldName, newName, onlyIn, cancellationToken).ConfigureAwait(false);
+        if (logKey is { } where)
+        {
+            return (null, (KeptReason.NameIsLogKey, where));
+        }
+
         if (renamed is null)
         {
             return (null, (KeptReason.NothingToRename, null));
@@ -322,7 +327,7 @@ internal static class TupleElementRenamer
     }
 
     /// <summary>The rename of every element named <paramref name="oldName"/> (only those declared in <paramref name="onlyIn"/>'s files when given), with every use.</summary>
-    private static async Task<(Solution? Renamed, List<ISymbol?> Visible)> RenameOneAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
+    private static async Task<(Solution? Renamed, List<ISymbol?> Visible, string? LogKey)> RenameOneAsync(Solution solution, string oldName, string newName, ISet<string>? onlyIn, CancellationToken cancellationToken)
     {
         var visible = new List<ISymbol?>();
         var documents = new List<(Document Document, SyntaxNode Root, SemanticModel Model)>();
@@ -402,6 +407,12 @@ internal static class TupleElementRenamer
                 if (model.GetSymbolInfo(name, cancellationToken).Symbol is IFieldSymbol { ContainingType.IsTupleType: true } element
                     && element.Locations.Any(l => l.IsInSource && renamed.Contains(Key(l))))
                 {
+                    // The hole's text is a log key (CamelCaseRenamer.GetLogKeyHandlerAsync).
+                    if (CamelCaseRenamer.GetLogKeyHandler(name, name.Span, model, cancellationToken) is { } handler)
+                    {
+                        return (null, visible, $"{document.FilePath ?? document.Name}({name.GetLocation().GetLineSpan().StartLinePosition.Line + 1}) in {handler}");
+                    }
+
                     // '(pair.first, ...)' and 'new { pair.first }' infer a name from the use: it's written out, so the
                     // inferred element (and every use of it) keeps the old name. Not in a literal converted to a tuple
                     // type, whose names win: there the written-out name was only a CS8123 (coverlet's 'return (false,
@@ -418,7 +429,7 @@ internal static class TupleElementRenamer
 
         if (changes.Count == 0)
         {
-            return (null, visible);
+            return (null, visible, null);
         }
 
         foreach (var file in changes)
@@ -432,7 +443,7 @@ internal static class TupleElementRenamer
             }
         }
 
-        return (solution, visible);
+        return (solution, visible, null);
     }
 
     /// <summary>

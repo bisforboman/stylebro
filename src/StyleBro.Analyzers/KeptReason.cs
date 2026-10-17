@@ -85,6 +85,18 @@ public enum KeptReason
 
     /// <summary>A XAML file uses the name (a binding path, 'x:Name', an event handler), which binds it by name at run time.</summary>
     NameInXamlFile,
+
+    /// <summary>A XAML file names it as an element or attribute ('&lt;local:Badge caption="hi"/&gt;'), which the XAML build resolves.</summary>
+    NameInXamlMarkup,
+
+    /// <summary>A derived type hides the member with a 'new' member of the same name, which would then hide nothing (CS0109).</summary>
+    HiddenByNewMember,
+
+    /// <summary>
+    /// The name is in an interpolated string's hole whose handler takes the hole's text as a <c>[CallerArgumentExpression]</c>
+    /// argument (ZLogger's structured-log keys), so the text is data at run time.
+    /// </summary>
+    NameIsLogKey,
 }
 
 /// <summary>
@@ -139,6 +151,9 @@ public sealed class KeptFinding
         KeptReason.NameInSnapshotFile => "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
         KeptReason.UsedFromVisualBasic => "Visual Basic code uses the name, and StyleBro doesn't edit VB code",
         KeptReason.NameInXamlFile => "a XAML file uses the name (a binding path, x:Name, an event handler), which binds it by name at run time: renaming would break the binding silently",
+        KeptReason.NameInXamlMarkup => "a XAML file names it as an element or attribute (a type or property of the project's own namespace): renaming would break the XAML build (MC3074, MC3072)",
+        KeptReason.HiddenByNewMember => "a derived type hides it with a 'new' member of the same name, which would then hide nothing (CS0109)",
+        KeptReason.NameIsLogKey => "the name is a log key: it's in an interpolated string's hole whose handler takes the hole's text as a [CallerArgumentExpression] argument (structured logging, e.g. ZLogger), so renaming would change the logged data",
         KeptReason.PublicApi => "a related override, implementation or parameter is public API (stylebro_rename_public_api)",
         KeptReason.ImplementsAnotherMember => "it also overrides or implements a member that isn't renamed",
         KeptReason.DerivedMemberHasNewName => "a derived type already has a member with the new name",

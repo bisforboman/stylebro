@@ -121,7 +121,8 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 `DerivedMemberHasNewName`, `NewNameTaken`, `NewNameMeansSomethingElse`, `GeneratedReference`, `ReferenceNotByName`,
 `AddsErrors`, `DisabledCode`, `NamespaceFromOutside`, `DerivedTypeInAnotherProject`,
 `UsedInProjectNotLoaded`, `NothingToRename`, `MembersReadByPosition`, `AddsDeconstruction`, `KeptWithOtherElement`,
-`UsedThroughDynamic`, `NameInSnapshotFile`, `UsedFromVisualBasic`, `NameInXamlFile`
+`UsedThroughDynamic`, `NameInSnapshotFile`, `UsedFromVisualBasic`, `NameInXamlFile`, `NameInXamlMarkup`,
+`HiddenByNewMember`, `NameIsLogKey`
 (what each means: `reasonText`).
 
 ## AGENTS.md

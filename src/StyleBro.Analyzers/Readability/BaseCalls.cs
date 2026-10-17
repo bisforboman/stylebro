@@ -85,7 +85,7 @@ internal static class BaseCalls
         return new TextChange(node.Token.Span, "this");
     }
 
-    private static bool PrefersNoQualifier(ISymbol symbol, AnalyzerConfigOptions options)
+    internal static bool PrefersNoQualifier(ISymbol symbol, AnalyzerConfigOptions options)
     {
         var key = symbol switch
         {

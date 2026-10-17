@@ -668,6 +668,28 @@ public class FieldNamingTests
         }
         """);
 
+    // Trial 28 (Jackett): a 'new' field exists to hide the base member by its name; renamed, it hid nothing (CS0109).
+    [Fact]
+    public Task NewFieldsHidingABaseMember_AreNotReported() => VerifyNotFixedAsync(
+        [
+            """
+            class Base
+            {
+                protected int {|BRO1303:Total|};
+
+                protected int count => 1;
+            }
+
+            class C : Base
+            {
+                private new int Total;
+                internal new static readonly int count = 1;
+
+                public int Get() => Total + count;
+            }
+            """,
+        ]);
+
     [Fact]
     public Task UnsafeRenames_AreSkipped() => VerifyNoDiagnosticsAsync("""
         using System;

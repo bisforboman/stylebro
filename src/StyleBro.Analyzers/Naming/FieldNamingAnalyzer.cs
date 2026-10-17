@@ -81,6 +81,7 @@ public sealed class FieldNamingAnalyzer : DiagnosticAnalyzer
         // FieldNames' styles follow the naming rules; NamingRules checks the new name against the rule Roslyn picks for the
         // field too (stryker: a '_' rule for private static fields wins over one for static readonly, so '_lockObj' stays).
         if (rename is ({ } rule, { } newName)
+            && !PascalCaseNamingAnalyzer.HidesBaseMember(field)
             && PublicApi.CanRename(field, options)
             && (field.DeclaredAccessibility == Accessibility.Private || !IsInDisabledCode(field, context))
             && !(rule == FieldRule.Prefix && FieldNames.IsPrefixRequiredByNamingRule(field.Name.Substring(0, 2), options))
