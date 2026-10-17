@@ -228,6 +228,47 @@ internal static class CamelCaseRenamer
         return current is not null;
     }
 
+    /// <summary>
+    /// The interpolated string handler type when the span is inside an interpolation hole whose handler's AppendFormatted
+    /// takes the hole's text as a <c>[CallerArgumentExpression]</c> argument (owner's choice 2026-10-17, trial 28: ZLogger
+    /// logs <c>$"{userId}"</c> under the key "userId", so a rename changes the logged data); else null. Syntax first: only
+    /// spans inside an interpolation are bound, once per hole.
+    /// </summary>
+    internal static async Task<string?> GetLogKeyHandlerAsync(Document document, TextSpan span, CancellationToken cancellationToken)
+    {
+        if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root)
+        {
+            return null;
+        }
+
+        var node = root.FindToken(span.Start).Parent;
+        return node?.FirstAncestorOrSelf<InterpolationSyntax>() is null
+            || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
+            ? null
+            : GetLogKeyHandler(node, span, model, cancellationToken);
+    }
+
+    /// <summary><see cref="GetLogKeyHandlerAsync"/> from the node at the span, with its semantic model.</summary>
+    internal static string? GetLogKeyHandler(SyntaxNode node, TextSpan span, SemanticModel model, CancellationToken cancellationToken)
+    {
+        for (var current = node; current is not null and not MemberDeclarationSyntax; current = current.Parent)
+        {
+            if (current is InterpolationSyntax interpolation
+                && interpolation.Expression.Span.Contains(span)
+                && model.GetOperation(interpolation.Parent!, cancellationToken) is IInterpolatedStringOperation content
+                && content.Parts.FirstOrDefault(p => p.Syntax == interpolation) is IInterpolatedStringAppendOperation { AppendCall: IInvocationOperation { TargetMethod: { Parameters: { Length: > 1 } parameters } method } }
+                && parameters.Any(p => p.GetAttributes().Any(a =>
+                    a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
+                    && a.ConstructorArguments.Length == 1
+                    && a.ConstructorArguments[0].Value as string == parameters[0].Name)))
+            {
+                return method.ContainingType.Name;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>The solution with the edits, keyed by <see cref="GetFileKey"/>.</summary>
     private static async Task<Solution> ApplyAsync(Solution solution, Dictionary<string, List<TextChange>> changes, CancellationToken cancellationToken)
     {
@@ -980,47 +1021,6 @@ internal static class CamelCaseRenamer
         static bool IsDeclaration(SyntaxToken token) => token.Parent is VariableDeclaratorSyntax or ParameterSyntax or SingleVariableDesignationSyntax
             or ForEachStatementSyntax or CatchDeclarationSyntax or LocalFunctionStatementSyntax or TypeParameterSyntax
             or FromClauseSyntax or LetClauseSyntax or JoinClauseSyntax or JoinIntoClauseSyntax or QueryContinuationSyntax;
-    }
-
-    /// <summary>
-    /// The interpolated string handler type when the span is inside an interpolation hole whose handler's AppendFormatted
-    /// takes the hole's text as a <c>[CallerArgumentExpression]</c> argument (owner's choice 2026-10-17, trial 28: ZLogger
-    /// logs <c>$"{userId}"</c> under the key "userId", so a rename changes the logged data); else null. Syntax first: only
-    /// spans inside an interpolation are bound, once per hole.
-    /// </summary>
-    internal static async Task<string?> GetLogKeyHandlerAsync(Document document, TextSpan span, CancellationToken cancellationToken)
-    {
-        if (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root)
-        {
-            return null;
-        }
-
-        var node = root.FindToken(span.Start).Parent;
-        return node?.FirstAncestorOrSelf<InterpolationSyntax>() is null
-            || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
-            ? null
-            : GetLogKeyHandler(node, span, model, cancellationToken);
-    }
-
-    /// <summary><see cref="GetLogKeyHandlerAsync"/> from the node at the span, with its semantic model.</summary>
-    internal static string? GetLogKeyHandler(SyntaxNode node, TextSpan span, SemanticModel model, CancellationToken cancellationToken)
-    {
-        for (var current = node; current is not null and not MemberDeclarationSyntax; current = current.Parent)
-        {
-            if (current is InterpolationSyntax interpolation
-                && interpolation.Expression.Span.Contains(span)
-                && model.GetOperation(interpolation.Parent!, cancellationToken) is IInterpolatedStringOperation content
-                && content.Parts.FirstOrDefault(p => p.Syntax == interpolation) is IInterpolatedStringAppendOperation { AppendCall: IInvocationOperation { TargetMethod: { Parameters: { Length: > 1 } parameters } method } }
-                && parameters.Any(p => p.GetAttributes().Any(a =>
-                    a.AttributeClass?.Name == "CallerArgumentExpressionAttribute"
-                    && a.ConstructorArguments.Length == 1
-                    && a.ConstructorArguments[0].Value as string == parameters[0].Name)))
-            {
-                return method.ContainingType.Name;
-            }
-        }
-
-        return null;
     }
 
     /// <summary>
