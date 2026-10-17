@@ -2,9 +2,9 @@
 # Runs one trial agent in its own container (.trials/README.md): builds or updates the image, starts the container
 # stylebro-trial<N>-<Name> with .trials/trial<N>/<Folder> at /work and .trials/trial<N>/logs/<Name> at /logs (both
 # read-write), the package feed at /feed (read-only) and the shared NuGet volume at /nuget, installs stylebro-migrate from
-# the feed, and prints how to `docker exec` into it.
+# the feed, and prints how to `docker exec` into it. -Folder and -Logs are relative to .trials/trial<N> (or absolute).
 #
-#   ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx [-Folder clifx] [-Feed <dir>] [-Version 0.8.0-trial29]
+#   ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx [-Folder clifx] [-Logs logs/clifx] [-Feed <dir>] [-Version 0.8.0-trial29]
 #                                             [-Cpus 4] [-Memory 12g] [-Windows]
 #   ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx -Stop      (stops it; running the first line again resumes it)
 #   ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 [-Name clifx] -Remove  (removes one, or every container of the trial)
@@ -14,6 +14,7 @@ param(
     [Parameter(Mandatory)][int]$Trial,
     [string]$Name,
     [string]$Folder,
+    [string]$Logs,
     [string]$Feed = "$env:TEMP\stylebro-trial$Trial\feed",
     [string]$Version = "0.8.0-trial$Trial",
     [double]$Cpus = 4,
@@ -53,8 +54,8 @@ if (-not $Windows -and $engine -ne 'linux') { throw "Docker runs $engine contain
 
 $here = $PSScriptRoot
 $trialDir = [IO.Path]::GetFullPath((Join-Path $here "../../.trials/trial$Trial"))
-$work = Join-Path $trialDir $(if ($Folder) { $Folder } else { $Name })
-$logs = Join-Path $trialDir "logs/$Name"
+$work = [IO.Path]::GetFullPath([IO.Path]::Combine($trialDir, $(if ($Folder) { $Folder } else { $Name })))
+$logs = [IO.Path]::GetFullPath([IO.Path]::Combine($trialDir, $(if ($Logs) { $Logs } else { "logs/$Name" })))
 if (-not (Test-Path $Feed)) { throw "No package feed at $Feed (pack StyleBro.Package and StyleBro.Migrate into it first)." }
 New-Item -ItemType Directory -Force $work, $logs | Out-Null
 
