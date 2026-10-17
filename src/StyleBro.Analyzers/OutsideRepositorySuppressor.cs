@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -15,7 +14,9 @@ namespace StyleBro.Analyzers;
 /// '..\..\outside\Shared.cs' from a sibling folder (trial 27). 'stylebro-migrate format' leaves such files alone (someone
 /// else's code, like a submodule's), so without this its check said clean while the build failed on them. The package's
 /// build targets pass the repository's folder (<see cref="Property"/>: the nearest folder above the project with a '.git'
-/// folder or file); without it, or with 'none', nothing is hidden.
+/// folder or file); without it, or with 'none', nothing is hidden. Unlike <see cref="PackageFileSuppressor"/>, which hides
+/// only BRO findings (a package's file is compiled from the cache, where only StyleBro's own suggestions are noise), the
+/// built-in rules' are hidden too: 'format' doesn't touch the file for them either, so they would fail the build the same way.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class OutsideRepositorySuppressor : DiagnosticSuppressor
@@ -35,8 +36,12 @@ public sealed class OutsideRepositorySuppressor : DiagnosticSuppressor
     {
         var roots = PackageFileSuppressor.Roots(root);
         return roots.Count == 1 && !roots[0].Equals("none", StringComparison.OrdinalIgnoreCase)
-            && Path.IsPathRooted(path) && !PackageFileSuppressor.IsUnder(path, roots);
+            && IsFullPath(PackageFileSuppressor.Normalize(path)) && !PackageFileSuppressor.IsUnder(path, roots);
     }
+
+    // Text only, the same on every OS: Path.IsPathRooted on Linux doesn't take a drive letter.
+    private static bool IsFullPath(string path) =>
+        path.StartsWith("/", StringComparison.Ordinal) || (path.Length > 2 && char.IsLetter(path[0]) && path[1] == ':' && path[2] == '/');
 
     /// <inheritdoc/>
     public override void ReportSuppressions(SuppressionAnalysisContext context)
