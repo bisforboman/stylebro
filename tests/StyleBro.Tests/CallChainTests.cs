@@ -414,6 +414,26 @@ public class CallChainTests
         }
         """);
 
+    // The pair's inner chain isn't analyzed on its own once the pair is looked through: '.ToUpper()' is reported once.
+    [Fact]
+    public Task ParenthesesBro1405Removes_TheInnerChainIsPartOfTheOuterOne() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public string M(string a) => (a
+                .Trim(){|BRO1523:.|}ToUpper()){|BRO1523:.|}ToLower();
+        }
+        """,
+        """
+        public class C
+        {
+            public string M(string a) => (a
+                .Trim()
+                .ToUpper())
+                .ToLower();
+        }
+        """);
+
     // Trial 27 (PalCalc): parentheses BRO1405 removes don't end a chain, so the call after them is reported in the same run.
     [Theory]
     [InlineData("", true)]
