@@ -217,7 +217,7 @@ internal static class FormatCommand
     private static readonly string[] ProjectQuery =
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
-        "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:StyleBroBaseline",
+        "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline",
         "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo",
     ];
 
@@ -1934,14 +1934,18 @@ internal static class FormatCommand
     /// A project's configurations besides its default (<paramref name="configuration"/>, Debug unless set): its Configurations
     /// property (the SDK's Debug;Release), only those the solution builds when it says (<paramref name="solution"/>), with the
     /// solution's platforms ('Release|x64', also 'Debug|x64' beside the default: a platform-only solution), at most four
-    /// ('within reason': a configuration costs a 'dotnet format' run where the code differs).
+    /// ('within reason': a configuration costs a 'dotnet format' run where the code differs). A solution platform the project's
+    /// <paramref name="platforms"/> (its Platforms property, the SDK's AnyCPU) doesn't list builds it in its own platform: the
+    /// solution maps it (Mediator's x86 and x64 build AnyCPU projects, which failed with Platform=x86).
     /// </summary>
-    public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution)
+    public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution, string platforms = "")
     {
         var own = configuration.Trim().Length > 0 ? configuration.Trim() : "Debug";
+        var projectPlatforms = (platforms.Trim().Length > 0 ? platforms : "AnyCPU").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        string Mapped(string c) => SplitConfiguration(c) is (var name, { } platform) && !projectPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase) ? name : c;
         return (configurations.Trim().Length > 0 ? configurations : "Debug;Release")
             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .SelectMany(c => solution is null ? [c] : solution.Where(s => SplitConfiguration(s).Configuration.Equals(c, StringComparison.OrdinalIgnoreCase)))
+            .SelectMany(c => solution is null ? [c] : solution.Where(s => SplitConfiguration(s).Configuration.Equals(c, StringComparison.OrdinalIgnoreCase)).Select(Mapped))
             .Where(c => !c.Equals(own, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(c => SplitConfiguration(c).Platform is not null)
@@ -4418,7 +4422,7 @@ internal static class FormatCommand
             if (verifying)
             {
                 var solutionConfigurations = SolutionConfigurations(workspacePath);
-                RecordUnchecked(root, withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations)
+                RecordUnchecked(root, withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations, EvaluatedProperty(projects[k].FullPath, "Platforms"))
                     .Select(c => (projects[k].FullPath, c))).ToList());
             }
         }
@@ -4798,7 +4802,7 @@ internal static class FormatCommand
         withGenerator?.AddRange(tests.Where(p => p.Value.Analyzers.Length > 0).Select(p => p.Key).OrderBy(Path.GetFileNameWithoutExtension, StringComparer.OrdinalIgnoreCase));
         var others = tests.AsParallel()
             .Where(p => p.Value.Analyzers.Length == 0)
-            .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution)))
+            .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution, EvaluatedProperty(p.Value.FullPath, "Platforms"))))
             .Where(p => p.Others.Count > 0)
             .ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Others, StringComparer.OrdinalIgnoreCase);
         if (others.Count == 0)

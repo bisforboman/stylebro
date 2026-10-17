@@ -56,8 +56,11 @@ public sealed partial class MigrationTests
         Assert.Equal(["Debug|x64", "Release|x64"], FormatCommand.SolutionConfigurations(Path.Combine(root, "App.slnx")));
 
         // A platform-only solution: the default configuration in its platform is another one too (a run only where it parses differently).
-        Assert.Equal(["Debug|x64", "Release|x64"], FormatCommand.OtherConfigurations("Debug;Release", "Debug", ["Debug|x64", "Release|x64"]));
-        Assert.Equal(["Release", "Debug|x64", "Release|x64"], FormatCommand.OtherConfigurations("Debug;Release", "Debug", ["Debug", "Release", "Debug|x64", "Release|x64"]));
+        Assert.Equal(["Debug|x64", "Release|x64"], FormatCommand.OtherConfigurations("Debug;Release", "Debug", ["Debug|x64", "Release|x64"], "x64"));
+        Assert.Equal(["Release", "Debug|x64", "Release|x64"], FormatCommand.OtherConfigurations("Debug;Release", "Debug", ["Debug", "Release", "Debug|x64", "Release|x64"], "AnyCPU;x64"));
+
+        // A platform the project doesn't list builds it in its own (Mediator: x86 and x64 solution platforms, AnyCPU projects).
+        Assert.Equal(["Release"], FormatCommand.OtherConfigurations("Debug;Release", "Debug", ["Debug", "Release", "Debug|x86", "Release|x86"]));
 
         Assert.Equal(("Release", "x64"), FormatCommand.SplitConfiguration("Release|x64"));
         Assert.Equal(("Release", (string?)null), FormatCommand.SplitConfiguration("Release"));
