@@ -32,9 +32,9 @@ function Invoke-Docker {
 $label = "stylebro-trial=$Trial"
 if ($Remove) {
     $filter = if ($Name) { "name=^stylebro-trial$Trial-$Name$" } else { "label=$label" }
-    $ids = docker ps -aq --filter $filter --filter "label=$label"
+    $ids = @(docker ps -aq --filter $filter --filter "label=$label")
     if ($ids) { Invoke-Docker rm -f @ids | Out-Null }
-    "Removed $(@($ids).Count) container(s)."
+    "Removed $($ids.Count) container(s)."
     return
 }
 if (-not $Name) { throw '-Name is required (except with -Remove).' }

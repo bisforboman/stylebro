@@ -56,6 +56,12 @@ path, `NUGET_PACKAGES` per trial, never `dotnet build-server shutdown`, don't ki
 `Dockerfile` is the Linux image; `Dockerfile.windows` (Windows-only repos) needs Docker in Windows-containers mode, the
 owner's setting, and is untested until then (`-Windows` refuses otherwise).
 
+Tested 2026-10-17 with CliFx at 10cbf9b6 (StyleBro main 12f01ef0, 4 CPUs/12 GB): init, format (clean on run 2), verify
+clean, Debug/Release TreatWarningsAsErrors builds with and without EnforceCodeStyleInBuild green, 122/122 tests before and
+after, no AD0001; the same as trial 27 on the host apart from that trial's own fixes. Restore 40 s with an empty NuGet
+volume, 5 s warm. The bind mount is slow: a Debug build took 25 s on `/work` and 11 s on the container's own file system,
+and format ~6.5 minutes. For speed, clone under `/home/trial` and copy logs to `/logs`. Image ~2.3 GB.
+
 The Linux image: .NET SDK 10.0.402 (the base), SDKs 9.0.319 and 8.0.426, runtimes (and ASP.NET Core runtimes) 7.0.20
 and 6.0.36, git, pwsh, python3, user `trial`, nothing GUI. Raise the pinned versions together with the trial machine's.
 
@@ -70,6 +76,9 @@ docker exec -w /work stylebro-trial29-clifx pwsh -c '...'               # anythi
 ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx -Stop    # rerun the first line to resume
 ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Remove              # every container of the trial, when it's done
 ```
+
+Run `docker exec` from PowerShell; from Git Bash set `MSYS_NO_PATHCONV=1` first, or it rewrites `/work/...` into
+`C:/Program Files/Git/work/...`.
 
 Inside the container:
 
