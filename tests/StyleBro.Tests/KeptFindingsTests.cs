@@ -200,6 +200,17 @@ public sealed class KeptFindingsTests : IDisposable
     [InlineData("Views/Main.axaml", "<ListBox DisplayMemberPath='title' />", KeptReason.NameInXamlFile)]
     [InlineData("Page.xaml", "<TextBlock\n    Text=\"{Binding Path=Model.title, Mode=OneWay}\" />", KeptReason.NameInXamlFile)]
     [InlineData("Page.xaml", "<title xmlns:x=\"clr-namespace:title\" title=\"Title\" />", null)]
+    [InlineData("Page.xaml", "<Button Click=\"title\" />", KeptReason.NameInXamlFile)]
+    [InlineData("Page.xaml", "<TextBlock x:Name=\"title\" />", KeptReason.NameInXamlFile)]
+    [InlineData("Page.xaml", "<Setter Property=\"local:Shell.title\" />", KeptReason.NameInXamlFile)]
+
+    // Trial 28: words in text for people (Text-Grab's 'Text="Padding depends on window width"') name nothing, and neither
+    // does the 'x:' of '{x:Static ...}' or '{x:Null}'.
+    [InlineData("Page.xaml", "<TextBlock Text=\"Pick a title first\" />", null)]
+    [InlineData("Page.xaml", "<TextBlock Text=\"title\" ToolTip=\"title\" Content=\"title\" Header=\"title\" />", null)]
+    [InlineData("Page.xaml", "<Control Description=\"the title of the window\" />", null)]
+    [InlineData("Page.xaml", "<Path Data=\"M0,0 L1,1 title\" />", null)]
+    [InlineData("Page.xaml", "<TextBlock Text=\"{}{0} title\" />", null)]
     [InlineData("Page.xaml.txt", "<Window Title=\"{Binding title}\" />", null)]
     public async Task APropertyInAXamlFile_IsKept(string file, string xaml, KeptReason? expected)
     {
@@ -214,11 +225,11 @@ public sealed class KeptFindingsTests : IDisposable
     // Trial 27: element and attribute names from the project's own namespaces name its types and properties: renaming
     // them broke the build (MC3074, MC3072). The framework's names and geometry values ('Data="M0,0 z"') don't count.
     [Theory]
-    [InlineData("<Application xmlns:local=\"clr-namespace:Repro\"><local:boolConverter x:Key=\"BC\" /></Application>", "internal class boolConverter\n{\n}\n", KeptReason.NameInXamlFile)]
-    [InlineData("<Window xmlns:local=\"using:Repro\" local:tagBehavior.Key=\"main\" />", "internal static class tagBehavior\n{\n}\n", KeptReason.NameInXamlFile)]
-    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><local:Badge caption=\"hi\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlFile)]
-    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><local:Badge><local:Badge.caption>hi</local:Badge.caption></local:Badge></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlFile)]
-    [InlineData("<Window xmlns=\"clr-namespace:Repro\"><Badge caption=\"hi\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlFile)]
+    [InlineData("<Application xmlns:local=\"clr-namespace:Repro\"><local:boolConverter x:Key=\"BC\" /></Application>", "internal class boolConverter\n{\n}\n", KeptReason.NameInXamlMarkup)]
+    [InlineData("<Window xmlns:local=\"using:Repro\" local:tagBehavior.Key=\"main\" />", "internal static class tagBehavior\n{\n}\n", KeptReason.NameInXamlMarkup)]
+    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><local:Badge caption=\"hi\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlMarkup)]
+    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><local:Badge><local:Badge.caption>hi</local:Badge.caption></local:Badge></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlMarkup)]
+    [InlineData("<Window xmlns=\"clr-namespace:Repro\"><Badge caption=\"hi\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlMarkup)]
     [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><TextBlock caption=\"hi\" /><caption /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", null)]
     [InlineData("<Window><Path Data=\"M0,0 L1,1 caption\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", null)]
     public async Task ANameInAXamlFilesElementOrAttributeName_IsKept(string xaml, string code, KeptReason? expected)
@@ -308,6 +319,20 @@ public sealed class KeptFindingsTests : IDisposable
             id,
             ("Base.cs", "internal class Base\n{\n    " + baseMember + "\n}\n"),
             ("Derived.cs", "internal class Derived : Base\n{\n    " + derivedMember + "\n}\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
+    // Trial 28: the 'x:' prefix of a markup extension isn't a name (a-2: Point3's public field 'x' was kept for '{x:Static ...}').
+    [Theory]
+    [InlineData("<TextBlock Text=\"{Binding Source={x:Static SystemParameters.HighContrast}}\" Tag=\"{x:Null}\" />", null)]
+    [InlineData("<TextBlock Text=\"{x:Static local:Point3.x}\" />", KeptReason.NameInXamlFile)]
+    public async Task APrefixInAXamlMarkupExtension_KeepsNoName(string xaml, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.FieldPascalCase,
+            ("Point3.cs", "internal sealed class Point3\n{\n    public double x;\n}\n"),
+            ("MainWindow.xaml", xaml));
 
         Assert.Equal(expected, reason);
     }

@@ -512,9 +512,14 @@ internal static class CamelCaseRenamer
 
         // XAML binds members by name at run time: properties and events (bindings), methods (event handlers), static fields
         // and types ('x:Static', 'x:Class'). Not private fields: XAML can't reach them, and a word in a 'Text="..."' value
-        // would keep a common name like 'name'.
-        return symbol is not IFieldSymbol { DeclaredAccessibility: Accessibility.Private } && names.Files.Xaml.TryGetValue(symbol.Name, out var xaml)
-            ? (KeptReason.NameInXamlFile, xaml)
+        // would keep a common name like 'name'. An element or attribute name is the XAML build's (MC3074, MC3072).
+        if (symbol is IFieldSymbol { DeclaredAccessibility: Accessibility.Private })
+        {
+            return (null, null);
+        }
+
+        return names.Files.XamlMarkup.TryGetValue(symbol.Name, out var markup) ? (KeptReason.NameInXamlMarkup, markup)
+            : names.Files.Xaml.TryGetValue(symbol.Name, out var xaml) ? (KeptReason.NameInXamlFile, xaml)
             : (null, null);
     }
 
@@ -739,6 +744,18 @@ internal static class CamelCaseRenamer
             }
         }
 
+        if (symbol is ITypeParameterSymbol renamedTypeParameter)
+        {
+            foreach (var (document, span) in await GetCrefTypeParametersAsync(solution, renamedTypeParameter, newName, cancellationToken).ConfigureAwait(false))
+            {
+                var key = GetFileKey(document);
+                if (!result.Any(r => r.File == key && r.Change.Span == span))
+                {
+                    result.Add((key, new TextChange(span, newName)));
+                }
+            }
+        }
+
         return (result, null, null);
 
         async Task<bool> CanRenameAsync(ISymbol related)
@@ -879,6 +896,46 @@ internal static class CamelCaseRenamer
         }
 
         return access.Span;
+    }
+
+    /// <summary>
+    /// The old name in the doc comment crefs of the type parameter's own type or method that spell its type parameters
+    /// (<c>&lt;see cref="Node{_TVertex}"/&gt;</c>): a cref declares type parameters of its own there, so references don't
+    /// find them, and BRO1606 ("Initializes a new instance of the <see cref="Node{TVertex}"/> class") fixed them a run later
+    /// (trial 28). Every use of the old name in such a cref is renamed with it; a cref that already uses the new name is left.
+    /// </summary>
+    private static async Task<List<(Document Document, TextSpan Span)>> GetCrefTypeParametersAsync(Solution solution, ITypeParameterSymbol typeParameter, string newName, CancellationToken cancellationToken)
+    {
+        var found = new List<(Document Document, TextSpan Span)>();
+        ISymbol owner = (ISymbol?)typeParameter.DeclaringMethod ?? typeParameter.DeclaringType!;
+        var arity = owner is IMethodSymbol method ? method.Arity : ((INamedTypeSymbol)owner).Arity;
+        foreach (var reference in (owner.ContainingType ?? owner).DeclaringSyntaxReferences)
+        {
+            if (solution.GetDocument(reference.SyntaxTree) is not { } document)
+            {
+                continue;
+            }
+
+            var crefs = (await reference.GetSyntaxAsync(cancellationToken).ConfigureAwait(false))
+                .DescendantNodes(descendIntoTrivia: true)
+                .OfType<XmlCrefAttributeSyntax>()
+                .Select(a => a.Cref)
+                .Where(cref => cref.DescendantNodes().OfType<GenericNameSyntax>().Any(g =>
+                    g.Identifier.ValueText == owner.Name
+                    && g.TypeArgumentList.Arguments.Count == arity
+                    && g.TypeArgumentList.Arguments[typeParameter.Ordinal] is IdentifierNameSyntax { Identifier.ValueText: var name }
+                    && name == typeParameter.Name));
+            foreach (var cref in crefs)
+            {
+                var names = cref.DescendantNodes().OfType<IdentifierNameSyntax>().ToList();
+                if (names.All(n => n.Identifier.ValueText != newName))
+                {
+                    found.AddRange(names.Where(n => n.Identifier.ValueText == typeParameter.Name).Select(n => (document, n.Identifier.Span)));
+                }
+            }
+        }
+
+        return found;
     }
 
     /// <summary>

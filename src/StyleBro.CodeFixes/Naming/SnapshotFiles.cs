@@ -13,9 +13,10 @@ namespace StyleBro.CodeFixes.Naming;
 /// A data member whose name is there keeps it: renaming broke 2 of 15 xunit.v3 + Verify tests in trial 23. Read from the
 /// solution's additional files and from disk, under each project's repository (its git root, else its folder), so the
 /// tests' snapshots count while a 'stylebro-migrate format' run loads only the library. The same scan reads XAML files
-/// ('.xaml': WPF, WinUI, MAUI; '.axaml': Avalonia): the identifiers in their attribute values ('{Binding title}',
-/// 'DisplayMemberPath="label"', 'x:Name', 'Click="OnSave"') bind to members by name at run time, so they're treated like
-/// strings too (owner's choice 2026-10-16; trial 26: a renamed view-model property left a WPF binding empty).
+/// ('.xaml': WPF, WinUI, MAUI; '.axaml': Avalonia): the identifiers in their attribute values that can name code
+/// ('{Binding title}', 'DisplayMemberPath="label"', 'x:Name', 'Click="OnSave"') bind to members by name at run time, so
+/// they're treated like strings too (owner's choice 2026-10-16; trial 26: a renamed view-model property left a WPF binding
+/// empty), and its element and attribute names from the project's namespaces name its types and properties.
 /// </summary>
 internal static class SnapshotFiles
 {
@@ -31,8 +32,17 @@ internal static class SnapshotFiles
     // A start tag with its attributes ('<local:Badge Caption="hi" />', '<local:Badge.Caption>').
     private static readonly Regex StartTag = new(@"<(?<tag>[\w:.]+)(?<attributes>(?:\s+[\w:.]+\s*=\s*(?:""[^""]*""|'[^']*'))*)\s*/?>", RegexOptions.CultureInvariant);
 
-    // Attributes whose value is path markup ('Data="M0,0 L1,1 z"'): its letters aren't names.
-    private static readonly HashSet<string> Geometry = new(StringComparer.Ordinal) { "Data", "Points", "Figures", "Geometry", "PathData" };
+    // A value that is one name, maybe dotted or prefixed: 'onSave', 'Items.Count', 'local:Badge.Caption'.
+    private static readonly Regex NameValue = new(@"^\s*(?:[\p{L}_][\w.]*:)?[\p{L}_][\p{L}\p{Nd}_]*(?:\.[\p{L}_][\p{L}\p{Nd}_]*)*\s*$", RegexOptions.CultureInvariant);
+
+    // A namespace prefix ('x:' in '{x:Static ...}', 'local:' in 'local:Badge'): not a name of code.
+    private static readonly Regex Prefix = new(@"(?<![\w.$])[\p{L}_][\p{L}\p{Nd}_]*:", RegexOptions.CultureInvariant);
+
+    // Attributes whose value is text for people ('Text="window width"'): a word there names nothing (trial 28, Text-Grab).
+    private static readonly HashSet<string> FreeText = new(StringComparer.Ordinal)
+    {
+        "Text", "ToolTip", "Content", "Header", "Title", "Description", "PlaceholderText", "Placeholder", "Watermark", "Label", "HelpText",
+    };
 
     private static readonly string[] Markers = { ".verified.", ".approved.", ".received." };
 
@@ -67,7 +77,7 @@ internal static class SnapshotFiles
             }
             else if (document.FilePath is { } xaml && IsXamlFile(xaml) && document.GetTextAsync().GetAwaiter().GetResult() is { } markup)
             {
-                AddXaml(words.Xaml, xaml, markup.ToString());
+                AddXaml(words, xaml, markup.ToString());
             }
         }
 
@@ -76,6 +86,7 @@ internal static class SnapshotFiles
             var scanned = Scan(root);
             Merge(words.Snapshots, scanned.Snapshots);
             Merge(words.Xaml, scanned.Xaml);
+            Merge(words.XamlMarkup, scanned.XamlMarkup);
         }
 
         return words;
@@ -154,7 +165,7 @@ internal static class SnapshotFiles
                     }
                     else if (IsXamlFile(file) && new FileInfo(file).Length < 1 << 20)
                     {
-                        AddXaml(words.Xaml, file, File.ReadAllText(file));
+                        AddXaml(words, file, File.ReadAllText(file));
                     }
                 }
 
@@ -182,15 +193,16 @@ internal static class SnapshotFiles
 #pragma warning restore RS1035
 
     /// <summary>
-    /// The identifiers of a XAML file that name code: in attribute values (not the namespace declarations' URIs) binding
-    /// paths and their segments, member paths, 'x:Name', event handlers, 'x:Static' members; and the element and attribute
-    /// names from the project's own namespaces (a prefix mapped to 'clr-namespace:' or Avalonia's 'using:'): its types
+    /// The identifiers of a XAML file that name code. <see cref="Words.Xaml"/>: those in attribute values that can name
+    /// members (<c>NamesCode</c>): binding paths and their segments, member paths, 'x:Name', event handlers, 'x:Static'
+    /// members, without namespace prefixes; not free text (trial 28, Text-Grab: 'Text="... window width"' kept a property
+    /// 'width'), nor geometry ('Data="M0,0 z"'). <see cref="Words.XamlMarkup"/>: the element and attribute names from the
+    /// project's own namespaces (a prefix mapped to 'clr-namespace:' or Avalonia's 'using:'): its types
     /// ('&lt;local:BoolConverter/&gt;'), their properties ('&lt;local:Badge Caption="hi"/&gt;', '&lt;local:Badge.Caption&gt;')
     /// and attached properties ('local:TagBehavior.Key="main"'). Trial 27: renamed types and properties used there broke
-    /// the build (MC3074, MC3072). The framework's element and attribute names are left out, and so are geometry values
-    /// ('Data="M0,0 z"': path markup, not names).
+    /// the build (MC3074, MC3072). The framework's element and attribute names are left out.
     /// </summary>
-    private static void AddXaml(Dictionary<string, string> words, string path, string text)
+    private static void AddXaml(Words found, string path, string text)
     {
         var lineStarts = new List<int> { 0 };
         for (var i = 0; i < text.Length; i++)
@@ -201,7 +213,7 @@ internal static class SnapshotFiles
             }
         }
 
-        void AddWords(string value, int index)
+        void AddWords(Dictionary<string, string> words, string value, int index)
         {
             foreach (Match match in Word.Matches(value))
             {
@@ -215,12 +227,11 @@ internal static class SnapshotFiles
 
         foreach (Match attribute in Attribute.Matches(text))
         {
-            var name = attribute.Groups["name"].Value;
             var value = attribute.Groups["value"];
-            if (!name.StartsWith("xmlns", StringComparison.Ordinal)
-                && !(Geometry.Contains(name.Substring(name.LastIndexOf('.') + 1)) && !value.Value.TrimStart().StartsWith("{", StringComparison.Ordinal)))
+            if (NamesCode(attribute.Groups["name"].Value, value.Value))
             {
-                AddWords(value.Value, value.Index);
+                // Prefixes blanked out, so the words keep their places ('{x:Static ...}' keeps no member called 'x').
+                AddWords(found.Xaml, Prefix.Replace(value.Value, m => new string(' ', m.Length)), value.Index);
             }
         }
 
@@ -241,7 +252,7 @@ internal static class SnapshotFiles
             var ownElement = local.Contains(prefix);
             if (ownElement)
             {
-                AddWords(tagName, tag.Groups["tag"].Index);
+                AddWords(found.XamlMarkup, tagName, tag.Groups["tag"].Index);
             }
 
             var attributes = tag.Groups["attributes"];
@@ -254,9 +265,28 @@ internal static class SnapshotFiles
                 if (!fullName.StartsWith("xmlns", StringComparison.Ordinal)
                     && (attributePrefix.Length > 0 ? local.Contains(attributePrefix) : ownElement || (attributeName.IndexOf('.') >= 0 && local.Contains(string.Empty))))
                 {
-                    AddWords(attributeName, attributes.Index + attribute.Index);
+                    AddWords(found.XamlMarkup, attributeName, attributes.Index + attribute.Index);
                 }
             }
+        }
+
+        // Values that can name code: markup extensions ('{Binding Path=title}', '{x:Static local:Foo.Bar}', ElementName),
+        // 'x:' directives ('x:Name', 'x:Class', 'x:DataType'), 'Name', member paths ('DisplayMemberPath'), and a value that is
+        // one name ('Click="OnSave"', 'TargetType="local:Badge"') unless the attribute holds text for people.
+        static bool NamesCode(string name, string value)
+        {
+            if (name.StartsWith("xmlns", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var local = name.Substring(name.IndexOf(':') + 1);
+            var trimmed = value.TrimStart();
+            return (trimmed.StartsWith("{", StringComparison.Ordinal) && !trimmed.StartsWith("{}", StringComparison.Ordinal))
+                || name.StartsWith("x:", StringComparison.Ordinal)
+                || local == "Name"
+                || local.EndsWith("Path", StringComparison.Ordinal)
+                || (!FreeText.Contains(local.Substring(local.LastIndexOf('.') + 1)) && NameValue.IsMatch(value));
         }
 
         static (string Prefix, string Name) Split(string name)
@@ -289,6 +319,10 @@ internal static class SnapshotFiles
     {
         public Dictionary<string, string> Snapshots { get; } = new(StringComparer.Ordinal);
 
+        /// <summary>Gets the identifiers in XAML attribute values that can name code (bindings, 'x:Name', event handlers).</summary>
         public Dictionary<string, string> Xaml { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets the XAML element and attribute names from the project's own namespaces (its types and properties).</summary>
+        public Dictionary<string, string> XamlMarkup { get; } = new(StringComparer.Ordinal);
     }
 }

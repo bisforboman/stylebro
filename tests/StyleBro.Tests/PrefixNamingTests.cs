@@ -45,6 +45,65 @@ public class PrefixNamingTests
         }
         """);
 
+    // Trial 28: a cref spells the type's type parameters ('Node{_TVertex}'), which references don't find; BRO1606 fixed them a
+    // run later. A cref of another type, or one that already uses the new name, is left.
+    [Fact]
+    public Task TypeParametersInCrefs_AreRenamedToo() => VerifyFixAsync(
+        """
+        /// <summary>A node.</summary>
+        /// <typeparam name="_TVertex">The vertex.</typeparam>
+        public sealed class Node<{|BRO1305:_TVertex|}>
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Node{_TVertex}"/> class, see <see cref="Other{_TVertex}"/>.
+            /// </summary>
+            /// <param name="vertex">The <typeparamref name="_TVertex"/>.</param>
+            public Node(_TVertex vertex) => Vertex = vertex;
+
+            /// <summary>Gets the vertex, see <see cref="Map{_TResult}(System.Func{_TVertex, _TResult})"/>.</summary>
+            public _TVertex Vertex { get; }
+
+            /// <summary>Maps it, like <see cref="Map{_TResult}(System.Func{_TVertex, _TResult})"/>.</summary>
+            /// <typeparam name="_TResult">The result.</typeparam>
+            /// <param name="map">The map.</param>
+            /// <returns>The result.</returns>
+            public _TResult Map<{|BRO1305:_TResult|}>(System.Func<_TVertex, _TResult> map) => map(Vertex);
+        }
+
+        /// <summary>Another.</summary>
+        /// <typeparam name="T">The item.</typeparam>
+        public sealed class Other<T>
+        {
+        }
+        """,
+        """
+        /// <summary>A node.</summary>
+        /// <typeparam name="TVertex">The vertex.</typeparam>
+        public sealed class Node<TVertex>
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Node{TVertex}"/> class, see <see cref="Other{_TVertex}"/>.
+            /// </summary>
+            /// <param name="vertex">The <typeparamref name="TVertex"/>.</param>
+            public Node(TVertex vertex) => Vertex = vertex;
+
+            /// <summary>Gets the vertex, see <see cref="Map{TResult}(System.Func{TVertex, TResult})"/>.</summary>
+            public TVertex Vertex { get; }
+
+            /// <summary>Maps it, like <see cref="Map{TResult}(System.Func{TVertex, TResult})"/>.</summary>
+            /// <typeparam name="TResult">The result.</typeparam>
+            /// <param name="map">The map.</param>
+            /// <returns>The result.</returns>
+            public TResult Map<TResult>(System.Func<TVertex, TResult> map) => map(Vertex);
+        }
+
+        /// <summary>Another.</summary>
+        /// <typeparam name="T">The item.</typeparam>
+        public sealed class Other<T>
+        {
+        }
+        """);
+
     [Fact]
     public Task Interfaces_AreRenamedEverywhere() => VerifyFixAsync(
         """
