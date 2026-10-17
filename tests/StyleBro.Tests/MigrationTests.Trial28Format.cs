@@ -76,6 +76,13 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain(said, l => l.Contains("failed", StringComparison.Ordinal));
         Assert.StartsWith("Not clean: 1 finding in code only another configuration compiles", line, StringComparison.Ordinal);
         Assert.DoesNotContain("build", line!.Substring(line.IndexOf("(above)", StringComparison.Ordinal)), StringComparison.Ordinal);
+
+        // Findings as warnings and a failure no line names (an MSBuild error): failed too.
+        said.Clear();
+        FormatCommand.RecordUnchecked(root, [(project, "Release")]);
+        line = FormatCommand.UncheckedLine(root, said.Add, (_, _) => (1, [$"{file}(3,1): warning BRO1002: Add a space after '//' [{project}]", "MSBUILD : error MSB1009: Project file does not exist."]));
+        Assert.Contains("Release build of App failed (exit code 1).", said);
+        Assert.Contains("baselining doesn't fix that", line, StringComparison.Ordinal);
     }
 
     [Fact]

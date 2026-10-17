@@ -1179,7 +1179,8 @@ internal static class FormatCommand
             // A build that failed on more than the findings (an error in a referenced project, a compile error) checked nothing
             // past it, with findings or not (trial 28, ZLogger: 18 findings shown, the failed Release build not).
             var errors = lines.Where(m => m.Groups["kind"].Value == "error" && !ids.Contains(m.Groups["id"].Value)).Select(Shown).Distinct(StringComparer.Ordinal).ToList();
-            var buildFailed = exitCode != 0 && (found.Count == 0 || errors.Count > 0);
+            // Failed on the findings alone only when they are errors (TreatWarningsAsErrors); else on something no line names.
+            var buildFailed = exitCode != 0 && (found.Count == 0 || errors.Count > 0 || !lines.Any(m => m.Groups["kind"].Value == "error" && ids.Contains(m.Groups["id"].Value)));
             if (found.Count > 0 || !buildFailed)
             {
                 log($"{configuration} build of {name}: {(found.Count == 0 ? "no findings." : $"{found.Count} finding{(found.Count == 1 ? string.Empty : "s")}:")}");
