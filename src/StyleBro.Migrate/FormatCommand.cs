@@ -2890,12 +2890,22 @@ internal static class FormatCommand
     /// <summary>
     /// The baseline the projects under <paramref name="root"/> read: the file a Directory.Build.props above names with
     /// &lt;StyleBroBaseline&gt;, else the nearest stylebro.baseline at or above the root (as the package's targets look for
-    /// it), else a new one at <paramref name="newAt"/> (the root by default; --files gives the repository's, where a whole run
-    /// puts it); null when the props turn it off ('none') or name it with other MSBuild properties.
+    /// it), else a new one at <paramref name="newAt"/> (<see cref="NewBaselineFolder"/> by default; --files gives the
+    /// repository's, where a whole run puts it); null when the props turn it off ('none') or name it with other MSBuild properties.
     /// </summary>
     public static string? BaselineFile(string root, string? newAt = null) => NamedBaseline(root) is var (named, value, _) && named
         ? value
         : FoundBaseline(root, newAt);
+
+    /// <summary>
+    /// Where a new baseline goes for a run on <paramref name="root"/>: the folder that holds the projects of the solution it
+    /// finds there (<see cref="WorkingRoot"/>), as for a run on that solution, else the root. Trial 28, Jackett: the preview
+    /// (on the repository) wrote stylebro.baseline, 'format src/Jackett.sln' src/stylebro.baseline.
+    /// </summary>
+    public static string NewBaselineFolder(string root) =>
+        Directory.Exists(root) && BaselineCommand.FindWorkspace(root) is { } workspace && File.Exists(Path.Combine(root, workspace))
+            ? WorkingRoot(Path.Combine(root, workspace))
+            : root;
 
     /// <summary>
     /// What to say when findings are kept and the props turn the baseline off (&lt;StyleBroBaseline&gt;none): nothing hides
@@ -3744,16 +3754,6 @@ internal static class FormatCommand
 
         return found ?? Path.Combine(at, Analyzers.Baseline.Baseline.FileName);
     }
-
-    /// <summary>
-    /// Where a new baseline goes for a run on <paramref name="root"/>: the folder that holds the projects of the solution it
-    /// finds there (<see cref="WorkingRoot"/>), as for a run on that solution, else the root. Trial 28, Jackett: the preview
-    /// (on the repository) wrote stylebro.baseline, 'format src/Jackett.sln' src/stylebro.baseline.
-    /// </summary>
-    public static string NewBaselineFolder(string root) =>
-        Directory.Exists(root) && BaselineCommand.FindWorkspace(root) is { } workspace && File.Exists(Path.Combine(root, workspace))
-            ? WorkingRoot(Path.Combine(root, workspace))
-            : root;
 
     /// <summary>Where <see cref="SaveKept"/> records a repository's kept findings.</summary>
     private static string KeptRecord(string root) =>
