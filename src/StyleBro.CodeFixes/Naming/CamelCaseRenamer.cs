@@ -592,9 +592,14 @@ internal static class CamelCaseRenamer
         // docs/decisions.md): any string at all kept 692 of Orleans' renames for words like "options" in
         // 'Assert.Equal("options", e.ParamName)', and Flow.Launcher's 'type' for a JSON key in another plugin. AngleSharp's
         // test assets ('static string nbc => Read("Pages.nbc.html")') were kept for URLs and encoding names (trial 21).
+        // A name only a field would have ('_root', 'm_count': a leading underscore or prefix) counts in any string (owner's
+        // decision 2026-10-17, trial 29: Harmony's tests list '"_root", "_type"' and read each with
+        // AccessTools.DeclaredField in a loop); no message says '_root', so the common words stay renamed.
         if (symbol is IFieldSymbol or IPropertySymbol or IEventSymbol && !isData)
         {
-            return names.Reflection.Contains(symbol.Name) ? symbol.Name : null;
+            return names.Reflection.Contains(symbol.Name) || (symbol is IFieldSymbol && LooksLikeFieldName(symbol.Name) && strings.Contains(symbol.Name))
+                ? symbol.Name
+                : null;
         }
 
         if (symbol is not INamedTypeSymbol)
@@ -606,6 +611,10 @@ internal static class CamelCaseRenamer
         var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
         return strings.FirstOrDefault(s => pattern.IsMatch(s));
     }
+
+    // '_x' or a one-letter prefix ('m_x', 's_x', 't_x'): no word in a message looks like that.
+    private static bool LooksLikeFieldName(string name) =>
+        name.Length > 1 && (name[0] == '_' || (name.Length > 2 && name[1] == '_' && name[0] is 'm' or 's' or 't'));
 
     /// <summary>
     /// Whether a property of the type that BRO1309 would rename keeps its name because it's in a string (test JSON, a wire

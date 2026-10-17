@@ -794,7 +794,8 @@ and it's on purpose. The reasons, per finding:
 
 - the name is in a string elsewhere in the solution (serialized names and test JSON for properties and public fields;
   for other fields only where code reaches a member by name: `GetField("_count")`, `GetProperty(...)`, `Type.GetType(...)`,
-  `[MemberData("...")]`, an attribute's `Name = "..."`): the rename would compile but break at run time;
+  `[MemberData("...")]`, an attribute's `Name = "..."`, or anywhere for a name only a field has, like `"_count"`): the
+  rename would compile but break at run time;
 - the name is in a `nameof(...)` elsewhere, whose text would change with it (an HTTP header name, a log key);
 - the name is a structured log key: it's in an interpolated string's hole whose handler takes the hole's text as a
   `[CallerArgumentExpression]` argument (ZLogger's `$"{UserId}"`);

@@ -10,3 +10,5 @@
   stopped working.
 - **`stylebro-migrate format`** formats the hand-written `.cs` file next to a T4 template that writes another file
   (`<#@ output extension=".Generated.cs" #>`); it used to skip it, and the build then reported its findings.
+- **BRO1303** and the other field rules keep a private field whose exact name, like `_root` or `m_count`, is any string
+  in the solution (a test listing field names and reading each by reflection), not only an argument of `GetField(...)`.

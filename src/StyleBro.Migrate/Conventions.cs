@@ -235,7 +235,7 @@ internal static class Conventions
         new(PeriodKey, "doc comment texts", "warning", ("warning", "ending with a period"), ("none", "without a period"), Off(DiagnosticIds.DocumentationEndsWithPeriod)) { Unit = "text" },
         new(DocOrderKey, "doc element order", "warning", ("warning", "in BRO1619's order"), ("none", "in another order"), Off(DiagnosticIds.DocumentationElementOrder)) { Unit = "doc comment" },
         new(LangwordKey, "keywords in doc comments", "warning", ("warning", "'<see langword=\"null\"/>'"), ("none", "'<c>null</c>'"), Off(DiagnosticIds.LangwordElement)) { Unit = "keyword" },
-        new(NonPrivateNamingKey, "non-private fields", "warning", ("warning", "named as BRO1306 says (PascalCase, or your enforced naming rule)"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
+        new(NonPrivateNamingKey, "non-private fields", "warning", ("warning", "PascalCase or as your naming rule says"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
         new(PrimaryParametersKey, "primary-constructor parameter names", "warning", ("warning", "like 'logger'"), ("none", "like '_logger'"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
@@ -1014,6 +1014,7 @@ internal static class Conventions
                         case null:
                             counts[NonPrivateNamingKey][0]++;
                             break;
+
                         case { Rule: StyleBro.Analyzers.Naming.FieldRule.PascalCasing }:
                             counts[NonPrivateNamingKey][1]++;
                             break;
