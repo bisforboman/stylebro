@@ -177,7 +177,8 @@ public sealed partial class MigrationTests
         Assert.Equal([5, 6, 7], DocIndentation.Lines(Text, useTabs: false, tabWidth: 4));
         Assert.Equal(Text.Replace("\t\t", "        ", StringComparison.Ordinal), DocIndentation.Fix(Text, useTabs: false, tabWidth: 4));
 
-        // With tabs asked for: the first line is the one written otherwise, which the whitespace pass rewrites whole.
+        // A first line written otherwise: the whitespace pass rewrites the whole comment (all tabs, or tabs asked for).
+        Assert.Empty(DocIndentation.Lines(Text.Replace("        ///", "\t\t///", StringComparison.Ordinal), useTabs: false, tabWidth: 4));
         Assert.Empty(DocIndentation.Lines(Text, useTabs: true, tabWidth: 4));
         var tabs = Text.Replace("        ///", "\t\t///", StringComparison.Ordinal).Replace("\t\t/// Text.", "        /// Text.", StringComparison.Ordinal);
         Assert.Equal([5], DocIndentation.Lines(tabs, useTabs: true, tabWidth: 4));
