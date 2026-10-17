@@ -127,6 +127,49 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void Format_PlansNoRunsForAPackagesFiles()
+    {
+        // PolyShim's '#if !POLYSHIM_INCLUDE_COVERAGE', Nullable's '#if DEBUG': Release runs and shared-file parts for code format
+        // never changes, and only once the restore had put the files into the build.
+        Write("packages/nullable/1.3.1/.nupkg.metadata", "{}");
+        Write("packages/nullable/1.3.1/contentFiles/cs/net40/Nullable/A.cs", "#if DEBUG\nclass A { }\n#endif\n");
+        Write("src/B.cs", "#if DEBUG\nclass B { }\n#endif\n");
+        Assert.True(FormatCommand.IsPackageFile(Path.Combine(root, "packages", "nullable", "1.3.1", "contentFiles", "cs", "net40", "Nullable", "A.cs")));
+        Assert.Empty(FormatCommand.TestedSymbols(Path.Combine(root, "packages", "nullable", "1.3.1", "contentFiles", "cs", "net40", "Nullable", "A.cs")));
+        Assert.False(FormatCommand.IsPackageFile(Path.Combine(root, "src", "B.cs")));
+        Assert.Equal(["DEBUG"], FormatCommand.TestedSymbols(Path.Combine(root, "src", "B.cs")));
+
+        // And they're not "outside the repository" in any packages folder (the restore's NUGET_PACKAGES, not this process's).
+        var repository = Path.Combine(root, "repo");
+        Assert.Empty(FormatCommand.OutsideRepository([Path.Combine(root, "packages", "nullable", "1.3.1", "contentFiles", "cs", "net40", "Nullable", "A.cs")], repository, Path.Combine(root, "other")));
+        Assert.Equal([Path.Combine(root, "src", "B.cs")], FormatCommand.OutsideRepository([Path.Combine(root, "src", "B.cs")], repository, Path.Combine(root, "other")));
+    }
+
+    [Fact]
+    public void NotBuiltFolders_ReadASlnxsBuildFalse()
+    {
+        // io-abstractions' Pipeline/Build.csproj: '<Build Project="false" />', never restored: "Without StyleBro".
+        Write("App.slnx", "<Solution>\n  <Project Path=\"src/A/A.csproj\" />\n  <Folder Name=\"/Pipeline/\">\n    <Project Path=\"Pipeline/Build.csproj\">\n      <Build Project=\"false\" />\n    </Project>\n    <Project Path=\"tools/T/T.csproj\">\n      <Build Solution=\"Debug|*\" Project=\"false\" />\n    </Project>\n  </Folder>\n</Solution>\n");
+        string[] projects = [Path.Combine(root, "src", "A", "A.csproj"), Path.Combine(root, "Pipeline", "Build.csproj"), Path.Combine(root, "tools", "T", "T.csproj")];
+        Assert.Equal(["Pipeline/"], FormatCommand.NotBuiltFolders(Path.Combine(root, "App.slnx"), projects, root));
+    }
+
+    [Fact]
+    public void IfBodies_KeepOnlyTheIndentation_AndTheirOtherSpacingIsFixed()
+    {
+        // b-1: 'builder.Append(v+1);' is a kept body: its indentation stays, 'v + 1' was never written and verify said clean.
+        var before = IfDebugBody.Replace("        Log();\n        Log();", "        Log(1+2);\n        Log();", StringComparison.Ordinal);
+        var after = before.Replace("        Log(1+2);", "            Log(1 + 2);", StringComparison.Ordinal);
+        Assert.Equal(before.Replace("Log(1+2)", "Log(1 + 2)", StringComparison.Ordinal), IfBodies.Keep(before, [7], after));
+
+        var file = Path.Combine(root, "C.cs");
+        var protectedLines = new Dictionary<string, (string Text, List<int> Lines)>(StringComparer.OrdinalIgnoreCase) { [file] = (before, [7]) };
+        string Line(int line, int column, string message) => $"{file}({line},{column}): error WHITESPACE: Fix whitespace formatting. {message} [{root}/A.csproj]";
+        Assert.True(IfBodies.IsKeptFinding(Line(8, 9, "Insert '\\s\\s\\s\\s'."), protectedLines));
+        Assert.False(IfBodies.IsKeptFinding(Line(8, 14, "Insert '\\s'."), protectedLines));
+    }
+
+    [Fact]
     public void DocIndentation_RewritesTheLinesTheWhitespacePassLeaves()
     {
         // PalCalc: the first '///' line has spaces, the others and the member's line tabs at the same column (tab_width 4).
