@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Layout.ConditionalLayoutAnalyzer, StyleBro.CodeFixes.Layout.ConditionalLayoutCodeFixProvider>;
 
 namespace StyleBro.Tests;
@@ -94,6 +96,19 @@ public class ConditionalLayoutTests
         }
         """,
         "dotnet_style_operator_placement_when_wrapping = end_of_line\ndotnet_diagnostic.BRO1520.severity = none\n");
+
+    [Fact]
+    public async Task OperatorPlacementOff_TheMessageNamesTheMirroredSide()
+    {
+        var test = new Test
+        {
+            TestCode = "public class C\n{\n    public int M(bool a) => a {|#0:?|} 1 :\n        2;\n}\n",
+            FixedCode = "public class C\n{\n    public int M(bool a) => a ?\n        1 :\n        2;\n}\n",
+        };
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", "root = true\n\n[*]\ndotnet_diagnostic.BRO1520.severity = none\n"));
+        test.TestState.ExpectedDiagnostics.Add(new DiagnosticResult(StyleBro.Analyzers.DiagnosticIds.ConditionalLayout, DiagnosticSeverity.Warning).WithLocation(0).WithArguments("after", "?"));
+        await test.RunAsync();
+    }
 
     [Fact]
     public Task OperatorPlacementOff_ABreakOnBothSidesOfTheOtherToken_FollowsTheSetting() => VerifyFixAsync(
