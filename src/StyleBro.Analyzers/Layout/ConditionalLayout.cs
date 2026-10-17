@@ -13,17 +13,21 @@ namespace StyleBro.Analyzers.Layout;
 /// ': b' part each start their own line. Only expressions already split are checked: when the line breaks next to one of
 /// '?' and ':', the other one gets a line break too, on the side BRO1520's setting
 /// (dotnet_style_operator_placement_when_wrapping) asks for. A token with a line break on the wrong side is BRO1520's,
-/// so the two fixes never edit the same gap.
+/// so the two fixes never edit the same gap. With BRO1520 off, the line break goes on the side the other token has its
+/// line break on, so each conditional is consistent on its own (owner's decision, 2026-10-17).
 /// </summary>
 internal static class ConditionalLayout
 {
-    /// <summary>Every '?' or ':' that needs a line break, with the edit that inserts it.</summary>
-    public static IEnumerable<(SyntaxToken Token, bool Beginning, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, AnalyzerConfigOptions options)
+    /// <summary>
+    /// Every '?' or ':' that needs a line break, with the edit that inserts it. <paramref name="mirror"/>: BRO1520 is off,
+    /// so the other token's side wins over the setting.
+    /// </summary>
+    public static IEnumerable<(SyntaxToken Token, bool Beginning, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, AnalyzerConfigOptions options, bool mirror)
     {
         var beginning = WrappingPlacement.Read(options, WrappingPlacement.OperatorKey, beginning: true);
         foreach (var conditional in TreeWalk.Nodes(root).OfType<ConditionalExpressionSyntax>())
         {
-            foreach (var finding in Find(conditional, text, beginning))
+            foreach (var finding in Find(conditional, text, beginning, mirror))
             {
                 yield return finding;
             }
@@ -35,7 +39,7 @@ internal static class ConditionalLayout
     /// ('a ? x : b ? y : z', laid out as a list by many teams: each link checked on its own would become a staircase), and a token whose part ('? a' or ': b') spans several lines: its other lines would need
     /// re-indenting.
     /// </summary>
-    private static IEnumerable<(SyntaxToken Token, bool Beginning, TextChange Change)> Find(ConditionalExpressionSyntax conditional, SourceText text, bool beginning)
+    private static IEnumerable<(SyntaxToken Token, bool Beginning, TextChange Change)> Find(ConditionalExpressionSyntax conditional, SourceText text, bool beginning, bool mirror)
     {
         if (conditional.ContainsDiagnostics
             || conditional.WhenFalse is ConditionalExpressionSyntax
@@ -69,17 +73,19 @@ internal static class ConditionalLayout
         var first = text.Lines.GetLineFromPosition(conditional.SpanStart);
         var lineBreak = text.ToString(TextSpan.FromBounds(first.End, first.EndIncludingLineBreak)); // split, so not the last line
 
-        foreach (var (token, before, after, part) in new[] { (question, breaks[0], breaks[1], conditional.WhenTrue), (colon, breaks[2], breaks[3], conditional.WhenFalse) })
+        foreach (var (token, before, after, part, otherBefore, otherAfter) in new[] { (question, breaks[0], breaks[1], conditional.WhenTrue, breaks[2], breaks[3]), (colon, breaks[2], breaks[3], conditional.WhenFalse, breaks[0], breaks[1]) })
         {
             if (before || after || Line(text, part.SpanStart) != Line(text, part.Span.End))
             {
                 continue;
             }
 
-            var span = beginning
+            // Mirrored only when the other token's side is clear (a line break on one side of it).
+            var side = mirror && otherBefore != otherAfter ? otherBefore : beginning;
+            var span = side
                 ? TextSpan.FromBounds(token.GetPreviousToken().Span.End, token.SpanStart)
                 : TextSpan.FromBounds(token.Span.End, token.GetNextToken().SpanStart);
-            yield return (token, beginning, new TextChange(span, lineBreak + indentation));
+            yield return (token, side, new TextChange(span, lineBreak + indentation));
         }
     }
 

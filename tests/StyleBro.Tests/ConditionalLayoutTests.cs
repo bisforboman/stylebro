@@ -56,6 +56,69 @@ public class ConditionalLayoutTests
         """);
 
     [Fact]
+    public Task OperatorPlacementOff_TheMissingLineBreakMirrorsTheOtherToken() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t)
+            {
+                var x = a ?
+                    s {|BRO1524::|} t;
+                var y = a {|BRO1524:?|} s :
+                    t;
+                var z = a {|BRO1524:?|} s
+                    : t;
+                return a
+                    ? s {|BRO1524::|} t;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t)
+            {
+                var x = a ?
+                    s :
+                    t;
+                var y = a ?
+                    s :
+                    t;
+                var z = a
+                    ? s
+                    : t;
+                return a
+                    ? s
+                    : t;
+            }
+        }
+        """,
+        "dotnet_style_operator_placement_when_wrapping = end_of_line\ndotnet_diagnostic.BRO1520.severity = none\n");
+
+    [Fact]
+    public Task OperatorPlacementOff_ABreakOnBothSidesOfTheOtherToken_FollowsTheSetting() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t) =>
+                a
+                    ?
+                    s {|BRO1524::|} t;
+        }
+        """,
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t) =>
+                a
+                    ?
+                    s :
+                    t;
+        }
+        """,
+        "dotnet_style_operator_placement_when_wrapping = end_of_line\ndotnet_diagnostic.BRO1520.severity = none\n");
+
+    [Fact]
     public Task EndOfLine_FromTheSdkKey() => VerifyFixAsync(
         """
         public class C

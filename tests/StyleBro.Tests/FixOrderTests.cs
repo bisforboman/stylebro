@@ -1022,6 +1022,24 @@ public class FixOrderTests
         "BRO1524");
 
     [Fact]
+    public Task Conditionals_OperatorPlacementOff_EachConditionalMirrorsItsOwnLineBreak() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public string M(bool a, string s, string t)
+            {
+                var x = a ? s :
+                    t;
+                return a
+                    ? x : t;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1520.severity = none\n",
+        "BRO1520",
+        "BRO1524");
+
+    [Fact]
     public Task Ordering_AMultiLineFieldSortedAboveAField() => AssertConvergesInEveryOrderAsync(
         """
         public class C
