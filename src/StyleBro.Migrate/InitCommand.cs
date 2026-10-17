@@ -175,7 +175,17 @@ internal static class InitCommand
             sonarScopes = [.. SonarScopes(root, sonar, sonarLines, own), .. optionScopes];
 
             // Code where the team suppressed a Sonar rule stays exempt from the rule that now fixes it.
-            var (added, files, _, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write);
+            var blocked = new List<string>();
+            var (added, files, _, _) = Program.RewriteSuppressions(root, Suppressions.WithSonar(new Dictionary<string, SortedSet<string>>(), sonar), write, blocked: blocked);
+            if (Program.BlockedLine(blocked, write) is { } blockedLine)
+            {
+                Console.WriteLine(blockedLine);
+                if (write)
+                {
+                    return 1;
+                }
+            }
+
             if (added > 0)
             {
                 Console.WriteLine($"Suppressions: {added} {(write ? "added" : "to add")} for the rules that fix Sonar's in {files} files (the Sonar ones stay).");
@@ -219,6 +229,11 @@ internal static class InitCommand
             {
                 targets[0].ModernizeNotes.ForEach(Console.WriteLine);
             }
+        }
+
+        if (Migration.UnreadableLine(root) is { } unreadable)
+        {
+            Console.WriteLine(unreadable);
         }
 
         var agentsMd = args.Contains(AgentsFile.Option);
@@ -511,7 +526,11 @@ internal static class InitCommand
 
         if (!decided.ContainsKey(StyleBro.Analyzers.Naming.FieldNames.StyleKey) && FieldNamingRule(own) is { } rule)
         {
-            decided[StyleBro.Analyzers.Naming.FieldNames.StyleKey] = $"the naming rule dotnet_naming_rule.{rule} decides";
+            // With how many follow it (trial 28, Jackett: "223 places -> the naming rule ... decides" said nothing about the code).
+            var follow = counts.TryGetValue(StyleBro.Analyzers.Naming.FieldNames.StyleKey, out var fieldCounts)
+                ? $": {fieldCounts[StyleBro.Analyzers.Naming.FieldNames.GetStyle(new Conventions.Options(own)) == StyleBro.Analyzers.Naming.FieldStyle.UnderscoreCamelCase ? 1 : 0]} follow it"
+                : string.Empty;
+            decided[StyleBro.Analyzers.Naming.FieldNames.StyleKey] = $"the naming rule dotnet_naming_rule.{rule} decides{follow}";
         }
 
         if (!decided.ContainsKey(Conventions.StaticPrefixKey) && Conventions.PrefixRequiredByNamingRule(own) is { } prefix)

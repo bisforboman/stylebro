@@ -218,8 +218,15 @@ forms in your C# (generated code, EF Core migrations, vendored folders, submodul
 turns every analyzer off or says `generated_code = true` don't count; code inside `#if`
 counts too, as `format` sees it in the target framework that defines the symbol):
 
+Only C# files a project compiles count: a file below no project (a Unity `Assets/` folder) doesn't, unless a project
+or a `Directory.Build` file has a Compile item reaching outside its folder (`..` or a property) or a shared project
+(`.projitems`) could include it. A file `init` can't read (open in another program) isn't counted, and the report says
+which ones; close them and run `init` again.
+
 Vendored folders are recognized by their name (`vendor`, `third_party`, ...), or by a license file of their own whose
-copyright holder isn't your root license's (a fork copied in with its `LICENSE`). Code copied in under another name
+copyright holder isn't your root license's (a fork copied in with its `LICENSE`). A license template's placeholders
+(Apache's `Copyright [yyyy] [name of copyright owner]`, MIT's `<year> <copyright holders>`) name no holder, so such a
+license decides nothing either way. When a license file can't be read, its folder isn't counted and isn't marked. Code copied in under another name
 without a license of its own (a `src/Sdk` from another product) counts as yours and can decide a convention; mark its folder `generated_code = true` in
 your root `.editorconfig` (`[src/Sdk/**]`, see [excluding vendored code](#excluding-vendored-code)) and run `init` again:
 folders marked that way don't count.
@@ -264,7 +271,7 @@ A few settings work a little differently:
 - **`<inheritdoc/>` on overrides and implementations** ([BRO1601](rules/BRO1601.md)): in projects that generate
   documentation, `init` counts the overrides and interface implementations BRO1601 checks, with and without a doc
   comment. Mostly documented: the rule stays on; mostly undocumented or mixed: it's turned off.
-- **Line endings** count files. Without `end_of_line`, `format` writes your OS's line ending into the lines it rewrites
+- **Line endings** count files. Without `end_of_line` (or with `end_of_line = unset`), `format` writes your OS's line ending into the lines it rewrites
   (on Windows CRLF into LF files), so `init` writes the files' ending when it's clear and nothing when it's mixed. Files
   git converts on checkout (`core.autocrlf`, or a `.gitattributes` `text` attribute without `eol`: LF in the repository,
   CRLF in a Windows checkout) don't count, and the report names which of the two converts them: there the OS's ending is

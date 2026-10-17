@@ -187,7 +187,9 @@ tool again replaces the block, so put your own settings outside it.
   (`stylebro_private_mutable_static_field_naming`): without these keys BRO1303 and BRO1306 would follow a camel-case
   `dotnet_naming_rule` for static fields that StyleCop never enforced (IDE1006 off), and rename fields StyleCop was
   happy with. A naming rule of your root `.editorconfig` for private static fields (IDE1006 not off) that no such field
-  in the code breaks wins over SA1309 for them: after the swap it's the rule that's left. With SA1309 off, `stylebro_allow_leading_underscore_in_pascal_fields = true` keeps constants, `static
+  in the code breaks wins over SA1309 for them: after the swap it's the rule that's left. The same goes for `static
+  readonly` fields: when the rule covers them (one requiring just `static` does) and none breaks it, the PascalCase line
+  isn't written and BRO1306 follows the rule (constants stay PascalCase unless a rule names `const`). With SA1309 off, `stylebro_allow_leading_underscore_in_pascal_fields = true` keeps constants, `static
   readonly` and non-private fields that start with `_` (`_defaultSelector`): StyleCop's PascalCase rules only check
   that the first character isn't lower-case, and the underscore is SA1309's.
 - **SDK rules.** The rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order, IDE0049 type aliases, and so
