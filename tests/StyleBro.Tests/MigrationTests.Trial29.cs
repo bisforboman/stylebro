@@ -17,6 +17,7 @@ public sealed partial class MigrationTests
         Write("Format.cs", "class Written { }");
         Write("Page.tt", "<#@ output extension=\"html\" #>\n");
         Write("Page.cs", "class Hand { }");
+        Write("Page.html", "<html />");
 
         Assert.Equal(["Format.cs", "ReturnsExtensions.Generated.cs"], Migration.TextTemplateOutputs(root).Order(StringComparer.Ordinal));
 
