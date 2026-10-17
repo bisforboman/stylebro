@@ -1266,9 +1266,10 @@ an editorconfig comment). verify-package check 5 tests it end to end.
   turns on off-by-default rules. Exception: `.trials/` (owner, 2026-10-15: one place to keep track of them) is
   gitignored and holds stub `.editorconfig` (`root = true`), `Directory.Build.props/.targets` and
   `Directory.Packages.props`, so clones there inherit nothing; first-run trials go to `.trials/trialNN/<repo>`, repros to
-  `.trials/trialNN/spot/`, logs to `.trials/trialNN/logs/` (checked: a project there sees no StyleBro property or CPM). Since 2026-10-17 (owner: "Hybrid
-  containers") each trial agent runs in its own container (`scripts/trials/Start-TrialContainer.ps1`, Linux image; the
-  Windows image waits for Windows-containers mode): `.trials/README.md`.
+  `.trials/trialNN/spot/`, logs to `.trials/trialNN/logs/` (checked: a project there sees no StyleBro property or CPM). Since 2026-10-17 (owner: "Hybrid: cloud
+  sessions for Linux repos, host for Windows-only, Docker as fallback") library repos and spot checks run as cloud
+  sessions, Windows-only repos on the host under the no-desktop rule; `scripts/trials/` (Docker) is the fallback for local
+  reruns and a future Windows container: `.trials/README.md`.
 - `$$` in unit-test markup is the caret position (raw `$$"""` strings are tested in samples/Messy only).
 - Parallel rule PRs conflict in the same list files. Since 2026-10-11 the append-only lists are one file per entry
   (decisions, backlog items, mutation entries) and the rest are `merge=union` in the committed `.gitattributes`

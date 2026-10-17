@@ -1,4 +1,4 @@
-# Linux image for StyleBro's first-run trials (scripts/trials/Start-TrialContainer.ps1 builds and runs it; .trials/README.md).
+# Linux image for StyleBro's first-run trials, the fallback for local reruns (trials run as cloud sessions) (scripts/trials/Start-TrialContainer.ps1 builds and runs it; .trials/README.md).
 # .NET SDK 10 (the base, same version as the trial machine), SDKs 9 and 8 and runtimes 7 and 6 side by side, so repos that
 # target net6.0-net10.0 build and test. The base image already has git, curl and PowerShell (pwsh); python3 is added.
 # Nothing GUI, no secrets. Every version is pinned: raise them together with the trial machine's SDKs.

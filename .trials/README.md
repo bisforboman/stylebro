@@ -35,16 +35,26 @@ Procedure:
    (wrapping around) and write down why.
 3. Record each repository's commit, and why it was chosen, in the trial's logs.
 
-## Where trials run (owner's decision, 2026-10-17: containers)
+## Where trials run (owner's decision, 2026-10-17)
 
-Nothing a trial does may touch the owner's desktop: no GUI apps, no window, clipboard, screen or hotkey tests, no diff
-tools (`DiffEngine_Disabled=true`), even on the host. Trials also leave nothing behind on the host (processes, locked
-files, stray props). So each trial agent works in its own container, made by `scripts/trials/Start-TrialContainer.ps1`:
+"Hybrid: cloud sessions for Linux repos, host for Windows-only, Docker as fallback"
+([decision](https://github.com/bisforboman/stylebro/blob/main/docs/decisions/2026-10-17-where-trials-run.md)):
 
 | Repository | Where |
 | --- | --- |
-| Libraries, console/web apps, anything that builds on Linux (net6.0-net10.0, netstandard) | Linux container (`scripts/trials/Dockerfile`) |
-| WPF, WinForms, .NET Framework / net4x targets, old-style csproj, Windows-only tests | Windows container (`Dockerfile.windows`) once Docker runs Windows containers; until then on the host, under the no-desktop rule |
+| Libraries, console/web apps, anything that builds on Linux (net6.0-net10.0, netstandard); spot checks | Cloud sessions (Linux) |
+| WPF, WinForms, .NET Framework / net4x targets, old-style csproj, Windows-only tests | The host, under the no-desktop rule |
+
+Nothing a trial does may touch the owner's desktop: no GUI apps, no window, clipboard, screen or hotkey tests, no diff
+tools (`DiffEngine_Disabled=true`, `CI=true` for Verify suites), even on the host. Host runs keep the old rules: own tool
+path, `NUGET_PACKAGES` per trial, never `dotnet build-server shutdown`, don't kill processes you didn't start.
+
+## Docker fallback (local reruns, a future Windows container)
+
+`scripts/trials/` is the fallback for local reruns and a future Windows container: one container per agent, made by
+`scripts/trials/Start-TrialContainer.ps1`, so nothing is left on the host (processes, locked files, stray props).
+`Dockerfile` is the Linux image; `Dockerfile.windows` (Windows-only repos) needs Docker in Windows-containers mode, the
+owner's setting, and is untested until then (`-Windows` refuses otherwise).
 
 The Linux image: .NET SDK 10.0.402 (the base), SDKs 9.0.319 and 8.0.426, runtimes (and ASP.NET Core runtimes) 7.0.20
 and 6.0.36, git, pwsh, python3, user `trial`, nothing GUI. Raise the pinned versions together with the trial machine's.
@@ -81,7 +91,6 @@ The mount is case-insensitive (it's an NTFS folder): a repository with paths dif
 Each repro and scratch copy still needs its own `.git` (`git init` + a commit, or a clone) before StyleBro runs: init climbs
 to the git root, and a repro inside the agent's clone without its own `.git` would be judged as part of that clone.
 
-Briefs (written per trial, not committed) must give each agent: its container name and the Start/Remove lines, that every
-command runs through `docker exec` (paths `/work`, `/logs`, `/feed`), to clone inside the container, the no-desktop rule,
-and, for host runs of Windows-only repos, the old host rules (own tool path, `NUGET_PACKAGES`, `DiffEngine_Disabled=true`,
-`CI=true` for Verify suites).
+A brief for a container run (written per trial, not committed) must give the agent its container name and the
+Start/Remove lines, say that every command runs through `docker exec` (paths `/work`, `/logs`, `/feed`), to clone inside
+the container, and the no-desktop rule.
