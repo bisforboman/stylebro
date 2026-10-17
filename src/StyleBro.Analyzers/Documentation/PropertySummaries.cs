@@ -108,6 +108,7 @@ internal static class PropertySummaries
                 restrictedGetter = false;
             }
         }
+
         var visibleSetter = setter is not null && !restrictedSetter && !(styleSharp && initOnly);
         var visibleGetter = getter && !restrictedGetter;
 

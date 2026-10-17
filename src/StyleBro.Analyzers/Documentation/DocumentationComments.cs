@@ -209,22 +209,6 @@ internal static class DocumentationComments
         }
     }
 
-    private static bool IsBareAmpersand(SyntaxToken token) =>
-        token.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken
-        && token.Text.IndexOf('&') >= 0
-        && !(token.IsKind(SyntaxKind.XmlEntityLiteralToken) && Entity.IsMatch(token.Text));
-
-    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
-    {
-        var (key, defaultValue) = GetVisibility(symbol) switch
-        {
-            Accessibility.Public => (ExposedElementsKey, true),
-            Accessibility.Internal => (InternalElementsKey, true),
-            _ => (PrivateElementsKey, false),
-        };
-        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
-    }
-
     /// <summary>
     /// Public (visible outside the assembly, including protected), Internal or Private, from the member and every type
     /// around it. Explicit interface implementations count as public.
@@ -252,6 +236,22 @@ internal static class DocumentationComments
         }
 
         return result;
+    }
+
+    private static bool IsBareAmpersand(SyntaxToken token) =>
+        token.Kind() is SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlEntityLiteralToken
+        && token.Text.IndexOf('&') >= 0
+        && !(token.IsKind(SyntaxKind.XmlEntityLiteralToken) && Entity.IsMatch(token.Text));
+
+    private static bool NeedsDocumentation(ISymbol symbol, AnalyzerConfigOptions options)
+    {
+        var (key, defaultValue) = GetVisibility(symbol) switch
+        {
+            Accessibility.Public => (ExposedElementsKey, true),
+            Accessibility.Internal => (InternalElementsKey, true),
+            _ => (PrivateElementsKey, false),
+        };
+        return options.TryGetValue(key, out var value) && bool.TryParse(value.Trim(), out var configured) ? configured : defaultValue;
     }
 
     private static bool IsDocumentationComment(SyntaxTrivia trivia)
