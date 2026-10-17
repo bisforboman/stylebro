@@ -216,7 +216,9 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - Replaces SA1201-SA1204 and SA1214. Sort key: kind -> accessibility -> const -> static -> readonly.
   Defaults match StyleCop so migration is painless (kind order verified pairwise against StyleCop 1.1.118).
 - One diagnostic per type, on the first out-of-place member. The fix sorts the whole type.
-- Trivia: blank-line layout stays with the position; comments, docs and attributes move with the member.
+- Trivia: blank-line layout stays with the position; comments, docs and attributes move with the member. Since trial 27
+  (owner: "the sort keeps blank lines"): two members that were neighbours and stay neighbours keep their own gap, and the
+  "creates a BRO1505 violation" blank line is added also with BRO1505 off (a BRO1519 blank line of the old pair counts).
   Exception: a member led by a `//` comment moved into a later slot without a blank line gets one, otherwise the
   sort creates a BRO1504 violation and `dotnet format` needs a second run (seen in Newtonsoft.Json).
 - The Fix All rewriter sorts nested types before their parents in one pass.

@@ -3,7 +3,6 @@ namespace Messy;
 public class Inventory
 {
     private readonly Dictionary<string, int> _stock = new();
-
     private int _version;
 
     public int Version => _version;
