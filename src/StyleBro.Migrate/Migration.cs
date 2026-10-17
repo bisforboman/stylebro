@@ -1083,16 +1083,27 @@ internal static class Migration
         : new HashSet<string> { "SA1634", "SA1637", "SA1638", "SA1639", "SA1640", "SA1641" };
 
     /// <summary>
-    /// The C# files a T4 template beside them writes ('Format.tt' writes 'Format.cs'), relative to <paramref name="root"/>
-    /// with '/': generated code that 'format' leaves alone (the build's GeneratedFileSuppressor knows them by DependentUpon).
+    /// The C# files a T4 template beside them writes ('Format.tt' writes 'Format.cs', or the extension its
+    /// <c>&lt;#@ output extension=".Generated.cs" #&gt;</c> names), relative to <paramref name="root"/> with '/': generated
+    /// code that 'format' leaves alone (the build's GeneratedFileSuppressor knows them by DependentUpon). Trial 29 (Moq):
+    /// 'ReturnsExtensions.tt' writes 'ReturnsExtensions.Generated.cs', and the hand-written 'ReturnsExtensions.cs' beside it
+    /// was left unformatted while the build reported it (1,216 errors with warnings as errors after a clean verify).
     /// </summary>
     public static List<string> TextTemplateOutputs(string root) =>
         StyleCopSetup.EnumerateFiles(root)
             .Where(f => f.EndsWith(".tt", StringComparison.OrdinalIgnoreCase))
-            .Select(f => Path.ChangeExtension(f, ".cs"))
-            .Where(File.Exists)
+            .Select(f => Path.ChangeExtension(f, TextTemplateExtension(f)))
+            .Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(f))
             .Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))
             .ToList();
+
+    // T4's output extension: the template's 'output' directive, else '.cs' (what Visual Studio's generator writes for C#).
+    private static string TextTemplateExtension(string template)
+    {
+        var text = File.Exists(template) ? File.ReadAllText(template) : string.Empty;
+        var directive = Regex.Match(text, @"<#@\s*output\b[^#]*?\bextension\s*=\s*""(?<extension>[^""]+)""", RegexOptions.IgnoreCase);
+        return directive.Success ? directive.Groups["extension"].Value.Trim() : ".cs";
+    }
 
     /// <summary>
     /// The files (relative to <paramref name="root"/>, '/'-separated) the stylebro-migrate block's <see cref="KeptUsingsPrefix"/>

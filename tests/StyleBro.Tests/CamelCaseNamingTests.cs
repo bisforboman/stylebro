@@ -697,6 +697,69 @@ public class CamelCaseNamingTests
         }
         """);
 
+    // Trial 29 (Harmony): Harmony injects a patch method's parameters by name ('__result', '__instance', '___counter', the
+    // patched method's own names), so '__result' -> 'result' compiled and the patch stopped working. A '__' name is never
+    // renamed; every parameter of a Harmony patch method is kept (an attribute on it or its parameters, or a patch method
+    // name in a type with a Harmony attribute). The same method names in a type without one are still reported.
+    [Fact]
+    public Task ParametersHarmonyBindsByName_AreNotReported() => VerifyFixAsync(
+        """
+        using System;
+
+        class HarmonyPatch : Attribute { public HarmonyPatch(Type t, string m) { } }
+        class HarmonyPostfix : Attribute { }
+        class HarmonyArgument : Attribute { public HarmonyArgument(string name) { } }
+
+        [HarmonyPatch(typeof(object), "ToString")]
+        class Patch
+        {
+            static void Prefix(object __instance, int Count, ref string ___name) { }
+            static void Postfix(ref string __result, string Original) => __result = Original;
+            static void Helper(int {|BRO1302:Other|}) { }
+        }
+
+        static class Manual
+        {
+            static void Get1Patch(ref int __result) => __result = 2;
+            [HarmonyPostfix] static void After(int Value) { }
+            static void Before([HarmonyArgument("x")] int Renamed, int Second) { }
+        }
+
+        class NotAPatch
+        {
+            static void Prefix(int {|BRO1302:Count|}) { }
+            [Obsolete] static void Old(int {|BRO1302:Value|}) { }
+        }
+        """,
+        """
+        using System;
+
+        class HarmonyPatch : Attribute { public HarmonyPatch(Type t, string m) { } }
+        class HarmonyPostfix : Attribute { }
+        class HarmonyArgument : Attribute { public HarmonyArgument(string name) { } }
+
+        [HarmonyPatch(typeof(object), "ToString")]
+        class Patch
+        {
+            static void Prefix(object __instance, int Count, ref string ___name) { }
+            static void Postfix(ref string __result, string Original) => __result = Original;
+            static void Helper(int other) { }
+        }
+
+        static class Manual
+        {
+            static void Get1Patch(ref int __result) => __result = 2;
+            [HarmonyPostfix] static void After(int Value) { }
+            static void Before([HarmonyArgument("x")] int Renamed, int Second) { }
+        }
+
+        class NotAPatch
+        {
+            static void Prefix(int count) { }
+            [Obsolete] static void Old(int value) { }
+        }
+        """);
+
     // Mapster: 'from Param_0 in products.AsQueryable()' became 'param0', and a test comparing the query's ToString failed.
     // Names in an expression tree are data at run time: range variables of an IQueryable query and parameters of a
     // lambda converted to an Expression (or nested in one) aren't reported. The same names in delegates still are.
