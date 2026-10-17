@@ -111,7 +111,7 @@ PalCalc (644 s; 3 entries: default, Release (4 projects), Release_NoBundle (1 pr
 
 | Phase | Wall | What |
 |---|---|---|
-| Planning | 76 s | 16 project evaluations (5-6.5 s each, parallel), 3 + 9 framework/configuration evaluations (parallel), **11 evaluations one at a time** (09:41:26-09:42:02, ~3 s each: `ConfigurationRuns`' lazy `key(...)` calls the parallel prefetch doesn't cover), 11 more (parallel), `dotnet restore` 17.5 s of an already restored solution |
+| Planning | 76 s | 16 project evaluations (5-6.5 s each, parallel), 3 + 9 framework/configuration evaluations (parallel), **11 evaluations one at a time** (09:41:26-09:42:02, ~3 s each: Release and Release_NoBundle views of projects the plan reaches through references, asked for while the plan is built, outside the parallel prefetch; the exact call site is for the implementation PR), 11 more (parallel), `dotnet restore` 17.5 s of an already restored solution |
 | Run 1 check | 83 s | 3 processes at once (44, 53, 78 s) |
 | Run 1 fixes | 227 s | default 162 s (load 21.5 s, files 3.2 s, code-style analysis 27 s + fixes 5 s, analyzer analysis 16 s, **analyzer fixes 85 s**), then Release 33 s and Release_NoBundle 29 s, which fix the same shared files' `#if` variants |
 | Run 2 check + fix (2 files changed) | 88 s + 74 s | the fix of 5 files: load 26 s, code-style analysis 20 s (compiling the solution), analyzer analysis 8.5 s, fixes 11 s |
@@ -282,7 +282,15 @@ Roslyn in the tool is ruled out too: the SDK's code-style analyzers are built ag
 - the host code compiles against the 4.8 reference assemblies and uses only API present there (Roslyn keeps binary
   compatibility; `MSBuildWorkspace` is in Workspaces.MSBuild 4.8 too); anything newer through reflection, as
   `CSharp14.cs` does for syntax;
-- StyleBro's analyzers and fixers load into that Roslyn exactly as they do in the compiler and in dotnet format today.
+- StyleBro's analyzers and fixers load into that Roslyn exactly as they do in the compiler and in dotnet format today;
+- **two Roslyns in one process**: the tool already uses Roslyn 4.8 in its default load context (`IfBodies` parses,
+  `Conventions` compiles trees, `ConfigSet` builds an `AnalyzerConfigSet`, the descriptors come from the referenced
+  StyleBro.Analyzers). A `Solution` from the host's context and a 4.8 `SyntaxTree` don't unify, so the host lives in its
+  own context and crosses the boundary with plain types only (paths, texts, finding lines: the seam above), or the whole
+  tool resolves Roslyn from the SDK at startup (a bigger change);
+- **the runtime**: the SDK's dotnet-format assemblies target the SDK's framework (net10.0 for 10.0.x); the tool is net8.0
+  with `RollForward=Major`, so it runs on the newest installed runtime, which is that SDK's own when it is installed (the
+  normal case). The host checks it before loading and falls back to the child processes (or says why) otherwise.
 
 To verify before building: dotnet format's source (dotnet/sdk `src/BuiltInTools/dotnet-format`) for how it discovers
 fixers, builds its Fix All contexts and orders ids, and which of its pieces are public enough to reuse.
@@ -406,29 +414,34 @@ Each is asked as a multiple-choice question; the recommended option is first.
 **Q-D2. The order fixes are applied in.**
 - *A fixed order (recommended)*: deterministic runs (today's order changes between processes); `FixOrderTests` already
   requires the same text in every order for interacting ids; a difference the parity runs find becomes a test case.
+  Before: two runs of the same repository may apply ids in different orders; after: always the same order.
 - *Mimic dotnet format's order*: closer to today, but that order isn't stable, so "byte-identical" can't be promised
-  either way.
+  either way, and the host would have to reproduce an implementation detail of every SDK.
 
 **Q-D3. Which Roslyn the host uses.**
 - *The SDK's own Roslyn and MSBuild, loaded at runtime from the SDK `global.json` selects (recommended)*: the same
-  compiler, code-style analyzers and fixers `dotnet format` and the build use; works with every future SDK. Needs an
-  assembly load context and API limited to Roslyn 4.8's surface.
+  compiler, code-style analyzers and fixers `dotnet format` and the build use; works with every future SDK. Costs an
+  assembly load context, API limited to Roslyn 4.8's surface, and a fallback to the child processes when the SDK's
+  runtime isn't there. Before/after for users: none (same compiler as today's `dotnet format`).
 - *Ship a Roslyn version in the tool*: simpler code, but the SDK's code-style analyzers don't load in an older Roslyn,
-  and C# newer than the shipped Roslyn doesn't parse.
-- *Require a minimum SDK and fail otherwise*: on top of the first option, decide the oldest SDK supported (e.g. 8.0.100).
+  and C# newer than the shipped Roslyn doesn't parse: every new SDK would need a tool release first.
 
 **Q-D4. Restore.**
 - *Skip `dotnet restore` when the restore output is newer than every input and lists StyleBro.Analyzers
-  (recommended)*: PalCalc 17.5 s saved per call; `--restore` forces it.
+  (recommended)*: before 2-18 s per call (PalCalc 17.5 s), after ~0 when nothing changed; `--restore` forces it. Cost: a
+  file-time check can miss a change NuGet's own check would catch (a package replaced under the same version).
 - *Always restore (today)*: always right, 2-18 s per call.
 - *Restore only with `--restore`*: fastest, but a first `format` right after adding the package would run without it.
 
 **Q-D5. Verify from the clean record.**
-- *Answer `--verify-no-changes` from the record when the state matches (recommended)*: seconds instead of minutes after
-  a `format` on the same machine; the key gains the SDK, package and tool versions.
-- *Keep running the checks (today)*: verify always re-derives the answer; PalCalc 191 s.
+- *Answer `--verify-no-changes` from the record when the state matches (recommended)*: before PalCalc 191 s, CliFx
+  160 s after a clean `format`; after a few seconds (hashing the files). The key gains the SDK, package and tool
+  versions; what it still can't see (an environment variable changing MSBuild evaluation) could make it say clean
+  wrongly. CI (fresh checkout, no record) is unchanged.
+- *Keep running the checks (today)*: verify always re-derives the answer.
 
 **Q-D6. Rollout.**
 - *Behind `--engine host`, then the default once the parity harness is byte-identical on every trial copy, the old
-  engine kept for one release (recommended)*.
-- *Switch directly in one release*: faster to ship, any difference lands on users.
+  engine kept for one release (recommended)*: before/after for users only once proven; costs keeping two engines for
+  a release.
+- *Switch directly in one release*: faster to ship and one engine to maintain, any difference lands on users.
