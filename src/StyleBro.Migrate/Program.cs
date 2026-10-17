@@ -235,7 +235,22 @@ internal static class Program
             Console.WriteLine($"Vendored code in {string.Join(", ", vendored)}: marked generated_code = true, so formatting and StyleBro leave it alone.");
         }
 
-        var suppressions = RewriteSuppressions(root, Suppressions.WithoutOff(Suppressions.WithSonar(Suppressions.WithStyleSharp(result.Replacements, setup), sonar), plan.Values.SelectMany(blocks => blocks).SelectMany(b => b.Lines)), write, sonar is null ? setup.Folders : null);
+        if (Migration.UnreadableLine(root) is { } unreadable)
+        {
+            Console.WriteLine(unreadable);
+        }
+
+        var blocked = new List<string>();
+        var suppressions = RewriteSuppressions(root, Suppressions.WithoutOff(Suppressions.WithSonar(Suppressions.WithStyleSharp(result.Replacements, setup), sonar), plan.Values.SelectMany(blocks => blocks).SelectMany(b => b.Lines)), write, sonar is null ? setup.Folders : null, blocked);
+        if (BlockedLine(blocked, write) is { } blockedLine)
+        {
+            Console.WriteLine(blockedLine);
+            if (write)
+            {
+                return 1;
+            }
+        }
+
         Console.WriteLine(suppressions.Added == 0
             ? suppressions.Already > 0 ? $"Suppressions: already carried over ({suppressions.Already} files suppress the replacing rules too)." : "Suppressions: none in the code to carry over."
             : $"Suppressions: {suppressions.Added} {(write ? "added" : "to add")} for the replacing rules in {suppressions.Files} files (the original ones stay).");
@@ -245,8 +260,8 @@ internal static class Program
         {
             // Trial 25: after the swap the report still said "once StyleCop.Analyzers is gone, remove it", and the stylecop.json
             // settings were lost when it was; the block records them now, so the file can go.
-            var it = styleCopJson.Count == 1 ? "it" : "them";
-            Console.WriteLine($"{string.Join(", ", styleCopJson.Select(s => s.Replace('\\', '/')))}: StyleBro doesn't read {it}; the settings are in the block now, which also records them for later runs. {(setup.VersionRecorded ? "StyleCop.Analyzers is gone, so" : "Once StyleCop.Analyzers is gone,")} {it} can go, with the <AdditionalFiles> item{(styleCopJson.Count == 1 ? string.Empty : "s")} naming {it}.");
+            var (it, they) = styleCopJson.Count == 1 ? ("it", "it") : ("them", "they");
+            Console.WriteLine($"{string.Join(", ", styleCopJson.Select(s => s.Replace('\\', '/')))}: StyleBro doesn't read {it}; the settings are in the block now, which also records them for later runs. {(setup.VersionRecorded ? "StyleCop.Analyzers is gone, so" : "Once StyleCop.Analyzers is gone,")} {they} can go, with the <AdditionalFiles> item{(styleCopJson.Count == 1 ? string.Empty : "s")} naming {it}.");
         }
 
         if (suppressions.NotCarried > 0)
@@ -640,9 +655,14 @@ internal static class Program
     /// <summary>
     /// Carries the suppressions in the code over (<see cref="Suppressions"/>): StyleCop's and Sonar's ids, to the rules that
     /// replace them. Returns how many were (or would be) added, in how many files, and how many weren't carried over (IDE0055).
+    /// All or nothing (trial 28: a locked file crashed the run after one file was rewritten): the files that can't be read, or
+    /// can't be written where an edit is due, go into <paramref name="blocked"/> (relative paths), and with any of them nothing
+    /// is written.
     /// </summary>
-    internal static (int Added, int Files, int NotCarried, int Already) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write, IReadOnlyList<string>? folders = null)
+    internal static (int Added, int Files, int NotCarried, int Already) RewriteSuppressions(string root, IReadOnlyDictionary<string, SortedSet<string>> replacements, bool write, IReadOnlyList<string>? folders = null, List<string>? blocked = null)
     {
+        blocked ??= [];
+        var edits = new List<(string File, string Text)>();
         int added = 0;
         int files = 0;
         int notCarried = 0;
@@ -660,9 +680,6 @@ internal static class Program
         var marked = Migration.MarkedGeneratedFolders(root);
         foreach (var file in StyleCopSetup.EnumerateFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || StyleCopSetup.IsMSBuild(f)))
         {
-            var bytes = File.ReadAllBytes(file);
-            var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
-            var text = Encoding.UTF8.GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
             var relative = Path.GetRelativePath(root, file).Replace('\\', '/');
 
             // Only where StyleCop ran (trial 22, kafkaflow: samples' 'NoWarn SA1600' got BRO1601 although nothing runs there): the
@@ -670,6 +687,12 @@ internal static class Program
             var folder = Path.GetDirectoryName(relative)!.Replace('\\', '/');
             if (folders is not null && !folders.Any(f => Migration.IsUnder(relative, f) || (StyleCopSetup.IsMSBuild(file) && Migration.IsUnder(f.TrimEnd('/') + "/", folder))))
             {
+                continue;
+            }
+
+            if (Migration.ReadOrNull(file) is not { } text)
+            {
+                blocked.Add(relative);
                 continue;
             }
 
@@ -693,14 +716,43 @@ internal static class Program
 
             added += count;
             files++;
-            if (write)
+            edits.Add((file, rewritten));
+        }
+
+        if (write)
+        {
+            blocked.AddRange(edits.Where(e => !CanWrite(e.File)).Select(e => Path.GetRelativePath(root, e.File).Replace('\\', '/')));
+            if (blocked.Count == 0)
             {
-                PreviewCommand.EditFile(file, _ => rewritten);
+                edits.ForEach(e => PreviewCommand.EditFile(e.File, _ => e.Text));
             }
         }
 
         return (added, files, notCarried, already);
+
+        // As File.WriteAllText opens it, without writing.
+        static bool CanWrite(string file)
+        {
+            try
+            {
+                using var stream = File.Open(file, FileMode.Open, FileAccess.Write, FileShare.Read);
+                return true;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }
     }
+
+    /// <summary>
+    /// What to say about the files <see cref="RewriteSuppressions"/> couldn't read or write (<paramref name="blocked"/>), or null
+    /// when there are none. With <paramref name="write"/> nothing was written.
+    /// </summary>
+    internal static string? BlockedLine(IReadOnlyCollection<string> blocked, bool write) => blocked.Count == 0
+        ? null
+        : $"Couldn't {(write ? "read or write" : "read")} {(blocked.Count == 1 ? "this file" : $"these {blocked.Count} files")} (open in another program?): {string.Join(", ", blocked.Take(10))}{(blocked.Count > 10 ? ", ..." : string.Empty)}. "
+            + (write ? $"Nothing was written, so nothing is half done: close {(blocked.Count == 1 ? "it" : "them")} and run again." : "Suppressions in them aren't counted.");
 
     /// <summary>The StyleSharp rules that are on and stand for no StyleCop rule (<see cref="StyleCopSetup.StandsFor"/>), or none without StyleSharp.</summary>
     internal static List<string> StyleSharpOnly(StyleCopSetup setup) => setup.StyleSharp is not { } styleSharp || setup.Raw is not { } raw

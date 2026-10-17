@@ -151,8 +151,12 @@ internal sealed class StyleCopSetup
     /// <summary>A StyleCop.Analyzers reference or central version in an MSBuild file.</summary>
     private static readonly Regex StyleCopPackage = new(@"\b(?:Include|Update)\s*=\s*""StyleCop\.Analyzers(?:\.Unstable)?""|<Analyzer\b[^>]*?\bInclude\s*=\s*""[^""]*StyleCop\.Analyzers", RegexOptions.IgnoreCase);
 
-    /// <summary>An item or Copy task taking an .editorconfig (not one the compiler reads as a config file).</summary>
-    private static readonly Regex CopiesEditorConfig = new(@"<(?!EditorConfigFiles\b|GlobalAnalyzerConfigFiles\b)[\w.]+\s[^>]*\b(?:Include|SourceFiles)\s*=\s*""[^""]*\.editorconfig""", RegexOptions.IgnoreCase);
+    /// <summary>
+    /// An item or Copy task taking an .editorconfig (not one the compiler reads as a config file, nor the SDK's item types,
+    /// which at most copy it to the output folder: trial 28, EpubReader's '&lt;None Include="..\.editorconfig"&gt;' with a Link
+    /// only shows it in Solution Explorer).
+    /// </summary>
+    private static readonly Regex CopiesEditorConfig = new(@"<(?!(?:EditorConfigFiles|GlobalAnalyzerConfigFiles|None|Content|Compile|AdditionalFiles|EmbeddedResource|Folder|Page|Resource)\s)[\w.]+\s[^>]*\b(?:Include|SourceFiles)\s*=\s*""[^""]*\.editorconfig""", RegexOptions.IgnoreCase);
 
     public StyleCopSetup(IReadOnlyDictionary<string, Severity> severities, JsonElement? settings, IReadOnlyList<string> sources, IReadOnlyList<Scope> scopes, string? version = null, bool documentationParsed = true)
     {

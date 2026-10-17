@@ -1893,6 +1893,13 @@ internal static class Conventions
                     break;
 
                 case XmlElementSyntax { StartTag.Name.LocalName.ValueText: "summary" } summary:
+                    // A '///' that documents nothing (below attributes, inside a body) is BRO1602's '//' to be, which BRO1616
+                    // skips: not counted (trial 28).
+                    if (summary.FirstAncestorOrSelf<DocumentationCommentTriviaSyntax>() is { } documentation && StyleBro.Analyzers.Documentation.DocumentationComments.IsMisplaced(documentation.ParentTrivia))
+                    {
+                        break;
+                    }
+
                     var textLines = summary.Content.SelectMany(c => c.DescendantTokens())
                         .Where(t => !t.IsKind(SyntaxKind.XmlTextLiteralNewLineToken) && !string.IsNullOrWhiteSpace(t.Text))
                         .Select(t => Line(t.SpanStart))

@@ -213,6 +213,7 @@ public sealed partial class MigrationTests
 
         // Code outside it too: the root's value decides, and the note names the other.
         Write("tools/T.cs", "class T { }\n");
+        Write("tools/T.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\"><ItemGroup><PackageReference Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" /></ItemGroup></Project>");
         result = Migration.Generate(StyleCopSetup.Read(root), root);
         Assert.Equal("camelCase", result.FieldStyle);
         Assert.Contains(result.Notes, n => n.Contains("SA1309 is on (off in src/), so BRO1303 uses 'camelCase'", StringComparison.Ordinal));

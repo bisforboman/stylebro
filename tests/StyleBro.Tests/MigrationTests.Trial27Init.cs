@@ -140,6 +140,7 @@ public sealed partial class MigrationTests
         Write("App/C.cs", "class C { }\n");
         Write("adonis-ui/LICENSE", "MIT License\n\nCopyright (c) 2018 Benjamin Rühl\n");
         Write("adonis-ui/src/AdonisUI/A.cs", "class A { }\n");
+        Write("adonis-ui/src/AdonisUI/AdonisUI.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
         Write("Packages/Core/LICENSE.md", "Copyright (c) 2023-2024 Tyler Camp and contributors\n");
         Write("Packages/Core/B.cs", "class B { }\n");
         Write("docs/LICENSE", "Copyright (c) Someone Else\n");
