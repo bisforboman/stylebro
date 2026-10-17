@@ -2333,6 +2333,81 @@ internal static class FormatCommand
     }
 
     /// <summary>
+    /// The C# projects the workspace doesn't list but its projects reference, directly or through each other (trial 29: Moq's
+    /// Issue1648Harness isn't in Moq.sln, Moq.Tests references it, and the build compiled and reported it while no run
+    /// formatted it), each given to ONE run that loads it (several runs may check at once): the first default-configuration
+    /// run that reaches it and has its framework, else the run without a framework. A multi-targeted one, or one no such run
+    /// loads, goes to <paramref name="leftOut"/>: formatting it in a framework's run would merge its copies (conflict markers).
+    /// <paramref name="known"/>: the workspace's projects by full path; <paramref name="read"/> evaluates any other.
+    /// </summary>
+    public static Dictionary<int, List<string>> OutsideProjectRuns(
+        IReadOnlyList<(string Framework, string Configuration, IReadOnlyList<string> Projects)> runs,
+        IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> known,
+        Func<string, (string[] Frameworks, string[] References)> read,
+        string root,
+        out List<string> leftOut)
+    {
+        var outside = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase);
+        var pending = new Queue<string>(known.Values.SelectMany(p => p.References));
+        while (pending.Count > 0)
+        {
+            var reference = pending.Dequeue();
+            if (known.ContainsKey(reference) || outside.ContainsKey(reference) || !reference.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+                || Path.GetRelativePath(root, reference).StartsWith("..", StringComparison.Ordinal) || !File.Exists(reference))
+            {
+                continue;
+            }
+
+            outside[reference] = read(reference);
+            foreach (var next in outside[reference].References)
+            {
+                pending.Enqueue(next);
+            }
+        }
+
+        // Which projects each one reaches through its references.
+        var reach = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> Reach(string project)
+        {
+            if (reach.TryGetValue(project, out var found))
+            {
+                return found;
+            }
+
+            var result = reach[project] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var references = known.TryGetValue(project, out var listed) ? listed.References : outside.TryGetValue(project, out var other) ? other.References : [];
+            foreach (var reference in references)
+            {
+                result.Add(reference);
+                result.UnionWith(Reach(reference));
+            }
+
+            return result;
+        }
+
+        var assigned = new Dictionary<int, List<string>>();
+        leftOut = [];
+        foreach (var (project, (frameworks, _)) in outside.OrderBy(p => p.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            var loading = Enumerable.Range(0, runs.Count)
+                .Where(i => runs[i].Configuration.Length == 0 && runs[i].Projects.Any(p => Reach(p).Contains(project)))
+                .ToList();
+            var own = frameworks.Length == 1 ? NormalizeFramework(frameworks[0]) : null;
+            var index = own is null ? -1 : loading.Where(i => runs[i].Framework == own).Append(-1).First();
+            index = index >= 0 || own is null ? index : loading.Where(i => runs[i].Framework.Length == 0).Append(-1).First();
+            if (index < 0)
+            {
+                leftOut.Add(project);
+                continue;
+            }
+
+            (assigned.TryGetValue(index, out var list) ? list : assigned[index] = []).Add(project);
+        }
+
+        return assigned;
+    }
+
+    /// <summary>
     /// The folder a run on <paramref name="workspace"/> (a solution, filter, Traversal project or project) works from: the
     /// deepest one holding it and every project it lists. A project is its own folder (what it references gets no run).
     /// </summary>
@@ -4669,8 +4744,25 @@ internal static class FormatCommand
         reportFolders.AddRange(plan.Select(_ => Path.Combine(Path.GetTempPath(), $"stylebro-format-report-{Guid.NewGuid():N}")).Where(_ => report is not null));
 
         // Each run formats its own projects' files ('--include'); named files only in the runs whose projects have them.
+        // Projects the workspace doesn't list but its projects reference: the run that loads them formats them too.
+        // ponytail: not in the configuration runs' plan; such a project's '#if DEBUG' code is formatted in the default one only.
+        var outsideRuns = OutsideProjectRuns(
+            plan.Select(p => (p.Framework, p.Configuration, (IReadOnlyList<string>)p.Projects.Select(x => projects[x].FullPath).ToList())).ToList(),
+            projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase),
+            p =>
+            {
+                var (frameworks, references, _, _, _, _) = ParseProject(EvaluateProject(p), Path.GetDirectoryName(p));
+                return (frameworks, references);
+            },
+            root,
+            out var outsideLeft);
+        if (outsideLeft.Count > 0)
+        {
+            log($"{UnformattedHeader} {string.Join(", ", outsideLeft.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')))}: projects the build compiles that {Path.GetFileName(workspacePath)} doesn't list, and no run of one of their frameworks loads (a multi-targeted one would get its copies merged). Add them to the solution, or run 'stylebro-migrate format' on each.");
+        }
+
         var requested = OptionValues(passThrough, "--include");
-        var includes = plan.Select(p => RunInclude(requested, Include(root, solutionDirectory, p.Projects, p.Projects.SelectMany(x => LinkedFor(x, p.Framework, p.Configuration))).ToList())).ToList();
+        var includes = plan.Select((p, i) => RunInclude(requested, Include(root, solutionDirectory, p.Projects.Concat(outsideRuns.TryGetValue(i, out var extra) ? extra : []), p.Projects.SelectMany(x => LinkedFor(x, p.Framework, p.Configuration))).ToList())).ToList();
         if (requested is not null && requested.Any(r => !includes.Any(i => i.Contains(r))))
         {
             // A named file no run's projects have (or a path that isn't one): every run gets them, as named.

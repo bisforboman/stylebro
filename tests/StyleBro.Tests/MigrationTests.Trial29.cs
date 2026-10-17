@@ -48,4 +48,42 @@ public sealed partial class MigrationTests
         Assert.Equal([11, 0], counts["dotnet_diagnostic.BRO1306.severity"]);
         Assert.DoesNotContain("dotnet_diagnostic.BRO1306.severity = none", Conventions.Decide(counts, new Dictionary<string, string>()).Lines);
     }
+
+    [Fact]
+    public void Format_GivesAProjectOutsideTheSolutionToOneRun()
+    {
+        // Moq: Moq.Tests (net472;net8.0) references Issue1648Harness (net472), which Moq.sln doesn't list; the build reported it
+        // and no run formatted it. The net472 run that loads it formats it; a multi-targeted one is left out (copies merged).
+        string P(string name) => Path.Combine(root, name, name + ".csproj");
+        foreach (var name in new[] { "Tests", "Moq", "Harness", "Multi", "Deep" })
+        {
+            Write($"{name}/{name}.csproj", "<Project />");
+        }
+
+        var known = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase)
+        {
+            [P("Tests")] = (["net472", "net8.0"], [P("Moq"), P("Harness"), P("Multi")]),
+            [P("Moq")] = (["net462", "net8.0"], []),
+        };
+        var outside = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase)
+        {
+            [P("Harness")] = (["net472"], [P("Deep")]),
+            [P("Multi")] = (["net472", "net8.0"], []),
+            [P("Deep")] = (["net8.0"], []),
+        };
+        List<(string Framework, string Configuration, IReadOnlyList<string> Projects)> runs =
+        [
+            ("net462", string.Empty, [P("Moq")]),
+            ("net472", string.Empty, [P("Tests")]),
+            ("net8.0", "Release", [P("Tests")]),
+            ("net8.0", string.Empty, [P("Moq"), P("Tests")]),
+        ];
+
+        var assigned = FormatCommand.OutsideProjectRuns(runs, known, p => outside[p], root, out var left);
+
+        Assert.Equal([1, 3], assigned.Keys.Order());
+        Assert.Equal([P("Harness")], assigned[1]);
+        Assert.Equal([P("Deep")], assigned[3]); // through the harness, in the default configuration's net8.0 run
+        Assert.Equal([P("Multi")], left);
+    }
 }

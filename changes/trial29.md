@@ -12,3 +12,5 @@
   (`<#@ output extension=".Generated.cs" #>`); it used to skip it, and the build then reported its findings.
 - **BRO1303** and the other field rules keep a private field whose exact name, like `_root` or `m_count`, is any string
   in the solution (a test listing field names and reading each by reflection), not only an argument of `GetField(...)`.
+- **`stylebro-migrate format`** formats a project your solution doesn't list but another project references (the build
+  compiles it, so its findings failed a build with warnings as errors after a clean `format`).

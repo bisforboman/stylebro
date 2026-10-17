@@ -1528,6 +1528,10 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
 - Moq: `format` excluded the `.cs` next to each `.tt`, but `<#@ output extension=".Generated.cs" #>` writes another file;
   the hand-written `ReturnsExtensions.cs` was left unformatted and the TWAE build failed (1,216 errors after a clean
   verify). `Migration.TextTemplateOutput` reads the directive; `FormatCommand.IsGenerated` uses it too.
+- Moq: `Issue1648Harness` isn't in Moq.sln but Moq.Tests references it; the build compiled and reported it, no run's
+  `--include` named it. `FormatCommand.OutsideProjectRuns` gives each such single-framework project (transitively
+  referenced, under the root) to ONE default-configuration run of its framework (else the framework-less run); a
+  multi-targeted one is logged under "Leaving alone" (a framework run would merge its copies). Not in configuration runs.
 - Environment (cloud container): the .NET SDK comes from Ubuntu's packages (builds.dotnet.microsoft.com is blocked by the
   proxy; `apt-get install dotnet-sdk-10.0 dotnet-sdk-8.0`), pwsh via `dotnet tool install -g PowerShell`. The container
   runs as root, which ignores read-only files: `Migrate_WithALockedFile_WritesNothing` fails there (and on main).
