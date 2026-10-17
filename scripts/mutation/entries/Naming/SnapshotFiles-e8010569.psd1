@@ -1,7 +1,7 @@
-# Trial 27: path markup holds no names.
+# Trial 27: path markup holds no names (only a value that is one name counts).
 @{
     File = 'src/StyleBro.CodeFixes/Naming/SnapshotFiles.cs'
-    Find = '&& !(Geometry.Contains('
-    Replace = '&& !(false && Geometry.Contains('
+    Find = '&& NameValue.IsMatch(value));'
+    Replace = ');'
     Tests = 'KeptFindingsTests.ANameInAXamlFilesElementOrAttributeName_IsKept'
 }

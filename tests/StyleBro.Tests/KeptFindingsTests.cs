@@ -200,6 +200,7 @@ public sealed class KeptFindingsTests : IDisposable
     [InlineData("Views/Main.axaml", "<ListBox DisplayMemberPath='title' />", KeptReason.NameInXamlFile)]
     [InlineData("Page.xaml", "<TextBlock\n    Text=\"{Binding Path=Model.title, Mode=OneWay}\" />", KeptReason.NameInXamlFile)]
     [InlineData("Page.xaml", "<title xmlns:x=\"clr-namespace:title\" title=\"Title\" />", null)]
+    [InlineData("Page.xaml", "<Window xmlns:local=\"using:title\" />", null)]
     [InlineData("Page.xaml", "<Button Click=\"title\" />", KeptReason.NameInXamlFile)]
     [InlineData("Page.xaml", "<TextBlock x:Name=\"title\" />", KeptReason.NameInXamlFile)]
     [InlineData("Page.xaml", "<Setter Property=\"local:Shell.title\" />", KeptReason.NameInXamlFile)]
@@ -252,6 +253,16 @@ public sealed class KeptFindingsTests : IDisposable
             public void AppendFormatted<T>(T value, [System.Runtime.CompilerServices.CallerArgumentExpression("value")] string? name = null) { }
         }
 
+        [System.Runtime.CompilerServices.InterpolatedStringHandler]
+        public ref struct PlainHandler
+        {
+            public PlainHandler(int literalLength, int formattedCount) { }
+
+            public void AppendLiteral(string s) { }
+
+            public void AppendFormatted<T>(T value, string? format = null) { }
+        }
+
         """;
 
     [Theory]
@@ -260,11 +271,12 @@ public sealed class KeptFindingsTests : IDisposable
     [InlineData(DiagnosticIds.ParameterCasing, "public static void Run(int UserId) => Log($\"user {UserId}\");", KeptReason.NameIsLogKey)]
     [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; string s = $\"user {UserId}\"; }", null)]
     [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; Log($\"user {1}\"); Log(UserId); }", null)]
+    [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; LogPlain($\"user {UserId}\"); }", null)]
     public async Task ANameInALogKeyHole_IsKept(string id, string member, KeptReason? expected)
     {
         var reason = await GetReasonAsync(
             id,
-            ("Program.cs", "internal static class Program\n{\n    " + member + "\n\n    public static void Log(ref KeyHandler handler) { }\n\n    public static void Log(int value) { }\n}\n"),
+            ("Program.cs", "internal static class Program\n{\n    " + member + "\n\n    public static void Log(ref KeyHandler handler) { }\n\n    public static void LogPlain(ref PlainHandler handler) { }\n\n    public static void Log(int value) { }\n}\n"),
             ("Handler.cs", LogKeyHandler));
 
         Assert.Equal(expected, reason);

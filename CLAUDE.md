@@ -1480,6 +1480,28 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   Leading-lambda calls count apart for BRO1107/BRO1108 (`FoldLeadingLambdas`). Usings are sorted per run between
   directives. PinPreset without a root solution uses the shallowest solutions (stryker's src/).
 
+## Trial 28 analyzer fixes (2026-10-17)
+
+- A member declared `new` that hides a base member by its name isn't renamed (`PascalCaseNamingAnalyzer.HidesBaseMember`,
+  part of `InheritsName`; fields in FieldNamingAnalyzer): renamed, the `new` was CS0109 (Jackett, 152 errors). The renamer
+  keeps a base member a derived `new` member hides (`KeptReason.HiddenByNewMember`; private/sealed skipped for speed).
+- Log keys (owner): a reference inside an interpolation hole whose handler's AppendFormatted has `[CallerArgumentExpression]`
+  on its value parameter keeps the name (`CamelCaseRenamer.GetLogKeyHandler`, also TupleElementRenamer;
+  `KeptReason.NameIsLogKey`, Where = `path(line) in Handler`). Roslyn 4.8: `GetOperation(InterpolationSyntax)` is null;
+  bind the interpolated string and match its `Parts` by syntax.
+- Renaming a local/parameter drops a `this.X` that only it made necessary where `dotnet_style_qualification_for_*` is
+  false (`GetUnneededMemberThisAsync`, BaseCalls.PrefersNoQualifier): BRO1131 and BRO1301 converge in either order.
+- BRO1305 renames the type parameter in its own type's/method's crefs too (cref type arguments are declarations, which
+  FindReferences doesn't return).
+- XAML: values count only where they can name code (`SnapshotFiles.NamesCode`: markup extensions, `x:` directives,
+  `Name`, `*Path`, a one-name value unless the attribute is free text); prefixes are blanked; element/attribute names are
+  `Words.XamlMarkup` (`KeptReason.NameInXamlMarkup`, "breaks the XAML build").
+- T4 outputs (DependentUpon `*.tt` / AutoGen) join `StyleBroGeneratedFolders` (files listed by themselves); the suppressor
+  now also hides `SdkIds` there; `format` excludes the `.cs` next to each `.tt` (`Migration.TextTemplateOutputs`). Not
+  `generated_code = true`: that also makes the compiler treat nullable annotations as oblivious (CS8669).
+- Submodules: entries at or above `StyleBroRepositoryRoot` are dropped from `StyleBroSubmoduleFolders` (a submodule's own
+  checkout read the superproject's .gitmodules and hid everything). verify-package checks 12 and 13.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

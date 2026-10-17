@@ -104,6 +104,41 @@ public class CamelCaseNamingTests
         """.Replace("FIXED", fixedReturn, StringComparison.Ordinal),
         editorConfig);
 
+    // An extension method needs its 'this.': the plain name doesn't find extension methods.
+    [Fact]
+    public Task AThisBeforeAnExtensionMethod_Stays() => VerifyFixAsync(
+        """
+        public static class Extensions
+        {
+            public static int Ext(this Indexer indexer) => 1;
+        }
+
+        public class Indexer
+        {
+            public int Get()
+            {
+                var {|BRO1301:Ext|} = 2;
+                return this.Ext() + Ext;
+            }
+        }
+        """,
+        """
+        public static class Extensions
+        {
+            public static int Ext(this Indexer indexer) => 1;
+        }
+
+        public class Indexer
+        {
+            public int Get()
+            {
+                var ext = 2;
+                return this.Ext() + ext;
+            }
+        }
+        """,
+        "dotnet_style_qualification_for_method = false");
+
     [Fact]
     public Task Variables_AreRenamedEverywhere() => VerifyFixAsync(
         """

@@ -789,6 +789,10 @@ and it's on purpose. The reasons, per finding:
   for other fields only where code reaches a member by name: `GetField("_count")`, `GetProperty(...)`, `Type.GetType(...)`,
   `[MemberData("...")]`, an attribute's `Name = "..."`): the rename would compile but break at run time;
 - the name is in a `nameof(...)` elsewhere, whose text would change with it (an HTTP header name, a log key);
+- the name is a structured log key: it's in an interpolated string's hole whose handler takes the hole's text as a
+  `[CallerArgumentExpression]` argument (ZLogger's `$"{UserId}"`);
+- a XAML file uses the name (a binding, an event handler, or a type or property of the project's own namespace);
+- a derived type hides the member with a `new` member of the same name, which would then hide nothing (CS0109);
 - another member would hide the new name, or the new name already means something else where the name is used;
 - a use is in generated code (a source generator, a Razor page, a designer file), which a tool writes again;
 - a related override or implementation is public API, or also implements a member that isn't renamed;
@@ -866,7 +870,15 @@ from outside the repository (`<Compile Include="..\..\..\outside\Shared.cs" Link
 its findings don't count in `--verify-no-changes`. The build doesn't report them either: the package's build targets pass
 the repository's folder (the nearest one above the project with a `.git` folder or file), and StyleBro hides its findings,
 and those of the built-in rules it turns on (IDE0055, IDE0011, ...), in files outside it. To report them anyway, set
-`<StyleBroRepositoryRoot>none</StyleBroRepositoryRoot>` (or another folder) in `Directory.Build.props`.
+`<StyleBroRepositoryRoot>none</StyleBroRepositoryRoot>` (or another folder) in `Directory.Build.props`. That only changes
+the build: `stylebro-migrate format` still leaves files outside the repository alone (it doesn't read the property), so
+fix them by hand or in their own repository. In a submodule's own checkout, its own files are checked: the superproject's
+`.gitmodules` above it doesn't count for it.
+
+**Files a T4 template writes.** A C# file that a `.tt` template writes (the project lists it with
+`<DependentUpon>Name.tt</DependentUpon>` or `<AutoGen>True</AutoGen>`) is generated code: the template writes it again.
+StyleBro doesn't report findings there (nor the built-in rules it turns on), and `stylebro-migrate format` leaves the
+C# file next to each `.tt` file with the same name alone.
 
 ## Multi-targeted repositories
 

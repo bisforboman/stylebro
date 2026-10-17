@@ -334,6 +334,26 @@ public class PascalCaseNamingTests
             """,
         ]);
 
+    // A 'new' that hides nothing (already CS0109) keeps nothing: the member is renamed.
+    [Fact]
+    public Task ANewMemberHidingNothing_IsRenamed() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public new void {|BRO1309:helper|}()
+            {
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public new void Helper()
+            {
+            }
+        }
+        """);
+
     // The base member's rename would leave the derived 'new' member hiding nothing.
     [Fact]
     public Task ABaseMemberADerivedNewMemberHides_KeepsTheName() => VerifyNotFixedAsync(
