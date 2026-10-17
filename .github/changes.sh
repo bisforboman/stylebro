@@ -15,9 +15,9 @@ fi
 
 files=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
 # Docs, markdown outside src/tests/samples, the docs site's setup, the backlog generator and its items, New-Decision, the
-# changelog fold script (the build job checks it), and the StyleCop survey except what the parity check and
-# StyleBro.Migrate (embedded CSVs) read.
-docs='^(docs/|(?!(src|tests|samples)/).*\.md$|mkdocs\.yml$|\.github/docs-requirements\.txt$|\.github/workflows/docs\.yml$|scripts/New-Backlog\.py$|scripts/backlog/|scripts/New-Decision\.ps1$|scripts/changelog\.py$|scripts/stylecop-survey/(?!Compare-WithStyleCop\.ps1$|parity/|data/inventory-|data/mapping\.csv$))'
+# trial containers (scripts/trials, run by hand only), the changelog fold script (the build job checks it), and the
+# StyleCop survey except what the parity check and StyleBro.Migrate (embedded CSVs) read.
+docs='^(docs/|(?!(src|tests|samples)/).*\.md$|mkdocs\.yml$|\.github/docs-requirements\.txt$|\.github/workflows/docs\.yml$|scripts/New-Backlog\.py$|scripts/backlog/|scripts/New-Decision\.ps1$|scripts/trials/|scripts/changelog\.py$|scripts/stylecop-survey/(?!Compare-WithStyleCop\.ps1$|parity/|data/inventory-|data/mapping\.csv$))'
 perf='^(src/|scripts/benchmark/|scripts/realworld/repos\.psd1$|Directory\.|global\.json$|[^/]*\.slnx$|\.github/workflows/ci\.yml$)'
 
 code=$(grep -vP "$docs" <<< "$files" || true)
