@@ -123,6 +123,9 @@ when we can do that"): don't suggest releases at all; the user says when.
   runs every StyleCop parity set (`Compare-WithStyleCop.ps1`).
 - **Advisor**: when an advisor tool is available, call it before design decisions or recommendations, before splitting
   work across agents or sessions, and before declaring a larger task done.
+- **Asking the owner** (2026-10-17, owner: "Remember to prompt me when you want any input from me"): whenever work needs
+  the owner's input (a design choice, a Windows-only step, an approval), ask with the AskUserQuestion tool, which
+  prompts them, never only in prose, a PR body or a log; then carry on with what doesn't depend on the answer.
 - **Where work runs**: long work (multi-step tasks, PRs, CI waits, releases) runs as cloud sessions; the owner's
   computer must stay free to restart or turn off. Work that needs it (local timings, Windows-only checks) is asked for,
   never started unasked; a cloud session that needs such a step says so in its PR.
@@ -1509,6 +1512,31 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   `generated_code = true`: that also makes the compiler treat nullable annotations as oblivious (CS8669).
 - Submodules: entries at or above `StyleBroRepositoryRoot` are dropped from `StyleBroSubmoduleFolders` (a submodule's own
   checkout read the superproject's .gitmodules and hid everything). verify-package checks 12 and 13.
+
+## Trial 29 fixes (2026-10-17, first trial run as a cloud session)
+
+- Repos: Moq (`v4` branch), Ulid, error-or (StyleCop, migrate), Harmony (random, seed 29). error-or and Ulid clean.
+- Harmony (owner: "Both"): BRO1302/BRO1310/BRO1313 never report a `__x` parameter or any parameter of a Harmony patch
+  method (`BoundParameterNames.IsBound`, syntax: a `Harmony*` attribute on the method or a parameter, or
+  Prefix/Postfix/Transpiler/Finalizer/Prepare/Cleanup/TargetMethod(s) in a `Harmony*`-attributed type). Renamed
+  `__result`/`__instance` compiled and Harmony's injection failed at run time.
+- Harmony (owner: "Underscore names anywhere"): a private field whose name only a field has (`_x`, `m_x`/`s_x`/`t_x`) is
+  kept by ANY string equal to it in the solution, not only a reflection-shaped one (`CamelCaseRenamer.LooksLikeFieldName`;
+  tests listed `"_root", "_type"` and read them in a loop). Cost: a private `_id` next to Mongo-style `"_id"` strings stays.
+- Harmony (owner: "Count it, BRO1306 off"): `init` counts public/internal non-const, non-static-readonly fields' casing
+  when no enforced naming rule covers them (`Conventions.CountNonPrivateNaming`, shares BRO1306's severity convention).
+- Moq: `format` excluded the `.cs` next to each `.tt`, but `<#@ output extension=".Generated.cs" #>` writes another file;
+  the hand-written `ReturnsExtensions.cs` was left unformatted and the TWAE build failed (1,216 errors after a clean
+  verify). `Migration.TextTemplateOutput` reads the directive; `FormatCommand.IsGenerated` uses it too.
+- Moq: `Issue1648Harness` isn't in Moq.sln but Moq.Tests references it; the build compiled and reported it, no run's
+  `--include` named it. `FormatCommand.OutsideProjectRuns` gives each such single-framework project (transitively
+  referenced, under the root) to ONE default-configuration run of its framework (else the framework-less run); a
+  multi-targeted one is logged under "Leaving alone" (a framework run would merge its copies). Not in configuration runs.
+- Environment (cloud container): the .NET SDK comes from Ubuntu's packages (builds.dotnet.microsoft.com is blocked by the
+  proxy; `apt-get install dotnet-sdk-10.0 dotnet-sdk-8.0`), pwsh via `dotnet tool install -g PowerShell`. The container
+  runs as root, which ignores read-only files: `Migrate_WithALockedFile_WritesNothing` fails there (and on main).
+  Untouched-code build failures seen with TWAE: NuGet audit (NU1902) in Ulid and Harmony (`-p:NuGetAudit=false`),
+  Ulid's CS0618/CS8002, Harmony's own IDE0054 and a compiler crash ("PromiseNotToEnqueue") with EnforceCodeStyleInBuild.
 
 ## Known open questions
 

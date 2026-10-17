@@ -179,9 +179,9 @@ public sealed partial class MigrationTests
         Assert.Equal([1, 3], counts["dotnet_diagnostic.BRO1306.severity"]);
         Assert.Contains("dotnet_diagnostic.BRO1306.severity = none", Conventions.Decide(counts, new Dictionary<string, string>()).Lines);
 
-        // Without the rule (or with it off), nothing is counted: StyleCop's defaults are BRO1306's own business.
+        // Without the rule (or with it off), the fields count against StyleCop's PascalCase (trial 29): BRO1306 renames '_writes'.
         Write(".editorconfig", "root = true\n\n[*.cs]\n" + Rule.Replace("= suggestion", "= none", StringComparison.Ordinal));
-        Assert.Equal([0, 0], Conventions.Count(root, Migration.OwnSettings(root))["dotnet_diagnostic.BRO1306.severity"]);
+        Assert.Equal([3, 1], Conventions.Count(root, Migration.OwnSettings(root))["dotnet_diagnostic.BRO1306.severity"]);
     }
 
     [Fact]

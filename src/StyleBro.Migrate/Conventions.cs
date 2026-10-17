@@ -235,7 +235,7 @@ internal static class Conventions
         new(PeriodKey, "doc comment texts", "warning", ("warning", "ending with a period"), ("none", "without a period"), Off(DiagnosticIds.DocumentationEndsWithPeriod)) { Unit = "text" },
         new(DocOrderKey, "doc element order", "warning", ("warning", "in BRO1619's order"), ("none", "in another order"), Off(DiagnosticIds.DocumentationElementOrder)) { Unit = "doc comment" },
         new(LangwordKey, "keywords in doc comments", "warning", ("warning", "'<see langword=\"null\"/>'"), ("none", "'<c>null</c>'"), Off(DiagnosticIds.LangwordElement)) { Unit = "keyword" },
-        new(NonPrivateNamingKey, "non-private fields your naming rule covers", "warning", ("warning", "named as it says"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
+        new(NonPrivateNamingKey, "non-private fields", "warning", ("warning", "PascalCase or as your naming rule says"), ("none", "named otherwise"), Off(DiagnosticIds.FieldPascalCase)) { Unit = "field" },
         new(DocElementBlankLineKey, "doc comments above their element", "warning", ("warning", "right above it"), ("none", "with a blank line below"), Off(DiagnosticIds.BlankLineAfterDocumentation)) { Unit = "doc comment" },
         new(PrimaryParametersKey, "primary-constructor parameter names", "warning", ("warning", "like 'logger'"), ("none", "like '_logger'"), Off(DiagnosticIds.ParameterCasing)) { Unit = "parameter" },
         new(StyleBro.Analyzers.Naming.TupleElementNames.CasingKey, "tuple element names", "PascalCase", ("PascalCase", "'(int Count, ...)'"), ("camelCase", "'(int count, ...)'"), Off(DiagnosticIds.TupleElementCasing)) { Unit = "element" },
@@ -434,7 +434,9 @@ internal static class Conventions
     /// <summary>
     /// BRO1306's severity: the non-private fields an enforced SDK naming rule covers (BRO1306 follows it), named as it says or
     /// not (trial 23, jint: a 'suggestion' rule asked for '_camelCase' on every instance field, the code had 827 PascalCase
-    /// public ones against 263, and BRO1306 renamed ~545). A rule the code doesn't follow mustn't win.
+    /// public ones against 263, and BRO1306 renamed ~545). A rule the code doesn't follow mustn't win. Without such a rule,
+    /// the public and internal fields that aren't constants or static readonly, PascalCase (StyleCop's SA1307) or not (owner's
+    /// decision 2026-10-17, trial 29: Harmony names them camelCase, 470 to 21, and BRO1306 renamed the internal ones).
     /// </summary>
     private const string NonPrivateNamingKey = "dotnet_diagnostic." + DiagnosticIds.FieldPascalCase + ".severity";
 
@@ -974,8 +976,9 @@ internal static class Conventions
 
     /// <summary>
     /// <see cref="NonPrivateNamingKey"/>'s places: the non-private fields an enforced naming rule covers (BRO1306 follows it,
-    /// <see cref="StyleBro.Analyzers.Naming.FieldNames.GetNonPrivateCasing"/>), named as it says or not. Needs symbols: one
-    /// compilation of the trees, without references (declarations bind without them); only when such a rule exists.
+    /// <see cref="StyleBro.Analyzers.Naming.FieldNames.GetNonPrivateCasing"/>), named as it says or not; without such a rule,
+    /// public and internal fields that aren't constants or static readonly (their casing has keys of its own), PascalCase or
+    /// not. Needs symbols: one compilation of the trees, without references (declarations bind without them).
     /// </summary>
     public static void CountNonPrivateNaming(IReadOnlyList<SyntaxTree> trees, Dictionary<string, int[]> counts, IReadOnlyDictionary<string, string>? settings)
     {
@@ -985,21 +988,37 @@ internal static class Conventions
         }
 
         var styles = StyleBro.Analyzers.Naming.FieldNames.GetStyles(new Options(settings), StyleBro.Analyzers.Severities.Configured(settings, "IDE1006", "Style"));
-        if (styles.NonPrivate is null)
-        {
-            return;
-        }
-
         var compilation = CSharpCompilation.Create("conventions", trees);
         foreach (var tree in trees)
         {
             var model = compilation.GetSemanticModel(tree);
             foreach (var variable in tree.GetRoot().DescendantNodes(n => n is not (BlockSyntax or ArrowExpressionClauseSyntax)).OfType<FieldDeclarationSyntax>().SelectMany(f => f.Declaration.Variables))
             {
-                if (model.GetDeclaredSymbol(variable) is IFieldSymbol field
-                    && StyleBro.Analyzers.Naming.FieldNames.GetNonPrivateCasing(field, styles) is { } casing && casing != StyleBro.Analyzers.Naming.NamingCasing.Other)
+                if (model.GetDeclaredSymbol(variable) is not IFieldSymbol field)
                 {
-                    counts[NonPrivateNamingKey][StyleBro.Analyzers.Naming.FieldNames.GetRename(field, styles) is null ? 0 : 1]++;
+                    continue;
+                }
+
+                if ((styles.NonPrivate is null ? null : StyleBro.Analyzers.Naming.FieldNames.GetNonPrivateCasing(field, styles)) is { } casing)
+                {
+                    if (casing != StyleBro.Analyzers.Naming.NamingCasing.Other)
+                    {
+                        counts[NonPrivateNamingKey][StyleBro.Analyzers.Naming.FieldNames.GetRename(field, styles) is null ? 0 : 1]++;
+                    }
+                }
+                else if (!field.IsConst && !(field.IsStatic && field.IsReadOnly) && StyleBro.Analyzers.Naming.FieldNames.IsPascalChecked(field, styles))
+                {
+                    // A prefix or an inner underscore ('m_x', 'a_b') is BRO1307's or BRO1308's, not a casing.
+                    switch (StyleBro.Analyzers.Naming.FieldNames.GetRename(field, styles))
+                    {
+                        case null:
+                            counts[NonPrivateNamingKey][0]++;
+                            break;
+
+                        case { Rule: StyleBro.Analyzers.Naming.FieldRule.PascalCasing }:
+                            counts[NonPrivateNamingKey][1]++;
+                            break;
+                    }
                 }
             }
         }

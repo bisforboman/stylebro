@@ -1,6 +1,6 @@
 {
   "area": "Stable",
   "item": "Two clean trials before 1.0",
-  "notes": "Owner's decision 2026-10-11 (docs/decisions/2026-10-11-when-stylebro-goes-stable.md): 1.0 ships after two clean trials in a row, first-run trials on new kinds of repository with no high-severity bugs; external users aren't required. Tally: trial 8 in progress, 0 clean in a row so far.",
+  "notes": "Owner's decision 2026-10-11 (docs/decisions/2026-10-11-when-stylebro-goes-stable.md): 1.0 ships after two clean trials in a row, first-run trials on new kinds of repository with no high-severity bugs; external users aren't required. Tally: 0 clean in a row after trial 29 (2026-10-17): Harmony's patch parameters and listed private fields were renamed (tests failed), and Moq's build broke on a file format skipped next to a T4 template.",
   "status": "Planned"
 }

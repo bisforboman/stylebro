@@ -194,6 +194,11 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeParameter(SyntaxNodeAnalysisContext context)
     {
         var node = (ParameterSyntax)context.Node;
+        if (BoundParameterNames.IsBound(node))
+        {
+            return;
+        }
+
         if (!node.Identifier.IsMissing && ReportBaseName(context, node))
         {
             return;

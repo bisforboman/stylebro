@@ -47,20 +47,35 @@ public sealed class KeptFindingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("Assert.Equal(\"_blockedUntil\", c)")] // Orleans: words in messages ('options') kept 692 renames
-    [InlineData("new System.ArgumentNullException(\"_blockedUntil\")")]
-    [InlineData("Settings[\"_blockedUntil\"]")] // Flow.Launcher: 'type', a JSON key in another plugin
-    [InlineData("System.Text.Json.JsonDocument.Parse(\"{}\").RootElement.GetProperty(\"_blockedUntil\")")] // Orleans: JSON, not a Type
-    [InlineData("DeleteMembershipEntries(\"_blockedUntil\")")] // 'Member' inside 'Membership' isn't a word
-    [InlineData("FieldsetName(\"_blockedUntil\")")] // nor 'Field' inside 'Fieldset'
+    [InlineData("Assert.Equal(\"BlockedUntil\", c)")] // Orleans: words in messages ('options') kept 692 renames
+    [InlineData("new System.ArgumentNullException(\"BlockedUntil\")")]
+    [InlineData("Settings[\"BlockedUntil\"]")] // Flow.Launcher: 'type', a JSON key in another plugin
+    [InlineData("System.Text.Json.JsonDocument.Parse(\"{}\").RootElement.GetProperty(\"BlockedUntil\")")] // Orleans: JSON, not a Type
+    [InlineData("DeleteMembershipEntries(\"BlockedUntil\")")] // 'Member' inside 'Membership' isn't a word
+    [InlineData("FieldsetName(\"BlockedUntil\")")] // nor 'Field' inside 'Fieldset'
     public async Task AFieldWhoseNameIsAnOrdinaryStringElsewhere_IsRenamed(string use)
     {
         var reason = await GetReasonAsync(
             DiagnosticIds.PrivateFieldNaming,
-            ("C.cs", "class C\n{\n    private int _blockedUntil;\n\n    public int Get() => _blockedUntil;\n}\n"),
+            ("C.cs", "class C\n{\n    private int BlockedUntil;\n\n    public int Get() => BlockedUntil;\n}\n"),
             ("Tests.cs", $"class Tests\n{{\n    object Use(C c) => {use};\n}}\n"));
 
         Assert.Null(reason);
+    }
+
+    // Trial 29 (Harmony, owner's choice 2026-10-17): the tests list '"_root", "_type"' and read each with
+    // AccessTools.DeclaredField in a loop. A name only a field has ('_x', 'm_x') counts in any string.
+    [Theory]
+    [InlineData("_blockedUntil", "new[] { \"_blockedUntil\", \"_other\" }")]
+    [InlineData("m_blockedUntil", "new System.Collections.Generic.List<string> { \"m_blockedUntil\" }")]
+    public async Task AFieldNameOnlyAFieldHas_IsKept_InAnyString(string name, string use)
+    {
+        var reason = await GetReasonAsync(
+            name.StartsWith("m_", StringComparison.Ordinal) ? DiagnosticIds.FieldPrefix : DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", $"class C\n{{\n    private int {name};\n\n    public int Get() => {name};\n}}\n"),
+            ("Tests.cs", $"class Tests\n{{\n    void Use() {{ var names = {use}; }}\n}}\n"));
+
+        Assert.Equal(KeptReason.NameInString, reason);
     }
 
     // Jint (trial 23): a script reads 'host.ByteField' of a private test class, so a public field is data whatever its type's

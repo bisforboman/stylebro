@@ -564,7 +564,7 @@ A few settings work a little differently:
 | Doc comment periods | summary, param, returns, ... texts ending with a period or not | [BRO1603](rules/BRO1603.md) | `dotnet_diagnostic.BRO1603.severity` |
 | Doc element order | doc comments with `<typeparam>`/`<param>`/`<returns>` and later elements (`<exception>`, `<remarks>`, ...): in BRO1619's order or another; with fewer than 3 of those, the comments with only `<typeparam>`/`<param>`/`<returns>` decide | [BRO1619](rules/BRO1619.md) | `dotnet_diagnostic.BRO1619.severity` |
 | Keywords in doc comments | `<see langword="null"/>` or `<c>null</c>` | [BRO1618](rules/BRO1618.md) | `dotnet_diagnostic.BRO1618.severity` |
-| Non-private field names | public, internal and protected fields an enforced naming rule (`dotnet_naming_rule.*`) covers: named as it says or not (a rule your code doesn't follow turns BRO1306 off) | [BRO1306](rules/BRO1306.md) | `dotnet_diagnostic.BRO1306.severity` |
+| Non-private field names | public, internal and protected fields an enforced naming rule (`dotnet_naming_rule.*`) covers: named as it says or not (a rule your code doesn't follow turns BRO1306 off); without such a rule, public and internal fields that aren't constants or static readonly: PascalCase or not (camelCase code turns BRO1306 off) | [BRO1306](rules/BRO1306.md) | `dotnet_diagnostic.BRO1306.severity` |
 | Blank line below doc comments | doc comments right above their element or with a blank line between | [BRO1511](rules/BRO1511.md) | `dotnet_diagnostic.BRO1511.severity` |
 | Primary-constructor parameters | named `logger` or `_logger` (classes and structs) | [BRO1302](rules/BRO1302.md) | `dotnet_diagnostic.BRO1302.severity` |
 | Tuple element names | `(int Count, ...)` or `(int count, ...)` | [BRO1311](rules/BRO1311.md) | `stylebro_tuple_element_name_casing` |
@@ -800,7 +800,8 @@ and it's on purpose. The reasons, per finding:
 
 - the name is in a string elsewhere in the solution (serialized names and test JSON for properties and public fields;
   for other fields only where code reaches a member by name: `GetField("_count")`, `GetProperty(...)`, `Type.GetType(...)`,
-  `[MemberData("...")]`, an attribute's `Name = "..."`): the rename would compile but break at run time;
+  `[MemberData("...")]`, an attribute's `Name = "..."`, or anywhere for a name only a field has, like `"_count"`): the
+  rename would compile but break at run time;
 - the name is in a `nameof(...)` elsewhere, whose text would change with it (an HTTP header name, a log key);
 - the name is a structured log key: it's in an interpolated string's hole whose handler takes the hole's text as a
   `[CallerArgumentExpression]` argument (ZLogger's `$"{UserId}"`);
@@ -910,7 +911,9 @@ stylebro-migrate format MySolution.sln --verify-no-changes --severity warn
 ```
 
 Plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055) without writing anything (reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000) and [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)). The command runs
-`dotnet format` once per target framework instead; without multi-targeted projects it's one run. A diagnostic
+`dotnet format` once per target framework instead; without multi-targeted projects it's one run. A project the
+solution doesn't list but one of its projects references (so the build compiles it) is formatted in the run of its
+framework; one with several frameworks is listed under "Leaving alone" (add it to the solution). A diagnostic
 every framework sees is printed once, and `--report` writes one `format-report.json` covering all runs. Spellings of
 one framework share a run (`net6` and `net6.0`, NuGet's short names). A run loads only the projects that target its
 framework, so the renaming fixes also check the names in every other C# file of the repository: a field the tests
