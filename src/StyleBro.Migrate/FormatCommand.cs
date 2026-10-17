@@ -1118,7 +1118,7 @@ internal static class FormatCommand
     /// builds report none of format's rules (<see cref="Diagnostics"/>) in the project. Owner's decision 2026-10-16: verify said
     /// clean while a Release build of a project with an in-solution source generator failed on Release-only code.
     /// </summary>
-    public static string? UncheckedLine(string root, Action<string> log, Func<string, string, IReadOnlyList<string>>? build = null)
+    public static string? UncheckedLine(string root, Action<string> log, Func<string, string, (int ExitCode, IReadOnlyList<string> Output)>? build = null)
     {
         if (!Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out var projects) || projects.Count == 0)
         {
@@ -1127,25 +1127,46 @@ internal static class FormatCommand
 
         var ids = Diagnostics(root).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var findings = new List<string>();
+        var failed = new List<string>();
         foreach (var (project, configuration) in projects)
         {
             var name = Path.GetFileNameWithoutExtension(project);
             log($"Not checked by format: {name} in {configuration} (it takes an in-solution source generator): building it...");
-            var found = (build ?? BuildOutput)(project, configuration)
-                .Select(l => Regex.Match(l, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): (?:warning|error) (?<id>\w+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$"))
-                .Where(m => m.Success && ids.Contains(m.Groups["id"].Value) && (!m.Groups["project"].Success || string.Equals(Path.GetFullPath(m.Groups["project"].Value), Path.GetFullPath(project), StringComparison.OrdinalIgnoreCase)))
-                .Select(m => $"  {Relative(root, m.Groups["path"].Value)}({m.Groups["line"].Value},{m.Groups["column"].Value}): {m.Groups["id"].Value}: {m.Groups["message"].Value}")
+            var (exitCode, output) = (build ?? BuildOutput)(project, configuration);
+            var lines = output.Select(l => Regex.Match(l, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): (?<kind>warning|error) (?<id>\w+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$"))
+                .Where(m => m.Success)
+                .ToList();
+            string Shown(Match m) => $"  {Relative(root, m.Groups["path"].Value)}({m.Groups["line"].Value},{m.Groups["column"].Value}): {m.Groups["id"].Value}: {m.Groups["message"].Value}";
+
+            // A multi-targeted project's lines name the framework too ('[...\Lib.csproj::TargetFramework=net8.0]'): all were dropped.
+            var found = lines
+                .Where(m => ids.Contains(m.Groups["id"].Value) && (!m.Groups["project"].Success || string.Equals(Path.GetFullPath(BuildLineProject(m.Groups["project"].Value)), Path.GetFullPath(project), StringComparison.OrdinalIgnoreCase)))
+                .Select(Shown)
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
             log($"{configuration} build of {name}: {(found.Count == 0 ? "no findings." : $"{found.Count} finding{(found.Count == 1 ? string.Empty : "s")}:")}");
             found.ForEach(log);
             findings.AddRange(found);
+
+            // A build that failed without findings of its own checked nothing (an error in a referenced project, a compile error).
+            if (exitCode != 0 && found.Count == 0)
+            {
+                var errors = lines.Where(m => m.Groups["kind"].Value == "error").Select(Shown).Distinct(StringComparer.Ordinal).ToList();
+                log($"{configuration} build of {name} failed{(errors.Count == 0 ? $" (exit code {exitCode})." : $", first error{(errors.Count == 1 ? string.Empty : "s")}:")}");
+                errors.Take(5).ToList().ForEach(log);
+                failed.Add($"{name} in {configuration}");
+            }
         }
 
-        return findings.Count == 0
-            ? null
-            : $"Not clean: {findings.Count} finding{(findings.Count == 1 ? string.Empty : "s")} in code only another configuration compiles (above), which 'format' can't fix there: fix {(findings.Count == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings.Count == 1 ? "it" : "them")}.";
+        return findings.Count > 0
+            ? $"Not clean: {findings.Count} finding{(findings.Count == 1 ? string.Empty : "s")} in code only another configuration compiles (above), which 'format' can't fix there: fix {(findings.Count == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings.Count == 1 ? "it" : "them")}."
+            : failed.Count > 0
+                ? $"Not clean: the build of {string.Join(", ", failed)} failed (above), so the code only that configuration compiles wasn't checked: fix the build, then run again."
+                : null;
     }
+
+    /// <summary>The project file of a build line's '[...]' tag, without what a multi-targeted build adds ('::TargetFramework=net8.0').</summary>
+    public static string BuildLineProject(string tag) => tag.IndexOf("::", StringComparison.Ordinal) is var at and >= 0 ? tag.Substring(0, at) : tag;
 
     /// <summary>Keeps the kept findings of a run on <paramref name="root"/> for the check after it (<see cref="CheckFirstOption"/>).</summary>
     public static void Remember(string root, List<KeptFinding> kept)
@@ -1849,36 +1870,65 @@ internal static class FormatCommand
             return null;
         }
 
+        // A platform other than Any CPU makes the pair a configuration of its own ('Release|x64'): a project's
+        // '$(Configuration)|$(Platform)' conditions (PalCalc's DefineConstants) see it.
+        static string Pair(string name, string platform) => IsAnyPlatform(platform) ? name : $"{name}|{platform}";
         var text = File.ReadAllText(path);
         if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
         {
             var section = Regex.Match(text, @"GlobalSection\(SolutionConfigurationPlatforms\)[^\r\n]*(?<body>.*?)EndGlobalSection", RegexOptions.Singleline);
             return section.Success
-                ? Regex.Matches(section.Groups["body"].Value, @"^\s*(?<name>[^|=\r\n]+?)\s*\|", RegexOptions.Multiline).Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+                ? Regex.Matches(section.Groups["body"].Value, @"^\s*(?<name>[^|=\r\n]+?)\s*\|\s*(?<platform>[^=\r\n]*?)\s*=", RegexOptions.Multiline).Select(m => Pair(m.Groups["name"].Value, m.Groups["platform"].Value)).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
                 : null;
         }
 
         if (path.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
         {
             var types = Regex.Matches(text, @"<BuildType\s+Name\s*=\s*""(?<name>[^""]+)""").Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            return types.Count > 0 ? types : ["Debug", "Release"];
+            var platforms = Regex.Matches(text, @"<Platform\s+Name\s*=\s*""(?<name>[^""]+)""").Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            return (types.Count > 0 ? types : ["Debug", "Release"]).SelectMany(t => platforms.Count > 0 ? platforms.Select(p => Pair(t, p)) : [t]).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         return null;
     }
 
+    /// <summary>Whether a solution platform builds projects in their own platform (Any CPU, Mixed Platforms).</summary>
+    private static bool IsAnyPlatform(string platform) =>
+        platform.Replace(" ", string.Empty, StringComparison.Ordinal) is var p && (p.Length == 0 || p.Equals("AnyCPU", StringComparison.OrdinalIgnoreCase) || p.Equals("MixedPlatforms", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>A configuration as <see cref="SolutionConfigurations"/> names it ('Release', 'Release|x64'): its name and platform (null: the project's own).</summary>
+    public static (string Configuration, string? Platform) SplitConfiguration(string configuration) =>
+        configuration.IndexOf('|') is var at and >= 0 ? (configuration.Substring(0, at), configuration.Substring(at + 1)) : (configuration, null);
+
+    /// <summary>The MSBuild argument that sets <paramref name="platform"/>, none for null.</summary>
+    internal static string[] PlatformProperty(string? platform) => platform is null ? [] : [$"-property:Platform={platform}"];
+
+    /// <summary>Sets a configuration (<see cref="SplitConfiguration"/>) the way a run sees it: like TargetFramework, as environment variables, so the project file's own conditions see them.</summary>
+    internal static void SetConfiguration(IDictionary<string, string?> environment, string configuration)
+    {
+        var (name, platform) = SplitConfiguration(configuration);
+        environment["Configuration"] = name;
+        if (platform is not null)
+        {
+            environment["Platform"] = platform;
+        }
+    }
+
     /// <summary>
     /// A project's configurations besides its default (<paramref name="configuration"/>, Debug unless set): its Configurations
-    /// property (the SDK's Debug;Release), only those the solution builds when it says (<paramref name="solution"/>), at most
-    /// four ('within reason': a configuration costs a 'dotnet format' run where the code differs).
+    /// property (the SDK's Debug;Release), only those the solution builds when it says (<paramref name="solution"/>), with the
+    /// solution's platforms ('Release|x64', also 'Debug|x64' beside the default: a platform-only solution), at most four
+    /// ('within reason': a configuration costs a 'dotnet format' run where the code differs).
     /// </summary>
     public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution)
     {
         var own = configuration.Trim().Length > 0 ? configuration.Trim() : "Debug";
         return (configurations.Trim().Length > 0 ? configurations : "Debug;Release")
             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(c => !c.Equals(own, StringComparison.OrdinalIgnoreCase) && (solution is null || solution.Contains(c, StringComparer.OrdinalIgnoreCase)))
+            .SelectMany(c => solution is null ? [c] : solution.Where(s => SplitConfiguration(s).Configuration.Equals(c, StringComparison.OrdinalIgnoreCase)))
+            .Where(c => !c.Equals(own, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(c => SplitConfiguration(c).Platform is not null)
             .Take(4)
             .ToList();
     }
@@ -3166,7 +3216,7 @@ internal static class FormatCommand
                     "msbuild",
                     fullPath,
                     $"-property:TargetFramework={framework}",
-                    .. configuration.Length > 0 ? [$"-property:Configuration={configuration}"] : Array.Empty<string>(),
+                    .. configuration.Length > 0 ? [$"-property:Configuration={SplitConfiguration(configuration).Configuration}", .. PlatformProperty(SplitConfiguration(configuration).Platform)] : Array.Empty<string>(),
                     "-target:AddImplicitDefineConstants",
                     "-getProperty:DefineConstants",
                     "-getProperty:LangVersion",
@@ -4588,11 +4638,12 @@ internal static class FormatCommand
             : null;
 
     /// <summary>The output of a build of one project in one configuration (<see cref="UncheckedLine"/>).</summary>
-    private static List<string> BuildOutput(string project, string configuration)
+    private static (int ExitCode, IReadOnlyList<string> Output) BuildOutput(string project, string configuration)
     {
         var output = new List<string>();
-        Dotnet(Path.GetDirectoryName(project)!, null, ["build", project, "-c", configuration, "--no-restore", "--no-incremental", "-nologo"], output.Add);
-        return output;
+        var (name, platform) = SplitConfiguration(configuration);
+        var exitCode = Dotnet(Path.GetDirectoryName(project)!, null, ["build", project, "-c", name, .. PlatformProperty(platform), "--no-restore", "--no-incremental", "-nologo"], output.Add);
+        return (exitCode, output);
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
@@ -4629,7 +4680,7 @@ internal static class FormatCommand
             // Like TargetFramework: the project file's own '$(Configuration)' conditions (DefineConstants) see it.
             if (f.Configuration.Length > 0)
             {
-                start.Environment["Configuration"] = f.Configuration;
+                SetConfiguration(start.Environment, f.Configuration);
             }
         }
 

@@ -382,7 +382,7 @@ internal static class BaselineCommand
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, RedirectStandardOutput = true, RedirectStandardError = true };
         if (configuration.Length > 0)
         {
-            start.Environment["Configuration"] = configuration;
+            FormatCommand.SetConfiguration(start.Environment, configuration);
         }
 
         var options = new List<string> { "--verify-no-changes", "--severity", "warn", "--report", reportDir };
