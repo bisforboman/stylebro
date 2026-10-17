@@ -28,7 +28,7 @@ public sealed partial class MigrationTests
     public void Format_ReadsTheConfigurationsASolutionBuilds()
     {
         Write("App.sln", "Global\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n\t\tDebug|Any CPU = Debug|Any CPU\n\t\tRelease|Any CPU = Release|Any CPU\n\t\tRelease|x64 = Release|x64\n\t\tCI|Any CPU = CI|Any CPU\n\tEndGlobalSection\nEndGlobal\n");
-        Assert.Equal(["Debug", "Release", "CI"], FormatCommand.SolutionConfigurations(Path.Combine(root, "App.sln")));
+        Assert.Equal(["Debug", "Release", "Release|x64", "CI"], FormatCommand.SolutionConfigurations(Path.Combine(root, "App.sln"))); // trial 27: a platform of its own
 
         // A .slnx lists them only when it has others than Debug and Release.
         Write("App.slnx", "<Solution>\n  <Project Path=\"src/A/A.csproj\" />\n</Solution>\n");

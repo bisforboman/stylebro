@@ -105,7 +105,7 @@ internal static class BaselineCommand
                 Console.WriteLine($"Running the style and analyzer passes for {configuration} too: code there compiles differently.");
                 foreach (var pass in new[] { "style", "analyzers" })
                 {
-                    var folder = Path.Combine(reportDir, configuration + "-" + pass);
+                    var folder = Path.Combine(reportDir, configuration.Replace("|", "-", StringComparison.Ordinal) + "-" + pass);
                     Directory.CreateDirectory(folder);
                     var exit = RunDotnetFormat(root, project, folder, pass, exclusions, configuration);
                     var report = Path.Combine(folder, "format-report.json");
