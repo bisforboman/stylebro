@@ -1251,13 +1251,13 @@ public class DocumentationTests
         editorConfig: "stylebro_inheritdoc_style = spaced");
 
     // Trial 20: the blank lines BRO1506 reports below a '//' comment go with the insertion (it can't see them after it);
-    // with BRO1506 off they stay.
+    // with BRO1506 off they stay. The comment follows a '}' (right after '{' it stands on its own and keeps them, trial 27).
     [Theory]
     [InlineData("", "    // Explains it.\n    /// <inheritdoc/>\n")]
     [InlineData("dotnet_diagnostic.BRO1506.severity = none", "    // Explains it.\n\n    /// <inheritdoc/>\n")]
     public Task InheritDoc_BelowACommentAndABlankLine(string editorConfig, string expected) => VerifyFixAsync(
-        "/// <summary>A.</summary>\npublic class C\n{\n    // Explains it.\n\n    [System.Obsolete(\"x\")]\n    public override string {|BRO1601:ToString|}() => \"c\";\n}\n",
-        "/// <summary>A.</summary>\npublic class C\n{\n" + expected + "    [System.Obsolete(\"x\")]\n    public override string ToString() => \"c\";\n}\n",
+        "/// <summary>A.</summary>\npublic class C\n{\n    /// <summary>B.</summary>\n    public void B()\n    {\n    }\n    // Explains it.\n\n    [System.Obsolete(\"x\")]\n    public override string {|BRO1601:ToString|}() => \"c\";\n}\n",
+        "/// <summary>A.</summary>\npublic class C\n{\n    /// <summary>B.</summary>\n    public void B()\n    {\n    }\n" + expected + "    [System.Obsolete(\"x\")]\n    public override string ToString() => \"c\";\n}\n",
         editorConfig: editorConfig);
 
     // Stateless: 'Default constructor.' became '... the <see cref="Alarm"/> class. Default constructor.'.

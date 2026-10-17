@@ -3012,6 +3012,27 @@ public class FixOrderTests
         "BRO1515",
         "BRO1101");
 
+    // Trial 27: a comment right after '{' keeps one blank line below it; removing the empty regions below it leaves no
+    // run of blank lines for BRO1517's next run.
+    [Fact]
+    public Task Regions_BelowAStandaloneComment_LeaveOneBlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            // TODO: Implement
+
+            #region First
+
+
+            #endregion
+
+            public int A;
+        }
+        """,
+        "BRO1112",
+        "BRO1506",
+        "BRO1517");
+
     // Trial 27 (fields_first): the fields moved up stay together and the moved members keep their blank lines, with
     // BRO1505 off (the Microsoft style) and on.
     [Theory]

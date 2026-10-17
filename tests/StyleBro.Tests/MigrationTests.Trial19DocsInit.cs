@@ -76,6 +76,9 @@ public sealed partial class MigrationTests
 
             class A
             {
+                public void N()
+                {
+                }
                 // [Test]
                 // public void Old() { }
 
