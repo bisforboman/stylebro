@@ -89,9 +89,10 @@ public sealed partial class MigrationTests
         Assert.Equal(1, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, whole)));
         Assert.Equal(FormatCommand.NotVerified, lines[^1]);
 
-        // Skipped for one framework only, or because of an F# reference: a warning.
+        // Skipped for one framework only (no other loaded in its place): not verified either (trial 28). Because of an F#
+        // reference: a warning.
         var partly = FormatCommand.Incomplete(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { "net10.0" } }, new Dictionary<string, List<string>> { ["Tests"] = new() { "net10.0", "net8.0" } });
-        Assert.Equal(0, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, partly)));
+        Assert.Equal(1, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, partly)));
         var fSharp = FormatCommand.Incomplete(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { string.Empty } }, new Dictionary<string, List<string>>(), new[] { "Lib.fsproj" });
         Assert.Equal(0, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, fSharp)));
         Assert.DoesNotContain(fSharp, l => l.Contains("per-framework runs are the cause", StringComparison.Ordinal));

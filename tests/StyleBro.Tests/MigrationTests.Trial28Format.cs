@@ -156,7 +156,6 @@ public sealed partial class MigrationTests
             {
                 Directory.CreateDirectory(args[report + 1]);
                 File.WriteAllText(Path.Combine(args[report + 1], "format-report.json"), "[]");
-                return 0;
             }
 
             // The whitespace pass on Windows: the line it fixes gets CRLF, so the file mixes them.

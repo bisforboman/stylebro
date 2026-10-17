@@ -1977,7 +1977,7 @@ internal static class FormatCommand
     /// Whether a project's file, or a Directory.Build.props/.targets above it in its repository, picks Compile items by
     /// configuration (a Compile item, or an ItemGroup/When around one, with a '$(Configuration)' condition): its files then
     /// differ between configurations even without an '#if' (trial 28: a Release-only file was never formatted or checked).
-    /// ponytail: the text of those files only, not other imports; one there is missed.
+    /// Up to the repository root (to the drive's without one). ponytail: the text of those files only, not other imports.
     /// </summary>
     public static bool CompileByConfiguration(string projectPath)
     {
@@ -1987,7 +1987,7 @@ internal static class FormatCommand
         {
             files.Add(Path.Combine(folder, "Directory.Build.props"));
             files.Add(Path.Combine(folder, "Directory.Build.targets"));
-            if (top is null || string.Equals(Path.TrimEndingDirectorySeparator(folder), Path.TrimEndingDirectorySeparator(top), StringComparison.OrdinalIgnoreCase))
+            if (top is not null && string.Equals(Path.TrimEndingDirectorySeparator(folder), Path.TrimEndingDirectorySeparator(top), StringComparison.OrdinalIgnoreCase))
             {
                 break;
             }
@@ -3745,9 +3745,8 @@ internal static class FormatCommand
     private static string FoundBaseline(string root, string? newAt = null)
     {
         var at = Path.GetFullPath(newAt ?? NewBaselineFolder(root));
-        var below = Path.GetRelativePath(Path.GetFullPath(root), at) is var relative && !relative.StartsWith("..", StringComparison.Ordinal) && !Path.IsPathRooted(relative);
         string? found = null;
-        for (var folder = below ? at : Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
+        for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
         {
             found ??= File.Exists(Path.Combine(folder, Analyzers.Baseline.Baseline.FileName)) ? Path.Combine(folder, Analyzers.Baseline.Baseline.FileName) : null;
         }
