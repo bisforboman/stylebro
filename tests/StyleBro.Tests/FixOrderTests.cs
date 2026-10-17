@@ -2950,6 +2950,35 @@ public class FixOrderTests
         "BRO1509",
         "BRO1519");
 
+    // Trial 27 (fields_first): the fields moved up stay together and the moved members keep their blank lines, with
+    // BRO1505 off (the Microsoft style) and on.
+    [Theory]
+    [InlineData("dotnet_diagnostic.BRO1505.severity = none\n")]
+    [InlineData("")]
+    public Task Sort_FieldsFirst_KeepsBlankLines(string bro1505) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public sealed class Late
+        {
+            public int Size => _size + _extra;
+
+            public int Value { get { return _size; } }
+            public void Grow()
+            {
+                _size++;
+            }
+
+            public void Shrink() => _size--;
+
+            private int _size;
+            private int _extra;
+        }
+        """,
+        "stylebro_member_order_scope = fields_first\n" + bro1505,
+        "BRO1001",
+        "BRO1505",
+        "BRO1509",
+        "BRO1519");
+
     // Trial 24 (Dawnshard, CSharpier mode: BRO1505 off): the sort put a property right below a constructor's '}' with no
     // blank line, which BRO1519 added on the next run.
     [Fact]

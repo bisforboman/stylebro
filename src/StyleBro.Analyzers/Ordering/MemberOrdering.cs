@@ -163,16 +163,27 @@ internal static class MemberOrdering
             && Layout.BlankLineRuns.JudgesGapAfter(brace, next.GetFirstToken(), text, isOn, gapIsReplaced: true);
 
         // The same, also for a body's '}' on one line ('void A() { }'): BRO1509's expansion of the type gave it BRO1519's
-        // blank line (trial 25).
+        // blank line (trial 25). Likewise a one-line accessor list with a body ('int P { get { return p; } }'), which
+        // BRO1509 expands too (trial 27).
         bool MayHaveBlankLineAfterBrace(MemberDeclarationSyntax previous, MemberDeclarationSyntax next) =>
             WantsBlankLineAfterBrace(previous, next)
-            || (isOn is not null && previous.GetLastToken() is { RawKind: (int)SyntaxKind.CloseBraceToken, Parent: BlockSyntax } brace
+            || (isOn is not null && previous.GetLastToken() is { RawKind: (int)SyntaxKind.CloseBraceToken } brace
+                && (brace.Parent is BlockSyntax || (brace.Parent is AccessorListSyntax list && list.Accessors.Any(a => a.Body is not null)))
                 && Layout.BlankLineRuns.WantsBlankLineAfter(brace.Parent!, brace, next.GetFirstToken(), isOn, gapIsReplaced: true));
 
         for (var slot = 0; slot < count; slot++)
         {
             var source = order[slot];
             var layout = split[slot].Layout;
+
+            // Two members that were neighbours and stay neighbours keep the gap they had: fields moved up as a block stay
+            // compact instead of taking the blank lines of the slots they land in (trial 27, fields_first), and members
+            // that move together keep their blank line whatever other fixes do to the slots around them.
+            if (slot > 0 && source > 0 && order[slot - 1] == source - 1)
+            {
+                result[slot] = WithLineEnd(members[source].WithLeadingTrivia(split[source].Layout.AddRange(split[source].Content)), slot);
+                continue;
+            }
 
             // A blank line BRO1519 put below a member's '}' (BRO1505 off: CSharpier mode) belongs to that '}', not to the
             // slot: sorted below a member without one it goes, so sorting before or after BRO1519 (or BRO1509's
@@ -189,12 +200,14 @@ internal static class MemberOrdering
             // Blank lines stay with the slot, so a slot without one can end up between members that need one: a method
             // below a field where two fields sat before (BRO1505, SA1516), or a '//' comment below code (BRO1504,
             // SA1515). The sort must not create a violation that only a second 'dotnet format' run fixes, so it adds
-            // the blank line in exactly those cases; violations that already existed are left to those rules.
+            // the blank line in exactly those cases; violations that already existed are left to those rules. Also with
+            // BRO1505 off (the Microsoft style): a moved member gets the blank line it had, not a '}' glued to it (trial 27).
             if (slot > 0 && !oneLine && !layout.Any(SyntaxKind.EndOfLineTrivia))
             {
-                var createsSeparation = isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) != false
-                    && NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines, allowAdjacentSingleLine)
-                    && !NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines, allowAdjacentSingleLine);
+                // A blank line BRO1519 gives the slot's old pair counts as there (removed above for the '}' it belongs to).
+                var createsSeparation = NeedsSeparation(members[order[slot - 1]], members[source], autoAccessorLines, allowAdjacentSingleLine)
+                    && (!NeedsSeparation(members[slot - 1], members[slot], autoAccessorLines, allowAdjacentSingleLine)
+                        || MayHaveBlankLineAfterBrace(members[slot - 1], members[slot]));
                 var createsComment = StartsWithLineComment(split[source].Content) && !StartsWithLineComment(split[slot].Content);
 
                 // A doc comment arriving where a member without one sat (field below field: no blank line needed before)
@@ -215,20 +228,24 @@ internal static class MemberOrdering
                 layout = layout.Add(SyntaxFactory.EndOfLine(newLine));
             }
 
-            var member = members[source].WithLeadingTrivia(layout.AddRange(split[source].Content));
+            result[slot] = WithLineEnd(members[source].WithLeadingTrivia(layout.AddRange(split[source].Content)), slot);
+        }
 
+        MemberDeclarationSyntax WithLineEnd(MemberDeclarationSyntax member, int slot)
+        {
             if (slot < count - 1 && !oneLine && !EndsWithNewLine(member))
             {
-                member = member.WithTrailingTrivia(member.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine(newLine)));
+                return member.WithTrailingTrivia(member.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine(newLine)));
             }
-            else if (slot == count - 1 && !EndsWithNewLine(members[count - 1]) && EndsWithNewLine(member))
+
+            if (slot == count - 1 && !EndsWithNewLine(members[count - 1]) && EndsWithNewLine(member))
             {
                 // The last slot keeps the file's ending: no line break after the last type when there was none.
                 var trailing = member.GetTrailingTrivia();
-                member = member.WithTrailingTrivia(trailing.RemoveAt(trailing.Count - 1));
+                return member.WithTrailingTrivia(trailing.RemoveAt(trailing.Count - 1));
             }
 
-            result[slot] = member;
+            return member;
         }
 
         var sorted = SyntaxFactory.List(result);
@@ -342,7 +359,7 @@ internal static class MemberOrdering
         var order = SortedOrder(keys, segments, anchors);
         return (container is TypeDeclarationSyntax type
                 && (InitializerOrder.ReordersDependentInitializers(type, order) || ObservableOrder.ReordersObservableMembers(type, order, generatedPart)))
-            || GroupComments.MovesGroupComment(members, keys, order)
+            || GroupComments.MovesGroupComment(members, keys, order, options.IsFieldsFirst)
             ? null
             : keys;
     }
