@@ -123,6 +123,9 @@ when we can do that"): don't suggest releases at all; the user says when.
   runs every StyleCop parity set (`Compare-WithStyleCop.ps1`).
 - **Advisor**: when an advisor tool is available, call it before design decisions or recommendations, before splitting
   work across agents or sessions, and before declaring a larger task done.
+- **Asking the owner** (2026-10-17, owner: "Remember to prompt me when you want any input from me"): whenever work needs
+  the owner's input (a design choice, a Windows-only step, an approval), ask with the AskUserQuestion tool, which
+  prompts them, never only in prose, a PR body or a log; then carry on with what doesn't depend on the answer.
 - **Where work runs**: long work (multi-step tasks, PRs, CI waits, releases) runs as cloud sessions; the owner's
   computer must stay free to restart or turn off. Work that needs it (local timings, Windows-only checks) is asked for,
   never started unasked; a cloud session that needs such a step says so in its PR.
