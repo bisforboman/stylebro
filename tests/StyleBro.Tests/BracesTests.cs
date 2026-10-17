@@ -572,6 +572,57 @@ public class BracesTests
         """,
         editorConfig: "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_print_width = 60");
 
+    // Trial 27 (CliFx): CSharpier can't break a 'return' of one string, so a long one stays on one line: no braces.
+    [Fact]
+    public Task WithCSharpier_AnUnbreakableLongStatementIsNotMultiLine() => VerifyNoDiagnosticsAsync(
+        """
+        public class C
+        {
+            public string M(int count, string name)
+            {
+                if (count == 0)
+                    return $"global::System.Array.Empty<global::Some.Validator<{name}>>()";
+
+                if (count == 1)
+                    return "global::System.Array.Empty<global::Some.LongerNamespace.Validator>()";
+
+                return name;
+            }
+        }
+        """,
+        editorConfig: "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_by = csharpier\nstylebro_layout_print_width = 60");
+
+    // A long 'return' CSharpier can break (a call's arguments) still counts.
+    [Fact]
+    public Task WithCSharpier_ABreakableLongReturnIsMultiLine() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public string M(int count, string name)
+            {
+                if (count == 0)
+                    {|BRO1515:return string.Concat("global::System.Array.Empty<", name, ">()");|}
+
+                return name;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public string M(int count, string name)
+            {
+                if (count == 0)
+                {
+                    return string.Concat("global::System.Array.Empty<", name, ">()");
+                }
+
+                return name;
+            }
+        }
+        """,
+        editorConfig: "csharp_prefer_braces = when_multiline:warning\nstylebro_layout_by = csharpier\nstylebro_layout_print_width = 60");
+
     [Fact]
     public Task SingleLineJumps_AllowedWithTheOption() => VerifyNoDiagnosticsAsync(
         """
@@ -987,4 +1038,41 @@ public class BracesTests
         }
         """,
         editorConfig: "stylebro_allow_consecutive_usings = false");
+
+    // Trial 27 (io-abstractions): an embedded empty statement is left to the compiler's CS0642 (a likely bug), like BRO1101
+    // leaves it; also in an if/else chain whose other clause gets braces.
+    [Fact]
+    public Task AnEmbeddedEmptyStatement_IsNotReported() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public void M(int[] xs)
+            {
+                foreach (var x in xs) ;
+                while (xs.Length > 3)
+                    ;
+                if (xs.Length > 0)
+                    ;
+                else
+                    {|BRO1514:M(xs);|}
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public void M(int[] xs)
+            {
+                foreach (var x in xs) ;
+                while (xs.Length > 3)
+                    ;
+                if (xs.Length > 0)
+                    ;
+                else
+                {
+                    M(xs);
+                }
+            }
+        }
+        """);
 }

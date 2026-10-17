@@ -1707,6 +1707,29 @@ public class FixOrderTests
         "BRO1519",
         "BRO1527");
 
+    // A multi-line auto-property's blank line below it, in the slot another member takes: BRO1527 puts the property on one
+    // line, so the blank line isn't BRO1519's and stays with the slot (trial 27: members that stay neighbours keep their
+    // gap, so the case above no longer moves one).
+    [Fact]
+    public Task AutoAccessors_SortedAboveANewNeighbourWithoutBro1505() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            internal int B
+            {
+                get;
+                set;
+            }
+
+            internal int A { get; set; }
+            public int C { get; set; }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1001",
+        "BRO1519",
+        "BRO1527");
+
     [Fact]
     public Task EmptyTypeBody_NextToASemicolonAndASingleLineBlock() => AssertConvergesInEveryOrderWithConfigAsync(
         """
@@ -2264,6 +2287,33 @@ public class FixOrderTests
             public void A()
             {
             }
+        }
+        """,
+        "dotnet_diagnostic.BRO1112.severity = warning\n",
+        "BRO1001",
+        "BRO1112",
+        "BRO1505");
+
+    // The blank line BRO1505 wants below a method's '}' lands in the slot of a field sorted below another field: the regions
+    // fix makes BRO1505's blank lines before it sorts, as BRO1505 does when it runs first (members that stay neighbours
+    // keep their gap since trial 27, so the case above no longer needs it).
+    [Fact]
+    public Task Regions_RemovedAroundAFieldMissingItsBlankLine() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            #region All
+            public void M()
+            {
+            }
+            private int b;
+
+            public void N()
+            {
+            }
+
+            private int c;
+            #endregion
         }
         """,
         "dotnet_diagnostic.BRO1112.severity = warning\n",
@@ -2966,6 +3016,118 @@ public class FixOrderTests
         """,
         "csharp_prefer_braces = when_multiline\ncsharp_preserve_single_line_statements = true\ndotnet_diagnostic.BRO1505.severity = none\n",
         "BRO1001",
+        "BRO1509",
+        "BRO1519");
+
+    // Trial 27 (PalCalc): BRO1405 removing the parentheses around a chain's start merged two chains, and only the next
+    // run's BRO1523 put '.Distinct()' on its own line. BRO1523 looks through parentheses BRO1405 removes.
+    [Fact]
+    public Task Parentheses_AroundAChainStart_MergeTheChainInOneRun() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public static class C
+        {
+            public static IEnumerable<int> N(List<int> a, List<int> b)
+            {
+                return ( ( from e in a select e )
+                    .Concat(
+                    ( from e in b select e ) ) ).Distinct();
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1405",
+        "BRO1110",
+        "BRO1523");
+
+    // Trial 27 (PalCalc): '((x * y))' lost one pair per run: the inner pair is BRO1405's only once the outer one is gone.
+    [Fact]
+    public Task Parentheses_Nested_AreRemovedInOneRun() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public static class C
+        {
+            public static double P(double x, double y)
+            {
+                return System.Math.Max(
+                    (
+                        (x * y)
+                    ),
+                    1.0);
+            }
+        }
+        """,
+        "stylebro_closing_parenthesis_placement = own_line\n",
+        "BRO1405",
+        "BRO1110");
+
+    // Trial 27 (io-abstractions): an embedded empty statement is left to the compiler's CS0642 by both rules; wrapped in
+    // braces, BRO1101 removed the ';' only on the next run.
+    [Fact]
+    public Task Braces_LeaveAnEmbeddedEmptyStatement() => AssertConvergesInEveryOrderAsync(
+        """
+        public static class C
+        {
+            public static void M(int[] xs)
+            {
+                foreach (var x in xs) ;
+                while (xs.Length > 3)
+                    ;
+            }
+        }
+        """,
+        "BRO1514",
+        "BRO1515",
+        "BRO1101");
+
+    // Trial 27: a comment right after '{' keeps one blank line below it; removing the empty regions below it leaves no
+    // run of blank lines for BRO1517's next run.
+    [Fact]
+    public Task Regions_BelowAStandaloneComment_LeaveOneBlankLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            // TODO: Implement
+
+            #region First
+
+
+            #endregion
+
+            public int A;
+        }
+        """,
+        "BRO1112",
+        "BRO1506",
+        "BRO1517");
+
+    // Trial 27 (fields_first): the fields moved up stay together and the moved members keep their blank lines, with
+    // BRO1505 off (the Microsoft style) and on.
+    [Theory]
+    [InlineData("dotnet_diagnostic.BRO1505.severity = none\n")]
+    [InlineData("")]
+    public Task Sort_FieldsFirst_KeepsBlankLines(string bro1505) => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public sealed class Late
+        {
+            public int Size => _size + _extra;
+
+            public int Value { get { return _size; } }
+            public void Grow()
+            {
+                _size++;
+            }
+
+            public void Shrink() => _size--;
+
+            private int _size;
+            private int _extra;
+        }
+        """,
+        "stylebro_member_order_scope = fields_first\n" + bro1505,
+        "BRO1001",
+        "BRO1505",
         "BRO1509",
         "BRO1519");
 

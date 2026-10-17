@@ -16,7 +16,7 @@ internal static class Parentheses
 {
     /// <summary>Whether StyleCop's SA1119 reports these parentheses and removing them keeps the code's meaning.</summary>
     public static bool IsUnnecessary(ParenthesizedExpressionSyntax node, SourceText text) =>
-        IsReportedByStyleCop(node) && ParsesTheSame(new[] { node }, text);
+        IsReportedByStyleCop(node, node) && ParsesTheSame(new[] { node }, text);
 
     /// <summary>
     /// Whether removing these pattern parentheses keeps the code's meaning. <paramref name="keepPrecedence"/>: whether
@@ -24,6 +24,22 @@ internal static class Parentheses
     /// </summary>
     public static bool IsUnnecessary(ParenthesizedPatternSyntax pattern, SourceText text, Func<bool> keepPrecedence) =>
         !(DeclaresPrecedence(pattern) && keepPrecedence()) && ParsesTheSame(new[] { pattern }, text);
+
+    /// <summary>
+    /// The pairs nested right inside <paramref name="node"/> (removed with it) that StyleCop reports once the pairs around them
+    /// are gone: in '((x * y))' as an argument only the outer pair is SA1119's, the inner one only on the next run (trial 27,
+    /// PalCalc). The fix removes them with it, so one run is enough.
+    /// </summary>
+    public static IEnumerable<ParenthesizedExpressionSyntax> GetNested(ParenthesizedExpressionSyntax node)
+    {
+        for (var inner = node.Expression as ParenthesizedExpressionSyntax; inner is not null; inner = inner.Expression as ParenthesizedExpressionSyntax)
+        {
+            if (IsReportedByStyleCop(inner, node))
+            {
+                yield return inner;
+            }
+        }
+    }
 
     /// <summary>The '(' and ')' of a parenthesized expression or pattern.</summary>
     public static (SyntaxToken Open, SyntaxToken Close) GetTokens(SyntaxNode node)
@@ -146,10 +162,11 @@ internal static class Parentheses
     private static SyntaxNode? Container(SyntaxNode node) =>
         node.Ancestors().FirstOrDefault(a => a is StatementSyntax or MemberDeclarationSyntax);
 
-    private static bool IsReportedByStyleCop(ParenthesizedExpressionSyntax node)
+    /// <summary>Whether SA1119 reports <paramref name="node"/> at the place of <paramref name="place"/> (itself or a pair around it).</summary>
+    private static bool IsReportedByStyleCop(ParenthesizedExpressionSyntax node, ExpressionSyntax place)
     {
         var expression = node.Expression;
-        var parent = node.Parent;
+        var parent = place.Parent;
         if (expression is not (BinaryExpressionSyntax or AssignmentExpressionSyntax or PrefixUnaryExpressionSyntax or PostfixUnaryExpressionSyntax)
             && !expression.IsKind(SyntaxKind.CastExpression)
             && !expression.IsKind(SyntaxKind.ConditionalExpression)
@@ -171,7 +188,7 @@ internal static class Parentheses
 
             if (expression is SwitchExpressionSyntax or WithExpressionSyntax)
             {
-                var outer = node.AncestorsAndSelf().TakeWhile(a => a is ParenthesizedExpressionSyntax).Last();
+                var outer = place.AncestorsAndSelf().TakeWhile(a => a is ParenthesizedExpressionSyntax).Last();
                 if (outer.Parent is AwaitExpressionSyntax or CastExpressionSyntax or MemberAccessExpressionSyntax or ConditionalAccessExpressionSyntax or ElementAccessExpressionSyntax or InvocationExpressionSyntax)
                 {
                     return false;
@@ -188,16 +205,16 @@ internal static class Parentheses
             return false;
         }
 
-        if (parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
+        if (parent is AssignmentExpressionSyntax assignment && assignment.Left == place)
         {
             return false;
         }
 
         return parent switch
         {
-            MemberAccessExpressionSyntax access => access.Expression != node,
+            MemberAccessExpressionSyntax access => access.Expression != place,
             CheckedExpressionSyntax => true,
-            EqualsValueClauseSyntax equals => equals.Value == node,
+            EqualsValueClauseSyntax equals => equals.Value == place,
             AssignmentExpressionSyntax => true,
             ExpressionSyntax => false,
             _ => true,

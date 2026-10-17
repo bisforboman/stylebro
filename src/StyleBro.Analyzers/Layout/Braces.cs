@@ -112,7 +112,9 @@ internal static class Braces
         var reported = false;
         foreach (var child in children)
         {
-            if (child is BlockSyntax)
+            // An embedded empty statement ('foreach (var x in xs) ;') is left to the compiler's CS0642 (a likely bug), like
+            // BRO1101 does: wrapped as '{ ; }', BRO1101 removed the ';' only on the next run (trial 27).
+            if (child is BlockSyntax or EmptyStatementSyntax)
             {
                 continue;
             }
@@ -487,8 +489,21 @@ internal static class Braces
 
         var childLine = text.Lines.GetLineFromPosition(child.SpanStart);
         var indent = childLine.LineNumber == ownerLine.LineNumber ? LeadingWhitespace(text, ownerLine).Length + unit : child.SpanStart - childLine.Start;
-        return Line(text, child.SpanStart) == Line(text, child.Span.End) && indent + child.Span.Length > width;
+        return Line(text, child.SpanStart) == Line(text, child.Span.End) && indent + child.Span.Length > width && !IsUnbreakable(child);
     }
+
+    /// <summary>
+    /// A statement CSharpier can't break however long it is: 'return', 'yield return' or 'throw' of one string literal or
+    /// interpolated string (CSharpier keeps those as written). It stays on one line, so it isn't multi-line (trial 27, CliFx).
+    /// </summary>
+    private static bool IsUnbreakable(StatementSyntax child) =>
+        child switch
+        {
+            ReturnStatementSyntax ret => ret.Expression,
+            YieldStatementSyntax yield => yield.Expression,
+            ThrowStatementSyntax thrown => thrown.Expression,
+            _ => null,
+        } is LiteralExpressionSyntax or InterpolatedStringExpressionSyntax;
 
     /// <summary>
     /// An 'if' statement's (not an 'else' clause's) child that is a jump statement ('return', 'throw', 'break',

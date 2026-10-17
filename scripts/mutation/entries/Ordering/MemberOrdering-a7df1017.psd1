@@ -1,7 +1,7 @@
-# BRO1001: the sort adds BRO1505's blank line only when BRO1505 is on (trial 25)
+# BRO1001: a blank line BRO1519 gives the slot's old pair counts as there (trial 27)
 @{
     File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'
-    Find = 'var createsSeparation = isOn?.Invoke(DiagnosticIds.ElementsSeparatedByBlankLine) != false'
-    Replace = 'var createsSeparation = true'
-    Tests = 'MemberOrderingTests.OneLineType_IsExpandedBeforeTheSort_WhenBro1509IsOn'
+    Find = '|| MayHaveBlankLineAfterBrace(members[slot - 1], members[slot]));'
+    Replace = ');'
+    Tests = 'MemberOrderingTests.FieldsFirst_GivesMovedMembersTheirBlankLines_WhenBro1505IsOff'
 }

@@ -54,7 +54,8 @@ public sealed class CallChainCodeFixProvider : CodeFixProvider
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var wanted = new HashSet<int>(diagnostics.Select(d => d.Location.SourceSpan.Start));
-        var changes = CallChains.GetFindings(root, text)
+        var parenthesesRemoved = Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.UnnecessaryParentheses, cancellationToken);
+        var changes = CallChains.GetFindings(root, text, parenthesesRemoved)
             .Where(f => wanted.Contains(f.Link.SpanStart))
             .Select(f => f.Change)
             .ToList();

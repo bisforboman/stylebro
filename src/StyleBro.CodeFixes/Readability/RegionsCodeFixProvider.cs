@@ -100,7 +100,15 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
                 }
 
                 var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
-                foreach (var blank in TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText, TrailingBlankLines.RemovesStandalone(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree))))
+                var below = TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText, TrailingBlankLines.RemovesStandalone(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree)));
+
+                // A standalone comment keeps one blank line below it (right after '{' too, trial 27); the rest is BRO1517's.
+                if (below.Count == 0 && IsOn(DiagnosticIds.MultipleBlankLines))
+                {
+                    below = TrailingBlankLines.GetBlankLinesAfterComment(comment, removedText, removeStandalone: true).Skip(1).ToList();
+                }
+
+                foreach (var blank in below)
                 {
                     blanks.Add(new TextChange(TextSpan.FromBounds(ToOriginal(blank.Start), ToOriginal(blank.EndIncludingLineBreak)), string.Empty));
                 }

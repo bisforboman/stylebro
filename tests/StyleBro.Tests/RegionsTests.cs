@@ -44,7 +44,8 @@ public class RegionsTests
         }
         """);
 
-    // Kavita: the blank lines left below the comment are found once per removed region and span removed lines.
+    // Kavita: the blank lines left below the comment are found once per removed region and span removed lines. Right after
+    // '{' the comment stands on its own (trial 27) and keeps one of them.
     [Fact]
     public Task EmptyRegionsBelowAComment_TheBlankLinesGoOnce() => VerifyFixAsync(
         """
@@ -69,6 +70,7 @@ public class RegionsTests
         public class C
         {
             // TODO: Implement
+
             public int A;
         }
         """);

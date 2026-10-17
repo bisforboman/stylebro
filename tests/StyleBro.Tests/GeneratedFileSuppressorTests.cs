@@ -133,8 +133,16 @@ public class GeneratedFileSuppressorTests
         Assert.NotEmpty(await RunAsync(Code, @"C:\repo\src\Guard.cs", submodules: @"C:\repo\shared\"));
     }
 
+    // Nor files outside the repository (trial 27: a file linked in from a sibling folder).
+    [Fact]
+    public async Task EveryAnalyzer_IsQuietOutsideTheRepository()
+    {
+        Assert.Empty(await RunAsync(Code, @"C:\work\outside\Shared.cs", repository: @"C:\work\app"));
+        Assert.NotEmpty(await RunAsync(Code, @"C:\work\app\src\Shared.cs", repository: @"C:\work\app"));
+    }
+
     /// <summary>Every StyleBro analyzer with every BRO rule on, over <paramref name="code"/>: its BRO diagnostics.</summary>
-    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null, (string Code, string Path)? other = null, string? submodules = null)
+    internal static async Task<ImmutableArray<Diagnostic>> RunAsync(string code, string path, string? folders = null, (string Code, string Path)? other = null, string? submodules = null, string? repository = null)
     {
         var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
         var trees = new[] { (code, path) }.Concat(other is { } more ? [more] : Array.Empty<(string, string)>())
@@ -154,6 +162,11 @@ public class GeneratedFileSuppressorTests
         if (submodules is not null)
         {
             global = global.Add(PackageFileSuppressor.SubmoduleProperty, submodules);
+        }
+
+        if (repository is not null)
+        {
+            global = global.Add(OutsideRepositorySuppressor.Property, repository);
         }
 
         var analyzers = typeof(DiagnosticIds).Assembly.GetTypes()

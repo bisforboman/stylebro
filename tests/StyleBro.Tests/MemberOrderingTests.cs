@@ -1281,6 +1281,7 @@ public class MemberOrderingTests
         }
         """);
 
+    // The two fields were neighbours and stay neighbours: they keep their gap, not the one of the slot they land in.
     [Fact]
     public Task MethodMovedBelowAField_GetsABlankLine() => VerifyFixAsync(
         """
@@ -1296,7 +1297,6 @@ public class MemberOrderingTests
         class C
         {
             int a;
-
             int b;
 
             void M() { }
@@ -1478,7 +1478,8 @@ public class MemberOrderingTests
         editorConfig: "stylebro_member_static_first = false\n");
 
     // The sort adds a blank line only where BRO1505 wants one: with stylebro_allow_adjacent_single_line_members, a
-    // single-line method moved below a single-line property needs none (without it, BRO1505 separates them all).
+    // single-line method moved below a single-line property needs none (without it, BRO1505 separates them). The two
+    // properties stay neighbours and keep their gap.
     [Theory]
     [InlineData("true", "")]
     [InlineData("false", "\n")]
@@ -1495,7 +1496,7 @@ public class MemberOrderingTests
         public class C
         {
             public int P { get; set; }
-        {{blankLine}}    public int R { get; set; }
+            public int R { get; set; }
         {{blankLine}}    public int M() => P;
         }
         """,
@@ -1559,6 +1560,7 @@ public class MemberOrderingTests
         {
             private int x;
             private int y;
+
             public void B() { }
         }
         """,
@@ -1573,7 +1575,6 @@ public class MemberOrderingTests
         public class C
         {
             private int x;
-
             private int y;
 
             public void B() { }
@@ -1593,7 +1594,6 @@ public class MemberOrderingTests
             public class C
             {
                 private int x;
-
                 private int y;
 
                 public void B() { }
@@ -1738,6 +1738,115 @@ public class MemberOrderingTests
             public int Count => _count;
 
             private class Nested { }
+        }
+        """,
+        FieldsFirst);
+
+    // BRO1505 off: the blank line BRO1519 put below a method's '}' belongs to that '}'. A field sorted into its place below
+    // another field (not its old neighbour) doesn't get it.
+    [Fact]
+    public Task Bro1519sBlankLine_IsNotLeftBetweenTwoFields() => VerifyFixAsync(
+        """
+        class C
+        {
+            int a;
+            void M()
+            {
+            }
+
+            int {|BRO1001:b|};
+            void N()
+            {
+            }
+
+            int c;
+        }
+        """,
+        """
+        class C
+        {
+            int a;
+            int b;
+            int c;
+            void M()
+            {
+            }
+
+            void N()
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
+
+    // Trial 27 (the Microsoft style, BRO1505 off): the fields moved up stay together, and the method that took the last
+    // slot gets its blank line below the '}' above it.
+    [Fact]
+    public Task FieldsFirst_GivesMovedMembersTheirBlankLines_WhenBro1505IsOff() => VerifyFixAsync(
+        """
+        public sealed class Late
+        {
+            public int Size => _size + _extra;
+
+            public void Grow()
+            {
+                _size++;
+            }
+
+            public void Shrink() => _size--;
+
+            private int {|BRO1001:_size|};
+            private int _extra;
+        }
+        """,
+        """
+        public sealed class Late
+        {
+            private int _size;
+            private int _extra;
+
+            public int Size => _size + _extra;
+
+            public void Grow()
+            {
+                _size++;
+            }
+
+            public void Shrink() => _size--;
+        }
+        """,
+        FieldsFirst + "dotnet_diagnostic.BRO1505.severity = none\n");
+
+    // Trial 27: under fields_first the other members keep their order, so a comment above one of them (here an unparsed
+    // summary) isn't a group comment the sort would split: the type is sorted.
+    [Fact]
+    public Task FieldsFirst_SortsATypeWhoseFirstMemberHasAComment() => VerifyFixAsync(
+        """
+        public sealed class Late
+        {
+            // Gets the size.
+            public int Size => _size;
+
+            public void Grow()
+            {
+                _size++;
+            }
+
+            private int {|BRO1001:_size|};
+        }
+        """,
+        """
+        public sealed class Late
+        {
+            private int _size;
+
+            // Gets the size.
+            public int Size => _size;
+
+            public void Grow()
+            {
+                _size++;
+            }
         }
         """,
         FieldsFirst);

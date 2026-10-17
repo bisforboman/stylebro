@@ -14,30 +14,49 @@ namespace StyleBro.Analyzers.Layout;
 /// call). The chain's first line may hold the receiver and one call; a chain whose first line holds two or more calls
 /// wraps by filling lines and isn't checked (owner's decision 2026-10-12, issue #135: 'sb.Append(id).Append(x)' + newline
 /// + '.Append(y).Append(z)' was split below the first line only, leaving a mixed layout). The fix only rewrites the gap
-/// before the link: a line break plus the indentation of the chain's lines that already start with a link.
+/// before the link: a line break plus the indentation of the chain's lines that already start with a link. With BRO1405 on,
+/// parentheses it removes around a chain's start count as gone ('(q.Concat(r)).Distinct()' is one chain): removing them
+/// merged two chains, and only the next run put the rest on its lines (trial 27, PalCalc).
 /// </summary>
 internal static class CallChains
 {
     /// <summary>Every link that should start its line, with the edit that puts it there.</summary>
-    public static IEnumerable<(SyntaxToken Link, TextChange Change)> GetFindings(SyntaxNode root, SourceText text)
+    public static IEnumerable<(SyntaxToken Link, TextChange Change)> GetFindings(SyntaxNode root, SourceText text, bool parenthesesRemoved)
     {
+        // Parentheses BRO1405 removes, decided once per pair (a reparse of the statement).
+        Dictionary<ParenthesizedExpressionSyntax, bool>? removed = parenthesesRemoved ? new() : null;
+        bool IsRemoved(ParenthesizedExpressionSyntax node)
+        {
+            if (removed is null)
+            {
+                return false;
+            }
+
+            if (!removed.TryGetValue(node, out var result))
+            {
+                removed[node] = result = Maintainability.Parentheses.IsUnnecessary(node, text);
+            }
+
+            return result;
+        }
+
         foreach (var node in TreeWalk.Nodes(root))
         {
             if (node is not (InvocationExpressionSyntax or ElementAccessExpressionSyntax or ConditionalAccessExpressionSyntax
                 or MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression })
-                || IsInChain(node))
+                || IsInChain(node, IsRemoved))
             {
                 continue;
             }
 
-            foreach (var finding in GetFindings((ExpressionSyntax)node, text))
+            foreach (var finding in GetFindings((ExpressionSyntax)node, text, IsRemoved))
             {
                 yield return finding;
             }
         }
     }
 
-    private static IEnumerable<(SyntaxToken Link, TextChange Change)> GetFindings(ExpressionSyntax chain, SourceText text)
+    private static IEnumerable<(SyntaxToken Link, TextChange Change)> GetFindings(ExpressionSyntax chain, SourceText text, System.Func<ParenthesizedExpressionSyntax, bool> isRemoved)
     {
         if (Line(text, chain.SpanStart) == Line(text, chain.Span.End))
         {
@@ -45,7 +64,7 @@ internal static class CallChains
         }
 
         var links = new List<(SyntaxToken Token, bool Call)>();
-        var receiverCall = Walk(chain, links);
+        var receiverCall = Walk(chain, links, isRemoved);
         links.Reverse();
         var starts = links.Select(l => StartsLine(l.Token, text)).ToList();
 
@@ -115,13 +134,14 @@ internal static class CallChains
     }
 
     /// <summary>Whether the node continues a chain that an enclosing node belongs to (only the outermost is analyzed).</summary>
-    private static bool IsInChain(SyntaxNode node) => node.Parent switch
+    private static bool IsInChain(SyntaxNode node, System.Func<ParenthesizedExpressionSyntax, bool> isRemoved) => node.Parent switch
     {
         InvocationExpressionSyntax invocation => invocation.Expression == node,
         ElementAccessExpressionSyntax access => access.Expression == node,
         MemberAccessExpressionSyntax access => access.Expression == node && access.IsKind(SyntaxKind.SimpleMemberAccessExpression),
         ConditionalAccessExpressionSyntax => true,
-        PostfixUnaryExpressionSyntax suppression => suppression.IsKind(SyntaxKind.SuppressNullableWarningExpression) && IsInChain(suppression),
+        PostfixUnaryExpressionSyntax suppression => suppression.IsKind(SyntaxKind.SuppressNullableWarningExpression) && IsInChain(suppression, isRemoved),
+        ParenthesizedExpressionSyntax parenthesized => IsInChain(parenthesized, isRemoved) && isRemoved(parenthesized),
         _ => false,
     };
 
@@ -129,7 +149,7 @@ internal static class CallChains
     /// Collects the chain's links from the last to the first: the '.' of a member access or the '?' of a conditional
     /// access, and whether the member is called. Returns whether the chain's receiver is a call ('RuleFor(x)').
     /// </summary>
-    private static bool Walk(ExpressionSyntax expression, List<(SyntaxToken Token, bool Call)> links)
+    private static bool Walk(ExpressionSyntax expression, List<(SyntaxToken Token, bool Call)> links, System.Func<ParenthesizedExpressionSyntax, bool> isRemoved)
     {
         var call = false;
         while (true)
@@ -161,9 +181,13 @@ internal static class CallChains
                     return false;
 
                 case ConditionalAccessExpressionSyntax conditional:
-                    Walk(conditional.WhenNotNull, links);
+                    Walk(conditional.WhenNotNull, links, isRemoved);
                     expression = conditional.Expression;
                     call = false;
+                    continue;
+
+                case ParenthesizedExpressionSyntax parenthesized when isRemoved(parenthesized):
+                    expression = parenthesized.Expression;
                     continue;
 
                 default:

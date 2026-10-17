@@ -17,8 +17,12 @@ namespace StyleBro.Analyzers.Ordering;
 /// </summary>
 internal static class GroupComments
 {
-    /// <summary>Whether the sort (<paramref name="order"/>: new index -> old index) moves a member led by a group comment.</summary>
-    public static bool MovesGroupComment(SyntaxList<MemberDeclarationSyntax> members, MemberKey[] keys, int[] order)
+    /// <summary>
+    /// Whether the sort (<paramref name="order"/>: new index -> old index) moves a member led by a group comment. With
+    /// <paramref name="fieldsFirst"/> every non-field shares one rank and keeps its order, so a comment above one (an
+    /// unparsed '///' summary, trial 27) stays above the same members: only fields moved past it.
+    /// </summary>
+    public static bool MovesGroupComment(SyntaxList<MemberDeclarationSyntax> members, MemberKey[] keys, int[] order, bool fieldsFirst)
     {
         var position = new int[order.Length];
         var moved = false;
@@ -35,7 +39,7 @@ internal static class GroupComments
 
         for (var i = 0; i + 1 < members.Count; i++)
         {
-            if (keys[i + 1].KindRank == keys[i].KindRank && Moves(position, i) && HasComment(members[i]))
+            if (!fieldsFirst && keys[i + 1].KindRank == keys[i].KindRank && Moves(position, i) && HasComment(members[i]))
             {
                 return true;
             }

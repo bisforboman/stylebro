@@ -79,6 +79,13 @@ BRO1410, BRO1520-BRO1527, BRO1616-BRO1619) are off too: runtime says nothing abo
 - **IDE0003** (remove `this.`) is a warning, where runtime's build has it as a suggestion: the guide asks for no `this.`.
 - **The file header** (the .NET Foundation's license) isn't set: it's runtime's, not a style. BRO1615 and IDE0073 stay
   your choice.
+- **Moving fields to the top** (`fields_first`) keeps blank lines although BRO1505 is off: fields moved together stay
+  together, and the members they leave get a blank line between them where they had one (no `}` glued to the next
+  member). Blank lines nothing moves past are left as written.
+- **Local functions on one line** (`int Square(int v) { return v * v; }`): the SDK's formatting (IDE0055, runtime's
+  `csharp_new_line_before_open_brace = all` with `csharp_preserve_single_line_blocks = true`) moves the `{` to the next
+  line and keeps the body on it (`{ return v * v; }`); a one-line method stays as written. That is the SDK's, not
+  StyleBro's; BRO1509, which expands such blocks, is off in the style.
 
 ## Versions
 

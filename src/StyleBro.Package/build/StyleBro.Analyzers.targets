@@ -124,7 +124,19 @@
       <StyleBroSubmoduleFolders>@(_StyleBroSubmodule, '|')</StyleBroSubmoduleFolders>
     </PropertyGroup>
   </Target>
+  <!--
+    The project's git repository, for OutsideRepositorySuppressor: StyleBro's findings in files compiled from outside it
+    ('..\..\outside\Shared.cs') are hidden, 'stylebro-migrate format' leaves them alone. The nearest folder above the
+    project with a '.git' folder (found by its HEAD) or a '.git' file (a worktree or submodule); 'none' turns it off.
+  -->
+  <PropertyGroup Condition="'$(StyleBroRepositoryRoot)' == ''">
+    <_StyleBroGitFolderRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', '.git/HEAD'))</_StyleBroGitFolderRoot>
+    <_StyleBroGitFileRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', '.git'))</_StyleBroGitFileRoot>
+    <StyleBroRepositoryRoot>$(_StyleBroGitFolderRoot)</StyleBroRepositoryRoot>
+    <StyleBroRepositoryRoot Condition="$(_StyleBroGitFileRoot.Length) &gt; $(_StyleBroGitFolderRoot.Length)">$(_StyleBroGitFileRoot)</StyleBroRepositoryRoot>
+  </PropertyGroup>
   <ItemGroup>
+    <CompilerVisibleProperty Include="StyleBroRepositoryRoot" />
     <CompilerVisibleProperty Include="StyleBroSubmoduleFolders" />
     <CompilerVisibleProperty Include="StyleBroGeneratedFolders" />
     <CompilerVisibleProperty Include="StyleBroSonar" />

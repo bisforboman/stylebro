@@ -158,6 +158,9 @@ internal sealed class MemberOrderOptions
 
     public bool ConstantsFirst { get; }
 
+    /// <summary>Gets a value indicating whether only fields move (<see cref="ScopeKey"/> <c>fields_first</c>).</summary>
+    public bool IsFieldsFirst => ReferenceEquals(this, FieldsFirst);
+
     /// <summary>Gets a value indicating whether the types of a namespace or file are ordered too.</summary>
     public bool OrderNamespaces { get; }
 
