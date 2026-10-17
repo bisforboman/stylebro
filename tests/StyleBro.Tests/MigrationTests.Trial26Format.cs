@@ -236,7 +236,7 @@ public sealed partial class MigrationTests
         var line = FormatCommand.UncheckedLine(root, said.Add, (p, c) =>
         {
             built.Add($"{Path.GetFileName(p)} {c}");
-            return output;
+            return (0, output);
         });
 
         Assert.Equal(["UsesGen.csproj Release"], built);
@@ -247,9 +247,9 @@ public sealed partial class MigrationTests
         Assert.StartsWith("Not clean: 2 findings in code only another configuration compiles", line, StringComparison.Ordinal);
 
         // Once per command; a clean build is clean.
-        Assert.Null(FormatCommand.UncheckedLine(root, said.Add, (_, _) => output));
+        Assert.Null(FormatCommand.UncheckedLine(root, said.Add, (_, _) => (0, output)));
         FormatCommand.RecordUnchecked(root, [(project, "Release")]);
-        Assert.Null(FormatCommand.UncheckedLine(root, said.Add, (_, _) => []));
+        Assert.Null(FormatCommand.UncheckedLine(root, said.Add, (_, _) => (0, [])));
         Assert.Equal("Release build of UsesGen: no findings.", said[^1]);
     }
 

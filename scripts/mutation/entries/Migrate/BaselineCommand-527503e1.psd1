@@ -1,7 +1,7 @@
 # baseline: write where the build reads (none = nothing)
 @{
     File = 'src/StyleBro.Migrate/BaselineCommand.cs'
-    Find = 'if (FormatCommand.BaselineFile(root) is not { } path)'
-    Replace = 'if (Path.Combine(root, Baseline.FileName) is not { } path)'
+    Find = 'projects.Values.Select(p => p.File).OfType<string>()'
+    Replace = 'projects.Values.Select(p => p.File ?? Path.Combine(root, Baseline.FileName)).OfType<string>()'
     Tests = 'BaselineTests.Generator_WritesNothingWhenThePropsTurnTheBaselineOff'
 }

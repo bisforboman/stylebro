@@ -924,11 +924,13 @@ public sealed class KeptFindingsTests : IDisposable
             return 0;
         });
 
-        Assert.Equal(0, code);
+        // Its build fails (no project file): it checked nothing, so not clean (trial 27), and the verdict comes after it.
+        Assert.Equal(FormatCommand.NotCleanExitCode, code);
         var header = lines.IndexOf("Checking StyleBro's rules (1 ids), changing nothing.");
         var build = lines.FindIndex(l => l.StartsWith("Not checked by format: Missing in Release", StringComparison.Ordinal));
         Assert.True(header >= 0 && build > header, string.Join("\n", lines));
-        Assert.Equal("Clean.", lines[^1]);
+        Assert.Equal("Formatting is clean. But:", lines[^2]);
+        Assert.StartsWith("Not clean: the build of Missing in Release failed", lines[^1], StringComparison.Ordinal);
     }
 
     [Fact]

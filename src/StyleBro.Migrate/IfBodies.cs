@@ -101,15 +101,16 @@ internal static class IfBodies
 
     /// <summary>
     /// <paramref name="after"/> with the protected <paramref name="lines"/> of <paramref name="before"/> given their indentation and
-    /// line break back, and the line breaks of the lines from the code above each one down to it. A line is found again by its
-    /// text without the indentation and the lines around it (<see cref="Locate"/>), else it's left as it is.
+    /// line break back, and the line breaks of the lines from the code above each one down to it; the run's other edits on them
+    /// stay ('v+1' -> 'v + 1', trial 27). A line is found again by its text without whitespace and the lines around it
+    /// (<see cref="Locate"/>), else it's left as it is.
     /// </summary>
     public static string Keep(string before, IReadOnlyCollection<int> lines, string after)
     {
         var old = Split(before);
         var now = Split(after);
-        var oldText = old.Select(l => l.Text.Trim()).ToArray();
-        var nowText = now.Select(l => l.Text.Trim()).ToArray();
+        var oldText = old.Select(l => WithoutWhitespace(l.Text)).ToArray();
+        var nowText = now.Select(l => WithoutWhitespace(l.Text)).ToArray();
         var changed = false;
         foreach (var index in lines.Where(l => l < old.Count).SelectMany(l => Range(old, l).Select(i => (Line: i, Indent: i == l))).DistinctBy(x => x.Line))
         {
@@ -201,12 +202,13 @@ internal static class IfBodies
     }
 
     /// <summary>
-    /// Whether a 'dotnet format --verify-no-changes' line is a whitespace finding <see cref="Keep"/> undoes: on a protected line
-    /// (1-based in <paramref name="protectedLines"/>, by full path), or only a line break on the lines above one.
+    /// Whether a 'dotnet format --verify-no-changes' line is a whitespace finding <see cref="Keep"/> undoes: in a protected line's
+    /// indentation (1-based in <paramref name="protectedLines"/>, by full path; not the rest of the line, which format fixes), or
+    /// only a line break on the lines above one.
     /// </summary>
     public static bool IsKeptFinding(string line, IReadOnlyDictionary<string, (string Text, List<int> Lines)> protectedLines)
     {
-        var match = Regex.Match(line, @"^\s*(?<path>.+?)\((?<line>\d+),\d+\): \w+ WHITESPACE:");
+        var match = Regex.Match(line, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): \w+ WHITESPACE:");
         if (!match.Success || !protectedLines.TryGetValue(Path.GetFullPath(match.Groups["path"].Value), out var file))
         {
             return false;
@@ -215,12 +217,14 @@ internal static class IfBodies
         // A finding is reported where its edit starts: one that writes a line break starts at the end of the line before the
         // line it indents.
         var number = int.Parse(match.Groups["line"].Value, System.Globalization.CultureInfo.InvariantCulture) - 1;
-        if (file.Lines.Contains(WritesLineBreak.IsMatch(line) ? number + 1 : number))
+        var old = Split(file.Text);
+        if (WritesLineBreak.IsMatch(line)
+            ? file.Lines.Contains(number + 1)
+            : file.Lines.Contains(number) && number < old.Count && int.Parse(match.Groups["column"].Value, System.Globalization.CultureInfo.InvariantCulture) <= Indentation(old[number].Text).Length + 1)
         {
             return true;
         }
 
-        var old = Split(file.Text);
         return LineBreakOnly.IsMatch(line) && file.Lines.Any(l => l < old.Count && Range(old, l).Contains(number));
     }
 
@@ -309,6 +313,8 @@ internal static class IfBodies
     }
 
     private static string Indentation(string line) => line[..(line.Length - line.TrimStart().Length)];
+
+    private static string WithoutWhitespace(string line) => Regex.Replace(line, @"\s+", string.Empty);
 
     // Each line's text and its line break ("" for the last).
     private static List<(string Text, string Break)> Split(string text) =>

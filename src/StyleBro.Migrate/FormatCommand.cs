@@ -132,6 +132,9 @@ internal static class FormatCommand
     /// <summary>The start of the line a check of several runs at once prints as each run finishes.</summary>
     public const string ProgressPrefix = "Checked ";
 
+    /// <summary>The start of the line that names the lines whose indentation '#if' decides (printed for the first run only).</summary>
+    public const string IfBodiesHeader = "Indentation kept:";
+
     /// <summary>What to say when the restore fails without a NuGet error to quote.</summary>
     internal const string RestoreHint = "The restore failed: run 'dotnet restore' to see why. Once the packages are restored, '--no-restore' skips it.";
 
@@ -186,9 +189,6 @@ internal static class FormatCommand
     /// <summary>The start of the line that names the Visual Basic projects format leaves alone (printed for the first run only).</summary>
     private const string VisualBasicHeader = "Visual Basic:";
 
-    /// <summary>The start of the line that names the lines whose indentation '#if' decides (printed for the first run only).</summary>
-    private const string IfBodiesHeader = "Indentation kept:";
-
     /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
     private const string GeneratorsHeader = "Generators:";
 
@@ -217,12 +217,15 @@ internal static class FormatCommand
     private static readonly string[] ProjectQuery =
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
-        "-getProperty:Configuration", "-getProperty:Configurations",
+        "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline",
         "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo",
     ];
 
     /// <summary>What <see cref="TestedSymbols"/> found, per file (full path).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string[]> TestedSymbolsCache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Whether a folder holds a NuGet package (<see cref="IsPackageFile"/>), per folder.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> PackageFolders = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The projects <see cref="EvaluateProject"/> evaluated (full path), once per process.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<string>> Evaluations = new(StringComparer.OrdinalIgnoreCase);
@@ -504,7 +507,7 @@ internal static class FormatCommand
 
     /// <summary>
     /// The files of <paramref name="compile"/> (full paths) that exist outside <paramref name="repository"/>, sorted. Not a
-    /// package's (NuGet's folder, <paramref name="packages"/>: a package's contentFiles, NLog's benchmark diagnoser config).
+    /// package's (NuGet's folder, <paramref name="packages"/>, or any other with the package's files, <see cref="IsPackageFile"/>: a package's contentFiles, NLog's benchmark diagnoser config).
     /// </summary>
     public static List<string> OutsideRepository(IEnumerable<string> compile, string repository, string? packages = null)
     {
@@ -512,7 +515,7 @@ internal static class FormatCommand
         packages ??= Environment.GetEnvironmentVariable("NUGET_PACKAGES") is { Length: > 0 } set ? set : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
         var nuget = Path.TrimEndingDirectorySeparator(Path.GetFullPath(packages)) + Path.DirectorySeparatorChar;
         return compile.Select(Path.GetFullPath)
-            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && !f.StartsWith(nuget, StringComparison.OrdinalIgnoreCase))
+            .Where(f => File.Exists(f) && !f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && !f.StartsWith(nuget, StringComparison.OrdinalIgnoreCase) && !IsPackageFile(f))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -1118,7 +1121,7 @@ internal static class FormatCommand
     /// builds report none of format's rules (<see cref="Diagnostics"/>) in the project. Owner's decision 2026-10-16: verify said
     /// clean while a Release build of a project with an in-solution source generator failed on Release-only code.
     /// </summary>
-    public static string? UncheckedLine(string root, Action<string> log, Func<string, string, IReadOnlyList<string>>? build = null)
+    public static string? UncheckedLine(string root, Action<string> log, Func<string, string, (int ExitCode, IReadOnlyList<string> Output)>? build = null)
     {
         if (!Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out var projects) || projects.Count == 0)
         {
@@ -1127,25 +1130,46 @@ internal static class FormatCommand
 
         var ids = Diagnostics(root).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var findings = new List<string>();
+        var failed = new List<string>();
         foreach (var (project, configuration) in projects)
         {
             var name = Path.GetFileNameWithoutExtension(project);
             log($"Not checked by format: {name} in {configuration} (it takes an in-solution source generator): building it...");
-            var found = (build ?? BuildOutput)(project, configuration)
-                .Select(l => Regex.Match(l, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): (?:warning|error) (?<id>\w+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$"))
-                .Where(m => m.Success && ids.Contains(m.Groups["id"].Value) && (!m.Groups["project"].Success || string.Equals(Path.GetFullPath(m.Groups["project"].Value), Path.GetFullPath(project), StringComparison.OrdinalIgnoreCase)))
-                .Select(m => $"  {Relative(root, m.Groups["path"].Value)}({m.Groups["line"].Value},{m.Groups["column"].Value}): {m.Groups["id"].Value}: {m.Groups["message"].Value}")
+            var (exitCode, output) = (build ?? BuildOutput)(project, configuration);
+            var lines = output.Select(l => Regex.Match(l, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): (?<kind>warning|error) (?<id>\w+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$"))
+                .Where(m => m.Success)
+                .ToList();
+            string Shown(Match m) => $"  {Relative(root, m.Groups["path"].Value)}({m.Groups["line"].Value},{m.Groups["column"].Value}): {m.Groups["id"].Value}: {m.Groups["message"].Value}";
+
+            // A multi-targeted project's lines name the framework too ('[...\Lib.csproj::TargetFramework=net8.0]'): all were dropped.
+            var found = lines
+                .Where(m => ids.Contains(m.Groups["id"].Value) && (!m.Groups["project"].Success || string.Equals(Path.GetFullPath(BuildLineProject(m.Groups["project"].Value)), Path.GetFullPath(project), StringComparison.OrdinalIgnoreCase)))
+                .Select(Shown)
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
             log($"{configuration} build of {name}: {(found.Count == 0 ? "no findings." : $"{found.Count} finding{(found.Count == 1 ? string.Empty : "s")}:")}");
             found.ForEach(log);
             findings.AddRange(found);
+
+            // A build that failed without findings of its own checked nothing (an error in a referenced project, a compile error).
+            if (exitCode != 0 && found.Count == 0)
+            {
+                var errors = lines.Where(m => m.Groups["kind"].Value == "error").Select(Shown).Distinct(StringComparer.Ordinal).ToList();
+                log($"{configuration} build of {name} failed{(errors.Count == 0 ? $" (exit code {exitCode})." : $", first error{(errors.Count == 1 ? string.Empty : "s")}:")}");
+                errors.Take(5).ToList().ForEach(log);
+                failed.Add($"{name} in {configuration}");
+            }
         }
 
-        return findings.Count == 0
-            ? null
-            : $"Not clean: {findings.Count} finding{(findings.Count == 1 ? string.Empty : "s")} in code only another configuration compiles (above), which 'format' can't fix there: fix {(findings.Count == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings.Count == 1 ? "it" : "them")}.";
+        return findings.Count > 0
+            ? $"Not clean: {findings.Count} finding{(findings.Count == 1 ? string.Empty : "s")} in code only another configuration compiles (above), which 'format' can't fix there: fix {(findings.Count == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings.Count == 1 ? "it" : "them")}."
+            : failed.Count > 0
+                ? $"Not clean: the build of {string.Join(", ", failed)} failed (above), so the code only that configuration compiles wasn't checked: fix the build, then run again."
+                : null;
     }
+
+    /// <summary>The project file of a build line's '[...]' tag, without what a multi-targeted build adds ('::TargetFramework=net8.0').</summary>
+    public static string BuildLineProject(string tag) => tag.IndexOf("::", StringComparison.Ordinal) is var at and >= 0 ? tag.Substring(0, at) : tag;
 
     /// <summary>Keeps the kept findings of a run on <paramref name="root"/> for the check after it (<see cref="CheckFirstOption"/>).</summary>
     public static void Remember(string root, List<KeptFinding> kept)
@@ -1318,6 +1342,37 @@ internal static class FormatCommand
         }
 
         return $"{PartlyWhitespaceHeader} {string.Join(" ", parts)}";
+    }
+
+    /// <summary>
+    /// The documentation comment lines the whitespace pass leaves and IDE0055 reports (<see cref="DocIndentation"/>) in the
+    /// files a run on <paramref name="root"/> with <paramref name="args"/> formats: what the workspace's projects compile under
+    /// the root ('format' evaluated them), the whitespace pass's (not <see cref="WhitespaceExclusions"/>, '--include' only,
+    /// not '--exclude', submodules or the folders a migration left alone), not generated code.
+    /// </summary>
+    public static List<(string File, List<int> Lines, bool UseTabs, int TabWidth)> DocIndentationFindings(string root, IReadOnlyList<string> args)
+    {
+        var exclusions = WhitespaceExclusions(root);
+        if (exclusions is { Count: 0 })
+        {
+            return [];
+        }
+
+        HashSet<string> compiled;
+        lock (ProjectCache)
+        {
+            compiled = ProjectCache.Values.SelectMany(d => d.Values).SelectMany(p => p.Compile).Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+        var include = OptionValues(args, "--include");
+        List<string> exclude = [.. OptionValues(args, "--exclude") ?? [], .. exclusions ?? [], .. StyleCopSetup.NestedRepositories(root), .. Migration.UnformattedFolders(root)];
+        bool Matches(string path, string relative) => Covers(path, relative) || Covers(path.TrimEnd('/') + "/", relative);
+        var files = compiled.Where(f => f.StartsWith(top, StringComparison.OrdinalIgnoreCase) && File.Exists(f))
+            .Select(f => (File: f, Relative: Path.GetRelativePath(root, f).Replace('\\', '/')))
+            .Where(f => (include is null || include.Any(i => Matches(i.Replace('\\', '/'), f.Relative))) && !exclude.Any(x => Matches(x.Replace('\\', '/'), f.Relative)))
+            .Select(f => f.File);
+        return DocIndentation.Find(root, files).Where(f => !IsGeneratedCode(f.File)).ToList();
     }
 
     /// <summary>The paths of <paramref name="paths"/> ('--include'/'--exclude' style) no folder of <paramref name="excluded"/> holds.</summary>
@@ -1849,36 +1904,51 @@ internal static class FormatCommand
             return null;
         }
 
+        // A platform other than Any CPU makes the pair a configuration of its own ('Release|x64'): a project's
+        // '$(Configuration)|$(Platform)' conditions (PalCalc's DefineConstants) see it.
+        static string Pair(string name, string platform) => IsAnyPlatform(platform) ? name : $"{name}|{platform}";
         var text = File.ReadAllText(path);
         if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
         {
             var section = Regex.Match(text, @"GlobalSection\(SolutionConfigurationPlatforms\)[^\r\n]*(?<body>.*?)EndGlobalSection", RegexOptions.Singleline);
             return section.Success
-                ? Regex.Matches(section.Groups["body"].Value, @"^\s*(?<name>[^|=\r\n]+?)\s*\|", RegexOptions.Multiline).Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+                ? Regex.Matches(section.Groups["body"].Value, @"^\s*(?<name>[^|=\r\n]+?)\s*\|\s*(?<platform>[^=\r\n]*?)\s*=", RegexOptions.Multiline).Select(m => Pair(m.Groups["name"].Value, m.Groups["platform"].Value)).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
                 : null;
         }
 
         if (path.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
         {
             var types = Regex.Matches(text, @"<BuildType\s+Name\s*=\s*""(?<name>[^""]+)""").Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            return types.Count > 0 ? types : ["Debug", "Release"];
+            var platforms = Regex.Matches(text, @"<Platform\s+Name\s*=\s*""(?<name>[^""]+)""").Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            return (types.Count > 0 ? types : ["Debug", "Release"]).SelectMany(t => platforms.Count > 0 ? platforms.Select(p => Pair(t, p)) : [t]).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         return null;
     }
 
+    /// <summary>A configuration as <see cref="SolutionConfigurations"/> names it ('Release', 'Release|x64'): its name and platform (null: the project's own).</summary>
+    public static (string Configuration, string? Platform) SplitConfiguration(string configuration) =>
+        configuration.IndexOf('|') is var at and >= 0 ? (configuration.Substring(0, at), configuration.Substring(at + 1)) : (configuration, null);
+
     /// <summary>
     /// A project's configurations besides its default (<paramref name="configuration"/>, Debug unless set): its Configurations
-    /// property (the SDK's Debug;Release), only those the solution builds when it says (<paramref name="solution"/>), at most
-    /// four ('within reason': a configuration costs a 'dotnet format' run where the code differs).
+    /// property (the SDK's Debug;Release), only those the solution builds when it says (<paramref name="solution"/>), with the
+    /// solution's platforms ('Release|x64', also 'Debug|x64' beside the default: a platform-only solution), at most four
+    /// ('within reason': a configuration costs a 'dotnet format' run where the code differs). A solution platform the project's
+    /// <paramref name="platforms"/> (its Platforms property, the SDK's AnyCPU) doesn't list builds it in its own platform: the
+    /// solution maps it (Mediator's x86 and x64 build AnyCPU projects, which failed with Platform=x86).
     /// </summary>
-    public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution)
+    public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution, string platforms = "")
     {
         var own = configuration.Trim().Length > 0 ? configuration.Trim() : "Debug";
+        var projectPlatforms = (platforms.Trim().Length > 0 ? platforms : "AnyCPU").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        string Mapped(string c) => SplitConfiguration(c) is (var name, { } platform) && !projectPlatforms.Contains(platform, StringComparer.OrdinalIgnoreCase) ? name : c;
         return (configurations.Trim().Length > 0 ? configurations : "Debug;Release")
             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(c => !c.Equals(own, StringComparison.OrdinalIgnoreCase) && (solution is null || solution.Contains(c, StringComparer.OrdinalIgnoreCase)))
+            .SelectMany(c => solution is null ? [c] : solution.Where(s => SplitConfiguration(s).Configuration.Equals(c, StringComparison.OrdinalIgnoreCase)).Select(Mapped))
+            .Where(c => !c.Equals(own, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(c => SplitConfiguration(c).Platform is not null)
             .Take(4)
             .ToList();
     }
@@ -1936,9 +2006,25 @@ internal static class FormatCommand
 
     /// <summary>
     /// The identifiers a C# file's '#if' and '#elif' lines test (comments aside), once per file and process: what
-    /// <see cref="CompileView.Key"/> compares.
+    /// <see cref="CompileView.Key"/> compares. None for a package's file (<see cref="IsPackageFile"/>), which 'format' never
+    /// changes: its '#if DEBUG' (Nullable's, PolyShim's) made runs for Release and parts for shared files, and only where the
+    /// restore had put the package's files into the build (trial 27).
     /// </summary>
-    public static string[] TestedSymbols(string file) => TestedSymbolsCache.GetOrAdd(Path.GetFullPath(file), path => File.Exists(path) ? TestedIn(File.ReadAllText(path)) : []);
+    public static string[] TestedSymbols(string file) => TestedSymbolsCache.GetOrAdd(Path.GetFullPath(file), path => File.Exists(path) && !IsPackageFile(path) ? TestedIn(File.ReadAllText(path)) : []);
+
+    /// <summary>Whether a file is in a NuGet package's folder (any packages folder: a folder above it has the package's '.nupkg.metadata').</summary>
+    public static bool IsPackageFile(string file)
+    {
+        for (var folder = Path.GetDirectoryName(Path.GetFullPath(file)); folder is not null; folder = Path.GetDirectoryName(folder))
+        {
+            if (PackageFolders.GetOrAdd(folder, f => File.Exists(Path.Combine(f, ".nupkg.metadata"))))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>The identifiers the '#if' and '#elif' lines of a C# text test (<see cref="TestedSymbols"/>).</summary>
     public static string[] TestedIn(string text) =>
@@ -2356,28 +2442,33 @@ internal static class FormatCommand
 
     /// <summary>
     /// The folders (relative to <paramref name="root"/>, '/'-separated with a trailing '/', as '--exclude' takes them) of the
-    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder),
-    /// when no other of its <paramref name="projects"/> (full paths) is in that folder. Other workspaces: none.
+    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder), or a
+    /// .slnx with '&lt;Build Project="false" /&gt;', when no other of its <paramref name="projects"/> (full paths) is in that
+    /// folder. Other workspaces: none.
     /// </summary>
     public static List<string> NotBuiltFolders(string solutionPath, IReadOnlyList<string> projects, string root)
     {
-        if (!solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || !File.Exists(solutionPath))
+        var slnx = solutionPath.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase);
+        if ((!slnx && !solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)) || !File.Exists(solutionPath))
         {
             return [];
         }
 
-        // ponytail: .sln only; a .slnx's '<Build Project="false" />' isn't read.
+        // A .slnx says it with '<Build Project="false" />' (without 'Solution': for every configuration; trial 27, io-abstractions'
+        // Pipeline/Build.csproj: "no StyleBro.Analyzers in its restore output").
         var text = File.ReadAllText(solutionPath);
+        var notBuilt = slnx
+            ? Regex.Matches(text, @"<Project\s+Path\s*=\s*""(?<path>[^""]+\.csproj)""[^>]*(?<!/)>(?<body>(?:(?!</Project>).)*)</Project>", RegexOptions.Singleline)
+                .Where(m => Regex.IsMatch(m.Groups["body"].Value, @"<Build\s+Project\s*=\s*""false""\s*/>", RegexOptions.IgnoreCase))
+                .Select(m => m.Groups["path"].Value)
+            : Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline)
+                .Where(m => Regex.Escape(m.Groups["guid"].Value) is var guid
+                    && Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) && !Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
+                .Select(m => m.Groups["path"].Value);
         var folders = new List<string>();
-        foreach (Match project in Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline))
+        foreach (var path in notBuilt)
         {
-            var guid = Regex.Escape(project.Groups["guid"].Value);
-            if (!Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) || Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
-            {
-                continue;
-            }
-
-            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, project.Groups["path"].Value.Replace('\\', Path.DirectorySeparatorChar)));
+            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, path.Replace('\\', Path.DirectorySeparatorChar)));
             var folder = Path.GetDirectoryName(full)!;
             var relative = Path.GetRelativePath(root, folder).Replace('\\', '/');
             if (relative != "." && !relative.StartsWith("..", StringComparison.Ordinal)
@@ -2578,71 +2669,106 @@ internal static class FormatCommand
     /// </summary>
     public static string? BaselineKept(string root, IReadOnlyCollection<KeptFinding> kept, string? newAt = null)
     {
-        if (BaselineFile(root, newAt) is not { } file)
+        // Each project's own (trial 27: <StyleBroBaseline> in src/Directory.Build.props named eng/'s, and the root's was written).
+        var projects = ProjectBaselines(root, newAt);
+        if (projects.Count == 0)
         {
-            return null;
+            return BaselineFile(root, newAt) is { } file ? BaselineKeptInto(root, file, kept) : null;
         }
 
-        var exists = File.Exists(file);
-        if (kept.Count == 0 && !exists)
+        var lines = BaselineGroups(projects, kept.Select(k => (Finding: k, k.Path)), BaselineFile(root, newAt))
+            .Select(g => BaselineKeptInto(root, g.File, g.Items))
+            .OfType<string>()
+            .ToList();
+        if (kept.Count > 0 && DifferentBaselinesLine(root, projects) is { } different)
         {
-            return null;
+            lines.Insert(0, different);
         }
 
-        var folder = Path.GetDirectoryName(file)!;
-        var lines = new Dictionary<string, HashSet<string>?>(StringComparer.OrdinalIgnoreCase);
-        HashSet<string>? Fingerprints(string path) => lines.TryGetValue(path, out var known)
-            ? known
-            : lines[path] = File.Exists(path) ? File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n').Select(Analyzers.Baseline.Baseline.Fingerprint).ToHashSet(StringComparer.Ordinal) : null;
+        return lines.Count == 0 ? null : string.Join("\n", lines);
+    }
 
-        var counts = new Dictionary<Analyzers.Baseline.Baseline.Key, int>();
-        var (removed, removedFindings) = (0, 0);
-        foreach (var (key, count) in exists ? Analyzers.Baseline.Baseline.Parse(File.ReadAllText(file)).Entries : new Dictionary<Analyzers.Baseline.Baseline.Key, int>())
+    /// <summary>
+    /// The baseline file each project under <paramref name="root"/> that a run evaluated reads (full path to it, null when it's
+    /// off or can't be resolved, with the files the project compiles): its evaluated &lt;StyleBroBaseline&gt;, which the package's
+    /// targets resolve as the build does, else <see cref="BaselineFile"/>.
+    /// </summary>
+    public static Dictionary<string, (string? File, bool Off, HashSet<string> Compile)> ProjectBaselines(string root, string? newAt = null)
+    {
+        var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
+        List<(string FullPath, string[] Compile)> projects;
+        lock (ProjectCache)
         {
-            if (Fingerprints(Path.Combine(folder, key.Path))?.Contains(key.Fingerprint) == true)
+            projects = ProjectCache.Values.SelectMany(d => d.Values).Select(p => (FullPath: Path.GetFullPath(p.FullPath), p.Compile))
+                .Where(p => p.FullPath.StartsWith(top, StringComparison.OrdinalIgnoreCase))
+                .DistinctBy(p => p.FullPath, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        string? fallback = null;
+        var fallbackOff = false;
+        var fell = false;
+        return projects.ToDictionary(
+            p => p.FullPath,
+            p =>
             {
-                counts[key] = count;
-            }
-            else
+                var (known, file) = BaselineOf(EvaluatedProperty(p.FullPath, "StyleBroBaseline"), Path.GetDirectoryName(p.FullPath)!);
+                if (!known && !fell)
+                {
+                    (fell, fallback, fallbackOff) = (true, BaselineFile(root, newAt), NamedBaseline(root).Off);
+                }
+
+                return (known ? file : fallback, known ? file is null : fallbackOff, p.Compile.Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase));
+            },
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// A project's evaluated &lt;StyleBroBaseline&gt; (<paramref name="evaluated"/>) as a file: (false, null) when it's empty (no
+    /// package targets, no baseline found), (true, null) for 'none', else the full path (relative to the project, like MSBuild).
+    /// </summary>
+    public static (bool Known, string? File) BaselineOf(string evaluated, string projectDirectory) => evaluated.Trim() switch
+    {
+        "" => (false, null),
+        var none when none.Equals("none", StringComparison.OrdinalIgnoreCase) => (true, null),
+        var value => (true, Path.GetFullPath(Path.Combine(projectDirectory, value.Replace('\\', Path.DirectorySeparatorChar)))),
+    };
+
+    /// <summary>
+    /// <paramref name="items"/> (each with its file) grouped by the baseline the projects compiling the file read (<see cref="ProjectBaselines"/>;
+    /// <paramref name="fallback"/> for a file none compiles), every project's baseline listed even without items; not the ones that are off.
+    /// </summary>
+    public static List<(string File, List<T> Items)> BaselineGroups<T>(IReadOnlyDictionary<string, (string? File, bool Off, HashSet<string> Compile)> projects, IEnumerable<(T Item, string Path)> items, string? fallback)
+    {
+        var groups = projects.Values.Select(p => p.File).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToDictionary(f => f, _ => new List<T>(), StringComparer.OrdinalIgnoreCase);
+        foreach (var (item, path) in items)
+        {
+            foreach (var file in BaselinesOf(projects, path, fallback))
             {
-                removed++;
-                removedFindings += count;
+                (groups.TryGetValue(file, out var list) ? list : groups[file] = []).Add(item);
             }
         }
 
-        var added = 0;
-        foreach (var group in kept.Select(k => (Finding: k, Relative: Analyzers.Baseline.Baseline.RelativePath(folder, Path.GetFullPath(k.Path))))
-            .Where(k => k.Relative is not null && File.Exists(k.Finding.Path))
-            .GroupBy(k => new Analyzers.Baseline.Baseline.Key(k.Finding.Id, k.Relative!, Analyzers.Baseline.Baseline.Fingerprint(File.ReadLines(k.Finding.Path).ElementAtOrDefault(k.Finding.Line - 1) ?? string.Empty))))
-        {
-            var had = counts.TryGetValue(group.Key, out var count) ? count : 0;
-            if (group.Count() > had)
-            {
-                added += group.Count() - had;
-                counts[group.Key] = group.Count();
-            }
-        }
+        return groups.OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => (g.Key, g.Value)).ToList();
+    }
 
-        if (added == 0 && removed == 0)
-        {
-            return null;
-        }
+    /// <summary>The baselines a file's findings go into: those of the projects compiling it (<see cref="ProjectBaselines"/>), else <paramref name="fallback"/>.</summary>
+    public static List<string> BaselinesOf(IReadOnlyDictionary<string, (string? File, bool Off, HashSet<string> Compile)> projects, string path, string? fallback)
+    {
+        var full = Path.GetFullPath(path);
+        var owners = projects.Values.Where(p => p.Compile.Contains(full)).ToList();
+        return (owners.Count > 0 ? owners.Select(p => p.File) : [fallback]).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(file)!); // a baseline <StyleBroBaseline> names in a folder not made yet
-        File.WriteAllText(file, new Analyzers.Baseline.Baseline(counts).Render());
-        var name = Relative(root, file);
-        var parts = new List<string>();
-        if (added > 0)
-        {
-            parts.Add($"added {added} kept finding{(added == 1 ? string.Empty : "s")}, so the build and 'format --verify-no-changes' skip {(added == 1 ? "it" : "them")} (new violations still fail; delete an entry to see it again)");
-        }
-
-        if (removed > 0)
-        {
-            parts.Add($"removed {removed} entr{(removed == 1 ? "y" : "ies")} whose line is gone{(removedFindings == removed ? string.Empty : $" ({removedFindings} findings)")}");
-        }
-
-        return $"Baseline: {name}: {string.Join("; ", parts)} (https://bisforboman.github.io/stylebro/baseline/).";
+    /// <summary>What to say when the projects read different baselines (<see cref="ProjectBaselines"/>), or null.</summary>
+    public static string? DifferentBaselinesLine(string root, IReadOnlyDictionary<string, (string? File, bool Off, HashSet<string> Compile)> projects)
+    {
+        var files = projects.GroupBy(p => p.Value.File ?? string.Empty, StringComparer.OrdinalIgnoreCase).OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase).ToList();
+        return files.Count < 2
+            ? null
+            : "Baseline: the projects read different baselines ("
+                + string.Join("; ", files.Select(g => $"{(g.Key.Length == 0 ? "none" : Relative(root, g.Key))}: {string.Join(", ", g.Select(p => Path.GetFileNameWithoutExtension(p.Key)).Order(StringComparer.OrdinalIgnoreCase).Take(4))}{(g.Count() > 4 ? $" and {g.Count() - 4} more" : string.Empty)}"))
+                + "): each gets the findings in the files its projects compile.";
     }
 
     /// <summary>
@@ -2651,7 +2777,7 @@ internal static class FormatCommand
     /// it), else a new one at <paramref name="newAt"/> (the root by default; --files gives the repository's, where a whole run
     /// puts it); null when the props turn it off ('none') or name it with other MSBuild properties.
     /// </summary>
-    public static string? BaselineFile(string root, string? newAt = null) => NamedBaseline(root) is var (named, value) && named
+    public static string? BaselineFile(string root, string? newAt = null) => NamedBaseline(root) is var (named, value, _) && named
         ? value
         : FoundBaseline(root, newAt);
 
@@ -2660,7 +2786,7 @@ internal static class FormatCommand
     /// them from the build, which fails on them with warnings as errors, while 'format' and its check call them clean (trial 24).
     /// </summary>
     public static string? BaselineOffLine(string root, int kept) =>
-        kept > 0 && NamedBaseline(root) is (true, null)
+        kept > 0 && (ProjectBaselines(root) is { Count: > 0 } projects ? projects.Values.Any(p => p.Off) : NamedBaseline(root).Off)
             ? $"Baseline off: <StyleBroBaseline>none</StyleBroBaseline> in Directory.Build.props, so the {(kept == 1 ? "kept finding isn't" : $"{kept} kept findings aren't")} baselined: "
                 + $"the build still reports {(kept == 1 ? "it" : "them")} (an error with warnings as errors). Suppress {(kept == 1 ? "it" : "them")}, or remove that setting so 'format' baselines {(kept == 1 ? "it" : "them")} (https://bisforboman.github.io/stylebro/baseline/)."
             : null;
@@ -2746,6 +2872,20 @@ internal static class FormatCommand
         return common;
     }
 
+    /// <summary>The MSBuild argument that sets <paramref name="platform"/>, none for null.</summary>
+    internal static string[] PlatformProperty(string? platform) => platform is null ? [] : [$"-property:Platform={platform}"];
+
+    /// <summary>Sets a configuration (<see cref="SplitConfiguration"/>) the way a run sees it: like TargetFramework, as environment variables, so the project file's own conditions see them.</summary>
+    internal static void SetConfiguration(IDictionary<string, string?> environment, string configuration)
+    {
+        var (name, platform) = SplitConfiguration(configuration);
+        environment["Configuration"] = name;
+        if (platform is not null)
+        {
+            environment["Platform"] = platform;
+        }
+    }
+
     /// <summary>
     /// The configurations the baseline checks besides the default (<see cref="ConfigurationRuns"/>): those where some project's
     /// code parses differently. None when MSBuild can't evaluate the workspace (the run reports that itself).
@@ -2796,6 +2936,14 @@ internal static class FormatCommand
                 lines.Add(line);
             }
         });
+
+        // What the whitespace pass leaves and the build's IDE0055 reports: 'format' fixes it (DocIndentation).
+        if ((code == 0 || code == NotCleanExitCode) && DocIndentation.FindingLines(DocIndentationFindings(root, args)) is { Count: > 0 } docLines)
+        {
+            lines.AddRange(docLines);
+            code = NotCleanExitCode;
+        }
+
         if (code == 0)
         {
             lines.ForEach(log);
@@ -2917,6 +3065,12 @@ internal static class FormatCommand
                     }
                 });
                 kept = ReadKept(keptFile, copy, source);
+            }
+
+            // As 'format' does after each run (DocIndentation).
+            if (copyCode == 0)
+            {
+                DocIndentation.FixFiles(DocIndentationFindings(copyRoot, copyArgs.Skip(1).ToList()));
             }
 
             // CSharpier on the files the copy's run changed, as 'format' runs it: what it puts back isn't left to change.
@@ -3166,7 +3320,7 @@ internal static class FormatCommand
                     "msbuild",
                     fullPath,
                     $"-property:TargetFramework={framework}",
-                    .. configuration.Length > 0 ? [$"-property:Configuration={configuration}"] : Array.Empty<string>(),
+                    .. configuration.Length > 0 ? [$"-property:Configuration={SplitConfiguration(configuration).Configuration}", .. PlatformProperty(SplitConfiguration(configuration).Platform)] : Array.Empty<string>(),
                     "-target:AddImplicitDefineConstants",
                     "-getProperty:DefineConstants",
                     "-getProperty:LangVersion",
@@ -3352,7 +3506,7 @@ internal static class FormatCommand
     /// The baseline a Directory.Build.props at or above <paramref name="root"/> names with &lt;StyleBroBaseline&gt; (Named: true),
     /// null as its value when that turns it off ('none') or uses other MSBuild properties; Named false when none names one.
     /// </summary>
-    private static (bool Named, string? Value) NamedBaseline(string root)
+    internal static (bool Named, string? Value, bool Off) NamedBaseline(string root)
     {
         for (var folder = Path.GetFullPath(root); folder is not null; folder = Path.GetDirectoryName(folder))
         {
@@ -3361,11 +3515,86 @@ internal static class FormatCommand
             {
                 // MSBuild reads '\' as a folder separator on every OS ('eng\stylebro.baseline' on Linux too).
                 var value = named.Groups["value"].Value.Trim().Replace("$(MSBuildThisFileDirectory)", folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase).Replace('\\', Path.DirectorySeparatorChar);
-                return (true, value.Equals("none", StringComparison.OrdinalIgnoreCase) || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)));
+                var off = value.Equals("none", StringComparison.OrdinalIgnoreCase);
+                return (true, off || value.Contains("$(", StringComparison.Ordinal) ? null : Path.GetFullPath(Path.Combine(folder, value)), off);
             }
         }
 
-        return (false, null);
+        return (false, null, false);
+    }
+
+    /// <summary>Whether 'dotnet format' leaves a file alone as generated code: its name ('.g.cs', '.designer.cs', ...) or an '&lt;auto-generated' header.</summary>
+    private static bool IsGeneratedCode(string file) =>
+        Regex.IsMatch(Path.GetFileName(file), @"\.(?:g|g\.i|designer|generated)\.cs$|^TemporaryGeneratedFile_", RegexOptions.IgnoreCase)
+            || File.ReadLines(file).Take(10).Any(l => l.Contains("<auto-generated", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Whether a solution platform builds projects in their own platform (Any CPU, Mixed Platforms).</summary>
+    private static bool IsAnyPlatform(string platform) =>
+        platform.Replace(" ", string.Empty, StringComparison.Ordinal) is var p && (p.Length == 0 || p.Equals("AnyCPU", StringComparison.OrdinalIgnoreCase) || p.Equals("MixedPlatforms", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Puts <paramref name="kept"/> into the baseline <paramref name="file"/> (<see cref="BaselineKept"/>).</summary>
+    private static string? BaselineKeptInto(string root, string file, IReadOnlyCollection<KeptFinding> kept)
+    {
+        var exists = File.Exists(file);
+        if (kept.Count == 0 && !exists)
+        {
+            return null;
+        }
+
+        var folder = Path.GetDirectoryName(file)!;
+        var lines = new Dictionary<string, HashSet<string>?>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string>? Fingerprints(string path) => lines.TryGetValue(path, out var known)
+            ? known
+            : lines[path] = File.Exists(path) ? File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n').Select(Analyzers.Baseline.Baseline.Fingerprint).ToHashSet(StringComparer.Ordinal) : null;
+
+        var counts = new Dictionary<Analyzers.Baseline.Baseline.Key, int>();
+        var (removed, removedFindings) = (0, 0);
+        foreach (var (key, count) in exists ? Analyzers.Baseline.Baseline.Parse(File.ReadAllText(file)).Entries : new Dictionary<Analyzers.Baseline.Baseline.Key, int>())
+        {
+            if (Fingerprints(Path.Combine(folder, key.Path))?.Contains(key.Fingerprint) == true)
+            {
+                counts[key] = count;
+            }
+            else
+            {
+                removed++;
+                removedFindings += count;
+            }
+        }
+
+        var added = 0;
+        foreach (var group in kept.Select(k => (Finding: k, Relative: Analyzers.Baseline.Baseline.RelativePath(folder, Path.GetFullPath(k.Path))))
+            .Where(k => k.Relative is not null && File.Exists(k.Finding.Path))
+            .GroupBy(k => new Analyzers.Baseline.Baseline.Key(k.Finding.Id, k.Relative!, Analyzers.Baseline.Baseline.Fingerprint(File.ReadLines(k.Finding.Path).ElementAtOrDefault(k.Finding.Line - 1) ?? string.Empty))))
+        {
+            var had = counts.TryGetValue(group.Key, out var count) ? count : 0;
+            if (group.Count() > had)
+            {
+                added += group.Count() - had;
+                counts[group.Key] = group.Count();
+            }
+        }
+
+        if (added == 0 && removed == 0)
+        {
+            return null;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(file)!); // a baseline <StyleBroBaseline> names in a folder not made yet
+        File.WriteAllText(file, new Analyzers.Baseline.Baseline(counts).Render());
+        var name = Relative(root, file);
+        var parts = new List<string>();
+        if (added > 0)
+        {
+            parts.Add($"added {added} kept finding{(added == 1 ? string.Empty : "s")}, so the build and 'format --verify-no-changes' skip {(added == 1 ? "it" : "them")} (new violations still fail; delete an entry to see it again)");
+        }
+
+        if (removed > 0)
+        {
+            parts.Add($"removed {removed} entr{(removed == 1 ? "y" : "ies")} whose line is gone{(removedFindings == removed ? string.Empty : $" ({removedFindings} findings)")}");
+        }
+
+        return $"Baseline: {name}: {string.Join("; ", parts)} (https://bisforboman.github.io/stylebro/baseline/).";
     }
 
     /// <summary>The nearest stylebro.baseline at or above <paramref name="root"/>, else a new one at the root.</summary>
@@ -3554,6 +3783,12 @@ internal static class FormatCommand
             }
 
             allFailures.UnionWith(failures);
+
+            // Documentation comment lines the whitespace pass leaves and the build's IDE0055 reports (DocIndentation).
+            if (code == 0)
+            {
+                DocIndentation.FixFiles(DocIndentationFindings(root, args));
+            }
 
             var fixedState = Snapshot(root);
             var changed = ChangedFiles(before, fixedState);
@@ -4022,6 +4257,10 @@ internal static class FormatCommand
         // Quietly: the whitespace pass touches them on every run, and the line above already says they're left alone.
         using var outsideFiles = outside.Count > 0 ? new UntouchedFiles(outside, null, log) : null;
         var outsideSet = outside.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Nor do their '#if's or a package's files plan runs (trial 27): format leaves them alone. ponytail: for this process.
+        outside.ForEach(f => TestedSymbolsCache[Path.GetFullPath(f)] = []);
+        bool Planned(string file) => !outsideSet.Contains(file) && !IsPackageFile(file);
         bool Ignored(string line) => outsideSet.Count > 0 && IsFindingLine(line) && FindingPath(line) is { } findingPath && outsideSet.Contains(findingPath);
 
         // Projects the solution lists but no configuration builds: the restore skips them, so StyleBro wouldn't run there, and
@@ -4112,7 +4351,7 @@ internal static class FormatCommand
 
         // The projects that share files, and the multi-targeted ones: their settings for each run's framework, evaluated at
         // once (one 'dotnet msbuild' each).
-        var sharing = SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile)), byName: false).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var sharing = SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile.Where(Planned).ToArray())), byName: false).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var multiTargeted = projects.Values.Where(p => p.Frameworks.Length > 1).Select(p => p.FullPath).ToList();
         allFrameworks.Select(r => r.Framework).DefaultIfEmpty(string.Empty)
             .SelectMany(f => sharing.Union(multiTargeted, StringComparer.OrdinalIgnoreCase).Select(s => (Project: s, Spelling: Spelling(s, f))))
@@ -4134,7 +4373,7 @@ internal static class FormatCommand
         // frameworks compile (refit: src/Polyfills/*.cs linked for net4* only were never formatted, and verify said clean).
         string[] CompileFor(string fullPath, string framework, string configuration = "") =>
             byFullPath.TryGetValue(fullPath, out var key)
-                ? FrameworkCompile(projects[key].Compile, projects[key].Frameworks.Length > 1 || configuration.Length > 0 ? View(fullPath, framework, configuration)?.Compile : null)
+                ? FrameworkCompile(projects[key].Compile, projects[key].Frameworks.Length > 1 || configuration.Length > 0 ? View(fullPath, framework, configuration)?.Compile : null).Where(Planned).ToArray()
                 : [];
         IEnumerable<string> LinkedFor(string key, string framework, string configuration) => Linked(projects[key].FullPath, projects[key].Linked, CompileFor(projects[key].FullPath, framework, configuration));
 
@@ -4183,7 +4422,7 @@ internal static class FormatCommand
             if (verifying)
             {
                 var solutionConfigurations = SolutionConfigurations(workspacePath);
-                RecordUnchecked(root, withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations)
+                RecordUnchecked(root, withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations, EvaluatedProperty(projects[k].FullPath, "Platforms"))
                     .Select(c => (projects[k].FullPath, c))).ToList());
             }
         }
@@ -4563,7 +4802,7 @@ internal static class FormatCommand
         withGenerator?.AddRange(tests.Where(p => p.Value.Analyzers.Length > 0).Select(p => p.Key).OrderBy(Path.GetFileNameWithoutExtension, StringComparer.OrdinalIgnoreCase));
         var others = tests.AsParallel()
             .Where(p => p.Value.Analyzers.Length == 0)
-            .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution)))
+            .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution, EvaluatedProperty(p.Value.FullPath, "Platforms"))))
             .Where(p => p.Others.Count > 0)
             .ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Others, StringComparer.OrdinalIgnoreCase);
         if (others.Count == 0)
@@ -4588,11 +4827,12 @@ internal static class FormatCommand
             : null;
 
     /// <summary>The output of a build of one project in one configuration (<see cref="UncheckedLine"/>).</summary>
-    private static List<string> BuildOutput(string project, string configuration)
+    private static (int ExitCode, IReadOnlyList<string> Output) BuildOutput(string project, string configuration)
     {
         var output = new List<string>();
-        Dotnet(Path.GetDirectoryName(project)!, null, ["build", project, "-c", configuration, "--no-restore", "--no-incremental", "-nologo"], output.Add);
-        return output;
+        var (name, platform) = SplitConfiguration(configuration);
+        var exitCode = Dotnet(Path.GetDirectoryName(project)!, null, ["build", project, "-c", name, .. PlatformProperty(platform), "--no-restore", "--no-incremental", "-nologo"], output.Add);
+        return (exitCode, output);
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>
@@ -4629,7 +4869,7 @@ internal static class FormatCommand
             // Like TargetFramework: the project file's own '$(Configuration)' conditions (DefineConstants) see it.
             if (f.Configuration.Length > 0)
             {
-                start.Environment["Configuration"] = f.Configuration;
+                SetConfiguration(start.Environment, f.Configuration);
             }
         }
 
