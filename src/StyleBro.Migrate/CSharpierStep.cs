@@ -315,7 +315,7 @@ internal static class CSharpierStep
         return failed.Count == 0
             ? $"Not clean: CSharpier's check failed (exit code {code}): {string.Join(" ", output.Where(l => l.Trim().Length > 0).Take(3).Select(l => l.Trim()))}"
             : $"Not clean: CSharpier would change {failed.Count} file{(failed.Count == 1 ? string.Empty : "s")} ({string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}). "
-                + "'stylebro-migrate format' runs it on the files it changes; for the others run 'dotnet csharpier format' on them.";
+                + "'stylebro-migrate format' runs it on the files it changes and on those whose line endings aren't end_of_line's; for the others run 'dotnet csharpier format' on them.";
     }
 
     /// <summary>The folders the tool formats under <paramref name="root"/> (full paths).</summary>

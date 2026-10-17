@@ -187,7 +187,7 @@ internal static class FormatCommand
     private const string VisualBasicHeader = "Visual Basic:";
 
     /// <summary>The start of the line that names the lines whose indentation '#if' decides (printed for the first run only).</summary>
-    private const string IfBodiesHeader = "Indentation kept:";
+    public const string IfBodiesHeader = "Indentation kept:";
 
     /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
     private const string GeneratorsHeader = "Generators:";
@@ -2461,28 +2461,33 @@ internal static class FormatCommand
 
     /// <summary>
     /// The folders (relative to <paramref name="root"/>, '/'-separated with a trailing '/', as '--exclude' takes them) of the
-    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder),
-    /// when no other of its <paramref name="projects"/> (full paths) is in that folder. Other workspaces: none.
+    /// projects a .sln lists but no solution configuration builds (no '.Build.0' line for the project: Bogus's Builder), or a
+    /// .slnx with '&lt;Build Project="false" /&gt;', when no other of its <paramref name="projects"/> (full paths) is in that
+    /// folder. Other workspaces: none.
     /// </summary>
     public static List<string> NotBuiltFolders(string solutionPath, IReadOnlyList<string> projects, string root)
     {
-        if (!solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || !File.Exists(solutionPath))
+        var slnx = solutionPath.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase);
+        if ((!slnx && !solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)) || !File.Exists(solutionPath))
         {
             return [];
         }
 
-        // ponytail: .sln only; a .slnx's '<Build Project="false" />' isn't read.
+        // A .slnx says it with '<Build Project="false" />' (without 'Solution': for every configuration; trial 27, io-abstractions'
+        // Pipeline/Build.csproj: "no StyleBro.Analyzers in its restore output").
         var text = File.ReadAllText(solutionPath);
+        var notBuilt = slnx
+            ? Regex.Matches(text, @"<Project\s+Path\s*=\s*""(?<path>[^""]+\.csproj)""[^>]*(?<!/)>(?<body>(?:(?!</Project>).)*)</Project>", RegexOptions.Singleline)
+                .Where(m => Regex.IsMatch(m.Groups["body"].Value, @"<Build\s+Project\s*=\s*""false""\s*/>", RegexOptions.IgnoreCase))
+                .Select(m => m.Groups["path"].Value)
+            : Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline)
+                .Where(m => Regex.Escape(m.Groups["guid"].Value) is var guid
+                    && Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) && !Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
+                .Select(m => m.Groups["path"].Value);
         var folders = new List<string>();
-        foreach (Match project in Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline))
+        foreach (var path in notBuilt)
         {
-            var guid = Regex.Escape(project.Groups["guid"].Value);
-            if (!Regex.IsMatch(text, guid + @"\.[^\r\n]*\.ActiveCfg\s*=", RegexOptions.IgnoreCase) || Regex.IsMatch(text, guid + @"\.[^\r\n]*\.Build\.0\s*=", RegexOptions.IgnoreCase))
-            {
-                continue;
-            }
-
-            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, project.Groups["path"].Value.Replace('\\', Path.DirectorySeparatorChar)));
+            var full = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionPath)!, path.Replace('\\', Path.DirectorySeparatorChar)));
             var folder = Path.GetDirectoryName(full)!;
             var relative = Path.GetRelativePath(root, folder).Replace('\\', '/');
             if (relative != "." && !relative.StartsWith("..", StringComparison.Ordinal)

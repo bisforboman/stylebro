@@ -172,8 +172,9 @@ internal static class PreviewCommand
                     incomplete ??= line;
                 }
 
-                // What format left out on purpose (old-style projects it doesn't restore, projects without StyleBro or not built).
-                if ((line.StartsWith(FormatCommand.OldStyleHeader, StringComparison.Ordinal) || line.StartsWith(FormatCommand.PartlyLoadedHeader, StringComparison.Ordinal) || line.StartsWith(FormatCommand.NotBuiltHeader, StringComparison.Ordinal)) && !notes.Contains(line))
+                // What format left out on purpose (old-style projects it doesn't restore, projects without StyleBro or not built,
+                // lines whose indentation '#if' decides).
+                if (new[] { FormatCommand.OldStyleHeader, FormatCommand.PartlyLoadedHeader, FormatCommand.NotBuiltHeader, FormatCommand.IfBodiesHeader }.Any(h => line.StartsWith(h, StringComparison.Ordinal)) && !notes.Contains(line))
                 {
                     notes.Add(line);
                 }
