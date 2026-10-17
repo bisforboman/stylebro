@@ -79,7 +79,7 @@ public class PackageFileSuppressorTests
     [InlineData(@"C:\work\app\src\Lib\..\..\..\outside\Shared.cs", @"C:\work\app\", true)]
     [InlineData(@"C:\work\app-old\Shared.cs", @"C:\work\app", true)]
     [InlineData(@"C:\work\app\src\Lib\Program.cs", @"C:\work\app", false)]
-    [InlineData(@"c:/work/APP/src/Lib/Program.cs", @"C:\work\app", false)]
+    [InlineData("c:/work/APP/src/Lib/Program.cs", @"C:\work\app", false)]
     [InlineData(@"C:\work\outside\Shared.cs", null, false)]
     [InlineData(@"C:\work\outside\Shared.cs", "", false)]
     [InlineData(@"C:\work\outside\Shared.cs", "none", false)]
