@@ -30,7 +30,7 @@ namespace StyleBro.Migrate;
 /// skipped silently), and clearing it for every project without the framework failed too (Serilog's TestDummies,
 /// netstandard2.0, references Serilog, which then offered only net8.0: TestDummies and the tests that use it didn't load).
 /// </remarks>
-internal static class FormatCommand
+internal static partial class FormatCommand
 {
     /// <summary>
     /// Imported right after each project file (BeforeMicrosoftNETSdkTargets), before the SDK decides whether it's
@@ -247,73 +247,15 @@ internal static class FormatCommand
     /// </summary>
     public static int Run(string[] args, Action<string>? output = null, Func<string[], Action<string>?, int>? runOnce = null)
     {
-        Action<string> log = output ?? Console.WriteLine;
-        ResetExplained();
-        DeleteStaleTemp(Path.GetTempPath(), DateTime.UtcNow.AddDays(-1));
-
-        runOnce = KeepingLineEndings(runOnce ?? RunOnce);
-
-        // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
-        if (args.Contains("--report") && !args.Contains("--verify-no-changes"))
+        // --timings: how long each phase took, after everything else (docs/proposals/format-speed.md, "Also seen").
+        using var timings = args.Contains(TimingsOption) ? PhaseTimes.Start() : null;
+        int exit;
+        using (PhaseTimes.Measure("total"))
         {
-            return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
+            exit = RunMeasured(args.Where(a => a != TimingsOption).ToArray(), output, runOnce);
         }
 
-        // Every mode takes the documented options ('--files a.cs --once' passed --once on to 'dotnet format').
-        var once = args.Contains(OnceOption);
-        args = ProjectAsPath(args.Where(a => a != OnceOption).ToArray());
-        var (files, rest) = TakeFiles(args);
-        if (files is not null)
-        {
-            return RunFiles(files, rest, log, output, runOnce, once ? 1 : MaxRuns);
-        }
-
-        var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
-        if (!File.Exists(path) && !Directory.Exists(path))
-        {
-            (output ?? Console.Error.WriteLine)($"Not found: {path}");
-            return 1;
-        }
-
-        // A solution in a folder of its own (solutions/App.slnx listing ../src/...): the runs work from the folder that holds
-        // all its projects, else '--include ../src/Lib/' matched nothing and the changed files weren't looked for there.
-        var root = File.Exists(path) ? WorkingRoot(path) : path;
-        if (JsonReport.Current is { } json && json["path"] is null)
-        {
-            json["path"] = root;
-        }
-
-        // Rules a bulk severity hides from 'dotnet format' but not from the build: no run is clean then. --verify-no-changes
-        // checks CSharpier's layout too where it formats the repository (owner's decision 2026-10-16).
-        // CSharpier's check comes after StyleBro's (trial 26: its "checking..." line came before the header), so the verdict that
-        // says clean waits for it.
-        var verify = args.Contains("--verify-no-changes");
-        Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out _);
-        var hidden = HiddenLine(root);
-
-        // The verdict and everything after it (the kept findings it lists, the baseline line) wait as one block.
-        var verdicts = new List<string>();
-        Action<string> runLog = hidden is null && !verify ? log : line =>
-        {
-            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal))
-            {
-                verdicts.Add(line);
-            }
-            else
-            {
-                log(hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal));
-            }
-        };
-        var exit = verify ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
-        var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null }.OfType<string>().ToList();
-        verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
-        foreach (var line in buts)
-        {
-            log(line);
-            exit = exit == 0 ? NotCleanExitCode : exit;
-        }
-
-        JsonReport.Set("clean", exit == 0);
+        PhaseTimes.Lines().ForEach(output ?? Console.WriteLine);
         return exit;
     }
 
@@ -1147,9 +1089,12 @@ internal static class FormatCommand
     /// --verify-no-changes: builds each project and configuration <see cref="RecordUnchecked"/> kept for <paramref name="root"/>
     /// (<paramref name="build"/>: the output of a build, in tests) and returns what makes it not clean, or null when those
     /// builds report none of format's rules (<see cref="Diagnostics"/>) in the project. Owner's decision 2026-10-16: verify said
-    /// clean while a Release build of a project with an in-solution source generator failed on Release-only code.
+    /// clean while a Release build of a project with an in-solution source generator failed on Release-only code. The projects
+    /// of one configuration build together (<paramref name="together"/>; <see cref="TogetherProject"/>: their shared references
+    /// once, CliFx's two builds took 99 s one after another); when that build fails, each builds on its own as before, which
+    /// tells whose build failed.
     /// </summary>
-    public static string? UncheckedLine(string root, Action<string> log, Func<string, string, (int ExitCode, IReadOnlyList<string> Output)>? build = null)
+    public static string? UncheckedLine(string root, Action<string> log, Func<string, string, (int ExitCode, IReadOnlyList<string> Output)>? build = null, Func<IReadOnlyList<string>, string, (int ExitCode, IReadOnlyList<string> Output)>? together = null)
     {
         if (!Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out var projects) || projects.Count == 0)
         {
@@ -1159,11 +1104,25 @@ internal static class FormatCommand
         var ids = Diagnostics(root).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var findings = new List<string>();
         var failed = new List<string>();
+        var built = new Dictionary<(string, string), (int ExitCode, IReadOnlyList<string> Output)>();
+        foreach (var (configuration, group) in BuildGroups(projects))
+        {
+            group.ForEach(project => log($"Building {Path.GetFileNameWithoutExtension(project)} in {configuration} to check it (it takes an in-solution source generator)..."));
+            using var phase = PhaseTimes.Measure($"verify: build {configuration} ({group.Count} project{(group.Count == 1 ? string.Empty : "s")})");
+            if (group.Count > 1 && (together ?? BuildTogether)(group, configuration) is { ExitCode: 0 } all)
+            {
+                // Each project's own lines: those of the build of it alone (it succeeded, so no other line can fail it).
+                group.ForEach(project => built[(project, configuration)] = (0, OwnOutput(project, all.Output)));
+                continue;
+            }
+
+            group.ForEach(project => built[(project, configuration)] = (build ?? BuildOutput)(project, configuration));
+        }
+
         foreach (var (project, configuration) in projects)
         {
             var name = Path.GetFileNameWithoutExtension(project);
-            log($"Building {name} in {configuration} to check it (it takes an in-solution source generator)...");
-            var (exitCode, output) = (build ?? BuildOutput)(project, configuration);
+            var (exitCode, output) = built[(project, configuration)];
             var lines = output.Select(l => Regex.Match(l, @"^\s*(?<path>.+?)\((?<line>\d+),(?<column>\d+)\): (?<kind>warning|error) (?<id>\w+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$"))
                 .Where(m => m.Success)
                 .ToList();
@@ -2765,14 +2724,24 @@ internal static class FormatCommand
     /// <summary>
     /// Records the findings a clean 'format' run on <paramref name="root"/> kept, for a '--verify-no-changes' on the same
     /// state (<see cref="StateKey"/>): it needn't format a copy to find them (in the temporary folder; a courtesy, never an error).
+    /// When that run checked every plan entry clean (<paramref name="verdict"/>: the lines verify ends with then, the kept
+    /// findings its check <paramref name="reported"/>, the generator <paramref name="builds"/> it makes after it, and the line
+    /// it says about them, <paramref name="generatorLine"/>), verify answers from the record (<see cref="VerifyFromRecord"/>).
     /// </summary>
-    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept)
+    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<KeptFinding>? reported = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null)
     {
         try
         {
             var file = KeptRecord(root);
             Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-            File.WriteAllLines(file, kept.Select(k => k.ToString()).Prepend(StateKey(root, args)));
+            var checks = verdict is null
+                ? []
+                : verdict.Select(v => VerdictMark + v)
+                    .Concat((reported ?? []).Select(k => ReportedMark + k))
+                    .Concat((builds ?? []).Select(b => $"{BuildMark}{b.Project}\t{b.Configuration}"))
+                    .Concat(generatorLine is null || builds is not { Count: > 0 } ? [] : [GeneratorMark + generatorLine])
+                    .Prepend(CheckedMark);
+            File.WriteAllLines(file, kept.Select(k => k.ToString()).Concat(checks).Prepend(StateKey(root, args)));
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -2935,8 +2904,8 @@ internal static class FormatCommand
 
     /// <summary>
     /// What the findings a run keeps depend on: every C# file, project, solution and settings file of the repository (its
-    /// content), the options (not those that only say how to run: --verify-no-changes, --no-restore, --report) and this
-    /// tool's version.
+    /// content), the options (not those that only say how to run: --verify-no-changes, --no-restore, --restore, --timings,
+    /// --report), this tool's version and the SDK's and StyleBro.Analyzers' (<see cref="Versions"/>).
     /// </summary>
     public static string StateKey(string root, IEnumerable<string> args)
     {
@@ -2955,14 +2924,15 @@ internal static class FormatCommand
             {
                 i++;
             }
-            else if (list[i] is not ("--verify-no-changes" or "--no-restore" or CheckFirstOption or OnceOption))
+            else if (list[i] is not ("--verify-no-changes" or "--no-restore" or RestoreOption or TimingsOption or CheckFirstOption or OnceOption))
             {
                 options.Add(i == 0 && !list[i].StartsWith("-", StringComparison.Ordinal) ? Path.GetFullPath(list[i]) : list[i]);
             }
         }
 
+        // And the SDK's and StyleBro.Analyzers' versions (owner's decision 2026-10-17: verify answers from the record).
         var version = typeof(FormatCommand).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion;
-        var text = string.Join("\n", files.Append(string.Join(" ", options)).Append(version ?? string.Empty));
+        var text = string.Join("\n", files.Append(string.Join(" ", options)).Append(version ?? string.Empty).Append(Versions(root)));
         return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
     }
 
@@ -3049,6 +3019,12 @@ internal static class FormatCommand
     /// </summary>
     internal static int Verify(string[] args, string root, Action<string> log, Func<string[], Action<string>?, int> runOnce)
     {
+        // Nothing changed since a clean 'format' checked every run (owner's decision 2026-10-17): its check stands.
+        if (VerifyFromRecord(args, root, log) is { } fromRecord)
+        {
+            return fromRecord;
+        }
+
         var lines = new List<string>();
 
         // The progress of the runs at once is shown as it comes (splat: nothing for 48 minutes before), and what the check
@@ -3226,7 +3202,13 @@ internal static class FormatCommand
             : null;
         try
         {
-            var (copyCode, kept, changedFiles) = recorded is null ? FormatCopy() : (0, recorded, new List<string>());
+            (int, List<KeptFinding>, List<string>) copied;
+            using (PhaseTimes.Measure(recorded is null ? "verify: format a copy" : "verify: kept findings from the record"))
+            {
+                copied = recorded is null ? FormatCopy() : (0, recorded, new List<string>());
+            }
+
+            var (copyCode, kept, changedFiles) = copied;
             var changed = changedFiles.Count;
             JsonReport.AddRun(1, changedFiles, null);
             if (putBack.Count > 0 && changed == 0 && copyCode == 0)
@@ -3373,9 +3355,15 @@ internal static class FormatCommand
     /// </summary>
     internal static void BuildGenerators(IEnumerable<string> generators, string root, Action<string> log, string configuration = "")
     {
+        // Whether each is built: one 'dotnet msbuild' each, all at once.
         var stale = generators.Distinct(StringComparer.OrdinalIgnoreCase)
             .Where(g => File.Exists(g) && !BuiltGenerators.ContainsKey(g + "|" + configuration))
-            .Where(g => !IsBuilt(g, configuration) || !BuiltGenerators.TryAdd(g + "|" + configuration, true))
+            .AsParallel()
+            .AsOrdered()
+            .Select(g => (Generator: g, Built: IsBuilt(g, configuration)))
+            .ToList()
+            .Where(g => !g.Built || !BuiltGenerators.TryAdd(g.Generator + "|" + configuration, true))
+            .Select(g => g.Generator)
             .ToList();
         if (stale.Count == 0)
         {
@@ -3669,6 +3657,79 @@ internal static class FormatCommand
         return (false, null, false);
     }
 
+    /// <summary><see cref="Run"/> without --timings.</summary>
+    private static int RunMeasured(string[] args, Action<string>? output, Func<string[], Action<string>?, int>? runOnce)
+    {
+        Action<string> log = output ?? Console.WriteLine;
+        ResetExplained();
+        DeleteStaleTemp(Path.GetTempPath(), DateTime.UtcNow.AddDays(-1));
+
+        runOnce = KeepingLineEndings(runOnce ?? RunOnce);
+
+        // --report: the plain run (the preview reads the report). --once: one run, reported like the usual ones.
+        if (args.Contains("--report") && !args.Contains("--verify-no-changes"))
+        {
+            return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
+        }
+
+        // Every mode takes the documented options ('--files a.cs --once' passed --once on to 'dotnet format').
+        var once = args.Contains(OnceOption);
+        args = ProjectAsPath(args.Where(a => a != OnceOption).ToArray());
+        var (files, rest) = TakeFiles(args);
+        if (files is not null)
+        {
+            return RunFiles(files, rest, log, output, runOnce, once ? 1 : MaxRuns);
+        }
+
+        var path = Path.GetFullPath(args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal) ? args[0] : ".");
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            (output ?? Console.Error.WriteLine)($"Not found: {path}");
+            return 1;
+        }
+
+        // A solution in a folder of its own (solutions/App.slnx listing ../src/...): the runs work from the folder that holds
+        // all its projects, else '--include ../src/Lib/' matched nothing and the changed files weren't looked for there.
+        var root = File.Exists(path) ? WorkingRoot(path) : path;
+        if (JsonReport.Current is { } json && json["path"] is null)
+        {
+            json["path"] = root;
+        }
+
+        // Rules a bulk severity hides from 'dotnet format' but not from the build: no run is clean then. --verify-no-changes
+        // checks CSharpier's layout too where it formats the repository (owner's decision 2026-10-16).
+        // CSharpier's check comes after StyleBro's (trial 26: its "checking..." line came before the header), so the verdict that
+        // says clean waits for it.
+        var verify = args.Contains("--verify-no-changes");
+        Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out _);
+        var hidden = HiddenLine(root);
+
+        // The verdict and everything after it (the kept findings it lists, the baseline line) wait as one block.
+        var verdicts = new List<string>();
+        Action<string> runLog = hidden is null && !verify ? log : line =>
+        {
+            if (verdicts.Count > 0 || line.StartsWith("Clean", StringComparison.Ordinal))
+            {
+                verdicts.Add(line);
+            }
+            else
+            {
+                log(hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal));
+            }
+        };
+        var exit = verify ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
+        var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null }.OfType<string>().ToList();
+        verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
+        foreach (var line in buts)
+        {
+            log(line);
+            exit = exit == 0 ? NotCleanExitCode : exit;
+        }
+
+        JsonReport.Set("clean", exit == 0);
+        return exit;
+    }
+
     /// <summary>Whether 'dotnet format' leaves a file alone as generated code: its name ('.g.cs', '.designer.cs', ...) or an '&lt;auto-generated' header.</summary>
     private static bool IsGeneratedCode(string file) =>
         Regex.IsMatch(Path.GetFileName(file), @"\.(?:g|g\.i|designer|generated)\.cs$|^TemporaryGeneratedFile_", RegexOptions.IgnoreCase)
@@ -3898,12 +3959,16 @@ internal static class FormatCommand
             // What it fixes and the framework list are said once, not every run. A fix that failed leaves its findings: no
             // run is clean then (akka: BRO1309's fix threw in every run, and the last said "clean").
             var failures = new SortedSet<string>(StringComparer.Ordinal);
+            var incomplete = false;
+            var runPhase = PhaseTimes.Measure($"run {run}");
             var code = runOnce(runArgs, line =>
             {
                 if (FixFailure(line) is { } failure)
                 {
                     failures.Add(failure);
                 }
+
+                incomplete |= line.StartsWith(IncompleteMarker, StringComparison.Ordinal) || line.StartsWith(PartlyIncompleteMarker, StringComparison.Ordinal);
 
                 if (run == 1)
                 {
@@ -3914,13 +3979,22 @@ internal static class FormatCommand
                     log(line);
                 }
             });
+            runPhase.Dispose();
+
+            // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
+            // same on this state (VerifyFromRecord).
+            var checkedClean = TakeCheckedClean(root) && !incomplete;
 
             // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
             // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
             if (code == 0 && !args.Contains("--diagnostics") && !args.Contains("--all") && !MissingCompileRoots.ContainsKey(root) && EnforcesUnusedUsings(root) && ChangedFiles(before, Snapshot(root)).Count > 0)
             {
                 var usingsOutput = new List<string>();
-                code = runOnce([.. args, "--no-restore", "--diagnostics", UnusedUsings], usingsOutput.Add);
+                using (PhaseTimes.Measure($"run {run}: unused usings (IDE0005)"))
+                {
+                    code = runOnce([.. args, "--no-restore", "--diagnostics", UnusedUsings], usingsOutput.Add);
+                }
+
                 if (code != 0)
                 {
                     usingsOutput.ForEach(log);
@@ -3949,7 +4023,13 @@ internal static class FormatCommand
                 static string Files(int count) => $"{count} C# file{(count == 1 ? string.Empty : "s")}";
                 var ran = pretty.Count - endings.Count;
                 log($"CSharpier: formatting {string.Join(" and ", new[] { ran > 0 ? $"the {Files(ran)} run {run} changed" : null, endings.Count > 0 ? $"{Files(endings.Count)} whose line endings aren't end_of_line's" : null }.OfType<string>())}...");
-                var (csharpierCode, csharpierOutput) = CSharpierStep.Run(csharpier, "format", CSharpierStep.Arguments(csharpier, root, pretty, unformatted));
+                (int, List<string>) csharpierRun;
+                using (PhaseTimes.Measure($"run {run}: CSharpier"))
+                {
+                    csharpierRun = CSharpierStep.Run(csharpier, "format", CSharpierStep.Arguments(csharpier, root, pretty, unformatted));
+                }
+
+                var (csharpierCode, csharpierOutput) = csharpierRun;
                 if (csharpierCode != 0)
                 {
                     csharpierOutput.ForEach(log);
@@ -3998,7 +4078,10 @@ internal static class FormatCommand
                 var baselined = settled ? BaselineKept(root, keptFindings, shown) : null;
                 if (settled)
                 {
-                    SaveKept(root, args, keptFindings);
+                    // The run's check reported the kept findings (and nothing else), so verify's does, and ends with these lines.
+                    // Not after a run that changed files (endings only): its check was of the files before.
+                    var reported = checkedClean && changed.Count == 0 ? keptFindings : null;
+                    SaveKept(root, args, keptFindings, reported is null ? null : CleanVerdict(root, reported), reported, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null);
                 }
 
                 JsonReport.AddKept(keptFindings);
@@ -4123,7 +4206,8 @@ internal static class FormatCommand
             }
         }
 
-        // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through.
+        // Like 'dotnet format': an optional folder, solution or project first, then options, which pass through (not format's own).
+        args = args.Where(a => a != TimingsOption).ToArray();
         var hasPath = args.Length > 0 && !args[0].StartsWith("-", StringComparison.Ordinal);
         var path = Path.GetFullPath(hasPath ? args[0] : ".");
         var passThrough = args.Skip(hasPath ? 1 : 0).ToList();
@@ -4357,7 +4441,12 @@ internal static class FormatCommand
         }
 
         var noRestore = passThrough.Remove("--no-restore");
+        var forceRestore = passThrough.Remove(RestoreOption);
         var checkFirst = passThrough.Remove(CheckFirstOption);
+        var checkedKey = Key(root);
+        CheckedClean.TryRemove(checkedKey, out _);
+        UncheckedByFormat.TryRemove(checkedKey, out _);
+        GeneratorLines.TryRemove(checkedKey, out _);
         string[] restoreOptions = passThrough.Remove(UnlockedRestoreOption) ? [.. RestoreOptions, "-p:RestoreLockedMode=false"] : RestoreOptions;
 
         // The findings the fixes keep, for a check after this run (Remember): the caller's file, else one of its own.
@@ -4371,7 +4460,12 @@ internal static class FormatCommand
         var solutionDirectory = Path.GetDirectoryName(solutionPath)!;
         var isSolution = !workspacePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
         DeleteLeftoverFilters(solutionDirectory);
-        var projects = ReadProjects(workspacePath);
+        Dictionary<string, (string FullPath, string[] Frameworks, string[] References, string[] Linked, string[] Compile, string AssetsFile, string[] Analyzers)> projects;
+        using (PhaseTimes.Measure("plan: projects (solution list, evaluations)"))
+        {
+            projects = ReadProjects(workspacePath);
+        }
+
         if (projects.Count == 0)
         {
             error($"No C# project in {Path.GetFileName(workspacePath)}, so there's nothing to format. Name a solution or project with C# projects.");
@@ -4432,8 +4526,19 @@ internal static class FormatCommand
         // rewrote their restore output (xbox-live-developer-tools: the next Visual Studio build failed, "doesn't list 'win'
         // as a RuntimeIdentifier") and can't restore packages.config at all. Skipping the restore for the whole repository
         // instead left the SDK-style projects without the just-added StyleBro.Analyzers (actions/runner: "clean").
-        if (!noRestore)
+        // Not when the restore output is current (owner's decision 2026-10-17): newer than every input, listing StyleBro.Analyzers
+        // (RestoreIsCurrent); --restore restores anyway. A no-op 'dotnet restore' still took 2-18 s (PalCalc 17.5 s).
+        var restored = RestoredProjects(projects.Values.Select(p => (p.FullPath, p.AssetsFile)));
+        var restoreCurrent = SkipsRestore(noRestore, forceRestore, () => RestoreIsCurrent(root, restored));
+        if (restoreCurrent)
         {
+            PhaseTimes.Measure("restore: skipped, up to date").Dispose();
+            restoreWarning = SkippedRestoreWarning(root, restored);
+        }
+
+        if (!noRestore && !restoreCurrent)
+        {
+            using var restorePhase = PhaseTimes.Measure("restore");
             var oldStyle = projects.Values.Select(p => p.FullPath).Where(IsOldStyle).ToList();
             var restoreTarget = workspacePath;
             string? restoreFilter = null;
@@ -4461,6 +4566,7 @@ internal static class FormatCommand
                 }
 
                 restoreWarning = RestoreWarning(root, restoreOutput);
+                SaveRestoreStamp(root, restored.Select(p => p.AssetsFile), restoreWarning);
             }
             finally
             {
@@ -4472,7 +4578,10 @@ internal static class FormatCommand
         }
 
         passThrough.Insert(0, "--no-restore");
-        BuildGenerators(projects.Values.SelectMany(p => p.Analyzers), root, log);
+        using (PhaseTimes.Measure("generators: build check"))
+        {
+            BuildGenerators(projects.Values.SelectMany(p => p.Analyzers), root, log);
+        }
 
         // StyleBro rules a project lists in WarningsNotAsErrors: 'dotnet format' skips them, the build reports them as warnings
         // (trial 24: "clean", then BRO1001 and BRO1505 in the build). The runs take them out of the list.
@@ -4507,19 +4616,22 @@ internal static class FormatCommand
             : own.FirstOrDefault(f => NormalizeFramework(f) == framework);
 
         // The projects that share files, and the multi-targeted ones: their settings for each run's framework, evaluated at
-        // once (one 'dotnet msbuild' each).
+        // once (one 'dotnet msbuild' each), together with the configurations' (ConfigurationRuns: one wave, not two).
+        var planPhase = PhaseTimes.Measure("plan: frameworks and configurations (evaluations)");
         var sharing = SharingProjects(projects.Values.Select(p => (p.FullPath, p.Compile.Where(Planned).ToArray())), byName: false).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var multiTargeted = projects.Values.Where(p => p.Frameworks.Length > 1).Select(p => p.FullPath).ToList();
-        allFrameworks.Select(r => r.Framework).DefaultIfEmpty(string.Empty)
-            .SelectMany(f => sharing.Union(multiTargeted, StringComparer.OrdinalIgnoreCase).Select(s => (Project: s, Spelling: Spelling(s, f))))
-            .Where(s => s.Spelling is not null)
-            .Distinct()
-            .AsParallel()
-            .ForAll(s => CompileSettings(s.Project, s.Spelling!));
+        var frameworkViews = allFrameworks.Select(r => r.Framework).DefaultIfEmpty(string.Empty)
+            .SelectMany(f => sharing.Union(multiTargeted, StringComparer.OrdinalIgnoreCase).Select(s => (Project: s, Framework: f, Configuration: string.Empty)))
+            .ToList();
         var views = new System.Collections.Concurrent.ConcurrentDictionary<(string, string, string), CompileView?>();
         CompileView? View(string fullPath, string framework, string configuration = "") => views.GetOrAdd(
             (fullPath, framework, configuration),
             _ => byFullPath.ContainsKey(fullPath) && Spelling(fullPath, framework) is { } spelling ? ReadView(CompileSettings(fullPath, spelling, configuration)) : null);
+
+        // The configurations' evaluations (and the frameworks' above), all at once.
+        var frameworkRuns = allFrameworks.Count == 0 ? new List<(string Framework, List<string> Projects)> { (string.Empty, projects.Keys.ToList()) } : allFrameworks;
+        var withGenerator = new List<string>();
+        var configurationRuns = ConfigurationRuns(projects, frameworkRuns, workspacePath, View, withGenerator, frameworkViews);
 
         // A framework whose code compiles the same as another's in a project (CommunityToolkit: no '#if' tests a NET9_0 or
         // NET10_0 symbol, so net8.0, net9.0 and net10.0 parse every file the same) doesn't need a run of its own there.
@@ -4536,9 +4648,6 @@ internal static class FormatCommand
         IEnumerable<string> LinkedFor(string key, string framework, string configuration) => Linked(projects[key].FullPath, projects[key].Linked, CompileFor(projects[key].FullPath, framework, configuration));
 
         // "" for a run without a framework of its own (no project is multi-targeted).
-        var frameworkRuns = allFrameworks.Count == 0 ? new List<(string Framework, List<string> Projects)> { (string.Empty, projects.Keys.ToList()) } : allFrameworks;
-        var withGenerator = new List<string>();
-        var configurationRuns = ConfigurationRuns(projects, frameworkRuns, workspacePath, View, withGenerator);
         var runs = (allFrameworks.Count == 0 ? frameworkRuns : frameworkPlan).Select(r => (r.Framework, Configuration: string.Empty, r.Projects))
             .Concat(configurationRuns)
             .ToList();
@@ -4550,12 +4659,20 @@ internal static class FormatCommand
             .Select(g => g.Select(f => byFullPath[f]).ToList())
             .ToList();
 
+        // How the projects the configuration runs load (and their references) compile there: Separate asks for each, which
+        // were evaluated one at a time before (PalCalc: 11 of them, ~3 s each).
+        RunViews(configurationRuns, r => byFullPath.TryGetValue(r, out var key) ? projects[key].References : Array.Empty<string>())
+            .Where(v => byFullPath.ContainsKey(v.Project))
+            .AsParallel()
+            .ForAll(v => View(v.Project, v.Framework, v.Configuration));
+
         string RunLabel(string framework, string configuration) => string.Join(", ", new[] { framework.Length == 0 && allFrameworks.Count > 0 ? NoFrameworkLabel : framework, configuration }.Where(l => l.Length > 0));
         var plan = runs
             .SelectMany(p => Apart(p.Framework, p.Configuration, p.Projects) is var parts && parts.Count > 1
                 ? parts.Select((part, i) => (p.Framework, p.Configuration, Projects: part, Label: $"{(RunLabel(p.Framework, p.Configuration) is { Length: > 0 } label ? label + ", " : string.Empty)}part {i + 1} of {parts.Count}", Parts: i == 0 ? parts : null))
                 : new[] { (p.Framework, p.Configuration, p.Projects, Label: RunLabel(p.Framework, p.Configuration), Parts: (List<List<string>>?)null) })
             .ToList();
+        planPhase.Dispose();
 
         // Lines '#if' makes an if/else body in some runs and not in others (owner's decision 2026-10-16): each run indented them
         // its own way, undoing the run before (NLog never converged). They keep their indentation, and the whitespace findings
@@ -4574,6 +4691,7 @@ internal static class FormatCommand
         // The generators the other configurations' runs load, built in those configurations first (owner's decision 2026-10-17).
         foreach (var configuration in configurationRuns.Select(r => r.Configuration).Distinct(StringComparer.OrdinalIgnoreCase))
         {
+            using var generatorPhase = PhaseTimes.Measure($"generators: build check ({configuration})");
             BuildGenerators(configurationRuns.Where(r => r.Configuration.Equals(configuration, StringComparison.OrdinalIgnoreCase)).SelectMany(r => r.Projects).SelectMany(p => projects[p].Analyzers), root, log, configuration);
         }
 
@@ -4581,13 +4699,20 @@ internal static class FormatCommand
         {
             // --verify-no-changes still builds them in the others afterwards (UncheckedLine): verify said clean while that build
             // failed, and the build is the check of the generated code's configuration.
+            // A 'format' run keeps them for its record, which verify answers from (VerifyFromRecord).
             var verifying = passThrough.Contains("--verify-no-changes");
+            var solutionConfigurations = SolutionConfigurations(workspacePath);
+            var notChecked = withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations, EvaluatedProperty(projects[k].FullPath, "Platforms"))
+                .Select(c => (projects[k].FullPath, c))).ToList();
             if (verifying)
             {
                 log(GeneratorConfigurationsLine(withGenerator.Select(k => Path.GetFileNameWithoutExtension(k)).ToList()));
-                var solutionConfigurations = SolutionConfigurations(workspacePath);
-                RecordUnchecked(root, withGenerator.SelectMany(k => OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solutionConfigurations, EvaluatedProperty(projects[k].FullPath, "Platforms"))
-                    .Select(c => (projects[k].FullPath, c))).ToList());
+                RecordUnchecked(root, notChecked);
+            }
+            else
+            {
+                UncheckedByFormat[checkedKey] = notChecked;
+                GeneratorLines[checkedKey] = GeneratorConfigurationsLine(withGenerator.Select(k => Path.GetFileNameWithoutExtension(k)).ToList());
             }
         }
 
@@ -4599,7 +4724,12 @@ internal static class FormatCommand
             try
             {
                 var plain = notAsErrors.Count > 0 ? new RunEnvironment(string.Empty, select, string.Empty, string.Empty, string.Empty, null, Warnings: true) : null;
-                var single = Format(workspacePath, passThrough, a => Dotnet(root, plain, a, Watch));
+                int single;
+                using (PhaseTimes.Measure(passThrough.Contains("--verify-no-changes") ? "check: all projects" : "fix: all projects"))
+                {
+                    single = Format(workspacePath, passThrough, a => Dotnet(root, plain, a, Watch));
+                }
+
                 if (single == NotCleanExitCode && passThrough.Contains("--verify-no-changes") && findingsIgnored > 0 && findingsShown == 0)
                 {
                     single = 0; // only findings in files format leaves alone
@@ -4743,7 +4873,12 @@ internal static class FormatCommand
 
             current = plan[index].Framework;
             ran?.Lines.ForEach(Show);
-            var code = ran?.Code ?? RunFramework(index, verify: false, Show, only);
+            int code;
+            using (ran is null ? PhaseTimes.Measure($"fix: {RunName(index)}") : null)
+            {
+                code = ran?.Code ?? RunFramework(index, verify: false, Show, only);
+            }
+
             Crashed(plan[index].Projects);
             exit = exit == 0 ? code : exit;
         }
@@ -4765,7 +4900,13 @@ internal static class FormatCommand
                     .Select(i =>
                     {
                         var output = new List<string>();
-                        var (code, lines) = IfBodies.Without(RunFramework(i, verify: true, output.Add), output, l => Ignored(l) || IfBodies.IsKeptFinding(l, ifBodies));
+                        int checkCode;
+                        using (PhaseTimes.Measure($"check: {RunName(i)}"))
+                        {
+                            checkCode = RunFramework(i, verify: true, output.Add);
+                        }
+
+                        var (code, lines) = IfBodies.Without(checkCode, output, l => Ignored(l) || IfBodies.IsKeptFinding(l, ifBodies));
                         lock (shown)
                         {
                             log($"{ProgressPrefix}{RunName(i)} (run {++done} of {toRun.Count})");
@@ -4819,6 +4960,13 @@ internal static class FormatCommand
                 {
                     break;
                 }
+            }
+
+            // Every run's check was clean (not --verify-no-changes): what verify's checks would find on this state, which a clean
+            // end of 'format' records for it (VerifyFromRecord).
+            if (replay && !verifying && !usageError)
+            {
+                CheckedClean[checkedKey] = true;
             }
 
             // A run 'dotnet format' skipped a project in stands in for the frameworks merged into it: another of them runs
@@ -4994,7 +5142,8 @@ internal static class FormatCommand
         IReadOnlyList<(string Framework, List<string> Projects)> runs,
         string workspacePath,
         Func<string, string, string, CompileView?> view,
-        List<string>? withGenerator = null)
+        List<string>? withGenerator = null,
+        IEnumerable<(string FullPath, string Framework, string Configuration)>? alsoEvaluate = null)
     {
         var solution = SolutionConfigurations(workspacePath);
         var tests = projects.AsParallel()
@@ -5005,16 +5154,18 @@ internal static class FormatCommand
             .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution, EvaluatedProperty(p.Value.FullPath, "Platforms"))))
             .Where(p => p.Others.Count > 0)
             .ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Others, StringComparer.OrdinalIgnoreCase);
+
+        // One 'dotnet msbuild' per project, framework and configuration (the default's too), all at once, with the caller's.
+        runs.SelectMany(r => r.Projects.Where(others.ContainsKey).SelectMany(p => others[p].Prepend(string.Empty).Select(c => (projects[p].FullPath, r.Framework, Configuration: c))))
+            .Concat(alsoEvaluate ?? [])
+            .Distinct()
+            .AsParallel()
+            .ForAll(x => view(x.FullPath, x.Framework, x.Configuration));
         if (others.Count == 0)
         {
             return [];
         }
 
-        // One 'dotnet msbuild' per project, framework and configuration (the default's too), all at once.
-        runs.SelectMany(r => r.Projects.Where(others.ContainsKey).SelectMany(p => others[p].Prepend(string.Empty).Select(c => (projects[p].FullPath, r.Framework, c))))
-            .Distinct()
-            .AsParallel()
-            .ForAll(x => view(x.FullPath, x.Framework, x.c));
         string? Key(string project, string framework, string configuration) =>
             view(projects[project].FullPath, framework, configuration) is { } compiled ? FrameworkFamily(framework) + "|" + compiled.Key(compiled.Compile) : null;
         return ConfigurationRuns(runs, p => others.TryGetValue(p, out var own) ? own : [], Key);
@@ -5033,6 +5184,24 @@ internal static class FormatCommand
         var (name, platform) = SplitConfiguration(configuration);
         var exitCode = Dotnet(Path.GetDirectoryName(project)!, null, ["build", project, "-c", name, .. PlatformProperty(platform), "--no-restore", "--no-incremental", "-nologo"], output.Add);
         return (exitCode, output);
+    }
+
+    /// <summary>The output of one build of several projects in one configuration (<see cref="TogetherProject"/>, <see cref="UncheckedLine"/>).</summary>
+    private static (int ExitCode, IReadOnlyList<string> Output) BuildTogether(IReadOnlyList<string> projects, string configuration)
+    {
+        var output = new List<string>();
+        var (name, platform) = SplitConfiguration(configuration);
+        var file = Path.Combine(Path.GetTempPath(), $"stylebro-check-{Guid.NewGuid():N}.proj");
+        try
+        {
+            File.WriteAllText(file, TogetherProject(projects));
+            var exitCode = Dotnet(Path.GetDirectoryName(projects[0])!, null, ["build", file, "-c", name, .. PlatformProperty(platform), "--no-restore", "--no-incremental", "-nologo"], output.Add);
+            return (exitCode, output);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
     }
 
     /// <summary>Runs dotnet; with <paramref name="output"/>, its output (stdout and stderr) goes there line by line instead of the console.</summary>

@@ -642,7 +642,13 @@ project, which `dotnet format` can't load, stays a warning). When no project has
 before `dotnet format` runs: without the analyzers it would fix only whitespace and the built-in rules and report the
 code clean. Projects without it next to ones with it are named (`Without StyleBro: ...`). The command restores once
 before the runs; that restore skips NuGet's audit (`-p:NuGetAudit=false`): vulnerability warnings (NU1901-NU1904) are
-the build's business, and with `TreatWarningsAsErrors` they failed every run. A solution filter (`.slnf`) works like
+the build's business, and with `TreatWarningsAsErrors` they failed every run. It skips the restore when the restore
+output is current: every project's `obj/project.assets.json` lists StyleBro.Analyzers, the restore succeeded, the
+packages it expects are in the package folder, and nothing it depends on changed since (the project files, the
+`.props`/`.targets`, `Directory.Packages.props`, `nuget.config` and `global.json` files of the repository and the folders
+above it, your user `NuGet.Config`). `--restore` restores anyway (a package replaced under the same version, a changed
+package source), `--no-restore` never restores. `--timings` prints how long each phase took at the end (evaluating the
+projects, the restore, each check and fix run, CSharpier, the builds `--verify-no-changes` makes). A solution filter (`.slnf`) works like
 its solution, with only its projects. A solution with several filters of it next to it (Steeltoe's
 `Steeltoe.All.slnx` and its seven `.slnf` parts) counts as that solution; the command says how to name a filter instead.
 A folder with several solutions or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
@@ -837,8 +843,14 @@ Exit codes of `stylebro-migrate format`, for CI and agents:
 
 `--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats the files
 with findings (for their rules) in a temporary copy of the repository to see whether any file would change and which
-findings the fixes keep, then deletes the copy. After a clean `stylebro-migrate format` on the same code, settings and
-options, it already knows the findings that run kept (recorded in the temporary folder) and formats no copy.
+findings the fixes keep, then deletes the copy. After a clean `stylebro-migrate format` on the same code, settings,
+options, SDK and StyleBro version, it already knows what that run found (recorded in the temporary folder): when that
+run's last step checked every target framework and configuration and found nothing but kept findings, it answers from
+the record in seconds (`Checking StyleBro's rules: nothing changed since the last clean 'stylebro-migrate format'
+here ...`) without running `dotnet format` again; otherwise it checks, and formats no copy for the kept findings it
+knows. Delete the record (`stylebro-kept` in the temporary folder) to check anyway. The builds of the configurations an
+in-solution source generator keeps from the checks still run: there the build is the check. The projects of one
+configuration build together, in one build (a shared project once).
 Plain `dotnet format --verify-no-changes` can't tell the two apart and fails on kept findings.
 
 ## Excluding vendored code
