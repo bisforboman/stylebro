@@ -40,9 +40,6 @@ internal static partial class FormatCommand
     /// <summary>The start of the record line verify says before the generator builds (<see cref="GeneratorConfigurationsLine"/>).</summary>
     private const string GeneratorMark = "#before\t";
 
-    /// <summary>The start of a record line with a kept finding verify's check reports.</summary>
-    private const string ReportedMark = "#reported\t";
-
     /// <summary>The roots whose last 'format' run (not --verify-no-changes) was a check of every plan entry that was clean (<see cref="IsCleanCheck"/>).</summary>
     private static readonly ConcurrentDictionary<string, bool> CheckedClean = new(StringComparer.OrdinalIgnoreCase);
 
@@ -278,7 +275,6 @@ internal static partial class FormatCommand
                 body.Select(KeptFinding.Parse).OfType<KeptFinding>().ToList(),
                 body.Contains(CheckedMark),
                 body.Where(l => l.StartsWith(VerdictMark, StringComparison.Ordinal)).Select(l => l.Substring(VerdictMark.Length)).ToList(),
-                body.Where(l => l.StartsWith(ReportedMark, StringComparison.Ordinal)).Select(l => KeptFinding.Parse(l.Substring(ReportedMark.Length))).OfType<KeptFinding>().ToList(),
                 body.Where(l => l.StartsWith(BuildMark, StringComparison.Ordinal)).Select(l => l.Split('\t')).Where(p => p.Length == 3).Select(p => (p[1], p[2])).ToList(),
                 body.FirstOrDefault(l => l.StartsWith(GeneratorMark, StringComparison.Ordinal))?.Substring(GeneratorMark.Length));
         }
@@ -320,10 +316,11 @@ internal static partial class FormatCommand
             RecordUnchecked(root, record.Builds);
         }
 
-        if (record.Reported.Count > 0)
+        // As verify reports a check that found only the kept findings it knows (with --json).
+        if (record.Kept.Count > 0)
         {
             JsonReport.AddRun(1, [], null);
-            JsonReport.AddKept(record.Reported);
+            JsonReport.AddKept(record.Kept);
         }
 
         record.Verdict.ForEach(log);
@@ -447,5 +444,5 @@ internal static partial class FormatCommand
     }
 
     /// <summary>What a clean 'format' recorded for --verify-no-changes (<see cref="LoadRecord"/>).</summary>
-    public sealed record CleanRecord(List<KeptFinding> Kept, bool Checked, List<string> Verdict, List<KeptFinding> Reported, List<(string Project, string Configuration)> Builds, string? GeneratorLine);
+    public sealed record CleanRecord(List<KeptFinding> Kept, bool Checked, List<string> Verdict, List<(string Project, string Configuration)> Builds, string? GeneratorLine);
 }

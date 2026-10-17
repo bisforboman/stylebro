@@ -2724,11 +2724,11 @@ internal static partial class FormatCommand
     /// <summary>
     /// Records the findings a clean 'format' run on <paramref name="root"/> kept, for a '--verify-no-changes' on the same
     /// state (<see cref="StateKey"/>): it needn't format a copy to find them (in the temporary folder; a courtesy, never an error).
-    /// When that run checked every plan entry clean (<paramref name="verdict"/>: the lines verify ends with then, the kept
-    /// findings its check <paramref name="reported"/>, the generator <paramref name="builds"/> it makes after it, and the line
-    /// it says about them, <paramref name="generatorLine"/>), verify answers from the record (<see cref="VerifyFromRecord"/>).
+    /// When that run's check of every plan entry found nothing but them (<paramref name="verdict"/>: the lines verify ends with
+    /// then, the generator <paramref name="builds"/> it makes after it, and the line it says about them, <paramref name="generatorLine"/>),
+    /// verify answers from the record (<see cref="VerifyFromRecord"/>).
     /// </summary>
-    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<KeptFinding>? reported = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null)
+    public static void SaveKept(string root, IEnumerable<string> args, IEnumerable<KeptFinding> kept, IReadOnlyCollection<string>? verdict = null, IReadOnlyCollection<(string Project, string Configuration)>? builds = null, string? generatorLine = null)
     {
         try
         {
@@ -2737,7 +2737,6 @@ internal static partial class FormatCommand
             var checks = verdict is null
                 ? []
                 : verdict.Select(v => VerdictMark + v)
-                    .Concat((reported ?? []).Select(k => ReportedMark + k))
                     .Concat((builds ?? []).Select(b => $"{BuildMark}{b.Project}\t{b.Configuration}"))
                     .Concat(generatorLine is null || builds is not { Count: > 0 } ? [] : [GeneratorMark + generatorLine])
                     .Prepend(CheckedMark);
@@ -4080,8 +4079,7 @@ internal static partial class FormatCommand
                 {
                     // The run's check reported the kept findings (and nothing else), so verify's does, and ends with these lines.
                     // Not after a run that changed files (endings only): its check was of the files before.
-                    var reported = checkedClean && changed.Count == 0 ? keptFindings : null;
-                    SaveKept(root, args, keptFindings, reported is null ? null : CleanVerdict(root, reported), reported, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null);
+                    SaveKept(root, args, keptFindings, checkedClean && changed.Count == 0 ? CleanVerdict(root, keptFindings) : null, UncheckedByFormat.TryRemove(Key(root), out var builds) ? builds : null, GeneratorLines.TryRemove(Key(root), out var generatorLine) ? generatorLine : null);
                 }
 
                 JsonReport.AddKept(keptFindings);

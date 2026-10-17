@@ -227,12 +227,11 @@ public sealed partial class MigrationTests
         var project = Path.Combine(root, "src", "A", "A.csproj");
         string[] formatArgs = [root, "--no-restore", FormatCommand.CheckFirstOption];
         var verdict = FormatCommand.CleanVerdict(root, [kept]);
-        FormatCommand.SaveKept(root, formatArgs, [kept], verdict, [kept], [(project, "Release")], "Configurations: A: it takes an in-solution source generator ...");
+        FormatCommand.SaveKept(root, formatArgs, [kept], verdict, [(project, "Release")], "Configurations: A: it takes an in-solution source generator ...");
 
         var record = FormatCommand.LoadRecord(root, [root, "--verify-no-changes"])!;
         Assert.True(record.Checked);
         Assert.Equal([kept.ToString()], record.Kept.Select(k => k.ToString()));
-        Assert.Equal([kept.ToString()], record.Reported.Select(k => k.ToString()));
         Assert.Equal(new List<(string, string)> { (project, "Release") }, record.Builds);
         Assert.Equal(verdict, record.Verdict);
         Assert.Equal(kept.ToString(), FormatCommand.LoadKept(root, [root])!.Single().ToString()); // the old reader still reads it
