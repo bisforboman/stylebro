@@ -479,7 +479,7 @@ internal static class BaselineCommand
 
         public Dictionary<string, int> NotCovered { get; }
 
-        /// <summary>The findings in files outside the run's folder, not added (<see cref="Build"/>).</summary>
+        /// <summary>Gets the number of findings in files outside the run's folder, which aren't added (<see cref="Build"/>).</summary>
         public int Outside { get; }
     }
 }

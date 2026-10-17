@@ -19,7 +19,10 @@ wrong lines), to find every violation `dotnet format` would fix today and
 writes them to the baseline the build reads: the file `<StyleBroBaseline>` names (see below), else the nearest
 `stylebro.baseline` in that folder or above, else a new one in that folder (the current folder when you name a solution
 or project below it). It says where it wrote; with `<StyleBroBaseline>none</StyleBroBaseline>` it writes nothing.
-Entries of an existing baseline for files outside that folder stay. Commit the file.
+It asks each project which file its build reads (a `<StyleBroBaseline>` in a nested `src/Directory.Build.props` counts),
+so projects that read different files each get the findings in the files they compile, and it says so. Findings in files
+outside that folder (`src/` files the projects of `tests/Tests.slnx` compile) aren't added, and the entries an existing
+baseline has for them stay. Commit the file.
 
 ```text
 Wrote stylebro.baseline: 820 violations on 759 lines.

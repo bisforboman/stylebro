@@ -925,13 +925,17 @@ cause: they reference TestFSharp.fsproj"); a restore doesn't change it, and the 
 Where a project's code tests a symbol a configuration may set (`DEBUG`, `RELEASE`, `TRACE`, or one of its own
 `DefineConstants`), `format`, `--verify-no-changes`, the preview and `baseline` also run the other configurations its
 `Configurations` lists that the solution builds (Release; at most four), for that project only, and only where its
-code compiles differently than in a run already made: the comparison that lets frameworks share a run. The
-`Configurations:` line names them; their runs show up as `== Release` (or `== net8.0, Release`). A repository whose
-code tests only framework symbols (`NET8_0_OR_GREATER`) gets no extra run. A project that runs an in-solution source
+code compiles differently than in a run already made: the comparison that lets frameworks share a run. A solution
+platform other than Any CPU counts as a configuration of its own (`Release|x64`, also `Debug|x64` in a solution with
+only x64), so a project's `'$(Configuration)|$(Platform)' == 'Release|x64'` code is run too. The `Configurations:` line
+names them; their runs show up as `== Release` (or `== net8.0, Release`). A repository whose code tests only framework
+symbols (`NET8_0_OR_GREATER`) gets no extra run, and neither do the files of a NuGet package a project compiles (a
+source package's `#if DEBUG`): `format` never changes them. A project that runs an in-solution source
 generator stays in its default configuration (`format` builds the generator for that one only) and is named so;
 `--verify-no-changes` then builds it in its other configurations (`Not checked by format: UsesGen in Release ...:
 building it...`) and is not clean when that build reports one of the rules `format` fixes (`Release build of UsesGen: 2
-findings`), which you fix by hand there.
+findings`), which you fix by hand there, or when that build fails (`Release build of UsesGen failed`, with its first
+errors): then it checked nothing.
 
 ### Lines whose if/else body `#if` decides
 
@@ -949,9 +953,18 @@ In code like this, `#if` decides whether a line is the body of an `if`, `else` o
 Where the symbol is defined the last line is the `else` body, and the formatter indents it; where it isn't, it's a
 statement of its own, and the formatter un-indents it. Each framework's or configuration's run undid the other's, so
 `format` never settled. It leaves the indentation of such lines as it is (`Indentation kept: ...` names them; it compares
-the parses of the symbols its runs define), formats the rest of the file, and their whitespace findings don't count in
-`--verify-no-changes`. A build with IDE0055 as an error still reports one of them in the configuration whose indentation
-the line doesn't have: braces (`else { ... }` around both branches' bodies) settle it for every build.
+the parses of the symbols its runs define), formats the rest of the file and of those lines (`v+1` becomes `v + 1`), and
+their indentation findings don't count in `--verify-no-changes`. A build with IDE0055 as an error still reports one of
+them in the configuration whose indentation the line doesn't have: braces (`else { ... }` around both branches' bodies)
+settle it for every build.
+
+### Documentation comments indented with tabs and spaces
+
+`dotnet format` leaves a documentation comment's other `///` lines, and the line of the code below it, when they're
+indented with tabs where the first `///` line has spaces (or the other way around) and reach the same column, while the
+build's IDE0055 (`EnforceCodeStyleInBuild`) reports them. `format` rewrites the indentation of exactly those lines as
+`indent_style` and `tab_width` ask, and `--verify-no-changes` reports them (`IDE0055: Fix formatting: indent this line
+with spaces, like the first line of the documentation comment above it`). Nothing else on those lines changes.
 
 ## Old-style (non-SDK) projects
 
