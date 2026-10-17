@@ -55,7 +55,8 @@ public sealed class ConditionalLayoutCodeFixProvider : CodeFixProvider
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var wanted = new HashSet<int>(diagnostics.Select(d => d.Location.SourceSpan.Start));
         var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
-        var changes = ConditionalLayout.GetFindings(root, text, options)
+        var mirror = !Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, DiagnosticIds.OperatorPlacement, cancellationToken);
+        var changes = ConditionalLayout.GetFindings(root, text, options, mirror)
             .Where(f => wanted.Contains(f.Token.SpanStart))
             .Select(f => f.Change)
             .ToList();
