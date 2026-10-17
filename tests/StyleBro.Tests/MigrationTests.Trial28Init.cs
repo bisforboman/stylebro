@@ -40,13 +40,23 @@ public sealed partial class MigrationTests
         var a = Path.Combine(root, "App", "A.cs");
         var before = File.ReadAllText(a);
 
-        // Not even readable, then readable but not writable: both stop the run before anything is written.
-        foreach (var share in new[] { FileShare.None, FileShare.Read })
+        // Not even readable (locked), then readable but not writable (read-only): both stop the run before anything is written.
+        var b = Path.Combine(root, "App", "B.cs");
+        foreach (var locked in new[] { true, false })
         {
             string output;
-            using (new FileStream(Path.Combine(root, "App", "B.cs"), FileMode.Open, share == FileShare.None ? FileAccess.ReadWrite : FileAccess.Read, share))
+            if (locked)
             {
+                using (new FileStream(b, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    output = Capture(() => Assert.Equal(1, Program.Migrate(new[] { root, "--write" })));
+                }
+            }
+            else
+            {
+                File.SetAttributes(b, FileAttributes.ReadOnly);
                 output = Capture(() => Assert.Equal(1, Program.Migrate(new[] { root, "--write" })));
+                File.SetAttributes(b, FileAttributes.Normal);
             }
 
             Assert.Contains("Couldn't read or write this file (open in another program?): App/B.cs. Nothing was written", output, StringComparison.Ordinal);
