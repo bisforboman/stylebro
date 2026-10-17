@@ -132,7 +132,7 @@ internal static class DocIndentation
 
     /// <summary>A finding line per line <see cref="Find"/> found, like 'dotnet format --verify-no-changes' writes them (IDE0055, as the build reports it).</summary>
     public static List<string> FindingLines(IEnumerable<(string File, List<int> Lines, bool UseTabs, int TabWidth)> found) =>
-        found.SelectMany(f => f.Lines.Select(l => $"{f.File}({l},1): warning IDE0055: Fix formatting: indent this line with {(f.UseTabs ? "tabs" : "spaces")}, like the first line of the documentation comment above it ('dotnet format' leaves it, the build reports it)."))
+        found.SelectMany(f => f.Lines.Select(l => $"{f.File}({l},1): warning IDE0055: Fix formatting: indent this line with {(f.UseTabs ? "tabs" : "spaces")}, like the first line of the documentation comment above it ('dotnet format' leaves it; the build's IDE0055 reports it where documentation isn't generated; 'stylebro-migrate format' fixes it)."))
             .ToList();
 
     // How many columns the whitespace takes.

@@ -91,7 +91,11 @@ internal static class PreviewCommand
     /// </summary>
     public static int Run(string? command, string[] options, Func<string[], Action<string>, int>? format = null)
     {
-        format ??= FormatCommand.RunPlain;
+        // Each file keeps its own line ending, as in FormatCommand.Run (trial 28: every changed file of an LF repository was
+        // CRLF in the patch, the whitespace pass writing the OS's ending without end_of_line).
+        var formatOnce = format ?? FormatCommand.RunPlain;
+        var keepingEndings = FormatCommand.KeepingLineEndings((a, o) => formatOnce(a, o!));
+        format = (a, o) => keepingEndings(a, o);
         var clock = Stopwatch.StartNew();
         var named = options.FirstOrDefault(o => o.StartsWith("--diff=", StringComparison.Ordinal))?.Substring("--diff=".Length);
         var patch = named is null ? null : Path.GetFullPath(named);

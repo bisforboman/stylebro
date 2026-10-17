@@ -74,7 +74,7 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
-    public void Format_FindsTheConfigurationsWhoseCodeDiffers_AndLeavesGeneratorProjectsInTheirDefault()
+    public void Format_FindsTheConfigurationsWhoseCodeDiffers_GeneratorProjectsToo()
     {
         // MimeKit's Benchmarks: one framework in <TargetFrameworks> (an outer evaluation without Compile items) and '#if DEBUG'.
         Write("App.slnx", "<Solution>\n  <Project Path=\"Bench/Bench.csproj\" />\n</Solution>\n");
@@ -82,12 +82,20 @@ public sealed partial class MigrationTests
         Write("Bench/Program.cs", "class P\n{\n#if DEBUG\n    int a;\n#else\n    int b;\n#endif\n}\n");
         Assert.Equal(["Release"], FormatCommand.WorkspaceConfigurations(Path.Combine(root, "App.slnx")));
 
-        // A project that runs an in-solution source generator stays in its default configuration (it's built for that one only).
+        // A project that runs an in-solution source generator gets them too (trial 28, owner: "Fix it in a Release run"; format
+        // builds the generator in Release first).
         Write("Gen/Gen.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>netstandard2.0</TargetFramework></PropertyGroup>\n</Project>\n");
         Write("Bench2/Bench2.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFrameworks>net8.0</TargetFrameworks></PropertyGroup>\n  <ItemGroup><ProjectReference Include=\"../Gen/Gen.csproj\" OutputItemType=\"Analyzer\" ReferenceOutputAssembly=\"false\" /></ItemGroup>\n</Project>\n");
         Write("Bench2/Program.cs", "class P\n{\n#if DEBUG\n    int a;\n#endif\n}\n");
         Write("App2.slnx", "<Solution>\n  <Project Path=\"Bench2/Bench2.csproj\" />\n  <Project Path=\"Gen/Gen.csproj\" />\n</Solution>\n");
-        Assert.Empty(FormatCommand.WorkspaceConfigurations(Path.Combine(root, "App2.slnx")));
+        Assert.Equal(["Release"], FormatCommand.WorkspaceConfigurations(Path.Combine(root, "App2.slnx")));
+
+        // Trial 28: no '#if', but a file only Release compiles.
+        Write("Tel/Tel.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>\n  <ItemGroup Condition=\"'$(Configuration)' != 'Release'\"><Compile Remove=\"Telemetry.Release.cs\" /></ItemGroup>\n</Project>\n");
+        Write("Tel/A.cs", "class A\n{\n}\n");
+        Write("Tel/Telemetry.Release.cs", "class T\n{\n}\n");
+        Write("App3.slnx", "<Solution>\n  <Project Path=\"Tel/Tel.csproj\" />\n</Solution>\n");
+        Assert.Equal(["Release"], FormatCommand.WorkspaceConfigurations(Path.Combine(root, "App3.slnx")));
     }
 
     [Fact]

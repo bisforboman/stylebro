@@ -52,7 +52,9 @@ without diagnostics, so nothing can hide it. Either run `dotnet format whitespac
 easy to review), or check only `dotnet format style` and `dotnet format analyzers` in CI. `stylebro-migrate baseline`
 says how many such formatting changes it found (whitespace, line endings, charset, final newline, using order:
 `dotnet format` reports them as WHITESPACE, ENDOFLINE, CHARSET, FINALNEWLINE and IMPORTS). Files under `obj/` and `bin/`
-(generated AssemblyInfo and global usings) don't count.
+(generated AssemblyInfo and global usings) don't count. A formatting change also brings back the baselined findings on
+the lines it changes (an entry matches a line's text): write the baseline after `stylebro-migrate format`'s whitespace
+changes, not before.
 
 **Findings kept on purpose are covered too.** A rename StyleBro's fix leaves because it would break code only the fix
 can see (the name read by reflection, used in generated code: see

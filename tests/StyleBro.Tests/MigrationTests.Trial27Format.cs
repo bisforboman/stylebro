@@ -31,9 +31,10 @@ public sealed partial class MigrationTests
         FormatCommand.RecordUnchecked(root, [(project, "Release")]);
         var line = FormatCommand.UncheckedLine(root, said.Add, (_, _) => (1, [$"{Path.Combine(root, "Gen", "G.cs")}(1,1): error CS8370: Feature 'file-scoped namespace' is not available in C# 7.3. [{gen}]"]));
 
-        Assert.Equal("Release build of Lib: no findings.", said[1]);
-        Assert.Equal("Release build of Lib failed, first error:", said[2]);
-        Assert.Equal("  Gen/G.cs(1,1): CS8370: Feature 'file-scoped namespace' is not available in C# 7.3.", said[3]);
+        // Trial 28: no "no findings." right before "failed".
+        Assert.Equal("Release build of Lib failed, first error:", said[1]);
+        Assert.Equal("  Gen/G.cs(1,1): CS8370: Feature 'file-scoped namespace' is not available in C# 7.3.", said[2]);
+        Assert.Equal(3, said.Count);
         Assert.StartsWith("Not clean: the build of Lib in Release failed (above)", line, StringComparison.Ordinal);
 
         // A failed build without any error line says its exit code; a build that succeeds is clean.

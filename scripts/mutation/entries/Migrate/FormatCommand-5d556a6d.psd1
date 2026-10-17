@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
     Find = '(frameworks.Length == 1 && EvaluatedProperty(fullPath, "TargetFrameworks").Trim().Length > 0)'
     Replace = 'false'
-    Tests = 'MigrationTests.Format_FindsTheConfigurationsWhoseCodeDiffers_AndLeavesGeneratorProjectsInTheirDefault'
+    Tests = 'MigrationTests.Format_FindsTheConfigurationsWhoseCodeDiffers_GeneratorProjectsToo'
 }

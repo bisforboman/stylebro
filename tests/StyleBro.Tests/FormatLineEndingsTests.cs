@@ -78,6 +78,30 @@ public sealed class FormatLineEndingsTests : IDisposable
         Assert.Contains(lines, l => l.StartsWith("1 whitespace finding is only this OS's line ending", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void Verify_AFileEndOfLineConverts_IsNotClean()
+    {
+        // Trial 28: 'end_of_line = crlf' and an LF file: "Clean" (only this OS's line ending), while 'format' converted it.
+        var root = NewFolder(("C.cs", "class C\n{\n}\n"), (".editorconfig", "root = true\n\n[*.cs]\nend_of_line = crlf\n"));
+        var endOfLine = $"{Path.Combine(root, "C.cs")}(1,8): error ENDOFLINE: Fix end of line marker. Replace 1 characters with '\\r\\n'.";
+        var lines = new List<string>();
+
+        var code = FormatCommand.Run(new[] { root, "--verify-no-changes" }, lines.Add, (args, output) =>
+        {
+            if (args.Contains("--verify-no-changes"))
+            {
+                output?.Invoke(endOfLine);
+                return 2;
+            }
+
+            File.WriteAllText(Path.Combine(args[0], "C.cs"), "class C\r\n{\r\n}\r\n");
+            return 0;
+        });
+
+        Assert.Equal(FormatCommand.NotCleanExitCode, code);
+        Assert.Contains("Not clean: formatting would change 1 file. Run 'stylebro-migrate format'.", lines);
+    }
+
     [Theory]
     [InlineData("a\r\nb\r\n", true)]
     [InlineData("a\nb\n", false)]

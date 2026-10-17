@@ -162,7 +162,7 @@ public sealed partial class MigrationTests
     {
         FormatCommand.ResetExplained();
         var line = FormatCommand.Explain("Warnings were encountered while loading the workspace. Set the verbosity option to the 'diagnostic' level to log warnings.", "net6.0");
-        Assert.Equal("'dotnet format' had warnings loading the workspace in its net6.0 run (a project or reference it couldn't load completely, e.g. one in another language); they don't stop the run. To see them, add '--verbosity diagnostic' to this 'stylebro-migrate format' command.", line);
+        Assert.Equal("'dotnet format' had warnings loading the workspace in its net6.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'stylebro-migrate format' command.", line);
         Assert.DoesNotContain("dotnet format <solution>", line, StringComparison.Ordinal);
         FormatCommand.ResetExplained();
     }
@@ -216,8 +216,8 @@ public sealed partial class MigrationTests
     [Fact]
     public void Verify_BuildsTheConfigurationsFormatSkipsForAGeneratorProject()
     {
-        Assert.StartsWith("Configurations: UsesGen: its default configuration only", FormatCommand.GeneratorConfigurationsLine(["UsesGen"], verify: true), StringComparison.Ordinal);
-        Assert.StartsWith("Configurations: A, B: their default configuration only", FormatCommand.GeneratorConfigurationsLine(["A", "B"], verify: false), StringComparison.Ordinal);
+        Assert.StartsWith("Configurations: UsesGen: it takes an in-solution source generator, so a build of its other configurations", FormatCommand.GeneratorConfigurationsLine(["UsesGen"]), StringComparison.Ordinal);
+        Assert.StartsWith("Configurations: A, B: they take an in-solution source generator, so a build of their", FormatCommand.GeneratorConfigurationsLine(["A", "B"]), StringComparison.Ordinal);
 
         var project = Path.Combine(root, "src", "UsesGen", "UsesGen.csproj");
         var greeter = Path.Combine(root, "src", "UsesGen", "Greeter.cs");
@@ -240,7 +240,7 @@ public sealed partial class MigrationTests
         });
 
         Assert.Equal(["UsesGen.csproj Release"], built);
-        Assert.Equal("Not checked by format: UsesGen in Release (it takes an in-solution source generator): building it...", said[0]);
+        Assert.Equal("Building UsesGen in Release to check it (it takes an in-solution source generator)...", said[0]);
         Assert.Equal("Release build of UsesGen: 2 findings:", said[1]);
         Assert.Equal("  src/UsesGen/Greeter.cs(8,34): BRO1509: Put 'Empty' on separate lines (https://bisforboman.github.io/stylebro/rules/BRO1509/)", said[2]);
         Assert.Equal(4, said.Count);
