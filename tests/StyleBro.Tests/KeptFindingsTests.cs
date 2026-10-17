@@ -228,6 +228,90 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.Equal(expected, reason);
     }
 
+    // Trial 28 (ZLogger, owner's choice 2026-10-17 "Keep such names"): an interpolated string handler whose AppendFormatted
+    // takes the hole's text as a [CallerArgumentExpression] argument logs '{UserId}' under the key "UserId".
+    private const string LogKeyHandler = """
+        [System.Runtime.CompilerServices.InterpolatedStringHandler]
+        public ref struct KeyHandler
+        {
+            public KeyHandler(int literalLength, int formattedCount) { }
+
+            public void AppendLiteral(string s) { }
+
+            public void AppendFormatted<T>(T value, [System.Runtime.CompilerServices.CallerArgumentExpression("value")] string? name = null) { }
+        }
+
+        """;
+
+    [Theory]
+    [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; Log($\"user {UserId}\"); }", KeptReason.NameIsLogKey)]
+    [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; Log($\"user {UserId + 1}\"); }", KeptReason.NameIsLogKey)]
+    [InlineData(DiagnosticIds.ParameterCasing, "public static void Run(int UserId) => Log($\"user {UserId}\");", KeptReason.NameIsLogKey)]
+    [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; string s = $\"user {UserId}\"; }", null)]
+    [InlineData(DiagnosticIds.VariableCasing, "public static void Run() { int UserId = 42; Log($\"user {1}\"); Log(UserId); }", null)]
+    public async Task ANameInALogKeyHole_IsKept(string id, string member, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            id,
+            ("Program.cs", "internal static class Program\n{\n    " + member + "\n\n    public static void Log(ref KeyHandler handler) { }\n\n    public static void Log(int value) { }\n}\n"),
+            ("Handler.cs", LogKeyHandler));
+
+        Assert.Equal(expected, reason);
+    }
+
+    [Fact]
+    public async Task ANameInALogKeyHole_SaysWhereAndWhichHandler()
+    {
+        var (solution, document, diagnostic) = await FindAsync(
+            DiagnosticIds.VariableCasing,
+            ("Program.cs", "public static class Program\n{\n    public static void Run()\n    {\n        int UserId = 42;\n        Log($\"user {UserId}\");\n    }\n\n    public static void Log(ref KeyHandler handler) { }\n}\n"),
+            ("Handler.cs", LogKeyHandler));
+        var file = Path.Combine(Path.GetTempPath(), $"stylebro-kept-test-{Guid.NewGuid():N}.tsv");
+        Environment.SetEnvironmentVariable(KeptFinding.Variable, file);
+        try
+        {
+            await CamelCaseRenamer.RenameAsync(solution, new[] { (document, diagnostic) }, CancellationToken.None);
+
+            var kept = KeptFinding.Parse(File.ReadAllLines(file).Single())!;
+            Assert.Equal(KeptReason.NameIsLogKey, kept.Reason);
+            Assert.EndsWith("Program.cs(6) in KeyHandler", kept.Where);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(KeptFinding.Variable, null);
+            File.Delete(file);
+        }
+    }
+
+    [Theory]
+    [InlineData("Log($\"{pair.zqxUser}\");", KeptReason.NameIsLogKey)]
+    [InlineData("Log($\"{1}\"); _ = pair.zqxUser;", null)]
+    public async Task ATupleElementInALogKeyHole_IsKept(string use, KeptReason? expected)
+    {
+        var (solution, _, _) = await FindAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "internal class C\n{\n    private int _zqxN;\n\n    public void Run()\n    {\n        (int zqxUser, int zqxId) pair = (1, 2);\n        " + use + "\n    }\n\n    public int GetN() => _zqxN;\n\n    private static void Log(ref KeyHandler handler) { }\n}\n"),
+            ("Handler.cs", LogKeyHandler));
+
+        Assert.Equal(expected, await TupleElementRenamer.GetKeptReasonAsync(solution, "zqxUser", "ZqxUser", "C.cs", CancellationToken.None));
+    }
+
+    // Trial 28 (Jackett): renaming a base member that a derived type hides with 'new' leaves that 'new' hiding nothing (CS0109).
+    [Theory]
+    [InlineData("protected int count { get; set; }", "private new string count => \"x\";", KeptReason.HiddenByNewMember)]
+    [InlineData("protected int count { get; set; }", "private string Count2 => \"x\";", null)]
+    [InlineData("internal int total;", "internal new string total = \"x\";", KeptReason.HiddenByNewMember)]
+    public async Task ABaseMemberHiddenByANewMember_IsKept(string baseMember, string derivedMember, KeptReason? expected)
+    {
+        var id = baseMember.Contains('{') ? DiagnosticIds.ElementPascalCase : DiagnosticIds.FieldPascalCase;
+        var reason = await GetReasonAsync(
+            id,
+            ("Base.cs", "internal class Base\n{\n    " + baseMember + "\n}\n"),
+            ("Derived.cs", "internal class Derived : Base\n{\n    " + derivedMember + "\n}\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
     // Trial 27 (PalCalc): the assembly attributes MSBuild writes under obj/ were the evidence for keeping a public field 'c'.
     [Theory]
     [InlineData("obj/Debug/net8.0/App.AssemblyInfo.cs", null)]
@@ -1037,7 +1121,7 @@ public sealed class KeptFindingsTests : IDisposable
 
         var first = solution.GetDocument(ids[0])!;
         var compilation = (await first.Project.GetCompilationAsync())!;
-        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FieldNamingAnalyzer(), new PascalCaseNamingAnalyzer());
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FieldNamingAnalyzer(), new PascalCaseNamingAnalyzer(), new CamelCaseNamingAnalyzer());
         var tree = await first.GetSyntaxTreeAsync();
         var diagnostic = (await compilation.WithAnalyzers(analyzers).GetAnalyzerDiagnosticsAsync()).First(d => d.Id == id && d.Location.SourceTree == tree);
         return (solution, first, diagnostic);

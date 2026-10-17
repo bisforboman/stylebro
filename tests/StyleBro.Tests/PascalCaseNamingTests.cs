@@ -291,6 +291,67 @@ public class PascalCaseNamingTests
             """,
         ]);
 
+    // Trial 28 (Jackett): a 'new' member exists to hide the base member by its name; renamed, it hid nothing (CS0109).
+    [Fact]
+    public Task NewMembersHidingABaseMember_AreNotReported() => VerifyNotFixedAsync(
+        [
+            """
+            public class ConfigurationData
+            {
+            }
+
+            public class ConfigurationDataApiKey : ConfigurationData
+            {
+            }
+
+            public abstract class BaseIndexer
+            {
+                protected ConfigurationData configData = new ConfigurationDataApiKey();
+
+                protected void {|BRO1309:download|}()
+                {
+                }
+
+                public class {|BRO1309:nested|}
+                {
+                }
+            }
+
+            public class MyIndexer : BaseIndexer
+            {
+                private new ConfigurationDataApiKey configData => (ConfigurationDataApiKey)base.configData;
+
+                private new void download()
+                {
+                }
+
+                private new class nested
+                {
+                }
+
+                public string Get() => configData.ToString();
+            }
+            """,
+        ]);
+
+    // The base member's rename would leave the derived 'new' member hiding nothing.
+    [Fact]
+    public Task ABaseMemberADerivedNewMemberHides_KeepsTheName() => VerifyNotFixedAsync(
+        [
+            """
+            public class Base
+            {
+                protected int {|BRO1309:count|} => 1;
+            }
+            """,
+            """
+            public class Derived : Base
+            {
+                private new int count => 2;
+            }
+            """,
+        ]);
+
     [Fact]
     public Task PropertyNamesInStrings_KeepTheName() => VerifyNotFixedAsync(
         [

@@ -53,6 +53,57 @@ public class CamelCaseNamingTests
         },
         "dotnet_diagnostic.IDE0042.severity = warning");
 
+    // Trial 28 (Jackett): the 'this.' a local named like the method made necessary goes with the rename where the repository
+    // asks for no qualifier (BRO1131 writes it while the local shadows the method).
+    [Theory]
+    [InlineData("dotnet_style_qualification_for_method = false:suggestion", "return Download(link) + download.Method + this.Method;")]
+    [InlineData("dotnet_style_qualification_for_method = true", "return this.Download(link) + download.Method + this.Method;")]
+    [InlineData(null, "return this.Download(link) + download.Method + this.Method;")]
+    public Task AThisALocalMadeNecessary_GoesWithTheRename(string? editorConfig, string fixedReturn) => VerifyFixAsync(
+        """
+        public class Settings
+        {
+            public string Method { get; set; } = string.Empty;
+        }
+
+        public class Indexer
+        {
+            public string Method { get; } = string.Empty;
+
+            public Settings Definition { get; } = new Settings();
+
+            public string Get(string link)
+            {
+                var {|BRO1301:Download|} = Definition;
+                return this.Download(link) + Download.Method + this.Method;
+            }
+
+            private string Download(string link) => link;
+        }
+        """,
+        """
+        public class Settings
+        {
+            public string Method { get; set; } = string.Empty;
+        }
+
+        public class Indexer
+        {
+            public string Method { get; } = string.Empty;
+
+            public Settings Definition { get; } = new Settings();
+
+            public string Get(string link)
+            {
+                var download = Definition;
+                FIXED
+            }
+
+            private string Download(string link) => link;
+        }
+        """.Replace("FIXED", fixedReturn, StringComparison.Ordinal),
+        editorConfig);
+
     [Fact]
     public Task Variables_AreRenamedEverywhere() => VerifyFixAsync(
         """

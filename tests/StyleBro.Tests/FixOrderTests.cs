@@ -1525,6 +1525,36 @@ public class FixOrderTests
         "BRO1303",
         "BRO1306");
 
+    // Trial 28 (Jackett): a local 'Download' shadows the method 'base.Download' calls, so BRO1131 writes 'this.Download'; once
+    // BRO1301 renames the local, the 'this.' is the repository's unwanted qualifier, and the rename drops it.
+    [Fact]
+    public Task BaseCall_WithALocalThatShadowsTheMethod() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class Settings
+        {
+            public string Method { get; set; } = string.Empty;
+        }
+
+        public class BaseIndexer
+        {
+            protected string Download(string link, string method) => link + method;
+        }
+
+        public class MyIndexer : BaseIndexer
+        {
+            public Settings Definition { get; } = new Settings();
+
+            public string Get(string link)
+            {
+                var Download = Definition;
+                return base.Download(link, Download.Method);
+            }
+        }
+        """,
+        "dotnet_style_qualification_for_method = false:suggestion\n",
+        "BRO1131",
+        "BRO1301");
+
     // StabilityMatrix (CSharpier's layout): IDE0055 put '{ get; init; }' on its own line below a split generic type, BRO1527
     // joined it back, on every run.
     [Fact]
