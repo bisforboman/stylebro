@@ -13,7 +13,8 @@ namespace StyleBro.Analyzers;
 
 /// <summary>
 /// Files whose findings the suppressors hide (<see cref="PackageFileSuppressor"/>: NuGet packages and git submodules;
-/// <see cref="GeneratedFileSuppressor"/>: source generator output) aren't analyzed at all: every analyzer used to run on
+/// <see cref="GeneratedFileSuppressor"/>: source generator output; <see cref="OutsideRepositorySuppressor"/>: files outside the
+/// repository) aren't analyzed at all: every analyzer used to run on
 /// them and the findings were dropped afterwards. 'dotnet format' runs the analyzers once per id it fixes, so
 /// Spectre.Console's 281 Polyfill files from the package cache took about half of its netstandard2.0 run (trial 24). Every
 /// analyzer's Initialize wraps its context with <see cref="SkipForeignFiles"/>; whether a tree is foreign is decided once
@@ -62,9 +63,11 @@ internal static class ForeignFiles
         global.TryGetValue(PackageFileSuppressor.Property, out var packages);
         global.TryGetValue(PackageFileSuppressor.SubmoduleProperty, out var submodules);
         global.TryGetValue(GeneratedFileSuppressor.Property, out var generated);
+        global.TryGetValue(OutsideRepositorySuppressor.Property, out var repository);
         return PackageFileSuppressor.IsPackageFile(path, packages)
             || PackageFileSuppressor.IsSubmoduleFile(path, submodules)
-            || GeneratedFileSuppressor.IsGeneratedFile(path, generated);
+            || GeneratedFileSuppressor.IsGeneratedFile(path, generated)
+            || OutsideRepositorySuppressor.IsOutside(path, repository);
     }
 
     private static bool IsForeign(ISymbol symbol, AnalyzerOptions options) =>

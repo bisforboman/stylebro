@@ -73,6 +73,42 @@ public class PackageFileSuppressorTests
         Assert.Equal(suppressed, Assert.Single(diagnostics).IsSuppressed);
     }
 
+    // Trial 27: '..\..\outside\Shared.cs' linked into a project. Only full paths, and only with the repository's folder.
+    [Theory]
+    [InlineData(@"C:\work\outside\Shared.cs", @"C:\work\app", true)]
+    [InlineData(@"C:\work\app\src\Lib\..\..\..\outside\Shared.cs", @"C:\work\app\", true)]
+    [InlineData(@"C:\work\app-old\Shared.cs", @"C:\work\app", true)]
+    [InlineData(@"C:\work\app\src\Lib\Program.cs", @"C:\work\app", false)]
+    [InlineData(@"c:/work/APP/src/Lib/Program.cs", @"C:\work\app", false)]
+    [InlineData(@"C:\work\outside\Shared.cs", null, false)]
+    [InlineData(@"C:\work\outside\Shared.cs", "", false)]
+    [InlineData(@"C:\work\outside\Shared.cs", "none", false)]
+    [InlineData("Shared.cs", @"C:\work\app", false)]
+    [InlineData("/home/me/outside/Shared.cs", "/home/me/app", true)]
+    public void IsOutsideRepository(string path, string? root, bool expected)
+    {
+        Assert.Equal(expected, OutsideRepositorySuppressor.IsOutside(path, root));
+    }
+
+    // StyleBro's findings and the built-in rules' its preset and init turn on; another analyzer's stay.
+    [Theory]
+    [InlineData(@"C:\work\outside\Shared.cs", "BRO1107", true)]
+    [InlineData(@"C:\work\outside\Shared.cs", "IDE0055", true)]
+    [InlineData(@"C:\work\outside\Shared.cs", "CA1000", false)]
+    [InlineData(@"C:\work\app\src\Program.cs", "BRO1107", false)]
+    [InlineData(@"C:\work\app\src\Program.cs", "IDE0055", false)]
+    public async Task SuppressesFindingsOutsideTheRepository(string path, string id, bool suppressed)
+    {
+        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText("class C { }", path: path) }, Array.Empty<MetadataReference>());
+        var global = ImmutableDictionary<string, string>.Empty.Add(OutsideRepositorySuppressor.Property, @"C:\work\app");
+        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new Provider(global));
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FakeRule(id), new OutsideRepositorySuppressor());
+        var diagnostics = await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
+            .GetAnalyzerDiagnosticsAsync();
+
+        Assert.Equal(suppressed, Assert.Single(diagnostics).IsSuppressed);
+    }
+
 #pragma warning disable RS1001 // A stand-in for a rule, never loaded as an analyzer.
     internal sealed class FakeRule : DiagnosticAnalyzer
     {
