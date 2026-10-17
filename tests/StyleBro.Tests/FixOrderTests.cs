@@ -1707,6 +1707,29 @@ public class FixOrderTests
         "BRO1519",
         "BRO1527");
 
+    // A multi-line auto-property's blank line below it, in the slot another member takes: BRO1527 puts the property on one
+    // line, so the blank line isn't BRO1519's and stays with the slot (trial 27: members that stay neighbours keep their
+    // gap, so the case above no longer moves one).
+    [Fact]
+    public Task AutoAccessors_SortedAboveANewNeighbourWithoutBro1505() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            internal int B
+            {
+                get;
+                set;
+            }
+
+            internal int A { get; set; }
+            public int C { get; set; }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none\n",
+        "BRO1001",
+        "BRO1519",
+        "BRO1527");
+
     [Fact]
     public Task EmptyTypeBody_NextToASemicolonAndASingleLineBlock() => AssertConvergesInEveryOrderWithConfigAsync(
         """

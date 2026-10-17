@@ -1742,6 +1742,43 @@ public class MemberOrderingTests
         """,
         FieldsFirst);
 
+    // BRO1505 off: the blank line BRO1519 put below a method's '}' belongs to that '}'. A field sorted into its place below
+    // another field (not its old neighbour) doesn't get it.
+    [Fact]
+    public Task Bro1519sBlankLine_IsNotLeftBetweenTwoFields() => VerifyFixAsync(
+        """
+        class C
+        {
+            int a;
+            void M()
+            {
+            }
+
+            int {|BRO1001:b|};
+            void N()
+            {
+            }
+
+            int c;
+        }
+        """,
+        """
+        class C
+        {
+            int a;
+            int b;
+            int c;
+            void M()
+            {
+            }
+
+            void N()
+            {
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1505.severity = none");
+
     // Trial 27 (the Microsoft style, BRO1505 off): the fields moved up stay together, and the method that took the last
     // slot gets its blank line below the '}' above it.
     [Fact]

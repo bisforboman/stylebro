@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Analyzers/Ordering/MemberOrdering.cs'
     Find = '                layout = SyntaxFactory.TriviaList();'
     Replace = ''
-    Tests = 'StyleBro.Tests.FixOrderTests.Sort_ExpandedBlocks_BRO1519sBlankLineFollowsTheBrace'
+    Tests = 'MemberOrderingTests.Bro1519sBlankLine_IsNotLeftBetweenTwoFields'
 }
