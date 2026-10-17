@@ -79,7 +79,7 @@ internal static class PropertySummaries
     /// without one reads as 'Gets', and a summary is right when it starts with the words and a space ('Gets or sets' also
     /// starts with 'Gets '), except 'Gets or sets' for a restricted setter.
     /// </remarks>
-    public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text, bool styleSharp = false)
+    public static Finding? GetFinding(PropertyDeclarationSyntax property, SourceText text, SemanticModel? model, bool styleSharp = false)
     {
         var getter = property.ExpressionBody is not null || property.AccessorList?.Accessors.Any(a => a.IsKind(SyntaxKind.GetAccessorDeclaration)) == true;
         var setter = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration) || a.IsKind(SyntaxKind.InitAccessorDeclaration));
@@ -90,6 +90,23 @@ internal static class PropertySummaries
         var getAccessor = property.AccessorList?.Accessors.FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration));
         var restrictedSetter = setter is not null && (styleSharp ? setter.Modifiers.Count > 0 : IsRestricted(setter));
         var restrictedGetter = !styleSharp && setter is not null && getAccessor is not null && IsRestricted(getAccessor);
+
+        // Like StyleCop's SA1623, an 'internal' accessor of a property only its assembly sees (an internal class's) is as
+        // visible as the property: 'Gets or sets' (trial 27, TheAlgorithms: BRO1605 asked for 'Gets', SA1623 for 'Gets or
+        // sets'). A 'private' one stays restricted. Bound only when an accessor is restricted without 'private'.
+        if (!styleSharp && ((restrictedSetter && !HasPrivate(setter!)) || (restrictedGetter && !HasPrivate(getAccessor!))))
+        {
+            if (model is null || model.GetDeclaredSymbol(property) is not { } symbol)
+            {
+                return null;
+            }
+
+            if (DocumentationComments.GetVisibility(symbol) != Accessibility.Public)
+            {
+                restrictedSetter = restrictedSetter && HasPrivate(setter!);
+                restrictedGetter = restrictedGetter && HasPrivate(getAccessor!);
+            }
+        }
         var visibleSetter = setter is not null && !restrictedSetter && !(styleSharp && initOnly);
         var visibleGetter = getter && !restrictedGetter;
 
@@ -124,6 +141,7 @@ internal static class PropertySummaries
         }
 
         // The longest known prefix the summary starts with: 'Gets or sets' also starts with 'Gets'.
+        // Ignoring case, like StyleCop: 'Gets or Sets key' is right (trial 27: it became 'Gets or sets or Sets key').
         var old = KnownPrefixes.FirstOrDefault(p => StartsWithWord(rest, p) && (isBool || !p.EndsWith("whether", StringComparison.OrdinalIgnoreCase))) ?? string.Empty;
 
         // A bool's summary may use StyleCop's 'a value indicating whether' or just the verb ('Gets the open state'):
@@ -195,6 +213,8 @@ internal static class PropertySummaries
         accessor.Modifiers.Any(m => m.IsKind(SyntaxKind.PrivateKeyword) || m.IsKind(SyntaxKind.InternalKeyword))
         && !accessor.Modifiers.Any(m => m.IsKind(SyntaxKind.ProtectedKeyword) && accessor.Modifiers.Any(n => n.IsKind(SyntaxKind.InternalKeyword)));
 
+    private static bool HasPrivate(AccessorDeclarationSyntax accessor) => accessor.Modifiers.Any(m => m.IsKind(SyntaxKind.PrivateKeyword));
+
     /// <summary>Where the summary's text starts, or null when there's no summary or it starts with an element.</summary>
     private static int? GetSummaryTextStart(SyntaxNode member)
     {
@@ -231,7 +251,7 @@ internal static class PropertySummaries
 
     private static bool StartsWithWord(string text, string words)
     {
-        return text.StartsWith(words, StringComparison.Ordinal)
+        return text.StartsWith(words, StringComparison.OrdinalIgnoreCase)
             && (text.Length == words.Length || !char.IsLetterOrDigit(text[words.Length]));
     }
 

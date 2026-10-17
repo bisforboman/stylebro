@@ -36,7 +36,9 @@ internal static class SummaryLayout
         foreach (var trivia in TreeWalk.Trivia(root))
         {
             // '/** */' comments too: their start tag's line doesn't begin with '///', so they're skipped below.
-            if (trivia.GetStructure() is not DocumentationCommentTriviaSyntax documentation)
+            // A '///' that documents nothing is BRO1602's, which makes it a plain comment: laying it out first gave another
+            // text in some fix orders (trial 27: '[Obsolete]' above the summary).
+            if (trivia.GetStructure() is not DocumentationCommentTriviaSyntax documentation || DocumentationComments.IsMisplaced(trivia))
             {
                 continue;
             }

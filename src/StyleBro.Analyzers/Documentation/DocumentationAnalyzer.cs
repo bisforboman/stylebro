@@ -47,7 +47,7 @@ public sealed class DocumentationAnalyzer : DiagnosticAnalyzer
             c =>
             {
                 var tree = c.Node.SyntaxTree;
-                if (PropertySummaries.GetFinding((PropertyDeclarationSyntax)c.Node, tree.GetText(c.CancellationToken), PropertySummaries.FollowsStyleSharp(c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree))) is { } finding)
+                if (PropertySummaries.GetFinding((PropertyDeclarationSyntax)c.Node, tree.GetText(c.CancellationToken), c.SemanticModel, PropertySummaries.FollowsStyleSharp(c.Options.AnalyzerConfigOptionsProvider.GetOptions(tree))) is { } finding)
                 {
                     c.ReportDiagnostic(Diagnostic.Create(
                         finding.RestrictedSetter ? Descriptors.PropertySummaryRestrictedSetter : Descriptors.PropertySummaryWording,

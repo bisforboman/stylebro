@@ -134,7 +134,7 @@ public sealed class KeptFinding
     {
         KeptReason.NameInString => "the name is in a string in the solution (reflection, serialization): renaming would compile but break at run time",
         KeptReason.NameInNameof => "the name is used in nameof(...), so the rename would change that string too",
-        KeptReason.OtherPropertyKept => "another property of the type keeps its name (it's in a string or a snapshot file, or it's snake_case), so all of them keep theirs",
+        KeptReason.OtherPropertyKept => "another property of the type keeps its name (it's in a string, a snapshot file or a XAML file, or it's snake_case), so all of them keep theirs",
         KeptReason.UsedThroughDynamic => "code uses the name through 'dynamic', which binds it by name at run time",
         KeptReason.NameInSnapshotFile => "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
         KeptReason.UsedFromVisualBasic => "Visual Basic code uses the name, and StyleBro doesn't edit VB code",

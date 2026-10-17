@@ -211,6 +211,37 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.Equal(expected, reason);
     }
 
+    // Trial 27: element and attribute names from the project's own namespaces name its types and properties: renaming
+    // them broke the build (MC3074, MC3072). The framework's names and geometry values ('Data="M0,0 z"') don't count.
+    [Theory]
+    [InlineData("<Application xmlns:local=\"clr-namespace:Repro\"><local:boolConverter x:Key=\"BC\" /></Application>", "internal class boolConverter\n{\n}\n", KeptReason.NameInXamlFile)]
+    [InlineData("<Window xmlns:local=\"using:Repro\" local:tagBehavior.Key=\"main\" />", "internal static class tagBehavior\n{\n}\n", KeptReason.NameInXamlFile)]
+    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><local:Badge caption=\"hi\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlFile)]
+    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><local:Badge><local:Badge.caption>hi</local:Badge.caption></local:Badge></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlFile)]
+    [InlineData("<Window xmlns=\"clr-namespace:Repro\"><Badge caption=\"hi\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", KeptReason.NameInXamlFile)]
+    [InlineData("<Window xmlns:local=\"clr-namespace:Repro\"><TextBlock caption=\"hi\" /><caption /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", null)]
+    [InlineData("<Window><Path Data=\"M0,0 L1,1 caption\" /></Window>", "internal class Badge\n{\n    public string caption { get; set; } = string.Empty;\n}\n", null)]
+    public async Task ANameInAXamlFilesElementOrAttributeName_IsKept(string xaml, string code, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(DiagnosticIds.ElementPascalCase, ("Code.cs", "namespace Repro;\n\n" + code), ("MainWindow.xaml", xaml));
+
+        Assert.Equal(expected, reason);
+    }
+
+    // Trial 27 (PalCalc): the assembly attributes MSBuild writes under obj/ were the evidence for keeping a public field 'c'.
+    [Theory]
+    [InlineData("obj/Debug/net8.0/App.AssemblyInfo.cs", null)]
+    [InlineData("src/App.AssemblyInfo.cs", KeptReason.NameInString)]
+    public async Task BuildMetadataUnderObj_HoldsNoNames(string path, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.FieldPascalCase,
+            ("Point.cs", "internal sealed class Point\n{\n    public int c;\n}\n"),
+            (path, "[assembly: System.Reflection.AssemblyCompanyAttribute(\"c\")]\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
     // An event handler is a method XAML names; a private field isn't reachable from XAML, so a word there doesn't keep it.
     [Fact]
     public async Task AnEventHandlerInAXamlFile_IsKept_APrivateFieldIsNot()

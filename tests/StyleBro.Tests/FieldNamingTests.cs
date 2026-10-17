@@ -435,6 +435,43 @@ public class FieldNamingTests
             dotnet_naming_style.s_camel.capitalization = camel_case
             """);
 
+    // Trial 27 (GraphSharp): 'internal float _horizontalgap' became 'Horizontalgap' next to the property 'HorizontalGap'. A
+    // private field still becomes 'count' next to 'Count'.
+    [Fact]
+    public Task PascalName_DifferingOnlyInCaseFromAMember_IsKept() => VerifyFixAsync(
+        """
+        public class Layout
+        {
+            internal float _horizontalgap = 10;
+
+            internal float {|BRO1306:_verticalGapSize|} = 10;
+
+            private int {|BRO1303:_count|};
+
+            public float HorizontalGap => _horizontalgap;
+
+            public float VerticalGap => _verticalGapSize;
+
+            public int Count => _count;
+        }
+        """,
+        """
+        public class Layout
+        {
+            internal float _horizontalgap = 10;
+
+            internal float VerticalGapSize = 10;
+
+            private int count;
+
+            public float HorizontalGap => _horizontalgap;
+
+            public float VerticalGap => VerticalGapSize;
+
+            public int Count => count;
+        }
+        """);
+
     // BRO1307 leaves a prefix a naming rule requires, also on a non-private field (the private ones are left earlier,
     // by the naming rule's style StyleBro doesn't write).
     [Fact]

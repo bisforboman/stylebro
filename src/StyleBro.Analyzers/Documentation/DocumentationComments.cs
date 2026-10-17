@@ -165,12 +165,15 @@ internal static class DocumentationComments
     {
         foreach (var comment in trivia)
         {
-            if (IsTripleSlashComment(comment) && !DocumentsAMember(comment))
+            if (IsMisplaced(comment))
             {
                 yield return comment;
             }
         }
     }
+
+    /// <summary>Whether the comment is BRO1602's: a '///' comment that documents nothing.</summary>
+    public static bool IsMisplaced(SyntaxTrivia comment) => IsTripleSlashComment(comment) && !DocumentsAMember(comment);
 
     /// <summary>Where BRO1602 is reported: the comment's first line, from its '///'.</summary>
     public static TextSpan GetReportSpan(SyntaxTrivia comment, SourceText text)
@@ -226,7 +229,7 @@ internal static class DocumentationComments
     /// Public (visible outside the assembly, including protected), Internal or Private, from the member and every type
     /// around it. Explicit interface implementations count as public.
     /// </summary>
-    private static Accessibility GetVisibility(ISymbol symbol)
+    internal static Accessibility GetVisibility(ISymbol symbol)
     {
         var result = Accessibility.Public;
         for (var current = symbol; current is not null; current = current.ContainingType)

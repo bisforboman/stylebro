@@ -492,6 +492,14 @@ internal static class FieldNames
             }
         }
 
+        // A PascalCase name that differs only in case from another member reads as that member (trial 27, GraphSharp:
+        // '_horizontalgap' -> 'Horizontalgap' next to 'HorizontalGap'). A private camelCase field next to its property
+        // ('count' and 'Count') is the usual pair.
+        if (char.IsUpper(newName[0]) && type.MemberNames.Any(n => n != newName && n != field.Name && string.Equals(n, newName, System.StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
         // Another field of the type would get the same name (the field itself is one of them).
         if (facts.CountNewName(style, newName, hungarian) > 1)
         {
