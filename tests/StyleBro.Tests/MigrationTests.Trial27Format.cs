@@ -69,4 +69,29 @@ public sealed partial class MigrationTests
         FormatCommand.SetConfiguration(environment, "Release");
         Assert.False(environment.ContainsKey("Platform"));
     }
+
+    [Fact]
+    public void DocIndentation_RewritesTheLinesTheWhitespacePassLeaves()
+    {
+        // PalCalc: the first '///' line has spaces, the others and the member's line tabs at the same column (tab_width 4).
+        const string Text = "namespace Lib\n{\n    public class C\n    {\n        /// <summary>\n\t\t/// Text.\n\t\t/// </summary>\n\t\tpublic int P { get; set; }\n    }\n}\n";
+        Assert.Equal([5, 6, 7], DocIndentation.Lines(Text, useTabs: false, tabWidth: 4));
+        Assert.Equal(Text.Replace("\t\t", "        ", StringComparison.Ordinal), DocIndentation.Fix(Text, useTabs: false, tabWidth: 4));
+
+        // With tabs asked for: the first line is the one written otherwise, which the whitespace pass rewrites whole.
+        Assert.Empty(DocIndentation.Lines(Text, useTabs: true, tabWidth: 4));
+        var tabs = Text.Replace("        ///", "\t\t///", StringComparison.Ordinal).Replace("\t\t/// Text.", "        /// Text.", StringComparison.Ordinal);
+        Assert.Equal([5], DocIndentation.Lines(tabs, useTabs: true, tabWidth: 4));
+
+        // Another column is the whitespace pass's (tab_width 8: two tabs are 16 columns), and so are other lines, the rest of a
+        // line and its line break.
+        Assert.Empty(DocIndentation.Lines(Text, useTabs: false, tabWidth: 8));
+        const string Other = "class C\n{\n    /// <summary>\r\n\t/// Text.  \r\n    /// </summary>\r\n\t[Obsolete] int P;\n\tint Q;\n}\n";
+        Assert.Equal([3, 5], DocIndentation.Lines(Other, useTabs: false, tabWidth: 4));
+        Assert.Equal("class C\n{\n    /// <summary>\r\n    /// Text.  \r\n    /// </summary>\r\n    [Obsolete] int P;\n\tint Q;\n}\n", DocIndentation.Fix(Other, useTabs: false, tabWidth: 4));
+
+        // A string that looks like one isn't one.
+        Assert.Empty(DocIndentation.Lines("class C\n{\n    string s = @\"\n    /// a\n\t/// b\";\n}\n", useTabs: false, tabWidth: 4));
+        Assert.StartsWith("Lib/C.cs(6,1): warning IDE0055: Fix formatting: indent this line with spaces", DocIndentation.FindingLines([("Lib/C.cs", [6], false, 4)])[0], StringComparison.Ordinal);
+    }
 }
