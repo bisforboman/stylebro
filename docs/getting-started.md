@@ -856,7 +856,10 @@ submodule paths from the `.gitmodules` above the project, and StyleBro doesn't a
 is not a submodule (a copied library) still needs the `generated_code = true` section above. A file a project compiles
 from outside the repository (`<Compile Include="..\..\..\outside\Shared.cs" Link="..." />`) is left alone the same way:
 `format` names it (`Leaving alone: ../outside/Shared.cs (outside the repository)`), puts it back if a fix reached it, and
-its findings don't count in `--verify-no-changes`.
+its findings don't count in `--verify-no-changes`. The build doesn't report them either: the package's build targets pass
+the repository's folder (the nearest one above the project with a `.git` folder or file), and StyleBro hides its findings,
+and those of the built-in rules it turns on (IDE0055, IDE0011, ...), in files outside it. To report them anyway, set
+`<StyleBroRepositoryRoot>none</StyleBroRepositoryRoot>` (or another folder) in `Directory.Build.props`.
 
 ## Multi-targeted repositories
 
