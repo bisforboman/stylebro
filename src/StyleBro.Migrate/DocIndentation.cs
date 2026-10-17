@@ -25,7 +25,8 @@ internal static class DocIndentation
     /// </summary>
     public static List<int> Lines(string text, bool useTabs, int tabWidth)
     {
-        if (!text.Contains("///", StringComparison.Ordinal))
+        // Tabs and spaces at one column: a file without a tab has none (the first '///' line or another one has it).
+        if (!text.Contains("///", StringComparison.Ordinal) || !text.Contains('\t', StringComparison.Ordinal))
         {
             return [];
         }
