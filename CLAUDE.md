@@ -147,8 +147,8 @@ when we can do that"): don't suggest releases at all; the user says when.
   on the untouched code and fail after the fixes; OpenTelemetry without tests), `mutation` (mutation.yml:
   `scripts/mutation/Invoke-Mutations.ps1` breaks each guard listed in `scripts/mutation/entries/<Area>/<file>-<hash>.psd1` (one file per entry, so parallel PRs
   don't conflict; write it with `scripts/mutation/New-Mutation.ps1 -File -Find -Replace -Tests [-Comment]`, which picks the
-  folder and the name) and needs a test to fail; add an entry for every new guard; entries are sorted by path; 4 parallel shards `mutation shard 0..3` (`-Shard i -Shards 4`, index modulo
-  4, each shard also runs the stale check over all entries), and the job `mutation` passes only if every shard did).
+  folder and the name) and needs a test to fail; add an entry for every new guard; entries are sorted by path; parallel shards `mutation shard N` (`-Shard i -Shards n`, index modulo n: 4 on PRs, 8 for
+  the full nightly run since 2026-10-18, which outgrew 4 x 60 minutes; timeout 90), each shard also runs the stale check over all entries), and the job `mutation` passes only if every shard did).
   **Scoped PR runs (2026-10-09, owner's decision)**: each workflow's `changes` job (`.github/changes.sh`, git diff
   against the base) decides; a docs-only PR (docs/, `*.md` outside src/tests/samples, New-Backlog.py, survey files
   parity/Migrate don't read) skips the work of parity, real world (on ubuntu) and mutation, but every required check

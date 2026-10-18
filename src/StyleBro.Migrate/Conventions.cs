@@ -212,7 +212,6 @@ internal static class Conventions
         new(TypeAccessKey, "internal-by-default types", "warning", ("warning", "with 'internal'"), ("none", "without an access modifier"), Off(DiagnosticIds.AccessModifier)) { Unit = "type" },
         new(IndentCaseBlockKey, "'case X:' blocks", "true", ("true", "indented"), ("false", "at the label's level"), null) { Unit = "block" },
         new(PropertySummaryKey, "property summaries", "warning", ("warning", "starting with 'Gets'/'Sets'"), ("none", "in their own words"), Off(DiagnosticIds.PropertySummaryWording)) { Unit = "summary" },
-        new(ConstructorSummaryKey, "constructor summaries", "warning", ("warning", "with the standard sentence"), ("none", "in their own words"), Off(DiagnosticIds.ConstructorSummary)) { Unit = "summary" },
         new(CombinedLocalsKey, "adjacent locals of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedLocals)),
         new(CombinedAttributesKey, "declarations with 2+ attributes", "warning", ("warning", "one per list ('[A]' '[B]')"), ("none", "combined ('[A, B]')"), Off(DiagnosticIds.CombinedAttributes)),
         new(CombinedFieldsKey, "adjacent fields of one type", "warning", ("warning", "declared one by one"), ("none", "declared together ('int a, b;')"), Off(DiagnosticIds.CombinedFields)),
@@ -355,9 +354,6 @@ internal static class Conventions
     /// rewrote them all). Owner's decision 2026-10-12.
     /// </summary>
     private const string PropertySummaryKey = "dotnet_diagnostic." + DiagnosticIds.PropertySummaryWording + ".severity";
-
-    /// <summary>BRO1606's severity: constructor summaries with the standard sentence ('Initializes a new instance of ...') or in their own words ('Opens a file ...').</summary>
-    private const string ConstructorSummaryKey = "dotnet_diagnostic." + DiagnosticIds.ConstructorSummary + ".severity";
 
     /// <summary>
     /// BRO1102's severity: declarations with two or more attributes, combined in a list ('[A, B]') or one per list (tusdotnet:
@@ -517,10 +513,8 @@ internal static class Conventions
     /// <summary>The top-level doc elements BRO1603 checks (DocumentationPeriods' text elements).</summary>
     private static readonly HashSet<string> PeriodElements = new(StringComparer.Ordinal) { "summary", "remarks", "param", "typeparam", "returns", "value", "exception" };
 
-    /// <summary>The StyleCop way to begin a property summary (BRO1604) or a constructor summary (BRO1606).</summary>
+    /// <summary>The StyleCop way to begin a property summary (BRO1604).</summary>
     private static readonly string[] PropertySummaryStarts = { "Gets", "Sets", "Initializes" };
-
-    private static readonly string[] ConstructorSummaryStarts = { "Initializes a new instance", "Initializes static members", "Prevents a default instance" };
 
     /// <summary>The framework names IDE0049 rewrites to keywords.</summary>
     private static readonly HashSet<string> FrameworkTypeNames = new(StringComparer.Ordinal)
@@ -1925,17 +1919,17 @@ internal static class Conventions
                         .Distinct()
                         .ToList();
 
-                    // How property and constructor summaries begin (BRO1604/BRO1606); one that starts with an element isn't counted.
+                    // How property summaries begin (BRO1604); one that starts with an element isn't counted. Not constructors: BRO1606
+                    // accepts a summary in its own words (since #163), so they say nothing against it (issue #179).
                     var summaryKey = summary.Parent?.ParentTrivia.Token.Parent?.AncestorsAndSelf().FirstOrDefault(a => a is MemberDeclarationSyntax) switch
                     {
                         PropertyDeclarationSyntax => PropertySummaryKey,
-                        ConstructorDeclarationSyntax => ConstructorSummaryKey,
                         _ => null,
                     };
                     var firstToken = summary.Content.SelectMany(c => c.DescendantTokens()).FirstOrDefault(t => !t.IsKind(SyntaxKind.XmlTextLiteralNewLineToken) && !string.IsNullOrWhiteSpace(t.Text));
                     if (summaryKey is not null && firstToken.IsKind(SyntaxKind.XmlTextLiteralToken))
                     {
-                        var starts = summaryKey == PropertySummaryKey ? PropertySummaryStarts : ConstructorSummaryStarts;
+                        var starts = PropertySummaryStarts;
                         var words = string.Join(" ", summary.Content.SelectMany(c => c.DescendantTokens()).Where(t => t.IsKind(SyntaxKind.XmlTextLiteralToken)).Select(t => t.Text.Trim()).Where(t => t.Length > 0));
                         Add(summaryKey, !starts.Any(s => words == s || words.StartsWith(s + " ", StringComparison.Ordinal)));
                     }

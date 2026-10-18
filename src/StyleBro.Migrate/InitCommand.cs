@@ -1626,14 +1626,24 @@ internal static class InitCommand
             return false;
         }
 
+        var files = StyleCopSetup.EnumerateFiles(folder).Where(StyleCopSetup.IsMSBuild).ToList();
+        var usesStyleBro = files.Any(f => (Migration.ReadOrNull(f) ?? string.Empty).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase));
+
+        // A props that stops the import of the one above it, where StyleBro is referenced (issue #177, StanzaSharp's
+        // samples/docker: '<Project />' so the sample builds like a user's app): its projects don't get StyleBro.
+        if (!usesStyleBro && File.Exists(props) && !Regex.IsMatch(File.ReadAllText(props), @"<Import\b|GetPathOfFileAbove", RegexOptions.IgnoreCase)
+            && StyleCopSetup.EnumerateFiles(root).Where(StyleCopSetup.IsMSBuild).Any(f => !Path.GetFullPath(f).StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) && (Migration.ReadOrNull(f) ?? string.Empty).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
         var listing = solutions.Where(s => !elsewhere || !(s.Folder + Path.DirectorySeparatorChar).StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)).ToList();
         if (listing.Count == 0)
         {
             return false;
         }
 
-        var files = StyleCopSetup.EnumerateFiles(folder).Where(StyleCopSetup.IsMSBuild).ToList();
-        return !files.Any(f => (Migration.ReadOrNull(f) ?? string.Empty).Contains("StyleBro.Analyzers", StringComparison.OrdinalIgnoreCase))
+        return !usesStyleBro
             && !files.Where(f => f.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)).Any(p => listing.Any(s => s.Text.Contains(Path.GetRelativePath(s.Folder, p).Replace('\\', '/'), StringComparison.OrdinalIgnoreCase)));
     }
 
