@@ -16,7 +16,7 @@ bro check                                                            # before fi
 - `format --files` fixes StyleBro's findings (and the built-in rules `init` turns on, plus whitespace) in the named
   files only, loading just the project each file belongs to. It repeats until a run changes nothing, like `format`.
 - `bro check` (`format --verify-no-changes`) changes nothing and exits 0 when formatting would change no file. Findings StyleBro's fixes
-  keep on purpose don't fail it ([Findings kept on purpose](getting-started.md#findings-kept-on-purpose)); plain
+  keep on purpose don't fail it ([Findings kept on purpose](kept-findings.md#findings-kept-on-purpose)); plain
   `dotnet format --verify-no-changes` does fail on them. It takes `--files` too.
 - Don't hand-fix the BRO warnings the format leaves: each is kept for a reason (a rename would break reflection, a
   `nameof`, generated code, ...). `--json` lists them with the reason.
