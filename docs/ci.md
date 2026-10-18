@@ -7,7 +7,7 @@ Two checks keep a repository clean. They overlap on purpose: the build catches w
    `EnforceCodeStyleInBuild`). With warnings as errors, a violation fails the build.
 2. **`bro check`** fails (exit code 2) when formatting would change any file. It
    also covers whitespace formatting, which isn't a build warning. Unlike plain `dotnet format --verify-no-changes`, it
-   doesn't fail on [findings kept on purpose](getting-started.md#findings-kept-on-purpose): renames StyleBro's fixes
+   doesn't fail on [findings kept on purpose](kept-findings.md#findings-kept-on-purpose): renames StyleBro's fixes
    leave because they'd break code only the fix can see (a name read by reflection, say). Those stay as build warnings,
    so suppress or [baseline](baseline.md) them where warnings are errors.
 
@@ -134,14 +134,14 @@ steps:
   a change touches.
 - **Kept findings and `TreatWarningsAsErrors`:** the findings StyleBro's fixes keep on purpose don't fail
   `bro check`, but they are warnings, so they fail a build that treats warnings as
-  errors. Suppress or baseline them in the first run ([getting-started.md](getting-started.md#findings-kept-on-purpose)).
+  errors. Suppress or baseline them in the first run ([getting-started.md](kept-findings.md#findings-kept-on-purpose)).
 - **CI builds Release:** plain `dotnet format` checks the Debug configuration only, so code under `#if !DEBUG` isn't
   checked while a Release build with warnings as errors reports it. `bro check` also
   checks the other configurations where a project's code compiles differently there
-  ([getting-started.md](getting-started.md#debug-and-release)).
+  ([getting-started.md](debug-and-release.md#debug-and-release)).
 - **Old-style (non-SDK) projects:** restore with Visual Studio's MSBuild before the check
   (`msbuild -t:restore -p:RestorePackagesConfig=true`) and keep the .NET Framework reference assemblies available:
-  [getting-started.md](getting-started.md#old-style-non-sdk-projects).
+  [getting-started.md](old-style-projects.md#old-style-non-sdk-projects).
 - **A large existing codebase:** commit a [baseline](baseline.md) so CI fails only on new violations. A baseline can't
   hide whitespace formatting; either run `dotnet format whitespace` once, or check only `dotnet format style` and
   `dotnet format analyzers` in CI until you do.

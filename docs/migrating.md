@@ -72,7 +72,7 @@ second, versioned reference instead ([getting-started.md](getting-started.md#1-a
 removing StyleCop means removing its `packages.config` entry and the `<Analyzer>` items. StyleBro goes in the same way:
 a `packages.config` entry, its `<Analyzer>` items and the import of its build targets, not a `PackageReference`.
 Running `format` there takes extra steps, and `--diff` leaves those projects out:
-[getting-started.md](getting-started.md#old-style-non-sdk-projects).
+[getting-started.md](old-style-projects.md#old-style-non-sdk-projects).
 
 ### StyleCop referenced in a git submodule
 
@@ -148,7 +148,7 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
 - Git submodules and other nested repositories (folders with their own `.git` file or folder) are otherwise skipped:
   their settings, code and project files belong to another repository, and nothing in them is changed
   (`bro format` excludes them too). Files a project
-  links from a submodule are another matter: see [excluding vendored code](getting-started.md#excluding-vendored-code).
+  links from a submodule are another matter: see [excluding vendored code](vendored-code.md#excluding-vendored-code).
 - The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
   off: with 1.1.x the rules added in 1.2 (SA1141, SA1142, SA1316, SA1414), with 1.0.x also SA1135, SA1136, SA1137,

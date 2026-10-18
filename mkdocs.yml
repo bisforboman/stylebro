@@ -61,7 +61,14 @@ markdown_extensions:
 # Rule pages: grouped like docs/rules/README.md (DocExamplesTests checks that they match).
 nav:
   - Home: index.md
-  - Getting started: getting-started.md
+  - Getting started:
+      - getting-started.md
+      - What init keeps from your code: init-conventions.md
+      - Findings kept on purpose: kept-findings.md
+      - Excluding vendored code: vendored-code.md
+      - Multi-targeted repositories: multi-targeting.md
+      - Debug and Release: debug-and-release.md
+      - Old-style (non-SDK) projects: old-style-projects.md
   - Migrating from StyleCop: migrating.md
   - Rules:
       - rules/README.md

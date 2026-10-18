@@ -151,7 +151,7 @@ frameworks) and its test project:
 |---|---|
 | No C# files staged | instant (nothing runs) |
 | Check only, clean | 7 to 12 s |
-| Check only, a file needs formatting | about 25 s (a second run on a copy tells [kept findings](getting-started.md#findings-kept-on-purpose) apart) |
+| Check only, a file needs formatting | about 25 s (a second run on a copy tells [kept findings](kept-findings.md#findings-kept-on-purpose) apart) |
 | Fix and stage | 20 to 35 s (formats until a run changes nothing) |
 
 A project with several target frameworks is formatted once per framework, so each framework adds a load. Files of

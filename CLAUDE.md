@@ -163,6 +163,9 @@ when we can do that"): don't suggest releases at all; the user says when.
   first, the others merge main once after it); merge main into a PR only when GitHub shows a real conflict (DIRTY
   several times) or CI needs main's code, and after any merge run the mutation stale check (every entry's `Find` still
   in its `File`) before pushing; a changes/ fragment is `changes/<branch>.md` with the branch's `/` as a folder.
+  docs/getting-started.md keeps the path (install, A, B, first run); its reference sections have their own pages
+  (init-conventions, kept-findings, vendored-code, multi-targeting, debug-and-release, old-style-projects), each with a
+  short pointer left under its old heading so released tools' links still land: write new detail there, not in the path.
 - **Changelog** (2026-10-11, owner's decision, ShotDetector's style): a PR with a change users notice adds
   `changes/<branch>.md` (a `/` in the branch is a folder; changes/README.md: `### Breaking changes` / `### New` / `### Changed` / `### Fixed` /
   `### Upgrading` and bullets), never CHANGELOG.md itself, so parallel PRs don't conflict there. CI's build job runs
