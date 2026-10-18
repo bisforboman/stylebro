@@ -48,6 +48,9 @@ public sealed partial class MigrationTests
                 /// <summary>Getsome text.</summary>
                 public int Other { get; }
 
+                /// <summary><see cref="A"/> count.</summary>
+                public int Count { get; }
+
                 /// <summary>Runs.</summary>
                 public void Run() { }
             }
@@ -55,7 +58,8 @@ public sealed partial class MigrationTests
                 new CSharpParseOptions(documentationMode: Microsoft.CodeAnalysis.DocumentationMode.Diagnose)),
             counts);
 
-        // Properties: Name, Size the StyleCop way; Samples, IsFloat, Other in their own words; Run isn't a property.
+        // Properties: Name, Size the StyleCop way; Samples, IsFloat, Other in their own words; Count starts with an element and
+        // isn't counted; Run isn't a property.
         // Constructors aren't counted: BRO1606 accepts a summary in its own words (issue #179).
         Assert.Equal(new[] { 2, 3 }, counts[PropertySummaryKey]);
         Assert.False(counts.TryGetValue(ConstructorSummaryKey, out var constructors) && constructors.Sum() > 0);
