@@ -6,7 +6,7 @@
 - **`bro init`** and **`--write`** recognize CSharpier in every folder that configures it, not only the
   first one, so StyleBro's layout rules no longer fight CSharpier in the other folders.
 - StyleBro no longer reports code that a project compiles from a git submodule. `format` can't fix it there.
-- **`bro`** names a StyleCop reference that comes from a git submodule and says where the package swap
+- **`bro migrate`** names a StyleCop reference that comes from a git submodule and says where the package swap
   goes instead (the repository's own `Directory.Build.props`). After that swap, a second `--write` recognizes the
   migrated setup instead of calling it leftovers.
 - **`bro init`** no longer makes BRO1404 add `public` to interface members when the `.editorconfig` says

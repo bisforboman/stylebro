@@ -745,7 +745,7 @@ public sealed partial class MigrationTests : IDisposable
         var migrated = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", migrated);
         Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", migrated);
-        Assert.DoesNotContain("bro init:", migrated);
+        Assert.DoesNotContain("stylebro-migrate init:", migrated);
     }
 
     [Fact]
@@ -1228,6 +1228,8 @@ public sealed partial class MigrationTests : IDisposable
     [InlineData("preview|migrate|.|--diff=a.patch", ".|--diff=a.patch")]
     [InlineData("init|.|--write", "init|.|--write")]
     [InlineData(".|--write", ".|--write")]
+    [InlineData("migrate|init|--write", "./init|--write")]
+    [InlineData("preview|--help", "--help")]
     public void TheShortCommands_StandForTheirOptions(string args, string expected)
     {
         string[] Split(string s) => s.Length == 0 ? [] : s.Split('|');
@@ -1239,6 +1241,25 @@ public sealed partial class MigrationTests : IDisposable
     {
         Assert.Null(Program.Expand(["preview", "."]));
         Assert.Equal(1, Program.Main(["preview"]));
+    }
+
+    [Fact]
+    public void CheckWithAPreview_FailsBeforeRunningAnything()
+    {
+        var error = CaptureError(() => Assert.Equal(1, Program.Main(["check", root, "--diff"])));
+        Assert.Contains("don't go together", error, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void JsonBeforeAShortCommand_RunsThatCommand()
+    {
+        // 'bro --json check' used to read 'check' as the folder to migrate.
+        Write("src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        var output = Capture(() => CaptureError(() => Program.Main(["--json", "migrate", root])));
+        Assert.Contains("\"command\": \"migrate\"", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("Not a directory", output, StringComparison.Ordinal);
+        var error = CaptureError(() => Capture(() => Program.Main(["--json", "check", root, "--diff"])));
+        Assert.Contains("don't go together", error, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1332,6 +1353,7 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Contains("+class C { int a; int b; }", text);
         var kept = System.Text.RegularExpressions.Regex.Match(output, @"The copy is kept: (.*) \(log").Groups[1].Value;
         Assert.True(Directory.Exists(kept));
+        Assert.False(File.Exists(PreviewCommand.MarkerOf(Path.GetDirectoryName(kept)!))); // a kept copy is the user's: no later command deletes it
         DeleteFolder(Path.GetDirectoryName(kept)!);
         DeleteFolder(Path.GetDirectoryName(patch)!);
     }

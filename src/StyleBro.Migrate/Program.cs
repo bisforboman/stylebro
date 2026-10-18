@@ -117,7 +117,9 @@ internal static class Program
 
     public static int Main(string[] args)
     {
-        if (Expand(args) is not { } expanded)
+        // --json may come first ('bro --json check'): the short commands are expanded without it.
+        var json = args.Contains(JsonReport.Option);
+        if (Expand(args.Where(a => a != JsonReport.Option).ToArray()) is not { } expanded)
         {
             Console.Error.WriteLine("Usage: bro preview <init|migrate|format> [path] [options] (the command with --diff).");
             return 1;
@@ -136,13 +138,18 @@ internal static class Program
             return 0;
         }
 
-        if (!args.Contains(JsonReport.Option))
+        if (args is ["format", ..] && PreviewCommand.Wants(args) && args.Contains("--verify-no-changes"))
+        {
+            Console.Error.WriteLine("A preview (bro preview, or --diff) and a check (bro check, or --verify-no-changes) don't go together: run one of them.");
+            return 1;
+        }
+
+        if (!json)
         {
             return Guarded(args);
         }
 
         // --json: the human text goes to stderr, the report to stdout.
-        args = args.Where(a => a != JsonReport.Option).ToArray();
         var command = args.FirstOrDefault() is "baseline" or "init" or "format" ? args[0] : "migrate";
         var preview = command != "baseline" && PreviewCommand.Wants(args);
         JsonReport.Begin(preview ? "preview" : command, preview ? command : null);
@@ -169,10 +176,13 @@ internal static class Program
     /// </summary>
     public static string[]? Expand(string[] args) => args switch
     {
+        // After 'migrate' a command's name is a folder ('bro migrate init' migrates ./init).
+        ["migrate", "init" or "format" or "baseline" or "help" or "migrate" or "check" or "preview", .. var rest] => ["./" + args[1], .. rest],
         ["migrate", .. var rest] => rest,
         ["check", .. var rest] => ["format", .. rest, .. rest.Contains("--verify-no-changes") ? Array.Empty<string>() : ["--verify-no-changes"]],
         ["preview", "migrate", .. var rest] => Diff(rest),
         ["preview", "init" or "format", .. var rest] => [args[1], .. Diff(rest)],
+        ["preview", "--help" or "-h" or "-?" or "help", ..] => ["--help"],
         ["preview", ..] => null,
         _ => args,
     };
@@ -603,7 +613,7 @@ internal static class Program
             {
                 if (Regex.IsMatch(lines[i], @"\bdotnet\s+format\b.*--verify-no-changes") && !lines[i].TrimStart().StartsWith('#'))
                 {
-                    notes.Add($"{Path.GetRelativePath(root, file).Replace('\\', '/')}:{i + 1} runs 'dotnet format --verify-no-changes': findings StyleBro keeps on purpose (a rename that would break reflection, for example) fail it every time. Run 'bro format --verify-no-changes' there instead (it checks the same and accepts those), or write a baseline (bro baseline).");
+                    notes.Add($"{Path.GetRelativePath(root, file).Replace('\\', '/')}:{i + 1} runs 'dotnet format --verify-no-changes': findings StyleBro keeps on purpose (a rename that would break reflection, for example) fail it every time. Run 'bro check' there instead (it checks the same and accepts those), or write a baseline (bro baseline).");
                 }
             }
         }
@@ -804,10 +814,10 @@ internal static class Program
 
     private static bool IsUnder(string path, string folder) => path.StartsWith(folder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Runs the command the arguments name.</summary>
-    /// <summary>The command; a dotnet command it depends on that failed (MSBuild couldn't evaluate a project) ends it with that command's output, not a stack trace.</summary>
     private static string[] Diff(string[] rest) => PreviewCommand.Wants(rest) ? rest : [.. rest, "--diff"];
 
+    /// <summary>Runs the command the arguments name.</summary>
+    /// <summary>The command; a dotnet command it depends on that failed (MSBuild couldn't evaluate a project) ends it with that command's output, not a stack trace.</summary>
     private static int Guarded(string[] args)
     {
         try
@@ -856,7 +866,7 @@ internal static class Program
         {
             if (options.Contains("--write"))
             {
-                Console.Error.WriteLine("--diff previews without writing anything: use --diff or --write, not both.");
+                Console.Error.WriteLine("A preview (bro preview, or --diff) writes nothing: use it or --write, not both.");
                 return 1;
             }
 

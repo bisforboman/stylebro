@@ -53,6 +53,10 @@ dotnet tool install --global StyleBro.Tool --prerelease
 bro init --write      # adds a block to .editorconfig
 ```
 
+Until the next release the tool on nuget.org is still **StyleBro.Migrate** with the command
+`stylebro-migrate` (0.7.0-alpha.1): `dotnet tool install --global StyleBro.Migrate --prerelease`, then
+`stylebro-migrate` wherever these pages say `bro` (`stylebro-migrate [path]` for `bro migrate [path]`).
+
 ```
 bro format            # whitespace + StyleBro's rules + the built-in rules init turns on
 dotnet format analyzers --diagnostics BRO1001

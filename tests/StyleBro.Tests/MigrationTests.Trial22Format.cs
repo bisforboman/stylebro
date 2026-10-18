@@ -133,7 +133,7 @@ public sealed partial class MigrationTests
         {
             if (args.Contains("--verify-no-changes"))
             {
-                output?.Invoke("Checking StyleBro's rules and the built-in rules bro migrate turns on (1 ids), changing nothing.");
+                output?.Invoke("Checking StyleBro's rules and the built-in rules init and migrate turn on (1 ids), changing nothing.");
                 output?.Invoke("Checked part 1 of 1 (1 of 1)");
                 output?.Invoke(finding);
                 return FormatCommand.NotCleanExitCode;

@@ -157,8 +157,14 @@ when we can do that"): don't suggest releases at all; the user says when.
   changed (`-OnlyFiles`); a guard broken through another file (shared helper) is caught by the full run on main. `build`
   always runs (docs are tested). All scripts run locally too (mutations in a separate worktree: they undo
   each mutation with `git checkout`, so commit first).
+- **Fewer conflicts** (2026-10-18, owner's choices, after measuring PRs #173-#252: 3 real conflicts in 31 main merges,
+  all between sibling PRs of one trial; 13 of 15 recent merges unnecessary, 5 follow-up commits only repaired stale
+  mutation entries): a trial opens ONE PR (if it must split, a fixed order: the PR touching the shared files merges
+  first, the others merge main once after it); merge main into a PR only when GitHub shows a real conflict (DIRTY
+  several times) or CI needs main's code, and after any merge run the mutation stale check (every entry's `Find` still
+  in its `File`) before pushing; a changes/ fragment is `changes/<branch>.md` with the branch's `/` as a folder.
 - **Changelog** (2026-10-11, owner's decision, ShotDetector's style): a PR with a change users notice adds
-  `changes/<branch>.md` (changes/README.md: `### Breaking changes` / `### New` / `### Changed` / `### Fixed` /
+  `changes/<branch>.md` (a `/` in the branch is a folder; changes/README.md: `### Breaking changes` / `### New` / `### Changed` / `### Fixed` /
   `### Upgrading` and bullets), never CHANGELOG.md itself, so parallel PRs don't conflict there. CI's build job runs
   `python scripts/changelog.py --test` and `--check` (every fragment parses). Write for the release notes' reader:
   short, concrete, no internal jargon, never private-app details.

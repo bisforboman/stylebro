@@ -68,10 +68,10 @@ and 6.0.36, git, pwsh, python3, user `trial`, nothing GUI. Raise the pinned vers
 ### Commands (on the host, from the repository root)
 
 ```powershell
-# The feed, as for every trial: pack StyleBro.Package and StyleBro.Migrate with -p:Version=0.8.0-trialNN -o $env:TEMP\stylebro-trialNN\feed
+# The feed, as for every trial: pack StyleBro.Package and StyleBro.Migrate (package StyleBro.Tool) with -p:Version=0.8.0-trialNN -o $env:TEMP\stylebro-trialNN\feed
 ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx          # build the image, start stylebro-trial29-clifx
 docker exec -w /work stylebro-trial29-clifx git clone https://github.com/Tyrrrz/CliFx .
-docker exec -w /work stylebro-trial29-clifx stylebro-migrate init --write
+docker exec -w /work stylebro-trial29-clifx bro init --write
 docker exec -w /work stylebro-trial29-clifx pwsh -c '...'               # anything longer: a script under /work or /logs
 ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx -Stop    # rerun the first line to resume
 ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Remove              # every container of the trial, when it's done
@@ -86,7 +86,7 @@ Inside the container:
   both read-write and visible on the host;
 - `/feed` = the package feed (read-only): the repo's `nuget.config` gets `<add key="stylebro" value="/feed" />`;
 - `/nuget` = `NUGET_PACKAGES`, the named volume `stylebro-nuget` shared by all containers (warm restores);
-- `stylebro-migrate` (the trial's version) is on the PATH; `DOTNET_CLI_TELEMETRY_OPTOUT`, `DiffEngine_Disabled` are set.
+- `bro` (the trial's version) is on the PATH; `DOTNET_CLI_TELEMETRY_OPTOUT`, `DiffEngine_Disabled` are set.
 - Limits: 4 CPUs and 12 GB per container by default (`-Cpus`, `-Memory`); the machine has 16 logical CPUs and 64 GB, so
   four agents at a time leave room for the owner's work. Docker Desktop's own VM limit (Settings > Resources) caps them all.
 - Inside a container, `dotnet build-server shutdown` and killing processes only affect that agent; on the host the old

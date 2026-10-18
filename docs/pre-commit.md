@@ -16,7 +16,7 @@ The examples call `bro` as a global tool (`dotnet tool install -g StyleBro.Tool 
 the tool in the repository's tool manifest (`dotnet tool install StyleBro.Tool --prerelease`), write
 `dotnet bro` instead.
 
-Every recipe here was tested on a repository with a multi-targeted library (bro 0.7.0-alpha.1,
+Every recipe here was tested on a repository with a multi-targeted library (StyleBro.Migrate 0.7.0-alpha.1, then `stylebro-migrate`,
 Husky.Net 0.9.1, lefthook 2.2.2, Git Bash on Windows).
 
 ## A plain git hook

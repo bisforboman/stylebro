@@ -7,13 +7,16 @@ From install to the first `dotnet format` run. Pick the path that fits:
 - [B. Coming from StyleCop](#b-coming-from-stylecop)
 
 Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your projects) and **StyleBro.Tool** (the
-`bro` command line tool, used once to write settings):
+`bro` command line tool: settings, formatting and checks):
 
 ### Which version
 
 The latest release on nuget.org is **0.7.0-alpha.1**, a prerelease: install the tool with `--prerelease` and reference
 that exact version. This page describes `main`, which matched that release when it shipped; what changed since then
 ships in the next one and is listed in [changes/](https://github.com/bisforboman/stylebro/tree/main/changes).
+Until the next release the tool on nuget.org is still **StyleBro.Migrate** with the command
+`stylebro-migrate` (0.7.0-alpha.1): `dotnet tool install --global StyleBro.Migrate --prerelease`, then
+`stylebro-migrate` wherever these pages say `bro` (`stylebro-migrate [path]` for `bro migrate [path]`).
 To try the code on `main` before the next release, build both
 packages from a clone into a local folder (any version string works; `0.8.0-dev.1` here):
 
@@ -44,12 +47,13 @@ only looks for a package in the sources mapped to it, so the source alone gives 
 
 ## Preview first
 
-Before changing anything, `--diff` shows what a path would do to your code. It works on all three commands:
+Before changing anything, `bro preview` (the commands' `--diff`) shows what a path would do to your code. It works
+on all three commands:
 
 ```
-bro preview init          # path A: init's settings, then format
+bro preview init                  # path A: init's settings, then format
 bro preview migrate path/to/repo  # path B: the migration's settings (--write), then format
-bro preview format        # only the format run
+bro preview format                # only the format run
 ```
 
 The preview copies the repository to a temporary folder (git's tracked and untracked files, not the ignored ones; the
@@ -411,7 +415,7 @@ A few settings work a little differently:
   its own), and the report says how to switch (remove the line and run `bro format`). Ical.Net:
   `charset = utf-8` with 108 of 223 files starting with a BOM, all 108 stripped; the starter kit:
   `insert_final_newline = false` with 1,092 of 1,597 files ending in a line break, all 1,092 removed. `bro
-  --write` does the same. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
+  migrate --write` does the same. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
   and trims trailing whitespace on every line it formats, so the report only says so (with IDE0055 off nothing is trimmed).
   These keys (and `end_of_line`) are judged per file against the `.editorconfig` that decides it, as the compiler reads
   them: the nearest one that sets the key wins, within it the last matching section. A nearer file overrides anything
