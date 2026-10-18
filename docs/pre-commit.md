@@ -1,22 +1,22 @@
 # Pre-commit hook
 
 A pre-commit hook runs StyleBro on the C# files you're about to commit, so a style problem never reaches CI. It uses
-`stylebro-migrate format --files` (see [Scripts and AI agents](agents.md#format-files)), which loads only the projects
+`bro format --files` (see [Scripts and AI agents](agents.md#format-files)), which loads only the projects
 those files belong to.
 
 There are two kinds of hook:
 
 - **Check only** (recommended for a hand-written hook): `--verify-no-changes` changes nothing. When formatting would
-  change a staged file, the commit stops and says to run `stylebro-migrate format`.
+  change a staged file, the commit stops and says to run `bro format`.
 - **Fix and stage**: format the staged files and `git add` them again. Husky.Net and lefthook do this safely, also for
   files you staged only partly. A hand-written hook can't do that easily (see
   [Partly staged files](#partly-staged-files)).
 
-The examples call `stylebro-migrate` as a global tool (`dotnet tool install -g StyleBro.Migrate --prerelease`). With
-the tool in the repository's tool manifest (`dotnet tool install StyleBro.Migrate --prerelease`), write
-`dotnet stylebro-migrate` instead.
+The examples call `bro` as a global tool (`dotnet tool install -g StyleBro.Tool --prerelease`). With
+the tool in the repository's tool manifest (`dotnet tool install StyleBro.Tool --prerelease`), write
+`dotnet bro` instead.
 
-Every recipe here was tested on a repository with a multi-targeted library (stylebro-migrate 0.7.0-alpha.1,
+Every recipe here was tested on a repository with a multi-targeted library (bro 0.7.0-alpha.1,
 Husky.Net 0.9.1, lefthook 2.2.2, Git Bash on Windows).
 
 ## A plain git hook
@@ -30,9 +30,9 @@ Linux and macOS, make it executable too: `chmod +x .git/hooks/pre-commit`.
 #!/bin/sh
 # StyleBro: fail the commit when formatting would change a staged C# file.
 git diff --cached --name-only --diff-filter=ACMR -z -- '*.cs' |
-  xargs -0 -r stylebro-migrate format --verify-no-changes --files || {
+  xargs -0 -r bro check --files || {
   echo "StyleBro: formatting would change the files above." >&2
-  echo "Run 'stylebro-migrate format --files <file>...' (or 'stylebro-migrate format'), review, git add, commit again." >&2
+  echo "Run 'bro format --files <file>...' (or 'bro format'), review, git add, commit again." >&2
   exit 1
 }
 ```
@@ -41,9 +41,9 @@ A commit stopped by it looks like this:
 
 ```
 C:\src\shop\src\Orders\My Order.cs(5,36): warning BRO1509: Put 'Empty' on separate lines
-Not clean: formatting would change 1 file. Run 'stylebro-migrate format'.
+Not clean: formatting would change 1 file. Run 'bro format'.
 StyleBro: formatting would change the files above.
-Run 'stylebro-migrate format --files <file>...' (or 'stylebro-migrate format'), review, git add, commit again.
+Run 'bro format --files <file>...' (or 'bro format'), review, git add, commit again.
 ```
 
 It never writes a file, so edits you didn't stage stay unstaged. It checks the files as they are in your working
@@ -66,7 +66,7 @@ if [ -n "$partial" ]; then
   exit 1
 fi
 
-staged | xargs -0 -r stylebro-migrate format --files || exit 1
+staged | xargs -0 -r bro format --files || exit 1
 staged | xargs -0 -r git --literal-pathspecs add --
 ```
 
@@ -80,7 +80,7 @@ would stage your other edits too.
 ```
 dotnet new tool-manifest
 dotnet tool install Husky
-dotnet tool install StyleBro.Migrate --prerelease
+dotnet tool install StyleBro.Tool --prerelease
 dotnet husky install
 dotnet husky add pre-commit -c "dotnet husky run --group pre-commit"
 ```
@@ -95,7 +95,7 @@ Then add the task to `.husky/task-runner.json`:
       "name": "stylebro",
       "group": "pre-commit",
       "command": "dotnet",
-      "args": ["stylebro-migrate", "format", "--files", "${staged}"],
+      "args": ["bro", "format", "--files", "${staged}"],
       "include": ["**/*.cs"]
     }
   ]
@@ -119,7 +119,7 @@ pre-commit:
   commands:
     stylebro:
       glob: "*.cs"
-      run: stylebro-migrate format --files {staged_files}
+      run: bro format --files {staged_files}
       stage_fixed: true
 ```
 

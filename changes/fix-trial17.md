@@ -2,12 +2,12 @@
 
 - **`--diff`** writes the full diff to `.git/stylebro-preview.patch` (outside a git repository: the temp folder) instead
   of an untracked file in the current folder; `--diff=file` still names another file.
-- **`stylebro-migrate format`** says once what "Could not format '...fsproj'" and "Warnings were encountered while
+- **`bro format`** says once what "Could not format '...fsproj'" and "Warnings were encountered while
   loading the workspace" mean, instead of repeating them in every run.
 
 ### Fixed
 
-- **`stylebro-migrate format`** and **`baseline`** leave a folder CSharpier formats out of the whitespace pass when
+- **`bro format`** and **`baseline`** leave a folder CSharpier formats out of the whitespace pass when
   CSharpier only formats part of the repository (`IDE0055 = none` in that folder's section), so the two formatters no
   longer undo each other's changes forever (`[A] [B]` against `[A][B]`).
 - **BRO1603-BRO1607, BRO1617-BRO1619** leave documentation comments with malformed XML alone: `IComparable<T>` written

@@ -6,7 +6,7 @@
 - **BRO1506**: a comment right after a block's `{` with a blank line below it counts as standalone, like the section
   headers after it, and keeps its blank line.
 - Findings in files a project compiles from outside its git repository (`..\..\outside\Shared.cs`) are hidden in the
-  build, StyleBro's and those of the built-in rules it turns on: `stylebro-migrate format` leaves those files alone.
+  build, StyleBro's and those of the built-in rules it turns on: `bro format` leaves those files alone.
   `<StyleBroRepositoryRoot>none</StyleBroRepositoryRoot>` reports them again.
 
 ### Fixed

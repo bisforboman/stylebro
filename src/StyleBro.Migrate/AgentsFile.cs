@@ -30,14 +30,14 @@ internal static class AgentsFile
     public const string End = "<!-- END stylebro -->";
 
     /// <summary>The section, markers included.</summary>
-    public const string Section = Begin + " (written by stylebro-migrate; edits inside are replaced) -->\n"
+    public const string Section = Begin + " (written by bro; edits inside are replaced) -->\n"
         + "## StyleBro (C# style)\n"
         + "\n"
         + "This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyzers whose fixes `dotnet format` applies.\n"
         + "\n"
-        + "- After editing C# files, run `stylebro-migrate format --files <the .cs files you changed>` (faster than a whole run; the tool is the\n"
-        + "  StyleBro.Migrate package: `dotnet tool install -g StyleBro.Migrate`).\n"
-        + "- Before finishing, `stylebro-migrate format --verify-no-changes` must exit 0. It does when only findings kept on\n"
+        + "- After editing C# files, run `bro format --files <the .cs files you changed>` (faster than a whole run; the tool is the\n"
+        + "  StyleBro.Tool package: `dotnet tool install -g StyleBro.Tool`).\n"
+        + "- Before finishing, `bro check` must exit 0. It does when only findings kept on\n"
         + "  purpose are left.\n"
         + "- Don't hand-fix BRO warnings the format leaves: they are kept on purpose (a rename would break reflection, `nameof`,\n"
         + "  generated code, ...); the format output gives each one's reason. Leave them unless asked.\n"

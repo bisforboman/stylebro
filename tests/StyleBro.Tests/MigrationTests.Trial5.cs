@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What a trial of 0.5.0-alpha.1 on NCronJob, NSubstitute and linkdotnet/Blog found in 'stylebro-migrate init'.</summary>
+/// <summary>What a trial of 0.5.0-alpha.1 on NCronJob, NSubstitute and linkdotnet/Blog found in 'bro init'.</summary>
 public sealed partial class MigrationTests
 {
     private const string OperatorKey = "dotnet_style_operator_placement_when_wrapping";

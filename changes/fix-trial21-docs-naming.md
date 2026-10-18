@@ -14,5 +14,5 @@
   named after its own type (`SimulatorEvent _simulatorEvent` -> `SimulatorEvent`); both were kept before.
 - **BRO1309** keeps a static property only for a string that reaches it by name (`GetProperty("nbc")`), not for a URL or
   file name that contains the word.
-- `stylebro-migrate format` lists a tuple element (**BRO1311**) kept because another element of its tuple type keeps
+- `bro format` lists a tuple element (**BRO1311**) kept because another element of its tuple type keeps
   its name as kept with that element, instead of repeating the other element's reason.

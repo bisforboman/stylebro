@@ -51,8 +51,8 @@ def on_post_build(config):
 
     text = (
         f"# {config['site_name']}\n\n> {config['site_description']}\n\n"
-        "Install the StyleBro.Analyzers package, run `stylebro-migrate init --write` (or `stylebro-migrate --write` when "
-        "coming from StyleCop), then `stylebro-migrate format`. For scripts and AI agents (`--json`, `format --files`, "
+        "Install the StyleBro.Analyzers package, run `bro init --write` (or `bro migrate --write` when "
+        "coming from StyleCop), then `bro format`. For scripts and AI agents (`--json`, `format --files`, "
         f"AGENTS.md): {config['site_url']}agents/\n\n"
         "## Docs\n\n" + "\n".join(docs) + "\n\n## Rules\n\n" + "\n".join(rules) + "\n"
     )

@@ -119,7 +119,7 @@ internal static class FieldNames
 
     /// <summary>
     /// true: constants, static readonly and non-private fields starting with '_' aren't renamed by BRO1306, like StyleCop
-    /// with SA1309 off ('stylebro-migrate --write' sets it then). Default false.
+    /// with SA1309 off ('bro migrate --write' sets it then). Default false.
     /// </summary>
     public const string AllowUnderscoreKey = "stylebro_allow_leading_underscore_in_pascal_fields";
 
@@ -174,7 +174,7 @@ internal static class FieldNames
     /// naming rules are enforced, which decides if they count for non-private fields (<see cref="GetNonPrivateStyles"/>).
     /// </param>
     /// <remarks>
-    /// <see cref="StaticStyleKey"/> wins over the naming rules for both: 'stylebro-migrate --write' sets it to PascalCase,
+    /// <see cref="StaticStyleKey"/> wins over the naming rules for both: 'bro migrate --write' sets it to PascalCase,
     /// so a naming rule StyleCop never enforced (IDE1006 off) doesn't rename a StyleCop-clean repository's fields.
     /// </remarks>
     public static FieldStyles GetStyles(AnalyzerConfigOptions options, ReportDiagnostic? namingRuleSeverity = null)

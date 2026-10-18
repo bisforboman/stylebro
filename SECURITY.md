@@ -11,5 +11,5 @@ answer in the report's thread.
 
 ## Supported versions
 
-Fixes go into the latest release of StyleBro.Analyzers and StyleBro.Migrate on nuget.org
+Fixes go into the latest release of StyleBro.Analyzers and StyleBro.Tool on nuget.org
 ([releases](https://github.com/bisforboman/stylebro/releases)). Older versions don't get fixes; upgrade to the latest.

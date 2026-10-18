@@ -23,7 +23,7 @@ internal static partial class FormatCommand
     public const string TimingsOption = "--timings";
 
     /// <summary>The line the record's answer to --verify-no-changes starts with (<see cref="VerifyFromRecord"/>).</summary>
-    public const string FromRecordHeader = "Checking StyleBro's rules: nothing changed since the last clean 'stylebro-migrate format' here";
+    public const string FromRecordHeader = "Checking StyleBro's rules: nothing changed since the last clean 'bro format' here";
 
     /// <summary>The record line that says the run that ended clean checked every plan entry (<see cref="SaveKept"/>).</summary>
     private const string CheckedMark = "#checked";

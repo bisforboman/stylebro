@@ -17,7 +17,7 @@ namespace StyleBro.Migrate;
 /// to the repository, without touching it. The repository is copied to a temporary folder (git's tracked and untracked,
 /// not ignored files; submodules' working trees too, as repositories of their own so format still skips them), committed
 /// there, and the command runs on the copy: init's or the migration's settings (plus the StyleBro.Analyzers reference
-/// when the repository has none), then 'stylebro-migrate format' until a run changes nothing (at most <see cref="MaxRuns"/>).
+/// when the repository has none), then 'bro format' until a run changes nothing (at most <see cref="MaxRuns"/>).
 /// A '--verify-no-changes --report' run before the fixes says which rules were reported in each file the format changed.
 /// Prints a summary and writes the full diff to a patch file.
 /// </summary>
@@ -50,11 +50,11 @@ internal static class PreviewCommand
     /// <summary>Why '--diff' doesn't run on old-style (non-SDK) projects with packages.config, and what to do instead.</summary>
     public static string OldStyleUnsupported(IReadOnlyList<string> projects, string? command)
     {
-        var write = command switch { "init" => "'stylebro-migrate init --write'", "format" => null, _ => "'stylebro-migrate --write'" };
+        var write = command switch { "init" => "'bro init --write'", "format" => null, _ => "'bro migrate --write'" };
         return $"--diff doesn't work with packages.config projects ({string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)}): "
             + "the copy has no git-ignored packages folder, and 'dotnet restore' can't restore packages.config.\n"
             + "Instead, on a clean working tree: " + (write is null ? string.Empty : $"run {write}, ")
-            + "restore with Visual Studio's MSBuild (msbuild -t:restore -p:RestorePackagesConfig=true), run 'stylebro-migrate format' and review 'git diff' ('git checkout .' undoes it). "
+            + "restore with Visual Studio's MSBuild (msbuild -t:restore -p:RestorePackagesConfig=true), run 'bro format' and review 'git diff' ('git checkout .' undoes it). "
             + "See https://bisforboman.github.io/stylebro/getting-started/#old-style-non-sdk-projects.";
     }
 
@@ -62,7 +62,7 @@ internal static class PreviewCommand
     public static string PackagesConfigLeftOut(IReadOnlyList<string> projects) =>
         $"packages.config projects left out of the preview: {string.Join(", ", projects.Take(3))}{(projects.Count > 3 ? $" and {projects.Count - 3} more" : string.Empty)} "
         + "('dotnet restore' can't restore packages.config, and the copy has no packages folder). The other projects are previewed; "
-        + "'stylebro-migrate format' covers those too once Visual Studio's MSBuild restored them (msbuild -t:restore -p:RestorePackagesConfig=true).";
+        + "'bro format' covers those too once Visual Studio's MSBuild restored them (msbuild -t:restore -p:RestorePackagesConfig=true).";
 
     /// <summary>
     /// Whether every project an <see cref="FormatCommand.IncompleteMarker"/> line names is one of the packages.config projects
@@ -143,7 +143,7 @@ internal static class PreviewCommand
         // What format will run on, checked before anything runs: with several solutions it would fail after the settings step.
         if (project is null && Directory.Exists(path) && BaselineCommand.FindWorkspace(path) is null)
         {
-            Console.Error.WriteLine(BaselineCommand.NoWorkspace(path, command == "format" ? "'stylebro-migrate format <file> --diff'" : "--project <file>"));
+            Console.Error.WriteLine(BaselineCommand.NoWorkspace(path, command == "format" ? "'bro format <file> --diff'" : "--project <file>"));
             return 1;
         }
 
@@ -194,9 +194,9 @@ internal static class PreviewCommand
 
         var what = command switch
         {
-            "init" => "'stylebro-migrate init --write' and 'stylebro-migrate format'",
-            "format" => "'stylebro-migrate format'",
-            _ => "'stylebro-migrate --write' and 'stylebro-migrate format'",
+            "init" => "'bro init --write' and 'bro format'",
+            "format" => "'bro format'",
+            _ => "'bro migrate --write' and 'bro format'",
         };
         Console.WriteLine($"Previewing {what} on a copy; nothing in {source} changes.");
         if (packagesConfig.Count > 0)
@@ -250,7 +250,7 @@ internal static class PreviewCommand
                 var settings = Settings(command, target, rest.Contains("--modernize"), rest.Contains(AgentsFile.Option), profile, LogFile, style);
                 if (settings != 0)
                 {
-                    return Fail(tail, settings, $"{(command == "init" ? "'stylebro-migrate init --write'" : "'stylebro-migrate --write'")} failed (exit code {settings}, see above).");
+                    return Fail(tail, settings, $"{(command == "init" ? "'bro init --write'" : "'bro migrate --write'")} failed (exit code {settings}, see above).");
                 }
             }
 
@@ -297,7 +297,7 @@ internal static class PreviewCommand
             var putBack = new List<string>();
             var tree = Tree(copy);
 
-            // CSharpier where the repository uses it, as 'stylebro-migrate format' runs it (whole folders where it changes nothing else).
+            // CSharpier where the repository uses it, as 'bro format' runs it (whole folders where it changes nothing else).
             var formatRoot = File.Exists(target) ? FormatCommand.WorkingRoot(target) : target;
             var csharpier = CSharpierStep.Find(formatRoot);
             var unformatted = csharpier is null ? null : CSharpierStep.Unformatted(csharpier, formatRoot);
@@ -313,7 +313,7 @@ internal static class PreviewCommand
 
                 if (code != 0)
                 {
-                    return Fail(tail, code, $"'stylebro-migrate format' failed (exit code {code}).");
+                    return Fail(tail, code, $"'bro format' failed (exit code {code}).");
                 }
 
                 if (run == 1 && !File.Exists(reportFile))
@@ -381,7 +381,7 @@ internal static class PreviewCommand
             Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Full diff: {(Path.GetRelativePath(Environment.CurrentDirectory, patch) is var shown && !shown.StartsWith("..", StringComparison.Ordinal) ? shown : patch)} ({lines:N0} lines)"));
             notes.ForEach(n => Console.WriteLine($"Note: {n}"));
 
-            // A project that didn't load is left out, as 'stylebro-migrate format' does (StabilityMatrix: a legacy project the
+            // A project that didn't load is left out, as 'bro format' does (StabilityMatrix: a legacy project the
             // solution doesn't build, already failing with NU1008, stopped the whole preview), and named at the end.
             // packages.config projects were left out on purpose (the note says why): no restore advice for them, it can't work.
             if (incomplete is not null && !OnlyLeftOut(incomplete, packagesConfig))
@@ -469,7 +469,7 @@ internal static class PreviewCommand
     /// <summary>
     /// Copies a repository: git's tracked and untracked, not ignored files ('git ls-files -co --exclude-standard'), else
     /// (not a repository) everything outside bin, obj and .git. A submodule (or another repository inside) is copied the
-    /// same way and made a repository of its own, so 'stylebro-migrate format' leaves it alone in the copy too. Returns the
+    /// same way and made a repository of its own, so 'bro format' leaves it alone in the copy too. Returns the
     /// tracked files a .gitignore ignores, for <see cref="MakeRepository"/>: MoreLINQ tracks bld/ExtensionsGenerator under an
     /// ignored bld/, and the copy's repository left them out, so the preview showed none of their changes.
     /// </summary>

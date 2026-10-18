@@ -1,4 +1,4 @@
-# Proposal: a faster `stylebro-migrate format`
+# Proposal: a faster `bro format`
 
 Status: **proposal, for the owner's review** (owner's decision 2026-10-17: "Yes, after this fix round": a design doc
 first, measured on the trial repositories; implementation later, in separate PRs). Nothing here is implemented.
@@ -59,7 +59,7 @@ Everything around the child processes reads their console output: finding lines 
 
 ## Measurements
 
-Setup: `stylebro-migrate` and StyleBro.Analyzers `0.8.0-trial27` (the trial's packages, main 12961da1), SDK 10.0.402,
+Setup: `bro` and StyleBro.Analyzers `0.8.0-trial27` (the trial's packages, main 12961da1), SDK 10.0.402,
 Windows 11, 16 logical processors. Each repository is a copy of its trial clone under `.trials/speed/`, reset to the
 trial's step-4 commit (after `init --write` and the package, before the first `format`). Every `dotnet` call the tool
 made went through a logging shim on `PATH` (start, duration, arguments; a 30-line console app named `dotnet.exe` that runs the real one, not committed), and `format` ran with
@@ -202,7 +202,7 @@ from 644 s to ~590 s. They don't touch the structure: the run itself stays 4x a 
 
 ### (a) An in-process host instead of `dotnet format`
 
-`stylebro-migrate` loads the workspace itself and runs analyzers and fixes in its own process:
+`bro` loads the workspace itself and runs analyzers and fixes in its own process:
 
 - **One MSBuildWorkspace per configuration** (default, Release, ...), loaded once per `format` call and kept for the
   check, every fix, every run and the re-check. A multi-targeted project loads once per framework in that workspace
@@ -268,7 +268,7 @@ Effort: large (several PRs, see the phases). Proof: the parity harness (below) o
 host behind an option until it is.
 
 **Which Roslyn and MSBuild.** StyleBro builds against Roslyn 4.8 (so the analyzers load in every SDK and Visual
-Studio); `stylebro-migrate` references only `Microsoft.CodeAnalysis.CSharp` 4.8. A host on Roslyn 4.8 Workspaces is
+Studio); `bro` references only `Microsoft.CodeAnalysis.CSharp` 4.8. A host on Roslyn 4.8 Workspaces is
 ruled out: 4.8 can't parse C# 14 (CLAUDE.md, BRO1144), and the trial repositories target net10.0. Shipping a newer
 Roslyn in the tool is ruled out too: the SDK's code-style analyzers are built against the SDK's compiler (5.9 for
 10.0.402) and don't load in an older one, and a newer SDK would always be ahead of what the tool shipped. So the host
@@ -368,7 +368,7 @@ vs semantic). Effort: medium; needs (a).
    repositories at their step-4 commits, cached clones), run the current `format` and the new one on two copies, compare
    the trees byte for byte after every run, the kept findings (path, line, id, reason), the exit codes, the baseline and
    the `--json` report; print the time of both. Any difference fails.
-2. **Real-world CI**: the CSharpier repositories already run `stylebro-migrate format`; a job that runs the parity
+2. **Real-world CI**: the CSharpier repositories already run `bro format`; a job that runs the parity
    harness on two or three repositories (one multi-targeted with parts, one with configurations, one CSharpier) on PRs
    touching src/StyleBro.Migrate.
 3. **The host behind an option** (`--engine host`) until the harness is clean on every trial copy, then the default
@@ -404,7 +404,7 @@ few seconds. For CliFx that is ~80 s / ~40 s (today 133-155 s / 27 s per re-chec
 Each is asked as a multiple-choice question; the recommended option is first.
 
 **Q-D1. The engine.**
-- *In-process host in stylebro-migrate (recommended)*: one workspace per configuration for the whole `format`; the
+- *In-process host in bro (recommended)*: one workspace per configuration for the whole `format`; the
   largest gain (CliFx ~3-4x, PalCalc ~2-2.5x, re-checks ~10x); a large change that re-does what dotnet format does.
   Before: 24 processes on CliFx; after: 1.
 - *A long-lived host process per plan entry*: still a child process, but one per entry reused for check, fix and

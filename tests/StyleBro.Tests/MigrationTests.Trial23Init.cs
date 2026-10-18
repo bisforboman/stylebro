@@ -210,7 +210,7 @@ public sealed partial class MigrationTests
 
         Assert.Contains("there are no StyleCop settings", output, StringComparison.Ordinal);
         Assert.DoesNotContain("severities there don't describe", output, StringComparison.Ordinal);
-        Assert.Contains("Nothing to migrate. Run 'stylebro-migrate init' instead", output, StringComparison.Ordinal);
+        Assert.Contains("Nothing to migrate. Run 'bro init' instead", output, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public sealed partial class MigrationTests
 
         var output = Capture(() => Assert.Equal(1, Program.Main(["init", root, "--diff"])));
 
-        Assert.Contains("Run 'stylebro-migrate --write' instead", output, StringComparison.Ordinal);
+        Assert.Contains("Run 'bro migrate --write' instead", output, StringComparison.Ordinal);
         Assert.DoesNotContain("preview", output, StringComparison.OrdinalIgnoreCase);
     }
 

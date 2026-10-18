@@ -1,6 +1,6 @@
 {
   "area": "Agents",
   "item": "Findings kept on purpose",
-  "notes": "Owner's request 2026-10-10: a fix that leaves a finding on purpose (a rename that would break reflection, `nameof`, generated code or a hiding member) offers no code action, and `stylebro-migrate format` lists each with its reason; `--verify-no-changes` exits 0 when only kept findings are left. See decisions.md and getting-started.md.",
+  "notes": "Owner's request 2026-10-10: a fix that leaves a finding on purpose (a rename that would break reflection, `nameof`, generated code or a hiding member) offers no code action, and `bro format` lists each with its reason; `--verify-no-changes` exits 0 when only kept findings are left. See decisions.md and getting-started.md.",
   "status": "Done (2026-10-10)"
 }

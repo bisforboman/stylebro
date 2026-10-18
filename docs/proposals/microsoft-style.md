@@ -18,7 +18,7 @@ dotnet/runtime writes down. This proposal adds that style as a layer on top of t
 <StyleBroStyle>microsoft</StyleBroStyle>
 ```
 
-and `stylebro-migrate init --style microsoft`, which writes that property and the IDE severities the style needs.
+and `bro init --style microsoft`, which writes that property and the IDE severities the style needs.
 
 ## Sources
 
@@ -146,11 +146,11 @@ the layer follows it; under the recommended answer:
   BRO1001, BRO1002, BRO1005, BRO1101-BRO1103, BRO1105-BRO1115, BRO1118, BRO1120, BRO1122, BRO1125, BRO1126, BRO1131,
   BRO1132, BRO1301, BRO1305, BRO1307, BRO1308, BRO1311, BRO1401, BRO1405-BRO1407, BRO1501-BRO1506, BRO1508-BRO1511,
   BRO1513, BRO1518, BRO1519, BRO1601-BRO1607, BRO1610, BRO1611.
-- **Off, beyond StyleCop** (no SA id, so runtime's build has no opinion; `stylebro-migrate` turns these off too):
+- **Off, beyond StyleCop** (no SA id, so runtime's build has no opinion; `bro migrate` turns these off too):
   BRO1133-BRO1151, BRO1410, BRO1520-BRO1527, BRO1616-BRO1619. BRO1310/BRO1312-BRO1314/BRO1409/BRO1143/BRO1145/BRO1147/
   BRO1148 are already off.
 
-This list is what `stylebro-migrate --write` derives from runtime's build (the same SA-to-BRO mapping, `data/mapping.csv`),
+This list is what `bro migrate --write` derives from runtime's build (the same SA-to-BRO mapping, `data/mapping.csv`),
 plus the guide's overrides (BRO1008, BRO1302, BRO1303, BRO1306, BRO1309, BRO1514-BRO1517 on). Building the layer can
 generate it that way and commit the result, so the reasoning is reproducible.
 
@@ -217,7 +217,7 @@ From 1.0 the style counts as part of the preset's defaults:
 
 The style page records the runtime commit it was written from, and lists runtime changes not yet followed.
 
-### `stylebro-migrate --write`
+### `bro migrate --write`
 
 `--write` maps a StyleCop/StyleSharp/Sonar setup and writes `StyleBroPreset=none` plus a complete block, so a style
 would only be ignored there (STYLEBRO004). `--write` doesn't write `StyleBroStyle` and, when the repository already has

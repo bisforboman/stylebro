@@ -4,9 +4,9 @@ global_level = -1
 # The Microsoft style (<StyleBroStyle>microsoft</StyleBroStyle>, docs/styles.md): dotnet/runtime's coding style
 # (docs/coding-guidelines/coding-style.md and the root .editorconfig, read at commit 24543ddd), on top of the preset
 # layers (global_level -2), so these lines win over the preset's. Rules neither source names follow runtime's build
-# (eng/CodeAnalysis.src.globalconfig) through stylebro-migrate's StyleCop mapping; StyleBro's rules beyond StyleCop are
+# (eng/CodeAnalysis.src.globalconfig) through bro migrate's StyleCop mapping; StyleBro's rules beyond StyleCop are
 # off. Only what differs from the preset is here. The severities of the built-in rules go into .editorconfig with
-# 'stylebro-migrate init --style microsoft' ('dotnet format' ignores severities in a package's global config).
+# 'bro init --style microsoft' ('dotnet format' ignores severities in a package's global config).
 # Using order (dotnet_sort_system_directives_first) isn't set here: init writes it when the code sorts its usings.
 
 # ---------------------------------------------------------------------------

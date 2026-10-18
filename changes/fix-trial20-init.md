@@ -1,6 +1,6 @@
 ### Changed
 
-- `stylebro-migrate init` honors folders that turn every analyzer off (`dotnet_analyzer_diagnostic.severity = none` or
+- `bro init` honors folders that turn every analyzer off (`dotnet_analyzer_diagnostic.severity = none` or
   `silent` in their own `.editorconfig`, such as test samples): it turns StyleBro's rules, IDE0055 and the other built-in
   rules it manages off there by id, so the build and `format` leave those files alone. Before, it turned StyleBro's rules
   on there, and `format` rewrote the samples. Rules the folder's `.editorconfig` sets by id stay as they are.

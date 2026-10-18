@@ -5,7 +5,7 @@ namespace StyleBro.Tests;
 
 public sealed partial class MigrationTests : IDisposable
 {
-    private readonly string root = Directory.CreateTempSubdirectory("stylebro-migrate-").FullName;
+    private readonly string root = Directory.CreateTempSubdirectory("bro-").FullName;
 
     /// <inheritdoc/>
     public void Dispose() => DeleteFolder(root);
@@ -660,7 +660,7 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         var editorConfig = File.ReadAllText(Path.Combine(root, ".editorconfig"));
 
-        // 'stylebro-migrate format' makes IDE0055 safe there; init points to it instead of turning the rule down.
+        // 'bro format' makes IDE0055 safe there; init points to it instead of turning the rule down.
         Assert.Contains("dotnet_diagnostic.IDE0055.severity = warning", editorConfig);
         Assert.Contains("dotnet_diagnostic.IDE0036.severity = warning", editorConfig);
         Assert.Contains("dotnet_diagnostic.IDE0048.severity = none", InitCommand.Block());
@@ -739,13 +739,13 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write" }));
         Assert.Equal(first, File.ReadAllText(Path.Combine(root, ".editorconfig")));
 
-        // Next to settings from 'stylebro-migrate --write' the modernize block is still added.
+        // Next to settings from 'bro migrate --write' the modernize block is still added.
         Write(".editorconfig", Migration.Apply("root = true\n", Migration.Render(new[] { ("[*.cs]", new List<string> { "dotnet_diagnostic.IDE0040.severity = none" }) })));
         Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--modernize" }));
         var migrated = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.Contains("dotnet_diagnostic.IDE0040.severity = none", migrated);
         Assert.Contains("dotnet_diagnostic.IDE0090.severity = warning", migrated);
-        Assert.DoesNotContain("stylebro-migrate init:", migrated);
+        Assert.DoesNotContain("bro init:", migrated);
     }
 
     [Fact]
@@ -769,7 +769,7 @@ public sealed partial class MigrationTests : IDisposable
     [Fact]
     public void ThePreset_SetsNoBuiltInRuleSeverities()
     {
-        // 'dotnet format' ignores rule severities in a package's global config; they belong in 'stylebro-migrate init'.
+        // 'dotnet format' ignores rule severities in a package's global config; they belong in 'bro init'.
         var preset = Presets.AllLines();
 
         Assert.DoesNotContain(preset, l => l.StartsWith("dotnet_diagnostic.IDE", StringComparison.Ordinal));
@@ -912,7 +912,7 @@ public sealed partial class MigrationTests : IDisposable
     public void NextStep_NamesStyleBroFormat()
     {
         // Single- or multi-targeted: plain 'dotnet format' also applies other analyzers' fixes (owner's decision 2026-10-09).
-        Assert.Contains("run 'stylebro-migrate format'", Program.NextStep);
+        Assert.Contains("run 'bro format'", Program.NextStep);
         Assert.Contains(Program.AddPackageHint, Capture(() => InitCommand.Run(new[] { root, "--write" }))); // no project references StyleBro yet
         Write("Directory.Build.props", "<Project><ItemGroup><PackageReference Include=\"StyleBro.Analyzers\" Version=\"1.0.0\" /></ItemGroup></Project>");
         Assert.Contains(Program.FormatHint, Capture(() => InitCommand.Run(new[] { root, "--write" })));
@@ -1159,7 +1159,7 @@ public sealed partial class MigrationTests : IDisposable
 
         Assert.Equal(before, File.ReadAllText(Path.Combine(root, ".editorconfig")));
         Assert.Contains(".editorconfig (StyleCop rule severities)", output, StringComparison.Ordinal);
-        Assert.Contains("stylebro-migrate --write", output, StringComparison.Ordinal);
+        Assert.Contains("bro migrate --write", output, StringComparison.Ordinal);
 
         File.Delete(Path.Combine(root, ".editorconfig"));
         Write("Directory.Packages.props", "<Project><ItemGroup><PackageVersion Include=\"StyleCop.Analyzers\" Version=\"1.1.118\" /></ItemGroup></Project>");
@@ -1205,7 +1205,7 @@ public sealed partial class MigrationTests : IDisposable
         var output = Capture(() => Assert.Equal(0, Program.Main(new[] { option })));
         Assert.Equal(0, Program.Main(new[] { "init", root, "--help" }));
 
-        Assert.All(new[] { "stylebro-migrate [path] [--write]", "stylebro-migrate init", "stylebro-migrate format", "stylebro-migrate baseline" }, u => Assert.Contains(u, output, StringComparison.Ordinal));
+        Assert.All(new[] { "bro migrate [path] [--write]", "bro init", "bro format", "bro baseline", "bro check", "bro preview" }, u => Assert.Contains(u, output, StringComparison.Ordinal));
         Assert.Equal(new[] { "stylecop.json" }, Directory.EnumerateFileSystemEntries(root).Select(Path.GetFileName));
     }
 
@@ -1216,6 +1216,29 @@ public sealed partial class MigrationTests : IDisposable
         Assert.Equal(1, Program.Main(new[] { "init", root, "--modernise" }));
         Assert.Equal(1, Program.Main(new[] { "baseline", root, "--projct", "x.sln" }));
         Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
+    }
+
+    [Theory]
+    [InlineData("migrate|.|--write", ".|--write")]
+    [InlineData("migrate", "")]
+    [InlineData("check|src/App", "format|src/App|--verify-no-changes")]
+    [InlineData("check|--verify-no-changes", "format|--verify-no-changes")]
+    [InlineData("preview|init|.|--keep", "init|.|--keep|--diff")]
+    [InlineData("preview|format", "format|--diff")]
+    [InlineData("preview|migrate|.|--diff=a.patch", ".|--diff=a.patch")]
+    [InlineData("init|.|--write", "init|.|--write")]
+    [InlineData(".|--write", ".|--write")]
+    public void TheShortCommands_StandForTheirOptions(string args, string expected)
+    {
+        string[] Split(string s) => s.Length == 0 ? [] : s.Split('|');
+        Assert.Equal(Split(expected), Program.Expand(Split(args)));
+    }
+
+    [Fact]
+    public void PreviewWithoutACommand_Fails()
+    {
+        Assert.Null(Program.Expand(["preview", "."]));
+        Assert.Equal(1, Program.Main(["preview"]));
     }
 
     [Fact]

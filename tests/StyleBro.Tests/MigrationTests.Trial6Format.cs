@@ -187,7 +187,7 @@ public sealed partial class MigrationTests
             return 1;
         }))));
 
-        Assert.StartsWith("The preview failed: 'stylebro-migrate format' failed (exit code 1).", error.Replace("\r\n", "\n"), StringComparison.Ordinal);
+        Assert.StartsWith("The preview failed: 'bro format' failed (exit code 1).", error.Replace("\r\n", "\n"), StringComparison.Ordinal);
         Assert.Contains("  error NU1101", error, StringComparison.Ordinal);
         Assert.DoesNotContain("Wrote the built-in rule severities", error + output, StringComparison.Ordinal);
         Assert.Contains("--no-restore: ignored", output, StringComparison.Ordinal);

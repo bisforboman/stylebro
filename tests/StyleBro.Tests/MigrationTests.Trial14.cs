@@ -27,7 +27,7 @@ public sealed partial class MigrationTests
         Assert.Equal("Source", Source(Conventions.FinalNewlineKey, "false"));
         Assert.Equal(2, groups.Single(g => g.Key == Conventions.FinalNewlineKey && g.Value == "false").Counts[Conventions.FinalNewlineKey][0]);
 
-        // A later section in the nearer file wins; the stylebro block isn't the repository's; a 'root = true' folder is its own.
+        // A later section in the nearer file wins; the stylestylebro-migrate block isn't the repository's; a 'root = true' folder is its own.
         Assert.Equal("Source", Source(Conventions.EndOfLineKey, "lf"));
         Assert.DoesNotContain(groups, g => g.Value is "crlf" or "utf-8-bom");
         Assert.Equal(3, groups.Single(g => g.Key == Conventions.CharsetKey && g.Value == "utf-8").Counts[Conventions.CharsetKey].Sum());
@@ -211,7 +211,7 @@ public sealed partial class MigrationTests
         }
 
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--project", "Source/App.csproj" })));
-        Assert.Contains("To format it: 'stylebro-migrate format Source/App.csproj'.", output, StringComparison.Ordinal);
+        Assert.Contains("To format it: 'bro format Source/App.csproj'.", output, StringComparison.Ordinal);
         var first = File.ReadAllText(Path.Combine(root, ".editorconfig"));
         Assert.True(first.IndexOf("dotnet_sort_system_directives_first", StringComparison.Ordinal) < first.IndexOf("BRO1306", StringComparison.Ordinal));
 

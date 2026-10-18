@@ -1,6 +1,6 @@
 ### Changed
 
-- `stylebro-migrate format` runs a solution's platforms like its configurations: code under
+- `bro format` runs a solution's platforms like its configurations: code under
   `'$(Configuration)|$(Platform)' == 'Release|x64'` is fixed and checked too.
 - `format` rewrites the indentation of documentation comment lines that `dotnet format` leaves while the build's IDE0055
   reports them (`///` lines indented with tabs under a first line with spaces, at the same column), and

@@ -57,6 +57,6 @@ of `sdk-check-cases.ps1` are probes: `no-repro` there means StyleCop doesn't rep
 ## Measuring a migration
 
 `Measure-MigrationDelta.ps1 -Path <clone> -Solution <sln> -ResetTargetRepo` commits a plain `dotnet format` as the
-baseline, runs `stylebro-migrate --write`, then `dotnet format` with StyleBro (StyleCop.Analyzers removed, like a real
+baseline, runs `bro migrate --write`, then `dotnet format` with StyleBro (StyleCop.Analyzers removed, like a real
 migration). The remaining diff (`git diff --ignore-cr-at-eol`) is what switching changes. It resets the target to
 `origin/HEAD`, so use a throwaway clone.

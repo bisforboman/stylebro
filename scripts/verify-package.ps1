@@ -3,14 +3,14 @@
 # from a local feed into a project outside the repository, and checks what only the package's build targets do:
 #   1. the preset reaches the compiler (BRO1112, which the preset turns off, isn't reported; other rules are);
 #   2. <StyleBroPreset>none</StyleBroPreset> turns it off;
-#   3. 'stylebro-migrate init --diff' previews without writing; after 'init --write', 'dotnet format' fixes the built-in rules too (their severities come from
+#   3. 'bro init --diff' previews without writing; after 'init --write', 'dotnet format' fixes the built-in rules too (their severities come from
 #      .editorconfig) and applies the preset's formatting options; a second run changes nothing;
 #   4. a stylebro.baseline above the project hides its violations, and a new violation is still reported;
 #   5. the multi-target guard: after 'init --modernize --write', 'dotnet format' applies the newer-API rules (tier C) in a
 #      single-target project and not in a netstandard2.0;net10.0 one, which still builds;
 #   6. BRO1145 (C# 12 syntax) isn't reported in a netstandard2.0;net10.0 project unless it sets LangVersion;
 #   7. a file compiled from the package folder (a source package's contentFiles) isn't checked;
-#   8. a rename the fix keeps on purpose (the name read by reflection in another file): 'stylebro-migrate format' lists it
+#   8. a rename the fix keeps on purpose (the name read by reflection in another file): 'bro format' lists it
 #      with its reason, and its --verify-no-changes exits 2 while something is left to fix, then 0 with only it left;
 #      with --files and --json, the JSON on stdout has it with its reason;
 #   9. preset versions: 'init --write' pinned <StyleBroPreset>; unset, the newest version and 'latest' give the same
@@ -46,7 +46,7 @@ function Build([string[]]$extra = @(), [string]$path = $project) {
 
 function Migrate([string[]]$arguments) {
     dotnet run --project (Join-Path $root 'src/StyleBro.Migrate') --no-build -- @arguments | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw "stylebro-migrate $($arguments -join ' ') failed." }
+    if ($LASTEXITCODE -ne 0) { throw "bro $($arguments -join ' ') failed." }
 }
 
 try {
@@ -54,7 +54,7 @@ try {
     dotnet pack (Join-Path $root 'src/StyleBro.Package') -c Release -o $feed -p:Version=$version --nologo -v q
     if ($LASTEXITCODE -ne 0) { throw 'Packing failed.' }
     dotnet build (Join-Path $root 'src/StyleBro.Migrate') --nologo -v q
-    if ($LASTEXITCODE -ne 0) { throw 'Building stylebro-migrate failed.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Building bro failed.' }
 
     Set-Content (Join-Path $repo 'nuget.config') @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -108,7 +108,7 @@ try {
     Write-Host '== 4. Baseline'
     Set-Content (Join-Path $app 'Old.cs') "namespace App;`n`ninternal class Old`n{`n    public string Name = `"`";`n}`n" -NoNewline
     Migrate @('baseline', $repo, '--project', 'src/App/App.csproj')
-    Check (Test-Path (Join-Path $repo 'stylebro.baseline')) 'stylebro-migrate baseline wrote stylebro.baseline'
+    Check (Test-Path (Join-Path $repo 'stylebro.baseline')) 'bro baseline wrote stylebro.baseline'
     Check (-not ((Build) -contains 'BRO1106 Old.cs')) 'the baselined violation is not reported'
     # A relative <StyleBroBaseline> (docs/baseline.md's form, eng/ next to src/) is found above the project too (trial 25).
     $eng = Join-Path $repo 'eng'

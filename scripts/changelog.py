@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 # The release notes' order (release.yml publishes the section as it is); a heading may go on after the word,
-# e.g. "Breaking changes (stylebro-migrate only)". "Upgrading" becomes "Upgrading from <previous version>" and starts
+# e.g. "Breaking changes (bro only)". "Upgrading" becomes "Upgrading from <previous version>" and starts
 # with the bump line every release needs.
 ORDER = ["Breaking changes", "New", "Changed", "Fixed", "Upgrading"]
 
@@ -63,7 +63,7 @@ def fold(root: Path, version: str, summary: str, date: str) -> list[Path]:
     if f"\n## {version} " in text:
         sys.exit(f"CHANGELOG.md already has {version}")
     previous = re.search(r"^## (\S+) ", text, re.M)
-    tool = "dotnet tool update -g StyleBro.Migrate" + (" --prerelease" if "-" in version else "")
+    tool = "dotnet tool update -g StyleBro.Tool" + (" --prerelease" if "-" in version else "")
     upgrading = [f"Bump the package, then update the tool: `{tool}`."] + merged.pop("Upgrading", [])
     if previous:
         merged[f"Upgrading from {previous.group(1)}"] = ["\n\n".join(upgrading)]  # paragraphs, not bullets
@@ -95,7 +95,7 @@ def test():
         want = ("# Changelog\r\n\r\nIntro.\r\n\r\n## 0.6.0-alpha.1 – 2026-02-02\r\n\r\nSummary.\r\n\r\n"
                 "### Breaking changes (tool only)\r\n\r\n- Gone.\r\n\r\n### New\r\n\r\n- A thing,\r\n  two lines.\r\n\r\n"
                 "### Fixed\r\n\r\n- A fix.\r\n- B fix.\r\n\r\n### Upgrading from 0.5.0-alpha.1\r\n\r\n"
-                "Bump the package, then update the tool: `dotnet tool update -g StyleBro.Migrate --prerelease`.\r\n\r\n"
+                "Bump the package, then update the tool: `dotnet tool update -g StyleBro.Tool --prerelease`.\r\n\r\n"
                 "Run `init` again.\r\n\r\n## 0.5.0-alpha.1 – 2026-01-01\r\n\r\nOld.\r\n")
         assert got == want, got
         assert [p.name for p in (root / "changes").iterdir()] == ["README.md"]

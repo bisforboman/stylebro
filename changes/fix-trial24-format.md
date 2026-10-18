@@ -1,7 +1,7 @@
 ### New
 
 - **CSharpier after `format`**: where the repository formats with CSharpier (its `csharpier` tool, or the
-  CSharpier.MsBuild package), `stylebro-migrate format` runs it on the C# files each run changed, so one command leaves
+  CSharpier.MsBuild package), `bro format` runs it on the C# files each run changed, so one command leaves
   a tree `dotnet csharpier check` accepts. `--verify-no-changes` runs CSharpier's check on the C# files it formats too.
   Where CSharpier puts back what a fix changed (a modifier order), both say so and name the files.
 

@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>Trial 24's findings in 'stylebro-migrate format', verify, the preview and baseline, and CSharpier after format.</summary>
+/// <summary>Trial 24's findings in 'bro format', verify, the preview and baseline, and CSharpier after format.</summary>
 public sealed partial class MigrationTests
 {
     [Theory]

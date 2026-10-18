@@ -13,6 +13,6 @@
   towards the conventions.
 - **init:** a `Directory.Build.props` above the git repository is no longer imported into a new one in the repository.
 - **Report texts:** the line-endings note no longer says IDE0055 is lowered where it's off (CSharpier); a second
-  `stylebro-migrate --write` says suppressions were already carried over; the note about suppressions of whitespace
+  `bro migrate --write` says suppressions were already carried over; the note about suppressions of whitespace
   rules says when it matters.
 - **Preview:** StyleBro's `GlobalPackageReference` goes next to StyleCop's instead of into a new `ItemGroup` at the end.

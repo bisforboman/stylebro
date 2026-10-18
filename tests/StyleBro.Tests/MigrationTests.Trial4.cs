@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What a trial of 0.4.0-alpha.1 on Bogus, RealWorld, Buildalyzer and FluentAssertions found in stylebro-migrate.</summary>
+/// <summary>What a trial of 0.4.0-alpha.1 on Bogus, RealWorld, Buildalyzer and FluentAssertions found in bro.</summary>
 public sealed partial class MigrationTests
 {
     [Fact]
@@ -19,7 +19,7 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain("stylebro_null_check_style =", editorConfig);
         Assert.Contains("  off      null checks: 6 'is null', 6 '== null' -> BRO1133 is off", output);
         Assert.Contains("# init: null checks: your code mixes both forms (6 'is null', 6 '== null'), so BRO1133 is off. To choose one: set stylebro_null_check_style and remove the next line.\ndotnet_diagnostic.BRO1133.severity = none", editorConfig);
-        Assert.Contains("Summary:\n  Turned 1 rule off because your code mixes both forms: BRO1133 (null checks).\n  To choose later: set the key in .editorconfig, remove its init line, run 'stylebro-migrate format'.", output.Replace("\r\n", "\n"));
+        Assert.Contains("Summary:\n  Turned 1 rule off because your code mixes both forms: BRO1133 (null checks).\n  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.", output.Replace("\r\n", "\n"));
 
         // The repository's own severity stays.
         Write(".editorconfig", "root = true\n[*.cs]\ndotnet_diagnostic.BRO1133.severity = warning\n");

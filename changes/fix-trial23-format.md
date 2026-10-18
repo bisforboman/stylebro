@@ -1,6 +1,6 @@
 ### New
 
-- `stylebro-migrate format` puts the findings its fixes keep on purpose into `stylebro.baseline` (the one the build
+- `bro format` puts the findings its fixes keep on purpose into `stylebro.baseline` (the one the build
   reads) when a run ends clean, so a build with warnings as errors passes and `--verify-no-changes` agrees; new
   violations still fail. `<StyleBroBaseline>none</StyleBroBaseline>` turns it off.
 - `format`, `--verify-no-changes`, `--diff` and `baseline` build an in-solution source generator first when it isn't

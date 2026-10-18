@@ -2,7 +2,7 @@ name: Release
 
 # Merging a release PR releases: on every push to main this reads the newest version in CHANGELOG.md
 # ("## X.Y.Z – date" or "## X.Y.Z-alpha.N – date"), and if v<version> isn't tagged yet, runs the checks, publishes
-# StyleBro.Analyzers and StyleBro.Migrate to nuget.org and creates the GitHub release (and the tag) with that
+# StyleBro.Analyzers and StyleBro.Tool to nuget.org and creates the GitHub release (and the tag) with that
 # CHANGELOG section as the notes. Most pushes to main: the version is already tagged and nothing else runs.
 # Pushing a v* tag by hand still releases that tag.
 # Prereleases (a '-' in the version) use the 'prerelease' environment (no reviewers; its deployment policy must allow

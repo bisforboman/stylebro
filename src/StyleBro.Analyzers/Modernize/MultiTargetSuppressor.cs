@@ -9,7 +9,7 @@ namespace StyleBro.Analyzers.Modernize;
 
 /// <summary>
 /// The multi-target guard (docs/modernizing.md): hides a diagnostic of an SDK rule whose fix writes a newer API (tier C of
-/// 'stylebro-migrate init --modernize') when the project targets several frameworks and one of them lacks that API. The
+/// 'bro init --modernize') when the project targets several frameworks and one of them lacks that API. The
 /// SDK rules check the API per target framework, so they report in the newer framework's compilation and 'dotnet format'
 /// writes the fix into the file every framework shares. The package passes the framework list as
 /// <c>build_property.StyleBroTargetFrameworks</c> (comma-separated: ';' starts a comment in the generated editorconfig).
@@ -77,7 +77,7 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
     /// <summary>
     /// Whether every target framework of the project reaches the minimum; true for a single target (the compilation itself
     /// shows what it has) or an unknown list. For StyleBro's own fixes whose result binds only where an API exists (trial
-    /// 21: BRO1151's params collections), since 'stylebro-migrate format' and 'dotnet format' fix the file every framework
+    /// 21: BRO1151's params collections), since 'bro format' and 'dotnet format' fix the file every framework
     /// shares from the newest framework's findings.
     /// </summary>
     internal static bool AllHave(AnalyzerConfigOptions options, (Version Core, Version? Standard) minimum)

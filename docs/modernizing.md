@@ -1,6 +1,6 @@
 # Modernizing code for newer runtimes
 
-`stylebro-migrate init --modernize` turns on the .NET SDK's own rules that rewrite code into newer C# and newer APIs:
+`bro init --modernize` turns on the .NET SDK's own rules that rewrite code into newer C# and newer APIs:
 target-typed `new()`, collection expressions, `is not null`, file-scoped namespaces, `ArgumentNullException.ThrowIfNull`,
 ranges, and more. StyleBro adds no rules of its own here: the SDK has a fixer for each that `dotnet format` applies.
 What `init` adds is the choice of which rules are safe in your repository, and the package adds the
@@ -8,14 +8,14 @@ What `init` adds is the choice of which rules are safe in your repository, and t
 lacks the API.
 
 ```
-stylebro-migrate init --modernize            # shows the blocks and notes
-stylebro-migrate init --modernize --write    # adds them to .editorconfig
+bro init --modernize            # shows the blocks and notes
+bro init --modernize --write    # adds them to .editorconfig
 dotnet format
 ```
 
 It's opt-in: plain `init` doesn't write these rules, and StyleBro's preset doesn't turn them on. The rules go in their own
 block in the root `.editorconfig`, between `# BEGIN stylebro-modernize` and `# END stylebro-modernize`. Running the
-command again replaces it, and it stays when you run `init` without `--modernize` or `stylebro-migrate --write`. Keys your
+command again replaces it, and it stays when you run `init` without `--modernize` or `bro migrate --write`. Keys your
 root `.editorconfig` already sets for C# (a rule's severity, `csharp_style_namespace_declarations`) are left out, so
 your settings stay. The CA rules need the .NET analyzers, which are on by default from .NET 5; set
 `<EnableNETAnalyzers>true</EnableNETAnalyzers>` for projects that target only .NET Framework or .NET Standard.

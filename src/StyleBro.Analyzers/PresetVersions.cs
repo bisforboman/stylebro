@@ -7,7 +7,7 @@ namespace StyleBro.Analyzers;
 public static class PresetVersions
 {
     /// <summary>
-    /// The newest preset layer in the package: what 'latest' means, and what 'stylebro-migrate init' writes. Raised with a
+    /// The newest preset layer in the package: what 'latest' means, and what 'bro init' writes. Raised with a
     /// minor's first new rule; PresetVersionTests checks it against the layer files and the build targets.
     /// </summary>
     public const string Latest = "1.0";

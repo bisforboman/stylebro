@@ -55,7 +55,7 @@
   </PropertyGroup>
   <!--
     A relative path ('eng/stylebro.baseline' in a Directory.Build.props) is relative to the project as MSBuild reads it, not
-    to the file that set it: then it's the nearest folder at or above the project that has it, the way stylebro-migrate
+    to the file that set it: then it's the nearest folder at or above the project that has it, the way bro
     format finds it next to the Directory.Build.props (trial 25: format and its check said clean, the build failed).
   -->
   <PropertyGroup Condition="'$(StyleBroBaseline)' != '' and '$(StyleBroBaseline)' != 'none' and !$([System.IO.Path]::IsPathRooted('$(StyleBroBaseline)')) and !Exists('$(StyleBroBaseline)')">
@@ -140,7 +140,7 @@
   </Target>
   <!--
     The project's git repository, for OutsideRepositorySuppressor: StyleBro's findings in files compiled from outside it
-    ('..\..\outside\Shared.cs') are hidden, 'stylebro-migrate format' leaves them alone. The nearest folder above the
+    ('..\..\outside\Shared.cs') are hidden, 'bro format' leaves them alone. The nearest folder above the
     project with a '.git' folder (found by its HEAD) or a '.git' file (a worktree or submodule); 'none' turns it off.
   -->
   <PropertyGroup Condition="'$(StyleBroRepositoryRoot)' == ''">

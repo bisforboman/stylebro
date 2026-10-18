@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # Writes data/stylesharp-mapping.csv: for every StyleSharp rule (SST ids, data/inventory-stylesharp-<version>.csv), the
-# StyleCop rules (SA/SX ids) it stands for, so stylebro-migrate reads a StyleSharp setup like a StyleCop one. StyleSharp
+# StyleCop rules (SA/SX ids) it stands for, so bro migrate reads a StyleSharp setup like a StyleCop one. StyleSharp
 # numbered its StyleCop-style rules like StyleCop's (SST1309 is at SA1309's number), but not every number kept its
 # meaning: the exceptions are below, checked against each rule's title and description. An SST rule without a StyleCop
 # equivalent maps to nothing (migrate reports it as a rule that goes with StyleSharp).

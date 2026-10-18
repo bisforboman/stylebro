@@ -12,9 +12,9 @@ For a team deciding whether to switch. Measured numbers only; each one says wher
 | Rules beyond StyleCop | None | 26 (most from Roslynator, Meziantou, Sonar or StyleCop's own tracker) |
 | Analyzer time, Newtonsoft.Json (242 files) | 1,291-2,171 ms (182 analyzers) | 411-687 ms (66 analyzers); 3.1-3.4x faster in each of 3 runs ([Speed](#speed)) |
 | StyleCop's open bugs on the replaced rules | 54 checked | 34 not shared, 8 shared (7 fixed, 1 kept on purpose), 12 not applicable or the same by design |
-| Moving a StyleCop-clean repo | (the starting point) | Files changed after `stylebro-migrate --write` + `dotnet format`: Polly 1, OpenTelemetry 1, a private app 7; only 1 of those 9 is a StyleBro fix ([Migration](#migration)) |
-| Baseline (fail only on new violations) | No | Yes (`stylebro-migrate baseline`) |
-| Multi-targeted projects | Not measured | Fix All merges each target framework's copy itself (no conflict markers in Newtonsoft.Json, 8 frameworks); `stylebro-migrate format` works around the SDK's IDE0055 crash |
+| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate migrate --write` + `dotnet format`: Polly 1, OpenTelemetry 1, a private app 7; only 1 of those 9 is a StyleBro fix ([Migration](#migration)) |
+| Baseline (fail only on new violations) | No | Yes (`bro baseline`) |
+| Multi-targeted projects | Not measured | Fix All merges each target framework's copy itself (no conflict markers in Newtonsoft.Json, 8 frameworks); `bro format` works around the SDK's IDE0055 crash |
 | Release status | 1.2.0-beta.556 (beta for years; last stable 1.1.118) | 0.7.0-alpha.1 on nuget.org (129 rules), a prerelease |
 
 ## What it is
@@ -26,7 +26,7 @@ could be unsafe (it would change behavior, lose a comment, or depend on `#if` co
 reporting something it can't fix.
 
 Formatting the SDK already handles (spacing, indentation, using order, modifier order, ...) isn't duplicated: StyleBro's
-preset sets the SDK's options and `stylebro-migrate init` turns the SDK rules on.
+preset sets the SDK's options and `bro init` turns the SDK rules on.
 
 StyleCop's fixes, run under `dotnet format`, from [differences-from-stylecop.md](differences-from-stylecop.md#same-reports-different-fix):
 
@@ -50,7 +50,7 @@ StyleCop 1.2 has 197 diagnostics ([stylecop-mapping.md](stylecop-mapping.md), [b
 | | Diagnostics | |
 |---|---:|---|
 | StyleBro rule | 106 | 92 BRO rules replace them; differences listed in [differences-from-stylecop.md](differences-from-stylecop.md) |
-| .NET SDK rule | 45 | Spacing, indentation, using order, modifier order and more: the preset sets the options, `stylebro-migrate init` the severities |
+| .NET SDK rule | 45 | Spacing, indentation, using order, modifier order and more: the preset sets the options, `bro init` the severities |
 | Dropped: no safe automatic fix | 32 | [skipped-rules.md](skipped-rules.md#dropped-no-safe-automatic-fix) |
 | Dropped: StyleCop never reports it | 10 | SA1109, SA1126, SA1301, SA1409, SA1628, SA1630-SA1632, SA1644, SA1650 |
 | Variants, not applicable | 4 | SA1119_p, SX1309S, SA0001, SA0002 |
@@ -120,12 +120,12 @@ comparable.
 
 ## Migration
 
-`stylebro-migrate` ([migrating.md](migrating.md)) reads a repository's StyleCop setup (rulesets, global configs,
+`bro` ([migrating.md](migrating.md)) reads a repository's StyleCop setup (rulesets, global configs,
 `.editorconfig` files, `stylecop.json`, the StyleCop version) and writes StyleBro and SDK settings that match it, carries
 `#pragma warning disable SA...`, `[SuppressMessage]` and `<NoWarn>` suppressions over to the replacing rules, and
 reports the StyleCop rules nothing enforces any more.
 
-Files `dotnet format` changes after `stylebro-migrate --write` on repositories that were StyleCop-clean (CLAUDE.md,
+Files `dotnet format` changes after `bro migrate migrate --write` on repositories that were StyleCop-clean (CLAUDE.md,
 "Migration re-measured with the SDK replacements", 2026-10-03; `scripts/stylecop-survey/Measure-MigrationDelta.ps1`):
 
 | Repository | Files changed | What |
@@ -136,13 +136,13 @@ Files `dotnet format` changes after `stylebro-migrate --write` on repositories t
 
 The rules StyleCop doesn't have are turned off by the migration, so they change nothing there.
 
-- **Baseline** ([baseline.md](baseline.md)): `stylebro-migrate baseline` records today's violations; the build, the IDE
+- **Baseline** ([baseline.md](baseline.md)): `bro baseline` records today's violations; the build, the IDE
   and `dotnet format` ignore them and only new or edited lines count. On FFMpegCore with every rule: 820 violations on
   759 lines baselined, then 0 StyleBro errors in the build and `dotnet format --verify-no-changes` clean (2026-10-02).
   Whitespace formatting can't be baselined.
 - **Multi-targeted projects:** StyleBro's Fix All merges each target framework's copy of a file itself, so its fixes
   write no conflict markers (Newtonsoft.Json, 8 frameworks). The SDK's IDE0055 fix crashes plain `dotnet format` there (reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000) and [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001));
-  `stylebro-migrate format` runs `dotnet format` once per target framework (Serilog: 505 IDE0055 findings -> 0 in one
+  `bro format` runs `dotnet format` once per target framework (Serilog: 505 IDE0055 findings -> 0 in one
   run, 2026-10-03; [ci.md](ci.md#notes)).
 
 ## Beyond StyleCop
@@ -152,9 +152,9 @@ chosen in [beyond-stylecop.md](https://github.com/bisforboman/stylebro/blob/main
 each with a fix like every other rule. For example: null checks in one form (BRO1133), operator placement when an
 expression wraps (BRO1520), split call chains one call per line (BRO1523), no `$`/`@` a plain string doesn't need
 (BRO1138), generic crefs in braces (BRO1617), no `else` after a jump (BRO1143, off by default). The preset turns 22
-of them on; `stylebro-migrate` turns them off, so migrating changes nothing until you opt in.
+of them on; `bro migrate` turns them off, so migrating changes nothing until you opt in.
 
-`stylebro-migrate init --modernize` ([modernizing.md](modernizing.md)) turns on the SDK's own rules for newer C# and
+`bro init --modernize` ([modernizing.md](modernizing.md)) turns on the SDK's own rules for newer C# and
 APIs in tiers, and StyleBro's multi-target guard hides a newer-API rule in a project where one target framework lacks
 the API.
 
@@ -172,7 +172,7 @@ What StyleBro doesn't do:
 
 Where it deliberately differs from StyleCop's defaults ([differences-from-stylecop.md](differences-from-stylecop.md#preset-choices)):
 no `this.` prefix, usings outside the namespace, region removal (BRO1112) and namespace-name casing (BRO1312) off, and the
-XML file header only once a company is configured. `stylebro-migrate` keeps a team's own settings instead.
+XML file header only once a company is configured. `bro migrate` keeps a team's own settings instead.
 
 Checked and not checked:
 

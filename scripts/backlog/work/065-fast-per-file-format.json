@@ -1,6 +1,6 @@
 {
   "area": "Agents",
   "item": "Fast per-file format",
-  "notes": "Owner's request 2026-10-10: `stylebro-migrate format --files a.cs b.cs` formats only those files with just their project(s) loaded (repeat until clean, kept list, `--verify-no-changes` as usual). See docs/agents.md for the timing.",
+  "notes": "Owner's request 2026-10-10: `bro format --files a.cs b.cs` formats only those files with just their project(s) loaded (repeat until clean, kept list, `--verify-no-changes` as usual). See docs/agents.md for the timing.",
   "status": "Done (2026-10-10)"
 }

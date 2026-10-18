@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What a trial on vs-validation, SmartEnum, Scrutor and TodoApi found in 'stylebro-migrate init'.</summary>
+/// <summary>What a trial on vs-validation, SmartEnum, Scrutor and TodoApi found in 'bro init'.</summary>
 public sealed partial class MigrationTests
 {
     private const string SortKey = "dotnet_sort_system_directives_first";

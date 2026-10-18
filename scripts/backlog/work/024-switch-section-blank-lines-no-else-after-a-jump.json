@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "Switch section blank lines, no `else` after a jump, overloads together (survey #6, #16, #17)",
-  "notes": "BRO1526 (`stylebro_blank_line_between_switch_sections`, default include; after a multi-line block BRO1519 decides), BRO1143 (off by default; `else if` chains skipped), BRO1001 option `stylebro_keep_overloads_together` (default false). See decisions.md. BRO1526 off after `stylebro-migrate`.",
+  "notes": "BRO1526 (`stylebro_blank_line_between_switch_sections`, default include; after a multi-line block BRO1519 decides), BRO1143 (off by default; `else if` chains skipped), BRO1001 option `stylebro_keep_overloads_together` (default false). See decisions.md. BRO1526 off after `bro migrate`.",
   "status": "Done (2026-10-05)"
 }

@@ -6,7 +6,7 @@ internal static class Descriptors
 {
     /// <summary>For the rules whose fix can leave a finding on purpose (a rename that would break code it can't see).</summary>
     private const string KeptNote = " If 'dotnet format' doesn't fix a finding, StyleBro kept it on purpose (for example, the name is read by "
-        + "reflection): 'stylebro-migrate format' lists each one with the reason. Change it by hand only after checking those uses, "
+        + "reflection): 'bro format' lists each one with the reason. Change it by hand only after checking those uses, "
         + "or suppress or baseline it.";
 
     public static readonly DiagnosticDescriptor MemberOrdering = new(

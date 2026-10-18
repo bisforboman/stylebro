@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "C# 14: keywords and extension blocks (survey 2026-10-05)",
-  "notes": "BRO1144 `@field`/`@extension`/`@partial` where C# 14 reads the name as a keyword (Sonar S8367/S8368/S8380, no fix elsewhere); BRO1001 sorts extension blocks right before methods and sorts their members; BRO1509 expands a one-line extension block. On in the preset, BRO1144 off after `stylebro-migrate`. See decisions.md.",
+  "notes": "BRO1144 `@field`/`@extension`/`@partial` where C# 14 reads the name as a keyword (Sonar S8367/S8368/S8380, no fix elsewhere); BRO1001 sorts extension blocks right before methods and sorts their members; BRO1509 expands a one-line extension block. On in the preset, BRO1144 off after `bro migrate`. See decisions.md.",
   "status": "Done (2026-10-05)"
 }

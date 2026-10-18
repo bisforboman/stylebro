@@ -82,7 +82,7 @@ else:
     out.append('No new rules planned. The last batch, fix-safe replacements for the SDK rules whose fixes crash `dotnet format`')
     out.append('or write merge conflict markers in multi-targeted projects (decided 2026-10-03, see [decisions.md](decisions.md)),')
     out.append('is done: BRO1514-BRO1516 (IDE0011), BRO1404/BRO1007 (IDE0040), BRO1405-BRO1407 (IDE0047/IDE0048) and')
-    out.append('BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `stylebro-migrate` turn those SDK rules off.\n')
+    out.append('BRO1517-BRO1519 (IDE2000/IDE2002/IDE2003). `init` and `bro` turn those SDK rules off.\n')
 
 out.append('### Work beyond single rules\n')
 out.append('StyleCop parity is done apart from the parity items below. Decided 2026-10-03 ([decisions.md](decisions.md)), in this order:\n')
@@ -95,7 +95,7 @@ out.append('')
 out.append('### Read the SDK\'s own settings\n')
 out.append('Decided 2026-10-03 ([decisions.md](decisions.md)): where the SDK has an `.editorconfig` key for the same choice, StyleBro')
 out.append('follows it. Precedence: a `stylebro_*` key, then the SDK key, then StyleCop\'s behavior (today\'s default, unchanged')
-out.append('when neither is set). `stylebro-migrate` keeps writing what matches the StyleCop setup.\n')
+out.append('when neither is set). `bro migrate` keeps writing what matches the StyleCop setup.\n')
 out.append('| Rules | SDK key | What changes | Status |')
 out.append('|-------|---------|--------------|--------|')
 for rules, key, change, status in [
@@ -108,7 +108,7 @@ for rules, key, change, status in [
 ]:
     out.append(f'| {rules} | {key} | {change} | {status} |')
 out.append('')
-out.append('IDE0055 (the SDK\'s whole formatter) isn\'t replaced: in multi-targeted repositories `stylebro-migrate format` runs')
+out.append('IDE0055 (the SDK\'s whole formatter) isn\'t replaced: in multi-targeted repositories `bro format` runs')
 out.append('`dotnet format` once per target framework, which avoids the crash. Also to do: report the SDK fixer bugs upstream')
 out.append('(dotnet/roslyn).\n')
 

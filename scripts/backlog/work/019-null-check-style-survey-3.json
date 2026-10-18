@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "Null check style (survey #3)",
-  "notes": "BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `stylebro-migrate`.",
+  "notes": "BRO1133: `x is null` (default, decided by the owner) or `x == null` (`stylebro_null_check_style`), see decisions.md. Off after `bro migrate`.",
   "status": "Done (2026-10-04)"
 }

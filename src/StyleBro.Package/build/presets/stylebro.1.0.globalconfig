@@ -176,7 +176,7 @@ dotnet_diagnostic.BRO1517.severity = warning
 dotnet_diagnostic.BRO1518.severity = warning
 dotnet_diagnostic.BRO1519.severity = warning
 
-# BRO1520-BRO1522: where an operator, '=>' or '=' goes when the line breaks next to it. Not StyleCop rules (stylebro-migrate
+# BRO1520-BRO1522: where an operator, '=>' or '=' goes when the line breaks next to it. Not StyleCop rules (bro
 # turns them off). Placement: dotnet_style_operator_placement_when_wrapping (default beginning_of_line),
 # stylebro_arrow_placement_when_wrapping (default end_of_line), stylebro_equals_placement_when_wrapping (default
 # end_of_line); not set here, so an .editorconfig value takes effect.
@@ -185,21 +185,21 @@ dotnet_diagnostic.BRO1521.severity = warning
 dotnet_diagnostic.BRO1522.severity = warning
 
 # BRO1523: in a call chain split over several lines, every call after the first line starts its own line. Not a
-# StyleCop rule (stylebro-migrate turns it off).
+# StyleCop rule (bro migrate turns it off).
 dotnet_diagnostic.BRO1523.severity = warning
-# BRO1525: no blank line after an attribute list (StyleCop's proposed SA1521, never implemented; stylebro-migrate turns it
+# BRO1525: no blank line after an attribute list (StyleCop's proposed SA1521, never implemented; bro migrate turns it
 # off)
 dotnet_diagnostic.BRO1525.severity = warning
 # BRO1524: a split conditional expression has the condition, '? a' and ': b' on their own lines (StyleCop issue #651,
-# never implemented there; stylebro-migrate turns it off). The '?'/':' side follows BRO1520's setting.
+# never implemented there; bro migrate turns it off). The '?'/':' side follows BRO1520's setting.
 dotnet_diagnostic.BRO1524.severity = warning
 
 # BRO1526: a blank line between switch sections (stylebro_blank_line_between_switch_sections, default include; not set
-# here, so an .editorconfig value takes effect). Not a StyleCop rule (Roslynator RCS0061; stylebro-migrate turns it off).
+# here, so an .editorconfig value takes effect). Not a StyleCop rule (Roslynator RCS0061; bro migrate turns it off).
 dotnet_diagnostic.BRO1526.severity = warning
 
 # BRO1527: auto-accessors on the declaration's line ('{ get; set; }'). Not a StyleCop rule (Roslynator RCS0042;
-# stylebro-migrate turns it off).
+# bro migrate turns it off).
 dotnet_diagnostic.BRO1527.severity = warning
 
 # BRO1143: no 'else' after an 'if' branch that ends in a jump (Meziantou MA0071, Roslynator RCS1211). Off: a matter of
@@ -221,15 +221,15 @@ dotnet_diagnostic.BRO1131.severity = warning
 dotnet_diagnostic.BRO1132.severity = warning
 
 # BRO1134: the same for types, namespaces, members, accessors and local functions (StyleCop issue #605, never
-# implemented there; stylebro-migrate turns it off)
+# implemented there; bro migrate turns it off)
 dotnet_diagnostic.BRO1134.severity = warning
 # BRO1135: integer literal suffixes in upper case ('1L', not '1l', which looks like '11'). Not a StyleCop rule
-# (stylebro-migrate turns it off).
+# (bro migrate turns it off).
 dotnet_diagnostic.BRO1135.severity = warning
 # BRO1133: null checks in one form, '== null' or 'is null' (stylebro_null_check_style, default pattern_matching; not set
-# here, so an .editorconfig value takes effect). Not a StyleCop rule (stylebro-migrate turns it off).
+# here, so an .editorconfig value takes effect). Not a StyleCop rule (bro migrate turns it off).
 dotnet_diagnostic.BRO1133.severity = warning
-# BRO1136-BRO1142, BRO1408: not StyleCop rules (stylebro-migrate turns them off).
+# BRO1136-BRO1142, BRO1408: not StyleCop rules (bro migrate turns them off).
 # BRO1136: 'x => x' instead of '(x) => x' (StyleCop issue #762)
 dotnet_diagnostic.BRO1136.severity = warning
 # BRO1137: no redundant 'return;' or 'yield break;' at the end of a body (StyleCop issue #760)
@@ -249,13 +249,13 @@ dotnet_diagnostic.BRO1142.severity = warning
 dotnet_diagnostic.BRO1144.severity = warning
 # BRO1408: no 'enum E : int' or 'class C : object'
 dotnet_diagnostic.BRO1408.severity = warning
-# BRO1146: 'record R' instead of 'record class R' (Meziantou MA0174; stylebro-migrate turns it off)
+# BRO1146: 'record R' instead of 'record class R' (Meziantou MA0174; bro migrate turns it off)
 dotnet_diagnostic.BRO1146.severity = warning
-# BRO1149: 'if (a && b)' instead of an 'if' nested alone in another (Sonar S1066; stylebro-migrate turns it off)
+# BRO1149: 'if (a && b)' instead of an 'if' nested alone in another (Sonar S1066; bro migrate turns it off)
 dotnet_diagnostic.BRO1149.severity = warning
-# BRO1150: 'source.Count(p)' instead of 'source.Where(p).Count()' (Sonar S2971; stylebro-migrate turns it off)
+# BRO1150: 'source.Count(p)' instead of 'source.Where(p).Count()' (Sonar S2971; bro migrate turns it off)
 dotnet_diagnostic.BRO1150.severity = warning
-# BRO1151: the elements, not an array, for a params parameter (Sonar S3878; stylebro-migrate turns it off)
+# BRO1151: the elements, not an array, for a params parameter (Sonar S3878; bro migrate turns it off)
 dotnet_diagnostic.BRO1151.severity = warning
 
 # BRO1145: 'class Marker;' instead of 'class Marker { }' (C# 12; Meziantou MA0206). Off: a matter of taste, and it needs
@@ -330,13 +330,13 @@ dotnet_diagnostic.BRO1613.severity = warning
 dotnet_diagnostic.BRO1615.severity = warning
 
 # BRO1616: a <summary>'s tags on lines of their own (stylebro_summary_layout = multi_line, the default), or one line when the
-# text fits (single_line_when_fits). Not a StyleCop rule (stylebro-migrate turns it off); the layout isn't set here, so
+# text fits (single_line_when_fits). Not a StyleCop rule (bro migrate turns it off); the layout isn't set here, so
 # an .editorconfig value takes effect.
 dotnet_diagnostic.BRO1616.severity = warning
 
 # BRO1617-BRO1619: a cref's type arguments in braces (List{T}, not List&lt;T&gt;), <see langword="null"/> instead of
 # <c>null</c>, and top-level documentation elements in the order summary, typeparam, param, returns, value, exception,
-# remarks, example, seealso. Not StyleCop rules (stylebro-migrate turns them off).
+# remarks, example, seealso. Not StyleCop rules (bro migrate turns them off).
 dotnet_diagnostic.BRO1617.severity = warning
 dotnet_diagnostic.BRO1618.severity = warning
 dotnet_diagnostic.BRO1619.severity = warning
@@ -379,7 +379,7 @@ dotnet_diagnostic.BRO1513.severity = warning
 
 # ---------------------------------------------------------------------------
 # Options for the built-in .NET rules that cover common StyleCop rules. Only the options: 'dotnet format' ignores rule
-# severities in a package's global config, so the severities go into your .editorconfig with 'stylebro-migrate init'
+# severities in a package's global config, so the severities go into your .editorconfig with 'bro init'
 # (see the README). The formatting options below apply to 'dotnet format' either way.
 # ---------------------------------------------------------------------------
 
@@ -415,7 +415,7 @@ dotnet_style_parentheses_in_other_operators = never_if_unnecessary
 # Using directives: outside the namespace (works with file-scoped namespaces; StyleCop's SA1200 default is
 # inside). Sorting (SA1208, SA1210, SA1211) isn't set here: 'dotnet format' sorts usings whenever
 # dotnet_sort_system_directives_first is set, to any value, and an .editorconfig can't unset a key this file sets.
-# 'stylebro-migrate init' writes it into .editorconfig when the code sorts its usings (or has too few to tell).
+# 'bro init' writes it into .editorconfig when the code sorts its usings (or has too few to tell).
 csharp_using_directive_placement = outside_namespace
 
 # Blank lines (SA1507, SA1508, SA1513). The SDK marks these rules experimental.

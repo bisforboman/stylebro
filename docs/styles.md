@@ -15,7 +15,7 @@ copies: `_camelCase` and `s_camelCase` fields, no `this.`, braces optional on on
 The easiest way to set it up is `init`:
 
 ```shell
-stylebro-migrate init --style microsoft --write
+bro init --style microsoft --write
 ```
 
 It writes both properties and the severities of the built-in .NET rules the style needs into `.editorconfig` (`dotnet
@@ -36,7 +36,7 @@ To say in the build which style you use when it's the default, set `<StyleBroSty
   same as `stylecop`: the preset alone.
 - It follows the preset version: it never turns on a rule your `<StyleBroPreset>` doesn't have.
 - Your own `.editorconfig` and `.globalconfig` win over it, as they win over the preset.
-- `stylebro-migrate --write` (coming from StyleCop) doesn't use a style: its block follows your StyleCop settings, and it
+- `bro migrate --write` (coming from StyleCop) doesn't use a style: its block follows your StyleCop settings, and it
   removes `<StyleBroStyle>` if it finds one. `--style` works with `init` only.
 
 ## What it sets

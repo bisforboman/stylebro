@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "`<summary>` on one line or on three (survey #5)",
-  "notes": "BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `stylebro-migrate`.",
+  "notes": "BRO1616: tags on lines of their own (default, from a survey of the reference repositories: 14,329 to 148) or `single_line_when_fits` (`stylebro_summary_layout`, `max_line_length`); summary only. Off after `bro migrate`.",
   "status": "Done (2026-10-04)"
 }

@@ -123,7 +123,7 @@ public sealed partial class MigrationTests
         var output = Capture(() => Assert.Equal(1, Program.Migrate([root, "--write"])));
         Assert.Contains("StyleCop.Analyzers (or StyleSharp.Analyzers) isn't referenced by any project, so StyleCop doesn't run here: its settings are leftovers (src", output, StringComparison.Ordinal);
         Assert.Contains("Nothing to migrate, nothing written", output, StringComparison.Ordinal);
-        Assert.Contains("Run 'stylebro-migrate init' instead", output, StringComparison.Ordinal);
+        Assert.Contains("Run 'bro init' instead", output, StringComparison.Ordinal);
         Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
 
         output = Capture(() => Assert.Equal(0, InitCommand.Run([root])));
@@ -244,9 +244,9 @@ public sealed partial class MigrationTests
         Write("eShop.slnx", "<Solution />");
         Write("eShop.Web.slnf", "{ \"solution\": { \"path\": \"eShop.slnx\", \"projects\": [] } }");
 
-        var message = BaselineCommand.NoWorkspace(root, "'stylebro-migrate format <file>'");
+        var message = BaselineCommand.NoWorkspace(root, "'bro format <file>'");
         Assert.Contains("eShop.slnx, eShop.Web.slnf", message, StringComparison.Ordinal);
-        Assert.Contains("'stylebro-migrate format eShop.slnx' or 'stylebro-migrate format eShop.Web.slnf' (--project <file> works too)", message, StringComparison.Ordinal);
+        Assert.Contains("'bro format eShop.slnx' or 'bro format eShop.Web.slnf' (--project <file> works too)", message, StringComparison.Ordinal);
         Assert.DoesNotContain("works too", BaselineCommand.NoWorkspace(root, "--project <file>"), StringComparison.Ordinal);
     }
 }

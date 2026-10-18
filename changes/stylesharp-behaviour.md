@@ -10,11 +10,11 @@
 
 ### Changed
 
-- `stylebro-migrate` on a StyleSharp repository writes StyleSharp's own meaning where its rule differs from the StyleCop
+- `bro` on a StyleSharp repository writes StyleSharp's own meaning where its rule differs from the StyleCop
   rule with the same number: the settings above, StyleSharp's list of words a name may start with (`id`, `ok`, `db`,
   ...), one-line empty blocks, no period check in `<param>`, `<typeparam>` and `<exception>`, and no namespace naming.
   StyleSharp-clean code no longer gets changes StyleSharp then reports (`SST1624`, `SST1201`).
-- `stylebro-migrate` on a StyleCop 1.1 repository keeps BRO1401 on and only leaves switch expressions alone, instead of
+- `bro` on a StyleCop 1.1 repository keeps BRO1401 on and only leaves switch expressions alone, instead of
   turning the rule off when the code had a switch expression without the comma.
 
 ### Fixed

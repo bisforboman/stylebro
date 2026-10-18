@@ -5,7 +5,7 @@ namespace StyleBro.Tests;
 /// <summary>
 /// Issue #133: without end_of_line, the SDK's whitespace pass writes the OS's line ending into the line breaks it rewrites,
 /// so a CRLF file got LF lines on Linux (and an LF file CRLF lines on Windows), and '--verify-no-changes' depended on the OS.
-/// 'stylebro-migrate format' gives a file that used one ending throughout its own ending back.
+/// 'bro format' gives a file that used one ending throughout its own ending back.
 /// </summary>
 public sealed class FormatLineEndingsTests : IDisposable
 {
@@ -99,7 +99,7 @@ public sealed class FormatLineEndingsTests : IDisposable
         });
 
         Assert.Equal(FormatCommand.NotCleanExitCode, code);
-        Assert.Contains("Not clean: formatting would change 1 file. Run 'stylebro-migrate format'.", lines);
+        Assert.Contains("Not clean: formatting would change 1 file. Run 'bro format'.", lines);
     }
 
     [Theory]

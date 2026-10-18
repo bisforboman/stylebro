@@ -1,11 +1,11 @@
 #!/usr/bin/env pwsh
-# Measures what switching from StyleCop to StyleBro changes in a StyleCop-clean repo, with the settings stylebro-migrate
+# Measures what switching from StyleCop to StyleBro changes in a StyleCop-clean repo, with the settings bro
 # generates. The goal is (almost) nothing: every change is either a StyleBro bug, a migration gap, or an SDK rule that
 # is broader than its StyleCop counterpart (docs/skipped-rules.md, "Covered, with known differences").
 #
 #   1. Plain 'dotnet format' without StyleBro, committed as the baseline (it has its own noise: line endings, conflict
 #      markers in multi-targeted files).
-#   2. stylebro-migrate --write, committed.
+#   2. bro migrate --write, committed.
 #   3. 'dotnet format' with StyleBro (and the preset unless the migration turned it off), StyleCop.Analyzers removed
 #      like a real migration would. The remaining working-tree diff is StyleBro's.
 #
@@ -60,7 +60,7 @@ try {
 
     dotnet run --project (Join-Path $repo 'src/StyleBro.Migrate') --no-build -- . --write 2>&1 |
         Select-String '^(Read|StyleCop|Suppressions|Wrote|Kept|Turned)'
-    git add -A 2>$null; git commit -qm 'stylebro-migrate' --no-verify 2>$null
+    git add -A 2>$null; git commit -qm 'bro' --no-verify 2>$null
 
     $env:CustomAfterMicrosoftCommonTargets = $hook
     dotnet format $Solution --severity warn 2>&1 | Out-Null

@@ -1,6 +1,6 @@
 # Versioning
 
-StyleBro.Analyzers and StyleBro.Migrate share one version number. What changed in each release:
+StyleBro.Analyzers and StyleBro.Tool share one version number. What changed in each release:
 [CHANGELOG.md](https://github.com/bisforboman/stylebro/blob/main/CHANGELOG.md) (the same text as the
 [GitHub Releases](https://github.com/bisforboman/stylebro/releases)).
 
@@ -36,9 +36,9 @@ So upgrading the package never breaks a build by itself: you raise the preset ve
 rules (each release's notes list them).
 
 - Unset means the package's major version: `1.0` in all of 1.x.
-- `stylebro-migrate init --write` pins the newest version it knows in `Directory.Build.props`, so a new setup gets
+- `bro init --write` pins the newest version it knows in `Directory.Build.props`, so a new setup gets
   every rule at once.
-- With `<StyleBroPreset>none</StyleBroPreset>` (also after `stylebro-migrate --write`), rules added after 1.0 are off
+- With `<StyleBroPreset>none</StyleBroPreset>` (also after `bro migrate migrate --write`), rules added after 1.0 are off
   too: they are off by default, and only the preset turns them on. To turn on a single one,
   `dotnet_diagnostic.BROxxxx.severity = warning` in `.editorconfig`.
 - A version newer than the package warns (STYLEBRO002) and uses the package's newest; anything else fails the build

@@ -231,7 +231,7 @@ public sealed partial class MigrationTests
 
         var output = Capture(() => Assert.Equal(1, Program.Migrate([root, "--write"])));
 
-        Assert.Contains("Run 'stylebro-migrate init' instead: it follows the code's own conventions and the Sonar setup", output, StringComparison.Ordinal);
+        Assert.Contains("Run 'bro init' instead: it follows the code's own conventions and the Sonar setup", output, StringComparison.Ordinal);
         Assert.False(File.Exists(Path.Combine(root, ".editorconfig")));
     }
 

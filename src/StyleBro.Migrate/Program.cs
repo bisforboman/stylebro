@@ -9,35 +9,35 @@ using System.Text.RegularExpressions;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// stylebro-migrate [path] [--write]: reads the StyleCop setup of the repository at 'path' (default: the current
+/// bro migrate [path] [--write]: reads the StyleCop setup of the repository at 'path' (default: the current
 /// directory) and prints the matching StyleBro and SDK settings. With --write it puts them into the repository's
 /// .editorconfig files, between markers so a second run replaces them, and carries StyleCop suppressions in the code
 /// ('#pragma warning disable SA1202', [SuppressMessage], &lt;NoWarn&gt;) over to the rules that replace them.
-/// 'stylebro-migrate baseline' writes a baseline instead (<see cref="BaselineCommand"/>), 'stylebro-migrate init' the
-/// built-in rule severities the preset relies on (<see cref="InitCommand"/>), 'stylebro-migrate format' runs 'dotnet
+/// 'bro baseline' writes a baseline instead (<see cref="BaselineCommand"/>), 'bro init' the
+/// built-in rule severities the preset relies on (<see cref="InitCommand"/>), 'bro format' runs 'dotnet
 /// format' safely in multi-targeted repositories (<see cref="FormatCommand"/>).
 /// </summary>
 internal static class Program
 {
-    /// <summary>What 'stylebro-migrate --help' prints.</summary>
+    /// <summary>What 'bro --help' prints.</summary>
     public const string Usage = """
-        stylebro-migrate: move a repository to StyleBro (https://bisforboman.github.io/stylebro/).
+        bro: move a repository to StyleBro (https://bisforboman.github.io/stylebro/).
           Getting started: https://bisforboman.github.io/stylebro/getting-started/
           From StyleCop:   https://bisforboman.github.io/stylebro/migrating/
           Settings:        https://bisforboman.github.io/stylebro/configuration/
 
         Usage:
-          stylebro-migrate [path] [--write] [--agents-md] [--sonar-profile <file>]
+          bro migrate [path] [--write] [--agents-md] [--sonar-profile <file>]
               Coming from StyleCop: reads the StyleCop setup at 'path' (default: the current folder) and prints the
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize] [--style microsoft|stylecop] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
+          bro init [path] [--write] [--modernize] [--style microsoft|stylecop] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. --style microsoft sets the Microsoft style
               (dotnet/runtime's; <StyleBroStyle>) and the built-in rules it needs; your code's own conventions still win.
               --style stylecop names the default (the preset is StyleCop's defaults). A repository with a StyleCop setup is told to
-              use 'stylebro-migrate --write' instead. --project names what 'format' will run on (relative to 'path').
+              use 'bro migrate --write' instead. --project names what 'format' will run on (relative to 'path').
 
               --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
               markers, updated on every run). Opt-in.
@@ -46,7 +46,7 @@ internal static class Program
               the Sonar rules that are on turn on the StyleBro and .NET rules that fix what they report. --sonar-profile
               takes a quality profile exported from the server (api/qualityprofiles/backup) instead of the defaults.
 
-          stylebro-migrate format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [--restore] [--timings] [dotnet format options]
+          bro format [folder, solution or project] [--files <a.cs> <b.cs> ...] [--all] [--once] [--restore] [--timings] [dotnet format options]
               'dotnet format' that fixes StyleBro's rules and the built-in rules init/migrate turn on (plus whitespace),
               once per target framework in multi-targeted repositories, never inside git submodules. Runs again until a
               run changes nothing (at most 3 runs) and prints the files each run changed (the first 10); --once runs once. --all also
@@ -63,9 +63,15 @@ internal static class Program
               The restore is skipped when its output is current; --restore restores anyway, --no-restore never.
               --timings prints how long each phase took.
 
-          stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
-          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft|stylecop] [--sonar-profile <file>]
-          stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
+          bro check [folder, solution or project] [--files <a.cs> ...] [options]
+              The same as 'bro format --verify-no-changes'.
+
+          bro preview <init|migrate|format> [path] [--keep] [--all] [--no-restore] [options]
+              The same as the command with --diff (below).
+
+          bro migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
+          bro init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft|stylecop] [--sonar-profile <file>]
+          bro format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per
               rule, sample changes) and writes the full diff to .git/stylebro-preview.patch (or <file>). Adds the
@@ -73,33 +79,33 @@ internal static class Program
               names what format runs on when the folder has several solutions or projects; --no-restore uses the
               repository's own restore (run 'dotnet restore' first).
 
-          stylebro-migrate baseline [path or solution or project] [--project <solution or project>]
+          bro baseline [path or solution or project] [--project <solution or project>]
               Writes stylebro.baseline with today's violations, so only new code has to follow the rules.
 
           --json (any command): one JSON object on stdout (settings, conventions, runs, changes per rule, kept
               findings, clean, exit code; https://bisforboman.github.io/stylebro/agents/); the text goes to stderr.
 
-          stylebro-migrate help | --help | -h
+          bro help | --help | -h
               This text.
 
-          stylebro-migrate --version
+          bro --version
               The tool's version.
         """;
 
     /// <summary>The option that names a SonarQube quality profile backup (XML) to follow.</summary>
     internal const string SonarProfileOption = "--sonar-profile";
 
-    /// <summary>How to format after init or --write: 'stylebro-migrate format', not plain 'dotnet format'.</summary>
-    internal const string FormatHint = "Next: run 'stylebro-migrate format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
+    /// <summary>How to format after init or --write: 'bro format', not plain 'dotnet format'.</summary>
+    internal const string FormatHint = "Next: run 'bro format'. Plain 'dotnet format' also applies every other analyzer's and the compiler's fixes.";
 
     /// <summary>The next step after init when no project references StyleBro.Analyzers yet.</summary>
-    internal const string AddPackageHint = "Next: add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), then run 'stylebro-migrate format'.";
+    internal const string AddPackageHint = "Next: add the StyleBro.Analyzers package (https://bisforboman.github.io/stylebro/getting-started/), then run 'bro format'.";
 
     /// <summary>What to do after --write: swap the packages and format.</summary>
-    internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
+    internal const string NextStep = "Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'bro format'.";
 
     /// <summary>What to do after --write when StyleBro.Analyzers is already in and StyleCop.Analyzers still is.</summary>
-    internal const string RemoveStyleCopStep = "Next: remove StyleCop.Analyzers, and run 'stylebro-migrate format'.";
+    internal const string RemoveStyleCopStep = "Next: remove StyleCop.Analyzers, and run 'bro format'.";
 
     private static readonly Regex SolutionProject = new(@"""([^""$]*?\.(?:cs|vb|fs)proj)""", RegexOptions.IgnoreCase);
 
@@ -111,6 +117,13 @@ internal static class Program
 
     public static int Main(string[] args)
     {
+        if (Expand(args) is not { } expanded)
+        {
+            Console.Error.WriteLine("Usage: bro preview <init|migrate|format> [path] [options] (the command with --diff).");
+            return 1;
+        }
+
+        args = expanded;
         if (args.FirstOrDefault() == "help" || args.Any(a => a is "--help" or "-h" or "-?"))
         {
             Console.WriteLine(Usage);
@@ -149,7 +162,22 @@ internal static class Program
         return code;
     }
 
-    /// <summary>stylebro-migrate [path] [--write]: the migration from StyleCop.</summary>
+    /// <summary>
+    /// The short commands, as the options they stand for (owner's decision 2026-10-18): 'migrate' is the plain path form
+    /// (still accepted), 'check' is 'format --verify-no-changes', 'preview &lt;command&gt;' is the command with --diff. Null for
+    /// 'preview' without a command it knows.
+    /// </summary>
+    public static string[]? Expand(string[] args) => args switch
+    {
+        ["migrate", .. var rest] => rest,
+        ["check", .. var rest] => ["format", .. rest, .. rest.Contains("--verify-no-changes") ? Array.Empty<string>() : ["--verify-no-changes"]],
+        ["preview", "migrate", .. var rest] => Diff(rest),
+        ["preview", "init" or "format", .. var rest] => [args[1], .. Diff(rest)],
+        ["preview", ..] => null,
+        _ => args,
+    };
+
+    /// <summary>bro migrate [path] [--write]: the migration from StyleCop.</summary>
     public static int Migrate(string[] args)
     {
         var (profile, rest) = TakeOption(args, SonarProfileOption);
@@ -183,8 +211,8 @@ internal static class Program
             // Without settings there's nothing to call leftovers (trial 23, tools/Gen: "no StyleCop settings" then "StyleCop's
             // severities there don't describe the code").
             Console.WriteLine(evidence.Count == 0
-                ? $"Nothing to migrate{(write ? ", nothing written" : string.Empty)}. Run 'stylebro-migrate init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")}."
-                : $"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'stylebro-migrate init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")} and ignores those lines.");
+                ? $"Nothing to migrate{(write ? ", nothing written" : string.Empty)}. Run 'bro init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")}."
+                : $"Nothing to migrate{(write ? ", nothing written" : string.Empty)}: StyleCop's severities there don't describe the code (every rule they don't mention would count as on). Run 'bro init' instead: it follows the code's own conventions{(sonar is null ? string.Empty : " and the Sonar setup")} and ignores those lines.");
             return 1;
         }
 
@@ -477,7 +505,7 @@ internal static class Program
                 folders.Count > setup.FoldersWithout.Count
                     ? $"{tool} runs everywhere except {Names(setup.FoldersWithout)}: the settings apply where it runs, with the rules {tool} has on there."
                     : $"{tool} runs only in {Names(folders)}: the settings apply there, with the rules {tool} has on there.",
-                $"No {tool} in {Names(setup.FoldersWithout)}: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'stylebro-migrate format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.",
+                $"No {tool} in {Names(setup.FoldersWithout)}: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'bro format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.",
             }
             : new List<string>();
         lines.AddRange(setup.Warnings.Select(w => "Warning: " + w));
@@ -547,11 +575,11 @@ internal static class Program
     {
         if (named is { Length: > 0 })
         {
-            Console.WriteLine($"To format it: 'stylebro-migrate format {named}'.");
+            Console.WriteLine($"To format it: 'bro format {named}'.");
         }
         else if (BaselineCommand.WorkspaceCandidates(root) is { Count: > 1 } several)
         {
-            Console.WriteLine($"This folder has several solutions or projects ({string.Join(", ", several)}): name the one to format, e.g. 'stylebro-migrate format {several[0]}'.");
+            Console.WriteLine($"This folder has several solutions or projects ({string.Join(", ", several)}): name the one to format, e.g. 'bro format {several[0]}'.");
         }
 
         VerifyNoChangesSteps(root).ForEach(Console.WriteLine);
@@ -575,7 +603,7 @@ internal static class Program
             {
                 if (Regex.IsMatch(lines[i], @"\bdotnet\s+format\b.*--verify-no-changes") && !lines[i].TrimStart().StartsWith('#'))
                 {
-                    notes.Add($"{Path.GetRelativePath(root, file).Replace('\\', '/')}:{i + 1} runs 'dotnet format --verify-no-changes': findings StyleBro keeps on purpose (a rename that would break reflection, for example) fail it every time. Run 'stylebro-migrate format --verify-no-changes' there instead (it checks the same and accepts those), or write a baseline (stylebro-migrate baseline).");
+                    notes.Add($"{Path.GetRelativePath(root, file).Replace('\\', '/')}:{i + 1} runs 'dotnet format --verify-no-changes': findings StyleBro keeps on purpose (a rename that would break reflection, for example) fail it every time. Run 'bro format --verify-no-changes' there instead (it checks the same and accepts those), or write a baseline (bro baseline).");
                 }
             }
         }
@@ -778,6 +806,8 @@ internal static class Program
 
     /// <summary>Runs the command the arguments name.</summary>
     /// <summary>The command; a dotnet command it depends on that failed (MSBuild couldn't evaluate a project) ends it with that command's output, not a stack trace.</summary>
+    private static string[] Diff(string[] rest) => PreviewCommand.Wants(rest) ? rest : [.. rest, "--diff"];
+
     private static int Guarded(string[] args)
     {
         try
@@ -811,7 +841,7 @@ internal static class Program
         if (command is null && options.Any(a => a.Split('=')[0] == InitCommand.StyleOption))
         {
             // A migrated repository follows its own StyleCop settings (docs/proposals/microsoft-style.md).
-            Console.Error.WriteLine($"{InitCommand.StyleOption} is for 'stylebro-migrate init': the migration writes settings that match your StyleCop setup instead, and turns the preset (which a style sits on) off.");
+            Console.Error.WriteLine($"{InitCommand.StyleOption} is for 'bro init': the migration writes settings that match your StyleCop setup instead, and turns the preset (which a style sits on) off.");
             return 1;
         }
 

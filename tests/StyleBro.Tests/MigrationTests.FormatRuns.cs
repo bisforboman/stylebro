@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>How 'stylebro-migrate format' plans its runs on a large multi-targeted repository (trial 21, splat: 150 runs before).</summary>
+/// <summary>How 'bro format' plans its runs on a large multi-targeted repository (trial 21, splat: 150 runs before).</summary>
 public sealed partial class MigrationTests
 {
     [Fact]

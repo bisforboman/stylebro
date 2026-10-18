@@ -3,7 +3,7 @@
 - **BRO1506** no longer reports a standalone comment, one with a blank line right above and right below it (a note on
   the code above, a section header): removing the blank line glued it onto unrelated code. The new
   `stylebro_blank_line_below_standalone_comments = remove` reports it again, like StyleCop's SA1512, and
-  `stylebro-migrate` writes it where SA1512 is on.
+  `bro migrate` writes it where SA1512 is on.
 - **BRO1110** with `stylebro_closing_parenthesis_placement = own_line` leaves a `)` that is already below the last item
   where it is, at any indentation, instead of reindenting it or pulling it up to a `}`.
 - **BRO1149** without BRO1520 (for example with CSharpier) puts the merged `&&` where

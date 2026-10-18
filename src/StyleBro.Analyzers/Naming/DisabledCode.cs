@@ -8,7 +8,7 @@ namespace StyleBro.Analyzers.Naming;
 /// <summary>
 /// Names in code excluded by '#if': a rename can't see them (the compiler doesn't bind disabled code), so a name used
 /// there keeps its old spelling while the declaration changes, and another target framework's build breaks (Bogus:
-/// type parameter 'V' renamed to 'TV', the inactive '#else' branch kept '(Action&lt;T, V&gt;)'). 'stylebro-migrate format'
+/// type parameter 'V' renamed to 'TV', the inactive '#else' branch kept '(Action&lt;T, V&gt;)'). 'bro format'
 /// formats one target framework at a time, so the linked copies that would show that branch as active aren't there.
 /// The naming analyzers don't report a symbol whose old name is a word in disabled code where it can be referenced.
 /// </summary>

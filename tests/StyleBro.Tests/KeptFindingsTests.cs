@@ -12,7 +12,7 @@ using StyleBro.Migrate;
 namespace StyleBro.Tests;
 
 /// <summary>
-/// Findings a fix keeps on purpose: why (the reason the renamer's own checks give), that 'stylebro-migrate format' lists
+/// Findings a fix keeps on purpose: why (the reason the renamer's own checks give), that 'bro format' lists
 /// them, and that they don't make it fail. The tests that set <see cref="KeptFinding.Variable"/> live in this class, so
 /// they don't run in parallel with each other.
 /// </summary>
@@ -733,7 +733,7 @@ public sealed class KeptFindingsTests : IDisposable
 
         Assert.Equal(2, code);
         Assert.Contains("C.cs(1,1): warning BRO1505: Add a blank line", lines);
-        Assert.Contains("Not clean: formatting would change 1 file. Run 'stylebro-migrate format'.", lines);
+        Assert.Contains("Not clean: formatting would change 1 file. Run 'bro format'.", lines);
         Assert.Equal("class C { }\n", File.ReadAllText(Path.Combine(root, "C.cs")));
     }
 
@@ -1089,7 +1089,7 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.True(verdict >= 0 && finding > verdict && but > finding, string.Join("\n", lines));
     }
 
-    /// <summary>Runs <paramref name="action"/> with a repository-names file of one more file, as 'stylebro-migrate format' writes it.</summary>
+    /// <summary>Runs <paramref name="action"/> with a repository-names file of one more file, as 'bro format' writes it.</summary>
     private static async Task<T> WithRepositoryNamesAsync<T>((string Path, string Text) other, Func<Task<T>> action)
     {
         var file = Path.Combine(Path.GetTempPath(), $"stylebro-names-test-{Guid.NewGuid():N}.tsv");
@@ -1119,7 +1119,7 @@ public sealed class KeptFindingsTests : IDisposable
         return root;
     }
 
-    /// <summary>What the fix writes for a kept rename, to the file 'stylebro-migrate format' named.</summary>
+    /// <summary>What the fix writes for a kept rename, to the file 'bro format' named.</summary>
     private static void WriteKept(string path) =>
         File.AppendAllText(
             Environment.GetEnvironmentVariable(KeptFinding.Variable)!,

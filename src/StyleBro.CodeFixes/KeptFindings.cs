@@ -7,7 +7,7 @@ namespace StyleBro.CodeFixes;
 
 /// <summary>
 /// Writes the findings a fix leaves on purpose to the file <see cref="KeptFinding.Variable"/> names, for
-/// 'stylebro-migrate format' to list with their reasons. Does nothing when the variable isn't set (the IDE, plain
+/// 'bro format' to list with their reasons. Does nothing when the variable isn't set (the IDE, plain
 /// 'dotnet format').
 /// </summary>
 internal static class KeptFindings
@@ -16,7 +16,7 @@ internal static class KeptFindings
 
     public static void Record(Diagnostic diagnostic, KeptReason reason, string? where = null)
     {
-#pragma warning disable RS1035 // Only 'stylebro-migrate format' sets the variable; the IDE and the build never write.
+#pragma warning disable RS1035 // Only 'bro format' sets the variable; the IDE and the build never write.
         var file = Environment.GetEnvironmentVariable(KeptFinding.Variable);
         if (string.IsNullOrEmpty(file))
         {

@@ -2,7 +2,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>Trial 26's findings in 'stylebro-migrate format', verify and the preview.</summary>
+/// <summary>Trial 26's findings in 'bro format', verify and the preview.</summary>
 public sealed partial class MigrationTests
 {
     private const string IfDebugBody = "class C\n{\n    void M(bool x)\n    {\n#if DEBUG\n        if (x)\n#endif\n        Log();\n        Log();\n    }\n\n    void Log() { }\n}\n";
@@ -162,7 +162,7 @@ public sealed partial class MigrationTests
     {
         FormatCommand.ResetExplained();
         var line = FormatCommand.Explain("Warnings were encountered while loading the workspace. Set the verbosity option to the 'diagnostic' level to log warnings.", "net6.0");
-        Assert.Equal("'dotnet format' had warnings loading the workspace in its net6.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'stylebro-migrate format' command.", line);
+        Assert.Equal("'dotnet format' had warnings loading the workspace in its net6.0 run; they don't stop the run. To see them, add '--verbosity diagnostic' to this 'bro format' command.", line);
         Assert.DoesNotContain("dotnet format <solution>", line, StringComparison.Ordinal);
         FormatCommand.ResetExplained();
     }

@@ -374,7 +374,7 @@ such a comment into the block for `if`, `while` and the other statements; the sa
 Skip multi-line headers like BRO1132 does.
 
 Done (2026-10-04): [BRO1134](rules/BRO1134.md), a new id next to BRO1132 (SA1108 covers statements only, and
-`stylebro-migrate` maps BRO1132 to SA1108).
+`bro migrate` maps BRO1132 to SA1108).
 
 #### 6. Generic crefs in braces (SA1653, #758)
 
@@ -465,7 +465,7 @@ with StyleCop.
    two fields when the first spans several lines (a multi-line initializer); BRO1505 never asks for one between fields.
    StyleCop's `master` also stopped reporting two single-line properties in a row (commit 2aeb4e3d, unreleased). The
    parity set has no multi-line field, so it didn't show.
-7. **stylebro-migrate ignores two stylecop.json settings** (from reading `Migration.cs`, not run):
+7. **bro ignores two stylecop.json settings** (from reading `Migration.cs`, not run):
    `documentationCulture` (StyleCop checks SA1623/SA1624/SA1642/SA1643 against translated standard texts, see
    [#1143](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1143) and
    [#3397](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3397)), so BRO1604-BRO1607 would rewrite a German

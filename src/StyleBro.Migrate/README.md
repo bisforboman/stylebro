@@ -1,13 +1,13 @@
-# stylebro-migrate
+# bro
 
 Moves a repository from StyleCop.Analyzers to [StyleBro](https://github.com/bisforboman/stylebro) without changing
 its code style. It reads the repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
 `stylecop.json`, the StyleCop version) and writes the StyleBro and .NET SDK settings that enforce the same things.
 
 ```
-dotnet tool install --global StyleBro.Migrate --prerelease
-stylebro-migrate path/to/repo           # dry run: what StyleCop enforces, what carries over, the settings
-stylebro-migrate path/to/repo --write   # writes them
+dotnet tool install --global StyleBro.Tool --prerelease
+bro migrate path/to/repo           # dry run: what StyleCop enforces, what carries over, the settings
+bro migrate path/to/repo --write   # writes them
 ```
 
 With `--write` it:
@@ -18,7 +18,7 @@ With `--write` it:
 - adds the replacing rule ids to existing StyleCop suppressions (`#pragma warning disable`, `[SuppressMessage]`,
   `<NoWarn>`).
 
-Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `stylebro-migrate format` (below).
+Then add the `StyleBro.Analyzers` package, remove `StyleCop.Analyzers`, and run `bro format` (below).
 
 The report lists the StyleCop rules that nothing enforces after the switch, and why. Details:
 [docs/migrating.md](https://bisforboman.github.io/stylebro/migrating/).
@@ -26,7 +26,7 @@ The report lists the StyleCop rules that nothing enforces after the switch, and 
 ## Starting without StyleCop
 
 ```
-stylebro-migrate init [path] [--write]
+bro init [path] [--write]
 ```
 
 Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order,
@@ -40,7 +40,7 @@ wrapped line, `== null`, ...), it keeps them and prints what it counted; EF Core
 repository with a StyleCop setup it stops and points to `--write` instead.
 
 ```
-stylebro-migrate init [path] --modernize [--write]
+bro init [path] --modernize [--write]
 ```
 
 Also adds the SDK's rules that rewrite code into newer C# and newer APIs (`new()`, collection expressions,
@@ -60,7 +60,7 @@ Details: [docs/migrating.md](https://bisforboman.github.io/stylebro/migrating/#c
 ## Formatting
 
 ```
-stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]
+bro format [folder, solution or project] [--all] [dotnet format options]
 ```
 
 `dotnet format` with only StyleBro's rules and the built-in rules `init` or `--write` turn on (`--diagnostics ...`),
@@ -68,7 +68,7 @@ plus whitespace formatting. Plain `dotnet format` also applies every other analy
 can break the build; `--all` does that too. Git submodules are never formatted. In a repository with multi-targeted
 projects it runs once per target framework: plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055),
 because Roslyn can't merge the frameworks' copies of a file. Other options pass through (`--severity warn`,
-`--report`, ...). `stylebro-migrate --help` lists every command, `stylebro-migrate --version` prints the version.
+`--report`, ...). `bro --help` lists every command, `bro --version` prints the version.
 
 It ends by listing the findings StyleBro's fixes keep on purpose, each with its reason (a name read by reflection, used
 in generated code, ...): don't change those by hand without checking the uses; suppress or baseline them.
@@ -90,13 +90,13 @@ findings with reasons, clean, exit code), the text on stderr. With `--agents-md`
 ## Preview
 
 ```
-stylebro-migrate path/to/repo --diff[=file] [--keep]
-stylebro-migrate init [path] --diff[=file] [--keep]
-stylebro-migrate format [path] --diff[=file] [--keep]
+bro preview migrate path/to/repo[=file] [--keep]
+bro preview init [path][=file] [--keep]
+bro preview format [path][=file] [--keep]
 ```
 
 Shows what the command would change without touching the repository: it runs on a temporary copy (`--write` for the
-first two, then `stylebro-migrate format` until a run changes nothing), prints the settings it wrote, the files each
+first two, then `bro format` until a run changes nothing), prints the settings it wrote, the files each
 rule changed and a few sample hunks, and writes the full diff to `.git/stylebro-preview.patch` (or `file`). A repository
 without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the copy. Example:
 [docs/getting-started.md](https://bisforboman.github.io/stylebro/getting-started/#preview-first).
@@ -104,7 +104,7 @@ without the StyleBro.Analyzers reference gets it in the copy. `--keep` keeps the
 ## Baseline
 
 ```
-stylebro-migrate baseline [path or solution] [--project MySolution.sln]
+bro baseline [path or solution] [--project MySolution.sln]
 ```
 
 Writes `stylebro.baseline` with every violation `dotnet format` would fix today. The StyleBro.Analyzers package then

@@ -235,7 +235,7 @@ internal static class TupleElementRenamer
             return (null, (KeptReason.NothingToRename, null));
         }
 
-        // Code this 'stylebro-migrate format' run doesn't load (RepositoryNames) can only see an element declared in a
+        // Code this 'bro format' run doesn't load (RepositoryNames) can only see an element declared in a
         // signature other projects see (eShop's private 'FindUserFromExternalProviderAsync' returning '(ApplicationUser
         // user, ...)' was kept for a local 'user' in the MAUI app, outside the run), only from a project that sees the
         // member (an internal one: InternalsVisibleTo), and only uses it as a member ('.value', 'value:', another tuple
@@ -307,7 +307,7 @@ internal static class TupleElementRenamer
 
     private static string? FindProjectName(string file)
     {
-#pragma warning disable RS1035 // Only for files 'stylebro-migrate format' listed (RepositoryNames): the IDE and the build never get here.
+#pragma warning disable RS1035 // Only for files 'bro format' listed (RepositoryNames): the IDE and the build never get here.
         try
         {
             for (var directory = System.IO.Path.GetDirectoryName(file); !string.IsNullOrEmpty(directory); directory = System.IO.Path.GetDirectoryName(directory))

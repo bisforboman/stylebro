@@ -9,7 +9,7 @@ namespace StyleBro.Analyzers;
 
 /// <summary>
 /// The names in a repository's C# files that the renaming fixes check beyond the solution they see: string literals
-/// (reflection: <c>GetField("count")</c>), <see langword="nameof"/> names, and each file's identifiers. 'stylebro-migrate format'
+/// (reflection: <c>GetField("count")</c>), <see langword="nameof"/> names, and each file's identifiers. 'bro format'
 /// formats a multi-targeted repository one target framework at a time, and a run loads only the projects that target
 /// that framework: Scrutor's netstandard2.0 run loaded the library without its tests, which read a private field with
 /// GetField, and the field was renamed. So format writes these names for every C# file to the file

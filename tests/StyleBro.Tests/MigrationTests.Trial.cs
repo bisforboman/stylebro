@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What a trial of 0.3.0-alpha.1 on Ocelot, eShop, AutoMapper and vs-threading found in stylebro-migrate.</summary>
+/// <summary>What a trial of 0.3.0-alpha.1 on Ocelot, eShop, AutoMapper and vs-threading found in bro.</summary>
 public sealed partial class MigrationTests
 {
     [Fact]

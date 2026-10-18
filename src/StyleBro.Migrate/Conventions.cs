@@ -14,7 +14,7 @@ namespace StyleBro.Migrate;
 
 /// <summary>
 /// The conventions a repository's code already follows, for the settings StyleBro has (owner's decision 2026-10-09,
-/// docs/decisions.md: "Detect the main ones"). 'stylebro-migrate init' counts both forms of each in the repository's own
+/// docs/decisions.md: "Detect the main ones"). 'bro init' counts both forms of each in the repository's own
 /// C# (syntax only; generated, vendored and EF Core migration files and submodules don't count) and writes the form most
 /// of the code uses when it is clear: at least <see cref="Share"/> of at least <see cref="MinimumSample"/> places, or all of
 /// at least <see cref="MinimumAgreeing"/>. Ocelot
@@ -1084,7 +1084,7 @@ internal static class Conventions
     }
 
     /// <summary>
-    /// The C# files' line endings for 'stylebro-migrate': init's line-ending convention alone (files git converts on checkout
+    /// The C# files' line endings for 'bro': init's line-ending convention alone (files git converts on checkout
     /// don't count). The end_of_line line when the files clearly agree (none when mixed or too few), and what to report
     /// (null without C# files).
     /// </summary>
@@ -1216,7 +1216,7 @@ internal static class Conventions
             : $"'format' converts the other {others} ({value.ToUpperInvariant()}) to {files?.ToUpperInvariant()} where it formats them";
         return value is not ("lf" or "crlf") || files is null || files == value
             ? null
-            : (files, $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To keep {value.ToUpperInvariant()}: put 'end_of_line = {value}' below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'stylebro-migrate format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
+            : (files, $"Line endings: {file ?? "your .editorconfig"} says end_of_line = {value}, but {endings[files == "lf" ? 0 : 1]} of {Plural(endings.Sum(), "C# file")} are {files.ToUpperInvariant()} as committed and git doesn't convert them: nothing enforced it, so end_of_line = {files} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To keep {value.ToUpperInvariant()}: put 'end_of_line = {value}' below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files), or add '*.cs text eol={value}' to .gitattributes and run 'git add --renormalize .'.");
     }
 
     /// <summary>
@@ -1251,7 +1251,7 @@ internal static class Conventions
         var keeps = winner < 0 ? $"'format' leaves {each} as it is"
             : files[1 - winner] == 0 ? "'format' leaves the files alone"
             : $"'format' {(winner == 1 ? add : remove)} the {Plural(files[1 - winner], "file")} that {(winner == 1 ? "lack" : "have")} one";
-        return (line, $"{title}: {file ?? "your .editorconfig"} says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {key} = {value} everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'stylebro-migrate format' (it rewrites the files).");
+        return (line, $"{title}: {file ?? "your .editorconfig"} says {key} = {value}, but {files[1]} of {Plural(files.Sum(), "C# file")} {found}: nothing enforced it, so {line} is written for C# files{(file is null ? string.Empty : $" in {file}")} and {keeps}. To have {key} = {value} everywhere: put that line below the stylebro-migrate block, in a [*.cs] section (a later line wins; the block's own lines come back on the next init) and run 'bro format' (it rewrites the files).");
     }
 
     /// <summary>
@@ -1260,7 +1260,7 @@ internal static class Conventions
     /// the lookup stops at 'root = true' (Roslyn's own <see cref="AnalyzerConfigSet"/> per file). Bogus's Source/.editorconfig
     /// ('[*]', not root = true) says insert_final_newline = false over the root's '[*.cs]' true: init judged the files against
     /// the root's key, wrote 'unset' into the root block, which never reached them, and 'format' stripped the last line break
-    /// from 48 files. The stylebro blocks don't count (init's own lines aren't the repository's), and the files are the ones
+    /// from 48 files. The stylestylebro-migrate blocks don't count (init's own lines aren't the repository's), and the files are the ones
     /// <see cref="Count(string, IReadOnlyDictionary{string, string}?)"/> counts.
     /// </summary>
     public static List<FileSettingGroup> FileSettings(string root)
@@ -1348,7 +1348,7 @@ internal static class Conventions
         var settle = $"'*.cs text eol={value}' in .gitattributes (then 'git add --renormalize .'), or remove end_of_line from {file ?? ".editorconfig"}";
         return (
             [
-                $"# {(file is null ? string.Empty : "init: ")}Line endings: {why}. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: {settle}; then run stylebro-migrate again.",
+                $"# {(file is null ? string.Empty : "init: ")}Line endings: {why}. Until that's settled, formatting and IDE0055 leave each file's endings as checked out. To settle it: {settle}; then run bro again.",
                 $"{EndOfLineKey} = unset",
                 "dotnet_diagnostic.IDE0055.severity = suggestion",
             ],
@@ -2652,7 +2652,7 @@ internal static class Conventions
         int Clear(string key) => counts.TryGetValue(key, out var c) && c[0] + c[1] >= MinimumAgreeing ? Winner(c[0], c[1]) : -2;
         var contradicted = new[] { ThisQualificationKey, "csharp_using_directive_placement", "csharp_new_line_before_open_brace" }.Any(k => Clear(k) is 1 or -1);
         return Clear(StyleBro.Analyzers.Naming.FieldNames.StyleKey) == 1 && Clear(StaticPrefixKey) == 1 && !contradicted
-            ? "  note     your code looks like the Microsoft style (dotnet/runtime's: '_' fields, 's_' statics, no 'this.'): try 'stylebro-migrate init --style microsoft' (https://bisforboman.github.io/stylebro/styles/)"
+            ? "  note     your code looks like the Microsoft style (dotnet/runtime's: '_' fields, 's_' statics, no 'this.'): try 'bro init --style microsoft' (https://bisforboman.github.io/stylebro/styles/)"
             : null;
     }
 
@@ -3197,7 +3197,7 @@ internal static class Conventions
 
         if (lists.TurnedOff.Count + lists.Unfollowed.Count + lists.BothAllowed.Count > 0)
         {
-            yield return "  To choose later: set the key in .editorconfig, remove its init line, run 'stylebro-migrate format'.";
+            yield return "  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.";
         }
 
         if (lists.TooFew.Count > 0)
