@@ -293,7 +293,7 @@ internal static class Braces
                 // A '//' comment below the new '}': BRO1504's blank line, which a comment below a ';' may not want
                 // (BlankLines.IsCommentBelowCode; akka.net's '// ReSharper restore ...' below a wrapped 'throw').
                 _ when isOn is not null && isOn(DiagnosticIds.BlankLineBeforeComment) && outer.Statement.GetLastToken().GetNextToken().LeadingTrivia.FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia)) is var comment
-                    && BlankLines.NeedsBlankLineAbove(comment, text, isOn, BlankLines.GetExemptPrefixes(options), SwitchSectionBlankLines.ReadMode(options), belowCloseBrace: true) => eol,
+                    && BlankLines.NeedsBlankLineAbove(comment, text, isOn, BlankLines.GetExemptPrefixes(options), SwitchSectionBlankLines.ReadMode(options), belowCloseBrace: true, tabWidth: Indentation.GetTabWidth(options)) => eol,
                 _ => string.Empty,
             };
             changes.Add(new TextChange(outer.Close, closing + suffix));

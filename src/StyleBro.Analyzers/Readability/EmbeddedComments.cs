@@ -104,13 +104,23 @@ internal static class EmbeddedComments
     /// <summary>
     /// Removes the comments where they are (a line left blank goes completely, as in BRO1101's fix) and inserts them
     /// after '{' (below any blank lines there), one per line, indented like the block's first line (or one unit deeper
-    /// than '{' in an empty block).
+    /// than '{' in an empty block). A '{' on a line below the header goes up to the header's line when
+    /// <paramref name="braceOnHeaderLine"/> (csharp_new_line_before_open_brace leaves this kind of brace out): without the
+    /// comments in between, the next run's whitespace pass would move it there (Pinta: 'if (a != b) // why' + '{').
     /// </summary>
-    public static IEnumerable<TextChange> GetChanges(SyntaxToken openBrace, ImmutableArray<SyntaxTrivia> comments, SourceText text, string indentUnit)
+    public static IEnumerable<TextChange> GetChanges(SyntaxToken openBrace, ImmutableArray<SyntaxTrivia> comments, SourceText text, string indentUnit, bool braceOnHeaderLine = false)
     {
-        foreach (var change in EmptyStatements.GetChanges(text, comments.Select(c => c.Span)))
+        var previous = openBrace.GetPreviousToken();
+        if (braceOnHeaderLine && Line(text, previous.SpanStart) != Line(text, openBrace.SpanStart))
         {
-            yield return change;
+            yield return new TextChange(TextSpan.FromBounds(previous.Span.End, openBrace.SpanStart), " ");
+        }
+        else
+        {
+            foreach (var change in EmptyStatements.GetChanges(text, comments.Select(c => c.Span)))
+            {
+                yield return change;
+            }
         }
 
         var braceLine = text.Lines.GetLineFromPosition(openBrace.SpanStart);

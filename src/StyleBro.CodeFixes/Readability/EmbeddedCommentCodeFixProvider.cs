@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using StyleBro.Analyzers;
+using StyleBro.Analyzers.Layout;
 using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Readability;
@@ -55,13 +56,14 @@ public sealed class EmbeddedCommentCodeFixProvider : CodeFixProvider
         }
 
         var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var indentUnit = Indentation.GetUnit(document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree));
+        var options = document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GetOptions(root.SyntaxTree);
+        var indentUnit = Indentation.GetUnit(options);
         var changes = diagnostics
             .Select(d => EmbeddedComments.GetOpenBrace(root.FindTrivia(d.Location.SourceSpan.Start)))
             .Distinct()
             .Select(brace => (Brace: brace, Comments: EmbeddedComments.GetComments(brace, text)))
             .Where(x => !x.Comments.IsEmpty)
-            .SelectMany(x => EmbeddedComments.GetChanges(x.Brace, x.Comments, text, indentUnit));
+            .SelectMany(x => EmbeddedComments.GetChanges(x.Brace, x.Comments, text, indentUnit, !SingleLineBlocks.NewLineBeforeBrace(x.Brace.Parent!, options)));
         return document.WithText(text.WithChanges(changes));
     }
 }

@@ -157,7 +157,7 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
 
                 var line = removedText.Lines.GetLineFromPosition(position);
                 var comment = removedRoot.FindTrivia(line.Start + line.ToString().Length - line.ToString().TrimStart().Length);
-                if (BlankLines.NeedsBlankLineAbove(comment, removedText, IsOn, exempt, SwitchSectionBlankLines.ReadMode(configOptions)))
+                if (BlankLines.NeedsBlankLineAbove(comment, removedText, IsOn, exempt, SwitchSectionBlankLines.ReadMode(configOptions), tabWidth: Indentation.GetTabWidth(configOptions)))
                 {
                     var above = removedText.Lines[line.LineNumber - 1];
                     var lineBreak = removedText.ToString(TextSpan.FromBounds(above.End, above.EndIncludingLineBreak));

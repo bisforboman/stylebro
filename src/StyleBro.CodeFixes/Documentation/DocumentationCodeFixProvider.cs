@@ -267,7 +267,7 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         var newText = text.WithChanges(slashes);
         var newRoot = CSharpSyntaxTree.ParseText(newText, (CSharpParseOptions)tree.Options, cancellationToken: cancellationToken).GetRoot(cancellationToken);
         var converted = newRoot.FindTrivia(start);
-        return BlankLines.NeedsBlankLineAbove(converted, newText, IsOn, BlankLines.GetExemptPrefixes(options), SwitchSectionBlankLines.ReadMode(options))
+        return BlankLines.NeedsBlankLineAbove(converted, newText, IsOn, BlankLines.GetExemptPrefixes(options), SwitchSectionBlankLines.ReadMode(options), tabWidth: Indentation.GetTabWidth(options))
             ? new TextChange(new TextSpan(text.Lines.GetLineFromPosition(start).Start, 0), SingleLineBlocks.LineBreak(text, start))
             : null;
     }

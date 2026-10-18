@@ -46,7 +46,7 @@ public sealed class BlankLineAfterAnalyzer : DiagnosticAnalyzer
         var switchSections = SwitchSectionBlankLines.ReadMode(configOptions);
         foreach (var trivia in TreeWalk.Trivia(root))
         {
-            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken), exempt, switchSections))
+            if (BlankLines.NeedsBlankLineAbove(trivia, text, id => Severities.IsOn(options, context.Tree, id, context.CancellationToken), exempt, switchSections, tabWidth: Indentation.GetTabWidth(configOptions)))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.BlankLineBeforeComment, trivia.GetLocation()));
             }

@@ -2216,6 +2216,7 @@ internal static class Conventions
         void CommentsBelowCode()
         {
             var exempt = StyleBro.Analyzers.Layout.BlankLines.GetExemptPrefixes(new Options(settings));
+            var tabWidth = StyleBro.Analyzers.Indentation.GetTabWidth(new Options(settings));
             static List<SyntaxTrivia> Comments(SyntaxNode node) =>
                 node.DescendantTrivia().Where(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia) && !t.ToString().StartsWith("///", StringComparison.Ordinal)).ToList();
             var comments = Comments(root);
@@ -2224,7 +2225,7 @@ internal static class Conventions
             for (var i = 0; i < comments.Count; i++)
             {
                 var line = text.Lines.GetLineFromPosition(comments[i].SpanStart).LineNumber;
-                if (StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove(comments[i], text, _ => false, exempt))
+                if (StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove(comments[i], text, _ => false, exempt, tabWidth: tabWidth))
                 {
                     Add(CommentAboveKey, true);
                 }
@@ -2253,7 +2254,7 @@ internal static class Conventions
             var compactComments = Comments(CSharpSyntaxTree.ParseText(compact, (CSharpParseOptions)tree.Options).GetRoot());
             if (compactComments.Count == comments.Count)
             {
-                counts[CommentAboveKey][0] += spaced.Count(i => StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove(compactComments[i], compact, _ => false, exempt));
+                counts[CommentAboveKey][0] += spaced.Count(i => StyleBro.Analyzers.Layout.BlankLines.NeedsBlankLineAbove(compactComments[i], compact, _ => false, exempt, tabWidth: tabWidth));
             }
         }
 
