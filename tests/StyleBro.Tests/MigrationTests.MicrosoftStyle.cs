@@ -66,6 +66,24 @@ public sealed partial class MigrationTests
     }
 
     [Fact]
+    public void InitWithTheStyleCopStyle_PinsItsName_AndWritesWhatPlainInitWrites()
+    {
+        Write("src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
+        Write("src/App/Cache.cs", RuntimeShaped);
+
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write", "--style", "StyleCop" })));
+        var props = File.ReadAllText(Path.Combine(root, "Directory.Build.props"));
+        Assert.Contains($"<StyleBroPreset>{PresetVersions.Latest}</StyleBroPreset>\n    <StyleBroStyle>stylecop</StyleBroStyle>", props, StringComparison.Ordinal);
+        var styled = File.ReadAllText(Path.Combine(root, ".editorconfig"));
+
+        // The default style has no layer: the same settings as without --style.
+        File.Delete(Path.Combine(root, ".editorconfig"));
+        File.Delete(Path.Combine(root, "Directory.Build.props"));
+        Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--write" })));
+        Assert.Equal(File.ReadAllText(Path.Combine(root, ".editorconfig")), styled);
+    }
+
+    [Fact]
     public void InitWithAnUnknownStyle_Fails()
     {
         Write("src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");

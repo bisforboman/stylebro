@@ -1,7 +1,8 @@
 # Styles
 
-StyleBro's preset follows StyleCop's defaults. A style is a second layer on top of it, for code that follows another
-well-known way of writing C#. There is one: **`microsoft`**, the coding style of
+StyleBro's preset follows StyleCop's defaults: that is the **`stylecop`** style, the default. Another style is a second
+layer on top of the preset, for code that follows another well-known way of writing C#. There is one: **`microsoft`**,
+the coding style of
 [dotnet/runtime](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md), which much of .NET
 copies: `_camelCase` and `s_camelCase` fields, no `this.`, braces optional on one-line bodies, fields at the top of the type.
 
@@ -25,10 +26,14 @@ accesses, `init` turns IDE0003 off instead of removing them; with `count` instea
 Plain `init` suggests the style when your code looks like runtime's (`_` and `s_` fields, no `this.`); it never sets it
 by itself.
 
+To say in the build which style you use when it's the default, set `<StyleBroStyle>stylecop</StyleBroStyle>` (`init
+--style stylecop --write` writes it). It changes nothing: the preset already is StyleCop's defaults.
+
 ## How it combines
 
 - The style needs the preset: with `<StyleBroPreset>none</StyleBroPreset>` it is ignored, with warning STYLEBRO004. Any
-  value other than `microsoft` or `none` fails the build (STYLEBRO003).
+  value other than `stylecop`, `microsoft` or `none` fails the build (STYLEBRO003). `none` and an unset style mean the
+  same as `stylecop`: the preset alone.
 - It follows the preset version: it never turns on a rule your `<StyleBroPreset>` doesn't have.
 - Your own `.editorconfig` and `.globalconfig` win over it, as they win over the preset.
 - `stylebro-migrate --write` (coming from StyleCop) doesn't use a style: its block follows your StyleCop settings, and it
