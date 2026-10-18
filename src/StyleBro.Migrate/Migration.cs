@@ -1290,14 +1290,19 @@ internal static class Migration
     /// holder isn't the root license's, neither name containing the other: another project's code copied in (trial 27:
     /// PalCalc's adonis-ui/ and its AutoCompleteComboBox fork, tab-indented, took 194 of 476 formatted files). Nothing without
     /// a root license or a copyright line to compare. ponytail: a vendored folder without a license of its own (PalCalc's
-    /// GraphSharp/) isn't recognized; the docs say how to mark it.
+    /// GraphSharp/) isn't recognized; the docs say how to mark it. The root's licenses all count as its own (trial 31: Hangfire's
+    /// root has COPYING, whose GPL text names the Free Software Foundation, next to its own LICENSE.md, and the root folder
+    /// itself was vendored: the whole repository marked generated).
     /// </summary>
     internal static IEnumerable<string> LicensedFolders(string root, IReadOnlyList<string> files)
     {
         var top = Path.GetFullPath(root).TrimEnd('\\', '/');
         var licenses = files.Where(IsLicense).ToList();
-        if (licenses.FirstOrDefault(f => string.Equals(Path.GetDirectoryName(Path.GetFullPath(f)), top, StringComparison.OrdinalIgnoreCase)) is not { } own
-            || CopyrightHolder(ReadOrNull(own)) is not { } holder)
+        var holders = licenses.Where(f => string.Equals(Path.GetDirectoryName(Path.GetFullPath(f)), top, StringComparison.OrdinalIgnoreCase))
+            .Select(f => CopyrightHolder(ReadOrNull(f)))
+            .OfType<string>()
+            .ToList();
+        if (holders.Count == 0)
         {
             return [];
         }
@@ -1307,7 +1312,7 @@ internal static class Migration
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
             .Where(folder => csharpFolders.Any(c => c == folder || IsUnder(c, folder)))
             .Where(folder => licenses.Where(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/') == folder).Select(f => CopyrightHolder(ReadOrNull(f))).OfType<string>()
-                .Any(other => !other.Contains(holder, StringComparison.Ordinal) && !holder.Contains(other, StringComparison.Ordinal)))
+                .Any(other => holders.All(holder => !other.Contains(holder, StringComparison.Ordinal) && !holder.Contains(other, StringComparison.Ordinal))))
             .Distinct()
             .ToList();
     }
@@ -1315,6 +1320,7 @@ internal static class Migration
     /// <summary>
     /// The folders with C# files and a license file of their own that <see cref="LicensedFolders"/> can't judge because a license
     /// (theirs, or the root's) can't be read (trial 28: a locked LICENSE turned 4 rules off). Left out of the counts, not marked.
+    /// Never the root itself: an unreadable second root license (Hangfire has five) left the whole repository out.
     /// </summary>
     internal static IEnumerable<string> UndecidedLicenseFolders(string root, IReadOnlyList<string> files)
     {
@@ -1330,7 +1336,7 @@ internal static class Migration
         return licenses
             .Where(f => f != own && (rootUnread || ReadOrNull(f) is null))
             .Select(f => Path.GetRelativePath(root, Path.GetDirectoryName(f)!).Replace('\\', '/'))
-            .Where(folder => csharpFolders.Any(c => c == folder || IsUnder(c, folder)))
+            .Where(folder => folder != "." && csharpFolders.Any(c => c == folder || IsUnder(c, folder)))
             .Distinct()
             .ToList();
     }

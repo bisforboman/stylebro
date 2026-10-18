@@ -656,7 +656,10 @@ internal sealed class StyleCopSetup
 
     /// <summary>
     /// Files in the repository, skipping build output, version control and nested repositories (git submodules and other
-    /// folders with their own '.git' file or folder): their settings and code belong to another repository.
+    /// folders with their own '.git' file or folder): their settings and code belong to another repository. Also skipped:
+    /// an extracted NuGet package (a folder with its .nupkg), where a nuget.config's packages folder or packages.config's
+    /// packages/ is inside the repository (trial 31: Hangfire's '%USERPROFILE%/.nuget/TrustedPackages', not expanded off
+    /// Windows, gave init a "vendored" Microsoft.NET.Test.Sdk).
     /// </summary>
     public static IEnumerable<string> EnumerateFiles(string root) => EnumerateFiles(root, ownRoot: false);
 
@@ -671,7 +674,13 @@ internal sealed class StyleCopSetup
         while (pending.Count > 0)
         {
             var directory = pending.Pop();
-            foreach (var file in Directory.EnumerateFiles(directory))
+            var files = Directory.GetFiles(directory);
+            if (files.Any(f => f.EndsWith(".nupkg", StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            foreach (var file in files)
             {
                 yield return file;
             }

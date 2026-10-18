@@ -350,6 +350,26 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.Equal(expected, reason);
     }
 
+    // Trial 31 (Ursa.Avalonia): a field registering a XAML framework's property is found by its '<Name>Property' name.
+    [Theory]
+    [InlineData("private static StyledProperty<int> LevelProperty = new();", KeptReason.RegistrationField)]
+    [InlineData("private static DirectProperty<int> LevelProperty = new();", KeptReason.RegistrationField)]
+    [InlineData("private static DependencyProperty IsOpenProperty = new();", KeptReason.RegistrationField)]
+    [InlineData("private static DependencyPropertyKey IsOpenPropertyKey = new();", KeptReason.RegistrationField)]
+    [InlineData("private static RoutedEvent<int> ClickEvent = new();", KeptReason.RegistrationField)]
+    [InlineData("private static StyledProperty<int> Level = new();", null)]
+    [InlineData("private StyledProperty<int> LevelProperty = new();", null)]
+    [InlineData("private static Holder LevelProperty = new();", null)]
+    public async Task AFieldRegisteringAXamlProperty_IsKept(string field, KeptReason? expected)
+    {
+        var reason = await GetReasonAsync(
+            DiagnosticIds.PrivateFieldNaming,
+            ("C.cs", "internal class C\n{\n    " + field + "\n\n    public object Get() => " + field.Split(' ')[^3] + ";\n}\n"),
+            ("Framework.cs", "public abstract class AvaloniaProperty { }\npublic class StyledProperty<T> : AvaloniaProperty { }\npublic class DirectProperty<T> : AvaloniaProperty { }\npublic sealed class DependencyProperty { }\npublic sealed class DependencyPropertyKey { }\npublic class RoutedEvent { }\npublic class RoutedEvent<T> : RoutedEvent { }\npublic class Holder { }\n"));
+
+        Assert.Equal(expected, reason);
+    }
+
     // Trial 28: the 'x:' prefix of a markup extension isn't a name (a-2: Point3's public field 'x' was kept for '{x:Static ...}').
     [Theory]
     [InlineData("<TextBlock Text=\"{Binding Source={x:Static SystemParameters.HighContrast}}\" Tag=\"{x:Null}\" />", null)]

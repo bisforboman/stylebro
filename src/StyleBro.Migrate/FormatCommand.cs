@@ -784,6 +784,17 @@ internal static partial class FormatCommand
     public static string? SkippedProject(string line) =>
         Regex.Match(line, "Required references did not load for (.+?) or referenced project") is { Success: true } match ? match.Groups[1].Value : null;
 
+    /// <summary>
+    /// The project and framework a skip (<see cref="SkippedProject"/>) in the run for <paramref name="run"/> is about: 'Lib' in
+    /// that run, or 'Lib(netstandard1.3)', a multi-targeted project the run loaded with all its frameworks (a reference whose
+    /// own frameworks don't include the run's), for that framework. Trial 31 (Hangfire): 'Hangfire.Core(netstandard1.3)' from
+    /// the net461 run was a project skipped in every run, "so those files weren't formatted", though its other frameworks were.
+    /// </summary>
+    public static (string Project, string Framework) SkippedFor(string skipped, string run) =>
+        Regex.Match(skipped, @"^(?<name>.+)\((?<framework>[^()]+)\)$") is { Success: true } match
+            ? (match.Groups["name"].Value, match.Groups["framework"].Value)
+            : (skipped, run);
+
     /// <summary>Whether a line of 'dotnet format''s output says it crashed (an unhandled exception: its changes may be half written).</summary>
     public static bool IsCrash(string line) => line.StartsWith("Unhandled exception", StringComparison.Ordinal);
 
@@ -4274,9 +4285,10 @@ internal static partial class FormatCommand
                 nuGetErrors.Add(line);
             }
 
-            if (SkippedProject(line) is { } project)
+            if (SkippedProject(line) is { } skippedName)
             {
-                (skipped.TryGetValue(project, out var set) ? set : skipped[project] = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)).Add(current);
+                var (project, framework) = SkippedFor(skippedName, current);
+                (skipped.TryGetValue(project, out var set) ? set : skipped[project] = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)).Add(framework);
             }
 
             if (UnsupportedProject(line) is { } other)

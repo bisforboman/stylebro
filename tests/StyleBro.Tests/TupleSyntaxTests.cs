@@ -148,13 +148,36 @@ public class TupleSyntaxTests
             {
                 var a = (1, "a");
                 var b = (1, 2L);
-                var c = ((long)1, (string)null);
+                var c = (1L, (string)null);
                 var d = (1 + 2, Count());
             }
 
             int Count() => 0;
         }
         """);
+
+    [Fact]
+    public Task ConvertedLiterals_GetBRO1122sSuffix_OnlyWhereItIsOn()
+    {
+        // Ursa.Avalonia: 'new ValueTuple<double, double, double>(0, 0, 0)' became '((double)0, ...)', which BRO1122 turned into
+        // '0D' in a second run. A suffix only where its value is exact: (float)0.1 isn't 0.1F.
+        const string Source = """
+            using System;
+
+            class C
+            {
+                void M()
+                {
+                    var a = {|BRO1123:new ValueTuple<double, double, float>(0, 1, 2)|};
+                    var b = {|BRO1123:new ValueTuple<ulong, decimal>(1, 2)|};
+                }
+            }
+            """;
+        return Task.WhenAll(
+            Verify.VerifyFixAsync(Source, Source.Replace("{|BRO1123:new ValueTuple<double, double, float>(0, 1, 2)|}", "(0D, 1D, 2F)").Replace("{|BRO1123:new ValueTuple<ulong, decimal>(1, 2)|}", "(1UL, 2M)")),
+            Verify.VerifyFixAsync(Source, Source.Replace("{|BRO1123:new ValueTuple<double, double, float>(0, 1, 2)|}", "((double)0, (double)1, (float)2)").Replace("{|BRO1123:new ValueTuple<ulong, decimal>(1, 2)|}", "((ulong)1, (decimal)2)"), editorConfig: "dotnet_diagnostic.BRO1122.severity = none"),
+            Verify.VerifyFixAsync(Source, Source.Replace("{|BRO1123:new ValueTuple<double, double, float>(0, 1, 2)|}", "(0D, 1D, 2F)").Replace("{|BRO1123:new ValueTuple<ulong, decimal>(1, 2)|}", "(1ul, 2M)"), editorConfig: "dotnet_diagnostic.BRO1135.severity = none"));
+    }
 
     [Fact]
     public Task CreationsThatWouldChangeOrNotCompile_AreNotReported() => Verify.VerifyNoDiagnosticsAsync("""

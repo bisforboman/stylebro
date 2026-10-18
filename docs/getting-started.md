@@ -810,6 +810,8 @@ and it's on purpose. The reasons, per finding:
 - the name is a structured log key: it's in an interpolated string's hole whose handler takes the hole's text as a
   `[CallerArgumentExpression]` argument (ZLogger's `$"{UserId}"`);
 - a XAML file uses the name (a binding, an event handler, or a type or property of the project's own namespace);
+- the field registers a XAML framework's property or routed event (`LevelProperty` for an Avalonia, WPF, WinUI or MAUI
+  property `Level`, `ClickEvent`): XAML and the framework's analyzers find it by that name;
 - a derived type hides the member with a `new` member of the same name, which would then hide nothing (CS0109);
 - another member would hide the new name, or the new name already means something else where the name is used;
 - a use is in generated code (a source generator, a Razor page, a designer file), which a tool writes again;
