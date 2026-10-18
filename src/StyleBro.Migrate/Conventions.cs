@@ -1054,6 +1054,60 @@ internal static class Conventions
         return counts;
     }
 
+    /// <summary>
+    /// The repository's own C# files (relative, '/'-separated) whose line ending isn't <paramref name="ending"/> ('lf' or
+    /// 'crlf') and that hold a string literal spanning lines, each with its own ending: converting the file would change the
+    /// literal's value (owner's decision 2026-10-18; trial 32, RazorLight: init wrote end_of_line = lf for 134 of 153 files,
+    /// and two tests comparing rendered output with a verbatim string failed once its CRLF became LF). Files git converts on
+    /// checkout and files with both endings are left out. A token spanning lines is a literal: inactive code is trivia.
+    /// </summary>
+    public static List<(string Path, string Ending)> LiteralEndingFiles(string root, string ending)
+    {
+        var target = ending.Equals("lf", StringComparison.OrdinalIgnoreCase) ? 0 : ending.Equals("crlf", StringComparison.OrdinalIgnoreCase) ? 1 : -1;
+        var found = new List<(string Path, string Ending)>();
+        if (target < 0)
+        {
+            return found;
+        }
+
+        var converted = ConvertedByGit(root);
+        foreach (var file in Migration.OwnCSharpFiles(root))
+        {
+            var text = Migration.ReadOrNull(file);
+            var relative = Path.GetRelativePath(root, file).Replace('\\', '/');
+            if (text is null || Migration.IsGeneratedOrVendored(relative, text) || converted.ContainsKey(Path.GetFullPath(file))
+                || LineEnding(text) is not (0 or 1) || LineEnding(text) == target)
+            {
+                continue;
+            }
+
+            if (CSharpSyntaxTree.ParseText(text).GetRoot().DescendantTokens().Any(t => t.Text.Contains('\n')))
+            {
+                found.Add((relative, target == 0 ? "crlf" : "lf"));
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    /// The .editorconfig sections that keep <see cref="LiteralEndingFiles"/>' endings, and the report line, or none. A section
+    /// names the file (special characters escaped); 'unset' wouldn't do: probed, 'dotnet format' then writes the OS's ending.
+    /// </summary>
+    public static (List<(string Section, List<string> Lines)> Sections, string? Report) LiteralEndingSections(string root, string ending)
+    {
+        var files = LiteralEndingFiles(root, ending);
+        var sections = files.Select(f => (System.Text.RegularExpressions.Regex.Replace(f.Path, @"[\[\]{}*?!,]", @"\$0"), new List<string> { "# init: a string literal in it spans lines, and another ending would change its value", $"{EndOfLineKey} = {f.Ending}" })).ToList();
+        if (files.Count == 0)
+        {
+            return (sections, null);
+        }
+
+        var they = files.Count == 1 ? "it keeps its" : "they keep their";
+        var listed = string.Join(", ", files.Take(5).Select(f => f.Path)) + (files.Count > 5 ? ", ..." : string.Empty);
+        return (sections, $"Line endings: {Plural(files.Count, "file")} with the other ending {(files.Count == 1 ? "holds" : "hold")} a string literal spanning lines, so {they} ending (another would change the literal's value): {listed}");
+    }
+
     /// <summary>A text's line ending: 0 LF, 1 CRLF, -1 none or both.</summary>
     public static int LineEnding(string text)
     {

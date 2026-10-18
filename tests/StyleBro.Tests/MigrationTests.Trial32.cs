@@ -108,4 +108,31 @@ public sealed partial class MigrationTests
         Assert.DoesNotContain(result.Lines, l => l.StartsWith("csharp_indent_case_contents_when_block", StringComparison.Ordinal));
         Assert.DoesNotContain(result.Notes, n => n.StartsWith("'case X:' blocks", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void LineEndings_AFileWhoseStringLiteralSpansLines_KeepsItsEnding()
+    {
+        // RazorLight: init wrote end_of_line = lf (134 of 153 files), format turned the CRLF ones LF, and two tests comparing
+        // rendered output with a verbatim string failed (owner's decision 2026-10-18: those files keep their ending).
+        for (var i = 0; i < 9; i++)
+        {
+            Write($"F{i}.cs", $"namespace App;\n\npublic class F{i}\n{{\n}}\n");
+        }
+
+        Write("F0.cs", "namespace App;\n\npublic class F0\n{\n    public const string Json = @\"{\n}\";\n}\n");
+
+        Write("Expected.cs", "namespace App;\r\n\r\npublic class Expected\r\n{\r\n    public const string Json = @\"{\r\n}\";\r\n}\r\n");
+        Write("Plain.cs", "namespace App;\r\n\r\npublic class Plain\r\n{\r\n    public const string Json = \"{}\";\r\n}\r\n");
+
+        var (lines, report, _, scopes) = InitCommand.Detect(root, new Dictionary<string, string>(), []);
+        Assert.Contains("end_of_line = lf", lines);
+        var section = Assert.Single(scopes, s => s.Lines.Contains("end_of_line = crlf"));
+        Assert.Equal("Expected.cs", section.Section);
+        Assert.Contains(report, l => l.Contains("1 file with the other ending holds a string literal spanning lines, so it keeps its ending", StringComparison.Ordinal));
+
+        // The migration writes the same section.
+        Write("Lib.csproj", """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" /></ItemGroup></Project>""");
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Equal("Expected.cs", Assert.Single(result.EndingSections).Section);
+    }
 }

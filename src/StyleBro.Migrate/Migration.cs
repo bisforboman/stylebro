@@ -450,6 +450,13 @@ internal static class Migration
             if (endOfLine is not null)
             {
                 lines.Add(endOfLine);
+
+                // The files of the other ending whose string literals span lines keep theirs (trial 32, RazorLight).
+                if (Conventions.LiteralEndingSections(root, endOfLine.Substring(endOfLine.IndexOf('=') + 1).Trim()) is ({ Count: > 0 } literalSections, { } literalNote))
+                {
+                    result.EndingSections.AddRange(literalSections.Select(s => (s.Section, s.Lines.Select(l => l.Replace("# init: ", "# ")).ToList())));
+                    result.Notes.Add(literalNote);
+                }
             }
         }
 
@@ -682,6 +689,7 @@ internal static class Migration
         }
 
         plan[".editorconfig"].AddRange(main.CSharpierSections);
+        plan[".editorconfig"].AddRange(main.EndingSections);
 
         foreach (var folder in MigrationFolders(root))
         {
@@ -2288,5 +2296,8 @@ internal static class Migration
 
         /// <summary>Gets the sections for the folders CSharpier formats, when it formats only part of the code (<see cref="Conventions.CSharpierScopes"/>).</summary>
         public List<(string Section, List<string> Lines)> CSharpierSections { get; } = [];
+
+        /// <summary>Gets the sections that keep a file's line ending (<see cref="Conventions.LiteralEndingSections"/>).</summary>
+        public List<(string Section, List<string> Lines)> EndingSections { get; } = [];
     }
 }

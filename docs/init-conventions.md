@@ -76,7 +76,9 @@ A few settings work a little differently:
   the report says how to settle it (`*.cs text eol=lf` in `.gitattributes`, or removing `end_of_line`). When your
   `end_of_line` says one ending but the files git leaves alone clearly have the other (`crlf`, with nearly every file LF),
   nothing ever enforced it: `init` writes the files' ending for C# files, so `format` doesn't flip every file it touches,
-  and the report says how to switch to the key's ending instead.
+  and the report says how to switch to the key's ending instead. A file with the other ending that holds a string literal
+  spanning lines (`@"..."`, `"""..."""`) keeps its ending in a section of its own (`[tests/Render.cs]` +
+  `end_of_line = crlf`): converting it would change the literal's value, and a test comparing text with it would fail.
 - **`s_`/`t_` prefixes** count private static fields (constants aside) with and without the .NET runtime's `s_` (or `t_`)
   prefix. Mostly without: [BRO1307](rules/BRO1307.md) stays on; mostly with: `init` writes `s_camelCase` for the kinds
   that have it (`stylebro_private_static_field_naming` for `static readonly` fields,

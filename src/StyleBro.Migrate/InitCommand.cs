@@ -731,7 +731,17 @@ internal static class InitCommand
         }
 
         var nested = NestedWhitespace(root, fileSettings, report, formatsWhitespace && !settings.ContainsKey("dotnet_diagnostic.IDE0055.severity"), formatsWhitespace);
-        return (WithoutRepeats([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings]), report, nested, scopes);
+        var written = WithoutRepeats([.. csharpier.Lines ?? [], .. alignment?.Lines ?? [], .. kept, .. detected, .. endings]);
+
+        // The files of the other ending whose string literals span lines keep theirs (trial 32, RazorLight).
+        if (written.LastOrDefault(l => l.StartsWith(Conventions.EndOfLineKey + " = ", StringComparison.Ordinal)) is { } endingLine
+            && Conventions.LiteralEndingSections(root, endingLine.Substring(endingLine.IndexOf('=') + 1).Trim()) is ({ Count: > 0 } literalSections, { } literalReport))
+        {
+            scopes.AddRange(literalSections);
+            report.Add($"  {"note",-8} {literalReport}");
+        }
+
+        return (written, report, nested, scopes);
     }
 
     /// <summary>
