@@ -17,7 +17,8 @@
 #      findings while the package has one layer; a version newer than the package warns (STYLEBRO002), an invalid one
 #      fails the build (STYLEBRO001). Once a minor adds a layer: also check that its rule is off by default and on with it;
 #  10. the Microsoft style: <StyleBroStyle>microsoft</StyleBroStyle> accepts '_'/'s_' fields, orders fields first and keeps
-#      rules runtime has off off; an unknown style fails (STYLEBRO003), one with StyleBroPreset none warns (STYLEBRO004);
+#      rules runtime has off off; 'stylecop' gives the preset's findings; an unknown style fails (STYLEBRO003), one with
+#      StyleBroPreset none warns (STYLEBRO004);
 #      after 'init --write --style microsoft', 'dotnet format' removes 'this.' (IDE0003) and a second run changes nothing.
 #  11. a file a project compiles from outside its git repository ('..\..\..\outside\Shared.cs') isn't checked, with a
 #      '.git' folder or a '.git' file (a worktree) above the project; <StyleBroRepositoryRoot>none</StyleBroRepositoryRoot> checks it.
@@ -218,6 +219,8 @@ try {
     $styled = Build @('-p:StyleBroStyle=microsoft') $styleProject
     Check (($plain -contains 'BRO1303 Holder.cs') -and -not ($styled -match '^BRO130[367] ')) "the style's '_' and 's_' fields are accepted (BRO1303/BRO1306/BRO1307 without it)"
     Check (($styled -contains 'BRO1001 Holder.cs') -and ($plain -contains 'BRO1505 Holder.cs') -and -not ($styled -match '^BRO1505 ')) 'fields first (BRO1001), and rules runtime has off stay off (BRO1505)'
+    $stylecop = Build @('-p:StyleBroStyle=stylecop') $styleProject
+    Check (($stylecop -join "`n") -eq ($plain -join "`n")) "the 'stylecop' style is the preset itself (same findings as unset)"
     $unknown = dotnet build $styleProject --nologo --no-incremental -p:StyleBroStyle=google 2>&1 | Out-String
     Check ($LASTEXITCODE -ne 0 -and $unknown -match 'error STYLEBRO003') 'an unknown style fails the build (STYLEBRO003)'
     $ignored = dotnet build $styleProject --nologo --no-incremental -p:TreatWarningsAsErrors=false -p:StyleBroStyle=microsoft -p:StyleBroPreset=none 2>&1 | Out-String

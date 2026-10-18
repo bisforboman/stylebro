@@ -19,8 +19,8 @@ file), not an `.editorconfig` key:
 A version newer than the package warns (STYLEBRO002) and uses the package's newest; any other value fails the build
 (STYLEBRO001). See [versioning](versioning.md#new-rules).
 
-A style, `<StyleBroStyle>microsoft</StyleBroStyle>`, changes some of these defaults to dotnet/runtime's coding style: see
-[styles](styles.md).
+These defaults are the `stylecop` style. Another style, `<StyleBroStyle>microsoft</StyleBroStyle>`, changes some of them
+to dotnet/runtime's coding style: see [styles](styles.md).
 
 ```ini
 [*.cs]

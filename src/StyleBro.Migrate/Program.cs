@@ -32,10 +32,11 @@ internal static class Program
               StyleBro and .NET settings that enforce the same things. --write puts them into the .editorconfig files,
               turns StyleBro's preset off and carries StyleCop suppressions over.
 
-          stylebro-migrate init [path] [--write] [--modernize] [--style microsoft] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
+          stylebro-migrate init [path] [--write] [--modernize] [--style microsoft|stylecop] [--agents-md] [--sonar-profile <file>] [--project <solution or project>]
               Without StyleCop: the built-in .NET rules StyleBro's preset relies on, for the root .editorconfig.
               --modernize adds the SDK's rules for newer C# and APIs. --style microsoft sets the Microsoft style
-              (dotnet/runtime's; <StyleBroStyle>) and the built-in rules it needs; your code's own conventions still win. A repository with a StyleCop setup is told to
+              (dotnet/runtime's; <StyleBroStyle>) and the built-in rules it needs; your code's own conventions still win.
+              --style stylecop names the default (the preset is StyleCop's defaults). A repository with a StyleCop setup is told to
               use 'stylebro-migrate --write' instead. --project names what 'format' will run on (relative to 'path').
 
               --agents-md (both): also write a StyleBro section into AGENTS.md (instructions for AI agents, between
@@ -63,7 +64,7 @@ internal static class Program
               --timings prints how long each phase took.
 
           stylebro-migrate [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--sonar-profile <file>]
-          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft] [--sonar-profile <file>]
+          stylebro-migrate init [path] --diff[=<file>] [--keep] [--all] [--no-restore] [--project <solution or project>] [--modernize] [--style microsoft|stylecop] [--sonar-profile <file>]
           stylebro-migrate format [folder, solution or project] --diff[=<file>] [--keep] [--project <solution or project>] [options]
               Preview: runs the command (--write for the first two) and then format until a run changes nothing on a
               temporary copy of the repository, which is never touched. Prints a summary (settings, files changed per

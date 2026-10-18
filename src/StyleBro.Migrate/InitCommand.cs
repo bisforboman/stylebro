@@ -70,6 +70,12 @@ internal static class InitCommand
     public const string StyleOption = "--style";
 
     /// <summary>
+    /// The style the preset itself is (StyleCop's defaults): a name for the default, no layer of its own (owner's decision
+    /// 2026-10-18). '--style stylecop' writes it to Directory.Build.props and changes nothing else.
+    /// </summary>
+    public const string DefaultStyle = "stylecop";
+
+    /// <summary>
     /// The Microsoft style's built-in rule init writes as a suggestion where a multi-targeted project doesn't set LangVersion
     /// ('static' local functions need C# 8; netstandard2.0 and .NET Framework get C# 7.3 then), like <see cref="Modernize"/>'s
     /// newer-C# rules.
@@ -124,11 +130,15 @@ internal static class InitCommand
         (var workspace, args) = Program.TakeOption(rest, "--project");
         (var style, args) = Program.TakeOption(args, StyleOption);
         style = style?.Trim().ToLowerInvariant();
-        if (style is not null && StyleSettings(style) is null)
+        if (style is not null && style != DefaultStyle && StyleSettings(style) is null)
         {
-            Console.Error.WriteLine($"Unknown style: '{style}'. Styles: microsoft (https://bisforboman.github.io/stylebro/styles/).");
+            Console.Error.WriteLine($"Unknown style: '{style}'. Styles: stylecop (the default), microsoft (https://bisforboman.github.io/stylebro/styles/).");
             return 1;
         }
+
+        // The default style has no settings of its own: only its name is pinned.
+        var pinnedStyle = style;
+        style = style == DefaultStyle ? null : style;
 
         var write = args.Contains("--write");
         var root = Path.GetFullPath(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)) ?? ".");
@@ -260,7 +270,7 @@ internal static class InitCommand
                 Console.Write(target.HasModernize ? null : target.Modernize);
             }
 
-            PinPreset(root, write: false, style);
+            PinPreset(root, write: false, pinnedStyle);
             AgentsFile.Update(root, write: false, agentsMd).ForEach(Console.WriteLine);
             return 0;
         }
@@ -297,7 +307,7 @@ internal static class InitCommand
             }
         }
 
-        PinPreset(root, write: true, style);
+        PinPreset(root, write: true, pinnedStyle);
         if (changed && !EnforcesCodeStyleInBuild(root))
         {
             // The file the projects import (Moonglade has only src/Directory.Build.props).

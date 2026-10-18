@@ -68,6 +68,8 @@ when we can do that"): don't suggest releases at all; the user says when.
   `PresetVersions.Latest` in Directory.Build.props (`Migration.SetPreset`); `--write` keeps `none`. Tests count a rule the
   latest preset turns on as on (Verifier, DocExamplesTests); realworld enables newer layers' rules; StyleBro's own code
   uses `latest`.
+  **Styles** (docs/styles.md): `<StyleBroStyle>microsoft</StyleBroStyle>` adds `presets/styles/microsoft.X.Y.globalconfig`
+  on top of the preset (`init --style microsoft`); `stylecop` (2026-10-18, owner) only names the default, no layer.
 - `src/StyleBro.Migrate`: net8.0 console tool `stylebro-migrate` (PackAsTool, published from alpha.5 with the analyzers;
   its package README is `src/StyleBro.Migrate/README.md`), see "Migration tool".
   References StyleBro.Analyzers (reads every rule's "Replaces StyleCop SAxxxx" from its description) and embeds
