@@ -29,6 +29,11 @@ by itself.
 To say in the build which style you use when it's the default, set `<StyleBroStyle>stylecop</StyleBroStyle>` (`init
 --style stylecop --write` writes it). It changes nothing: the preset already is StyleCop's defaults.
 
+CSharpier isn't a style: it decides who formats the layout, not which conventions the code follows, so it works with
+any style. When the repository uses it (a `.csharpierrc`, the `csharpier` dotnet tool or the CSharpier.MsBuild
+package), `init` turns off the rules for the layout CSharpier owns, and `bro format` runs CSharpier after its own
+fixes. Details: [what init keeps from your code](init-conventions.md).
+
 ## How it combines
 
 - The style needs the preset: with `<StyleBroPreset>none</StyleBroPreset>` it is ignored, with warning STYLEBRO004. Any
