@@ -164,6 +164,13 @@ internal static class Conventions
     /// </summary>
     public const string ThisQualificationKey = "dotnet_diagnostic.IDE0003.severity";
 
+    /// <summary>
+    /// The SDK formatter's indentation of a block that is a switch section's content ('case X:' + '{' on the next line):
+    /// below the label (true, the default) or at its indentation. AngleSharp writes all 131 at the label's, and IDE0055
+    /// re-indented thousands of lines.
+    /// </summary>
+    public const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
+
     /// <summary>The list layout conventions a leading-lambda call is counted apart for (<see cref="FoldLeadingLambdas"/>).</summary>
     public static readonly string[] LeadingLambdaKeys = { "stylebro_split_list_first_item", ItemsPerLineKey };
 
@@ -502,13 +509,6 @@ internal static class Conventions
     /// multi-line) or mixed ('get { return x; }' above a multi-line 'set').
     /// </summary>
     private const string AccessorLayoutKey = "dotnet_diagnostic." + DiagnosticIds.AccessorsConsistentLayout + ".severity";
-
-    /// <summary>
-    /// The SDK formatter's indentation of a block that is a switch section's content ('case X:' + '{' on the next line):
-    /// below the label (true, the default) or at its indentation. AngleSharp writes all 131 at the label's, and IDE0055
-    /// re-indented thousands of lines.
-    /// </summary>
-    public const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
 
     /// <summary>The top-level doc elements BRO1603 checks (DocumentationPeriods' text elements).</summary>
     private static readonly HashSet<string> PeriodElements = new(StringComparer.Ordinal) { "summary", "remarks", "param", "typeparam", "returns", "value", "exception" };
