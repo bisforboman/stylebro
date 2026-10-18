@@ -34,6 +34,18 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
         "IDE0004", "IDE0059", "IDE0075", "IDE0100", "CA1012", "CA1052", "CA1805", "CA1822", "CA1852",
     };
 
+    /// <summary>
+    /// The xunit.analyzers rules 'bro format' fixes where a repository references xunit (owner's decision 2026-10-18: fixes
+    /// that keep each test's meaning and support Fix All; xUnit1013's fix added [Theory] to a non-test method, xUnit1030's
+    /// failed a test that relies on losing the synchronization context).
+    /// </summary>
+    internal static readonly string[] XunitIds =
+    {
+        "xUnit1014", "xUnit1025", "xUnit1048", "xUnit2000", "xUnit2003", "xUnit2004", "xUnit2006", "xUnit2007", "xUnit2008",
+        "xUnit2009", "xUnit2010", "xUnit2011", "xUnit2012", "xUnit2013", "xUnit2015", "xUnit2017", "xUnit2020", "xUnit2029",
+        "xUnit2030", "xUnit2031",
+    };
+
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = CreateDescriptors();
 
     /// <inheritdoc/>
@@ -87,8 +99,8 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
 
     private static ImmutableDictionary<string, SuppressionDescriptor> CreateDescriptors()
     {
-        // Every StyleBro rule id, plus the SDK rules.
-        return BroIds().Concat(SdkIds).Distinct(StringComparer.Ordinal)
+        // Every StyleBro rule id, plus the SDK rules and the xUnit rules format fixes.
+        return BroIds().Concat(SdkIds).Concat(XunitIds).Distinct(StringComparer.Ordinal)
             .ToImmutableDictionary(id => id, id => new SuppressionDescriptor("BASELINE_" + id, id, "In stylebro.baseline"));
     }
 }

@@ -185,7 +185,8 @@ internal static class CamelCaseNames
 
     /// <summary>
     /// Whether the token is the name a <c>nameof(...)</c> produces: its argument's last name ('nameof(x)',
-    /// 'nameof(this.x)', 'nameof(Type.x)'). Renaming that symbol changes the string.
+    /// 'nameof(this.x)', 'nameof(Type.x)'). Renaming that symbol changes the string. Not xUnit's
+    /// <c>[MemberData(nameof(x))]</c> (<see cref="IsMemberDataName"/>), where the string follows the rename.
     /// </summary>
     public static bool IsNameofName(SyntaxToken token)
     {
@@ -200,10 +201,28 @@ internal static class CamelCaseNames
             Parent: ArgumentListSyntax
             {
                 Arguments.Count: 1,
-                Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } },
+                Parent: InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } nameof,
             },
-        };
+        }
+            && !IsMemberDataName(nameof);
     }
+
+    /// <summary>
+    /// Whether a <c>nameof(...)</c> is the member name of xUnit's <c>[MemberData(nameof(Cases))]</c>: xUnit looks the member up
+    /// by that string, so a rename that changes both keeps the test working (backlog 074: xunit.analyzers' xUnit1014 writes
+    /// these, and they kept BRO1309's renames of theory data).
+    /// </summary>
+    public static bool IsMemberDataName(InvocationExpressionSyntax nameof) =>
+        nameof.Parent is AttributeArgumentSyntax { NameEquals: null, NameColon: null } argument
+        && argument.Parent is AttributeArgumentListSyntax list
+        && list.Arguments.IndexOf(argument) == 0
+        && list.Parent is AttributeSyntax attribute
+        && attribute.Name switch
+        {
+            QualifiedNameSyntax qualified => qualified.Right,
+            AliasQualifiedNameSyntax alias => alias.Name,
+            var other => other,
+        } is IdentifierNameSyntax { Identifier.ValueText: "MemberData" or "MemberDataAttribute" };
 
     private sealed class ScopeNames
     {

@@ -44,7 +44,8 @@ the code (`eng/stylebro.baseline` next to `src/`) covers files in other folders 
 ## What it covers
 
 Every StyleBro rule, and the SDK rules `bro init` or `bro migrate --write` turns on (IDE0003, IDE0009, IDE0011, IDE0036,
-IDE0040, IDE0047, IDE0048, IDE0049, IDE0055, IDE0065, IDE0073, IDE2000, IDE2002, IDE2003). A baselined violation isn't
+IDE0040, IDE0047, IDE0048, IDE0049, IDE0055, IDE0065, IDE0073, IDE2000, IDE2002, IDE2003), and the
+[xUnit rules `bro format` fixes](xunit.md). A baselined violation isn't
 reported by the build or the IDE, and `dotnet format` leaves it alone.
 
 **Not covered: whitespace formatting.** `dotnet format` (and `dotnet format whitespace`) formats whitespace directly,

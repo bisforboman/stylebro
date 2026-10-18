@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 using StyleBro.Analyzers;
 using StyleBro.Analyzers.Documentation;
 using StyleBro.Analyzers.Layout;
+using StyleBro.Analyzers.Readability;
 
 namespace StyleBro.CodeFixes.Documentation;
 
@@ -190,8 +191,9 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
             else if (misplaced.FirstOrDefault(t => DocumentationComments.GetReportSpan(t, text) == span) is { } comment && comment != default)
             {
                 var slashes = DocumentationComments.GetSlashChanges(comment, text).ToList();
-                changes.AddRange(slashes);
-                if (GetBlankLineAbove(document, root, text, comment, slashes, options, cancellationToken) is { } blankLine)
+                var edits = WithoutEmptyEnds(document, root, text, comment, slashes, options, cancellationToken);
+                changes.AddRange(edits);
+                if (GetBlankLineAbove(document, root, text, comment, edits, options, cancellationToken) is { } blankLine)
                 {
                     changes.Add(blankLine);
                 }
@@ -199,6 +201,52 @@ public sealed class DocumentationCodeFixProvider : CodeFixProvider
         }
 
         return document.WithText(text.WithChanges(LinkedFileFixAllProvider.Merge(changes)));
+    }
+
+    /// <summary>
+    /// BRO1602's edits plus BRO1120's removal of the empty '//' lines the conversion leaves at the ends of their comment
+    /// group, when BRO1120 is on (trial 073, Ardalis.Extensions: a '///' block ending in '/// ' needed a second run). Judged
+    /// by BRO1120's own logic on the text with the slashes replaced; only removals of whole lines of this comment, mapped
+    /// back by line (the slash edits keep every line).
+    /// </summary>
+    private static List<TextChange> WithoutEmptyEnds(Document document, SyntaxNode root, SourceText text, SyntaxTrivia comment, List<TextChange> slashes, AnalyzerConfigOptions options, CancellationToken cancellationToken)
+    {
+        var tree = root.SyntaxTree;
+        if (slashes.Count == 0 || !Severities.IsOn(document.Project.CompilationOptions, tree, DiagnosticIds.EmptyComment, cancellationToken))
+        {
+            return slashes;
+        }
+
+        var first = text.Lines.GetLineFromPosition(comment.FullSpan.Start).LineNumber;
+        var last = text.Lines.GetLineFromPosition(comment.Span.End).LineNumber;
+        var newText = text.WithChanges(slashes);
+        var newRoot = CSharpSyntaxTree.ParseText(newText, (CSharpParseOptions)tree.Options, cancellationToken: cancellationToken).GetRoot(cancellationToken);
+        var removed = new List<(int First, int Last)>();
+        foreach (var (_, empty) in CommentText.GetEmptyComments(CommentText.GetComments(newRoot), newText, CommentText.HasHeaderTemplate(options)))
+        {
+            foreach (var change in CommentText.GetRemovals(empty, newText))
+            {
+                // Whole lines only ('x; //' keeps its code: a column there isn't the original's).
+                var from = newText.Lines.GetLineFromPosition(change.Span.Start);
+                var to = newText.Lines.GetLineFromPosition(change.Span.End);
+                if (change.Span.Start == from.Start && change.Span.End == to.Start && to.LineNumber > from.LineNumber
+                    && newText.Lines.GetLineFromPosition(empty[0].SpanStart).LineNumber is var line && line >= first && line <= last)
+                {
+                    removed.Add((from.LineNumber, to.LineNumber - 1));
+                }
+            }
+        }
+
+        if (removed.Count == 0)
+        {
+            return slashes;
+        }
+
+        bool IsRemoved(int line) => removed.Any(r => line >= r.First && line <= r.Last);
+        return slashes.Where(c => !IsRemoved(text.Lines.GetLineFromPosition(c.Span.Start).LineNumber))
+            .Concat(removed.Select(r => new TextChange(TextSpan.FromBounds(text.Lines[r.First].Start, text.Lines[r.Last].EndIncludingLineBreak), string.Empty)))
+            .OrderBy(c => c.Span.Start)
+            .ToList();
     }
 
     /// <summary>
