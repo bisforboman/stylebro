@@ -113,7 +113,9 @@ internal static class TupleSyntax
                     return null;
                 }
 
-                items[i] = "(" + type.ConvertedType.ToMinimalDisplayString(model, argument.SpanStart) + ")" + items[i];
+                // With BRO1122 on, a suffix where it would take the cast's place on the next run ('0D', trial 31).
+                items[i] = LiteralSuffixes.GetSuffixedLiteral((LiteralExpressionSyntax)argument.Expression, type.ConvertedType, model, cancellationToken)
+                    ?? "(" + type.ConvertedType.ToMinimalDisplayString(model, argument.SpanStart) + ")" + items[i];
             }
         }
 

@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -100,31 +101,10 @@ internal static class LiteralSuffixes
         var target = model.GetTypeInfo(cast, cancellationToken).Type;
         var constant = model.GetConstantValue(cast, cancellationToken);
         if (target is null || !constant.HasValue || constant.Value is null
-            || SymbolEqualityComparer.Default.Equals(target, model.GetTypeInfo(literal, cancellationToken).Type))
+            || SymbolEqualityComparer.Default.Equals(target, model.GetTypeInfo(literal, cancellationToken).Type)
+            || SuffixedText(literal.Token, negative, suffix, constant.Value, model, cancellationToken) is not { } newText)
         {
             // Redundant casts are IDE0004's; no constant means a compile error like (ulong)-1.
-            return null;
-        }
-
-        // With BRO1135 off the code's unsigned suffixes may be lower case (init turns it off for '0u'): 'u' and 'ul' then, so
-        // BRO1122 doesn't bring in upper case nobody asked for. 'L' stays: a lower-case 'l' alone looks like '1' (CS0078).
-        if (suffix.Contains('U') && !Severities.IsOn(model.Compilation.Options, cast.SyntaxTree, DiagnosticIds.LiteralSuffixCase, cancellationToken))
-        {
-            suffix = suffix.ToLowerInvariant();
-        }
-
-        var newText = StripSuffix(literal.Token.Text) + suffix;
-        var token = SyntaxFactory.ParseToken(newText);
-        if (!token.IsKind(SyntaxKind.NumericLiteralToken) || token.Text != newText || token.ContainsDiagnostics || token.Value is null)
-        {
-            return null;
-        }
-
-        var value = negative ? Negate(token.Value) : token.Value;
-        if (value is null || value.GetType() != constant.Value.GetType() || !value.Equals(constant.Value)
-            || (value is decimal m && !decimal.GetBits(m).SequenceEqual(decimal.GetBits((decimal)constant.Value))))
-        {
-            // Decimals also compare their scale: (decimal)1.50 is 1.5, but 1.50M prints as "1.50".
             return null;
         }
 
@@ -140,6 +120,18 @@ internal static class LiteralSuffixes
 
         return new TextChange(cast.Span, replacement);
     }
+
+    /// <summary>
+    /// A literal that converts to another numeric type (BRO1123's tuple literal from <c>new ValueTuple&lt;double, ...&gt;(0, ...)</c>)
+    /// written with that type's suffix, as BRO1122 would write the cast (<c>0D</c>, not <c>(double)0</c> for BRO1122's next
+    /// run, trial 31); null when BRO1122 is off, the type has no suffix or the suffixed literal's value would differ.
+    /// </summary>
+    public static string? GetSuffixedLiteral(LiteralExpressionSyntax literal, ITypeSymbol target, SemanticModel model, CancellationToken cancellationToken) =>
+        literal.Token.IsKind(SyntaxKind.NumericLiteralToken) && Suffix(target.SpecialType) is { } suffix
+        && model.GetOperation(literal, cancellationToken)?.Parent is IConversionOperation { ConstantValue: { HasValue: true, Value: { } constant } }
+        && Severities.IsOn(model.Compilation.Options, literal.SyntaxTree, DiagnosticIds.LiteralSuffix, cancellationToken)
+            ? SuffixedText(literal.Token, negative: false, suffix, constant, model, cancellationToken)
+            : null;
 
     /// <summary>
     /// The fix's edit: <see cref="GetChange"/>, and when BRO1405 is on, without the parentheses around the cast that
@@ -179,6 +171,45 @@ internal static class LiteralSuffixes
         SyntaxKind.DecimalKeyword => "M",
         _ => null,
     };
+
+    private static string? Suffix(SpecialType type) => type switch
+    {
+        SpecialType.System_UInt32 => "U",
+        SpecialType.System_Int64 => "L",
+        SpecialType.System_UInt64 => "UL",
+        SpecialType.System_Single => "F",
+        SpecialType.System_Double => "D",
+        SpecialType.System_Decimal => "M",
+        _ => null,
+    };
+
+    /// <summary>
+    /// The literal's digits with <paramref name="suffix"/>, or null when that literal (negated with <paramref name="negative"/>)
+    /// isn't exactly <paramref name="constant"/>: <c>(decimal)0.1234567890123456789</c> rounds through double, and
+    /// <c>(float)</c> of a double literal can round differently than a float literal.
+    /// </summary>
+    private static string? SuffixedText(SyntaxToken literal, bool negative, string suffix, object constant, SemanticModel model, CancellationToken cancellationToken)
+    {
+        // With BRO1135 off the code's unsigned suffixes may be lower case (init turns it off for '0u'): 'u' and 'ul' then, so
+        // BRO1122 doesn't bring in upper case nobody asked for. 'L' stays: a lower-case 'l' alone looks like '1' (CS0078).
+        if (suffix.Contains('U') && !Severities.IsOn(model.Compilation.Options, literal.SyntaxTree!, DiagnosticIds.LiteralSuffixCase, cancellationToken))
+        {
+            suffix = suffix.ToLowerInvariant();
+        }
+
+        var newText = StripSuffix(literal.Text) + suffix;
+        var token = SyntaxFactory.ParseToken(newText);
+        if (!token.IsKind(SyntaxKind.NumericLiteralToken) || token.Text != newText || token.ContainsDiagnostics || token.Value is null)
+        {
+            return null;
+        }
+
+        var value = negative ? Negate(token.Value) : token.Value;
+        return value is null || value.GetType() != constant.GetType() || !value.Equals(constant)
+            || (value is decimal m && !decimal.GetBits(m).SequenceEqual(decimal.GetBits((decimal)constant)))
+            ? null // Decimals also compare their scale: (decimal)1.50 is 1.5, but 1.50M prints as "1.50".
+            : newText;
+    }
 
     /// <summary>The literal without its suffix (StyleCop's StripLiteralSuffix: d/f are digits in hex literals).</summary>
     private static string StripSuffix(string text)

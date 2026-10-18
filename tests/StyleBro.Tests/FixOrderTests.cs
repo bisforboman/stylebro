@@ -2017,6 +2017,21 @@ public class FixOrderTests
         "BRO1122",
         "BRO1405");
 
+    // Ursa.Avalonia (trial 31): BRO1123's '(0, 0, 0)' for 'new ValueTuple<double, double, double>(0, 0, 0)' got casts, which
+    // BRO1122 turned into suffixes in a second run.
+    [Fact]
+    public Task TupleLiteral_GetsTheSuffixedLiterals() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+
+        public class C
+        {
+            public (double, double, long) M() => new ValueTuple<double, double, long>(0, (double)1, 2);
+        }
+        """,
+        "BRO1122",
+        "BRO1123");
+
     // stylebro_allow_adjacent_single_line_members: BRO1001's sort and BRO1527's collapse leave single-line members
     // without a block body together, as BRO1505 judges them.
     [Fact]

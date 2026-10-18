@@ -1055,8 +1055,10 @@ internal static class PreviewCommand
             GitChecked(folder, ["add", "-f", "--", .. chunk]);
         }
 
-        // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so.
-        File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n");
+        // The format runs restore and build into bin/obj: not changes to show, also where no .gitignore says so. Nor the
+        // packages folder, where a nuget.config puts it inside the repository.
+        var packages = PackagesFolderInside(folder) is { } inside ? $"/{inside}/\n" : string.Empty;
+        File.AppendAllText(Path.Combine(folder, ".git", "info", "exclude"), "\nbin/\nobj/\n" + packages);
         Commit(folder, "baseline");
     }
 
@@ -1154,6 +1156,33 @@ internal static class PreviewCommand
 
     /// <summary>The conventions init found in the code (from its header to the next empty line), or nothing.</summary>
     public static string DetectedPart(string output) => Part(output, InitCommand.DetectedHeader);
+
+    /// <summary>
+    /// NuGet's global packages folder (relative, '/'-separated) when a nuget.config puts it inside the folder, else null. The
+    /// format runs' restore fills it (trial 31: Hangfire's 'globalPackagesFolder = %USERPROFILE%/.nuget/TrustedPackages' isn't
+    /// expanded off Windows, and the preview counted 12,576 package files as changed).
+    /// </summary>
+    internal static string? PackagesFolderInside(string folder)
+    {
+        string output;
+        try
+        {
+            output = FormatCommand.Capture(folder, "nuget", "locals", "global-packages", "--list");
+        }
+        catch (Exception e) when (e is ToolException or System.ComponentModel.Win32Exception or IOException)
+        {
+            return null;
+        }
+
+        const string Prefix = "global-packages:";
+        if (output.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.StartsWith(Prefix, StringComparison.Ordinal)) is not { } line)
+        {
+            return null;
+        }
+
+        var relative = Path.GetRelativePath(Path.GetFullPath(folder), Path.GetFullPath(line.Substring(Prefix.Length).Trim())).Replace('\\', '/').TrimEnd('/');
+        return relative is "." or "" || relative.StartsWith("../", StringComparison.Ordinal) || relative == ".." || Path.IsPathRooted(relative) ? null : relative;
+    }
 
     /// <summary>
     /// Runs git in the preview's copy, where every command must work: a failure throws <see cref="GitFailedException"/>

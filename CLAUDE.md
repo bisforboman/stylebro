@@ -1568,6 +1568,34 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   The trial feed goes into the user NuGet config before `init --diff` (the preview adds the tool's version). `pgrep -f`
   in a wait loop matches the loop's own command line.
 
+## Trial 31 (2026-10-18, not clean: owner "Not clean", tally 0)
+
+- Repos: irihitech/Ursa.Avalonia (Avalonia/XAML, Android/iOS/Browser heads; `init --style stylecop --write`: pins
+  `<StyleBroStyle>stylecop</StyleBroStyle>` in both props files, same .editorconfig as plain init), AArnott/Nerdbank.MessagePack
+  (StyleCop, in-solution generator, migrate), Tyrrrz/CliWrap (CSharpier, clean), HangfireIO/Hangfire (random, seed 31:
+  bitwarden/server, HandyControl, Radarr, BenchmarkDotNet skipped; also `--style microsoft` on a copy).
+- Hangfire's root has COPYING (GPL text: "Copyright (C) 2007 Free Software Foundation") next to LICENSE.md: the first root
+  license was the holder, LICENSE.md differed, and `LicensedFolders` returned "." itself: init marked the whole repository
+  `generated_code = true` and counted nothing. Now every root license's holder is the root's own and "." is never vendored.
+- `StyleCopSetup.EnumerateFiles` skips a folder holding a `.nupkg` (an extracted package: a nuget.config packages folder or
+  packages.config's packages/ inside the repository); the preview excludes NuGet's global packages folder when it is inside the
+  copy (`PreviewCommand.PackagesFolderInside`, `dotnet nuget locals global-packages --list`). Hangfire's
+  `globalPackagesFolder = %USERPROFILE%/...` isn't expanded off Windows: 12,576 "changed" files, a vendored Test.Sdk.
+- Owner ("Keep `<Name>Property` fields"): the renamer keeps static fields registering a XAML property or routed event
+  (`CamelCaseRenamer.IsRegistrationField`: `...Property` of an AvaloniaProperty/DependencyProperty/BindableProperty type,
+  `...PropertyKey`, `...Event` of a RoutedEvent; by type name; `KeptReason.RegistrationField`). Ursa's naming rule renamed 8
+  `LevelProperty`s to `_levelProperty`: AVP1022 +176.
+- BRO1123's creation fix writes BRO1122's suffix (`LiteralSuffixes.GetSuffixedLiteral`, same value check through
+  `SuffixedText`) where it would cast a literal: `new ValueTuple<double, ...>(0, ...)` needed a second run in Ursa.
+- `format`: a skip named `Lib(netstandard1.3)` (a multi-targeted reference loaded with all frameworks in another framework's
+  run) is Lib's skip for that framework (`FormatCommand.SkippedFor`), not "Incomplete: ... weren't formatted". Hangfire's
+  netstandard1.3 projects don't load in `dotnet format` at all (plain `dotnet format` says "Required references did not load",
+  the build works), so its verify says "Not verified" by design.
+- Environment: blocked feeds (Avalonia nightly, feedz.io) removed from the clones' nuget.config; global.json 10.0.402/patch
+  pinned down to the apt SDK's band; `NUGET_CERT_REVOCATION_MODE=offline` (NU3018 through the proxy); Hangfire's
+  `signatureValidationMode = require` set to accept for the unsigned trial package. CliWrap's untouched TWAE build fails on
+  CS8620 with SDK 10.0.112 (compare counts); Nerdbank's net9.0 test runs can't start (no .NET 9 runtime).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

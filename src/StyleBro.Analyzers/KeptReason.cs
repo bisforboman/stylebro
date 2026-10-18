@@ -97,6 +97,12 @@ public enum KeptReason
     /// argument (ZLogger's structured-log keys), so the text is data at run time.
     /// </summary>
     NameIsLogKey,
+
+    /// <summary>
+    /// A static field that registers a XAML framework's property or routed event (<c>LevelProperty</c> for the property
+    /// <c>Level</c>): XAML finds it by that name.
+    /// </summary>
+    RegistrationField,
 }
 
 /// <summary>
@@ -154,6 +160,7 @@ public sealed class KeptFinding
         KeptReason.NameInXamlMarkup => "a XAML file names it as an element or attribute (a type or property of the project's own namespace): renaming would break the XAML build (MC3074, MC3072)",
         KeptReason.HiddenByNewMember => "a derived type hides it with a 'new' member of the same name, which would then hide nothing (CS0109)",
         KeptReason.NameIsLogKey => "the name is a log key: it's in an interpolated string's hole whose handler takes the hole's text as a [CallerArgumentExpression] argument (structured logging, e.g. ZLogger), so renaming would change the logged data",
+        KeptReason.RegistrationField => "it registers a XAML framework's property or routed event (Avalonia, WPF, MAUI, WinUI), whose field XAML and the framework's analyzers find by the '<Name>Property' or '<Name>Event' name",
         KeptReason.PublicApi => "a related override, implementation or parameter is public API (stylebro_rename_public_api)",
         KeptReason.ImplementsAnotherMember => "it also overrides or implements a member that isn't renamed",
         KeptReason.DerivedMemberHasNewName => "a derived type already has a member with the new name",

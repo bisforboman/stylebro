@@ -640,6 +640,34 @@ internal static class CamelCaseRenamer
     private static bool IsTypeMember(ISymbol symbol) =>
         symbol is IPropertySymbol or IEventSymbol || symbol is IMethodSymbol { MethodKind: MethodKind.Ordinary };
 
+    /// <summary>
+    /// A static field that registers a XAML framework's property (<c>LevelProperty</c>, an Avalonia, WPF/WinUI or MAUI property
+    /// type, also a read-only one's <c>LevelPropertyKey</c>) or routed event (<c>ClickEvent</c>): XAML finds the registration by
+    /// that name (attached properties, dependency property lookups), and Avalonia's AVP1022 reports any other name (trial 31:
+    /// Ursa.Avalonia's internal <c>LevelProperty</c> renamed to the repository's '_levelProperty').
+    /// </summary>
+    internal static bool IsRegistrationField(IFieldSymbol field)
+    {
+        if (!field.IsStatic)
+        {
+            return false;
+        }
+
+        var names = field.Name.EndsWith("Property", StringComparison.Ordinal) ? new[] { "AvaloniaProperty", "DependencyProperty", "BindableProperty" }
+            : field.Name.EndsWith("PropertyKey", StringComparison.Ordinal) ? new[] { "DependencyPropertyKey", "BindablePropertyKey" }
+            : field.Name.EndsWith("Event", StringComparison.Ordinal) ? new[] { "RoutedEvent" }
+            : null;
+        for (var type = field.Type as INamedTypeSymbol; names is not null && type is not null; type = type.BaseType)
+        {
+            if (Array.IndexOf(names, type.Name) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>'IShape.area' (an explicit implementation's name) -> 'area'.</summary>
     private static string SimpleName(string name) => name.Substring(name.LastIndexOf('.') + 1);
 
@@ -697,6 +725,11 @@ internal static class CamelCaseRenamer
             symbols.AddRange(type.InstanceConstructors.Concat(type.StaticConstructors)
                 .Concat(type.GetMembers().OfType<IMethodSymbol>().Where(m => m.MethodKind == MethodKind.Destructor))
                 .Where(m => !m.IsImplicitlyDeclared));
+        }
+
+        if (symbol is IFieldSymbol field && IsRegistrationField(field))
+        {
+            return (result, KeptReason.RegistrationField, null);
         }
 
         if ((IsTypeMember(symbol) || symbol is IFieldSymbol || symbol is INamedTypeSymbol { ContainingType: not null }) && await IsHiddenByNewMemberAsync(solution, symbol, cancellationToken).ConfigureAwait(false))
