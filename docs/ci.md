@@ -71,7 +71,7 @@ jobs:
       - run: dotnet tool install --global StyleBro.Tool --prerelease
 
       - name: Code style
-        run: bro format MySolution.sln --verify-no-changes --severity warn --no-restore --report format-report
+        run: bro check MySolution.sln --severity warn --no-restore --report format-report
 
       - name: Upload what dotnet format would change
         if: failure()
@@ -95,7 +95,7 @@ steps:
   - script: dotnet tool install --global StyleBro.Tool --prerelease
     displayName: Install bro
 
-  - script: bro format MySolution.sln --verify-no-changes --severity warn --no-restore --report $(Build.ArtifactStagingDirectory)/format-report
+  - script: bro check MySolution.sln --severity warn --no-restore --report $(Build.ArtifactStagingDirectory)/format-report
     displayName: Code style
 
   - publish: $(Build.ArtifactStagingDirectory)/format-report

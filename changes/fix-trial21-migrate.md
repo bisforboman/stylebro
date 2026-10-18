@@ -4,7 +4,7 @@
   setting asks for modifiers on types only) and `case X:` blocks at the label's level
   (`csharp_indent_case_contents_when_block = false`).
 - **`format`** removes the usings its fixes leave unused in the same run where IDE0005 is enforced, one run sooner.
-- **`bro`** says your `stylecop.json` can go once StyleCop.Analyzers is gone; the preview counts carried-over
+- **`bro migrate`** says your `stylecop.json` can go once StyleCop.Analyzers is gone; the preview counts carried-over
   suppressions the same way `--write` does.
 
 ### Fixed

@@ -1,7 +1,12 @@
 # bro
 
-Moves a repository from StyleCop.Analyzers to [StyleBro](https://github.com/bisforboman/stylebro) without changing
-its code style. It reads the repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
+The `bro` command for [StyleBro](https://github.com/bisforboman/stylebro): sets a repository up (`init`, or `migrate`
+from StyleCop), fixes and checks it (`format`, `check`, `preview`) and writes baselines. Until 0.7.0-alpha.1 it was
+`stylebro-migrate` in the package StyleBro.Migrate.
+
+## Migrating from StyleCop
+
+`bro migrate` moves a repository from StyleCop.Analyzers to StyleBro without changing its code style. It reads the repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
 `stylecop.json`, the StyleCop version) and writes the StyleBro and .NET SDK settings that enforce the same things.
 
 ```
@@ -30,10 +35,7 @@ bro init [path] [--write]
 ```
 
 Adds the severities of the built-in .NET rules StyleBro relies on (IDE0055 formatting, IDE0036 modifier order,
-IDE0049 type aliases, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
-a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. When at least
-three quarters of the private fields start with `_`, it keeps them (`stylebro_private_field_naming = _camelCase`). In a
-IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
+IDE0049 type aliases, IDE0065 using placement, ...) to the repository's `.editorconfig`. They have to be there: `dotnet format` ignores rule severities in
 a package's global config, where StyleBro's preset is. Not needed after `--write`, which writes them too. For the
 conventions your code clearly follows (three quarters of at least 10 places: `_field` names, `=>` at the start of a
 wrapped line, `== null`, ...), it keeps them and prints what it counted; EF Core migrations are marked as generated. In a
@@ -72,7 +74,7 @@ because Roslyn can't merge the frameworks' copies of a file. Other options pass 
 
 It ends by listing the findings StyleBro's fixes keep on purpose, each with its reason (a name read by reflection, used
 in generated code, ...): don't change those by hand without checking the uses; suppress or baseline them.
-`--verify-no-changes` changes nothing and exits 0 when only such findings are left, 2 when formatting would change a
+`bro check` (`format --verify-no-changes`) changes nothing and exits 0 when only such findings are left, 2 when formatting would change a
 file: the check for CI and AI agents (plain `dotnet format --verify-no-changes` fails on kept findings too). Right after a
 clean `format` on the same code it answers from that run's record in seconds.
 
@@ -83,16 +85,16 @@ prints how long each phase took.
 
 `format --files a.cs b.cs` formats only those files, loading just the projects they belong to (a fraction of a whole run after a small
 edit). Every command takes `--json`: one JSON object on stdout (settings, conventions, runs, changes per rule, kept
-findings with reasons, clean, exit code), the text on stderr. With `--agents-md`, `init --write` and
-`--write` also put a StyleBro section into `AGENTS.md` (opt-in). Details and the JSON fields:
+findings with reasons, clean, exit code), the text on stderr. With `--agents-md`, `bro init --write` and
+`bro migrate --write` also put a StyleBro section into `AGENTS.md` (opt-in). Details and the JSON fields:
 [Scripts and AI agents](https://bisforboman.github.io/stylebro/agents/).
 
 ## Preview
 
 ```
-bro preview migrate path/to/repo[=file] [--keep]
-bro preview init [path][=file] [--keep]
-bro preview format [path][=file] [--keep]
+bro preview migrate path/to/repo [--diff=file] [--keep]
+bro preview init [path] [--diff=file] [--keep]
+bro preview format [path] [--diff=file] [--keep]
 ```
 
 Shows what the command would change without touching the repository: it runs on a temporary copy (`--write` for the

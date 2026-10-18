@@ -10,12 +10,12 @@ repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site
 
 ```
 bro format --files src/Orders/OrderService.cs src/Orders/Order.cs   # after an edit: a fraction of a whole run
-bro check                                      # before finishing: exit 0 = clean
+bro check                                                            # before finishing: exit 0 = clean
 ```
 
 - `format --files` fixes StyleBro's findings (and the built-in rules `init` turns on, plus whitespace) in the named
   files only, loading just the project each file belongs to. It repeats until a run changes nothing, like `format`.
-- `--verify-no-changes` changes nothing and exits 0 when formatting would change no file. Findings StyleBro's fixes
+- `bro check` (`format --verify-no-changes`) changes nothing and exits 0 when formatting would change no file. Findings StyleBro's fixes
   keep on purpose don't fail it ([Findings kept on purpose](getting-started.md#findings-kept-on-purpose)); plain
   `dotnet format --verify-no-changes` does fail on them. It takes `--files` too.
 - Don't hand-fix the BRO warnings the format leaves: each is kept for a reason (a rename would break reflection, a
@@ -57,7 +57,7 @@ Most of the time is loading projects: a file of a project with many target frame
 ## `--json`
 
 Every command takes `--json`: `init`, the StyleCop migration (`bro migrate [path]`, dry run and `--write`), the
-`--diff` previews and `format` (with `--verify-no-changes` and `--files` too). The result is one JSON object on stdout;
+previews (`bro preview`, or `--diff`) and `format` (with `--verify-no-changes` and `--files` too). The result is one JSON object on stdout;
 everything the command would print for people goes to stderr instead, so `bro format --json > result.json`
 keeps the text on the screen and the object in the file.
 
@@ -149,7 +149,7 @@ The section:
 This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyzers whose fixes `dotnet format` applies.
 
 - After editing C# files, run `bro format --files <the .cs files you changed>` (faster than a whole run; the tool is the
-  StyleBro.Tool package: `dotnet tool install -g StyleBro.Tool`).
+  StyleBro.Tool package: `dotnet tool install -g StyleBro.Tool --prerelease`).
 - Before finishing, `bro check` must exit 0. It does when only findings kept on
   purpose are left.
 - Don't hand-fix BRO warnings the format leaves: they are kept on purpose (a rename would break reflection, `nameof`,

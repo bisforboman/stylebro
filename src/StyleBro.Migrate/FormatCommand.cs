@@ -314,8 +314,8 @@ internal static partial class FormatCommand
 
     /// <summary>The line that says which rules a run fixes, or (<paramref name="verify"/>) checks without changing anything.</summary>
     public static string RulesLine(bool verify, int ids) => verify
-        ? $"{CheckingHeader} and the built-in rules bro migrate turns on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
-        : $"{FixingHeader} and the built-in rules bro migrate turns on ({ids} ids); --all applies every analyzer's and compiler fix.";
+        ? $"{CheckingHeader} and the built-in rules init and migrate turn on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
+        : $"{FixingHeader} and the built-in rules init and migrate turn on ({ids} ids); --all applies every analyzer's and compiler fix.";
 
     /// <summary>One plain 'dotnet format' run (the preview's: it counts the runs and reads the reports itself).</summary>
     public static int RunPlain(string[] args, Action<string>? output) => RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
@@ -3168,6 +3168,7 @@ internal static partial class FormatCommand
         // The whole repository: settings above the folder (.editorconfig, Directory.Build.props, nuget.config) count.
         var source = RepositoryRoot(root) ?? root;
         var verifyTemp = Path.Combine(Path.GetTempPath(), $"stylebro-verify-{Guid.NewGuid():N}");
+        PreviewCommand.MarkCopy(verifyTemp);
         var copy = verifyTemp;
         var keptFile = verifyTemp + ".kept.tsv";
         var copyFailures = new SortedSet<string>(StringComparer.Ordinal);
@@ -3381,6 +3382,10 @@ internal static partial class FormatCommand
             if (Directory.Exists(verifyTemp))
             {
                 PreviewCommand.Delete(verifyTemp);
+            }
+            else
+            {
+                File.Delete(PreviewCommand.MarkerOf(verifyTemp));
             }
         }
     }
@@ -3683,7 +3688,8 @@ internal static partial class FormatCommand
 
             foreach (var directory in new[] { "stylebro-format-report-*", "stylebro-format-json-*", "stylebro-verify-*" }.SelectMany(p => Directory.EnumerateDirectories(folder, p)))
             {
-                if (Directory.GetLastWriteTimeUtc(directory) < before)
+                // A verify copy only when this tool marked it (PreviewCommand.MarkCopy): another program's alike-named folder stays.
+                if (Directory.GetLastWriteTimeUtc(directory) < before && (!Path.GetFileName(directory).StartsWith("stylebro-verify-", StringComparison.Ordinal) || PreviewCommand.IsOwnCopy(directory)))
                 {
                     PreviewCommand.Delete(directory);
                 }

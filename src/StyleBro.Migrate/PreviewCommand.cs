@@ -152,6 +152,7 @@ internal static class PreviewCommand
         var prefix = source == folder ? string.Empty : Git(folder, "rev-parse", "--show-prefix").Output.Trim();
         patch ??= DefaultPatchPath(folder);
         var temp = Directory.CreateTempSubdirectory("stylebro-preview-").FullName;
+        MarkCopy(temp);
         var outside = FormatCommand.OutsideCompile(source);
         var copy = CopyLocation(temp, source, outside);
         var target = Path.GetFullPath(Path.Combine(copy, prefix, File.Exists(path) ? Path.GetFileName(path) : string.Empty));
@@ -415,6 +416,12 @@ internal static class PreviewCommand
             log.Dispose();
             if (keep || !ok)
             {
+                // A copy kept on request is the user's from now on: no later command deletes it (a failed run's goes after a day).
+                if (keep)
+                {
+                    File.Delete(MarkerOf(temp));
+                }
+
                 Console.WriteLine($"The copy is kept: {copy} (log: {Path.Combine(temp, "preview.log")}).");
             }
             else
@@ -1165,8 +1172,19 @@ internal static class PreviewCommand
     }
 
     /// <summary>
+    /// Marks <paramref name="folder"/> (in the shared temp folder) as a copy this tool made: <see cref="DeleteStaleCopies"/>
+    /// deletes only marked folders, never one another program or the user named alike, nor a copy kept with --keep.
+    /// </summary>
+    internal static void MarkCopy(string folder) => File.WriteAllText(MarkerOf(folder), string.Empty);
+
+    /// <summary>Whether <paramref name="folder"/> is a copy this tool made and may delete (marked, not a link).</summary>
+    internal static bool IsOwnCopy(string folder) =>
+        File.Exists(MarkerOf(folder)) && !new DirectoryInfo(folder).Attributes.HasFlag(FileAttributes.ReparsePoint);
+
+    /// <summary>
     /// Deletes the copies of previews and verify runs in <paramref name="temp"/> last written more than <paramref name="age"/>
-    /// ago: a killed run leaves its copy (a running one writes to its copy all the time). Quietly: one in use stays.
+    /// ago: a killed run leaves its copy (a running one writes to its copy all the time). Only folders this tool marked
+    /// (<see cref="MarkCopy"/>). Quietly: one in use stays.
     /// </summary>
     internal static void DeleteStaleCopies(string temp, TimeSpan age)
     {
@@ -1174,16 +1192,13 @@ internal static class PreviewCommand
         {
             foreach (var folder in new[] { "stylebro-preview-*", "stylebro-verify-*" }.SelectMany(p => Directory.EnumerateDirectories(temp, p)))
             {
-                if (DateTime.UtcNow - Directory.GetLastWriteTimeUtc(folder) > age)
+                if (IsOwnCopy(folder) && DateTime.UtcNow - Directory.GetLastWriteTimeUtc(folder) > age)
                 {
                     try
                     {
-                        foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
-                        {
-                            File.SetAttributes(file, FileAttributes.Normal);
-                        }
-
+                        ClearAttributes(folder);
                         Directory.Delete(folder, recursive: true);
+                        File.Delete(MarkerOf(folder));
                     }
                     catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                     {
@@ -1200,19 +1215,18 @@ internal static class PreviewCommand
     {
         try
         {
-            // git makes its object files read-only.
-            foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-            }
-
+            ClearAttributes(folder);
             Directory.Delete(folder, recursive: true);
+            File.Delete(MarkerOf(folder));
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             Console.WriteLine($"Couldn't delete the copy ({e.Message}): {folder}");
         }
     }
+
+    /// <summary>The marker next to a copy (<see cref="MarkCopy"/>): beside it, so the copy itself stays the repository's files.</summary>
+    internal static string MarkerOf(string folder) => Path.TrimEndingDirectorySeparator(folder) + ".stylebro-copy";
 
     /// <summary>
     /// For '--no-restore': the restore's output (project.assets.json and the files next to it) copied into the copy, so
@@ -1440,6 +1454,15 @@ internal static class PreviewCommand
         }
 
         return code == 0 ? 1 : code;
+    }
+
+    /// <summary>git makes its object files read-only; links inside the copy aren't followed (their targets aren't ours).</summary>
+    private static void ClearAttributes(string folder)
+    {
+        foreach (var file in Directory.EnumerateFiles(folder, "*", new EnumerationOptions { RecurseSubdirectories = true, AttributesToSkip = FileAttributes.ReparsePoint }))
+        {
+            File.SetAttributes(file, FileAttributes.Normal);
+        }
     }
 }
 

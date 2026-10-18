@@ -19,5 +19,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
+    <!-- Pins the test framework's transitive System.Security.Cryptography.Pkcs above 9.0.6 (NU1903, GHSA-846f-f764-76mx). Tests only: no shipped package contains it. -->
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.21" />
   </ItemGroup>
 </Project>

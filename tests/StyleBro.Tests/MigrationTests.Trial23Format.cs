@@ -152,9 +152,15 @@ public sealed partial class MigrationTests
         var verify = Directory.CreateDirectory(Path.Combine(root, "stylebro-verify-old")).FullName;
         var fresh = Directory.CreateDirectory(Path.Combine(root, "stylebro-preview-new")).FullName;
         var other = Directory.CreateDirectory(Path.Combine(root, "other-old")).FullName;
+        var unmarked = Directory.CreateDirectory(Path.Combine(root, "stylebro-preview-someone-elses")).FullName;
         File.WriteAllText(Path.Combine(old, "a.txt"), "x");
         File.SetAttributes(Path.Combine(old, "a.txt"), FileAttributes.ReadOnly);
-        foreach (var folder in new[] { old, verify, other })
+        foreach (var folder in new[] { old, verify, fresh })
+        {
+            PreviewCommand.MarkCopy(folder);
+        }
+
+        foreach (var folder in new[] { old, verify, other, unmarked })
         {
             Directory.SetLastWriteTimeUtc(folder, DateTime.UtcNow.AddDays(-2));
         }
@@ -162,9 +168,13 @@ public sealed partial class MigrationTests
         PreviewCommand.DeleteStaleCopies(root, TimeSpan.FromDays(1));
 
         Assert.False(Directory.Exists(old));
+        Assert.False(File.Exists(PreviewCommand.MarkerOf(old)));
         Assert.False(Directory.Exists(verify));
         Assert.True(Directory.Exists(fresh));
         Assert.True(Directory.Exists(other));
+
+        // Only copies this tool marked: an alike-named folder it didn't make (or a copy kept with --keep) stays.
+        Assert.True(Directory.Exists(unmarked));
     }
 
     [Fact]

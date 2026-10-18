@@ -53,7 +53,7 @@ easy to review), or check only `dotnet format style` and `dotnet format analyzer
 says how many such formatting changes it found (whitespace, line endings, charset, final newline, using order:
 `dotnet format` reports them as WHITESPACE, ENDOFLINE, CHARSET, FINALNEWLINE and IMPORTS). Files under `obj/` and `bin/`
 (generated AssemblyInfo and global usings) don't count. A formatting change also brings back the baselined findings on
-the lines it changes (an entry matches a line's text): write the baseline after `bro migrate format`'s whitespace
+the lines it changes (an entry matches a line's text): write the baseline after `bro format`'s whitespace
 changes, not before.
 
 **Findings kept on purpose are covered too.** A rename StyleBro's fix leaves because it would break code only the fix

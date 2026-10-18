@@ -1,7 +1,8 @@
 # Changelog fragments
 
 What's changed since the last release, one file per pull request, so parallel PRs never edit the same lines of
-CHANGELOG.md. Name it after the branch (`changes/fix-trial7-rules.md`); write it for the release notes' reader:
+CHANGELOG.md. Name it after the branch, a `/` in it as a folder (`changes/fix-trial7-rules.md`, `changes/fix/trial7.md` for the
+branch `fix/trial7`), so two branches never write the same file; write it for the release notes' reader:
 short, concrete, what a user sees, no internal jargon and nothing about private code bases.
 
 ```markdown

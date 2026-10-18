@@ -36,7 +36,7 @@ internal static class AgentsFile
         + "This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyzers whose fixes `dotnet format` applies.\n"
         + "\n"
         + "- After editing C# files, run `bro format --files <the .cs files you changed>` (faster than a whole run; the tool is the\n"
-        + "  StyleBro.Tool package: `dotnet tool install -g StyleBro.Tool`).\n"
+        + "  StyleBro.Tool package: `dotnet tool install -g StyleBro.Tool --prerelease`).\n"
         + "- Before finishing, `bro check` must exit 0. It does when only findings kept on\n"
         + "  purpose are left.\n"
         + "- Don't hand-fix BRO warnings the format leaves: they are kept on purpose (a rename would break reflection, `nameof`,\n"

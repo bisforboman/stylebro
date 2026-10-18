@@ -38,7 +38,7 @@ rules (each release's notes list them).
 - Unset means the package's major version: `1.0` in all of 1.x.
 - `bro init --write` pins the newest version it knows in `Directory.Build.props`, so a new setup gets
   every rule at once.
-- With `<StyleBroPreset>none</StyleBroPreset>` (also after `bro migrate migrate --write`), rules added after 1.0 are off
+- With `<StyleBroPreset>none</StyleBroPreset>` (also after `bro migrate --write`), rules added after 1.0 are off
   too: they are off by default, and only the preset turns them on. To turn on a single one,
   `dotnet_diagnostic.BROxxxx.severity = warning` in `.editorconfig`.
 - A version newer than the package warns (STYLEBRO002) and uses the package's newest; anything else fails the build

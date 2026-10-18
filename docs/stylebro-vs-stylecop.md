@@ -12,7 +12,7 @@ For a team deciding whether to switch. Measured numbers only; each one says wher
 | Rules beyond StyleCop | None | 26 (most from Roslynator, Meziantou, Sonar or StyleCop's own tracker) |
 | Analyzer time, Newtonsoft.Json (242 files) | 1,291-2,171 ms (182 analyzers) | 411-687 ms (66 analyzers); 3.1-3.4x faster in each of 3 runs ([Speed](#speed)) |
 | StyleCop's open bugs on the replaced rules | 54 checked | 34 not shared, 8 shared (7 fixed, 1 kept on purpose), 12 not applicable or the same by design |
-| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate migrate --write` + `dotnet format`: Polly 1, OpenTelemetry 1, a private app 7; only 1 of those 9 is a StyleBro fix ([Migration](#migration)) |
+| Moving a StyleCop-clean repo | (the starting point) | Files changed after `bro migrate --write` + `dotnet format`: Polly 1, OpenTelemetry 1, a private app 7; only 1 of those 9 is a StyleBro fix ([Migration](#migration)) |
 | Baseline (fail only on new violations) | No | Yes (`bro baseline`) |
 | Multi-targeted projects | Not measured | Fix All merges each target framework's copy itself (no conflict markers in Newtonsoft.Json, 8 frameworks); `bro format` works around the SDK's IDE0055 crash |
 | Release status | 1.2.0-beta.556 (beta for years; last stable 1.1.118) | 0.7.0-alpha.1 on nuget.org (129 rules), a prerelease |
@@ -125,7 +125,7 @@ comparable.
 `#pragma warning disable SA...`, `[SuppressMessage]` and `<NoWarn>` suppressions over to the replacing rules, and
 reports the StyleCop rules nothing enforces any more.
 
-Files `dotnet format` changes after `bro migrate migrate --write` on repositories that were StyleCop-clean (CLAUDE.md,
+Files `dotnet format` changes after `bro migrate --write` on repositories that were StyleCop-clean (CLAUDE.md,
 "Migration re-measured with the SDK replacements", 2026-10-03; `scripts/stylecop-survey/Measure-MigrationDelta.ps1`):
 
 | Repository | Files changed | What |

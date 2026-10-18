@@ -44,7 +44,9 @@ def parse(path: Path) -> list[tuple[str, str]]:
 
 
 def fragments(root: Path) -> list[Path]:
-    return sorted(p for p in (root / "changes").glob("*.md") if p.name != "README.md")
+    # changes/<branch>.md, a branch's "/" as a folder (fix/trial19 -> changes/fix/trial19.md): branch names are unique, so two
+    # PRs never add the same file (fix/trial19 and fix-trial19 both wrote changes/fix-trial19.md once).
+    return sorted(p for p in (root / "changes").rglob("*.md") if p != root / "changes" / "README.md")
 
 
 def fold(root: Path, version: str, summary: str, date: str) -> list[Path]:
@@ -77,6 +79,10 @@ def fold(root: Path, version: str, summary: str, date: str) -> list[Path]:
     log.write_bytes((text[:at] + section + text[at:]).replace("\n", nl).encode("utf-8"))
     for f in found:
         f.unlink()
+        parent = f.parent
+        while parent != root / "changes" and not any(parent.iterdir()):
+            parent.rmdir()
+            parent = parent.parent
     return found
 
 
@@ -88,7 +94,8 @@ def test():
             b"# Changelog\r\n\r\nIntro.\r\n\r\n## 0.5.0-alpha.1 \xe2\x80\x93 2026-01-01\r\n\r\nOld.\r\n")
         (root / "changes" / "README.md").write_text("not a fragment")
         (root / "changes" / "a.md").write_text("### Fixed\n\n- A fix.\n\n### New\n\n- A thing,\n  two lines.\n")
-        (root / "changes" / "b.md").write_text(
+        (root / "changes" / "fix").mkdir()
+        (root / "changes" / "fix" / "b.md").write_text(
             "### Upgrading\n\nRun `init` again.\n\n### Fixed\n\n- B fix.\n\n### Breaking changes (tool only)\n\n- Gone.\n")
         fold(root, "0.6.0-alpha.1", "Summary.", "2026-02-02")
         got = (root / "CHANGELOG.md").read_bytes().decode()

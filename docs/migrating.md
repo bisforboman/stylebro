@@ -8,11 +8,11 @@ and writes the matching settings.
 ```
 dotnet tool install --global StyleBro.Tool --prerelease
 bro migrate path/to/repo           # dry run: prints the report and the settings
-bro preview migrate path/to/repo    # preview: what the settings and the format run would change in the code
+bro preview migrate path/to/repo   # preview: what the settings and the format run would change in the code
 bro migrate path/to/repo --write   # writes them
 ```
 
-`--diff` runs `--write` and then `bro format` (until a run changes nothing) on a temporary copy of the
+The preview (`bro preview migrate`, or `--diff`) runs `--write` and then `bro format` (until a run changes nothing) on a temporary copy of the
 repository, prints which files each rule changed with a few sample hunks, and writes the full diff to
 `.git/stylebro-preview.patch` (`--diff=file` for another name, `--keep` keeps the copy). The copy also gets the
 StyleBro.Analyzers reference if the repository has none, next to StyleCop's (see [Swap the package](#swap-the-package));
@@ -20,7 +20,8 @@ StyleCop.Analyzers stays, but format only fixes StyleBro's
 and the built-in rules' ids, so it changes nothing. In a StyleCop-clean repository the format part should be close to
 empty. Details: [Preview first](getting-started.md#preview-first).
 
-The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.7.0-alpha.1;
+The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.7.0-alpha.1, as StyleBro.Migrate
+with the command `stylebro-migrate`; StyleBro.Tool and `bro` from the next release;
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
 Then swap the package (below) and run `bro format`. It runs `dotnet format` with only StyleBro's rules
@@ -364,7 +365,7 @@ the repository has a Sonar setup (init follows that too, and the code's own conv
 
 ## Coming from SonarQube
 
-Many teams run SonarQube or SonarCloud next to (or instead of) StyleCop. `bro` and `bro init`
+Many teams run SonarQube or SonarCloud next to (or instead of) StyleCop. `bro migrate` and `bro init`
 read that setup too and turn on the StyleBro and .NET rules that fix what the team's Sonar rules report, so
 `bro format` cleans up findings Sonar can only list. Sonar stays: StyleBro doesn't turn any Sonar rule off,
 and Sonar keeps reporting its own ids.
