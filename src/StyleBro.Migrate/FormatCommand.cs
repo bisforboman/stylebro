@@ -47,6 +47,14 @@ internal static partial class FormatCommand
           <ItemGroup Condition="'$(StyleBroFormatOther)' != '' and $(StyleBroFormatOther.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))">
             <ProjectReference Update="@(ProjectReference)" AdditionalProperties="%(ProjectReference.AdditionalProperties);StyleBroFormatLoose=true" />
           </ItemGroup>
+          <!-- The same for the references the SDK adds during the build (transitive ones), which the Update above never sees. -->
+          <Target Name="_StyleBroFormatLooseTransitive" AfterTargets="IncludeTransitiveProjectReferences" Condition="'$(StyleBroFormatOther)' != '' and $(StyleBroFormatOther.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))">
+            <ItemGroup>
+              <ProjectReference Condition="!$([System.String]::Copy('%(ProjectReference.AdditionalProperties)').Contains('StyleBroFormatLoose=true'))">
+                <AdditionalProperties>%(ProjectReference.AdditionalProperties);StyleBroFormatLoose=true</AdditionalProperties>
+              </ProjectReference>
+            </ItemGroup>
+          </Target>
           <!-- A project that writes the run's framework another way ('net6' for 'net6.0') gets its own spelling. -->
           <PropertyGroup Condition="'$(StyleBroFormatAliases)' != '' and '$(TargetFramework)' != ''">
             <_StyleBroAliasKey>|$(MSBuildProjectFullPath.ToUpperInvariant())=</_StyleBroAliasKey>
