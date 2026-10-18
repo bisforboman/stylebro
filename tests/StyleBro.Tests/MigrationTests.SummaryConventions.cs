@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>Issue #132: init counts how property and constructor summaries begin (BRO1604, BRO1606).</summary>
+/// <summary>Issue #132: init counts how property summaries begin (BRO1604); constructors' don't count (issue #179).</summary>
 public sealed partial class MigrationTests
 {
     private const string PropertySummaryKey = "dotnet_diagnostic.BRO1604.severity";
@@ -48,6 +48,9 @@ public sealed partial class MigrationTests
                 /// <summary>Getsome text.</summary>
                 public int Other { get; }
 
+                /// <summary><see cref="A"/> count.</summary>
+                public int Count { get; }
+
                 /// <summary>Runs.</summary>
                 public void Run() { }
             }
@@ -55,18 +58,17 @@ public sealed partial class MigrationTests
                 new CSharpParseOptions(documentationMode: Microsoft.CodeAnalysis.DocumentationMode.Diagnose)),
             counts);
 
-        // Properties: Name, Size the StyleCop way; Samples, IsFloat, Other in their own words. Constructors: A(), static A()
-        // against A(string); A(int) starts with an element and isn't counted; Run isn't a property.
+        // Properties: Name, Size the StyleCop way; Samples, IsFloat, Other in their own words; Count starts with an element and
+        // isn't counted; Run isn't a property.
+        // Constructors aren't counted: BRO1606 accepts a summary in its own words (issue #179).
         Assert.Equal(new[] { 2, 3 }, counts[PropertySummaryKey]);
-        Assert.Equal(new[] { 2, 1 }, counts[ConstructorSummaryKey]);
+        Assert.False(counts.TryGetValue(ConstructorSummaryKey, out var constructors) && constructors.Sum() > 0);
     }
 
     [Theory]
     [InlineData(PropertySummaryKey, 0, 113, "dotnet_diagnostic.BRO1604.severity = none")]
     [InlineData(PropertySummaryKey, 5, 5, "dotnet_diagnostic.BRO1604.severity = none")]
     [InlineData(PropertySummaryKey, 40, 2, null)]
-    [InlineData(ConstructorSummaryKey, 0, 12, "dotnet_diagnostic.BRO1606.severity = none")]
-    [InlineData(ConstructorSummaryKey, 12, 0, null)]
     public void Conventions_SummaryWording_IsFollowed(string key, int first, int second, string? expected)
     {
         var lines = Conventions.Decide(new Dictionary<string, int[]> { [key] = new[] { first, second } }, new Dictionary<string, string>()).Lines
