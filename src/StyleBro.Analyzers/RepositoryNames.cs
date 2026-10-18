@@ -105,7 +105,8 @@ public static class RepositoryNames
                 }
             }
             else if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == "nameof"
-                && token.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 1 } invocation)
+                && token.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments.Count: 1 } invocation
+                && !Naming.CamelCaseNames.IsMemberDataName(invocation))
             {
                 yield return (NameofKind, invocation.ArgumentList.Arguments[0].Expression.GetLastToken().ValueText, 0);
             }

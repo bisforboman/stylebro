@@ -14,6 +14,69 @@ public class PascalCaseNamingTests
     [InlineData("_1", null)]
     public void NewName(string name, string? expected) => Assert.Equal(expected, PascalCaseNamingAnalyzer.GetNewName(name));
 
+    // Backlog 074: xunit.analyzers' xUnit1014 writes [MemberData(nameof(cases))]; xUnit finds the member by that string, so
+    // the rename (which changes both) is safe.
+    [Fact]
+    public Task TheoryData_NamedByMemberDataNameof_IsRenamed() => VerifyFixAsync(
+        """
+        namespace Xunit
+        {
+            [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
+            internal sealed class MemberDataAttribute : System.Attribute
+            {
+                public MemberDataAttribute(string memberName, params object[] parameters)
+                {
+                }
+            }
+        }
+
+        internal class Tests
+        {
+            public static object[][] {|BRO1309:cases|}() => new[] { new object[] { 1 } };
+
+            public static object[][] {|BRO1309:rows|} => new[] { new object[] { 1 } };
+
+            [Xunit.MemberData(nameof(cases))]
+            public void ByMethod(int value)
+            {
+            }
+
+            [Xunit.MemberData(nameof(rows))]
+            public void ByProperty(int value)
+            {
+            }
+        }
+        """,
+        """
+        namespace Xunit
+        {
+            [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
+            internal sealed class MemberDataAttribute : System.Attribute
+            {
+                public MemberDataAttribute(string memberName, params object[] parameters)
+                {
+                }
+            }
+        }
+
+        internal class Tests
+        {
+            public static object[][] Cases() => new[] { new object[] { 1 } };
+
+            public static object[][] Rows => new[] { new object[] { 1 } };
+
+            [Xunit.MemberData(nameof(Cases))]
+            public void ByMethod(int value)
+            {
+            }
+
+            [Xunit.MemberData(nameof(Rows))]
+            public void ByProperty(int value)
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task TypesAndMembers_AreRenamedEverywhere() => VerifyFixAsync(
         """

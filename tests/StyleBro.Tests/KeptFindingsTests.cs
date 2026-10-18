@@ -484,6 +484,27 @@ public sealed class KeptFindingsTests : IDisposable
     }
 
     [Fact]
+    public void RepositoryNames_LeaveOutMemberDataNameofs()
+    {
+        // Backlog 074: xUnit finds [MemberData(nameof(Cases))]'s member by that string, so a rename that changes both is safe.
+        var root = CSharpSyntaxTree.ParseText("""
+            class T
+            {
+                [Xunit.MemberData(nameof(Cases))]
+                [MemberDataAttribute(nameof(Rows), MemberType = typeof(T))]
+                [Other(nameof(Kept))]
+                [MemberData("x", nameof(Arg))]
+                [MemberData(Skip = nameof(Named))]
+                void M() => _ = nameof(Used);
+            }
+            """).GetRoot();
+
+        var lines = RepositoryNames.Lines(root, "T.cs").Where(l => l[0] == RepositoryNames.NameofKind).ToList();
+
+        Assert.Equal(new[] { "N\t\tKept", "N\t\tArg", "N\t\tNamed", "N\t\tUsed" }, lines);
+    }
+
+    [Fact]
     public void RepositoryNames_WriteAndReadALoneSurrogate()
     {
         // Orleans: '"jobs/\uD800"' in a test; File.WriteAllLines threw EncoderFallbackException before any formatting.

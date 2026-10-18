@@ -69,6 +69,7 @@ nav:
       - Multi-targeted repositories: multi-targeting.md
       - Debug and Release: debug-and-release.md
       - Old-style (non-SDK) projects: old-style-projects.md
+      - xUnit's fixes: xunit.md
   - Migrating from StyleCop: migrating.md
   - Rules:
       - rules/README.md

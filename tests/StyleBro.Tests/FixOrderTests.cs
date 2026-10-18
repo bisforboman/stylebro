@@ -39,6 +39,47 @@ public class FixOrderTests
         "BRO1602",
         "BRO1616");
 
+    // Trial 073 (Ardalis.Extensions): a '///' block above commented-out code ended in an empty '/// ' line; once BRO1602
+    // made it '//', BRO1120 removed that line on a second run.
+    [Fact]
+    public Task MisplacedDocumentation_WithEmptyLines_LosesThemAtTheEnds() => AssertConvergesInEveryOrderAsync(
+        """
+        public static class C
+        {
+            ///
+            /// <summary>Old text.</summary>
+            ///
+            /// <returns>Nothing.</returns>
+            ///
+
+            /// Already in LINQ.
+            ///
+
+            // public static void M() { }
+        }
+        """,
+        "BRO1602",
+        "BRO1120");
+
+    // The same with the empty line above the text, below code: BRO1504's blank line goes where the comment then starts.
+    [Fact]
+    public Task MisplacedDocumentation_BelowCode_LosesItsEmptyFirstLine() => AssertConvergesInEveryOrderAsync(
+        """
+        public static class C
+        {
+            public static void M()
+            {
+                var a = 1;
+                ///
+                /// Count it.
+                a++;
+            }
+        }
+        """,
+        "BRO1602",
+        "BRO1120",
+        "BRO1504");
+
     [Fact]
     public Task Braces_AnElseChainThatBecomesInconsistent() => AssertConvergesInEveryOrderAsync(
         """

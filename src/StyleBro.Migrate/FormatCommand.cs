@@ -159,6 +159,9 @@ internal static partial class FormatCommand
     /// <summary>The same line for --verify-no-changes.</summary>
     private const string CheckingHeader = "Checking StyleBro's rules";
 
+    /// <summary>What <see cref="RulesLine"/> adds when the repository references xunit (<see cref="ReferencesXunit"/>).</summary>
+    private const string XunitPart = ", xunit.analyzers' assertion rules where they are warnings or errors";
+
     /// <summary>The start of the line that lists the target frameworks (printed for the first run only).</summary>
     private const string MultiTargetedHeader = "Multi-targeted: ";
 
@@ -197,6 +200,12 @@ internal static partial class FormatCommand
 
     /// <summary>The start of the lines about the source generators format builds first (<see cref="BuildGenerators"/>).</summary>
     private const string GeneratorsHeader = "Generators:";
+
+    /// <summary>
+    /// A reference to a package that brings xunit.analyzers (not xunit.assert or the runners): &lt;PackageReference
+    /// Include="xunit" /&gt;, &lt;PackageVersion Include="xunit.v3.mtp-v2" ... /&gt;, packages.config's id="xunit".
+    /// </summary>
+    private static readonly Regex XunitReference = new(@"\b(?:Include|Update|id)\s*=\s*""xunit(?:\.v3(?:\.mtp-[\w-]+)?|\.analyzers)?""", RegexOptions.IgnoreCase);
 
     /// <summary>The source generator projects built or found built in this process (<see cref="BuildGenerators"/>).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
@@ -313,9 +322,9 @@ internal static partial class FormatCommand
     }
 
     /// <summary>The line that says which rules a run fixes, or (<paramref name="verify"/>) checks without changing anything.</summary>
-    public static string RulesLine(bool verify, int ids) => verify
-        ? $"{CheckingHeader} and the built-in rules init and migrate turn on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
-        : $"{FixingHeader} and the built-in rules init and migrate turn on ({ids} ids); --all applies every analyzer's and compiler fix.";
+    public static string RulesLine(bool verify, int ids, bool xunit = false) => verify
+        ? $"{CheckingHeader}{(xunit ? XunitPart : string.Empty)} and the built-in rules init and migrate turn on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
+        : $"{FixingHeader}{(xunit ? XunitPart : string.Empty)} and the built-in rules init and migrate turn on ({ids} ids); --all applies every analyzer's and compiler fix.";
 
     /// <summary>One plain 'dotnet format' run (the preview's: it counts the runs and reads the reports itself).</summary>
     public static int RunPlain(string[] args, Action<string>? output) => RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
@@ -997,8 +1006,24 @@ internal static partial class FormatCommand
             ids.Add(UnusedUsings);
         }
 
+        // xunit.analyzers' fixes that keep each test's meaning (owner's decision 2026-10-18); 'dotnet format --severity warn'
+        // applies them only where the repository leaves the rule at warning or error.
+        if (ReferencesXunit(root))
+        {
+            ids.UnionWith(Analyzers.Baseline.BaselineSuppressor.XunitIds);
+        }
+
         return ids.ToList();
     }
+
+    /// <summary>
+    /// Whether a project, props, targets or packages.config file at or below <paramref name="root"/> references xunit
+    /// (xunit, xunit.v3 or xunit.analyzers itself), which brings xunit.analyzers and its fixes along.
+    /// </summary>
+    public static bool ReferencesXunit(string root) =>
+        StyleCopSetup.EnumerateFiles(root)
+            .Where(f => Path.GetExtension(f).ToLowerInvariant() is ".csproj" or ".props" or ".targets" || Path.GetFileName(f).Equals("packages.config", StringComparison.OrdinalIgnoreCase))
+            .Any(f => XunitReference.IsMatch(File.ReadAllText(f)));
 
     /// <summary>
     /// Whether the .editorconfig files at and above <paramref name="root"/> (nearer ones win) make IDE0005 (unnecessary
@@ -4395,7 +4420,7 @@ internal static partial class FormatCommand
         if (!passThrough.Remove("--all") && !passThrough.Contains("--diagnostics"))
         {
             var ids = Diagnostics(root);
-            log(RulesLine(passThrough.Contains("--verify-no-changes"), ids.Count));
+            log(RulesLine(passThrough.Contains("--verify-no-changes"), ids.Count, ids.Contains(Analyzers.Baseline.BaselineSuppressor.XunitIds[0])));
             passThrough.Add("--diagnostics");
             passThrough.AddRange(ids);
         }

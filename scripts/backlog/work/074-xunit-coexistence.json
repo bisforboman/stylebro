@@ -1,6 +1,6 @@
 {
   "area": "Hardening",
   "item": "StyleBro and xunit.analyzers coexist",
-  "notes": "Owner's idea 2026-10-13: check that StyleBro's fixes never create xunit.analyzers warnings (renames of [MemberData]/[ClassData] members and theory data, member ordering, layout of test classes, BRO1601/BRO1313 on test methods) and that xUnit's fixes don't fight StyleBro's. A survey on xUnit-heavy repos with both analyzers on; fix conflicts found, add FixOrderTests where they interact.",
-  "status": "Planned"
+  "notes": "Owner's idea 2026-10-13: check that StyleBro's fixes never create xunit.analyzers warnings (renames of [MemberData]/[ClassData] members and theory data, member ordering, layout of test classes, BRO1601/BRO1313 on test methods) and that xUnit's fixes don't fight StyleBro's. A survey on xUnit-heavy repos with both analyzers on; fix conflicts found, add FixOrderTests where they interact. Checked 2026-10-18 with backlog 073 (CacheCow, Ardalis.Extensions, stateless with xunit.analyzers 2.2.0, a probe with MemberData/ClassData/fixtures): StyleBro's fixes created no xUnit warnings (sorting, layout, BRO1601 on IDisposable/fixtures, parameter renames); xUnit's fixes and StyleBro's converged in one or two runs. Fixed: a [MemberData(nameof(x))] (which xUnit1014 writes) kept x's rename as 'used in nameof' (CamelCaseNames.IsMemberDataName); BRO1602 left empty '//' lines for BRO1120's next run (Ardalis.Extensions, FixOrderTests). Public theory data isn't renamed by default (stylebro_rename_public_api).",
+  "status": "Done (2026-10-18)"
 }

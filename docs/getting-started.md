@@ -290,7 +290,8 @@ those change behavior or break the build: on one trial repository it added `requ
 Sonar fix removed `init;` accessors, nine build errors. `bro format` passes `dotnet format` only StyleBro's
 rule ids and the built-in rules `init` or the migration turn on (`--diagnostics ...`); whitespace formatting runs as
 usual. It also runs once per target framework where needed ([Multi-targeted repositories](multi-targeting.md#multi-targeted-repositories))
-and never touches git submodules. The plain equivalent is `dotnet format --diagnostics` with the ids to fix:
+and never touches git submodules. Where the repository uses xunit, it also applies
+[xUnit's assertion fixes](xunit.md). The plain equivalent is `dotnet format --diagnostics` with the ids to fix:
 
 ```
 dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 BRO1008

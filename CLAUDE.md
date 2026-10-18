@@ -1599,6 +1599,22 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   `signatureValidationMode = require` set to accept for the unsigned trial package. CliWrap's untouched TWAE build fails on
   CS8620 with SDK 10.0.112 (compare counts); Nerdbank's net9.0 test runs can't start (no .NET 9 runtime).
 
+## xUnit fixes in format (backlog 073/074, 2026-10-18)
+
+- Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
+  xunit.analyzers ids (`BaselineSuppressor.XunitIds`: xUnit1014/1025/1048 and the assertion rewrites) to `--diagnostics`
+  where a project/props/targets/packages.config references xunit, xunit.v3(.mtp-*) or xunit.analyzers
+  (`FormatCommand.ReferencesXunit`); `--severity warn` leaves the repo's severities in charge; the baseline covers them;
+  init writes nothing; v2 and v3 alike. Docs: docs/xunit.md. Left out because they changed behaviour in the survey:
+  xUnit1013 (`[Theory]` on CacheCow's `ILogger.Log`), xUnit1030 (a stateless test needs to lose its sync context).
+- Survey: maintained repositories have no xUnit warnings left (the build shows them); the assertion fixes cascade
+  (2004 -> 2009/2017, 2010 -> 2000 -> 2013) and converge within `MaxRuns` to one text in every order. Measuring newer
+  analyzers than a repo pins: a `CustomAfterMicrosoftCommonTargets` hook that swaps the `Analyzer` items after
+  `ResolveLockFileAnalyzers` (trial073 logs). A symlinked folder (two paths to one file) crashed `bro format` (duplicate
+  key): use a path fix for case-sensitivity workarounds instead.
+- Coexistence fixes: `[MemberData(nameof(x))]` (xUnit1014 writes it) no longer keeps x's rename (`CamelCaseNames.IsMemberDataName`,
+  also in RepositoryNames); BRO1602 drops the empty `//` lines BRO1120 would remove next run (`WithoutEmptyEnds`).
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

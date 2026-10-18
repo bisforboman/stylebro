@@ -1260,6 +1260,16 @@ public class DocumentationTests
         "/// <summary>A.</summary>\npublic class C\n{\n    /// <summary>B.</summary>\n    public void B()\n    {\n    }\n" + expected + "    [System.Obsolete(\"x\")]\n    public override string ToString() => \"c\";\n}\n",
         editorConfig: editorConfig);
 
+    // Trial 073: the empty lines at the ends of the converted comment go too while BRO1120 is on (it removes them, but
+    // only on a run after this one); its other empty lines and other comments stay.
+    [Theory]
+    [InlineData("", "    // Old text.\n    //\n    // More.\n")]
+    [InlineData("dotnet_diagnostic.BRO1120.severity = none", "    //\n    // Old text.\n    //\n    // More.\n    // \n")]
+    public Task MisplacedDocumentation_EmptyEndLines(string editorConfig, string expected) => VerifyFixAsync(
+        "public class C\n{\n    {|BRO1602:///|}\n    /// Old text.\n    ///\n    /// More.\n    /// \n\n    //\n    // public void M() { }\n}\n",
+        "public class C\n{\n" + expected + "\n    //\n    // public void M() { }\n}\n",
+        editorConfig: editorConfig);
+
     // Stateless: 'Default constructor.' became '... the <see cref="Alarm"/> class. Default constructor.'.
     // After replaced filler, text that can't follow the standard sentence is left to a person; a finalizer summary that is
     // a 'Finalizes' sentence of its own is kept.

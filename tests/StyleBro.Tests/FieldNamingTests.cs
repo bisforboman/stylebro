@@ -1835,6 +1835,52 @@ public class FieldNamingTests
         }
         """);
 
+    // Backlog 074: [MemberData(nameof(more))] follows the rename (xUnit looks the member up by that string).
+    [Fact]
+    public Task TheoryDataField_NamedByMemberDataNameof_IsRenamed() => VerifyFixAsync(
+        """
+        namespace Xunit
+        {
+            internal sealed class MemberDataAttribute : System.Attribute
+            {
+                public MemberDataAttribute(string memberName)
+                {
+                }
+            }
+        }
+
+        internal class Tests
+        {
+            internal static readonly object[][] {|BRO1306:more|} = { new object[] { 1 } };
+
+            [Xunit.MemberData(nameof(more))]
+            public void ByField(int value)
+            {
+            }
+        }
+        """,
+        """
+        namespace Xunit
+        {
+            internal sealed class MemberDataAttribute : System.Attribute
+            {
+                public MemberDataAttribute(string memberName)
+                {
+                }
+            }
+        }
+
+        internal class Tests
+        {
+            internal static readonly object[][] More = { new object[] { 1 } };
+
+            [Xunit.MemberData(nameof(More))]
+            public void ByField(int value)
+            {
+            }
+        }
+        """);
+
     [Fact]
     public Task NameofInAnotherType_KeepsTheName() => VerifyNotFixedAsync(
         [
