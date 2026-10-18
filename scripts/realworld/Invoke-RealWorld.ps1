@@ -6,10 +6,10 @@
 #     fails on warnings whose fix deliberately changes nothing, like the renames the string guards keep back); a repo
 #     with a documented exception sets MaxRuns in repos.psd1
 #   - with -Tests: no test that passed on the untouched code fails after the fixes
-#   - Formatter = 'csharpier' (repos.psd1): a repository CSharpier formats, run the way its team would: 'stylebro-migrate
-#     init --write' (which detects CSharpier and turns the layout rules off) and 'stylebro-migrate format' instead of every
+#   - Formatter = 'csharpier' (repos.psd1): a repository CSharpier formats, run the way its team would: 'bro
+#     init --write' (which detects CSharpier and turns the layout rules off) and 'bro format' instead of every
 #     rule; then the repository's own CSharpier ('dotnet tool restore', 'dotnet csharpier format .'), after which
-#     'stylebro-migrate format --verify-no-changes' and 'dotnet csharpier check .' must be clean: the two settle
+#     'bro format --verify-no-changes' and 'dotnet csharpier check .' must be clean: the two settle
 #
 #   ./scripts/realworld/Invoke-RealWorld.ps1 -Repo Serilog [-Tests] [-Work <dir>] [-Enable BRO1313,BRO1314] [-TestCache <file>]
 # -Enable turns on rules that are off by default (they don't run otherwise).
@@ -45,14 +45,14 @@ if ($LASTEXITCODE -ne 0) { throw 'Building StyleBro failed.' }
 $csharpier = $r.Formatter -eq 'csharpier'
 if ($csharpier) {
     dotnet build (Join-Path $root 'src/StyleBro.Migrate') -c $Configuration -nologo -v q | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw 'Building stylebro-migrate failed.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Building bro failed.' }
     # A copy, like the analyzers: a run in progress doesn't lock this repository's build output.
-    $migrateBin = Join-Path $Work 'stylebro-migrate'
+    $migrateBin = Join-Path $Work 'bro'
     Remove-Item -Recurse -Force $migrateBin -ErrorAction SilentlyContinue
     Copy-Item -Recurse (Join-Path $root "src/StyleBro.Migrate/bin/$Configuration/net8.0") $migrateBin
     $migrate = Join-Path $migrateBin 'StyleBro.Migrate.dll'
 
-    # 'stylebro-migrate format' wants the package in the restore output, as a team would have it: packed under a version
+    # 'bro format' wants the package in the restore output, as a team would have it: packed under a version
     # of its own (a compiler server never sees an older build under the same path) and put straight into the global
     # packages folder, so the repository's nuget.config (packageSourceMapping) never has to know the local feed.
     $packageVersion = "0.0.0-realworld.$([DateTime]::UtcNow.ToString('yyyyMMddHHmmss'))"
@@ -219,9 +219,9 @@ if ($Tests -and $r.Tests) {
 }
 
 if ($csharpier) {
-    Measure-Phase 'stylebro-migrate init --write' {
+    Measure-Phase 'bro init --write' {
         dotnet $migrate init $path --write 2>&1 | Out-Host
-        if ($LASTEXITCODE -ne 0) { throw "stylebro-migrate init --write failed (exit $LASTEXITCODE)." }
+        if ($LASTEXITCODE -ne 0) { throw "bro init --write failed (exit $LASTEXITCODE)." }
         Push-Location $path
         try {
             # The repository's own CSharpier version, from its tool manifest.
@@ -271,8 +271,8 @@ if ($csharpier) {
     # '--verify-no-changes' must say clean (it formats a copy of the repository; the generator projects' build output goes
     # along, so Mapperly's in-solution generator runs there too).
     $verifyCode = 0
-    [void](Measure-Phase 'stylebro-migrate format --verify-no-changes after CSharpier' { $script:verifyCode = Invoke-Format -Verify })
-    if ($verifyCode -ne 0) { $problems.Add("after CSharpier, 'stylebro-migrate format --verify-no-changes' failed (exit $verifyCode)") }
+    [void](Measure-Phase 'bro format --verify-no-changes after CSharpier' { $script:verifyCode = Invoke-Format -Verify })
+    if ($verifyCode -ne 0) { $problems.Add("after CSharpier, 'bro format --verify-no-changes' failed (exit $verifyCode)") }
     Push-Location $path
     try {
         $left = @(Get-CSharpierRejected)

@@ -11,7 +11,7 @@ using StyleBro.Analyzers;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// stylebro-migrate format [folder, solution or project] [--all] [dotnet format options]: 'dotnet format' that fixes
+/// bro format [folder, solution or project] [--all] [dotnet format options]: 'dotnet format' that fixes
 /// only StyleBro's rules and the built-in ones init/migrate turn on (<see cref="Diagnostics"/>; --all: everything), never
 /// inside git submodules, and is safe in multi-targeted repositories. There 'dotnet format' loads one copy of every
 /// file per target framework, the SDK's IDE0055 fix edits each copy on its own (each sees other '#if' code), and
@@ -39,7 +39,7 @@ internal static partial class FormatCommand
     /// </summary>
     public const string SelectFrameworkTargets = """
         <Project>
-          <!-- stylebro-migrate format: TargetFramework comes from the environment; projects not on the keep list load as usual. -->
+          <!-- bro format: TargetFramework comes from the environment; projects not on the keep list load as usual. -->
           <PropertyGroup Condition="'$(TargetFrameworks)' != '' and (('$(StyleBroFormatKeep)' != '' and !$(StyleBroFormatKeep.Contains('|$(MSBuildProjectFullPath.ToUpperInvariant())|'))) or '$(StyleBroFormatLoose)' == 'true')">
             <TargetFramework></TargetFramework>
           </PropertyGroup>
@@ -63,7 +63,7 @@ internal static partial class FormatCommand
         </Project>
         """;
 
-    /// <summary>The most runs 'stylebro-migrate format' makes until a run changes nothing.</summary>
+    /// <summary>The most runs 'bro format' makes until a run changes nothing.</summary>
     public const int MaxRuns = 3;
 
     /// <summary>
@@ -309,13 +309,13 @@ internal static partial class FormatCommand
         }
 
         return $"Not clean: .editorconfig's bulk severity (dotnet_analyzer_diagnostic.severity or a category's) hides {ids.Count} StyleBro rules from 'dotnet format' "
-            + $"({string.Join(", ", ids.Take(3))}{(ids.Count > 3 ? ", ..." : string.Empty)}), which the build reports. Run 'stylebro-migrate init --write': it sets them by id.";
+            + $"({string.Join(", ", ids.Take(3))}{(ids.Count > 3 ? ", ..." : string.Empty)}), which the build reports. Run 'bro init --write': it sets them by id.";
     }
 
     /// <summary>The line that says which rules a run fixes, or (<paramref name="verify"/>) checks without changing anything.</summary>
     public static string RulesLine(bool verify, int ids) => verify
-        ? $"{CheckingHeader} and the built-in rules stylebro-migrate turns on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
-        : $"{FixingHeader} and the built-in rules stylebro-migrate turns on ({ids} ids); --all applies every analyzer's and compiler fix.";
+        ? $"{CheckingHeader} and the built-in rules bro migrate turns on ({ids} ids), changing nothing; --all checks every analyzer's and compiler fix too."
+        : $"{FixingHeader} and the built-in rules bro migrate turns on ({ids} ids); --all applies every analyzer's and compiler fix.";
 
     /// <summary>One plain 'dotnet format' run (the preview's: it counts the runs and reads the reports itself).</summary>
     public static int RunPlain(string[] args, Action<string>? output) => RunOnce(args.Where(a => a != OnceOption).ToArray(), output);
@@ -877,7 +877,7 @@ internal static partial class FormatCommand
     public static string? Explain(string line, string run = "", string? restoreWarning = null)
     {
         // The per-framework runs load the projects their own way: a plain 'dotnet format' may not show what they saw (trial 26).
-        var see = "add '--verbosity diagnostic' to this 'stylebro-migrate format' command";
+        var see = "add '--verbosity diagnostic' to this 'bro format' command";
         var where = run.Length > 0 ? $" in its {run} run" : string.Empty;
 
         // "Required references did not load ... Run `dotnet restore`" after a restore that worked (FluentAssertions, trial 23):
@@ -957,8 +957,8 @@ internal static partial class FormatCommand
         && !lines.Any(l => l.StartsWith(LikelyCause, StringComparison.Ordinal));
 
     /// <summary>
-    /// The ids 'stylebro-migrate format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
-    /// and the stylebro blocks of the .editorconfig files at and above <paramref name="root"/> name (rules set to none
+    /// The ids 'bro format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
+    /// and the stylestylebro-migrate blocks of the .editorconfig files at and above <paramref name="root"/> name (rules set to none
     /// aren't fixed anyway).
     /// </summary>
     public static List<string> Diagnostics(string root)
@@ -1244,7 +1244,7 @@ internal static partial class FormatCommand
     /// Where the whitespace pass must not run: null when it runs everywhere, empty when it runs nowhere, else the folders
     /// (relative, '/'-terminated) and files it leaves out. Each C# file's effective IDE0055 decides (its own severity, else
     /// the Style category's, else the bulk one), read through the whole .editorconfig chain and the .globalconfig files like
-    /// the compiler does: a stylebro block's or the repository's own (splat's 'none' was "kept", and the whitespace pass still
+    /// the compiler does: a stylestylebro-migrate block's or the repository's own (splat's 'none' was "kept", and the whitespace pass still
     /// de-indented its code). 'dotnet format' runs its whitespace pass whatever IDE0055 says, so a CSharpier folder
     /// ('[src/GuardClauses/**.cs]' with IDE0055 = none) has to be left out by path, else the two formatters undo each other
     /// forever (GuardClauses: '[NotNull] [ValidatedNotNull]' against '[NotNull][ValidatedNotNull]').
@@ -2591,7 +2591,7 @@ internal static partial class FormatCommand
 
     /// <summary>The note for the projects <see cref="MissingWorkloadPacks"/> leaves out.</summary>
     public static string MissingWorkloadsLine(IReadOnlyList<string> projects, IReadOnlyList<string> packs) =>
-        $"{UnformattedHeader} {string.Join(", ", projects)}: {(projects.Count == 1 ? "it needs" : "they need")} workloads this machine doesn't have ({string.Join(", ", packs.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase))}), so 'dotnet restore' fails on {(projects.Count == 1 ? "it" : "them")} (NETSDK1147) and 'format' leaves {(projects.Count == 1 ? "it" : "them")} alone. Run 'dotnet workload restore' and then 'stylebro-migrate format' again to format {(projects.Count == 1 ? "it" : "them")} too.";
+        $"{UnformattedHeader} {string.Join(", ", projects)}: {(projects.Count == 1 ? "it needs" : "they need")} workloads this machine doesn't have ({string.Join(", ", packs.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase))}), so 'dotnet restore' fails on {(projects.Count == 1 ? "it" : "them")} (NETSDK1147) and 'format' leaves {(projects.Count == 1 ? "it" : "them")} alone. Run 'dotnet workload restore' and then 'bro format' again to format {(projects.Count == 1 ? "it" : "them")} too.";
 
     public static string NotBuiltHint(IReadOnlyList<string> folders, string root)
     {
@@ -2601,7 +2601,7 @@ internal static partial class FormatCommand
             .ToList();
         return projects.Count == 0
             ? string.Empty
-            : $" Where a Directory.Build.props above brings StyleBro into {(projects.Count == 1 ? "its build" : "their builds")}, format {(projects.Count == 1 ? "it" : "each")} on {(projects.Count == 1 ? "its" : "their")} own: {string.Join(", ", projects.Select(p => $"'stylebro-migrate format {p}'"))}.";
+            : $" Where a Directory.Build.props above brings StyleBro into {(projects.Count == 1 ? "its build" : "their builds")}, format {(projects.Count == 1 ? "it" : "each")} on {(projects.Count == 1 ? "its" : "their")} own: {string.Join(", ", projects.Select(p => $"'bro format {p}'"))}.";
     }
 
     /// <summary>Each project of a solution (or the project itself) with its evaluated target frameworks, for init's count.</summary>
@@ -3323,7 +3323,7 @@ internal static partial class FormatCommand
                 }
 
                 log(changed > 0
-                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'stylebro-migrate format'."
+                    ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'bro format'."
                     : "Not clean: formatting a copy of the repository failed (see above).");
                 return code;
             }
@@ -4220,7 +4220,7 @@ internal static partial class FormatCommand
                     log(FixFailuresLine(allFailures));
                 }
 
-                log($"Not clean: still changing after {MaxRuns} runs. Run 'stylebro-migrate format' again, and if it keeps changing the same lines, please report it.");
+                log($"Not clean: still changing after {MaxRuns} runs. Run 'bro format' again, and if it keeps changing the same lines, please report it.");
                 return NotCleanExitCode;
             }
 
@@ -4314,7 +4314,7 @@ internal static partial class FormatCommand
         var workspace = File.Exists(path) ? Path.GetFileName(path) : BaselineCommand.FindWorkspace(root);
         if (workspace is null)
         {
-            error(BaselineCommand.NoWorkspace(root, "'stylebro-migrate format <file>'"));
+            error(BaselineCommand.NoWorkspace(root, "'bro format <file>'"));
             return 1;
         }
 
@@ -4328,7 +4328,7 @@ internal static partial class FormatCommand
         // Another run's swapped files (its 'dotnet format' may outlive a killed 'format'): they come back when it ends.
         if (DirectiveMask.Busy(root) is { Count: > 0 } busy)
         {
-            error($"Stopped: another 'stylebro-migrate format' (or the 'dotnet format' it started, still running after it was stopped) has swapped the '#' of protected lines in {string.Join(", ", busy.Take(5))}{(busy.Count > 5 ? $" and {busy.Count - 5} more" : string.Empty)}. Wait until it ends (the next command puts them back), then run again.");
+            error($"Stopped: another 'bro format' (or the 'dotnet format' it started, still running after it was stopped) has swapped the '#' of protected lines in {string.Join(", ", busy.Take(5))}{(busy.Count > 5 ? $" and {busy.Count - 5} more" : string.Empty)}. Wait until it ends (the next command puts them back), then run again.");
             return 1;
         }
 
@@ -4938,7 +4938,7 @@ internal static partial class FormatCommand
             out var outsideLeft);
         if (outsideLeft.Count > 0)
         {
-            log($"{UnformattedHeader} {string.Join(", ", outsideLeft.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')))}: projects the build compiles that {Path.GetFileName(workspacePath)} doesn't list, and no run of one of their frameworks loads (a multi-targeted one would get its copies merged). Add them to the solution, or run 'stylebro-migrate format' on each.");
+            log($"{UnformattedHeader} {string.Join(", ", outsideLeft.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')))}: projects the build compiles that {Path.GetFileName(workspacePath)} doesn't list, and no run of one of their frameworks loads (a multi-targeted one would get its copies merged). Add them to the solution, or run 'bro format' on each.");
         }
 
         var requested = OptionValues(passThrough, "--include");
@@ -5442,7 +5442,7 @@ internal static partial class FormatCommand
     /// also on Ctrl+C. Leaving the files out of the whitespace pass instead took two more 'dotnet format' runs (style and
     /// analyzers, whose IDE0055 formats too) for each run that has them: CommunityToolkit 8 to 11.5 minutes. Before it
     /// swaps anything it writes a record (<see cref="RecordFolder"/>), deleted once the files are back: a process killed
-    /// in between leaves it, and the next stylebro-migrate command puts the '#' back (<see cref="Recover"/>).
+    /// in between leaves it, and the next bro command puts the '#' back (<see cref="Recover"/>).
     /// </summary>
     internal sealed class DirectiveMask : IDisposable
     {
@@ -5527,11 +5527,11 @@ internal static partial class FormatCommand
                         var chars = Read(path)!.ToCharArray();
                         found.ForEach(o => chars[o] = '#');
                         Write(path, new string(chars));
-                        log($"Restored: {path}: {count} '#' an interrupted 'stylebro-migrate format' had swapped.");
+                        log($"Restored: {path}: {count} '#' an interrupted 'bro format' had swapped.");
                     }
                     else
                     {
-                        log($"Not restored: {path}: an interrupted 'stylebro-migrate format' swapped the '#' of {count} line(s) for U+{mark:X4}, and the file has changed since. Put the '#' back by hand.");
+                        log($"Not restored: {path}: an interrupted 'bro format' swapped the '#' of {count} line(s) for U+{mark:X4}, and the file has changed since. Put the '#' back by hand.");
                     }
                 }
 

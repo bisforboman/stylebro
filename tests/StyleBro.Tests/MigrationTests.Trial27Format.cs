@@ -2,7 +2,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>Trial 27's findings in 'stylebro-migrate format', verify and the baseline.</summary>
+/// <summary>Trial 27's findings in 'bro format', verify and the baseline.</summary>
 public sealed partial class MigrationTests
 {
     [Fact]

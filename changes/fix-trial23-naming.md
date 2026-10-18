@@ -2,7 +2,7 @@
 
 - **Naming rules (BRO1303, BRO1306, BRO1309)**: a name in a checked-in snapshot or approval file (`*.verified.*`,
   `*.received.*`, `*.approved.*`) keeps it, like a name in a string: renaming a DTO's property failed Verify's snapshot
-  tests. `stylebro-migrate format` lists such findings as kept, with the file.
+  tests. `bro format` lists such findings as kept, with the file.
 - **Naming rules**: a member used through `dynamic` (`((dynamic)x).Field`) keeps its name; renaming it compiled but failed
   at run time.
 - **BRO1306**: a public or internal field of a private class is now also kept when its name is inside a string (a script

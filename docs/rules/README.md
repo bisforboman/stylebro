@@ -4,7 +4,7 @@ Every StyleBro rule, by area. Each one has a code fix that `dotnet format` appli
 has an example, the reasons, the configuration and how it differs from StyleCop.
 
 **Default**: *on* means the rule reports as a warning with the package's preset; *off* rules are opt-in
-(`dotnet_diagnostic.BROxxxx.severity = warning` in `.editorconfig`). `stylebro-migrate` sets each rule from your
+(`dotnet_diagnostic.BROxxxx.severity = warning` in `.editorconfig`). `bro migrate` sets each rule from your
 StyleCop setup instead, and turns off the rules StyleCop doesn't have.
 
 Where the rules and the preset differ from StyleCop: [differences-from-stylecop.md](../differences-from-stylecop.md).

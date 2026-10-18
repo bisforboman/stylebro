@@ -15,7 +15,7 @@ internal static class PropertySummaries
 {
     /// <summary>
     /// The .editorconfig key for BRO1604-BRO1607: <c>stylecop</c> (default, StyleCop's SA1623/SA1624/SA1642/SA1643) or
-    /// <c>stylesharp</c> (StyleSharp's SST rules at those numbers, which stylebro-migrate writes for a StyleSharp repository).
+    /// <c>stylesharp</c> (StyleSharp's SST rules at those numbers, which bro migrate writes for a StyleSharp repository).
     /// </summary>
     public const string WordingKey = "stylebro_summary_wording";
 

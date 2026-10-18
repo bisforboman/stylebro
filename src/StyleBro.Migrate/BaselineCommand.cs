@@ -9,7 +9,7 @@ using StyleBro.Analyzers.Baseline;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// stylebro-migrate baseline [path] [--project &lt;solution or project&gt;]: writes the baseline the build reads for 'path'
+/// bro baseline [path] [--project &lt;solution or project&gt;]: writes the baseline the build reads for 'path'
 /// (default: the current directory): the file &lt;StyleBroBaseline&gt; names, else the nearest stylebro.baseline at or above,
 /// else a new one there. It holds every violation 'dotnet format' would fix today, so the build and 'dotnet format' only
 /// report new ones. Runs 'dotnet format --verify-no-changes --report' (with an existing baseline moved aside, so it
@@ -364,7 +364,7 @@ internal static class BaselineCommand
             .ToList();
         var filtersText = filters.Count == 0
             ? null
-            : $"its solution filters ({string.Join(", ", filters.Take(5))}{(filters.Count > 5 ? $" and {filters.Count - 5} more" : string.Empty)}) are parts of it: name one to run on only its projects, e.g. 'stylebro-migrate format {filters[0]}'.";
+            : $"its solution filters ({string.Join(", ", filters.Take(5))}{(filters.Count > 5 ? $" and {filters.Count - 5} more" : string.Empty)}) are parts of it: name one to run on only its projects, e.g. 'bro format {filters[0]}'.";
         return (IsBelow(workspace), filtersText) switch
         {
             (true, null) => BelowNote(workspace),
@@ -396,13 +396,13 @@ internal static class BaselineCommand
         {
             Console.WriteLine($"Not in the baseline: {result.Whitespace} formatting changes (whitespace, line endings, charset, final newline or using order: "
                 + "'dotnet format' makes them without diagnostics, so nothing can hide them; and the baselined findings on the lines they "
-                + "change show up again, since the baseline matches a line's text). Run 'stylebro-migrate format' once, or check only "
+                + "change show up again, since the baseline matches a line's text). Run 'bro format' once, or check only "
                 + "'dotnet format style' and 'dotnet format analyzers' in CI.");
         }
 
         foreach (var (id, count) in result.NotCovered.OrderBy(r => r.Key, StringComparer.Ordinal))
         {
-            Console.WriteLine($"Not in the baseline: {count} {id} (not a StyleBro rule or one of the SDK rules 'stylebro-migrate init' turns on).");
+            Console.WriteLine($"Not in the baseline: {count} {id} (not a StyleBro rule or one of the SDK rules 'bro init' turns on).");
         }
 
         if (result.Outside > 0)
@@ -411,10 +411,10 @@ internal static class BaselineCommand
         }
     }
 
-    /// <summary>Why nothing is written: the props turn the baseline off ('none'), or name it with MSBuild properties stylebro-migrate can't resolve.</summary>
+    /// <summary>Why nothing is written: the props turn the baseline off ('none'), or name it with MSBuild properties bro can't resolve.</summary>
     public static string OffLine(bool off) => off
         ? "Nothing written: <StyleBroBaseline>none</StyleBroBaseline> turns the baseline off."
-        : "Nothing written: <StyleBroBaseline> in Directory.Build.props names the baseline with MSBuild properties other than $(MSBuildThisFileDirectory), which stylebro-migrate can't resolve.";
+        : "Nothing written: <StyleBroBaseline> in Directory.Build.props names the baseline with MSBuild properties other than $(MSBuildThisFileDirectory), which bro can't resolve.";
 
     /// <summary>
     /// The 'dotnet format' passes the baseline runs, each on its own: a run of all three reports the analyzers' findings at

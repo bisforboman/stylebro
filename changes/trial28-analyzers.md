@@ -2,10 +2,10 @@
 
 - Names used as structured log keys keep them: a variable, parameter, field, property or tuple element used in an
   interpolated string's hole whose handler takes the hole's text as a `[CallerArgumentExpression]` argument (ZLogger's
-  `$"{UserId}"` logs the key `UserId`) isn't renamed by BRO1301-BRO1311. `stylebro-migrate format` lists it as kept, with
+  `$"{UserId}"` logs the key `UserId`) isn't renamed by BRO1301-BRO1311. `bro format` lists it as kept, with
   the handler's name, and baselines it.
 - Files a T4 template writes (a Compile item with `DependentUpon` `*.tt` or `AutoGen` True) count as generated code:
-  StyleBro and the built-in rules it turns on report nothing there, and `stylebro-migrate format` leaves the C# file next
+  StyleBro and the built-in rules it turns on report nothing there, and `bro format` leaves the C# file next
   to each `.tt` file alone.
 
 ### Fixed

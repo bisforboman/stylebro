@@ -3,7 +3,7 @@
 What changes when a project moves from StyleCop.Analyzers with its default settings to StyleBro with its preset. Each
 difference is deliberate; this page says why, and how to get StyleCop's behavior back where that's possible.
 
-Teams that changed StyleCop's settings don't need the preset: `stylebro-migrate` writes settings that match theirs
+Teams that changed StyleCop's settings don't need the preset: `bro migrate` writes settings that match theirs
 ([migrating.md](migrating.md)). Rules StyleBro doesn't cover at all are in [skipped-rules.md](skipped-rules.md).
 
 Kept up to date by tests: every preset setting whose value differs from StyleCop's defaults must be named on this page
@@ -16,13 +16,13 @@ The preset follows StyleCop's defaults except here.
 
 | Topic | StyleCop default | StyleBro preset | Why | To get StyleCop's behavior |
 |---|---|---|---|---|
-| `this.` prefix (SA1101) | Required | Not required (`dotnet_style_qualification_for_field`, `_property`, `_method`, `_event` = `false`; `stylebro-migrate init` writes `dotnet_diagnostic.IDE0009.severity = none`, unless your `.editorconfig` requires `this.`) | Most teams turn SA1101 off (2 of the 3 surveyed); it's also the SDK's default. User decision. With these keys `false`, [BRO1131](rules/BRO1131.md) (SA1100) removes `base.` instead of writing `this.`. | Set the four `dotnet_style_qualification_for_*` keys to `true` and IDE0009 to `warning` in `.editorconfig`. |
-| Using placement (SA1200, [BRO1008](rules/BRO1008.md)) | Inside the namespace | Outside (`csharp_using_directive_placement = outside_namespace`) | Works with file-scoped namespaces, matches the .NET templates; all three surveyed teams turn SA1200 off. User decision. Without the preset BRO1008 needs the setting (unset: nothing reported, owner's decision); `stylebro-migrate` writes StyleCop's choice, `inside_namespace` by default. | `csharp_using_directive_placement = inside_namespace`. |
+| `this.` prefix (SA1101) | Required | Not required (`dotnet_style_qualification_for_field`, `_property`, `_method`, `_event` = `false`; `bro init` writes `dotnet_diagnostic.IDE0009.severity = none`, unless your `.editorconfig` requires `this.`) | Most teams turn SA1101 off (2 of the 3 surveyed); it's also the SDK's default. User decision. With these keys `false`, [BRO1131](rules/BRO1131.md) (SA1100) removes `base.` instead of writing `this.`. | Set the four `dotnet_style_qualification_for_*` keys to `true` and IDE0009 to `warning` in `.editorconfig`. |
+| Using placement (SA1200, [BRO1008](rules/BRO1008.md)) | Inside the namespace | Outside (`csharp_using_directive_placement = outside_namespace`) | Works with file-scoped namespaces, matches the .NET templates; all three surveyed teams turn SA1200 off. User decision. Without the preset BRO1008 needs the setting (unset: nothing reported, owner's decision); `bro migrate` writes StyleCop's choice, `inside_namespace` by default. | `csharp_using_directive_placement = inside_namespace`. |
 | Regions between members (SA1124, [BRO1112](rules/BRO1112.md)) | Reported | Off (`dotnet_diagnostic.BRO1112.severity = none`) | Removing every region in an existing codebase is a large one-time change, so it's opt-in. (Regions inside code, SA1123/[BRO1113](rules/BRO1113.md), stay on.) | `dotnet_diagnostic.BRO1112.severity = warning`. |
 | Namespace names (SA1300, [BRO1312](rules/BRO1312.md)) | Reported | Off (`dotnet_diagnostic.BRO1312.severity = none`) | Renaming a namespace renames every type in it: a breaking change for other code and for stored type names (`$type`, `Type.GetType`). In the surveyed repositories every lower-case namespace part was deliberate (brand names like `iText`, `iOS`; culture codes). User decision; findings in [proposals/namespace-names.md](https://github.com/bisforboman/stylebro/blob/main/docs/proposals/namespace-names.md). | `dotnet_diagnostic.BRO1312.severity = warning`. |
 | Missing documentation (SA1600, SA1601, SA1602, SA1611, SA1615, ...) | Reported | Only overrides and interface implementations, fixed with `<inheritdoc/>` ([BRO1601](rules/BRO1601.md)) | The only automatic fix for other members is placeholder text, which satisfies the rule without documenting anything. User decision. | Not available (keep StyleCop's SA1600 for reporting only, or use the compiler's CS1591). |
-| Several statements on one line (SA1107) | Reported | Split by the SDK formatter (`csharp_preserve_single_line_statements = false`, IDE0055) | A new project gets one statement per line. `stylebro-migrate` writes `true` instead: `false` also splits one-line anonymous methods and blocks StyleCop accepts (`delegate { /* comment */ }` in StyleCop-clean vs-threading), so SA1107 is reported as not expressible there. | `csharp_preserve_single_line_statements = true` (nothing splits `a(); b();` then). |
-| File header (SA1633-SA1641) | Required, XML format (`// <copyright file="X.cs" company="PlaceholderCompany">`) | XML format with [BRO1615](rules/BRO1615.md) (`dotnet_diagnostic.BRO1615.severity = warning`), but it does nothing until `stylebro_file_header_company` is set; `stylebro-migrate` turns it off when `stylecop.json` names no company | A header needs the team's company name and copyright text; a placeholder header everywhere is worse than none. | `stylebro_file_header_company = YourCompany` (and `stylebro_file_header_copyright` if the text differs). For a plain header (`xmlHeader: false`): `file_header_template = ...` and `dotnet_diagnostic.IDE0073.severity = warning`. |
+| Several statements on one line (SA1107) | Reported | Split by the SDK formatter (`csharp_preserve_single_line_statements = false`, IDE0055) | A new project gets one statement per line. `bro migrate` writes `true` instead: `false` also splits one-line anonymous methods and blocks StyleCop accepts (`delegate { /* comment */ }` in StyleCop-clean vs-threading), so SA1107 is reported as not expressible there. | `csharp_preserve_single_line_statements = true` (nothing splits `a(); b();` then). |
+| File header (SA1633-SA1641) | Required, XML format (`// <copyright file="X.cs" company="PlaceholderCompany">`) | XML format with [BRO1615](rules/BRO1615.md) (`dotnet_diagnostic.BRO1615.severity = warning`), but it does nothing until `stylebro_file_header_company` is set; `bro migrate` turns it off when `stylecop.json` names no company | A header needs the team's company name and copyright text; a placeholder header everywhere is worse than none. | `stylebro_file_header_company = YourCompany` (and `stylebro_file_header_copyright` if the text differs). For a plain header (`xmlHeader: false`): `file_header_template = ...` and `dotnet_diagnostic.IDE0073.severity = warning`. |
 
 Settings that look different but match StyleCop: `stylebro_private_field_naming = camelCase` (SA1306/SA1309: no
 leading underscore; `_camelCase` is StyleCop's opt-in SX1309 and SX1309S together;
@@ -38,14 +38,14 @@ SA1401, SA1402, SA1649).
 ## SDK rules that replace StyleCop rules
 
 Where StyleBro relies on an SDK rule instead of shipping its own (its options come from the preset, its severity from
-`stylebro-migrate init`), `dotnet format` fixes with the SDK's logic, which isn't
+`bro init`), `dotnet format` fixes with the SDK's logic, which isn't
 always exactly StyleCop's. Details in [skipped-rules.md](skipped-rules.md#covered-with-known-differences).
 
 - **IDE0036** (for SA1206, SA1207) enforces the SDK's whole modifier order, where StyleCop only checks that the access
   modifier comes first and `static` next. On six real repos it changed nothing StyleCop accepts.
 - **IDE0073** (for SA1633 with `xmlHeader: false`) writes a plain header; the XML header is [BRO1615](rules/BRO1615.md).
 - **Using sorting** in `dotnet format` happens whenever `dotnet_sort_system_directives_first` is set, even to `false`.
-  The preset doesn't set it: `stylebro-migrate --write` writes it when SA1208 or SA1210 is on, `init` when the code
+  The preset doesn't set it: `bro migrate --write` writes it when SA1208 or SA1210 is on, `init` when the code
   sorts its usings.
 
 ## Rule by rule
@@ -72,7 +72,7 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1302](rules/BRO1302.md)-[BRO1314](rules/BRO1314.md) (SA1300, SA1302-SA1316) | Names other assemblies see: public, protected or protected internal types, members, parameters, type parameters, tuple elements in signatures, and namespaces of such types, unless `stylebro_rename_public_api = true` | Renaming them breaks code outside the solution, which the fix can't reach (named arguments too); owner's decision 2026-10-09 in [decisions.md](https://github.com/bisforboman/stylebro/blob/main/docs/decisions.md). Set the key to report them like StyleCop. |
 | [BRO1301](rules/BRO1301.md)-[BRO1310](rules/BRO1310.md), [BRO1314](rules/BRO1314.md) (SA1300, SA1302-SA1313) | A name a `nameof(...)` produces (in the member for variables and parameters, in the type for fields; elsewhere in the solution the fix keeps the warning) | The rename would change the string: Ocelot built an HTTP header name with `nameof`, and a test read a private field with `GetField(nameof(_components))`. |
 | [BRO1504](rules/BRO1504.md), [BRO1506](rules/BRO1506.md) (SA1515, SA1512) | A run of `//` lines right below a line ending in `;`, with a blank line after it | It describes the code above (eShop: a note below a field); StyleCop's fixes move the blank line above it, attaching it to the next member. |
-| [BRO1506](rules/BRO1506.md) (SA1512) | A standalone `//` comment: a blank line (or the block's `{` line, trial 27) right above and a blank line right below it, not before a `}`; unless `stylebro_blank_line_below_standalone_comments = remove`, which `stylebro-migrate` writes when SA1512 is on | Owner's choice (2026-10-14): a note on the code above or a section header; SA1512's fix glued them onto unrelated code below (AzureEventGridSimulator, 10 files). |
+| [BRO1506](rules/BRO1506.md) (SA1512) | A standalone `//` comment: a blank line (or the block's `{` line, trial 27) right above and a blank line right below it, not before a `}`; unless `stylebro_blank_line_below_standalone_comments = remove`, which `bro migrate` writes when SA1512 is on | Owner's choice (2026-10-14): a note on the code above or a section header; SA1512's fix glued them onto unrelated code below (AzureEventGridSimulator, 10 files). |
 | [BRO1120](rules/BRO1120.md) (SA1120) | Empty comments that are all a pair of braces holds (`catch` / `{` / `//` / `}`) | They mark the block as empty on purpose; StyleCop's fix leaves a bare `{ }`. |
 | [BRO1311](rules/BRO1311.md) (SA1316) | Names in tuple literals and inferred names (StyleCop's `includeInferredTupleElementNames`, off by default) | Not tuple types; renaming an inferred name means renaming the variable it comes from. |
 | [BRO1132](rules/BRO1132.md) (SA1108) | A statement header spanning several lines (`if (a` + `&& b) // c`); a comment before a single-line block (`if (x) // c` + `{ y(); }`), a comment spanning lines, a directive between the header and `{` | After a split condition the comment usually explains its last line, not the block; moved into the block it would mislead (user decision). The fix needs a line of its own inside the block for the comment, and moves only one-line comments. |
@@ -145,10 +145,10 @@ under "Compared with StyleCop". Two things differ for every rule:
 | [BRO1310](rules/BRO1310.md) (SA1305) | A prefix after a leading underscore (`_iCount`) | StyleCop reports it once SA1309 removed the underscore; StyleBro does both in one rename. |
 | [BRO1407](rules/BRO1407.md) (SA1408) | `and`/`or` mixed in a pattern (`v is > 1 and < 5 or 10`) | StyleCop's current source checks patterns too; the released 1.2.0-beta.556 predates it. |
 | [BRO1104](rules/BRO1104.md) (SA1129) | Target-typed `new()` for value types | StyleCop 1.1.118 predates it; 1.2 reports it too. |
-| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line switch expressions without a trailing comma | StyleCop 1.1.118 doesn't check them; 1.2 does. `stylebro-migrate` writes `stylebro_trailing_comma_switch_expressions = false` for a 1.1.x repository. |
+| [BRO1401](rules/BRO1401.md) (SA1413) | Multi-line switch expressions without a trailing comma | StyleCop 1.1.118 doesn't check them; 1.2 does. `bro migrate` writes `stylebro_trailing_comma_switch_expressions = false` for a 1.1.x repository. |
 | [BRO1107](rules/BRO1107.md), [BRO1108](rules/BRO1108.md) (SA1116, SA1117) | Record parameters, primary-constructor parameters and base arguments | StyleCop 1.2.0-beta.556 doesn't check them; they're lists like any other. |
 | [BRO1110](rules/BRO1110.md) (SA1111) | A `)` on its own line after target-typed `new(...)` and `: this(...)`/`: base(...)` arguments | StyleCop (1.1.118 and 1.2) doesn't check these lists; they're argument lists like any other. |
-| [BRO1306](rules/BRO1306.md) (SA1303, SA1311) | Constants and `static readonly` fields starting with `_` | StyleCop leaves them to SA1309; StyleBro renames to the full correct name in one pass (`stylebro_allow_leading_underscore_in_pascal_fields = true` keeps them, set by `stylebro-migrate` when SA1309 is off). |
+| [BRO1306](rules/BRO1306.md) (SA1303, SA1311) | Constants and `static readonly` fields starting with `_` | StyleCop leaves them to SA1309; StyleBro renames to the full correct name in one pass (`stylebro_allow_leading_underscore_in_pascal_fields = true` keeps them, set by `bro migrate` when SA1309 is off). |
 | [BRO1123](rules/BRO1123.md) (SA1141) | Tuple types in locals, arrays, nullables, `typeof` and type arguments of calls | StyleCop only checks declarations and creations. |
 | [BRO1125](rules/BRO1125.md) (SA1130) | Calls like `list.ForEach(delegate (int item) { ... })` | StyleCop's overload check misses them; StyleBro binds the lambda and finds the same method. |
 | [BRO1128](rules/BRO1128.md) (SA1103) | A mixed query that also has SA1104/SA1105 findings | StyleCop leaves the rest of the query to a second run. |
@@ -255,7 +255,7 @@ Rules StyleCop doesn't have. The preset turns them on at `warning`:
 - `dotnet_diagnostic.BRO1618.severity`
 - `dotnet_diagnostic.BRO1619.severity`
 
-`stylebro-migrate` writes them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on
+`bro migrate` writes them as `none`, so a StyleCop-clean repository doesn't change when it migrates. Turn them on
 in `.editorconfig` to use them.
 
 | Rule | What it checks | From |

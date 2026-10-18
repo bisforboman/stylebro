@@ -17,8 +17,8 @@ own build settings.
 ## 1. Dry run
 
 ```
-dotnet tool install --global StyleBro.Migrate --prerelease
-stylebro-migrate samples/StyleCopMigration
+dotnet tool install --global StyleBro.Tool --prerelease
+bro migrate samples/StyleCopMigration
 ```
 
 From a clone of this repository: `dotnet run --project src/StyleBro.Migrate -- samples/StyleCopMigration`.
@@ -51,13 +51,13 @@ Then the settings it would write (the full block is below, under step 2).
 ## 2. Write the settings
 
 ```
-stylebro-migrate samples/StyleCopMigration --write
+bro migrate samples/StyleCopMigration --write
 ```
 
 ```text
 Wrote the settings to .editorconfig.
 Turned the preset off in Directory.Build.props (<StyleBroPreset>none</StyleBroPreset>): the settings above replace it.
-Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'stylebro-migrate format'.
+Next: add the StyleBro.Analyzers package, remove StyleCop.Analyzers, and run 'bro format'.
 ```
 
 The block added to `.editorconfig` (the team's own lines above it stay). The team's changes show up as settings:
@@ -66,7 +66,7 @@ false`, the company name. Every other rule follows StyleCop's defaults.
 
 ```ini
 # BEGIN stylebro-migrate
-# Generated from this repository's StyleCop settings by stylebro-migrate. Run it again to update; edits
+# Generated from this repository's StyleCop settings by bro migrate. Run it again to update; edits
 # between these markers are overwritten.
 [*.cs]
 # StyleBro rules: on when StyleCop enforced every rule they replace.
@@ -159,7 +159,7 @@ That's the point of migrating: a StyleCop-clean repository stays as it is.
 
 ## Without the migration tool
 
-For comparison: `stylebro-migrate init --write` refuses here (it finds `stylecop.json` and points to the migration).
+For comparison: `bro init --write` refuses here (it finds `stylecop.json` and points to the migration).
 With StyleBro's preset anyway (the package without the migration's settings, then `dotnet format`), 3 of the 4 files
 change, because the preset follows StyleCop's defaults, not this team's changes:
 

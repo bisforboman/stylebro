@@ -96,7 +96,7 @@ public sealed partial class MigrationTests
     public void TheMigration_RejectsAStyle_AndRemovesOne()
     {
         var error = CaptureError(() => Capture(() => Assert.Equal(1, Program.Main(new[] { root, "--write", "--style", "microsoft" }))));
-        Assert.Contains("--style is for 'stylebro-migrate init'", error, StringComparison.Ordinal);
+        Assert.Contains("--style is for 'bro init'", error, StringComparison.Ordinal);
 
         var props = "<Project>\n  <PropertyGroup>\n    <StyleBroPreset>1.0</StyleBroPreset>\n    <StyleBroStyle>microsoft</StyleBroStyle>\n  </PropertyGroup>\n</Project>\n";
         Assert.Equal("<Project>\n  <PropertyGroup>\n    <StyleBroPreset>1.0</StyleBroPreset>\n  </PropertyGroup>\n</Project>\n", Migration.RemoveStyle(props));
@@ -173,11 +173,11 @@ public sealed partial class MigrationTests
         }
 
         var output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root })));
-        Assert.Contains("try 'stylebro-migrate init --style microsoft'", output, StringComparison.Ordinal);
+        Assert.Contains("try 'bro init --style microsoft'", output, StringComparison.Ordinal);
         Assert.False(File.Exists(Path.Combine(root, "Directory.Build.props")));
 
         output = Capture(() => Assert.Equal(0, InitCommand.Run(new[] { root, "--style", "microsoft" })));
-        Assert.DoesNotContain("try 'stylebro-migrate init --style microsoft'", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("try 'bro init --style microsoft'", output, StringComparison.Ordinal);
         Assert.Null(Conventions.StyleSuggestion(new Dictionary<string, int[]> { [FieldNames.StyleKey] = new[] { 0, 20 }, [Conventions.StaticPrefixKey] = new[] { 0, 10 }, [Conventions.ThisQualificationKey] = new[] { 2, 30 } }));
     }
 

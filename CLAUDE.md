@@ -24,7 +24,7 @@ matches `Expected/`) and `dotnet pack src/StyleBro.Package` (`StyleBro.Analyzers
 DLLs, targets and globalconfig) are all green. The rename needed no fixes. Since then: real-world testing
 (see the log below) and 71 rules; 397 unit tests (incl. every doc example), all green (2026-10-02). Since
 2026-10-05: 118 rules, 842 tests. Migration tool
-`stylebro-migrate` added (2026-10-01, see below).
+`bro` added (2026-10-01, see below).
 0.7.0-alpha.1 (2026-10-13, 129 rules: preset versions (`StyleBroPreset` X.Y/latest/none), StyleBro + CSharpier
 settle (`stylebro_layout_by`, `stylebro_layout_print_width`), naming rules only when enforced, verify/preview with
 in-solution generators, MSBuild-evaluated StyleCop conditions, leftover StyleCop config, trial 13-14 fixes; owner's call) is the latest on
@@ -38,10 +38,10 @@ init adapts to the repo's conventions, public API not renamed by default; owner'
 nuget.org once its tag runs; bump `StyleBroSelfVersion` after it's live. Before it: 0.3.0-alpha.1 (125 rules incl. BRO1410, 11 options, `--diff` preview, docs site help links, both first-run trials'
 fixes; owner's call, 2026-10-09) is the latest on nuget.org once its tag runs; bump `StyleBroSelfVersion` after it's
 live. Before it: 0.2.0-alpha.1 (124 rules, `init`/`format`/`init --modernize`, the preset finally reaching the compiler, the
-first-run fixes; owner's call "a new minor version", 2026-10-06) is the latest on nuget.org with StyleBro.Migrate;
+first-run fixes; owner's call "a new minor version", 2026-10-06) is the latest on nuget.org with StyleBro.Migrate (now StyleBro.Tool);
 after it's live, bump `StyleBroSelfVersion` in its own PR (the preset then applies to StyleBro's own code: run
 `dotnet format` and commit that). Earlier: alpha.8 (71 rules + baseline support + the BRO1117 crash fix, 2026-10-02), alpha.7 (71 rules), alpha.6 (54 rules,
-the first prerelease published without an approval step), alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `stylebro-migrate` (package StyleBro.Migrate, a .NET
+the first prerelease published without an approval step), alpha.5 (43 rules + the tool), alpha.4 (44 rules), alpha.3 (18 rules). From alpha.5 on, release.yml also packs `bro` (package StyleBro.Tool, a .NET
 tool) with the same version; CI packs both too.
 
 **Release policy (user's decision, 2026-09-30):** don't publish a version for every batch of rules while the project
@@ -70,7 +70,10 @@ when we can do that"): don't suggest releases at all; the user says when.
   uses `latest`.
   **Styles** (docs/styles.md): `<StyleBroStyle>microsoft</StyleBroStyle>` adds `presets/styles/microsoft.X.Y.globalconfig`
   on top of the preset (`init --style microsoft`); `stylecop` (2026-10-18, owner) only names the default, no layer.
-- `src/StyleBro.Migrate`: net8.0 console tool `stylebro-migrate` (PackAsTool, published from alpha.5 with the analyzers;
+- `src/StyleBro.Migrate`: net8.0 console tool `bro` (package **StyleBro.Tool** since 2026-10-18, owner's decision; was
+  `stylebro-migrate` in StyleBro.Migrate; the project and assembly keep the old name; `bro check` = `format
+  --verify-no-changes`, `bro preview <cmd>` = `--diff`, `bro migrate` = the bare path form, `Program.Expand`; markers
+  in users' files keep `stylebro-migrate`) (PackAsTool, published from alpha.5 with the analyzers;
   its package README is `src/StyleBro.Migrate/README.md`), see "Migration tool".
   References StyleBro.Analyzers (reads every rule's "Replaces StyleCop SAxxxx" from its description) and embeds
   `scripts/stylecop-survey/data/inventory-1.2.0-beta.556.csv` and `data/mapping.csv` (written by New-Mapping.ps1).
@@ -734,7 +737,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   comment arriving below code) violation; it adds the blank line only then. Pre-existing ones are left to those rules,
   so compact interfaces stay compact.
 
-## Migration tool (`stylebro-migrate`, 2026-10-01)
+## Migration tool (`bro`, 2026-10-01)
 
 - User's decision: porting = "generate config from theirs". The preset stays the default for new projects; the tool
   reads a repo's StyleCop setup and writes matching settings, so a StyleCop-clean repo stays (almost) unchanged.
@@ -819,7 +822,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 - Package targets: the nearest `stylebro.baseline` above the project (`GetPathOfFileAbove`) becomes an AdditionalFile;
   `<StyleBroBaseline>` overrides the path (file name must stay `stylebro.baseline`), `none` turns it off. Checked by
   packing a test version and consuming it.
-- `stylebro-migrate baseline [path] [--project x]` (`BaselineCommand.cs`): moves an existing baseline aside, runs
+- `bro baseline [path] [--project x]` (`BaselineCommand.cs`): moves an existing baseline aside, runs
   `dotnet format --verify-no-changes --severity warn --report`, dedupes TFM copies, writes the file, prints counts per
   rule, whitespace changes and uncovered ids (other analyzers).
 - FFMpegCore end to end (all rules + preset, TreatWarningsAsErrors): 820 violations on 759 lines baselined; then build
@@ -845,7 +848,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   per type per compilation (cache in a compilation-start action). Same results (218 findings both ways); 468 -> ~150 ms,
   StyleBro total ~800 ms. Next most expensive: DocumentationAnalyzer (~160 ms), CommentTextAnalyzer (~80 ms).
 
-## Preset packaging bug and `stylebro-migrate init` (2026-10-02)
+## Preset packaging bug and `bro init` (2026-10-02)
 
 - Found while writing the CI guide: **the preset never reached the compiler through the NuGet package (alpha.1 to
   alpha.8).** The package's build targets added it as `GlobalAnalyzerConfigFiles`, but the SDK turns those into
@@ -858,7 +861,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   both. Formatting OPTIONS from a global config are honored by `dotnet format` (`csharp_preserve_single_line_statements
   = false` split a line), and severity `none` for BRO rules too. User's decision: the preset keeps BRO severities and
   the SDK options; the 12 `dotnet_diagnostic.IDE*` severities moved to `src/StyleBro.Migrate/sdk-rules.editorconfig`,
-  which `stylebro-migrate init [--write]` (`InitCommand.cs`) writes into the root .editorconfig between the
+  which `bro init [--write]` (`InitCommand.cs`) writes into the root .editorconfig between the
   stylebro-migrate markers (a `--write` block wins; it has them too). Tests: `ThePreset_SetsNoBuiltInRuleSeverities`,
   `Init_WritesTheBuiltInRulesOnce_AndLeavesMigratedSettingsAlone`. Checked through a locally packed package: build
   gets IDE0040/IDE0036/IDE0055, and after `init --write`, `dotnet format` fixes them.
@@ -868,7 +871,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
 ## First run through the package (2026-10-03)
 
 - `scratchpad/pkgrun.ps1`: the package from a local feed (hook adds only a PackageReference + feed, isolated
-  NUGET_PACKAGES), `stylebro-migrate init --write`, then plain `dotnet format` (whitespace + style + analyzers), i.e.
+  NUGET_PACKAGES), `bro init --write`, then plain `dotnet format` (whitespace + style + analyzers), i.e.
   exactly a new user's first run. FFMpegCore: 142 files in one pass, compiles, second run clean.
 - **Serilog: `dotnet format` wrote NOTHING.** First "Changes must be within bounds of SourceText" in BRO1108's Fix All:
   `LinkedFileFixAllProvider` (and `CamelCaseRenamer`) applied every linked copy's edits to the FIRST copy's text, but
@@ -1045,13 +1048,13 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   where StyleCop only wants access first and `static` next. Measured with IDE0036 alone at warning: Polly, OpenTelemetry,
   private app, FFMpegCore, Serilog 0 changes; Newtonsoft.Json 27 lines, all real SA1206 violations (`public new static`,
   `static private`). A planted `static public` was fixed, so the zeros are real. So no BRO rule: IDE0036 + the default
-  `csharp_preferred_modifier_order` in the preset and in stylebro-migrate (strongest of SA1206/SA1207; a repo's own
+  `csharp_preferred_modifier_order` in the preset and in bro (strongest of SA1206/SA1207; a repo's own
   order is kept). Listed under "covered with known differences".
 
 - **SA1205 -> IDE0040** (2026-10-02): probed with StyleCop 1.2 (9 SA1205 on partial parts without an access modifier:
   classes, structs, interfaces, records, nested, static) and `dotnet format style --diagnostics IDE0040` with
   `for_non_interface_members`: all 9 fixed (the other part's modifier or the default), StyleCop quiet afterwards.
-  stylebro-migrate maps SA1205 to IDE0040 with SA1400; the preset already had IDE0040 on. Case added to
+  bro migrate maps SA1205 to IDE0040 with SA1400; the preset already had IDE0040 on. Case added to
   sdk-check-cases.ps1 and the row to data/sdk-check.csv.
 
 - **Migration re-measured after `init` and the Fix All changes** (2026-10-03): Polly 3, OpenTelemetry 1 (unchanged).
@@ -1065,7 +1068,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   overload with `this.`), fixed, compiles, second run clean. Private app not run (its clone was busy with the delta).
 
 - **GOTCHA (2026-10-03):** `Measure-MigrationDelta.ps1 -ResetTargetRepo` leaves its clone at two extra commits
-  ("baseline: plain dotnet format", which in Polly holds a file with conflict markers, and "stylebro-migrate"), and the
+  ("baseline: plain dotnet format", which in Polly holds a file with conflict markers, and "bro"), and the
   real-world script resets to HEAD, i.e. to those. Reset the clone to upstream (`git reset --hard HEAD~2`) before a
   real-world run. Today's first runs of BRO1006/BRO1131/BRO1514-BRO1516/BRO1404/BRO1007/BRO1405 on Polly,
   OpenTelemetry and the private app used the migrated state; rerun on upstream (see below).
@@ -1114,7 +1117,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   Also found: `--verify-no-changes` fails on guard-kept renames (a fix that deliberately changes nothing still counts),
   so the real-world script tests convergence as "a run changes no file".
 
-## `stylebro-migrate format` (2026-10-03, IDE0055 investigation)
+## `bro format` (2026-10-03, IDE0055 investigation)
 
 - Plain `dotnet format` with IDE0055 at warning crashes on multi-targeted repos (Roslyn's linked-file merge, no
   StyleBro needed; the style pass alone too; reported upstream: https://github.com/dotnet/roslyn/issues/86000 and https://github.com/dotnet/roslyn/issues/86001). The whitespace pass formats only the first framework's code (https://github.com/dotnet/sdk/issues/56585). With
@@ -1232,7 +1235,7 @@ locally built master), and its open PRs (checked 2026-10-05: nothing missing).
   implementations (master), and its inserted doc comment brings BRO1513's blank line when the line above is code.
 - BRO1501 keeps blank lines that group initializer entries (#2832); BRO1504: no blank line needed after `=>` (#3392).
 
-**New rules** (ON in the preset and OFF after `stylebro-migrate` unless noted; a rule StyleCop doesn't have is turned
+**New rules** (ON in the preset and OFF after `bro migrate` unless noted; a rule StyleCop doesn't have is turned
 off by migrate automatically: its description names no SA id. GOTCHA: an `SAxxxx` in a description makes
 `Migration.ExpandIds` treat the rule as a StyleCop replacement):
 - BRO1617 generic crefs in braces, BRO1618 `<see langword>` for a keyword alone in `<c>`, BRO1619 top-level doc
@@ -1254,7 +1257,7 @@ off by migrate automatically: its description names no SA id. GOTCHA: an `SAxxxx
   many more skips, see the rule page; its fix sorts with BRO1001 in the same run).
 - BRO1139 leaves an `else` after a jump to BRO1143 when that rule is on.
 
-**`stylebro-migrate init --modernize`** (docs/modernizing.md): the SDK's modernization rules in tiers (A everywhere,
+**`bro init --modernize`** (docs/modernizing.md): the SDK's modernization rules in tiers (A everywhere,
 B needs LangVersion set in multi-targeted projects, C needs a newer API). `Modernize/MultiTargetSuppressor` hides tier
 C in a project with 2+ frameworks when one lacks the API (table of minimum versions; maintenance: a new tier C rule
 needs a row, `TheMultiTargetGuard_CoversExactlyTierC` enforces it). The package targets pass
@@ -1294,7 +1297,7 @@ an editorconfig comment). verify-package check 5 tests it end to end.
 
 Decisions in `docs/decisions.md`, details on the rule pages and in the PRs (#48-#56).
 
-**New rules** (beyond StyleCop; off after `stylebro-migrate`):
+**New rules** (beyond StyleCop; off after `bro migrate`):
 - BRO1527 auto-accessors on one line (on; skips bodies, attributes, comments, `csharp_preserve_single_line_blocks =
   false`), BRO1145 empty class/struct/interface body -> `;` (OFF; C# 12+, multi-target LangVersion guard), BRO1146
   `record class` -> `record` (#52). BRO1505 and BRO1001 judge a property BRO1527 collapses as one-line
@@ -1398,7 +1401,7 @@ Real-world jobs cache the clone's `.git` (`realworld-clone-<repo>-<commit>`) and
 would evict them from the 10 GB limit), so a new pin is cached by the next nightly. The script skips the fetch when the
 commit is already in the clone; StyleBro's DLLs are never in a cached path.
 
-**Sonar** (#89, #90, #94): `stylebro-migrate` reads Sonar setups (`SonarSetup.cs`: exported profile via
+**Sonar** (#89, #90, #94): `bro migrate` reads Sonar setups (`SonarSetup.cs`: exported profile via
 `--sonar-profile`, the package's default "Sonar way" list from `data/`, rulesets incl. the scanner's, globalconfigs,
 root .editorconfig) and maps Sonar ids to StyleBro/SDK rules (`data/sonar-mapping.tsv`; public code excluded where a
 fix would change an API); Sonar suppressions carry over like StyleCop's. BRO1149 (nested ifs, S1066), BRO1150

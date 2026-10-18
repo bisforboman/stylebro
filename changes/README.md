@@ -10,9 +10,9 @@ short, concrete, what a user sees, no internal jargon and nothing about private 
 - **BRO1603** no longer adds a period after text that ends in code (`x = 1`, `a/b`).
 ```
 
-Sections, in the release notes' order: `### Breaking changes` (words may follow, e.g. `(stylebro-migrate only)`),
+Sections, in the release notes' order: `### Breaking changes` (words may follow, e.g. `(bro only)`),
 `### New`, `### Changed`, `### Fixed`, `### Upgrading`. A fragment can have several. `### Upgrading` is for a step a
-user has to take because of this change ("run `stylebro-migrate init` again to ..."); the release adds the package
+user has to take because of this change ("run `bro init` again to ..."); the release adds the package
 and tool bump line itself and titles the section "Upgrading from <previous version>". Changes nobody using the
 packages would notice (CI, tests, internal docs) need no fragment. CI checks every fragment
 (`python scripts/changelog.py --check`).

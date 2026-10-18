@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What the eighth trial (StabilityMatrix, Flow.Launcher, Orleans, Xbox Live tools) found in 'stylebro-migrate init'.</summary>
+/// <summary>What the eighth trial (StabilityMatrix, Flow.Launcher, Orleans, Xbox Live tools) found in 'bro init'.</summary>
 public sealed partial class MigrationTests
 {
     private const string MemberOrderKey = "dotnet_diagnostic.BRO1001.severity";

@@ -1,19 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    stylebro-migrate: turns a repository's StyleCop setup (rule severities and stylecop.json) into the StyleBro and
-    SDK settings that enforce the same things, so switching to StyleBro doesn't change the code's style.
+    The 'bro' command (package StyleBro.Tool; this project keeps its old name StyleBro.Migrate): init, migrate (a
+    repository's StyleCop setup into the StyleBro and SDK settings that enforce the same things), format, check, preview,
+    baseline.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>stylebro-migrate</ToolCommandName>
-    <PackageId>StyleBro.Migrate</PackageId>
+    <ToolCommandName>bro</ToolCommandName>
+    <PackageId>StyleBro.Tool</PackageId>
     <!-- Released together with StyleBro.Analyzers: release.yml overrides this with the tag's version. -->
     <Version>0.7.0-alpha.1</Version>
-    <Description>Generates StyleBro and .NET SDK settings from a repository's StyleCop configuration, so moving from StyleCop.Analyzers to StyleBro keeps the code's style.</Description>
+    <Description>The bro command for StyleBro: sets a repository up (init, or migrate from StyleCop), fixes it (format, check, preview) and writes baselines.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/bisforboman/stylebro</PackageProjectUrl>
     <PackageTags>stylecop;sonarqube;migration;analyzers;code-style;dotnet-format;dotnet-tool</PackageTags>

@@ -15,7 +15,7 @@ internal static class TrailingBlankLines
 {
     /// <summary>
     /// <c>stylebro_blank_line_below_standalone_comments</c>: <c>allow</c> (default) keeps the blank line below a standalone
-    /// comment (<see cref="IsStandalone"/>), <c>remove</c> removes it like StyleCop's SA1512 (stylebro-migrate writes it
+    /// comment (<see cref="IsStandalone"/>), <c>remove</c> removes it like StyleCop's SA1512 (bro migrate writes it
     /// for StyleCop setups with SA1512 on).
     /// </summary>
     public const string StandaloneKey = "stylebro_blank_line_below_standalone_comments";

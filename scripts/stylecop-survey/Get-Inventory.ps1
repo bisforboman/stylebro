@@ -2,7 +2,7 @@
 # Writes data/inventory-<version>.csv: every diagnostic in the given StyleCop.Analyzers versions, with title,
 # category, default state and whether StyleCop ships a code fix. Restores the packages into the NuGet cache first.
 # -Package StyleSharp.Analyzers writes data/inventory-stylesharp-<version>.csv the same way (StyleSharp, a StyleCop
-# successor with SST ids, which stylebro-migrate reads like StyleCop: New-StyleSharpMapping.ps1).
+# successor with SST ids, which bro migrate reads like StyleCop: New-StyleSharpMapping.ps1).
 param([string[]]$Versions = @('1.0.2', '1.1.118', '1.2.0-beta.556'), [string]$Package = 'StyleCop.Analyzers')
 $ErrorActionPreference = 'Stop'
 

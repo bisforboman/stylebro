@@ -1,6 +1,6 @@
 {
   "area": "Configuration",
   "item": "A style for private static fields (SX1309S alone)",
-  "notes": "`stylebro_private_mutable_static_field_naming = camelCase | _camelCase` for private static fields that aren't readonly or const (not set: a naming rule requiring just `static`, else BRO1303's style); stylebro-migrate pins it to the instance style. Parity set `naming-static-underscore`. Agent's proposal in decisions.md.",
+  "notes": "`stylebro_private_mutable_static_field_naming = camelCase | _camelCase` for private static fields that aren't readonly or const (not set: a naming rule requiring just `static`, else BRO1303's style); bro migrate pins it to the instance style. Parity set `naming-static-underscore`. Agent's proposal in decisions.md.",
   "status": "Done (2026-10-10)"
 }

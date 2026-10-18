@@ -163,11 +163,11 @@ internal static class CamelCaseRenamer
 
     /// <summary>
     /// The entries of the file <see cref="RepositoryNames.Variable"/> names (read once per file), or none when it isn't set:
-    /// only 'stylebro-migrate format' sets it.
+    /// only 'bro format' sets it.
     /// </summary>
     internal static List<RepositoryNames.Entry> ReadRepositoryNames()
     {
-#pragma warning disable RS1035 // Only 'stylebro-migrate format' sets the variable; the IDE and the build never read a file.
+#pragma warning disable RS1035 // Only 'bro format' sets the variable; the IDE and the build never read a file.
         var file = Environment.GetEnvironmentVariable(RepositoryNames.Variable);
         if (string.IsNullOrEmpty(file))
         {
@@ -444,7 +444,7 @@ internal static class CamelCaseRenamer
             }
         }
 
-        // 'stylebro-migrate format' runs one target framework at a time: the files of projects this run doesn't load.
+        // 'bro format' runs one target framework at a time: the files of projects this run doesn't load.
         var outside = new Dictionary<string, string>(StringComparer.Ordinal);
         var outsideMembers = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         foreach (var entry in ReadRepositoryNames())

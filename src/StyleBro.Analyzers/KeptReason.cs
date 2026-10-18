@@ -3,7 +3,7 @@ namespace StyleBro.Analyzers;
 /// <summary>
 /// Why a code fix leaves a finding on purpose. The analyzer doesn't report what it can see is unsafe; these are the
 /// reasons only the fix can see (other projects, the whole solution), so the warning stays and nothing is changed.
-/// 'stylebro-migrate format' lists them (see <see cref="KeptFinding"/>).
+/// 'bro format' lists them (see <see cref="KeptFinding"/>).
 /// </summary>
 public enum KeptReason
 {
@@ -50,7 +50,7 @@ public enum KeptReason
     DerivedTypeInAnotherProject,
 
     /// <summary>
-    /// Code this 'stylebro-migrate format' run doesn't load uses the name: a project formatted in another run (a
+    /// Code this 'bro format' run doesn't load uses the name: a project formatted in another run (a
     /// multi-targeted library's run for a framework its tests don't target, projects sharing files), or a file no loaded
     /// project compiles. Renaming would leave that use behind.
     /// </summary>
@@ -101,7 +101,7 @@ public enum KeptReason
 
 /// <summary>
 /// One finding a fix kept, as a line of the file named by <see cref="Variable"/> (tab-separated: path, line, column,
-/// rule, reason, message, and where the reason was found when the fix knows it). The fixes append to it when the variable is set; 'stylebro-migrate format' sets it and reads it.
+/// rule, reason, message, and where the reason was found when the fix knows it). The fixes append to it when the variable is set; 'bro format' sets it and reads it.
 /// </summary>
 public sealed class KeptFinding
 {

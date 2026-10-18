@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "No blank line after attributes (StyleCop's proposed SA1521, issue #738)",
-  "notes": "BRO1525: also between stacked attribute lists; comments and directives in the gap skipped. Off after `stylebro-migrate`.",
+  "notes": "BRO1525: also between stacked attribute lists; comments and directives in the gap skipped. Off after `bro migrate`.",
   "status": "Done (2026-10-04)"
 }

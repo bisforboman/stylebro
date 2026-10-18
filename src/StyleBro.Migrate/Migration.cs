@@ -60,7 +60,7 @@ internal static class Migration
     /// <summary>The files (full paths) <see cref="ReadOrNull"/> couldn't read in this process.</summary>
     internal static readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> Unreadable = new(StringComparer.OrdinalIgnoreCase);
 
-    private const string UnformattedSuffix = "; 'stylebro-migrate format' leaves them alone (remove this line to format them)";
+    private const string UnformattedSuffix = "; 'bro format' leaves them alone (remove this line to format them)";
 
     /// <summary>The StyleBro rules that read documentation as XML, like the StyleCop rules they replace.</summary>
     private static readonly HashSet<string> XmlDocumentationRules = new(StringComparer.Ordinal)
@@ -509,7 +509,7 @@ internal static class Migration
             }
         }
 
-        // IDE0055 on in a multi-targeted repository: plain 'dotnet format' crashes there, 'stylebro-migrate format' doesn't.
+        // IDE0055 on in a multi-targeted repository: plain 'dotnet format' crashes there, 'bro format' doesn't.
         var formattingOn = lines.Any(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal)
             && !l.EndsWith("= none", StringComparison.Ordinal) && !l.EndsWith("= suggestion", StringComparison.Ordinal) && !l.EndsWith("= silent", StringComparison.Ordinal));
         if (formattingOn && InitCommand.MultiTargetedProjects(root).Any())
@@ -766,7 +766,7 @@ internal static class Migration
     /// 'dotnet format' sort usings). Null when it's already there.
     /// </summary>
     public static string? DisablePreset(string? existing, bool importParent = false) =>
-        SetPreset(existing, "none", "The settings come from stylebro-migrate's block in .editorconfig.", importParent);
+        SetPreset(existing, "none", "The settings come from bro migrate's block in .editorconfig.", importParent);
 
     /// <summary>
     /// Directory.Build.props with &lt;StyleBroPreset&gt;<paramref name="value"/>&lt;/StyleBroPreset&gt; (and
@@ -837,7 +837,7 @@ internal static class Migration
     }
 
     /// <summary>
-    /// Directory.Build.props without &lt;StyleBroStyle&gt; (its whole line when it has one to itself): 'stylebro-migrate --write'
+    /// Directory.Build.props without &lt;StyleBroStyle&gt; (its whole line when it has one to itself): 'bro migrate --write'
     /// turns the preset off for its own block, and a style needs the preset (STYLEBRO004). Null when there's none.
     /// </summary>
     public static string? RemoveStyle(string? existing)
@@ -1029,7 +1029,7 @@ internal static class Migration
     {
         var text = new StringBuilder();
         text.Append(BeginMarker).Append('\n');
-        text.Append($"# Generated from this repository's {settings} settings by stylebro-migrate. Run it again to update; edits\n");
+        text.Append($"# Generated from this repository's {settings} settings by bro migrate. Run it again to update; edits\n");
         text.Append("# between these markers are overwritten.\n");
         var first = true;
         foreach (var (section, lines) in sections)
@@ -1453,7 +1453,7 @@ internal static class Migration
             .Select(folder => Path.GetRelativePath(root, folder).Replace('\\', '/'));
 
     /// <summary>
-    /// The folders (relative, '/'-separated) the root .editorconfig marks 'generated_code = true' outside the stylebro blocks,
+    /// The folders (relative, '/'-separated) the root .editorconfig marks 'generated_code = true' outside the stylestylebro-migrate blocks,
     /// in sections like '[src/Sdk/**]' or '[src/Sdk/**.cs]': code the team excluded from formatting doesn't vote on its
     /// conventions either. Copied-in code under another folder name (actions/runner's src/Sdk decided 761 of 902 wrapped
     /// operators) can't be told from the team's own; marked like this, it's left out.
@@ -1693,7 +1693,7 @@ internal static class Migration
 
     private static bool IsVendorFolder(string name) => name.ToLowerInvariant() is "vendor" or "vendored" or "third_party" or "thirdparty" or "external";
 
-    /// <summary>Whether the root .editorconfig (outside stylebro-migrate's block) marks generated code itself.</summary>
+    /// <summary>Whether the root .editorconfig (outside the stylebro-migrate block) marks generated code itself.</summary>
     private static bool MarksGeneratedCode(string root)
     {
         var editorConfig = Path.Combine(root, ".editorconfig");

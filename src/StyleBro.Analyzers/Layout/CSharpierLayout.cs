@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace StyleBro.Analyzers.Layout;
 
 /// <summary>
-/// CSharpier lays the code out (<c>stylebro_layout_by = csharpier</c>, written by <c>stylebro-migrate init</c> when it detects
+/// CSharpier lays the code out (<c>stylebro_layout_by = csharpier</c>, written by <c>bro init</c> when it detects
 /// CSharpier): the fixes that rewrite code and the rules that judge layout CSharpier changes afterwards follow CSharpier's
 /// line width (<c>stylebro_layout_print_width</c>, CSharpier's printWidth), so the two formatters settle in one round each.
 /// </summary>

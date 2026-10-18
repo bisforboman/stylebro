@@ -142,7 +142,7 @@ public sealed partial class MigrationTests
         // AngleSharp: build/_build.csproj gets StyleBro from build/Directory.Build.props, no solution configuration builds it,
         // and its ~25 warnings stayed after every format run.
         Write("build/_build.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />\n");
-        Assert.Equal(" Where a Directory.Build.props above brings StyleBro into its build, format it on its own: 'stylebro-migrate format build/_build.csproj'.", FormatCommand.NotBuiltHint(["build/"], root));
+        Assert.Equal(" Where a Directory.Build.props above brings StyleBro into its build, format it on its own: 'bro format build/_build.csproj'.", FormatCommand.NotBuiltHint(["build/"], root));
         Assert.Equal(string.Empty, FormatCommand.NotBuiltHint([], root));
     }
 

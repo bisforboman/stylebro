@@ -1,6 +1,6 @@
 {
   "area": "Hardening",
   "item": "IDE0055 in multi-targeted repos",
-  "notes": "`dotnet format` crashes in Roslyn's linked-file merge there. `stylebro-migrate format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md.",
+  "notes": "`dotnet format` crashes in Roslyn's linked-file merge there. `bro format` runs it once per target framework (projects loaded for one framework: nothing to merge); `init` writes IDE0055 at warning everywhere. See decisions.md.",
   "status": "Done (2026-10-03)"
 }

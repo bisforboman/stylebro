@@ -1,8 +1,8 @@
 ### Changed
 
-- **`stylebro-migrate init`** turns [BRO1506](https://bisforboman.github.io/stylebro/rules/BRO1506/) off when your code
+- **`bro init`** turns [BRO1506](https://bisforboman.github.io/stylebro/rules/BRO1506/) off when your code
   mostly keeps a blank line below its `//` comments (or mixes both), like its other convention checks.
-- **`stylebro-migrate init`** no longer turns IDE0009 off when your `.editorconfig` requires `this.`
+- **`bro init`** no longer turns IDE0009 off when your `.editorconfig` requires `this.`
   (`dotnet_style_qualification_for_* = true:warning`).
 - A suppressed Sonar S4136 in `<NoWarn>` no longer turns BRO1001 off in that folder: **`init`** and **`--write`** set
   `stylebro_keep_overloads_together = false` there instead, and members are still ordered.

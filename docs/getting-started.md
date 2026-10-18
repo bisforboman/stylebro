@@ -6,8 +6,8 @@ From install to the first `dotnet format` run. Pick the path that fits:
 - [A. A new project, or no StyleCop](#a-a-new-project-or-no-stylecop)
 - [B. Coming from StyleCop](#b-coming-from-stylecop)
 
-Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your projects) and **StyleBro.Migrate** (the
-`stylebro-migrate` command line tool, used once to write settings):
+Both use two packages: **StyleBro.Analyzers** (the rules, referenced by your projects) and **StyleBro.Tool** (the
+`bro` command line tool, used once to write settings):
 
 ### Which version
 
@@ -21,7 +21,7 @@ packages from a clone into a local folder (any version string works; `0.8.0-dev.
 git clone https://github.com/bisforboman/stylebro
 dotnet pack stylebro/src/StyleBro.Package -o stylebro-feed -p:Version=0.8.0-dev.1
 dotnet pack stylebro/src/StyleBro.Migrate -o stylebro-feed -p:Version=0.8.0-dev.1
-dotnet tool install --global StyleBro.Migrate --add-source stylebro-feed --version 0.8.0-dev.1
+dotnet tool install --global StyleBro.Tool --add-source stylebro-feed --version 0.8.0-dev.1
 ```
 
 Then add the folder as a package source in your repository's `nuget.config` and use `0.8.0-dev.1` wherever this page
@@ -47,13 +47,13 @@ only looks for a package in the sources mapped to it, so the source alone gives 
 Before changing anything, `--diff` shows what a path would do to your code. It works on all three commands:
 
 ```
-stylebro-migrate init --diff          # path A: init's settings, then format
-stylebro-migrate path/to/repo --diff  # path B: the migration's settings (--write), then format
-stylebro-migrate format --diff        # only the format run
+bro preview init          # path A: init's settings, then format
+bro preview migrate path/to/repo  # path B: the migration's settings (--write), then format
+bro preview format        # only the format run
 ```
 
 The preview copies the repository to a temporary folder (git's tracked and untracked files, not the ignored ones; the
-working trees of submodules too), runs the command there, then `stylebro-migrate format` until a run changes nothing,
+working trees of submodules too), runs the command there, then `bro format` until a run changes nothing,
 and deletes the copy. Your repository isn't touched. If it doesn't reference StyleBro.Analyzers yet, the copy gets the
 reference from [step 1](#1-add-the-package) (the tool's own version) and the output says so. It prints a summary and
 writes the full diff to `.git/stylebro-preview.patch` in the repository's git folder, where it isn't an untracked file
@@ -64,10 +64,10 @@ repository's own restore output, so run `dotnet restore` first (it's ignored whe
 needs a restore). Where the preview adds the reference under central package management: next to StyleCop's (a
 `GlobalPackageReference` gets a `GlobalPackageReference`, in the same `Directory.Packages.props`), else a version-less
 `PackageReference` with the version in the `Directory.Packages.props` that applies (also one that a folder's
-`Directory.Packages.props` imports). FFMpegCore, `stylebro-migrate init --diff`:
+`Directory.Packages.props` imports). FFMpegCore, `bro preview init`:
 
 ```text
-Previewing 'stylebro-migrate init --write' and 'stylebro-migrate format' on a copy; nothing in C:\src\FFMpegCore changes.
+Previewing 'bro init --write' and 'bro format' on a copy; nothing in C:\src\FFMpegCore changes.
 Copying the repository to C:\Users\me\AppData\Local\Temp\stylebro-preview-fmsw0dps.3qa\FFMpegCore... 0s
 Settings: 31 lines in .editorconfig; 3 lines in Directory.Build.props (StyleBro.Analyzers)
   StyleBro.Analyzers wasn't referenced: added StyleBro.Analyzers 0.7.0-alpha.1 to Directory.Build.props for the preview, as docs/getting-started.md says (the patch includes it).
@@ -165,7 +165,7 @@ Two things that get in the way of a package from a local feed (trying a build be
   `Directory.Build.props` of its own that doesn't import the root one.
 
 The package brings StyleBro's rules and its preset: rule severities and formatting options, close to StyleCop's
-defaults. Your own `.editorconfig` wins over the preset. The preset has a version, and `stylebro-migrate init --write`
+defaults. Your own `.editorconfig` wins over the preset. The preset has a version, and `bro init --write`
 (step 2) pins it in `Directory.Build.props` (`<StyleBroPreset>1.0</StyleBroPreset>`), so a later package upgrade adds no
 new rules until you raise it ([versioning](versioning.md#new-rules)). To configure everything yourself instead:
 `<StyleBroPreset>none</StyleBroPreset>`.
@@ -177,11 +177,11 @@ Their severities have to be in `.editorconfig`, because `dotnet format` ignores 
 In the repository root:
 
 ```
-stylebro-migrate init            # shows the block
-stylebro-migrate init --write    # adds it to .editorconfig (created if missing)
+bro init            # shows the block
+bro init --write    # adds it to .editorconfig (created if missing)
 ```
 
-`stylebro-migrate init --diff` shows what the block and the format run in step 3 would change, without writing
+`bro preview init` shows what the block and the format run in step 3 would change, without writing
 anything ([Preview first](#preview-first)).
 
 The block sits between `# BEGIN stylebro-migrate` and `# END stylebro-migrate`; running the command again replaces it.
@@ -192,7 +192,7 @@ file sets it yet).
 An `.editorconfig` that silences analyzers in bulk (`dotnet_analyzer_diagnostic.severity = silent`, or a category's
 severity below warning) would hide StyleBro's rules from `dotnet format`, while the build still reports them at the
 preset's severities. `init` then writes each rule the preset turns on by its id, so both see the same rules; a rule
-your `.editorconfig` sets by id stays as you set it. `stylebro-migrate format` never says clean while such a bulk setting
+your `.editorconfig` sets by id stays as you set it. `bro format` never says clean while such a bulk setting
 hides rules from it. The built-in rules are another matter: where your `.editorconfig` turns the Style category off (or
 every analyzer, without a Style entry), the block leaves out the ones it would turn on by id (IDE0055, IDE0036, IDE0049),
 so your setting decides them, and `format` skips the whitespace pass.
@@ -261,7 +261,7 @@ arithmetic parentheses (IDE0048), default values (IDE0034) and operator placemen
 reach their files, since `root = true` stops the lookup there. `init` gives each such folder with C# code a block of its
 own in its `.editorconfig`, with the built-in rule severities, judged from that folder's code and settings alone (the
 report has a section per folder). A folder with too little code to tell keeps StyleBro's defaults, and the report says so.
-`stylebro-migrate --write` writes the whole block into such a folder too.
+`bro migrate --write` writes the whole block into such a folder too.
 
 A few settings work a little differently:
 
@@ -278,7 +278,7 @@ A few settings work a little differently:
   what the checkout has, and a fixed one would make `format` rewrite every file on the other OS. When git converts at
   least as many files as it leaves alone, those are the convention and nothing is written: a few files committed with
   CRLF don't decide for the rest (one trial repository had 3 such files next to 145 converted ones, and
-  `end_of_line = crlf` from those 3 meant 12,593 line-ending errors in an LF checkout). `stylebro-migrate --write`
+  `end_of_line = crlf` from those 3 meant 12,593 line-ending errors in an LF checkout). `bro migrate --write`
   writes `end_of_line` the same way. When your `.editorconfig` sets `end_of_line` but git converts the files on
   checkout (`end_of_line = lf` with `*.cs text=auto` means CRLF files in a Windows checkout), `init` keeps endings out of
   it: `end_of_line = unset` for C# files and IDE0055 as a suggestion, so neither `format` nor the build touches them, and
@@ -340,7 +340,7 @@ A few settings work a little differently:
   `dotnet-tools.json`, at the root or in a solution's or project's folder or a folder above it; or a `CSharpier.MsBuild`
   package reference), the two formatters would undo each other's layout
   (StabilityMatrix's pre-commit check rejected 161 files StyleBro had formatted). `init` then turns off IDE0055 (so
-  `stylebro-migrate format` skips the whitespace pass; when CSharpier formats only some folders, IDE0055 is off in those
+  `bro format` skips the whitespace pass; when CSharpier formats only some folders, IDE0055 is off in those
   folders' sections, one section per folder CSharpier formats, and the whitespace pass leaves just them out), IDE0036
   (CSharpier orders modifiers itself, and the two orders differ: `file static` against `static file`) and every StyleBro rule for something CSharpier decides, and the
   layout conventions in the table are reported as `set` (`CSharpier formats it`). Off:
@@ -369,7 +369,7 @@ A few settings work a little differently:
   sorts using directives itself (System first), so `init` writes no sort key (`dotnet format` sorts usings whenever
   `dotnet_sort_system_directives_first` or `dotnet_separate_import_directive_groups` is set, and its order differs from
   CSharpier's in places: `App3._0` against `App3_0`). Where your `.editorconfig` sets one (`false`, or `true` for the
-  groups), `init` writes the closer value in its block: a key can't be unset. `stylebro-migrate format` runs
+  groups), `init` writes the closer value in its block: a key can't be unset. `bro format` runs
   CSharpier itself on the C# files each run changed (the repository's `csharpier` tool, restored first, or the copy the
   CSharpier.MsBuild package brings; whole folders where CSharpier would change nothing else, since each file named on
   its command line costs it ~80 ms): other fixes that rewrite code (attributes split, parentheses added, `if`s merged)
@@ -381,7 +381,7 @@ A few settings work a little differently:
   `static file` against CSharpier's `file static`), no run can settle it: `format`, `--verify-no-changes` and the
   preview say so (the preview exits 2 like `format`), name the files and the rules whose edits CSharpier undoes, and
   say how to turn those off (`init` turns IDE0036 off with CSharpier). With only a `.csharpierrc` and no tool or package, `format` says to run CSharpier.
-  `stylebro-migrate --write` (from StyleCop) does the same. To have StyleBro format instead, remove CSharpier and run
+  `bro migrate --write` (from StyleCop) does the same. To have StyleBro format instead, remove CSharpier and run
   `init` again.
 - **Running `init` again** keeps the convention lines the first run wrote (the ones below `# Conventions in this
   repository's code`, with their `# init:` comments), and the report says `kept from the last init`. They describe your
@@ -408,9 +408,9 @@ A few settings work a little differently:
   `insert_final_newline` but the C# files don't clearly follow it (BOM or not, last line break or not, the same 75 %),
   nothing ever enforced it, and `format` would add or strip the BOM or the last line break in every file. Like a line
   ending the files contradict, `init` writes the files' value for C# files (`unset` when they're mixed: each file keeps
-  its own), and the report says how to switch (remove the line and run `stylebro-migrate format`). Ical.Net:
+  its own), and the report says how to switch (remove the line and run `bro format`). Ical.Net:
   `charset = utf-8` with 108 of 223 files starting with a BOM, all 108 stripped; the starter kit:
-  `insert_final_newline = false` with 1,092 of 1,597 files ending in a line break, all 1,092 removed. `stylebro-migrate
+  `insert_final_newline = false` with 1,092 of 1,597 files ending in a line break, all 1,092 removed. `bro
   --write` does the same. `trim_trailing_whitespace = false` can't be kept this way: `dotnet format` doesn't read the key
   and trims trailing whitespace on every line it formats, so the report only says so (with IDE0055 off nothing is trimmed).
   These keys (and `end_of_line`) are judged per file against the `.editorconfig` that decides it, as the compiler reads
@@ -457,7 +457,7 @@ A few settings work a little differently:
 - **Preset version**: `init --write` sets `<StyleBroPreset>` in each `Directory.Build.props` your projects read, but not
   in one whose projects no solution lists and that doesn't mention StyleBro.Analyzers (example or test-fixture folders).
   A `Directory.Build.props` it has to create below another one imports that one, so nothing the projects read gets lost.
-- **Run from a subfolder**: when the folder you run `init` (or `stylebro-migrate --write`) in is part of a git repository
+- **Run from a subfolder**: when the folder you run `init` (or `bro migrate --write`) in is part of a git repository
   whose build reaches past it (a `Directory.Build.props`, `Directory.Packages.props`, `.editorconfig` or `.globalconfig`
   above it, a solution in it that lists projects outside it, like `build/App.sln`, a solution above it that lists its
   projects, a project in it that references one outside it, or no project in it at all), it works on the repository's
@@ -478,7 +478,7 @@ A few settings work a little differently:
   (`resharper_int_align_variables = true`, `resharper_csharp_int_align_fields = true` and the other `int_align` keys;
   the comments' alignment aside), IDE0055's whitespace formatting would flatten it (RestSharp:
   `var doc      = CreateAttributesXml();` became `var doc = CreateAttributesXml();` in 171 files). `init` turns IDE0055
-  off, with a `# init:` comment, so `stylebro-migrate format` skips the whitespace pass. No StyleBro rule changes the
+  off, with a `# init:` comment, so `bro format` skips the whitespace pass. No StyleBro rule changes the
   spaces inside a line, so they stay on. An IDE0055 severity of your own wins.
 - **One-line jumps** (`if (x) return;`, also `break`, `continue`, `throw`, `goto`, `yield break` on the `if` line): from
   3 of them on, `init` writes `stylebro_allow_single_line_jump_statements = true`, majority or not, so
@@ -588,7 +588,7 @@ Conventions in the code (a convention needs 3 places or more: below 10 they must
 Summary:
   Kept your style for 5 settings: wrote stylebro_trailing_comma; 4 were already StyleBro's default.
   Turned 2 rules off because your code mixes both forms: BRO1133 (null checks), BRO1107 (split lists).
-  To choose later: set the key in .editorconfig, remove its init line, run 'stylebro-migrate format'.
+  To choose later: set the key in .editorconfig, remove its init line, run 'bro format'.
   4 settings had fewer than 3 places to tell, StyleBro's defaults stay: stylebro_private_field_naming,
     dotnet_style_operator_placement_when_wrapping, stylebro_equals_placement_when_wrapping, stylebro_summary_layout.
 ```
@@ -605,7 +605,7 @@ dotnet_diagnostic.BRO1133.severity = none
 #### Changing a detected setting later
 
 Set the key in your own part of `.editorconfig`, outside the block (for example `stylebro_null_check_style =
-equality_operator`), remove the rule's `severity = none` line from the block, and run `stylebro-migrate format` to bring
+equality_operator`), remove the rule's `severity = none` line from the block, and run `bro format` to bring
 the code in line. The block is rewritten each time `init` runs, but a key you set yourself wins over what it counts: it
 then writes neither the setting nor the `severity = none` line.
 
@@ -616,18 +616,18 @@ holder than the root's) get the same section.
 
 When it finds a StyleCop setup (`stylecop.json`, StyleCop rule ids in `.editorconfig`, rulesets or
 global configs, a StyleCop.Analyzers reference), it stops without writing and tells you to run
-`stylebro-migrate --write` instead: that's [path B](#b-coming-from-stylecop), which turns StyleBro's rules on only where
+`bro migrate --write` instead: that's [path B](#b-coming-from-stylecop), which turns StyleBro's rules on only where
 StyleCop enforced them.
 
 With SonarQube or SonarCloud (a `SonarAnalyzer.CSharp` reference, Sonar rule severities in rulesets or configs, or a
 quality profile you export and pass with `--sonar-profile profile.xml`), `init` also turns on the StyleBro and .NET rules
 that fix what your Sonar rules report (S927 -> BRO1313, S4136 -> overloads kept together, ...) and prints which:
-[Coming from SonarQube](migrating.md#coming-from-sonarqube). The same works for `stylebro-migrate --write` in path B.
+[Coming from SonarQube](migrating.md#coming-from-sonarqube). The same works for `bro migrate --write` in path B.
 
-### 3. Run stylebro-migrate format
+### 3. Run bro format
 
 ```
-stylebro-migrate format
+bro format
 ```
 
 This fixes whitespace, the built-in rules and every StyleBro rule. One fix can make work for another rule, so the
@@ -651,7 +651,7 @@ package source), `--no-restore` never restores. `--timings` prints how long each
 projects, the restore, each check and fix run, CSharpier, the builds `--verify-no-changes` makes). A solution filter (`.slnf`) works like
 its solution, with only its projects. A solution with several filters of it next to it (Steeltoe's
 `Steeltoe.All.slnx` and its seven `.slnf` parts) counts as that solution; the command says how to name a filter instead.
-A folder with several solutions or projects needs one named (`stylebro-migrate format MySolution.slnx`): the command lists them instead of picking one.
+A folder with several solutions or projects needs one named (`bro format MySolution.slnx`): the command lists them instead of picking one.
 With none at the root, it looks for a Traversal project there (`dirs.proj` with `Sdk="Microsoft.Build.Traversal"`,
 which `dotnet format` can't load: `format` runs on a temporary solution with the projects it lists), then for solutions
 one folder down (`src/MySolution.slnx`): the only one is used, and the command says so (`Using src/MySolution.slnx`);
@@ -677,7 +677,7 @@ change: see [Large codebases](#large-codebases).
 
 **Why not plain `dotnet format`?** It also applies every other analyzer's fixes and the compiler's own, and some of
 those change behavior or break the build: on one trial repository it added `required` to properties (CS8618) and a
-Sonar fix removed `init;` accessors, nine build errors. `stylebro-migrate format` passes `dotnet format` only StyleBro's
+Sonar fix removed `init;` accessors, nine build errors. `bro format` passes `dotnet format` only StyleBro's
 rule ids and the built-in rules `init` or the migration turn on (`--diagnostics ...`); whitespace formatting runs as
 usual. It also runs once per target framework where needed ([Multi-targeted repositories](#multi-targeted-repositories))
 and never touches git submodules. The plain equivalent is `dotnet format --diagnostics` with the ids to fix:
@@ -686,13 +686,13 @@ and never touches git submodules. The plain equivalent is `dotnet format --diagn
 dotnet format --diagnostics BRO1001 BRO1505 BRO1601 IDE0055 IDE0036 BRO1008
 ```
 
-`stylebro-migrate format --all` applies everything, like plain `dotnet format`.
+`bro format --all` applies everything, like plain `dotnet format`.
 
 [What to expect on the first run](#what-to-expect-on-the-first-run): solution names, run time, warnings as errors.
 
 ### 4. Check it in CI
 
-Run `stylebro-migrate format --verify-no-changes --severity warn` after the build: it changes nothing and fails (exit
+Run `bro check --severity warn` after the build: it changes nothing and fails (exit
 code 2) when formatting would change a file. Findings kept on purpose don't fail it; plain
 `dotnet format --verify-no-changes` fails on those too, so a script or an AI agent that loops "until clean" never gets
 there with it. Set-up for GitHub Actions and Azure Pipelines: [ci.md](ci.md). `init` and the migration
@@ -707,24 +707,24 @@ agents (opt-in). For scripts and agents there are `format --files` (just the fil
 
 Still deciding? [StyleBro vs StyleCop](stylebro-vs-stylecop.md) compares the two with measured numbers.
 
-`stylebro-migrate` reads your StyleCop setup (rulesets, global configs, `.editorconfig` files, `stylecop.json`) and
+`bro migrate` reads your StyleCop setup (rulesets, global configs, `.editorconfig` files, `stylecop.json`) and
 writes StyleBro and SDK settings that enforce the same things, so code StyleCop was happy with stays as it is. A
 walk-through on a small project, with real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro/blob/main/samples/StyleCopMigration/README.md).
 
 ### 1. Dry run
 
 ```
-stylebro-migrate path/to/repo
+bro migrate path/to/repo
 ```
 
 It prints what it read, the settings it would write, and the StyleCop rules nothing enforces after the switch (dropped
 by design, partly covered, or not covered yet). Nothing is changed. To also see what the settings and the format run
-would do to the code: `stylebro-migrate path/to/repo --diff` ([Preview first](#preview-first)).
+would do to the code: `bro preview migrate path/to/repo` ([Preview first](#preview-first)).
 
 ### 2. Write the settings
 
 ```
-stylebro-migrate path/to/repo --write
+bro migrate path/to/repo --write
 ```
 
 This writes the settings into your `.editorconfig` files (between the `stylebro-migrate` markers), turns StyleBro's
@@ -741,13 +741,13 @@ for both package ids, `StyleCop.Analyzers` and the prerelease `StyleCop.Analyzer
 can stay; StyleBro ignores them. `stylecop.json` can also go, with its `<AdditionalFiles>` item: the block
 records its settings for later runs.
 
-### 4. Run stylebro-migrate format
+### 4. Run bro format
 
 ```
-stylebro-migrate format
+bro format
 ```
 
-Why not plain `dotnet format`: [step 3 of path A](#3-run-stylebro-migrate-format). In a StyleCop-clean repository this should change
+Why not plain `dotnet format`: [step 3 of path A](#3-run-bro-format). In a StyleCop-clean repository this should change
 little or nothing. Look at what it did change: usually code StyleCop
 missed, or a rule where StyleBro deliberately differs ([differences-from-stylecop.md](differences-from-stylecop.md)).
 Then check the report from step 1 for rules your team relied on that nothing enforces any more. Details:
@@ -756,7 +756,7 @@ Then check the report from step 1 for rules your team relied on that nothing enf
 ## The Microsoft style (optional)
 
 For code written like dotnet/runtime's (`_camelCase` and `s_camelCase` fields, no `this.`, braces optional on one-line
-bodies), `stylebro-migrate init --style microsoft --write` puts that style on top of the preset instead of StyleCop's
+bodies), `bro init --style microsoft --write` puts that style on top of the preset instead of StyleCop's
 defaults; your code's own conventions still win, apart from private static fields: they get the style's `s_` unless
 your code clearly has none (the report says how many get it). Lines an earlier `init` wrote that the style says too
 are dropped. Plain `init` suggests it when your code looks like that. What it sets:
@@ -768,7 +768,7 @@ To also rewrite code into newer C# and newer APIs (target-typed `new()`, collect
 namespaces, `ArgumentNullException.ThrowIfNull`, ...) with the SDK's own rules, after either path:
 
 ```
-stylebro-migrate init --modernize --write
+bro init --modernize --write
 dotnet format
 ```
 
@@ -780,12 +780,12 @@ API, and the newer-C# rules are suggestions unless the project sets `LangVersion
 
 - **Name the solution when the root has several.** With more than one project or solution file in the folder (say
   `Build.csproj` next to `MySolution.slnx`), `dotnet format` stops with MSB1011 ("more than one project or solution
-  file"). Pass the one to format: `dotnet format MySolution.slnx` (the same for `stylebro-migrate format`).
-- **Multi-targeted repositories take longer.** `stylebro-migrate format` runs `dotnet format` once per target
+  file"). Pass the one to format: `dotnet format MySolution.slnx` (the same for `bro format`).
+- **Multi-targeted repositories take longer.** `bro format` runs `dotnet format` once per target
   framework, and each run loads the solution again. That's minutes, not seconds: Dapper, which builds in 13 seconds,
   took 345 seconds to format.
 - **`TreatWarningsAsErrors` fails the first build** until everything is fixed or recorded: StyleBro's findings are
-  warnings, so they become errors. Run `dotnet format` (or `stylebro-migrate format`) before building, or record what's
+  warnings, so they become errors. Run `dotnet format` (or `bro format`) before building, or record what's
   left in a [baseline](baseline.md).
 - **Some renames are left to you.** The naming rules don't rename a member whose name also appears in a string
   (reflection, serialized names, `DebuggerDisplay`): the rename would compile but break at run time. Those warnings
@@ -812,7 +812,7 @@ and it's on purpose. The reasons, per finding:
 - a related override or implementation is public API, or also implements a member that isn't renamed;
 - the rename would add compile errors (tuple element names), or the namespace is also defined outside the solution.
 
-`stylebro-migrate format` lists them after its last run:
+`bro format` lists them after its last run:
 
 ```
 Run 2: 0 files changed, clean.
@@ -833,7 +833,7 @@ again; `<StyleBroBaseline>none</StyleBroBaseline>` turns this off, and `format` 
 that the build still reports them (an error with `TreatWarningsAsErrors`). The list of kept findings is printed after
 every run, also when `format` ends "Not clean" (then nothing is baselined).
 
-Exit codes of `stylebro-migrate format`, for CI and agents:
+Exit codes of `bro format`, for CI and agents:
 
 | Exit code | Plain run | `--verify-no-changes` |
 |---|---|---|
@@ -844,10 +844,10 @@ Exit codes of `stylebro-migrate format`, for CI and agents:
 
 `--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats the files
 with findings (for their rules) in a temporary copy of the repository to see whether any file would change and which
-findings the fixes keep, then deletes the copy. After a clean `stylebro-migrate format` on the same code, settings,
+findings the fixes keep, then deletes the copy. After a clean `bro format` on the same code, settings,
 options, SDK and StyleBro version, it already knows what that run found (recorded in the temporary folder): when that
 run's last step checked every target framework and configuration and found nothing but kept findings, it answers from
-the record in seconds (`Checking StyleBro's rules: nothing changed since the last clean 'stylebro-migrate format'
+the record in seconds (`Checking StyleBro's rules: nothing changed since the last clean 'bro format'
 here ...`) without running `dotnet format` again; otherwise it checks, and formats no copy for the kept findings it
 knows. Delete the record (`stylebro-kept` in the temporary folder) to check anyway. The builds of the configurations an
 in-solution source generator keeps from the checks still run: there the build is the check. The projects of one
@@ -876,12 +876,12 @@ code, in the build and in `dotnet format`. One side effect: the compiler treats 
 unless they say `#nullable enable` themselves.
 
 `dotnet_analyzer_diagnostic.severity = none` in that folder isn't enough: a rule turned on by its id
-(`dotnet_diagnostic.BRO1001.severity = warning` in the root) wins over it. `stylebro-migrate --write` therefore writes
+(`dotnet_diagnostic.BRO1001.severity = warning` in the root) wins over it. `bro migrate --write` therefore writes
 every replacing rule as `none` into such a folder's `.editorconfig`, and it never edits files inside git submodules
 (folders with their own `.git`).
 
 **Files linked from a submodule.** A project can compile files from another folder (`<Compile Include="..\..\ext\Lib\Code.cs" />`,
-or a shared `.projitems`). `stylebro-migrate format` never formats anything inside a git submodule (it passes `--exclude`
+or a shared `.projitems`). `bro format` never formats anything inside a git submodule (it passes `--exclude`
 with every submodule folder), so StyleBro doesn't report findings there either: the package's build targets read the
 submodule paths from the `.gitmodules` above the project, and StyleBro doesn't analyze the files in those folders. A folder that
 is not a submodule (a copied library) still needs the `generated_code = true` section above. A file a project compiles
@@ -891,23 +891,23 @@ its findings don't count in `--verify-no-changes`. The build doesn't report them
 the repository's folder (the nearest one above the project with a `.git` folder or file), and StyleBro hides its findings,
 and those of the built-in rules it turns on (IDE0055, IDE0011, ...), in files outside it. To report them anyway, set
 `<StyleBroRepositoryRoot>none</StyleBroRepositoryRoot>` (or another folder) in `Directory.Build.props`. That only changes
-the build: `stylebro-migrate format` still leaves files outside the repository alone (it doesn't read the property), so
+the build: `bro format` still leaves files outside the repository alone (it doesn't read the property), so
 fix them by hand or in their own repository. In a submodule's own checkout, its own files are checked: the superproject's
 `.gitmodules` above it doesn't count for it.
 
 **Files a T4 template writes.** A C# file that a `.tt` template writes (the project lists it with
 `<DependentUpon>Name.tt</DependentUpon>` or `<AutoGen>True</AutoGen>`) is generated code: the template writes it again.
-StyleBro doesn't report findings there (nor the built-in rules it turns on), and `stylebro-migrate format` leaves the
+StyleBro doesn't report findings there (nor the built-in rules it turns on), and `bro format` leaves the
 C# file next to each `.tt` file with the same name alone.
 
 ## Multi-targeted repositories
 
-If any project sets several `<TargetFrameworks>`, plain `dotnet format` doesn't work at all; `stylebro-migrate format`
+If any project sets several `<TargetFrameworks>`, plain `dotnet format` doesn't work at all; `bro format`
 does. It takes the same arguments and options:
 
 ```
-stylebro-migrate format
-stylebro-migrate format MySolution.sln --verify-no-changes --severity warn
+bro format
+bro format MySolution.sln --verify-no-changes --severity warn
 ```
 
 Plain `dotnet format` crashes there on the SDK's formatting fix (IDE0055) without writing anything (reported upstream as [dotnet/roslyn#86000](https://github.com/dotnet/roslyn/issues/86000) and [dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)). The command runs
@@ -928,7 +928,7 @@ separate parts of a framework's run (`== net8.0, part 1 of 2`), each with what i
 format` crashes on their different edits of one file ([dotnet/roslyn#86001](https://github.com/dotnet/roslyn/issues/86001)).
 Projects that compile a shared file with the same settings (a polyfill every library links) share a run: they parse it
 the same, so its copies get the same edits (`<LangVersion>latest</LangVersion>` counts as the version it means). This
-applies without multi-targeted projects too. Why: [ci.md](ci.md#notes). `stylebro-migrate init` tells you when it finds such projects.
+applies without multi-targeted projects too. Why: [ci.md](ci.md#notes). `bro init` tells you when it finds such projects.
 
 A framework whose code compiles exactly like another's in a project gets no run of its own there: when no `#if` tests a
 symbol that tells them apart (say the code tests `NET8_0_OR_GREATER` but nothing newer), `net8.0`, `net9.0` and `net10.0`
@@ -945,18 +945,18 @@ last one: nothing is left for another to fix.
 
 `dotnet format` may warn that it couldn't load part of the workspace in one framework's run (`'dotnet format' had
 warnings loading the workspace in its net6.0 run`). To see the warnings, add `--verbosity diagnostic` to the same
-`stylebro-migrate format` command: a plain `dotnet format` loads the projects differently and may not show them.
+`bro format` command: a plain `dotnet format` loads the projects differently and may not show them.
 
 A multi-line string can hold lines starting with `#` (`#pragma warning disable` in a source generator's test input)
 inside an `#if` branch some framework leaves out: there those lines read as directives, and the SDK's formatter moves
 them to column 0, breaking the string where the branch is compiled (CS8999). `format` names such files (`Protected:
 ...`) and, while `dotnet format` runs, swaps those lines' `#` for a character the file doesn't have, then puts it back,
 so the rest of the file is formatted as usual. If `format` is killed before it puts the `#` back (a closed terminal, a
-crash), the next `stylebro-migrate` command does: it keeps a record of the swap in `%TEMP%/stylebro-mask` (`$TMPDIR` on
+crash), the next `bro` command does: it keeps a record of the swap in `%TEMP%/stylebro-mask` (`$TMPDIR` on
 Linux and macOS) and says `Restored: <file>`. A file changed in a way that moved the swapped characters is left alone
 and named (`Not restored: ...`); `format` and `--verify-no-changes` then stop with `Stopped: ...` until the `#` is back.
 A `dotnet format` that outlives a killed `format` still writes those files: they're put back once it has ended, and
-until then `format` stops with `Stopped: another 'stylebro-migrate format' ...`. A `#` line in an `#elif` branch or
+until then `format` stops with `Stopped: another 'bro format' ...`. A `#` line in an `#elif` branch or
 under a condition like `NET8_0_OR_GREATER && !NET10_0_OR_GREATER`, and a string's own `#if`/`#endif` lines, are
 protected too.
 
@@ -1023,7 +1023,7 @@ of those lines, so verify leaves them to `format` there. Nothing else on those l
 ## Old-style (non-SDK) projects
 
 Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, usually .NET Framework with
-`packages.config`) work with `stylebro-migrate format`, with a few extra steps:
+`packages.config`) work with `bro format`, with a few extra steps:
 
 - **Restore with Visual Studio's MSBuild first**, from a Developer Command Prompt:
 
@@ -1071,33 +1071,33 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   <PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" Condition="'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')" />
   ```
 
-  `stylebro-migrate` names the packages.config projects and says this in its report.
+  `bro` names the packages.config projects and says this in its report.
 - **`--diff` leaves `packages.config` projects out**: the copy it formats has no git-ignored `packages` folder, and
   `dotnet restore` can't restore `packages.config`. It previews the other projects and names the ones it left out; only
   when every project uses `packages.config` does it stop. Other old-style projects preview like `format` runs:
   unrestored, so the preview has no StyleBro changes for them, and it says which. To see the changes in the
   `packages.config` projects, on a clean working tree: run the command without `--diff`, restore with MSBuild as above,
-  run `stylebro-migrate format`, and review `git diff` (`git checkout .` undoes it).
+  run `bro format`, and review `git diff` (`git checkout .` undoes it).
 - **Next to multi-targeted projects**, the old-style ones get a `dotnet format` run of their own (`== old-style
   projects`): they have no target framework for the per-framework runs. When `dotnet format` can't load them there, it
   says so, and `--verify-no-changes` says `Not verified` instead of clean.
 - If StyleCop came in through `packages.config` or an `<Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\...">`
-  hint path, `stylebro-migrate` reads its version there: rules that version doesn't have stay off.
+  hint path, `bro migrate` reads its version there: rules that version doesn't have stay off.
 
 ## Large codebases
 
 If `dotnet format` would change too much at once, record today's violations in a baseline instead:
 
 ```
-stylebro-migrate baseline                            # in the folder with your solution
-stylebro-migrate baseline --project MySolution.sln   # or name it
+bro baseline                            # in the folder with your solution
+bro baseline --project MySolution.sln   # or name it
 ```
 
 This writes `stylebro.baseline`; commit it. The build, the IDE and `dotnet format` then ignore those violations, and
 only new code has to follow the rules. A baseline can't hide whitespace formatting. Details: [baseline.md](baseline.md).
 
 **How long a full run takes.** `format` loads the whole solution once per run, and in a multi-targeted repository once
-per target framework. On Orleans (about 200 projects, several target frameworks) the first `stylebro-migrate format`
+per target framework. On Orleans (about 200 projects, several target frameworks) the first `bro format`
 took 57 minutes and about 9 GB of memory, and `format --verify-no-changes` 11.5 minutes. A repository that size with
 `TreatWarningsAsErrors` is best started with a baseline: the build passes right away, and the backlog can be fixed a
-project at a time (`stylebro-migrate format path/to/Project.csproj`) or a few files at a time (`--files`).
+project at a time (`bro format path/to/Project.csproj`) or a few files at a time (`--files`).

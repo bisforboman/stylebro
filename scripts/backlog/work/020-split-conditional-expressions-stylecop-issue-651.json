@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "Split conditional expressions (StyleCop issue #651)",
-  "notes": "BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520's setting; chains skipped. Off after `stylebro-migrate`.",
+  "notes": "BRO1524: the condition, `? a` and `: b` each start their own line once the expression is split; `?`/`:` side from BRO1520's setting; chains skipped. Off after `bro migrate`.",
   "status": "Done (2026-10-04)"
 }

@@ -1,6 +1,6 @@
 # Using StyleBro from scripts and AI agents
 
-`stylebro-migrate` has three things for scripts and AI coding agents: a JSON result for every command (`--json`), a
+`bro` has three things for scripts and AI coding agents: a JSON result for every command (`--json`), a
 fast format of just the files an edit touched (`format --files`), and, on request (`--agents-md`), a section in the
 repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site also has an index for agents:
 [llms.txt](https://bisforboman.github.io/stylebro/llms.txt) (every page and rule with one line each) and
@@ -9,8 +9,8 @@ repository's `AGENTS.md` that tells an agent how to work with StyleBro. The site
 ## The loop for an agent
 
 ```
-stylebro-migrate format --files src/Orders/OrderService.cs src/Orders/Order.cs   # after an edit: a fraction of a whole run
-stylebro-migrate format --verify-no-changes                                      # before finishing: exit 0 = clean
+bro format --files src/Orders/OrderService.cs src/Orders/Order.cs   # after an edit: a fraction of a whole run
+bro check                                      # before finishing: exit 0 = clean
 ```
 
 - `format --files` fixes StyleBro's findings (and the built-in rules `init` turns on, plus whitespace) in the named
@@ -28,8 +28,8 @@ anything else is `dotnet format`'s.
 ## `format --files`
 
 ```
-stylebro-migrate format --files <file> [<file> ...] [--verify-no-changes] [dotnet format options]
-stylebro-migrate format <folder, solution or project> --files <file> [<file> ...]
+bro format --files <file> [<file> ...] [--verify-no-changes] [dotnet format options]
+bro format <folder, solution or project> --files <file> [<file> ...]
 ```
 
 Paths are relative to the current folder, or else to the git repository's root. Without a solution or project named,
@@ -56,9 +56,9 @@ Most of the time is loading projects: a file of a project with many target frame
 
 ## `--json`
 
-Every command takes `--json`: `init`, the StyleCop migration (`stylebro-migrate [path]`, dry run and `--write`), the
+Every command takes `--json`: `init`, the StyleCop migration (`bro migrate [path]`, dry run and `--write`), the
 `--diff` previews and `format` (with `--verify-no-changes` and `--files` too). The result is one JSON object on stdout;
-everything the command would print for people goes to stderr instead, so `stylebro-migrate format --json > result.json`
+everything the command would print for people goes to stderr instead, so `bro format --json > result.json`
 keeps the text on the screen and the object in the file.
 
 ```json
@@ -127,7 +127,7 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 
 ## AGENTS.md
 
-It's opt-in: with `--agents-md`, `stylebro-migrate init --write` and `stylebro-migrate --write` put a short StyleBro
+It's opt-in: with `--agents-md`, `bro init --write` and `bro migrate --write` put a short StyleBro
 section into the repository's `AGENTS.md` (created when there's none), between `<!-- BEGIN stylebro` and
 `<!-- END stylebro -->`; running the command again with `--agents-md` replaces it, and leaves the rest of the file
 alone. Without `--write` the commands print the section, and `--diff --agents-md` includes it in the patch. Without
@@ -143,14 +143,14 @@ Tip: --agents-md writes a StyleBro section into AGENTS.md for AI coding agents.
 The section:
 
 ```markdown
-<!-- BEGIN stylebro (written by stylebro-migrate; edits inside are replaced) -->
+<!-- BEGIN stylebro (written by bro; edits inside are replaced) -->
 ## StyleBro (C# style)
 
 This repository uses [StyleBro](https://bisforboman.github.io/stylebro/): analyzers whose fixes `dotnet format` applies.
 
-- After editing C# files, run `stylebro-migrate format --files <the .cs files you changed>` (faster than a whole run; the tool is the
-  StyleBro.Migrate package: `dotnet tool install -g StyleBro.Migrate`).
-- Before finishing, `stylebro-migrate format --verify-no-changes` must exit 0. It does when only findings kept on
+- After editing C# files, run `bro format --files <the .cs files you changed>` (faster than a whole run; the tool is the
+  StyleBro.Tool package: `dotnet tool install -g StyleBro.Tool`).
+- Before finishing, `bro check` must exit 0. It does when only findings kept on
   purpose are left.
 - Don't hand-fix BRO warnings the format leaves: they are kept on purpose (a rename would break reflection, `nameof`,
   generated code, ...); the format output gives each one's reason. Leave them unless asked.

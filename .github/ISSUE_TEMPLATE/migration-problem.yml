@@ -1,5 +1,5 @@
 name: Migration problem
-description: stylebro-migrate (init, --write, format, baseline) did something wrong or unexpected.
+description: bro (init, --write, format, baseline) did something wrong or unexpected.
 labels: [bug]
 body:
   - type: markdown
@@ -9,14 +9,14 @@ body:
     id: command
     attributes:
       label: Command
-      placeholder: stylebro-migrate init --write
+      placeholder: bro init --write
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: StyleBro.Migrate and .NET SDK version
-      placeholder: StyleBro.Migrate 0.7.0-alpha.1, SDK 10.0.401
+      label: StyleBro.Tool and .NET SDK version
+      placeholder: StyleBro.Tool 0.7.0-alpha.1, SDK 10.0.401
     validations:
       required: true
   - type: textarea

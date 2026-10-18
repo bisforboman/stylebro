@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "Readability batch B (StyleCop issues #762, #760; survey #7, #8, #10, #12, #13, #14)",
-  "notes": "BRO1136 `x => x`, BRO1137 redundant `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string, BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses (`stylebro_object_creation_parentheses`, default omit), BRO1142 one local per declaration, BRO1408 redundant base type. On in the preset, off after `stylebro-migrate`.",
+  "notes": "BRO1136 `x => x`, BRO1137 redundant `return;`/`yield break;`, BRO1138 unneeded `$`/`@`/raw string, BRO1139 `else if`, BRO1140 empty record body, BRO1141 object creation parentheses (`stylebro_object_creation_parentheses`, default omit), BRO1142 one local per declaration, BRO1408 redundant base type. On in the preset, off after `bro migrate`.",
   "status": "Done (2026-10-05)"
 }

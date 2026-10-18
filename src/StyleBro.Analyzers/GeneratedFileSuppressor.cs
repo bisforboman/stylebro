@@ -10,7 +10,7 @@ namespace StyleBro.Analyzers;
 
 /// <summary>
 /// Hides StyleBro's findings in source generator output: 'dotnet format' can neither fix nor report a generated
-/// document (so 'stylebro-migrate baseline' can't record it), and the generator writes it again on every build.
+/// document (so 'bro baseline' can't record it), and the generator writes it again on every build.
 /// Roslyn treats a file as generated only by its name (.g.cs, .designer.cs, ...) or an auto-generated header, which
 /// generators don't have to write (RestSharp's ReadOnlyRestClientOptions.cs: about 950 warnings across 6 frameworks).
 /// The compiler puts every generated file under the project's intermediate output folder (obj/), or under
@@ -18,7 +18,7 @@ namespace StyleBro.Analyzers;
 /// (<see cref="Property"/>, '|'-separated). Without them, a path with an 'obj' folder counts. The list also names the files
 /// a T4 template writes (a Compile item with DependentUpon '*.tt' or AutoGen True; owner's choice 2026-10-17, trial 28:
 /// ZLogger's MessageTemplate.Format.cs): the template writes them again, so they're generated code too, and the built-in
-/// rules' findings (<see cref="BaselineSuppressor.SdkIds"/>) are hidden there as well, since 'stylebro-migrate format'
+/// rules' findings (<see cref="BaselineSuppressor.SdkIds"/>) are hidden there as well, since 'bro format'
 /// leaves such files alone.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

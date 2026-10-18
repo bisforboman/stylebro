@@ -12,7 +12,7 @@ namespace StyleBro.CodeFixes.Naming;
 /// '*.approved.*'): they hold the names a serializer wrote, so they're treated like strings (owner's choice 2026-10-15).
 /// A data member whose name is there keeps it: renaming broke 2 of 15 xunit.v3 + Verify tests in trial 23. Read from the
 /// solution's additional files and from disk, under each project's repository (its git root, else its folder), so the
-/// tests' snapshots count while a 'stylebro-migrate format' run loads only the library. The same scan reads XAML files
+/// tests' snapshots count while a 'bro format' run loads only the library. The same scan reads XAML files
 /// ('.xaml': WPF, WinUI, MAUI; '.axaml': Avalonia): the identifiers in their attribute values that can name code
 /// ('{Binding title}', 'DisplayMemberPath="label"', 'x:Name', 'Click="OnSave"') bind to members by name at run time, so
 /// they're treated like strings too (owner's choice 2026-10-16; trial 26: a renamed view-model property left a WPF binding

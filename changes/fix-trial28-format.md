@@ -1,6 +1,6 @@
 ### Changed
 
-- `stylebro-migrate format` fixes the Release-only code (`#if !DEBUG`) of projects that use an in-solution source
+- `bro format` fixes the Release-only code (`#if !DEBUG`) of projects that use an in-solution source
   generator: it builds the generator in Release first and gives the project a Release run like any other project.
 - A project whose project file picks its `Compile` items by `$(Configuration)` (a file only Release compiles) gets a run
   in that configuration too, so that file is formatted and checked.

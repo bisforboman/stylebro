@@ -40,7 +40,7 @@ internal static class Severities
 
     /// <summary>
     /// The severity .editorconfig settings give an id: its own 'dotnet_diagnostic.ID.severity', else its category's, else the
-    /// bulk one. For stylebro-migrate, which reads the files itself (trial 20: 'category-Style.severity = warning' enforced
+    /// bulk one. For bro, which reads the files itself (trial 20: 'category-Style.severity = warning' enforced
     /// IDE0009 and IDE0040, which init judged by the id's own line only).
     /// </summary>
     public static ReportDiagnostic? FromSettings(AnalyzerConfigOptions options, string id, string? category) =>
@@ -49,7 +49,7 @@ internal static class Severities
     /// <summary>
     /// The severity .editorconfig settings (key, value) give an id, or null: its own entry, else its category's, else the
     /// bulk one, like <see cref="Configured(CompilationOptions?, SyntaxTree, string, CancellationToken, AnalyzerConfigOptions?, string?)"/>.
-    /// For 'stylebro-migrate', which reads the files themselves.
+    /// For 'bro', which reads the files themselves.
     /// </summary>
     public static ReportDiagnostic? Configured(IReadOnlyDictionary<string, string> settings, string id, string? category) =>
         Parse(settings.TryGetValue($"dotnet_diagnostic.{id}.severity", out var own) ? own : null)

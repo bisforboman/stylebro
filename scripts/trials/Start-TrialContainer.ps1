@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # Runs one trial agent in its own container (.trials/README.md): builds or updates the image, starts the container
 # stylebro-trial<N>-<Name> with .trials/trial<N>/<Folder> at /work and .trials/trial<N>/logs/<Name> at /logs (both
-# read-write), the package feed at /feed (read-only) and the shared NuGet volume at /nuget, installs stylebro-migrate from
+# read-write), the package feed at /feed (read-only) and the shared NuGet volume at /nuget, installs bro from
 # the feed, and prints how to `docker exec` into it. -Folder and -Logs are relative to .trials/trial<N> (or absolute).
 #
 #   ./scripts/trials/Start-TrialContainer.ps1 -Trial 29 -Name clifx [-Folder clifx] [-Logs logs/clifx] [-Feed <dir>] [-Version 0.8.0-trial29]
@@ -76,7 +76,7 @@ if (-not $state) {
         --cpus $Cpus --memory $Memory `
         -v "${work}:$($c.work)" -v "${logs}:$($c.logs)" -v "${Feed}:$($c.feed):ro" -v "${volume}:$($c.nuget)" `
         $image | Out-Null
-    Invoke-Docker exec $container dotnet tool install --tool-path $tools StyleBro.Migrate --version $Version --add-source $c.feed | Out-Null
+    Invoke-Docker exec $container dotnet tool install --tool-path $tools StyleBro.Tool --version $Version --add-source $c.feed | Out-Null
 } elseif ($state -ne 'running') {
     Invoke-Docker start $container | Out-Null
 }
@@ -87,8 +87,8 @@ Container $container is running ($Cpus CPUs, $Memory; image $image, NuGet volume
   $work -> $($c.work)
   $logs -> $($c.logs)
   $Feed -> $($c.feed) (read-only; use it as the package source in the repo's nuget.config)
-  stylebro-migrate $Version is on the PATH ($tools).
-Commands:  docker exec $container <command>      e.g. docker exec -w $($c.work)/<repo> $container stylebro-migrate init --write
+  bro $Version is on the PATH ($tools).
+Commands:  docker exec $container <command>      e.g. docker exec -w $($c.work)/<repo> $container bro init --write
 Shell:     docker exec -it $container $shell
 Stop:      $PSCommandPath -Trial $Trial -Name $Name -Stop
 Remove:    $PSCommandPath -Trial $Trial -Name $Name -Remove

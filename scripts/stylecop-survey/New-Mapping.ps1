@@ -143,7 +143,7 @@ foreach ($cat in ($inv | ForEach-Object Category | Sort-Object -Unique)) {
 }
 [IO.File]::WriteAllText([IO.Path]::GetFullPath($Out), $sb.ToString())
 
-# The same proposals for stylebro-migrate's report (embedded in the tool): why a rule isn't covered.
+# The same proposals for bro's report (embedded in the tool): why a rule isn't covered.
 $rows | ForEach-Object { [pscustomobject]@{ Id = $_.Rule.Id; Proposal = $_.Proposal } } |
     ConvertTo-Csv -NoTypeInformation -UseQuotes AsNeeded | Set-Content (Join-Path $data 'mapping.csv')
 # docs/skipped-rules.md: every rule StyleBro doesn't cover, and the covered ones with known differences.

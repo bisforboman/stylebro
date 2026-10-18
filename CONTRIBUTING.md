@@ -6,7 +6,7 @@
 src/StyleBro.Analyzers     netstandard2.0, Microsoft.CodeAnalysis.CSharp only (no Workspaces, RS1038)
 src/StyleBro.CodeFixes     netstandard2.0, code fixes + Fix All providers
 src/StyleBro.Package       packs both DLLs into analyzers/dotnet/cs + build/ preset
-src/StyleBro.Migrate       stylebro-migrate: StyleCop setup -> .editorconfig settings, init, format, baseline
+src/StyleBro.Migrate       bro: StyleCop setup -> .editorconfig settings, init, format, baseline
 tests/StyleBro.Tests       Microsoft.CodeAnalysis.Testing: diagnostics, single fix, Fix All, fix order, doc examples
 samples/Messy              dotnet format integration sample (Input -> Expected)
 samples/MultiTarget        the same for a project with two target frameworks
@@ -91,7 +91,7 @@ Every script also runs locally.
 
 ## Changelog
 
-A pull request with a change users notice (a rule, a setting, a fix, `stylebro-migrate` behaviour) adds
+A pull request with a change users notice (a rule, a setting, a fix, `bro` behaviour) adds
 `changes/<branch>.md` with `### New` / `### Changed` / `### Fixed` (or `### Breaking changes`, `### Upgrading`) and
 short bullets written for the release notes' reader; [changes/README.md](changes/README.md) has the details. Never edit
 CHANGELOG.md itself: the release pull request folds the fragments into it (`python scripts/changelog.py X.Y.Z "..."`),

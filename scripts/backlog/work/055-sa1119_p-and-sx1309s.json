@@ -1,6 +1,6 @@
 {
   "area": "Parity",
   "item": "SA1119_p and SX1309S",
-  "notes": "The last two StyleCop variants. SA1119_p is SA1119's hidden IDE greying of the same parentheses, covered by BRO1405 (StyleCop never checks parentheses in patterns); SX1309S is BRO1303 with `_camelCase`, which stylebro-migrate now counts as covering it. Both in stylecop-mapping.md.",
+  "notes": "The last two StyleCop variants. SA1119_p is SA1119's hidden IDE greying of the same parentheses, covered by BRO1405 (StyleCop never checks parentheses in patterns); SX1309S is BRO1303 with `_camelCase`, which bro now counts as covering it. Both in stylecop-mapping.md.",
   "status": "Done (2026-10-09)"
 }

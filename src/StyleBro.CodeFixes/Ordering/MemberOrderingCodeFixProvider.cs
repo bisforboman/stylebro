@@ -59,7 +59,7 @@ public sealed class MemberOrderingCodeFixProvider : CodeFixProvider
 
     /// <summary>
     /// Where code reads the container's members by position through reflection ('path(line)'), when sorting would change
-    /// what it reads; else null. Looked for in the whole solution and, under 'stylebro-migrate format', in the repository's
+    /// what it reads; else null. Looked for in the whole solution and, under 'bro format', in the repository's
     /// other projects (<see cref="RepositoryNames"/>): Stateless's tests read 'GetFields(...)[0]' of a library type.
     /// </summary>
     internal static async Task<string?> GetReadByPositionAsync(Document document, SyntaxNode container, MemberAccess?[]? partialAccess, CancellationToken cancellationToken)

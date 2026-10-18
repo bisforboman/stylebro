@@ -2,17 +2,17 @@
 
 Switching a StyleCop-clean repository to StyleBro shouldn't reformat code StyleCop was happy with. StyleBro's preset
 follows StyleCop's defaults with a few deliberate exceptions ([differences-from-stylecop.md](differences-from-stylecop.md)),
-but most teams have changed some of StyleCop's defaults anyway. `stylebro-migrate` reads what your team changed
+but most teams have changed some of StyleCop's defaults anyway. `bro migrate` reads what your team changed
 and writes the matching settings.
 
 ```
-dotnet tool install --global StyleBro.Migrate --prerelease
-stylebro-migrate path/to/repo           # dry run: prints the report and the settings
-stylebro-migrate path/to/repo --diff    # preview: what the settings and the format run would change in the code
-stylebro-migrate path/to/repo --write   # writes them
+dotnet tool install --global StyleBro.Tool --prerelease
+bro migrate path/to/repo           # dry run: prints the report and the settings
+bro preview migrate path/to/repo    # preview: what the settings and the format run would change in the code
+bro migrate path/to/repo --write   # writes them
 ```
 
-`--diff` runs `--write` and then `stylebro-migrate format` (until a run changes nothing) on a temporary copy of the
+`--diff` runs `--write` and then `bro format` (until a run changes nothing) on a temporary copy of the
 repository, prints which files each rule changed with a few sample hunks, and writes the full diff to
 `.git/stylebro-preview.patch` (`--diff=file` for another name, `--keep` keeps the copy). The copy also gets the
 StyleBro.Analyzers reference if the repository has none, next to StyleCop's (see [Swap the package](#swap-the-package));
@@ -23,13 +23,13 @@ empty. Details: [Preview first](getting-started.md#preview-first).
 The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.7.0-alpha.1;
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
-Then swap the package (below) and run `stylebro-migrate format`. It runs `dotnet format` with only StyleBro's rules
+Then swap the package (below) and run `bro format`. It runs `dotnet format` with only StyleBro's rules
 and the built-in rules the block turns on (plus whitespace formatting, unless the block turns IDE0055 off: `dotnet
 format`'s whitespace pass ignores that severity, so then only its style and analyzer passes run), once per target framework where projects
 target several, and never inside git submodules. Plain `dotnet format` also applies every other analyzer's fixes and
 the compiler's: in one trial repository it added `required` (CS8618) and a Sonar fix removed `init;` accessors, nine
 build errors. The plain equivalent is `dotnet format --diagnostics <ids>` with every id to fix (`--diagnostics BRO1001
-BRO1505 IDE0055 IDE0036 ...`); `stylebro-migrate format --all` keeps everything.
+BRO1505 IDE0055 IDE0036 ...`); `bro format --all` keeps everything.
 
 ## Swap the package
 
@@ -111,7 +111,7 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   as one wildcard, `src/{LiteBus,LiteBus.Inbox*}`), a
   sub-directory `.editorconfig` that covers all of them counts as the base (a `src/.editorconfig` that turns everything
   but documentation off), and folders without StyleCop get none of its settings (their rules are off, see below); the report lists them, and so does a
-  comment line at the top of the block (`# No StyleCop ran in: examples; ...`), which tells `stylebro-migrate format` to
+  comment line at the top of the block (`# No StyleCop ran in: examples; ...`), which tells `bro format` to
   leave those folders alone: its whitespace pass would reformat them whatever the rule severities say. Remove that line
   to have them formatted. The block also has a section for those folders that turns StyleBro's rules and the
   built-in ones it sets off by id (`dotnet_diagnostic.BRO1401.severity = none`, ...), so the build doesn't report
@@ -146,7 +146,7 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   says `root = true` gets a block of its own, judged from its own code; one without C# files (an npm app) gets none.
 - Git submodules and other nested repositories (folders with their own `.git` file or folder) are otherwise skipped:
   their settings, code and project files belong to another repository, and nothing in them is changed
-  (`stylebro-migrate format` excludes them too). Files a project
+  (`bro format` excludes them too). Files a project
   links from a submodule are another matter: see [excluding vendored code](getting-started.md#excluding-vendored-code).
 - The StyleCop.Analyzers version: from a `PackageReference` or `PackageVersion`, a `packages.config` entry, or an
   `<Analyzer>` hint path into a `packages` folder (old-style projects). Rules the version's DLL doesn't have count as
@@ -285,7 +285,7 @@ The dry run lists the StyleCop rules that are on but that nothing enforces after
 ## Coming from StyleSharp
 
 [StyleSharp.Analyzers](https://www.nuget.org/packages/StyleSharp.Analyzers) is a StyleCop successor with `SST` ids
-(`SST1309`) and `stylesharp.*` settings in `.editorconfig`. `stylebro-migrate` reads it the way it reads StyleCop: a
+(`SST1309`) and `stylesharp.*` settings in `.editorconfig`. `bro migrate` reads it the way it reads StyleCop: a
 project that references `StyleSharp.Analyzers` (a `PackageReference`, a central `PackageVersion`, an `<Analyzer>` item or
 `packages.config`) counts as running StyleCop, and each SST rule's severity (from `.editorconfig`, `.globalconfig` and
 rulesets, plus StyleSharp's own defaults) counts as the StyleCop rule it stands for. Most SST rules kept StyleCop's
@@ -353,20 +353,20 @@ StyleSharp.Analyzers`) and `stylesharp-mapping.csv` (written by `New-StyleSharpM
 `dotnet_separate_import_directive_groups`), `dotnet format` sorts usings whatever the value. Files that aren't in that
 order while your ordering rule (SA1208/SA1210, or StyleSharp's SST1208/SST1210, which compares case-sensitively) is on
 and would report their sorted order are named in the report and in the block (`# Usings kept as they are ...`), and
-`stylebro-migrate format` leaves them out, so it doesn't write what that rule reports. Files whose sorted order the rule
+`bro format` leaves them out, so it doesn't write what that rule reports. Files whose sorted order the rule
 accepts (`Microsoft.*` above `System` under SA1210 alone: System first is fine with `systemUsingDirectivesFirst`) are
 sorted, and the report says how many. Remove the line once that rule is gone to have them
 sorted. The key itself is yours and stays.
 
 **Settings without a package.** StyleCop or StyleSharp settings (`stylecop.json`, `SA`/`SST` severities) that no project
-uses describe nothing the build enforces: the migration writes nothing and points to `stylebro-migrate init`, also when
+uses describe nothing the build enforces: the migration writes nothing and points to `bro init`, also when
 the repository has a Sonar setup (init follows that too, and the code's own conventions).
 
 ## Coming from SonarQube
 
-Many teams run SonarQube or SonarCloud next to (or instead of) StyleCop. `stylebro-migrate` and `stylebro-migrate init`
+Many teams run SonarQube or SonarCloud next to (or instead of) StyleCop. `bro` and `bro init`
 read that setup too and turn on the StyleBro and .NET rules that fix what the team's Sonar rules report, so
-`stylebro-migrate format` cleans up findings Sonar can only list. Sonar stays: StyleBro doesn't turn any Sonar rule off,
+`bro format` cleans up findings Sonar can only list. Sonar stays: StyleBro doesn't turn any Sonar rule off,
 and Sonar keeps reporting its own ids.
 
 What it reads, in this order (later wins, like for StyleCop):
@@ -459,7 +459,7 @@ for that folder with `stylebro_keep_overloads_together = false`, and BRO1001 sta
 ## Modernizing afterwards
 
 StyleCop has no rules for newer C# or APIs, so the migration turns none on. To add the SDK's modernization rules
-(their own block, kept when you run `stylebro-migrate --write` again): `stylebro-migrate init --modernize --write`,
+(their own block, kept when you run `bro migrate --write` again): `bro init --modernize --write`,
 see [modernizing.md](modernizing.md).
 
 ## Limits

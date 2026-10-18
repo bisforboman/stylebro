@@ -7,10 +7,10 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 
 - **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent,
   and they converge in a single pass. One exception, on purpose: a rename that would break code only the fix can see
-  (a name read by reflection, used in generated code) keeps its warning, and `stylebro-migrate format` lists it with
+  (a name read by reflection, used in generated code) keeps its warning, and `bro format` lists it with
   the reason ([Findings kept on purpose](getting-started.md#findings-kept-on-purpose)).
 - **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, StyleBro uses that rule instead
-  of shipping a copy: the preset sets its options and `stylebro-migrate init` turns it on in `.editorconfig`.
+  of shipping a copy: the preset sets its options and `bro init` turns it on in `.editorconfig`.
 - **Configurable through `.editorconfig`**, with a recommended preset shipped in the package.
 
 ## Install
@@ -20,12 +20,12 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 ```
 
 ```
-dotnet tool install --global StyleBro.Migrate --prerelease
-stylebro-migrate init --write      # turns on the built-in rules StyleBro relies on, in .editorconfig
-stylebro-migrate format            # whitespace + StyleBro's rules + those built-in rules
+dotnet tool install --global StyleBro.Tool --prerelease
+bro init --write      # turns on the built-in rules StyleBro relies on, in .editorconfig
+bro format            # whitespace + StyleBro's rules + those built-in rules
 ```
 
-Coming from StyleCop? Run `stylebro-migrate --write` instead of `init`: see
+Coming from StyleCop? Run `bro migrate --write` instead of `init`: see
 [Migrating from StyleCop](migrating.md).
 
 ## Where next

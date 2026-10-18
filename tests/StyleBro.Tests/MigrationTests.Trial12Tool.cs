@@ -61,7 +61,7 @@ public sealed partial class MigrationTests
         Write("src/B.slnf", "{ \"solution\": { \"path\": \"All.sln\", \"projects\": [] } }");
 
         Assert.Equal(Path.Combine("src", "All.slnx"), BaselineCommand.FindWorkspace(root));
-        Assert.Equal("Using src/All.slnx: no solution or project at the root, and it's the only solution one folder down; its solution filters (src/A.slnf, src/B.slnf) are parts of it: name one to run on only its projects, e.g. 'stylebro-migrate format src/A.slnf'.", BaselineCommand.PickedNote(root, BaselineCommand.FindWorkspace(root)!));
+        Assert.Equal("Using src/All.slnx: no solution or project at the root, and it's the only solution one folder down; its solution filters (src/A.slnf, src/B.slnf) are parts of it: name one to run on only its projects, e.g. 'bro format src/A.slnf'.", BaselineCommand.PickedNote(root, BaselineCommand.FindWorkspace(root)!));
         Assert.Equal("All.slnx", BaselineCommand.FindWorkspace(Path.Combine(root, "src")));
         Assert.StartsWith("Using All.slnx; its solution filters (A.slnf, B.slnf)", BaselineCommand.PickedNote(Path.Combine(root, "src"), "All.slnx"), StringComparison.Ordinal);
 
@@ -88,7 +88,7 @@ public sealed partial class MigrationTests
     public void CiSteps_WithPlainVerifyNoChanges_GetANote()
     {
         // sourcegit's format-check.yml failed after adoption on the findings StyleBro keeps.
-        Write(".github/workflows/format-check.yml", "jobs:\n  check:\n    steps:\n      # run: dotnet format --verify-no-changes\n      - run: dotnet format --verify-no-changes src/SourceGit.csproj\n      - run: stylebro-migrate format --verify-no-changes\n");
+        Write(".github/workflows/format-check.yml", "jobs:\n  check:\n    steps:\n      # run: dotnet format --verify-no-changes\n      - run: dotnet format --verify-no-changes src/SourceGit.csproj\n      - run: bro format --verify-no-changes\n");
         Write("azure-pipelines.yml", "steps:\n- script: dotnet build\n");
 
         var notes = Program.VerifyNoChangesSteps(root);

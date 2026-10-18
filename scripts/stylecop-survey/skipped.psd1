@@ -4,7 +4,7 @@
 #
 # Status:
 #   Candidate      A StyleBro rule with a safe fix looks feasible; not done yet.
-#   SdkLater       The SDK can fix it (measured by Test-SdkCoverage.ps1), but the preset and stylebro-migrate don't
+#   SdkLater       The SDK can fix it (measured by Test-SdkCoverage.ps1), but the preset and bro migrate don't
 #                  turn that on yet (see Why for the catch).
 #   Drop           No safe automatic fix (the fix needs human-written text, an API change, or file operations).
 #   NotInStyleCop  StyleCop 1.2 never reports it (probed with an obvious violation in sdk-check-cases.ps1).
@@ -16,9 +16,9 @@
     Skipped = @{
         # ---- Special -----------------------------------------------------------------------------------------------
         SA0001 = @{ Status = 'NotApplicable'; Why = 'StyleCop''s own setup diagnostic: XML comment analysis is disabled (no GenerateDocumentationFile).'
-            Revisit = 'Nothing to port. stylebro-migrate already detects the same condition and keeps the XML documentation rules (BRO1603-BRO1611) off.' }
+            Revisit = 'Nothing to port. bro migrate already detects the same condition and keeps the XML documentation rules (BRO1603-BRO1611) off.' }
         SA0002 = @{ Status = 'NotApplicable'; Why = 'StyleCop''s own diagnostic for an invalid stylecop.json.'
-            Revisit = 'Nothing to port. stylebro-migrate parses stylecop.json leniently (comments, trailing commas).' }
+            Revisit = 'Nothing to port. bro migrate parses stylecop.json leniently (comments, trailing commas).' }
 
         # ---- Readability -------------------------------------------------------------------------------------------
         SA1109 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic for a region between `if (b)` and its block (probed).'
@@ -38,7 +38,7 @@
         SA1401 = @{ Status = 'Drop'; Why = 'Making a public or protected field private changes the public API and breaks callers. 141 / 48 / 39 findings with the rule on.'
             Revisit = 'Only for private nested types or `internal` fields without InternalsVisibleTo, converting to a property. Probably not worth it.' }
         SA1402 = @{ Status = 'Drop'; Why = 'Moving a type to its own file isn''t something `dotnet format` can do (code fixes can''t add documents through it).'
-            Revisit = 'Would need a separate tool (stylebro-migrate could do it as a one-off).' }
+            Revisit = 'Would need a separate tool (bro could do it as a one-off).' }
         SA1403 = @{ Status = 'Drop'; Why = 'StyleCop has no fix; splitting namespaces into files has the same problem as SA1402.'
             Revisit = 'Same as SA1402.' }
         SA1404 = @{ Status = 'Drop'; Why = 'The justification of a SuppressMessage has to be written by a person.'
@@ -112,7 +112,7 @@
         SA1648 = @{ Status = 'Drop'; Why = '`<inheritdoc/>` where there is nothing to inherit: the fix is real documentation.'
             Revisit = 'Nothing automatic. (BRO1601 only adds `<inheritdoc/>` where there is something to inherit.)' }
         SA1649 = @{ Status = 'Drop'; Why = 'Renaming files isn''t something `dotnet format` can do.'
-            Revisit = 'Would need a separate tool (stylebro-migrate could do it as a one-off, with `git mv`).' }
+            Revisit = 'Would need a separate tool (bro could do it as a one-off, with `git mv`).' }
         SA1650 = @{ Status = 'NotInStyleCop'; Why = 'Off by default and no diagnostic on misspelled words (probed).'
             Revisit = 'Nothing to port.' }
     }

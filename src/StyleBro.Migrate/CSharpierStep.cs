@@ -140,7 +140,7 @@ internal static class CSharpierStep
                 + $"so the two formatters undo each other there and no run settles it. Set {(ids.Count == 1 ? "it" : "them")} to none where CSharpier formats "
                 + $"({string.Join(", ", ids.Select(id => $"dotnet_diagnostic.{id}.severity = none"))} in .editorconfig), and please report it: https://github.com/bisforboman/stylebro/issues."
             : $"Not clean: CSharpier puts back what the fixes changed in {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}, "
-                + "so the two formatters undo each other there and no run settles it. Run 'stylebro-migrate init' again (with CSharpier it turns off the built-in rules CSharpier decides, "
+                + "so the two formatters undo each other there and no run settles it. Run 'bro init' again (with CSharpier it turns off the built-in rules CSharpier decides, "
                 + "e.g. IDE0036's modifier order), or set the rule that changes those lines to none.";
 
     /// <summary>
@@ -206,7 +206,7 @@ internal static class CSharpierStep
         return code == 0 || (failed.Count == 0 && all.Count > 0) ? null : failed;
     }
 
-    /// <summary>Whether a path is one of the MSBuild files 'stylebro-migrate init' edits (<see cref="FailedCSharp"/>).</summary>
+    /// <summary>Whether a path is one of the MSBuild files 'bro init' edits (<see cref="FailedCSharp"/>).</summary>
     public static bool IsInitProps(string path) =>
         Path.GetFileName(path.Replace('\\', '/')) is var name
         && (name.Equals("Directory.Build.props", StringComparison.OrdinalIgnoreCase) || name.Equals("Directory.Packages.props", StringComparison.OrdinalIgnoreCase));
@@ -315,7 +315,7 @@ internal static class CSharpierStep
         return failed.Count == 0
             ? $"Not clean: CSharpier's check failed (exit code {code}): {string.Join(" ", output.Where(l => l.Trim().Length > 0).Take(3).Select(l => l.Trim()))}"
             : $"Not clean: CSharpier would change {failed.Count} file{(failed.Count == 1 ? string.Empty : "s")} ({string.Join(", ", failed.Take(5))}{(failed.Count > 5 ? $" and {failed.Count - 5} more" : string.Empty)}). "
-                + "'stylebro-migrate format' runs it on the files it changes and on those whose line endings aren't end_of_line's; for the others run 'dotnet csharpier format' on them.";
+                + "'bro format' runs it on the files it changes and on those whose line endings aren't end_of_line's; for the others run 'dotnet csharpier format' on them.";
     }
 
     /// <summary>The folders the tool formats under <paramref name="root"/> (full paths).</summary>

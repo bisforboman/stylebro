@@ -19,7 +19,7 @@ internal sealed class Baseline
     public const string FileName = "stylebro.baseline";
 
     public const string Header =
-        "# StyleBro baseline: existing violations that aren't reported. Regenerate with 'stylebro-migrate baseline'.\n"
+        "# StyleBro baseline: existing violations that aren't reported. Regenerate with 'bro baseline'.\n"
         + "# Rule\tFile\tLine fingerprint\tCount\n";
 
     private readonly Dictionary<Key, int> counts;

@@ -1,6 +1,6 @@
 {
   "area": "Beyond StyleCop",
   "item": "Comments in declaration headers (StyleCop issue #605)",
-  "notes": "BRO1134: BRO1132's move for types, namespaces, members, accessors and local functions; multi-line headers skipped. Off after `stylebro-migrate`.",
+  "notes": "BRO1134: BRO1132's move for types, namespaces, members, accessors and local functions; multi-line headers skipped. Off after `bro migrate`.",
   "status": "Done (2026-10-04)"
 }

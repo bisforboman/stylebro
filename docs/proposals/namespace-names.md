@@ -1,7 +1,7 @@
 # Proposal: namespace names (SA1300 for namespaces)
 
 Status: **decided 2026-10-04: ship opt-in** as recommended below (see [decisions.md](../decisions.md)). BRO1312 is
-off by default, `stylebro-migrate` turns it on with SA1300, the root namespace isn't reported, public namespaces are
+off by default, `bro migrate` turns it on with SA1300, the root namespace isn't reported, public namespaces are
 renamed, and the resource, config and XAML limits are documented.
 
 BRO1309 replaces StyleCop's SA1300 for types and members but skips namespaces, so `namespace myCompany.data;` is
@@ -74,7 +74,7 @@ guarantees; for them the rule's value is catching a new one.
 
 A separate id instead of more BRO1309: the risk is of a different kind (every type in the namespace gets a new full
 name), so it should be possible to have BRO1309 on and this off. **Off by default** in the descriptor and the preset.
-`stylebro-migrate` turns it on when SA1300 is on (it replaces SA1300 for namespaces) and carries
+`bro migrate` turns it on when SA1300 is on (it replaces SA1300 for namespaces) and carries
 `allowedNamespaceComponents` over as `stylebro_allowed_namespace_components`.
 
 Reported like StyleCop: each part of every declaration. Not reported (the analyzer):
@@ -132,7 +132,7 @@ Files and folders are not renamed.
    StyleCop migrants: without it, migrating loses SA1300's check on new namespaces.
 2. **Separate id (BRO1312) and off by default?** The prototype says yes to both. BRO1311 is taken by the tuple
    element names branch, hence 1312.
-3. **Should `stylebro-migrate` turn it on when SA1300 is on?** It does now (the description says it replaces SA1300).
+3. **Should `bro` turn it on when SA1300 is on?** It does now (the description says it replaces SA1300).
    For a StyleCop-clean repo it reports nothing, as long as the allowed components carry over (they do).
 4. **The root namespace: not reported, or reported but not fixed?** Not reporting keeps "every diagnostic has a fix",
    but a lower-case project name then goes unnoticed. Reporting it would be a diagnostic `dotnet format` can't fix.
@@ -147,7 +147,7 @@ Files and folders are not renamed.
 
 ## Recommendation
 
-Ship BRO1312 as an **opt-in** rule (off in the preset, on through `stylebro-migrate` when SA1300 is on), with the
+Ship BRO1312 as an **opt-in** rule (off in the preset, on through `bro` when SA1300 is on), with the
 prototype's guards, not reporting the root namespace (question 4), and renaming public namespaces like BRO1309 renames
 public types (question 5), with the breaking-change note on the rule page. It closes the parity gap for StyleCop
 users at little risk: StyleCop-clean repos have nothing to rename, and a new lower-case namespace is usually a single

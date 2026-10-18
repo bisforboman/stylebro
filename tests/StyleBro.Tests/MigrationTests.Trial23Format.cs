@@ -3,7 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>Trial 23's findings in 'stylebro-migrate format', verify, the preview and baseline.</summary>
+/// <summary>Trial 23's findings in 'bro format', verify, the preview and baseline.</summary>
 public sealed partial class MigrationTests
 {
     [Theory]

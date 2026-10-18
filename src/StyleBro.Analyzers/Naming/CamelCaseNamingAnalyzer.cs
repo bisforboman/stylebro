@@ -22,7 +22,7 @@ public sealed class CamelCaseNamingAnalyzer : DiagnosticAnalyzer
     /// BRO1313's scope: <c>all</c> (default) or <c>non_generic_methods</c>, Sonar's S927: methods only, and not where the
     /// base's parameter type is a type parameter the member fills in (MediatR's <c>Handle(TNotification notification)</c>
     /// implemented as <c>Handle(OrderPlaced @event)</c>) or a generic type whose type arguments differ in kind
-    /// (<c>IEnumerable&lt;T&gt;</c> against <c>IEnumerable&lt;int&gt;</c>). stylebro-migrate writes it for S927.
+    /// (<c>IEnumerable&lt;T&gt;</c> against <c>IEnumerable&lt;int&gt;</c>). bro migrate writes it for S927.
     /// </summary>
     public const string BaseNameScopeKey = "stylebro_match_base_parameter_names";
 

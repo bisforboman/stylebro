@@ -19,7 +19,7 @@
 # Differences that are expected against master but not beta.556 then show up as failures; the rule pages and
 # docs/differences-from-stylecop.md ("Compared with StyleCop's unreleased master") say which are deliberate.
 #
-# -StyleSharp runs StyleSharp.Analyzers (a StyleCop successor, SST ids) instead, as stylebro-migrate reads it: each SA id
+# -StyleSharp runs StyleSharp.Analyzers (a StyleCop successor, SST ids) instead, as bro migrate reads it: each SA id
 # of a set stands for the SST ids data/stylesharp-mapping.csv maps to it, stylecop.json is left out (StyleSharp doesn't
 # read it) and StyleBro gets the settings migrate writes for a StyleSharp repository ($styleSharpSettings below). The
 # 'Expected' entries are StyleCop's, so this mode only lists the differences (a probe, it never fails); docs/migrating.md
@@ -34,7 +34,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $config = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'parity/parity.psd1')
-# What stylebro-migrate writes for a StyleSharp repository with StyleSharp's defaults (SST1309: '_camelCase').
+# What bro migrate writes for a StyleSharp repository with StyleSharp's defaults (SST1309: '_camelCase').
 $styleSharpSettings = @'
 stylebro_private_field_naming = _camelCase
 stylebro_summary_wording = stylesharp

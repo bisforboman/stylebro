@@ -9,9 +9,9 @@ using StyleBro.Analyzers.Baseline;
 namespace StyleBro.Analyzers;
 
 /// <summary>
-/// Hides StyleBro's findings, and those of the built-in rules its preset and 'stylebro-migrate init' turn on
+/// Hides StyleBro's findings, and those of the built-in rules its preset and 'bro init' turn on
 /// (<see cref="BaselineSuppressor.SdkIds"/>), in files outside the project's git repository: a project that compiles
-/// '..\..\outside\Shared.cs' from a sibling folder (trial 27). 'stylebro-migrate format' leaves such files alone (someone
+/// '..\..\outside\Shared.cs' from a sibling folder (trial 27). 'bro format' leaves such files alone (someone
 /// else's code, like a submodule's), so without this its check said clean while the build failed on them. The package's
 /// build targets pass the repository's folder (<see cref="Property"/>: the nearest folder above the project with a '.git'
 /// folder or file); without it, or with 'none', nothing is hidden. Unlike <see cref="PackageFileSuppressor"/>, which hides

@@ -77,7 +77,7 @@ internal static class NamespaceRenamer
 
         var result = new List<(string File, TextChange Change)>();
 
-        // Files of projects this 'stylebro-migrate format' run doesn't load (RepositoryNames): a string with the namespace,
+        // Files of projects this 'bro format' run doesn't load (RepositoryNames): a string with the namespace,
         // or a use of the part.
         var loaded = new HashSet<string>(solution.Projects.SelectMany(p => p.Documents).Select(d => d.FilePath).OfType<string>(), StringComparer.OrdinalIgnoreCase);
         foreach (var entry in CamelCaseRenamer.ReadRepositoryNames())

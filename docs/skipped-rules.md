@@ -98,7 +98,7 @@ Maintainability rule. StyleCop: on by default, has a code fix. Teams keeping it 
 
 **Why:** Moving a type to its own file isn't something `dotnet format` can do (code fixes can't add documents through it).
 
-**To revisit:** Would need a separate tool (stylebro-migrate could do it as a one-off).
+**To revisit:** Would need a separate tool (bro could do it as a one-off).
 
 <a id="sa1403"></a>
 
@@ -388,7 +388,7 @@ Documentation rule. StyleCop: on by default, has a code fix. Teams keeping it on
 
 **Why:** Renaming files isn't something `dotnet format` can do.
 
-**To revisit:** Would need a separate tool (stylebro-migrate could do it as a one-off, with `git mv`).
+**To revisit:** Would need a separate tool (bro could do it as a one-off, with `git mv`).
 
 ## Dropped: StyleCop never reports it
 
@@ -502,7 +502,7 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 
 **Why:** StyleCop's own setup diagnostic: XML comment analysis is disabled (no GenerateDocumentationFile).
 
-**To revisit:** Nothing to port. stylebro-migrate already detects the same condition and keeps the XML documentation rules (BRO1603-BRO1611) off.
+**To revisit:** Nothing to port. bro migrate already detects the same condition and keeps the XML documentation rules (BRO1603-BRO1611) off.
 
 <a id="sa0002"></a>
 
@@ -512,7 +512,7 @@ Special rule. StyleCop: on by default, no code fix. Teams keeping it on (OTel / 
 
 **Why:** StyleCop's own diagnostic for an invalid stylecop.json.
 
-**To revisit:** Nothing to port. stylebro-migrate parses stylecop.json leniently (comments, trailing commas).
+**To revisit:** Nothing to port. bro migrate parses stylecop.json leniently (comments, trailing commas).
 
 ## Covered, with known differences
 

@@ -4,7 +4,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
-/// <summary>What a trial of 0.5.0-alpha.1 on LiteBus found in stylebro-migrate.</summary>
+/// <summary>What a trial of 0.5.0-alpha.1 on LiteBus found in bro.</summary>
 public sealed partial class MigrationTests
 {
     private const string OnlyDocumentation = """
@@ -100,7 +100,7 @@ public sealed partial class MigrationTests
             new[]
             {
                 "StyleCop runs only in src/LiteBus.Core, src/LiteBus.Events: the settings apply there, with the rules StyleCop has on there.",
-                "No StyleCop in samples, src/LiteBus.Analyzers, tests: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'stylebro-migrate format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.",
+                "No StyleCop in samples, src/LiteBus.Analyzers, tests: StyleBro's rules and the built-in ones the block sets are off there by id, so the build and 'bro format' leave them alone. To have them checked and formatted too, remove the block's '# No StyleCop ran in' line and its section for them.",
             },
             Program.ScopeReport(setup));
         var hints = Program.PackageHints(setup, root);

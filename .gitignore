@@ -17,3 +17,4 @@ docs/backlog.md
 !.trials/Directory.Build.props
 !.trials/Directory.Build.targets
 !.trials/Directory.Packages.props
+__pycache__/

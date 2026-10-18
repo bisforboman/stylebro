@@ -11,13 +11,13 @@ namespace StyleBro.Analyzers.Baseline;
 
 /// <summary>
 /// Hides the violations listed in <c>stylebro.baseline</c> (an AdditionalFile; the package adds the nearest one above
-/// the project). Covers every StyleBro rule and the SDK rules 'stylebro-migrate init' or '--write' turns on. A suppressed
+/// the project). Covers every StyleBro rule and the SDK rules 'bro init' or '--write' turns on. A suppressed
 /// diagnostic is neither reported by the build nor fixed by 'dotnet format'.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class BaselineSuppressor : DiagnosticSuppressor
 {
-    /// <summary>The SDK rules stylebro-migrate (init or --write) can turn on (MigrationTests checks this list).</summary>
+    /// <summary>The SDK rules bro (init or --write) can turn on (MigrationTests checks this list).</summary>
     internal static readonly string[] SdkIds =
     {
         "IDE0003", "IDE0009", "IDE0011", "IDE0036", "IDE0040", "IDE0047", "IDE0048", "IDE0049", "IDE0055", "IDE0065", "IDE0073",
@@ -30,7 +30,7 @@ public sealed class BaselineSuppressor : DiagnosticSuppressor
         "IDE0340", "IDE0350", "IDE0360", "CA1510", "CA1511", "CA1512", "CA1513", "CA1825", "CA1829", "CA1834", "CA1847", "CA1850", "CA1864",
         "CA1865", "CA1872", "CA2249", "CA2263",
 
-        // turned on by a SonarQube setup (stylebro-migrate's Sonar mapping)
+        // turned on by a SonarQube setup (bro migrate's Sonar mapping)
         "IDE0004", "IDE0059", "IDE0075", "IDE0100", "CA1012", "CA1052", "CA1805", "CA1822", "CA1852",
     };
 

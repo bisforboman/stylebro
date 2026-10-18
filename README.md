@@ -15,8 +15,8 @@ correctness and migration, with measured numbers.
 
 ## Principles
 
-- **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run. One exception, on purpose: a rename that would break code only the fix can see (a name read by reflection, used in generated code) is left with its warning, and `stylebro-migrate format` lists each with its reason ([Findings kept on purpose](https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose)).
-- **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, StyleBro uses that rule instead of shipping a copy: the preset sets its options and `stylebro-migrate init` turns it on in `.editorconfig`.
+- **Every rule has a code fix, and Fix All works.** Fixes are written for `dotnet format`: deterministic, idempotent, and they converge in a single pass. CI checks this with a second `dotnet format --verify-no-changes` run. One exception, on purpose: a rename that would break code only the fix can see (a name read by reflection, used in generated code) is left with its warning, and `bro format` lists each with its reason ([Findings kept on purpose](https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose)).
+- **Don't duplicate the SDK.** If a built-in `IDE` rule already covers a StyleCop rule, StyleBro uses that rule instead of shipping a copy: the preset sets its options and `bro init` turns it on in `.editorconfig`.
 - **Configurable through `.editorconfig`**, with a recommended preset shipped as a low-priority global config.
 
 ## Rules
@@ -49,37 +49,37 @@ modifier order, ...). Their severities have to be in `.editorconfig`: `dotnet fo
 from a package's preset.
 
 ```
-dotnet tool install --global StyleBro.Migrate --prerelease
-stylebro-migrate init --write      # adds a block to .editorconfig
+dotnet tool install --global StyleBro.Tool --prerelease
+bro init --write      # adds a block to .editorconfig
 ```
 
 ```
-stylebro-migrate format            # whitespace + StyleBro's rules + the built-in rules init turns on
+bro format            # whitespace + StyleBro's rules + the built-in rules init turns on
 dotnet format analyzers --diagnostics BRO1001
 ```
 
 The preset (StyleBro's rule severities and the formatting options) comes with the package. To opt out and configure
-everything yourself: `<StyleBroPreset>none</StyleBroPreset>`. Coming from StyleCop? Use `stylebro-migrate --write`
+everything yourself: `<StyleBroPreset>none</StyleBroPreset>`. Coming from StyleCop? Use `bro migrate --write`
 instead of `init` (below). Checking it in CI: [docs/ci.md](https://github.com/bisforboman/stylebro/blob/main/docs/ci.md).
 
-`stylebro-migrate format` is `dotnet format` (same options) limited to StyleBro's and those built-in rules: plain
+`bro format` is `dotnet format` (same options) limited to StyleBro's and those built-in rules: plain
 `dotnet format` also applies every other analyzer's and the compiler's fixes, which can break the build. With several
 target frameworks it runs once per framework, where plain `dotnet format` crashes on the SDK's formatting fix (details
 in [docs/ci.md](https://github.com/bisforboman/stylebro/blob/main/docs/ci.md)).
 
 ## Migrating from StyleCop
 
-`stylebro-migrate` reads a repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
+`bro migrate` reads a repository's StyleCop setup (rulesets, global configs, `.editorconfig` files,
 `stylecop.json`) and writes matching StyleBro and SDK settings into its `.editorconfig` files, so the switch doesn't
 reformat code StyleCop was happy with. It also carries `#pragma warning disable SA…` and `[SuppressMessage]`
 suppressions over to the replacing rules, and lists the StyleCop rules nothing enforces any more.
-`dotnet tool install --global StyleBro.Migrate --prerelease`, then `stylebro-migrate path/to/repo`. See
+`dotnet tool install --global StyleBro.Tool --prerelease`, then `bro migrate path/to/repo`. See
 [docs/migrating.md](https://github.com/bisforboman/stylebro/blob/main/docs/migrating.md).
 
 ## Baseline: fail only on new violations
 
-In a codebase with many existing violations, `stylebro-migrate baseline` records them in `stylebro.baseline`. The
-build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules `stylebro-migrate init`
+In a codebase with many existing violations, `bro baseline` records them in `stylebro.baseline`. The
+build, the IDE and `dotnet format` then ignore those (every StyleBro rule and the SDK rules `bro init`
 turns on), so only new code has to follow the rules; a violation counts as new once its line is edited. See
 [docs/baseline.md](https://github.com/bisforboman/stylebro/blob/main/docs/baseline.md).
 

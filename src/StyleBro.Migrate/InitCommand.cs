@@ -8,26 +8,26 @@ using System.Text.RegularExpressions;
 namespace StyleBro.Migrate;
 
 /// <summary>
-/// stylebro-migrate init [path] [--write] [--modernize]: puts the severities of the built-in .NET rules the preset relies
+/// bro init [path] [--write] [--modernize]: puts the severities of the built-in .NET rules the preset relies
 /// on into the repository's root .editorconfig. They can't live in the preset: 'dotnet format' ignores rule severities in a
 /// package's global config (the build doesn't), so only .editorconfig makes it fix them. Written between the same markers
-/// as 'stylebro-migrate --write', which replaces the block with settings matched to a StyleCop setup. --modernize adds a
+/// as 'bro migrate --write', which replaces the block with settings matched to a StyleCop setup. --modernize adds a
 /// second block with the SDK's modernization rules (<see cref="Modernize"/>). It looks at the repository first: the
 /// conventions its code clearly follows are kept (<see cref="Detect"/>), EF Core migrations are marked as generated, and a
-/// repository with a StyleCop setup is sent to 'stylebro-migrate --write' instead (owner's decisions 2026-10-09,
+/// repository with a StyleCop setup is sent to 'bro migrate --write' instead (owner's decisions 2026-10-09,
 /// docs/decisions.md).
 /// </summary>
 internal static class InitCommand
 {
     /// <summary>
     /// What multi-targeted repositories need to know: plain 'dotnet format' crashes on IDE0055's fix there (Roslyn's
-    /// linked-file merge, measured on Serilog and Newtonsoft.Json without StyleBro); 'stylebro-migrate format' doesn't.
+    /// linked-file merge, measured on Serilog and Newtonsoft.Json without StyleBro); 'bro format' doesn't.
     /// </summary>
     public const string MultiTargetedHint =
-        "Run 'stylebro-migrate format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted\n"
+        "Run 'bro format' instead of 'dotnet format' here: with IDE0055 on, 'dotnet format' crashes on multi-targeted\n"
         + "projects (Roslyn can't merge the target frameworks' copies of a file). The command runs it once per target framework.";
 
-    /// <summary>The start marker of the --modernize block (its own block, so it survives 'stylebro-migrate --write').</summary>
+    /// <summary>The start marker of the --modernize block (its own block, so it survives 'bro migrate --write').</summary>
     public const string ModernizeBegin = "# BEGIN stylebro-modernize";
 
     /// <summary>The end marker of the --modernize block.</summary>
@@ -55,8 +55,8 @@ internal static class InitCommand
     /// <summary>The first line of the detected conventions in the output (the preview shows that part).</summary>
     public const string DetectedHeader = "Conventions in the code";
 
-    /// <summary>What init says, with or without --write, when 'stylebro-migrate --write' already wrote the settings.</summary>
-    public const string MigratedLine = ".editorconfig already has settings from 'stylebro-migrate --write'; they include the built-in rules.";
+    /// <summary>What init says, with or without --write, when 'bro migrate --write' already wrote the settings.</summary>
+    public const string MigratedLine = ".editorconfig already has settings from 'bro migrate --write'; they include the built-in rules.";
 
     /// <summary>What init says, with or without --write, when the .editorconfig already has the settings it would write.</summary>
     public const string PresentLine = ".editorconfig already has these settings: nothing to add.";
@@ -321,7 +321,7 @@ internal static class InitCommand
         return 0;
     }
 
-    /// <summary>Whether the root .editorconfig has the block 'stylebro-migrate --write' wrote (then init leaves it alone).</summary>
+    /// <summary>Whether the root .editorconfig has the block 'bro migrate --write' wrote (then init leaves it alone).</summary>
     public static bool IsMigrated(string root) =>
         File.Exists(Path.Combine(root, ".editorconfig")) && File.ReadAllText(Path.Combine(root, ".editorconfig")) is var text
         && text.Contains(Migration.BeginMarker, StringComparison.Ordinal) && !text.Contains("stylebro-migrate init", StringComparison.Ordinal);
@@ -344,7 +344,7 @@ internal static class InitCommand
         {
             Console.WriteLine("This repository has a StyleCop setup:");
             evidence.ForEach(e => Console.WriteLine("  " + e));
-            Console.WriteLine("Run 'stylebro-migrate --write' instead (a dry run without --write first): it turns StyleBro's rules on only where StyleCop");
+            Console.WriteLine("Run 'bro migrate --write' instead (a dry run without --write first): it turns StyleBro's rules on only where StyleCop");
             Console.WriteLine("enforced them, so code StyleCop was happy with stays as it is. 'init' would apply StyleBro's preset to all of it.");
             return true;
         }
@@ -1042,7 +1042,7 @@ internal static class InitCommand
 
     /// <summary>
     /// The convention lines (the part under <see cref="ConventionsHeader"/>) of the init block in an existing root
-    /// .editorconfig, or none: without an init block, or one from 'stylebro-migrate --write'.
+    /// .editorconfig, or none: without an init block, or one from 'bro migrate --write'.
     /// </summary>
     public static List<string> PreviousConventions(string? editorConfig)
     {
@@ -1126,7 +1126,7 @@ internal static class InitCommand
         {
             notes.Add($"Modernize: the newer-C# rules (tier B) are suggestions: {Conventions.Plural(withoutLangVersion.Count, "multi-targeted project")} {(withoutLangVersion.Count == 1 ? "doesn't" : "don't")} set LangVersion ({List(withoutLangVersion)}).\n"
                 + "  Each target framework then gets its own C# version (7.3 for .NET Framework and netstandard2.0); fixes made for the newer one break the older one.\n"
-                + "  To turn them on: set <LangVersion>latest</LangVersion> (or a fixed version) in those projects or Directory.Build.props, then run 'stylebro-migrate init --modernize --write' again.");
+                + "  To turn them on: set <LangVersion>latest</LangVersion> (or a fixed version) in those projects or Directory.Build.props, then run 'bro init --modernize --write' again.");
         }
 
         if (multiTargeted.Count > 0)
@@ -1797,7 +1797,7 @@ internal static class InitCommand
         if (!migrated && settings.TryGetValue(IdeSeverityKey, out var ideSeverity) && !detected.Any(l => KeyOf(l) == IdeSeverityKey))
         {
             leftOut.Add(IdeSeverityKey);
-            Console.WriteLine($"{Source(IdeSeverityKey)} sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. {(OffSeverity(ideSeverity) ? "'stylebro-migrate format' leaves whitespace alone (no whitespace pass where IDE0055 is off)." : "'stylebro-migrate format' still formats whitespace (its whitespace pass runs unless IDE0055 is off).")}");
+            Console.WriteLine($"{Source(IdeSeverityKey)} sets IDE0055 ({ideSeverity}): kept, the block doesn't set it. {(OffSeverity(ideSeverity) ? "'bro format' leaves whitespace alone (no whitespace pass where IDE0055 is off)." : "'bro format' still formats whitespace (its whitespace pass runs unless IDE0055 is off).")}");
         }
 
         // This file turns the Style category (or every analyzer) off itself: the template's built-in rules by id would win over
@@ -1843,7 +1843,7 @@ internal static class InitCommand
             JsonReport.AddSettings(name, modernize.Block);
         }
 
-        // What --write would change: nothing when the settings are there (written by 'stylebro-migrate --write', or by an
+        // What --write would change: nothing when the settings are there (written by 'bro migrate --write', or by an
         // earlier init). The dry run says the same as --write (mdx: it showed a block --write then said was there).
         return new Target
         {
