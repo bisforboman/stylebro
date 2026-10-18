@@ -1538,6 +1538,25 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   Untouched-code build failures seen with TWAE: NuGet audit (NU1902) in Ulid and Harmony (`-p:NuGetAudit=false`),
   Ulid's CS0618/CS8002, Harmony's own IDE0054 and a compiler crash ("PromiseNotToEnqueue") with EnforceCodeStyleInBuild.
 
+## Trial 30 (2026-10-18, clean: owner "Count it clean", tally 1 in a row)
+
+- Repos: rwmt/Multiplayer (RimWorld mod, Harmony patches, Krafs.Rimworld.Ref), mayuki/Chell (T4 `.Generated.cs` next to a
+  hand-written `.cs`, multi-targeted), BAndysc/AvaloniaVisualBasic6 (Avalonia, net8.0;net9.0, mobile heads), QuestPDF
+  (random, seed 30: duplicati drew first, too large). Kind 4 (projects the solution doesn't list): no buildable repo among
+  ~60 checked; a spot copy of Chell without the library in its .sln (owner) exercised "Leaving alone", `--files` on that
+  project and `format` on it: identical to the main run.
+- Fixed: projects whose evaluation has `MissingWorkloadPack` items (Android/iOS/Browser heads, NETSDK1147) stopped format at
+  the restore; now "Leaving alone" with the packs, left out of the restore filter and the runs (`MissingWorkloadPacks`,
+  `MissingWorkloadsLine`; no `whole` plain run then). Not covered: a multi-targeted project's outer evaluation might not
+  list a platform framework's packs (restore fails as before).
+- Measured: init 3-16 s on the four, LiteDB (1,426 files) 15 s, duplicati (1,574 files, 108 projects) 43 s. The `_x` string
+  guard in LiteDB (1,911 `"_id"` strings, `_camelCase` repo): 1 coincidental hold (`_doc` = an Expression.Parameter name), 1
+  real (`_cacheCtor`, GetField). Harmony: no `__x` or patch parameter renamed; the game can't run here (tests only).
+- Environment: untouched Multiplayer/QuestPDF/VB6 fail TreatWarningsAsErrors builds on nullable warnings (compare error
+  counts); Multiplayer needs `-p:WarningsNotAsErrors=NU1701`; Chell's net5.0 tests run with `DOTNET_ROLL_FORWARD=Major`.
+  The trial feed goes into the user NuGet config before `init --diff` (the preview adds the tool's version). `pgrep -f`
+  in a wait loop matches the loop's own command line.
+
 ## Known open questions
 
 - Answered: `dotnet format` does pick up code fixes from analyzers referenced as

@@ -1,6 +1,6 @@
 {
   "area": "Stable",
   "item": "Two clean trials before 1.0",
-  "notes": "Owner's decision 2026-10-11 (docs/decisions/2026-10-11-when-stylebro-goes-stable.md): 1.0 ships after two clean trials in a row, first-run trials on new kinds of repository with no high-severity bugs; external users aren't required. Tally: 0 clean in a row after trial 29 (2026-10-17): Harmony's patch parameters and listed private fields were renamed (tests failed), and Moq's build broke on a file format skipped next to a T4 template.",
+  "notes": "Owner's decision 2026-10-11 (docs/decisions/2026-10-11-when-stylebro-goes-stable.md): 1.0 ships after two clean trials in a row, first-run trials on new kinds of repository with no high-severity bugs; external users aren't required. Tally: 1 clean in a row after trial 30 (2026-10-18; owner: \"Count it clean\"): Chell, rwmt/Multiplayer, QuestPDF and AvaloniaVisualBasic6 converged in one run with builds and tests as on the untouched code; the one bug (format stopped at the restore on Android/iOS/Browser heads without their workloads) changed nothing and is fixed. Before: 0 after trial 29 (Harmony's patch parameters and listed private fields renamed, Moq's build broke on a file format skipped next to a T4 template).",
   "status": "Planned"
 }

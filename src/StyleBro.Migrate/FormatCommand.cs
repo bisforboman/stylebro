@@ -224,7 +224,7 @@ internal static partial class FormatCommand
     [
         "-getProperty:TargetFrameworks", "-getProperty:TargetFramework", "-getProperty:ProjectAssetsFile", "-getProperty:MSBuildProjectExtensionsPath", "-getProperty:WarningsNotAsErrors",
         "-getProperty:Configuration", "-getProperty:Configurations", "-getProperty:Platforms", "-getProperty:StyleBroBaseline", "-getProperty:GenerateDocumentationFile",
-        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-nologo",
+        "-getItem:ProjectReference", "-getItem:Compile", "-getItem:PackageReference", "-getItem:GlobalPackageReference", "-getItem:Analyzer", "-getItem:MissingWorkloadPack", "-nologo",
     ];
 
     /// <summary>What <see cref="TestedSymbols"/> found, per file (full path).</summary>
@@ -2577,6 +2577,22 @@ internal static partial class FormatCommand
     /// How to format the projects in <see cref="NotBuiltFolders"/> (<paramref name="folders"/>) on their own: a build of one
     /// still runs StyleBro when a Directory.Build.props above it references it (AngleSharp's build/_build.csproj kept ~25 warnings).
     /// </summary>
+    /// <summary>
+    /// The workload packs a project's evaluation (<see cref="ProjectQuery"/>) says aren't installed: the SDK's
+    /// MissingWorkloadPack items, which make 'dotnet restore' and the build fail with NETSDK1147. Empty when none are missing.
+    /// </summary>
+    public static string[] MissingWorkloadPacks(string msbuildJson)
+    {
+        using var json = JsonDocument.Parse(msbuildJson);
+        return json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("MissingWorkloadPack", out var packs)
+            ? packs.EnumerateArray().Select(p => p.GetProperty("Identity").GetString()!).Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
+            : [];
+    }
+
+    /// <summary>The note for the projects <see cref="MissingWorkloadPacks"/> leaves out.</summary>
+    public static string MissingWorkloadsLine(IReadOnlyList<string> projects, IReadOnlyList<string> packs) =>
+        $"{UnformattedHeader} {string.Join(", ", projects)}: {(projects.Count == 1 ? "it needs" : "they need")} workloads this machine doesn't have ({string.Join(", ", packs.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase))}), so 'dotnet restore' fails on {(projects.Count == 1 ? "it" : "them")} (NETSDK1147) and 'format' leaves {(projects.Count == 1 ? "it" : "them")} alone. Run 'dotnet workload restore' and then 'stylebro-migrate format' again to format {(projects.Count == 1 ? "it" : "them")} too.";
+
     public static string NotBuiltHint(IReadOnlyList<string> folders, string root)
     {
         var projects = folders.SelectMany(f => Directory.EnumerateFiles(Path.Combine(root, f), "*.csproj"))
@@ -4589,6 +4605,37 @@ internal static partial class FormatCommand
         bool Planned(string file) => !outsideSet.Contains(file) && !IsPackageFile(file);
         bool Ignored(string line) => outsideSet.Count > 0 && IsFindingLine(line) && FindingPath(line) is { } findingPath && outsideSet.Contains(findingPath);
 
+        // Projects that need a workload this machine doesn't have (trial 30, owner's choice 2026-10-18: AvaloniaVisualBasic6's
+        // Android, iOS and Browser heads): 'dotnet restore' failed on them (NETSDK1147) and stopped the whole run, though the code
+        // they share built. They're left alone, like a build of the other projects leaves them; the rest is formatted.
+        var needWorkloads = projects
+            .Select(p => (p.Key, p.Value.FullPath, Packs: MissingWorkloadPacks(EvaluateProject(p.Value.FullPath))))
+            .Where(p => p.Packs.Length > 0)
+            .ToList();
+        if (needWorkloads.Count > 0)
+        {
+            var folders = needWorkloads
+                .Select(p => Path.GetRelativePath(root, Path.GetDirectoryName(p.FullPath)!).Replace('\\', '/'))
+                .Where(f => f != "." && !f.StartsWith("..", StringComparison.Ordinal))
+                .Select(f => f + "/")
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            log(MissingWorkloadsLine(needWorkloads.Select(p => Path.GetRelativePath(root, p.FullPath).Replace('\\', '/')).ToList(), needWorkloads.SelectMany(p => p.Packs).ToList()));
+            projects = new(projects, projects.Comparer); // the list is cached for the process
+            needWorkloads.ForEach(p => projects.Remove(p.Key));
+            if (projects.Count == 0)
+            {
+                return Done(1);
+            }
+
+            if (folders.Count > 0)
+            {
+                Exclude(folders);
+                excluded.AddRange(folders);
+            }
+        }
+
         // Projects the solution lists but no configuration builds: the restore skips them, so StyleBro wouldn't run there, and
         // only the whitespace pass and the SDK's rules would (Bogus's Nuke builder: its usings were sorted, and the run warned
         // "Without StyleBro"). They're left alone, like the build leaves them.
@@ -4619,9 +4666,13 @@ internal static partial class FormatCommand
             var oldStyle = projects.Values.Select(p => p.FullPath).Where(IsOldStyle).ToList();
             var restoreTarget = workspacePath;
             string? restoreFilter = null;
-            if (oldStyle.Count > 0)
+            if (oldStyle.Count > 0 || needWorkloads.Count > 0)
             {
-                log(OldStyleNote(oldStyle.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')).Order(StringComparer.OrdinalIgnoreCase).ToList(), oldStyle.Any(UsesPackagesConfig)));
+                if (oldStyle.Count > 0)
+                {
+                    log(OldStyleNote(oldStyle.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')).Order(StringComparer.OrdinalIgnoreCase).ToList(), oldStyle.Any(UsesPackagesConfig)));
+                }
+
                 var sdkStyle = projects.Where(p => !oldStyle.Contains(p.Value.FullPath)).Select(p => p.Key).ToList();
                 restoreTarget = sdkStyle.Count == 0 ? null : isSolution ? restoreFilter = Path.Combine(solutionDirectory, $".stylebro-restore-{Guid.NewGuid():N}.slnf") : workspacePath;
                 if (restoreFilter is not null)
@@ -4793,7 +4844,7 @@ internal static partial class FormatCommand
             }
         }
 
-        var whole = plan.Count <= 1 && allFrameworks.Count == 0 && visualBasic.Count == 0;
+        var whole = plan.Count <= 1 && allFrameworks.Count == 0 && visualBasic.Count == 0 && needWorkloads.Count == 0;
         var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
         File.WriteAllText(select, SelectFrameworkTargets);
         if (whole && !(checkFirst && !passThrough.Contains("--report")))
