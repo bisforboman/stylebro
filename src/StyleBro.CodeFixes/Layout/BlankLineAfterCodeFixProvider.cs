@@ -67,7 +67,7 @@ public sealed class BlankLineAfterCodeFixProvider : CodeFixProvider
             {
                 blankLines.AddRange(BlankLines.GetBlankLinesBelow(root.FindToken(start), text));
             }
-            else if (BlankLines.NeedsBlankLineAbove(root.FindTrivia(start), text, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken), exempt, SwitchSectionBlankLines.ReadMode(configOptions)))
+            else if (BlankLines.NeedsBlankLineAbove(root.FindTrivia(start), text, id => Severities.IsOn(document.Project.CompilationOptions, root.SyntaxTree, id, cancellationToken), exempt, SwitchSectionBlankLines.ReadMode(configOptions), tabWidth: Indentation.GetTabWidth(configOptions)))
             {
                 var line = text.Lines.GetLineFromPosition(start);
                 var above = text.Lines[line.LineNumber - 1];

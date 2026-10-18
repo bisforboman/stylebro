@@ -4,6 +4,51 @@ namespace StyleBro.Tests;
 
 public class EmbeddedCommentTests
 {
+    // Pinta (trial 32): with control blocks' '{' at the end of the header's line, the moved comment left '{' alone on the
+    // line below, and the next run's whitespace pass moved it up. The fix moves it now; methods keep theirs.
+    [Fact]
+    public Task BraceOnTheHeaderLine_GoesUpWithTheMove() => VerifyFixAsync(
+        """
+        public class C
+        {
+            public int M(int x)
+            {
+                if (x == 0) {|BRO1132:// zero|}
+                {
+                    return 0;
+                }
+
+                while (x > 10)
+                    {|BRO1132:// shrink|}
+                {
+                    x--;
+                }
+
+                return x;
+            }
+        }
+        """,
+        """
+        public class C
+        {
+            public int M(int x)
+            {
+                if (x == 0) {
+                    // zero
+                    return 0;
+                }
+
+                while (x > 10) {
+                    // shrink
+                    x--;
+                }
+
+                return x;
+            }
+        }
+        """,
+        editorConfig: "csharp_new_line_before_open_brace = methods,types");
+
     [Fact]
     public Task CommentsAfterTheHeader_MoveIntoTheBlock() => VerifyFixAsync(
         """

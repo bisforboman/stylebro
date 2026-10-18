@@ -105,7 +105,7 @@ internal static class BlankLines
     /// <paramref name="switchSections"/> (BRO1526's setting) wants no blank line there. With <paramref name="belowCloseBrace"/>,
     /// the answer once a fix has wrapped the statement above in braces (a '}' ends the line above instead of a ';').
     /// </summary>
-    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include, bool belowCloseBrace = false)
+    public static bool NeedsBlankLineAbove(SyntaxTrivia comment, SourceText text, Func<string, bool> isOn, IReadOnlyList<string> exemptPrefixes, SwitchSectionBlankLines.Mode switchSections = SwitchSectionBlankLines.Mode.Include, bool belowCloseBrace = false, int tabWidth = 4)
     {
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.ToString().StartsWith("///", StringComparison.Ordinal))
         {
@@ -147,7 +147,7 @@ internal static class BlankLines
             && !IsBetweenListItems(comment)
             && !IsInsideExpression(comment)
             && !LeadsEmbeddedStatement(comment)
-            && !ContinuesTrailingComment(comment, text, aboveLine)
+            && !ContinuesTrailingComment(comment, text, aboveLine, tabWidth)
             && !(Readability.EmbeddedComments.GetMovingRule(comment, text) is { } rule && isOn(rule))
             && (belowCloseBrace || !IsCommentBelowCode(comment, text));
     }
@@ -267,14 +267,21 @@ internal static class BlankLines
     /// Whether the comment continues a trailing comment on the line above, starting in the same column
     /// (<c>x(); // because ...</c> + <c>         // ... the rest</c>; akka.net). A blank line between would split the
     /// sentence, and the next 'dotnet format' run would move the separated half to the code's indentation. StyleCop's
-    /// SA1515 reports it; this only makes BRO1504 quieter.
+    /// SA1515 reports it; this only makes BRO1504 quieter. Columns as shown, with tabs <paramref name="tabWidth"/> wide:
+    /// the formatter aligns such a line to the trailing comment that way, so with tabs the two start at different offsets
+    /// (Pinta, tab_width = 8: the blank line went in and the next run re-indented the comment).
     /// </summary>
-    private static bool ContinuesTrailingComment(SyntaxTrivia comment, SourceText text, TextLine aboveLine)
+    private static bool ContinuesTrailingComment(SyntaxTrivia comment, SourceText text, TextLine aboveLine, int tabWidth)
     {
-        var column = comment.SpanStart - text.Lines.GetLineFromPosition(comment.SpanStart).Start;
-        return column < aboveLine.Span.Length
-            && comment.Token.Parent?.SyntaxTree.GetRoot().FindTrivia(aboveLine.Start + column) is { RawKind: (int)SyntaxKind.SingleLineCommentTrivia } trailing
-            && trailing.SpanStart == aboveLine.Start + column;
+        var end = aboveLine.End;
+        while (end > aboveLine.Start && char.IsWhiteSpace(text[end - 1]))
+        {
+            end--;
+        }
+
+        return end > aboveLine.Start
+            && comment.Token.Parent?.SyntaxTree.GetRoot().FindTrivia(end - 1) is { RawKind: (int)SyntaxKind.SingleLineCommentTrivia } trailing
+            && Indentation.GetVisualColumn(text, trailing.SpanStart, tabWidth) == Indentation.GetVisualColumn(text, comment.SpanStart, tabWidth);
     }
 
     /// <summary>

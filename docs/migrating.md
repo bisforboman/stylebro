@@ -160,6 +160,9 @@ real output: [samples/StyleCopMigration](https://github.com/bisforboman/stylebro
   `none`, or `ignore` when the operators are mixed, `csharp_space_after_cast`, the parentheses options); where no option
   expresses the code (`new ()`, mixed `if(x)`/`if (x)`, a few outliers), IDE0055 stays on and the report names what
   `format` changes.
+- The indentation of `case X:` blocks, which no StyleCop rule checks but `format`'s whitespace pass rewrites: code that
+  writes the block's `{` at the label's level gets `csharp_indent_case_contents_when_block = false`, as in `init`; mixed
+  code keeps the SDK's default, and the report says so.
 - Whether any project sets `GenerateDocumentationFile`. Without it the build doesn't parse XML documentation and
   StyleCop's rules that read it never run (it reports SA0001 instead), but `dotnet format` does parse it. So the
   StyleBro rules that read documentation as XML (BRO1603-BRO1611) stay off.

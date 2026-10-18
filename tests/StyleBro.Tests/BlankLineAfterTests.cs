@@ -188,6 +188,21 @@ public class BlankLineAfterTests
         }
         """);
 
+    // Pinta (trial 32, tab_width = 8): the formatter aligns a comment below a trailing comment to that comment's column as
+    // shown, tabs counted as wide as tab_width. BRO1504 compared character offsets, put a blank line between the two, and
+    // the next run's whitespace pass moved the separated comment to the field's indentation.
+    [Fact]
+    public Task CommentAlignedWithTabs_ContinuesTheTrailingComment() => VerifyNoDiagnosticsAsync(
+        "class C\n{\n\tint tools = 0; // NRT - set in factory method\n\t\t       // Stores the button corresponding to each tool.\n\tint buttons = 1;\n}\n",
+        "indent_style = tab\ntab_width = 8\nindent_size = 8");
+
+    // The same lines with tabs 4 wide: the comment starts at column 15, the trailing one at 19, so it's a comment of its own.
+    [Fact]
+    public Task CommentAlignedWithTabs_OtherTabWidth_GetsABlankLine() => VerifyFixAsync(
+        "class C\n{\n\tint tools = 0; // NRT - set in factory method\n\t\t       {|BRO1504:// Stores the button corresponding to each tool.|}\n\tint buttons = 1;\n}\n",
+        "class C\n{\n\tint tools = 0; // NRT - set in factory method\n\n\t\t       // Stores the button corresponding to each tool.\n\tint buttons = 1;\n}\n",
+        "indent_style = tab\ntab_width = 4\nindent_size = 4");
+
     [Fact]
     public Task StyleCopExceptions_NoDiagnostic() => VerifyNoDiagnosticsAsync("""
         class C

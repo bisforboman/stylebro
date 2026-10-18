@@ -1599,6 +1599,36 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   `signatureValidationMode = require` set to accept for the unsigned trial package. CliWrap's untouched TWAE build fails on
   CS8620 with SDK 10.0.112 (compare counts); Nerdbank's net9.0 test runs can't start (no .NET 9 runtime).
 
+## Trial 32 (2026-10-18, not clean: owner "Not clean", tally 0)
+
+- Repos: ControlzEx/ControlzEx (WPF library, StyleCop 1.2 + WpfAnalyzers, migrate; builds on Linux with
+  `EnableWindowsTargeting=true`, its tests are Windows-only), PintaProject/Pinta (GTK, two root licenses with different
+  holders, tab_width 8), toddams/RazorLight (xUnit; xunit.analyzers 1.18 swapped in by a hook, owner's decision: no repository
+  with real xUnit warnings left builds here, ~50 checked), dotnetcore/CAP (random, seed 32; ShareX, MaterialDesign, Terminal.Gui,
+  ReactiveUI, quartznet, AngleSharp, ImageSharp too large, spectre.console/Dapper used, StackExchange.Redis needs a server,
+  command-line-api needs .NET 11).
+- Held up: the XAML registration guard on WPF (5 private `...PropertyKey` fields kept with BRO1306 + camelCase statics on a
+  spot copy), no root vendored with two root licenses, the xUnit allowlist (xUnit2013/xUnit2000 fixed in one run, xUnit1031 left).
+- RazorLight (owner: "Exempt those files"): init wrote `end_of_line = lf` (134 of 153 files) and format converted CRLF files
+  whose multi-line verbatim strings the tests compare with: 2 failures. `Conventions.LiteralEndingFiles`/`LiteralEndingSections`:
+  each file of the other ending with a token spanning lines gets `[path]` + its own ending (init's scopes, migrate's
+  `EndingSections`). Probed: `end_of_line = unset` in that section makes `dotnet format` write the OS's ending.
+- CAP: `bro format`'s net10.0 run skipped two samples: Dashboard.K8s (net8.0) gets CAP (net8.0;net10.0) as a TRANSITIVE
+  project reference, added during the build by `IncludeTransitiveProjectReferences`, so the evaluation-time `Update` never
+  marked it `StyleBroFormatLoose`. `SelectFrameworkTargets` has a target after it that marks those too (real-MSBuild test).
+- Pinta (one-run fixes): BRO1504's `ContinuesTrailingComment` compares visual columns (`Indentation.GetVisualColumn`,
+  `GetTabWidth`: tab_width, else indent_size): the formatter aligns a comment below a trailing comment by visual column;
+  BRO1132/BRO1134 join `{` onto the header line when `csharp_new_line_before_open_brace` leaves the block's kind out.
+- ControlzEx (owner: "Migrate detects it"): migrate writes `csharp_indent_case_contents_when_block = false` when the code puts
+  `case X:` blocks at the label's level (`AddUncheckedFormatting`); format's whitespace pass re-indents them whatever IDE0055's
+  severity. The other IDE0055-only conventions are StyleCop's (SA1500, SA1107, SA10xx).
+- Environment: setup script works (SDK 10.0.112 + 8.0.131 preinstalled; pwsh via `dotnet tool install -g PowerShell`); Pinta's
+  effects tests need `apt-get install libgtk-4-1 libadwaita-1-0`; ControlzEx: global.json removed, `Directory.packages.props`
+  renamed (case-sensitive FS), the trial feed added to its NuGet.Config (`<clear/>`); CAP/RazorLight `-p:NuGetAudit=false`;
+  RazorLight tests with `DOTNET_ROLL_FORWARD=Major`, MarkdownSnippets regenerates its README on build, 16 Precompile tests fail
+  untouched (line endings). `NUGET_CERT_REVOCATION_MODE=offline` is needed for `dotnet test` too (tests restore). A test that
+  starts `dotnet build` must not redirect output (a surviving build node keeps the pipe open): log to a file.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
