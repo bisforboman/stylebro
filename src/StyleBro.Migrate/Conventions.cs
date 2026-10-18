@@ -508,7 +508,7 @@ internal static class Conventions
     /// below the label (true, the default) or at its indentation. AngleSharp writes all 131 at the label's, and IDE0055
     /// re-indented thousands of lines.
     /// </summary>
-    private const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
+    public const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
 
     /// <summary>The top-level doc elements BRO1603 checks (DocumentationPeriods' text elements).</summary>
     private static readonly HashSet<string> PeriodElements = new(StringComparer.Ordinal) { "summary", "remarks", "param", "typeparam", "returns", "value", "exception" };

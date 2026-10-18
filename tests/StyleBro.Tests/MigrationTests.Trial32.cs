@@ -61,4 +61,51 @@ public sealed partial class MigrationTests
         Dotnet(false, "restore", "Top/Top.csproj");
         Assert.Equal(0, Dotnet(true, "build", "Top/Top.csproj", "--no-restore"));
     }
+
+    [Fact]
+    public void Migrate_CaseBlocksAtTheLabelsLevel_AreKept()
+    {
+        // ControlzEx (StyleCop-clean): its 7 'case X:' blocks have '{' at the label's column, which no StyleCop rule checks,
+        // and format's whitespace pass indented them all (owner's decision 2026-10-18: migrate follows the code there).
+        Write("Lib.csproj", """<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" /></ItemGroup></Project>""");
+        Write(".editorconfig", "root = true\n");
+        Write("C.cs", """
+            namespace Lib
+            {
+                public class C
+                {
+                    public int M(int x)
+                    {
+                        switch (x)
+                        {
+                            case 0:
+                            {
+                                return 0;
+                            }
+
+                            case 1:
+                            {
+                                return 1;
+                            }
+
+                            default:
+                            {
+                                return 2;
+                            }
+                        }
+                    }
+                }
+            }
+            """);
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Contains("csharp_indent_case_contents_when_block = false", result.Lines);
+        Assert.Contains(result.Notes, n => n.StartsWith("'case X:' blocks: StyleCop doesn't check their indentation, and your code has 0 indented below the label, 3 at the label's level", StringComparison.Ordinal));
+
+        // The SDK's form in the code: nothing to write or say.
+        Write("C.cs", "namespace Lib\n{\n    public class C\n    {\n        public int M(int x)\n        {\n            switch (x)\n            {\n                case 0:\n                    {\n                        return 0;\n                    }\n            }\n\n            return -1;\n        }\n    }\n}\n");
+        result = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.DoesNotContain(result.Lines, l => l.StartsWith("csharp_indent_case_contents_when_block", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.Notes, n => n.StartsWith("'case X:' blocks", StringComparison.Ordinal));
+    }
 }

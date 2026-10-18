@@ -378,6 +378,7 @@ internal static class Migration
         if (fieldStyle is null)
         {
             AddSpacingOfRulesOff(setup, root, ownSettings, lines, result);
+            AddUncheckedFormatting(root, ownSettings, lines, result);
         }
 
         var kept = lines.Skip(sdkStart).Where(line => KeyOf(line) is { } key && own.Contains(key)).ToList();
@@ -1941,6 +1942,32 @@ internal static class Migration
     /// code, IDE0055 stays on and the notes name what 'format' changes. ponytail: counted over the whole repository, also where
     /// StyleCop doesn't run.
     /// </summary>
+    /// <summary>
+    /// The formatter's layout no StyleCop rule checks, as the code has it (owner's decision 2026-10-18): the indentation of a
+    /// 'case X:' block, which 'format' rewrites whatever IDE0055's severity (its whitespace pass). ControlzEx, StyleCop-clean,
+    /// writes its 7 at the label's level, and format re-indented them all. Written when the code clearly has the other form,
+    /// like init; mixed code keeps the SDK's default and says so.
+    /// </summary>
+    private static void AddUncheckedFormatting(string root, IReadOnlyDictionary<string, string> own, List<string> lines, Result result)
+    {
+        const string Key = Conventions.IndentCaseBlockKey;
+        if (own.ContainsKey(Key) || Conventions.CSharpier(root) is not null || !Conventions.Count(root, own).TryGetValue(Key, out var c) || c.Length < 2 || c[1] == 0)
+        {
+            return;
+        }
+
+        var found = $"{c[0]} indented below the label, {c[1]} at the label's level";
+        if (c.Sum() >= Conventions.MinimumAgreeing && Conventions.Winner(c[0], c[1]) == 1)
+        {
+            lines.Add($"{Key} = false");
+            result.Notes.Add($"'case X:' blocks: StyleCop doesn't check their indentation, and your code has {found}: {Key} = false, so 'format' keeps them.");
+        }
+        else
+        {
+            result.Notes.Add($"'case X:' blocks: StyleCop doesn't check their indentation, and your code has {found}: 'format' indents them all below the label (the SDK's default). To keep the label's level instead: {Key} = false below the block.");
+        }
+    }
+
     private static void AddSpacingOfRulesOff(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> own, List<string> lines, Result result)
     {
         var ide = lines.FindLast(l => l.StartsWith("dotnet_diagnostic.IDE0055.severity = ", StringComparison.Ordinal));
