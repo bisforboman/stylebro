@@ -1465,3 +1465,6 @@ internal static class PreviewCommand
         }
     }
 }
+
+/// <summary>A git command in the preview's copy failed: the preview stops instead of showing an incomplete diff.</summary>
+internal sealed class GitFailedException(string message) : Exception(message);
