@@ -93,7 +93,7 @@ internal static class IfBodies
             {
                 depth++;
             }
-            else if (node is StatementSyntax
+            else if (node is StatementSyntax and not BlockSyntax
                 && (node.Parent is ElseClauseSyntax
                     || (node.Parent is StatementSyntax parent and not BlockSyntax and not LabeledStatementSyntax && !(node is UsingStatementSyntax && parent is UsingStatementSyntax))))
             {
