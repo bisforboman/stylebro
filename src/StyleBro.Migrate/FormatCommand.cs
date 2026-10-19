@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -170,6 +171,9 @@ internal static partial class FormatCommand
     /// <summary>What <see cref="RulesLine"/> adds when the repository references xunit (<see cref="ReferencesXunit"/>).</summary>
     private const string XunitPart = ", xunit.analyzers' assertion rules where they are warnings or errors";
 
+    /// <summary>The start of the line that says the xUnit fixes aren't applied (<see cref="XunitWithoutFixAll"/>; printed for the first run only).</summary>
+    private const string XunitHeader = "xUnit:";
+
     /// <summary>The start of the line that lists the target frameworks (printed for the first run only).</summary>
     private const string MultiTargetedHeader = "Multi-targeted: ";
 
@@ -191,8 +195,8 @@ internal static partial class FormatCommand
     /// <summary>How 'dotnet format' starts its note about workspace load warnings.</summary>
     private const string WorkspaceWarnings = "Warnings were encountered while loading the workspace";
 
-    /// <summary>The start of the line that names files with old Mac line endings (printed for the first run only).</summary>
-    private const string OldMacHeader = "Not formatted:";
+    /// <summary>The start of the line that names the files whose old Mac line endings format converted.</summary>
+    private const string OldMacHeader = "Line endings:";
 
     /// <summary>The start of the line that names the folders without StyleCop format leaves alone (printed for the first run only).</summary>
     private const string UnformattedHeader = "Leaving alone:";
@@ -213,13 +217,16 @@ internal static partial class FormatCommand
     /// A reference to a package that brings xunit.analyzers (not xunit.assert or the runners): &lt;PackageReference
     /// Include="xunit" /&gt;, &lt;PackageVersion Include="xunit.v3.mtp-v2" ... /&gt;, packages.config's id="xunit".
     /// </summary>
+    /// <summary>The first xunit.analyzers version whose code fixes have no Fix All (1.18.0-1.23.0 all had it).</summary>
+    private static readonly Version XunitFixAllEnds = new(1, 24, 0);
+
     private static readonly Regex XunitReference = new(@"\b(?:Include|Update|id)\s*=\s*""xunit(?:\.v3(?:\.mtp-[\w-]+)?|\.analyzers)?""", RegexOptions.IgnoreCase);
 
     /// <summary>The source generator projects built or found built in this process (<see cref="BuildGenerators"/>).</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, XunitHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The projects and configurations a --verify-no-changes run on a folder couldn't check (<see cref="RecordUnchecked"/>), per folder.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<(string Project, string Configuration)>> Unchecked = new(StringComparer.OrdinalIgnoreCase);
@@ -1016,13 +1023,41 @@ internal static partial class FormatCommand
 
         // xunit.analyzers' fixes that keep each test's meaning (owner's decision 2026-10-18); 'dotnet format --severity warn'
         // applies them only where the repository leaves the rule at warning or error.
-        if (ReferencesXunit(root))
+        if (ReferencesXunit(root) && XunitWithoutFixAll(root) is null)
         {
             ids.UnionWith(Analyzers.Baseline.BaselineSuppressor.XunitIds);
         }
 
         return ids.ToList();
     }
+
+    /// <summary>
+    /// The newest xunit.analyzers version from 1.24.0 on that the restore output under <paramref name="root"/> lists, else null.
+    /// From 1.24.0 none of its code fixes has Fix All, which 'dotnet format' applies fixes through (trial 33, Tmds.DBus with
+    /// xunit.v3 3.2.2: "Unable to fix xUnit2013 ... doesn't support Fix All", format said clean and check didn't). Owner's
+    /// decision 2026-10-19: the xUnit ids are left out there.
+    /// </summary>
+    public static string? XunitWithoutFixAll(string root)
+    {
+        var source = RepositoryRoot(root) ?? root;
+        return StyleCopSetup.EnumerateFiles(source).Where(f => Path.GetExtension(f).Equals(".csproj", StringComparison.OrdinalIgnoreCase))
+            .Select(p => Path.Combine(Path.GetDirectoryName(p)!, "obj", "project.assets.json"))
+            .Concat(Directory.Exists(Path.Combine(source, "artifacts", "obj")) ? Directory.EnumerateFiles(Path.Combine(source, "artifacts", "obj"), "project.assets.json", SearchOption.AllDirectories) : [])
+            .Where(File.Exists)
+            .SelectMany(a => XunitAnalyzersVersions(File.ReadAllText(a)))
+            .Where(v => v >= XunitFixAllEnds)
+            .Max()?.ToString(3);
+    }
+
+    /// <summary>The xunit.analyzers versions a project.assets.json lists ('"xunit.analyzers/1.27.0"', a prerelease suffix ignored).</summary>
+    public static IEnumerable<Version> XunitAnalyzersVersions(string assets) =>
+        Regex.Matches(assets, @"""xunit\.analyzers/(?<version>\d+\.\d+\.\d+)[^""]*""", RegexOptions.IgnoreCase)
+            .Select(m => Version.Parse(m.Groups["version"].Value));
+
+    /// <summary>What format says when it leaves the xUnit fixes out (<see cref="XunitWithoutFixAll"/>).</summary>
+    public static string XunitWithoutFixAllLine(string version) =>
+        $"{XunitHeader} xunit.analyzers {version} is restored here, and from {XunitFixAllEnds.ToString(2)} on its code fixes have no Fix All, "
+        + "which 'dotnet format' needs: its assertion fixes aren't applied (the build still reports their warnings; your IDE fixes them one at a time).";
 
     /// <summary>
     /// Whether a project, props, targets or packages.config file at or below <paramref name="root"/> references xunit
@@ -1574,6 +1609,12 @@ internal static partial class FormatCommand
             .ToList();
     }
 
+    /// <summary>What format says about the files whose old Mac line endings it converted (<see cref="ConvertLoneCrs"/>).</summary>
+    public static string OldMacLine(IReadOnlyList<string> files) =>
+        $"{OldMacHeader} {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)}: a CR alone ended "
+        + $"{(files.Count == 1 ? "some of its lines" : "some of their lines")} (old Mac line endings), which 'dotnet format' (a .NET SDK bug) would add a line break to on every run. "
+        + $"Converted to {(files.Count == 1 ? "the file's" : "each file's")} own line break first.";
+
     /// <summary>Whether a C# text has a CR without an LF after it outside its string and character literals (<see cref="OldMacLineEndings"/>).</summary>
     public static bool HasLoneCr(string text) => LoneCrs(text).Code;
 
@@ -1592,13 +1633,7 @@ internal static partial class FormatCommand
                 continue;
             }
 
-            literals ??= Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(text).GetRoot().DescendantTokens()
-                .Where(t => Microsoft.CodeAnalysis.CSharp.CSharpExtensions.Kind(t) is Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken
-                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.CharacterLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.InterpolatedStringTextToken
-                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.MultiLineRawStringLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.SingleLineRawStringLiteralToken
-                    or Microsoft.CodeAnalysis.CSharp.SyntaxKind.Utf8StringLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.Utf8MultiLineRawStringLiteralToken)
-                .Select(t => t.Span)
-                .ToList();
+            literals ??= LiteralSpans(text);
             if (literals.Any(s => s.Contains(at)))
             {
                 literal = true;
@@ -1610,6 +1645,58 @@ internal static partial class FormatCommand
         }
 
         return (code, literal);
+    }
+
+    /// <summary>
+    /// The text with every CR that no LF follows outside its string and character literals (<see cref="HasLoneCr"/>) written as
+    /// the file's own line break: CRLF or LF, whichever its other lines use more, else <paramref name="configured"/>
+    /// (end_of_line's), else LF. A lone CR is a line break to the compiler, so the code means the same. Owner's decision
+    /// 2026-10-19 (trial 33: taglib-sharp's '}\r}' and a Scriban file): format left such files out, said clean, and the
+    /// build failed on them.
+    /// </summary>
+    public static string WithoutLoneCrs(string text, string? configured = null)
+    {
+        var crlf = Regex.Count(text, "\r\n");
+        var lf = Regex.Count(text, "(?<!\r)\n");
+        var newline = crlf > lf ? "\r\n" : lf > crlf ? "\n" : configured?.Trim().ToLowerInvariant() == "crlf" ? "\r\n" : "\n";
+        List<Microsoft.CodeAnalysis.Text.TextSpan>? literals = null;
+        var result = new StringBuilder(text.Length);
+        var copied = 0;
+        for (var at = text.IndexOf('\r', StringComparison.Ordinal); at >= 0; at = text.IndexOf('\r', at + 1))
+        {
+            if (at + 1 < text.Length && text[at + 1] == '\n')
+            {
+                continue;
+            }
+
+            literals ??= LiteralSpans(text);
+            if (!literals.Any(s => s.Contains(at)))
+            {
+                result.Append(text, copied, at - copied).Append(newline);
+                copied = at + 1;
+            }
+        }
+
+        return copied == 0 ? text : result.Append(text, copied, text.Length - copied).ToString();
+    }
+
+    /// <summary>
+    /// Writes <paramref name="files"/> (relative to <paramref name="root"/>) without their lone CRs (<see cref="WithoutLoneCrs"/>,
+    /// end_of_line from the settings), keeping each file's encoding and byte order mark.
+    /// </summary>
+    public static void ConvertLoneCrs(string root, IReadOnlyCollection<string> files)
+    {
+        var set = ConfigSet(root);
+        foreach (var file in files.Select(f => Path.GetFullPath(Path.Combine(root, f))))
+        {
+            set.GetOptionsForSourcePath(file).AnalyzerOptions.TryGetValue("end_of_line", out var configured);
+            var bytes = File.ReadAllBytes(file);
+            var bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+            using var reader = new StreamReader(new MemoryStream(bytes), new UTF8Encoding(false), detectEncodingFromByteOrderMarks: true);
+            var text = reader.ReadToEnd();
+            var encoding = reader.CurrentEncoding is UTF8Encoding ? new UTF8Encoding(bom) : reader.CurrentEncoding;
+            File.WriteAllText(file, WithoutLoneCrs(text, configured), encoding);
+        }
     }
 
     /// <summary>
@@ -3801,6 +3888,16 @@ internal static partial class FormatCommand
         return (false, null, false);
     }
 
+    /// <summary>The spans of a C# text's string and character literals (where a CR is part of a value).</summary>
+    private static List<Microsoft.CodeAnalysis.Text.TextSpan> LiteralSpans(string text) =>
+        Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(text).GetRoot().DescendantTokens()
+            .Where(t => Microsoft.CodeAnalysis.CSharp.CSharpExtensions.Kind(t) is Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken
+                or Microsoft.CodeAnalysis.CSharp.SyntaxKind.CharacterLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.InterpolatedStringTextToken
+                or Microsoft.CodeAnalysis.CSharp.SyntaxKind.MultiLineRawStringLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.SingleLineRawStringLiteralToken
+                or Microsoft.CodeAnalysis.CSharp.SyntaxKind.Utf8StringLiteralToken or Microsoft.CodeAnalysis.CSharp.SyntaxKind.Utf8MultiLineRawStringLiteralToken)
+            .Select(t => t.Span)
+            .ToList();
+
     /// <summary><see cref="Run"/> without --timings.</summary>
     private static int RunMeasured(string[] args, Action<string>? output, Func<string[], Action<string>?, int>? runOnce)
     {
@@ -4478,11 +4575,13 @@ internal static partial class FormatCommand
             Exclude(templates);
         }
 
-        // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles.
-        if (OldMacLineEndings(root) is { Count: > 0 } oldMac)
+        // The SDK's formatter adds a line break to a file with old Mac line endings on every run: it never settles. format writes
+        // their lone CRs as the file's line break first; a check (which changes nothing) leaves them in, so 'dotnet format'
+        // reports them as files formatting would change.
+        if (!passThrough.Contains("--verify-no-changes") && OldMacLineEndings(root) is { Count: > 0 } oldMac)
         {
-            log($"{OldMacHeader} {string.Join(", ", oldMac)}: old Mac line endings (a CR alone). 'dotnet format' (a .NET SDK bug) adds a line break to such a file on every run, so it never settles. Convert them to LF or CRLF, then run again.");
-            Exclude(oldMac);
+            ConvertLoneCrs(root, oldMac);
+            log(OldMacLine(oldMac));
         }
 
         // 'dotnet format' runs its whitespace pass whatever IDE0055's severity says: where the settings turn IDE0055 off,
@@ -4768,6 +4867,13 @@ internal static partial class FormatCommand
         if (notAsErrors.Count > 0)
         {
             log(NotAsErrorsLine(notAsErrors));
+        }
+
+        // A restore just now can bring xunit.analyzers 1.24+ along, which Diagnostics couldn't see before it.
+        if (passThrough.Contains(Analyzers.Baseline.BaselineSuppressor.XunitIds[0]) && XunitWithoutFixAll(root) is { } xunitVersion)
+        {
+            log(XunitWithoutFixAllLine(xunitVersion));
+            passThrough.RemoveAll(Analyzers.Baseline.BaselineSuppressor.XunitIds.Contains);
         }
 
         // Without StyleBro's analyzers 'dotnet format' fixes whitespace and the built-in rules and says clean.

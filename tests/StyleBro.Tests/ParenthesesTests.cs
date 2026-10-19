@@ -54,6 +54,58 @@ public class ParenthesesTests
         """);
 
     [Fact]
+    public Task QueryClausesUnderFrom_MoveWithIt() => VerifyFixAsync(
+        """
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public class C
+        {
+            public IEnumerable<int> M(int[] items) => Use(
+                {|BRO1405:(from a in items
+                 let b = a + 1
+                 where b > 2
+                  select b)|});
+
+            public IEnumerable<int> N(int[] items) => Use({|BRO1405:(from a in items
+                                                           select a)|});
+
+            public IEnumerable<int> O(int[] items) => Use({|BRO1405:(
+                from a in items
+                select a)|});
+
+            public IEnumerable<int> P(int[] items) => Use({|BRO1405:(from a in items
+                    where a > 0                            select a)|});
+
+            private static IEnumerable<int> Use(IEnumerable<int> x) => x;
+        }
+        """,
+        """
+        using System.Collections.Generic;
+        using System.Linq;
+
+        public class C
+        {
+            public IEnumerable<int> M(int[] items) => Use(
+                from a in items
+                let b = a + 1
+                where b > 2
+                  select b);
+
+            public IEnumerable<int> N(int[] items) => Use(from a in items
+                                                          select a);
+
+            public IEnumerable<int> O(int[] items) => Use(from a in items
+                select a);
+
+            public IEnumerable<int> P(int[] items) => Use(from a in items
+                    where a > 0                            select a);
+
+            private static IEnumerable<int> Use(IEnumerable<int> x) => x;
+        }
+        """);
+
+    [Fact]
     public Task RemovalsThatOnlyBreakTogether_AreNotBothApplied() => VerifyFixAsync(
         """
         public class C
