@@ -43,6 +43,12 @@ internal static partial class FormatCommand
     /// <summary>The roots whose last 'format' run (not --verify-no-changes) was a check of every plan entry that was clean (<see cref="IsCleanCheck"/>).</summary>
     private static readonly ConcurrentDictionary<string, bool> CheckedClean = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The findings the checks of a root's last 'format' run found where a run's check wasn't clean (not kept, not whitespace):
+    /// its fixes ran on their files, so they are what no fix changes when that run changed nothing (<see cref="TakeCheckFindings"/>).
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, List<string>> CheckFindings = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>The projects and configurations a 'format' run on a root couldn't check (<see cref="RecordUnchecked"/>), for its record.</summary>
     private static readonly ConcurrentDictionary<string, List<(string Project, string Configuration)>> UncheckedByFormat = new(StringComparer.OrdinalIgnoreCase);
 
@@ -258,6 +264,23 @@ internal static partial class FormatCommand
 
     /// <summary>Whether the last 'format' run on <paramref name="root"/> was a clean check of every plan entry (and forgets it).</summary>
     public static bool TakeCheckedClean(string root) => CheckedClean.TryRemove(Key(root), out var clean) && clean;
+
+    /// <summary>Keeps the findings a 'format' run's checks found on <paramref name="root"/> (<see cref="FindingsToFix"/>) for the end of that run.</summary>
+    public static void RecordCheckFindings(string root, List<string> findings) => CheckFindings[Key(root)] = findings;
+
+    /// <summary>The findings the checks of the last 'format' run on <paramref name="root"/> found (<see cref="CheckFindings"/>), and forgets them.</summary>
+    public static List<string> TakeCheckFindings(string root) => CheckFindings.TryRemove(Key(root), out var lines) ? lines : [];
+
+    /// <summary>
+    /// The findings among a run's check <paramref name="lines"/> that its fixes should change: not whitespace (only line endings
+    /// where a copy formats clean, or kept indentation) and not one the fixes keep on purpose (<paramref name="known"/>).
+    /// </summary>
+    public static List<string> FindingsToFix(IEnumerable<string> lines, IReadOnlyCollection<KeptFinding> known) =>
+        lines.Where(l => IsFindingLine(l) && !IsWhitespaceLine(l) && AsKept(l, known) is null).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).ToList();
+
+    /// <summary>What 'format' and --verify-no-changes say about findings no fix changes.</summary>
+    public static string UnfixedLine(int count) =>
+        $"Not clean: {count} finding{(count == 1 ? string.Empty : "s")} above no fix changes (the build reports {(count == 1 ? "it" : "them")}): fix {(count == 1 ? "it" : "them")} by hand, or suppress or baseline {(count == 1 ? "it" : "them")}.";
 
     /// <summary>The record <see cref="SaveKept"/> wrote for this state of the repository and these options, else null.</summary>
     public static CleanRecord? LoadRecord(string root, IEnumerable<string> args)

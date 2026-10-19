@@ -3488,7 +3488,7 @@ internal static partial class FormatCommand
 
             if (unfixed > 0)
             {
-                log($"Not clean: {unfixed} finding{(unfixed == 1 ? string.Empty : "s")} above no fix changes (the build reports {(unfixed == 1 ? "it" : "them")}): fix {(unfixed == 1 ? "it" : "them")} by hand, or suppress or baseline {(unfixed == 1 ? "it" : "them")}.");
+                log(UnfixedLine(unfixed));
                 return NotCleanExitCode;
             }
 
@@ -4228,6 +4228,7 @@ internal static partial class FormatCommand
             // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
             // same on this state (VerifyFromRecord).
             var checkedClean = TakeCheckedClean(root) && !incomplete;
+            var checkFindings = TakeCheckFindings(root);
 
             // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
             // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
@@ -4311,13 +4312,18 @@ internal static partial class FormatCommand
             var endingsOnly = changed.Count > 0 && failures.Count == 0 && putBack.Count == 0
                 && changed.All(f => File.Exists(f) && beforeText.TryGetValue(f, out var was) && was == Hash(File.ReadAllBytes(f), endingsAside: true));
 
+            // What the run's checks found and its fixes didn't change: the build reports it, as verify says (trial 34,
+            // protobuf-net: BRO1008's fix needs every project compiling the file to agree, and "Clean" stood above it).
+            var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null).ToList() : [];
+
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
-            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : ", clean.")}");
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : ", clean.")}");
             ListFiles(shown, changed, 10).ForEach(log);
             allChanged.UnionWith(changed);
             if (changed.Count == 0 || endingsOnly || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
+                unfixed.ForEach(log);
                 var settled = (changed.Count == 0 || endingsOnly) && failures.Count == 0;
                 var baselined = settled ? BaselineKept(root, keptFindings, shown) : null;
                 if (settled)
@@ -4328,7 +4334,7 @@ internal static partial class FormatCommand
                 }
 
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, shown, clean: settled).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: settled && unfixed.Count == 0).ForEach(log);
                 if (baselined is not null)
                 {
                     log(baselined);
@@ -4352,6 +4358,12 @@ internal static partial class FormatCommand
                     var check = new List<string>();
                     runOnce([.. WithInclude(NoRestore(args).Where(a => a != CheckFirstOption && a != "--verify-no-changes"), putBackFiles.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))), "--verify-no-changes"], check.Add);
                     log(CSharpierStep.PutBackLine(putBack, FindingIds(check.Where(l => FindingPath(l) is { } path && putBackFiles.Contains(path, StringComparer.OrdinalIgnoreCase)))));
+                    return NotCleanExitCode;
+                }
+
+                if (unfixed.Count > 0)
+                {
+                    log(UnfixedLine(unfixed.Count));
                     return NotCleanExitCode;
                 }
 
@@ -4691,6 +4703,7 @@ internal static partial class FormatCommand
         var checkFirst = passThrough.Remove(CheckFirstOption);
         var checkedKey = Key(root);
         CheckedClean.TryRemove(checkedKey, out _);
+        CheckFindings.TryRemove(checkedKey, out _);
         UncheckedByFormat.TryRemove(checkedKey, out _);
         GeneratorLines.TryRemove(checkedKey, out _);
         string[] restoreOptions = passThrough.Remove(UnlockedRestoreOption) ? [.. RestoreOptions, "-p:RestoreLockedMode=false"] : RestoreOptions;
@@ -5272,6 +5285,10 @@ internal static partial class FormatCommand
             if (replay && !verifying && !usageError)
             {
                 CheckedClean[checkedKey] = true;
+            }
+            else if (atOnce is not null && !verifying)
+            {
+                RecordCheckFindings(root, FindingsToFix(atOnce.Values.SelectMany(c => c.Lines), known));
             }
 
             // A run 'dotnet format' skipped a project in stands in for the frameworks merged into it: another of them runs

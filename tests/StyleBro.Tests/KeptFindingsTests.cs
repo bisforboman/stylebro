@@ -729,6 +729,47 @@ public sealed class KeptFindingsTests : IDisposable
     }
 
     [Fact]
+    public void Format_AFindingItsCheckFoundAndNoFixChanged_IsNotClean()
+    {
+        // Trial 34, protobuf-net: the check before the second run found BRO1008, whose fix changed nothing (the projects that
+        // compile the file disagree), and 'format' said "Clean" where verify said "1 finding above no fix changes".
+        var root = NewFolder();
+        var file = Path.Combine(root, "C.cs");
+        var project = Path.Combine(root, "App.csproj");
+        var finding = $"{file}(3,5): warning BRO1008: Move the using directive outside the namespace [{project}]";
+        var kept = $"{file}(3,17): warning BRO1303: Rename '_count' to 'count' [{project}]";
+        var whitespace = $"{file}(4,1): warning WHITESPACE: Fix whitespace formatting. Replace 2 characters with '\\n'. [{project}]";
+        var lines = new List<string>();
+        var run = 0;
+
+        var code = FormatCommand.Run(new[] { root }, lines.Add, (args, _) =>
+        {
+            if (++run == 1)
+            {
+                File.WriteAllText(file, "class C { int x; }\n");
+            }
+            else
+            {
+                // The same finding from two frameworks' checks counts once; kept findings and whitespace don't count.
+                FormatCommand.RecordCheckFindings(root, FormatCommand.FindingsToFix(new[] { finding, finding + " ", kept, whitespace }, []));
+            }
+
+            WriteKept(file);
+            return 0;
+        });
+
+        Assert.Equal(FormatCommand.NotCleanExitCode, code);
+        Assert.Contains("Run 2: 0 files changed, but its check found what no fix changes (below).", lines);
+        Assert.Contains(finding, lines);
+        Assert.DoesNotContain(kept, lines);
+        Assert.DoesNotContain(lines, l => l.StartsWith("Clean: ", StringComparison.Ordinal));
+        Assert.Equal(FormatCommand.UnfixedLine(1), lines[^1]);
+
+        // A finding the last run's fixes kept (known before this run's own) doesn't count either.
+        Assert.Empty(FormatCommand.FindingsToFix(new[] { kept }, [new KeptFinding(file, 3, 17, "BRO1303", KeptReason.NameInString, "Rename '_count' to 'count'")]));
+    }
+
+    [Fact]
     public void Verify_OnlyKeptFindingsLeft_ExitsZero_AndHidesTheirWarnings()
     {
         var root = NewFolder();
