@@ -1,0 +1,18 @@
+{
+  "repo": "nodatime/nodatime",
+  "branch": null,
+  "commit": null,
+  "csFiles": null,
+  "tags": [
+    "multi-target",
+    "library",
+    "twae"
+  ],
+  "setups": null,
+  "build": null,
+  "workaround": null,
+  "tests": null,
+  "usedIn": null,
+  "verified": null,
+  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+}

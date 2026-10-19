@@ -1,0 +1,20 @@
+{
+  "repo": "Cysharp/MemoryPack",
+  "branch": null,
+  "commit": null,
+  "csFiles": null,
+  "tags": [
+    "generator",
+    "multi-target",
+    "if-in-bodies",
+    "library",
+    "unity-copy"
+  ],
+  "setups": null,
+  "build": null,
+  "workaround": null,
+  "tests": null,
+  "usedIn": null,
+  "verified": null,
+  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+}
