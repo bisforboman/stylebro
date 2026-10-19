@@ -28,6 +28,11 @@ decide: xunit.analyzers' default, or what `.editorconfig` sets.
 | xUnit2029, xUnit2030 | `Assert.Empty(list.Where(p))` | `Assert.DoesNotContain(list, p)` |
 | xUnit2031 | `Assert.Single(list.Where(p))` | `Assert.Single(list, p)` |
 
+**Only up to xunit.analyzers 1.23.** From 1.24.0 on (the version `xunit.v3` 3.x brings along), none of xunit.analyzers'
+fixes supports Fix All, and `dotnet format` applies fixes only through Fix All. Where the restore output has
+xunit.analyzers 1.24 or later, `bro format` leaves these rules out and says so (`xUnit: xunit.analyzers 1.27.0 is restored
+here, ...`): the build still reports their warnings, and your IDE fixes them one at a time.
+
 Some of these fixes leave work for another: `Assert.Equal(true, s.Contains("b"))` becomes `Assert.True(s.Contains("b"))`,
 then `Assert.Contains("b", s)`. `bro format` runs again until nothing changes, so the result is the same in any order.
 

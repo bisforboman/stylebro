@@ -101,11 +101,42 @@ internal static class Parentheses
         var after = close.GetNextToken();
         var openText = before.Span.End == open.SpanStart && Glues(before, innerFirst) ? " " : string.Empty;
         var closeText = after.SpanStart == close.Span.End && Glues(innerLast, after) ? " " : string.Empty;
-        return new List<TextChange>
+        var changes = new List<TextChange> { new(TextSpan.FromBounds(open.SpanStart, openEnd), openText) };
+        changes.AddRange(GetQueryAlignment(inner, open, open.SpanStart - openEnd + openText.Length, text));
+        changes.Add(new(TextSpan.FromBounds(closeStart, close.Span.End), closeText));
+        return changes;
+    }
+
+    /// <summary>
+    /// The query's clauses that start a line under its 'from' move with it by <paramref name="shift"/> columns: the formatter
+    /// aligns them with 'from', so left alone they moved on the next run (trial 33, Ix.NET: '(from a in list.Attributes' with
+    /// 'let'/'where'/'select' below it).
+    /// </summary>
+    private static IEnumerable<TextChange> GetQueryAlignment(SyntaxNode inner, SyntaxToken open, int shift, SourceText text)
+    {
+        // A line break in the removed gap ('(' alone on its line) joins 'from' to the line above: no column to keep.
+        if (inner is not QueryExpressionSyntax query || shift >= 0 || text.Lines.GetLinePosition(open.SpanStart).Line != text.Lines.GetLinePosition(query.SpanStart).Line)
         {
-            new(TextSpan.FromBounds(open.SpanStart, openEnd), openText),
-            new(TextSpan.FromBounds(closeStart, close.Span.End), closeText),
-        };
+            yield break;
+        }
+
+        var from = query.FromClause.FromKeyword;
+        var column = from.SpanStart - text.Lines.GetLineFromPosition(from.SpanStart).Start;
+        foreach (var token in query.DescendantTokens())
+        {
+            // 'from' itself never qualifies: the '(' stands before it on its line.
+            var line = text.Lines.GetLineFromPosition(token.SpanStart);
+            if (token.SpanStart - line.Start != column
+                || token.Parent is not (QueryClauseSyntax or SelectOrGroupClauseSyntax or QueryContinuationSyntax)
+                || token.Parent.FirstAncestorOrSelf<QueryExpressionSyntax>() != query
+                || token != token.Parent.GetFirstToken()
+                || text.ToString(TextSpan.FromBounds(line.Start, token.SpanStart)).Any(c => c != ' '))
+            {
+                continue;
+            }
+
+            yield return new TextChange(new TextSpan(token.SpanStart + shift, -shift), string.Empty);
+        }
     }
 
     private static bool IsRemovable(List<SyntaxTrivia> gap) =>

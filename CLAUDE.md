@@ -1629,6 +1629,31 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   untouched (line endings). `NUGET_CERT_REVOCATION_MODE=offline` is needed for `dotnet test` too (tests restore). A test that
   starts `dotnet build` must not redirect output (a surviving build node keeps the pipe open): log to a file.
 
+## Trial 33 (2026-10-19, not clean: owner "Not clean", tally 0)
+
+- Repos: tmds/Tmds.DBus (runtime style: `_x`/`s_x` fields, `init --style microsoft --write`; in-solution generator, xunit.v3),
+  Handlebars-Net/Handlebars.Net (7 CRLF files in an LF repository, one a test file with multi-line verbatim strings),
+  dotnet/reactive's Ix.NET (`Ix.Async.NET.sln` leaves out the source generator its projects reference; init moved to the git
+  root and counted all of reactive), mono/taglib-sharp (tabs, `tab_width = 4`), scriban/scriban (random, seed 33). Trial 32's
+  fixes held: Handlebars' CRLF test file got its own `end_of_line` section, Ix.NET's generator was formatted in the
+  netstandard2.0 run, taglib-sharp needed one run. After the fixes all five matched their untouched TWAE builds and tests.
+- Lone CRs (owner: "Convert them"): taglib-sharp (`}\r}`) and Scriban (CRLF file with a lone CR) were left out ("Not
+  formatted: ... old Mac line endings"), but format and check ended "Clean" and the build failed on them. format now writes
+  each lone CR outside literals as the file's own line break (`FormatCommand.WithoutLoneCrs`/`ConvertLoneCrs`: the more
+  common of CRLF/LF, else end_of_line, else LF; BOM kept) and says so (`Line endings:`); `--verify-no-changes` doesn't exclude
+  them, so check reports them as files formatting would change.
+- xUnit (owner: "Skip the ids"): from xunit.analyzers 1.24.0 on NONE of its fixes has Fix All (1.18-1.23 all had; checked by
+  loading each version's providers), so `dotnet format` prints "Unable to fix xUnitNNNN ... doesn't support Fix All". format
+  said Clean, check Not clean (Tmds.DBus, xunit.v3 3.2.2 -> 1.27.0). `FormatCommand.XunitWithoutFixAll` reads the restore
+  output; `Diagnostics` leaves the allowlist out then, and after a restore the run drops it and prints `xUnit: ...`.
+- BRO1405 removing the `(` before a multi-line query moves the clause lines aligned under `from` with it
+  (`Parentheses.GetQueryAlignment`): the formatter aligns clauses with `from`, so Ix.NET's generator needed a second run.
+- Environment: pwsh missing (setup script didn't link it; `dotnet tool install -g PowerShell` + `ln -s` into /usr/local/bin);
+  reactive needs a full clone (Nerdbank.GitVersioning); taglib-sharp `-p:NuGetAudit=false`; no .NET 9 runtime (taglib's and
+  Tmds' net9.0 test runs can't start, as untouched). `bro init --write` doesn't add the StyleBro.Analyzers reference: add it
+  as the preview's patch does. GOTCHA: a mutation loop's `git checkout <file>` reverts uncommitted work in that file: commit
+  first.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
