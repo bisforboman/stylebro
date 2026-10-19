@@ -20,8 +20,8 @@ StyleCop.Analyzers stays, but format only fixes StyleBro's
 and the built-in rules' ids, so it changes nothing. In a StyleCop-clean repository the format part should be close to
 empty. Details: [Preview first](getting-started.md#preview-first).
 
-The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.7.0-alpha.1, as StyleBro.Migrate
-with the command `stylebro-migrate`; StyleBro.Tool and `bro` from the next release;
+The tool is on nuget.org from 0.1.0-alpha.5, released with the analyzers under the same version (latest: 0.8.0-alpha.1; up to 0.8.0-alpha.1 it was StyleBro.Migrate
+with the command `stylebro-migrate`;
 [which version](getting-started.md#which-version) says how to build `main` instead). To run it straight from a clone: `dotnet run --project src/StyleBro.Migrate -- path/to/repo`.
 
 Then swap the package (below) and run `bro format`. It runs `dotnet format` with only StyleBro's rules
@@ -44,7 +44,7 @@ applies to every project:
 <GlobalPackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556" />
 
 <!-- after -->
-<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" />
+<GlobalPackageReference Include="StyleBro.Analyzers" Version="0.8.0-alpha.1" />
 ```
 
 With central package management the version goes into the `Directory.Packages.props` that holds StyleCop's version,
@@ -87,7 +87,7 @@ so it can't be edited here. The report names the file and says where the swap go
 <!-- StyleBro replaces StyleCop (referenced in the shared infrastructure). -->
 <ItemGroup>
   <PackageReference Remove="StyleCop.Analyzers" />
-  <PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" />
+  <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-alpha.1" PrivateAssets="all" />
 </ItemGroup>
 ```
 
