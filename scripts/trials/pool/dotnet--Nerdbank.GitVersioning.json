@@ -1,0 +1,23 @@
+{
+  "repo": "dotnet/Nerdbank.GitVersioning",
+  "branch": "main",
+  "commit": "6451516938d4194c445cce95297da9eaf4d4e431",
+  "csFiles": 148,
+  "tags": [
+    "stylecop",
+    "multi-target",
+    "if-in-bodies",
+    "library"
+  ],
+  "setups": "StyleCop.Analyzers 1.3.1-beta + stylecop.json, EnforceCodeStyleInBuild, AnalysisLevel latest, 4 .editorconfig files (198-line root, 38 dotnet_diagnostic). Frameworks net472;net8.0, net8.0-net10.0. global.json pins 10.0.402 (rollForward patch). 14 files with #if in member bodies. One .vb file.",
+  "build": "fails",
+  "workaround": null,
+  "tests": "Not run: restore fails.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Fails: restore needs Nerdbank.GitVersioning.LKG 3.8.80-alpha from an Azure DevOps feed (pkgs.dev.azure.com/andrewarnott), which the proxy blocks (403); nuget.org only has 3.3.37. Also global.json needs SDK 10.0.402 (removable). Its versioning also needs full git history."
+}

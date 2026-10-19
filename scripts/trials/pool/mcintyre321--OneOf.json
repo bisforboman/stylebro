@@ -1,0 +1,23 @@
+{
+  "repo": "mcintyre321/OneOf",
+  "branch": "master",
+  "commit": "6e02dbe75d0f20f198c640d4c04190a85c5ac9e6",
+  "csFiles": 88,
+  "tags": [
+    "t4-or-generated",
+    "multi-target",
+    "library",
+    "generator"
+  ],
+  "setups": "No analyzers, no TreatWarningsAsErrors, no .editorconfig. OneOf/OneOf.Extended are mostly *.generated.cs files written by the in-solution console project Generator (not T4). In-solution source generator OneOf.SourceGenerator. Frameworks net35;net45;netstandard1.3;netstandard2.0 (libraries), tests net6.0 and net451; LangVersion 9.0/preview. No #if. An F# project (OneOf.FSharp) uses FSharp.NET.Sdk 1.0.5.",
+  "build": "ok with workaround",
+  "workaround": "The solution build fails only in OneOf.FSharp (old FSharp.NET.Sdk 1.0.5: \"dotnet exited with code 150\"); every C# project builds. DOTNET_ROLL_FORWARD=Major for the net6.0 tests.",
+  "tests": "DOTNET_ROLL_FORWARD=Major dotnet test OneOf.SourceGenerator.Tests (10/10) and OneOf.SourceGenerator.AnalyzerTests (9/9). Left out: OneOf.Tests (net451, needs .NET Framework / Mono).",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Committed generated code (*.generated.cs from a console generator) + a source generator; small. \"generator\" added."
+}

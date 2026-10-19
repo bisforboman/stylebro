@@ -1,0 +1,24 @@
+{
+  "repo": "FastEndpoints/FastEndpoints",
+  "branch": "main",
+  "commit": "65f7b8f352cc227856e444789ca18261001a76b7",
+  "csFiles": 985,
+  "tags": [
+    "generator",
+    "library",
+    "web",
+    "multi-target",
+    "if-in-bodies"
+  ],
+  "setups": "No style analyzers, no TreatWarningsAsErrors; .editorconfig (187 lines). In-solution generators (5 OutputItemType=\"Analyzer\" references). global.json pins SDK 11.0.100-rc.2; libraries and tests target net10.0;net11.0 (some netstandard2.0).",
+  "build": "fails",
+  "workaround": null,
+  "tests": "Not run: does not build here.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Fails: global.json requires the .NET 11 SDK (11.0.100-rc.2) and every test project targets net11.0; only SDK 10 is installed. Also 985 .cs files, above \"a few hundred\". Revisit when an SDK 11 is on the trial machine."
+}

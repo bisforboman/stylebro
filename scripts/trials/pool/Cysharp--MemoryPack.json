@@ -1,0 +1,25 @@
+{
+  "repo": "Cysharp/MemoryPack",
+  "branch": "main",
+  "commit": "f96ba3054f14e528b5f75eba4ff02de0b71fa64a",
+  "csFiles": 242,
+  "tags": [
+    "generator",
+    "multi-target",
+    "if-in-bodies",
+    "library",
+    "t4",
+    "unity-project"
+  ],
+  "setups": "No style analyzers, no TreatWarningsAsErrors. .editorconfig (49 lines: charset, LF, 4 VSTHRD severities). In-solution source generator (MemoryPack.Generator, IsRoslynComponent, project reference from MemoryPack and the tests). Four T4 templates in MemoryPack.Core with their .cs outputs (DependentUpon). Frameworks net6.0-net8.0 + netstandard2.0/2.1; LangVersion 10/11/12/latest per project. 26 files with #if in member bodies. src/MemoryPack.Unity is a Unity project (27 .cs files no csproj compiles).",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test tests/MemoryPack.Tests/MemoryPack.Tests.csproj (net8.0, xunit): 157/157 passed, 44 s. Nothing left out.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Generator + T4 + #if in bodies in one library; the Unity folder is C# that no project compiles. Tag \"unity-copy\" corrected to \"unity-project\" (no copy step: the Unity project has its own files); \"t4\" added."
+}

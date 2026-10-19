@@ -1292,6 +1292,9 @@ an editorconfig comment). verify-package check 5 tests it end to end.
   sessions for Linux repos, host for Windows-only, Docker as fallback") library repos and spot checks run as cloud
   sessions, Windows-only repos on the host under the no-desktop rule; `scripts/trials/` (Docker) is the fallback for local
   reruns and a future Windows container: `.trials/README.md`.
+  Trial repositories are chosen ahead (owner, 2026-10-19): `scripts/trials/used.tsv` (everything used or rejected),
+  `pool/` (one checked candidate per file, tagged), `random.json` (fixed, append-only random list); a trial adds its four to
+  `used.tsv` in its PR.
 - `$$` in unit-test markup is the caret position (raw `$$"""` strings are tested in samples/Messy only).
 - Parallel rule PRs conflict in the same list files. Since 2026-10-11 the append-only lists are one file per entry
   (decisions, backlog items, mutation entries) and the rest are `merge=union` in the committed `.gitattributes`

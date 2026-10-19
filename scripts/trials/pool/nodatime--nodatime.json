@@ -1,0 +1,23 @@
+{
+  "repo": "nodatime/nodatime",
+  "branch": "main",
+  "commit": "190ed54bc626ae6410656aca113d539c8de9dbdf",
+  "csFiles": 490,
+  "tags": [
+    "multi-target",
+    "library",
+    "twae",
+    "if-in-bodies"
+  ],
+  "setups": "Microsoft.CodeAnalysis.NetAnalyzers (package), TreatWarningsAsErrors, no .editorconfig. Library netstandard2.0;net8.0, tests net48;net10.0, tools net10.0. LangVersion latest. 60 files with #if, 8 with #if in member bodies. global.json 10.0.101 latestMinor.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test src/NodaTime.Test -f net10.0: 22,799 passed, 6 skipped (75 s); src/NodaTime.TzdbCompiler.Test: 110/110. net48 only on Windows.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Warnings as errors without an .editorconfig; a big, fast test suite. \"if-in-bodies\" added."
+}

@@ -1,0 +1,150 @@
+repo	used	note
+rosenbjerg/FFMpegCore	realworld
+App-vNext/Polly	realworld
+open-telemetry/opentelemetry-dotnet	realworld
+JamesNK/Newtonsoft.Json	realworld
+serilog/serilog	realworld
+jellyfin/jellyfin	realworld
+FluentValidation/FluentValidation	realworld
+JoshClose/CsvHelper	realworld, trial 18
+dotnet-architecture/eShopOnWeb	realworld
+jbogard/MediatR	realworld	now LuckyPennySoftware/MediatR
+libgit2/libgit2sharp	realworld
+riok/mapperly	realworld
+martinothamar/Mediator	realworld
+ardalis/GuardClauses	trial 1, trial 17
+DapperLib/Dapper	trial 1
+dotnet/Nerdbank.Streams	trial 1, trial 15
+ardalis/CleanArchitecture	trial 1, trial 10
+Kareadita/Kavita	trial 2, trial 14
+khellang/Scrutor	trial 2, trial 6
+SixLabors/Fonts	trial 2, trial 18
+spectreconsole/spectre.console	trial 2, trial 13, trial 24
+ThreeMammals/Ocelot	trial 3
+dotnet/eShop	trial 3, trial 13
+AutoMapper/AutoMapper	trial 3	now LuckyPennySoftware/AutoMapper
+microsoft/vs-threading	trial 3
+bchavez/Bogus	trial 4, trial 14
+Buildalyzer/Buildalyzer	trial 4	was phmonte/Buildalyzer; moved
+fluentassertions/fluentassertions	trial 4, trial 23
+ullmark/hashids.net	trial 4
+litenova/LiteBus	trial 5
+NCronJob-Dev/NCronJob	trial 5
+nsubstitute/NSubstitute	trial 5
+linkdotnet/Blog	trial 5
+microsoft/vs-validation	trial 6
+ardalis/SmartEnum	trial 6
+davidfowl/TodoApi	trial 6
+jpdillingham/Soulseek.NET	trial 7
+dotnet-state-machine/stateless	trial 7
+sveinungf/spreadcheetah	trial 7
+LykosAI/StabilityMatrix	trial 8
+Flow-Launcher/Flow.Launcher	trial 8, trial 25
+dotnet/orleans	trial 8
+microsoft/xbox-live-developer-tools	trial 8
+oocx/tfplan2md	trial 9
+kubernetes-client/csharp	trial 9
+drewnoakes/metadata-extractor-dotnet	trial 9
+Blazor-Diagrams/Blazor.Diagrams	trial 9
+openmcdf/openmcdf	trial 10	was ironfede/openmcdf; moved
+actions/runner	trial 10
+MapsterMapper/Mapster	trial 11
+ical-org/ical.net	trial 11
+evolutionary-architecture/evolutionary-architecture-by-example	trial 11
+autofac/Autofac	trial 11, trial 25
+restsharp/RestSharp	trial 12
+sourcegit-scm/sourcegit	trial 12
+SteeltoeOSS/Steeltoe	trial 12
+reactivemarbles/DynamicData	trial 13
+aaubry/YamlDotNet	trial 13
+EntityGraphQL/EntityGraphQL	trial 14
+sebastienros/fluid	trial 15
+EdiWang/Moonglade	trial 15
+recyclarr/recyclarr	trial 15
+tusdotnet/tusdotnet	trial 16
+xoofx/markdig	trial 16
+simplcommerce/SimplCommerce	trial 16
+aspnet-contrib/AspNet.Security.OAuth.Providers	trial 16
+FakeItEasy/FakeItEasy	trial 17
+Tyrrrz/CliWrap	trial 17, trial 31
+adamhathcock/sharpcompress	trial 18
+bagetter/BaGetter	trial 18
+microsoft/Microsoft.IO.RecyclableMemoryStream	trial 19
+BcryptNet/bcrypt.net	trial 19
+morelinq/MoreLINQ	trial 20
+coverlet-coverage/coverlet	trial 20
+reactiveui/splat	trial 21
+AngleSharp/AngleSharp	trial 21
+pm7y/AzureEventGridSimulator	trial 21	was pmcilreavy/AzureEventGridSimulator; moved
+sshnet/SSH.NET	trial 21
+akkadotnet/akka.net	trial 22
+CommunityToolkit/dotnet	trial 22
+Farfetch/kafkaflow	trial 22
+sebastienros/jint	trial 23
+stryker-mutator/stryker-net	trial 23
+microsoft/vs-streamjsonrpc	trial 23
+reactiveui/refit	trial 24
+SapiensAnatis/Dawnshard	trial 24
+jstedfast/MimeKit	trial 25
+specklesystems/speckle-sharp	trial 25
+serdedotnet/serde	trial 26
+NLog/NLog	trial 26
+planetarium/bencodex.net	trial 26
+nuskey8/Lua-CSharp	trial 26
+tylercamp/palcalc	trial 27
+TestableIO/System.IO.Abstractions	trial 27
+TheAlgorithms/C-Sharp	trial 27
+Tyrrrz/CliFx	trial 27
+Cysharp/ZLogger	trial 28
+vers-one/EpubReader	trial 28
+Jackett/Jackett	trial 28
+TheJoeFin/Text-Grab	trial 28
+devlooped/moq	trial 29
+Cysharp/Ulid	trial 29
+amantinband/error-or	trial 29
+pardeike/Harmony	trial 29
+rwmt/Multiplayer	trial 30
+mayuki/Chell	trial 30
+BAndysc/AvaloniaVisualBasic6	trial 30
+QuestPDF/QuestPDF	trial 30
+litedb-org/LiteDB	trial 30 (extra check)
+irihitech/Ursa.Avalonia	trial 31
+AArnott/Nerdbank.MessagePack	trial 31
+HangfireIO/Hangfire	trial 31
+ControlzEx/ControlzEx	trial 32
+PintaProject/Pinta	trial 32
+toddams/RazorLight	trial 32
+dotnetcore/CAP	trial 32
+tmds/Tmds.DBus	trial 33
+Handlebars-Net/Handlebars.Net	trial 33
+dotnet/reactive	trial 33
+mono/taglib-sharp	trial 33
+scriban/scriban	trial 33
+protobuf-net/protobuf-net	trial 34
+zeromq/netmq	trial 34
+sprache/Sprache	trial 34	a fourth repo not yet recorded (claude/trial-34 names none, checked 2026-10-19)
+dotnet/xharness	microsoft-style run
+aliostad/CacheCow	xunit survey
+ardalis/Ardalis.Extensions	xunit survey
+ardalis/Specification	xunit survey
+bitfaster/BitFaster.Caching	xunit survey
+Tyrrrz/YoutubeExplode	xunit survey
+TelegramBots/Telegram.Bot	xunit survey
+duplicati/duplicati	rejected trial 30	too large
+d2phap/ImageGlass	rejected trial 30
+Radarr/Radarr	rejected trial 30, 31
+SubtitleEdit/subtitleedit	rejected trial 30
+MonoGame/MonoGame	rejected trial 30
+JosefNemec/Playnite	rejected trial 30
+bitwarden/server	rejected trial 31
+HandyOrg/HandyControl	rejected trial 31
+dotnet/BenchmarkDotNet	rejected trial 31
+ShareX/ShareX	rejected trial 32	too large
+MaterialDesignInXAML/MaterialDesignInXamlToolkit	rejected trial 32	too large
+gui-cs/Terminal.Gui	rejected trial 32	too large
+reactiveui/ReactiveUI	rejected trial 32	too large
+quartznet/quartznet	rejected trial 32	too large
+SixLabors/ImageSharp	rejected trial 32	too large
+StackExchange/StackExchange.Redis	rejected trial 32	needs a Redis server
+dotnet/command-line-api	rejected trial 32	needs .NET 11
+Humanizr/Humanizer	rejected	doesn't build here

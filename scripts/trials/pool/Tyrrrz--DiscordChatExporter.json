@@ -1,0 +1,24 @@
+{
+  "repo": "Tyrrrz/DiscordChatExporter",
+  "branch": "prime",
+  "commit": "276471f5fd48291153d6f4b0c20802ec5c310bc5",
+  "csFiles": 197,
+  "tags": [
+    "csharpier",
+    "xaml",
+    "avalonia",
+    "app",
+    "twae"
+  ],
+  "setups": "CSharpier.MsBuild 1.3.0 (format check on build), TreatWarningsAsErrors (Directory.Build.props), Nullable, no .editorconfig. net10.0 only; global.json 10.0.100 latestFeature. Avalonia GUI (7 .axaml), CliFx console app (CliFx source generator from the package). No #if.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "None offline: every test in DiscordChatExporter.Cli.Tests exports from Discord with a bot token (Secrets.DiscordToken); only the build can be checked.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "CSharpier + Avalonia app with warnings as errors, but no offline tests: usable for format/build checks only. \"twae\" added."
+}
