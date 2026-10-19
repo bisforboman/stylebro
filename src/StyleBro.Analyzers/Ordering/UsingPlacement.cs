@@ -397,7 +397,7 @@ internal static class UsingPlacement
                 .ToLookup(m => m.Name));
 
     /// <summary>
-    /// Whether a '#if' branch declares a namespace, or a type outside the namespace (owner's decision 2026-10-19): another build
+    /// Whether a '#if' branch leaves out a namespace, or a type outside the namespace (owner's decision 2026-10-19): another build
     /// of the file (a framework, a configuration, or another project compiling it with other symbols) then has other
     /// declarations, where its usings may bind differently or can't move at all, and the fix needs every copy to agree. Trial
     /// 34, protobuf-net: a polyfill 'namespace System.Diagnostics.CodeAnalysis' under '#if !PLAT_DYNAMIC_ACCESS_ATTR' below the
@@ -426,14 +426,8 @@ internal static class UsingPlacement
             }
         }
 
-        // The namespace itself in a branch: a build without it has nothing here.
-        var depth = 0;
-        foreach (var directive in trivia.Where(t => t.SpanStart < ns.SpanStart))
-        {
-            depth += directive.IsKind(SyntaxKind.IfDirectiveTrivia) ? 1 : directive.IsKind(SyntaxKind.EndIfDirectiveTrivia) ? -1 : 0;
-        }
-
-        return depth > 0;
+        // The namespace itself in a branch needs no check here: usings aren't moved across a '#if' above them (RegionsOnly).
+        return false;
     }
 
     private static string Indentation(TextLine line)
