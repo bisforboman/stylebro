@@ -80,7 +80,7 @@ public sealed partial class MigrationTests
             ("net8.0", string.Empty, [P("Moq"), P("Tests")]),
         ];
 
-        var assigned = FormatCommand.OutsideProjectRuns(runs, known, p => outside[p], root, out var left);
+        var assigned = FormatCommand.OutsideProjectRuns(runs, known, p => outside[p], root, out var left, out _);
 
         Assert.Equal([1, 3], assigned.Keys.Order());
         Assert.Equal([P("Harness")], assigned[1]);

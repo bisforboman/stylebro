@@ -1921,6 +1921,19 @@ internal static partial class FormatCommand
         return keep;
     }
 
+    /// <summary>The workspace's projects (<paramref name="listed"/>) and those it doesn't list but references (<paramref name="outside"/>), by full path.</summary>
+    public static Dictionary<string, (string[] Frameworks, string[] References)> WithOutside(
+        Dictionary<string, (string[] Frameworks, string[] References)> listed,
+        IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> outside)
+    {
+        foreach (var (project, info) in outside)
+        {
+            listed.TryAdd(project, info);
+        }
+
+        return listed;
+    }
+
     /// <summary>
     /// The projects of <paramref name="keep"/>'s run that don't target its framework but reference a project it forces onto
     /// it. Their references ask for the referenced project's own frameworks (StyleBroFormatLoose clears the forced one, see
@@ -2435,16 +2448,18 @@ internal static partial class FormatCommand
     /// formatted it), each given to ONE run that loads it (several runs may check at once): the first default-configuration
     /// run that reaches it and has its framework, else the run without a framework. A multi-targeted one, or one no such run
     /// loads, goes to <paramref name="leftOut"/>: formatting it in a framework's run would merge its copies (conflict markers).
-    /// <paramref name="known"/>: the workspace's projects by full path; <paramref name="read"/> evaluates any other.
+    /// <paramref name="known"/>: the workspace's projects by full path; <paramref name="read"/> evaluates any other;
+    /// <paramref name="outsideProjects"/>: those others, by full path.
     /// </summary>
     public static Dictionary<int, List<string>> OutsideProjectRuns(
         IReadOnlyList<(string Framework, string Configuration, IReadOnlyList<string> Projects)> runs,
         IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> known,
         Func<string, (string[] Frameworks, string[] References)> read,
         string root,
-        out List<string> leftOut)
+        out List<string> leftOut,
+        out Dictionary<string, (string[] Frameworks, string[] References)> outsideProjects)
     {
-        var outside = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase);
+        var outside = outsideProjects = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase);
         var pending = new Queue<string>(known.Values.SelectMany(p => p.References));
         while (pending.Count > 0)
         {
@@ -5115,7 +5130,8 @@ internal static partial class FormatCommand
                 return (frameworks, references);
             },
             root,
-            out var outsideLeft);
+            out var outsideLeft,
+            out var outsideProjects);
         if (outsideLeft.Count > 0)
         {
             log($"{UnformattedHeader} {string.Join(", ", outsideLeft.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')))}: projects the build compiles that {Path.GetFileName(workspacePath)} doesn't list, and no run of one of their frameworks loads (a multi-targeted one would get its copies merged). Add them to the solution, or run 'bro format' on each.");
@@ -5165,8 +5181,10 @@ internal static partial class FormatCommand
                 options.Add("--include");
                 options.AddRange(include);
 
-                // A run without a framework of its own still gets the repository's names (it loads only some projects).
-                var byPath = projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase);
+                // A run without a framework of its own still gets the repository's names (it loads only some projects). The
+                // projects the workspace doesn't list count too (trial 34, protobuf-net: TestCompatibilityLevel, netstandard2.0,
+                // references protobuf-net.Core, which offered only net8.0 then, so protobuf-net.Test didn't load).
+                var byPath = WithOutside(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), outsideProjects);
                 var keep = framework.Length == 0 ? new HashSet<string>() : Keep(byPath, framework);
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
                 var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);

@@ -18,4 +18,28 @@ public sealed partial class MigrationTests
         // Balanced branches ('#if' around a whole block) open no block for one build only.
         Assert.False(IfBodies.IsCandidate("class C\n{\n    void M()\n    {\n#if DEBUG\n        {\n            Open();\n        }\n#endif\n    }\n\n    void Open() { }\n}\n"));
     }
+
+    [Fact]
+    public void Format_AProjectTheWorkspaceDoesntList_LoosensItsReferences()
+    {
+        // protobuf-net: protobuf-net.Test (net472;net8.0) references TestCompatibilityLevel (netstandard2.0, not in the solution
+        // filter), which references protobuf-net.Core (multi-targeted). The net8.0 run forced Core onto net8.0, so
+        // TestCompatibilityLevel couldn't reference it and protobuf-net.Test didn't load.
+        var core = Path.Combine(root, "Core", "Core.csproj");
+        var test = Path.Combine(root, "Test", "Test.csproj");
+        var level = Path.Combine(root, "Level", "Level.csproj");
+        var listed = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase)
+        {
+            [core] = (["netstandard2.0", "net8.0"], []),
+            [test] = (["net472", "net8.0"], [core, level]),
+        };
+        var outside = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase) { [level] = (["netstandard2.0"], [core]) };
+
+        var all = FormatCommand.WithOutside(listed, outside);
+        var keep = FormatCommand.Keep(all, "net8.0");
+        Assert.Contains(level, FormatCommand.Other(all, keep, "net8.0"));
+
+        // A listed project's own entry wins.
+        Assert.Equal(["net472", "net8.0"], FormatCommand.WithOutside(all, new Dictionary<string, (string[] Frameworks, string[] References)> { [test] = (["net8.0"], []) })[test].Frameworks);
+    }
 }
