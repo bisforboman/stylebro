@@ -1,18 +1,22 @@
 {
   "repo": "castleproject/Core",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "master",
+  "commit": "963107421f7c11dc37ce0017487a895b6bc01e4c",
+  "csFiles": 831,
   "tags": [
     "multi-target",
     "if-in-bodies",
     "library"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "No analyzers, no TreatWarningsAsErrors, Nullable off; .editorconfig (19 lines). Frameworks net8.0;net9.0;net462;netstandard2.0 (tests net8.0;net9.0;net10.0;net462). LangVersion 14. 130 files with #if, 14 with #if in member bodies.",
+  "build": "ok",
   "workaround": null,
-  "tests": null,
+  "tests": "dotnet test src/Castle.Core.Tests -f net10.0: 1,890 passed, 13 skipped (33 s); -f net8.0: 1,877 passed, 13 skipped. net9.0 needs a 9 runtime, net462 Windows.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "831 .cs files: above \"a few hundred\". Dynamic proxies with many framework #ifs."
 }

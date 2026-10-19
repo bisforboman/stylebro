@@ -1,17 +1,23 @@
 {
   "repo": "domn1995/dunet",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "main",
+  "commit": "098362a250fc024ca32af901a8efa5386c202835",
+  "csFiles": 56,
   "tags": [
     "generator",
-    "library"
+    "library",
+    "csharpier",
+    "twae"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "CSharpier as a local dotnet tool (.config/dotnet-tools.json, .csharpierrc printWidth 100), TreatWarningsAsErrors, no .editorconfig. In-solution generator (Dunet.Generator, netstandard2.0, IsRoslynComponent, project reference from the tests). net10.0, LangVersion 14; global.json 10.0.0 rollForward minor. No #if.",
+  "build": "ok",
   "workaround": null,
-  "tests": null,
+  "tests": "dotnet test Dunet.sln: Dunet.Test 203/203, Dunet.Integration 9/9 (net10.0), 138 s.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Small CSharpier + generator repository with warnings as errors. Tags \"csharpier\" and \"twae\" added."
 }

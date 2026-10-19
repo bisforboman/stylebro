@@ -1,18 +1,23 @@
 {
   "repo": "microsoft/vs-mef",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "main",
+  "commit": "a62f02b33907eb4e449653a73769d1ffced9b7ae",
+  "csFiles": 337,
   "tags": [
     "stylecop",
     "multi-target",
+    "if-in-bodies",
     "library"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "StyleCop.Analyzers.Unstable 1.2.0.556 + stylecop.json, VS Threading analyzers, EnforceCodeStyleInBuild, AnalysisLevel latest, 7 .editorconfig files (192-line root, 128 dotnet_diagnostic). Frameworks netstandard2.0;net472;net8.0;net10.0. global.json pins 10.0.401 (rollForward patch). 9 files with #if in member bodies. One .vb file.",
+  "build": "fails",
   "workaround": null,
-  "tests": null,
+  "tests": "Not run: restore fails.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Fails: nuget.config lists only an Azure DevOps feed (blocked by the proxy, 403); with nuget.org instead, Microsoft.VisualStudio.Internal.MicroBuild.VisualStudio/NonShipping are missing (internal packages). Also global.json needs SDK 10.0.401."
 }

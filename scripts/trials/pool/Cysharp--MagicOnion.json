@@ -1,18 +1,25 @@
 {
   "repo": "Cysharp/MagicOnion",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "main",
+  "commit": "cf1316f822ae27a79b821af42b13f558efd06f3a",
+  "csFiles": 778,
   "tags": [
     "generator",
     "multi-target",
-    "library"
+    "if-in-bodies",
+    "library",
+    "t4",
+    "web"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "PublicApiAnalyzers (PublicAPI.Shipped/Unshipped), no style analyzers, no TreatWarningsAsErrors. .editorconfig (78 lines, 11 dotnet_diagnostic). In-solution generator (MagicOnion.Client.SourceGenerator, 5 OutputItemType=\"Analyzer\" references). 3 T4 templates. Frameworks net8.0;net10.0 plus netstandard2.0/2.1 libraries, LangVersion 14/latest. 23 files with #if in member bodies. gRPC server/client (ASP.NET Core).",
+  "build": "ok",
   "workaround": null,
-  "tests": null,
+  "tests": "dotnet test tests/MagicOnion.<X>.Tests -f net10.0 for Abstractions, Client.SourceGenerator, Client, Integration, Serialization.MemoryPack, Serialization.MessagePack, Server.JsonTranscoding, Server: 921 passed, 0 failed, ~5 min. Left out: Server.Redis.Tests (needs Redis), Client/Server.NativeAot.Tests (AOT publish, slow), net8.0 runs (same code).",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "778 .cs files: above \"a few hundred\". Generator + multi-target + #if in bodies; the tests pass offline in-process."
 }

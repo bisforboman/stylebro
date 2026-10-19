@@ -12,93 +12,93 @@ jbogard/MediatR	realworld	now LuckyPennySoftware/MediatR
 libgit2/libgit2sharp	realworld
 riok/mapperly	realworld
 martinothamar/Mediator	realworld
-ardalis/GuardClauses	trial 1, trial 17	owner inferred
-DapperLib/Dapper	trial 1	owner inferred
-dotnet/Nerdbank.Streams	trial 1, trial 15	owner inferred
-ardalis/CleanArchitecture	trial 1, trial 10	owner inferred
+ardalis/GuardClauses	trial 1, trial 17
+DapperLib/Dapper	trial 1
+dotnet/Nerdbank.Streams	trial 1, trial 15
+ardalis/CleanArchitecture	trial 1, trial 10
 Kareadita/Kavita	trial 2, trial 14
-khellang/Scrutor	trial 2, trial 6	owner inferred
+khellang/Scrutor	trial 2, trial 6
 SixLabors/Fonts	trial 2, trial 18
 spectreconsole/spectre.console	trial 2, trial 13, trial 24
 ThreeMammals/Ocelot	trial 3
 dotnet/eShop	trial 3, trial 13
 AutoMapper/AutoMapper	trial 3	now LuckyPennySoftware/AutoMapper
-microsoft/vs-threading	trial 3	owner inferred
+microsoft/vs-threading	trial 3
 bchavez/Bogus	trial 4, trial 14
-phmonte/Buildalyzer	trial 4	owner inferred
-fluentassertions/fluentassertions	trial 4, trial 23	owner inferred
-ullmark/hashids.net	trial 4	owner inferred
-litenova/LiteBus	trial 5	owner inferred
-NCronJob-Dev/NCronJob	trial 5	owner inferred
-nsubstitute/NSubstitute	trial 5	owner inferred
+Buildalyzer/Buildalyzer	trial 4	was phmonte/Buildalyzer; moved
+fluentassertions/fluentassertions	trial 4, trial 23
+ullmark/hashids.net	trial 4
+litenova/LiteBus	trial 5
+NCronJob-Dev/NCronJob	trial 5
+nsubstitute/NSubstitute	trial 5
 linkdotnet/Blog	trial 5
 microsoft/vs-validation	trial 6
-ardalis/SmartEnum	trial 6	owner inferred
+ardalis/SmartEnum	trial 6
 davidfowl/TodoApi	trial 6
-jpdillingham/Soulseek.NET	trial 7	owner inferred
-dotnet-state-machine/stateless	trial 7	owner inferred
-sveinungf/spreadcheetah	trial 7	owner inferred
+jpdillingham/Soulseek.NET	trial 7
+dotnet-state-machine/stateless	trial 7
+sveinungf/spreadcheetah	trial 7
 LykosAI/StabilityMatrix	trial 8
-Flow-Launcher/Flow.Launcher	trial 8, trial 25	owner inferred
+Flow-Launcher/Flow.Launcher	trial 8, trial 25
 dotnet/orleans	trial 8
-microsoft/xbox-live-developer-tools	trial 8	owner inferred
+microsoft/xbox-live-developer-tools	trial 8
 oocx/tfplan2md	trial 9
-kubernetes-client/csharp	trial 9	owner inferred
-drewnoakes/metadata-extractor-dotnet	trial 9	owner inferred
-Blazor-Diagrams/Blazor.Diagrams	trial 9	owner inferred
-ironfede/openmcdf	trial 10	owner inferred
+kubernetes-client/csharp	trial 9
+drewnoakes/metadata-extractor-dotnet	trial 9
+Blazor-Diagrams/Blazor.Diagrams	trial 9
+openmcdf/openmcdf	trial 10	was ironfede/openmcdf; moved
 actions/runner	trial 10
-MapsterMapper/Mapster	trial 11	owner inferred
-ical-org/ical.net	trial 11	owner inferred
-evolutionary-architecture/evolutionary-architecture-by-example	trial 11	owner inferred
-autofac/Autofac	trial 11, trial 25	owner inferred
+MapsterMapper/Mapster	trial 11
+ical-org/ical.net	trial 11
+evolutionary-architecture/evolutionary-architecture-by-example	trial 11
+autofac/Autofac	trial 11, trial 25
 restsharp/RestSharp	trial 12
-sourcegit-scm/sourcegit	trial 12	owner inferred
-SteeltoeOSS/Steeltoe	trial 12	owner inferred
-reactivemarbles/DynamicData	trial 13	owner inferred
-aaubry/YamlDotNet	trial 13	owner inferred
-EntityGraphQL/EntityGraphQL	trial 14	owner inferred
-sebastienros/fluid	trial 15	owner inferred
-EdiWang/Moonglade	trial 15	owner inferred
-recyclarr/recyclarr	trial 15	owner inferred
-tusdotnet/tusdotnet	trial 16	owner inferred
-xoofx/markdig	trial 16	owner inferred
-simplcommerce/SimplCommerce	trial 16	owner inferred
-aspnet-contrib/AspNet.Security.OAuth.Providers	trial 16	owner inferred
-FakeItEasy/FakeItEasy	trial 17	owner inferred
+sourcegit-scm/sourcegit	trial 12
+SteeltoeOSS/Steeltoe	trial 12
+reactivemarbles/DynamicData	trial 13
+aaubry/YamlDotNet	trial 13
+EntityGraphQL/EntityGraphQL	trial 14
+sebastienros/fluid	trial 15
+EdiWang/Moonglade	trial 15
+recyclarr/recyclarr	trial 15
+tusdotnet/tusdotnet	trial 16
+xoofx/markdig	trial 16
+simplcommerce/SimplCommerce	trial 16
+aspnet-contrib/AspNet.Security.OAuth.Providers	trial 16
+FakeItEasy/FakeItEasy	trial 17
 Tyrrrz/CliWrap	trial 17, trial 31
-adamhathcock/sharpcompress	trial 18	owner inferred
-bagetter/BaGetter	trial 18	owner inferred
-microsoft/Microsoft.IO.RecyclableMemoryStream	trial 19	owner inferred
-BcryptNet/bcrypt.net	trial 19	owner inferred
-morelinq/MoreLINQ	trial 20	owner inferred
-coverlet-coverage/coverlet	trial 20	owner inferred
+adamhathcock/sharpcompress	trial 18
+bagetter/BaGetter	trial 18
+microsoft/Microsoft.IO.RecyclableMemoryStream	trial 19
+BcryptNet/bcrypt.net	trial 19
+morelinq/MoreLINQ	trial 20
+coverlet-coverage/coverlet	trial 20
 reactiveui/splat	trial 21
-AngleSharp/AngleSharp	trial 21	owner inferred
-pmcilreavy/AzureEventGridSimulator	trial 21	owner inferred
-sshnet/SSH.NET	trial 21	owner inferred
-akkadotnet/akka.net	trial 22	owner inferred
-CommunityToolkit/dotnet	trial 22	owner inferred
-Farfetch/kafkaflow	trial 22	owner inferred
-sebastienros/jint	trial 23	owner inferred
-stryker-mutator/stryker-net	trial 23	owner inferred
-microsoft/vs-streamjsonrpc	trial 23	owner inferred
+AngleSharp/AngleSharp	trial 21
+pm7y/AzureEventGridSimulator	trial 21	was pmcilreavy/AzureEventGridSimulator; moved
+sshnet/SSH.NET	trial 21
+akkadotnet/akka.net	trial 22
+CommunityToolkit/dotnet	trial 22
+Farfetch/kafkaflow	trial 22
+sebastienros/jint	trial 23
+stryker-mutator/stryker-net	trial 23
+microsoft/vs-streamjsonrpc	trial 23
 reactiveui/refit	trial 24
-SapiensAnatis/Dawnshard	trial 24	owner inferred
-jstedfast/MimeKit	trial 25	owner inferred
-specklesystems/speckle-sharp	trial 25	owner inferred
-serdedotnet/serde	trial 26	owner inferred
+SapiensAnatis/Dawnshard	trial 24
+jstedfast/MimeKit	trial 25
+specklesystems/speckle-sharp	trial 25
+serdedotnet/serde	trial 26
 NLog/NLog	trial 26
-planetarium/bencodex.net	trial 26	owner inferred
-nuskey8/Lua-CSharp	trial 26	owner inferred
-tylercamp/palcalc	trial 27	owner inferred
-TestableIO/System.IO.Abstractions	trial 27	owner inferred
+planetarium/bencodex.net	trial 26
+nuskey8/Lua-CSharp	trial 26
+tylercamp/palcalc	trial 27
+TestableIO/System.IO.Abstractions	trial 27
 TheAlgorithms/C-Sharp	trial 27
 Tyrrrz/CliFx	trial 27
-Cysharp/ZLogger	trial 28	owner inferred
-vers-one/EpubReader	trial 28	owner inferred
-Jackett/Jackett	trial 28	owner inferred
-TheJoeFin/Text-Grab	trial 28	owner inferred
+Cysharp/ZLogger	trial 28
+vers-one/EpubReader	trial 28
+Jackett/Jackett	trial 28
+TheJoeFin/Text-Grab	trial 28
 devlooped/moq	trial 29
 Cysharp/Ulid	trial 29
 amantinband/error-or	trial 29
@@ -120,16 +120,16 @@ Handlebars-Net/Handlebars.Net	trial 33
 dotnet/reactive	trial 33
 mono/taglib-sharp	trial 33
 scriban/scriban	trial 33
-protobuf-net/protobuf-net	trial 34	owner inferred
-zeromq/netmq	trial 34	owner inferred
-sprache/Sprache	trial 34	owner inferred; a fourth repo not yet recorded
+protobuf-net/protobuf-net	trial 34
+zeromq/netmq	trial 34
+sprache/Sprache	trial 34	a fourth repo not yet recorded (claude/trial-34 names none, checked 2026-10-19)
 dotnet/xharness	microsoft-style run
-aliostad/CacheCow	xunit survey	owner inferred
-ardalis/Ardalis.Extensions	xunit survey	owner inferred
-ardalis/Specification	xunit survey	owner inferred
-bitfaster/BitFaster.Caching	xunit survey	owner inferred
-Tyrrrz/YoutubeExplode	xunit survey	owner inferred
-TelegramBots/Telegram.Bot	xunit survey	owner inferred
+aliostad/CacheCow	xunit survey
+ardalis/Ardalis.Extensions	xunit survey
+ardalis/Specification	xunit survey
+bitfaster/BitFaster.Caching	xunit survey
+Tyrrrz/YoutubeExplode	xunit survey
+TelegramBots/Telegram.Bot	xunit survey
 duplicati/duplicati	rejected trial 30	too large
 d2phap/ImageGlass	rejected trial 30
 Radarr/Radarr	rejected trial 30, 31

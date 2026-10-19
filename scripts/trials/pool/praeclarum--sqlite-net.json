@@ -1,18 +1,23 @@
 {
   "repo": "praeclarum/sqlite-net",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "master",
+  "commit": "21e525c7825f8947047c36b3b3a81f70d5710d33",
+  "csFiles": 50,
   "tags": [
     "multi-target",
     "if-in-bodies",
-    "library"
+    "library",
+    "twae"
   ],
-  "setups": null,
-  "build": null,
-  "workaround": null,
-  "tests": null,
+  "setups": "No analyzers, TreatWarningsAsErrors, .editorconfig (167 lines, no dotnet_diagnostic, tabs). Packages netstandard2.0;net8.0;net9.0;net8.0-ios; tests net8.0 (compile src/SQLite.cs and SQLiteAsync.cs as links). 46 files with #if, 7 with #if in member bodies. global.json 9.0.100 latestFeature.",
+  "build": "ok with workaround",
+  "workaround": "Remove global.json (pins SDK 9.0.100, not installed). The solution build fails on net8.0-ios (NETSDK1147: workloads); build/test tests/SQLite.Tests/SQLite.Tests.csproj instead.",
+  "tests": "dotnet test tests/SQLite.Tests (net8.0, NUnit): 227 passed, 3 skipped, 22 s. The iOS test project is left out.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "One big file (SQLite.cs) linked into several projects, tabs, many #if: a format stress test. Small. \"twae\" added."
 }

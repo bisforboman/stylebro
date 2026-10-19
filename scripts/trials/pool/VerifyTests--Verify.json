@@ -1,19 +1,25 @@
 {
   "repo": "VerifyTests/Verify",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "main",
+  "commit": "db6185ac25223febaf1be559f2221df84278248b",
+  "csFiles": 870,
   "tags": [
     "multi-target",
+    "if-in-bodies",
     "snapshot-tests",
     "library",
-    "twae"
+    "twae",
+    "generator"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "TreatWarningsAsErrors + EnforceCodeStyleInBuild, 14 .editorconfig files (403-line root, 53 dotnet_diagnostic), LangVersion preview. 2,388 *.verified.* files. In-solution generator (Verify.MSTest.SourceGenerator). global.json pins SDK 11.0.100-rc.2; most projects target net11.0 (libraries net6.0-net11.0 + netstandard2.0).",
+  "build": "fails",
   "workaround": null,
-  "tests": null,
+  "tests": "Not run: does not build here.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Fails: needs the .NET 11 SDK (global.json 11.0.100-rc.2, 30+ projects net11.0 only). Also 870 .cs files. Revisit with an SDK 11."
 }

@@ -1,18 +1,24 @@
 {
   "repo": "andrewlock/StronglyTypedId",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "master",
+  "commit": "6bd17db4a4b700eaad9e209baf41478cc3f0bbe9",
+  "csFiles": 46,
   "tags": [
     "generator",
     "library",
-    "snapshot-tests"
+    "snapshot-tests",
+    "multi-target",
+    "if-in-bodies"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "No analyzers, no TreatWarningsAsErrors, no .editorconfig. In-solution generator (StronglyTypedIds, netstandard2.0, OutputItemType=\"Analyzer\" from the integration tests). Tests net6.0;net7.0;net8.0;net9.0 (+net48/netcoreapp3.1 on Windows); Verify snapshot tests (20 *.verified.* files). LangVersion latest. 13 files with #if, 11 with #if in member bodies (the generator templates).",
+  "build": "ok",
   "workaround": null,
-  "tests": null,
+  "tests": "dotnet test StronglyTypedId.sln -f net8.0: StronglyTypedIds.Tests 48/48, IntegrationTests 177 passed + 3 skipped, IntegrationTests.ExternalIds 177 + 3 skipped, 54 s. Other frameworks need runtimes 6/7/9 (DOTNET_ROLL_FORWARD=Major would do). The Nuget.* integration tests need a packed local package (left out).",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Small generator library with snapshot tests; only 46 .cs files. \"multi-target\" and \"if-in-bodies\" added."
 }

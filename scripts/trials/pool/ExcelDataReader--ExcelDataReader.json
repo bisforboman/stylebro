@@ -1,18 +1,23 @@
 {
   "repo": "ExcelDataReader/ExcelDataReader",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "develop",
+  "commit": "64a0c2a2ed29454f954797913fc9202854d7a7d1",
+  "csFiles": 180,
   "tags": [
+    "stylecop",
     "multi-target",
     "if-in-bodies",
     "library"
   ],
-  "setups": null,
-  "build": null,
-  "workaround": null,
-  "tests": null,
+  "setups": "StyleCop.Analyzers 1.2.0-beta.556 (Directory.Build.props) + stylecop.json, .editorconfig (221 lines, 14 dotnet_diagnostic) and a root .globalconfig; AnalysisLevel latest-recommended; no TreatWarningsAsErrors. Library net462;netstandard2.0;netstandard2.1;net8.0, tests net10.0 (+net462 on Windows), sample net462;net10.0-windows. LangVersion 14. 31 files with #if, 19 with #if in member bodies.",
+  "build": "ok with workaround",
+  "workaround": "-p:EnableWindowsTargeting=true (ExcelDataReader.Sample targets net10.0-windows: NETSDK1100 otherwise)",
+  "tests": "dotnet test src/ExcelDataReader.Tests (net10.0, NUnit 5): 673 passed, 2 skipped, 66 s. net462 only on Windows.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "A small StyleCop repository (migrate) with #if in method bodies. \"stylecop\" added."
 }

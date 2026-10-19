@@ -28,7 +28,7 @@
     "shouldly/shouldly",
     "Tyrrrz/DiscordChatExporter",
     "VerifyTests/Verify",
-    "WireMock-Net/WireMock.Net",
+    "wiremock/WireMock.Net",
     "xunit/xunit"
   ]
 }

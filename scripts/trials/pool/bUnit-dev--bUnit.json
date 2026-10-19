@@ -1,18 +1,27 @@
 {
   "repo": "bUnit-dev/bUnit",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "main",
+  "commit": "9043ecf7e7ab9bcc09ffa45b372db1ce9d3e3f38",
+  "csFiles": 402,
   "tags": [
     "multi-target",
+    "if-in-bodies",
     "library",
-    "razor"
+    "razor",
+    "sonar",
+    "twae",
+    "generator",
+    "snapshot-tests"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "SonarAnalyzer.CSharp + AsyncFixer, TreatWarningsAsErrors, EnforceCodeStyleInBuild, AnalysisMode AllEnabledByDefault, 5 .editorconfig files (514-line root, 87 dotnet_diagnostic) and 2 globalconfigs. 193 .razor files, in-solution generator (bunit.generators). Libraries and tests target net8.0;net9.0;net10.0;net11.0.",
+  "build": "fails",
   "workaround": null,
-  "tests": null,
+  "tests": "Not run: does not build here.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "Fails: every library and test project targets net11.0 too (NETSDK1045 with SDK 10). Revisit with an SDK 11 (Razor + Sonar + strict analysis would be a good target)."
 }

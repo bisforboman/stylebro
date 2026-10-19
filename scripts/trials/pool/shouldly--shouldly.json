@@ -1,17 +1,23 @@
 {
   "repo": "shouldly/shouldly",
-  "branch": null,
-  "commit": null,
-  "csFiles": null,
+  "branch": "master",
+  "commit": "c1f66b002ecd1b084feff6ec1978fa5eedb6f260",
+  "csFiles": 642,
   "tags": [
     "multi-target",
-    "library"
+    "library",
+    "twae",
+    "if-in-bodies"
   ],
-  "setups": null,
-  "build": null,
+  "setups": "TreatWarningsAsErrors, AnalysisLevel 5, 3 .editorconfig files (356-line root, 100 dotnet_diagnostic), no third-party analyzers. Library netstandard2.0;net8.0;net9.0, Shouldly.DiffEngine net472;net8.0;net9.0, tests net10.0 (+net48 on Windows); xunit.v3 (MTP) and TUnit. LangVersion 12/14. 9 files with #if in member bodies.",
+  "build": "ok",
   "workaround": null,
-  "tests": null,
+  "tests": "dotnet test --solution Shouldly.sln (MTP runner from global.json): 6 test projects, 1,122 passed, 0 failed, ~1 min.",
   "usedIn": null,
-  "verified": null,
-  "notes": "Seeded 2026-10-19; tags are expected, not checked."
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "642 .cs files: above \"a few hundred\". A dense .editorconfig with 100 severities, warnings as errors, xunit.v3 + TUnit. \"twae\" and \"if-in-bodies\" added."
 }
