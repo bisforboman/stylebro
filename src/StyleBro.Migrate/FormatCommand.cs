@@ -1628,7 +1628,7 @@ internal static partial class FormatCommand
         var (code, literal) = (false, false);
         for (var at = text.IndexOf('\r', StringComparison.Ordinal); at >= 0 && !(code && literal); at = text.IndexOf('\r', at + 1))
         {
-            if (at + 1 < text.Length && text[at + 1] == '\n')
+            if (!IsLoneCr(text, at))
             {
                 continue;
             }
@@ -1664,7 +1664,7 @@ internal static partial class FormatCommand
         var copied = 0;
         for (var at = text.IndexOf('\r', StringComparison.Ordinal); at >= 0; at = text.IndexOf('\r', at + 1))
         {
-            if (at + 1 < text.Length && text[at + 1] == '\n')
+            if (!IsLoneCr(text, at))
             {
                 continue;
             }
@@ -3887,6 +3887,9 @@ internal static partial class FormatCommand
 
         return (false, null, false);
     }
+
+    /// <summary>Whether the CR at <paramref name="at"/> ends a line by itself: no LF follows it (an old Mac line ending).</summary>
+    private static bool IsLoneCr(string text, int at) => !(at + 1 < text.Length && text[at + 1] == '\n');
 
     /// <summary>The spans of a C# text's string and character literals (where a CR is part of a value).</summary>
     private static List<Microsoft.CodeAnalysis.Text.TextSpan> LiteralSpans(string text) =>
