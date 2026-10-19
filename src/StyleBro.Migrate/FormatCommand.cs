@@ -785,6 +785,13 @@ internal static partial class FormatCommand
     public static bool IsWhitespaceLine(string line) => line.Contains(" WHITESPACE: ", StringComparison.Ordinal) || line.Contains(" ENDOFLINE: ", StringComparison.Ordinal);
 
     /// <summary>
+    /// A whitespace line (<see cref="IsWhitespaceLine"/>) or the same formatter's finding as IDE0055 ('warning IDE0055: Fix
+    /// formatting'): where 'format' leaves the code as it is, it was only this OS's line ending in lines the formatter rewrites
+    /// (trial 34, protobuf-net: a CRLF file's ';' + blank line before an '#if DEBUG' block, written back with LF).
+    /// </summary>
+    public static bool IsFormattingLine(string line) => IsWhitespaceLine(line) || line.Contains(" IDE0055: ", StringComparison.Ordinal);
+
+    /// <summary>
     /// The files that differ between two snapshots (removed or with other content), sorted. Not new files: 'dotnet format'
     /// never adds one, a build step does (recyclarr's git-ignored Generated/*.g.cs, missing in verify's copy and written
     /// during its run: "would change 3 files" for 1).
@@ -3463,8 +3470,8 @@ internal static partial class FormatCommand
             JsonReport.AddKept(kept);
 
             // Whitespace findings in a copy that formats clean only swapped line endings (KeepingLineEndings).
-            var endingsOnly = lines.Count(IsWhitespaceLine);
-            lines.Where(l => !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).ToList().ForEach(log);
+            var endingsOnly = lines.Count(IsFormattingLine);
+            lines.Where(l => !IsKeptLine(l, keys) && !IsFormattingLine(l)).ToList().ForEach(log);
             if (endingsOnly > 0)
             {
                 log($"{endingsOnly} whitespace finding{(endingsOnly == 1 ? " is" : "s are")} only this OS's line ending where a file uses the other one: ignored, 'format' keeps each file's own ending (set end_of_line to choose one).");
@@ -3472,7 +3479,7 @@ internal static partial class FormatCommand
 
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
-            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
             KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {

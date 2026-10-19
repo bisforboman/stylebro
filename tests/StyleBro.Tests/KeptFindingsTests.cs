@@ -739,6 +739,7 @@ public sealed class KeptFindingsTests : IDisposable
         var finding = $"{file}(3,5): warning BRO1008: Move the using directive outside the namespace [{project}]";
         var kept = $"{file}(3,17): warning BRO1303: Rename '_count' to 'count' [{project}]";
         var whitespace = $"{file}(4,1): warning WHITESPACE: Fix whitespace formatting. Replace 2 characters with '\\n'. [{project}]";
+        var formatting = $"{file}(4,1): warning IDE0055: Fix formatting [{project}]";
         var lines = new List<string>();
         var run = 0;
 
@@ -750,8 +751,9 @@ public sealed class KeptFindingsTests : IDisposable
             }
             else
             {
-                // The same finding from two frameworks' checks counts once; kept findings and whitespace don't count.
-                FormatCommand.RecordCheckFindings(root, FormatCommand.FindingsToFix(new[] { finding, finding + " ", kept, whitespace }, []));
+                // The same finding from two frameworks' checks counts once; kept findings, whitespace and IDE0055 (where the run
+                // changed nothing, only a line ending) don't count.
+                FormatCommand.RecordCheckFindings(root, FormatCommand.FindingsToFix(new[] { finding, finding + " ", kept, whitespace, formatting }, []));
             }
 
             WriteKept(file);
