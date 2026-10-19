@@ -9,3 +9,8 @@
 - **BRO1008** no longer reports usings in a file where a `#if` branch the build leaves out declares a namespace, or a
   type outside the namespace (a polyfill for older frameworks): the fix needs every build of the file to agree, so the
   warning used to stay for good.
+- **bro format** loads a test project in every framework's run when it references a project the solution doesn't list,
+  which in turn references a multi-targeted project. That test project used to be skipped ("references didn't load")
+  and its framework-only code wasn't formatted or checked.
+- **bro format** and **bro check** no longer count an IDE0055 warning that only changes a line ending (a CRLF file's
+  lines written back with LF) as a finding no fix changes.
