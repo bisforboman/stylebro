@@ -16,7 +16,7 @@ body:
     id: version
     attributes:
       label: StyleBro.Tool and .NET SDK version
-      placeholder: StyleBro.Tool 0.7.0-alpha.1, SDK 10.0.401
+      placeholder: StyleBro.Tool 0.8.0-alpha.1, SDK 10.0.401
     validations:
       required: true
   - type: textarea

@@ -13,7 +13,7 @@
     <ToolCommandName>bro</ToolCommandName>
     <PackageId>StyleBro.Tool</PackageId>
     <!-- Released together with StyleBro.Analyzers: release.yml overrides this with the tag's version. -->
-    <Version>0.7.0-alpha.1</Version>
+    <Version>0.8.0-alpha.1</Version>
     <Description>The bro command for StyleBro: sets a repository up (init, or migrate from StyleCop), fixes it (format, check, preview) and writes baselines.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/bisforboman/stylebro</PackageProjectUrl>

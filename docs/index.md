@@ -16,7 +16,7 @@ Roslyn analyzers and code fixes that keep C# code tidy. It's a modern alternativ
 ## Install
 
 ```xml
-<PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" />
+<PackageReference Include="StyleBro.Analyzers" Version="0.8.0-alpha.1" PrivateAssets="all" />
 ```
 
 ```
@@ -24,10 +24,6 @@ dotnet tool install --global StyleBro.Tool --prerelease
 bro init --write      # turns on the built-in rules StyleBro relies on, in .editorconfig
 bro format            # whitespace + StyleBro's rules + those built-in rules
 ```
-
-Until the next release the tool on nuget.org is still **StyleBro.Migrate** with the command
-`stylebro-migrate` (0.7.0-alpha.1): `dotnet tool install --global StyleBro.Migrate --prerelease`, then
-`stylebro-migrate` wherever these pages say `bro` (`stylebro-migrate [path]` for `bro migrate [path]`).
 
 Coming from StyleCop? Run `bro migrate --write` instead of `init`: see
 [Migrating from StyleCop](migrating.md).
