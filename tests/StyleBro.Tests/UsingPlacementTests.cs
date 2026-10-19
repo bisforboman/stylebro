@@ -465,4 +465,20 @@ public class UsingPlacementTests
             Inside),
         Verify.VerifyNoDiagnosticsAsync("global using System.Text;\nusing System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n}\n", Inside),
         Verify.VerifyNoDiagnosticsAsync("using System.Text;\n\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } public StringBuilder? B { get; set; } }\n}\n", Outside));
+
+    // Trial 34, protobuf-net: a '#if' branch that declares a namespace, or a type outside the namespace, means another build
+    // of the file (another framework, configuration or project) has other declarations; the fix needs every copy to agree.
+    [Fact]
+    public Task Skipped_IfBranchesDeclaringNamespacesOrOuterTypes() => Task.WhenAll(
+        Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n\n#if POLYFILL\nnamespace System.Diagnostics.CodeAnalysis\n{\n    internal enum Members { None }\n}\n#endif\n", Outside),
+        Verify.VerifyNoDiagnosticsAsync("namespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n\n#if POLYFILL\ninternal sealed class Polyfill { }\n#endif\n", Outside),
+        Verify.VerifyNoDiagnosticsAsync("#if !POLYFILL\nnamespace App\n{\n    using System;\n\n    public class C { public Type? T { get; set; } }\n}\n#endif\n", Outside),
+        Verify.VerifyNoDiagnosticsAsync("namespace App;\n\nusing System;\n\npublic class C { public Type? T { get; set; } }\n\n#if POLYFILL\nnamespace Inner { }\n#endif\n", Outside));
+
+    // A type inside the namespace comes before the usings wherever they are: still moved.
+    [Fact]
+    public Task IfBranchDeclaringATypeInsideTheNamespace_StillMoves() => Verify.VerifyFixAsync(
+        "namespace App\n{\n    {|BRO1008:using System;|}\n\n    public class C { public Type? T { get; set; } }\n\n#if POLYFILL\n    internal sealed class Polyfill { }\n#endif\n}\n",
+        "using System;\n\nnamespace App\n{\n    public class C { public Type? T { get; set; } }\n\n#if POLYFILL\n    internal sealed class Polyfill { }\n#endif\n}\n",
+        Outside);
 }
