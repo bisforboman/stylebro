@@ -2742,6 +2742,37 @@ internal static partial class FormatCommand
             : [];
     }
 
+    /// <summary>
+    /// The workload packs a project needs that this machine doesn't have: its own evaluation's, and for a multi-targeted
+    /// project each platform framework's ('net8.0-ios'): the outer evaluation lists none of them (trial 35, sqlite-net's
+    /// 'netstandard2.0;net8.0;net8.0-ios' projects stopped the restore though trial 30's check passed them). A framework
+    /// MSBuild can't evaluate counts as needing nothing; the restore says why.
+    /// </summary>
+    internal static string[] MissingWorkloadPacksOf(string fullPath, IReadOnlyList<string> frameworks)
+    {
+        var packs = MissingWorkloadPacks(EvaluateProject(fullPath));
+        return packs.Length > 0 || frameworks.Count < 2
+            ? packs
+            : PlatformFrameworks(frameworks).SelectMany(f => FrameworkWorkloads(fullPath, f)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    /// <summary>The frameworks that name a platform ('net8.0-ios', 'net10.0-windows'): only those can need a workload.</summary>
+    public static IEnumerable<string> PlatformFrameworks(IEnumerable<string> frameworks) => frameworks.Where(f => f.Contains('-', StringComparison.Ordinal));
+
+    private static string[] FrameworkWorkloads(string fullPath, string framework)
+    {
+        try
+        {
+            return MissingWorkloadPacks(Evaluations.GetOrAdd($"{fullPath}|{framework}|workloads", _ => new Lazy<string>(() => Capture(
+                Path.GetDirectoryName(fullPath)!,
+                ["msbuild", fullPath, $"-property:TargetFramework={framework}", "-getItem:MissingWorkloadPack", "-nologo"]))).Value);
+        }
+        catch (ToolException)
+        {
+            return [];
+        }
+    }
+
     /// <summary>The note for the projects <see cref="MissingWorkloadPacks"/> leaves out.</summary>
     public static string MissingWorkloadsLine(IReadOnlyList<string> projects, IReadOnlyList<string> packs) =>
         $"{UnformattedHeader} {string.Join(", ", projects)}: {(projects.Count == 1 ? "it needs" : "they need")} workloads this machine doesn't have ({string.Join(", ", packs.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase))}), so 'dotnet restore' fails on {(projects.Count == 1 ? "it" : "them")} (NETSDK1147) and 'format' leaves {(projects.Count == 1 ? "it" : "them")} alone. Run 'dotnet workload restore' and then 'bro format' again to format {(projects.Count == 1 ? "it" : "them")} too.";
@@ -4797,7 +4828,7 @@ internal static partial class FormatCommand
         // Android, iOS and Browser heads): 'dotnet restore' failed on them (NETSDK1147) and stopped the whole run, though the code
         // they share built. They're left alone, like a build of the other projects leaves them; the rest is formatted.
         var needWorkloads = projects
-            .Select(p => (p.Key, p.Value.FullPath, Packs: MissingWorkloadPacks(EvaluateProject(p.Value.FullPath))))
+            .Select(p => (p.Key, p.Value.FullPath, Packs: MissingWorkloadPacksOf(p.Value.FullPath, p.Value.Frameworks)))
             .Where(p => p.Packs.Length > 0)
             .ToList();
         if (needWorkloads.Count > 0)
