@@ -110,7 +110,7 @@ public class MultiTargetSuppressorTests
             .GetAnalyzerDiagnosticsAsync();
     }
 
-#pragma warning disable RS1001 // A stand-in for the SDK rule, never loaded as an analyzer.
+#pragma warning disable RS1001, RS2008 // Stand-ins for SDK rules, never loaded as analyzers.
     private sealed class FakeRule : DiagnosticAnalyzer
     {
         private readonly DiagnosticDescriptor descriptor;
@@ -155,7 +155,7 @@ public class MultiTargetSuppressorTests
         }
     }
 
-#pragma warning restore RS1001
+#pragma warning restore RS1001, RS2008
 
     private sealed class Provider : AnalyzerConfigOptionsProvider
     {
