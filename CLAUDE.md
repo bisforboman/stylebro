@@ -1654,6 +1654,38 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   as the preview's patch does. GOTCHA: a mutation loop's `git checkout <file>` reverts uncommitted work in that file: commit
   first.
 
+## Trial 34 (2026-10-19, not clean: owner "Not clean", tally 0)
+
+- Repos: sprache/Sprache (query syntax in parentheses, BRO1405), jaredpar/complog (runtime/Roslyn style `_x`/`s_x`, xunit.v3
+  4.0.1 = xunit.analyzers 1.24+; `init --style microsoft --write`), protobuf-net/protobuf-net (a lone CR in a CRLF file,
+  xunit.v3 4.0.0, `_x`/`s_`; 1,179 files, through a solution filter of its main projects), zeromq/netmq (random, seed 34:
+  ConfuserEx drew first, .NET Framework only). Trial 33's fixes held: TypeModel.cs's lone CRs converted, xUnit 1.24+ format and
+  check agree, Sprache's queries aligned in one run (the inner `)` line stays put: owner "Leave it"). After the fixes all four
+  converged in one run, check clean, builds and tests as on the untouched code.
+- netmq: `#if DEBUG` + `try {` + `#endif` around a statement: the Debug and Release runs re-indented it every run ("still
+  changing after 3 runs") while check said clean (its copy formatted to no net change, the leftover whitespace finding read
+  as a line ending). `IfBodies.Depth` counts blocks, `IfBodies.OpensBlock` makes a file whose `#if` branches open more braces
+  than they close a candidate: the line's indentation is kept ("Indentation kept").
+- protobuf-net: BuildTools compiles Core's files with other symbols; BRO1008 reported a using in Core's net8.0 build the fix
+  could never move (a polyfill namespace under `#if !PLAT_DYNAMIC_ACCESS_ATTR`), and format said "Clean" above it. Owner
+  ("Skip such files"): `UsingPlacement.DeclaresUnderIf` (disabled text with `namespace`, or a type keyword outside the
+  namespace body). format now reports what its last check found and no fix changed (`RecordCheckFindings`/`TakeCheckFindings`,
+  `FindingsToFix`, `UnfixedLine` shared with verify; "Run N: 0 files changed, but its check found what no fix changes").
+  IDE0055 lines count as line endings like WHITESPACE where the run changes nothing (`IsFormattingLine`: a CRLF file's lines
+  the formatter rewrites with LF). Projects the workspace doesn't list but references join `Keep`/`Other`
+  (`OutsideProjectRuns(..., out outsideProjects)`, `WithOutside`): TestCompatibilityLevel (netstandard2.0, not in the filter)
+  references multi-targeted Core, and protobuf-net.Test didn't load in the net8.0 run.
+- Environment: SDK 10.0.112 + 8.0.131 and pwsh were there. complog's tests fail as a whole with both `HTTPS_PROXY` and
+  `https_proxy` set (a case-insensitive dictionary): run the test executable with `env -u https_proxy -u http_proxy -u no_proxy`;
+  its untouched TWAE build fails on CS8002 (Mono.Options). netmq's Debug test host crashes on a `Debug.Assert` untouched: tests
+  in Release; Ipv6ToIpv4 fails (no IPv6). protobuf-net: global.json 10.0.201 pinned down; BuildToolsSmokeTests needs a package
+  BuildTools can't pack (IsPackable=false): a solution filter without it and the F#/VB/AOT harnesses; its NuGet.Config has
+  `<clear/>`, so the trial feed goes BELOW it; 12 untouched TWAE errors (obsolete members in generated code); tests through
+  `dotnet test --solution trial.slnf` (MTP). serde-dn needs Roslyn 5.6 (generator, CS9057) and clrmd dnceng feeds (blocked).
+  GOTCHA: the container has 15 GB; protobuf-net's format (~10 GB) next to StyleBro's test suite got both OOM-killed (exit 137,
+  "Test host process crashed"): run heavy jobs one at a time. `init --write` puts StyleBroPreset in the props file the
+  projects import (netmq: src/Directory.Build.props), so add the StyleBro.Analyzers reference there.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
