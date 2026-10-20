@@ -26,4 +26,35 @@ public sealed partial class MigrationTests
         Assert.Equal(expected, FormatCommand.MissingWorkloadPacksOf(lib, ["net8.0", "net8.0-ios"]));
         Assert.Empty(FormatCommand.MissingWorkloadPacksOf(lib, ["net8.0"]));
     }
+
+    [Fact]
+    public void OldCSharpFiles_AreSharedFilesAnOlderBuildCompiles()
+    {
+        // sqlite-net: src/SQLite.cs is compiled by SQLite.Tests (net8.0, C# 12) and SQLite-net-static (netstandard2.0, C# 7.3).
+        FormatCommand.CompileView View(string langVersion, params string[] files) => new([], langVersion, "enable", files);
+        var files = FormatCommand.OldCSharpFiles(
+        [
+            View("12.0", "/r/src/SQLite.cs", "/r/tests/Test.cs"),
+            View("7.3", "/r/src/SQLite.cs", "/r/src/Only.cs"),
+            View("9.0", "/r/src/SQLite.cs"),
+            View("12.0", "/r/src/Modern.cs"),
+            View("14.0", "/r/src/Modern.cs"),
+            View("preview", "/r/src/Preview.cs"),
+            View("10.0", "/r/src/Preview.cs"),
+        ]);
+
+        Assert.Equal([("/r/src/Preview.cs", "10.0"), ("/r/src/SQLite.cs", "7.3")], files);
+    }
+
+    [Fact]
+    public void FormatsHook_AddsTheOldCSharpList()
+    {
+        Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>\n</Project>\n");
+        Write("select.targets", FormatCommand.SelectFrameworkTargets);
+        var list = Path.Combine(root, "x.oldcsharp");
+        string Items(params string[] properties) => FormatCommand.Capture(root, ["msbuild", Path.Combine(root, "App", "App.csproj"), $"-property:BeforeMicrosoftNETSdkTargets={Path.Combine(root, "select.targets")}", .. properties, "-getItem:AdditionalFiles", "-nologo"]);
+
+        Assert.Contains("x.oldcsharp", Items($"-property:StyleBroFormatOldCSharp={list}"));
+        Assert.DoesNotContain("oldcsharp", Items());
+    }
 }

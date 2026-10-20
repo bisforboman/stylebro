@@ -48,6 +48,13 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
     /// <summary>The SDK's rule for built-in type names ('Int32' -> 'int', 'IntPtr' -> 'nint').</summary>
     internal const string TypeNamesId = "IDE0049";
 
+    /// <summary>
+    /// The extension of the list 'bro format' passes its runs as an additional file: one line per file another project
+    /// compiles with an older C#, '&lt;lowest version&gt;\t&lt;full path&gt;' (trial 35: a file linked into a net8.0 project and a
+    /// netstandard2.0 one; each project's suppressor sees only its own frameworks).
+    /// </summary>
+    public const string OldCSharpExtension = ".oldcsharp";
+
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = Minimums.Keys.ToImmutableDictionary(
         id => id,
         id => new SuppressionDescriptor("MULTITARGET_" + id, id, "A target framework of this project lacks the API the fix writes (StyleBro's multi-target guard)"));
@@ -63,6 +70,7 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
     {
         // A single target: the rule itself checks that the API exists (AllHave).
         var options = context.Options.AnalyzerConfigOptionsProvider.GlobalOptions;
+        Dictionary<string, Version>? oldCSharp = null;
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
             if (Descriptors.TryGetValue(diagnostic.Id, out var descriptor) && !AllHave(options, Minimums[diagnostic.Id]))
@@ -71,7 +79,8 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
             }
             else if (diagnostic.Id == TypeNamesId && diagnostic.Location.SourceTree is { } tree
                 && TypeNameFixNeeds(tree, diagnostic.Location.SourceSpan, context.CancellationToken) is { } core
-                && !AllFrameworksDefaultTo(options, core))
+                && (!AllFrameworksDefaultTo(options, core)
+                    || ((oldCSharp ??= ReadOldCSharp(context)).TryGetValue(NormalizePath(tree.FilePath), out var lowest) && lowest < CSharpFor(core))))
             {
                 context.ReportSuppression(Suppression.Create(TypeNames, diagnostic));
             }
@@ -115,6 +124,30 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
         name = name.Substring(name.LastIndexOf('.') + 1);
         return name is "IntPtr" or "UIntPtr" ? new Version(5, 0) : null;
     }
+
+    /// <summary>The C# version .NET <paramref name="core"/> defaults to (<see cref="TypeNameFixNeeds"/>'s two: .NET 5 C# 9, .NET 8 C# 12).</summary>
+    internal static Version CSharpFor(Version core) => new(core.Major + 4, 0);
+
+    /// <summary>The files and lowest C# versions 'bro format' listed (<see cref="OldCSharpExtension"/>); empty without the list.</summary>
+    internal static Dictionary<string, Version> ReadOldCSharp(SuppressionAnalysisContext context)
+    {
+        var files = new Dictionary<string, Version>(StringComparer.OrdinalIgnoreCase);
+        foreach (var list in context.Options.AdditionalFiles.Where(f => f.Path.EndsWith(OldCSharpExtension, StringComparison.OrdinalIgnoreCase)))
+        {
+            foreach (var line in list.GetText(context.CancellationToken)?.Lines.Select(l => l.ToString()) ?? Enumerable.Empty<string>())
+            {
+                var tab = line.IndexOf('\t');
+                if (tab > 0 && Version.TryParse(line.Substring(0, tab), out var version))
+                {
+                    files[NormalizePath(line.Substring(tab + 1))] = version;
+                }
+            }
+        }
+
+        return files;
+    }
+
+    private static string NormalizePath(string path) => path.Replace('\\', '/');
 
     /// <summary>
     /// Whether every copy of a multi-targeted project's files compiles with at least the C# version .NET <paramref name="core"/>

@@ -97,14 +97,35 @@ public class MultiTargetSuppressorTests
         Assert.Equal(suppressed, diagnostic.IsSuppressed);
     }
 
+    [Theory]
+    [InlineData("7.3", "IntPtr", true)]
+    [InlineData("7.3", "alias", true)]
+    [InlineData("7.3", "Int32", false)]
+    [InlineData("9.0", "IntPtr", false)]
+    [InlineData("9.0", "alias", true)]
+    [InlineData("12.0", "alias", false)]
+    [InlineData(null, "alias", false)]
+    public async Task SuppressesTypeNames_InFilesFormatListsForAnOlderBuild(string? lowest, string name, bool suppressed)
+    {
+        // sqlite-net: SQLite.Tests (net8.0 only) compiles src/SQLite.cs, which SQLite-net-static also builds for
+        // netstandard2.0; its own suppressor sees one framework, so 'bro format' passes the list.
+        var code = name == "alias" ? "using H = System.Int32;\nclass C { }" : $"class C {{ {name} f; }}";
+        var list = lowest is null ? ImmutableArray<AdditionalText>.Empty : ImmutableArray.Create<AdditionalText>(new Text("/tmp/stylebro-1.oldcsharp", $"{lowest}\t/src/Other.cs\n{lowest}\t\\src\\Test0.cs\n"));
+        var global = ImmutableDictionary<string, string>.Empty.Add(MultiTargetSuppressor.Property, "net8.0");
+
+        var diagnostic = Assert.Single(await RunAsync(new FakeTypeNames(), code, global, list, "/src/Test0.cs"));
+
+        Assert.Equal(suppressed, diagnostic.IsSuppressed);
+    }
+
     /// <summary>A stand-in for the SDK rule: reports <paramref name="id"/> on the class; returns all its diagnostics.</summary>
     private static Task<ImmutableArray<Diagnostic>> RunAsync(string id, string? frameworks) =>
         RunAsync(new FakeRule(id), "class C { }", frameworks is null ? ImmutableDictionary<string, string>.Empty : ImmutableDictionary<string, string>.Empty.Add(MultiTargetSuppressor.Property, frameworks));
 
-    private static async Task<ImmutableArray<Diagnostic>> RunAsync(DiagnosticAnalyzer rule, string code, ImmutableDictionary<string, string> global)
+    private static async Task<ImmutableArray<Diagnostic>> RunAsync(DiagnosticAnalyzer rule, string code, ImmutableDictionary<string, string> global, ImmutableArray<AdditionalText> additional = default, string path = "")
     {
-        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText(code) }, Array.Empty<MetadataReference>());
-        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new Provider(global));
+        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText(code, path: path) }, Array.Empty<MetadataReference>());
+        var options = new AnalyzerOptions(additional.IsDefault ? ImmutableArray<AdditionalText>.Empty : additional, new Provider(global));
         var analyzers = ImmutableArray.Create(rule, new MultiTargetSuppressor());
         return await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
             .GetAnalyzerDiagnosticsAsync();
@@ -156,6 +177,21 @@ public class MultiTargetSuppressorTests
     }
 
 #pragma warning restore RS1001, RS2008
+
+    private sealed class Text : AdditionalText
+    {
+        private readonly string text;
+
+        public Text(string path, string text)
+        {
+            Path = path;
+            this.text = text;
+        }
+
+        public override string Path { get; }
+
+        public override Microsoft.CodeAnalysis.Text.SourceText GetText(CancellationToken cancellationToken = default) => Microsoft.CodeAnalysis.Text.SourceText.From(text);
+    }
 
     private sealed class Provider : AnalyzerConfigOptionsProvider
     {

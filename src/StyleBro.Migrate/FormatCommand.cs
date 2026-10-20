@@ -65,6 +65,10 @@ internal static partial class FormatCommand
             <_StyleBroAliasFrom>$([MSBuild]::Add($(_StyleBroAliasAt), $(_StyleBroAliasKey.Length)))</_StyleBroAliasFrom>
             <TargetFramework>$(StyleBroFormatAliases.Substring($(_StyleBroAliasFrom), $([MSBuild]::Subtract($(StyleBroFormatAliases.IndexOf('|', $(_StyleBroAliasFrom))), $(_StyleBroAliasFrom)))))</TargetFramework>
           </PropertyGroup>
+          <!-- Files another build compiles with an older C# (trial 35): StyleBro's multi-target guard reads the list. -->
+          <ItemGroup Condition="'$(StyleBroFormatOldCSharp)' != ''">
+            <AdditionalFiles Include="$(StyleBroFormatOldCSharp)" />
+          </ItemGroup>
           <!-- 'dotnet format' skips the rules WarningsNotAsErrors lists, which the build reports as warnings: not for its runs. -->
           <PropertyGroup Condition="'$(StyleBroFormatWarnings)' == 'true'">
             <WarningsNotAsErrors>$([System.Text.RegularExpressions.Regex]::Replace('$(WarningsNotAsErrors)', '(?i)\bBRO\d+\b', ''))</WarningsNotAsErrors>
@@ -2334,6 +2338,59 @@ internal static partial class FormatCommand
         $"Stopped: {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)} "
         + "have a line starting with a private-use character where a directive's '#' would be, the character 'format' swaps the '#' of protected lines for while it runs, "
         + "but no record says a run did (a run killed and its record lost, or an edit by hand). Put the '#' back, then run again.";
+
+    /// <summary>
+    /// Writes the list of <see cref="OldCSharpFiles"/> for the runs (<c>stylebro-*.oldcsharp</c> in the temp folder) and
+    /// returns its path, or null when there are none. Only projects compiling a file another project compiles are evaluated
+    /// per framework: a project's own frameworks are its suppressor's to see.
+    /// </summary>
+    private static string? WriteOldCSharpFiles(IReadOnlyList<(string FullPath, string[] Frameworks, string[] Compile)> projects)
+    {
+        var shared = projects.SelectMany(p => p.Compile.Distinct(StringComparer.OrdinalIgnoreCase).Select(f => (File: f, p.FullPath)))
+            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g.Select(x => x.FullPath))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var views = projects.Where(p => shared.Contains(p.FullPath))
+            .SelectMany(p => (p.Frameworks.Length > 0 ? p.Frameworks : [string.Empty]).Select(f => (p.FullPath, Framework: f)))
+            .AsParallel()
+            .Select(x => ReadView(CompileSettings(x.FullPath, x.Framework)))
+            .OfType<CompileView>()
+            .ToList();
+        var files = OldCSharpFiles(views);
+        if (files.Count == 0)
+        {
+            return null;
+        }
+
+        var path = Path.Combine(Path.GetTempPath(), $"stylebro-{Guid.NewGuid():N}{StyleBro.Analyzers.Modernize.MultiTargetSuppressor.OldCSharpExtension}");
+        File.WriteAllLines(path, files.Select(f => $"{f.Lowest}\t{f.File}"));
+        return path;
+    }
+
+    private static void DeleteOldCSharpFiles(string? path)
+    {
+        if (path is not null)
+        {
+            File.Delete(path);
+        }
+    }
+
+    /// <summary>
+    /// The files that compilations build with different C# versions, the lowest below 12 (the newest a guarded fix needs),
+    /// with that lowest version: where a fix made in a newer build's run can break an older build of the same file.
+    /// </summary>
+    public static List<(string File, string Lowest)> OldCSharpFiles(IEnumerable<CompileView> views) =>
+        views.SelectMany(v => v.Compile.Select(f => (File: f, Version: ParseLangVersion(v.LangVersion))))
+            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Select(x => x.Version).Distinct().Count() > 1 && g.Min(x => x.Version) < new Version(12, 0))
+            .Select(g => (g.Key, g.Min(x => x.Version)!.ToString()))
+            .OrderBy(x => x.Key, StringComparer.Ordinal)
+            .ToList();
+
+    // 'preview' and anything else that isn't a number: newer than every numbered version.
+    private static Version ParseLangVersion(string value) =>
+        Version.TryParse(value, out var version) ? version : new Version(int.MaxValue, 0);
 
     /// <summary>
     /// <see cref="CompileSettings"/>'s output read, or null: the defined symbols, the language version (<see cref="EffectiveLangVersion"/>),
@@ -5073,11 +5130,16 @@ internal static partial class FormatCommand
         var whole = plan.Count <= 1 && allFrameworks.Count == 0 && visualBasic.Count == 0 && needWorkloads.Count == 0;
         var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
         File.WriteAllText(select, SelectFrameworkTargets);
+
+        // Files projects share that another build compiles with an older C# (trial 35, sqlite-net: SQLite.Tests, net8.0, got
+        // IDE0049's 'using X = nint;' into src/SQLite.cs, which SQLite-net-static also compiles for netstandard2.0, C# 7.3).
+        // A suppressor sees only its own project's frameworks, so the runs hand it the list (the hook's AdditionalFiles).
+        var oldCSharp = WriteOldCSharpFiles(projects.Values.Select(p => (p.FullPath, p.Frameworks, p.Compile)).ToList());
         if (whole && !(checkFirst && !passThrough.Contains("--report")))
         {
             try
             {
-                var plain = notAsErrors.Count > 0 ? new RunEnvironment(string.Empty, select, string.Empty, string.Empty, string.Empty, null, Warnings: true) : null;
+                var plain = notAsErrors.Count > 0 || oldCSharp is not null ? new RunEnvironment(string.Empty, select, string.Empty, string.Empty, string.Empty, null, Warnings: notAsErrors.Count > 0, OldCSharp: oldCSharp) : null;
                 int single;
                 using (PhaseTimes.Measure(passThrough.Contains("--verify-no-changes") ? "check: all projects" : "fix: all projects"))
                 {
@@ -5096,6 +5158,7 @@ internal static partial class FormatCommand
             finally
             {
                 File.Delete(select);
+                DeleteOldCSharpFiles(oldCSharp);
             }
         }
 
@@ -5219,7 +5282,7 @@ internal static partial class FormatCommand
                 var keep = framework.Length == 0 ? new HashSet<string>() : Keep(byPath, framework);
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
                 var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);
-                var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names, notAsErrors.Count > 0, configuration);
+                var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names, notAsErrors.Count > 0, configuration, oldCSharp);
                 return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output), Passes(whitespaceExclusions, include));
             }
             finally
@@ -5396,6 +5459,7 @@ internal static partial class FormatCommand
         finally
         {
             File.Delete(select);
+            DeleteOldCSharpFiles(oldCSharp);
             if (string.IsNullOrEmpty(givenNames) && names.Length > 0)
             {
                 File.Delete(names);
@@ -5611,6 +5675,11 @@ internal static partial class FormatCommand
             if (f.Warnings)
             {
                 start.Environment["StyleBroFormatWarnings"] = "true";
+            }
+
+            if (f.OldCSharp is not null)
+            {
+                start.Environment["StyleBroFormatOldCSharp"] = f.OldCSharp;
             }
 
             // Like TargetFramework: the project file's own '$(Configuration)' conditions (DefineConstants) see it.
@@ -5986,7 +6055,7 @@ internal static partial class FormatCommand
     }
 
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>
-    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Other, string Aliases, string? Names, bool Warnings = false, string Configuration = "");
+    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Other, string Aliases, string? Names, bool Warnings = false, string Configuration = "", string? OldCSharp = null);
 
     /// <summary>
     /// Sets <see cref="KeptFinding.Variable"/> (or another variable that names a file) for the 'dotnet format' runs this

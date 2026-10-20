@@ -141,6 +141,7 @@ internal static class ConstructorSummaries
         var sentence = end >= 0 && (close < 0 || end < close) ? rest.Substring(0, end)
             : close >= 0 ? rest.Substring(0, close)
             : rest;
+
         // A sentence cut inside an element ('<c>Castle' of '<c>Castle.Options</c>.') isn't one: replacing it would leave the
         // element's end behind.
         if (!Filler.IsMatch(sentence.Trim()) || HasUnclosedElement(sentence))
