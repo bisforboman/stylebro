@@ -4183,6 +4183,7 @@ internal static partial class FormatCommand
             }
         };
         var exit = verify ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
+
         // --build builds every configuration, the generator projects' too.
         var workspaceForBuild = buildAll ? File.Exists(path) ? path : BaselineCommand.FindWorkspace(root) is { } found ? Path.Combine(root, found) : null : null;
         if (buildAll)

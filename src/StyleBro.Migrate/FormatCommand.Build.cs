@@ -20,9 +20,6 @@ internal static partial class FormatCommand
 
     private static readonly Regex BuildLine = new(@"^\s*(?<path>.+?)(?:\((?<line>\d+),(?<column>\d+)\))? ?: (?<kind>warning|error) (?<id>[A-Za-z]+\d+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$");
 
-    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
-    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true);
-
     /// <summary>The errors and warnings of a build's <paramref name="output"/> (each once: the summary repeats them), paths relative to <paramref name="root"/>.</summary>
     public static List<BuildMessage> BuildMessages(IEnumerable<string> output, string root) =>
         output.Select(l => BuildLine.Match(l))
@@ -66,7 +63,8 @@ internal static partial class FormatCommand
         SolutionConfigurations(workspacePath) is { Count: > 0 } solution
             ? solution
             : (EvaluatedProperty(workspacePath, "Configurations") is { Length: > 0 } own && workspacePath.EndsWith("proj", StringComparison.OrdinalIgnoreCase) ? own : "Debug;Release")
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
 
     /// <summary>
     /// The files that make the working tree of <paramref name="repository"/> differ from HEAD: (tracked path, in HEAD), plus
@@ -224,4 +222,7 @@ internal static partial class FormatCommand
         var exitCode = Dotnet(folder, null, ["build", workspace, "-c", name, .. PlatformProperty(platform), "-p:TreatWarningsAsErrors=true", "-p:NuGetAudit=false", "--no-incremental", "-nologo", "-nodeReuse:false", "-clp:NoSummary"], output.Add);
         return (exitCode, output);
     }
+
+    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
+    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true);
 }
