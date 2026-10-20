@@ -57,4 +57,34 @@ public sealed partial class MigrationTests
         Assert.Contains("x.oldcsharp", Items($"-property:StyleBroFormatOldCSharp={list}"));
         Assert.DoesNotContain("oldcsharp", Items());
     }
+
+    [Fact]
+    public void HeldBackIds_AreTheGuardsIdeRules_WhereFormatIgnoresSuppressors()
+    {
+        // Trial 35: SDK 10.0.113's 'dotnet format' doesn't load suppressors in its style pass, so the multi-target guard
+        // never hid IDE0049 or IDE0057 there.
+        string[] options = ["--severity", "warn", "--diagnostics", "BRO1001", "IDE0049", "IDE0057", "IDE0040", "CA1510", "IDE0330"];
+        var asked = 0;
+        bool Ignores()
+        {
+            asked++;
+            return false;
+        }
+
+        Assert.Equal(["IDE0049", "IDE0057", "IDE0330"], FormatCommand.HeldBackIds(options, guarded: true, Ignores));
+        Assert.Empty(FormatCommand.HeldBackIds(options, guarded: true, () => true));
+        Assert.Empty(FormatCommand.HeldBackIds(options, guarded: false, Ignores));
+        Assert.Empty(FormatCommand.HeldBackIds(["--diagnostics", "BRO1001", "IDE0040"], guarded: true, Ignores));
+        Assert.Equal(1, asked);
+        Assert.StartsWith("Held back: IDE0049, IDE0057:", FormatCommand.HeldBackLine(["IDE0049", "IDE0057"]));
+    }
+
+    [Fact]
+    public void FormatHonorsIdeSuppressions_ProbesThisSdk()
+    {
+        // The answer depends on the SDK (10.0.113: false; newer bands: true); asked twice, the second comes from the cache.
+        var first = FormatCommand.FormatHonorsIdeSuppressions();
+        Assert.Equal(first, FormatCommand.FormatHonorsIdeSuppressions());
+    }
 }
+

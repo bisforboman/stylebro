@@ -11,3 +11,6 @@
   (`Creates a new instance of <c>Options</c>.` became `... class.</c>.`, a build error): the whole sentence is replaced.
 - **BRO1304** and the other renames keep a nested type's name when a string names it the way reflection writes it
   (`"...Tests+PrivateInterface is not accessible"`), as they already did for `App.Shape` and `App.Shape, App`.
+- **`bro format`** leaves IDE0049, IDE0056, IDE0057 and IDE0330 out (it says "Held back") in repositories with
+  multi-targeted projects or files shared with an older C#, where the .NET SDK's `dotnet format` ignores the suppressor
+  that keeps their fixes from breaking an older framework's build (seen with SDK 10.0.113). Newer SDKs apply them as before.

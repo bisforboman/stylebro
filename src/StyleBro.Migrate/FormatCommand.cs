@@ -184,6 +184,9 @@ internal static partial class FormatCommand
     /// <summary>How format names the run of the projects without a target framework (old-style), see <see cref="Plan"/>.</summary>
     private const string NoFrameworkLabel = "old-style projects";
 
+    /// <summary>The start of the line that says which IDE fixes the multi-target guard can't cover here (<see cref="HeldBackIds"/>; printed for the first run only).</summary>
+    private const string HeldBackHeader = "Held back:";
+
     /// <summary>The start of the line that names the runs for other configurations (printed for the first run only).</summary>
     private const string ConfigurationsHeader = "Configurations:";
 
@@ -230,7 +233,7 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, XunitHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The projects and configurations a --verify-no-changes run on a folder couldn't check (<see cref="RecordUnchecked"/>), per folder.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<(string Project, string Configuration)>> Unchecked = new(StringComparer.OrdinalIgnoreCase);
@@ -2338,6 +2341,106 @@ internal static partial class FormatCommand
         $"Stopped: {string.Join(", ", files.Take(5))}{(files.Count > 5 ? $" and {files.Count - 5} more" : string.Empty)} "
         + "have a line starting with a private-use character where a directive's '#' would be, the character 'format' swaps the '#' of protected lines for while it runs, "
         + "but no record says a run did (a run killed and its record lost, or an edit by hand). Put the '#' back, then run again.";
+
+    /// <summary>
+    /// The IDE ids whose fixes only StyleBro's multi-target guard keeps from breaking an older framework's or project's build
+    /// (IDE0049's 'nint' and keywords in using aliases, tier C's newer APIs), out of the ids in <paramref name="options"/>:
+    /// all of them when the guard matters here (<paramref name="guarded"/>) and this SDK's 'dotnet format' ignores
+    /// suppressors for IDE rules (<paramref name="honors"/>, asked only then), else none.
+    /// </summary>
+    public static List<string> HeldBackIds(IReadOnlyList<string> options, bool guarded, Func<bool> honors)
+    {
+        var ids = options.Where(o => o == StyleBro.Analyzers.Modernize.MultiTargetSuppressor.TypeNamesId
+                || (o.StartsWith("IDE", StringComparison.Ordinal) && StyleBro.Analyzers.Modernize.MultiTargetSuppressor.Minimums.ContainsKey(o)))
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        return ids.Count > 0 && guarded && !honors() ? ids : [];
+    }
+
+    /// <summary>What format says about the ids <see cref="HeldBackIds"/> leaves out.</summary>
+    public static string HeldBackLine(IReadOnlyList<string> ids) =>
+        $"{HeldBackHeader} {string.Join(", ", ids)}: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, "
+        + "so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; "
+        + "a newer .NET SDK's 'dotnet format' applies them where the guard allows.";
+
+    /// <summary>
+    /// Whether this machine's 'dotnet format' hides an IDE diagnostic a DiagnosticSuppressor suppresses: a probe project in
+    /// the temp folder with StyleBro's analyzers and a framework list the tier-C guard hides IDE0057 for, checked once per
+    /// 'dotnet format' version (cached in the temp folder). True when the probe can't tell (nothing held back then).
+    /// </summary>
+    internal static bool FormatHonorsIdeSuppressions(Action<string>? log = null)
+    {
+        string version;
+        try
+        {
+            version = Capture(Path.GetTempPath(), "format", "--version").Trim().Split('+')[0];
+        }
+        catch (ToolException)
+        {
+            return true;
+        }
+
+        var cache = Path.Combine(Path.GetTempPath(), $"stylebro-ide-suppressions-{Regex.Replace(version, @"[^\w.-]", "_")}.txt");
+        if (File.Exists(cache) && bool.TryParse(File.ReadAllText(cache).Trim(), out var cached))
+        {
+            return cached;
+        }
+
+        var folder = Path.Combine(Path.GetTempPath(), $"stylebro-ide-probe-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(Path.Combine(folder, "Directory.Build.props"), "<Project />\n");
+            File.WriteAllText(Path.Combine(folder, "Directory.Build.targets"), "<Project />\n");
+            File.WriteAllText(Path.Combine(folder, "Directory.Packages.props"), "<Project />\n");
+            File.WriteAllText(Path.Combine(folder, ".editorconfig"), "root = true\n\n[*.cs]\ncsharp_style_prefer_range_operator = true\ndotnet_diagnostic.IDE0057.severity = warning\n");
+            File.WriteAllText(Path.Combine(folder, "A.cs"), "public static class A\n{\n    public static string M(string t) => t.Substring(1, t.Length - 2);\n}\n");
+            File.WriteAllText(Path.Combine(folder, "Probe.csproj"), $$"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>net$(BundledNETCoreAppTargetFrameworkVersion)</TargetFramework>
+                    <StyleBroTargetFrameworks>netstandard2.0,net$(BundledNETCoreAppTargetFrameworkVersion)</StyleBroTargetFrameworks>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
+                    <Analyzer Include="{{typeof(StyleBro.Analyzers.Modernize.MultiTargetSuppressor).Assembly.Location}}" />
+                  </ItemGroup>
+                </Project>
+                """);
+            var project = Path.Combine(folder, "Probe.csproj");
+            if (Dotnet(folder, null, ["restore", project, "-nologo"], _ => { }) != 0)
+            {
+                return true;
+            }
+
+            var exit = Dotnet(folder, null, ["format", "style", project, "--verify-no-changes", "--diagnostics", "IDE0057", "--no-restore"], _ => { });
+            if (exit is not 0 and not NotCleanExitCode)
+            {
+                return true;
+            }
+
+            var honors = exit == 0;
+            File.WriteAllText(cache, honors.ToString());
+            return honors;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or ToolException)
+        {
+            log?.Invoke($"Couldn't check whether 'dotnet format' honors suppressors for IDE rules ({e.Message}); nothing held back.");
+            return true;
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(folder, recursive: true);
+            }
+            catch (IOException)
+            {
+                // A build node may still hold a file; the temp folder is cleaned up eventually.
+            }
+        }
+    }
 
     /// <summary>
     /// Writes the list of <see cref="OldCSharpFiles"/> for the runs (<c>stylebro-*.oldcsharp</c> in the temp folder) and
@@ -5135,6 +5238,17 @@ internal static partial class FormatCommand
         // IDE0049's 'using X = nint;' into src/SQLite.cs, which SQLite-net-static also compiles for netstandard2.0, C# 7.3).
         // A suppressor sees only its own project's frameworks, so the runs hand it the list (the hook's AdditionalFiles).
         var oldCSharp = WriteOldCSharpFiles(projects.Values.Select(p => (p.FullPath, p.Frameworks, p.Compile)).ToList());
+
+        // The guard is a DiagnosticSuppressor, which some SDKs' 'dotnet format' doesn't load for IDE rules (trial 35: 10.0.113's
+        // style pass wrote sqlite-net's 'using X = nint;' and IDE0057's ranges into netstandard2.0 code). There those fixes are
+        // held back where the guard would matter (owner's decision 2026-10-20).
+        var guarded = oldCSharp is not null || projects.Values.Any(p => p.Frameworks.Length > 1);
+        if (HeldBackIds(passThrough, guarded, () => FormatHonorsIdeSuppressions(log)) is { Count: > 0 } heldBack)
+        {
+            log(HeldBackLine(heldBack));
+            passThrough.RemoveAll(heldBack.Contains);
+        }
+
         if (whole && !(checkFirst && !passThrough.Contains("--report")))
         {
             try
