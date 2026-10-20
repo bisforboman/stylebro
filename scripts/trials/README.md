@@ -21,7 +21,7 @@ them is in [.trials/README.md](../../.trials/README.md).
   "branch": "main",
   "commit": "the full sha the checks ran on",
   "csFiles": 240,
-  "tags": ["stylecop", "csharpier", "sonar", "stylesharp", "multi-target", "if-in-bodies", "generator", "xaml", "twae", "library", "app"],
+  "tags": ["stylecop", "csharpier", "sonar", "stylesharp", "multi-target", "if-in-bodies", "generator", "xaml", "twae", "library", "app", "needs-workload"],
   "setups": "what the repository really has: analyzers, .editorconfig, TreatWarningsAsErrors, frameworks",
   "build": "ok | ok with workaround | fails",
   "workaround": "what a trial must do locally (-p:NuGetAudit=false, a feed removed, ...), or null",
@@ -35,3 +35,8 @@ them is in [.trials/README.md](../../.trials/README.md).
 Checking an entry: clone at the default branch, restore and build Debug with the trial machine's SDKs, run the tests that
 need no network, Docker or database, count the `.cs` files outside `obj/`/`bin/`, and fill in every field. Wrong tags are
 corrected, not kept; an entry that fails stays with `build: "fails"` and why, so nobody checks it again.
+
+`needs-workload`: the solution has a project targeting a platform framework (`-ios`, `-android`, `-maccatalyst`,
+`-browser`, ...) whose workload the trial machine doesn't have (NETSDK1147; `-windows` needs only
+`EnableWindowsTargeting=true` and doesn't count). Such a repository stays in the pool, tagged, and a trial picks it only
+when that is the lens (format leaving those projects alone).

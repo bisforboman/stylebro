@@ -7,7 +7,8 @@
     "multi-target",
     "if-in-bodies",
     "library",
-    "twae"
+    "twae",
+    "needs-workload"
   ],
   "setups": "No analyzers, TreatWarningsAsErrors, .editorconfig (167 lines, no dotnet_diagnostic, tabs). Packages netstandard2.0;net8.0;net9.0;net8.0-ios; tests net8.0 (compile src/SQLite.cs and SQLiteAsync.cs as links). 46 files with #if, 7 with #if in member bodies. global.json 9.0.100 latestFeature.",
   "build": "ok with workaround",
