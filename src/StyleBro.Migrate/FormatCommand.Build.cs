@@ -20,6 +20,8 @@ internal static partial class FormatCommand
 
     private static readonly Regex BuildLine = new(@"^\s*(?<path>.+?)(?:\((?<line>\d+),(?<column>\d+)\))? ?: (?<kind>warning|error) (?<id>[A-Za-z]+\d+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$");
 
+    private static readonly Regex OutputLine = new(@"^\s*(?<name>\S.*?) -> (?:/|[A-Za-z]:\\)");
+
     /// <summary>The errors and warnings of a build's <paramref name="output"/> (each once: the summary repeats them), paths relative to <paramref name="root"/>.</summary>
     public static List<BuildMessage> BuildMessages(IEnumerable<string> output, string root) =>
         output.Select(l => BuildLine.Match(l))
@@ -225,20 +227,6 @@ internal static partial class FormatCommand
             : null;
     }
 
-    /// <summary>A build of a workspace in one configuration ('Release|x64') with TreatWarningsAsErrors, as CI builds (restore included, NuGet's audit off).</summary>
-    private static (int ExitCode, IReadOnlyList<string> Output) BuildWithWarningsAsErrors(string folder, string workspace, string configuration)
-    {
-        var output = new List<string>();
-        var (name, platform) = SplitConfiguration(configuration);
-        var exitCode = Dotnet(folder, null, ["build", workspace, "-c", name, .. PlatformProperty(platform), "-p:TreatWarningsAsErrors=true", "-p:NuGetAudit=false", "--no-incremental", "-nologo", "-nodeReuse:false", "-clp:NoSummary"], output.Add);
-        return (exitCode, output);
-    }
-
-    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
-    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true, string Project = "");
-
-    private static readonly Regex OutputLine = new(@"^\s*(?<name>\S.*?) -> (?:/|[A-Za-z]:\\)");
-
     /// <summary>
     /// The projects of <paramref name="expected"/> (names) a build's <paramref name="output"/> shows nothing compiled for: no
     /// 'Name -&gt; output' line and no compiler or analyzer message (MSBuild's and NuGet's don't count). In a failed build,
@@ -251,6 +239,15 @@ internal static partial class FormatCommand
             .Concat(messages.Where(m => m.Project.Length > 0 && !m.Id.StartsWith("MSB", StringComparison.Ordinal) && !m.Id.StartsWith("NETSDK", StringComparison.Ordinal) && !m.Id.StartsWith("NU", StringComparison.Ordinal)).Select(m => m.Project))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         return expected.Where(p => !compiled.Contains(p)).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    /// <summary>A build of a workspace in one configuration ('Release|x64') with TreatWarningsAsErrors, as CI builds (restore included, NuGet's audit off).</summary>
+    private static (int ExitCode, IReadOnlyList<string> Output) BuildWithWarningsAsErrors(string folder, string workspace, string configuration)
+    {
+        var output = new List<string>();
+        var (name, platform) = SplitConfiguration(configuration);
+        var exitCode = Dotnet(folder, null, ["build", workspace, "-c", name, .. PlatformProperty(platform), "-p:TreatWarningsAsErrors=true", "-p:NuGetAudit=false", "--no-incremental", "-nologo", "-nodeReuse:false", "-clp:NoSummary"], output.Add);
+        return (exitCode, output);
     }
 
     /// <summary>The names of the workspace's C# projects a configuration builds (<see cref="NotBuiltFolders"/> left out), none when they can't be read.</summary>
@@ -267,4 +264,7 @@ internal static partial class FormatCommand
             return [];
         }
     }
+
+    /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
+    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true, string Project = "");
 }
