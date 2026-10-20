@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -89,7 +90,8 @@ internal static class UsingPlacement
         if (mode == UsingPlacementMode.Preserve || tree.GetRoot(cancellationToken) is not CompilationUnitSyntax root
             || root.ContainsDiagnostics || root.Externs.Count > 0 || root.AttributeLists.Count > 0
             || root.Members.Count != 1 || root.Members[0] is not BaseNamespaceDeclarationSyntax ns
-            || ns.Externs.Count > 0 || ns.Members.Any(m => m is BaseNamespaceDeclarationSyntax))
+            || ns.Externs.Count > 0 || ns.Members.Any(m => m is BaseNamespaceDeclarationSyntax)
+            || DeclaresUnderIf(root, ns))
         {
             return null;
         }
@@ -393,6 +395,40 @@ internal static class UsingPlacement
                 .OfType<IMethodSymbol>()
                 .Where(m => m.IsExtensionMethod)
                 .ToLookup(m => m.Name));
+
+    /// <summary>
+    /// Whether a '#if' branch leaves out a namespace, or a type outside the namespace (owner's decision 2026-10-19): another build
+    /// of the file (a framework, a configuration, or another project compiling it with other symbols) then has other
+    /// declarations, where its usings may bind differently or can't move at all, and the fix needs every copy to agree. Trial
+    /// 34, protobuf-net: a polyfill 'namespace System.Diagnostics.CodeAnalysis' under '#if !PLAT_DYNAMIC_ACCESS_ATTR' below the
+    /// usings; the net8.0 build reported them, the fix declined for good. A type inside the namespace doesn't count: its
+    /// members come before the usings wherever they are.
+    /// </summary>
+    private static bool DeclaresUnderIf(CompilationUnitSyntax root, BaseNamespaceDeclarationSyntax ns)
+    {
+        var trivia = TreeWalk.Trivia(root);
+        if (!trivia.Any(t => t.IsKind(SyntaxKind.IfDirectiveTrivia)))
+        {
+            return false;
+        }
+
+        // Code a build leaves out: a namespace anywhere, a type outside the namespace's body.
+        var body = ns is NamespaceDeclarationSyntax block
+            ? TextSpan.FromBounds(block.OpenBraceToken.Span.End, block.CloseBraceToken.SpanStart)
+            : TextSpan.FromBounds(((FileScopedNamespaceDeclarationSyntax)ns).SemicolonToken.Span.End, root.FullSpan.End);
+        foreach (var disabled in trivia.Where(t => t.IsKind(SyntaxKind.DisabledTextTrivia)))
+        {
+            var words = disabled.ToString();
+            if (Regex.IsMatch(words, @"\bnamespace\b")
+                || (!body.Contains(disabled.SpanStart) && Regex.IsMatch(words, @"\b(?:class|struct|interface|enum|record|delegate)\b")))
+            {
+                return true;
+            }
+        }
+
+        // The namespace itself in a branch needs no check here: usings aren't moved across a '#if' above them (RegionsOnly).
+        return false;
+    }
 
     private static string Indentation(TextLine line)
     {

@@ -785,6 +785,13 @@ internal static partial class FormatCommand
     public static bool IsWhitespaceLine(string line) => line.Contains(" WHITESPACE: ", StringComparison.Ordinal) || line.Contains(" ENDOFLINE: ", StringComparison.Ordinal);
 
     /// <summary>
+    /// A whitespace line (<see cref="IsWhitespaceLine"/>) or the same formatter's finding as IDE0055 ('warning IDE0055: Fix
+    /// formatting'): where 'format' leaves the code as it is, it was only this OS's line ending in lines the formatter rewrites
+    /// (trial 34, protobuf-net: a CRLF file's ';' + blank line before an '#if DEBUG' block, written back with LF).
+    /// </summary>
+    public static bool IsFormattingLine(string line) => IsWhitespaceLine(line) || line.Contains(" IDE0055: ", StringComparison.Ordinal);
+
+    /// <summary>
     /// The files that differ between two snapshots (removed or with other content), sorted. Not new files: 'dotnet format'
     /// never adds one, a build step does (recyclarr's git-ignored Generated/*.g.cs, missing in verify's copy and written
     /// during its run: "would change 3 files" for 1).
@@ -1914,6 +1921,19 @@ internal static partial class FormatCommand
         return keep;
     }
 
+    /// <summary>The workspace's projects (<paramref name="listed"/>) and those it doesn't list but references (<paramref name="outside"/>), by full path.</summary>
+    public static Dictionary<string, (string[] Frameworks, string[] References)> WithOutside(
+        Dictionary<string, (string[] Frameworks, string[] References)> listed,
+        IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> outside)
+    {
+        foreach (var (project, info) in outside)
+        {
+            listed.TryAdd(project, info);
+        }
+
+        return listed;
+    }
+
     /// <summary>
     /// The projects of <paramref name="keep"/>'s run that don't target its framework but reference a project it forces onto
     /// it. Their references ask for the referenced project's own frameworks (StyleBroFormatLoose clears the forced one, see
@@ -2428,16 +2448,18 @@ internal static partial class FormatCommand
     /// formatted it), each given to ONE run that loads it (several runs may check at once): the first default-configuration
     /// run that reaches it and has its framework, else the run without a framework. A multi-targeted one, or one no such run
     /// loads, goes to <paramref name="leftOut"/>: formatting it in a framework's run would merge its copies (conflict markers).
-    /// <paramref name="known"/>: the workspace's projects by full path; <paramref name="read"/> evaluates any other.
+    /// <paramref name="known"/>: the workspace's projects by full path; <paramref name="read"/> evaluates any other;
+    /// <paramref name="outsideProjects"/>: those others, by full path.
     /// </summary>
     public static Dictionary<int, List<string>> OutsideProjectRuns(
         IReadOnlyList<(string Framework, string Configuration, IReadOnlyList<string> Projects)> runs,
         IReadOnlyDictionary<string, (string[] Frameworks, string[] References)> known,
         Func<string, (string[] Frameworks, string[] References)> read,
         string root,
-        out List<string> leftOut)
+        out List<string> leftOut,
+        out Dictionary<string, (string[] Frameworks, string[] References)> outsideProjects)
     {
-        var outside = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase);
+        var outside = outsideProjects = new Dictionary<string, (string[] Frameworks, string[] References)>(StringComparer.OrdinalIgnoreCase);
         var pending = new Queue<string>(known.Values.SelectMany(p => p.References));
         while (pending.Count > 0)
         {
@@ -3463,8 +3485,8 @@ internal static partial class FormatCommand
             JsonReport.AddKept(kept);
 
             // Whitespace findings in a copy that formats clean only swapped line endings (KeepingLineEndings).
-            var endingsOnly = lines.Count(IsWhitespaceLine);
-            lines.Where(l => !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).ToList().ForEach(log);
+            var endingsOnly = lines.Count(IsFormattingLine);
+            lines.Where(l => !IsKeptLine(l, keys) && !IsFormattingLine(l)).ToList().ForEach(log);
             if (endingsOnly > 0)
             {
                 log($"{endingsOnly} whitespace finding{(endingsOnly == 1 ? " is" : "s are")} only this OS's line ending where a file uses the other one: ignored, 'format' keeps each file's own ending (set end_of_line to choose one).");
@@ -3472,7 +3494,7 @@ internal static partial class FormatCommand
 
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
-            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsWhitespaceLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
+            var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
             KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {
@@ -3488,7 +3510,7 @@ internal static partial class FormatCommand
 
             if (unfixed > 0)
             {
-                log($"Not clean: {unfixed} finding{(unfixed == 1 ? string.Empty : "s")} above no fix changes (the build reports {(unfixed == 1 ? "it" : "them")}): fix {(unfixed == 1 ? "it" : "them")} by hand, or suppress or baseline {(unfixed == 1 ? "it" : "them")}.");
+                log(UnfixedLine(unfixed));
                 return NotCleanExitCode;
             }
 
@@ -4228,6 +4250,7 @@ internal static partial class FormatCommand
             // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
             // same on this state (VerifyFromRecord).
             var checkedClean = TakeCheckedClean(root) && !incomplete;
+            var checkFindings = TakeCheckFindings(root);
 
             // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
             // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
@@ -4311,13 +4334,18 @@ internal static partial class FormatCommand
             var endingsOnly = changed.Count > 0 && failures.Count == 0 && putBack.Count == 0
                 && changed.All(f => File.Exists(f) && beforeText.TryGetValue(f, out var was) && was == Hash(File.ReadAllBytes(f), endingsAside: true));
 
+            // What the run's checks found and its fixes didn't change: the build reports it, as verify says (trial 34,
+            // protobuf-net: BRO1008's fix needs every project compiling the file to agree, and "Clean" stood above it).
+            var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null).ToList() : [];
+
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
-            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : ", clean.")}");
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : ", clean.")}");
             ListFiles(shown, changed, 10).ForEach(log);
             allChanged.UnionWith(changed);
             if (changed.Count == 0 || endingsOnly || maxRuns == 1)
             {
                 var keptFindings = ReadKept(keptFile, root, root);
+                unfixed.ForEach(log);
                 var settled = (changed.Count == 0 || endingsOnly) && failures.Count == 0;
                 var baselined = settled ? BaselineKept(root, keptFindings, shown) : null;
                 if (settled)
@@ -4328,7 +4356,7 @@ internal static partial class FormatCommand
                 }
 
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, shown, clean: settled).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: settled && unfixed.Count == 0).ForEach(log);
                 if (baselined is not null)
                 {
                     log(baselined);
@@ -4352,6 +4380,12 @@ internal static partial class FormatCommand
                     var check = new List<string>();
                     runOnce([.. WithInclude(NoRestore(args).Where(a => a != CheckFirstOption && a != "--verify-no-changes"), putBackFiles.Select(f => Path.GetRelativePath(root, f).Replace('\\', '/'))), "--verify-no-changes"], check.Add);
                     log(CSharpierStep.PutBackLine(putBack, FindingIds(check.Where(l => FindingPath(l) is { } path && putBackFiles.Contains(path, StringComparer.OrdinalIgnoreCase)))));
+                    return NotCleanExitCode;
+                }
+
+                if (unfixed.Count > 0)
+                {
+                    log(UnfixedLine(unfixed.Count));
                     return NotCleanExitCode;
                 }
 
@@ -4691,6 +4725,7 @@ internal static partial class FormatCommand
         var checkFirst = passThrough.Remove(CheckFirstOption);
         var checkedKey = Key(root);
         CheckedClean.TryRemove(checkedKey, out _);
+        CheckFindings.TryRemove(checkedKey, out _);
         UncheckedByFormat.TryRemove(checkedKey, out _);
         GeneratorLines.TryRemove(checkedKey, out _);
         string[] restoreOptions = passThrough.Remove(UnlockedRestoreOption) ? [.. RestoreOptions, "-p:RestoreLockedMode=false"] : RestoreOptions;
@@ -5095,7 +5130,8 @@ internal static partial class FormatCommand
                 return (frameworks, references);
             },
             root,
-            out var outsideLeft);
+            out var outsideLeft,
+            out var outsideProjects);
         if (outsideLeft.Count > 0)
         {
             log($"{UnformattedHeader} {string.Join(", ", outsideLeft.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')))}: projects the build compiles that {Path.GetFileName(workspacePath)} doesn't list, and no run of one of their frameworks loads (a multi-targeted one would get its copies merged). Add them to the solution, or run 'bro format' on each.");
@@ -5145,8 +5181,10 @@ internal static partial class FormatCommand
                 options.Add("--include");
                 options.AddRange(include);
 
-                // A run without a framework of its own still gets the repository's names (it loads only some projects).
-                var byPath = projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase);
+                // A run without a framework of its own still gets the repository's names (it loads only some projects). The
+                // projects the workspace doesn't list count too (trial 34, protobuf-net: TestCompatibilityLevel, netstandard2.0,
+                // references protobuf-net.Core, which offered only net8.0 then, so protobuf-net.Test didn't load).
+                var byPath = WithOutside(projects.Values.ToDictionary(p => p.FullPath, p => (p.Frameworks, p.References), StringComparer.OrdinalIgnoreCase), outsideProjects);
                 var keep = framework.Length == 0 ? new HashSet<string>() : Keep(byPath, framework);
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
                 var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);
@@ -5272,6 +5310,10 @@ internal static partial class FormatCommand
             if (replay && !verifying && !usageError)
             {
                 CheckedClean[checkedKey] = true;
+            }
+            else if (atOnce is not null && !verifying)
+            {
+                RecordCheckFindings(root, FindingsToFix(atOnce.Values.SelectMany(c => c.Lines), known));
             }
 
             // A run 'dotnet format' skipped a project in stands in for the frameworks merged into it: another of them runs

@@ -15,7 +15,8 @@ namespace StyleBro.Migrate;
 /// Lines '#if' makes an if/else (or loop) body in one build and not in another (owner's decision 2026-10-16, "leave such
 /// lines alone"): '#if NETFRAMEWORK' + 'if (x) a(); else' + '#endif' + 'b();' is indented as the else body where the
 /// symbol is defined and as a statement of its own where it isn't, so format's per-framework and per-configuration runs
-/// undid each other's indentation forever (NLog never converged). format leaves the indentation of these lines as it is.
+/// undid each other's indentation forever (NLog never converged). The same for a block '#if' opens in one build only
+/// ('#if DEBUG' + 'try {' + '#endif' around a statement, trial 34: netmq). format leaves the indentation of these lines as it is.
 /// </summary>
 internal static class IfBodies
 {
@@ -33,7 +34,7 @@ internal static class IfBodies
     private static readonly Regex WritesLineBreak = new(@" WHITESPACE: Fix whitespace formatting\. (?:Replace \d+ characters with|Insert) '[^']*\\n", RegexOptions.Compiled);
 
     /// <summary>Whether a C# text may have such lines (<see cref="Lines"/> decides).</summary>
-    public static bool IsCandidate(string text) => text.Contains("#if", StringComparison.Ordinal) && Candidate.IsMatch(text);
+    public static bool IsCandidate(string text) => text.Contains("#if", StringComparison.Ordinal) && (Candidate.IsMatch(text) || OpensBlock(text));
 
     /// <summary>
     /// The lines (0-based) of <paramref name="text"/> whose statement nesting differs between the parses with
@@ -80,15 +81,19 @@ internal static class IfBodies
     }
 
     /// <summary>
-    /// How many statements a token is the body of (its own statement included), not counting blocks or a 'using' right
-    /// inside another, which the formatter doesn't indent.
+    /// How many statements a token is the body of (its own statement included), not counting a 'using' right inside another,
+    /// which the formatter doesn't indent, plus the blocks it is in: '#if' can open a block in one parse only.
     /// </summary>
     public static int Depth(SyntaxToken token)
     {
         var depth = 0;
         for (var node = token.Parent; node is not null && node is not MemberDeclarationSyntax; node = node.Parent)
         {
-            if (node is StatementSyntax and not BlockSyntax
+            if (node is BlockSyntax)
+            {
+                depth++;
+            }
+            else if (node is StatementSyntax and not BlockSyntax
                 && (node.Parent is ElseClauseSyntax
                     || (node.Parent is StatementSyntax parent and not BlockSyntax and not LabeledStatementSyntax && !(node is UsingStatementSyntax && parent is UsingStatementSyntax))))
             {
@@ -283,7 +288,7 @@ internal static class IfBodies
             .Select(f => $"{Path.GetRelativePath(root, f.Key).Replace('\\', '/')}:{Ranges(f.Value.Lines)}")
             .ToList();
         return $"{header} {string.Join(", ", places.Take(5))}{(places.Count > 5 ? $" and {places.Count - 5} more files" : string.Empty)}: "
-            + "'#if' decides whether these lines are an if/else (or loop) body, so each framework or configuration would indent them its own way. "
+            + "'#if' decides whether these lines are an if/else (or loop) body or inside a block, so each framework or configuration would indent them its own way. "
             + "Their indentation is left as it is.";
     }
 
@@ -310,6 +315,37 @@ internal static class IfBodies
         }
 
         return Enumerable.Range(Math.Max(start, 0), line - Math.Max(start, 0) + 1);
+    }
+
+    // Whether a branch of an '#if' (the lines up to the next '#elif', '#else' or '#endif') opens or closes more braces than the
+    // other: a block only some parses have. Braces in strings and comments count too; the parses decide.
+    private static bool OpensBlock(string text)
+    {
+        var (level, braces) = (0, 0);
+        foreach (var line in text.Split('\n'))
+        {
+            var trimmed = line.TrimStart();
+            if (trimmed.StartsWith('#'))
+            {
+                var directive = trimmed[1..].TrimStart();
+                if (Regex.IsMatch(directive, @"^(?:if|elif|else|endif)\b"))
+                {
+                    if (level > 0 && braces != 0)
+                    {
+                        return true;
+                    }
+
+                    level += directive.StartsWith("if", StringComparison.Ordinal) ? 1 : directive.StartsWith("endif", StringComparison.Ordinal) ? -1 : 0;
+                    braces = 0;
+                }
+
+                continue;
+            }
+
+            braces += line.Count(c => c == '{') - line.Count(c => c == '}');
+        }
+
+        return false;
     }
 
     private static string Indentation(string line) => line[..(line.Length - line.TrimStart().Length)];

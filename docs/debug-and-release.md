@@ -40,6 +40,23 @@ their indentation findings don't count in `--verify-no-changes`. A build with ID
 them in the configuration whose indentation the line doesn't have: braces (`else { ... }` around both branches' bodies)
 settle it for every build.
 
+The same goes for a block that `#if` opens in one build only:
+
+```csharp
+#if DEBUG
+            try
+            {
+#endif
+            Handle = AsyncSocket.Create(family, type, protocol);
+#if DEBUG
+            }
+            catch (SocketException x) { ... }
+#endif
+```
+
+Debug indents the statement as the `try` block's content, Release as a statement of the method. `format` keeps its
+indentation as it is (`Indentation kept: ...`).
+
 ## Documentation comments indented with tabs and spaces
 
 `dotnet format` leaves a documentation comment's other `///` lines, and the line of the code below it, when they're
