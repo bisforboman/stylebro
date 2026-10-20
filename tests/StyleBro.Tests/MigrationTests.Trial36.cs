@@ -97,4 +97,42 @@ public sealed partial class MigrationTests
         Assert.Empty(FormatCommand.LinkedFolders(Path.Combine(repository, "src", "App", "App.csproj"), repository));
         Assert.Equal(Path.Combine(repository, "src", "App"), FormatCommand.WorkingRoot(Path.Combine(repository, "src", "App", "App.csproj")));
     }
+
+    [Fact]
+    public void BuildCheck_AProjectAFailedOneKeptFromCompiling_IsNotVerified()
+    {
+        // Spot repro: Lib fails with warnings as errors (CS0168, the untouched code too), App references it, so MSBuild never
+        // compiles App and says nothing about it. --build said "Clean." with exit code 0.
+        var solution = Path.Combine(root, "Dep.slnx");
+        File.WriteAllText(solution, "<Solution>\n  <Project Path=\"Lib/Lib.csproj\" />\n  <Project Path=\"App/App.csproj\" />\n  <Project Path=\"Other/Other.csproj\" />\n</Solution>\n");
+        var lib = Path.Combine(root, "Lib", "Lib.csproj");
+        (int, IReadOnlyList<string>) Build(string folder, string workspace, string configuration) =>
+            (1, [$"{Path.Combine(folder, "Lib", "L.cs")}(7,13): error CS0168: The variable 'unused' is declared but never used [{lib}]", "  Other -> /tmp/out/Other.dll"]);
+
+        var lines = new List<string>();
+        var line = FormatCommand.BuildCheckLine(root, solution, lines.Add, Build, () => string.Empty, () => ["Lib", "App", "Other"]);
+
+        Assert.Contains("Debug: no findings, no new errors (1 error the untouched code has too, not counted).", lines);
+        Assert.Contains("  Didn't compile: App (a project it needs failed).", lines);
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker + " the Debug (App), Release (App) builds didn't compile the projects named", line, StringComparison.Ordinal);
+
+        // Every project compiled (its own error in the code counts: the compiler ran its analyzers): nothing to say.
+        Assert.Null(FormatCommand.BuildCheckLine(root, solution, _ => { }, Build, () => string.Empty, () => ["Lib", "Other"]));
+    }
+
+    [Fact]
+    public void Uncompiled_CountsOutputLinesAndCompilerMessages_NotMSBuilds()
+    {
+        var root2 = Path.Combine(root, "r");
+        IReadOnlyList<string> output =
+        [
+            "  A -> /out/A.dll",
+            $"{Path.Combine(root2, "B", "B.cs")}(1,1): error CS0168: unused [{Path.Combine(root2, "B", "B.csproj")}::TargetFramework=net8.0]",
+            $"/sdk/Microsoft.Common.CurrentVersion.targets(1259,5): error MSB3644: The reference assemblies were not found [{Path.Combine(root2, "C", "C.csproj")}]",
+            $"/sdk/Microsoft.NET.Sdk.targets(10,5): error NETSDK1147: To build this project, the following workloads must be installed: ios [{Path.Combine(root2, "D", "D.csproj")}]",
+            $"{Path.Combine(root2, "E", "E.csproj")} : error NU1101: Unable to find package X [{Path.Combine(root2, "E", "E.csproj")}]",
+        ];
+        var messages = FormatCommand.BuildMessages(output, root2);
+        Assert.Equal(["C", "D", "E", "F"], FormatCommand.Uncompiled(output, messages, ["A", "B", "C", "D", "E", "F"]));
+    }
 }
