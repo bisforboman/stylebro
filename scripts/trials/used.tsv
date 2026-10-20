@@ -152,3 +152,11 @@ Humanizr/Humanizer	rejected	doesn't build here
 agocke/serde-dn	rejected trial 34	its in-solution generator needs Roslyn 5.6 (CS9057 with SDK 10.0.112); serdedotnet/serde (trial 26) is likely the same project
 microsoft/clrmd	rejected trial 34	Arcade: restores from dnceng feeds the proxy blocks
 mkaring/ConfuserEx	rejected trial 34	random pick (seed 34): .NET Framework only (net20/net461), tests need Windows
+ExcelDataReader/ExcelDataReader	trial 35	StyleCop 1.2 (migrate), #if opening a 'try {' in a method body, 9 CRLF files in an LF repository
+praeclarum/sqlite-net	trial 35	SQLite.cs linked into net8.0 tests and netstandard2.0 libraries, tabs, mixed line endings, iOS projects (missing workload)
+castleproject/Core	trial 35	usings inside the namespace (BRO1008), multi-targeted with #if; 831 files
+Cysharp/MemoryPack	trial 35 (random, seed 35)	generator, T4, multi-targeted, #if in method bodies
+simpleinjector/SimpleInjector	rejected trial 35	.NET Framework projects (net45/net461), Windows-only
+dadhi/DryIoc	rejected trial 35	its one test project referencing projects the solution doesn't list is a net472 runner (Windows)
+zzzprojects/html-agility-pack	rejected trial 35	old-style and portable projects, Windows-only
+nunit/nunit	rejected trial 35	1,077 files; its unlisted reference is an F# project

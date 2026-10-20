@@ -65,6 +65,10 @@ internal static partial class FormatCommand
             <_StyleBroAliasFrom>$([MSBuild]::Add($(_StyleBroAliasAt), $(_StyleBroAliasKey.Length)))</_StyleBroAliasFrom>
             <TargetFramework>$(StyleBroFormatAliases.Substring($(_StyleBroAliasFrom), $([MSBuild]::Subtract($(StyleBroFormatAliases.IndexOf('|', $(_StyleBroAliasFrom))), $(_StyleBroAliasFrom)))))</TargetFramework>
           </PropertyGroup>
+          <!-- Files another build compiles with an older C# (trial 35): StyleBro's multi-target guard reads the list. -->
+          <ItemGroup Condition="'$(StyleBroFormatOldCSharp)' != ''">
+            <AdditionalFiles Include="$(StyleBroFormatOldCSharp)" />
+          </ItemGroup>
           <!-- 'dotnet format' skips the rules WarningsNotAsErrors lists, which the build reports as warnings: not for its runs. -->
           <PropertyGroup Condition="'$(StyleBroFormatWarnings)' == 'true'">
             <WarningsNotAsErrors>$([System.Text.RegularExpressions.Regex]::Replace('$(WarningsNotAsErrors)', '(?i)\bBRO\d+\b', ''))</WarningsNotAsErrors>
@@ -180,6 +184,9 @@ internal static partial class FormatCommand
     /// <summary>How format names the run of the projects without a target framework (old-style), see <see cref="Plan"/>.</summary>
     private const string NoFrameworkLabel = "old-style projects";
 
+    /// <summary>The start of the line that says which IDE fixes the multi-target guard can't cover here (<see cref="HeldBackIds"/>; printed for the first run only).</summary>
+    private const string HeldBackHeader = "Held back:";
+
     /// <summary>The start of the line that names the runs for other configurations (printed for the first run only).</summary>
     private const string ConfigurationsHeader = "Configurations:";
 
@@ -226,7 +233,7 @@ internal static partial class FormatCommand
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> BuiltGenerators = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The lines a run prints before its 'dotnet format' runs, which later runs and checks say once.</summary>
-    private static readonly string[] Headers = [FixingHeader, XunitHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
+    private static readonly string[] Headers = [FixingHeader, XunitHeader, HeldBackHeader, IfBodiesHeader, ProtectedHeader, NotAsErrorsHeader, VisualBasicHeader, GeneratorsHeader, CheckingHeader, MultiTargetedHeader, ConfigurationsHeader, MissingHeader, SharedFilesHeader, TraversalHeader, "Using ", NoWhitespaceHeader, PartlyWhitespaceHeader, OldMacHeader, UnformattedHeader, OldStyleHeader, PartlyLoadedHeader, NotBuiltHeader];
 
     /// <summary>The projects and configurations a --verify-no-changes run on a folder couldn't check (<see cref="RecordUnchecked"/>), per folder.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<(string Project, string Configuration)>> Unchecked = new(StringComparer.OrdinalIgnoreCase);
@@ -2336,6 +2343,159 @@ internal static partial class FormatCommand
         + "but no record says a run did (a run killed and its record lost, or an edit by hand). Put the '#' back, then run again.";
 
     /// <summary>
+    /// The IDE ids whose fixes only StyleBro's multi-target guard keeps from breaking an older framework's or project's build
+    /// (IDE0049's 'nint' and keywords in using aliases, tier C's newer APIs), out of the ids in <paramref name="options"/>:
+    /// all of them when the guard matters here (<paramref name="guarded"/>) and this SDK's 'dotnet format' ignores
+    /// suppressors for IDE rules (<paramref name="honors"/>, asked only then), else none.
+    /// </summary>
+    public static List<string> HeldBackIds(IReadOnlyList<string> options, bool guarded, Func<bool> honors)
+    {
+        var ids = options.Where(o => o == StyleBro.Analyzers.Modernize.MultiTargetSuppressor.TypeNamesId
+                || (o.StartsWith("IDE", StringComparison.Ordinal) && StyleBro.Analyzers.Modernize.MultiTargetSuppressor.Minimums.ContainsKey(o)))
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        return ids.Count > 0 && guarded && !honors() ? ids : [];
+    }
+
+    /// <summary>What format says about the ids <see cref="HeldBackIds"/> leaves out.</summary>
+    public static string HeldBackLine(IReadOnlyList<string> ids) =>
+        $"{HeldBackHeader} {string.Join(", ", ids)}: this .NET SDK's 'dotnet format' ignores the suppressor StyleBro's multi-target guard uses for IDE rules, "
+        + "so their fixes could write C# or APIs that another target framework or project compiling the same file doesn't have. They aren't applied here; "
+        + "a newer .NET SDK's 'dotnet format' applies them where the guard allows.";
+
+    /// <summary>
+    /// Whether this machine's 'dotnet format' hides an IDE diagnostic a DiagnosticSuppressor suppresses: a probe project in
+    /// the temp folder with StyleBro's analyzers and a framework list the tier-C guard hides IDE0057 for, checked once per
+    /// 'dotnet format' version (cached in the temp folder). True when the probe can't tell (nothing held back then).
+    /// </summary>
+    internal static bool FormatHonorsIdeSuppressions(Action<string>? log = null)
+    {
+        string version;
+        try
+        {
+            version = Capture(Path.GetTempPath(), "format", "--version").Trim().Split('+')[0];
+        }
+        catch (ToolException)
+        {
+            return true;
+        }
+
+        var cache = Path.Combine(Path.GetTempPath(), $"stylebro-ide-suppressions-{Regex.Replace(version, @"[^\w.-]", "_")}.txt");
+        if (File.Exists(cache) && bool.TryParse(File.ReadAllText(cache).Trim(), out var cached))
+        {
+            return cached;
+        }
+
+        var folder = Path.Combine(Path.GetTempPath(), $"stylebro-ide-probe-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(Path.Combine(folder, "Directory.Build.props"), "<Project />\n");
+            File.WriteAllText(Path.Combine(folder, "Directory.Build.targets"), "<Project />\n");
+            File.WriteAllText(Path.Combine(folder, "Directory.Packages.props"), "<Project />\n");
+            File.WriteAllText(Path.Combine(folder, ".editorconfig"), "root = true\n\n[*.cs]\ncsharp_style_prefer_range_operator = true\ndotnet_diagnostic.IDE0057.severity = warning\n");
+            File.WriteAllText(Path.Combine(folder, "A.cs"), "public static class A\n{\n    public static string M(string t) => t.Substring(1, t.Length - 2);\n}\n");
+            File.WriteAllText(Path.Combine(folder, "Probe.csproj"), $$"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>net$(BundledNETCoreAppTargetFrameworkVersion)</TargetFramework>
+                    <StyleBroTargetFrameworks>netstandard2.0,net$(BundledNETCoreAppTargetFrameworkVersion)</StyleBroTargetFrameworks>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
+                    <Analyzer Include="{{typeof(StyleBro.Analyzers.Modernize.MultiTargetSuppressor).Assembly.Location}}" />
+                  </ItemGroup>
+                </Project>
+                """);
+            var project = Path.Combine(folder, "Probe.csproj");
+            if (Dotnet(folder, null, ["restore", project, "-nologo"], _ => { }) != 0)
+            {
+                return true;
+            }
+
+            var exit = Dotnet(folder, null, ["format", "style", project, "--verify-no-changes", "--diagnostics", "IDE0057", "--no-restore"], _ => { });
+            if (exit is not 0 and not NotCleanExitCode)
+            {
+                return true;
+            }
+
+            var honors = exit == 0;
+            File.WriteAllText(cache, honors.ToString());
+            return honors;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or ToolException)
+        {
+            log?.Invoke($"Couldn't check whether 'dotnet format' honors suppressors for IDE rules ({e.Message}); nothing held back.");
+            return true;
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(folder, recursive: true);
+            }
+            catch (IOException)
+            {
+                // A build node may still hold a file; the temp folder is cleaned up eventually.
+            }
+        }
+    }
+
+    /// <summary>
+    /// Writes the list of <see cref="OldCSharpFiles"/> for the runs (<c>stylebro-*.oldcsharp</c> in the temp folder) and
+    /// returns its path, or null when there are none. Only projects compiling a file another project compiles are evaluated
+    /// per framework: a project's own frameworks are its suppressor's to see.
+    /// </summary>
+    private static string? WriteOldCSharpFiles(IReadOnlyList<(string FullPath, string[] Frameworks, string[] Compile)> projects)
+    {
+        var shared = projects.SelectMany(p => p.Compile.Distinct(StringComparer.OrdinalIgnoreCase).Select(f => (File: f, p.FullPath)))
+            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g.Select(x => x.FullPath))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var views = projects.Where(p => shared.Contains(p.FullPath))
+            .SelectMany(p => (p.Frameworks.Length > 0 ? p.Frameworks : [string.Empty]).Select(f => (p.FullPath, Framework: f)))
+            .AsParallel()
+            .Select(x => ReadView(CompileSettings(x.FullPath, x.Framework)))
+            .OfType<CompileView>()
+            .ToList();
+        var files = OldCSharpFiles(views);
+        if (files.Count == 0)
+        {
+            return null;
+        }
+
+        var path = Path.Combine(Path.GetTempPath(), $"stylebro-{Guid.NewGuid():N}{StyleBro.Analyzers.Modernize.MultiTargetSuppressor.OldCSharpExtension}");
+        File.WriteAllLines(path, files.Select(f => $"{f.Lowest}\t{f.File}"));
+        return path;
+    }
+
+    private static void DeleteOldCSharpFiles(string? path)
+    {
+        if (path is not null)
+        {
+            File.Delete(path);
+        }
+    }
+
+    /// <summary>
+    /// The files that compilations build with different C# versions, the lowest below 12 (the newest a guarded fix needs),
+    /// with that lowest version: where a fix made in a newer build's run can break an older build of the same file.
+    /// </summary>
+    public static List<(string File, string Lowest)> OldCSharpFiles(IEnumerable<CompileView> views) =>
+        views.SelectMany(v => v.Compile.Select(f => (File: f, Version: ParseLangVersion(v.LangVersion))))
+            .GroupBy(x => x.File, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Select(x => x.Version).Distinct().Count() > 1 && g.Min(x => x.Version) < new Version(12, 0))
+            .Select(g => (g.Key, g.Min(x => x.Version)!.ToString()))
+            .OrderBy(x => x.Key, StringComparer.Ordinal)
+            .ToList();
+
+    // 'preview' and anything else that isn't a number: newer than every numbered version.
+    private static Version ParseLangVersion(string value) =>
+        Version.TryParse(value, out var version) ? version : new Version(int.MaxValue, 0);
+
+    /// <summary>
     /// <see cref="CompileSettings"/>'s output read, or null: the defined symbols, the language version (<see cref="EffectiveLangVersion"/>),
     /// the nullable context and the compiled files.
     /// </summary>
@@ -2740,6 +2900,37 @@ internal static partial class FormatCommand
         return json.RootElement.TryGetProperty("Items", out var items) && items.TryGetProperty("MissingWorkloadPack", out var packs)
             ? packs.EnumerateArray().Select(p => p.GetProperty("Identity").GetString()!).Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
             : [];
+    }
+
+    /// <summary>
+    /// The workload packs a project needs that this machine doesn't have: its own evaluation's, and for a multi-targeted
+    /// project each platform framework's ('net8.0-ios'): the outer evaluation lists none of them (trial 35, sqlite-net's
+    /// 'netstandard2.0;net8.0;net8.0-ios' projects stopped the restore though trial 30's check passed them). A framework
+    /// MSBuild can't evaluate counts as needing nothing; the restore says why.
+    /// </summary>
+    internal static string[] MissingWorkloadPacksOf(string fullPath, IReadOnlyList<string> frameworks)
+    {
+        var packs = MissingWorkloadPacks(EvaluateProject(fullPath));
+        return packs.Length > 0 || frameworks.Count < 2
+            ? packs
+            : PlatformFrameworks(frameworks).SelectMany(f => FrameworkWorkloads(fullPath, f)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    /// <summary>The frameworks that name a platform ('net8.0-ios', 'net10.0-windows'): only those can need a workload.</summary>
+    public static IEnumerable<string> PlatformFrameworks(IEnumerable<string> frameworks) => frameworks.Where(f => f.Contains('-', StringComparison.Ordinal));
+
+    private static string[] FrameworkWorkloads(string fullPath, string framework)
+    {
+        try
+        {
+            return MissingWorkloadPacks(Evaluations.GetOrAdd($"{fullPath}|{framework}|workloads", _ => new Lazy<string>(() => Capture(
+                Path.GetDirectoryName(fullPath)!,
+                ["msbuild", fullPath, $"-property:TargetFramework={framework}", "-getItem:MissingWorkloadPack", "-nologo"]))).Value);
+        }
+        catch (ToolException)
+        {
+            return [];
+        }
     }
 
     /// <summary>The note for the projects <see cref="MissingWorkloadPacks"/> leaves out.</summary>
@@ -4797,7 +4988,7 @@ internal static partial class FormatCommand
         // Android, iOS and Browser heads): 'dotnet restore' failed on them (NETSDK1147) and stopped the whole run, though the code
         // they share built. They're left alone, like a build of the other projects leaves them; the rest is formatted.
         var needWorkloads = projects
-            .Select(p => (p.Key, p.Value.FullPath, Packs: MissingWorkloadPacks(EvaluateProject(p.Value.FullPath))))
+            .Select(p => (p.Key, p.Value.FullPath, Packs: MissingWorkloadPacksOf(p.Value.FullPath, p.Value.Frameworks)))
             .Where(p => p.Packs.Length > 0)
             .ToList();
         if (needWorkloads.Count > 0)
@@ -5042,11 +5233,27 @@ internal static partial class FormatCommand
         var whole = plan.Count <= 1 && allFrameworks.Count == 0 && visualBasic.Count == 0 && needWorkloads.Count == 0;
         var select = Path.Combine(Path.GetTempPath(), $"stylebro-format-{Guid.NewGuid():N}.targets");
         File.WriteAllText(select, SelectFrameworkTargets);
+
+        // Files projects share that another build compiles with an older C# (trial 35, sqlite-net: SQLite.Tests, net8.0, got
+        // IDE0049's 'using X = nint;' into src/SQLite.cs, which SQLite-net-static also compiles for netstandard2.0, C# 7.3).
+        // A suppressor sees only its own project's frameworks, so the runs hand it the list (the hook's AdditionalFiles).
+        var oldCSharp = WriteOldCSharpFiles(projects.Values.Select(p => (p.FullPath, p.Frameworks, p.Compile)).ToList());
+
+        // The guard is a DiagnosticSuppressor, which some SDKs' 'dotnet format' doesn't load for IDE rules (trial 35: 10.0.113's
+        // style pass wrote sqlite-net's 'using X = nint;' and IDE0057's ranges into netstandard2.0 code). There those fixes are
+        // held back where the guard would matter (owner's decision 2026-10-20).
+        var guarded = oldCSharp is not null || projects.Values.Any(p => p.Frameworks.Length > 1);
+        if (HeldBackIds(passThrough, guarded, () => FormatHonorsIdeSuppressions(log)) is { Count: > 0 } heldBack)
+        {
+            log(HeldBackLine(heldBack));
+            passThrough.RemoveAll(heldBack.Contains);
+        }
+
         if (whole && !(checkFirst && !passThrough.Contains("--report")))
         {
             try
             {
-                var plain = notAsErrors.Count > 0 ? new RunEnvironment(string.Empty, select, string.Empty, string.Empty, string.Empty, null, Warnings: true) : null;
+                var plain = notAsErrors.Count > 0 || oldCSharp is not null ? new RunEnvironment(string.Empty, select, string.Empty, string.Empty, string.Empty, null, Warnings: notAsErrors.Count > 0, OldCSharp: oldCSharp) : null;
                 int single;
                 using (PhaseTimes.Measure(passThrough.Contains("--verify-no-changes") ? "check: all projects" : "fix: all projects"))
                 {
@@ -5065,6 +5272,7 @@ internal static partial class FormatCommand
             finally
             {
                 File.Delete(select);
+                DeleteOldCSharpFiles(oldCSharp);
             }
         }
 
@@ -5188,7 +5396,7 @@ internal static partial class FormatCommand
                 var keep = framework.Length == 0 ? new HashSet<string>() : Keep(byPath, framework);
                 var (alias, aliases) = framework.Length == 0 ? (string.Empty, string.Empty) : Aliases(byPath, keep, framework);
                 var other = framework.Length == 0 ? new HashSet<string>() : Other(byPath, keep, framework);
-                var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names, notAsErrors.Count > 0, configuration);
+                var environment = new RunEnvironment(alias, select, PathList(keep), PathList(other), aliases, names, notAsErrors.Count > 0, configuration, oldCSharp);
                 return Format(filter ?? workspacePath, options, a => Dotnet(root, environment, a, output), Passes(whitespaceExclusions, include));
             }
             finally
@@ -5365,6 +5573,7 @@ internal static partial class FormatCommand
         finally
         {
             File.Delete(select);
+            DeleteOldCSharpFiles(oldCSharp);
             if (string.IsNullOrEmpty(givenNames) && names.Length > 0)
             {
                 File.Delete(names);
@@ -5580,6 +5789,11 @@ internal static partial class FormatCommand
             if (f.Warnings)
             {
                 start.Environment["StyleBroFormatWarnings"] = "true";
+            }
+
+            if (f.OldCSharp is not null)
+            {
+                start.Environment["StyleBroFormatOldCSharp"] = f.OldCSharp;
             }
 
             // Like TargetFramework: the project file's own '$(Configuration)' conditions (DefineConstants) see it.
@@ -5955,7 +6169,7 @@ internal static partial class FormatCommand
     }
 
     /// <summary>What a 'dotnet format' run for one framework gets in its environment (see the remarks on the class).</summary>
-    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Other, string Aliases, string? Names, bool Warnings = false, string Configuration = "");
+    private sealed record RunEnvironment(string Name, string SelectTargets, string Keep, string Other, string Aliases, string? Names, bool Warnings = false, string Configuration = "", string? OldCSharp = null);
 
     /// <summary>
     /// Sets <see cref="KeptFinding.Variable"/> (or another variable that names a file) for the 'dotnet format' runs this

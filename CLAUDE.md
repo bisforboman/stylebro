@@ -1689,6 +1689,38 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   "Test host process crashed"): run heavy jobs one at a time. `init --write` puts StyleBroPreset in the props file the
   projects import (netmq: src/Directory.Build.props), so add the StyleBro.Analyzers reference there.
 
+## Trial 35 (2026-10-20, not clean: owner "Not clean", tally 0)
+
+- First trial picked from `scripts/trials/` (pool + random.json; seed 35 -> Cysharp/MemoryPack). Repos: ExcelDataReader
+  (StyleCop 1.2, migrate; `#if` opening `try {` in XlsWorksheet.cs: settled in one run), praeclarum/sqlite-net (SQLite.cs
+  linked into net8.0 tests and netstandard2.0 libraries, iOS projects), castleproject/Core (usings inside the namespace:
+  BRO1008 left its two file-wide-`#if` files alone, format clean), MemoryPack. Lens 3 (an unlisted referenced project):
+  none of ~40 checked repos had one that builds here; a MemoryPack spot copy without MemoryPack.Streaming in the .sln
+  formatted the tests like the real run (Streaming, multi-targeted, "Leaving alone" by design). Lens 2 spot: a using
+  whose move would rebind `StringBuilder` stayed, a movable one moved. After the fixes all four matched their baselines.
+- Missing workloads (owner: "Leave it alone"): a multi-targeted project's outer evaluation lists no MissingWorkloadPack
+  items, so its platform frameworks (`-ios`, `-windows`, ...) are evaluated too (`MissingWorkloadPacksOf`,
+  `PlatformFrameworks`); such a project is left alone like trial 30's heads. Pool tag `needs-workload` (owner, via parent).
+- IDE0049 (owner: suppress, then "format tells the guard", then "Hold those ids back"): `using X = System.IntPtr;` ->
+  `= nint;` broke a C# 7.3 build (CS8370). `MultiTargetSuppressor` hides IDE0049 where the fix needs C# 9 (`nint`) or 12
+  (keyword in a using alias) and a framework defaults older (`AllFrameworksDefaultTo`, moved from EmptyRecordBodies) or
+  where `bro format`'s list says another project compiles the file with an older C# (`OldCSharpFiles`, a
+  `stylebro-*.oldcsharp` AdditionalFile added by the format hook via `StyleBroFormatOldCSharp`). GOTCHA: SDK 10.0.113's
+  `dotnet format` style pass loads no DiagnosticSuppressors, so neither this nor the tier-C guard works there
+  (`scripts/verify-package.ps1` check 5 fails locally, passes in CI on the newest SDK 10). `bro format` probes it once per
+  `dotnet format` version (`FormatHonorsIdeSuppressions`, cached in %TEMP%/stylebro-ide-suppressions-*.txt) and then
+  leaves IDE0049/IDE0056/IDE0057/IDE0330 out where the guard matters (`HeldBackIds`, "Held back:").
+- BRO1606: filler `Creates a new instance of <c>X</c>.` was cut at the inline `</c>` (`GetContainerEnd`, `<c>X</c>` as a
+  name, `HasUnclosedElement`): `class.</c>.`, 32 CS1570 in Castle Core. Renames: a nested type named as reflection writes
+  it (`"...Tests+PrivateInterface because"`) keeps its name (6 Castle Core test failures).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there. ExcelDataReader needs `EnableWindowsTargeting=true` (env var for
+  `bro preview`/`format`: its Sample targets net10.0-windows); sqlite-net: remove global.json, build the test project and
+  the nuget/ libraries one by one; MemoryPack's untouched TWAE build fails (50 CS8619): compare with
+  `-p:WarningsNotAsErrors=CS8619` too. `bro init --write` adds no StyleBro.Analyzers reference (add it like the preview's
+  patch). Don't run `Invoke-Mutations.ps1 -OnlyFiles src/StyleBro.Migrate/FormatCommand.cs`: that is all 257 of its
+  entries (hours); apply only the new entries. The stop hook flags commits in trial clones (third-party repos): give them
+  the noreply identity, never push them.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of

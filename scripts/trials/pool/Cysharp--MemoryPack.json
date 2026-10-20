@@ -15,7 +15,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test tests/MemoryPack.Tests/MemoryPack.Tests.csproj (net8.0, xunit): 157/157 passed, 44 s. Nothing left out.",
-  "usedIn": null,
+  "usedIn": "trial 35",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",

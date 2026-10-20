@@ -13,7 +13,7 @@
   "build": "ok with workaround",
   "workaround": "-p:EnableWindowsTargeting=true (ExcelDataReader.Sample targets net10.0-windows: NETSDK1100 otherwise)",
   "tests": "dotnet test src/ExcelDataReader.Tests (net10.0, NUnit 5): 673 passed, 2 skipped, 66 s. net462 only on Windows.",
-  "usedIn": null,
+  "usedIn": "trial 35",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",

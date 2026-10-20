@@ -452,6 +452,56 @@ public class PrefixNamingTests
             """,
         ]);
 
+    // Trial 35, Castle Core: the tests compare an exception message naming the nested type as reflection writes it.
+    [Fact]
+    public Task NestedTypeNamesInStrings_KeepTheName() => VerifyNotFixedAsync(
+        [
+            """
+            namespace App
+            {
+                public class Tests
+                {
+                    internal interface {|BRO1304:PrivateInterface|}
+                    {
+                    }
+                }
+            }
+            """,
+            """
+            class Check
+            {
+                string Expected() => "Can not create proxy for type App.Tests+PrivateInterface because it is not accessible.";
+            }
+            """,
+        ]);
+
+    [Fact]
+    public Task NestedTypeNamesInOtherWords_DontKeepTheName() => VerifyFixAsync(
+        [
+            """
+            public class Tests
+            {
+                internal interface {|BRO1304:Shape|}
+                {
+                }
+
+                string Text() => "a+Shapes";
+            }
+            """,
+        ],
+        [
+            """
+            public class Tests
+            {
+                internal interface IShape
+                {
+                }
+
+                string Text() => "a+Shapes";
+            }
+            """,
+        ]);
+
     [Fact]
     public Task TypeParametersOfATypeWithAGeneratedPart_KeepTheirNames() => VerifyNoDiagnosticsAsync(
         ("/0/Grid.razor.cs", """

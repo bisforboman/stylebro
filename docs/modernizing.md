@@ -151,6 +151,17 @@ fix can write.
 lacking everything. A minimum is the newest API the fix can write, so some safe fixes are hidden too (CA1872 in a
 `net8.0;net9.0` project, where only the lowercase variant needs .NET 9).
 
+It also hides IDE0049 (`Int32` -> `int`, from init's settings, not a tier) where the fix needs a newer C# than a
+framework defaults to: `nint`/`nuint` for `IntPtr`/`UIntPtr` (C# 9) and a keyword in a using alias
+(`using Handle = System.IntPtr;`, C# 12), in a `netstandard2.0;net8.0` project without a `LangVersion`. Under
+`bro format` the same goes for a file that another project compiles with an older C# (a file linked into a net8.0 test
+project and a netstandard2.0 library): format passes the guard the list of such files.
+
+Some .NET SDKs' `dotnet format` (seen with 10.0.113) doesn't load suppressors for IDE rules, so there the guard can't
+hide IDE0049, IDE0056, IDE0057 or IDE0330. `bro format` checks that once per SDK version and then leaves those fixes out
+in repositories with multi-targeted projects or such shared files ("Held back: ..."); a newer SDK applies them with the
+guard. Plain `dotnet format` on such an SDK applies them unguarded.
+
 What it doesn't see:
 
 - CA2263 covers any method with a generic overload; the table knows the base library's. A package whose generic

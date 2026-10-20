@@ -21,10 +21,10 @@ internal static class ConstructorSummaries
     // text"; Stateless: '... the <see cref="Alarm"/> class. Default constructor.'). A deliberately small list: 'Default
     // constructor', 'Constructor', 'Ctor', 'Constructor for X', 'Creates a new instance', 'Creates a new instance of X',
     // 'Creates an instance of X' (also with 'Constructs' or 'Instantiates', 'object' for 'instance', X a name or a
-    // '<see cref/>', optionally followed by 'class', 'struct' or 'type').
+    // '<see cref/>' or '<c>X</c>', optionally followed by 'class', 'struct' or 'type').
     private static readonly Regex Filler = new(
-        @"^(?:(?:the\s+)?default\s+)?(?:constructor|ctor)(?:\s+(?:for|of)\s+(?:the\s+)?(?:<see\s[^>]*/>|[\w.<>{},]+)(?:\s+(?:class|struct|type))?)?$"
-        + @"|^(?:creates|constructs|instantiates)\s+(?:a\s+new|an?)\s+(?:new\s+)?(?:instance|object)(?:\s+of\s+(?:the\s+)?(?:<see\s[^>]*/>|[\w.<>{},]+)(?:\s+(?:class|struct|type))?)?$",
+        @"^(?:(?:the\s+)?default\s+)?(?:constructor|ctor)(?:\s+(?:for|of)\s+(?:the\s+)?(?:<see\s[^>]*/>|<c>[\w.<>{},]+</c>|[\w.<>{},]+)(?:\s+(?:class|struct|type))?)?$"
+        + @"|^(?:creates|constructs|instantiates)\s+(?:a\s+new|an?)\s+(?:new\s+)?(?:instance|object)(?:\s+of\s+(?:the\s+)?(?:<see\s[^>]*/>|<c>[\w.<>{},]+</c>|[\w.<>{},]+)(?:\s+(?:class|struct|type))?)?$",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     /// <summary>
@@ -137,11 +137,14 @@ internal static class ConstructorSummaries
     private static int GetFillerLength(string rest)
     {
         var end = rest.IndexOf('.');
-        var close = rest.IndexOf("</", StringComparison.Ordinal);
+        var close = GetContainerEnd(rest);
         var sentence = end >= 0 && (close < 0 || end < close) ? rest.Substring(0, end)
             : close >= 0 ? rest.Substring(0, close)
             : rest;
-        if (!Filler.IsMatch(sentence.Trim()))
+
+        // A sentence cut inside an element ('<c>Castle' of '<c>Castle.Options</c>.') isn't one: replacing it would leave the
+        // element's end behind.
+        if (!Filler.IsMatch(sentence.Trim()) || HasUnclosedElement(sentence))
         {
             return 0;
         }
@@ -154,6 +157,30 @@ internal static class ConstructorSummaries
 
         return length;
     }
+
+    /// <summary>
+    /// Where the summary's own end tag (or a paragraph's) is in <paramref name="rest"/>, or -1: the first '&lt;/' whose
+    /// element doesn't start in <paramref name="rest"/>. An inline element's end ('&lt;c&gt;Name&lt;/c&gt;') isn't it (trial 35,
+    /// Castle Core: 'Creates a new instance of &lt;c&gt;ConfigurationCollection&lt;/c&gt;.' was cut before '&lt;/c&gt;', and the fix
+    /// wrote 'class.&lt;/c&gt;.': CS1570).
+    /// </summary>
+    private static int GetContainerEnd(string rest)
+    {
+        for (var close = rest.IndexOf("</", StringComparison.Ordinal); close >= 0; close = rest.IndexOf("</", close + 2, StringComparison.Ordinal))
+        {
+            var name = Regex.Match(rest.Substring(close + 2), @"^[\w:.-]+").Value;
+            if (name.Length == 0 || !Regex.IsMatch(rest.Substring(0, close), "<" + Regex.Escape(name) + @"[\s>]"))
+            {
+                return close;
+            }
+        }
+
+        return -1;
+    }
+
+    private static bool HasUnclosedElement(string sentence) =>
+        Regex.Matches(sentence, @"<([\w:.-]+)(?=[\s>])[^>]*(?<!/)>").Cast<Match>()
+            .Any(m => sentence.IndexOf("</" + m.Groups[1].Value + ">", m.Index, StringComparison.Ordinal) < 0);
 
     /// <summary>
     /// A whitespace-only summary gets the standard sentence, like StyleCop master: on one line it replaces the
