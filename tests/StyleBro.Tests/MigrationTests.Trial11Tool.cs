@@ -86,15 +86,18 @@ public sealed partial class MigrationTests
 
         var whole = FormatCommand.Incomplete(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { "net10.0", "net8.0" } }, new Dictionary<string, List<string>> { ["Tests"] = new() { "net10.0", "net8.0" } });
         Assert.Contains(whole, l => l.Contains("per-framework runs are the cause", StringComparison.Ordinal));
-        Assert.Equal(1, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, whole)));
-        Assert.Equal(FormatCommand.NotVerified, lines[^1]);
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, [.. whole, .. FormatCommand.SkippedGaps(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { "net10.0", "net8.0" } }, new Dictionary<string, List<string>> { ["Tests"] = new() { "net10.0", "net8.0" } })])));
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker, lines[^1], StringComparison.Ordinal);
+        Assert.Equal("Not checked: Tests: 'dotnet format' couldn't load it (references didn't load)", lines[^2]);
 
         // Skipped for one framework only (no other loaded in its place): not verified either (trial 28). Because of an F#
-        // reference: a warning.
+        // reference too (owner's decision 2026-10-20: the build analyzes that code), with the reason.
         var partly = FormatCommand.Incomplete(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { "net10.0" } }, new Dictionary<string, List<string>> { ["Tests"] = new() { "net10.0", "net8.0" } });
-        Assert.Equal(1, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, partly)));
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, [.. partly, .. FormatCommand.SkippedGaps(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { "net10.0" } }, new Dictionary<string, List<string>> { ["Tests"] = new() { "net10.0", "net8.0" } })])));
+        Assert.Contains("Not checked: Tests (net10.0):", lines[^2], StringComparison.Ordinal);
         var fSharp = FormatCommand.Incomplete(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { string.Empty } }, new Dictionary<string, List<string>>(), new[] { "Lib.fsproj" });
-        Assert.Equal(0, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, fSharp)));
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, FormatCommand.Verify(new[] { "--verify-no-changes" }, root, lines.Add, (a, o) => Run(a, o, [.. fSharp, .. FormatCommand.SkippedGaps(new Dictionary<string, SortedSet<string>> { ["Tests"] = new() { string.Empty } }, new Dictionary<string, List<string>>(), new[] { "Lib.fsproj" })])));
+        Assert.Contains("it references Lib.fsproj", lines[^2], StringComparison.Ordinal);
         Assert.DoesNotContain(fSharp, l => l.Contains("per-framework runs are the cause", StringComparison.Ordinal));
     }
 

@@ -12,8 +12,9 @@ Two checks keep a repository clean. They overlap on purpose: the build catches w
    so suppress or [baseline](baseline.md) them where warnings are errors.
 
 Exit codes of `bro check`: **0** clean (nothing to change; kept findings are listed
-with their reasons), **2** formatting would change a file (the output says which findings), anything else: `dotnet
-format` itself failed. A script or an AI agent can loop "run `bro format`, then check" and stop on 0; with
+with their reasons), **2** formatting would change a file (the output says which findings), **3** not verified: nothing
+to change in what it checked, but part of the build wasn't checked (a project that didn't load, a missing workload, ...;
+each is named, see [Not verified](kept-findings.md#not-verified)), anything else: `dotnet format` itself failed. A script or an AI agent can loop "run `bro format`, then check" and stop on 0; with
 plain `dotnet format --verify-no-changes` such a loop never ends while kept findings exist.
 
 To catch problems before they're committed: [Pre-commit hook](pre-commit.md).
@@ -50,6 +51,21 @@ reports them.
 Where the repository formats with CSharpier, `bro format` runs it on the files it changed, and
 `bro check` runs CSharpier's check on the C# files it formats too: a separate
 `dotnet csharpier check` step stays useful for the other files CSharpier formats (project files, JSON).
+
+## Build every configuration
+
+```
+bro check --build
+```
+
+After the check, builds the solution in every configuration it lists (`Debug`, `Release`, `Release|x64`, ...; a project:
+its `Configurations`, else Debug and Release), every target framework, with `TreatWarningsAsErrors`, as CI does. A
+finding of `bro format`'s rules in any of these builds fails the check (exit code 2): that's code no `dotnet format` run
+saw, `#if !DEBUG` code for example. Any other error fails only when it is new: the same builds of a copy of git HEAD
+(the working tree is never touched) don't have it, compared by file, rule and message (a fix may move the line). Errors
+the untouched code has too are counted but don't fail it, and without git every error does. Tests aren't run. It takes a
+build per configuration, two after `bro format` changed files, so it's slow: run it in CI or before a release rather
+than after every edit.
 
 ## GitHub Actions
 
