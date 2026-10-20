@@ -58,4 +58,43 @@ public sealed partial class MigrationTests
         Assert.Contains("nothing to change, but not verified (below)", PreviewCommand.FormatSummary(0, 0, rules, [false], notVerified: true), StringComparison.Ordinal);
         Assert.Contains("clean after 1 run", PreviewCommand.FormatSummary(3, 5, rules, [true, false]), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void WorkingRoot_HoldsTheRepositoryFilesTheProjectsCompileFromAboveIt()
+    {
+        // NodaTime: src/NodaTime.slnx lists src/NodaTime.Tools.Common, which compiles ..\..\lib\commandline\*.cs. format worked
+        // from src/, 'dotnet format --include' can't name ../lib/, and CommandLine.cs was never formatted (134 TWAE errors).
+        Write("src/All.slnx", "<Solution>\n  <Project Path=\"Tools/Tools.csproj\" />\n  <Project Path=\"Lib/Lib.csproj\" />\n</Solution>\n");
+        Write("src/Tools/Tools.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n    <Compile Include=\"..\\..\\lib\\commandline\\*.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write("src/Lib/Lib.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n    <Compile Include=\"../Shared/S.cs;$(Outside)/X.cs;..\\..\\missing\\*.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write("src/Shared/S.cs", "class S\n{\n}\n");
+        Write("lib/commandline/CommandLine.cs", "class CommandLine\n{\n}\n");
+        Write("src/Inside/Inside.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n    <!-- <Compile Include=\"..\\..\\lib\\commandline\\*.cs\" /> -->\n  </ItemGroup>\n</Project>\n");
+        Write("src/Only.slnx", "<Solution>\n  <Project Path=\"Lib/Lib.csproj\" />\n  <Project Path=\"Inside/Inside.csproj\" />\n</Solution>\n");
+
+        // Without a repository nothing tells whose files they are: the solution's folder, as before.
+        Assert.Equal(Path.Combine(root, "src"), FormatCommand.WorkingRoot(Path.Combine(root, "src", "All.slnx")));
+
+        PreviewCommand.MakeRepository(root);
+        Assert.Equal(root, FormatCommand.WorkingRoot(Path.Combine(root, "src", "All.slnx")));
+        Assert.Equal(root, FormatCommand.WorkingRoot(Path.Combine(root, "src", "Tools", "Tools.csproj")));
+        Assert.Equal([Path.Combine(root, "lib", "commandline")], FormatCommand.LinkedFolders(Path.Combine(root, "src", "Tools", "Tools.csproj"), root));
+
+        // A link inside the solution's folder (or one through a property, to a folder that doesn't exist, or commented out) changes nothing.
+        Assert.Equal(Path.Combine(root, "src"), FormatCommand.WorkingRoot(Path.Combine(root, "src", "Only.slnx")));
+        Assert.Equal(Path.Combine(root, "src"), FormatCommand.WorkingRoot(Path.Combine(root, "src", "Lib", "Lib.csproj")));
+        Assert.Empty(FormatCommand.LinkedFolders(Path.Combine(root, "src", "Inside", "Inside.csproj"), root));
+    }
+
+    [Fact]
+    public void LinkedFolders_OutsideTheRepository_AreNotTheRepositorys()
+    {
+        // A sibling repository's files (Speckle) stay someone else's code: format leaves them alone, from the same root as before.
+        Write("repo/src/App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <ItemGroup>\n    <Compile Include=\"..\\..\\..\\other\\*.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write("other/O.cs", "class O\n{\n}\n");
+        var repository = Path.Combine(root, "repo");
+        PreviewCommand.MakeRepository(repository);
+        Assert.Empty(FormatCommand.LinkedFolders(Path.Combine(repository, "src", "App", "App.csproj"), repository));
+        Assert.Equal(Path.Combine(repository, "src", "App"), FormatCommand.WorkingRoot(Path.Combine(repository, "src", "App", "App.csproj")));
+    }
 }
