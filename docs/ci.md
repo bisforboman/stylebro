@@ -63,7 +63,9 @@ its `Configurations`, else Debug and Release), every target framework, with `Tre
 finding of `bro format`'s rules in any of these builds fails the check (exit code 2): that's code no `dotnet format` run
 saw, `#if !DEBUG` code for example. Any other error fails only when it is new: the same builds of a copy of git HEAD
 (the working tree is never touched) don't have it, compared by file, rule and message (a fix may move the line). Errors
-the untouched code has too are counted but don't fail it, and without git every error does. Tests aren't run. It takes a
+the untouched code has too are counted but don't fail it, and without git every error does. A build that fails like the
+untouched code's (a missing workload at the restore, a compile error) checked only what built before the error: the
+check then ends "Not verified" (exit code 3). Tests aren't run. It takes a
 build per configuration, two after `bro format` changed files, so it's slow: run it in CI or before a release rather
 than after every edit.
 

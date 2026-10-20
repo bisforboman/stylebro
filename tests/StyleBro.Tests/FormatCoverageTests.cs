@@ -173,7 +173,7 @@ public sealed class FormatCoverageTests : IDisposable
 
         // The same code as HEAD (""): no second build, and errors other than format's rules are the code's own.
         built.Clear();
-        Assert.StartsWith(FormatCommand.NotVerifiedMarker, FormatCommand.BuildCheckLine(root, solution, _ => { }, Build, () => string.Empty), StringComparison.Ordinal);
+        Assert.Null(FormatCommand.BuildCheckLine(root, solution, _ => { }, Build, () => string.Empty));
         Assert.Equal([(root, "Debug"), (root, "Release|x64")], built);
 
         // A finding of format's rules always counts.
@@ -184,8 +184,8 @@ public sealed class FormatCoverageTests : IDisposable
         var both = FormatCommand.BuildCheckLine(root, solution, _ => { }, (folder, _, _) => (1, [$"{Path.Combine(folder, "A.csproj")} : error NETSDK1147: To build this project, the following workloads must be installed: ios"]), () => untouchedRoot);
         Assert.StartsWith(FormatCommand.NotVerifiedMarker + " the Debug, Release|x64 builds failed, as the untouched code's do", both, StringComparison.Ordinal);
 
-        // Builds that succeed: nothing to say.
-        Assert.Null(FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => (0, []), () => string.Empty));
+        // Failed without a line that explains it, like the untouched code's: not verified either.
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker, FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => (1, []), () => string.Empty), StringComparison.Ordinal);
 
         // No git: a failed build no line explains counts.
         Assert.Equal("Not clean: the Debug, Release|x64 builds failed (above).", FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => (1, []), () => null));

@@ -21,7 +21,7 @@ internal static partial class FormatCommand
     private static readonly Regex BuildLine = new(@"^\s*(?<path>.+?)(?:\((?<line>\d+),(?<column>\d+)\))? ?: (?<kind>warning|error) (?<id>[A-Za-z]+\d+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$");
 
     /// <summary>One error or warning of a build: its key (path relative to the build's root, framework, id, message: no line, which a fix moves) and how it's shown.</summary>
-    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown);
+    public sealed record BuildMessage(string Key, string Id, bool Error, string Shown, bool InSource = true);
 
     /// <summary>The errors and warnings of a build's <paramref name="output"/> (each once: the summary repeats them), paths relative to <paramref name="root"/>.</summary>
     public static List<BuildMessage> BuildMessages(IEnumerable<string> output, string root) =>
@@ -34,7 +34,7 @@ internal static partial class FormatCommand
                 var framework = project.IndexOf("::TargetFramework=", StringComparison.Ordinal) is var at and >= 0 ? project.Substring(at + "::TargetFramework=".Length) : string.Empty;
                 var where = m.Groups["line"].Success ? $"{path}({m.Groups["line"].Value},{m.Groups["column"].Value})" : path;
                 var shown = $"  {where}: {m.Groups["id"].Value}: {m.Groups["message"].Value}{(framework.Length > 0 ? $" ({framework})" : string.Empty)}";
-                return (Line: m.Value.Trim(), Message: new BuildMessage($"{path.ToUpperInvariant()}|{framework}|{m.Groups["id"].Value}|{m.Groups["message"].Value}", m.Groups["id"].Value, m.Groups["kind"].Value == "error", shown));
+                return (Line: m.Value.Trim(), Message: new BuildMessage($"{path.ToUpperInvariant()}|{framework}|{m.Groups["id"].Value}|{m.Groups["message"].Value}", m.Groups["id"].Value, m.Groups["kind"].Value == "error", shown, m.Groups["line"].Success));
             })
             .DistinctBy(x => x.Line, StringComparer.Ordinal)
             .Select(x => x.Message)
@@ -187,11 +187,13 @@ internal static partial class FormatCommand
                 {
                     failed.Add(configuration);
                 }
-                else if (exitCode != 0 && found.Count == 0)
+                else if (exitCode != 0 && found.Count == 0 && (current.Any(m => m.Error && !m.InSource) || !current.Any(m => m.Error)))
                 {
-                    // Failed like the untouched code's: no new error, but a failed build (a restore error, a compile error) checks
-                    // nothing past it (sqlite-net: NETSDK1147 at the restore, nothing compiled).
+                    // Failed like the untouched code's at the restore or in MSBuild (an error without a place in the code): nothing
+                    // compiled (sqlite-net: NETSDK1147). An error in the code is the compiler's, which ran the analyzers there
+                    // (Ulid's obsolete calls in its benchmarks, warnings as errors).
                     bothFailed.Add(configuration);
+                    current.Where(m => m.Error && !m.InSource).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
                 }
             }
         }
@@ -210,7 +212,7 @@ internal static partial class FormatCommand
         var findingsPart = findings > 0 ? $"the builds report {findings} finding{(findings == 1 ? string.Empty : "s")} of format's rules (above): fix {(findings == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings == 1 ? "it" : "them")}" : null;
         var failedPart = failed.Count > 0 ? $"the {string.Join(", ", failed)} build{(failed.Count == 1 ? string.Empty : "s")} {(untouched is null ? "failed" : "failed where the untouched code's didn't")} (above)" : null;
         return findingsPart is not null || failedPart is not null ? $"Not clean: {string.Join("; and ", new[] { findingsPart, failedPart }.OfType<string>())}."
-            : bothFailed.Count > 0 ? $"{NotVerifiedMarker} the {string.Join(", ", bothFailed)} build{(bothFailed.Count == 1 ? string.Empty : "s")} failed, as the untouched code's {(bothFailed.Count == 1 ? "does" : "do")} (above), so {(bothFailed.Count == 1 ? "it" : "they")} checked only what built before the errors: fix them, then run again."
+            : bothFailed.Count > 0 ? $"{NotVerifiedMarker} the {string.Join(", ", bothFailed)} build{(bothFailed.Count == 1 ? string.Empty : "s")} failed, as the untouched code's {(bothFailed.Count == 1 ? "does" : "do")} (above), so {(bothFailed.Count == 1 ? "it" : "they")} compiled nothing past {(bothFailed.Count == 1 ? "its" : "their")} errors: fix them (a missing workload, a failed restore), then run again."
             : null;
     }
 
