@@ -13,9 +13,10 @@ namespace StyleBro.Tests;
 
 /// <summary>
 /// Findings a fix keeps on purpose: why (the reason the renamer's own checks give), that 'bro format' lists
-/// them, and that they don't make it fail. The tests that set <see cref="KeptFinding.Variable"/> live in this class, so
-/// they don't run in parallel with each other.
+/// them, and that they don't make it fail. Its tests set <see cref="KeptFinding.Variable"/>, so the class shares
+/// <see cref="FormatEnvironmentCollection"/> with the other classes that run 'bro format'.
 /// </summary>
+[Collection(FormatEnvironmentCollection.Name)]
 public sealed class KeptFindingsTests : IDisposable
 {
     private readonly List<string> folders = [];

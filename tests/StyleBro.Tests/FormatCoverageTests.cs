@@ -8,6 +8,7 @@ namespace StyleBro.Tests;
 /// what they didn't check the way the build does, never "Clean"; 'bro check --build' builds every configuration with
 /// warnings as errors and compares with a copy of HEAD.
 /// </summary>
+[Collection(FormatEnvironmentCollection.Name)]
 public sealed class FormatCoverageTests : IDisposable
 {
     private readonly List<string> folders = [];

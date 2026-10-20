@@ -3,6 +3,7 @@ using StyleBro.Migrate;
 
 namespace StyleBro.Tests;
 
+[Collection(FormatEnvironmentCollection.Name)]
 public sealed partial class MigrationTests : IDisposable
 {
     private readonly string root = Directory.CreateTempSubdirectory("bro-").FullName;

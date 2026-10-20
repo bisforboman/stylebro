@@ -7,6 +7,7 @@ namespace StyleBro.Tests;
 /// so a CRLF file got LF lines on Linux (and an LF file CRLF lines on Windows), and '--verify-no-changes' depended on the OS.
 /// 'bro format' gives a file that used one ending throughout its own ending back.
 /// </summary>
+[Collection(FormatEnvironmentCollection.Name)]
 public sealed class FormatLineEndingsTests : IDisposable
 {
     private readonly List<string> folders = [];
