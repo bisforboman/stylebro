@@ -4187,7 +4187,7 @@ internal static partial class FormatCommand
         var workspaceForBuild = buildAll ? File.Exists(path) ? path : BaselineCommand.FindWorkspace(root) is { } found ? Path.Combine(root, found) : null : null;
         if (buildAll)
         {
-            Unchecked.TryRemove(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)), out _);
+            Unchecked.TryRemove(Key(root), out _);
         }
 
         var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null, workspaceForBuild is null ? null : BuildCheckLine(root, workspaceForBuild, log) }.OfType<string>().ToList();
