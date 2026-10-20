@@ -1721,6 +1721,32 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   entries (hours); apply only the new entries. The stop hook flags commits in trial clones (third-party repos): give them
   the noreply identity, never push them.
 
+## Trial 36 (2026-10-20, not clean: owner "Not clean", tally 0)
+
+- First trial of PR #266's check coverage. Repos: aalhour/C-Sharp-Algorithms (random, seed 36: npoi drew first, 3,125
+  files), icsharpcode/SharpZipLib (netstandard2.0 at C# 7.3 next to netstandard2.1/net6.0), nodatime/nodatime (`#if DEBUG`,
+  docs with `<c>`/`<see>`, x64/x86 platforms), wiremock/WireMock.Net (an old-style packages.config net48 project; its pool
+  entry's StyleCop/Sonar are commented out: init, not migrate). Held up: IDE0049 held back on SDK 10.0.113 with "Not
+  checked"/exit 3 in format and check (SharpZipLib, NodaTime, WireMock), WireMock.Net.Service named as not loaded, format's
+  Release runs for NodaTime's `#if DEBUG`; C-Sharp-Algorithms clean (exit 0 everywhere). After the fixes every repo matched
+  its baseline builds and tests.
+- NodaTime (owner: "Format them"): `src/NodaTime.Tools.Common` compiles `..\..\lib\commandline\*.cs`, above `src/` where
+  format worked (`dotnet format --include` can't name `../`): the file was dropped silently, check said "the rest is clean",
+  the TWAE build failed on 134 findings (`check --build` caught it). `WorkingRoot` now also holds the repository folders a
+  project's Compile items reach above it (`LinkedFolders`, text-based, up to the first wildcard, inside the git repository
+  only; outside stays someone else's code).
+- Preview (owner: "exit 3 like format"): `bro preview` runs format one run at a time through `RunPlain`, which logs the
+  `Not checked:` lines but returns 0, so it said "clean after 1 run" and exit 0 where format said "Not verified". It now
+  collects the last run's gap lines and ends with `GapVerdict` and exit 3 (`FormatSummary(..., notVerified)`).
+- `check --build` (owner: "Not verified, naming them"): a configuration that fails with an in-source error the untouched code
+  has too counted as checked, but MSBuild silently skips the projects referencing the failed one (spot repro: "Clean.", exit
+  0, App never compiled). `Uncompiled` lists the workspace projects (`BuiltProjects`: ReadProjects minus NotBuiltFolders) with
+  no `Name -> output` line and no compiler/analyzer message (MSB/NETSDK/NU don't count); they make it "Not verified".
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there. WireMock's untouched TWAE build stops in WireMock.Net.Abstractions
+  (CS8618, CS8002 RestEase): compare without TWAE (all 75 outputs) instead; SharpZipLib's has 2 SYSLIB0011 in its tests.
+  NodaTime has CPM: the trial's StyleBro reference goes into Directory.Packages.props + a version-less PackageReference.
+  GOTCHA again: a mutation loop's `git checkout` reverted uncommitted work; commit before testing mutations.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
