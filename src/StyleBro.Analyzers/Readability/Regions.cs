@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace StyleBro.Analyzers.Readability;
@@ -13,6 +15,22 @@ namespace StyleBro.Analyzers.Readability;
 /// </summary>
 internal static class Regions
 {
+    /// <summary>
+    /// The names of the repository's MarkdownSnippets snippets ('|'-separated), which the package targets read from the
+    /// markdown files' 'snippet: Name' lines when an mdsnippets.json is above the project.
+    /// </summary>
+    public const string SnippetsProperty = "build_property.StyleBroSnippets";
+
+    /// <summary>The snippet names of <see cref="SnippetsProperty"/>, none when it isn't set.</summary>
+    public static HashSet<string> GetSnippetNames(AnalyzerConfigOptions global) =>
+        global.TryGetValue(SnippetsProperty, out var names)
+            ? new HashSet<string>(names.Split('|').Select(n => n.Trim()).Where(n => n.Length > 0), StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+
+    /// <summary>The text after '#region', which MarkdownSnippets takes as the snippet's name.</summary>
+    public static string GetName(RegionDirectiveTriviaSyntax region) =>
+        string.Concat(region.EndOfDirectiveToken.LeadingTrivia.Select(t => t.ToString())).Trim();
+
     /// <summary>
     /// Every '#region' with its matching '#endregion', and whether it's inside a code element (a method, property,
     /// accessor or other member body; BRO1113) rather than between members or types (BRO1112). Regions without a

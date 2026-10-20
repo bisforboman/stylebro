@@ -3959,10 +3959,21 @@ internal static partial class FormatCommand
         }
     }
 
+    /// <summary>
+    /// An MSBuild query (<c>msbuild ... -getProperty</c>) with <c>-restore:false</c>, unless it asks for a restore itself: a
+    /// Directory.Build.rsp with <c>/Restore</c> made every query restore (trial 37, MSBuildSdks), and one with
+    /// <c>-property:TargetFramework=net9.0</c> rewrote a netstandard2.0 project's restore output for net9.0 (NU1109), so
+    /// 'dotnet format' couldn't load it and its findings were left for the build.
+    /// </summary>
+    public static IEnumerable<string> WithoutRestore(IReadOnlyList<string> arguments) =>
+        arguments.Count > 0 && arguments[0] == "msbuild" && !arguments.Any(a => a.StartsWith("-restore", StringComparison.OrdinalIgnoreCase) || a.StartsWith("/restore", StringComparison.OrdinalIgnoreCase))
+            ? arguments.Take(1).Append("-restore:false").Concat(arguments.Skip(1))
+            : arguments;
+
     internal static string Capture(string directory, params string[] arguments)
     {
         var start = new ProcessStartInfo("dotnet") { WorkingDirectory = directory, RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (var argument in arguments)
+        foreach (var argument in WithoutRestore(arguments))
         {
             start.ArgumentList.Add(argument);
         }

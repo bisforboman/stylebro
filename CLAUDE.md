@@ -1747,6 +1747,36 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   NodaTime has CPM: the trial's StyleBro reference goes into Directory.Packages.props + a version-less PackageReference.
   GOTCHA again: a mutation loop's `git checkout` reverted uncommitted work; commit before testing mutations.
 
+## Trial 37 (2026-10-20, not clean: owner "Not clean", tally 0)
+
+- Repos: microsoft/MSBuildSdks (StyleCop 1.1.118, migrate; `src/Shared` files linked into several projects; net472 to
+  net10.0), AArnott/Xunit.Combinatorial (StyleCop 1.2, migrate: changed nothing, 492/492), mcintyre321/OneOf (its F# project
+  fails the TWAE restore, NU1504: honestly Not verified), shouldly/shouldly (random, seed 37: sqlite-net drew first). Lens 2
+  (a project a failed one keeps from compiling): a spot repro (Broken <- Mid <- App, an MSBuild `<Error>` <- User): `check
+  --build` said Not verified naming them. Preview, format, check and check --build agreed on every repository (exit 3: IDE0049
+  held back on SDK 10.0.113). Wording nit left: a project failing on its own MSBuild error is listed as "a project they need
+  failed"; in HEAD mode an error without an id (MarkdownSnippets') isn't shown under "(above)".
+- MSBuildSdks: Directory.Build.rsp says `/Restore`, so every `dotnet msbuild` query that ran a target (CompileSettings'
+  `-target:AddImplicitDefineConstants -property:TargetFramework=net9.0`) restored, and a netstandard2.0 project got a net9.0
+  restore output (NU1109): `dotnet format` couldn't load Artifacts/CopyOnWrite (12 "Not checked" lines, among them net472's
+  "reference assemblies not found"), 4 findings stayed for the TWAE build. `FormatCommand.WithoutRestore`: `Capture` adds
+  `-restore:false` to msbuild queries. A plain `-getProperty` query doesn't restore, a target does.
+- shouldly (owner: "Analyzer skips snippet regions"): BRO1113 removed `#region ShouldBeObjects`, a MarkdownSnippets snippet,
+  and the build failed "Missing snippet". The package targets read the names (`_StyleBroFindSnippets`, compiler-visible
+  `StyleBroSnippets`, '|'-separated) from the repository's `*.md` (bin/obj/node_modules left out) when an `mdsnippets.json` is
+  above the project; RegionsAnalyzer skips those regions (`Regions.GetName`). GOTCHA: `--` in an XML comment breaks the
+  targets file (MSB4024).
+- shouldly (owner: "Widen both guards"): Shouldly quotes the call site's code in its messages, and its tests compare them: 37
+  of 1,122 failed (`_target`, `ThisString`, `doSomething` in `*.approved.txt`, "`methodCall()` should not throw" strings).
+  `CamelCaseRenamer.FindQuoted`: any rename's old name in a snapshot file keeps it (FindInCode's data-member-only check
+  removed), and with Shouldly (its assembly or a project named Shouldly) a word in a string of the declaring file
+  (`KeptReason.NameInShouldlyMessage`, `ContainsWord`). Rerun: 30 kept, baselined, 1,122/1,122.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there; `bro` needed `ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`.
+  MSBuildSdks and Xunit.Combinatorial need full clones (Nerdbank.GitVersioning) and global.json lowered; their nuget.configs
+  `<clear/>`, so the trial feed goes into them (run 1 only worked from the cached package). MSBuildSdks' `dotnet test -f`
+  fails its restore (NU1109): test without -f (exit 1 untouched too, net472). OneOf: `-p:WarningsNotAsErrors=NU1504`, build
+  its generator tests without TWAE. Mutation entries' `Tests` must not start with `FullyQualifiedName~` (the runner adds it).
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of

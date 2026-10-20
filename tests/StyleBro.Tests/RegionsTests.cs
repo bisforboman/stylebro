@@ -1,9 +1,53 @@
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
+using StyleBro.Analyzers.Readability;
+using StyleBro.CodeFixes.Readability;
 using static StyleBro.Tests.Verifier<StyleBro.Analyzers.Readability.RegionsAnalyzer, StyleBro.CodeFixes.Readability.RegionsCodeFixProvider>;
 
 namespace StyleBro.Tests;
 
 public class RegionsTests
 {
+    // shouldly (trial 37): its docs include '#region ShouldBeObjects' with MarkdownSnippets ('snippet: ShouldBeObjects'), and
+    // the build failed "Missing snippet" once the region was gone. The package targets pass the names (StyleBroSnippets).
+    [Fact]
+    public async Task SnippetRegions_Stay()
+    {
+        var test = new CSharpCodeFixTest<RegionsAnalyzer, RegionsCodeFixProvider, DefaultVerifier>
+        {
+            TestCode = """
+                public class C
+                {
+                    public int M()
+                    {
+                        #region ShouldBeObjects
+                        var y = 1;
+                        #endregion
+                        {|BRO1113:#region Other|}
+                        var z = y;
+                        #endregion
+                        return z;
+                    }
+                }
+                """,
+            FixedCode = """
+                public class C
+                {
+                    public int M()
+                    {
+                        #region ShouldBeObjects
+                        var y = 1;
+                        #endregion
+                        var z = y;
+                        return z;
+                    }
+                }
+                """,
+        };
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", "is_global = true\nbuild_property.StyleBroSnippets = |ShouldBeObjects||Another|\n"));
+        await test.RunAsync();
+    }
+
     [Fact]
     public Task Regions_AreRemoved() => VerifyFixAsync(
         """

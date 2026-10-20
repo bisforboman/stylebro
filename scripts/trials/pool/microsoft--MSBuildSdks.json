@@ -1,0 +1,22 @@
+{
+  "repo": "microsoft/MSBuildSdks",
+  "branch": "main",
+  "commit": "eeadbd0c1d4fecbd95f5c6d4c8194726998508bc",
+  "csFiles": 50,
+  "tags": [
+    "stylecop",
+    "multi-target",
+    "library"
+  ],
+  "setups": "StyleCop.Analyzers 1.1.118 as a GlobalPackageReference (Directory.Packages.props, central package management) + stylecop.json, MSBuildTreatWarningsAsErrors, Nerdbank.GitVersioning. Frameworks net472;net8.0;net9.0;net10.0 and netstandard2.0. src/Shared/*.cs and other projects' files linked into several projects (<Compile Include=\"..\\Shared\\...\" />).",
+  "build": "ok with workaround",
+  "workaround": "global.json pins 10.0.203 (latestMinor): lowered to 10.0.100. Needs a full clone (Nerdbank.GitVersioning).",
+  "tests": "dotnet test MSBuildSdks.sln --no-build -c Release (DOTNET_ROLL_FORWARD=Major for net9.0): 8 test projects, all pass. -f net10.0 fails the restore (NU1109).",
+  "usedIn": "trial 37",
+  "verified": {
+    "by": "trial 37",
+    "date": "2026-10-20",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0, 8.0; no 9.0)"
+  },
+  "notes": "StyleCop 1.1.118 + linked shared files: migrate and files compiled by several projects."
+}

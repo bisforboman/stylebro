@@ -139,6 +139,29 @@
     </PropertyGroup>
   </Target>
   <!--
+    The repository's MarkdownSnippets snippet names, for BRO1112/BRO1113: a '#region Name' the docs include ('snippet: Name',
+    also an in-place one in an HTML comment) stays, or the build's MarkdownSnippets step fails "Missing snippet" (trial 37,
+    shouldly). Read only when an mdsnippets.json is above the project, from the markdown files of the repository (else the
+    config's folder), bin/obj/node_modules left out. '|'-separated, with empty entries.
+  -->
+  <Target Name="_StyleBroFindSnippets" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroSnippets)' == ''">
+    <PropertyGroup>
+      <_StyleBroSnippetsConfig>$([MSBuild]::GetPathOfFileAbove('mdsnippets.json', '$(MSBuildProjectDirectory)'))</_StyleBroSnippetsConfig>
+      <_StyleBroSnippetsRoot Condition="'$(_StyleBroSnippetsConfig)' != '' and '$(StyleBroRepositoryRoot)' != '' and '$(StyleBroRepositoryRoot)' != 'none'">$([MSBuild]::NormalizeDirectory('$(StyleBroRepositoryRoot)'))</_StyleBroSnippetsRoot>
+      <_StyleBroSnippetsRoot Condition="'$(_StyleBroSnippetsConfig)' != '' and '$(_StyleBroSnippetsRoot)' == ''">$([MSBuild]::NormalizeDirectory($([System.IO.Path]::GetDirectoryName('$(_StyleBroSnippetsConfig)'))))</_StyleBroSnippetsRoot>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(_StyleBroSnippetsRoot)' != ''">
+      <_StyleBroMarkdown Include="$(_StyleBroSnippetsRoot)**/*.md" Exclude="$(_StyleBroSnippetsRoot)**/node_modules/**;$(_StyleBroSnippetsRoot)**/bin/**;$(_StyleBroSnippetsRoot)**/obj/**" />
+    </ItemGroup>
+    <ReadLinesFromFile File="%(_StyleBroMarkdown.FullPath)" Condition="'@(_StyleBroMarkdown)' != ''">
+      <Output TaskParameter="Lines" ItemName="_StyleBroMarkdownLine" />
+    </ReadLinesFromFile>
+    <PropertyGroup Condition="'@(_StyleBroMarkdownLine)' != ''">
+      <_StyleBroMarkdownText>@(_StyleBroMarkdownLine, '%0A')</_StyleBroMarkdownText>
+      <StyleBroSnippets>$([System.Text.RegularExpressions.Regex]::Replace('$(_StyleBroMarkdownText)', '(?m)^(?:[ \t]*(?:&lt;!--[ \t]*)?snippet:[ \t]*([^\s&gt;|]+)[^\n]*|[^\n]*)\n?', '$1|'))</StyleBroSnippets>
+    </PropertyGroup>
+  </Target>
+  <!--
     The project's git repository, for OutsideRepositorySuppressor: StyleBro's findings in files compiled from outside it
     ('..\..\outside\Shared.cs') are hidden, 'bro format' leaves them alone. The nearest folder above the
     project with a '.git' folder (found by its HEAD) or a '.git' file (a worktree or submodule); 'none' turns it off.
@@ -153,6 +176,7 @@
     <CompilerVisibleProperty Include="StyleBroRepositoryRoot" />
     <CompilerVisibleProperty Include="StyleBroSubmoduleFolders" />
     <CompilerVisibleProperty Include="StyleBroGeneratedFolders" />
+    <CompilerVisibleProperty Include="StyleBroSnippets" />
     <CompilerVisibleProperty Include="StyleBroSonar" />
     <CompilerVisibleProperty Include="StyleBroPackageFolders" />    <CompilerVisibleProperty Include="StyleBroTargetFrameworks" />
     <!-- BRO1145 (C# 12 syntax): the SDK sets LangVersion to MaxSupportedLangVersion unless the project sets it. -->

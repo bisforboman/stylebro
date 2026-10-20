@@ -13,7 +13,7 @@
   "build": "ok with workaround",
   "workaround": "The solution build fails only in OneOf.FSharp (old FSharp.NET.Sdk 1.0.5: \"dotnet exited with code 150\"); every C# project builds. DOTNET_ROLL_FORWARD=Major for the net6.0 tests.",
   "tests": "DOTNET_ROLL_FORWARD=Major dotnet test OneOf.SourceGenerator.Tests (10/10) and OneOf.SourceGenerator.AnalyzerTests (9/9). Left out: OneOf.Tests (net451, needs .NET Framework / Mono).",
-  "usedIn": null,
+  "usedIn": "trial 37",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",
