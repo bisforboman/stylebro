@@ -87,4 +87,3 @@ public sealed partial class MigrationTests
         Assert.Equal(first, FormatCommand.FormatHonorsIdeSuppressions());
     }
 }
-
