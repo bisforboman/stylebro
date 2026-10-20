@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace StyleBro.Analyzers.Modernize;
@@ -44,12 +45,18 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
         ["IDE0330"] = (new(9, 0), null),              // System.Threading.Lock
     }.ToImmutableDictionary();
 
+    /// <summary>The SDK's rule for built-in type names ('Int32' -> 'int', 'IntPtr' -> 'nint').</summary>
+    internal const string TypeNamesId = "IDE0049";
+
     private static readonly ImmutableDictionary<string, SuppressionDescriptor> Descriptors = Minimums.Keys.ToImmutableDictionary(
         id => id,
         id => new SuppressionDescriptor("MULTITARGET_" + id, id, "A target framework of this project lacks the API the fix writes (StyleBro's multi-target guard)"));
 
+    private static readonly SuppressionDescriptor TypeNames = new(
+        "MULTITARGET_" + TypeNamesId, TypeNamesId, "A target framework of this project compiles with a C# version too old for what the fix writes (StyleBro's multi-target guard)");
+
     /// <inheritdoc/>
-    public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } = Descriptors.Values.ToImmutableArray();
+    public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } = Descriptors.Values.Append(TypeNames).ToImmutableArray();
 
     /// <inheritdoc/>
     public override void ReportSuppressions(SuppressionAnalysisContext context)
@@ -61,6 +68,12 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
             if (Descriptors.TryGetValue(diagnostic.Id, out var descriptor) && !AllHave(options, Minimums[diagnostic.Id]))
             {
                 context.ReportSuppression(Suppression.Create(descriptor, diagnostic));
+            }
+            else if (diagnostic.Id == TypeNamesId && diagnostic.Location.SourceTree is { } tree
+                && TypeNameFixNeeds(tree, diagnostic.Location.SourceSpan, context.CancellationToken) is { } core
+                && !AllFrameworksDefaultTo(options, core))
+            {
+                context.ReportSuppression(Suppression.Create(TypeNames, diagnostic));
             }
         }
     }
@@ -84,6 +97,43 @@ public sealed class MultiTargetSuppressor : DiagnosticSuppressor
     {
         var frameworks = GetFrameworks(options);
         return frameworks.Count < 2 || frameworks.All(f => Has(f, minimum));
+    }
+
+    /// <summary>
+    /// The .NET version whose default C# an IDE0049 fix at <paramref name="span"/> needs, or null when any C# takes it: a
+    /// keyword in a using alias needs C# 12 (.NET 8's default), 'nint'/'nuint' for IntPtr/UIntPtr C# 9 (.NET 5's).
+    /// </summary>
+    internal static Version? TypeNameFixNeeds(SyntaxTree tree, Microsoft.CodeAnalysis.Text.TextSpan span, System.Threading.CancellationToken cancellationToken)
+    {
+        var node = tree.GetRoot(cancellationToken).FindNode(span);
+        if (node.AncestorsAndSelf().OfType<UsingDirectiveSyntax>().Any(u => u.Alias is not null))
+        {
+            return new Version(8, 0);
+        }
+
+        var name = tree.GetText(cancellationToken).ToString(span).Trim();
+        name = name.Substring(name.LastIndexOf('.') + 1);
+        return name is "IntPtr" or "UIntPtr" ? new Version(5, 0) : null;
+    }
+
+    /// <summary>
+    /// Whether every copy of a multi-targeted project's files compiles with at least the C# version .NET <paramref name="core"/>
+    /// defaults to: every framework reaches that .NET (no .NET Standard or .NET Framework default is that new), or the
+    /// project sets LangVersion itself (then every framework uses it, and the compilation's own version decides; a
+    /// LangVersion that differs per framework isn't detected). True for a single target or an unknown list.
+    /// </summary>
+    internal static bool AllFrameworksDefaultTo(AnalyzerConfigOptions global, Version core)
+    {
+        var frameworks = GetFrameworks(global);
+        if (frameworks.Count < 2 || frameworks.All(f => Has(f, (core, null))))
+        {
+            return true;
+        }
+
+        // The SDK sets LangVersion to MaxSupportedLangVersion when the project doesn't set it.
+        global.TryGetValue(Readability.EmptyRecordBodies.LangVersionProperty, out var langVersion);
+        global.TryGetValue(Readability.EmptyRecordBodies.MaxSupportedLangVersionProperty, out var defaultVersion);
+        return !string.IsNullOrWhiteSpace(langVersion) && !string.Equals(langVersion!.Trim(), defaultVersion?.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Whether a target framework (net48, netstandard2.1, netcoreapp3.1, net8.0-windows, ...) reaches the minimum.</summary>

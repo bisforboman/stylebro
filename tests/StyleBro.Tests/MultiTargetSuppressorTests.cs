@@ -64,13 +64,48 @@ public class MultiTargetSuppressorTests
         Assert.False(MultiTargetSuppressor.Has("net4.8", minimum));
     }
 
-    /// <summary>A stand-in for the SDK rule: reports <paramref name="id"/> on the class; returns all its diagnostics.</summary>
-    private static async Task<ImmutableArray<Diagnostic>> RunAsync(string id, string? frameworks)
+    [Theory]
+    [InlineData("netstandard2.0,net8.0", null, "IntPtr", true)]
+    [InlineData("netstandard2.0,net8.0", null, "System.UIntPtr", true)]
+    [InlineData("netstandard2.0,net8.0", null, "Int32", false)]
+    [InlineData("netstandard2.0,net8.0", null, "alias", true)]
+    [InlineData("net6.0,net8.0", null, "IntPtr", false)]
+    [InlineData("net6.0,net8.0", null, "alias", true)]
+    [InlineData("net8.0,net10.0", null, "alias", false)]
+    [InlineData("netstandard2.0,net8.0", "12.0", "alias", false)]
+    [InlineData("netstandard2.0,net8.0", "7.3", "IntPtr", true)]
+    [InlineData("netstandard2.0", null, "IntPtr", false)]
+    [InlineData(null, null, "alias", false)]
+    public async Task SuppressesTypeNames_WhereAFrameworksDefaultCSharpIsTooOld(string? frameworks, string? langVersion, string name, bool suppressed)
     {
-        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText("class C { }") }, Array.Empty<MetadataReference>());
-        var global = frameworks is null ? ImmutableDictionary<string, string>.Empty : ImmutableDictionary<string, string>.Empty.Add(MultiTargetSuppressor.Property, frameworks);
+        // sqlite-net: 'using Sqlite3DatabaseHandle = System.IntPtr;' became '= nint;' in the net8.0 run (C# 12), and
+        // SQLite-net-static's netstandard2.0 build (C# 7.3) failed with CS8370. 7.3 = the SDK's default there (MaxSupportedLangVersion).
+        var code = name == "alias" ? "using H = System.Int32;\nclass C { }" : $"class C {{ {name} f; }}";
+        var global = ImmutableDictionary<string, string>.Empty;
+        if (frameworks is not null)
+        {
+            global = global.Add(MultiTargetSuppressor.Property, frameworks).Add("build_property.MaxSupportedLangVersion", "7.3");
+        }
+
+        if (langVersion is not null)
+        {
+            global = global.Add("build_property.LangVersion", langVersion);
+        }
+
+        var diagnostic = Assert.Single(await RunAsync(new FakeTypeNames(), code, global));
+
+        Assert.Equal(suppressed, diagnostic.IsSuppressed);
+    }
+
+    /// <summary>A stand-in for the SDK rule: reports <paramref name="id"/> on the class; returns all its diagnostics.</summary>
+    private static Task<ImmutableArray<Diagnostic>> RunAsync(string id, string? frameworks) =>
+        RunAsync(new FakeRule(id), "class C { }", frameworks is null ? ImmutableDictionary<string, string>.Empty : ImmutableDictionary<string, string>.Empty.Add(MultiTargetSuppressor.Property, frameworks));
+
+    private static async Task<ImmutableArray<Diagnostic>> RunAsync(DiagnosticAnalyzer rule, string code, ImmutableDictionary<string, string> global)
+    {
+        var compilation = CSharpCompilation.Create("Test", new[] { CSharpSyntaxTree.ParseText(code) }, Array.Empty<MetadataReference>());
         var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, new Provider(global));
-        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FakeRule(id), new MultiTargetSuppressor());
+        var analyzers = ImmutableArray.Create(rule, new MultiTargetSuppressor());
         return await compilation.WithAnalyzers(analyzers, new CompilationWithAnalyzersOptions(options, null, true, false, reportSuppressedDiagnostics: true))
             .GetAnalyzerDiagnosticsAsync();
     }
@@ -92,6 +127,31 @@ public class MultiTargetSuppressorTests
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
             context.RegisterSyntaxNodeAction(c => c.ReportDiagnostic(Diagnostic.Create(descriptor, c.Node.GetLocation())), Microsoft.CodeAnalysis.CSharp.SyntaxKind.ClassDeclaration);
+        }
+    }
+
+    /// <summary>A stand-in for IDE0049: reports the framework names of built-in types ('Int32', 'System.IntPtr').</summary>
+    private sealed class FakeTypeNames : DiagnosticAnalyzer
+    {
+        private readonly DiagnosticDescriptor descriptor = new("IDE0049", "IDE0049", "IDE0049", "Test", DiagnosticSeverity.Warning, isEnabledByDefault: true);
+
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(descriptor);
+
+        public override void Initialize(AnalysisContext context)
+        {
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+            context.EnableConcurrentExecution();
+            context.RegisterSyntaxNodeAction(
+                c =>
+                {
+                    var name = (Microsoft.CodeAnalysis.CSharp.Syntax.IdentifierNameSyntax)c.Node;
+                    if (name.Identifier.ValueText is "Int32" or "IntPtr" or "UIntPtr")
+                    {
+                        var node = name.Parent is Microsoft.CodeAnalysis.CSharp.Syntax.QualifiedNameSyntax qualified && qualified.Right == name ? qualified : (SyntaxNode)name;
+                        c.ReportDiagnostic(Diagnostic.Create(descriptor, node.GetLocation()));
+                    }
+                },
+                Microsoft.CodeAnalysis.CSharp.SyntaxKind.IdentifierName);
         }
     }
 

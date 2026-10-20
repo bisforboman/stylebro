@@ -38,20 +38,8 @@ internal static class EmptyRecordBodies
     /// LangVersion itself (then every framework uses it; a LangVersion that differs per framework isn't detected).
     /// Without the package's properties (a single framework as far as StyleBro knows) only the file's version counts.
     /// </summary>
-    public static bool AllFrameworksAllowTypeBodySemicolon(AnalyzerConfigOptions global)
-    {
-        global.TryGetValue(MultiTargetSuppressor.Property, out var value);
-        var frameworks = (value ?? string.Empty).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 0).ToList();
-        if (frameworks.Count < 2 || frameworks.All(f => MultiTargetSuppressor.Has(f, (new Version(8, 0), null))))
-        {
-            return true;
-        }
-
-        // The SDK sets LangVersion to MaxSupportedLangVersion when the project doesn't set it.
-        global.TryGetValue(LangVersionProperty, out var langVersion);
-        global.TryGetValue(MaxSupportedLangVersionProperty, out var defaultVersion);
-        return !string.IsNullOrWhiteSpace(langVersion) && !string.Equals(langVersion!.Trim(), defaultVersion?.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool AllFrameworksAllowTypeBodySemicolon(AnalyzerConfigOptions global) =>
+        MultiTargetSuppressor.AllFrameworksDefaultTo(global, new Version(8, 0));
 
     private static TextChange? GetBodyChange(TypeDeclarationSyntax type)
     {
