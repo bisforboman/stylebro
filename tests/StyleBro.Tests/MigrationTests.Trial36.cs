@@ -135,4 +135,27 @@ public sealed partial class MigrationTests
         var messages = FormatCommand.BuildMessages(output, root2);
         Assert.Equal(["C", "D", "E", "F"], FormatCommand.Uncompiled(output, messages, ["A", "B", "C", "D", "E", "F"]));
     }
+
+    [Fact]
+    public void Files_AFileLinkedThroughAProperty_SharesItsProjectsRun()
+    {
+        // Trial 8's case (Files_ALinkedFile_IsFormattedInTheProjectThatCompilesIt) with the link through a property in its folder, which
+        // LinkedFolders doesn't read: the project's folder stays its working root, so the linked file is a group of its own
+        // with the same project, and both share one run of that project.
+        Write("App/App.csproj", "<Project>\n  <PropertyGroup>\n    <SharedDir>Shared</SharedDir>\n  </PropertyGroup>\n  <ItemGroup>\n    <Compile Include=\"..\\$(SharedDir)\\S.cs\" Link=\"S.cs\" />\n  </ItemGroup>\n</Project>\n");
+        Write("App/A.cs", "class A { }\n");
+        Write("Shared/S.cs", "class S { }\n");
+        Git("init", "-q");
+        var calls = new List<string[]>();
+
+        var log = new List<string>();
+        var code = FormatCommand.Run(["--files", Path.Combine(root, "Shared/S.cs"), Path.Combine(root, "App/A.cs"), "--once"], log.Add, (args, _) =>
+        {
+            calls.Add(args);
+            return 0;
+        });
+
+        Assert.True(code == 0, string.Join("\n", log));
+        Assert.Equal([$"{Path.Combine(root, "App", "App.csproj")} {FormatCommand.WorkingFolderOption} {root} --include Shared/S.cs App/A.cs"], calls.Select(c => string.Join(" ", c)));
+    }
 }

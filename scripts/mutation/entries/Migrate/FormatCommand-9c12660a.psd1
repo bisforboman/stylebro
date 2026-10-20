@@ -3,5 +3,5 @@
     File = 'src/StyleBro.Migrate/FormatCommand.cs'
     Find = 'if (workspaces.Count > 1)'
     Replace = 'if (workspaces.Count > 0)'
-    Tests = 'MigrationTests.Files_ALinkedFile_IsFormattedInTheProjectThatCompilesIt'
+    Tests = 'MigrationTests.Files_AFileLinkedThroughAProperty_SharesItsProjectsRun'
 }
