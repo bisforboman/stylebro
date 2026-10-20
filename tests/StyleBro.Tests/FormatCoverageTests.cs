@@ -173,12 +173,19 @@ public sealed class FormatCoverageTests : IDisposable
 
         // The same code as HEAD (""): no second build, and errors other than format's rules are the code's own.
         built.Clear();
-        Assert.Null(FormatCommand.BuildCheckLine(root, solution, _ => { }, Build, () => string.Empty));
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker, FormatCommand.BuildCheckLine(root, solution, _ => { }, Build, () => string.Empty), StringComparison.Ordinal);
         Assert.Equal([(root, "Debug"), (root, "Release|x64")], built);
 
         // A finding of format's rules always counts.
         var finding = FormatCommand.BuildCheckLine(root, solution, _ => { }, (folder, _, _) => (1, [$"{Path.Combine(folder, "A.cs")}(1,1): error BRO1002: Add a space after '//'"]), () => string.Empty);
         Assert.StartsWith("Not clean: the builds report 2 findings of format's rules", finding, StringComparison.Ordinal);
+
+        // Failed like the untouched code's (sqlite-net: NETSDK1147 at the restore, nothing compiled): not verified, not clean.
+        var both = FormatCommand.BuildCheckLine(root, solution, _ => { }, (folder, _, _) => (1, [$"{Path.Combine(folder, "A.csproj")} : error NETSDK1147: To build this project, the following workloads must be installed: ios"]), () => untouchedRoot);
+        Assert.StartsWith(FormatCommand.NotVerifiedMarker + " the Debug, Release|x64 builds failed, as the untouched code's do", both, StringComparison.Ordinal);
+
+        // Builds that succeed: nothing to say.
+        Assert.Null(FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => (0, []), () => string.Empty));
 
         // No git: a failed build no line explains counts.
         Assert.Equal("Not clean: the Debug, Release|x64 builds failed (above).", FormatCommand.BuildCheckLine(root, solution, _ => { }, (_, _, _) => (1, []), () => null));

@@ -4195,7 +4195,7 @@ internal static partial class FormatCommand
         foreach (var line in buts)
         {
             log(line);
-            exit = exit is 0 or NotVerifiedExitCode ? NotCleanExitCode : exit;
+            exit = line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal) ? WithGaps(exit, [line]) : exit is 0 or NotVerifiedExitCode ? NotCleanExitCode : exit;
         }
 
         JsonReport.Set("clean", exit == 0);

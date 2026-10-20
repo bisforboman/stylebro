@@ -118,7 +118,8 @@ internal static partial class FormatCommand
 
     /// <summary>
     /// --build: builds <paramref name="workspacePath"/> (under <paramref name="root"/>) in each of its configurations and
-    /// returns what makes it not clean (null: nothing). <paramref name="build"/> stands in for 'dotnet build' (folder,
+    /// returns what makes it not clean ("Not clean: ...") or not verified (<see cref="NotVerifiedMarker"/>: builds that failed
+    /// like the untouched code's), null for nothing. <paramref name="build"/> stands in for 'dotnet build' (folder,
     /// workspace, configuration) in tests; <paramref name="untouchedRoot"/> for the copy of HEAD (null: none, "": the same code).
     /// </summary>
     public static string? BuildCheckLine(string root, string workspacePath, Action<string> log, Func<string, string, string, (int ExitCode, IReadOnlyList<string> Output)>? build = null, Func<string?>? untouchedRoot = null)
@@ -163,6 +164,7 @@ internal static partial class FormatCommand
 
         var findings = 0;
         var failed = new List<string>();
+        var bothFailed = new List<string>();
         try
         {
             foreach (var configuration in configurations)
@@ -185,6 +187,12 @@ internal static partial class FormatCommand
                 {
                     failed.Add(configuration);
                 }
+                else if (exitCode != 0 && found.Count == 0)
+                {
+                    // Failed like the untouched code's: no new error, but a failed build (a restore error, a compile error) checks
+                    // nothing past it (sqlite-net: NETSDK1147 at the restore, nothing compiled).
+                    bothFailed.Add(configuration);
+                }
             }
         }
         finally
@@ -201,7 +209,9 @@ internal static partial class FormatCommand
 
         var findingsPart = findings > 0 ? $"the builds report {findings} finding{(findings == 1 ? string.Empty : "s")} of format's rules (above): fix {(findings == 1 ? "it" : "them")} by hand, or suppress or baseline {(findings == 1 ? "it" : "them")}" : null;
         var failedPart = failed.Count > 0 ? $"the {string.Join(", ", failed)} build{(failed.Count == 1 ? string.Empty : "s")} {(untouched is null ? "failed" : "failed where the untouched code's didn't")} (above)" : null;
-        return findingsPart is null && failedPart is null ? null : $"Not clean: {string.Join("; and ", new[] { findingsPart, failedPart }.OfType<string>())}.";
+        return findingsPart is not null || failedPart is not null ? $"Not clean: {string.Join("; and ", new[] { findingsPart, failedPart }.OfType<string>())}."
+            : bothFailed.Count > 0 ? $"{NotVerifiedMarker} the {string.Join(", ", bothFailed)} build{(bothFailed.Count == 1 ? string.Empty : "s")} failed, as the untouched code's {(bothFailed.Count == 1 ? "does" : "do")} (above), so {(bothFailed.Count == 1 ? "it" : "they")} checked only what built before the errors: fix them, then run again."
+            : null;
     }
 
     /// <summary>A build of a workspace in one configuration ('Release|x64') with TreatWarningsAsErrors, as CI builds (restore included, NuGet's audit off).</summary>
