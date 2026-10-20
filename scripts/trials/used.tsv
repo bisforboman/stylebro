@@ -165,3 +165,10 @@ aalhour/C-Sharp-Algorithms	trial 36 (random, seed 36)	net10.0 algorithms and dat
 icsharpcode/SharpZipLib	trial 36	netstandard2.0 (C# 7.3) next to netstandard2.1 and net6.0: IDE0049 held back
 nodatime/nodatime	trial 36	#if DEBUG code, doc comments with <c>/<see>, a project compiling ../../lib/commandline/*.cs from above the solution's folder
 wiremock/WireMock.Net	trial 36	an old-style packages.config net48 project in the solution; Debug/Release with x64/x86 platforms
+microsoft/MSBuildSdks	trial 37	StyleCop 1.1.118 (migrate), src/Shared files linked into several projects, net472 to net10.0
+AArnott/Xunit.Combinatorial	trial 37	StyleCop 1.2 beta (migrate), Library.Template, xunit.v3
+mcintyre321/OneOf	trial 37	an F# project failing the TreatWarningsAsErrors restore (NU1504), netstandard1.3/net35 libraries, in-solution generator
+shouldly/shouldly	trial 37 (random, seed 37)	dense .editorconfig, warnings as errors, multi-targeted, xunit.v3 + TUnit; seed 37 drew praeclarum/sqlite-net (trial 35)
+zzzprojects/System.Linq.Dynamic.Core	rejected trial 37	17 target frameworks incl. uap10.0 (restore fails, MSB4057), net452/Xamarin/UWP projects in the solution
+Tyrrrz/DiscordChatExporter	rejected trial 37	no offline tests: every test exports from Discord with a bot token
+jeffkl/MSBuildProjectCreator	rejected trial 37	global.json needs SDK 11.0.100-rc

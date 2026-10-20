@@ -13,7 +13,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test --solution Shouldly.sln (MTP runner from global.json): 6 test projects, 1,122 passed, 0 failed, ~1 min.",
-  "usedIn": null,
+  "usedIn": "trial 37 (random, seed 37)",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",

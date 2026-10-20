@@ -1,0 +1,22 @@
+{
+  "repo": "AArnott/Xunit.Combinatorial",
+  "branch": "main",
+  "commit": "70998ba24fc6141f0ce1995fff375dab659bd7a1",
+  "csFiles": 36,
+  "tags": [
+    "stylecop",
+    "multi-target",
+    "library"
+  ],
+  "setups": "StyleCop.Analyzers.Unstable 1.2.0.556 as a GlobalPackageReference + stylecop.json (Library.Template), central package management, Nerdbank.GitVersioning, xunit.v3 (MTP).",
+  "build": "ok with workaround",
+  "workaround": "global.json pins 10.0.402 (patch): lowered to 10.0.100, rollForward latestFeature. Needs a full clone.",
+  "tests": "dotnet test --no-build -c Release (MTP): 492 passed.",
+  "usedIn": "trial 37",
+  "verified": {
+    "by": "trial 37",
+    "date": "2026-10-20",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0, 8.0; no 9.0)"
+  },
+  "notes": "A small StyleCop 1.2 repository for migrate."
+}
