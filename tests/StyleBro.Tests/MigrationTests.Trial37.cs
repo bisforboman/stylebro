@@ -25,4 +25,23 @@ public sealed partial class MigrationTests
         Assert.Contains("net8.0", FormatCommand.Capture(root, ["msbuild", Path.Combine(root, "App", "App.csproj"), "-target:AddImplicitDefineConstants", "-getProperty:TargetFramework", "-nologo"]));
         Assert.False(File.Exists(Path.Combine(root, "App", "obj", "project.assets.json")));
     }
+
+    [Fact]
+    public void PackageTargets_ReadTheSnippetNamesOfTheRepositorysMarkdown()
+    {
+        // shouldly: mdsnippets.json in src/, the docs in documentation/ at the repository root.
+        Write(".git/HEAD", "ref: refs/heads/main\n");
+        Write("src/mdsnippets.json", "{}\n");
+        Write("docs/a.md", "# It's \"quoted\"; with semicolons; $(Foo) @(Bar) %41\nsnippet: ShouldBeObjects\n<!-- snippet: InPlace -->\n```cs\nx; y\n```\n");
+        Write("bin/b.md", "snippet: InBin\n");
+        var targets = Path.Combine(Presets.Root, "src", "StyleBro.Package", "build", "StyleBro.Analyzers.targets");
+        Write("src/App/App.csproj", $"<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>\n  <Import Project=\"{targets}\" />\n</Project>\n");
+        string Snippets() => FormatCommand.Capture(root, ["msbuild", Path.Combine(root, "src", "App", "App.csproj"), "-target:_StyleBroFindSnippets", "-getProperty:StyleBroSnippets", "-nologo"]).Trim();
+
+        Assert.Equal(["InPlace", "ShouldBeObjects"], Snippets().Split('|', StringSplitOptions.RemoveEmptyEntries).Order(StringComparer.Ordinal));
+
+        // Without an mdsnippets.json nothing is read.
+        File.Delete(Path.Combine(root, "src", "mdsnippets.json"));
+        Assert.Equal(string.Empty, Snippets());
+    }
 }

@@ -21,14 +21,25 @@ public sealed class RegionsAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context = context.SkipForeignFiles();
-        context.RegisterSyntaxTreeAction(c =>
+        context.RegisterCompilationStartAction(start =>
         {
-            foreach (var (region, _, inCodeElement) in Regions.GetRegions(c.Tree.GetRoot(c.CancellationToken)))
+            var snippets = Regions.GetSnippetNames(start.Options.AnalyzerConfigOptionsProvider.GlobalOptions);
+            start.RegisterSyntaxTreeAction(c =>
             {
-                c.ReportDiagnostic(Diagnostic.Create(
-                    inCodeElement ? Descriptors.NoRegionsInCodeElements : Descriptors.NoRegions,
-                    region.GetLocation()));
-            }
+                foreach (var (region, _, inCodeElement) in Regions.GetRegions(c.Tree.GetRoot(c.CancellationToken)))
+                {
+                    // A MarkdownSnippets snippet: the docs name the region, and without it the build fails "Missing snippet"
+                    // (trial 37, shouldly; owner's decision 2026-10-20).
+                    if (snippets.Contains(Regions.GetName(region)))
+                    {
+                        continue;
+                    }
+
+                    c.ReportDiagnostic(Diagnostic.Create(
+                        inCodeElement ? Descriptors.NoRegionsInCodeElements : Descriptors.NoRegions,
+                        region.GetLocation()));
+                }
+            });
         });
     }
 }
