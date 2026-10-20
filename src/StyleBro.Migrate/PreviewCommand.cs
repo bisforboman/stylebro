@@ -160,6 +160,10 @@ internal static class PreviewCommand
         var tail = new Queue<string>();
         string? incomplete = null;
         var notes = new List<string>();
+
+        // What the last format run didn't check the way the build does: the preview ends "Not verified" then, as format does
+        // (trial 36, SharpZipLib: "clean after 1 run" and exit 0 where format says "Not verified" for IDE0049, held back).
+        var gaps = new List<string>();
         void LogFile(string line)
         {
             lock (log)
@@ -175,6 +179,11 @@ internal static class PreviewCommand
                 if (line.StartsWith(FormatCommand.IncompleteMarker, StringComparison.Ordinal))
                 {
                     incomplete ??= line;
+                }
+
+                if (FormatCommand.IsGapLine(line) && !gaps.Contains(line))
+                {
+                    gaps.Add(line);
                 }
 
                 // What format left out on purpose (old-style projects it doesn't restore, projects without StyleBro or not built,
@@ -310,6 +319,7 @@ internal static class PreviewCommand
                 var code = 0;
                 var runArgs = run == 1 ? formatArgs.Concat(new[] { "--report", reportFolder }) : FormatCommand.NextRun(formatArgs.ToArray());
                 File.Delete(keptFile);
+                gaps.Clear();
                 Step($"Format run {run}", () => code = format(runArgs.Append(FormatCommand.OnceOption).ToArray(), Log));
 
                 if (code != 0)
@@ -368,8 +378,9 @@ internal static class PreviewCommand
             var (attribution, changes) = Attribute(File.ReadAllText(reportFile), Path.GetRelativePath(Path.GetDirectoryName(temp)!, copy).Replace('\\', '/'), files.Keys, f => WhitespaceOnly(copy, configured, f));
             JsonReport.Set("filesPerRule", new JsonObject(attribution.OrderBy(a => a.Key, StringComparer.Ordinal).Select(a => KeyValuePair.Create(a.Key, (JsonNode?)new JsonArray(a.Value.Keys.Select(f => (JsonNode?)f).ToArray())))));
             JsonReport.Set("changesPerRule", new JsonObject(JsonReport.ChangesPerRule(File.ReadAllText(reportFile)).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))));
-            JsonReport.Set("clean", !changed[^1] && putBack.Count == 0);
-            Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed, putBack.Count));
+            var notVerified = !changed[^1] && putBack.Count == 0 && gaps.Count > 0;
+            JsonReport.Set("clean", !changed[^1] && putBack.Count == 0 && gaps.Count == 0);
+            Console.WriteLine(FormatSummary(files.Count, changes, attribution, changed, putBack.Count, notVerified));
             foreach (var line in SampleLines(Samples(attribution, 3), (file, line) => Hunk(GitChecked(copy, "diff", "--cached", "-U0", configured, "--", file), line, 12)))
             {
                 Console.WriteLine(line);
@@ -400,8 +411,15 @@ internal static class PreviewCommand
                 Console.WriteLine(CSharpierStep.PutBackLine(putBack, FormatCommand.FindingIds(check.Where(l => FormatCommand.FindingPath(l) is { } path && putBack.Contains(Path.GetRelativePath(copy, path).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase)))));
             }
 
+            // As format: the parts no run checked, then "Not verified" (exit code 3) instead of clean.
+            if (notVerified)
+            {
+                FormatCommand.ReportGaps(gaps);
+                FormatCommand.GapVerdict(gaps).ForEach(Console.WriteLine);
+            }
+
             ok = true;
-            return putBack.Count > 0 || changed[^1] ? FormatCommand.NotCleanExitCode : 0;
+            return putBack.Count > 0 || changed[^1] ? FormatCommand.NotCleanExitCode : notVerified ? FormatCommand.NotVerifiedExitCode : 0;
         }
         catch (GitFailedException e)
         {
@@ -569,12 +587,13 @@ internal static class PreviewCommand
     }
 
     /// <summary>The format part of the summary: files, reported changes, runs, and the rules by the number of files they changed.</summary>
-    public static string FormatSummary(int files, int changes, Dictionary<string, SortedDictionary<string, int>> attribution, IReadOnlyList<bool> changedRuns, int putBack = 0)
+    public static string FormatSummary(int files, int changes, Dictionary<string, SortedDictionary<string, int>> attribution, IReadOnlyList<bool> changedRuns, int putBack = 0, bool notVerified = false)
     {
         var text = new StringBuilder();
         var runs = changedRuns.Count(c => c);
         var convergence = changedRuns.Count > 0 && changedRuns[^1] ? $"still changing after {changedRuns.Count} runs (the diff has all of them)"
             : putBack > 0 ? $"not clean: CSharpier puts back what the fixes change in {putBack} file{(putBack == 1 ? string.Empty : "s")} (below)"
+            : notVerified ? $"{(runs == 0 ? "nothing to change" : $"nothing left to change after {runs} run{(runs == 1 ? string.Empty : "s")}")}, but not verified (below)"
             : runs == 0 ? "nothing to change"
             : $"clean after {runs} run{(runs == 1 ? string.Empty : "s")}";
         text.Append(string.Create(CultureInfo.InvariantCulture, $"Format: {files:N0} file{(files == 1 ? string.Empty : "s")}, {changes:N0} reported change{(changes == 1 ? string.Empty : "s")}, {convergence}"));
