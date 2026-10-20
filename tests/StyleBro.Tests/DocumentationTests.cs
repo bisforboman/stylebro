@@ -1297,6 +1297,59 @@ public class DocumentationTests
         }
         """);
 
+    // Trial 35, Castle Core: the filler names the type in '<c>'; the fix cut the sentence before '</c>' and left
+    // 'class.</c>.' (CS1570). A name in '<c>' with a period inside isn't filler and stays.
+    [Fact]
+    public Task ConstructorSummaries_FillerWithTheNameInCode_IsReplacedWhole() => VerifyFixAsync(
+        """
+        /// <summary>A collection.</summary>
+        public class ConfigurationCollection
+        {
+            /// {|BRO1606:<summary>|}
+            /// Creates a new instance of <c>ConfigurationCollection</c>.
+            /// </summary>
+            public ConfigurationCollection()
+            {
+            }
+
+            /// {|BRO1606:<summary>|}Constructor for <c>ConfigurationCollection</c>. Copies the items.</summary>
+            /// <param name="a">The a.</param>
+            public ConfigurationCollection(int a)
+            {
+            }
+
+            /// <summary>Creates a new instance of <c>Castle.ConfigurationCollection</c>.</summary>
+            /// <param name="b">The b.</param>
+            public ConfigurationCollection(byte b)
+            {
+            }
+        }
+        """,
+        """
+        /// <summary>A collection.</summary>
+        public class ConfigurationCollection
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ConfigurationCollection"/> class.
+            /// </summary>
+            public ConfigurationCollection()
+            {
+            }
+
+            /// <summary>Initializes a new instance of the <see cref="ConfigurationCollection"/> class. Copies the items.</summary>
+            /// <param name="a">The a.</param>
+            public ConfigurationCollection(int a)
+            {
+            }
+
+            /// <summary>Creates a new instance of <c>Castle.ConfigurationCollection</c>.</summary>
+            /// <param name="b">The b.</param>
+            public ConfigurationCollection(byte b)
+            {
+            }
+        }
+        """);
+
     // Trial 22: the generic link is written like a person writes it, with a space after the comma.
     [Fact]
     public Task ConstructorSummaries_GenericLinkHasSpaces() => VerifyFixAsync(

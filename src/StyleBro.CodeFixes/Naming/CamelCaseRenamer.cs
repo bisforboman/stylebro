@@ -575,7 +575,7 @@ internal static class CamelCaseRenamer
 
     /// <summary>
     /// The first string code can refer to the symbol by, or null: a field by its name (GetField("_count")), a type by its name
-    /// or its qualified name (Type.GetType("App.Shape"), "App.Shape, App").
+    /// or its qualified name (Type.GetType("App.Shape"), "App.Shape, App"), a nested type also after '+' ("App.Tests+Shape is ...").
     /// </summary>
     private static string? MatchInStrings(ISymbol symbol, NamesInCode names)
     {
@@ -608,7 +608,10 @@ internal static class CamelCaseRenamer
             return strings.Contains(symbol.Name) ? symbol.Name : isData ? strings.FirstOrDefault(s => s.IndexOf(symbol.Name, StringComparison.Ordinal) >= 0 && word.IsMatch(s)) : null;
         }
 
-        var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + System.Text.RegularExpressions.Regex.Escape(symbol.Name) + @"($|[,`\[+])");
+        // A nested type as reflection writes it ('Tests+PrivateInterface') counts with anything after it: Castle Core's tests
+        // compare 'Can not create proxy for type ...TestCase+PrivateInterface because ...' (trial 35).
+        var escaped = System.Text.RegularExpressions.Regex.Escape(symbol.Name);
+        var pattern = new System.Text.RegularExpressions.Regex(@"(^|\.)" + escaped + @"($|[,`\[+])|\+" + escaped + @"(?!\w)");
         return strings.FirstOrDefault(s => pattern.IsMatch(s));
     }
 
