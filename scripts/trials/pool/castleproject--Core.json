@@ -12,7 +12,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test src/Castle.Core.Tests -f net10.0: 1,890 passed, 13 skipped (33 s); -f net8.0: 1,877 passed, 13 skipped. net9.0 needs a 9 runtime, net462 Windows.",
-  "usedIn": null,
+  "usedIn": "trial 35",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",

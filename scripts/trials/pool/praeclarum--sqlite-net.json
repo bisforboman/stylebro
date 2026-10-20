@@ -14,7 +14,7 @@
   "build": "ok with workaround",
   "workaround": "Remove global.json (pins SDK 9.0.100, not installed). The solution build fails on net8.0-ios (NETSDK1147: workloads); build/test tests/SQLite.Tests/SQLite.Tests.csproj instead.",
   "tests": "dotnet test tests/SQLite.Tests (net8.0, NUnit): 227 passed, 3 skipped, 22 s. The iOS test project is left out.",
-  "usedIn": null,
+  "usedIn": "trial 35",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",
