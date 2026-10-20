@@ -115,8 +115,8 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 | `filesPerRule` | object or null | `preview`: rule id -> the files it changed (`IDE0055` for whitespace-only files, `other` when nothing was reported). |
 | `keptFindings` | array | `format`: findings StyleBro's fixes keep on purpose: `path`, `line`, `column` (1-based), `rule`, `reason` (one of the names below), `reasonText`, `message`. |
 | `patch` | string or null | `preview`: the patch file (full path). |
-| `notChecked` | array | `format`: what the runs didn't check the way the build does, each "what: why" (exit code 3 when nothing else is left). |
-| `clean` | bool or null | `format`: no file is left to change (exit code 0). `preview`: the last run changed nothing. `null` for `init`/`migrate`. |
+| `notChecked` | array | `format` and `preview`: what the runs (a preview's last run) didn't check the way the build does, each "what: why" (exit code 3 when nothing else is left). |
+| `clean` | bool or null | `format`: no file is left to change (exit code 0). `preview`: the last run changed nothing and checked everything. `null` for `init`/`migrate`. |
 | `exitCode` | number | The process's exit code. |
 
 `reason` is one of: `NameInString`, `NameInNameof`, `OtherPropertyKept`, `PublicApi`, `ImplementsAnotherMember`,
