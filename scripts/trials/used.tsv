@@ -121,8 +121,9 @@ dotnet/reactive	trial 33
 mono/taglib-sharp	trial 33
 scriban/scriban	trial 33
 protobuf-net/protobuf-net	trial 34
-zeromq/netmq	trial 34
-sprache/Sprache	trial 34	a fourth repo not yet recorded (claude/trial-34 names none, checked 2026-10-19)
+zeromq/netmq	trial 34 (random, seed 34)
+sprache/Sprache	trial 34
+jaredpar/complog	trial 34	
 dotnet/xharness	microsoft-style run
 aliostad/CacheCow	xunit survey
 ardalis/Ardalis.Extensions	xunit survey
@@ -148,3 +149,6 @@ SixLabors/ImageSharp	rejected trial 32	too large
 StackExchange/StackExchange.Redis	rejected trial 32	needs a Redis server
 dotnet/command-line-api	rejected trial 32	needs .NET 11
 Humanizr/Humanizer	rejected	doesn't build here
+agocke/serde-dn	rejected trial 34	its in-solution generator needs Roslyn 5.6 (CS9057 with SDK 10.0.112); serdedotnet/serde (trial 26) is likely the same project
+microsoft/clrmd	rejected trial 34	Arcade: restores from dnceng feeds the proxy blocks
+mkaring/ConfuserEx	rejected trial 34	random pick (seed 34): .NET Framework only (net20/net461), tests need Windows
