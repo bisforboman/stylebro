@@ -2671,14 +2671,15 @@ internal static partial class FormatCommand
 
     /// <summary>
     /// The folder a run on <paramref name="workspace"/> (a solution, filter, Traversal project or project) works from: the
-    /// deepest one holding it and every project it lists. A project is its own folder (what it references gets no run).
+    /// deepest one holding it, every project it lists and the files of the repository those projects compile from above
+    /// their folders (<see cref="LinkedFolders"/>). A project is its own folder (what it references gets no run).
     /// </summary>
     public static string WorkingRoot(string workspace)
     {
         var folder = Path.GetDirectoryName(Path.GetFullPath(workspace))!;
         if (workspace.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
         {
-            return folder;
+            return Holding(folder, LinkedFolders(workspace, RepositoryRoot(folder)));
         }
 
         // ponytail: the project paths are read from the text (quoted '*.csproj'), not evaluated; that's every format the
@@ -2690,7 +2691,27 @@ internal static partial class FormatCommand
         foreach (var project in projects)
         {
             var projectFolder = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(listedFrom, project.Replace('\\', Path.DirectorySeparatorChar))))!;
-            while (Path.GetRelativePath(folder, projectFolder) is var relative && (Path.IsPathRooted(relative) || relative.StartsWith("..", StringComparison.Ordinal))
+            folder = Holding(folder, [projectFolder]);
+        }
+
+        // Files the projects compile from elsewhere in the repository (trial 36, NodaTime: src/NodaTime.Tools.Common compiles
+        // ../../lib/commandline/*.cs): 'dotnet format --include' can't name a path above the folder it works from, so they were
+        // never formatted, and the build reported their findings (owner's decision 2026-10-20: format them).
+        var repository = RepositoryRoot(folder);
+        foreach (var project in projects)
+        {
+            folder = Holding(folder, LinkedFolders(Path.GetFullPath(Path.Combine(listedFrom, project.Replace('\\', Path.DirectorySeparatorChar))), repository));
+        }
+
+        return folder;
+    }
+
+    /// <summary><paramref name="folder"/>, or the parent of it that holds every one of <paramref name="folders"/>.</summary>
+    private static string Holding(string folder, IEnumerable<string> folders)
+    {
+        foreach (var other in folders)
+        {
+            while (Path.GetRelativePath(folder, other) is var relative && (Path.IsPathRooted(relative) || relative.StartsWith("..", StringComparison.Ordinal))
                 && Path.GetDirectoryName(folder) is { } parent)
             {
                 folder = parent;
@@ -2698,6 +2719,32 @@ internal static partial class FormatCommand
         }
 
         return folder;
+    }
+
+    /// <summary>
+    /// The folders (full paths) of the files <paramref name="project"/> compiles from above its own folder, inside
+    /// <paramref name="repository"/> (none without one): from its Compile items' text ('..\..\lib\commandline\*.cs' gives
+    /// lib/commandline), up to the first wildcard, if that folder exists. ponytail: an item using a property, or set in a
+    /// Directory.Build.props, isn't seen.
+    /// </summary>
+    public static List<string> LinkedFolders(string project, string? repository)
+    {
+        if (repository is null || !File.Exists(project))
+        {
+            return [];
+        }
+
+        var own = Path.GetDirectoryName(Path.GetFullPath(project))!;
+        var top = Path.TrimEndingDirectorySeparator(Path.GetFullPath(repository)) + Path.DirectorySeparatorChar;
+        return Regex.Matches(StyleCopSetup.WithoutComments(File.ReadAllText(project)), @"<Compile\b[^>]*\bInclude\s*=\s*""(?<value>[^""]*)""", RegexOptions.IgnoreCase)
+            .SelectMany(m => m.Groups["value"].Value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Where(v => v.Contains("..", StringComparison.Ordinal))
+            .Select(v => v.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar))
+            .Select(v => v.IndexOfAny(['*', '?']) is var wildcard and >= 0 ? v.Substring(0, wildcard) : v)
+            .Select(v => Path.GetFullPath(Path.Combine(own, Path.GetDirectoryName(v.EndsWith(Path.DirectorySeparatorChar) ? v + "x" : v) ?? string.Empty)))
+            .Where(f => (Path.TrimEndingDirectorySeparator(f) + Path.DirectorySeparatorChar).StartsWith(top, StringComparison.OrdinalIgnoreCase) && Path.GetRelativePath(own, f).StartsWith("..", StringComparison.Ordinal) && Directory.Exists(f))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     /// <summary>Whether a workspace is a solution filter (.slnf).</summary>

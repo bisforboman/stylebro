@@ -1,0 +1,21 @@
+{
+  "repo": "icsharpcode/SharpZipLib",
+  "branch": "master",
+  "commit": "ff2d7c30bdb2474d507f001bc555405e9f02a0bb",
+  "csFiles": 152,
+  "tags": [
+    "multi-target",
+    "library"
+  ],
+  "setups": "No analyzers, no TreatWarningsAsErrors, .editorconfig. Library netstandard2.0;netstandard2.1;net6.0 without LangVersion (C# 7.3 / 8 / 10); tests net6.0;net462 (LangVersion 8.0), benchmark net462;net6.0. Old-style sample projects outside the solution.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "DOTNET_ROLL_FORWARD=Major dotnet test test/ICSharpCode.SharpZipLib.Tests -f net6.0 (NUnit): 367 passed, 31 skipped, 15 s. net462 only on Windows. Its TWAE build fails untouched on 2 SYSLIB0011 (BinaryFormatter in GeneralHandling.cs).",
+  "usedIn": "trial 36",
+  "verified": {
+    "by": "trial 36 session",
+    "date": "2026-10-20",
+    "sdks": "10.0.113, 8.0.132"
+  },
+  "notes": "A netstandard2.0 library at the default C# 7.3 next to newer frameworks: the IDE0049 multi-target guard (held back on SDK 10.0.113)."
+}
