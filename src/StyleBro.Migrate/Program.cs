@@ -57,14 +57,17 @@ internal static class Program
               --verify-no-changes changes nothing and checks whether formatting would change a file; kept findings
               don't fail it (plain 'dotnet format --verify-no-changes' fails on them). For CI and agents.
               Exit codes: 0 clean (only kept findings left, if any); 2 a run still changed files after 3 runs, or with
-              --verify-no-changes, formatting would change a file; other: 'dotnet format' failed.
+              --verify-no-changes, formatting would change a file; 3 not verified: nothing left in what it checked, but
+              part of the build wasn't (the 'Not checked:' lines say what and why); other: 'dotnet format' failed.
               --files formats only those files (paths relative to the current folder or the repository root), loading
               just the projects they belong to: a fraction of a whole run. With --verify-no-changes too.
               The restore is skipped when its output is current; --restore restores anyway, --no-restore never.
               --timings prints how long each phase took.
 
-          bro check [folder, solution or project] [--files <a.cs> ...] [options]
-              The same as 'bro format --verify-no-changes'.
+          bro check [folder, solution or project] [--files <a.cs> ...] [--build] [options]
+              The same as 'bro format --verify-no-changes'. --build then builds every configuration of the solution with
+              warnings as errors: findings of format's rules fail it, other errors only when a copy of git HEAD builds
+              without them.
 
           bro preview <init|migrate|format> [path] [--keep] [--all] [--no-restore] [options]
               The same as the command with --diff (below).

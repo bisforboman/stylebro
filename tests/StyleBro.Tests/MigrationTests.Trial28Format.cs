@@ -46,12 +46,13 @@ public sealed partial class MigrationTests
     public void Verify_IsNotVerified_WhenAFrameworksCodeWentUnchecked()
     {
         // Trial 28: "Partly incomplete" (no other framework of that code loaded) was followed by "Clean".
-        const string partly = "Partly incomplete: 'dotnet format' skipped Lib for netstandard1.3 (references didn't load): code only that framework compiles (inside #if) wasn't formatted.";
-        Assert.True(FormatCommand.Unverified([partly]));
-        Assert.True(FormatCommand.Unverified(["Incomplete: 'dotnet format' skipped Lib (references didn't load), so those files weren't formatted."]));
-        Assert.False(FormatCommand.Unverified([partly, $"{FormatCommand.LikelyCause} they reference Helpers.fsproj, which 'dotnet format' can't load."]));
-        Assert.False(FormatCommand.Unverified(["Clean."]));
-        Assert.StartsWith(FormatCommand.PartlyIncompleteMarker, FormatCommand.Incomplete(new Dictionary<string, SortedSet<string>> { ["Lib"] = new(["netstandard1.3"]) }, new Dictionary<string, List<string>> { ["Lib"] = ["net46", "netstandard1.3"] })[0], StringComparison.Ordinal);
+        var skipped = new Dictionary<string, SortedSet<string>> { ["Lib"] = new(["netstandard1.3"]) };
+        var frameworks = new Dictionary<string, List<string>> { ["Lib"] = ["net46", "netstandard1.3"] };
+        Assert.StartsWith(FormatCommand.PartlyIncompleteMarker, FormatCommand.Incomplete(skipped, frameworks)[0], StringComparison.Ordinal);
+        var gaps = FormatCommand.SkippedGaps(skipped, frameworks);
+        Assert.Equal(["Not checked: Lib (netstandard1.3): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles"], gaps);
+        Assert.Equal(gaps, FormatCommand.Gaps([.. FormatCommand.Incomplete(skipped, frameworks), .. gaps, .. gaps]));
+        Assert.Empty(FormatCommand.Gaps(["Clean."]));
     }
 
     [Fact]

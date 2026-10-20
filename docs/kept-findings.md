@@ -48,8 +48,9 @@ Exit codes of `bro format`, for CI and agents:
 |---|---|---|
 | 0 | clean: the last run changed nothing (kept findings don't count) | formatting would change nothing; only kept findings are left |
 | 2 | still changing after three runs | formatting would change a file |
-| 1 | | a project no run loaded (`Incomplete:`): its files weren't checked |
+| 3 | nothing left to change in what it checked, but part of the build wasn't checked (`Not checked:` lines, `Not verified:`) | the same |
 | other | `dotnet format` failed (load or build errors) | the same |
+
 
 `--verify-no-changes` changes nothing: when `dotnet format --verify-no-changes` reports findings, it formats the files
 with findings (for their rules) in a temporary copy of the repository to see whether any file would change and which
@@ -62,3 +63,25 @@ knows. Delete the record (`stylebro-kept` in the temporary folder) to check anyw
 in-solution source generator keeps from the checks still run: there the build is the check. The projects of one
 configuration build together, in one build (a shared project once).
 Plain `dotnet format --verify-no-changes` can't tell the two apart and fails on kept findings.
+
+## Not verified
+
+`format` and `--verify-no-changes` never say "Clean" for code they didn't see the way the build sees
+it. Each part they couldn't check gets a `Not checked: <what>: <why>` line before the verdict, which then is
+`Not verified: N parts of the build weren't checked (...); the rest is clean.` with exit code 3:
+
+- a project `dotnet format` couldn't load (references didn't load, a reference to an F# project), in every run or for
+  some target frameworks (`Incomplete:` / `Partly incomplete:` above it);
+- a project that needs a workload this machine doesn't have (Android, iOS, ...);
+- a project the build compiles that the solution doesn't list, which no run loads (a multi-targeted one), or which only
+  the default configuration's run formats while its `#if` code depends on the configuration;
+- configurations past the four other ones format runs per project;
+- the configurations of projects with an in-solution source generator, which only a build checks (`format` only:
+  `--verify-no-changes` builds them);
+- files a pass leaves out (a CR alone in a string), and rules whose fixes can't run: xunit.analyzers 1.24 and later
+  (no Fix All), IDE fixes held back where this SDK's `dotnet format` ignores the multi-target guard, IDE0005 while
+  files the projects compile are missing.
+
+Skips the build also makes aren't gaps: git submodules, Visual Basic projects, generated files, files outside the
+repository, projects no solution configuration builds, whitespace where IDE0055 is off. `--json` lists the gaps as
+`notChecked`. To see what the build itself reports there, [`bro check --build`](ci.md#build-every-configuration).

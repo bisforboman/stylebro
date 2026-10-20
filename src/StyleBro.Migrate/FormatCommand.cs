@@ -106,14 +106,14 @@ internal static partial class FormatCommand
     /// <summary>The exit code when files are left to change: a run still changed files, or --verify-no-changes found some ('dotnet format''s code).</summary>
     public const int NotCleanExitCode = 2;
 
+    /// <summary>The most configurations besides its default a project gets runs for (<see cref="OtherConfigurations"/>); more are gaps.</summary>
+    public const int MaxConfigurations = 4;
+
     /// <summary>Where people and agents read what a kept finding means.</summary>
     public const string KeptFindingsHelp = "https://bisforboman.github.io/stylebro/getting-started/#findings-kept-on-purpose";
 
     /// <summary>The start of the line that names projects 'dotnet format' can't load (F#) as the reason for skipped ones.</summary>
     public const string LikelyCause = "  Likely cause:";
-
-    /// <summary>What --verify-no-changes says when a project wasn't loaded in any run (<see cref="IncompleteMarker"/>).</summary>
-    public const string NotVerified = "Not verified: the files of the projects 'dotnet format' skipped weren't checked.";
 
     /// <summary>The start of the line that says a project wasn't formatted at all (<see cref="Incomplete"/>).</summary>
     public const string IncompleteMarker = "Incomplete:";
@@ -989,21 +989,11 @@ internal static partial class FormatCommand
         // Orleans: the test projects reference F# projects, which 'dotnet format' can't load; a restore doesn't help.
         if (lines.Count > 0 && unsupported is { Count: > 0 })
         {
-            lines.Add($"{LikelyCause} they reference {string.Join(", ", unsupported.Order(StringComparer.OrdinalIgnoreCase))}, which 'dotnet format' can't load (C# and Visual Basic only), so a restore won't help. Nothing is broken; that code just isn't formatted.");
+            lines.Add($"{LikelyCause} they reference {string.Join(", ", unsupported.Order(StringComparer.OrdinalIgnoreCase))}, which 'dotnet format' can't load (C# and Visual Basic only), so a restore won't help. Nothing is broken; that code just isn't formatted or checked.");
         }
 
         return lines;
     }
-
-    /// <summary>
-    /// Whether a --verify-no-changes run's output says code went unchecked: a project no run loaded (Autofac's tests), or one
-    /// skipped for some frameworks with no other framework of the same code loading in their place (trial 28: "Partly
-    /// incomplete" said clean, the code only those frameworks compile unchecked). Not when the cause is a project 'dotnet
-    /// format' can never load (an F# reference, "Likely cause"), which a restore doesn't change.
-    /// </summary>
-    public static bool Unverified(IReadOnlyCollection<string> lines) =>
-        lines.Any(l => l.StartsWith(IncompleteMarker, StringComparison.Ordinal) || l.StartsWith(PartlyIncompleteMarker, StringComparison.Ordinal))
-        && !lines.Any(l => l.StartsWith(LikelyCause, StringComparison.Ordinal));
 
     /// <summary>
     /// The ids 'bro format' fixes by default: every StyleBro rule, and the built-in IDE and CA rules init's template
@@ -2173,7 +2163,7 @@ internal static partial class FormatCommand
     /// <paramref name="platforms"/> (its Platforms property, the SDK's AnyCPU) doesn't list builds it in its own platform: the
     /// solution maps it (Mediator's x86 and x64 build AnyCPU projects, which failed with Platform=x86).
     /// </summary>
-    public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution, string platforms = "")
+    public static List<string> OtherConfigurations(string configurations, string configuration, IReadOnlyCollection<string>? solution, string platforms = "", int max = MaxConfigurations)
     {
         var own = configuration.Trim().Length > 0 ? configuration.Trim() : "Debug";
         var projectPlatforms = (platforms.Trim().Length > 0 ? platforms : "AnyCPU").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -2184,7 +2174,7 @@ internal static partial class FormatCommand
             .Where(c => !c.Equals(own, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(c => SplitConfiguration(c).Platform is not null)
-            .Take(4)
+            .Take(max)
             .ToList();
     }
 
@@ -3479,6 +3469,11 @@ internal static partial class FormatCommand
             }
         });
 
+        // What the runs didn't check the way the build does (Gap): listed with the verdict, which isn't "Clean" then.
+        var gaps = Gaps(lines);
+        lines.RemoveAll(IsGapLine);
+        ReportGaps(gaps);
+
         // What the whitespace pass leaves and the build's IDE0055 reports: 'format' fixes it (DocIndentation). Only where the
         // build reports it (documentation not generated).
         if ((code == 0 || code == NotCleanExitCode) && DocIndentation.FindingLines(DocIndentationFindings(root, args, reported: true)) is { Count: > 0 } docLines)
@@ -3490,11 +3485,10 @@ internal static partial class FormatCommand
         if (code == 0)
         {
             lines.ForEach(log);
-
-            if (Unverified(lines))
+            if (gaps.Count > 0)
             {
-                log(NotVerified);
-                return 1;
+                GapVerdict(gaps).ForEach(log);
+                return NotVerifiedExitCode;
             }
 
             log("Clean.");
@@ -3506,6 +3500,7 @@ internal static partial class FormatCommand
         if (code != NotCleanExitCode)
         {
             lines.ForEach(log);
+            gaps.ForEach(log);
             return code;
         }
 
@@ -3653,6 +3648,7 @@ internal static partial class FormatCommand
             if (putBack.Count > 0 && changed == 0 && copyCode == 0)
             {
                 lines.ForEach(log);
+                gaps.ForEach(log);
                 log(CSharpierStep.PutBackLine(putBack, FindingIds(lines.Where(l => FindingPath(l) is { } path && putBack.Contains(Path.GetRelativePath(source, path).Replace('\\', '/'), StringComparer.OrdinalIgnoreCase)))));
                 return NotCleanExitCode;
             }
@@ -3667,6 +3663,7 @@ internal static partial class FormatCommand
                     log($"{marked} of these {(marked == 1 ? "is" : "are")} kept on purpose (marked 'kept'): StyleBro's fixes leave them, they don't make this fail ({KeptFindingsHelp}).");
                 }
 
+                gaps.ForEach(log);
                 log(changed > 0
                     ? $"Not clean: formatting would change {changed} file{(changed == 1 ? string.Empty : "s")}. Run 'bro format'."
                     : "Not clean: formatting a copy of the repository failed (see above).");
@@ -3686,11 +3683,13 @@ internal static partial class FormatCommand
             // Findings no fix changes and no fix keeps on purpose: the build still reports them (AngleSharp's IDE0049 in a
             // using alias, which the SDK's fix can't rewrite: "Clean" with three errors above it).
             var unfixed = lines.Where(l => IsFindingLine(l) && !IsKeptLine(l, keys) && !IsFormattingLine(l)).Select(l => l.Trim()).Distinct(StringComparer.Ordinal).Count();
-            KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0).ForEach(log);
+            KeptSummary(kept, root, clean: unfixed == 0 && copyFailures.Count == 0 && gaps.Count == 0).ForEach(log);
             if (BaselineOffLine(root, kept.Count) is { } off)
             {
                 log(off);
             }
+
+            gaps.ForEach(log);
 
             // A fix that threw in the copy changed nothing there, which isn't "no fix changes" (akka: BRO1309's fix failed).
             if (copyFailures.Count > 0)
@@ -3705,10 +3704,10 @@ internal static partial class FormatCommand
                 return NotCleanExitCode;
             }
 
-            if (Unverified(lines))
+            if (gaps.Count > 0)
             {
-                log(NotVerified);
-                return 1;
+                log(NotVerifiedLine(gaps.Count));
+                return NotVerifiedExitCode;
             }
 
             if (kept.Count == 0)
@@ -4129,6 +4128,15 @@ internal static partial class FormatCommand
             return runOnce(args.Where(a => a != OnceOption).ToArray(), output);
         }
 
+        // --build: the builds after the check (BuildCheckLine), of the whole workspace.
+        var buildAll = args.Contains(BuildOption);
+        args = args.Where(a => a != BuildOption).ToArray();
+        if (buildAll && (!args.Contains("--verify-no-changes") || args.Contains(FilesOption)))
+        {
+            (output ?? Console.Error.WriteLine)($"{BuildOption} goes with 'bro check' of a whole folder, solution or project (not with --files): it builds every configuration with warnings as errors.");
+            return 1;
+        }
+
         // Every mode takes the documented options ('--files a.cs --once' passed --once on to 'dotnet format').
         var once = args.Contains(OnceOption);
         args = ProjectAsPath(args.Where(a => a != OnceOption).ToArray());
@@ -4175,12 +4183,20 @@ internal static partial class FormatCommand
             }
         };
         var exit = verify ? Verify(args, root, runLog, runOnce) : Repeat(args, root, runLog, output, runOnce, once ? 1 : MaxRuns);
-        var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null }.OfType<string>().ToList();
+
+        // --build builds every configuration, the generator projects' too.
+        var workspaceForBuild = buildAll ? File.Exists(path) ? path : BaselineCommand.FindWorkspace(root) is { } found ? Path.Combine(root, found) : null : null;
+        if (buildAll)
+        {
+            Unchecked.TryRemove(Key(root), out _);
+        }
+
+        var buts = new[] { hidden, verify ? UncheckedLine(root, log) : null, verify ? CSharpierStep.CheckLine(root, log: log) : null, workspaceForBuild is null ? null : BuildCheckLine(root, workspaceForBuild, log) }.OfType<string>().ToList();
         verdicts.Select((line, i) => i == 0 && buts.Count > 0 ? "Formatting is clean" + line.Substring("Clean".Length) + " But:" : hidden is null ? line : line.Replace(" changed, clean.", " changed.", StringComparison.Ordinal)).ToList().ForEach(log);
         foreach (var line in buts)
         {
             log(line);
-            exit = exit == 0 ? NotCleanExitCode : exit;
+            exit = line.StartsWith(NotVerifiedMarker, StringComparison.Ordinal) ? WithGaps(exit, [line]) : exit is 0 or NotVerifiedExitCode ? NotCleanExitCode : exit;
         }
 
         JsonReport.Set("clean", exit == 0);
@@ -4417,12 +4433,20 @@ internal static partial class FormatCommand
             // run is clean then (akka: BRO1309's fix threw in every run, and the last said "clean").
             var failures = new SortedSet<string>(StringComparer.Ordinal);
             var incomplete = false;
+            var gaps = new List<string>();
             var runPhase = PhaseTimes.Measure($"run {run}");
             var code = runOnce(runArgs, line =>
             {
                 if (FixFailure(line) is { } failure)
                 {
                     failures.Add(failure);
+                }
+
+                // Said with the verdict, once (Gap).
+                if (IsGapLine(line))
+                {
+                    gaps.Add(line);
+                    return;
                 }
 
                 incomplete |= line.StartsWith(IncompleteMarker, StringComparison.Ordinal) || line.StartsWith(PartlyIncompleteMarker, StringComparison.Ordinal);
@@ -4440,8 +4464,13 @@ internal static partial class FormatCommand
 
             // The run checked every plan entry, clean apart from kept findings, and loaded every project: verify's checks find the
             // same on this state (VerifyFromRecord).
-            var checkedClean = TakeCheckedClean(root) && !incomplete;
+            var checkedClean = TakeCheckedClean(root) && !incomplete && gaps.Count == 0;
             var checkFindings = TakeCheckFindings(root);
+
+            // The configurations an in-solution generator keeps from the runs: 'bro check' builds them, format doesn't (a gap).
+            gaps = Gaps(gaps.Concat(UncheckedByFormat.TryGetValue(Key(root), out var generatorBuilds)
+                ? generatorBuilds.Select(b => Gap($"{Path.GetFileNameWithoutExtension(b.Project)} in {b.Configuration}", "it takes an in-solution source generator, so only a build checks that configuration ('bro check' builds it)"))
+                : []));
 
             // Usings the run's fixes left unused ('Int32' -> 'int' keeps 'using System;') go in the same run, where IDE0005 is
             // enforced: otherwise they took a run of their own, and a third run said clean (trial 21).
@@ -4530,7 +4559,7 @@ internal static partial class FormatCommand
             var unfixed = changed.Count == 0 ? checkFindings.Where(l => AsKept(l, ReadKept(keptFile, root, root)) is null).ToList() : [];
 
             // Not "clean" when CSharpier put back what the fixes changed (trial 26: "Run 1: 0 files changed, clean." then "Not clean").
-            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : ", clean.")}");
+            log($"Run {run}: {changed.Count} file{(changed.Count == 1 ? string.Empty : "s")} changed{(endingsOnly ? ", line endings or byte order marks only (no run needed after it), clean:" : changed.Count > 0 ? ":" : failures.Count > 0 ? ", but code fixes failed (below)." : putBack.Count > 0 ? ", but CSharpier put back what the fixes changed (below)." : unfixed.Count > 0 ? ", but its check found what no fix changes (below)." : gaps.Count > 0 ? ", but not everything was checked (below)." : ", clean.")}");
             ListFiles(shown, changed, 10).ForEach(log);
             allChanged.UnionWith(changed);
             if (changed.Count == 0 || endingsOnly || maxRuns == 1)
@@ -4547,7 +4576,7 @@ internal static partial class FormatCommand
                 }
 
                 JsonReport.AddKept(keptFindings);
-                KeptSummary(keptFindings, shown, clean: settled && unfixed.Count == 0).ForEach(log);
+                KeptSummary(keptFindings, shown, clean: settled && unfixed.Count == 0 && gaps.Count == 0).ForEach(log);
                 if (baselined is not null)
                 {
                     log(baselined);
@@ -4559,6 +4588,8 @@ internal static partial class FormatCommand
                 }
 
                 AfterNotes(root, allChanged, formatted.Count).ForEach(log);
+                gaps.ForEach(log);
+                ReportGaps(gaps);
                 if (allFailures.Count > 0)
                 {
                     log(FixFailuresLine(allFailures));
@@ -4580,7 +4611,12 @@ internal static partial class FormatCommand
                     return NotCleanExitCode;
                 }
 
-                return 0;
+                if (gaps.Count > 0)
+                {
+                    log(NotVerifiedLine(gaps.Count));
+                }
+
+                return WithGaps(0, gaps);
             }
 
             if (run == maxRuns)
@@ -4590,6 +4626,7 @@ internal static partial class FormatCommand
                 JsonReport.AddKept(keptFindings);
                 KeptSummary(keptFindings, shown, clean: false).ForEach(log);
                 AfterNotes(root, allChanged, formatted.Count).ForEach(log);
+                gaps.ForEach(log);
                 if (allFailures.Count > 0)
                 {
                     log(FixFailuresLine(allFailures));
@@ -4633,6 +4670,9 @@ internal static partial class FormatCommand
         var usageError = false;
         var nuGetErrors = new List<string>();
         string? restoreWarning = null;
+
+        // What the runs don't check the way the build does (Gap), said once the runs are done.
+        var gaps = new List<string>();
         void Record(string line)
         {
             restoreFailed |= IsRestoreFailure(line);
@@ -4832,6 +4872,7 @@ internal static partial class FormatCommand
         if (styleExclusions.Count > 0)
         {
             log(LoneCrStringLine(styleExclusions));
+            gaps.Add(Gap(ShortList(styleExclusions), "a CR alone in a string, so the whitespace and style passes leave the file out"));
             if (whitespaceExclusions is not { Count: 0 })
             {
                 whitespaceExclusions = [.. whitespaceExclusions ?? [], .. styleExclusions.Where(f => whitespaceExclusions?.Any(e => Covers(e, f)) != true)];
@@ -4908,6 +4949,7 @@ internal static partial class FormatCommand
                 log(RestoreHintFor(nuGetErrors));
             }
 
+            gaps.Distinct(StringComparer.Ordinal).ToList().ForEach(log);
             return code;
         }
 
@@ -4951,6 +4993,11 @@ internal static partial class FormatCommand
         {
             log(MissingCompileLine(root, missing));
             MissingCompileRoots[root] = true;
+            if (passThrough.Contains(UnusedUsings))
+            {
+                gaps.Add(Gap(UnusedUsings, "files the projects compile are missing, so unused usings aren't checked"));
+            }
+
             passThrough = WithoutUnusedUsings(passThrough);
         }
 
@@ -5001,6 +5048,7 @@ internal static partial class FormatCommand
                 .Order(StringComparer.OrdinalIgnoreCase)
                 .ToList();
             log(MissingWorkloadsLine(needWorkloads.Select(p => Path.GetRelativePath(root, p.FullPath).Replace('\\', '/')).ToList(), needWorkloads.SelectMany(p => p.Packs).ToList()));
+            gaps.AddRange(WorkloadGaps(needWorkloads.Select(p => (Path.GetRelativePath(root, p.FullPath).Replace('\\', '/'), p.Packs))));
             projects = new(projects, projects.Comparer); // the list is cached for the process
             needWorkloads.ForEach(p => projects.Remove(p.Key));
             if (projects.Count == 0)
@@ -5102,6 +5150,7 @@ internal static partial class FormatCommand
         if (passThrough.Contains(Analyzers.Baseline.BaselineSuppressor.XunitIds[0]) && XunitWithoutFixAll(root) is { } xunitVersion)
         {
             log(XunitWithoutFixAllLine(xunitVersion));
+            gaps.Add(Gap("xunit.analyzers' rules", $"xunit.analyzers {xunitVersion}'s fixes have no Fix All, so 'dotnet format' can't apply or check them"));
             passThrough.RemoveAll(Analyzers.Baseline.BaselineSuppressor.XunitIds.Contains);
         }
 
@@ -5145,7 +5194,9 @@ internal static partial class FormatCommand
         // The configurations' evaluations (and the frameworks' above), all at once.
         var frameworkRuns = allFrameworks.Count == 0 ? new List<(string Framework, List<string> Projects)> { (string.Empty, projects.Keys.ToList()) } : allFrameworks;
         var withGenerator = new List<string>();
-        var configurationRuns = ConfigurationRuns(projects, frameworkRuns, workspacePath, View, withGenerator, frameworkViews);
+        var beyondConfigurations = new List<(string Project, List<string> Configurations)>();
+        var configurationRuns = ConfigurationRuns(projects, frameworkRuns, workspacePath, View, withGenerator, frameworkViews, beyondConfigurations);
+        gaps.AddRange(beyondConfigurations.Select(b => Gap($"{Path.GetFileNameWithoutExtension(b.Project)} in {string.Join(", ", b.Configurations)}", $"format runs at most {MaxConfigurations} other configurations per project, and its '#if' code compiles differently there")));
 
         // A framework whose code compiles the same as another's in a project (CommunityToolkit: no '#if' tests a NET9_0 or
         // NET10_0 symbol, so net8.0, net9.0 and net10.0 parse every file the same) doesn't need a run of its own there.
@@ -5246,6 +5297,7 @@ internal static partial class FormatCommand
         if (HeldBackIds(passThrough, guarded, () => FormatHonorsIdeSuppressions(log)) is { Count: > 0 } heldBack)
         {
             log(HeldBackLine(heldBack));
+            gaps.Add(Gap(string.Join(", ", heldBack), "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked"));
             passThrough.RemoveAll(heldBack.Contains);
         }
 
@@ -5266,6 +5318,7 @@ internal static partial class FormatCommand
                 }
 
                 Incomplete(skipped, new Dictionary<string, List<string>>(), unsupported).ForEach(log);
+                gaps.AddRange(SkippedGaps(skipped, new Dictionary<string, List<string>>(), unsupported));
                 Crashed(projects.Keys);
                 return Done(single);
             }
@@ -5343,6 +5396,16 @@ internal static partial class FormatCommand
         if (outsideLeft.Count > 0)
         {
             log($"{UnformattedHeader} {string.Join(", ", outsideLeft.Select(p => Path.GetRelativePath(root, p).Replace('\\', '/')))}: projects the build compiles that {Path.GetFileName(workspacePath)} doesn't list, and no run of one of their frameworks loads (a multi-targeted one would get its copies merged). Add them to the solution, or run 'bro format' on each.");
+            gaps.AddRange(outsideLeft.Select(p => Gap(Path.GetRelativePath(root, p).Replace('\\', '/'), $"the build compiles it, {Path.GetFileName(workspacePath)} doesn't list it, and no run loads it")));
+        }
+
+        // The ones a run formats get the default configuration's run only: their '#if DEBUG' code is a gap.
+        if (configurationRuns.Count > 0)
+        {
+            gaps.AddRange(outsideRuns.Values.SelectMany(p => p).Distinct(StringComparer.OrdinalIgnoreCase)
+                .Where(p => CompileByConfiguration(p) || ParseProject(EvaluateProject(p), Path.GetDirectoryName(p)).Compile.Any(f => TestedSymbols(f).Any(t => !IsFrameworkSymbol(t))))
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .Select(p => Gap($"{Path.GetRelativePath(root, p).Replace('\\', '/')} in its other configurations", $"{Path.GetFileName(workspacePath)} doesn't list it, so only the default configuration's run formats it, and its '#if' code compiles differently in the others")));
         }
 
         var requested = OptionValues(passThrough, "--include");
@@ -5589,6 +5652,7 @@ internal static partial class FormatCommand
             .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.Select(x => x.Framework).ToList(), StringComparer.OrdinalIgnoreCase);
         Incomplete(skipped, runFor, unsupported).ForEach(log);
+        gaps.AddRange(SkippedGaps(skipped, runFor, unsupported));
         return Done(exit);
     }
 
@@ -5699,7 +5763,8 @@ internal static partial class FormatCommand
         string workspacePath,
         Func<string, string, string, CompileView?> view,
         List<string>? withGenerator = null,
-        IEnumerable<(string FullPath, string Framework, string Configuration)>? alsoEvaluate = null)
+        IEnumerable<(string FullPath, string Framework, string Configuration)>? alsoEvaluate = null,
+        List<(string Project, List<string> Configurations)>? beyond = null)
     {
         var solution = SolutionConfigurations(workspacePath);
         var tests = projects.AsParallel()
@@ -5710,6 +5775,12 @@ internal static partial class FormatCommand
             .Select(p => (p.Key, Others: OtherConfigurations(EvaluatedProperty(p.Value.FullPath, "Configurations"), EvaluatedProperty(p.Value.FullPath, "Configuration"), solution, EvaluatedProperty(p.Value.FullPath, "Platforms"))))
             .Where(p => p.Others.Count > 0)
             .ToDictionary(p => p.Key, p => (IReadOnlyList<string>)p.Others, StringComparer.OrdinalIgnoreCase);
+
+        // The configurations past the most it runs (a gap: the build of those isn't checked).
+        beyond?.AddRange(others.Keys
+            .Select(k => (k, OtherConfigurations(EvaluatedProperty(projects[k].FullPath, "Configurations"), EvaluatedProperty(projects[k].FullPath, "Configuration"), solution, EvaluatedProperty(projects[k].FullPath, "Platforms"), int.MaxValue).Skip(MaxConfigurations).ToList()))
+            .Where(p => p.Item2.Count > 0)
+            .OrderBy(p => p.k, StringComparer.OrdinalIgnoreCase));
 
         // One 'dotnet msbuild' per project, framework and configuration (the default's too), all at once, with the caller's.
         runs.SelectMany(r => r.Projects.Where(others.ContainsKey).SelectMany(p => others[p].Prepend(string.Empty).Select(c => (projects[p].FullPath, r.Framework, Configuration: c))))
