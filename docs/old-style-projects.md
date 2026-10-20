@@ -25,18 +25,18 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   `packages.config`:
 
   ```xml
-  <package id="StyleBro.Analyzers" version="0.7.0-alpha.1" targetFramework="net462" developmentDependency="true" />
+  <package id="StyleBro.Analyzers" version="0.8.0-alpha.1" targetFramework="net462" developmentDependency="true" />
   ```
 
   In the project (paths relative to it; the `packages` folder is next to the solution):
 
   ```xml
   <ItemGroup>
-    <Analyzer Include="..\packages\StyleBro.Analyzers.0.7.0-alpha.1\analyzers\dotnet\cs\StyleBro.Analyzers.dll" />
-    <Analyzer Include="..\packages\StyleBro.Analyzers.0.7.0-alpha.1\analyzers\dotnet\cs\StyleBro.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleBro.Analyzers.0.8.0-alpha.1\analyzers\dotnet\cs\StyleBro.Analyzers.dll" />
+    <Analyzer Include="..\packages\StyleBro.Analyzers.0.8.0-alpha.1\analyzers\dotnet\cs\StyleBro.CodeFixes.dll" />
   </ItemGroup>
   <!-- at the end, after the Microsoft.CSharp.targets import: the preset and the baseline -->
-  <Import Project="..\packages\StyleBro.Analyzers.0.7.0-alpha.1\build\StyleBro.Analyzers.targets" Condition="Exists('..\packages\StyleBro.Analyzers.0.7.0-alpha.1\build\StyleBro.Analyzers.targets')" />
+  <Import Project="..\packages\StyleBro.Analyzers.0.8.0-alpha.1\build\StyleBro.Analyzers.targets" Condition="Exists('..\packages\StyleBro.Analyzers.0.8.0-alpha.1\build\StyleBro.Analyzers.targets')" />
   ```
 
   plus an `<Error Condition="!Exists('...StyleBro.Analyzers.targets')" ... />` line in the project's
@@ -46,7 +46,7 @@ Projects in the old format (`<Project ToolsVersion="15.0" ...>` without `Sdk=`, 
   serves SDK-style projects needs a condition that keeps it away from them:
 
   ```xml
-  <PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" Condition="'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')" />
+  <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-alpha.1" PrivateAssets="all" Condition="'$(UsingMicrosoftNETSdk)' == 'true' or !Exists('$(MSBuildProjectDirectory)\packages.config')" />
   ```
 
   `bro` names the packages.config projects and says this in its report.

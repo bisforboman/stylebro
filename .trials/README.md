@@ -25,15 +25,18 @@ Every repository must:
 
 Procedure:
 
+The lists live in [`scripts/trials/`](../scripts/trials/README.md) (owner's decision, 2026-10-19): `used.tsv` (everything
+used or rejected), `pool/` (checked candidates, tagged) and `random.json` (the fixed random list).
+
 1. Targeted: for each area the last trial's fixes touched, pick a repository that exercises it (for example a XAML MVVM
    app for name guards, a multi-targeted library with `#if` in method bodies for format, a CSharpier repository with an
-   in-solution generator). Smoke-build the candidates (restore + Debug build) before choosing.
-2. Random: write a fixed list of about 30 popular .NET repositories ranked by GitHub stars (C#, libraries or apps;
-   leave out huge ones such as dotnet/runtime, roslyn or aspnetcore, and any already used), then pick one with
-   Python's `random.Random(<trial number>).randrange(len(list))`. Log the list, the seed and the pick in
-   `.trials/trialNN/logs/`. Only if the pick fails the practical criteria above, take the next entry down the list
-   (wrapping around) and write down why.
-3. Record each repository's commit, and why it was chosen, in the trial's logs.
+   in-solution generator). Take a checked pool entry with the right tags first; otherwise smoke-build new candidates
+   (restore + Debug build) and add them to the pool, checked or rejected.
+2. Random: pick from `scripts/trials/random.json` with Python's `random.Random(<trial number>).randrange(len(repos))`.
+   If the pick is in `used.tsv` or fails the practical criteria above, take the next entry down the list (wrapping
+   around) and write down why. Log the seed and the pick in `.trials/trialNN/logs/`.
+3. Record each repository's commit, and why it was chosen, in the trial's logs; in the trial's PR add the four to
+   `used.tsv` (and set `usedIn` on their pool entries).
 
 ## Where trials run (owner's decision, 2026-10-17)
 

@@ -1,0 +1,27 @@
+{
+  "repo": "wiremock/WireMock.Net",
+  "branch": "master",
+  "commit": "c94824bd64d95945ab9e65a08c0c38c2e8405e98",
+  "csFiles": 777,
+  "tags": [
+    "multi-target",
+    "if-in-bodies",
+    "library",
+    "sonar",
+    "stylecop",
+    "twae",
+    "razor",
+    "snapshot-tests"
+  ],
+  "setups": "SonarAnalyzer.CSharp (10.x) and StyleCop.Analyzers 1.2.0-beta.556 (no stylecop.json), TreatWarningsAsErrors, .editorconfig (9 lines). Frameworks net8.0 + netstandard2.0/2.1 + net462/net48; 8 .razor files (Aspire/Blazor examples); 59 *.verified.* files. 35 files with #if, 15 with #if in member bodies. global.json sets the MTP test runner. The repository moved from WireMock-Net/WireMock.Net to wiremock/WireMock.Net.",
+  "build": "ok with workaround",
+  "workaround": "The solution build fails only in examples/WireMock.Net.Service (net48: no .NET Framework 4.8 reference assemblies on Linux, MSB3644); build the src/ and test/ projects, or ignore that example. 211 warnings.",
+  "tests": "dotnet test --project test/WireMock.Net.Tests/WireMock.Net.Tests.csproj -f net8.0 (xunit.v3, MTP; starts local servers only): 2,105 passed, 24 skipped, 0 failed, 39 s. net48 only on Windows; Aspire tests (need Docker) and the TUnit/Middleware/Routing projects not run.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "777 .cs files: above \"a few hundred\". Sonar + StyleCop together with warnings as errors. Tags sonar/stylecop/twae/razor/snapshot-tests added; renamed to wiremock/WireMock.Net."
+}

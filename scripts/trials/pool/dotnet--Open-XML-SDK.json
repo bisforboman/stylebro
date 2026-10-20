@@ -1,0 +1,24 @@
+{
+  "repo": "dotnet/Open-XML-SDK",
+  "branch": "main",
+  "commit": "431ab05cf160248cc3885a4a766026d4f8243792",
+  "csFiles": 1129,
+  "tags": [
+    "multi-target",
+    "generator",
+    "library",
+    "stylecop",
+    "twae"
+  ],
+  "setups": "StyleCop.Analyzers 1.2.0-beta.556 + stylecop.json, PublicApiAnalyzers, TreatWarningsAsErrors, AnalysisLevel latest-All, .editorconfig (184 lines, 34 dotnet_diagnostic). In-solution generator (DocumentFormat.OpenXml.Generator, emits most of the schema classes). Product frameworks netstandard2.0;net10.0;net8.0;net35;net40;net46, tests net8.0;net10.0 (+net472 on Windows). 27 files with #if in member bodies. global.json 10.0.100 rollForward feature.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test --solution Open-XML-SDK.slnx -f net10.0 (MTP): 2,733 passed, 3 skipped, 0 failed, 122 s. net472 only on Windows.",
+  "usedIn": null,
+  "verified": {
+    "by": "pool-check session",
+    "date": "2026-10-19",
+    "sdks": "10.0.113, 8.0.132 (runtimes 10.0.13, 8.0.32; no 9.0)"
+  },
+  "notes": "1,129 .cs files (plus generated code): well above \"a few hundred\", and the Debug build takes ~14 minutes here. StyleCop + generator + TWAE. Tags \"stylecop\", \"twae\", \"if-in-bodies\" added."
+}

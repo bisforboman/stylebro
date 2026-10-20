@@ -32,7 +32,7 @@ Fixing a failure is the same everywhere: run `bro format` (or `dotnet format`, s
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StyleBro.Analyzers" Version="0.7.0-alpha.1" PrivateAssets="all" />
+    <PackageReference Include="StyleBro.Analyzers" Version="0.8.0-alpha.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```

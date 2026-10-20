@@ -17,7 +17,7 @@
     Directory.Build.targets.
   -->
   <PropertyGroup>
-    <StyleBroSelfVersion>0.7.0-alpha.1</StyleBroSelfVersion>
+    <StyleBroSelfVersion>0.8.0-alpha.1</StyleBroSelfVersion>
     <!-- Every rule, also those of minors newer than the default preset (docs/versioning.md). -->
     <StyleBroPreset>latest</StyleBroPreset>
     <!-- StyleBroSelf=none from outside (scripts/verify-format.ps1) turns the self-check off everywhere. -->
