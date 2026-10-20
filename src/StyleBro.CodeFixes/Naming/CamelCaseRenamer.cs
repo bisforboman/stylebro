@@ -345,6 +345,11 @@ internal static class CamelCaseRenamer
             }
 
             var (reason, where) = IsReachableByName(symbol) ? FindInCode(symbol, await GetNamesInCodeAsync(solution).ConfigureAwait(false)) : (null, null);
+            if (reason is null)
+            {
+                (reason, where) = FindQuoted(symbol, await GetNamesInCodeAsync(solution).ConfigureAwait(false), copy.Project, solution, root);
+            }
+
             if (reason is null && symbol is IPropertySymbol { ContainingType: { } owner } && HasKeptProperty(owner, await GetNamesInCodeAsync(solution).ConfigureAwait(false), keptTypes))
             {
                 reason = KeptReason.OtherPropertyKept;
@@ -545,12 +550,6 @@ internal static class CamelCaseRenamer
             return (KeptReason.NameInString, names.WhereIs(match));
         }
 
-        // A snapshot or approval file holds what a serializer wrote: the names of data members.
-        if (IsDataSymbol(symbol) && names.Files.Snapshots.TryGetValue(symbol.Name, out var snapshot))
-        {
-            return (KeptReason.NameInSnapshotFile, snapshot);
-        }
-
         // XAML binds members by name at run time: properties and events (bindings), methods (event handlers), static fields
         // and types ('x:Static', 'x:Class'). Not private fields: XAML can't reach them, and a word in a 'Text="..."' value
         // would keep a common name like 'name'. An element or attribute name is the XAML build's (MC3074, MC3072).
@@ -562,6 +561,59 @@ internal static class CamelCaseRenamer
         return names.Files.XamlMarkup.TryGetValue(symbol.Name, out var markup) ? (KeptReason.NameInXamlMarkup, markup)
             : names.Files.Xaml.TryGetValue(symbol.Name, out var xaml) ? (KeptReason.NameInXamlFile, xaml)
             : (null, null);
+    }
+
+    /// <summary>
+    /// Code a test compares as text (owner's decision 2026-10-20, trial 37: Shouldly's own tests, 37 failures): any rename's old
+    /// name in a snapshot or approval file (Shouldly writes the call site's code into its messages, '_target' in
+    /// '*.approved.txt'), not only a data member's; and, in a project that uses Shouldly, the old name as a word in a string of
+    /// the file ("`methodCall()` should not throw ...").
+    /// </summary>
+    private static (KeptReason? Reason, string? Where) FindQuoted(ISymbol symbol, NamesInCode names, Project project, Solution solution, SyntaxNode root)
+    {
+        if (names.Files.Snapshots.TryGetValue(symbol.Name, out var snapshot))
+        {
+            return (KeptReason.NameInSnapshotFile, snapshot);
+        }
+
+        if (!UsesShouldly(project, solution))
+        {
+            return (null, null);
+        }
+
+        foreach (var token in TreeWalk.Tokens(root))
+        {
+            if ((token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken) || token.IsKind(SyntaxKind.Utf8StringLiteralToken)
+                || token.IsKind(SyntaxKind.SingleLineRawStringLiteralToken) || token.IsKind(SyntaxKind.MultiLineRawStringLiteralToken))
+                && ContainsWord(token.ValueText, symbol.Name))
+            {
+                return (KeptReason.NameInShouldlyMessage, $"{root.SyntaxTree.FilePath}({token.GetLocation().GetLineSpan().StartLinePosition.Line + 1})");
+            }
+        }
+
+        return (null, null);
+    }
+
+    /// <summary>Whether the project references Shouldly: the package's assembly, or the Shouldly project itself (its own tests).</summary>
+    private static bool UsesShouldly(Project project, Solution solution) =>
+        project.MetadataReferences.OfType<PortableExecutableReference>().Any(r => string.Equals(System.IO.Path.GetFileNameWithoutExtension(r.FilePath), "Shouldly", StringComparison.OrdinalIgnoreCase))
+        || project.ProjectReferences.Any(r => string.Equals(solution.GetProject(r.ProjectId)?.AssemblyName, "Shouldly", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Whether <paramref name="text"/> has <paramref name="word"/> with no letter, digit or '_' right before or after it.</summary>
+    internal static bool ContainsWord(string text, string word)
+    {
+        for (var at = text.IndexOf(word, StringComparison.Ordinal); at >= 0; at = text.IndexOf(word, at + 1, StringComparison.Ordinal))
+        {
+            var end = at + word.Length;
+            if ((at == 0 || !IsWordChar(text[at - 1])) && (end == text.Length || !IsWordChar(text[end])))
+            {
+                return true;
+            }
+        }
+
+        return false;
+
+        static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
     }
 
     /// <summary>

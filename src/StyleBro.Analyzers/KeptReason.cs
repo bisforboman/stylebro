@@ -103,6 +103,12 @@ public enum KeptReason
     /// <c>Level</c>): XAML finds it by that name.
     /// </summary>
     RegistrationField,
+
+    /// <summary>
+    /// The project uses Shouldly, whose failure messages quote the call site's code, and a string in the file has the name
+    /// (an expected message: "`methodCall()` should not throw").
+    /// </summary>
+    NameInShouldlyMessage,
 }
 
 /// <summary>
@@ -155,6 +161,7 @@ public sealed class KeptFinding
         KeptReason.OtherPropertyKept => "another property of the type keeps its name (it's in a string, a snapshot file or a XAML file, or it's snake_case), so all of them keep theirs",
         KeptReason.UsedThroughDynamic => "code uses the name through 'dynamic', which binds it by name at run time",
         KeptReason.NameInSnapshotFile => "the name is in a snapshot or approval file (*.verified.*, *.received.*, *.approved.*): renaming would fail those tests",
+        KeptReason.NameInShouldlyMessage => "the project uses Shouldly, whose failure messages quote the code, and a string in the file has the name (an expected message): renaming would fail that test",
         KeptReason.UsedFromVisualBasic => "Visual Basic code uses the name, and StyleBro doesn't edit VB code",
         KeptReason.NameInXamlFile => "a XAML file uses the name (a binding path, x:Name, an event handler), which binds it by name at run time: renaming would break the binding silently",
         KeptReason.NameInXamlMarkup => "a XAML file names it as an element or attribute (a type or property of the project's own namespace): renaming would break the XAML build (MC3074, MC3072)",

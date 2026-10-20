@@ -166,16 +166,48 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.Equal(expected, reason);
     }
 
-    // A private field isn't serialized: a word in a snapshot doesn't keep it.
-    [Fact]
-    public async Task APrivateFieldInASnapshotFile_IsRenamed()
+    // Trial 37 (shouldly): Shouldly writes the call site's code into its messages, and its approved files held private fields
+    // ('_target'), locals ('ThisString') and methods ('doSomething'): any rename's old name there keeps it (owner's decision
+    // 2026-10-20), not only a data member's.
+    [Theory]
+    [InlineData(DiagnosticIds.PrivateFieldNaming, "class C\n{\n    private int _total;\n\n    public int Get() => _total;\n}\n", "_total\n    should be\n1")]
+    [InlineData(DiagnosticIds.VariableCasing, "class C\n{\n    public int Get()\n    {\n        int Total = 1;\n        return Total;\n    }\n}\n", "Total\n    should be\n1")]
+    [InlineData(DiagnosticIds.ElementPascalCase, "class C\n{\n    public void Run() => total();\n\n    private void total() { }\n}\n", "`total()`\n    should not throw")]
+    public async Task AnyNameInASnapshotFile_IsKept(string id, string code, string snapshot)
     {
-        var reason = await GetReasonAsync(
-            DiagnosticIds.PrivateFieldNaming,
-            ("C.cs", "class C\n{\n    private int _total;\n\n    public int Get() => _total;\n}\n"),
-            ("C.Run.verified.txt", "{ _total: 1 }"));
+        Assert.Equal(KeptReason.NameInSnapshotFile, await GetReasonAsync(id, ("C.cs", code), ("C.Run.approved.txt", snapshot)));
+        Assert.Null(await GetReasonAsync(id, ("C.cs", code), ("C.Run.approved.txt", "other text")));
+    }
 
-        Assert.Null(reason);
+    // Trial 37 (shouldly): ExtractsCodeScenarios expects "`methodCall()` should not throw ..." in the file that calls
+    // methodCall(): with Shouldly, a word in a string of the file keeps the name; without it, the string is just text.
+    [Theory]
+    [InlineData(true, "\"`methodCall()` should not throw\"", KeptReason.NameInShouldlyMessage)]
+    [InlineData(false, "\"`methodCall()` should not throw\"", null)]
+    [InlineData(true, "\"`methodCallX()` should not throw\"", null)]
+    public async Task WithShouldly_ANameInAStringOfTheFile_IsKept(bool shouldly, string message, KeptReason? expected)
+    {
+        var (solution, document, diagnostic) = await FindAsync(
+            DiagnosticIds.ElementPascalCase,
+            ("C.cs", "class C\n{\n    public string Run()\n    {\n        methodCall();\n        return " + message + ";\n    }\n\n    private void methodCall() { }\n}\n"));
+        if (shouldly)
+        {
+            var library = ProjectId.CreateNewId();
+            solution = solution.AddProject(library, "Shouldly", "Shouldly", LanguageNames.CSharp).AddProjectReference(document.Project.Id, new ProjectReference(library));
+        }
+
+        Assert.Equal(expected, await CamelCaseRenamer.GetKeptReasonAsync(solution, solution.GetDocument(document.Id)!, diagnostic, CancellationToken.None));
+    }
+
+    [Theory]
+    [InlineData("`methodCall()` should", "methodCall", true)]
+    [InlineData("methodCall", "methodCall", true)]
+    [InlineData("methodCalls", "methodCall", false)]
+    [InlineData("_methodCall", "methodCall", false)]
+    [InlineData("a methodCall2", "methodCall", false)]
+    public void ContainsWord_NeedsAWordBoundaryOnBothSides(string text, string word, bool expected)
+    {
+        Assert.Equal(expected, CamelCaseRenamer.ContainsWord(text, word));
     }
 
     [Fact]

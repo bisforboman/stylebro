@@ -22,7 +22,7 @@ public sealed partial class MigrationTests
         Write("Directory.Build.rsp", "/Restore\n");
         Write("App/App.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>\n</Project>\n");
 
-        Assert.Contains("net8.0", FormatCommand.Capture(root, ["msbuild", Path.Combine(root, "App", "App.csproj"), "-target:AddImplicitDefineConstants", "-getProperty:TargetFramework", "-nologo"]));
+        Assert.Contains("net8.0", FormatCommand.Capture(root, "msbuild", Path.Combine(root, "App", "App.csproj"), "-target:AddImplicitDefineConstants", "-getProperty:TargetFramework", "-nologo"));
         Assert.False(File.Exists(Path.Combine(root, "App", "obj", "project.assets.json")));
     }
 
@@ -36,7 +36,7 @@ public sealed partial class MigrationTests
         Write("bin/b.md", "snippet: InBin\n");
         var targets = Path.Combine(Presets.Root, "src", "StyleBro.Package", "build", "StyleBro.Analyzers.targets");
         Write("src/App/App.csproj", $"<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup>\n  <Import Project=\"{targets}\" />\n</Project>\n");
-        string Snippets() => FormatCommand.Capture(root, ["msbuild", Path.Combine(root, "src", "App", "App.csproj"), "-target:_StyleBroFindSnippets", "-getProperty:StyleBroSnippets", "-nologo"]).Trim();
+        string Snippets() => FormatCommand.Capture(root, "msbuild", Path.Combine(root, "src", "App", "App.csproj"), "-target:_StyleBroFindSnippets", "-getProperty:StyleBroSnippets", "-nologo").Trim();
 
         Assert.Equal(["InPlace", "ShouldBeObjects"], Snippets().Split('|', StringSplitOptions.RemoveEmptyEntries).Order(StringComparer.Ordinal));
 
