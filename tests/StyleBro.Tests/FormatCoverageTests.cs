@@ -90,11 +90,12 @@ public sealed class FormatCoverageTests : IDisposable
     [Fact]
     public void SkippedProjects_AreGaps_WholeOrForSomeFrameworks()
     {
-        var skipped = new Dictionary<string, SortedSet<string>> { ["Lib"] = new(["netstandard1.3"]), ["Tests"] = new([string.Empty]) };
-        var frameworks = new Dictionary<string, List<string>> { ["Lib"] = ["netstandard1.3", "netstandard2.0"] };
+        var skipped = new Dictionary<string, SortedSet<string>> { ["Lib"] = new(["netstandard1.3"]), ["Tests"] = new([string.Empty]), ["All"] = new(["net10.0", "net8.0"]) };
+        var frameworks = new Dictionary<string, List<string>> { ["Lib"] = ["netstandard1.3", "netstandard2.0"], ["All"] = ["net8.0", "net10.0"] };
 
         Assert.Equal(
             [
+                "Not checked: All: 'dotnet format' couldn't load it (references didn't load)",
                 "Not checked: Lib (netstandard1.3): 'dotnet format' couldn't load it (references didn't load), so the code only that framework compiles",
                 "Not checked: Tests: 'dotnet format' couldn't load it (references didn't load)",
             ],
@@ -198,8 +199,10 @@ public sealed class FormatCoverageTests : IDisposable
         File.WriteAllText(Path.Combine(root, "A.cs"), "class A\n{\n}\n");
         File.Delete(Path.Combine(root, "Gone.cs"));
         File.WriteAllText(Path.Combine(root, "New.cs"), "class New { }\n");
+        File.WriteAllText(Path.Combine(root, "Staged.cs"), "class Staged { }\n");
+        Git(root, "add", "Staged.cs");
         var changed = FormatCommand.ChangedSinceHead(root)!;
-        Assert.Equal([("A.cs", true), ("Gone.cs", true), ("New.cs", false)], changed.OrderBy(c => c.Path, StringComparer.Ordinal));
+        Assert.Equal([("A.cs", true), ("Gone.cs", true), ("New.cs", false), ("Staged.cs", false)], changed.OrderBy(c => c.Path, StringComparer.Ordinal));
 
         var copy = NewFolder();
         File.WriteAllText(Path.Combine(copy, "A.cs"), "class A\n{\n}\n");
