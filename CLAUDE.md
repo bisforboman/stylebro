@@ -1777,6 +1777,30 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   fails its restore (NU1109): test without -f (exit 1 untouched too, net472). OneOf: `-p:WarningsNotAsErrors=NU1504`, build
   its generator tests without TWAE. Mutation entries' `Tests` must not start with `FullyQualifiedName~` (the runner adds it).
 
+## Trial 38 (2026-10-21, clean: owner "Count it clean", tally 1 in a row)
+
+- Repos: AwesomeAssertions/AwesomeAssertions (assertion library quoting caller code, PublicApiGenerator approval files; StyleCop
+  only in its net8.0 build: migrate), Cysharp/MagicOnion (init, in-solution generator, 921 tests), microsoft/vs-solutionpersistence
+  (StyleCop GlobalPackageReference, Directory.Build.rsp without /Restore: a spot copy added it), git-ecosystem/git-credential-manager
+  (random, seed 38: nunit, sqlite-net, shouldly, DiscordChatExporter, Verify, WireMock used or rejected, xunit/MudBlazor too large,
+  yarp needs SDK 11). All converged in one run, verdicts agreed (exit 3 for IDE0049 on SDK 10.0.113; MagicOnion's check --build
+  honestly "Not verified": its untouched TWAE restore fails on NU1510), builds and tests matched the baselines. No buildable
+  MarkdownSnippets repository (SimonCropp's need SDK 10.0.401+ / C# `with(...)`): lens 2 was a spot repro.
+- Snippets (spot): MarkdownSnippets reads `snippet:` in any case, `.mdx` pages, and `include: Name` takes a snippet too (in place
+  `<!-- include: Name. path: ... -->`, `...<!-- singleLineInclude: Name. path: ... -->` after the included text). The package
+  targets' `_StyleBroFindSnippets` regex and glob read all of them; checked against the real `mdsnippets` tool 28.5.1.
+- Owner ("API listings: public names only"): a snapshot shaped like a PublicApiGenerator listing (`namespace X` + `public` type
+  declarations, `SnapshotFiles.IsApiListing`) goes to `Words.ApiListings`, which keeps a name only when
+  `CamelCaseRenamer.IsInPublicApi` (public/protected all the way out); a spot AwesomeAssertions copy with `_camelCase` had 127 renames
+  held by parameter names there, after the fix 0 kept and tests identical. Public names rename only with
+  `stylebro_rename_public_api`, so the kept branch is tested with an `.editorconfig` in `KeptFindingsTests.FindAsync`.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`bro` needs `ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`).
+  vs-solutionpersistence: internal feed and MicroBuild packages (signing) removed, InternalsVisibleTo's PublicKey dropped,
+  global.json lowered. MagicOnion: `-p:NuGetAudit=false -p:WarningsNotAsErrors="NU1510%3BCS8002"`, packageSourceMapping needs a
+  `StyleBro.*` entry for the trial feed; 4 IDE0161 with EnforceCodeStyleInBuild are the untouched code's own. AwesomeAssertions:
+  `dotnet test --solution` refuses its VSTest projects; test the MTP projects one by one (5 caller-identification failures in
+  Release untouched; net472 needs mono). A baseline script that `cd`s into the clone needs absolute log paths.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
