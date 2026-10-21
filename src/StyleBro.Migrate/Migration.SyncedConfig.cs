@@ -15,12 +15,6 @@ namespace StyleBro.Migrate;
 internal static partial class Migration
 {
     /// <summary>
-    /// The settings files to write instead of the root .editorconfig: <paramref name="Source"/> is the submodule's file the
-    /// root one is a copy of (relative, '/'-separated), <paramref name="Folders"/> the top-level folders with projects.
-    /// </summary>
-    public sealed record SyncedConfig(string Source, IReadOnlyList<string> Folders);
-
-    /// <summary>
     /// The redirection for <paramref name="root"/>, or null: its .editorconfig has the same text as an .editorconfig inside a
     /// git submodule, and every C# project lies in a top-level folder (one at the root would see only the root's file).
     /// </summary>
@@ -127,4 +121,10 @@ internal static partial class Migration
 
         return pattern.StartsWith(folder + "/", StringComparison.Ordinal) ? pattern.Substring(folder.Length + 1) : null;
     }
+
+    /// <summary>
+    /// The settings files to write instead of the root .editorconfig: <paramref name="Source"/> is the submodule's file the
+    /// root one is a copy of (relative, '/'-separated), <paramref name="Folders"/> the top-level folders with projects.
+    /// </summary>
+    public sealed record SyncedConfig(string Source, IReadOnlyList<string> Folders);
 }
