@@ -1,0 +1,22 @@
+{
+  "repo": "ClosedXML/ClosedXML",
+  "branch": "develop",
+  "commit": "09f2f21a60e821ce7fb18ca3576b272e5dd6d921",
+  "csFiles": 933,
+  "tags": [
+    "library",
+    "multi-target",
+    "twae"
+  ],
+  "setups": "netstandard2.0;netstandard2.1 library, tests net8.0;net462 (NUnit), LangVersion 9.0, TreatWarningsAsErrors, Fody, .editorconfig with charset=utf-8 (122 files have a BOM), no style analyzers.",
+  "build": "ok",
+  "workaround": null,
+  "tests": "dotnet test ClosedXML.Tests -c Release -f net8.0: 6,583 passed, 10 fail untouched (fonts, root ignores read-only files), 50 skipped; net462 needs mono.",
+  "usedIn": "trial 41 (random, seed 41)",
+  "verified": {
+    "by": "trial 41 session",
+    "date": "2026-10-21",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime)"
+  },
+  "notes": "Random pick. Found BRO1139/BRO1519 order dependence ('else { if }' before a statement)."
+}

@@ -193,3 +193,10 @@ danielgerlag/workflow-core	trial 40 (random, seed 40)	709 files, netstandard2.0-
 graphql-dotnet/graphql-dotnet	rejected trial 40	random pick (seed 40): 1,111 .cs files, too large
 gluck/il-repack	rejected trial 40	cecil submodule in its solution, but its tests are net10.0-windows WPF and the repack step needs mono
 Topshelf/Topshelf	rejected trial 40	projects unchecked in some configurations, but net452/netcoreapp2.1 Windows services, unmaintained since 2020
+SixLabors/PolygonClipper	trial 41	StyleCop from the shared-infrastructure submodule (migrate), the build copies its .editorconfig over the root one; net8.0, Release TWAE; vendored tests/GeoJson fails TWAE untouched; feedz.io/dnceng feeds removed locally
+havit/Havit.Blazor	trial 41	Razor/Blazor components, 20 '[Parameter, EditorRequired] public ...' lines, net8.0-net10.0, x64/x86 solution platforms, in-solution generator (Roslyn pinned 5.9 -> 4.14 locally), xunit.v3 + bUnit, 1,368 tests
+ClosedXML/ClosedXML	trial 41 (random, seed 41)	933 files, netstandard2.0/2.1 + net8.0;net462 tests, LangVersion 9, TWAE; 10 tests fail untouched (fonts, root ignores read-only); seed 41 drew sta/websocket-sharp, then FastEndpoints (pool: fails), graphql-dotnet (rejected trial 40), workflow-core (used)
+sta/websocket-sharp	rejected trial 41	random pick (seed 41): no tests (examples only), old-style net35 csproj
+AutoFixture/AutoFixture	rejected trial 41	1,036 files; its combined attribute lists are on their own lines (2 share a line, both parameters)
+SixLabors/ImageSharp.Drawing	rejected trial 41	499 files, same shared-infrastructure setup as PolygonClipper (smaller one taken)
+Blazored/Modal	rejected trial 41	18 files; Havit.Blazor covers the same lenses with more code
