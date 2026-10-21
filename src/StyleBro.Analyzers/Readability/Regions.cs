@@ -17,7 +17,7 @@ internal static class Regions
 {
     /// <summary>
     /// The names of the repository's MarkdownSnippets snippets ('|'-separated), which the package targets read from the
-    /// markdown files' 'snippet: Name' lines when an mdsnippets.json is above the project.
+    /// markdown files' 'snippet: Name' and 'include: Name' lines when an mdsnippets.json is above the project.
     /// </summary>
     public const string SnippetsProperty = "build_property.StyleBroSnippets";
 
