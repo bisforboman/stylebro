@@ -20,7 +20,7 @@ namespace StyleBro.Migrate;
 /// with its options taken from stylecop.json. Every key the preset sets is written, so the result overrides the preset
 /// completely (an .editorconfig beats the preset's global config).
 /// </summary>
-internal static class Migration
+internal static partial class Migration
 {
     public const string BeginMarker = "# BEGIN stylebro-migrate";
     public const string EndMarker = "# END stylebro-migrate";
@@ -967,7 +967,7 @@ internal static class Migration
     public static List<string> UnformattedFolders(string root)
     {
         var folder = BlockFolder(root);
-        var path = Path.Combine(folder, ".editorconfig");
+        var path = BlockFile(root);
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var line = block.Value.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.StartsWith(UnformattedPrefix, StringComparison.Ordinal));
         var end = line?.IndexOf(';', UnformattedPrefix.Length) ?? -1;
@@ -1010,7 +1010,7 @@ internal static class Migration
     /// </summary>
     public static string? RecordedVersion(string root, string prefix = VersionPrefix)
     {
-        var path = Path.Combine(BlockFolder(root), ".editorconfig");
+        var path = BlockFile(root);
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var version = Regex.Match(block.Value, "^" + Regex.Escape(prefix) + @"(\S+)", RegexOptions.Multiline);
         return version.Success && !version.Groups[1].Value.Contains("$(", StringComparison.Ordinal) ? version.Groups[1].Value : null; // an earlier run recorded the property itself
@@ -1019,7 +1019,7 @@ internal static class Migration
     /// <summary>The stylecop.json settings the stylebro-migrate block (<see cref="BlockFolder"/>) records, or null.</summary>
     public static System.Text.Json.JsonElement? RecordedSettings(string root)
     {
-        var path = Path.Combine(BlockFolder(root), ".editorconfig");
+        var path = BlockFile(root);
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var line = Regex.Match(block.Value, "^" + Regex.Escape(SettingsPrefix) + "(.+)$", RegexOptions.Multiline);
         try
@@ -1126,7 +1126,7 @@ internal static class Migration
     public static List<string> KeptUsingsFiles(string root)
     {
         var blockFolder = BlockFolder(root);
-        var path = Path.Combine(blockFolder, ".editorconfig");
+        var path = BlockFile(root);
         var block = File.Exists(path) ? Regex.Match(File.ReadAllText(path), $"{BeginMarker}.*?{EndMarker}", RegexOptions.Singleline) : Match.Empty;
         var line = block.Value.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.StartsWith(KeptUsingsPrefix, StringComparison.Ordinal));
         return line is null

@@ -160,7 +160,7 @@ internal static class InitCommand
 
         var path = Path.Combine(root, ".editorconfig");
         var existing = File.Exists(path) ? File.ReadAllText(path) : null;
-        var migrated = existing?.Contains(Migration.BeginMarker) == true && !existing.Contains("stylebro-migrate init");
+        var migrated = IsMigrated(root);
         if (SendsToMigration(root, migrated))
         {
             return 1;
@@ -248,6 +248,7 @@ internal static class InitCommand
 
         var agentsMd = args.Contains(AgentsFile.Option);
         targets = targets.SelectMany(t => t.Nested.Prepend(t)).ToList();
+        targets = Synced(root, targets);
         if (!write)
         {
             foreach (var target in targets)
@@ -323,7 +324,7 @@ internal static class InitCommand
 
     /// <summary>Whether the root .editorconfig has the block 'bro migrate --write' wrote (then init leaves it alone).</summary>
     public static bool IsMigrated(string root) =>
-        File.Exists(Path.Combine(root, ".editorconfig")) && File.ReadAllText(Path.Combine(root, ".editorconfig")) is var text
+        Migration.BlockFile(root) is var path && File.Exists(path) && File.ReadAllText(path) is var text
         && text.Contains(Migration.BeginMarker, StringComparison.Ordinal) && !text.Contains("stylebro-migrate init", StringComparison.Ordinal);
 
     /// <summary>
@@ -1948,6 +1949,47 @@ internal static class InitCommand
             ?? throw new InvalidOperationException($"{resource} is missing from the tool.");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
+    }
+
+    /// <summary>
+    /// <paramref name="targets"/> with the root's replaced by one per project folder when the build copies the root
+    /// .editorconfig from a submodule (<see cref="Migration.Synced"/>, trial 40); as they are otherwise, or when one of those
+    /// folders has a target of its own.
+    /// </summary>
+    private static List<Target> Synced(string root, List<Target> targets)
+    {
+        if (targets.FirstOrDefault(t => t.Name == ".editorconfig") is not { } rootTarget
+            || Migration.Synced(root) is not { } synced
+            || targets.Any(t => synced.Folders.Any(f => t.Name == f + "/.editorconfig")))
+        {
+            return targets;
+        }
+
+        Console.WriteLine(Migration.SyncedLine(synced));
+        var folders = synced.Folders.Select(folder =>
+        {
+            var path = Path.Combine(root, folder, ".editorconfig");
+            var existing = File.Exists(path) ? File.ReadAllText(path) : null;
+            var plain = existing?.Replace("\r\n", "\n");
+            var migrated = plain?.Contains(Migration.BeginMarker, StringComparison.Ordinal) == true && !plain.Contains("stylebro-migrate init", StringComparison.Ordinal);
+            var block = Migration.Rebase(rootTarget.Block, folder);
+            var modernize = rootTarget.Modernize is null ? null : Migration.Rebase(rootTarget.Modernize, folder);
+            return new Target
+            {
+                Name = folder + "/.editorconfig",
+                Prefix = rootTarget.Prefix,
+                Path = path,
+                Existing = existing ?? string.Empty, // not 'root = true': the folder's file adds to the root's
+                Migrated = migrated,
+                Block = block,
+                Modernize = modernize,
+                ModernizeNotes = [],
+                HasBlock = migrated || (plain is not null && Migration.Apply(plain, block) == plain),
+                HasModernize = modernize is null || (plain is not null && Migration.Apply(plain, modernize, ModernizeBegin, ModernizeEnd) == plain),
+                FormatsWhitespace = rootTarget.FormatsWhitespace,
+            };
+        });
+        return targets.SelectMany(t => t == rootTarget ? folders : [t]).ToList();
     }
 
     /// <summary>One .editorconfig init writes to (<see cref="Prepare"/>).</summary>

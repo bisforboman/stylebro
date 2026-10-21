@@ -96,6 +96,12 @@ the block. It doesn't treat the setup as leftovers. Code that a project compiles
 StyleBro can't fix it there, and `format` skips submodules. The package's build targets read the submodule paths from
 `.gitmodules`.
 
+Such a submodule can also bring the `.editorconfig`: SixLabors' build copies `shared-infrastructure/.editorconfig` over
+the root one before every build, so settings written there would be gone after the first build. When the root
+`.editorconfig` has the same text as an `.editorconfig` inside a submodule, `--write` (and `bro init --write`) leaves it
+alone and writes the block into an `.editorconfig` in each top-level folder with projects (`src/`, `tests/`, ...), which
+adds to the root's. The report says so.
+
 `stylecop.json` and the StyleCop suppressions can stay; StyleBro ignores them. `stylecop.json` can also go once the
 package is gone: the block records its settings (`# stylecop.json settings ...`), and a later `--write` reads them from
 there. The steps in order:
