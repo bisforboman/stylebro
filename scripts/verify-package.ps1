@@ -22,7 +22,8 @@
 #      after 'init --write --style microsoft', 'dotnet format' removes 'this.' (IDE0003) and a second run changes nothing.
 #  11. a file a project compiles from outside its git repository ('..\..\..\outside\Shared.cs') isn't checked, with a
 #      '.git' folder or a '.git' file (a worktree) above the project; <StyleBroRepositoryRoot>none</StyleBroRepositoryRoot> checks it.
-#  12. a submodule's own checkout (the superproject's .gitmodules names its folder) is checked; the superproject hides it;
+#  12. a submodule's own checkout (the superproject's .gitmodules names its folder) is checked; the superproject hides it,
+#      also the submodule's own project when the superproject's solution builds it;
 #  13. a file a T4 template writes (DependentUpon '*.tt') isn't checked.
 # Every earlier check loaded the analyzers another way, which is how the preset went missing from alpha.1 to alpha.8.
 $ErrorActionPreference = 'Stop'
@@ -274,6 +275,7 @@ try {
     $supProject = Join-Path $supApp 'App.csproj'
     Set-Content $supProject ((Get-Content $project -Raw).Replace('</Project>', "  <ItemGroup><Compile Include=`"..\..\ext\lib\src\Lib\Util.cs`" Link=`"Util.cs`" /></ItemGroup>`n</Project>"))
     Check (-not ((Build @() $supProject) -contains 'BRO1106 Util.cs')) "the superproject's build hides the submodule file's findings"
+    Check (-not ((Build @("-p:SolutionDir=$sup/") $subProject) -contains 'BRO1106 Util.cs')) "the superproject's solution building the submodule's project hides its findings"
 
     Write-Host '== 13. Files a T4 template writes are generated code'
     $t4App = Join-Path $work 't4/src/T4'

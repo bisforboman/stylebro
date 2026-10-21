@@ -3031,6 +3031,16 @@ internal static partial class FormatCommand
     }
 
     /// <summary>
+    /// The keys of <paramref name="projects"/> (key, full path) inside <paramref name="folders"/> (relative to
+    /// <paramref name="root"/>, with a trailing '/', as <see cref="NotBuiltFolders"/> gives them).
+    /// </summary>
+    public static List<string> ProjectsIn(IEnumerable<(string Key, string FullPath)> projects, IReadOnlyCollection<string> folders, string root) =>
+        projects
+            .Where(p => Path.GetRelativePath(root, p.FullPath).Replace('\\', '/') is var relative && folders.Any(f => relative.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
+            .Select(p => p.Key)
+            .ToList();
+
+    /// <summary>
     /// What to say after runs that changed <paramref name="changed"/> (full paths): the generated files checked in next to
     /// them (<see cref="CheckedInGenerated"/>), and that CSharpier comes next where it formats the repository (Altinn: 12
     /// files failed 'csharpier check' after format).
@@ -5129,6 +5139,16 @@ internal static partial class FormatCommand
             log($"{NotBuiltHeader} {string.Join(", ", notBuilt)}: no configuration of {Path.GetFileName(solutionPath)} builds {(notBuilt.Count == 1 ? "the project there" : "their projects")}, so 'dotnet restore' skips {(notBuilt.Count == 1 ? "it" : "them")} and 'format' leaves {(notBuilt.Count == 1 ? "it" : "them")} alone.{NotBuiltHint(notBuilt, root)}");
             Exclude(notBuilt);
             excluded.AddRange(notBuilt);
+
+            // Nor do the runs load them (trial 39, StronglyTypedId's Nuget integration tests: their package isn't packed, so
+            // 'dotnet format' couldn't load them, and check said "Not checked" about projects no build compiles).
+            var leftAlone = ProjectsIn(projects.Select(p => (p.Key, p.Value.FullPath)), notBuilt, root);
+            projects = new(projects, projects.Comparer); // the list is cached for the process
+            leftAlone.ForEach(p => projects.Remove(p));
+            if (projects.Count == 0)
+            {
+                return Done(1);
+            }
         }
 
         // One restore before the runs, which then all get --no-restore. Old-style projects are left out: 'dotnet restore'

@@ -379,6 +379,7 @@ internal static class Migration
         {
             AddSpacingOfRulesOff(setup, root, ownSettings, lines, result);
             AddUncheckedFormatting(root, ownSettings, lines, result);
+            AddUsingGroups(root, ownSettings, lines, result);
         }
 
         var kept = lines.Skip(sdkStart).Where(line => KeyOf(line) is { } key && own.Contains(key)).ToList();
@@ -1135,6 +1136,10 @@ internal static class Migration
                 .Where(f => !f.StartsWith("../", StringComparison.Ordinal))
                 .ToList();
     }
+
+    /// <summary>Whether the code separates root namespaces' usings (<see cref="Conventions.UsingGroupsKey"/>'s counts).</summary>
+    public static bool SeparatesUsingGroups(int separated, int together) =>
+        separated + together >= Conventions.MinimumAgreeing && Conventions.Winner(separated, together) == 0;
 
     /// <summary>
     /// Private instance and static fields (not constants, not static readonly), by whether they start with '_'. Generated
@@ -1974,6 +1979,25 @@ internal static class Migration
         {
             result.Notes.Add($"'case X:' blocks: StyleCop doesn't check their indentation, and your code has {found}: 'format' indents them all below the label (the SDK's default). To keep the label's level instead: {Key} = false below the block.");
         }
+    }
+
+    /// <summary>
+    /// StyleCop's blankLinesBetweenUsingGroups = require (SA1516) wants a blank line between ITS groups (System when it goes
+    /// first, aliases, static usings), the SDK's dotnet_separate_import_directive_groups between every root namespace (owner's
+    /// choice 2026-10-21, "Follow the code"): the key stays true only where the code already separates root namespaces
+    /// (Open-XML-SDK: 557 files without, 4 with; true added blank lines to 342 StyleCop-clean files).
+    /// </summary>
+    private static void AddUsingGroups(string root, IReadOnlyDictionary<string, string> own, List<string> lines, Result result)
+    {
+        const string Key = "dotnet_separate_import_directive_groups";
+        var at = lines.IndexOf(Key + " = true");
+        if (at < 0 || own.ContainsKey(Key) || !Conventions.Count(root, own).TryGetValue(Conventions.UsingGroupsKey, out var c) || SeparatesUsingGroups(c[0], c[1]))
+        {
+            return;
+        }
+
+        lines[at] = Key + " = false";
+        result.Notes.Add($"Using groups: StyleCop's blankLinesBetweenUsingGroups separates its own groups (System first, aliases, static usings), {Key} every root namespace, and your code has {c[0]} files with a blank line between root namespaces, {c[1]} without: {Key} = false, so 'format' adds none.");
     }
 
     private static void AddSpacingOfRulesOff(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> own, List<string> lines, Result result)

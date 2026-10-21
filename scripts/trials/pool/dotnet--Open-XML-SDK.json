@@ -14,7 +14,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test --solution Open-XML-SDK.slnx -f net10.0 (MTP): 2,733 passed, 3 skipped, 0 failed, 122 s. net472 only on Windows.",
-  "usedIn": null,
+  "usedIn": "trial 39",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",
