@@ -384,6 +384,12 @@ internal static class Conventions
     /// </summary>
     private const string UsingsKey = "using order";
 
+    /// <summary>
+    /// The count of files whose usings change root namespace (DocumentFormat, Microsoft, System): a blank line at every change
+    /// (dotnet_separate_import_directive_groups' layout) or at none. Files with both aren't counted.
+    /// </summary>
+    public const string UsingGroupsKey = "using groups";
+
     /// <summary>Interface members (methods, properties, indexers, events): [with an access modifier, without].</summary>
     private const string InterfaceAccessKey = "interface member access";
 
@@ -1023,6 +1029,7 @@ internal static class Conventions
     {
         var counts = All.ToDictionary(c => c.Key, _ => new int[2], StringComparer.Ordinal);
         counts[UsingsKey] = new int[4];
+        counts[UsingGroupsKey] = new int[2];
         counts[StaticCasingKey] = new int[3];
         counts[CharsetKey] = new int[2];
         counts[FinalNewlineKey] = new int[2];
@@ -2375,6 +2382,10 @@ internal static class Conventions
                 var systemFirst = lists.All(l => IsSorted(l, systemFirst: true));
                 var plain = lists.All(l => IsSorted(l, systemFirst: false));
                 counts[UsingsKey][systemFirst ? (plain ? 2 : 0) : plain ? 1 : 3]++;
+                if (SeparatesRootNamespaces(lists) is { } separated)
+                {
+                    counts[UsingGroupsKey][separated ? 0 : 1]++;
+                }
             }
         }
 
@@ -2840,6 +2851,34 @@ internal static class Conventions
         UsingLists(root).Where(l => !IsSorted(l, systemFirst))
             .Select(l => l.OrderBy(u => u, Comparer<UsingDirectiveSyntax>.Create((a, b) => CompareUsings(a, b, systemFirst))).ToList())
             .ToList();
+
+    /// <summary>
+    /// Whether a file's lists of usings put a blank line wherever one namespace using follows another of a different root
+    /// namespace (true), nowhere (false), or both or there is no such place (null).
+    /// </summary>
+    public static bool? SeparatesRootNamespaces(IEnumerable<List<UsingDirectiveSyntax>> lists)
+    {
+        var (with, without) = (0, 0);
+        foreach (var list in lists)
+        {
+            for (var i = 1; i < list.Count; i++)
+            {
+                if (UsingGroup(list[i - 1]) == 0 && UsingGroup(list[i]) == 0 && UsingName(list[i - 1]).Split('.')[0] != UsingName(list[i]).Split('.')[0])
+                {
+                    if (list[i].GetLeadingTrivia().Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia)))
+                    {
+                        with++;
+                    }
+                    else
+                    {
+                        without++;
+                    }
+                }
+            }
+        }
+
+        return with > 0 && without > 0 ? null : with > 0 ? true : without > 0 ? false : null;
+    }
 
     /// <summary>A using's group in the order 'dotnet format' (and StyleCop) sorts them: namespaces, static, aliases.</summary>
     public static int UsingGroup(UsingDirectiveSyntax u) => u.Alias is not null ? 2 : u.StaticKeyword.IsKind(SyntaxKind.None) ? 0 : 1;

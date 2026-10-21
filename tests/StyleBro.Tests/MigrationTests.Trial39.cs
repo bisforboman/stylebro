@@ -39,4 +39,43 @@ public sealed partial class MigrationTests
         Assert.Equal(string.Empty, Submodules($"-property:SolutionDir={Path.Combine(root, "ext", "lib")}{Path.DirectorySeparatorChar}"));
         Assert.Equal(Path.Combine(root, "ext", "lib") + Path.DirectorySeparatorChar, Submodules($"-property:SolutionDir={root}{Path.DirectorySeparatorChar}"));
     }
+
+    [Fact]
+    public void Migration_UsingGroups_FollowTheCode()
+    {
+        // Open-XML-SDK: blankLinesBetweenUsingGroups = require became dotnet_separate_import_directive_groups = true, and the
+        // formatter put a blank line between root namespaces in 342 StyleCop-clean files (557 files had none, 4 had them all).
+        Write("stylecop.json", "{ \"settings\": { \"orderingRules\": { \"blankLinesBetweenUsingGroups\": \"require\", \"systemUsingDirectivesFirst\": false } } }\n");
+        foreach (var name in new[] { "A", "B", "C" })
+        {
+            Write($"{name}.cs", $"using Alpha;\nusing System;\nusing System.IO;\n\nclass {name}\n{{\n}}\n");
+        }
+
+        var result = Migration.Generate(StyleCopSetup.Read(root), root);
+        Assert.Contains("dotnet_separate_import_directive_groups = false", result.Lines);
+        Assert.Contains(result.Notes, n => n.StartsWith("Using groups:", StringComparison.Ordinal) && n.Contains("0 files with a blank line between root namespaces, 3 without", StringComparison.Ordinal));
+
+        // Where the code separates them, the key stays.
+        foreach (var name in new[] { "A", "B", "C" })
+        {
+            Write($"{name}.cs", $"using Alpha;\n\nusing System;\nusing System.IO;\n\nclass {name}\n{{\n}}\n");
+        }
+
+        Assert.Contains("dotnet_separate_import_directive_groups = true", Migration.Generate(StyleCopSetup.Read(root), root).Lines);
+    }
+
+    [Fact]
+    public void SeparatesRootNamespaces_IsTrueFalseOrMixed()
+    {
+        static bool? Separates(string usings) =>
+            Conventions.SeparatesRootNamespaces([[.. ((Microsoft.CodeAnalysis.CSharp.Syntax.CompilationUnitSyntax)Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(usings + "class A { }").GetRoot()).Usings]]);
+
+        Assert.True(Separates("using Alpha;\n\nusing System;\nusing System.IO;\n"));
+        Assert.False(Separates("using Alpha;\nusing System;\n"));
+        Assert.Null(Separates("using Alpha;\n\nusing Beta;\nusing System;\n"));
+        Assert.Null(Separates("using System;\nusing System.IO;\nusing static System.Math;\n"));
+        Assert.True(Migration.SeparatesUsingGroups(4, 0));
+        Assert.False(Migration.SeparatesUsingGroups(4, 557));
+        Assert.False(Migration.SeparatesUsingGroups(2, 0));
+    }
 }
