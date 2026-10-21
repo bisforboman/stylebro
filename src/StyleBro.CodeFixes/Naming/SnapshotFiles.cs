@@ -44,6 +44,11 @@ internal static class SnapshotFiles
         "Text", "ToolTip", "Content", "Header", "Title", "Description", "PlaceholderText", "Placeholder", "Watermark", "Label", "HelpText",
     };
 
+    // A public-API listing (PublicApiGenerator, used by ApiApprover and Verify's API tests): a 'namespace X' line, then
+    // public type declarations. It names the assembly's public API only (trial 38, AwesomeAssertions: 127 private fields
+    // were kept because the listing had parameters with their names).
+    private static readonly Regex ApiListing = new(@"^namespace [\w.]+\s*\r?\n\{\s*\r?\n\s+(?:\[[^\r\n]*\]\s*\r?\n\s+)*public (?:(?:static|sealed|abstract|partial|readonly|ref|unsafe) )*(?:class|interface|struct|enum|delegate|record)\b", RegexOptions.Multiline | RegexOptions.CultureInvariant);
+
     private static readonly string[] Markers = { ".verified.", ".approved.", ".received." };
 
     private static readonly string[] SkippedFolders = { "bin", "obj", ".git", ".vs", "node_modules" };
@@ -73,7 +78,7 @@ internal static class SnapshotFiles
         {
             if (document.FilePath is { } path && IsSnapshotFile(path) && document.GetTextAsync().GetAwaiter().GetResult() is { } text)
             {
-                Add(words.Snapshots, path, text.ToString());
+                AddSnapshot(words, path, text.ToString());
             }
             else if (document.FilePath is { } xaml && IsXamlFile(xaml) && document.GetTextAsync().GetAwaiter().GetResult() is { } markup)
             {
@@ -85,6 +90,7 @@ internal static class SnapshotFiles
         {
             var scanned = Scan(root);
             Merge(words.Snapshots, scanned.Snapshots);
+            Merge(words.ApiListings, scanned.ApiListings);
             Merge(words.Xaml, scanned.Xaml);
             Merge(words.XamlMarkup, scanned.XamlMarkup);
         }
@@ -161,7 +167,7 @@ internal static class SnapshotFiles
                     // Binary snapshots (images) and huge ones don't hold member names worth reading.
                     if (IsSnapshotFile(file) && new FileInfo(file).Length < 1 << 20 && File.ReadAllText(file) is var text && text.IndexOf('\0') < 0)
                     {
-                        Add(words.Snapshots, file, text);
+                        AddSnapshot(words, file, text);
                     }
                     else if (IsXamlFile(file) && new FileInfo(file).Length < 1 << 20)
                     {
@@ -191,6 +197,9 @@ internal static class SnapshotFiles
         return words;
     }
 #pragma warning restore RS1035
+
+    /// <summary>Whether the snapshot is a public-API listing (<see cref="Words.ApiListings"/>).</summary>
+    internal static bool IsApiListing(string text) => ApiListing.IsMatch(text);
 
     /// <summary>
     /// The identifiers of a XAML file that name code. <see cref="Words.Xaml"/>: those in attribute values that can name
@@ -296,6 +305,9 @@ internal static class SnapshotFiles
         }
     }
 
+    private static void AddSnapshot(Words words, string path, string text) =>
+        Add(IsApiListing(text) ? words.ApiListings : words.Snapshots, path, text);
+
     private static void Add(Dictionary<string, string> words, string path, string text)
     {
         var line = 1;
@@ -318,6 +330,9 @@ internal static class SnapshotFiles
     internal sealed class Words
     {
         public Dictionary<string, string> Snapshots { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Gets the words of the public-API listings among the snapshots: they hold only names of the public API.</summary>
+        public Dictionary<string, string> ApiListings { get; } = new(StringComparer.Ordinal);
 
         /// <summary>Gets the identifiers in XAML attribute values that can name code (bindings, 'x:Name', event handlers).</summary>
         public Dictionary<string, string> Xaml { get; } = new(StringComparer.Ordinal);

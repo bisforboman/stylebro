@@ -141,8 +141,10 @@
   <!--
     The repository's MarkdownSnippets snippet names, for BRO1112/BRO1113: a '#region Name' the docs include ('snippet: Name',
     also an in-place one in an HTML comment) stays, or the build's MarkdownSnippets step fails "Missing snippet" (trial 37,
-    shouldly). Read only when an mdsnippets.json is above the project, from the markdown files of the repository (else the
-    config's folder), bin/obj/node_modules left out. '|'-separated, with empty entries.
+    shouldly). Read only when an mdsnippets.json is above the project, from the markdown files (.md and .mdx) of the
+    repository (else the config's folder), bin/obj/node_modules left out. Like MarkdownSnippets, the keyword's case doesn't
+    matter, and 'include: Name' (in place: 'include: Name. path: ...', 'singleLineInclude: ...') takes a snippet too
+    (trial 38). '|'-separated, with empty entries.
   -->
   <Target Name="_StyleBroFindSnippets" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroSnippets)' == ''">
     <PropertyGroup>
@@ -151,14 +153,14 @@
       <_StyleBroSnippetsRoot Condition="'$(_StyleBroSnippetsConfig)' != '' and '$(_StyleBroSnippetsRoot)' == ''">$([MSBuild]::NormalizeDirectory($([System.IO.Path]::GetDirectoryName('$(_StyleBroSnippetsConfig)'))))</_StyleBroSnippetsRoot>
     </PropertyGroup>
     <ItemGroup Condition="'$(_StyleBroSnippetsRoot)' != ''">
-      <_StyleBroMarkdown Include="$(_StyleBroSnippetsRoot)**/*.md" Exclude="$(_StyleBroSnippetsRoot)**/node_modules/**;$(_StyleBroSnippetsRoot)**/bin/**;$(_StyleBroSnippetsRoot)**/obj/**" />
+      <_StyleBroMarkdown Include="$(_StyleBroSnippetsRoot)**/*.md;$(_StyleBroSnippetsRoot)**/*.mdx" Exclude="$(_StyleBroSnippetsRoot)**/node_modules/**;$(_StyleBroSnippetsRoot)**/bin/**;$(_StyleBroSnippetsRoot)**/obj/**" />
     </ItemGroup>
     <ReadLinesFromFile File="%(_StyleBroMarkdown.FullPath)" Condition="'@(_StyleBroMarkdown)' != ''">
       <Output TaskParameter="Lines" ItemName="_StyleBroMarkdownLine" />
     </ReadLinesFromFile>
     <PropertyGroup Condition="'@(_StyleBroMarkdownLine)' != ''">
       <_StyleBroMarkdownText>@(_StyleBroMarkdownLine, '%0A')</_StyleBroMarkdownText>
-      <StyleBroSnippets>$([System.Text.RegularExpressions.Regex]::Replace('$(_StyleBroMarkdownText)', '(?m)^(?:[ \t]*(?:&lt;!--[ \t]*)?snippet:[ \t]*([^\s&gt;|]+)[^\n]*|[^\n]*)\n?', '$1|'))</StyleBroSnippets>
+      <StyleBroSnippets>$([System.Text.RegularExpressions.Regex]::Replace('$(_StyleBroMarkdownText)', '(?im)^(?:(?:[^\n]*?&lt;!--[ \t]*|[ \t]*)(?:snippet|include|singleLineInclude):[ \t]*([^\s&gt;|]+?)\.?(?=[\s&gt;|]|$)[^\n]*|[^\n]*)\n?', '$1|'))</StyleBroSnippets>
     </PropertyGroup>
   </Target>
   <!--

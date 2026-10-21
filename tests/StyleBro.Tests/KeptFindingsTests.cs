@@ -179,6 +179,59 @@ public sealed class KeptFindingsTests : IDisposable
         Assert.Null(await GetReasonAsync(id, ("C.cs", code), ("C.Run.approved.txt", "other text")));
     }
 
+    // Trial 38 (AwesomeAssertions): a public-API listing (PublicApiGenerator) names the public API only. A private field or
+    // a local named like a public parameter there renames (owner's decision 2026-10-21); the same words in another snapshot
+    // still keep them.
+    [Theory]
+    [InlineData(DiagnosticIds.PrivateFieldNaming, "public class C\n{\n    private int Total;\n\n    public C(int total) => Total = total;\n}\n")]
+    [InlineData(DiagnosticIds.VariableCasing, "public class C\n{\n    public int Get()\n    {\n        int Total = 1;\n        return Total;\n    }\n}\n")]
+    public async Task APublicApiListing_KeepsNoPrivateName(string id, string code)
+    {
+        const string Listing = "[assembly: System.Reflection.AssemblyMetadata(\"RepositoryUrl\", \"x\")]\nnamespace Lib\n{\n    public class C\n    {\n        public C(int Total) { }\n    }\n}\n";
+        Assert.Null(await GetReasonAsync(id, ("C.cs", code), ("ApiApproval.Lib.verified.txt", Listing)));
+        Assert.Equal(KeptReason.NameInSnapshotFile, await GetReasonAsync(id, ("C.cs", code), ("ApiApproval.Lib.verified.txt", "{\n  Total: 1\n}\n")));
+    }
+
+    // With stylebro_rename_public_api, a public member the listing names keeps its name: renaming it fails the API test.
+    [Fact]
+    public async Task APublicApiListing_KeepsAPublicName()
+    {
+        const string Code = "public class C\n{\n    public string total { get; set; } = string.Empty;\n}\n";
+        const string Listing = "namespace Lib\n{\n    public class C\n    {\n        public string total { get; set; }\n    }\n}\n";
+        var editorConfig = (".editorconfig", "root = true\n\n[*.cs]\nstylebro_rename_public_api = true\n");
+        Assert.Equal(KeptReason.NameInSnapshotFile, await GetReasonAsync(DiagnosticIds.ElementPascalCase, ("C.cs", Code), editorConfig, ("ApiApproval.Lib.verified.txt", Listing)));
+        Assert.Null(await GetReasonAsync(DiagnosticIds.ElementPascalCase, ("C.cs", Code), editorConfig, ("ApiApproval.Lib.verified.txt", Listing.Replace("total", "other", StringComparison.Ordinal))));
+    }
+
+    [Theory]
+    [InlineData("Public", true)]
+    [InlineData("Run", true)]
+    [InlineData("value", true)]
+    [InlineData("Guarded", true)]
+    [InlineData("hidden", false)]
+    [InlineData("Inner", false)]
+    [InlineData("Nested", false)]
+    [InlineData("local", false)]
+    public void IsInPublicApi_FollowsEveryContainer(string name, bool expected)
+    {
+        var tree = CSharpSyntaxTree.ParseText("namespace Lib\n{\n    public class Public\n    {\n        public void Run(int value) { int local = value; _ = local; }\n        protected internal int Guarded;\n        private int hidden;\n        internal class Inner { public int Nested; }\n    }\n}\n");
+        var model = CSharpCompilation.Create("Lib", new[] { tree }, new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) }).GetSemanticModel(tree);
+        var symbol = tree.GetRoot().DescendantNodes().Select(n => model.GetDeclaredSymbol(n)).First(s => s?.Name == name)!;
+        Assert.Equal(expected, CamelCaseRenamer.IsInPublicApi(symbol));
+    }
+
+    [Theory]
+    [InlineData("namespace Lib\n{\n    public class C\n    {\n    }\n}\n", true)]
+    [InlineData("namespace Lib.Sub\r\n{\r\n    [System.Obsolete]\r\n    public static class C { }\r\n}\r\n", true)]
+    [InlineData("namespace Lib\n{\n    public sealed record R(int total);\n}\n", true)]
+    [InlineData("{\n  namespace: Lib,\n  total: 1\n}\n", false)]
+    [InlineData("namespace Lib\n{\n    internal class C { }\n}\n", false)]
+    [InlineData("total\n    should be\n1", false)]
+    public void IsApiListing_RecognizesPublicApiGeneratorOutput(string text, bool expected)
+    {
+        Assert.Equal(expected, SnapshotFiles.IsApiListing(text));
+    }
+
     // Trial 37 (shouldly): ExtractsCodeScenarios expects "`methodCall()` should not throw ..." in the file that calls
     // methodCall(): with Shouldly, a word in a string of the file keeps the name; without it, the string is just text.
     [Theory]
@@ -216,6 +269,9 @@ public sealed class KeptFindingsTests : IDisposable
         // The tests' snapshot sits beside the library, under the same git root; one in obj/ doesn't count.
         Assert.Equal(KeptReason.NameInSnapshotFile, await GetReasonOnDiskAsync(Path.Combine("tests", "SnapshotTests.Summary.verified.txt")));
         Assert.Null(await GetReasonOnDiskAsync(Path.Combine("tests", "obj", "SnapshotTests.Summary.verified.txt")));
+
+        // Trial 38: a public-API listing on disk counts for public names only ('Summary' is internal).
+        Assert.Null(await GetReasonOnDiskAsync(Path.Combine("tests", "Api.Lib.verified.txt"), "namespace Lib\n{\n    public class Summary\n    {\n        public decimal totalAmount { get; set; }\n    }\n}\n"));
 
         // Binary and huge files aren't read.
         Assert.Null(await GetReasonOnDiskAsync(Path.Combine("tests", "SnapshotTests.Image.verified.png"), "\0totalAmount"));
@@ -1277,6 +1333,12 @@ public sealed class KeptFindingsTests : IDisposable
         var ids = new List<DocumentId>();
         foreach (var (path, text) in files)
         {
+            if (path == ".editorconfig")
+            {
+                solution = solution.AddAnalyzerConfigDocument(DocumentId.CreateNewId(project), path, SourceText.From(text), filePath: Path.Combine(Path.GetTempPath(), path));
+                continue;
+            }
+
             if (!path.EndsWith(".cs", StringComparison.Ordinal))
             {
                 solution = solution.AddAdditionalDocument(DocumentId.CreateNewId(project), path, SourceText.From(text), filePath: Path.Combine(Path.GetTempPath(), path));
@@ -1292,7 +1354,8 @@ public sealed class KeptFindingsTests : IDisposable
         var compilation = (await first.Project.GetCompilationAsync())!;
         var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new FieldNamingAnalyzer(), new PascalCaseNamingAnalyzer(), new CamelCaseNamingAnalyzer());
         var tree = await first.GetSyntaxTreeAsync();
-        var diagnostic = (await compilation.WithAnalyzers(analyzers).GetAnalyzerDiagnosticsAsync()).First(d => d.Id == id && d.Location.SourceTree == tree);
+        var options = files.Any(f => f.Path == ".editorconfig") ? first.Project.AnalyzerOptions : null;
+        var diagnostic = (await compilation.WithAnalyzers(analyzers, options).GetAnalyzerDiagnosticsAsync()).First(d => d.Id == id && d.Location.SourceTree == tree);
         return (solution, first, diagnostic);
     }
 }

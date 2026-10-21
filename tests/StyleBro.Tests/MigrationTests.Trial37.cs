@@ -40,6 +40,14 @@ public sealed partial class MigrationTests
 
         Assert.Equal(["InPlace", "ShouldBeObjects"], Snippets().Split('|', StringSplitOptions.RemoveEmptyEntries).Order(StringComparer.Ordinal));
 
+        // Trial 38: MarkdownSnippets reads the keyword in any case, .mdx pages, and 'include: Name' (a snippet as an include,
+        // in place 'include: Name. path: ...' or 'singleLineInclude: ...'); a file name with dots is one key.
+        Write("README.md", "Snippet: Capital\ninclude: Included\n<!-- include: InPlaceInclude. path: /src/A.cs -->\nx;<!-- singleLineInclude: OneLine. path: /src/A.cs -->\nsnippet: Some.File.verified.txt\n");
+        Write("docs/page.mdx", "snippet: InMdx\n");
+        Assert.Equal(
+            ["Capital", "InMdx", "InPlace", "InPlaceInclude", "Included", "OneLine", "ShouldBeObjects", "Some.File.verified.txt"],
+            Snippets().Split('|', StringSplitOptions.RemoveEmptyEntries).Order(StringComparer.Ordinal));
+
         // Without an mdsnippets.json nothing is read.
         File.Delete(Path.Combine(root, "src", "mdsnippets.json"));
         Assert.Equal(string.Empty, Snippets());

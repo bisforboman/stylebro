@@ -172,3 +172,13 @@ shouldly/shouldly	trial 37 (random, seed 37)	dense .editorconfig, warnings as er
 zzzprojects/System.Linq.Dynamic.Core	rejected trial 37	17 target frameworks incl. uap10.0 (restore fails, MSB4057), net452/Xamarin/UWP projects in the solution
 Tyrrrz/DiscordChatExporter	rejected trial 37	no offline tests: every test exports from Discord with a bot token
 jeffkl/MSBuildProjectCreator	rejected trial 37	global.json needs SDK 11.0.100-rc
+microsoft/vs-solutionpersistence	trial 38	StyleCop 1.2 (GlobalPackageReference, migrate), Directory.Build.rsp (/m /verbosity:minimal, no /Restore: a spot copy added it); internal MicroBuild packages and signing removed locally
+AwesomeAssertions/AwesomeAssertions	trial 38	assertion library quoting caller code, StyleCop only in its net8.0 build (migrate), PublicApiGenerator approval files, net472/net8.0/net10.0, VB and F# specs
+Cysharp/MagicOnion	trial 38	init, in-solution generator, net8.0;net10.0 + netstandard, 921 offline tests; the untouched TWAE restore fails on NU1510
+git-ecosystem/git-credential-manager	trial 38 (random, seed 38)	init, net10.0 only, 1,612 tests; seed 38 drew nunit/nunit (rejected trial 35), the list then wrapped past xunit, MudBlazor and yarp
+xunit/xunit	rejected trial 38	1,552 .cs files, net472/x86/AOT runners
+MudBlazor/MudBlazor	rejected trial 38	1,184 .cs files plus Razor
+dotnet/yarp	rejected trial 38	global.json needs SDK 11.0.100-rc.1 and Arcade
+SimonCropp/MarkdownSnippets	rejected trial 38	ProjectFiles needs SDK 10.0.401+, C# 'with(...)' collection arguments
+VerifyTests/DiffEngine	rejected trial 38	C# 'with(...)' collection arguments (SDK 10.0.4xx), Windows-only heads
+microsoft/slngen	rejected trial 38	global.json needs SDK 11.0.100-rc.1 (Directory.Build.rsp with /Restore)
