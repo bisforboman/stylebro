@@ -6,3 +6,6 @@
   with projects when the root `.editorconfig` is a copy of a git submodule's that the build puts back (SixLabors'
   shared infrastructure). Before, the first build removed them, and the build reported findings `bro check` had called
   clean.
+- **`bro check --build`** run before the format's changes are committed no longer reports the code's own errors as new: the
+  copy of HEAD it compares with keeps format's rules as warnings, so it compiles the same projects. A project the
+  solution doesn't build in a configuration isn't named as one that didn't compile there.

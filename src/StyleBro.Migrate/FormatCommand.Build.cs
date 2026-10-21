@@ -18,6 +18,9 @@ internal static partial class FormatCommand
     /// <summary>The option that builds every configuration after the check (<see cref="BuildCheckLine"/>).</summary>
     public const string BuildOption = "--build";
 
+    /// <summary>The environment variable Microsoft.Common.targets imports a file from (MSBuild reads environment variables as properties).</summary>
+    private const string HookVariable = "CustomAfterMicrosoftCommonTargets";
+
     private static readonly Regex BuildLine = new(@"^\s*(?<path>.+?)(?:\((?<line>\d+),(?<column>\d+)\))? ?: (?<kind>warning|error) (?<id>[A-Za-z]+\d+): (?<message>.*?)(?: \[(?<project>[^\]]*)\])?\s*$");
 
     private static readonly Regex OutputLine = new(@"^\s*(?<name>\S.*?) -> (?:/|[A-Za-z]:\\)");
@@ -176,7 +179,7 @@ internal static partial class FormatCommand
                 var (exitCode, output) = build(root, workspacePath, configuration);
                 var current = BuildMessages(output, top);
                 (int ExitCode, IReadOnlyList<string> Output)? before = untouched is { Length: > 0 } copy
-                    ? build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration)
+                    ? WithHook(UntouchedHook(Path.GetDirectoryName(Path.GetFullPath(copy))!, ids), () => build(Path.GetFullPath(Path.Combine(copy, Path.GetRelativePath(top, root))), Path.GetFullPath(Path.Combine(copy, relative)), configuration))
                     : null;
                 var beforeMessages = before is { } b ? BuildMessages(b.Output, untouched!) : untouched == string.Empty ? current : null;
                 var (found, newErrors, old) = CompareBuild(current, beforeMessages, ids);
@@ -198,7 +201,7 @@ internal static partial class FormatCommand
                     bothFailed.Add(configuration);
                     current.Where(m => m.Error && !m.InSource).Select(m => m.Shown).Distinct(StringComparer.Ordinal).Take(5).ToList().ForEach(log);
                 }
-                else if (exitCode != 0 && found.Count == 0 && Uncompiled(output, current, expectedProjects ??= [.. expected?.Invoke() ?? BuiltProjects(workspacePath, root)]) is { Count: > 0 } skipped)
+                else if (exitCode != 0 && found.Count == 0 && Uncompiled(output, current, (expectedProjects ??= [.. expected?.Invoke() ?? BuiltProjects(workspacePath, root)]).Except(NotBuiltIn(workspacePath, configuration), StringComparer.OrdinalIgnoreCase)) is { Count: > 0 } skipped)
                 {
                     // Failed with errors in the code the untouched code has too: the projects that need the failed ones didn't
                     // compile, so their analyzers never ran (owner's decision 2026-10-20: not verified, naming them).
@@ -239,6 +242,57 @@ internal static partial class FormatCommand
             .Concat(messages.Where(m => m.Project.Length > 0 && !m.Id.StartsWith("MSB", StringComparison.Ordinal) && !m.Id.StartsWith("NETSDK", StringComparison.Ordinal) && !m.Id.StartsWith("NU", StringComparison.Ordinal)).Select(m => m.Project))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         return expected.Where(p => !compiled.Contains(p)).Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    /// <summary>
+    /// The MSBuild file the HEAD copy's build imports (<see cref="HookVariable"/>): format's rules (<paramref name="ids"/>) stay
+    /// warnings there. Trial 40, Blazored.Toast: HEAD had init's settings but not format's fixes, so the library failed on
+    /// BRO findings and the projects referencing it never compiled in the copy; their own errors (CS0067, the same seven)
+    /// then counted as new in the formatted build, and check --build said "Not clean". A hook already set is imported too.
+    /// </summary>
+    public static string UntouchedHook(string folder, IEnumerable<string> ids)
+    {
+        var path = Path.Combine(folder, "stylebro-untouched.targets");
+        var chained = Environment.GetEnvironmentVariable(HookVariable);
+        var import = string.IsNullOrEmpty(chained) ? string.Empty : $"  <Import Project=\"{System.Security.SecurityElement.Escape(chained)}\" Condition=\"Exists('{System.Security.SecurityElement.Escape(chained)}')\" />\n";
+        File.WriteAllText(path, $"<Project>\n{import}  <PropertyGroup>\n    <WarningsNotAsErrors>$(WarningsNotAsErrors);{string.Join(";", ids.Order(StringComparer.Ordinal))}</WarningsNotAsErrors>\n  </PropertyGroup>\n</Project>\n");
+        return path;
+    }
+
+    /// <summary>
+    /// The names of the .sln's C# projects <paramref name="configuration"/> ('Release', 'Release|x64') doesn't build: no
+    /// '.Build.0' line for it (trial 40, a Blazored.Toast copy: a sample unchecked in Release was named as a project that didn't
+    /// compile). Other workspaces: none.
+    /// </summary>
+    public static List<string> NotBuiltIn(string solutionPath, string configuration)
+    {
+        if (!solutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || !File.Exists(solutionPath))
+        {
+            return [];
+        }
+
+        var (name, platform) = SplitConfiguration(configuration);
+        var key = Regex.Escape($".{name}|{platform ?? "Any CPU"}.Build.0");
+        var text = File.ReadAllText(solutionPath);
+        return Regex.Matches(text, @"^Project\(""[^""]*""\)\s*=\s*""[^""]*""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,\s*""(?<guid>\{[^}]+\})""", RegexOptions.Multiline)
+            .Where(m => !Regex.IsMatch(text, Regex.Escape(m.Groups["guid"].Value) + key + @"\s*=", RegexOptions.IgnoreCase))
+            .Select(m => Path.GetFileNameWithoutExtension(m.Groups["path"].Value.Replace('\\', '/')))
+            .ToList();
+    }
+
+    /// <summary>Runs <paramref name="action"/> with <see cref="HookVariable"/> set to <paramref name="hook"/> (every MSBuild node inherits it).</summary>
+    private static T WithHook<T>(string hook, Func<T> action)
+    {
+        var previous = Environment.GetEnvironmentVariable(HookVariable);
+        Environment.SetEnvironmentVariable(HookVariable, hook);
+        try
+        {
+            return action();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(HookVariable, previous);
+        }
     }
 
     /// <summary>A build of a workspace in one configuration ('Release|x64') with TreatWarningsAsErrors, as CI builds (restore included, NuGet's audit off).</summary>
