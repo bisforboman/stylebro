@@ -13,7 +13,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test Dunet.sln: Dunet.Test 203/203, Dunet.Integration 9/9 (net10.0), 138 s.",
-  "usedIn": null,
+  "usedIn": "trial 39",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",

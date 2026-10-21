@@ -182,3 +182,7 @@ dotnet/yarp	rejected trial 38	global.json needs SDK 11.0.100-rc.1 and Arcade
 SimonCropp/MarkdownSnippets	rejected trial 38	ProjectFiles needs SDK 10.0.401+, C# 'with(...)' collection arguments
 VerifyTests/DiffEngine	rejected trial 38	C# 'with(...)' collection arguments (SDK 10.0.4xx), Windows-only heads
 microsoft/slngen	rejected trial 38	global.json needs SDK 11.0.100-rc.1 (Directory.Build.rsp with /Restore)
+domn1995/dunet	trial 39	CSharpier 1.3.0 (.csharpierrc printWidth 100), in-solution generator, TWAE, C# 14 extension blocks
+andrewlock/StronglyTypedId	trial 39	Verify snapshot tests, in-solution generator, .sln projects without a Build.0 line (Nuget integration tests)
+dotnet/Open-XML-SDK	trial 39	StyleCop 1.2 (migrate), PublicApiAnalyzers PublicAPI.Shipped.txt per framework, net35-net10.0, generator, TWAE
+jstedfast/MailKit	trial 39 (random, seed 39)	netstandard2.0;netstandard2.1;net462;net47;net48;net8.0;net10.0, MimeKit submodule in the solution

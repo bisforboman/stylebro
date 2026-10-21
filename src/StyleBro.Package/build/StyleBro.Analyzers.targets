@@ -115,7 +115,9 @@
     The repository's git submodules, for PackageFileSuppressor: another repository's code a project compiles (SixLabors'
     shared-infrastructure) can't be fixed here, and 'dotnet format' skips it. Their paths come from the .gitmodules
     nearest above the project, without the ones at or above StyleBroRepositoryRoot: in a submodule's own checkout that's
-    the superproject's .gitmodules, which names the submodule itself (trial 28: all of its own findings were hidden).
+    the superproject's .gitmodules, which names the submodule itself (trial 28: all of its own findings were hidden). Unless
+    the build's solution (SolutionDir, set by the IDE and 'dotnet format' too) is outside that submodule: the superproject's
+    solution builds the submodule's project (trial 39, MailKit.sln and MimeKit: 145,994 findings 'format' leaves alone).
     '|'-separated.
   -->
   <Target Name="_StyleBroFindSubmodules" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun" Condition="'$(StyleBroSubmoduleFolders)' == ''">
@@ -131,8 +133,11 @@
     <PropertyGroup Condition="'$(StyleBroRepositoryRoot)' != '' and '$(StyleBroRepositoryRoot)' != 'none'">
       <_StyleBroRepositoryFolder>$([MSBuild]::NormalizeDirectory('$(StyleBroRepositoryRoot)').ToUpperInvariant())</_StyleBroRepositoryFolder>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(SolutionDir)' != '' and '$(SolutionDir)' != '*Undefined*'">
+      <_StyleBroSolutionFolder>$([MSBuild]::NormalizeDirectory('$(SolutionDir)').ToUpperInvariant())</_StyleBroSolutionFolder>
+    </PropertyGroup>
     <ItemGroup Condition="'$(_StyleBroRepositoryFolder)' != ''">
-      <_StyleBroSubmodule Remove="@(_StyleBroSubmodule)" Condition="$(_StyleBroRepositoryFolder.StartsWith($([System.String]::Copy('%(_StyleBroSubmodule.Identity)').ToUpperInvariant())))" />
+      <_StyleBroSubmodule Remove="@(_StyleBroSubmodule)" Condition="$(_StyleBroRepositoryFolder.StartsWith($([System.String]::Copy('%(_StyleBroSubmodule.Identity)').ToUpperInvariant()))) and ('$(_StyleBroSolutionFolder)' == '' or $(_StyleBroSolutionFolder.StartsWith($([System.String]::Copy('%(_StyleBroSubmodule.Identity)').ToUpperInvariant()))))" />
     </ItemGroup>
     <PropertyGroup>
       <StyleBroSubmoduleFolders>@(_StyleBroSubmodule, '|')</StyleBroSubmoduleFolders>

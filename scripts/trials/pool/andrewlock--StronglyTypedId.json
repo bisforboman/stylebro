@@ -14,7 +14,7 @@
   "build": "ok",
   "workaround": null,
   "tests": "dotnet test StronglyTypedId.sln -f net8.0: StronglyTypedIds.Tests 48/48, IntegrationTests 177 passed + 3 skipped, IntegrationTests.ExternalIds 177 + 3 skipped, 54 s. Other frameworks need runtimes 6/7/9 (DOTNET_ROLL_FORWARD=Major would do). The Nuget.* integration tests need a packed local package (left out).",
-  "usedIn": null,
+  "usedIn": "trial 39",
   "verified": {
     "by": "pool-check session",
     "date": "2026-10-19",
