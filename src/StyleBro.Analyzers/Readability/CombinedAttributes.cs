@@ -27,7 +27,9 @@ internal static class CombinedAttributes
 
     /// <summary>
     /// '[A, B]' becomes '[A]' and '[B]', each keeping the target ('[assembly: A]'). A list on its own line
-    /// becomes one line per attribute at the same indentation; a list that shares its line becomes '[A] [B]'.
+    /// becomes one line per attribute at the same indentation; a list that shares its line becomes '[A][B]': the SDK
+    /// formatter's whitespace pass removes a space between attribute lists, so '[A] [B]' changed again on the next
+    /// 'dotnet format' run (trial 40, Blazored.Toast).
     /// </summary>
     public static TextChange GetChange(AttributeListSyntax list, SourceText text)
     {
@@ -39,7 +41,7 @@ internal static class CombinedAttributes
         var lastLine = text.Lines.GetLineFromPosition(list.Span.End);
         var rest = text.ToString(TextSpan.FromBounds(list.Span.End, lastLine.End)).Trim();
         var onItsOwnLine = indentation.All(c => c == ' ' || c == '\t') && (rest.Length == 0 || rest.StartsWith("//"));
-        var separator = onItsOwnLine ? GetLineBreak(text, line) + indentation : " ";
+        var separator = onItsOwnLine ? GetLineBreak(text, line) + indentation : string.Empty;
 
         return new TextChange(list.Span, string.Join(separator, parts));
     }

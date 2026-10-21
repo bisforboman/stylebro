@@ -314,21 +314,35 @@ internal static class Program
         }
 
         Console.WriteLine();
+
+        // Trial 40: a root .editorconfig the build copies from a submodule gets its block in the project folders' files instead.
+        var synced = Migration.Synced(root) is { } s && !s.Folders.Any(f => plan.ContainsKey(f + "/.editorconfig")) ? s : null;
+        if (synced is not null)
+        {
+            Console.WriteLine(Migration.SyncedLine(synced));
+        }
+
         foreach (var (file, sections) in plan)
         {
-            var path = Path.Combine(root, file);
-            var block = Migration.Render(sections, setup.StyleSharp is { WithStyleCop: false } ? "StyleSharp" : "StyleCop");
-            JsonReport.AddSettings(file, block);
-            if (write)
+            var rendered = Migration.Render(sections, setup.StyleSharp is { WithStyleCop: false } ? "StyleSharp" : "StyleCop");
+            var files = file == ".editorconfig" && synced is not null
+                ? synced.Folders.Select(f => (File: f + "/.editorconfig", Block: Migration.Rebase(rendered, f))).ToList()
+                : [(File: file, Block: rendered)];
+            foreach (var (target, block) in files)
             {
-                PreviewCommand.EditFile(path, existing => Migration.Apply(existing, block));
-                Console.WriteLine($"Wrote the settings to {file}.");
-            }
-            else
-            {
-                Console.WriteLine($"== {file}");
-                Console.Write(block);
-                Console.WriteLine();
+                var path = Path.Combine(root, target);
+                JsonReport.AddSettings(target, block);
+                if (write)
+                {
+                    PreviewCommand.EditFile(path, existing => Migration.Apply(existing, block));
+                    Console.WriteLine($"Wrote the settings to {target}.");
+                }
+                else
+                {
+                    Console.WriteLine($"== {target}");
+                    Console.Write(block);
+                    Console.WriteLine();
+                }
             }
         }
 
