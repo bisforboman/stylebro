@@ -60,12 +60,22 @@ internal static class ElseIfs
 
         var parts = top.DescendantNodesAndSelf().OfType<ElseClauseSyntax>().Select(Joinable).OfType<Part>().ToList();
         var changes = new List<TextChange>();
+        var blankLines = new List<TextChange>();
         foreach (var part in parts)
         {
             changes.Add(new TextChange(TextSpan.FromBounds(part.Else.ElseKeyword.Span.End, part.If.SpanStart), " "));
             if (part.CloseBrace is { } close)
             {
                 changes.Add(new TextChange(TextSpan.FromBounds(part.If.Span.End, close.Span.End), string.Empty));
+
+                // The '}' that goes may be one BRO1519 wants a blank line after: 'dotnet format' running BRO1519 first adds
+                // it and the join keeps it, so the join adds it too (ClosedXML, trial 41: the text depended on the order).
+                var next = close.GetNextToken();
+                if (isOn(DiagnosticIds.BlankLineAfterCloseBrace)
+                    && BlankLineRuns.JudgesGapAfter(close, next, text, isOn, gapIsReplaced: false, SwitchSectionBlankLines.ReadMode(options)))
+                {
+                    blankLines.Add(new TextChange(new TextSpan(next.FullSpan.Start, 0), SingleLineBlocks.LineBreak(text, close.SpanStart)));
+                }
             }
         }
 
@@ -107,7 +117,9 @@ internal static class ElseIfs
         }
 
         changes.AddRange(lineEdits);
-        return AddBraces(parts, changes, text, options, isOn);
+
+        // After the next statement's start, outside the chain AddBraces may rewrite as one edit.
+        return AddBraces(parts, changes, text, options, isOn) is { } result ? [.. result, .. blankLines] : null;
     }
 
     /// <summary>The join's edits, or one edit of the whole chain with the braces the brace rules want afterwards.</summary>
