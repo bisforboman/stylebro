@@ -1860,6 +1860,32 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   with a pattern from the same command line kills the calling shell (exit 144): filter by process name instead. Count TWAE
   errors with `--no-incremental`, and build the tests without TWAE (a failed TWAE build leaves no test binaries).
 
+## Trial 41 (2026-10-21, clean: owner "Count it clean", tally 1 in a row)
+
+- Repos: SixLabors/PolygonClipper (StyleCop from the shared-infrastructure submodule whose `.editorconfig` the build copies over
+  the root one: migrate wrote into `src/` and `tests/.editorconfig`; lenses 1 and 2), havit/Havit.Blazor (Razor, 20
+  `[Parameter, EditorRequired] public ...` lines, x64/x86 solution platforms; lenses 3 and 4), ClosedXML (random, seed 41:
+  websocket-sharp has no tests, the next three were used or rejected). All converged in one run; preview, format, check and
+  check --build agreed before and after committing (exit 3 only for IDE0049 on SDK 10.0.113; PolygonClipper's honestly
+  "Not verified": its vendored tests/GeoJson fails TWAE untouched, so the tests never compile); builds and tests matched.
+- BRO1509 + attributes (owner: "Own lines"): the SDK formatter puts each attribute list of a member spanning several lines on
+  its own line (types, methods, ctors, operators, properties, indexers, events, accessors; not local functions/parameters;
+  probed with `dotnet format whitespace`), but the whitespace pass runs before the fixes, so expanding `[A] public void M() { }`
+  needed a second run. `SingleLineBlocks.AddAttributeLines` breaks after each of the owner's lists in the same edit.
+- BRO1139 + BRO1519 (owner: "Keep the blank line"): `else { if (x) y; }` + a statement gave ClosedXML a different blank line
+  per fix order (preview and format disagreed in 2 files). `ElseIfs.GetChanges` adds BRO1519's line after the removed `}`
+  (`BlankLineRuns.JudgesGapAfter`), except when the join adds braces (the wrap brings it). Lesson: compare preview and format
+  output file by file, not only the file counts; FixOrderTests only sees analyzer fixes, never the whitespace pass.
+- Lens 3: BRO1102's `[A][B]` settles in one run with CSharpier (it puts each list on its own line) and with the SDK formatter
+  (Havit copy with BRO1102 on: `[Parameter][EditorRequired] public ...`, a later plain `dotnet format` changed only IDE0049).
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). PolygonClipper:
+  `git submodule update --init`, feedz.io/dnceng removed from SixLabors.Global.props and the trial feed added there
+  (RestoreSources overrides nuget.config). Havit.Blazor: global.json's sdk pin removed (keep `{"test":{"runner":
+  "Microsoft.Testing.Platform"}}` or `dotnet test --project` fails), Microsoft.CodeAnalysis 5.9 -> 4.14 (CS9057), trial feed
+  plus a `StyleBro.*` mapping in its nuget.config; E2E tests left out. ClosedXML's nuget.config `<clear/>`s: a version already
+  in the package cache restores anyway, a new one fails (NU1102). The mutation loop's `git checkout` reverted uncommitted
+  source once more: commit before testing mutations (third time this has bitten).
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
