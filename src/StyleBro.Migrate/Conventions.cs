@@ -171,6 +171,12 @@ internal static class Conventions
     /// </summary>
     public const string IndentCaseBlockKey = "csharp_indent_case_contents_when_block";
 
+    /// <summary>
+    /// The count of files whose usings change root namespace (DocumentFormat, Microsoft, System): a blank line at every change
+    /// (dotnet_separate_import_directive_groups' layout) or at none. Files with both aren't counted.
+    /// </summary>
+    public const string UsingGroupsKey = "using groups";
+
     /// <summary>The list layout conventions a leading-lambda call is counted apart for (<see cref="FoldLeadingLambdas"/>).</summary>
     public static readonly string[] LeadingLambdaKeys = { "stylebro_split_list_first_item", ItemsPerLineKey };
 
@@ -383,12 +389,6 @@ internal static class Conventions
     /// (nothing tells them apart), unsorted].
     /// </summary>
     private const string UsingsKey = "using order";
-
-    /// <summary>
-    /// The count of files whose usings change root namespace (DocumentFormat, Microsoft, System): a blank line at every change
-    /// (dotnet_separate_import_directive_groups' layout) or at none. Files with both aren't counted.
-    /// </summary>
-    public const string UsingGroupsKey = "using groups";
 
     /// <summary>Interface members (methods, properties, indexers, events): [with an access modifier, without].</summary>
     private const string InterfaceAccessKey = "interface member access";

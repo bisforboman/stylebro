@@ -1801,6 +1801,29 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   `dotnet test --solution` refuses its VSTest projects; test the MTP projects one by one (5 caller-identification failures in
   Release untouched; net472 needs mono). A baseline script that `cd`s into the clone needs absolute log paths.
 
+## Trial 39 (2026-10-21, not clean: owner "Not clean", tally 0)
+
+- Repos: domn1995/dunet (CSharpier 1.3, in-solution generator, TWAE, C# 14 extension blocks), andrewlock/StronglyTypedId (Verify
+  snapshots, generator), dotnet/Open-XML-SDK (StyleCop 1.2, migrate; PublicApiAnalyzers per framework, net35-net10.0, generator,
+  TWAE), jstedfast/MailKit (random, seed 39: netstandard2.0-net10.0 and net462/net47/net48, MimeKit submodule in its .sln).
+  All converged in one run; TWAE builds and tests matched the untouched code. dunet: format said clean, check named the one file
+  CSharpier already rejected before (by design: CSharpier runs only on the files format changes).
+- MailKit (owner: "Hide via the solution"): MailKit.sln builds `submodules/MimeKit`'s project; init's new root props gave it
+  StyleBro, and the build reported 145,994 findings `format` leaves alone (submodules) while format/check named only IDE0049.
+  Trial 28 keeps a submodule's own project's findings; `_StyleBroFindSubmodules` now keeps that submodule in
+  `StyleBroSubmoduleFolders` when `SolutionDir` is set and outside it (IDE and `dotnet format` set it too). verify-package check 12.
+- Open-XML-SDK (owner: "Follow the code"): `blankLinesBetweenUsingGroups: require` -> `dotnet_separate_import_directive_groups =
+  true` made the whitespace pass split root namespaces' usings in 342 StyleCop-clean files (StyleCop's groups are System-first/
+  alias/static, the SDK's every root namespace). `Conventions.UsingGroupsKey` counts files (blank line at every root change or
+  none); `Migration.AddUsingGroups` writes false unless `SeparatesUsingGroups`. Probed: with false the SDK neither adds nor removes
+  those blank lines. The 62 `field` -> `_field` renames (369 vs 62, SA1309 off) are the existing, reported design.
+- StronglyTypedId: projects in the .sln without a Build.0 line were "Not built ... left alone" yet listed as "Not checked"
+  ('dotnet format' couldn't load them: their package isn't packed). `FormatCommand.ProjectsIn` drops them from the runs.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). MailKit: `git submodule
+  update --init`, `--project MailKit.sln` (three solutions), 17 untouched TWAE errors (CS0168/CS8632), 64 network tests fail
+  untouched. Open-XML-SDK: its nuget.config `<clear/>`s, so the trial feed goes in there; a Debug build takes ~14 minutes and
+  check --build ~1 hour. A worker restart kills background waits: check the logs before rerunning.
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of

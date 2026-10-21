@@ -1137,6 +1137,10 @@ internal static class Migration
                 .ToList();
     }
 
+    /// <summary>Whether the code separates root namespaces' usings (<see cref="Conventions.UsingGroupsKey"/>'s counts).</summary>
+    public static bool SeparatesUsingGroups(int separated, int together) =>
+        separated + together >= Conventions.MinimumAgreeing && Conventions.Winner(separated, together) == 0;
+
     /// <summary>
     /// Private instance and static fields (not constants, not static readonly), by whether they start with '_'. Generated
     /// code (an '&lt;auto-generated' header, *.g.cs, *.Designer.cs, EF Core migrations) and vendored folders don't count;
@@ -1995,10 +1999,6 @@ internal static class Migration
         lines[at] = Key + " = false";
         result.Notes.Add($"Using groups: StyleCop's blankLinesBetweenUsingGroups separates its own groups (System first, aliases, static usings), {Key} every root namespace, and your code has {c[0]} files with a blank line between root namespaces, {c[1]} without: {Key} = false, so 'format' adds none.");
     }
-
-    /// <summary>Whether the code separates root namespaces' usings (<see cref="Conventions.UsingGroupsKey"/>'s counts).</summary>
-    public static bool SeparatesUsingGroups(int separated, int together) =>
-        separated + together >= Conventions.MinimumAgreeing && Conventions.Winner(separated, together) == 0;
 
     private static void AddSpacingOfRulesOff(StyleCopSetup setup, string root, IReadOnlyDictionary<string, string> own, List<string> lines, Result result)
     {
