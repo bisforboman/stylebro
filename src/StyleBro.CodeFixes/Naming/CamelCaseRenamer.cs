@@ -576,6 +576,11 @@ internal static class CamelCaseRenamer
             return (KeptReason.NameInSnapshotFile, snapshot);
         }
 
+        if (names.Files.ApiListings.TryGetValue(symbol.Name, out var listing) && IsInPublicApi(symbol))
+        {
+            return (KeptReason.NameInSnapshotFile, listing);
+        }
+
         if (!UsesShouldly(project, solution))
         {
             return (null, null);
@@ -592,6 +597,24 @@ internal static class CamelCaseRenamer
         }
 
         return (null, null);
+    }
+
+    /// <summary>
+    /// Whether a public-API listing can name the symbol: it and every type around it are public or protected (a parameter
+    /// or type parameter by its member). Private and internal members, and locals, are never in one.
+    /// </summary>
+    internal static bool IsInPublicApi(ISymbol symbol)
+    {
+        var current = symbol is IParameterSymbol or ITypeParameterSymbol ? symbol.ContainingSymbol : symbol;
+        for (; current is not null and not INamespaceSymbol; current = current.ContainingSymbol)
+        {
+            if (current.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Protected or Accessibility.ProtectedOrInternal))
+            {
+                return false;
+            }
+        }
+
+        return current is not null;
     }
 
     /// <summary>Whether the project references Shouldly: the package's assembly, or the Shouldly project itself (its own tests).</summary>
