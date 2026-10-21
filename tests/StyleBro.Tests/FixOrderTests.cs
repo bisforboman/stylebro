@@ -1020,6 +1020,22 @@ public class FixOrderTests
         "BRO1143",
         "BRO1519");
 
+    // Trial 41: BRO1509's expansion puts the attribute lists on their own lines; BRO1102 splitting the list before or after
+    // it gives the same text.
+    [Fact]
+    public Task CombinedAttributesOnAOneLineMember_GiveOneText() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+        using System.ComponentModel;
+
+        public class C
+        {
+            [Obsolete, Description("a")] public void M() { }
+        }
+        """,
+        "BRO1102",
+        "BRO1509");
+
     // NLog (trial 26): BRO1602's '//' below '[InlineData]' got BRO1504's blank line, which BRO1525 (comment in the gap) left.
     [Fact]
     public Task TripleSlashBelowAnAttribute_StaysAttached() => AssertConvergesInEveryOrderAsync(

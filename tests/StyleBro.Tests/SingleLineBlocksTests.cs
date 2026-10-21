@@ -792,4 +792,80 @@ public class SingleLineBlocksTests
         }
         """,
         editorConfig: "dotnet_diagnostic.BRO1505.severity = none\nstylebro_allow_empty_single_line_blocks = true\n");
+
+    // Trial 41: the SDK's formatter puts the attribute lists of a member spanning several lines on their own lines, after
+    // the fix in 'dotnet format' (its whitespace pass comes first): a second run. The expansion breaks those lines itself.
+    [Fact]
+    public Task AttributesOnTheHeaderLine_GetTheirOwnLines() => VerifyFixAsync(
+        """
+        using System;
+        using System.ComponentModel;
+
+        public class C
+        {
+            [Obsolete][Description("a")] public void M() {|BRO1509:{|} }
+
+            [Obsolete, Description("b")] public int P {|BRO1509:{|} get { return 1; } }
+
+            [Obsolete] public int Q { get; set; }
+
+            [Obsolete]
+
+            public void N() {|BRO1509:{|} }
+        }
+
+        [Obsolete] public class D {|BRO1509:{|} [Obsolete] public int R { get; set; } }
+        """,
+        """
+        using System;
+        using System.ComponentModel;
+
+        public class C
+        {
+            [Obsolete]
+            [Description("a")]
+            public void M()
+            {
+            }
+
+            [Obsolete, Description("b")]
+            public int P
+            {
+                get { return 1; }
+            }
+
+            [Obsolete] public int Q { get; set; }
+
+            [Obsolete]
+
+            public void N()
+            {
+            }
+        }
+
+        [Obsolete]
+        public class D
+        {
+            [Obsolete] public int R { get; set; }
+        }
+        """);
+
+    [Fact]
+    public Task AttributeGapWithAComment_IsSkipped() => VerifyFixAsync(
+        """
+        using System;
+
+        public class C
+        {
+            [Obsolete] /* why */ public void M() { }
+        }
+        """,
+        """
+        using System;
+
+        public class C
+        {
+            [Obsolete] /* why */ public void M() { }
+        }
+        """);
 }
