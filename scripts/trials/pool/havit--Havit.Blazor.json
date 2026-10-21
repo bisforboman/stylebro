@@ -1,0 +1,25 @@
+{
+  "repo": "havit/Havit.Blazor",
+  "branch": "master",
+  "commit": "ea76e5005c9cde3cec1994f4ee0e5926039b234c",
+  "csFiles": 761,
+  "tags": [
+    "razor",
+    "library",
+    "multi-target",
+    "generator",
+    "twae",
+    "app"
+  ],
+  "setups": "Blazor component library (757 .razor files), net10.0;net9.0;net8.0, CPM, x64/x86 solution platforms, in-solution generators, TreatWarningsAsErrors in one project, no style analyzers; Havit.Bootstrap/.editorconfig (SCSS, root = true).",
+  "build": "ok with workaround",
+  "workaround": "remove global.json's sdk pin (keep the test runner: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}}); Microsoft.CodeAnalysis(.CSharp) 5.9.0 -> 4.14.0 in Directory.Packages.props (CS9057 with SDK 10.0.113); nuget.config <clear/> + packageSourceMapping: add the trial feed with a StyleBro.* pattern",
+  "tests": "dotnet test --project <X>.Tests -c Release -f net10.0 / net8.0 for Components.Web, Bootstrap, Bootstrap.Smart, Grpc.Core/Client/Server, StrongApiStringLocalizers, Documentation, ApplicationInsights, Bootstrap.EntityFrameworkCore: 1,368 passed (net10.0 + net8.0). E2E tests (Playwright) left out; no net9.0 runtime.",
+  "usedIn": "trial 41",
+  "verified": {
+    "by": "trial 41 session",
+    "date": "2026-10-21",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime)"
+  },
+  "notes": "20 '[Parameter, EditorRequired] public ...' lines sharing their line (init turns BRO1102 off: the code mixes both forms)."
+}

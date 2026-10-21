@@ -256,6 +256,11 @@ internal static class SingleLineBlocks
             return null;
         }
 
+        if (!AddAttributeLines(Owner(node), baseIndent, lineBreak, text, changes))
+        {
+            return null;
+        }
+
         // Inside: every item on its own line, one level deeper (also enum values: StyleCop's SA1502 fix keeps them on one
         // line, which its SA1136 then reports).
         var items = GetItems(node);
@@ -378,6 +383,33 @@ internal static class SingleLineBlocks
 
         changes.AddRange(lines);
         return changes;
+    }
+
+    /// <summary>
+    /// The SDK's formatter puts every attribute list of a member that spans several lines on its own line
+    /// (<c>[A] public void M()</c> + a body, probed), but leaves a one-line member's alone, and 'dotnet format' runs its
+    /// whitespace pass before the analyzers' fixes: expanding <c>[Parameter, EditorRequired] public void M() { }</c> left
+    /// the lists on the header line for a second run (trial 41). So the expansion breaks the line after each of the
+    /// member's lists itself, at the member's indentation. False when a comment sits in such a gap (the node is skipped).
+    /// </summary>
+    private static bool AddAttributeLines(SyntaxNode owner, string indent, string lineBreak, SourceText text, List<TextChange> changes)
+    {
+        if (owner is not MemberDeclarationSyntax member)
+        {
+            return true;
+        }
+
+        foreach (var list in member.AttributeLists)
+        {
+            var next = list.CloseBracketToken.GetNextToken();
+            if (Line(text, list.CloseBracketToken.SpanStart) == Line(text, next.SpanStart)
+                && !Gap(list.CloseBracketToken, next, lineBreak + indent, text, changes))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>The SDK's csharp_preserve_single_line_statements (default true).</summary>

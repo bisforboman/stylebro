@@ -1020,6 +1020,71 @@ public class FixOrderTests
         "BRO1143",
         "BRO1519");
 
+    // Trial 41: BRO1509's expansion puts the attribute lists on their own lines; BRO1102 splitting the list before or after
+    // it gives the same text.
+    [Fact]
+    public Task CombinedAttributesOnAOneLineMember_GiveOneText() => AssertConvergesInEveryOrderAsync(
+        """
+        using System;
+        using System.ComponentModel;
+
+        public class C
+        {
+            [Obsolete, Description("a")] public void M() { }
+        }
+        """,
+        "BRO1102",
+        "BRO1509");
+
+    // ClosedXML (trial 41): 'else { if (x) y; }' followed by a statement: BRO1519 first added a blank line after the '}',
+    // which the join kept; BRO1139 first left no '}' to judge. The join adds BRO1519's blank line itself.
+    [Fact]
+    public Task ElseIf_KeepsTheBlankLineBRO1519WantsAfterTheRemovedBrace() => AssertConvergesInEveryOrderAsync(
+        """
+        public class C
+        {
+            public int Level { get; set; }
+
+            public C Ungroup(bool all)
+            {
+                if (all)
+                    Level = 0;
+                else
+                {
+                    if (Level > 0)
+                        Level -= 1;
+                }
+                return this;
+            }
+        }
+        """,
+        "BRO1139",
+        "BRO1519");
+
+    [Fact]
+    public Task ElseIf_KeepsTheBlankLineBRO1519WantsAfterTheRemovedBrace_WithoutTheBraceRules() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int Level { get; set; }
+
+            public C Ungroup(bool all)
+            {
+                if (all)
+                    Level = 0;
+                else
+                {
+                    if (Level > 0)
+                        Level -= 1;
+                }
+                return this;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1514.severity = none\ndotnet_diagnostic.BRO1515.severity = none\ndotnet_diagnostic.BRO1516.severity = none\n",
+        "BRO1139",
+        "BRO1519");
+
     // NLog (trial 26): BRO1602's '//' below '[InlineData]' got BRO1504's blank line, which BRO1525 (comment in the gap) left.
     [Fact]
     public Task TripleSlashBelowAnAttribute_StaysAttached() => AssertConvergesInEveryOrderAsync(

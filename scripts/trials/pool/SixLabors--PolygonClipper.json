@@ -1,0 +1,24 @@
+{
+  "repo": "SixLabors/PolygonClipper",
+  "branch": "develop",
+  "commit": "c9033242940972111bf7ddf64f66ba3e240c209e",
+  "csFiles": 105,
+  "tags": [
+    "stylecop",
+    "library",
+    "twae",
+    "copied-editorconfig",
+    "submodule"
+  ],
+  "setups": "StyleCop.Analyzers from the shared-infrastructure submodule (SixLabors.Global.props), stylecop.json and rulesets there; SixLaborsCopyConfigFiles copies the submodule's .editorconfig/.gitattributes/AGENTS.md over the root's on every build; net8.0 (net8.0;net10.0 in some), LangVersion 12, TreatWarningsAsErrors in Release (src/).",
+  "build": "ok with workaround",
+  "workaround": "git submodule update --init; remove feedz.io and dnceng from shared-infrastructure/msbuild/props/SixLabors.Global.props RestoreSources (add a local feed there: RestoreSources overrides nuget.config)",
+  "tests": "dotnet test tests/PolygonClipper.Tests: 201 passed, 2 skipped. The vendored tests/GeoJson project fails a TWAE build untouched (nullable warnings), so a TWAE build never compiles the tests.",
+  "usedIn": "trial 41",
+  "verified": {
+    "by": "trial 41 session",
+    "date": "2026-10-21",
+    "sdks": "10.0.113, 8.0.132 (no 9.0 runtime)"
+  },
+  "notes": "Smaller twin of ImageSharp.Web's setup (trial 40): migrate writes into src/ and tests/.editorconfig."
+}
