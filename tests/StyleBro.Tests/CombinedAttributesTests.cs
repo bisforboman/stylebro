@@ -45,7 +45,7 @@ public class CombinedAttributesTests
 
         class C
         {
-            [Obsolete] [DebuggerStepThrough] void M() { }
+            [Obsolete][DebuggerStepThrough] void M() { }
         }
         """);
 

@@ -270,7 +270,7 @@ rules that break multi-targeted projects (IDE0011, IDE0040, IDE0047, IDE0048, ID
   (`EmptyStatements.GetChanges`), so single fix and Fix All agree: whitespace-only lines go completely, otherwise
   the `;` takes the adjacent whitespace. Directives always have their own line, so no directive skip is needed.
 - **BRO1102** (SA1133) combined attributes: `[A, B]` -> `[A]` + `[B]`, target repeated. Own line -> one line per
-  attribute; shares a line with code -> `[A] [B]`. Like StyleCop, parameters/type parameters are not reported.
+  attribute; shares a line with code -> `[A][B]` (trial 40: the whitespace pass removes the space). Like StyleCop, parameters/type parameters are not reported.
   Lists with comments between attributes are skipped (StyleCop's fix drops the comment).
 - **BRO1103** (SA1131) constant on the left of a comparison: swap operands, flip `<`/`>`/`<=`/`>=`. "Constant" as in
   StyleCop (incl. `static readonly` fields). Only built-in operators and operators from the core library (same
