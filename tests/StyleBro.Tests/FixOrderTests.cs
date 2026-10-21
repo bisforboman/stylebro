@@ -1061,6 +1061,30 @@ public class FixOrderTests
         "BRO1139",
         "BRO1519");
 
+    [Fact]
+    public Task ElseIf_KeepsTheBlankLineBRO1519WantsAfterTheRemovedBrace_WithoutTheBraceRules() => AssertConvergesInEveryOrderWithConfigAsync(
+        """
+        public class C
+        {
+            public int Level { get; set; }
+
+            public C Ungroup(bool all)
+            {
+                if (all)
+                    Level = 0;
+                else
+                {
+                    if (Level > 0)
+                        Level -= 1;
+                }
+                return this;
+            }
+        }
+        """,
+        "dotnet_diagnostic.BRO1514.severity = none\ndotnet_diagnostic.BRO1515.severity = none\ndotnet_diagnostic.BRO1516.severity = none\n",
+        "BRO1139",
+        "BRO1519");
+
     // NLog (trial 26): BRO1602's '//' below '[InlineData]' got BRO1504's blank line, which BRO1525 (comment in the gap) left.
     [Fact]
     public Task TripleSlashBelowAnAttribute_StaysAttached() => AssertConvergesInEveryOrderAsync(
