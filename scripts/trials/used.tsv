@@ -186,3 +186,10 @@ domn1995/dunet	trial 39	CSharpier 1.3.0 (.csharpierrc printWidth 100), in-soluti
 andrewlock/StronglyTypedId	trial 39	Verify snapshot tests, in-solution generator, .sln projects without a Build.0 line (Nuget integration tests)
 dotnet/Open-XML-SDK	trial 39	StyleCop 1.2 (migrate), PublicApiAnalyzers PublicAPI.Shipped.txt per framework, net35-net10.0, generator, TWAE
 jstedfast/MailKit	trial 39 (random, seed 39)	netstandard2.0;netstandard2.1;net462;net47;net48;net8.0;net10.0, MimeKit submodule in the solution
+Cysharp/YetAnotherHttpHandler	trial 40	init; the HttpClientTestServer submodule's three projects are in the .slnx; native library copied into the test output by hand (its tests load runtimes/linux-x64 relative to the working folder)
+SixLabors/ImageSharp.Web	trial 40	StyleCop 1.2 from the shared-infrastructure submodule (migrate), its build copies the submodule's .editorconfig over the root one; feedz.io and dnceng feeds removed locally; AWS/Azure tests need emulators
+Blazored/Toast	trial 40	Razor components with code-behind, bUnit tests, net6.0;net7.0;net8.0; a spot copy with projects unchecked in the solution's configurations (lens 3)
+danielgerlag/workflow-core	trial 40 (random, seed 40)	709 files, netstandard2.0-net10.0; database/queue provider tests need servers (unit, integration and SQLite tests run); seed 40 drew graphql-dotnet/graphql-dotnet
+graphql-dotnet/graphql-dotnet	rejected trial 40	random pick (seed 40): 1,111 .cs files, too large
+gluck/il-repack	rejected trial 40	cecil submodule in its solution, but its tests are net10.0-windows WPF and the repack step needs mono
+Topshelf/Topshelf	rejected trial 40	projects unchecked in some configurations, but net452/netcoreapp2.1 Windows services, unmaintained since 2020
