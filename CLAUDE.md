@@ -1824,6 +1824,42 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   untouched. Open-XML-SDK: its nuget.config `<clear/>`s, so the trial feed goes in there; a Debug build takes ~14 minutes and
   check --build ~1 hour. A worker restart kills background waits: check the logs before rerunning.
 
+## Trial 40 (2026-10-21, not clean: owner "Not clean", tally 0)
+
+- Repos: Cysharp/YetAnotherHttpHandler (its HttpClientTestServer submodule's projects are in the .slnx; lens 1), SixLabors/
+  ImageSharp.Web (StyleCop from the shared-infrastructure submodule, migrate; lens 2), Blazored/Toast (Razor, bUnit; lens 4),
+  danielgerlag/workflow-core (random, seed 40: graphql-dotnet drew first, 1,111 files), a Toast spot copy with one project
+  unchecked in every configuration and one in Release (lens 3: no buildable repository had one; Bogus and Blazor.Diagrams
+  were used before, check used.tsv for EVERY candidate first). Held up: submodule projects built through the superproject's
+  solution report nothing (58 findings built on their own, trial 28's design); migrate kept ImageSharp.Web's own using keys
+  (1 file changed); the unbuilt project is "Not built ... left alone", not "Not checked". After the fixes every repository
+  matched its baseline (exit 3 only for IDE0049 on SDK 10.0.113).
+- ImageSharp.Web (owner: "Write into the folders"): SixLaborsCopyConfigFiles copies shared-infrastructure/.editorconfig over
+  the root one before every build, so migrate's block was gone after the first build (format/check Clean, TWAE build 897
+  findings). `Migration.Synced` (root .editorconfig text equal to an .editorconfig inside a submodule, every .csproj in a
+  top-level folder): migrate's plan and init's targets (`InitCommand.Synced`) write the block into `<folder>/.editorconfig`
+  instead, rebased (`Migration.Rebase`); `Migration.BlockFile` finds it for later runs (`IsMigrated`, recorded version/settings,
+  unformatted folders, kept usings). A new folder file must not get `root = true` (init's loop default).
+- `check --build` before format's changes are committed compared with a HEAD copy that had init's settings but not the fixes:
+  its library failed on BRO findings, the projects referencing it never compiled, and their own errors (Toast's CS0067) counted
+  as new: a false "Not clean". The copy's build now imports `stylebro-untouched.targets` through the
+  `CustomAfterMicrosoftCommonTargets` environment variable (`UntouchedHook`/`WithHook`), appending format's ids to
+  `WarningsNotAsErrors`. `NotBuiltIn`: a project the .sln doesn't build in a configuration isn't expected to compile there.
+- BRO1102 (owner: "`[A][B]`"): a shared-line split writes `[A][B]`; the whitespace pass removes the space between attribute
+  lists, so `[A] [B]` changed again on the next plain `dotnet format` run (`bro format` hid it in its own later pass).
+- Unexplained: 2 of 7 ImageSharp.Web previews printed "Without StyleBro: samples/ImageSharp.Web.Sample ... no StyleBro.Analyzers
+  in its restore output", both while other heavy dotnet jobs ran; never reproduced alone (new package version in the cache,
+  stale artifacts/ and full copies tried). A project without StyleBro is a note, not a gap: the build doesn't run StyleBro there
+  either.
+- Environment: SDK 10.0.113 + 8.0.132 and pwsh were there (`ln -s ~/.dotnet/tools/bro /usr/local/bin/bro`). YAHA:
+  `-p:NuGetAudit=false`, its tests load `runtimes/linux-x64/native/*.so` relative to the working folder (copy it into the test
+  output), one gRPC loopback test can hang (`--blame-hang-timeout 3m`). ImageSharp.Web: feedz.io and dnceng removed from
+  SixLabors.Global.props' RestoreSources and the trial feed added there (committed in the submodule and the clone, not pushed),
+  LFS images not fetched (4 tests fail untouched), AWS/Azure tests need emulators. workflow-core: `-p:WarningsNotAsErrors=NU1510`
+  (its TWAE restore fails, so check --build honestly says Not verified), database/queue tests need servers. `pkill -f`/`pgrep -f`
+  with a pattern from the same command line kills the calling shell (exit 144): filter by process name instead. Count TWAE
+  errors with `--no-incremental`, and build the tests without TWAE (a failed TWAE build leaves no test binaries).
+
 ## xUnit fixes in format (backlog 073/074, 2026-10-18)
 
 - Owner's choices (docs/decisions/2026-10-18-which-xunit-fixes-bro-format-applies.md): `bro format` adds an allowlist of
