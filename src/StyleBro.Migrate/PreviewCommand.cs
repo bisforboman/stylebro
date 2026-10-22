@@ -1302,6 +1302,24 @@ internal static class PreviewCommand
         return count;
     }
 
+    /// <summary>
+    /// Adds the .editorconfig files git ignores (bin/obj aside) to the copy's index: NSwag's .gitignore lists '.editorconfig',
+    /// so the settings init wrote there were missing from the patch (trial 43). Before the baseline commit (the files as they
+    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them.
+    /// </summary>
+    internal static void AddIgnoredSettings(string folder)
+    {
+        var ignored = GitChecked(folder, "ls-files", "--others", "--ignored", "--exclude-standard", "--", ":(glob)**/.editorconfig")
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(f => f.Trim())
+            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/"))
+            .ToList();
+        foreach (var chunk in ignored.Chunk(100))
+        {
+            GitChecked(folder, ["add", "-f", "--", .. chunk]);
+        }
+    }
+
     private static (int Code, string Output, string Error) RunGit(string directory, string[] arguments)
     {
         var start = new ProcessStartInfo("git")
@@ -1448,24 +1466,6 @@ internal static class PreviewCommand
     {
         GitChecked(copy, "add", "-A");
         return GitChecked(copy, "write-tree").Trim();
-    }
-
-    /// <summary>
-    /// Adds the .editorconfig files git ignores (bin/obj aside) to the copy's index: NSwag's .gitignore lists '.editorconfig',
-    /// so the settings init wrote there were missing from the patch (trial 43). Before the baseline commit (the files as they
-    /// were) and before the settings commit (the ones the settings step wrote); once added, 'git add -A' keeps them.
-    /// </summary>
-    public static void AddIgnoredSettings(string folder)
-    {
-        var ignored = GitChecked(folder, "ls-files", "--others", "--ignored", "--exclude-standard", "--", ":(glob)**/.editorconfig")
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-            .Select(f => f.Trim())
-            .Where(f => !Regex.IsMatch(f, "(^|/)(bin|obj)/"))
-            .ToList();
-        foreach (var chunk in ignored.Chunk(100))
-        {
-            GitChecked(folder, ["add", "-f", "--", .. chunk]);
-        }
     }
 
     private static void Commit(string folder, string message)
