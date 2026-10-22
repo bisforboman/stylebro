@@ -10,7 +10,9 @@ namespace StyleBro.Migrate;
 /// whose fixes can't run. Each gap is a <see cref="NotCheckedPrefix"/> line a run prints; check and format collect them,
 /// list them at the end and say <see cref="NotVerifiedLine"/> with <see cref="NotVerifiedExitCode"/> instead of "Clean".
 /// Skips the build also makes (submodules, Visual Basic, generated files, files outside the repository, projects no
-/// configuration builds, IDE0055 off) aren't gaps.
+/// configuration builds, IDE0055 off) aren't gaps. A held-back SDK rule (<see cref="HeldBackGap"/>) is listed like a gap
+/// but is a note: on its own it leaves the verdict and the exit code alone (owner's decision 2026-10-22, "Note it, don't
+/// fail"; SDK 10.0.1xx held IDE0049 back in every multi-targeted repository, so nothing could end clean there).
 /// </summary>
 internal static partial class FormatCommand
 {
@@ -20,8 +22,11 @@ internal static partial class FormatCommand
     /// <summary>The start of a line that names one part of the build a run didn't check, and why (<see cref="Gap"/>).</summary>
     public const string NotCheckedPrefix = "Not checked:";
 
-    /// <summary>Why the IDE fixes <see cref="HeldBackIds"/> leaves out aren't checked (their gap line).</summary>
-    public const string HeldBackReason = "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked";
+    /// <summary>
+    /// Why the IDE fixes <see cref="HeldBackIds"/> leaves out aren't checked (their gap line, <see cref="HeldBackGap"/>); it
+    /// tells that line from the gaps that count (<see cref="Unverified"/>).
+    /// </summary>
+    public const string HeldBackReason = "this SDK's 'dotnet format' ignores the multi-target guard, so these fixes are held back and not checked (a note: a newer .NET SDK checks them; the verdict doesn't count them)";
 
     /// <summary>The start of <see cref="NotVerifiedLine"/>.</summary>
     public const string NotVerifiedMarker = "Not verified:";
@@ -32,6 +37,12 @@ internal static partial class FormatCommand
     /// <summary>The first few of <paramref name="items"/> and how many more, for a gap line.</summary>
     public static string ShortList(IReadOnlyCollection<string> items, int shown = 3) =>
         string.Join(", ", items.Take(shown)) + (items.Count > shown ? $" and {items.Count - shown} more" : string.Empty);
+
+    /// <summary>The gap line for the SDK rules format holds back (<see cref="HeldBackIds"/>): listed, but not counted (<see cref="Unverified"/>).</summary>
+    public static string HeldBackGap(IReadOnlyList<string> ids) => Gap(string.Join(", ", ids), HeldBackReason);
+
+    /// <summary>The gaps that make the verdict "Not verified": all but the held-back SDK rules (<see cref="HeldBackGap"/>).</summary>
+    public static List<string> Unverified(IEnumerable<string> gaps) => gaps.Where(g => !g.EndsWith(HeldBackReason, StringComparison.Ordinal)).ToList();
 
     /// <summary>Whether a run's line names a gap (<see cref="Gap"/>).</summary>
     public static bool IsGapLine(string line) => line.StartsWith(NotCheckedPrefix, StringComparison.Ordinal);
@@ -62,9 +73,12 @@ internal static partial class FormatCommand
     public static List<string> WorkloadGaps(IEnumerable<(string Project, string[] Packs)> projects) =>
         projects.Select(p => Gap(p.Project, $"it needs {string.Join(", ", p.Packs)}, which this machine doesn't have installed")).ToList();
 
-    /// <summary>The verdict lines when <paramref name="gaps"/> are left: the list, then <see cref="NotVerifiedLine"/>. None without gaps.</summary>
+    /// <summary>
+    /// The verdict lines when <paramref name="gaps"/> are left: the list, then <see cref="NotVerifiedLine"/> when any of them
+    /// counts (<see cref="Unverified"/>). None without gaps.
+    /// </summary>
     public static List<string> GapVerdict(IReadOnlyList<string> gaps) =>
-        gaps.Count == 0 ? [] : [.. gaps, NotVerifiedLine(gaps.Count)];
+        Unverified(gaps) is { Count: > 0 } counted ? [.. gaps, NotVerifiedLine(counted.Count)] : [.. gaps];
 
     /// <summary>--json: the gaps as 'notChecked' (what, why), every time they're said.</summary>
     public static void ReportGaps(IEnumerable<string> gaps) =>
@@ -72,7 +86,7 @@ internal static partial class FormatCommand
 
     /// <summary>
     /// The exit code once <paramref name="gaps"/> are known: a clean <paramref name="code"/> becomes <see cref="NotVerifiedExitCode"/>
-    /// with gaps; findings and errors stay what they are.
+    /// with gaps that count (<see cref="Unverified"/>); findings and errors stay what they are.
     /// </summary>
-    public static int WithGaps(int code, IReadOnlyCollection<string> gaps) => code == 0 && gaps.Count > 0 ? NotVerifiedExitCode : code;
+    public static int WithGaps(int code, IReadOnlyCollection<string> gaps) => code == 0 && Unverified(gaps).Count > 0 ? NotVerifiedExitCode : code;
 }

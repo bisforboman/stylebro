@@ -179,7 +179,7 @@ public sealed class RegionsCodeFixProvider : CodeFixProvider
 
         // BRO1001 sorts within each region; without them it sorts across, now rather than in another run. Each sorted
         // container replaces its span in the original text, so the edits still merge with other copies' (multi-targeting).
-        var sorts = await MemberOrderingCodeFixProvider.GetSortChangesAsync(removed, cancellationToken).ConfigureAwait(false);
+        var sorts = await MemberOrderingCodeFixProvider.GetSortChangesAsync(removed, document.Project.Solution, cancellationToken).ConfigureAwait(false);
         var edits = new List<TextChange>();
         foreach (var sort in sorts)
         {

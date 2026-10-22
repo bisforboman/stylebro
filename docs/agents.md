@@ -23,7 +23,8 @@ bro check                                                            # before fi
 
 Exit codes: 0 clean (only kept findings left, if any); 2 a run still changed files after 3 runs, or with
 `--verify-no-changes`, formatting would change a file; 3 not verified: nothing left to change in what it checked, but
-part of the build wasn't (the `Not checked:` lines and `notChecked` name it; don't report such a run as clean); 1 a usage error (a file not found, no project above a file);
+part of the build wasn't (the `Not checked:` lines and `notChecked` name it; don't report such a run as clean; IDE fixes
+held back on an older .NET SDK are listed there too, but on their own leave the exit code 0); 1 a usage error (a file not found, no project above a file);
 anything else is `dotnet format`'s.
 
 ## `format --files`
@@ -115,7 +116,7 @@ Every field is always there (empty or `null` where it doesn't apply). Paths in t
 | `filesPerRule` | object or null | `preview`: rule id -> the files it changed (`IDE0055` for whitespace-only files, `other` when nothing was reported). |
 | `keptFindings` | array | `format`: findings StyleBro's fixes keep on purpose: `path`, `line`, `column` (1-based), `rule`, `reason` (one of the names below), `reasonText`, `message`. |
 | `patch` | string or null | `preview`: the patch file (full path). |
-| `notChecked` | array | `format` and `preview`: what the runs (a preview's last run) didn't check the way the build does, each "what: why" (exit code 3 when nothing else is left). |
+| `notChecked` | array | `format` and `preview`: what the runs (a preview's last run) didn't check the way the build does, each "what: why" (exit code 3 when nothing else is left, unless the only entries are held-back IDE fixes). |
 | `clean` | bool or null | `format`: no file is left to change (exit code 0). `preview`: the last run changed nothing and checked everything. `null` for `init`/`migrate`. |
 | `exitCode` | number | The process's exit code. |
 

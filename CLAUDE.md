@@ -1891,6 +1891,16 @@ node (`NodeCodeFixProvider` second id). Tests use a stub analyzer at Sonar's loc
   in the package cache restores anyway, a new one fails (NU1102). The mutation loop's `git checkout` reverted uncommitted
   source once more: commit before testing mutations (third time this has bitten).
 
+## Performance audit fixes (2026-10-22, owner's decisions)
+
+- BRO1112's and BRO1409's fixes sort with BRO1001 on the document they just changed (`GetSortChangesAsync(changed, namesFrom:
+  document.Project.Solution, ...)`): the names in code are cached per Solution, and asking with the changed document's solution
+  scanned the whole solution once per fixed file (Newtonsoft.Json: BRO1112's Fix All 387 s -> ~15 s). `CamelCaseRenamer.NameScans`
+  (AsyncLocal counter, tests only) lets `LinkedFileFixAllTests.FixAllThatSorts_ScansTheSolutionOnce` assert one scan per Fix All.
+  A new fix that reads solution-wide data must ask with the solution it started from, never a forked document's.
+- TrailingBlankLines calls `IsStandalone` last (it can only be true with a blank line below the comment).
+- Owner ("Note it, don't fail"): a held-back SDK rule (`HeldBackGap`, IDE0049 on SDK 10.0.1xx) is still a `Not checked:` line and
+  in `notChecked`, but `Unverified(gaps)` leaves it out of the verdict and the exit code (format, check, preview).
 ## Trial 42 (2026-10-22, not clean: owner "Not clean", tally 0)
 
 - Repos: nilaoda/N_m3u8DL-RE (random, seed 42: the list walked from nunit past ten used/rejected entries; net10.0 console app,

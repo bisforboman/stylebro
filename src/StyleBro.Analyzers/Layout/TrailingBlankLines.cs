@@ -43,8 +43,7 @@ internal static class TrailingBlankLines
         if (!comment.IsKind(SyntaxKind.SingleLineCommentTrivia)
             || comment.ToString().StartsWith("///", StringComparison.Ordinal)
             || IsFileHeader(comment)
-            || BlankLines.IsCommentBelowCode(comment, text)
-            || (!removeStandalone && IsStandalone(comment, text)))
+            || BlankLines.IsCommentBelowCode(comment, text))
         {
             return null;
         }
@@ -64,7 +63,7 @@ internal static class TrailingBlankLines
                 var content = text.ToString(next.Span).TrimStart();
                 return content.StartsWith("//", StringComparison.Ordinal) || content.StartsWith("/*", StringComparison.Ordinal)
                     ? null
-                    : lines;
+                    : WithoutStandalone(lines);
             }
 
             // The line after the file's last line break isn't a blank line; spaces there are BRO1507's.
@@ -78,7 +77,11 @@ internal static class TrailingBlankLines
             lines.Add(next);
         }
 
-        return lines;
+        return WithoutStandalone(lines);
+
+        // Last: a standalone comment has a blank line right below it, so most comments never read their run's lines.
+        List<TextLine>? WithoutStandalone(List<TextLine> found) =>
+            found.Count > 0 && !removeStandalone && IsStandalone(comment, text) ? null : found;
     }
 
     /// <summary>

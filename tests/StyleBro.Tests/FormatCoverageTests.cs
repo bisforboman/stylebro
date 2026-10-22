@@ -89,6 +89,47 @@ public sealed class FormatCoverageTests : IDisposable
     }
 
     [Fact]
+    public void HeldBackSdkRules_AreListed_ButLeaveTheVerdictClean()
+    {
+        // Owner 2026-10-22 ("Note it, don't fail"): SDK 10.0.1xx's 'dotnet format' ignores the multi-target guard, so IDE0049 was
+        // held back in every multi-targeted repository and nothing could end clean there.
+        var root = NewFolder();
+        var heldBack = FormatCommand.HeldBackGap(["IDE0049"]);
+        var lines = new List<string>();
+
+        Assert.Equal(0, FormatCommand.Verify(["--verify-no-changes"], root, lines.Add, (_, output) =>
+        {
+            output?.Invoke(heldBack);
+            return 0;
+        }));
+        Assert.Equal([heldBack, "Clean."], lines);
+
+        lines.Clear();
+        Assert.Equal(0, FormatCommand.Run([root, FormatCommand.OnceOption], lines.Add, (_, output) =>
+        {
+            output?.Invoke(heldBack);
+            return 0;
+        }));
+        Assert.Contains("Run 1: 0 files changed, clean.", lines);
+        Assert.Single(lines, heldBack);
+        Assert.DoesNotContain(lines, l => l.StartsWith(FormatCommand.NotVerifiedMarker, StringComparison.Ordinal));
+
+        // With a gap that counts, it's still "Not verified", counting that one only.
+        var gap = FormatCommand.Gap("Lib", "'dotnet format' couldn't load it (references didn't load)");
+        lines.Clear();
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, FormatCommand.Verify(["--verify-no-changes"], root, lines.Add, (_, output) =>
+        {
+            output?.Invoke(heldBack);
+            output?.Invoke(gap);
+            return 0;
+        }));
+        Assert.Equal([heldBack, gap, FormatCommand.NotVerifiedLine(1)], lines);
+        Assert.Equal(0, FormatCommand.WithGaps(0, [heldBack]));
+        Assert.Equal(FormatCommand.NotVerifiedExitCode, FormatCommand.WithGaps(0, [heldBack, gap]));
+        Assert.Equal([gap], FormatCommand.Unverified([heldBack, gap]));
+    }
+
+    [Fact]
     public void SkippedProjects_AreGaps_WholeOrForSomeFrameworks()
     {
         var skipped = new Dictionary<string, SortedSet<string>> { ["Lib"] = new(["netstandard1.3"]), ["Tests"] = new([string.Empty]), ["All"] = new(["net10.0", "net8.0"]) };

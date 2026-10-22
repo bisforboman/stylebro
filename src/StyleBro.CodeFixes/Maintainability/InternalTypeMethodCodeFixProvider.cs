@@ -152,7 +152,7 @@ public sealed class InternalTypeMethodCodeFixProvider : CodeFixProvider
         // BRO1001 sorts public members before internal ones: sort now rather than in another 'dotnet format' run. Each
         // sorted container replaces its span in the original text (like BRO1112's fix), so the edits still merge with
         // other copies' (multi-targeting); the keywords inside it come with the sorted text.
-        var sorts = await MemberOrderingCodeFixProvider.GetSortChangesAsync(changed, cancellationToken).ConfigureAwait(false);
+        var sorts = await MemberOrderingCodeFixProvider.GetSortChangesAsync(changed, document.Project.Solution, cancellationToken).ConfigureAwait(false);
         var edits = sorts.Select(s => new TextChange(TextSpan.FromBounds(ToOriginal(s.Span.Start), ToOriginal(s.Span.End)), s.NewText!))
             .Where(s => changes.Any(c => s.Span.Contains(c.Span)))
             .ToList();

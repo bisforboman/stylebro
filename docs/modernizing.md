@@ -160,7 +160,8 @@ project and a netstandard2.0 library): format passes the guard the list of such 
 Some .NET SDKs' `dotnet format` (seen with 10.0.113) doesn't load suppressors for IDE rules, so there the guard can't
 hide IDE0049, IDE0056, IDE0057 or IDE0330. `bro format` checks that once per SDK version and then leaves those fixes out
 in repositories with multi-targeted projects or such shared files ("Held back: ..."); a newer SDK applies them with the
-guard. Plain `dotnet format` on such an SDK applies them unguarded.
+guard. The `Not checked:` line for them is a note: it doesn't make `format` or `check` end "Not verified". Plain
+`dotnet format` on such an SDK applies them unguarded.
 
 What it doesn't see:
 
