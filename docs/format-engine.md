@@ -31,9 +31,12 @@ Engine: the host can't run here (the SDK's dotnet-format needs .NET 10, and 'bro
 
 ## What it changes
 
-- **Time.** On a three-framework library (CliFx: net10.0, netstandard2.0, netstandard2.1, six projects) the checks of a
-  `bro check` take 9-13 s instead of 18-27 s, and a `bro format` run that changes nothing is about twice as fast. The
-  fixes, and verify's formatting of a copy to tell kept findings apart, still start `dotnet format`.
+- **Time.** What it saves is the start, load and compile of each `dotnet format` process, so it helps most where those
+  dominate. On a three-framework library (CliFx: six projects; net10.0, netstandard2.0, netstandard2.1) a `bro check` of
+  formatted code took 25 s instead of 35 s (a plain `dotnet format --verify-no-changes`: 40 s). Where the analysis
+  itself dominates (a 15-project WPF app in three configurations, a library for seven frameworks), it took about as long
+  as the default on a 4-core machine. The fixes, and the copy `bro check` formats to tell kept findings apart, still
+  start `dotnet format`.
 - **Memory.** The process holds every framework's compilations of a configuration at once: a repository with many
   projects and frameworks needs more memory than one `dotnet format` process did.
 - **`--timings`** shows the workspace loads as `host: load workspace (<configuration>)`.

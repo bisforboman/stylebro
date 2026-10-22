@@ -101,11 +101,17 @@ public sealed class FormatHostTests : IDisposable
             .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "A", "A", LanguageNames.CSharp, filePath: "/r/A/A.csproj"))
             .AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "B", "B", LanguageNames.CSharp, filePath: "/r/B/B.csproj"));
         var view = Views.Of(solution, ["/r/A/A.csproj|"], []);
+        var b = solution.Projects.Single(p => p.Name == "B").Id;
         WorkspaceDiagnostic Warning(string message) => new(WorkspaceDiagnosticKind.Warning, message);
 
-        var warnings = Views.WarningsOf([Warning("Msbuild failed when processing the file '/r/A/A.csproj'"), Warning("Msbuild failed when processing the file '/r/B/B.csproj'"), Warning("Cannot open project '/r/F/F.fsproj'")], solution, view);
+        // The last one names A, but is about B (System.IO.Abstractions: it named the wrong run).
+        var warnings = Views.WarningsOf(
+            [Warning("Msbuild failed when processing the file '/r/A/A.csproj'"), Warning("Msbuild failed when processing the file '/r/B/B.csproj'"), Warning("Cannot open project '/r/F/F.fsproj'"), new ProjectDiagnostic(WorkspaceDiagnosticKind.Warning, "Found project reference without a matching metadata reference: /r/A/A.csproj", b)],
+            solution,
+            view);
 
         Assert.Equal(["Msbuild failed when processing the file '/r/A/A.csproj'", "Cannot open project '/r/F/F.fsproj'"], warnings.Select(w => w.Message));
+        Assert.Single(Views.WarningsOf([new ProjectDiagnostic(WorkspaceDiagnosticKind.Warning, "Found project reference without a matching metadata reference: /r/A/A.csproj", b)], solution, solution));
     }
 
     [Fact]

@@ -78,13 +78,18 @@ public static class Views
         name.EndsWith(")", StringComparison.Ordinal) && name.LastIndexOf('(') is var open and > 0 ? name.Substring(open + 1, name.Length - open - 2) : null;
 
     /// <summary>
-    /// The workspace's load warnings a view has: those that name one of its projects, and those that name none of the
-    /// workspace's (a project that didn't load at all), which every view has.
+    /// The workspace's load warnings a view has: one about a project (a ProjectDiagnostic) when the view has that project;
+    /// otherwise those whose text names one of the view's projects, and those that name none of the workspace's (a project
+    /// that didn't load at all), which every view has. "Found project reference without a matching metadata reference: X"
+    /// names the project referenced, not the one it is about: by text, it went to every view that has X (System.IO.Abstractions:
+    /// the net10.0 run instead of the net472 one).
     /// </summary>
     public static List<WorkspaceDiagnostic> WarningsOf(IEnumerable<WorkspaceDiagnostic> diagnostics, Solution workspace, Solution view)
     {
         var all = workspace.Projects.Select(p => p.FilePath).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var own = view.Projects.Select(p => p.FilePath).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        return diagnostics.Where(d => own.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase)) || !all.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase))).ToList();
+        return diagnostics.Where(d => d is ProjectDiagnostic project
+            ? view.ContainsProject(project.ProjectId)
+            : own.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase)) || !all.Any(p => d.Message.Contains(p, StringComparison.OrdinalIgnoreCase))).ToList();
     }
 }
