@@ -1037,11 +1037,16 @@ internal static class CamelCaseRenamer
             return newName;
         }
 
-        if (symbol is not IFieldSymbol field
+        // The field as the reference's own compilation sees it: the symbol came from the copy whose diagnostic started the
+        // rename, and in another target framework's copy its type isn't the one a simple name binds to there, so the
+        // qualifier came out fully qualified or not depending on which copy's edit won (Serilog's 'ref Serilog.Log.logger'
+        // in some runs, 'ref Log.logger' in others).
+        if (symbol is not IFieldSymbol
             || await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) is not { } root
             || root.FindToken(span.Start).Parent is not IdentifierNameSyntax name
             || !IsSimpleName(name)
             || await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false) is not { } model
+            || (model.GetSymbolInfo(name, cancellationToken).Symbol ?? symbol) is not IFieldSymbol field
             || model.LookupSymbols(span.Start, name: newName)
                 .Where(s => !IsHiddenByTheRename(s, field, newName) && !SymbolEqualityComparer.Default.Equals(s, field.Type))
                 .ToList() is not { Count: > 0 } found)

@@ -1631,6 +1631,44 @@ public class FixOrderTests
         "BRO1303",
         "BRO1306");
 
+    // The fix-loop measurement (2026-10, Serilog's Log.cs): 'ref Serilog.Log.logger' in some runs, 'ref Log.logger' in others.
+    // Not BRO1619's move of '<remarks>' (this case): the qualifier was spelled against another target framework's copy
+    // (LinkedFileFixAllTests.StaticFieldQualifier_IsTheSameWhicheverCopyIsFixed).
+    [Fact]
+    public Task StaticFieldRename_NextToADocumentationReorder() => AssertConvergesInEveryOrderAsync(
+        """
+        namespace Serilog;
+
+        /// <summary>
+        /// The entry point.
+        /// </summary>
+        /// <example>
+        /// Log.Logger = null;
+        /// </example>
+        /// <remarks>
+        /// Never throws.
+        /// </remarks>
+        public static class Log
+        {
+            static object _logger = new object();
+
+            /// <summary>
+            /// Gets the logger.
+            /// </summary>
+            public static object Logger => _logger;
+
+            /// <summary>
+            /// Resets the logger.
+            /// </summary>
+            public static void CloseAndFlush()
+            {
+                var logger = System.Threading.Interlocked.Exchange(ref _logger, new object());
+            }
+        }
+        """,
+        "BRO1303",
+        "BRO1619");
+
     // Trial 28 (Jackett): a local 'Download' shadows the method 'base.Download' calls, so BRO1131 writes 'this.Download'; once
     // BRO1301 renames the local, the 'this.' is the repository's unwanted qualifier, and the rename drops it.
     [Fact]
