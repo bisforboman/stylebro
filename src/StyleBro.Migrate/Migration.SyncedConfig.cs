@@ -168,6 +168,16 @@ internal static partial class Migration
         return null;
     }
 
+    /// <summary>What init and migrate say after writing into a root .editorconfig that <see cref="PackageCopy"/> finds.</summary>
+    public static string PackageCopyLine(PackageConfig copy) =>
+        $"Note: the root .editorconfig is a copy of {copy.Package}'s {copy.File}, and that package's build copies it back over the file before "
+        + "every build: these settings are gone after the next build, which then reports what 'bro format' and 'bro check' don't. Turn "
+        + "the package's copying off (or remove the package), then run this again; until then format and check say Not verified.";
+
+    /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
+    public static string PackageCopyGap(PackageConfig copy) =>
+        FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
+
     /// <summary>
     /// Whether one of the package's build files (.props/.targets under build/, buildTransitive/, buildMultiTargeting/) names
     /// <paramref name="file"/> (its file name, or its path for a file named just '.editorconfig'). Trial 45, dailydevops/guard:
@@ -183,16 +193,6 @@ internal static partial class Migration
             .Select(n => Path.Combine(folder, n))
             .Any(n => File.Exists(n) && File.ReadAllText(n).Replace('\\', '/').Contains(needle, StringComparison.OrdinalIgnoreCase));
     }
-
-    /// <summary>What init and migrate say after writing into a root .editorconfig that <see cref="PackageCopy"/> finds.</summary>
-    public static string PackageCopyLine(PackageConfig copy) =>
-        $"Note: the root .editorconfig is a copy of {copy.Package}'s {copy.File}, and that package's build copies it back over the file before "
-        + "every build: these settings are gone after the next build, which then reports what 'bro format' and 'bro check' don't. Turn "
-        + "the package's copying off (or remove the package), then run this again; until then format and check say Not verified.";
-
-    /// <summary>The gap format and check name for a <see cref="PackageCopy"/> (<see cref="FormatCommand.Gap"/>).</summary>
-    public static string PackageCopyGap(PackageConfig copy) =>
-        FormatCommand.Gap("the build's settings", $"the root .editorconfig is a copy of {copy.Package}'s {copy.File}, which the build copies back over it, so the build doesn't read the settings format checked with");
 
     /// <summary>A section's pattern for <paramref name="folder"/>'s .editorconfig, or null when it matches nothing there.</summary>
     private static string? RebasePattern(string pattern, string folder)
