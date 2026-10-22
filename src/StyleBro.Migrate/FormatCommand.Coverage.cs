@@ -41,8 +41,19 @@ internal static partial class FormatCommand
     /// <summary>The gap line for the SDK rules format holds back (<see cref="HeldBackIds"/>): listed, but not counted (<see cref="Unverified"/>).</summary>
     public static string HeldBackGap(IReadOnlyList<string> ids) => Gap(string.Join(", ", ids), HeldBackReason);
 
-    /// <summary>The gaps that make the verdict "Not verified": all but the held-back SDK rules (<see cref="HeldBackGap"/>).</summary>
-    public static List<string> Unverified(IEnumerable<string> gaps) => gaps.Where(g => !g.EndsWith(HeldBackReason, StringComparison.Ordinal)).ToList();
+    /// <summary>
+    /// The gap line for xunit.analyzers' fixes, which have no Fix All from 1.24.0 on (<see cref="XunitWithoutFixAll"/>): a note
+    /// like <see cref="HeldBackGap"/> (owner's decision 2026-10-22, trial 44: the build still reports their warnings, and the
+    /// verdict depended on whether the restore output was there before the run).
+    /// </summary>
+    public static string XunitGap(string version) =>
+        Gap("xunit.analyzers' rules", $"xunit.analyzers {version}'s fixes have no Fix All, so 'dotnet format' can't apply or check them (a note: the build still reports their warnings; {NoteEnd}");
+
+    /// <summary>The gaps that make the verdict "Not verified": all but the notes (<see cref="HeldBackGap"/>, <see cref="XunitGap"/>).</summary>
+    public static List<string> Unverified(IEnumerable<string> gaps) => gaps.Where(g => !g.EndsWith(NoteEnd, StringComparison.Ordinal)).ToList();
+
+    /// <summary>How a gap line that is only a note ends (<see cref="Unverified"/>).</summary>
+    private const string NoteEnd = "the verdict doesn't count them)";
 
     /// <summary>Whether a run's line names a gap (<see cref="Gap"/>).</summary>
     public static bool IsGapLine(string line) => line.StartsWith(NotCheckedPrefix, StringComparison.Ordinal);

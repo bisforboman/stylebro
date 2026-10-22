@@ -53,6 +53,19 @@ public sealed partial class MigrationTests
         Assert.Equal([gap], FormatCommand.Unverified([gap]));
     }
 
+    [Fact]
+    public void XunitGap_IsANote()
+    {
+        // charls-dotnet (xunit.analyzers 2.2.0): a fresh preview copy said Not verified for it, the restored checkout Clean.
+        var gap = FormatCommand.XunitGap("2.2.0");
+
+        Assert.True(FormatCommand.IsGapLine(gap));
+        Assert.Contains("xunit.analyzers 2.2.0's fixes have no Fix All", gap);
+        Assert.Empty(FormatCommand.Unverified([gap, FormatCommand.HeldBackGap(["IDE0049"])]));
+        var other = FormatCommand.Gap("Lib in Release", "it takes an in-solution source generator");
+        Assert.Equal([other], FormatCommand.Unverified([gap, other]));
+    }
+
     private void WritePackageCopyRepository(string type)
     {
         var packages = Path.Combine(root, "packages");
